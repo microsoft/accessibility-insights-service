@@ -9,8 +9,10 @@ import { inject, injectable } from 'inversify';
 import { ContextAwareLogger } from 'logger';
 import { WebController } from 'service-library';
 import { e2eTestGroupNames } from '../e2e-test-group-names';
+import { E2EScanScenario } from '../e2e-test-scenarios/e2e-scan-scenario';
+import { createScenarios } from '../e2e-test-scenarios/e2e-scan-scenario-factory';
 import { OrchestrationSteps, OrchestrationStepsImpl } from '../orchestration-steps';
-import { WebApiConfig } from './web-api-config';
+// import { WebApiConfig } from './web-api-config';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -22,8 +24,9 @@ export class HealthMonitorOrchestrationController extends WebController {
     public constructor(
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
         @inject(ContextAwareLogger) logger: ContextAwareLogger,
-        @inject(WebApiConfig) private readonly webApiConfig: WebApiConfig,
+        // @inject(WebApiConfig) private readonly webApiConfig: WebApiConfig,
         private readonly df = durableFunctions,
+        private readonly e2eScenarioFactory: typeof createScenarios = createScenarios,
     ) {
         super(logger);
     }
@@ -62,9 +65,14 @@ export class HealthMonitorOrchestrationController extends WebController {
         ): Generator<Task | TaskSet, void, SerializableResponse & void> {
             const thisObj = context.bindingData.controller as HealthMonitorOrchestrationController;
             const availabilityTestConfig = context.bindingData.availabilityTestConfig as AvailabilityTestConfig;
-            const scanNotificationUrl = `${thisObj.webApiConfig.baseUrl}${availabilityTestConfig.scanNotifyApiEndpoint}`;
-            const failScanNotificationUrl = `${thisObj.webApiConfig.baseUrl}${availabilityTestConfig.scanNotifyFailApiEndpoint}`;
+            // const scanNotificationUrl = `${thisObj.webApiConfig.baseUrl}${availabilityTestConfig.scanNotifyApiEndpoint}`;
+            // const failScanNotificationUrl = `${thisObj.webApiConfig.baseUrl}${availabilityTestConfig.scanNotifyFailApiEndpoint}`;
+
+            // do we need to update the availability test config's notification URLs with the URLs above?
             const orchestrationSteps = thisObj.createOrchestrationSteps(context, availabilityTestConfig);
+
+            const scenarios: E2EScanScenario[] = thisObj.e2eScenarioFactory(orchestrationSteps, availabilityTestConfig);
+
             const testContextData: TestContextData = {
                 scanUrl: availabilityTestConfig.urlToScan,
             };
@@ -73,27 +81,53 @@ export class HealthMonitorOrchestrationController extends WebController {
 
             yield* orchestrationSteps.invokeHealthCheckRestApi();
 
-            const scanId = yield* orchestrationSteps.invokeSubmitScanRequestRestApi(availabilityTestConfig.urlToScan, scanNotificationUrl);
+            // E2E test code starts
+
+            for (const scenario of scenarios) {
+                yield* scenario.submitScanPhase();
+            }
+
+            /*
+            // Submit normal single scan
+            const scanId = yield* orchestrationSteps.invokeSubmitScanRequestRestApi({
+                urlToScan: availabilityTestConfig.urlToScan,
+                scanNotificationUrl: scanNotificationUrl,
+            });
+
+            // Submit consolidated scan
             const consolidatedId = `${availabilityTestConfig.consolidatedIdBase}-${process.env.RELEASE_VERSION}`;
-            const consolidatedScanId = yield* orchestrationSteps.invokeSubmitConsolidatedScanRequestRestApi(
-                availabilityTestConfig.urlToScan,
+            const consolidatedScanId = yield* orchestrationSteps.invokeSubmitScanRequestRestApi({
+                urlToScan: availabilityTestConfig.urlToScan,
                 consolidatedId,
-                failScanNotificationUrl,
-            );
+                scanNotificationUrl: failScanNotificationUrl,
+            });
+
             testContextData.scanId = scanId;
             testContextData.consolidatedScanId = consolidatedScanId;
-            yield* orchestrationSteps.runFunctionalTestGroups(testContextData, e2eTestGroupNames.postScanSubmissionTests);
+            */
 
+            // think we can comment these out too
+            // yield* orchestrationSteps.runFunctionalTestGroups(testContextData, e2eTestGroupNames.postScanSubmissionTests);
+
+            for (const scenario of scenarios) {
+                yield* scenario.waitForScanCompletionPhase();
+            }
+
+            /*
             yield* orchestrationSteps.validateScanRequestSubmissionState(scanId);
             yield* orchestrationSteps.validateScanRequestSubmissionState(consolidatedScanId);
             const scanRunStatus = yield* orchestrationSteps.waitForScanRequestCompletion(scanId);
             const consolidatedScanRunStatus = yield* orchestrationSteps.waitForScanRequestCompletion(consolidatedScanId);
             yield* orchestrationSteps.runFunctionalTestGroups(testContextData, e2eTestGroupNames.postScanCompletionTests);
+*/
+            for (const scenario of scenarios) {
+                yield* scenario.afterScanCompletedPhase();
+            }
+
+            /*
 
             const reportId = scanRunStatus.reports[0].reportId;
             const consolidatedReportId = consolidatedScanRunStatus.reports[0].reportId;
-            testContextData.reportId = reportId;
-            testContextData.consolidatedReportId = consolidatedReportId;
             yield* orchestrationSteps.invokeGetScanReportRestApi(scanId, reportId);
             yield* orchestrationSteps.invokeGetScanReportRestApi(consolidatedScanId, consolidatedReportId);
             yield* orchestrationSteps.runFunctionalTestGroups(testContextData, e2eTestGroupNames.scanReportTests);
@@ -101,7 +135,7 @@ export class HealthMonitorOrchestrationController extends WebController {
             yield* orchestrationSteps.waitForScanCompletionNotification(scanId);
             yield* orchestrationSteps.waitForScanCompletionNotification(consolidatedScanId);
             yield* orchestrationSteps.runFunctionalTestGroups(testContextData, e2eTestGroupNames.postScanCompletionNotificationTests);
-
+*/
             // The last test group in a functional test suite to indicated a suite run completion
             yield* orchestrationSteps.runFunctionalTestGroups(testContextData, e2eTestGroupNames.finalizerTests);
         });

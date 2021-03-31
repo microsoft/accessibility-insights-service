@@ -3,7 +3,16 @@
 
 import { functionalTestGroupTypes, TestGroupName } from 'functional-tests';
 
-export const e2eTestGroupNames: { [key: string]: TestGroupName[] } = {
+export type E2ETestGroupNames = {
+    [key in
+        | 'postScanSubmissionTests'
+        | 'postScanCompletionTests'
+        | 'scanReportTests'
+        | 'postScanCompletionNotificationTests'
+        | 'finalizerTests']: TestGroupName[];
+};
+
+export const e2eTestGroupNames: E2ETestGroupNames = {
     postScanSubmissionTests: ['PostScan', 'ScanStatus'],
     postScanCompletionTests: ['ScanPreProcessing', 'ScanQueueing'],
     scanReportTests: ['ScanReports'],
@@ -12,16 +21,7 @@ export const e2eTestGroupNames: { [key: string]: TestGroupName[] } = {
 };
 
 export function getAllTestGroupClassNames(): string[] {
-    let allTestGroupClassNames: string[] = [];
-    Object.keys(e2eTestGroupNames).forEach((key) => {
-        const testGroupNames = e2eTestGroupNames[key];
-        const testGroupClassNames = testGroupNames.map((name) => {
-            const theClass = functionalTestGroupTypes[name];
+    const flattenedNames: TestGroupName[] = [].concat(...Object.values(e2eTestGroupNames));
 
-            return theClass.name;
-        });
-        allTestGroupClassNames = allTestGroupClassNames.concat(testGroupClassNames);
-    });
-
-    return allTestGroupClassNames;
+    return flattenedNames.map((name) => functionalTestGroupTypes[name].name);
 }

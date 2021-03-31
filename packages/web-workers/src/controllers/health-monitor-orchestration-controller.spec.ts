@@ -10,10 +10,11 @@ import { IOrchestrationFunctionContext, Task, TaskSet } from 'durable-functions/
 import { TestContextData, TestEnvironment, TestGroupName } from 'functional-tests';
 import { Logger } from 'logger';
 import { ScanRunResultResponse, ScanCompletedNotification } from 'service-library';
-import { IMock, It, Mock, Times } from 'typemoq';
+import { IMock, It, Mock, Times, MockBehavior } from 'typemoq';
 import { OrchestrationSteps } from '../orchestration-steps';
 import { GeneratorExecutor } from '../test-utilities/generator-executor';
 import { MockableLogger } from '../test-utilities/mockable-logger';
+import { ScanRequestOptions } from '../e2e-test-scenarios/e2e-scan-scenario-definitions';
 import { HealthMonitorOrchestrationController } from './health-monitor-orchestration-controller';
 import { WebApiConfig } from './web-api-config';
 
@@ -36,7 +37,7 @@ class TestableHealthMonitorOrchestrationController extends HealthMonitorOrchestr
         webApiConfig: WebApiConfig,
         df: typeof durableFunctions,
     ) {
-        super(serviceConfig, logger, webApiConfig, df);
+        super(serviceConfig, logger, df);
     }
 
     protected createOrchestrationSteps(
@@ -138,22 +139,11 @@ class OrchestrationStepsStub implements OrchestrationSteps {
         yield undefined;
     }
 
-    public *invokeSubmitScanRequestRestApi(url: string, scanNotifyUrl: string): Generator<any, string, any> {
+    public *invokeSubmitScanRequestRestApi(options: ScanRequestOptions): Generator<any, string, any> {
         this.orchestratorStepsCallCount.callSubmitScanRequest += 1;
         this.throwExceptionIfExpected();
-        expect(url).toBe(this.availabilityTestConfig.urlToScan);
-        expect(scanNotifyUrl).toEqual(`${baseWebApiUrl}${this.availabilityTestConfig.scanNotifyApiEndpoint}`);
-
-        return yield this.scanId;
-    }
-
-    public *invokeSubmitConsolidatedScanRequestRestApi(url: string, reportId: string, scanNotifyUrl: string): Generator<any, string, any> {
-        this.orchestratorStepsCallCount.callSubmitScanRequest += 1;
-        this.throwExceptionIfExpected();
-        expect(url).toBe(this.availabilityTestConfig.urlToScan);
-        const expectedConsolidatedId = `${this.availabilityTestConfig.consolidatedIdBase}-${releaseId}`;
-        expect(reportId).toBe(expectedConsolidatedId);
-        expect(scanNotifyUrl).toEqual(`${baseWebApiUrl}${this.availabilityTestConfig.scanNotifyFailApiEndpoint}`);
+        expect(options.urlToScan).toBe(this.availabilityTestConfig.urlToScan);
+        expect(options.scanNotificationUrl).toEqual(`${baseWebApiUrl}${this.availabilityTestConfig.scanNotifyApiEndpoint}`);
 
         return yield this.scanId;
     }
@@ -405,6 +395,21 @@ describe('HealthMonitorOrchestrationController', () => {
             }).toThrowError();
 
             expect(orchestratorIterator.next().done).toBe(true);
+        });
+
+        // eslint-disable-next-line jest/no-focused-tests
+        it.only('DELETE', () => {
+            const generatorMock = Mock.ofType(OrchestrationStepsStub, MockBehavior.Loose, false);
+            generatorMock
+                .setup((g) => g.invokeHealthCheckRestApi())
+                .returns(() => generatorMock.target.invokeHealthCheckRestApi())
+                .verifiable();
+
+            const executor = new GeneratorExecutor(generatorMock.object.invokeHealthCheckRestApi());
+
+            executor.runTillEnd();
+
+            generatorMock.verifyAll();
         });
     });
 
