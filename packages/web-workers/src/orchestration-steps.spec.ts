@@ -10,6 +10,7 @@ import { isNil } from 'lodash';
 import moment from 'moment';
 import { ScanRunErrorResponse, ScanRunResponse, ScanRunResultResponse, WebApiError } from 'service-library';
 import { IMock, It, Mock, Times } from 'typemoq';
+import { NotificationState } from 'storage-documents';
 import { ActivityAction } from './contracts/activity-actions';
 import {
     ActivityRequestData,
@@ -413,7 +414,7 @@ describe(OrchestrationStepsImpl, () => {
         });
     });
 
-    describe('waitForScanCompletion', () => {
+    describe('waitForScanRequestCompletion', () => {
         let generatorExecutor: GeneratorExecutor;
         let activityRequestData: ActivityRequestData;
         let nextTime1: moment.Moment;
@@ -543,17 +544,43 @@ describe(OrchestrationStepsImpl, () => {
     });
 
     describe('run functional test groups', () => {
-        let generatorExecutor: GeneratorExecutor;
-        let activityRequestData: ActivityRequestData[];
         const testContextData: TestContextData = {
             scanUrl: 'scan url',
         };
-        const testGroupNames: TestGroupName[] = ['PostScan', 'ScanStatus'];
         let taskMethodsMock: IMock<ITaskMethods>;
 
         beforeEach(() => {
-            generatorExecutor = new GeneratorExecutor<string>(testSubject.runFunctionalTestGroups(testContextData, testGroupNames));
-            activityRequestData = testGroupNames.map((testGroupName: TestGroupName) => {
+            taskMethodsMock = Mock.ofType<ITaskMethods>();
+            orchestrationContext.setup((oc) => oc.Task).returns(() => taskMethodsMock.object);
+        });
+
+        it('does nothing if list is undefined', () => {
+            orchestrationContext.setup((oc) => oc.callActivity(It.isAny(), It.isAny())).verifiable(Times.never());
+            taskMethodsMock.setup((t) => t.all(It.isAny())).verifiable(Times.never());
+
+            executeRunFunctionalGroups(undefined);
+
+            taskMethodsMock.verifyAll();
+        });
+
+        it('does nothing if list is empty', () => {
+            orchestrationContext.setup((oc) => oc.callActivity(It.isAny(), It.isAny())).verifiable(Times.never());
+            taskMethodsMock.setup((t) => t.all(It.isAny())).verifiable(Times.never());
+
+            executeRunFunctionalGroups([]);
+
+            taskMethodsMock.verifyAll();
+        });
+
+        it('triggers all test groups', () => {
+            const testGroupNames: TestGroupName[] = ['PostScan', 'ScanStatus'];
+            const task = {
+                isCompleted: true,
+                isFaulted: false,
+                action: undefined,
+            } as Task;
+
+            const activityRequestData: ActivityRequestData[] = testGroupNames.map((testGroupName: TestGroupName) => {
                 return {
                     activityName: ActivityAction.runFunctionalTestGroup,
                     data: {
@@ -564,17 +591,6 @@ describe(OrchestrationStepsImpl, () => {
                     } as RunFunctionalTestGroupData,
                 };
             });
-            taskMethodsMock = Mock.ofType<ITaskMethods>();
-            orchestrationContext.setup((oc) => oc.Task).returns(() => taskMethodsMock.object);
-        });
-
-        it('triggers all test groups', () => {
-            const task = {
-                isCompleted: true,
-                isFaulted: false,
-                action: undefined,
-            } as Task;
-
             activityRequestData.forEach((data: ActivityRequestData) => {
                 orchestrationContext
                     .setup((oc) => oc.callActivity(OrchestrationStepsImpl.activityTriggerFuncName, data))
@@ -588,7 +604,7 @@ describe(OrchestrationStepsImpl, () => {
                 .callback((tasks: Task[]) => (taskList = tasks))
                 .verifiable(Times.once());
 
-            generatorExecutor.runTillEnd();
+            executeRunFunctionalGroups(testGroupNames);
 
             expect(taskList.length === 2);
             expect(taskList[0]).toEqual(task);
@@ -596,6 +612,11 @@ describe(OrchestrationStepsImpl, () => {
 
             taskMethodsMock.verifyAll();
         });
+
+        function executeRunFunctionalGroups(testGroupNames: TestGroupName[]): void {
+            const generatorExecutor = new GeneratorExecutor<string>(testSubject.runFunctionalTestGroups(testContextData, testGroupNames));
+            generatorExecutor.runTillEnd();
+        }
     });
 
     describe('Log test run start', () => {
@@ -626,6 +647,102 @@ describe(OrchestrationStepsImpl, () => {
         });
     });
 
+    describe('waitForScanCompletionNotification', () => {
+        let generatorExecutor: GeneratorExecutor;
+        let activityRequestData: ActivityRequestData;
+        let nextTime1: moment.Moment;
+        let nextTime2: moment.Moment;
+        let nextTime3: moment.Moment;
+        let response: SerializableResponse<ScanRunResultResponse>;
+
+        beforeEach(() => {
+            generatorExecutor = new GeneratorExecutor<string>(testSubject.waitForScanCompletionNotification(scanId));
+
+            availabilityTestConfig.scanWaitIntervalInSeconds = 10;
+            availabilityTestConfig.maxScanCompletionNotificationWaitTimeInSeconds = 10 * 2 + 1;
+            nextTime1 = moment.utc(currentUtcDateTime).add(availabilityTestConfig.scanWaitIntervalInSeconds, 'seconds');
+            nextTime2 = nextTime1.clone().add(availabilityTestConfig.scanWaitIntervalInSeconds, 'seconds');
+            nextTime3 = nextTime2.clone().add(availabilityTestConfig.scanWaitIntervalInSeconds, 'seconds');
+
+            activityRequestData = {
+                activityName: ActivityAction.getScanResult,
+                data: {
+                    scanId: scanId,
+                },
+            };
+
+            response = createSerializableResponse<ScanRunResultResponse>(200, {
+                scanId: scanId,
+                notification: {
+                    state: 'pending',
+                },
+            } as ScanRunResultResponse);
+        });
+
+        it.each(['pending', 'sending', 'queued'])(
+            'times out if not completed with state %s by max time',
+            async (incompleteState: NotificationState) => {
+                response.body.notification.state = incompleteState;
+                setupCreateTimer(nextTime1);
+                setupCreateTimer(nextTime2);
+                setupCreateTimer(nextTime3);
+
+                orchestrationContext
+                    .setup((oc) => oc.callActivity(OrchestrationStepsImpl.activityTriggerFuncName, activityRequestData))
+                    .returns(() => response as any)
+                    .verifiable(Times.atLeast(2));
+
+                setupVerifyTrackActivityCall(false, {
+                    activityName: 'waitForScanCompletionNotification',
+                    requestResponse: JSON.stringify(response.body.notification),
+                    currentUtcDateTime: nextTime3.toDate().toUTCString(),
+                });
+
+                expect(() => generatorExecutor.runTillEnd()).toThrowError();
+            },
+        );
+
+        it.each(['sent', 'sendFailed', 'queueFailed'])(
+            'completes if the scan completed with state %s before max time',
+            async (completedState: NotificationState) => {
+                setupCreateTimer(nextTime1);
+                setupCreateTimer(nextTime2, () => {
+                    response.body.notification.state = completedState;
+                });
+                setupCreateTimerNeverCalled(nextTime3);
+
+                orchestrationContext
+                    .setup((oc) => oc.callActivity(OrchestrationStepsImpl.activityTriggerFuncName, activityRequestData))
+                    .returns(() => response as any)
+                    .verifiable(Times.atLeast(2));
+
+                setupTrackActivityNeverCalled();
+
+                generatorExecutor.runTillEnd();
+            },
+        );
+
+        test.each([199, 400])('throws if the scan api returns with failure status code %o', async (statusCode: number) => {
+            response = createSerializableResponse(statusCode);
+
+            setupCreateTimer(nextTime1);
+            setupCreateTimerNeverCalled(nextTime2);
+
+            orchestrationContext
+                .setup((oc) => oc.callActivity(OrchestrationStepsImpl.activityTriggerFuncName, activityRequestData))
+                .returns(() => response as any)
+                .verifiable(Times.atLeast(1));
+
+            setupVerifyTrackActivityCall(false, {
+                activityName: 'getScanResult',
+                requestResponse: JSON.stringify(response),
+                currentUtcDateTime: nextTime1.toDate().toUTCString(),
+            });
+
+            expect(() => generatorExecutor.runTillEnd()).toThrowError();
+        });
+    });
+
     function setupCreateTimer(fireTime: moment.Moment, callback?: () => void): void {
         orchestrationContext
             .setup((oc) => oc.createTimer(fireTime.toDate()))
@@ -639,6 +756,7 @@ describe(OrchestrationStepsImpl, () => {
             })
             .verifiable(Times.once());
     }
+
     function setupCreateTimerNeverCalled(fireTime: moment.Moment): void {
         orchestrationContext.setup((oc) => oc.createTimer(fireTime.toDate())).verifiable(Times.never());
     }

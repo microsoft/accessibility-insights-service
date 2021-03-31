@@ -4,7 +4,7 @@
 import { AvailabilityTestConfig, SerializableResponse } from 'common';
 import { IOrchestrationFunctionContext, Task, TaskSet } from 'durable-functions/lib/src/classes';
 import { TestContextData, TestEnvironment, TestGroupName } from 'functional-tests';
-import { isNil } from 'lodash';
+import { isNil, isEmpty } from 'lodash';
 import { Logger, LogLevel } from 'logger';
 import moment from 'moment';
 import {
@@ -275,6 +275,12 @@ export class OrchestrationStepsImpl implements OrchestrationSteps {
     }
 
     public *runFunctionalTestGroups(testContextData: TestContextData, testGroupNames: TestGroupName[]): Generator<TaskSet, void, void> {
+        if (isEmpty(testGroupNames)) {
+            this.logOrchestrationStep('List of functional tests is empty. Skipping this test run.');
+
+            return;
+        }
+
         const parallelTasks = testGroupNames.map((testGroupName: TestGroupName) => {
             const testData: RunFunctionalTestGroupData = {
                 runId: this.context.df.instanceId,
