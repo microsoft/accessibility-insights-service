@@ -7,6 +7,7 @@ import { Mock, IMock } from 'typemoq';
 import { E2ETestGroupNames } from '../e2e-test-group-names';
 import { OrchestrationSteps, OrchestrationStepsImpl } from '../orchestration-steps';
 import { GeneratorExecutor } from '../test-utilities/generator-executor';
+import { generatorStub } from '../test-utilities/generator-function';
 import { E2EScanScenarioDefinition, ScanRequestOptions } from './e2e-scan-scenario-definitions';
 import { SingleScanScenario } from './single-scan-scenario';
 
@@ -126,9 +127,3 @@ describe(SingleScanScenario, () => {
         generatorExecutor.runTillEnd();
     });
 });
-
-function* generatorStub<YieldType, ReturnType, NextType = unknown>(returnValue?: ReturnType): Generator<YieldType, ReturnType, NextType> {
-    yield undefined;
-
-    return returnValue;
-}

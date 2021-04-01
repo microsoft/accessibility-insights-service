@@ -13,6 +13,7 @@ import { GeneratorExecutor } from '../test-utilities/generator-executor';
 import { MockableLogger } from '../test-utilities/mockable-logger';
 import { E2EScanScenario } from '../e2e-test-scenarios/e2e-scan-scenario';
 import { finalizerTestGroupName } from '../e2e-test-group-names';
+import { generatorStub } from '../test-utilities/generator-function';
 import { HealthMonitorOrchestrationController } from './health-monitor-orchestration-controller';
 
 /* eslint-disable
@@ -102,7 +103,7 @@ describe('HealthMonitorOrchestrationController', () => {
                 .setup((m) => m.runFunctionalTestGroups(It.isAny(), [finalizerTestGroupName]))
                 .returns((_) => generatorStub())
                 .verifiable();
-            e2eScanScenarioMock.reset();
+
             e2eScanScenarioMock
                 .setup((m) => m.submitScanPhase())
                 .returns((_) => generatorStub())
@@ -123,9 +124,3 @@ describe('HealthMonitorOrchestrationController', () => {
         });
     });
 });
-
-function* generatorStub<YieldType, ReturnType, NextType = unknown>(returnValue?: ReturnType): Generator<YieldType, ReturnType, NextType> {
-    yield undefined;
-
-    return returnValue;
-}
