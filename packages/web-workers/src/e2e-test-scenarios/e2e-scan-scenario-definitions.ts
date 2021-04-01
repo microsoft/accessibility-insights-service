@@ -6,7 +6,7 @@ import { WebApiConfig } from '../controllers/web-api-config';
 import { E2ETestGroupNames } from '../e2e-test-group-names';
 
 export const E2EScanFactories: E2EScanScenarioDefinitionFactory[] = [
-    // Simple scan
+    // Simple scan with notification
     (availabilityConfig: AvailabilityTestConfig, webApiConfig: WebApiConfig): E2EScanScenarioDefinition => {
         return {
             requestOptions: {
@@ -21,7 +21,7 @@ export const E2EScanFactories: E2EScanScenarioDefinitionFactory[] = [
             },
         };
     },
-    // Consolidated scan
+    // Consolidated scan with failed notification
     (availabilityConfig: AvailabilityTestConfig, webApiConfig: WebApiConfig): E2EScanScenarioDefinition => {
         return {
             requestOptions: {

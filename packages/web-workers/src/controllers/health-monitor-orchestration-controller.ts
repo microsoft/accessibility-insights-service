@@ -12,9 +12,6 @@ import { createScenarios } from '../e2e-test-scenarios/create-scenarios';
 import { E2EScanScenario } from '../e2e-test-scenarios/e2e-scan-scenario';
 import { OrchestrationSteps, OrchestrationStepsImpl } from '../orchestration-steps';
 import { WebApiConfig } from './web-api-config';
-// import { WebApiConfig } from './web-api-config';
-
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
 @injectable()
 export class HealthMonitorOrchestrationController extends WebController {
@@ -33,6 +30,7 @@ export class HealthMonitorOrchestrationController extends WebController {
         super(logger);
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     protected async handleRequest(...args: any[]): Promise<void> {
         this.logger.setCommonProperties({ source: 'healthMonitorOrchestrationFunc' });
         this.logger.logInfo(`Executing '${this.context.executionContext.functionName}' function.`, {
@@ -44,6 +42,7 @@ export class HealthMonitorOrchestrationController extends WebController {
         this.invokeOrchestration();
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     protected validateRequest(...args: any[]): boolean {
         return true;
     }
