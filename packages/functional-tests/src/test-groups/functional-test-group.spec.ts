@@ -24,7 +24,6 @@ describe(FunctionalTestGroup, () => {
         testContextData = {
             scanUrl: 'scanUrl',
             scanId: 'scanId',
-            reportId: 'reportId',
         };
         a11yServiceClientMock = Mock.ofType(A11yServiceClient);
         scanRunProviderMock = Mock.ofType(OnDemandPageScanRunResultProvider);

@@ -2,26 +2,21 @@
 // Licensed under the MIT License.
 
 import { functionalTestGroupTypes, TestGroupName } from 'functional-tests';
+import { E2EScanScenarioDefinition } from './e2e-test-scenarios/e2e-scan-scenario-definitions';
 
-export const e2eTestGroupNames: { [key: string]: TestGroupName[] } = {
-    postScanSubmissionTests: ['PostScan', 'ScanStatus'],
-    postScanCompletionTests: ['ScanPreProcessing', 'ScanQueueing'],
-    scanReportTests: ['ScanReports'],
-    postScanCompletionNotificationTests: ['ScanCompletionNotification'],
-    finalizerTests: ['Finalizer'],
+export type E2ETestGroupNames = {
+    [key in
+        | 'postScanSubmissionTests'
+        | 'postScanCompletionTests'
+        | 'scanReportTests'
+        | 'postScanCompletionNotificationTests'
+        | 'finalizerTests']: TestGroupName[];
 };
 
-export function getAllTestGroupClassNames(): string[] {
-    let allTestGroupClassNames: string[] = [];
-    Object.keys(e2eTestGroupNames).forEach((key) => {
-        const testGroupNames = e2eTestGroupNames[key];
-        const testGroupClassNames = testGroupNames.map((name) => {
-            const theClass = functionalTestGroupTypes[name];
+export const finalizerTestGroupName: TestGroupName = 'Finalizer';
 
-            return theClass.name;
-        });
-        allTestGroupClassNames = allTestGroupClassNames.concat(testGroupClassNames);
-    });
+export const getTestGroupClassNamesForScenario = (scenario: E2EScanScenarioDefinition): string[] => {
+    const flattenedNames: TestGroupName[] = [].concat(...Object.values(scenario.testGroups));
 
-    return allTestGroupClassNames;
-}
+    return flattenedNames.map((name) => functionalTestGroupTypes[name].name);
+};
