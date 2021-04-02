@@ -10,6 +10,7 @@ import {
     ScanResultResponse,
     ScanRunErrorCodes,
     ScanRunResultResponse,
+    RunState,
 } from 'service-library';
 import {
     ItemType,
@@ -63,47 +64,12 @@ beforeEach(() => {
         },
         responseCode: 200,
     };
-    deepScanResult = [
-        {
-            scanId: 'scanId1',
-            url: 'url1',
-            scanRunState: 'pending',
-        },
-        {
-            scanId: 'scanId2',
-            url: 'url2',
-            scanRunState: 'failed',
-        },
-        {
-            scanId: 'scanId3',
-            url: 'url3',
-            scanRunState: 'completed',
-            scanResultState: 'pass',
-        },
-    ];
-    websiteScanResult = {
-        pageScans: [
-            {
-                scanId: 'scanId1',
-                url: 'url1',
-            },
-            {
-                scanId: 'scanId2',
-                url: 'url2',
-                runState: 'failed',
-            },
-            {
-                scanId: 'scanId3',
-                url: 'url3',
-                runState: 'completed',
-                scanState: 'pass',
-            },
-        ],
-    } as WebsiteScanResult;
+    deepScanResult = getDeepScanResult();
+    websiteScanResult = getWebsiteScanResult();
 });
 
 describe(ScanResponseConverter, () => {
-    test.each([true, false])('return scan run short form of client result, when notification enabled = %s', (notificationEnabled) => {
+    test.each([true, false])('return not completed result, when notification enabled = %s', (notificationEnabled) => {
         validateConverterShortResult('pending', 'pending', notificationEnabled);
         validateConverterShortResult('accepted', 'accepted', notificationEnabled);
         validateConverterShortResult('queued', 'queued', notificationEnabled);
@@ -111,19 +77,35 @@ describe(ScanResponseConverter, () => {
         validateConverterShortResult('failed', 'failed', notificationEnabled);
     });
 
-    test.each([true, false])('return scan run full form of client result, when notification enabled = %s', (notificationEnabled) => {
+    test.each([true, false])('return completed scan run result, when notification enabled = %s', (notificationEnabled) => {
         const pageScanDbResult = getPageScanResult('completed', notificationEnabled);
         const responseExpected = getScanResultClientResponseFull('completed', notificationEnabled);
         const response = scanResponseConverter.getScanResultResponse(baseUrl, apiVersion, pageScanDbResult, websiteScanResult);
         expect(response).toEqual(responseExpected);
     });
 
-    test.each([true, false])('return scan run full form of client result, when deepScan enabled = %s', (deepScanEnabled) => {
-        const pageScanDbResult = getPageScanResult('completed', false, deepScanEnabled);
-        const responseExpected = getScanResultClientResponseFull('completed', false, deepScanEnabled);
+    it('return completed scan result, when deepScan is disabled', () => {
+        const pageScanDbResult = getPageScanResult('completed', false, false);
+        const responseExpected = getScanResultClientResponseFull('completed', false, false);
         const response = scanResponseConverter.getScanResultResponse(baseUrl, apiVersion, pageScanDbResult, websiteScanResult);
         expect(response).toEqual(responseExpected);
     });
+
+    test.each(['pending', 'completed', 'failed'])(
+        'return completed result, when deepScan is enabled and overall deep scan state = %s',
+        (deepScanOverallState: RunState) => {
+            deepScanResult = getDeepScanResult(deepScanOverallState);
+            const pageScanDbResult = getPageScanResult('completed', false, true);
+            const responseExpected = getScanResultClientResponseFull(deepScanOverallState, false, true);
+            const response = scanResponseConverter.getScanResultResponse(
+                baseUrl,
+                apiVersion,
+                pageScanDbResult,
+                getWebsiteScanResult(deepScanOverallState),
+            );
+            expect(response).toEqual(responseExpected);
+        },
+    );
 
     it('adds error to notification if db has error info', () => {
         const pageScanDbResult = getPageScanResult('completed', true);
@@ -152,6 +134,67 @@ describe(ScanResponseConverter, () => {
         expect((<any>response).reports[0].links.href).toEqual('https://localhost/api/scans/id/reports/reportIdSarif?api-version=1.0');
     });
 });
+
+function getDeepScanResult(deepScanOverallState: RunState = 'pending'): DeepScanResultItem[] {
+    const result = [
+        {
+            scanId: 'scanId1',
+            url: 'url1',
+            scanRunState: 'pending',
+        },
+        {
+            scanId: 'scanId2',
+            url: 'url2',
+            scanRunState: 'failed',
+        },
+        {
+            scanId: 'scanId3',
+            url: 'url3',
+            scanRunState: 'completed',
+            scanResultState: 'pass',
+        },
+    ] as DeepScanResultItem[];
+
+    if (deepScanOverallState === 'failed') {
+        result.map((scan) => (scan.scanRunState = 'failed'));
+    } else if (deepScanOverallState === 'completed') {
+        result.map((scan) => (scan.scanRunState = 'completed'));
+        result[0].scanRunState = 'failed';
+    }
+
+    return result;
+}
+
+function getWebsiteScanResult(deepScanOverallState: RunState = 'pending'): WebsiteScanResult {
+    const result = {
+        pageScans: [
+            {
+                scanId: 'scanId1',
+                url: 'url1',
+            },
+            {
+                scanId: 'scanId2',
+                url: 'url2',
+                runState: 'failed',
+            },
+            {
+                scanId: 'scanId3',
+                url: 'url3',
+                runState: 'completed',
+                scanState: 'pass',
+            },
+        ],
+    } as WebsiteScanResult;
+
+    if (deepScanOverallState === 'failed') {
+        result.pageScans.map((scan) => (scan.runState = 'failed'));
+    } else if (deepScanOverallState === 'completed') {
+        result.pageScans.map((scan) => (scan.runState = 'completed'));
+        result.pageScans[0].runState = 'failed';
+    }
+
+    return result;
+}
 
 function getPageScanResult(state: RunStateDb, isNotificationEnabled = false, isDeepScanEnabled = false): OnDemandPageScanResult {
     if (!isDeepScanEnabled) {
