@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 import { TestContextData, TestEnvironment, TestGroupName } from 'functional-tests';
 import { AvailabilityTelemetry } from 'logger';
+import { PostScanRequestOptions } from 'web-api-client';
 
 export interface ActivityRequestData {
     activityName: string;
@@ -10,12 +11,7 @@ export interface ActivityRequestData {
 
 export interface CreateScanRequestData {
     scanUrl: string;
-    priority: number;
-    notifyScanUrl?: string;
-}
-
-export interface CreateConsolidatedScanRequestData extends CreateScanRequestData {
-    reportId: string;
+    scanOptions: PostScanRequestOptions;
 }
 
 export interface GetScanResultData {

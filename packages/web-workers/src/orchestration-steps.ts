@@ -15,17 +15,16 @@ import {
     ScanRunResponse,
     ScanRunResultResponse,
 } from 'service-library';
+import { PostScanRequestOptions } from 'web-api-client';
 import { ActivityAction } from './contracts/activity-actions';
 import {
     ActivityRequestData,
-    CreateConsolidatedScanRequestData,
     CreateScanRequestData,
     GetScanReportData,
     GetScanResultData,
     RunFunctionalTestGroupData,
     TrackAvailabilityData,
 } from './controllers/activity-request-data';
-import { ScanRequestOptions } from './e2e-test-scenarios/e2e-scan-scenario-definitions';
 
 export interface OrchestrationTelemetryProperties {
     requestResponse?: string;
@@ -41,7 +40,7 @@ export interface OrchestrationTelemetryProperties {
 
 export interface OrchestrationSteps {
     invokeHealthCheckRestApi(): Generator<Task, void, SerializableResponse>;
-    invokeSubmitScanRequestRestApi(options: ScanRequestOptions): Generator<Task, string, SerializableResponse>;
+    invokeSubmitScanRequestRestApi(scanUrl: string, scanOptions: PostScanRequestOptions): Generator<Task, string, SerializableResponse>;
     validateScanRequestSubmissionState(scanId: string): Generator<Task, void, SerializableResponse & void>;
     waitForScanRequestCompletion(scanId: string): Generator<Task, ScanRunResultResponse, SerializableResponse & void>;
     waitForScanCompletionNotification(scanId: string): Generator<Task, ScanCompletedNotification, SerializableResponse & void>;
@@ -154,34 +153,21 @@ export class OrchestrationStepsImpl implements OrchestrationSteps {
         this.logOrchestrationStep('Verified scan submitted successfully', LogLevel.info, { requestResponse: JSON.stringify(response) });
     }
 
-    public *invokeSubmitScanRequestRestApi(options: ScanRequestOptions): Generator<Task, string, SerializableResponse & void> {
-        let scanId: string;
-        if (options.consolidatedId) {
-            scanId = yield* this.invokeSubmitConsolidatedScanRequestRestApi(
-                options.urlToScan,
-                options.consolidatedId,
-                options.scanNotificationUrl,
-            );
-        } else {
-            scanId = yield* this.invokeSubmitSingleScanRequestRestApi(options.urlToScan, options.scanNotificationUrl);
-        }
-
-        return scanId;
-    }
-
-    private *invokeSubmitSingleScanRequestRestApi(
-        url: string,
-        notifyScanUrl: string,
+    public *invokeSubmitScanRequestRestApi(
+        scanUrl: string,
+        scanOptions?: PostScanRequestOptions,
     ): Generator<Task, string, SerializableResponse & void> {
         const requestData: CreateScanRequestData = {
-            scanUrl: url,
-            priority: 1000,
-            notifyScanUrl: notifyScanUrl,
+            scanUrl,
+            scanOptions: {
+                priority: 1000,
+                ...scanOptions,
+            },
         };
 
         const response = yield* this.callWebRequestActivity(ActivityAction.createScanRequest, requestData);
         const scanId = yield* this.getScanIdFromResponse(response, ActivityAction.createScanRequest);
-        this.logOrchestrationStep(`Orchestrator submitted scan with scan Id: ${scanId} and notification url ${notifyScanUrl}`);
+        this.logOrchestrationStep(`Orchestrator submitted scan with scan Id: ${scanId} and options ${JSON.stringify(scanOptions)}`);
 
         return scanId;
     }
@@ -252,25 +238,6 @@ export class OrchestrationStepsImpl implements OrchestrationSteps {
         }
 
         return scanStatus?.notification;
-    }
-
-    private *invokeSubmitConsolidatedScanRequestRestApi(
-        url: string,
-        reportId: string,
-        notifyScanUrl: string,
-    ): Generator<Task, string, SerializableResponse & void> {
-        const requestData: CreateConsolidatedScanRequestData = {
-            scanUrl: url,
-            reportId: reportId,
-            priority: 1000,
-            notifyScanUrl,
-        };
-
-        const response = yield* this.callWebRequestActivity(ActivityAction.createConsolidatedScanRequest, requestData);
-        const scanId = yield* this.getScanIdFromResponse(response, ActivityAction.createConsolidatedScanRequest);
-        this.logOrchestrationStep(`Orchestrator submitted consolidated scan request with scan Id: ${scanId}`);
-
-        return scanId;
     }
 
     public *runFunctionalTestGroups(testContextData: TestContextData, testGroupNames: TestGroupName[]): Generator<TaskSet, void, void> {

@@ -14,7 +14,6 @@ import {
     GetScanResultData,
     RunFunctionalTestGroupData,
     TrackAvailabilityData,
-    CreateConsolidatedScanRequestData,
 } from './activity-request-data';
 
 /* eslint-disable @typescript-eslint/no-explicit-any, no-invalid-this */
@@ -42,7 +41,6 @@ export class HealthMonitorClientController extends WebController {
 
         this.activityCallbacks = {
             [ActivityAction.createScanRequest]: this.createScanRequest,
-            [ActivityAction.createConsolidatedScanRequest]: this.createConsolidatedScanRequest,
             [ActivityAction.getScanResult]: this.getScanResult,
             [ActivityAction.getScanReport]: this.getScanReport,
             [ActivityAction.getHealthStatus]: this.getHealthStatus,
@@ -71,16 +69,7 @@ export class HealthMonitorClientController extends WebController {
 
     private readonly createScanRequest = async (data: CreateScanRequestData): Promise<SerializableResponse<ScanRunResponse[]>> => {
         const webApiClient = await this.webApiClientProvider();
-        const response = await webApiClient.postScanUrlWithNotifyUrl(data.scanUrl, data.notifyScanUrl, data.priority);
-
-        return this.serializeResponse(response);
-    };
-
-    private readonly createConsolidatedScanRequest = async (
-        data: CreateConsolidatedScanRequestData,
-    ): Promise<SerializableResponse<ScanRunResponse[]>> => {
-        const webApiClient = await this.webApiClientProvider();
-        const response = await webApiClient.postConsolidatedScan(data.scanUrl, data.reportId, data.notifyScanUrl, data.priority);
+        const response = await webApiClient.postScanUrl(data.scanUrl, data.scanOptions);
 
         return this.serializeResponse(response);
     };

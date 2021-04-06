@@ -8,7 +8,7 @@ import { E2ETestGroupNames } from '../e2e-test-group-names';
 import { OrchestrationSteps, OrchestrationStepsImpl } from '../orchestration-steps';
 import { GeneratorExecutor } from '../test-utilities/generator-executor';
 import { generatorStub } from '../test-utilities/generator-function';
-import { E2EScanScenarioDefinition, ScanRequestOptions } from './e2e-scan-scenario-definitions';
+import { E2EScanScenarioDefinition, ScanRequestDefinition } from './e2e-scan-scenario-definitions';
 import { SingleScanScenario } from './single-scan-scenario';
 
 class TestableSingleScanScenario extends SingleScanScenario {
@@ -24,9 +24,11 @@ describe(SingleScanScenario, () => {
     const url = 'url';
     const scanId = 'scan id';
     const reportId = 'report id';
-    const scanRequestOptions: ScanRequestOptions = {
-        urlToScan: url,
-        scanNotificationUrl: 'scan-notify-url',
+    const scanRequestDef: ScanRequestDefinition = {
+        url: url,
+        options: {
+            scanNotificationUrl: 'scan-notify-url',
+        },
     };
     const testGroupNames: Partial<E2ETestGroupNames> = {
         postScanSubmissionTests: ['PostScan'],
@@ -35,7 +37,7 @@ describe(SingleScanScenario, () => {
         postScanCompletionNotificationTests: ['ScanCompletionNotification'],
     };
     const testDefinition: E2EScanScenarioDefinition = {
-        requestOptions: scanRequestOptions,
+        scanRequestDef: scanRequestDef,
         testGroups: testGroupNames,
     };
 
@@ -57,7 +59,7 @@ describe(SingleScanScenario, () => {
             scanId: scanId,
         };
         orchestrationStepsMock
-            .setup((o) => o.invokeSubmitScanRequestRestApi(scanRequestOptions))
+            .setup((o) => o.invokeSubmitScanRequestRestApi(url, scanRequestDef.options))
             .returns(() => generatorStub(scanId))
             .verifiable();
         orchestrationStepsMock
