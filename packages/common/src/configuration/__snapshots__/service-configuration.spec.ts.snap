@@ -44,7 +44,7 @@ Object {
       "format": "int",
     },
     "urlToScan": Object {
-      "default": "https://www.washington.edu/accesscomputing/AU/before.html",
+      "default": "https://teststorage57bzoqjjclekk.z13.web.core.windows.net/2021-04-06/index.html",
       "doc": "Url to scan for availability testing",
       "format": "String",
     },
@@ -237,7 +237,7 @@ Object {
       "format": "int",
     },
     "urlToScan": Object {
-      "default": "https://www.washington.edu/accesscomputing/AU/before.html",
+      "default": "https://teststorage57bzoqjjclekk.z13.web.core.windows.net/2021-04-06/index.html",
       "doc": "Url to scan for availability testing",
       "format": "String",
     },
