@@ -86,8 +86,23 @@ export class ScanResponseConverter {
             ...this.getRunCompleteNotificationResponse(pageScanResult.notification),
             ...this.getDeepScanResult(websiteScanResult),
         };
+
         if (pageScanResult.scannedUrl !== undefined) {
             scanResultResponse.scannedUrl = pageScanResult.scannedUrl;
+        }
+
+        if (scanResultResponse.deepScanResult !== undefined) {
+            if (scanResultResponse.deepScanResult.every((scanResult) => scanResult.scanRunState === 'failed')) {
+                scanResultResponse.run.state = 'failed';
+            } else if (
+                scanResultResponse.deepScanResult.every(
+                    (scanResult) => scanResult.scanRunState === 'completed' || scanResult.scanRunState === 'failed',
+                )
+            ) {
+                scanResultResponse.run.state = 'completed';
+            } else {
+                scanResultResponse.run.state = 'pending';
+            }
         }
 
         return scanResultResponse;
