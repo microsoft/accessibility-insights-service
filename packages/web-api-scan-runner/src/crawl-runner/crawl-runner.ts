@@ -55,7 +55,9 @@ export class CrawlRunner {
         const outputDir = `${this.batchConfig.taskWorkingDir}/${this.storageDirName}`;
 
         return {
-            maxRequestsPerCrawl: 1, // the service crawl single page per runner execution
+            // defines maximum number of links to discover on a page
+            // the crawler will open only baseURL page per run
+            maxRequestsPerCrawl: 1000,
             localOutputDir: outputDir,
             silentMode: true,
             restartCrawl: true,

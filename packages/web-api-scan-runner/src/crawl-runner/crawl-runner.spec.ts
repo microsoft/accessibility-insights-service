@@ -69,7 +69,7 @@ describe('CrawlRunner', () => {
             baseUrl,
             discoveryPatterns,
             baseCrawlPage: page,
-            maxRequestsPerCrawl: 1,
+            maxRequestsPerCrawl: 1000,
             silentMode: true,
             restartCrawl: true,
             localOutputDir: `${workingDir}/crawler_storage`,
