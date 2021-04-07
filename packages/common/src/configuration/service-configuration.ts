@@ -272,7 +272,7 @@ export class ServiceConfiguration {
             availabilityTestConfig: {
                 urlToScan: {
                     format: 'String',
-                    default: 'https://www.washington.edu/accesscomputing/AU/before.html',
+                    default: 'https://teststorage57bzoqjjclekk.z13.web.core.windows.net/2021-04-06/index.html',
                     doc: 'Url to scan for availability testing',
                 },
                 consolidatedIdBase: {

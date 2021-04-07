@@ -69,6 +69,10 @@
             "path": "../packages/e2e-web-apis"
         },
         {
+            "name": "e2e-test-site",
+            "path": "../packages/e2e-test-site"
+        },
+        {
             "name": "web-api-client",
             "path": "../packages/web-api-client"
         },
