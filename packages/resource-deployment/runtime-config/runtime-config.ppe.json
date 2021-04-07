@@ -8,12 +8,6 @@
     "queueConfig": {
         "maxQueueSize": 40
     },
-    "scanConfig": {
-        "minLastReferenceSeenInDays": 3,
-        "pageRescanIntervalInDays": 3,
-        "failedPageRescanIntervalInHours": 3,
-        "maxScanRetryCount": 3
-    },
     "restApiConfig": {
         "scanRequestProcessingDelayInSeconds": 300
     },

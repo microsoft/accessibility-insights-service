@@ -10,7 +10,7 @@ import { GuidGenerator, RetryHelper, System } from 'common';
 
 @injectable()
 export class ScanFeedGenerator {
-    private readonly maxRetryCount = 2;
+    private readonly maxRetryCount = 5;
 
     constructor(
         @inject(ScanDataProvider) private readonly scanDataProvider: ScanDataProvider,

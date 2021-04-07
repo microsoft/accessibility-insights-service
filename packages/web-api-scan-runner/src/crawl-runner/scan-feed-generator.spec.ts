@@ -134,7 +134,7 @@ function createScanRequests(urls: string[]): ScanRunBatchRequest[] {
 
 function setupRetryHelperMock(times: number = 1): void {
     retryHelperMock
-        .setup(async (o) => o.executeWithRetries(It.isAny(), It.isAny(), 2, 1000))
+        .setup(async (o) => o.executeWithRetries(It.isAny(), It.isAny(), 5, 1000))
         .returns(async (action: () => Promise<void>, errorHandler: (err: Error) => Promise<void>, maxRetries: number) => {
             return action();
         })

@@ -178,13 +178,13 @@ let systemMock: IMock<typeof System>;
 let batchConfig: BatchConfig;
 let testSubject: TestableBatchTaskCreator;
 let jobManagerConfig: JobManagerConfig;
-let maxWallClockTimeInHours: number;
+let maxWallClockTimeInMinutes: number;
 let poolMetricsInfo: PoolMetricsInfo;
 let queueMessagesGenerator: QueueMessagesGenerator;
 
 describe(BatchTaskCreator, () => {
     beforeEach(() => {
-        maxWallClockTimeInHours = 2;
+        maxWallClockTimeInMinutes = 2;
         batchConfig = {
             accountName: 'account-name',
             accountUrl: '',
@@ -202,7 +202,7 @@ describe(BatchTaskCreator, () => {
         } as typeof System);
 
         jobManagerConfig = {
-            maxWallClockTimeInHours: maxWallClockTimeInHours,
+            maxWallClockTimeInMinutes: maxWallClockTimeInMinutes,
             addTasksIntervalInSeconds: 10,
         } as JobManagerConfig;
         serviceConfigMock.setup((o) => o.getConfigValue('jobManagerConfig')).returns(async () => Promise.resolve(jobManagerConfig));
@@ -308,7 +308,7 @@ describe(BatchTaskCreator, () => {
 
     it('exit manager after scheduled period', async () => {
         jobManagerConfig = {
-            maxWallClockTimeInHours: -1,
+            maxWallClockTimeInMinutes: -1,
         } as JobManagerConfig;
         serviceConfigMock.reset();
         serviceConfigMock.setup((o) => o.getConfigValue('jobManagerConfig')).returns(async () => Promise.resolve(jobManagerConfig));
@@ -317,7 +317,7 @@ describe(BatchTaskCreator, () => {
 
         loggerMock
             .setup((o) =>
-                o.logInfo(`Performing scheduled job manager termination after ${jobManagerConfig.maxWallClockTimeInHours / 4} hours.`),
+                o.logInfo(`Performing scheduled job manager termination after ${jobManagerConfig.maxWallClockTimeInMinutes} minutes.`),
             )
             .verifiable();
 

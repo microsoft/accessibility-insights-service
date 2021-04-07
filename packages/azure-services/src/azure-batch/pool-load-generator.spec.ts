@@ -25,7 +25,7 @@ describe(PoolLoadGenerator, () => {
                 return {
                     activeToRunningTasksRatio: activeToRunningTasksRatio,
                     addTasksIntervalInSeconds: 15,
-                    maxWallClockTimeInHours: 1,
+                    maxWallClockTimeInMinutes: 30,
                 } as JobManagerConfig;
             });
 
