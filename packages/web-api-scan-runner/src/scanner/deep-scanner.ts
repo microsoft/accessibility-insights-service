@@ -33,11 +33,11 @@ export class DeepScanner {
             deepScanId: websiteScanResult.deepScanId,
         });
 
-        const urlCrawlLimit = (await this.serviceConfig.getConfigValue('crawlConfig')).urlCrawlLimit;
-        if (websiteScanResult.knownPages !== undefined && websiteScanResult.knownPages.length >= urlCrawlLimit) {
+        const deepScanDiscoveryLimit = await this.getDeepScanLimit(websiteScanResult);
+        if (websiteScanResult.knownPages !== undefined && websiteScanResult.knownPages.length >= deepScanDiscoveryLimit) {
             this.logger.logInfo(`The website deep scan completed since maximum discovered pages limit was reached.`, {
                 discoveredUrlsTotal: websiteScanResult.knownPages.length.toString(),
-                discoveredUrlsLimit: urlCrawlLimit.toString(),
+                discoveredUrlsLimit: deepScanDiscoveryLimit.toString(),
             });
 
             return;
@@ -45,7 +45,7 @@ export class DeepScanner {
 
         const discoveryPatterns = websiteScanResult.discoveryPatterns ?? [this.discoveryPatternGenerator(websiteScanResult.baseUrl)];
         const discoveredUrls = await this.crawlRunner.run(scanMetadata.url, discoveryPatterns, page.currentPage);
-        const processedUrls = this.processUrls(discoveredUrls, urlCrawlLimit, websiteScanResult.knownPages);
+        const processedUrls = this.processUrls(discoveredUrls, deepScanDiscoveryLimit, websiteScanResult.knownPages);
         const websiteScanResultUpdated = await this.updateWebsiteScanResult(
             scanMetadata.id,
             websiteScanResult,
@@ -80,5 +80,11 @@ export class DeepScanner {
         }
 
         return this.websiteScanResultProvider.read(websiteScanRef.id, true);
+    }
+
+    private async getDeepScanLimit(websiteScanResult: WebsiteScanResult): Promise<number> {
+        const defaultLimit = (await this.serviceConfig.getConfigValue('crawlConfig')).deepScanDiscoveryLimit;
+
+        return websiteScanResult.deepScanLimit ?? defaultLimit;
     }
 }

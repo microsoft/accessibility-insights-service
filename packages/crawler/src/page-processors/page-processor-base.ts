@@ -153,7 +153,7 @@ export abstract class PageProcessorBase implements PageProcessor {
         const enqueued = await this.enqueueLinksExt({
             page,
             requestQueue,
-            pseudoUrls: this.discoveryPatterns,
+            pseudoUrls: this.discoveryPatterns?.length > 0 ? this.discoveryPatterns : undefined, // prevents from crawling all links
         });
         console.log(`Discovered ${enqueued.length} links on page ${page.url()}`);
 

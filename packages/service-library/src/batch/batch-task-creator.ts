@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import { Batch, BatchConfig, BatchTask, JobTask, JobTaskState, Message, Queue } from 'azure-services';
 import { JobManagerConfig, QueueRuntimeConfig, ServiceConfiguration, System } from 'common';
 import { inject, injectable } from 'inversify';
@@ -45,9 +46,7 @@ export abstract class BatchTaskCreator {
         }
 
         this.activeScanMessages = [];
-        const restartAfterTime = moment()
-            .add(this.jobManagerConfig.maxWallClockTimeInHours / 4, 'hour')
-            .toDate();
+        const restartAfterTime = moment().add(this.jobManagerConfig.maxWallClockTimeInMinutes, 'minutes').toDate();
 
         // eslint-disable-next-line no-constant-condition
         while (true) {
@@ -64,7 +63,7 @@ export abstract class BatchTaskCreator {
 
             if (moment().toDate() >= restartAfterTime) {
                 this.logger.logInfo(
-                    `Performing scheduled job manager termination after ${this.jobManagerConfig.maxWallClockTimeInHours / 4} hours.`,
+                    `Performing scheduled job manager termination after ${this.jobManagerConfig.maxWallClockTimeInMinutes} minutes.`,
                 );
 
                 break;

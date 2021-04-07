@@ -12,14 +12,10 @@ export class WebsiteScanResultAggregator {
         sourceDocument: Partial<WebsiteScanResultBase>,
         targetDocument: Partial<WebsiteScanResultBase>,
     ): Partial<WebsiteScanResultBase> {
+        const propertiesToKeep = ['_etag', 'deepScanId', 'deepScanLimit'];
         const mergedDocument = _.mergeWith(targetDocument, sourceDocument, (target, source, key) => {
-            // Preserve the current _etag value
-            if (key === '_etag') {
-                return target;
-            }
-
-            // Preserve original deep scan request scan id
-            if (key === 'deepScanId') {
+            // preserve the targe value if defined
+            if (propertiesToKeep.includes(key)) {
                 return target;
             }
 

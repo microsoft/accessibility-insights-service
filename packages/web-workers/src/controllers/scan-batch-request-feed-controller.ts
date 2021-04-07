@@ -158,7 +158,7 @@ export class ScanBatchRequestFeedController extends WebController {
             const consolidatedGroup = request.reportGroups.find((group) => group.consolidatedId !== undefined);
             if (consolidatedGroup) {
                 const websiteScanRequest: Partial<WebsiteScanResult> = {
-                    baseUrl: request.site.baseUrl,
+                    baseUrl: request.site?.baseUrl,
                     scanGroupId: consolidatedGroup.consolidatedId,
                     // the deep scan id will be saved only when new db document is created
                     deepScanId: request.deepScan ? request.scanId : undefined,
@@ -170,8 +170,8 @@ export class ScanBatchRequestFeedController extends WebController {
                             timestamp: new Date().toJSON(),
                         },
                     ],
-                    knownPages: request.site.knownPages,
-                    discoveryPatterns: request.site.discoveryPatterns,
+                    knownPages: request.site?.knownPages,
+                    discoveryPatterns: request.site?.discoveryPatterns?.length > 0 ? request.site.discoveryPatterns : undefined,
                     created: new Date().toJSON(),
                 };
 

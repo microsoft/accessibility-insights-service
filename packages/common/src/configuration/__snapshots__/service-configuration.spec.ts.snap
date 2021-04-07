@@ -50,9 +50,14 @@ Object {
     },
   },
   "crawlConfig": Object {
-    "urlCrawlLimit": Object {
+    "deepScanDiscoveryLimit": Object {
+      "default": 5,
+      "doc": "The maximum number of URLs that will be discovered for a deep scan request",
+      "format": "int",
+    },
+    "deepScanUpperLimit": Object {
       "default": 10,
-      "doc": "The maximum number of URLs that will be discovered for a deep scan",
+      "doc": "The maximum number of URLs that will be processed for a deep scan request",
       "format": "int",
     },
   },
@@ -74,9 +79,9 @@ Object {
       "doc": "The time interval at which a job manager adds tasks to the job.",
       "format": "int",
     },
-    "maxWallClockTimeInHours": Object {
-      "default": 1,
-      "doc": "The amount of time the job manager instance will run continuously.",
+    "maxWallClockTimeInMinutes": Object {
+      "default": 30,
+      "doc": "The amount of time the job manager instance will run continuously. Must correlate with queueConfig.messageVisibilityTimeoutInSeconds config value.",
       "format": "int",
     },
     "scanRunnerTaskImageName": Object {
@@ -114,8 +119,8 @@ Object {
       "format": "int",
     },
     "messageVisibilityTimeoutInSeconds": Object {
-      "default": 600,
-      "doc": "Message visibility timeout in seconds. Must correlate with taskTimeoutInMinutes config value.",
+      "default": 2400,
+      "doc": "Message visibility timeout in seconds. Must correlate with jobManagerConfig.maxWallClockTimeInMinutes and taskConfig.taskTimeoutInMinutes config values.",
       "format": "int",
     },
   },
@@ -186,7 +191,7 @@ Object {
     },
     "taskTimeoutInMinutes": Object {
       "default": 10,
-      "doc": "Timeout value after which the task has to be terminated. Must correlate with messageVisibilityTimeoutInSeconds config value.",
+      "doc": "Timeout value after which the task has to be terminated. Must correlate with queueConfig.messageVisibilityTimeoutInSeconds config value.",
       "format": "int",
     },
   },
@@ -243,9 +248,14 @@ Object {
     },
   },
   "crawlConfig": Object {
-    "urlCrawlLimit": Object {
+    "deepScanDiscoveryLimit": Object {
+      "default": 5,
+      "doc": "The maximum number of URLs that will be discovered for a deep scan request",
+      "format": "int",
+    },
+    "deepScanUpperLimit": Object {
       "default": 10,
-      "doc": "The maximum number of URLs that will be discovered for a deep scan",
+      "doc": "The maximum number of URLs that will be processed for a deep scan request",
       "format": "int",
     },
   },
@@ -267,9 +277,9 @@ Object {
       "doc": "The time interval at which a job manager adds tasks to the job.",
       "format": "int",
     },
-    "maxWallClockTimeInHours": Object {
-      "default": 1,
-      "doc": "The amount of time the job manager instance will run continuously.",
+    "maxWallClockTimeInMinutes": Object {
+      "default": 30,
+      "doc": "The amount of time the job manager instance will run continuously. Must correlate with queueConfig.messageVisibilityTimeoutInSeconds config value.",
       "format": "int",
     },
     "scanRunnerTaskImageName": Object {
@@ -307,8 +317,8 @@ Object {
       "format": "int",
     },
     "messageVisibilityTimeoutInSeconds": Object {
-      "default": 600,
-      "doc": "Message visibility timeout in seconds. Must correlate with taskTimeoutInMinutes config value.",
+      "default": 2400,
+      "doc": "Message visibility timeout in seconds. Must correlate with jobManagerConfig.maxWallClockTimeInMinutes and taskConfig.taskTimeoutInMinutes config values.",
       "format": "int",
     },
   },
@@ -379,7 +389,7 @@ Object {
     },
     "taskTimeoutInMinutes": Object {
       "default": 10,
-      "doc": "Timeout value after which the task has to be terminated. Must correlate with messageVisibilityTimeoutInSeconds config value.",
+      "doc": "Timeout value after which the task has to be terminated. Must correlate with queueConfig.messageVisibilityTimeoutInSeconds config value.",
       "format": "int",
     },
   },

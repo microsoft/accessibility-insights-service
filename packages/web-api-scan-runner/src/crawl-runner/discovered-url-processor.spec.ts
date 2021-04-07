@@ -18,17 +18,17 @@ describe(discoveredUrlProcessor, () => {
     });
 
     it('limits the number of urls according to config and count of knownUrls', () => {
-        const urlCrawlLimit = 3;
+        const deepScanDiscoveryLimit = 3;
 
-        const processedUrls = discoveredUrlProcessor(urlsList, urlCrawlLimit, ['some url']);
+        const processedUrls = discoveredUrlProcessor(urlsList, deepScanDiscoveryLimit, ['some url']);
 
         expect(processedUrls.length).toBe(2);
     });
 
     it('filters and applies limit in correct order', () => {
-        const urlCrawlLimit = knownUrls.length + 1;
+        const deepScanDiscoveryLimit = knownUrls.length + 1;
 
-        const processedUrls = discoveredUrlProcessor(urlsList, urlCrawlLimit, knownUrls);
+        const processedUrls = discoveredUrlProcessor(urlsList, deepScanDiscoveryLimit, knownUrls);
 
         expect(processedUrls.length).toBe(1);
         expect(knownUrls).not.toContain(processedUrls[0]);
@@ -40,10 +40,10 @@ describe(discoveredUrlProcessor, () => {
         expect(processedUrls).toEqual(urlsList);
     });
 
-    it('handles knownUrls.length > urlCrawlLimit', () => {
-        const urlCrawlLimit = knownUrls.length - 1;
+    it('handles knownUrls.length > deepScanDiscoveryLimit', () => {
+        const deepScanDiscoveryLimit = knownUrls.length - 1;
 
-        const processedUrls = discoveredUrlProcessor(urlsList, urlCrawlLimit, knownUrls);
+        const processedUrls = discoveredUrlProcessor(urlsList, deepScanDiscoveryLimit, knownUrls);
 
         expect(processedUrls.length).toBe(0);
     });

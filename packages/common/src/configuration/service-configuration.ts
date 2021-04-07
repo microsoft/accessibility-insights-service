@@ -24,7 +24,7 @@ export interface LogRuntimeConfig {
 export interface JobManagerConfig {
     activeToRunningTasksRatio: number;
     addTasksIntervalInSeconds: number;
-    maxWallClockTimeInHours: number;
+    maxWallClockTimeInMinutes: number;
     sendNotificationTasksCount: number;
     scanRunnerTaskImageName: string;
     sendNotificationTaskImageName: string;
@@ -75,7 +75,8 @@ export interface AvailabilityTestConfig {
 }
 
 export interface CrawlConfig {
-    urlCrawlLimit: number;
+    deepScanDiscoveryLimit: number;
+    deepScanUpperLimit: number;
 }
 
 export declare type ResourceType = 'batch' | 'registry';
@@ -155,8 +156,9 @@ export class ServiceConfiguration {
                 },
                 messageVisibilityTimeoutInSeconds: {
                     format: 'int',
-                    default: 600,
-                    doc: 'Message visibility timeout in seconds. Must correlate with taskTimeoutInMinutes config value.',
+                    default: (30 + 10) * 60, // maxWallClockTimeInMinutes + taskTimeoutInMinutes
+                    doc:
+                        'Message visibility timeout in seconds. Must correlate with jobManagerConfig.maxWallClockTimeInMinutes and taskConfig.taskTimeoutInMinutes config values.',
                 },
             },
             taskConfig: {
@@ -164,7 +166,7 @@ export class ServiceConfiguration {
                     format: 'int',
                     default: 10,
                     doc:
-                        'Timeout value after which the task has to be terminated. Must correlate with messageVisibilityTimeoutInSeconds config value.',
+                        'Timeout value after which the task has to be terminated. Must correlate with queueConfig.messageVisibilityTimeoutInSeconds config value.',
                 },
                 retentionTimeInDays: {
                     format: 'int',
@@ -190,10 +192,11 @@ export class ServiceConfiguration {
                     default: 20,
                     doc: 'The time interval at which a job manager adds tasks to the job.',
                 },
-                maxWallClockTimeInHours: {
+                maxWallClockTimeInMinutes: {
                     format: 'int',
-                    default: 1,
-                    doc: 'The amount of time the job manager instance will run continuously.',
+                    default: 30,
+                    doc:
+                        'The amount of time the job manager instance will run continuously. Must correlate with queueConfig.messageVisibilityTimeoutInSeconds config value.',
                 },
                 sendNotificationTasksCount: {
                     format: 'int',
@@ -317,10 +320,15 @@ export class ServiceConfiguration {
                 },
             },
             crawlConfig: {
-                urlCrawlLimit: {
+                deepScanDiscoveryLimit: {
+                    format: 'int',
+                    default: 5,
+                    doc: 'The maximum number of URLs that will be discovered for a deep scan request',
+                },
+                deepScanUpperLimit: {
                     format: 'int',
                     default: 10,
-                    doc: 'The maximum number of URLs that will be discovered for a deep scan',
+                    doc: 'The maximum number of URLs that will be processed for a deep scan request',
                 },
             },
         };

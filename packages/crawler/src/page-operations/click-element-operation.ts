@@ -31,7 +31,7 @@ export class ClickElementOperation {
             page,
             requestQueue,
             selector,
-            pseudoUrls: discoveryPatterns,
+            pseudoUrls: discoveryPatterns?.length > 0 ? discoveryPatterns : undefined, // prevents from crawling all links
             transformRequestFunction: (request: Apify.RequestOptions) => {
                 navigated = true;
                 navigationUrl = request.url;

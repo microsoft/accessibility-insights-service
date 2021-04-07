@@ -5,7 +5,7 @@ import _ from 'lodash';
 
 export type DiscoveredUrlProcessor = typeof discoveredUrlProcessor;
 
-export function discoveredUrlProcessor(discoveredUrls: string[], urlCrawlLimit: number, knownUrls?: string[]): string[] {
+export function discoveredUrlProcessor(discoveredUrls: string[], deepScanDiscoveryLimit: number, knownUrls?: string[]): string[] {
     if (_.isNil(discoveredUrls)) {
         return [];
     }
@@ -15,7 +15,7 @@ export function discoveredUrlProcessor(discoveredUrls: string[], urlCrawlLimit: 
         processedUrls = removeUrlsFromList(discoveredUrls, knownUrls);
     }
 
-    return limitNumUrls(processedUrls, getUrlLimit(urlCrawlLimit, knownUrls));
+    return limitNumUrls(processedUrls, getUrlLimit(deepScanDiscoveryLimit, knownUrls));
 }
 
 function removeUrlsFromList(urlList: string[], removeUrls: string[]): string[] {
@@ -26,8 +26,8 @@ function limitNumUrls(urlList: string[], numUrls: number): string[] {
     return _.take(urlList, numUrls);
 }
 
-function getUrlLimit(urlCrawlLimit: number, knownUrls?: string[]): number {
+function getUrlLimit(deepScanDiscoveryLimit: number, knownUrls?: string[]): number {
     const numKnownPages = _.isNil(knownUrls) ? 0 : knownUrls.length;
 
-    return Math.max(urlCrawlLimit - numKnownPages, 0);
+    return Math.max(deepScanDiscoveryLimit - numKnownPages, 0);
 }

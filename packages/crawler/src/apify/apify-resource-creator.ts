@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import * as fs from 'fs';
 import Apify from 'apify';
 import { injectable } from 'inversify';
@@ -51,7 +52,7 @@ export class ApifyResourceCreator implements ResourceCreator {
         await this.enqueueLinksExt({
             page: page,
             requestQueue: requestQueue,
-            pseudoUrls: discoveryPatterns,
+            pseudoUrls: discoveryPatterns?.length > 0 ? discoveryPatterns : undefined, // prevents from crawling all links
         });
     }
 
