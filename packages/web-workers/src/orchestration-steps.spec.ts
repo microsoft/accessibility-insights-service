@@ -11,18 +11,17 @@ import moment from 'moment';
 import { ScanRunErrorResponse, ScanRunResponse, ScanRunResultResponse, WebApiError } from 'service-library';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { NotificationState } from 'storage-documents';
+import { PostScanRequestOptions } from 'web-api-client';
 import { ActivityAction } from './contracts/activity-actions';
 import {
     ActivityRequestData,
     CreateScanRequestData,
     RunFunctionalTestGroupData,
     TrackAvailabilityData,
-    CreateConsolidatedScanRequestData,
 } from './controllers/activity-request-data';
 import { OrchestrationStepsImpl, OrchestrationTelemetryProperties } from './orchestration-steps';
 import { GeneratorExecutor } from './test-utilities/generator-executor';
 import { MockableLogger } from './test-utilities/mockable-logger';
-import { ScanRequestOptions } from './e2e-test-scenarios/e2e-scan-scenario-definitions';
 
 /* eslint-disable @typescript-eslint/consistent-type-assertions, @typescript-eslint/no-explicit-any */
 
@@ -133,17 +132,18 @@ describe(OrchestrationStepsImpl, () => {
         let activityRequestData: ActivityRequestData;
 
         beforeEach(() => {
-            const scanRequestOptions: ScanRequestOptions = {
-                urlToScan: scanUrl,
+            const scanRequestOptions: PostScanRequestOptions = {
                 scanNotificationUrl: notifyScanUrl,
             };
-            generatorExecutor = new GeneratorExecutor<string>(testSubject.invokeSubmitScanRequestRestApi(scanRequestOptions));
+            generatorExecutor = new GeneratorExecutor<string>(testSubject.invokeSubmitScanRequestRestApi(scanUrl, scanRequestOptions));
             activityRequestData = {
                 activityName: ActivityAction.createScanRequest,
                 data: {
                     scanUrl: scanUrl,
-                    priority: 1000,
-                    notifyScanUrl: notifyScanUrl,
+                    scanOptions: {
+                        priority: 1000,
+                        scanNotificationUrl: notifyScanUrl,
+                    },
                 } as CreateScanRequestData,
             };
         });
@@ -155,7 +155,7 @@ describe(OrchestrationStepsImpl, () => {
 
             orchestrationContext
                 .setup((oc) => oc.callActivity(OrchestrationStepsImpl.activityTriggerFuncName, activityRequestData))
-                .returns(() => {
+                .returns((name, data) => {
                     return response as any;
                 })
                 .verifiable(Times.once());
@@ -200,88 +200,6 @@ describe(OrchestrationStepsImpl, () => {
             setupVerifyTrackActivityCall(false, {
                 requestResponse: JSON.stringify(response),
                 activityName: ActivityAction.createScanRequest,
-            });
-
-            expect(() => generatorExecutor.runTillEnd()).toThrowError();
-        });
-    });
-
-    describe('invokeSubmitConsolidatedScanRequestRestApi', () => {
-        let generatorExecutor: GeneratorExecutor<string>;
-        let activityRequestData: ActivityRequestData;
-        let reportIdStub: string;
-
-        beforeEach(() => {
-            reportIdStub = 'some-report-id';
-            const scanRequestOptions: ScanRequestOptions = {
-                urlToScan: scanUrl,
-                consolidatedId: reportIdStub,
-                scanNotificationUrl: notifyScanUrl,
-            };
-            generatorExecutor = new GeneratorExecutor<string>(testSubject.invokeSubmitScanRequestRestApi(scanRequestOptions));
-            activityRequestData = {
-                activityName: ActivityAction.createConsolidatedScanRequest,
-                data: {
-                    scanUrl: scanUrl,
-                    priority: 1000,
-                    reportId: reportIdStub,
-                    notifyScanUrl: notifyScanUrl,
-                } as CreateConsolidatedScanRequestData,
-            };
-        });
-
-        test.each([200, 299])('triggers submitScanRequest with status code %o', async (statusCode) => {
-            const response: SerializableResponse<ScanRunResponse[]> = createSerializableResponse<ScanRunResponse[]>(statusCode, [
-                { scanId: scanId } as ScanRunResponse,
-            ]);
-
-            orchestrationContext
-                .setup((oc) => oc.callActivity(OrchestrationStepsImpl.activityTriggerFuncName, activityRequestData))
-                .returns(() => {
-                    return response as any;
-                })
-                .verifiable(Times.once());
-            setupTrackActivityNeverCalled();
-
-            const scanIdResult = generatorExecutor.runTillEnd();
-            expect(scanIdResult).toEqual(scanId);
-        });
-
-        test.each([199, 300])('submitScanRequest throws error on status code %o', async (statusCode) => {
-            const response: SerializableResponse<ScanRunResponse[]> = createSerializableResponse<ScanRunResponse[]>(statusCode);
-
-            orchestrationContext
-                .setup((oc) => oc.callActivity(OrchestrationStepsImpl.activityTriggerFuncName, activityRequestData))
-                .returns(() => response as any)
-                .verifiable(Times.once());
-
-            setupVerifyTrackActivityCall(false, {
-                requestResponse: JSON.stringify(response),
-                activityName: ActivityAction.createConsolidatedScanRequest,
-            });
-
-            expect(() => generatorExecutor.runTillEnd()).toThrowError();
-        });
-
-        it('submitScanRequest throws error on scan submitted failure', async () => {
-            const error: WebApiError = {
-                code: 'InternalError',
-                codeId: 2000,
-                message: 'test error message',
-            };
-
-            const response: SerializableResponse<ScanRunResponse[]> = createSerializableResponse<ScanRunResponse[]>(200, [
-                { error: error } as ScanRunResponse,
-            ]);
-
-            orchestrationContext
-                .setup((oc) => oc.callActivity(OrchestrationStepsImpl.activityTriggerFuncName, activityRequestData))
-                .returns(() => response as any)
-                .verifiable(Times.once());
-
-            setupVerifyTrackActivityCall(false, {
-                requestResponse: JSON.stringify(response),
-                activityName: ActivityAction.createConsolidatedScanRequest,
             });
 
             expect(() => generatorExecutor.runTillEnd()).toThrowError();

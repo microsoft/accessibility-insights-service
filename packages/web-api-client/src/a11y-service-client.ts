@@ -6,6 +6,7 @@ import { injectable } from 'inversify';
 import { Logger } from 'logger';
 import { HealthReport, ScanResultResponse, ScanRunRequest, ScanRunResponse } from 'service-library';
 import { A11yServiceCredential } from './a11y-service-credential';
+import { PostScanRequestOptions } from './request-options';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -42,43 +43,26 @@ export class A11yServiceClient {
         });
     }
 
-    public async postScanUrl(scanUrl: string, priority?: number): Promise<ResponseWithBodyType<ScanRunResponse[]>> {
-        const scanRequestData: ScanRunRequest = { url: scanUrl };
-
-        return this.postScanUrlWithRequest(scanRequestData, priority);
-    }
-
-    public async postScanUrlWithNotifyUrl(
-        scanUrl: string,
-        scanNotificationUrl: string,
-        priority?: number,
-    ): Promise<ResponseWithBodyType<ScanRunResponse[]>> {
-        const scanRequestData: ScanRunRequest = { url: scanUrl, scanNotifyUrl: scanNotificationUrl };
-
-        return this.postScanUrlWithRequest(scanRequestData, priority);
-    }
-
-    public async postConsolidatedScan(
-        scanUrl: string,
-        reportId: string,
-        scanNotificationUrl: string,
-        priority?: number,
-    ): Promise<ResponseWithBodyType<ScanRunResponse[]>> {
+    public async postScanUrl(scanUrl: string, options?: PostScanRequestOptions): Promise<ResponseWithBodyType<ScanRunResponse[]>> {
         const scanRequestData: ScanRunRequest = {
             url: scanUrl,
-            site: { baseUrl: scanUrl },
-            reportGroups: [{ consolidatedId: reportId }],
-            scanNotifyUrl: scanNotificationUrl,
+            scanNotifyUrl: options?.scanNotificationUrl,
+            priority: options?.priority || 0,
+            deepScan: options?.deepScan,
         };
 
-        return this.postScanUrlWithRequest(scanRequestData, priority);
+        if (options?.consolidatedId) {
+            scanRequestData.reportGroups = [{ consolidatedId: options.consolidatedId }];
+            scanRequestData.site = {
+                baseUrl: scanUrl,
+                ...options.deepScanOptions,
+            };
+        }
+
+        return this.postScanUrlWithRequest(scanRequestData);
     }
 
-    private async postScanUrlWithRequest(
-        scanRequestData: ScanRunRequest,
-        priority: number,
-    ): Promise<ResponseWithBodyType<ScanRunResponse[]>> {
-        scanRequestData.priority = priority || 0;
+    private async postScanUrlWithRequest(scanRequestData: ScanRunRequest): Promise<ResponseWithBodyType<ScanRunResponse[]>> {
         const requestUrl: string = `${this.requestBaseUrl}/scans`;
         const options: Options = { json: [scanRequestData] };
 

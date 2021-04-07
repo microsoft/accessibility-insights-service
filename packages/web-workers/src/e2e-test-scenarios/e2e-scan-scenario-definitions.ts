@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 import { AvailabilityTestConfig } from 'common';
+import { PostScanRequestOptions } from 'web-api-client';
 import { WebApiConfig } from '../controllers/web-api-config';
 import { E2ETestGroupNames } from '../e2e-test-group-names';
 
@@ -9,9 +10,11 @@ export const E2EScanFactories: E2EScanScenarioDefinitionFactory[] = [
     // Simple scan with notification
     (availabilityConfig: AvailabilityTestConfig, webApiConfig: WebApiConfig): E2EScanScenarioDefinition => {
         return {
-            requestOptions: {
-                urlToScan: availabilityConfig.urlToScan,
-                scanNotificationUrl: `${webApiConfig.baseUrl}${availabilityConfig.scanNotifyApiEndpoint}`,
+            scanRequestDef: {
+                url: availabilityConfig.urlToScan,
+                options: {
+                    scanNotificationUrl: `${webApiConfig.baseUrl}${availabilityConfig.scanNotifyApiEndpoint}`,
+                },
             },
             testGroups: {
                 postScanSubmissionTests: ['PostScan', 'ScanStatus'],
@@ -24,10 +27,12 @@ export const E2EScanFactories: E2EScanScenarioDefinitionFactory[] = [
     // Consolidated scan with failed notification
     (availabilityConfig: AvailabilityTestConfig, webApiConfig: WebApiConfig): E2EScanScenarioDefinition => {
         return {
-            requestOptions: {
-                urlToScan: availabilityConfig.urlToScan,
-                scanNotificationUrl: `${webApiConfig.baseUrl}${availabilityConfig.scanNotifyFailApiEndpoint}`,
-                consolidatedId: `${availabilityConfig.consolidatedIdBase}-${process.env.RELEASE_VERSION}`,
+            scanRequestDef: {
+                url: availabilityConfig.urlToScan,
+                options: {
+                    scanNotificationUrl: `${webApiConfig.baseUrl}${availabilityConfig.scanNotifyFailApiEndpoint}`,
+                    consolidatedId: `${availabilityConfig.consolidatedIdBase}-${process.env.RELEASE_VERSION}`,
+                },
             },
             testGroups: {
                 postScanSubmissionTests: [],
@@ -39,14 +44,13 @@ export const E2EScanFactories: E2EScanScenarioDefinitionFactory[] = [
     },
 ];
 
-export type ScanRequestOptions = {
-    urlToScan: string;
-    scanNotificationUrl?: string;
-    consolidatedId?: string;
+export type ScanRequestDefinition = {
+    url: string;
+    options?: PostScanRequestOptions;
 };
 
 export type E2EScanScenarioDefinition = {
-    requestOptions: ScanRequestOptions;
+    scanRequestDef: ScanRequestDefinition;
     testGroups: Partial<E2ETestGroupNames>;
 };
 

@@ -86,9 +86,10 @@ describe(HealthMonitorClientController, () => {
         it('handles createScanRequest', async () => {
             const scanUrl = 'scan-url';
             const priority = 1;
-            const notifyScanUrl = 'some-notify-url';
+            const scanNotifyUrl = 'some-notify-url';
+            const scanOptions = { scanNotificationUrl: scanNotifyUrl, priority };
             webApiClientMock
-                .setup(async (w) => w.postScanUrlWithNotifyUrl(scanUrl, notifyScanUrl, priority))
+                .setup(async (w) => w.postScanUrl(scanUrl, scanOptions))
                 .returns(async () => Promise.resolve(expectedResponse))
                 .verifiable(Times.once());
 
@@ -96,32 +97,7 @@ describe(HealthMonitorClientController, () => {
                 activityName: ActivityAction.createScanRequest,
                 data: {
                     scanUrl: scanUrl,
-                    priority: priority,
-                    notifyScanUrl: notifyScanUrl,
-                },
-            };
-            const result = await testSubject.invoke(context, args);
-            expect(result).toEqual(jsonResponse);
-        });
-
-        it('handles createConsolidatedScanRequest', async () => {
-            const scanUrl = 'scan-url';
-            const reportIdStub = 'some-report-id';
-            const priority = 1;
-            const notifyScanUrl = 'some-notify-url';
-
-            webApiClientMock
-                .setup(async (w) => w.postConsolidatedScan(scanUrl, reportIdStub, notifyScanUrl, priority))
-                .returns(async () => Promise.resolve(expectedResponse))
-                .verifiable(Times.once());
-
-            const args: ActivityRequestData = {
-                activityName: ActivityAction.createConsolidatedScanRequest,
-                data: {
-                    scanUrl: scanUrl,
-                    priority: priority,
-                    reportId: reportIdStub,
-                    notifyScanUrl: notifyScanUrl,
+                    scanOptions: scanOptions,
                 },
             };
             const result = await testSubject.invoke(context, args);

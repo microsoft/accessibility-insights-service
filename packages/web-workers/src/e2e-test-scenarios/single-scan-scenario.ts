@@ -14,12 +14,13 @@ export class SingleScanScenario implements E2EScanScenario {
 
     constructor(private readonly orchestrationSteps: OrchestrationSteps, public readonly testDefinition: E2EScanScenarioDefinition) {
         this.testContextData = {
-            scanUrl: this.testDefinition.requestOptions.urlToScan,
+            scanUrl: this.testDefinition.scanRequestDef.url,
         };
     }
 
     public *submitScanPhase(): Generator<Task | TaskSet, void, SerializableResponse & void> {
-        this.testContextData.scanId = yield* this.orchestrationSteps.invokeSubmitScanRequestRestApi(this.testDefinition.requestOptions);
+        const requestDef = this.testDefinition.scanRequestDef;
+        this.testContextData.scanId = yield* this.orchestrationSteps.invokeSubmitScanRequestRestApi(requestDef.url, requestDef.options);
 
         yield* this.orchestrationSteps.runFunctionalTestGroups(
             this.testContextData,

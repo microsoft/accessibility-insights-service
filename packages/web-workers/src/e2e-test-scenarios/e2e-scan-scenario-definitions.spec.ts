@@ -19,16 +19,20 @@ describe('E2EScanScenarioDefinitions', () => {
     it('creates request options appropriately from given configs', () => {
         process.env.RELEASE_VERSION = 'test-release-version';
         const definitions = E2EScanFactories.map((factory) => factory(availabilityConfig, webConfig));
-        const requestOptions = definitions.map((d) => d.requestOptions);
+        const requestOptions = definitions.map((d) => d.scanRequestDef);
         expect(requestOptions).toEqual([
             {
-                urlToScan: 'url-to-scan',
-                scanNotificationUrl: 'base-url/scan-notify-api-endpoint',
+                url: 'url-to-scan',
+                options: {
+                    scanNotificationUrl: 'base-url/scan-notify-api-endpoint',
+                },
             },
             {
-                urlToScan: 'url-to-scan',
-                scanNotificationUrl: 'base-url/scan-notify-fail-api-endpoint',
-                consolidatedId: 'consolidated-id-base-test-release-version',
+                url: 'url-to-scan',
+                options: {
+                    scanNotificationUrl: 'base-url/scan-notify-fail-api-endpoint',
+                    consolidatedId: 'consolidated-id-base-test-release-version',
+                },
             },
         ]);
     });
