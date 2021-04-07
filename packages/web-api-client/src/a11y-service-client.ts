@@ -55,7 +55,7 @@ export class A11yServiceClient {
             scanRequestData.reportGroups = [{ consolidatedId: options.consolidatedId }];
             scanRequestData.site = {
                 baseUrl: scanUrl,
-                ...options?.deepScanOptions,
+                ...options.deepScanOptions,
             };
         }
 
