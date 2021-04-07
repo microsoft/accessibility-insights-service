@@ -75,7 +75,8 @@ export interface AvailabilityTestConfig {
 }
 
 export interface CrawlConfig {
-    urlCrawlLimit: number;
+    deepScanDiscoveryLimit: number;
+    deepScanUpperLimit: number;
 }
 
 export declare type ResourceType = 'batch' | 'registry';
@@ -317,10 +318,15 @@ export class ServiceConfiguration {
                 },
             },
             crawlConfig: {
-                urlCrawlLimit: {
+                deepScanDiscoveryLimit: {
+                    format: 'int',
+                    default: 5,
+                    doc: 'The maximum number of URLs that will be discovered for a deep scan request',
+                },
+                deepScanUpperLimit: {
                     format: 'int',
                     default: 10,
-                    doc: 'The maximum number of URLs that will be discovered for a deep scan',
+                    doc: 'The maximum number of URLs that will be processed for a deep scan request',
                 },
             },
         };

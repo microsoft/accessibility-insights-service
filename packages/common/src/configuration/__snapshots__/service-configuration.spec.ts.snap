@@ -50,9 +50,14 @@ Object {
     },
   },
   "crawlConfig": Object {
-    "urlCrawlLimit": Object {
+    "deepScanDiscoveryLimit": Object {
+      "default": 5,
+      "doc": "The maximum number of URLs that will be discovered for a deep scan request",
+      "format": "int",
+    },
+    "deepScanUpperLimit": Object {
       "default": 10,
-      "doc": "The maximum number of URLs that will be discovered for a deep scan",
+      "doc": "The maximum number of URLs that will be processed for a deep scan request",
       "format": "int",
     },
   },
@@ -243,9 +248,14 @@ Object {
     },
   },
   "crawlConfig": Object {
-    "urlCrawlLimit": Object {
+    "deepScanDiscoveryLimit": Object {
+      "default": 5,
+      "doc": "The maximum number of URLs that will be discovered for a deep scan request",
+      "format": "int",
+    },
+    "deepScanUpperLimit": Object {
       "default": 10,
-      "doc": "The maximum number of URLs that will be discovered for a deep scan",
+      "doc": "The maximum number of URLs that will be processed for a deep scan request",
       "format": "int",
     },
   },

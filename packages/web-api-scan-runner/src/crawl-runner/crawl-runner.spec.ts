@@ -1,13 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-
 import 'reflect-metadata';
 
 import { Crawler, CrawlerRunOptions } from 'accessibility-insights-crawler';
 import { GlobalLogger } from 'logger';
 import { Page } from 'puppeteer';
 import { IMock, It, Mock, MockBehavior } from 'typemoq';
-import { ServiceConfiguration } from 'common';
 import { BatchConfig } from 'azure-services';
 import { CrawlRunner } from './crawl-runner';
 
@@ -25,30 +23,24 @@ describe('CrawlRunner', () => {
     const baseUrl = 'testUrl';
     const discoveryPatterns = ['testPattern'];
     const page = {} as Page;
-    const urlCrawlLimit = 42;
     const workingDir = '/workingDir';
     const batchConfigStub = {
         taskWorkingDir: workingDir,
     } as BatchConfig;
 
     let loggerMock: IMock<GlobalLogger>;
-    let serviceConfigMock: IMock<ServiceConfiguration>;
 
     beforeEach(() => {
         loggerMock = Mock.ofType<GlobalLogger>(undefined, MockBehavior.Loose);
-
-        serviceConfigMock = Mock.ofType<ServiceConfiguration>(undefined, MockBehavior.Strict);
     });
 
     afterEach(() => {
         loggerMock.verifyAll();
-        serviceConfigMock.verifyAll();
     });
 
     it('returns undefined when crawler provider returns null', async () => {
         const crawlerProviderMock = createCrawlerProviderMock(null);
-
-        const crawlRunner = new CrawlRunner(crawlerProviderMock.object, loggerMock.object, serviceConfigMock.object, batchConfigStub);
+        const crawlRunner = new CrawlRunner(crawlerProviderMock.object, loggerMock.object, batchConfigStub);
 
         expect(await crawlRunner.run(baseUrl, discoveryPatterns, page)).toBeUndefined();
 
@@ -61,16 +53,12 @@ describe('CrawlRunner', () => {
             .setup((m) => m.crawl(It.isAny()))
             .throws(Error())
             .verifiable();
-
         const crawlerProviderMock = createCrawlerProviderMock(crawlerMock.object);
+        const crawlRunner = new CrawlRunner(crawlerProviderMock.object, loggerMock.object, batchConfigStub);
 
-        initServiceConfigMock();
+        const result = await crawlRunner.run(baseUrl, discoveryPatterns, page);
 
-        const crawlRunner = new CrawlRunner(crawlerProviderMock.object, loggerMock.object, serviceConfigMock.object, batchConfigStub);
-
-        const retVal = await crawlRunner.run(baseUrl, discoveryPatterns, page);
-
-        expect(retVal).toBeUndefined();
+        expect(result).toBeUndefined();
 
         crawlerProviderMock.verifyAll();
         crawlerMock.verifyAll();
@@ -81,7 +69,7 @@ describe('CrawlRunner', () => {
             baseUrl,
             discoveryPatterns,
             baseCrawlPage: page,
-            maxRequestsPerCrawl: urlCrawlLimit,
+            maxRequestsPerCrawl: 1,
             silentMode: true,
             restartCrawl: true,
             localOutputDir: `${workingDir}/crawler_storage`,
@@ -96,10 +84,7 @@ describe('CrawlRunner', () => {
             .verifiable();
 
         const crawlerProviderMock = createCrawlerProviderMock(crawlerMock.object);
-
-        initServiceConfigMock();
-
-        const crawlRunner = new CrawlRunner(crawlerProviderMock.object, loggerMock.object, serviceConfigMock.object, batchConfigStub);
+        const crawlRunner = new CrawlRunner(crawlerProviderMock.object, loggerMock.object, batchConfigStub);
 
         const actualRetVal = await crawlRunner.run(baseUrl, discoveryPatterns, page);
 
@@ -117,14 +102,5 @@ describe('CrawlRunner', () => {
             .verifiable();
 
         return crawlerProviderMock;
-    }
-
-    function initServiceConfigMock(): void {
-        serviceConfigMock
-            .setup((m) => m.getConfigValue('crawlConfig'))
-            .returns(async () => ({
-                urlCrawlLimit,
-            }))
-            .verifiable();
     }
 });

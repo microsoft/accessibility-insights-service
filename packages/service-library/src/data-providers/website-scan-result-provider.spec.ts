@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
-import { IMock, Mock, It } from 'typemoq';
+import { IMock, Mock, It, Times } from 'typemoq';
 import { CosmosContainerClient, CosmosOperationResponse } from 'azure-services';
 import {
     WebsiteScanResult,
@@ -13,7 +13,7 @@ import {
     StorageDocument,
     websiteScanResultPartModelKeys,
 } from 'storage-documents';
-import { HashGenerator, RetryHelper } from 'common';
+import { HashGenerator, RetryHelper, ServiceConfiguration, CrawlConfig } from 'common';
 import { GlobalLogger } from 'logger';
 import * as MockDate from 'mockdate';
 import _ from 'lodash';
@@ -26,6 +26,7 @@ type TestWorkflow = 'merge' | 'create' | 'skip-merge';
 
 const maxRetryCount: number = 5;
 const msecBetweenRetries: number = 1000;
+const deepScanDiscoveryLimit = 2;
 const scanId = 'scanId';
 const websiteScanResultBaseId = 'websiteScanResultBaseId';
 const websiteScanResultBasePartitionKey = 'websiteScanResultBasePartitionKey';
@@ -34,12 +35,14 @@ const websiteScanResultPartId = 'websiteScanResultPartId';
 let websiteScanResultProvider: WebsiteScanResultProvider;
 let cosmosContainerClientMock: IMock<CosmosContainerClient>;
 let websiteScanResultAggregatorMock: IMock<WebsiteScanResultAggregator>;
+let serviceConfigurationMock: IMock<ServiceConfiguration>;
 let partitionKeyFactoryMock: IMock<PartitionKeyFactory>;
 let retryHelperMock: IMock<RetryHelper<WebsiteScanResult>>;
 let hashGeneratorMock: IMock<HashGenerator>;
 let globalLoggerMock: IMock<GlobalLogger>;
 let dateNow: Date;
 let websiteScanResultBase: WebsiteScanResultBase;
+let websiteScanResultBaseNormalized: WebsiteScanResultBase;
 let websiteScanResultPartModel: WebsiteScanResultPartModel;
 let websiteScanResult: WebsiteScanResult;
 let websiteScanResultPartDbDocumentExisting: WebsiteScanResultPart;
@@ -55,6 +58,7 @@ describe(WebsiteScanResultProvider, () => {
 
         cosmosContainerClientMock = Mock.ofType<CosmosContainerClient>();
         websiteScanResultAggregatorMock = Mock.ofType<WebsiteScanResultAggregator>();
+        serviceConfigurationMock = Mock.ofType(ServiceConfiguration);
         partitionKeyFactoryMock = Mock.ofType<PartitionKeyFactory>();
         retryHelperMock = Mock.ofType<RetryHelper<WebsiteScanResult>>();
         hashGeneratorMock = Mock.ofType<HashGenerator>();
@@ -63,6 +67,7 @@ describe(WebsiteScanResultProvider, () => {
         websiteScanResultProvider = new WebsiteScanResultProvider(
             cosmosContainerClientMock.object,
             websiteScanResultAggregatorMock.object,
+            serviceConfigurationMock.object,
             partitionKeyFactoryMock.object,
             hashGeneratorMock.object,
             globalLoggerMock.object,
@@ -75,6 +80,7 @@ describe(WebsiteScanResultProvider, () => {
 
         cosmosContainerClientMock.verifyAll();
         websiteScanResultAggregatorMock.verifyAll();
+        serviceConfigurationMock.verifyAll();
         partitionKeyFactoryMock.verifyAll();
         retryHelperMock.verifyAll();
         hashGeneratorMock.verifyAll();
@@ -139,10 +145,37 @@ describe(WebsiteScanResultProvider, () => {
     it('create new website scan result db document', async () => {
         setupDocumentEntities();
         setupHashGeneratorMock();
+
+        websiteScanResultBaseNormalized.deepScanLimit = deepScanDiscoveryLimit;
+
         setupWebsiteScanResultAggregatorMock('create');
         setupPartitionKeyFactoryMock();
         setupCosmosContainerClientMock('create');
         setupRetryHelperMock();
+        serviceConfigurationMock
+            .setup((o) => o.getConfigValue('crawlConfig'))
+            .returns(() => Promise.resolve({ deepScanDiscoveryLimit: deepScanDiscoveryLimit } as CrawlConfig))
+            .verifiable();
+
+        const actualWebsiteScanResult = await websiteScanResultProvider.mergeOrCreate(scanId, websiteScanResult);
+
+        expect(actualWebsiteScanResult).toEqual(websiteScanResultBaseDbDocumentCreated);
+    });
+
+    it('create new website scan result db document with discovery deep scan limit', async () => {
+        setupDocumentEntities(['page1', 'page2', 'page3']);
+        setupHashGeneratorMock();
+
+        websiteScanResultBaseNormalized.deepScanLimit = websiteScanResultPartModel.knownPages.length + 1;
+
+        setupWebsiteScanResultAggregatorMock('create');
+        setupPartitionKeyFactoryMock();
+        setupCosmosContainerClientMock('create');
+        setupRetryHelperMock();
+        serviceConfigurationMock
+            .setup((o) => o.getConfigValue('crawlConfig'))
+            .returns(() => Promise.resolve({ deepScanDiscoveryLimit: deepScanDiscoveryLimit } as CrawlConfig))
+            .verifiable();
 
         const actualWebsiteScanResult = await websiteScanResultProvider.mergeOrCreate(scanId, websiteScanResult);
 
@@ -312,16 +345,19 @@ function setupRetryHelperMock(): void {
 }
 
 function setupWebsiteScanResultAggregatorMock(workflow: TestWorkflow): void {
-    const baseDocument = getSourceDocument(websiteScanResultBaseDbDocumentCreated);
     if (workflow === 'create') {
         websiteScanResultAggregatorMock
-            .setup((o) => o.mergeBaseDocument(baseDocument, {}))
+            .setup((o) => o.mergeBaseDocument(websiteScanResultBaseNormalized, {}))
             .returns(() => websiteScanResultBaseDbDocumentCreated)
             .verifiable();
+        websiteScanResultAggregatorMock
+            .setup((o) => o.mergePartDocument(getSourceDocument(websiteScanResultPartDbDocumentExisting), {}))
+            .returns(() => websiteScanResultPartDbDocumentMerged)
+            .verifiable(Times.exactly(2));
     }
     if (workflow === 'merge') {
         websiteScanResultAggregatorMock
-            .setup((o) => o.mergeBaseDocument(baseDocument, websiteScanResultBaseDbDocumentExisting))
+            .setup((o) => o.mergeBaseDocument(websiteScanResultBaseNormalized, websiteScanResultBaseDbDocumentExisting))
             .returns(() => websiteScanResultBaseDbDocumentMerged)
             .verifiable();
         websiteScanResultAggregatorMock
@@ -333,7 +369,7 @@ function setupWebsiteScanResultAggregatorMock(workflow: TestWorkflow): void {
     }
     if (workflow === 'skip-merge') {
         websiteScanResultAggregatorMock
-            .setup((o) => o.mergeBaseDocument(baseDocument, websiteScanResultBaseDbDocumentExisting))
+            .setup((o) => o.mergeBaseDocument(websiteScanResultBaseNormalized, websiteScanResultBaseDbDocumentExisting))
             .returns(() => {
                 return { ...websiteScanResultBaseDbDocumentMerged, itemVersion: undefined };
             })
@@ -351,14 +387,20 @@ function getSourceDocument(dbDocument: StorageDocument): unknown {
     return document;
 }
 
-function setupDocumentEntities(): void {
+function setupDocumentEntities(knownPages: string[] = ['new page']): void {
     websiteScanResultBase = {
         baseUrl: 'baseUrl',
         scanGroupId: 'scanGroupId',
     } as WebsiteScanResultBase;
+    websiteScanResultBaseNormalized = {
+        ...websiteScanResultBase,
+        id: websiteScanResultBaseId,
+        partitionKey: websiteScanResultBasePartitionKey,
+        itemType: ItemType.websiteScanResult,
+    };
     websiteScanResultPartModel = {
         pageScans: [{ scanId, url: 'url' }],
-        knownPages: ['new page'],
+        knownPages,
     } as WebsiteScanResultPartModel;
     websiteScanResultPartDbDocumentExisting = {
         ...websiteScanResultPartModel,
@@ -379,11 +421,9 @@ function setupDocumentEntities(): void {
         ...websiteScanResultPartModel,
     } as WebsiteScanResult;
     websiteScanResultBaseDbDocumentExisting = {
-        ...websiteScanResultBase,
-        id: websiteScanResultBaseId,
-        partitionKey: websiteScanResultBasePartitionKey,
-        itemType: ItemType.websiteScanResult,
+        ...websiteScanResultBaseNormalized,
         _etag: 'etag-existing',
+        deepScanLimit: deepScanDiscoveryLimit,
     } as WebsiteScanResultBase;
     websiteScanResultBaseDbDocumentCreated = {
         ...websiteScanResultBaseDbDocumentExisting,

@@ -21,6 +21,7 @@
         "environmentDefinition": "production"
     },
     "crawlConfig": {
-        "urlCrawlLimit": 100
+        "deepScanDiscoveryLimit": 100,
+        "deepScanUpperLimit": 3000
     }
 }

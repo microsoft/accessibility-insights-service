@@ -26,6 +26,7 @@ describe(WebsiteScanResultAggregator, () => {
         const source = {
             deepScanId: '*', // should not be merged with target
             _etag: '*', // should not be merged with target
+            deepScanLimit: 7, // should not be merged with target
             discoveryPatterns: ['new discovery pattern', 'existing discovery pattern', null /* should remove falsey value */],
             reports: [
                 {
@@ -40,6 +41,7 @@ describe(WebsiteScanResultAggregator, () => {
         const target = {
             deepScanId: 'deepScanId',
             _etag: '_etag',
+            deepScanLimit: 11,
             discoveryPatterns: ['existing discovery pattern', 'old discovery pattern'],
             reports: [
                 {
@@ -53,6 +55,7 @@ describe(WebsiteScanResultAggregator, () => {
         const expectedDocument = {
             deepScanId: 'deepScanId',
             _etag: '_etag',
+            deepScanLimit: 11,
             discoveryPatterns: ['existing discovery pattern', 'old discovery pattern', 'new discovery pattern'],
             reports: [
                 {

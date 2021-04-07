@@ -3,7 +3,7 @@
 
 import { inject, injectable } from 'inversify';
 import { cosmosContainerClientTypes, CosmosContainerClient, client, CosmosOperationResponse } from 'azure-services';
-import { System, HashGenerator, RetryHelper } from 'common';
+import { System, HashGenerator, RetryHelper, ServiceConfiguration } from 'common';
 import {
     WebsiteScanResult,
     ItemType,
@@ -33,6 +33,7 @@ export class WebsiteScanResultProvider {
         @inject(cosmosContainerClientTypes.OnDemandScanRunsCosmosContainerClient)
         private readonly cosmosContainerClient: CosmosContainerClient,
         @inject(WebsiteScanResultAggregator) private readonly websiteScanResultAggregator: WebsiteScanResultAggregator,
+        @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
         @inject(PartitionKeyFactory) private readonly partitionKeyFactory: PartitionKeyFactory,
         @inject(HashGenerator) private readonly hashGenerator: HashGenerator,
         @inject(GlobalLogger) private readonly logger: GlobalLogger,
@@ -116,21 +117,21 @@ export class WebsiteScanResultProvider {
     }
 
     private async mergeOrCreateImpl(dbDocument: DbDocument): Promise<WebsiteScanResultBase> {
-        const baseDocument = await this.mergeAndWriteBaseDocument(dbDocument.baseDocument);
+        const baseDocument = await this.mergeAndWriteBaseDocument(dbDocument);
         await this.mergeAndWritePartDocument(dbDocument.partDocument);
 
         return baseDocument;
     }
 
-    private async mergeAndWriteBaseDocument(baseDocument: Partial<WebsiteScanResultBase>): Promise<WebsiteScanResultBase> {
-        const operationResult = await this.createBaseDocumentIfNotExists(baseDocument);
+    private async mergeAndWriteBaseDocument(dbDocument: DbDocument): Promise<WebsiteScanResultBase> {
+        const operationResult = await this.createBaseDocumentIfNotExists(dbDocument);
         if (operationResult.created) {
             return operationResult.scanResult;
         }
 
         const storageDocument = operationResult.scanResult;
         const originalDocument = _.cloneDeep(storageDocument);
-        const mergedDocument = this.websiteScanResultAggregator.mergeBaseDocument(baseDocument, storageDocument);
+        const mergedDocument = this.websiteScanResultAggregator.mergeBaseDocument(dbDocument.baseDocument, storageDocument);
         if (!this.same(originalDocument, mergedDocument)) {
             return (await this.cosmosContainerClient.writeDocument(mergedDocument as WebsiteScanResultBase)).item;
         } else {
@@ -188,12 +189,10 @@ export class WebsiteScanResultProvider {
         return partDocument;
     }
 
-    private async createBaseDocumentIfNotExists(
-        websiteScanResult: Partial<WebsiteScanResultBase>,
-    ): Promise<{ created: boolean; scanResult: WebsiteScanResultBase }> {
+    private async createBaseDocumentIfNotExists(dbDocument: DbDocument): Promise<{ created: boolean; scanResult: WebsiteScanResultBase }> {
         const operationResponse = await this.cosmosContainerClient.readDocument<WebsiteScanResultBase>(
-            websiteScanResult.id,
-            websiteScanResult.partitionKey,
+            dbDocument.baseDocument.id,
+            dbDocument.baseDocument.partitionKey,
             false,
         );
 
@@ -201,8 +200,9 @@ export class WebsiteScanResultProvider {
             return { created: false, scanResult: operationResponse.item };
         }
 
+        await this.setDeepScanLimit(dbDocument);
         // compact document before writing to database
-        const websiteScanResultDocument = this.websiteScanResultAggregator.mergeBaseDocument(websiteScanResult, {});
+        const websiteScanResultDocument = this.websiteScanResultAggregator.mergeBaseDocument(dbDocument.baseDocument, {});
         const scanResult = (await this.cosmosContainerClient.writeDocument(websiteScanResultDocument as WebsiteScanResultBase)).item;
 
         return { created: true, scanResult };
@@ -243,6 +243,22 @@ export class WebsiteScanResultProvider {
         };
 
         return { baseDocument, partDocument };
+    }
+
+    // set initial deep scan limit based on provided know list size
+    private async setDeepScanLimit(dbDocument: DbDocument): Promise<void> {
+        // compact known list
+        const partDocument = this.websiteScanResultAggregator.mergePartDocument(dbDocument.partDocument, {});
+        const config = await this.serviceConfig.getConfigValue('crawlConfig');
+
+        if (partDocument.knownPages?.length >= config.deepScanDiscoveryLimit) {
+            dbDocument.baseDocument.deepScanLimit =
+                partDocument.knownPages.length + 1 > config.deepScanUpperLimit
+                    ? config.deepScanUpperLimit
+                    : partDocument.knownPages.length + 1;
+        } else {
+            dbDocument.baseDocument.deepScanLimit = config.deepScanDiscoveryLimit;
+        }
     }
 
     private same(storageDocument: Partial<WebsiteScanResultBase>, mergedDocument: Partial<WebsiteScanResultBase>): boolean {
