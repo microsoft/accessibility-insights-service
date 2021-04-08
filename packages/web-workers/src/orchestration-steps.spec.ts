@@ -10,7 +10,7 @@ import { isNil } from 'lodash';
 import moment from 'moment';
 import { ScanRunErrorResponse, ScanRunResponse, ScanRunResultResponse, WebApiError } from 'service-library';
 import { IMock, It, Mock, Times } from 'typemoq';
-import { NotificationState } from 'storage-documents';
+import { NotificationState, ScanState } from 'storage-documents';
 import { PostScanRequestOptions } from 'web-api-client';
 import { ActivityAction } from './contracts/activity-actions';
 import {
@@ -340,7 +340,7 @@ describe(OrchestrationStepsImpl, () => {
         let nextTime3: moment.Moment;
 
         beforeEach(() => {
-            generatorExecutor = new GeneratorExecutor<string>(testSubject.waitForScanRequestCompletion(scanId));
+            generatorExecutor = new GeneratorExecutor<string>(testSubject.waitForBaseScanCompletion(scanId));
 
             availabilityTestConfig.scanWaitIntervalInSeconds = 10;
             availabilityTestConfig.maxScanWaitTimeInSeconds = 10 * 2 + 1;
@@ -374,7 +374,7 @@ describe(OrchestrationStepsImpl, () => {
                 .verifiable(Times.atLeast(2));
 
             setupVerifyTrackActivityCall(false, {
-                activityName: 'waitForScanCompletion',
+                activityName: 'waitForBaseScanCompletion',
                 requestResponse: JSON.stringify(response),
                 currentUtcDateTime: nextTime3.toDate().toUTCString(),
             });
@@ -382,29 +382,35 @@ describe(OrchestrationStepsImpl, () => {
             expect(() => generatorExecutor.runTillEnd()).toThrowError();
         });
 
-        it('completes if the scan completed before max time', async () => {
-            const response: SerializableResponse<ScanRunResultResponse> = createSerializableResponse<ScanRunResultResponse>(200, {
-                scanId: scanId,
-                run: {
-                    state: 'queued',
-                },
-            } as ScanRunResultResponse);
+        it.each(['pass', 'fail'])(
+            'completes if the scan completed with scanResult %s before max time',
+            async (completedScanScate: ScanState) => {
+                const response: SerializableResponse<ScanRunResultResponse> = createSerializableResponse<ScanRunResultResponse>(200, {
+                    scanId: scanId,
+                    run: {
+                        state: 'queued',
+                    },
+                    scanResult: {
+                        state: 'pending',
+                    },
+                } as ScanRunResultResponse);
 
-            setupCreateTimer(nextTime1);
-            setupCreateTimer(nextTime2, () => {
-                response.body.run.state = 'completed';
-            });
-            setupCreateTimerNeverCalled(nextTime3);
+                setupCreateTimer(nextTime1);
+                setupCreateTimer(nextTime2, () => {
+                    response.body.scanResult.state = completedScanScate;
+                });
+                setupCreateTimerNeverCalled(nextTime3);
 
-            orchestrationContext
-                .setup((oc) => oc.callActivity(OrchestrationStepsImpl.activityTriggerFuncName, activityRequestData))
-                .returns(() => response as any)
-                .verifiable(Times.atLeast(2));
+                orchestrationContext
+                    .setup((oc) => oc.callActivity(OrchestrationStepsImpl.activityTriggerFuncName, activityRequestData))
+                    .returns(() => response as any)
+                    .verifiable(Times.atLeast(2));
 
-            setupTrackActivityNeverCalled();
+                setupTrackActivityNeverCalled();
 
-            generatorExecutor.runTillEnd();
-        });
+                generatorExecutor.runTillEnd();
+            },
+        );
 
         it('throws if the scan failed before max time', async () => {
             let response: SerializableResponse<ScanRunResultResponse> = createSerializableResponse<ScanRunResultResponse>(200, {
@@ -432,7 +438,7 @@ describe(OrchestrationStepsImpl, () => {
                 .verifiable(Times.atLeast(2));
 
             setupVerifyTrackActivityCall(false, {
-                activityName: 'waitForScanCompletion',
+                activityName: 'waitForBaseScanCompletion',
                 requestResponse: JSON.stringify(failedResponse),
                 currentUtcDateTime: nextTime2.toDate().toUTCString(),
             });

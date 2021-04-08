@@ -31,7 +31,7 @@ export class SingleScanScenario implements E2EScanScenario {
     }
 
     public *waitForScanCompletionPhase(): Generator<Task | TaskSet, void, SerializableResponse & void> {
-        const scanRunStatus = yield* this.orchestrationSteps.waitForScanRequestCompletion(this.testContextData.scanId);
+        const scanRunStatus = yield* this.orchestrationSteps.waitForBaseScanCompletion(this.testContextData.scanId);
         yield* this.orchestrationSteps.runFunctionalTestGroups(
             this.testContextData,
             this.testDefinition.testGroups.postScanCompletionTests,

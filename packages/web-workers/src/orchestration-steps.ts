@@ -35,9 +35,9 @@ export interface OrchestrationSteps {
     invokeHealthCheckRestApi(): Generator<Task, void, SerializableResponse>;
     invokeSubmitScanRequestRestApi(scanUrl: string, scanOptions: PostScanRequestOptions): Generator<Task, string, SerializableResponse>;
     validateScanRequestSubmissionState(scanId: string): Generator<Task, void, SerializableResponse & void>;
-    waitForScanRequestCompletion(scanId: string): Generator<Task, ScanRunResultResponse, SerializableResponse & void>;
+    waitForBaseScanCompletion(scanId: string): Generator<Task, ScanRunResultResponse, SerializableResponse & void>;
     waitForScanCompletionNotification(scanId: string): Generator<Task, ScanCompletedNotification, SerializableResponse & void>;
-    waitForDeepScanCompletion(scanId: string): Generator<Task, ScanRunResultResponse, SerializableResponse & void>;
+    waitForFullScanCompletion(scanId: string): Generator<Task, ScanRunResultResponse, SerializableResponse & void>;
     invokeGetScanReportRestApi(scanId: string, reportId: string): Generator<Task, void, SerializableResponse & void>;
     runFunctionalTestGroups(
         testContextData: TestContextData,
@@ -75,14 +75,15 @@ export class OrchestrationStepsImpl implements OrchestrationSteps {
         this.logOrchestrationStep('Successfully fetched scan report');
     }
 
-    public *waitForScanRequestCompletion(scanId: string): Generator<Task, ScanRunResultResponse, SerializableResponse & void> {
+    public *waitForBaseScanCompletion(scanId: string): Generator<Task, ScanRunResultResponse, SerializableResponse & void> {
+        const scanRunSucceeded = (scanRunResult: ScanRunResultResponse) =>
+            scanRunResult.scanResult?.state === 'pass' || scanRunResult.scanResult?.state === 'fail';
         const scanRunCompleted = (scanRunResult: ScanRunResultResponse) =>
-            scanRunResult.run.state === 'completed' || scanRunResult.run.state === 'failed';
-        const scanRunSucceeded = (scanRunResult: ScanRunResultResponse) => scanRunResult.run.state === 'completed';
+            scanRunResult.run.state === 'failed' || scanRunSucceeded(scanRunResult);
 
         return yield* this.waitFor(
             scanId,
-            'waitForScanCompletion',
+            'waitForBaseScanCompletion',
             this.availabilityTestConfig.maxScanWaitTimeInSeconds,
             this.availabilityTestConfig.scanWaitIntervalInSeconds,
             scanRunCompleted,
@@ -103,6 +104,12 @@ export class OrchestrationStepsImpl implements OrchestrationSteps {
         );
 
         return scanStatus?.notification;
+    }
+
+    public *waitForFullScanCompletion(scanId: string): Generator<Task, ScanRunResultResponse, SerializableResponse & void> {
+        yield undefined;
+
+        return undefined;
     }
 
     private *waitFor(
@@ -196,12 +203,6 @@ export class OrchestrationStepsImpl implements OrchestrationSteps {
         this.logOrchestrationStep(`Orchestrator submitted scan with scan Id: ${scanId} and options ${JSON.stringify(scanOptions)}`);
 
         return scanId;
-    }
-
-    public *waitForDeepScanCompletion(scanId: string): Generator<Task, ScanRunResultResponse, SerializableResponse & void> {
-        yield undefined;
-
-        return undefined;
     }
 
     public *runFunctionalTestGroups(testContextData: TestContextData, testGroupNames: TestGroupName[]): Generator<TaskSet, void, void> {
