@@ -611,7 +611,7 @@ describe(OrchestrationStepsImpl, () => {
 
                 setupVerifyTrackActivityCall(false, {
                     activityName: 'waitForScanCompletionNotification',
-                    requestResponse: JSON.stringify(response.body.notification),
+                    requestResponse: JSON.stringify(response),
                     currentUtcDateTime: nextTime3.toDate().toUTCString(),
                 });
 
