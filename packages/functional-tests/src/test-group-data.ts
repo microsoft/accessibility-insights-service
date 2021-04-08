@@ -9,4 +9,5 @@ export interface TestGroupData {
 export interface TestContextData {
     scanUrl: string;
     scanId?: string;
+    expectedCrawledUrls?: string[];
 }
