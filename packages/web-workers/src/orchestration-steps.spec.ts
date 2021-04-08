@@ -10,7 +10,7 @@ import { isNil } from 'lodash';
 import moment from 'moment';
 import { ScanRunErrorResponse, ScanRunResponse, ScanRunResultResponse, WebApiError } from 'service-library';
 import { IMock, It, Mock, Times } from 'typemoq';
-import { NotificationState } from 'storage-documents';
+import { NotificationState, ScanState } from 'storage-documents';
 import { PostScanRequestOptions } from 'web-api-client';
 import { ActivityAction } from './contracts/activity-actions';
 import {
@@ -63,6 +63,7 @@ describe(OrchestrationStepsImpl, () => {
             maxScanCompletionNotificationWaitTimeInSeconds: 30,
             scanNotifyApiEndpoint: '/scan-notify-api',
             scanNotifyFailApiEndpoint: '/some-fail-endpoint',
+            maxDeepScanWaitTimeInSeconds: 40,
         };
 
         loggerMock = Mock.ofType(MockableLogger);
@@ -332,135 +333,6 @@ describe(OrchestrationStepsImpl, () => {
         });
     });
 
-    describe('waitForScanRequestCompletion', () => {
-        let generatorExecutor: GeneratorExecutor;
-        let activityRequestData: ActivityRequestData;
-        let nextTime1: moment.Moment;
-        let nextTime2: moment.Moment;
-        let nextTime3: moment.Moment;
-
-        beforeEach(() => {
-            generatorExecutor = new GeneratorExecutor<string>(testSubject.waitForScanRequestCompletion(scanId));
-
-            availabilityTestConfig.scanWaitIntervalInSeconds = 10;
-            availabilityTestConfig.maxScanWaitTimeInSeconds = 10 * 2 + 1;
-            nextTime1 = moment.utc(currentUtcDateTime).add(availabilityTestConfig.scanWaitIntervalInSeconds, 'seconds');
-            nextTime2 = nextTime1.clone().add(availabilityTestConfig.scanWaitIntervalInSeconds, 'seconds');
-            nextTime3 = nextTime2.clone().add(availabilityTestConfig.scanWaitIntervalInSeconds, 'seconds');
-
-            activityRequestData = {
-                activityName: ActivityAction.getScanResult,
-                data: {
-                    scanId: scanId,
-                },
-            };
-        });
-
-        it('times out if not completed by max time', async () => {
-            setupCreateTimer(nextTime1);
-            setupCreateTimer(nextTime2);
-            setupCreateTimer(nextTime3);
-
-            const response: SerializableResponse<ScanRunResultResponse> = createSerializableResponse<ScanRunResultResponse>(200, {
-                scanId: scanId,
-                run: {
-                    state: 'queued',
-                },
-            } as ScanRunResultResponse);
-
-            orchestrationContext
-                .setup((oc) => oc.callActivity(OrchestrationStepsImpl.activityTriggerFuncName, activityRequestData))
-                .returns(() => response as any)
-                .verifiable(Times.atLeast(2));
-
-            setupVerifyTrackActivityCall(false, {
-                activityName: 'waitForScanCompletion',
-                requestResponse: JSON.stringify(response),
-                currentUtcDateTime: nextTime3.toDate().toUTCString(),
-            });
-
-            expect(() => generatorExecutor.runTillEnd()).toThrowError();
-        });
-
-        it('completes if the scan completed before max time', async () => {
-            const response: SerializableResponse<ScanRunResultResponse> = createSerializableResponse<ScanRunResultResponse>(200, {
-                scanId: scanId,
-                run: {
-                    state: 'queued',
-                },
-            } as ScanRunResultResponse);
-
-            setupCreateTimer(nextTime1);
-            setupCreateTimer(nextTime2, () => {
-                response.body.run.state = 'completed';
-            });
-            setupCreateTimerNeverCalled(nextTime3);
-
-            orchestrationContext
-                .setup((oc) => oc.callActivity(OrchestrationStepsImpl.activityTriggerFuncName, activityRequestData))
-                .returns(() => response as any)
-                .verifiable(Times.atLeast(2));
-
-            setupTrackActivityNeverCalled();
-
-            generatorExecutor.runTillEnd();
-        });
-
-        it('throws if the scan failed before max time', async () => {
-            let response: SerializableResponse<ScanRunResultResponse> = createSerializableResponse<ScanRunResultResponse>(200, {
-                scanId: scanId,
-                run: {
-                    state: 'queued',
-                },
-            } as ScanRunResultResponse);
-            const failedResponse: SerializableResponse<ScanRunResultResponse> = createSerializableResponse<ScanRunResultResponse>(200, {
-                scanId: scanId,
-                run: {
-                    state: 'failed',
-                },
-            } as ScanRunResultResponse);
-
-            setupCreateTimer(nextTime1);
-            setupCreateTimer(nextTime2, () => {
-                response = failedResponse;
-            });
-            setupCreateTimerNeverCalled(nextTime3);
-
-            orchestrationContext
-                .setup((oc) => oc.callActivity(OrchestrationStepsImpl.activityTriggerFuncName, activityRequestData))
-                .returns(() => response as any)
-                .verifiable(Times.atLeast(2));
-
-            setupVerifyTrackActivityCall(false, {
-                activityName: 'waitForScanCompletion',
-                requestResponse: JSON.stringify(failedResponse),
-                currentUtcDateTime: nextTime2.toDate().toUTCString(),
-            });
-
-            expect(() => generatorExecutor.runTillEnd()).toThrowError();
-        });
-
-        test.each([199, 400])('throws if the scan api returns with failure status code %o', async (statusCode: number) => {
-            const response: SerializableResponse = createSerializableResponse(statusCode);
-
-            setupCreateTimer(nextTime1);
-            setupCreateTimerNeverCalled(nextTime2);
-
-            orchestrationContext
-                .setup((oc) => oc.callActivity(OrchestrationStepsImpl.activityTriggerFuncName, activityRequestData))
-                .returns(() => response as any)
-                .verifiable(Times.atLeast(1));
-
-            setupVerifyTrackActivityCall(false, {
-                activityName: 'getScanResult',
-                requestResponse: JSON.stringify(response),
-                currentUtcDateTime: nextTime1.toDate().toUTCString(),
-            });
-
-            expect(() => generatorExecutor.runTillEnd()).toThrowError();
-        });
-    });
-
     describe('run functional test groups', () => {
         const testContextData: TestContextData = {
             scanUrl: 'scan url',
@@ -564,22 +436,20 @@ describe(OrchestrationStepsImpl, () => {
         });
     });
 
-    describe('waitForScanCompletionNotification', () => {
+    describe('Wait', () => {
         let generatorExecutor: GeneratorExecutor;
         let activityRequestData: ActivityRequestData;
         let nextTime1: moment.Moment;
         let nextTime2: moment.Moment;
         let nextTime3: moment.Moment;
-        let response: SerializableResponse<ScanRunResultResponse>;
+
+        const scanWaitInterval = 10;
 
         beforeEach(() => {
-            generatorExecutor = new GeneratorExecutor<string>(testSubject.waitForScanCompletionNotification(scanId));
-
-            availabilityTestConfig.scanWaitIntervalInSeconds = 10;
-            availabilityTestConfig.maxScanCompletionNotificationWaitTimeInSeconds = 10 * 2 + 1;
-            nextTime1 = moment.utc(currentUtcDateTime).add(availabilityTestConfig.scanWaitIntervalInSeconds, 'seconds');
-            nextTime2 = nextTime1.clone().add(availabilityTestConfig.scanWaitIntervalInSeconds, 'seconds');
-            nextTime3 = nextTime2.clone().add(availabilityTestConfig.scanWaitIntervalInSeconds, 'seconds');
+            availabilityTestConfig.scanWaitIntervalInSeconds = scanWaitInterval;
+            nextTime1 = moment.utc(currentUtcDateTime).add(scanWaitInterval, 'seconds');
+            nextTime2 = nextTime1.clone().add(scanWaitInterval, 'seconds');
+            nextTime3 = nextTime2.clone().add(scanWaitInterval, 'seconds');
 
             activityRequestData = {
                 activityName: ActivityAction.getScanResult,
@@ -587,60 +457,225 @@ describe(OrchestrationStepsImpl, () => {
                     scanId: scanId,
                 },
             };
-
-            response = createSerializableResponse<ScanRunResultResponse>(200, {
-                scanId: scanId,
-                notification: {
-                    state: 'pending',
-                },
-            } as ScanRunResultResponse);
         });
 
-        it.each(['pending', 'sending', 'queued'])(
-            'times out if not completed with state %s by max time',
-            async (incompleteState: NotificationState) => {
-                response.body.notification.state = incompleteState;
-                setupCreateTimer(nextTime1);
-                setupCreateTimer(nextTime2);
-                setupCreateTimer(nextTime3);
+        describe('WaitForBaseScanCompletion', () => {
+            let initialResponse: SerializableResponse<ScanRunResultResponse>;
 
-                orchestrationContext
-                    .setup((oc) => oc.callActivity(OrchestrationStepsImpl.activityTriggerFuncName, activityRequestData))
-                    .returns(() => response as any)
-                    .verifiable(Times.atLeast(2));
+            beforeEach(() => {
+                generatorExecutor = new GeneratorExecutor<string>(testSubject.waitForBaseScanCompletion(scanId));
+                availabilityTestConfig.maxScanWaitTimeInSeconds = scanWaitInterval * 2 + 1;
 
-                setupVerifyTrackActivityCall(false, {
-                    activityName: 'waitForScanCompletionNotification',
-                    requestResponse: JSON.stringify(response.body.notification),
-                    currentUtcDateTime: nextTime3.toDate().toUTCString(),
-                });
+                initialResponse = createSerializableResponse<ScanRunResultResponse>(200, {
+                    scanId: scanId,
+                    run: {
+                        state: 'queued',
+                    },
+                    scanResult: {
+                        state: 'pending',
+                    },
+                } as ScanRunResultResponse);
+            });
+
+            it('times out if not completed by max time', async () => {
+                setupWaitWithTimeout(initialResponse, 'waitForBaseScanCompletion');
 
                 expect(() => generatorExecutor.runTillEnd()).toThrowError();
-            },
-        );
+            });
 
-        it.each(['sent', 'sendFailed', 'queueFailed'])(
-            'completes if the scan completed with state %s before max time',
-            async (completedState: NotificationState) => {
-                setupCreateTimer(nextTime1);
-                setupCreateTimer(nextTime2, () => {
-                    response.body.notification.state = completedState;
-                });
-                setupCreateTimerNeverCalled(nextTime3);
+            it.each(['pass', 'fail'])(
+                'completes if the scan completed with scanResult %s before max time',
+                async (completedScanState: ScanState) => {
+                    const finalResponse: SerializableResponse<ScanRunResultResponse> = createSerializableResponse<ScanRunResultResponse>(
+                        200,
+                        {
+                            scanId: scanId,
+                            run: {
+                                state: 'pending',
+                            },
+                            scanResult: {
+                                state: completedScanState,
+                            },
+                        } as ScanRunResultResponse,
+                    );
 
-                orchestrationContext
-                    .setup((oc) => oc.callActivity(OrchestrationStepsImpl.activityTriggerFuncName, activityRequestData))
-                    .returns(() => response as any)
-                    .verifiable(Times.atLeast(2));
+                    setupWaitWithCompletion(initialResponse, finalResponse, 'waitForBaseScanCompletion', true);
 
-                setupTrackActivityNeverCalled();
+                    generatorExecutor.runTillEnd();
+                },
+            );
+
+            it('throws if the scan run failed before max time', async () => {
+                const failedResponse: SerializableResponse<ScanRunResultResponse> = createSerializableResponse<ScanRunResultResponse>(200, {
+                    scanId: scanId,
+                    run: {
+                        state: 'failed',
+                    },
+                } as ScanRunResultResponse);
+
+                setupWaitWithCompletion(initialResponse, failedResponse, 'waitForBaseScanCompletion', false);
+
+                expect(() => generatorExecutor.runTillEnd()).toThrowError();
+            });
+
+            test.each([199, 400])('throws if the scan api returns with failure status code %o', async (statusCode: number) => {
+                setupWaitWithErrorResponse(statusCode);
+
+                expect(() => generatorExecutor.runTillEnd()).toThrowError();
+            });
+        });
+
+        describe('waitForScanCompletionNotification', () => {
+            let initialResponse: SerializableResponse<ScanRunResultResponse>;
+
+            beforeEach(() => {
+                generatorExecutor = new GeneratorExecutor<string>(testSubject.waitForScanCompletionNotification(scanId));
+                availabilityTestConfig.maxScanCompletionNotificationWaitTimeInSeconds = scanWaitInterval * 2 + 1;
+
+                initialResponse = createSerializableResponse<ScanRunResultResponse>(200, {
+                    scanId: scanId,
+                    notification: {
+                        state: 'pending',
+                    },
+                } as ScanRunResultResponse);
+            });
+
+            it.each(['pending', 'sending', 'queued'])(
+                'times out if not completed with state %s by max time',
+                async (incompleteState: NotificationState) => {
+                    initialResponse.body.notification.state = incompleteState;
+                    setupWaitWithTimeout(initialResponse, 'waitForScanCompletionNotification');
+
+                    expect(() => generatorExecutor.runTillEnd()).toThrowError();
+                },
+            );
+
+            it.each(['sent', 'sendFailed', 'queueFailed'])(
+                'completes if the scan completed with state %s before max time',
+                async (completedState: NotificationState) => {
+                    const finalResponse = createSerializableResponse<ScanRunResultResponse>(200, {
+                        scanId: scanId,
+                        notification: {
+                            state: completedState,
+                        },
+                    } as ScanRunResultResponse);
+
+                    setupWaitWithCompletion(initialResponse, finalResponse, 'waitForScanCompletionNotification', true);
+
+                    generatorExecutor.runTillEnd();
+                },
+            );
+
+            test.each([199, 400])('throws if the scan api returns with failure status code %o', async (statusCode: number) => {
+                setupWaitWithErrorResponse(statusCode);
+
+                expect(() => generatorExecutor.runTillEnd()).toThrowError();
+            });
+        });
+
+        describe('WaitForDeepScanCompletion', () => {
+            let initialResponse: SerializableResponse<ScanRunResultResponse>;
+
+            beforeEach(() => {
+                generatorExecutor = new GeneratorExecutor<string>(testSubject.waitForDeepScanCompletion(scanId));
+                availabilityTestConfig.maxDeepScanWaitTimeInSeconds = scanWaitInterval * 2 + 1;
+
+                initialResponse = createSerializableResponse<ScanRunResultResponse>(200, {
+                    scanId: scanId,
+                    run: {
+                        state: 'queued',
+                    },
+                } as ScanRunResultResponse);
+            });
+
+            it('times out if not completed by max time', async () => {
+                setupWaitWithTimeout(initialResponse, 'waitForDeepScanCompletion');
+
+                expect(() => generatorExecutor.runTillEnd()).toThrowError();
+            });
+
+            it('completes if the deep scan completed before max time', async () => {
+                const finalResponse: SerializableResponse<ScanRunResultResponse> = createSerializableResponse<ScanRunResultResponse>(200, {
+                    scanId: scanId,
+                    run: {
+                        state: 'completed',
+                    },
+                } as ScanRunResultResponse);
+
+                setupWaitWithCompletion(initialResponse, finalResponse, 'waitForDeepScanCompletion', true);
 
                 generatorExecutor.runTillEnd();
-            },
-        );
+            });
 
-        test.each([199, 400])('throws if the scan api returns with failure status code %o', async (statusCode: number) => {
-            response = createSerializableResponse(statusCode);
+            it('throws if the deep scan failed before max time', async () => {
+                const failedResponse: SerializableResponse<ScanRunResultResponse> = createSerializableResponse<ScanRunResultResponse>(200, {
+                    scanId: scanId,
+                    run: {
+                        state: 'failed',
+                    },
+                } as ScanRunResultResponse);
+
+                setupWaitWithCompletion(initialResponse, failedResponse, 'waitForDeepScanCompletion', false);
+
+                expect(() => generatorExecutor.runTillEnd()).toThrowError();
+            });
+
+            test.each([199, 400])('throws if the scan api returns with failure status code %o', async (statusCode: number) => {
+                setupWaitWithErrorResponse(statusCode);
+
+                expect(() => generatorExecutor.runTillEnd()).toThrowError();
+            });
+        });
+
+        function setupWaitWithTimeout(response: SerializableResponse<ScanRunResultResponse>, activityName: string): void {
+            setupCreateTimer(nextTime1);
+            setupCreateTimer(nextTime2);
+            setupCreateTimer(nextTime3);
+
+            orchestrationContext
+                .setup((oc) => oc.callActivity(OrchestrationStepsImpl.activityTriggerFuncName, activityRequestData))
+                .returns(() => response as any)
+                .verifiable(Times.atLeast(2));
+
+            setupVerifyTrackActivityCall(false, {
+                activityName: activityName,
+                requestResponse: JSON.stringify(response),
+                currentUtcDateTime: nextTime3.toDate().toUTCString(),
+            });
+        }
+
+        function setupWaitWithCompletion(
+            initialResponse: SerializableResponse<ScanRunResultResponse>,
+            completedResponse: SerializableResponse<ScanRunResultResponse>,
+            activityName: string,
+            shouldSucceed: boolean,
+        ): void {
+            let response = initialResponse;
+
+            setupCreateTimer(nextTime1);
+            setupCreateTimer(nextTime2, () => {
+                response = completedResponse;
+            });
+            setupCreateTimerNeverCalled(nextTime3);
+
+            orchestrationContext
+                .setup((oc) => oc.callActivity(OrchestrationStepsImpl.activityTriggerFuncName, activityRequestData))
+                .returns(() => response as any)
+                .verifiable(Times.atLeast(2));
+
+            if (shouldSucceed) {
+                setupTrackActivityNeverCalled();
+            } else {
+                setupVerifyTrackActivityCall(false, {
+                    activityName: activityName,
+                    requestResponse: JSON.stringify(completedResponse),
+                    currentUtcDateTime: nextTime2.toDate().toUTCString(),
+                });
+            }
+        }
+
+        function setupWaitWithErrorResponse(statusCode: number): void {
+            const response: SerializableResponse = createSerializableResponse(statusCode);
 
             setupCreateTimer(nextTime1);
             setupCreateTimerNeverCalled(nextTime2);
@@ -655,28 +690,26 @@ describe(OrchestrationStepsImpl, () => {
                 requestResponse: JSON.stringify(response),
                 currentUtcDateTime: nextTime1.toDate().toUTCString(),
             });
+        }
 
-            expect(() => generatorExecutor.runTillEnd()).toThrowError();
-        });
+        function setupCreateTimer(fireTime: moment.Moment, callback?: () => void): void {
+            orchestrationContext
+                .setup((oc) => oc.createTimer(fireTime.toDate()))
+                .returns(() => {
+                    currentUtcDateTime = fireTime.toDate();
+                    if (!isNil(callback)) {
+                        callback();
+                    }
+
+                    return undefined;
+                })
+                .verifiable(Times.once());
+        }
+
+        function setupCreateTimerNeverCalled(fireTime: moment.Moment): void {
+            orchestrationContext.setup((oc) => oc.createTimer(fireTime.toDate())).verifiable(Times.never());
+        }
     });
-
-    function setupCreateTimer(fireTime: moment.Moment, callback?: () => void): void {
-        orchestrationContext
-            .setup((oc) => oc.createTimer(fireTime.toDate()))
-            .returns(() => {
-                currentUtcDateTime = fireTime.toDate();
-                if (!isNil(callback)) {
-                    callback();
-                }
-
-                return undefined;
-            })
-            .verifiable(Times.once());
-    }
-
-    function setupCreateTimerNeverCalled(fireTime: moment.Moment): void {
-        orchestrationContext.setup((oc) => oc.createTimer(fireTime.toDate())).verifiable(Times.never());
-    }
 
     function createSerializableResponse<T>(statusCode: number, data?: T): SerializableResponse<T> {
         return ({

@@ -7,14 +7,7 @@ import { TestContextData, TestEnvironment, TestGroupName } from 'functional-test
 import { isNil, isEmpty } from 'lodash';
 import { Logger, LogLevel } from 'logger';
 import moment from 'moment';
-import {
-    NotificationState,
-    RunState,
-    ScanCompletedNotification,
-    ScanRunErrorResponse,
-    ScanRunResponse,
-    ScanRunResultResponse,
-} from 'service-library';
+import { ScanCompletedNotification, ScanRunErrorResponse, ScanRunResponse, ScanRunResultResponse } from 'service-library';
 import { PostScanRequestOptions } from 'web-api-client';
 import { ActivityAction } from './contracts/activity-actions';
 import {
@@ -42,8 +35,9 @@ export interface OrchestrationSteps {
     invokeHealthCheckRestApi(): Generator<Task, void, SerializableResponse>;
     invokeSubmitScanRequestRestApi(scanUrl: string, scanOptions: PostScanRequestOptions): Generator<Task, string, SerializableResponse>;
     validateScanRequestSubmissionState(scanId: string): Generator<Task, void, SerializableResponse & void>;
-    waitForScanRequestCompletion(scanId: string): Generator<Task, ScanRunResultResponse, SerializableResponse & void>;
+    waitForBaseScanCompletion(scanId: string): Generator<Task, ScanRunResultResponse, SerializableResponse & void>;
     waitForScanCompletionNotification(scanId: string): Generator<Task, ScanCompletedNotification, SerializableResponse & void>;
+    waitForDeepScanCompletion(scanId: string): Generator<Task, ScanRunResultResponse, SerializableResponse & void>;
     invokeGetScanReportRestApi(scanId: string, reportId: string): Generator<Task, void, SerializableResponse & void>;
     runFunctionalTestGroups(
         testContextData: TestContextData,
@@ -81,28 +75,76 @@ export class OrchestrationStepsImpl implements OrchestrationSteps {
         this.logOrchestrationStep('Successfully fetched scan report');
     }
 
-    public *waitForScanRequestCompletion(scanId: string): Generator<Task, ScanRunResultResponse, SerializableResponse & void> {
-        let scanRunState: RunState = 'pending';
-        let scanStatus: ScanRunResultResponse;
+    public *waitForBaseScanCompletion(scanId: string): Generator<Task, ScanRunResultResponse, SerializableResponse & void> {
+        const scanRunSucceeded = (scanRunResult: ScanRunResultResponse) =>
+            scanRunResult.scanResult?.state === 'pass' || scanRunResult.scanResult?.state === 'fail';
+        const scanRunCompleted = (scanRunResult: ScanRunResultResponse) =>
+            scanRunResult.run.state === 'failed' || scanRunSucceeded(scanRunResult);
+
+        return yield* this.waitFor(
+            scanId,
+            'waitForBaseScanCompletion',
+            this.availabilityTestConfig.maxScanWaitTimeInSeconds,
+            this.availabilityTestConfig.scanWaitIntervalInSeconds,
+            scanRunCompleted,
+            scanRunSucceeded,
+        );
+    }
+
+    public *waitForScanCompletionNotification(scanId: string): Generator<Task, ScanCompletedNotification, SerializableResponse & void> {
+        const scanNotificationCompleted = (scanRunResponse: ScanRunResultResponse) =>
+            ['sendFailed', 'queueFailed', 'sent'].includes(scanRunResponse.notification.state);
+
+        const scanStatus = yield* this.waitFor(
+            scanId,
+            'waitForScanCompletionNotification',
+            this.availabilityTestConfig.maxScanCompletionNotificationWaitTimeInSeconds,
+            this.availabilityTestConfig.scanWaitIntervalInSeconds,
+            scanNotificationCompleted,
+        );
+
+        return scanStatus?.notification;
+    }
+
+    public *waitForDeepScanCompletion(scanId: string): Generator<Task, ScanRunResultResponse, SerializableResponse & void> {
+        const deepScanSucceeded = (scanRunResult: ScanRunResultResponse) => scanRunResult.run.state === 'completed';
+        const deepScanCompleted = (scanRunResult: ScanRunResultResponse) =>
+            scanRunResult.run.state === 'failed' || deepScanSucceeded(scanRunResult);
+
+        return yield* this.waitFor(
+            scanId,
+            'waitForDeepScanCompletion',
+            this.availabilityTestConfig.maxDeepScanWaitTimeInSeconds,
+            this.availabilityTestConfig.scanWaitIntervalInSeconds,
+            deepScanCompleted,
+            deepScanSucceeded,
+        );
+    }
+
+    private *waitFor(
+        scanId: string,
+        activityName: string,
+        maxWaitTime: number,
+        waitTimeInterval: number,
+        isCompleted: (requestResponse: ScanRunResultResponse) => boolean,
+        isSucceeded: (requestResponse: ScanRunResultResponse) => boolean = isCompleted,
+    ): Generator<Task, ScanRunResultResponse, SerializableResponse & void> {
         const waitStartTime = moment.utc(this.context.df.currentUtcDateTime);
-        const waitEndTime = waitStartTime.clone().add(this.availabilityTestConfig.maxScanWaitTimeInSeconds, 'seconds');
-        const scanWaitIntervalInSeconds = this.availabilityTestConfig.scanWaitIntervalInSeconds;
+        const waitEndTime = waitStartTime.clone().add(maxWaitTime, 'seconds');
         let scanStatusResponse: SerializableResponse;
+        let scanStatus: ScanRunResultResponse;
+        let completed: boolean = false;
 
-        this.logOrchestrationStep('Starting wait for scan request completion');
+        this.logOrchestrationStep(`Starting ${activityName}`);
 
-        while (
-            scanRunState !== 'completed' &&
-            scanRunState !== 'failed' &&
-            moment.utc(this.context.df.currentUtcDateTime).isBefore(waitEndTime)
-        ) {
-            this.logOrchestrationStep(`Starting timer with wait time ${scanWaitIntervalInSeconds}`, LogLevel.info, {
+        while (completed === false && moment.utc(this.context.df.currentUtcDateTime).isBefore(waitEndTime)) {
+            this.logOrchestrationStep(`Starting timer with wait time ${waitTimeInterval}`, LogLevel.info, {
                 waitStartTime: waitStartTime.toJSON(),
                 waitEndTime: waitEndTime.toJSON(),
             });
 
             const timerOutput = yield this.context.df.createTimer(
-                moment.utc(this.context.df.currentUtcDateTime).add(scanWaitIntervalInSeconds, 'seconds').toDate(),
+                moment.utc(this.context.df.currentUtcDateTime).add(waitTimeInterval, 'seconds').toDate(),
             );
 
             this.logOrchestrationStep('Timer completed', LogLevel.info, {
@@ -114,13 +156,13 @@ export class OrchestrationStepsImpl implements OrchestrationSteps {
             scanStatusResponse = yield* this.callGetScanStatusActivity(scanId);
             scanStatus = yield* this.getScanStatus(scanStatusResponse);
 
-            scanRunState = scanStatus.run.state;
+            completed = isCompleted(scanStatus);
         }
 
         const totalWaitTimeInSeconds = moment.utc(this.context.df.currentUtcDateTime).diff(moment.utc(waitStartTime), 'seconds');
 
-        if (scanRunState === 'completed') {
-            this.logOrchestrationStep('Wait for scan request completion succeeded', LogLevel.info, {
+        if (completed === true && isSucceeded(scanStatus)) {
+            this.logOrchestrationStep(`${activityName} succeeded`, LogLevel.info, {
                 totalWaitTimeInSeconds: totalWaitTimeInSeconds.toString(),
                 waitStartTime: waitStartTime.toJSON(),
                 waitEndTime: waitEndTime.toJSON(),
@@ -129,7 +171,7 @@ export class OrchestrationStepsImpl implements OrchestrationSteps {
             const scanStatusResponseString = JSON.stringify(scanStatusResponse);
 
             yield* this.trackAvailability(false, {
-                activityName: 'waitForScanCompletion',
+                activityName: activityName,
                 requestResponse: scanStatusResponseString,
             });
 
@@ -139,9 +181,9 @@ export class OrchestrationStepsImpl implements OrchestrationSteps {
                 waitStartTime: waitStartTime.toJSON(),
                 waitEndTime: waitEndTime.toJSON(),
             };
-            this.logOrchestrationStep('Wait for scan request completion failed', LogLevel.error, traceData);
+            this.logOrchestrationStep(`${activityName} failed`, LogLevel.error, traceData);
 
-            throw new Error(`Wait for scan request completion failed. ${JSON.stringify(traceData)}`);
+            throw new Error(`${activityName} failed. ${JSON.stringify(traceData)}`);
         }
 
         return scanStatus;
@@ -170,74 +212,6 @@ export class OrchestrationStepsImpl implements OrchestrationSteps {
         this.logOrchestrationStep(`Orchestrator submitted scan with scan Id: ${scanId} and options ${JSON.stringify(scanOptions)}`);
 
         return scanId;
-    }
-
-    public *waitForScanCompletionNotification(scanId: string): Generator<Task, ScanCompletedNotification, SerializableResponse & void> {
-        let notificationState: NotificationState = 'pending';
-        const completedNotificationStates: NotificationState[] = ['sendFailed', 'queueFailed', 'sent'];
-        let scanStatus: ScanRunResultResponse;
-        const waitStartTime = moment.utc(this.context.df.currentUtcDateTime);
-        const waitEndTime = waitStartTime
-            .clone()
-            .add(this.availabilityTestConfig.maxScanCompletionNotificationWaitTimeInSeconds, 'seconds');
-        const scanWaitIntervalInSeconds = this.availabilityTestConfig.scanWaitIntervalInSeconds;
-        let scanStatusResponse: SerializableResponse;
-
-        this.logOrchestrationStep('Starting wait for scan completion notification');
-
-        while (
-            !completedNotificationStates.includes(notificationState) &&
-            moment.utc(this.context.df.currentUtcDateTime).isBefore(waitEndTime)
-        ) {
-            this.logOrchestrationStep(`Starting timer with wait time ${scanWaitIntervalInSeconds}`, LogLevel.info, {
-                waitStartTime: waitStartTime.toJSON(),
-                waitEndTime: waitEndTime.toJSON(),
-            });
-
-            const timerOutput = yield this.context.df.createTimer(
-                moment.utc(this.context.df.currentUtcDateTime).add(scanWaitIntervalInSeconds, 'seconds').toDate(),
-            );
-
-            this.logOrchestrationStep('Timer completed', LogLevel.info, {
-                requestResponse: JSON.stringify(timerOutput),
-                waitStartTime: waitStartTime.toJSON(),
-                waitEndTime: waitEndTime.toJSON(),
-            });
-
-            scanStatusResponse = yield* this.callGetScanStatusActivity(scanId);
-            scanStatus = yield* this.getScanStatus(scanStatusResponse);
-
-            notificationState = scanStatus.notification.state;
-        }
-
-        const totalWaitTimeInSeconds = moment.utc(this.context.df.currentUtcDateTime).diff(moment.utc(waitStartTime), 'seconds');
-
-        if (completedNotificationStates.includes(notificationState)) {
-            this.logOrchestrationStep('Wait for scan completition notification succeeded', LogLevel.info, {
-                totalWaitTimeInSeconds: totalWaitTimeInSeconds.toString(),
-                waitStartTime: waitStartTime.toJSON(),
-                waitEndTime: waitEndTime.toJSON(),
-            });
-        } else {
-            const notificationString = JSON.stringify(scanStatus.notification);
-
-            yield* this.trackAvailability(false, {
-                activityName: 'waitForScanCompletionNotification',
-                requestResponse: notificationString,
-            });
-
-            const traceData = {
-                requestResponse: notificationString,
-                totalWaitTimeInSeconds: totalWaitTimeInSeconds.toString(),
-                waitStartTime: waitStartTime.toJSON(),
-                waitEndTime: waitEndTime.toJSON(),
-            };
-            this.logOrchestrationStep('Wait for scan completion notification failed', LogLevel.error, traceData);
-
-            throw new Error(`Wait for scan completion notification failed. ${JSON.stringify(traceData)}`);
-        }
-
-        return scanStatus?.notification;
     }
 
     public *runFunctionalTestGroups(testContextData: TestContextData, testGroupNames: TestGroupName[]): Generator<TaskSet, void, void> {

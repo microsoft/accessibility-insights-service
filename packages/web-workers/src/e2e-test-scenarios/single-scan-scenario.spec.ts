@@ -87,7 +87,7 @@ describe(SingleScanScenario, () => {
         testSubject.testContextData = testContextData;
 
         orchestrationStepsMock
-            .setup((o) => o.waitForScanRequestCompletion(scanId))
+            .setup((o) => o.waitForBaseScanCompletion(scanId))
             .returns(() => generatorStub(scanRunStatus))
             .verifiable();
         orchestrationStepsMock

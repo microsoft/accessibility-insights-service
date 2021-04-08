@@ -72,6 +72,7 @@ export interface AvailabilityTestConfig {
     scanNotifyApiEndpoint: string;
     scanNotifyFailApiEndpoint: string;
     maxScanCompletionNotificationWaitTimeInSeconds: number;
+    maxDeepScanWaitTimeInSeconds: number;
 }
 
 export interface CrawlConfig {
@@ -275,7 +276,7 @@ export class ServiceConfiguration {
             availabilityTestConfig: {
                 urlToScan: {
                     format: 'String',
-                    default: 'https://teststorage57bzoqjjclekk.z13.web.core.windows.net/2021-04-06/index.html',
+                    default: 'https://teststorage57bzoqjjclekk.z13.web.core.windows.net/2021-04-06/',
                     doc: 'Url to scan for availability testing',
                 },
                 consolidatedIdBase: {
@@ -292,6 +293,11 @@ export class ServiceConfiguration {
                     format: 'int',
                     default: 600,
                     doc: 'Maximum wait time for scan notification request to complete',
+                },
+                maxDeepScanWaitTimeInSeconds: {
+                    format: 'int',
+                    default: 3600,
+                    doc: 'Maximum wait time for deep scan to complete',
                 },
                 scanWaitIntervalInSeconds: {
                     format: 'int',
