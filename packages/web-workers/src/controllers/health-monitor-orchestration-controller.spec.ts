@@ -42,6 +42,7 @@ describe('HealthMonitorOrchestrationController', () => {
         scanNotifyApiEndpoint: '/some-endpoint',
         maxScanCompletionNotificationWaitTimeInSeconds: 30,
         scanNotifyFailApiEndpoint: '/some-fail-endpoint',
+        maxDeepScanWaitTimeInSeconds: 40,
     };
     const contextStub = ({
         bindingData: {},

@@ -44,6 +44,7 @@ describe(HealthCheckController, () => {
             scanNotifyApiEndpoint: '/some-endpoint',
             maxScanCompletionNotificationWaitTimeInSeconds: 30,
             scanNotifyFailApiEndpoint: '/some-fail-endpoint',
+            maxDeepScanWaitTimeInSeconds: 40,
         };
 
         serviceConfigurationMock = Mock.ofType<ServiceConfiguration>();
