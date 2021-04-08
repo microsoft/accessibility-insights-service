@@ -37,7 +37,7 @@ export interface OrchestrationSteps {
     validateScanRequestSubmissionState(scanId: string): Generator<Task, void, SerializableResponse & void>;
     waitForBaseScanCompletion(scanId: string): Generator<Task, ScanRunResultResponse, SerializableResponse & void>;
     waitForScanCompletionNotification(scanId: string): Generator<Task, ScanCompletedNotification, SerializableResponse & void>;
-    waitForFullScanCompletion(scanId: string): Generator<Task, ScanRunResultResponse, SerializableResponse & void>;
+    waitForDeepScanCompletion(scanId: string): Generator<Task, ScanRunResultResponse, SerializableResponse & void>;
     invokeGetScanReportRestApi(scanId: string, reportId: string): Generator<Task, void, SerializableResponse & void>;
     runFunctionalTestGroups(
         testContextData: TestContextData,
@@ -106,10 +106,19 @@ export class OrchestrationStepsImpl implements OrchestrationSteps {
         return scanStatus?.notification;
     }
 
-    public *waitForFullScanCompletion(scanId: string): Generator<Task, ScanRunResultResponse, SerializableResponse & void> {
-        yield undefined;
+    public *waitForDeepScanCompletion(scanId: string): Generator<Task, ScanRunResultResponse, SerializableResponse & void> {
+        const deepScanSucceeded = (scanRunResult: ScanRunResultResponse) => scanRunResult.run.state === 'completed';
+        const deepScanCompleted = (scanRunResult: ScanRunResultResponse) =>
+            scanRunResult.run.state === 'failed' || deepScanSucceeded(scanRunResult);
 
-        return undefined;
+        return yield* this.waitFor(
+            scanId,
+            'waitForDeepScanCompletion',
+            this.availabilityTestConfig.maxDeepScanWaitTimeInSeconds,
+            this.availabilityTestConfig.scanWaitIntervalInSeconds,
+            deepScanCompleted,
+            deepScanSucceeded,
+        );
     }
 
     private *waitFor(

@@ -18,6 +18,11 @@ Object {
       "doc": "The Application Insights query time range",
       "format": [Function],
     },
+    "maxDeepScanWaitTimeInSeconds": Object {
+      "default": 3600,
+      "doc": "Maximum wait time for deep scan to complete",
+      "format": "int",
+    },
     "maxScanCompletionNotificationWaitTimeInSeconds": Object {
       "default": 600,
       "doc": "Maximum wait time for scan notification request to complete",
@@ -44,7 +49,7 @@ Object {
       "format": "int",
     },
     "urlToScan": Object {
-      "default": "https://teststorage57bzoqjjclekk.z13.web.core.windows.net/2021-04-06/index.html",
+      "default": "https://teststorage57bzoqjjclekk.z13.web.core.windows.net/2021-04-06/",
       "doc": "Url to scan for availability testing",
       "format": "String",
     },
@@ -216,6 +221,11 @@ Object {
       "doc": "The Application Insights query time range",
       "format": [Function],
     },
+    "maxDeepScanWaitTimeInSeconds": Object {
+      "default": 3600,
+      "doc": "Maximum wait time for deep scan to complete",
+      "format": "int",
+    },
     "maxScanCompletionNotificationWaitTimeInSeconds": Object {
       "default": 600,
       "doc": "Maximum wait time for scan notification request to complete",
@@ -242,7 +252,7 @@ Object {
       "format": "int",
     },
     "urlToScan": Object {
-      "default": "https://teststorage57bzoqjjclekk.z13.web.core.windows.net/2021-04-06/index.html",
+      "default": "https://teststorage57bzoqjjclekk.z13.web.core.windows.net/2021-04-06/",
       "doc": "Url to scan for availability testing",
       "format": "String",
     },
