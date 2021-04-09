@@ -4,6 +4,8 @@ import { GuidGenerator } from 'common';
 import { OnDemandPageScanRunResultProvider } from 'service-library';
 import { A11yServiceClient } from 'web-api-client';
 import { ConsolidatedScanReportsTestGroup } from './test-groups/consolidated-scan-reports-test-group';
+import { DeepScanPostCompletionTestGroup } from './test-groups/deep-scan-post-completion-test-group';
+import { DeepScanReportsTestGroup } from './test-groups/deep-scan-reports-test-group';
 import { FailedScanNotificationTestGroup } from './test-groups/failed-scan-notification-test-group';
 import { FinalizerTestGroup } from './test-groups/finalizer-test-group';
 import { FunctionalTestGroup } from './test-groups/functional-test-group';
@@ -23,6 +25,8 @@ export type TestGroupName =
     | 'ConsolidatedScanReports'
     | 'ScanCompletionNotification'
     | 'FailedScanNotification'
+    | 'DeepScanPostCompletion'
+    | 'DeepScanReports'
     | 'Finalizer';
 
 export type TestGroupConstructor = new (
@@ -40,5 +44,7 @@ export const functionalTestGroupTypes: { [key in TestGroupName]: TestGroupConstr
     ConsolidatedScanReports: ConsolidatedScanReportsTestGroup,
     ScanCompletionNotification: ScanCompletionNotificationTestGroup,
     FailedScanNotification: FailedScanNotificationTestGroup,
+    DeepScanPostCompletion: DeepScanPostCompletionTestGroup,
+    DeepScanReports: DeepScanReportsTestGroup,
     Finalizer: FinalizerTestGroup,
 };
