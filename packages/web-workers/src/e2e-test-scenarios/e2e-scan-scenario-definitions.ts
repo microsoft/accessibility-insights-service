@@ -42,69 +42,6 @@ export const E2EScanFactories: E2EScanScenarioDefinitionFactory[] = [
             },
         };
     },
-    // deep scan is true, with completion notification
-    (availabilityConfig: AvailabilityTestConfig, webApiConfig: WebApiConfig): E2EScanScenarioDefinition => {
-        return {
-            scanRequestDef: {
-                url: availabilityConfig.urlToScan,
-                options: {
-                    scanNotificationUrl: `${webApiConfig.baseUrl}${availabilityConfig.scanNotifyApiEndpoint}`,
-                    consolidatedId: `${availabilityConfig.consolidatedIdBase}-${process.env.RELEASE_VERSION}`,
-                    deepScan: true,
-                },
-            },
-            testGroups: {
-                postScanSubmissionTests: [],
-                postScanCompletionTests: ['DeepScanPostCompletion'],
-                scanReportTests: ['DeepScanReports'], // ConsolidatedScanReports?
-                postScanCompletionNotificationTests: [],
-            },
-        };
-    },
-    // deep scan is true, with completion notification, known urls
-    (availabilityConfig: AvailabilityTestConfig, webApiConfig: WebApiConfig): E2EScanScenarioDefinition => {
-        return {
-            scanRequestDef: {
-                url: availabilityConfig.urlToScan,
-                options: {
-                    scanNotificationUrl: `${webApiConfig.baseUrl}${availabilityConfig.scanNotifyApiEndpoint}`,
-                    consolidatedId: `${availabilityConfig.consolidatedIdBase}-${process.env.RELEASE_VERSION}`,
-                    deepScan: true,
-                    deepScanOptions: {
-                        knownPages: ['some-page'],
-                    },
-                },
-            },
-            testGroups: {
-                postScanSubmissionTests: [],
-                postScanCompletionTests: ['DeepScanPostCompletion'],
-                scanReportTests: ['DeepScanReports'], // ConsolidatedScanReports?
-                postScanCompletionNotificationTests: [],
-            },
-        };
-    },
-    // deep scan is true, with completion notification, discovery patterns
-    (availabilityConfig: AvailabilityTestConfig, webApiConfig: WebApiConfig): E2EScanScenarioDefinition => {
-        return {
-            scanRequestDef: {
-                url: availabilityConfig.urlToScan,
-                options: {
-                    scanNotificationUrl: `${webApiConfig.baseUrl}${availabilityConfig.scanNotifyApiEndpoint}`,
-                    consolidatedId: `${availabilityConfig.consolidatedIdBase}-${process.env.RELEASE_VERSION}`,
-                    deepScan: true,
-                    deepScanOptions: {
-                        discoveryPatterns: ['some-pattern'],
-                    },
-                },
-            },
-            testGroups: {
-                postScanSubmissionTests: [],
-                postScanCompletionTests: ['DeepScanPostCompletion'],
-                scanReportTests: ['DeepScanReports'], // ConsolidatedScanReports?
-                postScanCompletionNotificationTests: [],
-            },
-        };
-    },
 ];
 
 export type ScanRequestDefinition = {
