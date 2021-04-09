@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 import { AvailabilityTestConfig } from 'common';
+import { TestContextData } from 'functional-tests';
 import { PostScanRequestOptions } from 'web-api-client';
 import { WebApiConfig } from '../controllers/web-api-config';
 import { E2ETestGroupNames } from '../e2e-test-group-names';
@@ -10,11 +11,11 @@ export const E2EScanFactories: E2EScanScenarioDefinitionFactory[] = [
     // Simple scan with notification
     (availabilityConfig: AvailabilityTestConfig, webApiConfig: WebApiConfig): E2EScanScenarioDefinition => {
         return {
-            scanRequestDef: {
-                url: availabilityConfig.urlToScan,
-                options: {
-                    scanNotificationUrl: `${webApiConfig.baseUrl}${availabilityConfig.scanNotifyApiEndpoint}`,
-                },
+            scanOptions: {
+                scanNotificationUrl: `${webApiConfig.baseUrl}${availabilityConfig.scanNotifyApiEndpoint}`,
+            },
+            initialTestContextData: {
+                scanUrl: availabilityConfig.urlToScan,
             },
             testGroups: {
                 postScanSubmissionTests: ['PostScan', 'ScanStatus'],
@@ -27,31 +28,91 @@ export const E2EScanFactories: E2EScanScenarioDefinitionFactory[] = [
     // Consolidated scan with failed notification
     (availabilityConfig: AvailabilityTestConfig, webApiConfig: WebApiConfig): E2EScanScenarioDefinition => {
         return {
-            scanRequestDef: {
-                url: availabilityConfig.urlToScan,
-                options: {
-                    scanNotificationUrl: `${webApiConfig.baseUrl}${availabilityConfig.scanNotifyFailApiEndpoint}`,
-                    consolidatedId: `${availabilityConfig.consolidatedIdBase}-${process.env.RELEASE_VERSION}`,
-                },
+            scanOptions: {
+                scanNotificationUrl: `${webApiConfig.baseUrl}${availabilityConfig.scanNotifyFailApiEndpoint}`,
+                consolidatedId: `${availabilityConfig.consolidatedIdBase}-${process.env.RELEASE_VERSION}`,
+            },
+            initialTestContextData: {
+                scanUrl: availabilityConfig.urlToScan,
             },
             testGroups: {
-                postScanSubmissionTests: [],
-                postScanCompletionTests: [],
                 scanReportTests: ['ConsolidatedScanReports'],
                 postScanCompletionNotificationTests: ['FailedScanNotification'],
             },
         };
     },
+    (availabilityConfig: AvailabilityTestConfig, webApiConfig: WebApiConfig): E2EScanScenarioDefinition => {
+        const baseUrl = availabilityConfig.urlToScan;
+
+        return {
+            scanOptions: {
+                deepScan: true,
+            },
+            initialTestContextData: {
+                scanUrl: availabilityConfig.urlToScan,
+                expectedCrawledUrls: [
+                    baseUrl,
+                    `${baseUrl}linked1/index.html`,
+                    `${baseUrl}linked2/index.html`,
+                    `${baseUrl}linked1/inner-page.html`,
+                ],
+            },
+            testGroups: {
+                postDeepScanCompletionTests: ['DeepScanPostCompletion', 'DeepScanReports', 'ConsolidatedScanReports'],
+            },
+        };
+    },
+    (availabilityConfig: AvailabilityTestConfig, webApiConfig: WebApiConfig): E2EScanScenarioDefinition => {
+        const baseUrl = availabilityConfig.urlToScan;
+
+        return {
+            scanOptions: {
+                deepScan: true,
+                deepScanOptions: {
+                    knownPages: [`${baseUrl}unlinked/`],
+                },
+            },
+            initialTestContextData: {
+                scanUrl: availabilityConfig.urlToScan,
+                expectedCrawledUrls: [
+                    baseUrl,
+                    `${baseUrl}linked1/index.html`,
+                    `${baseUrl}linked2/index.html`,
+                    `${baseUrl}linked1/inner-page.html`,
+                    `${baseUrl}unlinked/`,
+                    `${baseUrl}unlinked/other.html`,
+                ],
+            },
+            testGroups: {
+                postDeepScanCompletionTests: ['DeepScanPostCompletion', 'DeepScanReports', 'ConsolidatedScanReports'],
+            },
+        };
+    },
+    (availabilityConfig: AvailabilityTestConfig, webApiConfig: WebApiConfig): E2EScanScenarioDefinition => {
+        const baseUrl = availabilityConfig.urlToScan;
+
+        return {
+            scanOptions: {
+                deepScan: true,
+                deepScanOptions: {
+                    discoveryPatterns: [`${baseUrl}linked1*`],
+                },
+            },
+            initialTestContextData: {
+                scanUrl: availabilityConfig.urlToScan,
+                expectedCrawledUrls: [baseUrl, `${baseUrl}linked1/index.html`, `${baseUrl}linked1/inner-page.html`],
+            },
+            testGroups: {
+                postDeepScanCompletionTests: ['DeepScanPostCompletion', 'DeepScanReports', 'ConsolidatedScanReports'],
+            },
+        };
+    },
 ];
 
-export type ScanRequestDefinition = {
-    url: string;
-    options?: PostScanRequestOptions;
-};
-
 export type E2EScanScenarioDefinition = {
-    scanRequestDef: ScanRequestDefinition;
+    scanOptions: PostScanRequestOptions;
     testGroups: Partial<E2ETestGroupNames>;
+    initialTestContextData: TestContextData;
 };
 
 export type E2EScanScenarioDefinitionFactory = (
