@@ -12,15 +12,17 @@ import { FunctionalTestGroup } from './functional-test-group';
 export class DeepScanReportsTestGroup extends FunctionalTestGroup {
     @test(TestEnvironment.all)
     public async testGetReports(): Promise<void> {
-        const response =
-            await this.a11yServiceClient.getScanStatus(this.testContextData.scanId) as ResponseWithBodyType<ScanRunResultResponse>;
+        const response = (await this.a11yServiceClient.getScanStatus(
+            this.testContextData.scanId,
+        )) as ResponseWithBodyType<ScanRunResultResponse>;
 
         await Promise.all(
             response.body.deepScanResult.map(async (item: DeepScanResultItem) => {
-                const crawledResponse =
-                    await this.a11yServiceClient.getScanStatus(item.scanId) as ResponseWithBodyType<ScanRunResultResponse>;
+                const crawledResponse = (await this.a11yServiceClient.getScanStatus(
+                    item.scanId,
+                )) as ResponseWithBodyType<ScanRunResultResponse>;
 
-                const htmlReportId = crawledResponse.body.reports.find(r => r.format === 'html').reportId;
+                const htmlReportId = crawledResponse.body.reports.find((r) => r.format === 'html').reportId;
                 const reportResponse = await this.a11yServiceClient.getScanReport(this.testContextData.scanId, htmlReportId);
 
                 this.ensureResponseSuccessStatusCode(response);
