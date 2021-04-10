@@ -31,10 +31,8 @@ export interface JobManagerConfig {
 }
 
 export interface ScanRunTimeConfig {
-    minLastReferenceSeenInDays: number;
-    pageRescanIntervalInDays: number;
-    failedPageRescanIntervalInHours: number;
-    maxScanRetryCount: number;
+    failedScanRetryIntervalInMinutes: number;
+    maxFailedScanRetryCount: number;
     maxSendNotificationRetryCount: number;
     scanTimeoutInMin: number;
 }
@@ -216,25 +214,15 @@ export class ServiceConfiguration {
                 },
             },
             scanConfig: {
-                minLastReferenceSeenInDays: {
+                failedScanRetryIntervalInMinutes: {
                     format: 'int',
                     default: 3,
-                    doc: 'Minimum days since we last saw a page. Pages older than this time will not be scanned.',
+                    doc: 'The minimum wait time before next retry of a failed scan request.',
                 },
-                pageRescanIntervalInDays: {
+                maxFailedScanRetryCount: {
                     format: 'int',
                     default: 3,
-                    doc: 'Minimum days since we last scanned. Pages newer than this time will not be scanned.',
-                },
-                failedPageRescanIntervalInHours: {
-                    format: 'int',
-                    default: 3,
-                    doc: 'Minimum hours since the last scan failed. Pages newer than this time will not be scanned.',
-                },
-                maxScanRetryCount: {
-                    format: 'int',
-                    default: 3,
-                    doc: 'Maximum number of retries allowed for a page scan',
+                    doc: 'Maximum number of retries allowed for a failed scan request.',
                 },
                 maxSendNotificationRetryCount: {
                     format: 'int',

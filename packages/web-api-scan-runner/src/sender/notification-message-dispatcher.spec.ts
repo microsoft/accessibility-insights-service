@@ -1,6 +1,5 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-
 import 'reflect-metadata';
 
 import { Queue, StorageConfig } from 'azure-services';
@@ -60,13 +59,8 @@ describe(NotificationMessageDispatcher, () => {
         onDemandPageScanResult.id = notificationRequestMessage.scanId;
 
         scanConfig = {
-            failedPageRescanIntervalInHours: 3,
-            maxScanRetryCount: 4,
             maxSendNotificationRetryCount: 4,
-            minLastReferenceSeenInDays: 5,
-            pageRescanIntervalInDays: 6,
-            scanTimeoutInMin: 1,
-        };
+        } as ScanRunTimeConfig;
 
         storageConfigStub = {
             notificationQueue: 'test-notification-queue',

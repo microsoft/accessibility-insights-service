@@ -94,7 +94,7 @@ describe('Dispatcher', () => {
             setupVerifiableScanRequestNotCalled();
             loggerMock.setup((o) => o.logWarn(It.isAny())).verifiable(Times.once());
 
-            await dispatcher.dispatchOnDemandScanRequests();
+            await dispatcher.dispatchScanRequests();
 
             verifyAll();
         },
@@ -106,7 +106,7 @@ describe('Dispatcher', () => {
         setupReadyToScanPageForAllPages(queryDataProviderStub);
         setupVerifiableScanRequestNotCalled();
 
-        await dispatcher.dispatchOnDemandScanRequests();
+        await dispatcher.dispatchScanRequests();
 
         verifyAll();
     });
@@ -126,7 +126,7 @@ describe('Dispatcher', () => {
 
         setupReadyToScanPageForAllPages(queryDataProviderStub);
 
-        await dispatcher.dispatchOnDemandScanRequests();
+        await dispatcher.dispatchScanRequests();
 
         expect(currentQueueSize).toBe(initialQueueSize + allPages.length);
         verifyAll();
@@ -147,7 +147,7 @@ describe('Dispatcher', () => {
 
         setupReadyToScanPageForAllPages(queryDataProviderStub);
 
-        await dispatcher.dispatchOnDemandScanRequests();
+        await dispatcher.dispatchScanRequests();
         expect(currentQueueSize).toBe(initialQueueSize + allPages.length);
 
         verifyAll();
@@ -168,7 +168,7 @@ describe('Dispatcher', () => {
 
         setupReadyToScanPageForAllPages(queryDataProviderStub);
 
-        await dispatcher.dispatchOnDemandScanRequests();
+        await dispatcher.dispatchScanRequests();
         expect(currentQueueSize).toBe(initialQueueSize + allPages.length);
 
         verifyAll();
@@ -182,7 +182,7 @@ describe('Dispatcher', () => {
             .returns(async () => Promise.resolve(getErrorResponse()))
             .verifiable(Times.once());
 
-        await expect(dispatcher.dispatchOnDemandScanRequests()).rejects.toThrowError(/Failed request response/);
+        await expect(dispatcher.dispatchScanRequests()).rejects.toThrowError(/Failed request response/);
         pageScanRequestProvider.verifyAll();
     });
 

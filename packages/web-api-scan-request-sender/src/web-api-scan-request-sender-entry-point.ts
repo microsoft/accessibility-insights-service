@@ -15,7 +15,7 @@ export class WebApiScanRequestSenderEntryPoint extends ProcessEntryPointBase {
         await logger.setup();
 
         const dispatcher = container.get(OnDemandDispatcher);
-        await dispatcher.dispatchOnDemandScanRequests();
+        await dispatcher.dispatchScanRequests();
 
         logger.logInfo(`Scan requests sent successfully.`);
     }
