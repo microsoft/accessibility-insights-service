@@ -30,7 +30,7 @@ export const E2EScanFactories: E2EScanScenarioDefinitionFactory[] = [
         return {
             scanOptions: {
                 scanNotificationUrl: `${webApiConfig.baseUrl}${availabilityConfig.scanNotifyFailApiEndpoint}`,
-                consolidatedId: `${availabilityConfig.consolidatedIdBase}-${process.env.RELEASE_VERSION}`,
+                consolidatedId: `${availabilityConfig.consolidatedIdBase}-${process.env.RELEASE_VERSION}-consolidated`,
             },
             initialTestContextData: {
                 scanUrl: availabilityConfig.urlToScan,
@@ -47,6 +47,7 @@ export const E2EScanFactories: E2EScanScenarioDefinitionFactory[] = [
         return {
             scanOptions: {
                 deepScan: true,
+                consolidatedId: `${availabilityConfig.consolidatedIdBase}-${process.env.RELEASE_VERSION}-deepScan`,
             },
             initialTestContextData: {
                 scanUrl: availabilityConfig.urlToScan,
@@ -68,6 +69,7 @@ export const E2EScanFactories: E2EScanScenarioDefinitionFactory[] = [
         return {
             scanOptions: {
                 deepScan: true,
+                consolidatedId: `${availabilityConfig.consolidatedIdBase}-${process.env.RELEASE_VERSION}-deepScanKnownPages`,
                 deepScanOptions: {
                     knownPages: [`${baseUrl}unlinked/`],
                 },
@@ -94,6 +96,7 @@ export const E2EScanFactories: E2EScanScenarioDefinitionFactory[] = [
         return {
             scanOptions: {
                 deepScan: true,
+                consolidatedId: `${availabilityConfig.consolidatedIdBase}-${process.env.RELEASE_VERSION}-deepScanDiscoveryPatterns`,
                 deepScanOptions: {
                     discoveryPatterns: [`${baseUrl}linked1*`],
                 },
