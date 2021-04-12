@@ -9,7 +9,7 @@ import { E2EScanFactories } from './e2e-scan-scenario-definitions';
 
 describe('E2EScanScenarioDefinitions', () => {
     const availabilityConfig = {
-        urlToScan: 'url-to-scan',
+        urlToScan: 'url-to-scan/',
         scanNotifyApiEndpoint: 'scan-notify-api-endpoint',
         scanNotifyFailApiEndpoint: 'scan-notify-fail-api-endpoint',
         consolidatedIdBase: 'consolidated-id-base',
@@ -20,22 +20,40 @@ describe('E2EScanScenarioDefinitions', () => {
 
     it('creates request options appropriately from given configs', () => {
         process.env.RELEASE_VERSION = 'test-release-version';
+        const expectedRequestOptions = [
+            {
+                scanNotificationUrl: 'base-url/scan-notify-api-endpoint',
+            },
+            {
+                scanNotificationUrl: 'base-url/scan-notify-fail-api-endpoint',
+                consolidatedId: 'consolidated-id-base-test-release-version-consolidated',
+            },
+            {
+                deepScan: true,
+                consolidatedId: 'consolidated-id-base-test-release-version-deepScan',
+            },
+            {
+                deepScan: true,
+                consolidatedId: 'consolidated-id-base-test-release-version-deepScanKnownPages',
+                deepScanOptions: {
+                    knownPages: [`url-to-scan/unlinked/`],
+                },
+            },
+            {
+                deepScan: true,
+                consolidatedId: 'consolidated-id-base-test-release-version-deepScanDiscoveryPatterns',
+                deepScanOptions: {
+                    discoveryPatterns: [`url-to-scan/linked1*`],
+                },
+            },
+        ];
+
         const definitions = E2EScanFactories.map((factory) => factory(availabilityConfig, webConfig));
         const requestOptions = definitions.map((d) => d.scanOptions);
-        expect(requestOptions).toEqual([
-            {
-                url: 'url-to-scan',
-                options: {
-                    scanNotificationUrl: 'base-url/scan-notify-api-endpoint',
-                },
-            },
-            {
-                url: 'url-to-scan',
-                options: {
-                    scanNotificationUrl: 'base-url/scan-notify-fail-api-endpoint',
-                    consolidatedId: 'consolidated-id-base-test-release-version',
-                },
-            },
-        ]);
+
+        expect(requestOptions).toHaveLength(expectedRequestOptions.length);
+        expectedRequestOptions.forEach((expectedOptions) => {
+            expect(requestOptions).toContainEqual(expectedOptions);
+        });
     });
 });
