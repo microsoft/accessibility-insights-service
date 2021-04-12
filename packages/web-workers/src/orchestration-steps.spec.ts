@@ -336,6 +336,7 @@ describe(OrchestrationStepsImpl, () => {
         const testContextData: TestContextData = {
             scanUrl: 'scan url',
         };
+        const scenarioName = 'testScenario';
         let taskMethodsMock: IMock<ITaskMethods>;
 
         beforeEach(() => {
@@ -376,6 +377,7 @@ describe(OrchestrationStepsImpl, () => {
                         runId: orchestrationInstanceId,
                         testGroupName,
                         testContextData,
+                        scenarioName,
                         environment: 1,
                     } as RunFunctionalTestGroupData,
                 };
@@ -403,7 +405,9 @@ describe(OrchestrationStepsImpl, () => {
         });
 
         function executeRunFunctionalGroups(testGroupNames: TestGroupName[]): void {
-            const generatorExecutor = new GeneratorExecutor<string>(testSubject.runFunctionalTestGroups(testContextData, testGroupNames));
+            const generatorExecutor = new GeneratorExecutor<string>(
+                testSubject.runFunctionalTestGroups(scenarioName, testContextData, testGroupNames),
+            );
             generatorExecutor.runTillEnd();
         }
     });

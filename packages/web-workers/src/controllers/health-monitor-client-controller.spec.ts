@@ -4,7 +4,7 @@ import 'reflect-metadata';
 
 import { Context } from '@azure/functions';
 import { GuidGenerator, ResponseWithBodyType, ServiceConfiguration } from 'common';
-import { FunctionalTestGroup, TestContextData, TestEnvironment, TestGroupConstructor, TestRunner } from 'functional-tests';
+import { FunctionalTestGroup, TestContextData, TestEnvironment, TestGroupConstructor, TestRunMetadata, TestRunner } from 'functional-tests';
 import { OnDemandPageScanRunResultProvider } from 'service-library';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { A11yServiceClient } from 'web-api-client';
@@ -47,6 +47,7 @@ describe(HealthMonitorClientController, () => {
     };
     const releaseId = 'release id';
     const runId = 'run id';
+    const scenarioName = 'test scenario';
     const serializeResponseStub = (response: ResponseWithBodyType) => jsonResponse;
 
     beforeEach(() => {
@@ -171,6 +172,7 @@ describe(HealthMonitorClientController, () => {
             const data: RunFunctionalTestGroupData = {
                 runId: runId,
                 testGroupName: 'PostScan',
+                scenarioName: scenarioName,
                 testContextData: {
                     scanUrl: 'scanUrl',
                 },
@@ -180,11 +182,17 @@ describe(HealthMonitorClientController, () => {
                 activityName: ActivityAction.runFunctionalTestGroup,
                 data: data,
             };
+            const expectedTestMetadata: TestRunMetadata = {
+                environment: TestEnvironment.canary,
+                releaseId: releaseId,
+                runId: runId,
+                scenarioName: scenarioName,
+            };
 
             let testContainer: any;
             testRunnerMock.setup((t) => t.setLogger(loggerMock.object)).verifiable(Times.once());
             testRunnerMock
-                .setup(async (t) => t.run(It.isAny(), TestEnvironment.canary, releaseId, runId))
+                .setup(async (t) => t.run(It.isAny(), expectedTestMetadata))
                 .callback((testGroup) => {
                     testContainer = testGroup;
                 })

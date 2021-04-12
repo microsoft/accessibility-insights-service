@@ -101,7 +101,7 @@ describe('HealthMonitorOrchestrationController', () => {
                 .returns((_) => generatorStub())
                 .verifiable();
             orchestrationStepsMock
-                .setup((m) => m.runFunctionalTestGroups(It.isAny(), [finalizerTestGroupName]))
+                .setup((m) => m.runFunctionalTestGroups(It.isAny(), It.isAny(), [finalizerTestGroupName]))
                 .returns((_) => generatorStub())
                 .verifiable();
 

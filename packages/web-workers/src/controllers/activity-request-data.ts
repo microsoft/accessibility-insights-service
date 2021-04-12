@@ -31,6 +31,7 @@ export interface TrackAvailabilityData {
 export interface RunFunctionalTestGroupData {
     runId: string;
     testGroupName: TestGroupName;
+    scenarioName: string;
     testContextData: TestContextData;
     environment: TestEnvironment;
 }

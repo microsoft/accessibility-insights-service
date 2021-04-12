@@ -40,6 +40,7 @@ export interface OrchestrationSteps {
     waitForDeepScanCompletion(scanId: string): Generator<Task, ScanRunResultResponse, SerializableResponse & void>;
     invokeGetScanReportRestApi(scanId: string, reportId: string): Generator<Task, void, SerializableResponse & void>;
     runFunctionalTestGroups(
+        testScenarioName: string,
         testContextData: TestContextData,
         testGroupNames: TestGroupName[],
     ): Generator<TaskSet, void, SerializableResponse & void>;
@@ -211,7 +212,11 @@ export class OrchestrationStepsImpl implements OrchestrationSteps {
         return scanId;
     }
 
-    public *runFunctionalTestGroups(testContextData: TestContextData, testGroupNames: TestGroupName[]): Generator<TaskSet, void, void> {
+    public *runFunctionalTestGroups(
+        testScenarioName: string,
+        testContextData: TestContextData,
+        testGroupNames: TestGroupName[],
+    ): Generator<TaskSet, void, void> {
         if (isEmpty(testGroupNames)) {
             this.logOrchestrationStep('List of functional tests is empty. Skipping this test run.');
 
@@ -222,6 +227,7 @@ export class OrchestrationStepsImpl implements OrchestrationSteps {
             const testData: RunFunctionalTestGroupData = {
                 runId: this.context.df.instanceId,
                 testGroupName,
+                scenarioName: testScenarioName,
                 testContextData,
                 environment: this.getTestEnvironment(this.availabilityTestConfig.environmentDefinition),
             };

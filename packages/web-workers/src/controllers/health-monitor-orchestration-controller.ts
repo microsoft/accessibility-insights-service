@@ -101,7 +101,7 @@ export class HealthMonitorOrchestrationController extends WebController {
 
     private *finalizeE2ETestRun(orchestrationSteps: OrchestrationSteps): Generator<TaskSet, void, SerializableResponse & void> {
         // The last test group in a functional test suite to indicated a suite run completion
-        yield* orchestrationSteps.runFunctionalTestGroups(undefined, [finalizerTestGroupName]);
+        yield* orchestrationSteps.runFunctionalTestGroups('Finalizer', undefined, [finalizerTestGroupName]);
     }
 }
 
