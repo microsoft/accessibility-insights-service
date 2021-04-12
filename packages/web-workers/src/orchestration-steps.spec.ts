@@ -232,7 +232,6 @@ describe(OrchestrationStepsImpl, () => {
                     return response as any;
                 })
                 .verifiable(Times.once());
-            setupVerifyTrackActivityCall(true, { activityName: ActivityAction.getScanReport });
 
             generatorExecutor.runTillEnd();
         });
@@ -433,6 +432,15 @@ describe(OrchestrationStepsImpl, () => {
             testSubject.logTestRunStart(testGroupNames);
 
             loggerMock.verifyAll();
+        });
+    });
+
+    describe('trackScanRequestCompleted', () => {
+        it('tracks availability ', () => {
+            setupVerifyTrackActivityCall(true, { activityName: 'scanRequestCompleted' });
+
+            const generatorExecutor = new GeneratorExecutor(testSubject.trackScanRequestCompleted());
+            generatorExecutor.runTillEnd();
         });
     });
 

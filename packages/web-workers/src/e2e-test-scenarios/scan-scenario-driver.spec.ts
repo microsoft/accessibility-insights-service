@@ -134,6 +134,10 @@ describe(ScanScenarioDriver, () => {
                 .setup((o) => o.runFunctionalTestGroups(testContextData, testGroupNames.postScanCompletionNotificationTests))
                 .returns(generatorStub)
                 .verifiable();
+            orchestrationStepsMock
+                .setup((o) => o.trackScanRequestCompleted())
+                .returns(generatorStub)
+                .verifiable();
 
             const generatorExecutor = new GeneratorExecutor(testSubject.afterScanCompletedPhase());
             generatorExecutor.runTillEnd();
@@ -144,6 +148,10 @@ describe(ScanScenarioDriver, () => {
                 .setup((o) => o.runFunctionalTestGroups(It.isAny(), It.isAny()))
                 .returns(generatorStub)
                 .verifiable(Times.never());
+            orchestrationStepsMock
+                .setup((o) => o.trackScanRequestCompleted())
+                .returns(generatorStub)
+                .verifiable();
 
             const generatorExecutor = new GeneratorExecutor(testSubject.afterScanCompletedPhase());
             generatorExecutor.runTillEnd();
@@ -167,6 +175,10 @@ describe(ScanScenarioDriver, () => {
                 .verifiable();
             orchestrationStepsMock
                 .setup((o) => o.runFunctionalTestGroups(testContextData, testGroupNames.postDeepScanCompletionTests))
+                .returns(generatorStub)
+                .verifiable();
+            orchestrationStepsMock
+                .setup((o) => o.trackScanRequestCompleted())
                 .returns(generatorStub)
                 .verifiable();
 

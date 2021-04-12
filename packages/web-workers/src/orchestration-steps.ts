@@ -44,6 +44,7 @@ export interface OrchestrationSteps {
         testGroupNames: TestGroupName[],
     ): Generator<TaskSet, void, SerializableResponse & void>;
     logTestRunStart(testGroupNames: string[]): void;
+    trackScanRequestCompleted(): Generator<Task, void, SerializableResponse & void>;
 }
 
 export class OrchestrationStepsImpl implements OrchestrationSteps {
@@ -67,10 +68,6 @@ export class OrchestrationStepsImpl implements OrchestrationSteps {
         };
 
         yield* this.callWebRequestActivity(activityName, requestData);
-
-        yield* this.trackAvailability(true, {
-            activityName,
-        });
 
         this.logOrchestrationStep('Successfully fetched scan report');
     }
@@ -255,6 +252,12 @@ export class OrchestrationStepsImpl implements OrchestrationSteps {
             environment: this.availabilityTestConfig.environmentDefinition,
         };
         this.logger.trackEvent('FunctionalTest', properties);
+    }
+
+    public *trackScanRequestCompleted(): Generator<Task, void, SerializableResponse & void> {
+        yield* this.trackAvailability(true, {
+            activityName: 'scanRequestCompleted',
+        });
     }
 
     private getTestEnvironment(environment: string): TestEnvironment {
