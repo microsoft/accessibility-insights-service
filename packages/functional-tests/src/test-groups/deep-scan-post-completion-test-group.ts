@@ -22,7 +22,8 @@ export class DeepScanPostCompletionTestGroup extends FunctionalTestGroup {
         );
 
         const crawledUrls = response.body.deepScanResult.map((r) => r.url);
-        expect(crawledUrls, 'response should include expected crawled URLs').to.be.equal(this.testContextData.expectedCrawledUrls);
+        expect(crawledUrls, `response should include expected crawled URLs for scan ID ${this.testContextData.scanId}`)
+            .to.be.equal(this.testContextData.expectedCrawledUrls);
 
         const crawledUrlStates = response.body.deepScanResult.map((r) => r.scanRunState);
         const doneScanning = crawledUrlStates.every((s) => s === 'completed' || s === 'failed');
