@@ -51,13 +51,7 @@ export const E2EScanFactories: E2EScanScenarioDefinitionFactory[] = [
             },
             initialTestContextData: {
                 scanUrl: availabilityConfig.urlToScan,
-                expectedCrawledUrls: [
-                    baseUrl,
-                    `${baseUrl}index.html`,
-                    `${baseUrl}linked1/index.html`,
-                    `${baseUrl}linked2/index.html`,
-                    `${baseUrl}linked1/inner-page.html`,
-                ],
+                expectedCrawledUrls: [baseUrl, `${baseUrl}linked1/`, `${baseUrl}linked2/`, `${baseUrl}linked1/inner-page.html`],
             },
             testGroups: {
                 postDeepScanCompletionTests: ['DeepScanPostCompletion', 'DeepScanReports', 'ConsolidatedScanReports'],
@@ -79,12 +73,10 @@ export const E2EScanFactories: E2EScanScenarioDefinitionFactory[] = [
                 scanUrl: availabilityConfig.urlToScan,
                 expectedCrawledUrls: [
                     baseUrl,
-                    `${baseUrl}index.html`,
-                    `${baseUrl}linked1/index.html`,
-                    `${baseUrl}linked2/index.html`,
+                    `${baseUrl}linked1/`,
+                    `${baseUrl}linked2/`,
                     `${baseUrl}linked1/inner-page.html`,
                     `${baseUrl}unlinked/`,
-                    `${baseUrl}unlinked/index.html`,
                     `${baseUrl}unlinked/other.html`,
                 ],
             },
@@ -106,7 +98,7 @@ export const E2EScanFactories: E2EScanScenarioDefinitionFactory[] = [
             },
             initialTestContextData: {
                 scanUrl: availabilityConfig.urlToScan,
-                expectedCrawledUrls: [baseUrl, `${baseUrl}linked1/index.html`, `${baseUrl}linked1/inner-page.html`],
+                expectedCrawledUrls: [baseUrl, `${baseUrl}linked1/`, `${baseUrl}linked1/inner-page.html`],
             },
             testGroups: {
                 postDeepScanCompletionTests: ['DeepScanPostCompletion', 'DeepScanReports', 'ConsolidatedScanReports'],

@@ -276,7 +276,7 @@ export class ServiceConfiguration {
             availabilityTestConfig: {
                 urlToScan: {
                     format: 'String',
-                    default: 'https://teststorage57bzoqjjclekk.z13.web.core.windows.net/2021-04-06/',
+                    default: 'https://teststorage57bzoqjjclekk.z13.web.core.windows.net/2021-04-13/',
                     doc: 'Url to scan for availability testing',
                 },
                 consolidatedIdBase: {
