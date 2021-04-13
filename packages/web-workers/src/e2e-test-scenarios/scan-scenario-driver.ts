@@ -44,10 +44,10 @@ export class ScanScenarioDriver implements E2EScanScenario {
 
     public *afterScanCompletedPhase(): Generator<Task | TaskSet, void, SerializableResponse & void> {
         const scanRequestOptions = this.testDefinition.scanOptions;
-        if (scanRequestOptions?.deepScan) {
+        if (scanRequestOptions.deepScan) {
             yield* this.afterDeepScan();
         }
-        if (scanRequestOptions?.scanNotificationUrl) {
+        if (scanRequestOptions.scanNotificationUrl) {
             yield* this.scanNotification();
         }
         yield* this.orchestrationSteps.trackScanRequestCompleted();
