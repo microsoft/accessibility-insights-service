@@ -50,7 +50,7 @@ export class ScanScenarioDriver implements E2EScanScenario {
         if (scanRequestOptions?.scanNotificationUrl) {
             yield* this.scanNotification();
         }
-        this.orchestrationSteps.trackScanRequestCompleted();
+        yield* this.orchestrationSteps.trackScanRequestCompleted();
     }
 
     private *scanNotification(): Generator<Task | TaskSet, void, SerializableResponse & void> {

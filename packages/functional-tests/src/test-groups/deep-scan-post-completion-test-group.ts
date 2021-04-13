@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { expect } from 'chai';
+import { expect, use } from 'chai';
 import * as deepEqualInAnyGroup from 'deep-equal-in-any-order';
 import { ResponseWithBodyType } from 'common';
 import { RunState, ScanRunResultResponse } from 'service-library';
@@ -13,7 +13,7 @@ import { FunctionalTestGroup } from './functional-test-group';
 export class DeepScanPostCompletionTestGroup extends FunctionalTestGroup {
     @test(TestEnvironment.all)
     public async testGetScanStatus(): Promise<void> {
-        chai.use(deepEqualInAnyGroup.default);
+        use(deepEqualInAnyGroup.default);
 
         const response = (await this.a11yServiceClient.getScanStatus(
             this.testContextData.scanId,
@@ -25,8 +25,10 @@ export class DeepScanPostCompletionTestGroup extends FunctionalTestGroup {
         );
 
         const crawledUrls = response.body.deepScanResult.map((r) => r.url);
-        expect(crawledUrls, `response should include expected crawled URLs for scan ID ${this.testContextData.scanId}`)
-            .to.deep.equalInAnyOrder(this.testContextData.expectedCrawledUrls);
+        expect(
+            crawledUrls,
+            `response should include expected crawled URLs for scan ID ${this.testContextData.scanId}`,
+        ).to.deep.equalInAnyOrder(this.testContextData.expectedCrawledUrls);
 
         const crawledUrlStates = response.body.deepScanResult.map((r) => r.scanRunState);
         const doneScanning = crawledUrlStates.every((s) => s === 'completed' || s === 'failed');
