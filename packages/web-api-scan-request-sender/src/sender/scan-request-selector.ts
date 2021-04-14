@@ -44,12 +44,12 @@ export class ScanRequestSelector {
         do {
             const response: CosmosOperationResponse<OnDemandPageScanRequest[]> = await this.pageScanRequestProvider.getRequests(
                 continuationToken,
-                itemsCount,
+                itemsCount - scanRequests.toQueue.length,
             );
             client.ensureSuccessStatusCode(response);
 
             continuationToken = response.continuationToken;
-            if (response.item.length > 0) {
+            if (response.item?.length > 0) {
                 await this.filterRequests(scanRequests, response.item);
             }
         } while (scanRequests.toQueue.length < itemsCount && continuationToken !== undefined);
