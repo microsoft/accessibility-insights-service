@@ -11,7 +11,7 @@ import { FinalizerTestGroup } from './test-groups/finalizer-test-group';
 import { FunctionalTestGroup } from './test-groups/functional-test-group';
 import { PostScanTestGroup } from './test-groups/post-scan-test-group';
 import { ScanCompletionNotificationTestGroup } from './test-groups/scan-completion-notification-test-group';
-import { ScanPreProcessingTestGroup } from './test-groups/scan-pre-processing-test-group';
+import { SingleScanPostCompletionTestGroup } from './test-groups/single-scan-post-completion-test-group';
 import { ScanQueuingTestGroup } from './test-groups/scan-queuing-test-group';
 import { ScanReportTestGroup } from './test-groups/scan-reports-test-group';
 import { ScanStatusTestGroup } from './test-groups/scan-status-test-group';
@@ -19,7 +19,7 @@ import { ScanStatusTestGroup } from './test-groups/scan-status-test-group';
 export type TestGroupName =
     | 'PostScan'
     | 'ScanStatus'
-    | 'ScanPreProcessing'
+    | 'SingleScanPostCompletion'
     | 'ScanQueueing'
     | 'ScanReports'
     | 'ConsolidatedScanReports'
@@ -38,7 +38,7 @@ export type TestGroupConstructor = new (
 export const functionalTestGroupTypes: { [key in TestGroupName]: TestGroupConstructor } = {
     PostScan: PostScanTestGroup,
     ScanStatus: ScanStatusTestGroup,
-    ScanPreProcessing: ScanPreProcessingTestGroup,
+    SingleScanPostCompletion: SingleScanPostCompletionTestGroup,
     ScanQueueing: ScanQueuingTestGroup,
     ScanReports: ScanReportTestGroup,
     ConsolidatedScanReports: ConsolidatedScanReportsTestGroup,

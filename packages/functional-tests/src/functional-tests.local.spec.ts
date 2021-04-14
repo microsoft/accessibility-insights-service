@@ -65,7 +65,7 @@ describe('functional tests', () => {
         await waitForScanRequestCompletion();
     });
 
-    testEach(['ScanPreProcessing', 'ScanQueueing', 'ScanReports', 'Finalizer'], isServiceCredProvided);
+    testEach(['SingleScanPostCompletion', 'ScanQueueing', 'ScanReports', 'Finalizer'], isServiceCredProvided);
 
     function isServiceCredProvided(): boolean {
         return (

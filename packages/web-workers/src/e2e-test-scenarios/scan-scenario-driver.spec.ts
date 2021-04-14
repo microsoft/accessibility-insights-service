@@ -29,7 +29,7 @@ describe(ScanScenarioDriver, () => {
     const reportId = 'report id';
     const testGroupNames: Partial<E2ETestGroupNames> = {
         postScanSubmissionTests: ['PostScan'],
-        postScanCompletionTests: ['ScanPreProcessing'],
+        postScanCompletionTests: ['SingleScanPostCompletion'],
         scanReportTests: ['ScanReports'],
         postScanCompletionNotificationTests: ['ScanCompletionNotification'],
         postDeepScanCompletionTests: ['ConsolidatedScanReports'],
