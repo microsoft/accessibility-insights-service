@@ -328,7 +328,7 @@ export class ServiceConfiguration {
             crawlConfig: {
                 deepScanDiscoveryLimit: {
                     format: 'int',
-                    default: 5,
+                    default: 6, // Must be at least high enough to allow the largest E2E deep scan test to complete
                     doc: 'The maximum number of URLs that will be discovered for a deep scan request',
                 },
                 deepScanUpperLimit: {
