@@ -91,7 +91,9 @@ export const E2EScanFactories: E2EScanScenarioDefinitionFactory[] = [
         return {
             scanOptions: {
                 deepScan: true,
-                consolidatedId: `${availabilityConfig.consolidatedIdBase}-${process.env.RELEASE_VERSION}-deepScanDiscoveryPatterns-${Date.now()}`,
+                consolidatedId: `${availabilityConfig.consolidatedIdBase}-${
+                    process.env.RELEASE_VERSION
+                }-deepScanDiscoveryPatterns-${Date.now()}`,
                 deepScanOptions: {
                     discoveryPatterns: [`${baseUrl}linked1[.*]`],
                 },
