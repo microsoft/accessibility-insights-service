@@ -9,18 +9,18 @@ import { OrchestrationSteps } from '../orchestration-steps';
 import { E2EScanScenario } from './e2e-scan-scenario';
 import { E2EScanScenarioDefinition } from './e2e-scan-scenario-definitions';
 
-export class SingleScanScenario implements E2EScanScenario {
+export class ScanScenarioDriver implements E2EScanScenario {
     protected readonly testContextData: TestContextData;
 
     constructor(private readonly orchestrationSteps: OrchestrationSteps, public readonly testDefinition: E2EScanScenarioDefinition) {
-        this.testContextData = {
-            scanUrl: this.testDefinition.scanRequestDef.url,
-        };
+        this.testContextData = testDefinition.initialTestContextData;
     }
 
     public *submitScanPhase(): Generator<Task | TaskSet, void, SerializableResponse & void> {
-        const requestDef = this.testDefinition.scanRequestDef;
-        this.testContextData.scanId = yield* this.orchestrationSteps.invokeSubmitScanRequestRestApi(requestDef.url, requestDef.options);
+        this.testContextData.scanId = yield* this.orchestrationSteps.invokeSubmitScanRequestRestApi(
+            this.testContextData.scanUrl,
+            this.testDefinition.scanOptions,
+        );
 
         yield* this.orchestrationSteps.runFunctionalTestGroups(
             this.testContextData,
@@ -43,11 +43,29 @@ export class SingleScanScenario implements E2EScanScenario {
     }
 
     public *afterScanCompletedPhase(): Generator<Task | TaskSet, void, SerializableResponse & void> {
-        // Wait for scan notification
+        const scanRequestOptions = this.testDefinition.scanOptions;
+        if (scanRequestOptions.deepScan) {
+            yield* this.afterDeepScan();
+        }
+        if (scanRequestOptions.scanNotificationUrl) {
+            yield* this.scanNotification();
+        }
+        yield* this.orchestrationSteps.trackScanRequestCompleted();
+    }
+
+    private *scanNotification(): Generator<Task | TaskSet, void, SerializableResponse & void> {
         yield* this.orchestrationSteps.waitForScanCompletionNotification(this.testContextData.scanId);
         yield* this.orchestrationSteps.runFunctionalTestGroups(
             this.testContextData,
             this.testDefinition.testGroups.postScanCompletionNotificationTests,
+        );
+    }
+
+    private *afterDeepScan(): Generator<Task | TaskSet, void, SerializableResponse & void> {
+        yield* this.orchestrationSteps.waitForDeepScanCompletion(this.testContextData.scanId);
+        yield* this.orchestrationSteps.runFunctionalTestGroups(
+            this.testContextData,
+            this.testDefinition.testGroups.postDeepScanCompletionTests,
         );
     }
 }

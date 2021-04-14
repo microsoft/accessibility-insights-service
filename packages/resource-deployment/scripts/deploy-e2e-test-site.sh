@@ -75,5 +75,5 @@ deployStorageAccount
 uploadSiteContents
 
 echo "Deployment of E2E test site complete"
-echo "The test site homepage can be found at $siteUrl$sitePath/index.html"
+echo "The test site homepage can be found at $siteUrl$sitePath/"
 

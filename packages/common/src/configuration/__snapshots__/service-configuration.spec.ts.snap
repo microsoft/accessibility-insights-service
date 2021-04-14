@@ -49,14 +49,14 @@ Object {
       "format": "int",
     },
     "urlToScan": Object {
-      "default": "https://teststorage57bzoqjjclekk.z13.web.core.windows.net/2021-04-06/",
+      "default": "https://teststorage57bzoqjjclekk.z13.web.core.windows.net/2021-04-13/",
       "doc": "Url to scan for availability testing",
       "format": "String",
     },
   },
   "crawlConfig": Object {
     "deepScanDiscoveryLimit": Object {
-      "default": 5,
+      "default": 6,
       "doc": "The maximum number of URLs that will be discovered for a deep scan request",
       "format": "int",
     },
@@ -252,14 +252,14 @@ Object {
       "format": "int",
     },
     "urlToScan": Object {
-      "default": "https://teststorage57bzoqjjclekk.z13.web.core.windows.net/2021-04-06/",
+      "default": "https://teststorage57bzoqjjclekk.z13.web.core.windows.net/2021-04-13/",
       "doc": "Url to scan for availability testing",
       "format": "String",
     },
   },
   "crawlConfig": Object {
     "deepScanDiscoveryLimit": Object {
-      "default": 5,
+      "default": 6,
       "doc": "The maximum number of URLs that will be discovered for a deep scan request",
       "format": "int",
     },

@@ -10,6 +10,7 @@ export type E2ETestGroupNames = {
         | 'postScanCompletionTests'
         | 'scanReportTests'
         | 'postScanCompletionNotificationTests'
+        | 'postDeepScanCompletionTests'
         | 'finalizerTests']: TestGroupName[];
 };
 

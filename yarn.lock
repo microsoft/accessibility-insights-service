@@ -2785,6 +2785,11 @@
   resolved "https://registry.yarnpkg.com/@types/dateformat/-/dateformat-3.0.1.tgz#98d747a2e5e9a56070c6bf14e27bff56204e34cc"
   integrity sha512-KlPPdikagvL6ELjWsljbyDIPzNCeliYkqRpI+zea99vBBbCIA5JNshZAwQKTON139c87y9qvTFVgkFd14rtS4g==
 
+"@types/deep-equal-in-any-order@^1.0.1":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@types/deep-equal-in-any-order/-/deep-equal-in-any-order-1.0.1.tgz#0559d855797a5034e187f248b23a4490e5444f2e"
+  integrity sha512-hUWUUE53WjKfcCncSmWmNXVNNT+0Iz7gYFnov3zdCXrX3Thxp1Cnmfd5LwWOeCVUV5LhpiFgS05vaAG72doo9w==
+
 "@types/domhandler@^2.4.1":
   version "2.4.1"
   resolved "https://registry.yarnpkg.com/@types/domhandler/-/domhandler-2.4.1.tgz#7b3b347f7762180fbcb1ece1ce3dd0ebbb8c64cf"
@@ -3820,9 +3825,9 @@ apify-client@^0.6.0:
     underscore "^1.9.1"
 
 apify-shared@>=0.5.0, apify-shared@^0.1.45, apify-shared@^0.4.0, apify-shared@^0.5.0:
-  version "0.6.3"
-  resolved "https://registry.yarnpkg.com/apify-shared/-/apify-shared-0.6.3.tgz#71e5dfedddab63860cdd8a0cacfaedf2ea35437d"
-  integrity sha512-34J5LWt9sjIFP52nPuz9z8IWecxGsuLEhjOxTZII4XRtmMylRecYFmVxVIltV+h7PHNuQzL2LUjjkQ372QvV4Q==
+  version "0.7.5"
+  resolved "https://registry.yarnpkg.com/apify-shared/-/apify-shared-0.7.5.tgz#558236954e90b4cd576b6bd5f99eb0e52a306ffa"
+  integrity sha512-gRYuTWeFUfKVMcV4BQJJ0PrIFspHxzk8nideH3r01dXmZB89MJNjD3r6QYONEjCWgD4RaOiYIn/8bWEtmsiXCw==
   dependencies:
     axios "^0.21.1"
     chalk "^4.0.0"
@@ -5387,6 +5392,14 @@ deep-eql@^3.0.1:
   integrity sha512-+QeIQyN5ZuO+3Uk5DYh6/1eKO0m0YmJFGNmFHGACpf1ClL1nmlV/p4gNgbl2pJGxgXb4faqo6UE+M5ACEMyVcw==
   dependencies:
     type-detect "^4.0.0"
+
+deep-equal-in-any-order@^1.1.4:
+  version "1.1.4"
+  resolved "https://registry.yarnpkg.com/deep-equal-in-any-order/-/deep-equal-in-any-order-1.1.4.tgz#fed84839ebd6bfa53298142db35b0d8293677b92"
+  integrity sha512-yigFzn8ynCxq7ECTXiH/sS3as0QZaXDeSY6QmXPA67C+TwfilSh2AkNMrmmCYp+dh/UcA7UHTmpC7qwT4zEOLA==
+  dependencies:
+    lodash.mapvalues "^4.6.0"
+    sort-any "^1.2.2"
 
 deep-extend@^0.6.0:
   version "0.6.0"
@@ -8937,6 +8950,11 @@ lodash.isstring@^4.0.1:
   resolved "https://registry.yarnpkg.com/lodash.isstring/-/lodash.isstring-4.0.1.tgz#d527dfb5456eca7cc9bb95d5daeaf88ba54a5451"
   integrity sha1-1SfftUVuynzJu5XV2ur4i6VKVFE=
 
+lodash.mapvalues@^4.6.0:
+  version "4.6.0"
+  resolved "https://registry.yarnpkg.com/lodash.mapvalues/-/lodash.mapvalues-4.6.0.tgz#1bafa5005de9dd6f4f26668c30ca37230cc9689c"
+  integrity sha1-G6+lAF3p3W9PJmaMMMo3IwzJaJw=
+
 lodash.memoize@4.x:
   version "4.1.2"
   resolved "https://registry.yarnpkg.com/lodash.memoize/-/lodash.memoize-4.1.2.tgz#bcc6c49a42a2840ed997f323eada5ecd182e0bfe"
@@ -9122,9 +9140,9 @@ map-visit@^1.0.0:
     object-visit "^1.0.0"
 
 marked@1.0.0, marked@>=1.1.1, marked@^2.0.0:
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/marked/-/marked-2.0.1.tgz#5e7ed7009bfa5c95182e4eb696f85e948cefcee3"
-  integrity sha512-5+/fKgMv2hARmMW7DOpykr2iLhl0NgjyELk5yn92iE7z8Se1IS9n3UsFm86hFXIkvMBmVxki8+ckcpjBeyo/hw==
+  version "2.0.3"
+  resolved "https://registry.yarnpkg.com/marked/-/marked-2.0.3.tgz#3551c4958c4da36897bda2a16812ef1399c8d6b0"
+  integrity sha512-5otztIIcJfPc2qGTN8cVtOJEjNJZ0jwa46INMagrYfk0EvqtRuEHLsEe0LrFS0/q+ZRKT0+kXK7P2T1AN5lWRA==
 
 match-all@^1.2.6:
   version "1.2.6"
@@ -11707,6 +11725,13 @@ socks@~2.3.2:
   dependencies:
     ip "1.1.5"
     smart-buffer "^4.1.0"
+
+sort-any@^1.2.2:
+  version "1.2.3"
+  resolved "https://registry.yarnpkg.com/sort-any/-/sort-any-1.2.3.tgz#901806cb3ec769b95c6d8eade7528c4f8dda404c"
+  integrity sha512-yJLpmCgDOu7Z6XS6ofzcKRy/Id8yfGB8KkzC7oKAk1F7P3jPWEU8GMxBJWDo5fKp71JYY1bJ8tmaHBfoTx+y8w==
+  dependencies:
+    lodash "^4.17.21"
 
 sort-keys@^2.0.0:
   version "2.0.0"

@@ -276,7 +276,7 @@ export class ServiceConfiguration {
             availabilityTestConfig: {
                 urlToScan: {
                     format: 'String',
-                    default: 'https://teststorage57bzoqjjclekk.z13.web.core.windows.net/2021-04-06/',
+                    default: 'https://teststorage57bzoqjjclekk.z13.web.core.windows.net/2021-04-13/',
                     doc: 'Url to scan for availability testing',
                 },
                 consolidatedIdBase: {
@@ -328,7 +328,7 @@ export class ServiceConfiguration {
             crawlConfig: {
                 deepScanDiscoveryLimit: {
                     format: 'int',
-                    default: 5,
+                    default: 6, // Must be at least high enough to allow the largest E2E deep scan test to complete
                     doc: 'The maximum number of URLs that will be discovered for a deep scan request',
                 },
                 deepScanUpperLimit: {
