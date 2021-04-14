@@ -12,6 +12,7 @@ import {
     CreateScanRequestData,
     GetScanReportData,
     GetScanResultData,
+    LogTestRunStartData,
     RunFunctionalTestGroupData,
     TrackAvailabilityData,
 } from './activity-request-data';
@@ -46,6 +47,7 @@ export class HealthMonitorClientController extends WebController {
             [ActivityAction.getHealthStatus]: this.getHealthStatus,
             [ActivityAction.trackAvailability]: this.trackAvailability,
             [ActivityAction.runFunctionalTestGroup]: this.runFunctionalTestGroup,
+            [ActivityAction.logTestRunStart]: this.logTestRunStart,
         };
 
         this.releaseId = process.env.RELEASE_VERSION;
@@ -102,16 +104,34 @@ export class HealthMonitorClientController extends WebController {
 
     private readonly runFunctionalTestGroup = async (data: RunFunctionalTestGroupData): Promise<void> => {
         const webApiClient = await this.webApiClientProvider();
-        const functionalTestGroupCtor = this.testGroupTypes[data.testGroupName];
+        const functionalTestGroupCtor = this.testGroupTypes[data.test.testGroupName];
         const functionalTestGroup = new functionalTestGroupCtor(webApiClient, this.onDemandPageScanRunResultProvider, this.guidGenerator);
         functionalTestGroup.setTestContext(data.testContextData);
         const testRunMetadata = {
             environment: data.environment,
             releaseId: this.releaseId,
             runId: data.runId,
-            scenarioName: data.scenarioName,
+            scenarioName: data.test.scenarioName,
         };
 
         await this.testRunner.run(functionalTestGroup, testRunMetadata);
+    };
+
+    private readonly logTestRunStart = async (data: LogTestRunStartData): Promise<void> => {
+        const formattedTestIds = data.testsToRun.map((testId) => {
+            return {
+                testGroupName: functionalTestGroupTypes[testId.testGroupName].name,
+                scenarioName: testId.scenarioName,
+            };
+        });
+        const testIdsString = JSON.stringify(formattedTestIds);
+        const properties = {
+            source: 'BeginTestSuite',
+            functionalTestGroups: testIdsString,
+            runId: data.runId,
+            releaseId: this.releaseId,
+            environment: data.environmentName,
+        };
+        this.logger.trackEvent('FunctionalTest', properties);
     };
 }

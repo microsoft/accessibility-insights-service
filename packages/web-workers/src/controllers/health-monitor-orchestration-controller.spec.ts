@@ -15,6 +15,7 @@ import { E2EScanScenario } from '../e2e-test-scenarios/e2e-scan-scenario';
 import { finalizerTestGroupName } from '../e2e-test-group-names';
 import { generatorStub } from '../test-utilities/generator-function';
 import { HealthMonitorOrchestrationController } from './health-monitor-orchestration-controller';
+import { TestIdentifier } from './activity-request-data';
 
 /* eslint-disable
   no-empty,
@@ -30,7 +31,7 @@ describe('HealthMonitorOrchestrationController', () => {
     const e2eScanScenarioMock = Mock.ofType<E2EScanScenario>();
     const orchestrationStepsMock = Mock.ofType<OrchestrationStepsImpl>();
     const loggerMock = Mock.ofType(MockableLogger);
-    const allTestGroupClassNames = ['testgroup1', 'testgroup2'];
+    const allTestIdentifiers: TestIdentifier[] = [{ testGroupName: 'PostScan', scenarioName: 'TestScenario' }];
 
     const availabilityTestConfig: AvailabilityTestConfig = {
         urlToScan: 'some-url',
@@ -77,7 +78,7 @@ describe('HealthMonitorOrchestrationController', () => {
             df.object,
             (_, __, ___) => [e2eScanScenarioMock.object],
             (_, __, ___) => orchestrationStepsMock.object,
-            (_) => allTestGroupClassNames,
+            (_) => allTestIdentifiers,
         );
     });
 
@@ -95,7 +96,10 @@ describe('HealthMonitorOrchestrationController', () => {
         it('executes activities in sequence', async () => {
             await testSubject.invoke(contextStub);
 
-            orchestrationStepsMock.setup((m) => m.logTestRunStart(allTestGroupClassNames)).verifiable();
+            orchestrationStepsMock
+                .setup((m) => m.logTestRunStart(allTestIdentifiers))
+                .returns(generatorStub)
+                .verifiable();
             orchestrationStepsMock
                 .setup((m) => m.invokeHealthCheckRestApi())
                 .returns((_) => generatorStub())

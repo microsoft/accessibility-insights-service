@@ -28,10 +28,20 @@ export interface TrackAvailabilityData {
     telemetry: AvailabilityTelemetry;
 }
 
-export interface RunFunctionalTestGroupData {
-    runId: string;
+export interface TestIdentifier {
     testGroupName: TestGroupName;
     scenarioName: string;
+}
+
+export interface RunFunctionalTestGroupData {
+    runId: string;
+    test: TestIdentifier;
     testContextData: TestContextData;
     environment: TestEnvironment;
+}
+
+export interface LogTestRunStartData {
+    testsToRun: TestIdentifier[];
+    runId: string;
+    environmentName: string;
 }

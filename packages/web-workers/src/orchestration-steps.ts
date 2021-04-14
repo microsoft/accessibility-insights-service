@@ -15,7 +15,9 @@ import {
     CreateScanRequestData,
     GetScanReportData,
     GetScanResultData,
+    LogTestRunStartData,
     RunFunctionalTestGroupData,
+    TestIdentifier,
     TrackAvailabilityData,
 } from './controllers/activity-request-data';
 
@@ -44,7 +46,7 @@ export interface OrchestrationSteps {
         testContextData: TestContextData,
         testGroupNames: TestGroupName[],
     ): Generator<TaskSet, void, SerializableResponse & void>;
-    logTestRunStart(testGroupNames: string[]): void;
+    logTestRunStart(testsToRun: TestIdentifier[]): Generator<Task, void, SerializableResponse & void>;
     trackScanRequestCompleted(): Generator<Task, void, SerializableResponse & void>;
 }
 
@@ -226,8 +228,10 @@ export class OrchestrationStepsImpl implements OrchestrationSteps {
         const parallelTasks = testGroupNames.map((testGroupName: TestGroupName) => {
             const testData: RunFunctionalTestGroupData = {
                 runId: this.context.df.instanceId,
-                testGroupName,
-                scenarioName: testScenarioName,
+                test: {
+                    testGroupName,
+                    scenarioName: testScenarioName,
+                },
                 testContextData,
                 environment: this.getTestEnvironment(this.availabilityTestConfig.environmentDefinition),
             };
@@ -247,17 +251,13 @@ export class OrchestrationStepsImpl implements OrchestrationSteps {
         this.logOrchestrationStep(`Completed functional tests: ${testGroupNames}`);
     }
 
-    public logTestRunStart(testGroupClassNames: string[]): void {
-        const testGroupNamesStr = testGroupClassNames.join(',');
-        const properties = {
-            ...this.getDefaultLogProperties(),
-            source: 'BeginTestSuite',
-            functionalTestGroups: testGroupNamesStr,
+    public *logTestRunStart(testsToRun: TestIdentifier[]): Generator<Task, void, SerializableResponse & void> {
+        const activityData: LogTestRunStartData = {
             runId: this.context.df.instanceId,
-            releaseId: process.env.RELEASE_VERSION,
-            environment: this.availabilityTestConfig.environmentDefinition,
+            environmentName: this.availabilityTestConfig.environmentDefinition,
+            testsToRun: testsToRun,
         };
-        this.logger.trackEvent('FunctionalTest', properties);
+        yield* this.callActivity(ActivityAction.logTestRunStart, false, activityData);
     }
 
     public *trackScanRequestCompleted(): Generator<Task, void, SerializableResponse & void> {

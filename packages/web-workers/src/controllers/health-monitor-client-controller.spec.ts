@@ -10,7 +10,7 @@ import { IMock, It, Mock, Times } from 'typemoq';
 import { A11yServiceClient } from 'web-api-client';
 import { ActivityAction } from '../contracts/activity-actions';
 import { MockableLogger } from '../test-utilities/mockable-logger';
-import { ActivityRequestData, RunFunctionalTestGroupData, TrackAvailabilityData } from './activity-request-data';
+import { ActivityRequestData, LogTestRunStartData, RunFunctionalTestGroupData, TrackAvailabilityData } from './activity-request-data';
 import { HealthMonitorClientController } from './health-monitor-client-controller';
 
 /* eslint-disable @typescript-eslint/consistent-type-assertions, @typescript-eslint/no-explicit-any */
@@ -171,8 +171,10 @@ describe(HealthMonitorClientController, () => {
         it('handles runFunctionalTestGroup', async () => {
             const data: RunFunctionalTestGroupData = {
                 runId: runId,
-                testGroupName: 'PostScan',
-                scenarioName: scenarioName,
+                test: {
+                    testGroupName: 'PostScan',
+                    scenarioName: scenarioName,
+                },
                 testContextData: {
                     scanUrl: 'scanUrl',
                 },
@@ -204,6 +206,47 @@ describe(HealthMonitorClientController, () => {
             expect(functionalTestGroupStub).toBeDefined();
             expect(functionalTestGroupStub.testContextData).toEqual(data.testContextData);
             testRunnerMock.verifyAll();
+        });
+
+        it('handles LogTestGroupStart', async () => {
+            const data: LogTestRunStartData = {
+                runId: runId,
+                testsToRun: [
+                    {
+                        testGroupName: 'PostScan',
+                        scenarioName: scenarioName,
+                    },
+                    {
+                        testGroupName: 'ScanStatus',
+                        scenarioName: scenarioName,
+                    },
+                ],
+                environmentName: 'canary',
+            };
+            const args: ActivityRequestData = {
+                activityName: ActivityAction.logTestRunStart,
+                data: data,
+            };
+            const expectedFormattedTestList = [
+                {
+                    testGroupName: 'PostScanTestGroup',
+                    scenarioName: scenarioName,
+                },
+                {
+                    testGroupName: 'ScanStatusTestGroup',
+                    scenarioName: scenarioName,
+                },
+            ];
+            const expectedLogProperties = {
+                source: 'BeginTestSuite',
+                functionalTestGroups: JSON.stringify(expectedFormattedTestList),
+                runId: runId,
+                releaseId: releaseId,
+                environment: data.environmentName,
+            };
+            loggerMock.setup((l) => l.trackEvent('FunctionalTest', expectedLogProperties)).verifiable();
+
+            await testSubject.invoke(context, args);
         });
     });
 });
