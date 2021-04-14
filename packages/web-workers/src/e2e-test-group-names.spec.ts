@@ -9,7 +9,7 @@ describe(getTestGroupClassNamesForScenario, () => {
     const testDefinition = {
         testGroups: {
             postScanSubmissionTests: ['PostScan', 'ScanStatus'],
-            postScanCompletionTests: ['ScanPreProcessing'],
+            postScanCompletionTests: ['SingleScanPostCompletion'],
             scanReportTests: [],
             postScanCompletionNotificationTests: ['ScanCompletionNotification'],
         },
@@ -18,7 +18,7 @@ describe(getTestGroupClassNamesForScenario, () => {
     const expectedTestGroupNames: string[] = [
         'PostScanTestGroup',
         'ScanStatusTestGroup',
-        'ScanPreProcessingTestGroup',
+        'SingleScanPostCompletionTestGroup',
         'ScanCompletionNotificationTestGroup',
     ];
 
