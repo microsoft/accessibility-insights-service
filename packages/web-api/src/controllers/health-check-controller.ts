@@ -5,6 +5,7 @@ import { AvailabilityTestConfig, getSerializableResponse, ResponseWithBodyType, 
 import { inject, injectable } from 'inversify';
 import { ContextAwareLogger } from 'logger';
 import { ApiController, HealthReport, HttpResponse, TestEnvironment, TestRun, TestRunResult, WebApiErrorCodes } from 'service-library';
+import { createHealthCheckQueryForRelease } from '../health-check-query';
 import { ApplicationInsightsClientProvider, webApiTypeNames } from '../web-api-types';
 
 /* eslint-disable max-len */
@@ -21,6 +22,7 @@ export class HealthCheckController extends ApiController {
         @inject(ContextAwareLogger) logger: ContextAwareLogger,
         @inject(webApiTypeNames.ApplicationInsightsClientProvider)
         protected readonly appInsightsClientProvider: ApplicationInsightsClientProvider,
+        protected readonly createQueryForRelease: typeof createHealthCheckQueryForRelease = createHealthCheckQueryForRelease,
     ) {
         super(logger);
     }
@@ -70,18 +72,7 @@ export class HealthCheckController extends ApiController {
     private async executeAppInsightsQuery(releaseId: string): Promise<ResponseWithBodyType<ApplicationInsightsQueryResponse>> {
         const appInsightsClient = await this.appInsightsClientProvider();
         const logQueryTimeRange = (await this.getAvailabilityTestConfig()).logQueryTimeRange;
-        const queryString = `customEvents
-        | where name == "FunctionalTest" and customDimensions.logSource == "TestRun" and customDimensions.releaseId == "${releaseId}"
-        and customDimensions.runId == toscalar(
-            customEvents
-            | where name == "FunctionalTest" and customDimensions.testContainer == "FinalizerTestGroup" and customDimensions.releaseId == "${releaseId}"
-            | top 1 by timestamp desc nulls last
-            | project tostring(customDimensions.runId)
-        )
-        | project timestamp, environment = customDimensions.environment, releaseId = customDimensions.releaseId, runId = customDimensions.runId,
-                  logSource = customDimensions.logSource, testContainer = customDimensions.testContainer, testName = customDimensions.testName,
-                  result = customDimensions.result, error = customDimensions.error
-        | order by timestamp asc nulls last`;
+        const queryString = this.createQueryForRelease(releaseId);
         const queryResponse = await appInsightsClient.executeQuery(queryString, logQueryTimeRange);
         if (queryResponse.statusCode === 200) {
             this.logger.logInfo('App Insights query succeeded.', {
@@ -118,6 +109,7 @@ export class HealthCheckController extends ApiController {
             const testRun: TestRun = {
                 testContainer: this.getColumnValue(columns, row, 'testContainer'),
                 testName: this.getColumnValue(columns, row, 'testName'),
+                scenarioName: this.getColumnValue(columns, row, 'scenarioName'),
                 result: result,
                 timestamp: new Date(this.getColumnValue(columns, row, 'timestamp')),
             };
