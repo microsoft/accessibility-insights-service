@@ -12,7 +12,7 @@ describe(getTestIdentifiersForScenario, () => {
         readableName: scenarioName,
         testGroups: {
             postScanSubmissionTests: ['PostScan', 'ScanStatus'],
-            postScanCompletionTests: ['ScanPreProcessing'],
+            postScanCompletionTests: ['SingleScanPostCompletion'],
             scanReportTests: [],
             postScanCompletionNotificationTests: ['ScanCompletionNotification'],
         },
@@ -28,7 +28,7 @@ describe(getTestIdentifiersForScenario, () => {
             scenarioName: scenarioName,
         },
         {
-            testGroupName: 'ScanPreProcessing',
+            testGroupName: 'SingleScanPostCompletion',
             scenarioName: scenarioName,
         },
         {

@@ -2094,7 +2094,7 @@
                                 "position": {
                                     "x": 0,
                                     "y": 33,
-                                    "colSpan": 10,
+                                    "colSpan": 12,
                                     "rowSpan": 5
                                 },
                                 "metadata": {
@@ -2173,9 +2173,9 @@
                             },
                             "19": {
                                 "position": {
-                                    "x": 10,
+                                    "x": 12,
                                     "y": 33,
-                                    "colSpan": 10,
+                                    "colSpan": 8,
                                     "rowSpan": 5
                                 },
                                 "metadata": {
