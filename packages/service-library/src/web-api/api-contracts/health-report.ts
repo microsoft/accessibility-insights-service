@@ -7,6 +7,7 @@ export declare type TestRunResult = 'pass' | 'fail' | 'warn';
 export interface TestRun {
     testContainer: string;
     testName: string;
+    scenarioName: string;
     result: TestRunResult;
     error?: string;
     timestamp: Date;

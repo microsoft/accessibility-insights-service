@@ -28,9 +28,20 @@ export interface TrackAvailabilityData {
     telemetry: AvailabilityTelemetry;
 }
 
+export interface TestIdentifier {
+    testGroupName: TestGroupName;
+    scenarioName: string;
+}
+
 export interface RunFunctionalTestGroupData {
     runId: string;
-    testGroupName: TestGroupName;
+    test: TestIdentifier;
     testContextData: TestContextData;
     environment: TestEnvironment;
+}
+
+export interface LogTestRunStartData {
+    testsToRun: TestIdentifier[];
+    runId: string;
+    environmentName: string;
 }

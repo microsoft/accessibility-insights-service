@@ -7,9 +7,10 @@ import { IOrchestrationFunctionContext, Task, TaskSet } from 'durable-functions/
 import { inject, injectable } from 'inversify';
 import { ContextAwareLogger } from 'logger';
 import { WebController } from 'service-library';
-import { finalizerTestGroupName, getTestGroupClassNamesForScenario } from '../e2e-test-group-names';
+import { finalizerTestGroupName } from '../e2e-test-group-names';
 import { createScenarios } from '../e2e-test-scenarios/create-scenarios';
 import { E2EScanScenario } from '../e2e-test-scenarios/e2e-scan-scenario';
+import { getTestIdentifiersForScenario } from '../e2e-test-scenarios/get-test-identifiers';
 import { OrchestrationSteps, OrchestrationStepsImpl } from '../orchestration-steps';
 import { WebApiConfig } from './web-api-config';
 
@@ -25,7 +26,7 @@ export class HealthMonitorOrchestrationController extends WebController {
         private readonly df = durableFunctions,
         private readonly e2eScenarioFactory: typeof createScenarios = createScenarios,
         private readonly orchestrationStepsProvider: typeof createOrchestrationSteps = createOrchestrationSteps,
-        private readonly testGroupClassNamesProvider: typeof getTestGroupClassNamesForScenario = getTestGroupClassNamesForScenario,
+        private readonly testIdentifiersProvider: typeof getTestIdentifiersForScenario = getTestIdentifiersForScenario,
     ) {
         super(logger);
     }
@@ -68,7 +69,7 @@ export class HealthMonitorOrchestrationController extends WebController {
                 thisObj.webApiConfig,
             );
 
-            thisObj.beginE2ETestRun(orchestrationSteps, scenarios);
+            yield* thisObj.beginE2ETestRun(orchestrationSteps, scenarios);
 
             yield* orchestrationSteps.invokeHealthCheckRestApi();
 
@@ -94,14 +95,17 @@ export class HealthMonitorOrchestrationController extends WebController {
         this.context.bindingData.availabilityTestConfig = await this.serviceConfig.getConfigValue('availabilityTestConfig');
     }
 
-    private beginE2ETestRun(orchestrationSteps: OrchestrationSteps, scenarios: E2EScanScenario[]): void {
-        const allTestGroupClassNames = scenarios.flatMap((scenario) => this.testGroupClassNamesProvider(scenario.testDefinition));
-        orchestrationSteps.logTestRunStart(allTestGroupClassNames);
+    private *beginE2ETestRun(
+        orchestrationSteps: OrchestrationSteps,
+        scenarios: E2EScanScenario[],
+    ): Generator<Task, void, SerializableResponse & void> {
+        const testsToRun = scenarios.flatMap((scenario) => this.testIdentifiersProvider(scenario.testDefinition));
+        yield* orchestrationSteps.logTestRunStart(testsToRun);
     }
 
     private *finalizeE2ETestRun(orchestrationSteps: OrchestrationSteps): Generator<TaskSet, void, SerializableResponse & void> {
         // The last test group in a functional test suite to indicated a suite run completion
-        yield* orchestrationSteps.runFunctionalTestGroups(undefined, [finalizerTestGroupName]);
+        yield* orchestrationSteps.runFunctionalTestGroups('Finalizer', undefined, [finalizerTestGroupName]);
     }
 }
 

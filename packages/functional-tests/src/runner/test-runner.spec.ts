@@ -51,6 +51,7 @@ class TestGroupBStub {
 describe(TestRunner, () => {
     const runId = 'run id';
     const releaseId = 'release id';
+    const scenarioName = 'scenarioName';
     let testContainerA: TestGroupAStub;
     let testContainerB: TestGroupBStub;
     let testContainerAName: string;
@@ -84,6 +85,7 @@ describe(TestRunner, () => {
         setupLoggerMock({
             runId: runId,
             releaseId: releaseId,
+            scenarioName: scenarioName,
             environment: 'canary',
             testContainer: testContainerAName,
             testName: 'testC',
@@ -93,6 +95,7 @@ describe(TestRunner, () => {
         setupLoggerMock({
             runId: runId,
             releaseId: releaseId,
+            scenarioName: scenarioName,
             environment: 'canary',
             testContainer: testContainerAName,
             testName: 'testD',
@@ -102,6 +105,7 @@ describe(TestRunner, () => {
         setupLoggerMock({
             runId: runId,
             releaseId: releaseId,
+            scenarioName: scenarioName,
             environment: 'canary',
             testContainer: testContainerAName,
             result: 'pass',
@@ -111,6 +115,7 @@ describe(TestRunner, () => {
         setupLoggerMock({
             runId: runId,
             releaseId: releaseId,
+            scenarioName: scenarioName,
             environment: 'canary',
             testContainer: testContainerBName,
             testName: 'testE',
@@ -120,13 +125,14 @@ describe(TestRunner, () => {
         setupLoggerMock({
             runId: runId,
             releaseId: releaseId,
+            scenarioName: scenarioName,
             environment: 'canary',
             testContainer: testContainerBName,
             result: 'pass',
             logSource: 'TestContainer',
         });
 
-        await testRunner.runAll([testContainerA, testContainerB], TestEnvironment.canary, releaseId, runId);
+        await testRunner.runAll([testContainerA, testContainerB], { environment: TestEnvironment.canary, releaseId, runId, scenarioName });
     });
 
     it('run tests for the given environment only', async () => {
@@ -134,6 +140,7 @@ describe(TestRunner, () => {
         setupLoggerMock({
             runId: runId,
             releaseId: releaseId,
+            scenarioName: scenarioName,
             environment: 'canary',
             testContainer: testContainerAName,
             testName: 'testC',
@@ -143,6 +150,7 @@ describe(TestRunner, () => {
         setupLoggerMock({
             runId: runId,
             releaseId: releaseId,
+            scenarioName: scenarioName,
             environment: 'canary',
             testContainer: testContainerAName,
             testName: 'testD',
@@ -152,13 +160,14 @@ describe(TestRunner, () => {
         setupLoggerMock({
             runId: runId,
             releaseId: releaseId,
+            scenarioName: scenarioName,
             environment: 'canary',
             testContainer: testContainerAName,
             result: 'pass',
             logSource: 'TestContainer',
         });
 
-        await testRunner.run(testContainerA, TestEnvironment.canary, releaseId, runId);
+        await testRunner.run(testContainerA, { environment: TestEnvironment.canary, releaseId, runId, scenarioName });
     });
 
     it('handle test exception', async () => {
@@ -166,6 +175,7 @@ describe(TestRunner, () => {
         setupLoggerMock({
             runId: runId,
             releaseId: releaseId,
+            scenarioName: scenarioName,
             environment: 'insider',
             testContainer: testContainerAName,
             testName: 'testA',
@@ -176,6 +186,7 @@ describe(TestRunner, () => {
         setupLoggerMock({
             runId: runId,
             releaseId: releaseId,
+            scenarioName: scenarioName,
             environment: 'insider',
             testContainer: testContainerAName,
             testName: 'testC',
@@ -185,13 +196,14 @@ describe(TestRunner, () => {
         setupLoggerMock({
             runId: runId,
             releaseId: releaseId,
+            scenarioName: scenarioName,
             environment: 'insider',
             testContainer: testContainerAName,
             result: 'fail',
             logSource: 'TestContainer',
         });
 
-        await testRunner.run(testContainerA, TestEnvironment.insider, releaseId, runId);
+        await testRunner.run(testContainerA, { environment: TestEnvironment.insider, releaseId, runId, scenarioName });
     });
 
     it('Runs test with correct context', async () => {
@@ -200,6 +212,7 @@ describe(TestRunner, () => {
         setupLoggerMock({
             runId: runId,
             releaseId: releaseId,
+            scenarioName: scenarioName,
             environment: 'all',
             testContainer: testContainerName,
             testName: 'test',
@@ -209,13 +222,14 @@ describe(TestRunner, () => {
         setupLoggerMock({
             runId: runId,
             releaseId: releaseId,
+            scenarioName: scenarioName,
             environment: 'all',
             testContainer: testContainerName,
             result: 'pass',
             logSource: 'TestContainer',
         });
 
-        await testRunner.run(testContainerWithContext, TestEnvironment.all, releaseId, runId);
+        await testRunner.run(testContainerWithContext, { environment: TestEnvironment.all, releaseId, runId, scenarioName });
     });
 
     function setupLoggerMock(params: TestRunLogProperties | TestContainerLogProperties): void {

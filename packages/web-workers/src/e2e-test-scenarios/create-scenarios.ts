@@ -6,7 +6,7 @@ import { WebApiConfig } from '../controllers/web-api-config';
 import { OrchestrationSteps } from '../orchestration-steps';
 import { E2EScanScenario } from './e2e-scan-scenario';
 import { E2EScanFactories } from './e2e-scan-scenario-definitions';
-import { SingleScanScenario } from './single-scan-scenario';
+import { ScanScenarioDriver } from './scan-scenario-driver';
 
 export function createScenarios(
     orchestrationSteps: OrchestrationSteps,
@@ -14,6 +14,6 @@ export function createScenarios(
     webApiConfig: WebApiConfig,
 ): E2EScanScenario[] {
     return E2EScanFactories.map((makeDefinition) => makeDefinition(availabilityTestConfig, webApiConfig)).map(
-        (definition) => new SingleScanScenario(orchestrationSteps, definition),
+        (definition) => new ScanScenarioDriver(orchestrationSteps, definition),
     );
 }
