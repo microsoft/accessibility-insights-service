@@ -45,7 +45,7 @@
         "jest-circus": "^26.6.3",
         "jest-junit": "^12.0.0",
         "mkdirp": "^1.0.4",
-        "mockdate": "^3.0.2",
+        "mockdate": "^3.0.5",
         "rimraf": "^3.0.2",
         "scanner-global-library": "1.0.0",
         "shebang-loader": "^0.0.1",

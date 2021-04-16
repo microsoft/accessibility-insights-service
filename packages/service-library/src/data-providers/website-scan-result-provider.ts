@@ -16,6 +16,7 @@ import {
 } from 'storage-documents';
 import { GlobalLogger } from 'logger';
 import _ from 'lodash';
+import pLimit from 'p-limit';
 import { PartitionKeyFactory } from '../factories/partition-key-factory';
 import { WebsiteScanResultAggregator } from './website-scan-result-aggregator';
 
@@ -28,6 +29,7 @@ interface DbDocument {
 export class WebsiteScanResultProvider {
     private readonly maxRetryCount: number = 5;
     private readonly msecBetweenRetries: number = 1000;
+    public maxConcurrencyLimit = 5;
 
     constructor(
         @inject(cosmosContainerClientTypes.OnDemandScanRunsCosmosContainerClient)
@@ -61,7 +63,12 @@ export class WebsiteScanResultProvider {
     public async mergeOrCreateBatch(
         websiteScanResults: { scanId: string; websiteScanResult: Partial<WebsiteScanResult> }[],
     ): Promise<void> {
-        await Promise.all(websiteScanResults.map(async (result) => this.mergeOrCreate(result.scanId, result.websiteScanResult)));
+        const limit = pLimit(this.maxConcurrencyLimit);
+        await Promise.all(
+            websiteScanResults.map((result) => {
+                return limit(async () => this.mergeOrCreate(result.scanId, result.websiteScanResult));
+            }),
+        );
     }
 
     /**
