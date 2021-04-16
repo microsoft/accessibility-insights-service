@@ -13,7 +13,7 @@ import { A11yServiceClient, A11yServiceCredential } from 'web-api-client';
 import { TestEnvironment } from './common-types';
 import { functionalTestGroupTypes, TestGroupName } from './functional-test-group-types';
 import { TestRunner } from './runner/test-runner';
-import { TestContextData } from './test-group-data';
+import { TestContextData } from './test-context-data';
 import { FunctionalTestGroup } from './test-groups/functional-test-group';
 
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/strict-boolean-expressions */
@@ -96,7 +96,12 @@ describe('functional tests', () => {
         names.forEach((name) => {
             testIf(name, condition, async () => {
                 const testContainer = getTests(name);
-                await testRunner.run(testContainer, TestEnvironment.all, releaseIdStub, runIdStub);
+                await testRunner.run(testContainer, {
+                    environment: TestEnvironment.all,
+                    releaseId: releaseIdStub,
+                    runId: runIdStub,
+                    scenarioName: 'local',
+                });
             });
         });
     }

@@ -35,6 +35,7 @@ describe(ScanScenarioDriver, () => {
         postDeepScanCompletionTests: ['ConsolidatedScanReports'],
     };
     const scanOptions: PostScanRequestOptions = {};
+    const scenarioName = 'TestScenario';
 
     let testDefinition: E2EScanScenarioDefinition;
 
@@ -42,6 +43,7 @@ describe(ScanScenarioDriver, () => {
 
     beforeEach(() => {
         testDefinition = {
+            readableName: scenarioName,
             testGroups: testGroupNames,
             initialTestContextData: {
                 scanUrl,
@@ -68,7 +70,7 @@ describe(ScanScenarioDriver, () => {
             .returns(() => generatorStub(scanId))
             .verifiable();
         orchestrationStepsMock
-            .setup((o) => o.runFunctionalTestGroups(expectedTestContextData, testGroupNames.postScanSubmissionTests))
+            .setup((o) => o.runFunctionalTestGroups(scenarioName, expectedTestContextData, testGroupNames.postScanSubmissionTests))
             .returns(generatorStub)
             .verifiable();
         orchestrationStepsMock
@@ -96,7 +98,7 @@ describe(ScanScenarioDriver, () => {
             .returns(() => generatorStub(scanRunStatus))
             .verifiable();
         orchestrationStepsMock
-            .setup((o) => o.runFunctionalTestGroups(testContextData, testGroupNames.postScanCompletionTests))
+            .setup((o) => o.runFunctionalTestGroups(scenarioName, testContextData, testGroupNames.postScanCompletionTests))
             .returns(generatorStub)
             .verifiable();
         orchestrationStepsMock
@@ -104,7 +106,7 @@ describe(ScanScenarioDriver, () => {
             .returns(generatorStub)
             .verifiable();
         orchestrationStepsMock
-            .setup((o) => o.runFunctionalTestGroups(testContextData, testGroupNames.scanReportTests))
+            .setup((o) => o.runFunctionalTestGroups(scenarioName, testContextData, testGroupNames.scanReportTests))
             .returns(generatorStub)
             .verifiable();
 
@@ -131,7 +133,7 @@ describe(ScanScenarioDriver, () => {
                 .returns(() => generatorStub(scanCompletedNotification))
                 .verifiable();
             orchestrationStepsMock
-                .setup((o) => o.runFunctionalTestGroups(testContextData, testGroupNames.postScanCompletionNotificationTests))
+                .setup((o) => o.runFunctionalTestGroups(scenarioName, testContextData, testGroupNames.postScanCompletionNotificationTests))
                 .returns(generatorStub)
                 .verifiable();
             orchestrationStepsMock
@@ -145,7 +147,7 @@ describe(ScanScenarioDriver, () => {
 
         it('with no scan request options', () => {
             orchestrationStepsMock
-                .setup((o) => o.runFunctionalTestGroups(It.isAny(), It.isAny()))
+                .setup((o) => o.runFunctionalTestGroups(It.isAny(), It.isAny(), It.isAny()))
                 .returns(generatorStub)
                 .verifiable(Times.never());
             orchestrationStepsMock
@@ -174,7 +176,7 @@ describe(ScanScenarioDriver, () => {
                 .returns(generatorStub)
                 .verifiable();
             orchestrationStepsMock
-                .setup((o) => o.runFunctionalTestGroups(testContextData, testGroupNames.postDeepScanCompletionTests))
+                .setup((o) => o.runFunctionalTestGroups(scenarioName, testContextData, testGroupNames.postDeepScanCompletionTests))
                 .returns(generatorStub)
                 .verifiable();
             orchestrationStepsMock

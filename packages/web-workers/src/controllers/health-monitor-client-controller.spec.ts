@@ -4,13 +4,13 @@ import 'reflect-metadata';
 
 import { Context } from '@azure/functions';
 import { GuidGenerator, ResponseWithBodyType, ServiceConfiguration } from 'common';
-import { FunctionalTestGroup, TestContextData, TestEnvironment, TestGroupConstructor, TestRunner } from 'functional-tests';
+import { FunctionalTestGroup, TestContextData, TestEnvironment, TestGroupConstructor, TestRunMetadata, TestRunner } from 'functional-tests';
 import { OnDemandPageScanRunResultProvider } from 'service-library';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { A11yServiceClient } from 'web-api-client';
 import { ActivityAction } from '../contracts/activity-actions';
 import { MockableLogger } from '../test-utilities/mockable-logger';
-import { ActivityRequestData, RunFunctionalTestGroupData, TrackAvailabilityData } from './activity-request-data';
+import { ActivityRequestData, LogTestRunStartData, RunFunctionalTestGroupData, TrackAvailabilityData } from './activity-request-data';
 import { HealthMonitorClientController } from './health-monitor-client-controller';
 
 /* eslint-disable @typescript-eslint/consistent-type-assertions, @typescript-eslint/no-explicit-any */
@@ -47,6 +47,7 @@ describe(HealthMonitorClientController, () => {
     };
     const releaseId = 'release id';
     const runId = 'run id';
+    const scenarioName = 'test scenario';
     const serializeResponseStub = (response: ResponseWithBodyType) => jsonResponse;
 
     beforeEach(() => {
@@ -170,7 +171,10 @@ describe(HealthMonitorClientController, () => {
         it('handles runFunctionalTestGroup', async () => {
             const data: RunFunctionalTestGroupData = {
                 runId: runId,
-                testGroupName: 'PostScan',
+                test: {
+                    testGroupName: 'PostScan',
+                    scenarioName: scenarioName,
+                },
                 testContextData: {
                     scanUrl: 'scanUrl',
                 },
@@ -180,11 +184,17 @@ describe(HealthMonitorClientController, () => {
                 activityName: ActivityAction.runFunctionalTestGroup,
                 data: data,
             };
+            const expectedTestMetadata: TestRunMetadata = {
+                environment: TestEnvironment.canary,
+                releaseId: releaseId,
+                runId: runId,
+                scenarioName: scenarioName,
+            };
 
             let testContainer: any;
             testRunnerMock.setup((t) => t.setLogger(loggerMock.object)).verifiable(Times.once());
             testRunnerMock
-                .setup(async (t) => t.run(It.isAny(), TestEnvironment.canary, releaseId, runId))
+                .setup(async (t) => t.run(It.isAny(), expectedTestMetadata))
                 .callback((testGroup) => {
                     testContainer = testGroup;
                 })
@@ -196,6 +206,47 @@ describe(HealthMonitorClientController, () => {
             expect(functionalTestGroupStub).toBeDefined();
             expect(functionalTestGroupStub.testContextData).toEqual(data.testContextData);
             testRunnerMock.verifyAll();
+        });
+
+        it('handles LogTestGroupStart', async () => {
+            const data: LogTestRunStartData = {
+                runId: runId,
+                testsToRun: [
+                    {
+                        testGroupName: 'PostScan',
+                        scenarioName: scenarioName,
+                    },
+                    {
+                        testGroupName: 'ScanStatus',
+                        scenarioName: scenarioName,
+                    },
+                ],
+                environmentName: 'canary',
+            };
+            const args: ActivityRequestData = {
+                activityName: ActivityAction.logTestRunStart,
+                data: data,
+            };
+            const expectedFormattedTestList = [
+                {
+                    testGroupName: 'PostScanTestGroup',
+                    scenarioName: scenarioName,
+                },
+                {
+                    testGroupName: 'ScanStatusTestGroup',
+                    scenarioName: scenarioName,
+                },
+            ];
+            const expectedLogProperties = {
+                source: 'BeginTestSuite',
+                functionalTestGroups: JSON.stringify(expectedFormattedTestList),
+                runId: runId,
+                releaseId: releaseId,
+                environment: data.environmentName,
+            };
+            loggerMock.setup((l) => l.trackEvent('FunctionalTest', expectedLogProperties)).verifiable();
+
+            await testSubject.invoke(context, args);
         });
     });
 });

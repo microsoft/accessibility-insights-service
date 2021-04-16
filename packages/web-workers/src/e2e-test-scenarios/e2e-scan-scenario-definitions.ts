@@ -11,6 +11,7 @@ export const E2EScanFactories: E2EScanScenarioDefinitionFactory[] = [
     // Simple scan with notification
     (availabilityConfig: AvailabilityTestConfig, webApiConfig: WebApiConfig): E2EScanScenarioDefinition => {
         return {
+            readableName: 'SingleScan',
             scanOptions: {
                 scanNotificationUrl: `${webApiConfig.baseUrl}${availabilityConfig.scanNotifyApiEndpoint}`,
             },
@@ -28,6 +29,7 @@ export const E2EScanFactories: E2EScanScenarioDefinitionFactory[] = [
     // Consolidated scan with failed notification
     (availabilityConfig: AvailabilityTestConfig, webApiConfig: WebApiConfig): E2EScanScenarioDefinition => {
         return {
+            readableName: 'ConsolidatedScan',
             scanOptions: {
                 scanNotificationUrl: `${webApiConfig.baseUrl}${availabilityConfig.scanNotifyFailApiEndpoint}`,
                 consolidatedId: `${availabilityConfig.consolidatedIdBase}-${process.env.RELEASE_VERSION}-consolidated-${Date.now()}`,
@@ -45,6 +47,7 @@ export const E2EScanFactories: E2EScanScenarioDefinitionFactory[] = [
         const baseUrl = availabilityConfig.urlToScan;
 
         return {
+            readableName: 'DeepScan',
             scanOptions: {
                 deepScan: true,
                 consolidatedId: `${availabilityConfig.consolidatedIdBase}-${process.env.RELEASE_VERSION}-deepScan-${Date.now()}`,
@@ -62,6 +65,7 @@ export const E2EScanFactories: E2EScanScenarioDefinitionFactory[] = [
         const baseUrl = availabilityConfig.urlToScan;
 
         return {
+            readableName: 'DeepScanKnownPages',
             scanOptions: {
                 deepScan: true,
                 consolidatedId: `${availabilityConfig.consolidatedIdBase}-${process.env.RELEASE_VERSION}-deepScanKnownPages-${Date.now()}`,
@@ -89,6 +93,7 @@ export const E2EScanFactories: E2EScanScenarioDefinitionFactory[] = [
         const baseUrl = availabilityConfig.urlToScan;
 
         return {
+            readableName: 'DeepScanDiscoveryPatterns',
             scanOptions: {
                 deepScan: true,
                 consolidatedId: `${availabilityConfig.consolidatedIdBase}-${
@@ -110,6 +115,7 @@ export const E2EScanFactories: E2EScanScenarioDefinitionFactory[] = [
 ];
 
 export type E2EScanScenarioDefinition = {
+    readableName: string;
     scanOptions: PostScanRequestOptions;
     testGroups: Partial<E2ETestGroupNames>;
     initialTestContextData: TestContextData;

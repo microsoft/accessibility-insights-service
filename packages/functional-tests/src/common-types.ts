@@ -28,6 +28,7 @@ export interface TestRunLogProperties {
     environment: string;
     testContainer: string;
     testName: string;
+    scenarioName: string;
     result: TestRunResult;
     error?: string;
 }
@@ -37,6 +38,7 @@ export interface TestContainerLogProperties {
     runId: string;
     releaseId: string;
     environment: string;
+    scenarioName: string;
     testContainer: string;
     result: TestRunResult;
 }

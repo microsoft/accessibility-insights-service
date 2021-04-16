@@ -16,7 +16,9 @@ import { ActivityAction } from './contracts/activity-actions';
 import {
     ActivityRequestData,
     CreateScanRequestData,
+    LogTestRunStartData,
     RunFunctionalTestGroupData,
+    TestIdentifier,
     TrackAvailabilityData,
 } from './controllers/activity-request-data';
 import { OrchestrationStepsImpl, OrchestrationTelemetryProperties } from './orchestration-steps';
@@ -336,6 +338,7 @@ describe(OrchestrationStepsImpl, () => {
         const testContextData: TestContextData = {
             scanUrl: 'scan url',
         };
+        const scenarioName = 'testScenario';
         let taskMethodsMock: IMock<ITaskMethods>;
 
         beforeEach(() => {
@@ -374,7 +377,10 @@ describe(OrchestrationStepsImpl, () => {
                     activityName: ActivityAction.runFunctionalTestGroup,
                     data: {
                         runId: orchestrationInstanceId,
-                        testGroupName,
+                        test: {
+                            testGroupName,
+                            scenarioName,
+                        },
                         testContextData,
                         environment: 1,
                     } as RunFunctionalTestGroupData,
@@ -403,35 +409,37 @@ describe(OrchestrationStepsImpl, () => {
         });
 
         function executeRunFunctionalGroups(testGroupNames: TestGroupName[]): void {
-            const generatorExecutor = new GeneratorExecutor<string>(testSubject.runFunctionalTestGroups(testContextData, testGroupNames));
+            const generatorExecutor = new GeneratorExecutor<string>(
+                testSubject.runFunctionalTestGroups(scenarioName, testContextData, testGroupNames),
+            );
             generatorExecutor.runTillEnd();
         }
     });
 
     describe('Log test run start', () => {
-        const testGroupNames = ['testGroup1', 'testGroup2'];
-        const testGroupNamesStr = 'testGroup1,testGroup2';
-        const releaseId = 'release id';
-        let expectedLogProperties: { [name: string]: string };
-
-        beforeEach(() => {
-            expectedLogProperties = {
-                ...getDefaultTelemetryProperties(),
-                source: 'BeginTestSuite',
-                functionalTestGroups: testGroupNamesStr,
-                runId: orchestrationInstanceId,
-                releaseId: releaseId,
-                environment: availabilityTestConfig.environmentDefinition,
-            };
-            process.env.RELEASE_VERSION = releaseId;
-        });
+        const testsToRun: TestIdentifier[] = [
+            {
+                testGroupName: 'PostScan',
+                scenarioName: 'testScenario',
+            },
+        ];
 
         it('logTestRunStart', async () => {
-            loggerMock.setup((l) => l.trackEvent('FunctionalTest', expectedLogProperties));
+            const expectedData: LogTestRunStartData = {
+                runId: orchestrationInstanceId,
+                environmentName: availabilityTestConfig.environmentDefinition,
+                testsToRun: testsToRun,
+            };
+            const activityRequestData: ActivityRequestData = {
+                activityName: ActivityAction.logTestRunStart,
+                data: expectedData,
+            };
+            orchestrationContext
+                .setup((oc) => oc.callActivity(OrchestrationStepsImpl.activityTriggerFuncName, activityRequestData))
+                .verifiable(Times.once());
 
-            testSubject.logTestRunStart(testGroupNames);
-
-            loggerMock.verifyAll();
+            const generatorExecutor = new GeneratorExecutor(testSubject.logTestRunStart(testsToRun));
+            generatorExecutor.runTillEnd();
         });
     });
 

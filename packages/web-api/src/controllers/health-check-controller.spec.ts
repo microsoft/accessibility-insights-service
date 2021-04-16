@@ -8,6 +8,7 @@ import { AvailabilityTestConfig, ResponseWithBodyType, ServiceConfiguration } fr
 import { HealthReport, HttpResponse, WebApiErrorCodes } from 'service-library';
 import { IMock, It, Mock } from 'typemoq';
 import { MockableLogger } from '../test-utilities/mockable-logger';
+import { createHealthCheckQueryForRelease } from '../health-check-query';
 import { HealthCheckController, HealthTarget } from './health-check-controller';
 
 /* eslint-disable @typescript-eslint/no-explicit-any, max-len */
@@ -15,12 +16,14 @@ import { HealthCheckController, HealthTarget } from './health-check-controller';
 describe(HealthCheckController, () => {
     const releaseTarget: HealthTarget = 'release';
     const releaseId = '2419';
+    const queryStringStub = 'query string stub';
     let healthCheckController: HealthCheckController;
     let context: Context;
     let serviceConfigurationMock: IMock<ServiceConfiguration>;
     let loggerMock: IMock<MockableLogger>;
     let appInsightsClientMock: IMock<ApplicationInsightsClient>;
     let availabilityTestConfig: AvailabilityTestConfig;
+    let createQueryMock: IMock<typeof createHealthCheckQueryForRelease>;
 
     beforeEach(() => {
         process.env.RELEASE_VERSION = releaseId;
@@ -54,8 +57,14 @@ describe(HealthCheckController, () => {
 
         loggerMock = Mock.ofType<MockableLogger>();
         appInsightsClientMock = Mock.ofType(ApplicationInsightsClient);
-        healthCheckController = new HealthCheckController(serviceConfigurationMock.object, loggerMock.object, async () =>
-            Promise.resolve(appInsightsClientMock.object),
+        createQueryMock = Mock.ofInstance(() => null);
+        createQueryMock.setup((c) => c(releaseId)).returns(() => queryStringStub);
+
+        healthCheckController = new HealthCheckController(
+            serviceConfigurationMock.object,
+            loggerMock.object,
+            async () => Promise.resolve(appInsightsClientMock.object),
+            createQueryMock.object,
         );
         healthCheckController.context = context;
     });
@@ -113,6 +122,7 @@ describe(HealthCheckController, () => {
                         { name: 'testContainer', type: 'dynamic' },
                         { name: 'testName', type: 'dynamic' },
                         { name: 'result', type: 'dynamic' },
+                        { name: 'scenarioName', type: 'dynamic' },
                         { name: 'error', type: 'dynamic' },
                     ],
                     rows: [
@@ -125,6 +135,7 @@ describe(HealthCheckController, () => {
                             'ValidationATestGroup',
                             'testA1',
                             'pass',
+                            'TestScenario1',
                         ],
                         [
                             '2020-01-13T03:11:00.352Z',
@@ -135,6 +146,7 @@ describe(HealthCheckController, () => {
                             'ValidationBTestGroup',
                             'testB1',
                             'pass',
+                            'TestScenario1',
                         ],
                         [
                             '2020-01-13T03:11:00.352Z',
@@ -145,6 +157,7 @@ describe(HealthCheckController, () => {
                             'FinalizerTestGroup',
                             'functionalTestsFinalizer',
                             'pass',
+                            'FinalizerScenario',
                         ],
                         [
                             '2020-01-13T03:11:00.352Z',
@@ -155,6 +168,7 @@ describe(HealthCheckController, () => {
                             'ValidationATestGroup',
                             'testA3',
                             'fail',
+                            'TestScenario2',
                             'error from test A3',
                         ],
                     ],
@@ -162,23 +176,11 @@ describe(HealthCheckController, () => {
                 },
             ],
         };
-        const queryString = `customEvents
-        | where name == "FunctionalTest" and customDimensions.logSource == "TestRun" and customDimensions.releaseId == "${releaseId}"
-        and customDimensions.runId == toscalar(
-            customEvents
-            | where name == "FunctionalTest" and customDimensions.testContainer == "FinalizerTestGroup" and customDimensions.releaseId == "${releaseId}"
-            | top 1 by timestamp desc nulls last
-            | project tostring(customDimensions.runId)
-        )
-        | project timestamp, environment = customDimensions.environment, releaseId = customDimensions.releaseId, runId = customDimensions.runId,
-                  logSource = customDimensions.logSource, testContainer = customDimensions.testContainer, testName = customDimensions.testName,
-                  result = customDimensions.result, error = customDimensions.error
-        | order by timestamp asc nulls last`;
         const successResponse: ResponseWithBodyType<ApplicationInsightsQueryResponse> = ({
             statusCode: 200,
             body: responseBody,
         } as any) as ResponseWithBodyType<ApplicationInsightsQueryResponse>;
-        setupAppInsightsResponse(successResponse, queryString);
+        setupAppInsightsResponse(successResponse);
 
         const expectedResponseBody: HealthReport = {
             healthStatus: 'fail',
@@ -189,24 +191,28 @@ describe(HealthCheckController, () => {
                 {
                     testContainer: 'ValidationATestGroup',
                     testName: 'testA1',
+                    scenarioName: 'TestScenario1',
                     result: 'pass',
                     timestamp: new Date('2020-01-13T03:11:00.352Z'),
                 },
                 {
                     testContainer: 'ValidationBTestGroup',
                     testName: 'testB1',
+                    scenarioName: 'TestScenario1',
                     result: 'pass',
                     timestamp: new Date('2020-01-13T03:11:00.352Z'),
                 },
                 {
                     testContainer: 'FinalizerTestGroup',
                     testName: 'functionalTestsFinalizer',
+                    scenarioName: 'FinalizerScenario',
                     result: 'pass',
                     timestamp: new Date('2020-01-13T03:11:00.352Z'),
                 },
                 {
                     testContainer: 'ValidationATestGroup',
                     testName: 'testA3',
+                    scenarioName: 'TestScenario2',
                     result: 'fail',
                     timestamp: new Date('2020-01-13T03:11:00.352Z'),
                     error: 'error from test A3',
@@ -245,23 +251,11 @@ describe(HealthCheckController, () => {
                 },
             ],
         };
-        const queryString = `customEvents
-        | where name == "FunctionalTest" and customDimensions.logSource == "TestRun" and customDimensions.releaseId == "${releaseId}"
-        and customDimensions.runId == toscalar(
-            customEvents
-            | where name == "FunctionalTest" and customDimensions.testContainer == "FinalizerTestGroup" and customDimensions.releaseId == "${releaseId}"
-            | top 1 by timestamp desc nulls last
-            | project tostring(customDimensions.runId)
-        )
-        | project timestamp, environment = customDimensions.environment, releaseId = customDimensions.releaseId, runId = customDimensions.runId,
-                  logSource = customDimensions.logSource, testContainer = customDimensions.testContainer, testName = customDimensions.testName,
-                  result = customDimensions.result, error = customDimensions.error
-        | order by timestamp asc nulls last`;
         const successResponse: ResponseWithBodyType<ApplicationInsightsQueryResponse> = ({
             statusCode: 200,
             body: responseBody,
         } as any) as ResponseWithBodyType<ApplicationInsightsQueryResponse>;
-        setupAppInsightsResponse(successResponse, queryString);
+        setupAppInsightsResponse(successResponse, queryStringStub);
 
         const expectedResponseBody: HealthReport = {
             healthStatus: 'warn',

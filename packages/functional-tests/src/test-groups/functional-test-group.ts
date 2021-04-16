@@ -5,7 +5,7 @@ import { getSerializableResponse, GuidGenerator, ResponseWithBodyType } from 'co
 import { inject } from 'inversify';
 import { OnDemandPageScanRunResultProvider, WebApiErrorCode } from 'service-library';
 import { A11yServiceClient } from 'web-api-client';
-import { TestContextData } from '../test-group-data';
+import { TestContextData } from '../test-context-data';
 
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 
