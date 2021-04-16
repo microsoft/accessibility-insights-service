@@ -50,7 +50,7 @@
         "moment": "^2.29.1",
         "node-fetch": "^2.6.1",
         "p-limit": "^3.1.0",
-        "puppeteer": "^5.5.0",
+        "puppeteer": "^8.0.0",
         "reflect-metadata": "^0.1.13",
         "sha.js": "^2.4.11",
         "storage-documents": "1.0.0",
