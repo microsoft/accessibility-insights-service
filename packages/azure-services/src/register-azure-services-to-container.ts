@@ -166,5 +166,12 @@ function setupSingletonAzureBatchServiceClientProvider(container: Container): vo
 }
 
 function defaultCosmosClientFactory(cosmosClientOptions: CosmosClientOptions): CosmosClient {
-    return new CosmosClient(cosmosClientOptions);
+    const options = {
+        connectionPolicy: {
+            requestTimeout: 10000,
+        },
+        ...cosmosClientOptions,
+    };
+
+    return new CosmosClient(options);
 }
