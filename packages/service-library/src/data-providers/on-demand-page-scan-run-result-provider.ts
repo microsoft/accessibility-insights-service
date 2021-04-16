@@ -6,11 +6,14 @@ import { client, CosmosContainerClient, cosmosContainerClientTypes, CosmosOperat
 import { flatMap, groupBy } from 'lodash';
 import { ItemType, OnDemandPageScanResult } from 'storage-documents';
 import * as cosmos from '@azure/cosmos';
+import pLimit from 'p-limit';
 import { PartitionKeyFactory } from '../factories/partition-key-factory';
 import { OperationResult } from './operation-result';
 
 @injectable()
 export class OnDemandPageScanRunResultProvider {
+    public maxConcurrencyLimit = 5;
+
     constructor(
         @inject(cosmosContainerClientTypes.OnDemandScanRunsCosmosContainerClient)
         private readonly cosmosContainerClient: CosmosContainerClient,
@@ -33,14 +36,17 @@ export class OnDemandPageScanRunResultProvider {
             return this.getPartitionKey(scanId);
         });
 
+        const limit = pLimit(this.maxConcurrencyLimit);
         const response = await Promise.all(
             Object.keys(scanIdsByPartition).map(async (pKey) => {
-                return this.cosmosContainerClient.executeQueryWithContinuationToken<OnDemandPageScanResult>(async (token) => {
-                    return this.cosmosContainerClient.queryDocuments<OnDemandPageScanResult>(
-                        this.getQuery(scanIdsByPartition[pKey], pKey),
-                        token,
-                    );
-                });
+                return limit(async () =>
+                    this.cosmosContainerClient.executeQueryWithContinuationToken<OnDemandPageScanResult>(async (token) => {
+                        return this.cosmosContainerClient.queryDocuments<OnDemandPageScanResult>(
+                            this.getQuery(scanIdsByPartition[pKey], pKey),
+                            token,
+                        );
+                    }),
+                );
             }),
         );
 
@@ -82,9 +88,10 @@ export class OnDemandPageScanRunResultProvider {
             return scanRun.partitionKey;
         });
 
+        const limit = pLimit(this.maxConcurrencyLimit);
         await Promise.all(
             Object.keys(scanRunsByPartition).map(async (pKey) => {
-                return this.cosmosContainerClient.writeDocuments(scanRunsByPartition[pKey], pKey);
+                return limit(async () => this.cosmosContainerClient.writeDocuments(scanRunsByPartition[pKey], pKey));
             }),
         );
     }

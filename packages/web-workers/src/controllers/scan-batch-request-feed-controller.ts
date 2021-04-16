@@ -24,17 +24,6 @@ import {
     WebsiteScanRef,
 } from 'storage-documents';
 
-interface ScanRequestTelemetryProperties {
-    scanUrl: string;
-    scanId: string;
-}
-
-interface BatchRequestFeedProcessTelemetryProperties {
-    scanRequests: string;
-    batchRequestId: string;
-    [name: string]: string;
-}
-
 @injectable()
 export class ScanBatchRequestFeedController extends WebController {
     public readonly apiVersion = '1.0';
@@ -64,11 +53,7 @@ export class ScanBatchRequestFeedController extends WebController {
                     acceptedScanRequests: addedRequests,
                 };
                 this.logger.trackEvent('ScanRequestAccepted', { batchRequestId: document.id }, scanRequestAcceptedMeasurements);
-
-                this.logger.logInfo(
-                    `The batch request document processed successfully.`,
-                    this.getLogPropertiesForRequests(document.scanRunBatchRequest, document.id),
-                );
+                this.logger.logInfo(`The batch request document processed successfully.`);
             }),
         );
 
@@ -88,10 +73,7 @@ export class ScanBatchRequestFeedController extends WebController {
             await this.writeRequestsToQueueContainer(requests, batchDocument.id);
 
             await this.scanDataProvider.deleteBatchRequest(batchDocument);
-            this.logger.logInfo(
-                `The batch request document deleted from inbound storage container.`,
-                this.getLogPropertiesForRequests(requests, batchDocument.id),
-            );
+            this.logger.logInfo(`Completed deleting batch requests from inbound storage container.`);
         }
 
         return requests.length;
@@ -147,10 +129,7 @@ export class ScanBatchRequestFeedController extends WebController {
         }
 
         await this.onDemandPageScanRunResultProvider.writeScanRuns(requestDocuments);
-        this.logger.logInfo(
-            `Added scan requests to permanent scan result storage container.`,
-            this.getLogPropertiesForRequests(requests, batchRequestId),
-        );
+        this.logger.logInfo(`Completed adding scan requests to permanent scan result storage container.`);
     }
 
     private createWebsiteScanResult(request: ScanRunBatchRequest): WebsiteScanResult {
@@ -204,28 +183,7 @@ export class ScanBatchRequestFeedController extends WebController {
         });
 
         await this.pageScanRequestProvider.insertRequests(requestDocuments);
-        this.logger.logInfo(
-            `Added scan requests to scan queue storage container.`,
-            this.getLogPropertiesForRequests(requests, batchRequestId),
-        );
-    }
-
-    private getLogPropertiesForRequests(
-        requests: ScanRunBatchRequest[],
-        batchRequestId: string,
-    ): BatchRequestFeedProcessTelemetryProperties {
-        return {
-            scanRequests: JSON.stringify(
-                requests.map((r) => {
-                    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-                    return {
-                        scanId: r.scanId,
-                        scanUrl: r.url,
-                    } as ScanRequestTelemetryProperties;
-                }),
-            ),
-            batchRequestId,
-        };
+        this.logger.logInfo(`Completed adding scan requests to scan queue storage container.`);
     }
 
     private validateRequestData(documents: OnDemandPageScanBatchRequest[]): boolean {

@@ -4,9 +4,12 @@
 import { CosmosContainerClient, cosmosContainerClientTypes, CosmosOperationResponse } from 'azure-services';
 import { inject, injectable } from 'inversify';
 import { ItemType, OnDemandPageScanRequest, PartitionKey } from 'storage-documents';
+import pLimit from 'p-limit';
 
 @injectable()
 export class PageScanRequestProvider {
+    public maxConcurrencyLimit = 5;
+
     constructor(
         @inject(cosmosContainerClientTypes.OnDemandScanRequestsCosmosContainerClient)
         private readonly cosmosContainerClient: CosmosContainerClient,
@@ -43,9 +46,10 @@ export class PageScanRequestProvider {
     }
 
     public async deleteRequests(ids: string[]): Promise<void> {
+        const limit = pLimit(this.maxConcurrencyLimit);
         await Promise.all(
             ids.map(async (id) => {
-                await this.cosmosContainerClient.deleteDocument(id, PartitionKey.pageScanRequestDocuments);
+                return limit(async () => this.cosmosContainerClient.deleteDocument(id, PartitionKey.pageScanRequestDocuments));
             }),
         );
     }

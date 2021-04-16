@@ -1,11 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import * as util from 'util';
 import * as cosmos from '@azure/cosmos';
 import { System } from 'common';
 import _ from 'lodash';
 import { Logger } from 'logger';
 import { VError } from 'verror';
+import pLimit from 'p-limit';
 import { CosmosClientWrapper } from '../azure-cosmos/cosmos-client-wrapper';
 import { CosmosDocument } from '../azure-cosmos/cosmos-document';
 import { CosmosOperationResponse } from '../azure-cosmos/cosmos-operation-response';
@@ -15,6 +17,8 @@ import { RetryOptions } from './retry-options';
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 export class CosmosContainerClient {
+    public maxConcurrencyLimit = 10;
+
     constructor(
         private readonly cosmosClientWrapper: CosmosClientWrapper,
         private readonly dbName: string,
@@ -141,9 +145,10 @@ export class CosmosContainerClient {
      * @param partitionKey The storage partition key
      */
     public async mergeOrWriteDocuments<T extends CosmosDocument>(documents: T[], partitionKey?: string): Promise<void> {
+        const limit = pLimit(this.maxConcurrencyLimit);
         await Promise.all(
             documents.map(async (document) => {
-                await this.mergeOrWriteDocument(document, partitionKey);
+                return limit(async () => this.mergeOrWriteDocument(document, partitionKey));
             }),
         );
     }
@@ -157,10 +162,13 @@ export class CosmosContainerClient {
      * @param partitionKey The storage partition key
      */
     public async writeDocuments<T>(documents: T[], partitionKey?: string): Promise<void> {
+        const limit = pLimit(this.maxConcurrencyLimit);
         await Promise.all(
             documents.map(async (document) => {
-                const effectivePartitionKey = this.getEffectivePartitionKey(document, partitionKey);
-                await this.cosmosClientWrapper.upsertItem<T>(document, this.dbName, this.collectionName, effectivePartitionKey);
+                return limit(async () => {
+                    const effectivePartitionKey = this.getEffectivePartitionKey(document, partitionKey);
+                    await this.cosmosClientWrapper.upsertItem<T>(document, this.dbName, this.collectionName, effectivePartitionKey);
+                });
             }),
         );
     }

@@ -7,10 +7,13 @@ import { ScanDataProvider, WebsiteScanResultProvider } from 'service-library';
 import { OnDemandPageScanResult, WebsiteScanResult, ScanRunBatchRequest } from 'storage-documents';
 import _ from 'lodash';
 import { GuidGenerator, RetryHelper, System } from 'common';
+import pLimit from 'p-limit';
 
 @injectable()
 export class ScanFeedGenerator {
+    public maxBatchSize = 20;
     private readonly maxRetryCount = 5;
+    private readonly maxConcurrencyLimit = 5;
 
     constructor(
         @inject(ScanDataProvider) private readonly scanDataProvider: ScanDataProvider,
@@ -45,18 +48,41 @@ export class ScanFeedGenerator {
             return;
         }
 
-        const batchId = this.guidGenerator.createGuid();
-        const scanRequests = this.createScanRequests(batchId, urlsToScan, pageScanResult, websiteScanResult);
-        const pageScans = scanRequests.map((scanRequest) => {
-            return { scanId: scanRequest.scanId, url: scanRequest.url, timestamp: new Date().toJSON() };
-        });
-        const updatedWebsiteScanResult: Partial<WebsiteScanResult> = {
-            id: websiteScanResult.id,
-            pageScans,
-        };
-        await this.websiteScanResultProvider.mergeOrCreate(pageScanResult.id, updatedWebsiteScanResult);
-        await this.scanDataProvider.writeScanRunBatchRequest(batchId, scanRequests);
+        const scanRequests = await this.createBatchRequests(urlsToScan, websiteScanResult, pageScanResult);
+        await this.updateWebsiteScanResult(scanRequests, websiteScanResult, pageScanResult);
         this.logger.logInfo(`Discovered pages has been queued for scanning.`);
+    }
+
+    private async createBatchRequests(
+        urlsToScan: string[],
+        websiteScanResult: WebsiteScanResult,
+        pageScanResult: OnDemandPageScanResult,
+    ): Promise<ScanRunBatchRequest[]> {
+        const scanRequests: ScanRunBatchRequest[] = [];
+        const chunks = System.chunkArray(urlsToScan, this.maxBatchSize);
+        const limit = pLimit(this.maxConcurrencyLimit);
+        await Promise.all(
+            chunks.map(async (urls) => {
+                return limit(async () => {
+                    const requests = await this.createBatchRequest(urls, websiteScanResult, pageScanResult);
+                    scanRequests.push(...requests);
+                });
+            }),
+        );
+
+        return scanRequests;
+    }
+
+    private async createBatchRequest(
+        urls: string[],
+        websiteScanResult: WebsiteScanResult,
+        pageScanResult: OnDemandPageScanResult,
+    ): Promise<ScanRunBatchRequest[]> {
+        const batchId = this.guidGenerator.createGuid();
+        const scanRequests = this.createScanRequests(batchId, urls, pageScanResult, websiteScanResult);
+        await this.scanDataProvider.writeScanRunBatchRequest(batchId, scanRequests);
+
+        return scanRequests;
     }
 
     private createScanRequests(
@@ -90,6 +116,21 @@ export class ScanFeedGenerator {
                 ],
             };
         });
+    }
+
+    private async updateWebsiteScanResult(
+        scanRequests: ScanRunBatchRequest[],
+        websiteScanResult: WebsiteScanResult,
+        pageScanResult: OnDemandPageScanResult,
+    ): Promise<void> {
+        const pageScans = scanRequests.map((scanRequest) => {
+            return { scanId: scanRequest.scanId, url: scanRequest.url, timestamp: new Date().toJSON() };
+        });
+        const updatedWebsiteScanResult: Partial<WebsiteScanResult> = {
+            id: websiteScanResult.id,
+            pageScans,
+        };
+        await this.websiteScanResultProvider.mergeOrCreate(pageScanResult.id, updatedWebsiteScanResult);
     }
 
     private getUrlsToScan(websiteScanResult: WebsiteScanResult): string[] {
