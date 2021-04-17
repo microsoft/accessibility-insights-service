@@ -71,6 +71,24 @@ export class ScanRequestSelector {
                     return;
                 }
 
+                if (scanResult.run.state === 'completed') {
+                    filteredScanRequests.toDelete.push({ request: scanRequest });
+                    this.logger.logError('The scan request has been completed. Removing scan request from a request queue.', {
+                        scanId: scanRequest.id,
+                    });
+
+                    return;
+                }
+
+                if (scanResult.run.retryCount >= this.maxFailedScanRetryCount) {
+                    filteredScanRequests.toDelete.push({ request: scanRequest });
+                    this.logger.logError('The scan request has reached maximum retry count. Removing scan request from a request queue.', {
+                        scanId: scanRequest.id,
+                    });
+
+                    return;
+                }
+
                 if (
                     scanResult.run.state === 'accepted' &&
                     (scanResult.run.retryCount === undefined || scanResult.run.retryCount < this.maxFailedScanRetryCount)
@@ -94,24 +112,6 @@ export class ScanRequestSelector {
                         runState: scanResult.run.state,
                         runTimestamp: scanResult.run.timestamp,
                         runRetryCount: scanResult.run.retryCount ? scanResult.run.retryCount.toString() : '0',
-                    });
-
-                    return;
-                }
-
-                if (scanResult.run.retryCount >= this.maxFailedScanRetryCount) {
-                    filteredScanRequests.toDelete.push({ request: scanRequest });
-                    this.logger.logError('The scan request has reached maximum retry count. Removing scan request from a request queue.', {
-                        scanId: scanRequest.id,
-                    });
-
-                    return;
-                }
-
-                if (scanResult.run.state === 'completed') {
-                    filteredScanRequests.toDelete.push({ request: scanRequest });
-                    this.logger.logError('The scan request has been completed. Removing scan request from a request queue.', {
-                        scanId: scanRequest.id,
                     });
 
                     return;

@@ -102,7 +102,7 @@ export class OnDemandDispatcher {
             state,
             timestamp: new Date().toJSON(),
             error: error ?? null, // reset error document property if no any error
-            retryCount: scanResult.run.retryCount ? scanResult.run.retryCount + 1 : 0,
+            retryCount: scanResult.run?.retryCount ? scanResult.run.retryCount + 1 : 0,
         };
 
         const response = await this.onDemandPageScanRunResultProvider.tryUpdateScanRun(scanResult);

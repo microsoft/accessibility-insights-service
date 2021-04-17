@@ -1,13 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import { Batch, BatchConfig, BatchTask, JobTask, Message, PoolLoadGenerator, PoolLoadSnapshot, Queue, StorageConfig } from 'azure-services';
 import { ServiceConfiguration, System } from 'common';
 import { inject, injectable } from 'inversify';
 import { isNil, mergeWith } from 'lodash';
 import { GlobalLogger } from 'logger';
-import moment from 'moment';
 import { BatchPoolLoadSnapshotProvider, BatchTaskCreator, OnDemandPageScanRunResultProvider, ScanMessage } from 'service-library';
-import { OnDemandPageScanResult, OnDemandScanRequestMessage, StorageDocument } from 'storage-documents';
+import { OnDemandScanRequestMessage, StorageDocument } from 'storage-documents';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -43,7 +43,6 @@ export class Worker extends BatchTaskCreator {
             const queueMessages = await this.queue.getMessagesWithTotalCount(queueName, poolLoadSnapshot.tasksIncrementCountPerInterval);
             if (queueMessages?.length > 0) {
                 messages = this.convertToScanMessages(queueMessages);
-                messages = await this.excludeCompletedScans(messages);
             }
         }
 
@@ -103,56 +102,6 @@ export class Worker extends BatchTaskCreator {
                 }
             }),
         );
-    }
-
-    protected async excludeCompletedScans(scanMessages: ScanMessage[]): Promise<ScanMessage[]> {
-        if (scanMessages.length === 0) {
-            return [];
-        }
-
-        const scanRuns: OnDemandPageScanResult[] = [];
-        const chunks = this.system.chunkArray(scanMessages, 100);
-        await Promise.all(
-            chunks.map(async (chunk) => {
-                const scanIds = chunk.map((m) => m.scanId);
-                const runs = await this.onDemandPageScanRunResultProvider.readScanRuns(scanIds);
-                scanRuns.push(...runs);
-            }),
-        );
-
-        const messageVisibilityTimeout = (await this.getQueueConfig()).messageVisibilityTimeoutInSeconds;
-        const acceptedScanMessages: ScanMessage[] = [];
-        await Promise.all(
-            scanRuns.map(async (scanRun) => {
-                const scanMessage = scanMessages.find((message) => message.scanId === scanRun.id);
-                if (
-                    scanRun.run.state === 'queued' &&
-                    moment.utc(scanRun.run.timestamp).add(messageVisibilityTimeout, 'second') > moment.utc()
-                ) {
-                    // Scan request just queued
-                    acceptedScanMessages.push(scanMessage);
-                } else if (scanRun.run.state === 'queued' || scanRun.run.state === 'running' || scanRun.run.state === 'failed') {
-                    // Should include 'queued', 'running', and 'failed' states to retry abnormally terminated scan tasks
-                    this.logger.logWarn(
-                        'The scan request did not complete successfully during the last task run. Retrying scan with new task run.',
-                        { scanId: scanRun.id, scanRunState: scanRun.run.state },
-                    );
-                    acceptedScanMessages.push(scanMessage);
-                } else {
-                    // Cancel scan request if current scan run state does not allow to retry scan task
-                    await this.queue.deleteMessage(this.getQueueName(), scanMessage.message);
-                    this.logger.logWarn(
-                        `The scan request has been cancelled because current scan run state does not allow to retry scan task.`,
-                        {
-                            scanId: scanMessage.scanId,
-                            scanRunState: scanRun.run.state,
-                        },
-                    );
-                }
-            }),
-        );
-
-        return acceptedScanMessages;
     }
 
     private async writePoolLoadSnapshot(poolLoadSnapshot: PoolLoadSnapshot): Promise<void> {

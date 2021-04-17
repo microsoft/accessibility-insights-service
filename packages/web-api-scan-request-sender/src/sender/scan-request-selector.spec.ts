@@ -10,6 +10,7 @@ import { CosmosOperationResponse } from 'azure-services';
 import { OnDemandPageScanRequest, OnDemandPageScanResult } from 'storage-documents';
 import * as MockDate from 'mockdate';
 import _ from 'lodash';
+import moment from 'moment';
 import { ScanRequestSelector, ScanRequests } from './scan-request-selector';
 
 const continuationToken = 'continuationToken1';
@@ -26,7 +27,7 @@ let filteredScanRequests: ScanRequests;
 let dateNow: Date;
 
 describe(ScanRequestSelector, () => {
-    beforeAll(() => {
+    beforeEach(() => {
         dateNow = new Date();
         MockDate.set(dateNow);
 
@@ -53,7 +54,7 @@ describe(ScanRequestSelector, () => {
         setupServiceConfiguration();
     });
 
-    afterAll(() => {
+    afterEach(() => {
         MockDate.reset();
 
         pageScanRequestProviderMock.verifyAll();
@@ -70,7 +71,7 @@ describe(ScanRequestSelector, () => {
         expect(result).toEqual(filteredScanRequests);
     });
 
-    it('return accepted scan requests', async () => {
+    it('queue accepted scan requests with fixed requested count', async () => {
         itemsCount = 3;
         createScanResults([{}, {}, {}, {}, {}]);
         createScanRequests();
@@ -84,6 +85,55 @@ describe(ScanRequestSelector, () => {
         const result = await scanRequestSelector.getRequests(itemsCount);
 
         expect(result).toEqual(expectedResult);
+    });
+
+    it('queue failed with retry scan requests', async () => {
+        createScanResults([
+            {
+                run: { state: 'queued' },
+            },
+            {
+                run: { state: 'running' },
+            },
+            {
+                run: { state: 'failed' },
+            },
+        ]);
+        itemsCount = scanResults.length;
+        createScanRequests();
+        setupPageScanRequestProvider();
+        setupOnDemandPageScanRunResultProvider();
+        createFilteredScanRequests(scanRequests.map((scanRequest) => scanRequest.id));
+
+        const result = await scanRequestSelector.getRequests(itemsCount);
+
+        expect(result).toEqual(filteredScanRequests);
+    });
+
+    it('delete completed and no-retry scan requests', async () => {
+        createScanResults([
+            {
+                run: { state: 'completed' },
+            },
+            {
+                run: {
+                    state: 'queued',
+                    retryCount: 10,
+                },
+            },
+        ]);
+        itemsCount = scanResults.length;
+        createScanRequests();
+        setupPageScanRequestProvider();
+        setupOnDemandPageScanRunResultProvider();
+        createFilteredScanRequests(
+            [],
+            scanRequests.map((scanRequest) => scanRequest.id),
+        );
+
+        const result = await scanRequestSelector.getRequests(itemsCount);
+
+        expect(result).toEqual(filteredScanRequests);
     });
 });
 
@@ -115,17 +165,18 @@ function createScanRequests(requests: OnDemandPageScanRequest[] = []): void {
 
 function createScanResults(scans: Partial<OnDemandPageScanResult>[]): void {
     let id = 0;
-
     scanResults = scans.map((scanResult) => {
-        return {
-            id: ++id,
-            run: {
-                state: 'accepted',
-                retryCount: 0,
-                timestamp: dateNow.toJSON(),
+        return _.merge(
+            {
+                id: ++id,
+                run: {
+                    state: 'accepted',
+                    retryCount: 0,
+                    timestamp: moment.utc().add(-2, 'minutes').toJSON(),
+                },
             },
-            ...scanResult,
-        } as OnDemandPageScanResult;
+            scanResult,
+        ) as OnDemandPageScanResult;
     });
 }
 
@@ -150,11 +201,10 @@ function setupPageScanRequestProvider(): void {
         )
         .verifiable();
 
-    if (itemsCount > scanRequests.length) {
+    if (itemsCount >= scanRequests.length) {
         pageScanRequestProviderMock
             .setup((o) => o.getRequests(continuationToken, It.isAnyNumber()))
-            .returns(() => Promise.resolve({ item: [], statusCode: 200 } as CosmosOperationResponse<OnDemandPageScanRequest[]>))
-            .verifiable();
+            .returns(() => Promise.resolve({ item: [], statusCode: 200 } as CosmosOperationResponse<OnDemandPageScanRequest[]>));
     }
 }
 
