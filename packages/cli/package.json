@@ -27,7 +27,7 @@
     },
     "homepage": "https://github.com/Microsoft/accessibility-insights-service#readme",
     "devDependencies": {
-        "@types/cheerio": "^0.22.29",
+        "@types/cheerio": "^0.22.28",
         "@types/cli-spinner": "^0.2.0",
         "@types/escape-html": "^1.0.1",
         "@types/jest": "^27.0.2",
@@ -61,7 +61,7 @@
         "@sindresorhus/fnv1a": "^2.0.1",
         "accessibility-insights-report": "4.2.0",
         "ajv": "^8.6.3",
-        "apify": "^1.1.1",
+        "apify": "^1.1.2",
         "apify-shared": "^0.5.0",
         "applicationinsights": "^2.1.8",
         "axe-core": "4.3.2",
