@@ -50,6 +50,7 @@ export const E2EScanFactories: E2EScanScenarioDefinitionFactory[] = [
             readableName: 'DeepScan',
             scanOptions: {
                 deepScan: true,
+                scanNotificationUrl: `${webApiConfig.baseUrl}${availabilityConfig.scanNotifyFailApiEndpoint}`,
                 consolidatedId: `${availabilityConfig.consolidatedIdBase}-${process.env.RELEASE_VERSION}-deepScan-${Date.now()}`,
             },
             initialTestContextData: {
@@ -57,8 +58,18 @@ export const E2EScanFactories: E2EScanScenarioDefinitionFactory[] = [
                 expectedCrawledUrls: [baseUrl, `${baseUrl}linked1/`, `${baseUrl}linked2/`, `${baseUrl}linked1/inner-page.html`],
             },
             testGroups: {
+<<<<<<< HEAD
                 postScanCompletionTests: ['DeepScanStatusConsistency'],
                 postDeepScanCompletionTests: ['DeepScanPostCompletion', 'DeepScanReports', 'ConsolidatedScanReports'],
+=======
+                postDeepScanCompletionTests: [
+                    'DeepScanPostCompletion',
+                    'DeepScanReports',
+                    'ConsolidatedScanReports',
+                    'DeepScanPreCompletionNotification',
+                ],
+                postScanCompletionNotificationTests: ['ScanCompletionNotification'],
+>>>>>>> e24d0eaeb045770b974a8b6c1d5ca440903a2c84
             },
         };
     },
