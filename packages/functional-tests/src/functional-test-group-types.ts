@@ -6,6 +6,7 @@ import { A11yServiceClient } from 'web-api-client';
 import { ConsolidatedScanReportsTestGroup } from './test-groups/consolidated-scan-reports-test-group';
 import { DeepScanPostCompletionTestGroup } from './test-groups/deep-scan-post-completion-test-group';
 import { DeepScanReportsTestGroup } from './test-groups/deep-scan-reports-test-group';
+import { DeepScanStatusConsistencyTestGroup } from './test-groups/deep-scan-status-consistency-test-group';
 import { FailedScanNotificationTestGroup } from './test-groups/failed-scan-notification-test-group';
 import { FinalizerTestGroup } from './test-groups/finalizer-test-group';
 import { FunctionalTestGroup } from './test-groups/functional-test-group';
@@ -27,6 +28,7 @@ export type TestGroupName =
     | 'FailedScanNotification'
     | 'DeepScanPostCompletion'
     | 'DeepScanReports'
+    | 'DeepScanStatusConsistency'
     | 'Finalizer';
 
 export type TestGroupConstructor = new (
@@ -46,5 +48,6 @@ export const functionalTestGroupTypes: { [key in TestGroupName]: TestGroupConstr
     FailedScanNotification: FailedScanNotificationTestGroup,
     DeepScanPostCompletion: DeepScanPostCompletionTestGroup,
     DeepScanReports: DeepScanReportsTestGroup,
+    DeepScanStatusConsistency: DeepScanStatusConsistencyTestGroup,
     Finalizer: FinalizerTestGroup,
 };

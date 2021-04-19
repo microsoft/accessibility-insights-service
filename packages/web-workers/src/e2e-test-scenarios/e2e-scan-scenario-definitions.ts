@@ -57,6 +57,7 @@ export const E2EScanFactories: E2EScanScenarioDefinitionFactory[] = [
                 expectedCrawledUrls: [baseUrl, `${baseUrl}linked1/`, `${baseUrl}linked2/`, `${baseUrl}linked1/inner-page.html`],
             },
             testGroups: {
+                postScanCompletionTests: ['DeepScanStatusConsistency'],
                 postDeepScanCompletionTests: ['DeepScanPostCompletion', 'DeepScanReports', 'ConsolidatedScanReports'],
             },
         };
@@ -85,6 +86,7 @@ export const E2EScanFactories: E2EScanScenarioDefinitionFactory[] = [
                 ],
             },
             testGroups: {
+                postScanCompletionTests: ['DeepScanStatusConsistency'],
                 postDeepScanCompletionTests: ['DeepScanPostCompletion', 'DeepScanReports', 'ConsolidatedScanReports'],
             },
         };
@@ -108,6 +110,7 @@ export const E2EScanFactories: E2EScanScenarioDefinitionFactory[] = [
                 expectedCrawledUrls: [baseUrl, `${baseUrl}linked1/`, `${baseUrl}linked1/inner-page.html`],
             },
             testGroups: {
+                postScanCompletionTests: ['DeepScanStatusConsistency'],
                 postDeepScanCompletionTests: ['DeepScanPostCompletion', 'DeepScanReports', 'ConsolidatedScanReports'],
             },
         };
