@@ -6,6 +6,7 @@ import { A11yServiceClient } from 'web-api-client';
 import { ConsolidatedScanReportsTestGroup } from './test-groups/consolidated-scan-reports-test-group';
 import { DeepScanPostCompletionTestGroup } from './test-groups/deep-scan-post-completion-test-group';
 import { DeepScanReportsTestGroup } from './test-groups/deep-scan-reports-test-group';
+import { DeepScanStatusConsistencyTestGroup } from './test-groups/deep-scan-status-consistency-test-group';
 import { FailedScanNotificationTestGroup } from './test-groups/failed-scan-notification-test-group';
 import { FinalizerTestGroup } from './test-groups/finalizer-test-group';
 import { FunctionalTestGroup } from './test-groups/functional-test-group';
@@ -15,6 +16,7 @@ import { SingleScanPostCompletionTestGroup } from './test-groups/single-scan-pos
 import { ScanQueuingTestGroup } from './test-groups/scan-queuing-test-group';
 import { ScanReportTestGroup } from './test-groups/scan-reports-test-group';
 import { ScanStatusTestGroup } from './test-groups/scan-status-test-group';
+import { DeepScanPreCompletionNotificationTestGroup } from './test-groups/deep-scan-pre-completion-notification-test-group';
 
 export type TestGroupName =
     | 'PostScan'
@@ -25,8 +27,10 @@ export type TestGroupName =
     | 'ConsolidatedScanReports'
     | 'ScanCompletionNotification'
     | 'FailedScanNotification'
+    | 'DeepScanPreCompletionNotification'
     | 'DeepScanPostCompletion'
     | 'DeepScanReports'
+    | 'DeepScanStatusConsistency'
     | 'Finalizer';
 
 export type TestGroupConstructor = new (
@@ -44,7 +48,9 @@ export const functionalTestGroupTypes: { [key in TestGroupName]: TestGroupConstr
     ConsolidatedScanReports: ConsolidatedScanReportsTestGroup,
     ScanCompletionNotification: ScanCompletionNotificationTestGroup,
     FailedScanNotification: FailedScanNotificationTestGroup,
+    DeepScanPreCompletionNotification: DeepScanPreCompletionNotificationTestGroup,
     DeepScanPostCompletion: DeepScanPostCompletionTestGroup,
     DeepScanReports: DeepScanReportsTestGroup,
+    DeepScanStatusConsistency: DeepScanStatusConsistencyTestGroup,
     Finalizer: FinalizerTestGroup,
 };

@@ -3,7 +3,7 @@
 import { expect, use } from 'chai';
 import * as deepEqualInAnyGroup from 'deep-equal-in-any-order';
 import { ResponseWithBodyType } from 'common';
-import { RunState, ScanRunResultResponse } from 'service-library';
+import { ScanRunResultResponse } from 'service-library';
 import { TestEnvironment } from '../common-types';
 import { test } from '../test-decorator';
 import { FunctionalTestGroup } from './functional-test-group';
@@ -30,11 +30,8 @@ export class DeepScanPostCompletionTestGroup extends FunctionalTestGroup {
             `response should include expected crawled URLs for scan ID ${this.testContextData.scanId}`,
         ).to.deep.equalInAnyOrder(this.testContextData.expectedCrawledUrls);
 
-        const crawledUrlStates = response.body.deepScanResult.map((r) => r.scanRunState);
-        const doneScanning = crawledUrlStates.every((s) => s === 'completed' || s === 'failed');
-        const allowedOverallStates: RunState[] = doneScanning ? ['completed', 'failed'] : ['accepted', 'pending', 'queued', 'running'];
-        expect(response.body.run.state, 'overall scan state should be consistent with individual URL states').to.be.oneOf(
-            allowedOverallStates,
-        );
+        const scansCompleted = response.body.deepScanResult.map((r) => r.scanRunState).every((s) => s === 'completed');
+        expect(scansCompleted, 'overall scan state matches individual states').to.equal(response.body.run.state === 'completed');
+        expect(scansCompleted, 'all crawled URL scans should be completed').true;
     }
 }
