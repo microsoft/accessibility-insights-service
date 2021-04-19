@@ -5,6 +5,7 @@ import { SerializableResponse } from 'common';
 // eslint-disable-next-line import/no-internal-modules
 import { Task, TaskSet } from 'durable-functions/lib/src/classes';
 import { TestContextData, TestGroupName } from 'functional-tests';
+import _ from 'lodash';
 import { OrchestrationSteps } from '../orchestration-steps';
 import { E2EScanScenario } from './e2e-scan-scenario';
 import { E2EScanScenarioDefinition } from './e2e-scan-scenario-definitions';
@@ -22,10 +23,10 @@ export class ScanScenarioDriver implements E2EScanScenario {
     }
 
     public *waitForScanCompletionPhase(): Generator<Task | TaskSet, void, SerializableResponse & void> {
-        yield* this.skipIfError(
-            this.orchestrationSteps.waitForBaseScanCompletion(this.testContextData.scanId),
-            this.testDefinition.testGroups.postScanCompletionTests.concat(this.testDefinition.testGroups.scanReportTests),
+        const testsToRun = _.compact(
+            [].concat(this.testDefinition.testGroups.postScanCompletionTests, this.testDefinition.testGroups.scanReportTests),
         );
+        yield* this.skipIfError(this.orchestrationSteps.waitForBaseScanCompletion(this.testContextData.scanId), testsToRun);
     }
 
     public *afterScanCompletedPhase(): Generator<Task | TaskSet, void, SerializableResponse & void> {
