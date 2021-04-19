@@ -22,6 +22,8 @@ export class DeepScanPreCompletionNotificationTestGroup extends FunctionalTestGr
         const crawledUrlStates = response.body.deepScanResult.map((r) => r.scanRunState);
         const doneScanning = crawledUrlStates.every((s) => s === 'completed' || s === 'failed');
         const notificationSent = ['sent', 'sendFailed'].includes(response.body.notification.state);
-        expect(notificationSent, 'Deep scan notification should not be sent until all scans complete').to.equal(doneScanning);
+        if (notificationSent) {
+            expect(doneScanning, 'Deep scan notification should not be sent until all scans complete').to.be.true;
+        }
     }
 }
