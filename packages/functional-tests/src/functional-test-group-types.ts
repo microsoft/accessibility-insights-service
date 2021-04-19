@@ -15,6 +15,7 @@ import { SingleScanPostCompletionTestGroup } from './test-groups/single-scan-pos
 import { ScanQueuingTestGroup } from './test-groups/scan-queuing-test-group';
 import { ScanReportTestGroup } from './test-groups/scan-reports-test-group';
 import { ScanStatusTestGroup } from './test-groups/scan-status-test-group';
+import { DeepScanPreCompletionNotificationTestGroup } from './test-groups/deep-scan-pre-completion-notification-test-group';
 
 export type TestGroupName =
     | 'PostScan'
@@ -25,6 +26,7 @@ export type TestGroupName =
     | 'ConsolidatedScanReports'
     | 'ScanCompletionNotification'
     | 'FailedScanNotification'
+    | 'DeepScanPreCompletionNotification'
     | 'DeepScanPostCompletion'
     | 'DeepScanReports'
     | 'Finalizer';
@@ -44,6 +46,7 @@ export const functionalTestGroupTypes: { [key in TestGroupName]: TestGroupConstr
     ConsolidatedScanReports: ConsolidatedScanReportsTestGroup,
     ScanCompletionNotification: ScanCompletionNotificationTestGroup,
     FailedScanNotification: FailedScanNotificationTestGroup,
+    DeepScanPreCompletionNotification: DeepScanPreCompletionNotificationTestGroup,
     DeepScanPostCompletion: DeepScanPostCompletionTestGroup,
     DeepScanReports: DeepScanReportsTestGroup,
     Finalizer: FinalizerTestGroup,
