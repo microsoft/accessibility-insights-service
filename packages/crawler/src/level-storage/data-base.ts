@@ -6,6 +6,7 @@ import encode from 'encoding-down';
 import { inject, injectable, optional } from 'inversify';
 import leveldown from 'leveldown';
 import levelup, { LevelUp } from 'levelup';
+import { CrawlerConfiguration } from '../crawler/crawler-configuration';
 import { crawlerIocTypes } from '../types/ioc-types';
 import { generateHash } from '../utility/crypto';
 import { DataBaseKey, ScanMetadata, ScanResult } from './storage-documents';
@@ -20,6 +21,7 @@ export class DataBase implements AsyncIterable<ScanResult> {
     private iterator: AsyncIterableIterator<string | Buffer>;
 
     constructor(
+        @inject(CrawlerConfiguration) private readonly crawlerConfig: CrawlerConfiguration,
         @inject(crawlerIocTypes.LevelUp) @optional() protected db?: LevelUp,
         protected readonly levelupObj: typeof levelup = levelup,
         protected readonly leveldownObj: typeof leveldown = leveldown,
@@ -76,7 +78,8 @@ export class DataBase implements AsyncIterable<ScanResult> {
         return value as ScanMetadata;
     }
 
-    public async openDb(outputDir: string = process.env.APIFY_LOCAL_STORAGE_DIR): Promise<void> {
+    public async openDb(): Promise<void> {
+        const outputDir = this.crawlerConfig.localOutputDir();
         if (this.db === undefined) {
             this.db = this.levelupObj(
                 this.encodeObj(this.leveldownObj(`${outputDir}/database`), { valueEncoding: 'json', keyEncoding: 'json' }),

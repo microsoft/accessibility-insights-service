@@ -40,6 +40,15 @@ describe(CrawlerConfiguration, () => {
         expect(crawlerConfiguration.baseUrl()).toEqual('baseUrl');
     });
 
+    it('localOutputDir', () => {
+        crawlerRunOptionsMock
+            .setup((o) => o.localOutputDir)
+            .returns(() => 'outputDir')
+            .verifiable();
+
+        expect(crawlerConfiguration.localOutputDir()).toEqual('outputDir');
+    });
+
     describe('getDiscoveryPattern', () => {
         const baseUrl = 'base url string';
         const baseUrlDiscoveryPattern = 'discovery pattern';
@@ -214,16 +223,6 @@ describe(CrawlerConfiguration, () => {
             existingSettings.APIFY_HEADLESS = undefined;
 
             crawlerConfiguration.setDefaultApifySettings();
-        });
-
-        it('setLocalOutputDir', () => {
-            const localOutputDir = 'new local output dir';
-            const expectedSettings = {
-                APIFY_LOCAL_STORAGE_DIR: localOutputDir,
-            };
-            apifySettingsHandlerMock.setup((ash) => ash.setApifySettings(expectedSettings)).verifiable();
-
-            crawlerConfiguration.setLocalOutputDir(localOutputDir);
         });
 
         it('setChromePath', () => {

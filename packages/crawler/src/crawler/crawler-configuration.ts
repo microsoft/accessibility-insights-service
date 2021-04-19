@@ -48,12 +48,12 @@ export class CrawlerConfiguration {
         return this.crawlerRunOptions.chromePath;
     }
 
-    public setDefaultApifySettings(): void {
-        this.settingsHandler.setApifySettings(this.getDefaultApifySettings());
+    public localOutputDir(): string {
+        return this.crawlerRunOptions.localOutputDir;
     }
 
-    public setLocalOutputDir(outputDir: string): void {
-        this.settingsHandler.setApifySettings({ APIFY_LOCAL_STORAGE_DIR: outputDir });
+    public setDefaultApifySettings(): void {
+        this.settingsHandler.setApifySettings(this.getDefaultApifySettings());
     }
 
     public setMemoryMBytes(memoryMBytes: number): void {
