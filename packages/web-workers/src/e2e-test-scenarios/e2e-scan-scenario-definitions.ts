@@ -50,7 +50,7 @@ export const E2EScanFactories: E2EScanScenarioDefinitionFactory[] = [
             readableName: 'DeepScan',
             scanOptions: {
                 deepScan: true,
-                scanNotificationUrl: `${webApiConfig.baseUrl}${availabilityConfig.scanNotifyFailApiEndpoint}`,
+                scanNotificationUrl: `${webApiConfig.baseUrl}${availabilityConfig.scanNotifyApiEndpoint}`,
                 consolidatedId: `${availabilityConfig.consolidatedIdBase}-${process.env.RELEASE_VERSION}-deepScan-${Date.now()}`,
             },
             initialTestContextData: {
