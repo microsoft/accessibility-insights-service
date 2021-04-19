@@ -23,19 +23,24 @@ export class ScanScenarioDriver implements E2EScanScenario {
     }
 
     public *waitForScanCompletionPhase(): Generator<Task | TaskSet, void, SerializableResponse & void> {
-        const testsToRun = _.compact(
-            [].concat(this.testDefinition.testGroups.postScanCompletionTests, this.testDefinition.testGroups.scanReportTests),
-        );
+        let testsToRun = [].concat(this.testDefinition.testGroups.postScanCompletionTests, this.testDefinition.testGroups.scanReportTests);
+        testsToRun = _.uniq(_.compact(testsToRun));
         yield* this.skipIfError(this.orchestrationSteps.waitForBaseScanCompletion(this.testContextData.scanId), testsToRun);
     }
 
     public *afterScanCompletedPhase(): Generator<Task | TaskSet, void, SerializableResponse & void> {
         const scanRequestOptions = this.testDefinition.scanOptions;
         if (scanRequestOptions.deepScan) {
-            yield* this.afterDeepScan();
+            yield* this.skipIfError(
+                this.orchestrationSteps.waitForDeepScanCompletion(this.testContextData.scanId),
+                this.testDefinition.testGroups.postDeepScanCompletionTests,
+            );
         }
         if (scanRequestOptions.scanNotificationUrl) {
-            yield* this.scanNotification();
+            yield* this.skipIfError(
+                this.orchestrationSteps.waitForScanCompletionNotification(this.testContextData.scanId),
+                this.testDefinition.testGroups.postScanCompletionNotificationTests,
+            );
         }
         yield* this.skipIfError(this.orchestrationSteps.trackScanRequestCompleted());
     }
@@ -44,20 +49,6 @@ export class ScanScenarioDriver implements E2EScanScenario {
         this.testContextData.scanId = yield* this.orchestrationSteps.invokeSubmitScanRequestRestApi(
             this.testContextData.scanUrl,
             this.testDefinition.scanOptions,
-        );
-    }
-
-    private *scanNotification(): Generator<Task | TaskSet, void, SerializableResponse & void> {
-        yield* this.skipIfError(
-            this.orchestrationSteps.waitForScanCompletionNotification(this.testContextData.scanId),
-            this.testDefinition.testGroups.postScanCompletionNotificationTests,
-        );
-    }
-
-    private *afterDeepScan(): Generator<Task | TaskSet, void, SerializableResponse & void> {
-        yield* this.skipIfError(
-            this.orchestrationSteps.waitForDeepScanCompletion(this.testContextData.scanId),
-            this.testDefinition.testGroups.postDeepScanCompletionTests,
         );
     }
 
