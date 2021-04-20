@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import * as util from 'util';
 import { QueueRuntimeConfig, RetryHelper, ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
@@ -11,6 +12,8 @@ import { Message } from './message';
 
 @injectable()
 export class Queue {
+    private readonly maxDequeueCount = 1; // increasing dequeue count may destroy global scan retry logic
+
     constructor(
         @inject(iocTypeNames.QueueServiceClientProvider) private readonly queueServiceClientProvider: QueueServiceClientProvider,
         @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
@@ -24,7 +27,6 @@ export class Queue {
      * @param numberOfMessages - number of messages to dequeue. Maximum supported is 32 per call (limited by Azure storage service)
      */
     public async getMessages(queue: string, numberOfMessages: number = 32): Promise<Message[]> {
-        const maxDequeueCount = (await this.getQueueConfig()).maxDequeueCount;
         const messages: Message[] = [];
         const queueClient = await this.getQueueClient(queue);
         const deadQueueURL = await this.getQueueClient(`${queue}-dead`);
@@ -34,11 +36,11 @@ export class Queue {
 
         const serverMessages = await this.getQueueMessages(queueClient, numberOfMessages);
         for (const serverMessage of serverMessages) {
-            if (serverMessage.dequeueCount > maxDequeueCount) {
+            if (serverMessage.dequeueCount > this.maxDequeueCount) {
                 await this.moveToDeadQueue(queueClient, deadQueueURL, serverMessage);
 
                 this.logger.logWarn(
-                    `Storage queue message ${serverMessage.messageId} exceeded dequeue threshold of ${maxDequeueCount} and moved to the ${queue}-dead queue.`,
+                    `Storage queue message ${serverMessage.messageId} exceeded dequeue threshold of ${this.maxDequeueCount} and moved to the ${queue}-dead queue.`,
                 );
             } else {
                 messages.push(new Message(serverMessage.messageText, serverMessage.messageId, serverMessage.popReceipt));

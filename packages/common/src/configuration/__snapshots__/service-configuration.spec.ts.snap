@@ -113,11 +113,6 @@ Object {
     },
   },
   "queueConfig": Object {
-    "maxDequeueCount": Object {
-      "default": 2,
-      "doc": "Maximum number of times message can be dequeued from a storage queue.",
-      "format": "int",
-    },
     "maxQueueSize": Object {
       "default": 10,
       "doc": "Maximum message count in scan request queue.",
@@ -306,11 +301,6 @@ Object {
     },
   },
   "queueConfig": Object {
-    "maxDequeueCount": Object {
-      "default": 2,
-      "doc": "Maximum number of times message can be dequeued from a storage queue.",
-      "format": "int",
-    },
     "maxQueueSize": Object {
       "default": 10,
       "doc": "Maximum message count in scan request queue.",

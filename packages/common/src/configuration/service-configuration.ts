@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import * as fs from 'fs';
 import convict from 'convict';
 import { injectable } from 'inversify';
@@ -14,7 +15,6 @@ export interface TaskRuntimeConfig {
 export interface QueueRuntimeConfig {
     maxQueueSize: number;
     messageVisibilityTimeoutInSeconds: number;
-    maxDequeueCount: number;
 }
 
 export interface LogRuntimeConfig {
@@ -147,11 +147,6 @@ export class ServiceConfiguration {
                     format: 'int',
                     default: 10,
                     doc: 'Maximum message count in scan request queue.',
-                },
-                maxDequeueCount: {
-                    format: 'int',
-                    default: 2,
-                    doc: 'Maximum number of times message can be dequeued from a storage queue.',
                 },
                 messageVisibilityTimeoutInSeconds: {
                     format: 'int',
