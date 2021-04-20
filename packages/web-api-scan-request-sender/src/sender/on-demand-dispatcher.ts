@@ -47,9 +47,7 @@ export class OnDemandDispatcher {
             return;
         }
 
-        this.logger.logInfo(`Adding ${scanRequests.length} scan requests to the task scan queue.`);
-        this.logger.trackEvent('ScanRequestQueued', null, { queuedScanRequests: scanRequests.length });
-
+        let count = 0;
         await Promise.all(
             scanRequests.map(async (scanRequest) => {
                 const message = {
@@ -60,6 +58,7 @@ export class OnDemandDispatcher {
                 const response = await this.queue.createMessage(this.storageConfig.scanQueue, message);
 
                 if (response === true) {
+                    count++;
                     await this.updateScanResultState(scanRequest.result, 'queued');
                     this.logger.logInfo('Successfully added scan request to the scan task queue.', {
                         scanId: scanRequest.request.id,
@@ -76,6 +75,9 @@ export class OnDemandDispatcher {
                 }
             }),
         );
+
+        this.logger.logInfo(`Added ${count} scan requests to the task scan queue.`);
+        this.logger.trackEvent('ScanRequestQueued', null, { queuedScanRequests: count });
     }
 
     private async deleteScanRequests(scanRequests: ScanRequest[]): Promise<void> {

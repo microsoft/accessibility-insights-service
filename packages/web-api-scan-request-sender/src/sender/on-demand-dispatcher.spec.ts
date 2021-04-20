@@ -1,287 +1,200 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/consistent-type-assertions */
 import 'reflect-metadata';
 
-import { CosmosOperationResponse } from 'azure-services';
-import { QueueRuntimeConfig, ServiceConfiguration } from 'common';
+import { IMock, Mock, It, Times } from 'typemoq';
 import { Logger } from 'logger';
-import { PageScanRequestProvider } from 'service-library';
-import { OnDemandPageScanRequest } from 'storage-documents';
-import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
+import { PageScanRequestProvider, OnDemandPageScanRunResultProvider, OperationResult } from 'service-library';
+import { ServiceConfiguration, QueueRuntimeConfig } from 'common';
+import { Queue, StorageConfig } from 'azure-services';
+import { OnDemandPageScanResult, ScanError } from 'storage-documents';
+import * as MockDate from 'mockdate';
+import _ from 'lodash';
 import { OnDemandDispatcher } from './on-demand-dispatcher';
-import { OnDemandScanRequestSender } from './on-demand-scan-request-sender';
+import { ScanRequestSelector, ScanRequests } from './scan-request-selector';
 
-export class MockableLogger extends Logger {}
+/* eslint-disable @typescript-eslint/no-explicit-any */
+const scanQueueName = 'scanQueueName';
 
-interface QueryDataProviderStubResponse<T> {
-    continuationToken: string;
-    items: T[];
-}
+let queueMock: IMock<Queue>;
+let pageScanRequestProviderMock: IMock<PageScanRequestProvider>;
+let scanRequestSelectorMock: IMock<ScanRequestSelector>;
+let onDemandPageScanRunResultProviderMock: IMock<OnDemandPageScanRunResultProvider>;
+let storageConfigMock: IMock<StorageConfig>;
+let serviceConfigurationMock: IMock<ServiceConfiguration>;
+let loggerMock: IMock<Logger>;
+let onDemandDispatcher: OnDemandDispatcher;
+let maxQueueSize: number;
+let messageCount: number;
+let dateNow: Date;
 
-class QueryDataProviderStub<T> {
-    private nextChunkIndex = 0;
-    private currentItemPos = 0;
-
-    constructor(private readonly items: T[], private readonly itemsPerNextChunk: number[]) {}
-
-    public reset(): void {
-        this.nextChunkIndex = 0;
-        this.currentItemPos = 0;
-    }
-
-    public getNextDataChunk(): QueryDataProviderStubResponse<T> {
-        if (this.itemsPerNextChunk.length < this.nextChunkIndex + 1) {
-            return {
-                continuationToken: undefined,
-                items: [],
-            };
-        }
-
-        const currentChunk = this.items.slice(this.currentItemPos, this.currentItemPos + this.itemsPerNextChunk[this.nextChunkIndex]);
-        this.currentItemPos += this.itemsPerNextChunk[this.nextChunkIndex];
-        this.nextChunkIndex += 1;
-
-        return {
-            continuationToken:
-                this.currentItemPos >= this.items.length
-                    ? undefined
-                    : `next chunk [${this.currentItemPos}:${this.currentItemPos + this.itemsPerNextChunk[this.nextChunkIndex]}]`,
-            items: currentChunk,
-        };
-    }
-}
-
-describe('Dispatcher', () => {
-    let loggerMock: IMock<MockableLogger>;
-    let pageScanRequestProvider: IMock<PageScanRequestProvider>;
-    let scanRequestSenderMock: IMock<OnDemandScanRequestSender>;
-    let dispatcher: OnDemandDispatcher;
-    let serviceConfigMock: IMock<ServiceConfiguration>;
-    const maxQueueSize = 10;
-    let currentQueueSize: number;
-
+describe(OnDemandDispatcher, () => {
     beforeEach(() => {
-        currentQueueSize = 1;
-        serviceConfigMock = Mock.ofType(ServiceConfiguration);
-        serviceConfigMock
-            .setup(async (s) => s.getConfigValue('queueConfig'))
-            .returns(async () => Promise.resolve({ maxQueueSize: maxQueueSize } as QueueRuntimeConfig));
+        dateNow = new Date();
+        MockDate.set(dateNow);
 
-        loggerMock = Mock.ofType(MockableLogger);
-        pageScanRequestProvider = Mock.ofType(PageScanRequestProvider);
-        scanRequestSenderMock = Mock.ofType(OnDemandScanRequestSender, MockBehavior.Strict);
-        dispatcher = new OnDemandDispatcher(
-            pageScanRequestProvider.object,
+        queueMock = Mock.ofType<Queue>();
+        pageScanRequestProviderMock = Mock.ofType<PageScanRequestProvider>();
+        scanRequestSelectorMock = Mock.ofType<ScanRequestSelector>();
+        onDemandPageScanRunResultProviderMock = Mock.ofType<OnDemandPageScanRunResultProvider>();
+        storageConfigMock = Mock.ofType<StorageConfig>();
+        serviceConfigurationMock = Mock.ofType<ServiceConfiguration>();
+        loggerMock = Mock.ofType<Logger>();
+
+        maxQueueSize = 10;
+        messageCount = 0;
+        storageConfigMock
+            .setup((o) => o.scanQueue)
+            .returns(() => scanQueueName)
+            .verifiable(Times.atLeastOnce());
+
+        onDemandDispatcher = new OnDemandDispatcher(
+            queueMock.object,
+            pageScanRequestProviderMock.object,
+            scanRequestSelectorMock.object,
+            onDemandPageScanRunResultProviderMock.object,
+            storageConfigMock.object,
+            serviceConfigurationMock.object,
             loggerMock.object,
-            scanRequestSenderMock.object,
-            serviceConfigMock.object,
         );
     });
 
-    function verifyAll(): void {
-        pageScanRequestProvider.verifyAll();
-        scanRequestSenderMock.verifyAll();
+    afterEach(() => {
+        queueMock.verifyAll();
+        pageScanRequestProviderMock.verifyAll();
+        scanRequestSelectorMock.verifyAll();
+        onDemandPageScanRunResultProviderMock.verifyAll();
+        storageConfigMock.verifyAll();
+        serviceConfigurationMock.verifyAll();
         loggerMock.verifyAll();
-    }
-
-    test.each([maxQueueSize, maxQueueSize + 1])(
-        'does nothing if current queue size is greater than max queue size - current queue size - %o',
-        async (queueSize: number) => {
-            currentQueueSize = queueSize;
-            setupVerifiableQueueSizeCall();
-            setupPageScanRequestProviderNotCalled();
-            setupVerifiableScanRequestNotCalled();
-            loggerMock.setup((o) => o.logWarn(It.isAny())).verifiable(Times.once());
-
-            await dispatcher.dispatchScanRequests();
-
-            verifyAll();
-        },
-    );
-
-    it('does not call scan request if no pages to add', async () => {
-        setupVerifiableQueueSizeCall();
-        const queryDataProviderStub = new QueryDataProviderStub<OnDemandPageScanRequest>([], []);
-        setupReadyToScanPageForAllPages(queryDataProviderStub);
-        setupVerifiableScanRequestNotCalled();
-
-        await dispatcher.dispatchScanRequests();
-
-        verifyAll();
     });
 
-    it('sends requests when total ready to scan pages < current queue size', async () => {
-        const initialQueueSize = 1;
-        currentQueueSize = 1;
-        setupVerifiableQueueSizeCall();
-        const allPages = getOnDemandRequests(maxQueueSize - 2);
-        const itemsPerChunk = allPages.length / 2;
-
-        const queryDataProviderStub = new QueryDataProviderStub<OnDemandPageScanRequest>(allPages, [
-            itemsPerChunk + 1,
-            0,
-            itemsPerChunk - 1,
-        ]);
-
-        setupReadyToScanPageForAllPages(queryDataProviderStub);
-
-        await dispatcher.dispatchScanRequests();
-
-        expect(currentQueueSize).toBe(initialQueueSize + allPages.length);
-        verifyAll();
-    });
-
-    it('sends requests when total ready to scan pages > current queue size', async () => {
-        const initialQueueSize = 1;
-        currentQueueSize = 1;
-        setupVerifiableQueueSizeCall();
-        const allPages = getOnDemandRequests(maxQueueSize + 2);
-        const itemsPerChunk = allPages.length / 2;
-
-        const queryDataProviderStub = new QueryDataProviderStub<OnDemandPageScanRequest>(allPages, [
-            itemsPerChunk + 1,
-            0,
-            itemsPerChunk - 1,
-        ]);
-
-        setupReadyToScanPageForAllPages(queryDataProviderStub);
-
-        await dispatcher.dispatchScanRequests();
-        expect(currentQueueSize).toBe(initialQueueSize + allPages.length);
-
-        verifyAll();
-    });
-
-    it('sends requests when total ready to scan pages = current queue size', async () => {
-        const initialQueueSize = 1;
-        currentQueueSize = 1;
-        setupVerifiableQueueSizeCall();
-        const allPages = getOnDemandRequests(maxQueueSize - currentQueueSize);
-        const itemsPerChunk = allPages.length / 2;
-
-        const queryDataProviderStub = new QueryDataProviderStub<OnDemandPageScanRequest>(allPages, [
-            itemsPerChunk + 1,
-            0,
-            itemsPerChunk - 1,
-        ]);
-
-        setupReadyToScanPageForAllPages(queryDataProviderStub);
-
-        await dispatcher.dispatchScanRequests();
-        expect(currentQueueSize).toBe(initialQueueSize + allPages.length);
-
-        verifyAll();
-    });
-
-    it('error while retrieving documents', async () => {
-        setupVerifiableQueueSizeCall();
-
-        pageScanRequestProvider
-            .setup(async (p) => p.getRequests(It.isAny(), It.isAny()))
-            .returns(async () => Promise.resolve(getErrorResponse()))
-            .verifiable(Times.once());
-
-        await expect(dispatcher.dispatchScanRequests()).rejects.toThrowError(/Failed request response/);
-        pageScanRequestProvider.verifyAll();
-    });
-
-    function getOnDemandRequests(count: number): OnDemandPageScanRequest[] {
-        const onDemandPageScanRequests: OnDemandPageScanRequest[] = [];
-
-        for (let i = 0; i < count; i += 1) {
-            onDemandPageScanRequests.push({
-                id: `onDemandPageScanRequests-${i}`,
-            } as OnDemandPageScanRequest);
-        }
-
-        return onDemandPageScanRequests;
-    }
-
-    function createOnDemandPagesRequestResponse(
-        onDemandPageScanRequests: OnDemandPageScanRequest[],
-        continuationToken?: string,
-    ): CosmosOperationResponse<OnDemandPageScanRequest[]> {
-        return {
-            type: 'CosmosOperationResponse<OnDemandPageScanRequest>',
-            statusCode: 200,
-            item: onDemandPageScanRequests,
-            continuationToken: continuationToken,
-        } as CosmosOperationResponse<OnDemandPageScanRequest[]>;
-    }
-
-    function setupReadyToScanPageForAllPages(dataProvider: QueryDataProviderStub<OnDemandPageScanRequest>): void {
-        let response;
-        let previousContinuationToken;
-        let expectedItemsCount = maxQueueSize - currentQueueSize;
-
-        do {
-            response = dataProvider.getNextDataChunk();
-
-            setupGetReadyToScanPagesCallForChunk(response.items, previousContinuationToken, response.continuationToken, expectedItemsCount);
-
-            if (response.items.length > 0) {
-                setupVerifiableScanRequestCallForChunk(response.items);
-                setupLoggerTrackEvent(response.items.length);
-            }
-
-            if (response.continuationToken === undefined) {
-                break;
-            }
-
-            expectedItemsCount -= response.items.length;
-            previousContinuationToken = response.continuationToken;
-        } while (response.continuationToken !== undefined);
-
-        dataProvider.reset();
-    }
-
-    function setupVerifiableScanRequestCallForChunk(onDemandPageScanRequests: OnDemandPageScanRequest[]): void {
-        scanRequestSenderMock
-            .setup(async (s) => s.sendRequestToScan(onDemandPageScanRequests))
-            .returns(async () => {
-                currentQueueSize += onDemandPageScanRequests.length;
-            })
-            .verifiable(Times.once());
-    }
-
-    function setupGetReadyToScanPagesCallForChunk(
-        onDemandPageScanRequests: OnDemandPageScanRequest[],
-        previousContinuationToken: string,
-        continuationToken: string,
-        expectedItemsCount: number,
-    ): void {
-        pageScanRequestProvider
-            .setup(async (p) => p.getRequests(previousContinuationToken, expectedItemsCount))
-            .returns(async () => Promise.resolve(createOnDemandPagesRequestResponse(onDemandPageScanRequests, continuationToken)));
-    }
-
-    function setupLoggerTrackEvent(itemCount: number): void {
+    it('skip dispatcher run when queue is full', async () => {
+        messageCount = maxQueueSize;
+        setupServiceConfiguration();
+        setupQueue();
         loggerMock
-            .setup((lm) => lm.trackEvent('ScanRequestQueued', null, It.isValue({ queuedScanRequests: itemCount })))
-            .verifiable(Times.once());
-    }
+            .setup((o) => o.logInfo('Skip adding new scan requests as scan task queue already reached to its maximum capacity.'))
+            .verifiable();
 
-    function setupPageScanRequestProviderNotCalled(): void {
-        pageScanRequestProvider.setup(async (p) => p.getRequests(It.isAny(), It.isAny())).verifiable(Times.never());
-    }
+        await onDemandDispatcher.dispatchScanRequests();
+    });
 
-    function setupVerifiableQueueSizeCall(): void {
-        scanRequestSenderMock
-            .setup(async (s) => s.getCurrentQueueSize())
-            .returns(async () => Promise.resolve(currentQueueSize))
-            .verifiable(Times.atLeastOnce());
-    }
+    it('delete scan requests', async () => {
+        const scanRequests = {
+            toQueue: [],
+            toDelete: [
+                {
+                    request: { id: 'id1' },
+                },
+                {
+                    request: { id: 'id2' },
+                },
+            ],
+        } as ScanRequests;
 
-    function setupVerifiableScanRequestNotCalled(): void {
-        scanRequestSenderMock.setup(async (s) => s.sendRequestToScan(It.isAny())).verifiable(Times.never());
-    }
+        setupServiceConfiguration();
+        setupQueue();
+        setupScanRequestSelector(scanRequests);
+        setupPageScanRequestProvider(scanRequests);
 
-    function getErrorResponse(): CosmosOperationResponse<OnDemandPageScanRequest[]> {
-        return <CosmosOperationResponse<OnDemandPageScanRequest[]>>{
-            type: 'CosmosOperationResponse<OnDemandPageScanRequest>',
-            statusCode: 500,
-            item: <OnDemandPageScanRequest[]>undefined,
+        await onDemandDispatcher.dispatchScanRequests();
+    });
+
+    it('queue scan requests', async () => {
+        const error: ScanError = {
+            errorType: 'InternalError',
+            message: 'Failed to create a scan request queue message.',
         };
-    }
+        const scanRequests = {
+            toDelete: [],
+            toQueue: [
+                {
+                    request: { id: 'id1', url: 'url1', deepScan: true, created: true },
+                    result: { run: { retryCount: 1 } },
+                },
+                {
+                    request: { id: 'id2', url: 'url2', deepScan: false, created: true },
+                    result: {},
+                },
+                {
+                    request: { id: 'id3', url: 'url3', deepScan: false, created: false, error },
+                    result: {},
+                },
+            ],
+        } as any;
+        loggerMock
+            .setup((o) =>
+                o.trackEvent('ScanRequestQueued', null, {
+                    queuedScanRequests: scanRequests.toQueue.filter((r: any) => r.request.created).length,
+                }),
+            )
+            .verifiable();
+
+        setupServiceConfiguration();
+        setupQueue(scanRequests);
+        setupScanRequestSelector(scanRequests);
+        setupPageScanRequestProvider(scanRequests);
+        setupOnDemandPageScanRunResultProvider(scanRequests);
+
+        await onDemandDispatcher.dispatchScanRequests();
+    });
 });
+
+function setupOnDemandPageScanRunResultProvider(scanRequests: ScanRequests): void {
+    scanRequests.toQueue.map((scanRequest: any) => {
+        const scanRequestClone = _.cloneDeep(scanRequest);
+        scanRequestClone.result.run = {
+            state: scanRequest.request.created ? 'queued' : 'failed',
+            timestamp: new Date().toJSON(),
+            error: scanRequest.request.error ?? null,
+            retryCount: scanRequest.result.run?.retryCount ? scanRequest.result.run.retryCount + 1 : 0,
+        };
+
+        onDemandPageScanRunResultProviderMock
+            .setup((o) => o.tryUpdateScanRun(It.isValue(scanRequestClone.result)))
+            .returns(() => Promise.resolve({ succeeded: true } as OperationResult<OnDemandPageScanResult>))
+            .verifiable();
+    });
+}
+
+function setupPageScanRequestProvider(scanRequests: ScanRequests): void {
+    scanRequests.toDelete.map((scanRequest) => {
+        pageScanRequestProviderMock.setup((o) => o.deleteRequests([scanRequest.request.id])).verifiable();
+    });
+}
+
+function setupScanRequestSelector(scanRequests: ScanRequests): void {
+    scanRequestSelectorMock
+        .setup((o) => o.getRequests(maxQueueSize - messageCount))
+        .returns(() => Promise.resolve(scanRequests))
+        .verifiable();
+}
+
+function setupServiceConfiguration(): void {
+    serviceConfigurationMock
+        .setup((o) => o.getConfigValue('queueConfig'))
+        .returns(() => Promise.resolve({ maxQueueSize } as QueueRuntimeConfig))
+        .verifiable();
+}
+
+function setupQueue(scanRequests: ScanRequests = undefined): void {
+    queueMock
+        .setup((o) => o.getMessageCount(scanQueueName))
+        .returns(() => Promise.resolve(messageCount))
+        .verifiable();
+
+    if (scanRequests) {
+        scanRequests.toQueue.map((scanRequest: any) => {
+            const message = {
+                id: scanRequest.request.id,
+                url: scanRequest.request.url,
+                deepScan: scanRequest.request.deepScan,
+            };
+            queueMock
+                .setup((o) => o.createMessage(scanQueueName, message))
+                .returns(() => Promise.resolve(scanRequest.request.created))
+                .verifiable();
+        });
+    }
+}
