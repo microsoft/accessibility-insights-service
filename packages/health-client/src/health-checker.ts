@@ -19,7 +19,7 @@ type Argv = {
     baseUrl: string;
 };
 
-const testTimeoutInMinutes = 60;
+const testTimeoutInMinutes = 75;
 const argv: Argv = yargs.argv as any;
 
 (async () => {

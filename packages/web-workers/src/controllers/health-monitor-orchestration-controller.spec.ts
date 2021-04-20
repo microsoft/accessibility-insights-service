@@ -98,7 +98,7 @@ describe('HealthMonitorOrchestrationController', () => {
 
             orchestrationStepsMock
                 .setup((m) => m.logTestRunStart(allTestIdentifiers))
-                .returns(generatorStub)
+                .returns((_) => generatorStub())
                 .verifiable();
             orchestrationStepsMock
                 .setup((m) => m.invokeHealthCheckRestApi())
