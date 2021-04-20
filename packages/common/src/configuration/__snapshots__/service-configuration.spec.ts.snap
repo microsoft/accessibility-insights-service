@@ -148,8 +148,8 @@ Object {
   },
   "scanConfig": Object {
     "failedScanRetryIntervalInMinutes": Object {
-      "default": 3,
-      "doc": "The minimum wait time before next retry of a failed scan request.",
+      "default": 60,
+      "doc": "The minimum wait time before next retry of a failed scan request. Should be greater than queueConfig.messageVisibilityTimeoutInSeconds config value.",
       "format": "int",
     },
     "maxFailedScanRetryCount": Object {
@@ -336,8 +336,8 @@ Object {
   },
   "scanConfig": Object {
     "failedScanRetryIntervalInMinutes": Object {
-      "default": 3,
-      "doc": "The minimum wait time before next retry of a failed scan request.",
+      "default": 60,
+      "doc": "The minimum wait time before next retry of a failed scan request. Should be greater than queueConfig.messageVisibilityTimeoutInSeconds config value.",
       "format": "int",
     },
     "maxFailedScanRetryCount": Object {
