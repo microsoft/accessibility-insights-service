@@ -95,9 +95,6 @@ AZ_BATCH_POOL_ID=on-demand-url-scan-pool
 AZ_BATCH_JOB_ID=1-on-demand-url-scan-schedule-job
 AZ_BATCH_TASK_ID=on-demand-url-scan-job-manager-task
 
-SCAN-REQUEST-SENDER_VARIABLES=
-QUEUE_SIZE=3
-
 COMMON_VARIABLES=
 AZURE_STORAGE_SCAN_QUEUE=ondemand-scanrequest
 KEY_VAULT_URL=https://$keyVault.vault.azure.net/

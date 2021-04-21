@@ -9,6 +9,7 @@ import { PageScanRequestProvider, OnDemandPageScanRunResultProvider } from 'serv
 import { OnDemandPageScanRunState, ScanError, OnDemandPageScanResult } from 'storage-documents';
 import { ScanRequestSelector, ScanRequest } from './scan-request-selector';
 
+/* eslint-disable max-len */
 @injectable()
 export class OnDemandDispatcher {
     constructor(
@@ -104,7 +105,7 @@ export class OnDemandDispatcher {
             state,
             timestamp: new Date().toJSON(),
             error: error ?? null, // reset error document property if no any error
-            retryCount: scanResult.run?.retryCount ? scanResult.run.retryCount + 1 : 0,
+            retryCount: scanResult.run?.retryCount ? scanResult.run.retryCount + 1 : 0, // undefined value indicates first scan request processing (not retry attempt)
         };
 
         const response = await this.onDemandPageScanRunResultProvider.tryUpdateScanRun(scanResult);

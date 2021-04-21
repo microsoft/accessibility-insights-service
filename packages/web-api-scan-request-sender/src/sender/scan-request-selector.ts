@@ -40,11 +40,12 @@ export class ScanRequestSelector {
             toDelete: [],
         };
 
+        const queryCount = itemsCount * 10;
         let continuationToken: string;
         do {
             const response: CosmosOperationResponse<OnDemandPageScanRequest[]> = await this.pageScanRequestProvider.getRequests(
                 continuationToken,
-                itemsCount - scanRequests.toQueue.length,
+                queryCount,
             );
             client.ensureSuccessStatusCode(response);
 
@@ -53,6 +54,8 @@ export class ScanRequestSelector {
                 await this.filterRequests(scanRequests, response.item);
             }
         } while (scanRequests.toQueue.length < itemsCount && continuationToken !== undefined);
+
+        scanRequests.toQueue = scanRequests.toQueue.slice(0, itemsCount);
 
         return scanRequests;
     }

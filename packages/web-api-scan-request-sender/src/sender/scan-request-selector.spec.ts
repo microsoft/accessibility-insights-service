@@ -191,7 +191,7 @@ function setupOnDemandPageScanRunResultProvider(): void {
 
 function setupPageScanRequestProvider(): void {
     pageScanRequestProviderMock
-        .setup((o) => o.getRequests(undefined, itemsCount))
+        .setup((o) => o.getRequests(undefined, itemsCount * 10))
         .returns(() =>
             Promise.resolve({
                 item: scanRequests.slice(0, itemsCount),
