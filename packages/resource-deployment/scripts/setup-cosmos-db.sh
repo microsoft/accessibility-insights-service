@@ -36,25 +36,18 @@ createCosmosCollection() {
     if az cosmosdb sql container show --account-name "$cosmosAccountName" --database-name "$dbName" --name "$collectionName" --resource-group "$resourceGroupName" --query "id" 2>/dev/null; then
         echo "Collection '$collectionName' already exists"
 
-        if [ $environment = "prod" ] || [ $environment = "ppe" ]; then
-            # configure autoscale throughput for production environment
-            autoscale=$(az cosmosdb sql container throughput show --account-name "$cosmosAccountName" --database-name "$dbName" --name "$collectionName" --resource-group "$resourceGroupName" --query "resource.autoscaleSettings.maxThroughput" -o tsv)
-            if [[ -n $autoscale ]]; then
-                echo "Autoscale throughput for collection '$collectionName' already enabled"
-                echo "Updating autoscale maximum throughput for collection '$collectionName'"
-                az cosmosdb sql container throughput update --account-name "$cosmosAccountName" --database-name "$dbName" --name "$collectionName" --resource-group "$resourceGroupName" --max-throughput "$throughput" 1>/dev/null
-            else
-                echo "Autoscale throughput for collection '$collectionName' is not enabled"
-                echo "Migrating collection '$collectionName' throughput to autoscale provision"
-                az cosmosdb sql container throughput migrate --account-name "$cosmosAccountName" --database-name "$dbName" --name "$collectionName" --resource-group "$resourceGroupName" --throughput-type "autoscale" 1>/dev/null
-
-                echo "Updating autoscale maximum throughput for collection '$collectionName'"
-                az cosmosdb sql container throughput update --account-name "$cosmosAccountName" --database-name "$dbName" --name "$collectionName" --resource-group "$resourceGroupName" --max-throughput "$throughput" 1>/dev/null
-            fi
+        autoscale=$(az cosmosdb sql container throughput show --account-name "$cosmosAccountName" --database-name "$dbName" --name "$collectionName" --resource-group "$resourceGroupName" --query "resource.autoscaleSettings.maxThroughput" -o tsv)
+        if [[ -n $autoscale ]]; then
+            echo "Autoscale throughput for collection '$collectionName' already enabled"
+            echo "Updating autoscale maximum throughput for collection '$collectionName'"
+            az cosmosdb sql container throughput update --account-name "$cosmosAccountName" --database-name "$dbName" --name "$collectionName" --resource-group "$resourceGroupName" --max-throughput "$throughput" 1>/dev/null
         else
-            # configure fixed throughput for dev environment
-            echo "Updating fixed throughput for collection '$collectionName'"
-            az cosmosdb sql container throughput update --account-name "$cosmosAccountName" --database-name "$dbName" --name "$collectionName" --resource-group "$resourceGroupName" --throughput "$throughput" 1>/dev/null
+            echo "Autoscale throughput for collection '$collectionName' is not enabled"
+            echo "Migrating collection '$collectionName' throughput to autoscale provision"
+            az cosmosdb sql container throughput migrate --account-name "$cosmosAccountName" --database-name "$dbName" --name "$collectionName" --resource-group "$resourceGroupName" --throughput-type "autoscale" 1>/dev/null
+
+            echo "Updating autoscale maximum throughput for collection '$collectionName'"
+            az cosmosdb sql container throughput update --account-name "$cosmosAccountName" --database-name "$dbName" --name "$collectionName" --resource-group "$resourceGroupName" --max-throughput "$throughput" 1>/dev/null
         fi
 
         echo "Successfully updated collection '$collectionName'"
