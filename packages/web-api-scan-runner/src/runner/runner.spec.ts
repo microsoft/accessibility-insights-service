@@ -6,9 +6,15 @@ import { IMock, Mock, It } from 'typemoq';
 import { OnDemandPageScanRunResultProvider, WebsiteScanResultProvider, OperationResult } from 'service-library';
 import { GlobalLogger } from 'logger';
 import * as MockDate from 'mockdate';
-import { OnDemandPageScanResult, OnDemandPageScanReport, WebsiteScanResult, WebsiteScanRef } from 'storage-documents';
+import {
+    OnDemandPageScanResult,
+    OnDemandPageScanReport,
+    WebsiteScanResult,
+    WebsiteScanRef,
+    OnDemandPageScanRunResult,
+} from 'storage-documents';
 import { AxeScanResults } from 'scanner-global-library';
-import { System } from 'common';
+import { System, ServiceConfiguration, ScanRunTimeConfig } from 'common';
 import { AxeResults } from 'axe-core';
 import { ScanMetadataConfig } from '../scan-metadata-config';
 import { PageScanProcessor } from '../scanner/page-scan-processor';
@@ -20,6 +26,8 @@ import { ScanRunnerTelemetryManager } from '../scan-runner-telemetry-manager';
 import { ScanMetadata } from '../types/scan-metadata';
 import { Runner } from './runner';
 
+const maxFailedScanRetryCount = 1;
+
 let scanMetadataConfigMock: IMock<ScanMetadataConfig>;
 let onDemandPageScanRunResultProviderMock: IMock<OnDemandPageScanRunResultProvider>;
 let WebsiteScanResultProviderMock: IMock<WebsiteScanResultProvider>;
@@ -29,6 +37,7 @@ let reportGeneratorMock: IMock<ReportGenerator>;
 let combinedScanResultProcessorMock: IMock<CombinedScanResultProcessor>;
 let scanNotificationProcessorMock: IMock<ScanNotificationProcessor>;
 let scanRunnerTelemetryManagerMock: IMock<ScanRunnerTelemetryManager>;
+let serviceConfigMock: IMock<ServiceConfiguration>;
 let loggerMock: IMock<GlobalLogger>;
 let runner: Runner;
 let scanMetadata: ScanMetadata;
@@ -50,6 +59,7 @@ describe(Runner, () => {
         combinedScanResultProcessorMock = Mock.ofType<CombinedScanResultProcessor>();
         scanNotificationProcessorMock = Mock.ofType<ScanNotificationProcessor>();
         scanRunnerTelemetryManagerMock = Mock.ofType<ScanRunnerTelemetryManager>();
+        serviceConfigMock = Mock.ofType(ServiceConfiguration);
         loggerMock = Mock.ofType<GlobalLogger>();
 
         dateNow = new Date();
@@ -68,6 +78,12 @@ describe(Runner, () => {
             pageResponseCode: 200,
         } as AxeScanResults;
         reports = [{}] as OnDemandPageScanReport[];
+        serviceConfigMock
+            .setup(async (s) => s.getConfigValue('scanConfig'))
+            .returns(async () => {
+                return { maxFailedScanRetryCount } as ScanRunTimeConfig;
+            })
+            .verifiable();
 
         runner = new Runner(
             scanMetadataConfigMock.object,
@@ -79,6 +95,7 @@ describe(Runner, () => {
             combinedScanResultProcessorMock.object,
             scanNotificationProcessorMock.object,
             scanRunnerTelemetryManagerMock.object,
+            serviceConfigMock.object,
             loggerMock.object,
         );
     });
@@ -169,13 +186,7 @@ describe(Runner, () => {
     });
 
     it('update website scan result if deep scan is enabled', async () => {
-        pageScanResultDbDocument.websiteScanRefs = [
-            {
-                id: 'websiteScanRefId',
-                scanGroupType: 'deep-scan',
-            },
-        ] as WebsiteScanRef[];
-
+        setupPageScanResultDbDocumentForDeepScan();
         setupScanMetadataConfig();
         setupUpdateScanRunStateToRunning();
         setupScanRunnerTelemetryManager();
@@ -185,7 +196,48 @@ describe(Runner, () => {
         setupScanNotificationProcessor();
         await runner.run();
     });
+
+    it('update website scan result if deep scan is enabled and scan fail with retry available', async () => {
+        axeScanResults.error = 'browser navigation error';
+        setupPageScanResultDbDocumentForDeepScan();
+        setupScanMetadataConfig();
+        setupUpdateScanRunStateToRunning();
+        setupScanRunnerTelemetryManager(true, false);
+        setupPageScanProcessor();
+        setupProcessScanResult();
+        setupUpdateScanResult();
+        setupScanNotificationProcessor();
+        await runner.run();
+    });
+
+    it('update website scan result if deep scan is enabled and scan fail with retry not available', async () => {
+        axeScanResults.error = 'browser navigation error';
+        pageScanResultDbDocument.run = {
+            retryCount: maxFailedScanRetryCount,
+        } as OnDemandPageScanRunResult;
+
+        setupPageScanResultDbDocumentForDeepScan();
+        setupScanMetadataConfig();
+        setupUpdateScanRunStateToRunning();
+        setupScanRunnerTelemetryManager(true, false);
+        setupPageScanProcessor();
+        setupProcessScanResult();
+
+        pageScanResult.run.retryCount = maxFailedScanRetryCount;
+        setupUpdateScanResult();
+        setupScanNotificationProcessor();
+        await runner.run();
+    });
 });
+
+function setupPageScanResultDbDocumentForDeepScan(): void {
+    pageScanResultDbDocument.websiteScanRefs = [
+        {
+            id: 'websiteScanRefId',
+            scanGroupType: 'deep-scan',
+        },
+    ] as WebsiteScanRef[];
+}
 
 function setupScanNotificationProcessor(): void {
     scanNotificationProcessorMock
@@ -204,8 +256,12 @@ function setupUpdateScanResult(): void {
                 {
                     scanId: scanMetadata.id,
                     url: scanMetadata.url,
-                    scanState: pageScanResult.scanResult.state,
-                    runState: pageScanResult.run.state,
+                    scanState: pageScanResult.scanResult?.state,
+                    runState:
+                        pageScanResult.run.state === 'failed' &&
+                        (pageScanResult.run.retryCount === undefined || pageScanResult.run.retryCount < maxFailedScanRetryCount)
+                            ? undefined
+                            : pageScanResult.run.state,
                     timestamp: dateNow.toJSON(),
                 },
             ],

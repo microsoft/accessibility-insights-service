@@ -1,10 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-
 import 'reflect-metadata';
 
 import { IMock, Mock } from 'typemoq';
-import { ServiceConfiguration, FeatureFlags } from 'common';
+import { ServiceConfiguration, FeatureFlags, ScanRunTimeConfig } from 'common';
 import { GlobalLogger } from 'logger';
 import { OnDemandPageScanResult, WebsiteScanResult, PageScan, OnDemandNotificationRequestMessage } from 'storage-documents';
 import { ScanMetadata } from '../types/scan-metadata';
@@ -16,6 +15,7 @@ let notificationQueueMessageSenderMock: IMock<NotificationMessageDispatcher>;
 let loggerMock: IMock<GlobalLogger>;
 let scanNotificationProcessor: ScanNotificationProcessor;
 let featureFlagsConfig: FeatureFlags;
+let scanConfig: ScanRunTimeConfig;
 let scanMetadata: ScanMetadata;
 let pageScanResult: OnDemandPageScanResult;
 let websiteScanResult: WebsiteScanResult;
@@ -29,9 +29,16 @@ describe(ScanNotificationProcessor, () => {
         featureFlagsConfig = {
             sendNotification: true,
         };
+        scanConfig = {
+            maxFailedScanRetryCount: 1,
+        } as ScanRunTimeConfig;
         serviceConfigMock
             .setup(async (s) => s.getConfigValue('featureFlags'))
             .returns(async () => featureFlagsConfig)
+            .verifiable();
+        serviceConfigMock
+            .setup(async (s) => s.getConfigValue('scanConfig'))
+            .returns(async () => scanConfig)
             .verifiable();
         scanMetadata = {
             id: 'scanMetadataId',
@@ -73,21 +80,41 @@ describe(ScanNotificationProcessor, () => {
     });
 
     it('send scan notification', async () => {
-        loggerMock
-            .setup((o) =>
-                o.logInfo('Sending scan completion notification message for a single scan.', {
-                    scanNotifyUrl: pageScanResult.notification.scanNotifyUrl,
-                }),
-            )
-            .verifiable();
-        const notificationRequestMessage = {
-            scanId: pageScanResult.id,
-            scanNotifyUrl: pageScanResult.notification.scanNotifyUrl,
-            runStatus: pageScanResult.run.state,
-            scanStatus: pageScanResult.scanResult?.state,
-            deepScanId: websiteScanResult.deepScanId,
-        } as OnDemandNotificationRequestMessage;
-        notificationQueueMessageSenderMock.setup((o) => o.sendNotificationMessage(notificationRequestMessage)).verifiable();
+        websiteScanResult = {} as WebsiteScanResult;
+        setupLoggerForSingleScan();
+        setupNotificationQueueMessageSender();
+        await scanNotificationProcessor.sendScanCompletionNotification(scanMetadata, pageScanResult, websiteScanResult);
+    });
+
+    it('send scan notification for a failed scan', async () => {
+        websiteScanResult = {} as WebsiteScanResult;
+        pageScanResult = {
+            id: 'pageScanResultId',
+            notification: {
+                scanNotifyUrl: 'scanNotifyUrl',
+            },
+            run: {
+                state: 'failed',
+                retryCount: 1,
+            },
+        } as OnDemandPageScanResult;
+        setupLoggerForSingleScan();
+        setupNotificationQueueMessageSender();
+        await scanNotificationProcessor.sendScanCompletionNotification(scanMetadata, pageScanResult, websiteScanResult);
+    });
+
+    it('skip notification for a failed scan with available retry', async () => {
+        websiteScanResult = {} as WebsiteScanResult;
+        pageScanResult = {
+            id: 'pageScanResultId',
+            notification: {
+                scanNotifyUrl: 'scanNotifyUrl',
+            },
+            run: {
+                state: 'failed',
+                retryCount: 0,
+            },
+        } as OnDemandPageScanResult;
         await scanNotificationProcessor.sendScanCompletionNotification(scanMetadata, pageScanResult, websiteScanResult);
     });
 
@@ -122,4 +149,44 @@ describe(ScanNotificationProcessor, () => {
         ];
         await scanNotificationProcessor.sendScanCompletionNotification(scanMetadata, pageScanResult, websiteScanResult);
     });
+
+    it('send scan notification for a deep scan', async () => {
+        scanMetadata.deepScan = true;
+        setupLoggerForDeepScan();
+        setupNotificationQueueMessageSender();
+        await scanNotificationProcessor.sendScanCompletionNotification(scanMetadata, pageScanResult, websiteScanResult);
+    });
 });
+
+function setupLoggerForDeepScan(): void {
+    loggerMock
+        .setup((o) =>
+            o.logInfo('Sending scan completion notification message for a deep scan.', {
+                deepScanId: websiteScanResult?.deepScanId,
+                scannedPages: websiteScanResult.pageScans.length.toString(),
+                scanNotifyUrl: pageScanResult.notification.scanNotifyUrl,
+            }),
+        )
+        .verifiable();
+}
+
+function setupLoggerForSingleScan(): void {
+    loggerMock
+        .setup((o) =>
+            o.logInfo('Sending scan completion notification message for a single scan.', {
+                scanNotifyUrl: pageScanResult.notification.scanNotifyUrl,
+            }),
+        )
+        .verifiable();
+}
+
+function setupNotificationQueueMessageSender(): void {
+    const notificationRequestMessage = {
+        scanId: pageScanResult.id,
+        scanNotifyUrl: pageScanResult.notification.scanNotifyUrl,
+        runStatus: pageScanResult.run.state,
+        scanStatus: pageScanResult.scanResult?.state,
+        deepScanId: websiteScanResult.deepScanId,
+    } as OnDemandNotificationRequestMessage;
+    notificationQueueMessageSenderMock.setup((o) => o.sendNotificationMessage(notificationRequestMessage)).verifiable();
+}

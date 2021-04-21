@@ -3,7 +3,7 @@
 
 import { inject, injectable } from 'inversify';
 import { OnDemandPageScanResult, OnDemandNotificationRequestMessage, WebsiteScanResult } from 'storage-documents';
-import { FeatureFlags, ServiceConfiguration } from 'common';
+import { ServiceConfiguration } from 'common';
 import { isEmpty } from 'lodash';
 import { GlobalLogger } from 'logger';
 import { ScanMetadata } from '../types/scan-metadata';
@@ -42,7 +42,9 @@ export class ScanNotificationProcessor {
         pageScanResult: OnDemandPageScanResult,
         websiteScanResult: WebsiteScanResult,
     ): Promise<boolean> {
-        const featureFlags = await this.getDefaultFeatureFlags();
+        const featureFlags = await this.serviceConfig.getConfigValue('featureFlags');
+        const scanConfig = await this.serviceConfig.getConfigValue('scanConfig');
+
         this.logger.logInfo(`The send scan completion feature flag is ${featureFlags.sendNotification ? 'enabled' : 'disabled'}.`, {
             sendNotificationFlag: featureFlags.sendNotification.toString(),
         });
@@ -58,11 +60,16 @@ export class ScanNotificationProcessor {
         }
 
         if (scanMetadata.deepScan !== true) {
-            this.logger.logInfo(`Sending scan completion notification message for a single scan.`, {
-                scanNotifyUrl: pageScanResult.notification.scanNotifyUrl,
-            });
+            if (
+                pageScanResult.run.state === 'completed' ||
+                (pageScanResult.run.state === 'failed' && pageScanResult.run.retryCount >= scanConfig.maxFailedScanRetryCount)
+            ) {
+                this.logger.logInfo(`Sending scan completion notification message for a single scan.`, {
+                    scanNotifyUrl: pageScanResult.notification.scanNotifyUrl,
+                });
 
-            return true;
+                return true;
+            }
         }
 
         const deepScanCompleted =
@@ -70,8 +77,8 @@ export class ScanNotificationProcessor {
             websiteScanResult.pageScans.length > 0 &&
             websiteScanResult.pageScans.every((pageScan) => pageScan.runState === 'completed' || pageScan.runState === 'failed');
 
-        if (deepScanCompleted) {
-            this.logger.logInfo(`Sending scan completion notification message for a deep scan.`, {
+        if (deepScanCompleted === true) {
+            this.logger.logInfo('Sending scan completion notification message for a deep scan.', {
                 deepScanId: websiteScanResult?.deepScanId,
                 scannedPages: websiteScanResult.pageScans.length.toString(),
                 scanNotifyUrl: pageScanResult.notification.scanNotifyUrl,
@@ -79,9 +86,5 @@ export class ScanNotificationProcessor {
         }
 
         return deepScanCompleted;
-    }
-
-    private async getDefaultFeatureFlags(): Promise<FeatureFlags> {
-        return this.serviceConfig.getConfigValue('featureFlags');
     }
 }

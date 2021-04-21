@@ -55,8 +55,7 @@ export class OnDemandPageScanRunResultProvider {
 
     /**
      * Returns succeeded equals to true if operation completed successfully.
-     * Otherwise returns succeeded equals to false if storage document was updated by other process
-     * at the time of merge storage operation.
+     * Otherwise returns succeeded equals to false if storage document was updated by other process at the time of merge storage operation.
      *
      * @param pageScanResult Page scan result to merge with storage corresponding document
      */
@@ -75,12 +74,22 @@ export class OnDemandPageScanRunResultProvider {
         }
     }
 
+    /**
+     * Writes document to a storage if document does not exist; otherwise, merges the provided document with the storage document.
+     *
+     * @param pageScanResult Page scan result to merge with storage corresponding document
+     */
     public async updateScanRun(pageScanResult: Partial<OnDemandPageScanResult>): Promise<OnDemandPageScanResult> {
         const operationResponse = await this.updateScanRunImpl(pageScanResult, true);
 
         return operationResponse.item;
     }
 
+    /**
+     * Upsert documents to a storage without merging.
+     *
+     * @param scanRuns Page scan results to write to a storage
+     */
     public async writeScanRuns(scanRuns: OnDemandPageScanResult[]): Promise<void> {
         const scanRunsByPartition = groupBy(scanRuns, (scanRun) => {
             this.setSystemProperties(scanRun);
