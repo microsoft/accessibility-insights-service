@@ -2,16 +2,14 @@
     "featureFlags": {
         "sendNotification": true
     },
-    "logConfig": {
-        "logInConsole": true
-    },
-    "queueConfig": {
-        "maxQueueSize": 10
-    },
-    "restApiConfig": {
-        "scanRequestProcessingDelayInSeconds": 300
-    },
     "availabilityTestConfig": {
         "environmentDefinition": "canary"
+    },
+    "queueConfig": {
+        "messageVisibilityTimeoutInSeconds": 360
+    },
+    "scanConfig": {
+        "failedScanRetryIntervalInMinutes": 8,
+        "maxFailedScanRetryCount": 1
     }
 }

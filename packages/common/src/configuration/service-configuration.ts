@@ -178,7 +178,6 @@ export class ServiceConfiguration {
                 activeToRunningTasksRatio: {
                     format: Number,
                     default: 3,
-                    // eslint-disable-next-line max-len
                     doc: `The target overload ratio of queued to running tasks. Higher ratio value will result higher queued tasks count.`,
                 },
                 addTasksIntervalInSeconds: {

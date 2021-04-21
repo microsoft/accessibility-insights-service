@@ -2,9 +2,6 @@
     "featureFlags": {
         "sendNotification": true
     },
-    "logConfig": {
-        "logInConsole": true
-    },
     "queueConfig": {
         "maxQueueSize": 40
     },
