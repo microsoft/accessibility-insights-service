@@ -32,7 +32,7 @@ export const E2EScanFactories: E2EScanScenarioDefinitionFactory[] = [
             readableName: 'ConsolidatedScan',
             scanOptions: {
                 scanNotificationUrl: `${webApiConfig.baseUrl}${availabilityConfig.scanNotifyFailApiEndpoint}`,
-                consolidatedId: `${availabilityConfig.consolidatedIdBase}-${process.env.RELEASE_VERSION}-consolidated-${Date.now()}`,
+                consolidatedId: `${availabilityConfig.consolidatedIdBase}-${webApiConfig.releaseId}-consolidated-${Date.now()}`,
             },
             initialTestContextData: {
                 scanUrl: availabilityConfig.urlToScan,
@@ -51,7 +51,7 @@ export const E2EScanFactories: E2EScanScenarioDefinitionFactory[] = [
             scanOptions: {
                 deepScan: true,
                 scanNotificationUrl: `${webApiConfig.baseUrl}${availabilityConfig.scanNotifyApiEndpoint}`,
-                consolidatedId: `${availabilityConfig.consolidatedIdBase}-${process.env.RELEASE_VERSION}-deepScan-${Date.now()}`,
+                consolidatedId: `${availabilityConfig.consolidatedIdBase}-${webApiConfig.releaseId}-deepScan-${Date.now()}`,
             },
             initialTestContextData: {
                 scanUrl: availabilityConfig.urlToScan,
@@ -76,7 +76,7 @@ export const E2EScanFactories: E2EScanScenarioDefinitionFactory[] = [
             readableName: 'DeepScanKnownPages',
             scanOptions: {
                 deepScan: true,
-                consolidatedId: `${availabilityConfig.consolidatedIdBase}-${process.env.RELEASE_VERSION}-deepScanKnownPages-${Date.now()}`,
+                consolidatedId: `${availabilityConfig.consolidatedIdBase}-${webApiConfig.releaseId}-deepScanKnownPages-${Date.now()}`,
                 deepScanOptions: {
                     knownPages: [`${baseUrl}unlinked/`],
                 },
@@ -106,7 +106,7 @@ export const E2EScanFactories: E2EScanScenarioDefinitionFactory[] = [
             scanOptions: {
                 deepScan: true,
                 consolidatedId: `${availabilityConfig.consolidatedIdBase}-${
-                    process.env.RELEASE_VERSION
+                    webApiConfig.releaseId
                 }-deepScanDiscoveryPatterns-${Date.now()}`,
                 deepScanOptions: {
                     discoveryPatterns: [`${baseUrl}linked1[.*]`],

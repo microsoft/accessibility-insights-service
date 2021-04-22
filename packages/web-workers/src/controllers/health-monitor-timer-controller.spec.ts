@@ -17,7 +17,10 @@ let guidGeneratorMock: IMock<GuidGenerator>;
 const orchestrationInstanceId = 'instance-id';
 
 describe('HealthMonitorTimerController', () => {
+    const releaseId = 'release id';
+
     beforeEach(() => {
+        process.env.RELEASE_VERSION = releaseId;
         serviceConfigurationMock = Mock.ofType(ServiceConfiguration);
         loggerMock = Mock.ofType(MockableLogger);
         guidGeneratorMock = Mock.ofType(GuidGenerator);
@@ -42,6 +45,7 @@ describe('HealthMonitorTimerController', () => {
                 {
                     FunctionName: 'health-monitor-orchestration-func',
                     InstanceId: orchestrationInstanceId,
+                    releaseId: releaseId,
                 },
             ];
             await testSubject.invoke(context, funcTimer);

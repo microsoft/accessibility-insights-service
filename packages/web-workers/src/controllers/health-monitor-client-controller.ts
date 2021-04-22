@@ -16,6 +16,7 @@ import {
     RunFunctionalTestGroupData,
     TrackAvailabilityData,
 } from './activity-request-data';
+import { WebApiConfig } from './web-api-config';
 
 /* eslint-disable @typescript-eslint/no-explicit-any, no-invalid-this */
 
@@ -24,7 +25,6 @@ export class HealthMonitorClientController extends WebController {
     public readonly apiVersion = '1.0';
     public readonly apiName = 'health-monitor-client';
     private readonly activityCallbacks: { [activityName: string]: (args: unknown) => Promise<unknown> };
-    private readonly releaseId: string;
 
     public constructor(
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
@@ -48,9 +48,8 @@ export class HealthMonitorClientController extends WebController {
             [ActivityAction.trackAvailability]: this.trackAvailability,
             [ActivityAction.runFunctionalTestGroup]: this.runFunctionalTestGroup,
             [ActivityAction.logTestRunStart]: this.logTestRunStart,
+            [ActivityAction.getWebApiConfig]: this.getWebApiConfig,
         };
-
-        this.releaseId = process.env.RELEASE_VERSION;
     }
 
     protected async handleRequest(...args: any[]): Promise<unknown> {
@@ -109,7 +108,7 @@ export class HealthMonitorClientController extends WebController {
         functionalTestGroup.setTestContext(data.testContextData);
         const testRunMetadata = {
             environment: data.environment,
-            releaseId: this.releaseId,
+            releaseId: data.releaseId,
             runId: data.runId,
             scenarioName: data.test.scenarioName,
         };
@@ -129,9 +128,13 @@ export class HealthMonitorClientController extends WebController {
             source: 'BeginTestSuite',
             functionalTestGroups: testIdsString,
             runId: data.runId,
-            releaseId: this.releaseId,
+            releaseId: data.releaseId,
             environment: data.environmentName,
         };
         this.logger.trackEvent('FunctionalTest', properties);
+    };
+
+    private readonly getWebApiConfig = async (): Promise<WebApiConfig> => {
+        return new WebApiConfig();
     };
 }
