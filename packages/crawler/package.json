@@ -27,7 +27,7 @@
         "@rollup/plugin-node-resolve": "^11.2.0",
         "@types/cheerio": "^0.22.23",
         "@types/encoding-down": "^5.0.0",
-        "@types/jest": "^26.0.20",
+        "@types/jest": "^26.0.22",
         "@types/leveldown": "^4.0.2",
         "@types/levelup": "^4.3.0",
         "@types/node": "^12.12.54",
