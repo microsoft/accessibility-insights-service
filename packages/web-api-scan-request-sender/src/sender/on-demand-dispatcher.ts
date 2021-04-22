@@ -61,9 +61,7 @@ export class OnDemandDispatcher {
                 if (response === true) {
                     count++;
                     await this.updateScanResultState(scanRequest.result, 'queued');
-                    this.logger.logInfo('Successfully added scan request to the scan task queue.', {
-                        scanId: scanRequest.request.id,
-                    });
+                    await this.trace(scanRequest);
                 } else {
                     const error: ScanError = {
                         errorType: 'InternalError',
@@ -77,7 +75,6 @@ export class OnDemandDispatcher {
             }),
         );
 
-        this.logger.logInfo(`Added ${count} scan requests to the task scan queue.`);
         this.logger.trackEvent('ScanRequestQueued', null, { queuedScanRequests: count });
     }
 
@@ -89,9 +86,7 @@ export class OnDemandDispatcher {
         await Promise.all(
             scanRequests.map(async (scanRequest) => {
                 await this.pageScanRequestProvider.deleteRequests([scanRequest.request.id]);
-                this.logger.logInfo('Successfully deleted scan request from a request queue.', {
-                    scanId: scanRequest.request.id,
-                });
+                await this.trace(scanRequest);
             }),
         );
     }
@@ -113,6 +108,47 @@ export class OnDemandDispatcher {
             this.logger.logError('Failed to update scan result state as it was modified by external process.', {
                 scanId: scanResult.id,
             });
+        }
+    }
+
+    private async trace(scanRequest: ScanRequest): Promise<void> {
+        switch (scanRequest.condition) {
+            case 'notFound': {
+                this.logger.logError('The scan result document not found in a storage. Removing scan request from a request queue.', {
+                    scanId: scanRequest.request.id,
+                });
+                break;
+            }
+            case 'completed': {
+                this.logger.logError('The scan request has been completed. Removing scan request from a request queue.', {
+                    scanId: scanRequest.request.id,
+                });
+                break;
+            }
+            case 'noRetry': {
+                this.logger.logError('The scan request has reached maximum retry count. Removing scan request from a request queue.', {
+                    scanId: scanRequest.request.id,
+                });
+                break;
+            }
+            case 'accepted': {
+                this.logger.logInfo('Sending scan request to a request queue.', {
+                    scanId: scanRequest.request.id,
+                });
+                break;
+            }
+            case 'retry': {
+                this.logger.logInfo('Sending scan request to a request queue with new retry attempt.', {
+                    scanId: scanRequest.request.id,
+                    runState: scanRequest.result.run.state,
+                    runTimestamp: scanRequest.result.run.timestamp,
+                    runRetryCount: scanRequest.result.run.retryCount ? scanRequest.result.run.retryCount.toString() : '0',
+                });
+                break;
+            }
+            default: {
+                throw new Error(`The '${scanRequest.condition}' operation condition not supported.`);
+            }
         }
     }
 

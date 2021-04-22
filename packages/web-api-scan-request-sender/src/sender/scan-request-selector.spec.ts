@@ -5,20 +5,18 @@ import 'reflect-metadata';
 import { IMock, Mock, It, Times } from 'typemoq';
 import { PageScanRequestProvider, OnDemandPageScanRunResultProvider } from 'service-library';
 import { ServiceConfiguration, ScanRunTimeConfig } from 'common';
-import { Logger } from 'logger';
 import { CosmosOperationResponse } from 'azure-services';
 import { OnDemandPageScanRequest, OnDemandPageScanResult } from 'storage-documents';
 import * as MockDate from 'mockdate';
 import _ from 'lodash';
 import moment from 'moment';
-import { ScanRequestSelector, ScanRequests } from './scan-request-selector';
+import { ScanRequestSelector, ScanRequests, DispatchCondition } from './scan-request-selector';
 
 const continuationToken = 'continuationToken1';
 
 let pageScanRequestProviderMock: IMock<PageScanRequestProvider>;
 let onDemandPageScanRunResultProviderMock: IMock<OnDemandPageScanRunResultProvider>;
 let serviceConfigMock: IMock<ServiceConfiguration>;
-let loggerMock: IMock<Logger>;
 let scanRequestSelector: ScanRequestSelector;
 let scanRequests: OnDemandPageScanRequest[];
 let scanResults: OnDemandPageScanResult[];
@@ -34,7 +32,6 @@ describe(ScanRequestSelector, () => {
         pageScanRequestProviderMock = Mock.ofType<PageScanRequestProvider>();
         onDemandPageScanRunResultProviderMock = Mock.ofType<OnDemandPageScanRunResultProvider>();
         serviceConfigMock = Mock.ofType<ServiceConfiguration>();
-        loggerMock = Mock.ofType<Logger>();
 
         itemsCount = 10;
         scanRequests = [];
@@ -48,7 +45,6 @@ describe(ScanRequestSelector, () => {
             pageScanRequestProviderMock.object,
             onDemandPageScanRunResultProviderMock.object,
             serviceConfigMock.object,
-            loggerMock.object,
         );
 
         setupServiceConfiguration();
@@ -60,7 +56,6 @@ describe(ScanRequestSelector, () => {
         pageScanRequestProviderMock.verifyAll();
         onDemandPageScanRunResultProviderMock.verifyAll();
         serviceConfigMock.verifyAll();
-        loggerMock.verifyAll();
     });
 
     it('no op', async () => {
@@ -78,7 +73,10 @@ describe(ScanRequestSelector, () => {
         setupPageScanRequestProvider();
         setupOnDemandPageScanRunResultProvider();
 
-        createFilteredScanRequests(scanRequests.map((scanRequest) => scanRequest.id));
+        createFilteredScanRequests(
+            'accepted',
+            scanRequests.map((scanRequest) => scanRequest.id),
+        );
         const expectedResult = _.cloneDeep(filteredScanRequests);
         expectedResult.toQueue = expectedResult.toQueue.slice(0, 3);
 
@@ -103,7 +101,31 @@ describe(ScanRequestSelector, () => {
         createScanRequests();
         setupPageScanRequestProvider();
         setupOnDemandPageScanRunResultProvider();
-        createFilteredScanRequests(scanRequests.map((scanRequest) => scanRequest.id));
+        createFilteredScanRequests(
+            'retry',
+            scanRequests.map((scanRequest) => scanRequest.id),
+        );
+
+        const result = await scanRequestSelector.getRequests(itemsCount);
+
+        expect(result).toEqual(filteredScanRequests);
+    });
+
+    it('delete completed scan requests', async () => {
+        createScanResults([
+            {
+                run: { state: 'completed' },
+            },
+        ]);
+        itemsCount = scanResults.length;
+        createScanRequests();
+        setupPageScanRequestProvider();
+        setupOnDemandPageScanRunResultProvider();
+        createFilteredScanRequests(
+            'completed',
+            [],
+            scanRequests.map((scanRequest) => scanRequest.id),
+        );
 
         const result = await scanRequestSelector.getRequests(itemsCount);
 
@@ -112,9 +134,6 @@ describe(ScanRequestSelector, () => {
 
     it('delete completed and no-retry scan requests', async () => {
         createScanResults([
-            {
-                run: { state: 'completed' },
-            },
             {
                 run: {
                     state: 'queued',
@@ -127,6 +146,7 @@ describe(ScanRequestSelector, () => {
         setupPageScanRequestProvider();
         setupOnDemandPageScanRunResultProvider();
         createFilteredScanRequests(
+            'noRetry',
             [],
             scanRequests.map((scanRequest) => scanRequest.id),
         );
@@ -137,16 +157,18 @@ describe(ScanRequestSelector, () => {
     });
 });
 
-function createFilteredScanRequests(toQueueIds: string[], toDeleteIds: string[] = []): void {
+function createFilteredScanRequests(condition: DispatchCondition, toQueueIds: string[], toDeleteIds: string[] = []): void {
     scanRequests.map((scanRequest) => {
         if (toQueueIds.includes(scanRequest.id)) {
             filteredScanRequests.toQueue.push({
                 request: scanRequest,
                 result: scanResults.find((scanResult) => scanResult.id === scanRequest.id),
+                condition,
             });
         } else if (toDeleteIds.includes(scanRequest.id)) {
             filteredScanRequests.toDelete.push({
                 request: scanRequest,
+                condition,
             });
         }
     });

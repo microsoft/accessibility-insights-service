@@ -86,9 +86,22 @@ describe(OnDemandDispatcher, () => {
             toDelete: [
                 {
                     request: { id: 'id1' },
+                    condition: 'completed',
                 },
                 {
                     request: { id: 'id2' },
+                    result: {
+                        run: {
+                            state: 'failed',
+                            timestamp: new Date().toJSON(),
+                            retryCount: 2,
+                        },
+                    },
+                    condition: 'noRetry',
+                },
+                {
+                    request: { id: 'id3' },
+                    condition: 'notFound',
                 },
             ],
         } as ScanRequests;
@@ -112,14 +125,17 @@ describe(OnDemandDispatcher, () => {
                 {
                     request: { id: 'id1', url: 'url1', deepScan: true, created: true },
                     result: { run: { retryCount: 1 } },
+                    condition: 'accepted',
                 },
                 {
                     request: { id: 'id2', url: 'url2', deepScan: false, created: true },
                     result: {},
+                    condition: 'accepted',
                 },
                 {
                     request: { id: 'id3', url: 'url3', deepScan: false, created: false, error },
                     result: {},
+                    condition: 'noRetry',
                 },
             ],
         } as any;
