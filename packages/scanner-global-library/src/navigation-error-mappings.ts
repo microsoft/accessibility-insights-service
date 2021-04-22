@@ -7,7 +7,7 @@ export const errorPatterns: Partial<Record<BrowserErrorTypes, string[]>> = {
     SslError: [
         'net::ERR_CERT_AUTHORITY_INVALID',
         'net::ERR_CERT_DATE_INVALID',
-        'net::HTTP2_INADEQUATE_TRANSPORT_SECURITY',
+        'net::ERR_HTTP2_INADEQUATE_TRANSPORT_SECURITY',
         'net::ERR_CERT_COMMON_NAME_INVALID',
         'SSL_ERROR_UNKNOWN',
     ],
