@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 import { BrowserErrorTypes } from './browser-error';
 
-export const errorPatterns: Partial<Record<BrowserErrorTypes, string[]>> = {
+export const navigationErrorPatterns: Partial<Record<BrowserErrorTypes, string[]>> = {
     UrlNavigationTimeout: ['Navigation timeout', 'net::ERR_CONNECTION_TIMED_OUT'],
     SslError: [
         'net::ERR_CERT_AUTHORITY_INVALID',

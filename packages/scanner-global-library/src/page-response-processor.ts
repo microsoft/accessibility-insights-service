@@ -3,7 +3,7 @@
 import { injectable } from 'inversify';
 import { Response } from 'puppeteer';
 import { BrowserError, BrowserErrorTypes } from './browser-error';
-import { errorPatterns } from './navigation-error-mappings';
+import { navigationErrorPatterns as errorPatterns } from './navigation-error-patterns';
 
 @injectable()
 export class PageResponseProcessor {
