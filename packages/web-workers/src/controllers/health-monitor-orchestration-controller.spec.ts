@@ -8,7 +8,7 @@ import * as durableFunctions from 'durable-functions';
 import { IOrchestrationFunctionContext } from 'durable-functions/lib/src/classes';
 import { TestEnvironment } from 'functional-tests';
 import { It, Mock } from 'typemoq';
-import { OrchestrationStepsImpl } from '../orchestration-steps';
+import { OrchestrationStepsImpl } from '../orchestration/orchestration-steps';
 import { GeneratorExecutor } from '../test-utilities/generator-executor';
 import { MockableLogger } from '../test-utilities/mockable-logger';
 import { E2EScanScenario } from '../e2e-test-scenarios/e2e-scan-scenario';

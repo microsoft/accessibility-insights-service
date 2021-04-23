@@ -3,7 +3,7 @@
 
 import { AvailabilityTestConfig } from 'common';
 import { WebApiConfig } from '../controllers/web-api-config';
-import { OrchestrationSteps } from '../orchestration-steps';
+import { OrchestrationSteps } from '../orchestration/orchestration-steps';
 import { E2EScanScenario } from './e2e-scan-scenario';
 import { E2EScanFactories } from './e2e-scan-scenario-definitions';
 import { ScanScenarioDriver } from './scan-scenario-driver';

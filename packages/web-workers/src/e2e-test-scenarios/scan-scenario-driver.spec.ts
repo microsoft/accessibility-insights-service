@@ -7,7 +7,7 @@ import { TestContextData, TestGroupName } from 'functional-tests';
 import { Mock, IMock, It } from 'typemoq';
 import { PostScanRequestOptions } from 'web-api-client';
 import { E2ETestGroupNames } from '../e2e-test-group-names';
-import { OrchestrationSteps, OrchestrationStepsImpl } from '../orchestration-steps';
+import { OrchestrationSteps, OrchestrationStepsImpl } from '../orchestration/orchestration-steps';
 import { GeneratorExecutor } from '../test-utilities/generator-executor';
 import { generatorStub } from '../test-utilities/generator-function';
 import { E2EScanScenarioDefinition } from './e2e-scan-scenario-definitions';

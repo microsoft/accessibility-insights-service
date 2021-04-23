@@ -9,9 +9,9 @@ import { LogLevel } from 'logger';
 import moment from 'moment';
 import { ScanResultResponse, ScanRunErrorResponse, ScanRunResultResponse } from 'service-library';
 import { ActivityAction } from '../contracts/activity-actions';
-import { OrchestrationTelemetryProperties } from '../orchestration-steps';
 import { ActivityActionDispatcher } from './activity-action-dispatcher';
 import { OrchestrationLogger } from './orchestration-logger';
+import { OrchestrationTelemetryProperties } from './orchestration-telemetry-properties';
 
 export class ScanWaitOrchestrator {
     constructor(
@@ -99,7 +99,7 @@ export class ScanWaitOrchestrator {
     }
 
     private *onTaskFailure(
-        response: SerializableResponse | ScanRunErrorResponse,
+        response: SerializableResponse,
         activityName: string,
         traceData?: OrchestrationTelemetryProperties,
     ): Generator<Task, void, SerializableResponse & void> {

@@ -6,7 +6,7 @@ import { SerializableResponse } from 'common';
 import { Task, TaskSet } from 'durable-functions/lib/src/classes';
 import { TestContextData, TestGroupName } from 'functional-tests';
 import _ from 'lodash';
-import { OrchestrationSteps } from '../orchestration-steps';
+import { OrchestrationSteps } from '../orchestration/orchestration-steps';
 import { E2EScanScenario } from './e2e-scan-scenario';
 import { E2EScanScenarioDefinition } from './e2e-scan-scenario-definitions';
 

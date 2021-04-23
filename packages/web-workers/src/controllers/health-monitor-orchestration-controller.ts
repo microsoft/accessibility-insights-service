@@ -11,7 +11,7 @@ import { finalizerTestGroupName } from '../e2e-test-group-names';
 import { createScenarios } from '../e2e-test-scenarios/create-scenarios';
 import { E2EScanScenario } from '../e2e-test-scenarios/e2e-scan-scenario';
 import { getTestIdentifiersForScenario } from '../e2e-test-scenarios/get-test-identifiers';
-import { OrchestrationSteps, OrchestrationStepsImpl } from '../orchestration-steps';
+import { OrchestrationSteps, OrchestrationStepsImpl } from '../orchestration/orchestration-steps';
 import { WebApiConfig } from './web-api-config';
 
 @injectable()

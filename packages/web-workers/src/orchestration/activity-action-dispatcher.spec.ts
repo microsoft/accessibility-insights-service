@@ -10,9 +10,9 @@ import { SerializableResponse } from 'common';
 import { ActivityAction } from '../contracts/activity-actions';
 import { ActivityRequestData } from '../controllers/activity-request-data';
 import { GeneratorExecutor } from '../test-utilities/generator-executor';
-import { OrchestrationTelemetryProperties } from '../orchestration-steps';
 import { OrchestrationLogger } from './orchestration-logger';
 import { ActivityActionDispatcher } from './activity-action-dispatcher';
+import { OrchestrationTelemetryProperties } from './orchestration-telemetry-properties';
 
 describe(ActivityActionDispatcher, () => {
     let loggerMock: IMock<OrchestrationLogger>;

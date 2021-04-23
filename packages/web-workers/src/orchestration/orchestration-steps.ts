@@ -9,7 +9,7 @@ import { Logger, LogLevel } from 'logger';
 import moment from 'moment';
 import { ScanCompletedNotification, ScanRunErrorResponse, ScanRunResponse, ScanRunResultResponse } from 'service-library';
 import { PostScanRequestOptions } from 'web-api-client';
-import { ActivityAction } from './contracts/activity-actions';
+import { ActivityAction } from '../contracts/activity-actions';
 import {
     ActivityRequestData,
     CreateScanRequestData,
@@ -19,20 +19,8 @@ import {
     RunFunctionalTestGroupData,
     TestIdentifier,
     TrackAvailabilityData,
-} from './controllers/activity-request-data';
-
-export interface OrchestrationTelemetryProperties {
-    requestResponse?: string;
-    instanceId?: string;
-    isReplaying?: string;
-    currentUtcDateTime?: string;
-    totalWaitTimeInSeconds?: string;
-    activityName?: string;
-    failureMessage?: string;
-    waitEndTime?: string;
-    waitStartTime?: string;
-    scanId?: string;
-}
+} from '../controllers/activity-request-data';
+import { OrchestrationTelemetryProperties } from './orchestration-telemetry-properties';
 
 export interface OrchestrationSteps {
     invokeHealthCheckRestApi(): Generator<Task, void, SerializableResponse>;

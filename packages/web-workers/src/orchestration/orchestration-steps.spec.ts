@@ -12,7 +12,7 @@ import { ScanRunErrorResponse, ScanRunResponse, ScanRunResultResponse, WebApiErr
 import { IMock, It, Mock, Times } from 'typemoq';
 import { NotificationState, ScanState } from 'storage-documents';
 import { PostScanRequestOptions } from 'web-api-client';
-import { ActivityAction } from './contracts/activity-actions';
+import { ActivityAction } from '../contracts/activity-actions';
 import {
     ActivityRequestData,
     CreateScanRequestData,
@@ -20,10 +20,11 @@ import {
     RunFunctionalTestGroupData,
     TestIdentifier,
     TrackAvailabilityData,
-} from './controllers/activity-request-data';
-import { OrchestrationStepsImpl, OrchestrationTelemetryProperties } from './orchestration-steps';
-import { GeneratorExecutor } from './test-utilities/generator-executor';
-import { MockableLogger } from './test-utilities/mockable-logger';
+} from '../controllers/activity-request-data';
+import { GeneratorExecutor } from '../test-utilities/generator-executor';
+import { MockableLogger } from '../test-utilities/mockable-logger';
+import { OrchestrationStepsImpl } from './orchestration-steps';
+import { OrchestrationTelemetryProperties } from './orchestration-telemetry-properties';
 
 /* eslint-disable @typescript-eslint/consistent-type-assertions, @typescript-eslint/no-explicit-any */
 

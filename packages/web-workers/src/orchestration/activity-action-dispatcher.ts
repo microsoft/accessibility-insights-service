@@ -8,8 +8,8 @@ import _ from 'lodash';
 import { LogLevel } from 'logger';
 import { ActivityAction } from '../contracts/activity-actions';
 import { ActivityRequestData, TrackAvailabilityData } from '../controllers/activity-request-data';
-import { OrchestrationTelemetryProperties } from '../orchestration-steps';
 import { OrchestrationLogger } from './orchestration-logger';
+import { OrchestrationTelemetryProperties } from './orchestration-telemetry-properties';
 
 export class ActivityActionDispatcher {
     public static readonly activityTriggerFuncName = 'health-monitor-client-func';

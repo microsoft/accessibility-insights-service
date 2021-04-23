@@ -4,7 +4,7 @@
 // eslint-disable-next-line import/no-internal-modules
 import { IOrchestrationFunctionContext } from 'durable-functions/lib/src/classes';
 import { Logger, LogLevel } from 'logger';
-import { OrchestrationTelemetryProperties } from '../orchestration-steps';
+import { OrchestrationTelemetryProperties } from './orchestration-telemetry-properties';
 
 export class OrchestrationLogger {
     constructor(private readonly context: IOrchestrationFunctionContext, private readonly logger: Logger) {}
