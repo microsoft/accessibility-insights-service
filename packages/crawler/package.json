@@ -56,7 +56,7 @@
         "levelup": "^4.4.0",
         "lodash": "^4.17.21",
         "logger": "1.0.0",
-        "puppeteer": "^5.5.0",
+        "puppeteer": "^9.0.0",
         "reflect-metadata": "^0.1.13",
         "scanner-global-library": "1.0.0",
         "sha.js": "^2.4.11",
