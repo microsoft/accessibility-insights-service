@@ -150,9 +150,9 @@ export class ServiceConfiguration {
                 },
                 messageVisibilityTimeoutInSeconds: {
                     format: 'int',
-                    default: (30 + 10) * 60, // maxWallClockTimeInMinutes + taskTimeoutInMinutes
+                    default: 30 * 1.5 * 60, // maxWallClockTimeInMinutes * delta termination wait time
                     doc:
-                        'Message visibility timeout in seconds. Must correlate with jobManagerConfig.maxWallClockTimeInMinutes and taskConfig.taskTimeoutInMinutes config values.',
+                        'Message visibility timeout in seconds. Must correlate with jobManagerConfig.maxWallClockTimeInMinutes config value.',
                 },
             },
             taskConfig: {
@@ -217,7 +217,7 @@ export class ServiceConfiguration {
                 maxFailedScanRetryCount: {
                     format: 'int',
                     default: 3,
-                    doc: 'Maximum number of retries allowed for a failed scan request.',
+                    doc: 'Maximum number of retries (additional times to re-run a scan) allowed for a failed scan request.',
                 },
                 maxSendNotificationRetryCount: {
                     format: 'int',
