@@ -25,7 +25,7 @@
     "devDependencies": {
         "@types/cheerio": "^0.22.23",
         "@types/dotenv": "^8.2.0",
-        "@types/jest": "^26.0.20",
+        "@types/jest": "^26.0.22",
         "@types/lodash": "^4.14.168",
         "@types/node": "^12.12.54",
         "@types/puppeteer": "^3.0.0",
