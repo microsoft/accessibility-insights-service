@@ -6,27 +6,34 @@ import 'reflect-metadata';
 import { DurableOrchestrationContext, IOrchestrationFunctionContext, ITaskMethods, Task } from 'durable-functions/lib/src/classes';
 import { It, Mock, Times } from 'typemoq';
 import { IMock } from 'typemoq/Api/IMock';
+import { SerializableResponse } from 'common';
 import { ActivityAction } from '../contracts/activity-actions';
 import { ActivityRequestData } from '../controllers/activity-request-data';
 import { GeneratorExecutor } from '../test-utilities/generator-executor';
+import { OrchestrationTelemetryProperties } from '../orchestration-steps';
 import { OrchestrationLogger } from './orchestration-logger';
-import { ActivityActionCaller } from './activity-action-caller';
+import { ActivityActionDispatcher } from './activity-action-dispatcher';
 
-describe(ActivityActionCaller, () => {
+describe(ActivityActionDispatcher, () => {
     let loggerMock: IMock<OrchestrationLogger>;
     let context: IOrchestrationFunctionContext;
     let orchestrationContextMock: IMock<DurableOrchestrationContext>;
 
-    let testSubject: ActivityActionCaller;
+    const instanceId = 'instance id';
+    const currentUtcDateTime = new Date(0, 1, 2, 3);
+
+    let testSubject: ActivityActionDispatcher;
 
     beforeEach(() => {
         loggerMock = Mock.ofType<OrchestrationLogger>();
         orchestrationContextMock = Mock.ofType<DurableOrchestrationContext>();
+        orchestrationContextMock.setup((o) => o.instanceId).returns(() => instanceId);
+        orchestrationContextMock.setup((o) => o.currentUtcDateTime).returns(() => currentUtcDateTime);
         context = ({
             df: orchestrationContextMock.object,
         } as unknown) as IOrchestrationFunctionContext;
 
-        testSubject = new ActivityActionCaller(context, loggerMock.object);
+        testSubject = new ActivityActionDispatcher(context, loggerMock.object);
     });
 
     afterEach(() => {
@@ -40,21 +47,61 @@ describe(ActivityActionCaller, () => {
             test: true,
         };
         const activityResult = 'activity result';
-        const activityRequestData: ActivityRequestData = {
-            activityName: activityName,
-            data: activityData,
-        };
-        orchestrationContextMock
-            .setup((oc) => oc.callActivity(ActivityActionCaller.activityTriggerFuncName, activityRequestData))
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            .returns(() => activityResult as any)
-            .verifiable(Times.once());
+        setupCallActivity(activityName, activityData, activityResult);
         loggerMock.setup((l) => l.logOrchestrationStep(It.isAny())).verifiable(Times.exactly(2));
 
         const generatorExecutor = new GeneratorExecutor(testSubject.callActivity(activityName, activityData));
         const result = generatorExecutor.runTillEnd();
 
         expect(result).toEqual(activityResult);
+    });
+
+    it.each([true, false])('trackAvailability when success=%s', (success) => {
+        const properties: OrchestrationTelemetryProperties = {
+            activityName: 'test activity name',
+        };
+        setupTrackAvailability(success, properties);
+
+        const generatorExecutor = new GeneratorExecutor(testSubject.callTrackAvailability(success, properties));
+        generatorExecutor.runTillEnd();
+    });
+
+    describe('callWebRequestActivity', () => {
+        const activityName = ActivityAction.getHealthStatus;
+        const activityData = {
+            test: true,
+        };
+
+        it.each([200, 299])('with successful status code %s', (statusCode) => {
+            const expectedResponse = {
+                statusCode: statusCode,
+            } as SerializableResponse;
+
+            setupCallActivity(activityName, activityData, expectedResponse);
+            setupTrackAvailabilityNeverCalled();
+
+            const generatorExecutor = new GeneratorExecutor(testSubject.callWebRequestActivity(activityName, activityData));
+            const actualResponse = generatorExecutor.runTillEnd();
+
+            expect(actualResponse).toEqual(expectedResponse);
+        });
+
+        it.each([199, 400])('with unsuccessful status code %s', (statusCode) => {
+            const expectedResponse = {
+                statusCode: statusCode,
+            } as SerializableResponse;
+            const trackAvailabilityProperties = {
+                requestResponse: JSON.stringify(expectedResponse),
+                activityName: activityName,
+            };
+
+            setupCallActivity(activityName, activityData, expectedResponse);
+            setupTrackAvailability(false, trackAvailabilityProperties);
+
+            const generatorExecutor = new GeneratorExecutor(testSubject.callWebRequestActivity(activityName, activityData));
+
+            expect(() => generatorExecutor.runTillEnd()).toThrow();
+        });
     });
 
     describe('callActivitiesInParallel', () => {
@@ -107,10 +154,7 @@ describe(ActivityActionCaller, () => {
                 action: undefined,
             } as Task;
             activities.forEach((activityRequestData: ActivityRequestData) => {
-                orchestrationContextMock
-                    .setup((oc) => oc.callActivity(ActivityActionCaller.activityTriggerFuncName, activityRequestData))
-                    .returns(() => task)
-                    .verifiable(Times.once());
+                setupCallActivity(activityRequestData.activityName, activityRequestData.data, task);
             });
 
             let taskList: Task[];
@@ -127,4 +171,43 @@ describe(ActivityActionCaller, () => {
             expect(taskList[1]).toEqual(task);
         });
     });
+
+    function setupCallActivity(activityName: string, data?: unknown, result?: unknown): void {
+        const activityRequestData: ActivityRequestData = {
+            activityName: activityName,
+            data: data,
+        };
+        orchestrationContextMock
+            .setup((oc) => oc.callActivity(ActivityActionDispatcher.activityTriggerFuncName, activityRequestData))
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            .returns(() => result as any)
+            .verifiable(Times.once());
+    }
+
+    function setupTrackAvailability(success: boolean, properties: OrchestrationTelemetryProperties): void {
+        const expectedData = {
+            name: 'workerAvailabilityTest',
+            telemetry: {
+                properties: {
+                    instanceId: instanceId,
+                    currentUtcDateTime: currentUtcDateTime.toUTCString(),
+                    ...properties,
+                },
+                success: success,
+            },
+        };
+
+        setupCallActivity(ActivityAction.trackAvailability, expectedData);
+    }
+
+    function setupTrackAvailabilityNeverCalled(): void {
+        orchestrationContextMock
+            .setup((oc) =>
+                oc.callActivity(
+                    ActivityActionDispatcher.activityTriggerFuncName,
+                    It.isObjectWith({ activityName: ActivityAction.trackAvailability }),
+                ),
+            )
+            .verifiable(Times.never());
+    }
 });
