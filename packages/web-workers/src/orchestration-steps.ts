@@ -31,6 +31,7 @@ export interface OrchestrationTelemetryProperties {
     failureMessage?: string;
     waitEndTime?: string;
     waitStartTime?: string;
+    scanId?: string;
 }
 
 export interface OrchestrationSteps {
