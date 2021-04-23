@@ -119,8 +119,8 @@ Object {
       "format": "int",
     },
     "messageVisibilityTimeoutInSeconds": Object {
-      "default": 2400,
-      "doc": "Message visibility timeout in seconds. Must correlate with jobManagerConfig.maxWallClockTimeInMinutes and taskConfig.taskTimeoutInMinutes config values.",
+      "default": 2700,
+      "doc": "Message visibility timeout in seconds. Must correlate with jobManagerConfig.maxWallClockTimeInMinutes config value.",
       "format": "int",
     },
   },
@@ -154,7 +154,7 @@ Object {
     },
     "maxFailedScanRetryCount": Object {
       "default": 3,
-      "doc": "Maximum number of retries allowed for a failed scan request.",
+      "doc": "Maximum number of retries (additional times to re-run a scan) allowed for a failed scan request.",
       "format": "int",
     },
     "maxSendNotificationRetryCount": Object {
@@ -307,8 +307,8 @@ Object {
       "format": "int",
     },
     "messageVisibilityTimeoutInSeconds": Object {
-      "default": 2400,
-      "doc": "Message visibility timeout in seconds. Must correlate with jobManagerConfig.maxWallClockTimeInMinutes and taskConfig.taskTimeoutInMinutes config values.",
+      "default": 2700,
+      "doc": "Message visibility timeout in seconds. Must correlate with jobManagerConfig.maxWallClockTimeInMinutes config value.",
       "format": "int",
     },
   },
@@ -342,7 +342,7 @@ Object {
     },
     "maxFailedScanRetryCount": Object {
       "default": 3,
-      "doc": "Maximum number of retries allowed for a failed scan request.",
+      "doc": "Maximum number of retries (additional times to re-run a scan) allowed for a failed scan request.",
       "format": "int",
     },
     "maxSendNotificationRetryCount": Object {
