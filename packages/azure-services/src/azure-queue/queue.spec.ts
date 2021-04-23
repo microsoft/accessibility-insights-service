@@ -51,7 +51,6 @@ describe(Queue, () => {
             .returns(async () =>
                 Promise.resolve({
                     maxQueueSize: 10,
-                    maxDequeueCount: 2,
                     messageVisibilityTimeoutInSeconds: messageVisibilityTimeout,
                 }),
             );

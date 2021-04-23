@@ -113,19 +113,14 @@ Object {
     },
   },
   "queueConfig": Object {
-    "maxDequeueCount": Object {
-      "default": 2,
-      "doc": "Maximum number of times message can be dequeued from a storage queue.",
-      "format": "int",
-    },
     "maxQueueSize": Object {
       "default": 10,
       "doc": "Maximum message count in scan request queue.",
       "format": "int",
     },
     "messageVisibilityTimeoutInSeconds": Object {
-      "default": 2400,
-      "doc": "Message visibility timeout in seconds. Must correlate with jobManagerConfig.maxWallClockTimeInMinutes and taskConfig.taskTimeoutInMinutes config values.",
+      "default": 2700,
+      "doc": "Message visibility timeout in seconds. Must correlate with jobManagerConfig.maxWallClockTimeInMinutes config value.",
       "format": "int",
     },
   },
@@ -152,29 +147,19 @@ Object {
     },
   },
   "scanConfig": Object {
-    "failedPageRescanIntervalInHours": Object {
-      "default": 3,
-      "doc": "Minimum hours since the last scan failed. Pages newer than this time will not be scanned.",
+    "failedScanRetryIntervalInMinutes": Object {
+      "default": 60,
+      "doc": "The minimum wait time before next retry of a failed scan request. Should be greater than queueConfig.messageVisibilityTimeoutInSeconds config value.",
       "format": "int",
     },
-    "maxScanRetryCount": Object {
+    "maxFailedScanRetryCount": Object {
       "default": 3,
-      "doc": "Maximum number of retries allowed for a page scan",
+      "doc": "Maximum number of retries (additional times to re-run a scan) allowed for a failed scan request.",
       "format": "int",
     },
     "maxSendNotificationRetryCount": Object {
       "default": 5,
       "doc": "Maximum number of retries allowed for a scan notification sending",
-      "format": "int",
-    },
-    "minLastReferenceSeenInDays": Object {
-      "default": 3,
-      "doc": "Minimum days since we last saw a page. Pages older than this time will not be scanned.",
-      "format": "int",
-    },
-    "pageRescanIntervalInDays": Object {
-      "default": 3,
-      "doc": "Minimum days since we last scanned. Pages newer than this time will not be scanned.",
       "format": "int",
     },
     "scanTimeoutInMin": Object {
@@ -316,19 +301,14 @@ Object {
     },
   },
   "queueConfig": Object {
-    "maxDequeueCount": Object {
-      "default": 2,
-      "doc": "Maximum number of times message can be dequeued from a storage queue.",
-      "format": "int",
-    },
     "maxQueueSize": Object {
       "default": 10,
       "doc": "Maximum message count in scan request queue.",
       "format": "int",
     },
     "messageVisibilityTimeoutInSeconds": Object {
-      "default": 2400,
-      "doc": "Message visibility timeout in seconds. Must correlate with jobManagerConfig.maxWallClockTimeInMinutes and taskConfig.taskTimeoutInMinutes config values.",
+      "default": 2700,
+      "doc": "Message visibility timeout in seconds. Must correlate with jobManagerConfig.maxWallClockTimeInMinutes config value.",
       "format": "int",
     },
   },
@@ -355,29 +335,19 @@ Object {
     },
   },
   "scanConfig": Object {
-    "failedPageRescanIntervalInHours": Object {
-      "default": 3,
-      "doc": "Minimum hours since the last scan failed. Pages newer than this time will not be scanned.",
+    "failedScanRetryIntervalInMinutes": Object {
+      "default": 60,
+      "doc": "The minimum wait time before next retry of a failed scan request. Should be greater than queueConfig.messageVisibilityTimeoutInSeconds config value.",
       "format": "int",
     },
-    "maxScanRetryCount": Object {
+    "maxFailedScanRetryCount": Object {
       "default": 3,
-      "doc": "Maximum number of retries allowed for a page scan",
+      "doc": "Maximum number of retries (additional times to re-run a scan) allowed for a failed scan request.",
       "format": "int",
     },
     "maxSendNotificationRetryCount": Object {
       "default": 5,
       "doc": "Maximum number of retries allowed for a scan notification sending",
-      "format": "int",
-    },
-    "minLastReferenceSeenInDays": Object {
-      "default": 3,
-      "doc": "Minimum days since we last saw a page. Pages older than this time will not be scanned.",
-      "format": "int",
-    },
-    "pageRescanIntervalInDays": Object {
-      "default": 3,
-      "doc": "Minimum days since we last scanned. Pages newer than this time will not be scanned.",
       "format": "int",
     },
     "scanTimeoutInMin": Object {

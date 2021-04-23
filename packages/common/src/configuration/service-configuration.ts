@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import * as fs from 'fs';
 import convict from 'convict';
 import { injectable } from 'inversify';
@@ -14,7 +15,6 @@ export interface TaskRuntimeConfig {
 export interface QueueRuntimeConfig {
     maxQueueSize: number;
     messageVisibilityTimeoutInSeconds: number;
-    maxDequeueCount: number;
 }
 
 export interface LogRuntimeConfig {
@@ -31,10 +31,8 @@ export interface JobManagerConfig {
 }
 
 export interface ScanRunTimeConfig {
-    minLastReferenceSeenInDays: number;
-    pageRescanIntervalInDays: number;
-    failedPageRescanIntervalInHours: number;
-    maxScanRetryCount: number;
+    failedScanRetryIntervalInMinutes: number;
+    maxFailedScanRetryCount: number;
     maxSendNotificationRetryCount: number;
     scanTimeoutInMin: number;
 }
@@ -150,16 +148,11 @@ export class ServiceConfiguration {
                     default: 10,
                     doc: 'Maximum message count in scan request queue.',
                 },
-                maxDequeueCount: {
-                    format: 'int',
-                    default: 2,
-                    doc: 'Maximum number of times message can be dequeued from a storage queue.',
-                },
                 messageVisibilityTimeoutInSeconds: {
                     format: 'int',
-                    default: (30 + 10) * 60, // maxWallClockTimeInMinutes + taskTimeoutInMinutes
+                    default: 30 * 1.5 * 60, // maxWallClockTimeInMinutes * delta termination wait time
                     doc:
-                        'Message visibility timeout in seconds. Must correlate with jobManagerConfig.maxWallClockTimeInMinutes and taskConfig.taskTimeoutInMinutes config values.',
+                        'Message visibility timeout in seconds. Must correlate with jobManagerConfig.maxWallClockTimeInMinutes config value.',
                 },
             },
             taskConfig: {
@@ -185,7 +178,6 @@ export class ServiceConfiguration {
                 activeToRunningTasksRatio: {
                     format: Number,
                     default: 3,
-                    // eslint-disable-next-line max-len
                     doc: `The target overload ratio of queued to running tasks. Higher ratio value will result higher queued tasks count.`,
                 },
                 addTasksIntervalInSeconds: {
@@ -216,25 +208,16 @@ export class ServiceConfiguration {
                 },
             },
             scanConfig: {
-                minLastReferenceSeenInDays: {
+                failedScanRetryIntervalInMinutes: {
                     format: 'int',
-                    default: 3,
-                    doc: 'Minimum days since we last saw a page. Pages older than this time will not be scanned.',
+                    default: 60,
+                    doc:
+                        'The minimum wait time before next retry of a failed scan request. Should be greater than queueConfig.messageVisibilityTimeoutInSeconds config value.',
                 },
-                pageRescanIntervalInDays: {
+                maxFailedScanRetryCount: {
                     format: 'int',
                     default: 3,
-                    doc: 'Minimum days since we last scanned. Pages newer than this time will not be scanned.',
-                },
-                failedPageRescanIntervalInHours: {
-                    format: 'int',
-                    default: 3,
-                    doc: 'Minimum hours since the last scan failed. Pages newer than this time will not be scanned.',
-                },
-                maxScanRetryCount: {
-                    format: 'int',
-                    default: 3,
-                    doc: 'Maximum number of retries allowed for a page scan',
+                    doc: 'Maximum number of retries (additional times to re-run a scan) allowed for a failed scan request.',
                 },
                 maxSendNotificationRetryCount: {
                     format: 'int',

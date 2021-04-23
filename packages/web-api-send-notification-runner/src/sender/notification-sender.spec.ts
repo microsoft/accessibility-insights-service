@@ -60,13 +60,8 @@ describe(NotificationSender, () => {
 
     beforeEach(() => {
         scanConfig = {
-            failedPageRescanIntervalInHours: 3,
-            maxScanRetryCount: 4,
             maxSendNotificationRetryCount: 5,
-            minLastReferenceSeenInDays: 5,
-            pageRescanIntervalInDays: 6,
-            scanTimeoutInMin: 1,
-        };
+        } as ScanRunTimeConfig;
         onDemandPageScanRunResultProviderMock = Mock.ofType(OnDemandPageScanRunResultProvider, MockBehavior.Strict);
         webAPIMock = Mock.ofType(NotificationSenderWebAPIClient);
         loggerMock = Mock.ofType(MockableLogger);

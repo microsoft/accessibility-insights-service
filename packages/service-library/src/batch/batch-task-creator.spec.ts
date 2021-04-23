@@ -434,7 +434,6 @@ describe(BatchTaskCreator, () => {
         const queueRuntimeConfig = {
             maxQueueSize: 10,
             messageVisibilityTimeoutInSeconds: 30,
-            maxDequeueCount: 2,
         } as QueueRuntimeConfig;
         serviceConfigMock
             .setup((o) => o.getConfigValue('queueConfig'))

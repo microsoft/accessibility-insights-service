@@ -48,7 +48,7 @@ export class CosmosContainerClient {
     }
 
     /**
-     * Writes document to a storage.
+     * Upsert document to a storage without merging.
      *
      * Use document partitionKey property if defined; otherwise, the partitionKey parameter.
      *
@@ -153,6 +153,14 @@ export class CosmosContainerClient {
         );
     }
 
+    /**
+     * Upsert documents to a storage without merging.
+     *
+     * Use document partitionKey property if defined; otherwise, the partitionKey parameter.
+     *
+     * @param documents Documents to write to a storage
+     * @param partitionKey The storage partition key
+     */
     public async writeDocuments<T>(documents: T[], partitionKey?: string): Promise<void> {
         const limit = pLimit(this.maxConcurrencyLimit);
         await Promise.all(

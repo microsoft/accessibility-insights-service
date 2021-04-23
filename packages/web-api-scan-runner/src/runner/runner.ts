@@ -8,13 +8,12 @@ import { OnDemandPageScanRunResultProvider, WebsiteScanResultProvider } from 'se
 import {
     OnDemandPageScanReport,
     OnDemandPageScanResult,
-    OnDemandPageScanRunResult,
     OnDemandPageScanRunState,
     OnDemandScanResult,
     ScanError,
     WebsiteScanResult,
 } from 'storage-documents';
-import { System } from 'common';
+import { System, ServiceConfiguration } from 'common';
 import _ from 'lodash';
 import { ReportGenerator } from '../report-generator/report-generator';
 import { ScanMetadataConfig } from '../scan-metadata-config';
@@ -37,6 +36,7 @@ export class Runner {
         @inject(CombinedScanResultProcessor) private readonly combinedScanResultProcessor: CombinedScanResultProcessor,
         @inject(ScanNotificationProcessor) protected readonly scanNotificationProcessor: ScanNotificationProcessor,
         @inject(ScanRunnerTelemetryManager) private readonly telemetryManager: ScanRunnerTelemetryManager,
+        @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
         @inject(GlobalLogger) private readonly logger: GlobalLogger,
     ) {}
 
@@ -56,7 +56,7 @@ export class Runner {
             await this.processScanResult(axeScanResults, pageScanResult);
         } catch (error) {
             const errorMessage = System.serializeError(error);
-            pageScanResult.run = this.createRunResult('failed', errorMessage);
+            this.setRunResult(pageScanResult, 'failed', errorMessage);
 
             this.logger.logError(`The scanner failed to scan a page.`, { error: errorMessage });
             this.telemetryManager.trackScanTaskFailed();
@@ -96,7 +96,7 @@ export class Runner {
 
     private async processScanResult(axeScanResults: AxeScanResults, pageScanResult: OnDemandPageScanResult): Promise<AxeScanResults> {
         if (_.isNil(axeScanResults.error)) {
-            pageScanResult.run = this.createRunResult('completed');
+            this.setRunResult(pageScanResult, 'completed');
             pageScanResult.scanResult = this.getScanStatus(axeScanResults);
             pageScanResult.reports = await this.generateScanReports(axeScanResults);
             if (axeScanResults.scannedUrl !== undefined) {
@@ -105,7 +105,7 @@ export class Runner {
 
             await this.combinedScanResultProcessor.generateCombinedScanResults(axeScanResults, pageScanResult);
         } else {
-            pageScanResult.run = this.createRunResult('failed', axeScanResults.error);
+            this.setRunResult(pageScanResult, 'failed', axeScanResults.error);
 
             this.logger.logError('Browser has failed to scan a page.', { error: JSON.stringify(axeScanResults.error) });
             this.telemetryManager.trackBrowserScanFailed();
@@ -125,6 +125,12 @@ export class Runner {
 
         const websiteScanRef = pageScanResult.websiteScanRefs?.find((ref) => ref.scanGroupType === 'deep-scan');
         if (websiteScanRef) {
+            const scanConfig = await this.serviceConfig.getConfigValue('scanConfig');
+            const runState =
+                pageScanResult.run.state === 'completed' || pageScanResult.run.retryCount >= scanConfig.maxFailedScanRetryCount
+                    ? pageScanResult.run.state
+                    : undefined;
+
             const updatedWebsiteScanResult: Partial<WebsiteScanResult> = {
                 id: websiteScanRef.id,
                 pageScans: [
@@ -132,7 +138,7 @@ export class Runner {
                         scanId: scanMetadata.id,
                         url: scanMetadata.url,
                         scanState: pageScanResult.scanResult?.state,
-                        runState: pageScanResult.run.state,
+                        runState,
                         timestamp: new Date().toJSON(),
                     },
                 ],
@@ -151,8 +157,9 @@ export class Runner {
         return this.reportWriter.writeBatch(reports);
     }
 
-    private createRunResult(state: OnDemandPageScanRunState, error?: string | ScanError): OnDemandPageScanRunResult {
-        return {
+    private setRunResult(pageScanResult: OnDemandPageScanResult, state: OnDemandPageScanRunState, error?: string | ScanError): void {
+        pageScanResult.run = {
+            ...pageScanResult.run,
             state,
             timestamp: new Date().toJSON(),
             error: _.isString(error) ? error.substring(0, 2048) : error,

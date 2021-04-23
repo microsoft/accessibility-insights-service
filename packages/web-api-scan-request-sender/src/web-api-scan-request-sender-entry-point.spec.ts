@@ -53,7 +53,7 @@ describe(WebApiScanRequestSenderEntryPoint, () => {
                 .verifiable(Times.once());
 
             onDispatcherMock
-                .setup(async (d) => d.dispatchOnDemandScanRequests())
+                .setup(async (d) => d.dispatchScanRequests())
                 .returns(async () => Promise.resolve())
                 .verifiable(Times.once());
 

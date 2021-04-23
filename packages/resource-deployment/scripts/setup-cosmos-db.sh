@@ -36,40 +36,26 @@ createCosmosCollection() {
     if az cosmosdb sql container show --account-name "$cosmosAccountName" --database-name "$dbName" --name "$collectionName" --resource-group "$resourceGroupName" --query "id" 2>/dev/null; then
         echo "Collection '$collectionName' already exists"
 
-        if [ $environment = "prod" ] || [ $environment = "ppe" ]; then
-            # configure autoscale throughput for production environment
-            autoscale=$(az cosmosdb sql container throughput show --account-name "$cosmosAccountName" --database-name "$dbName" --name "$collectionName" --resource-group "$resourceGroupName" --query "resource.autoscaleSettings.maxThroughput" -o tsv)
-            if [[ -n $autoscale ]]; then
-                echo "Autoscale throughput for collection '$collectionName' already enabled"
-                echo "Updating autoscale maximum throughput for collection '$collectionName'"
-                az cosmosdb sql container throughput update --account-name "$cosmosAccountName" --database-name "$dbName" --name "$collectionName" --resource-group "$resourceGroupName" --max-throughput "$throughput" 1>/dev/null
-            else
-                echo "Autoscale throughput for collection '$collectionName' is not enabled"
-                echo "Migrating collection '$collectionName' throughput to autoscale provision"
-                az cosmosdb sql container throughput migrate --account-name "$cosmosAccountName" --database-name "$dbName" --name "$collectionName" --resource-group "$resourceGroupName" --throughput-type "autoscale" 1>/dev/null
-
-                echo "Updating autoscale maximum throughput for collection '$collectionName'"
-                az cosmosdb sql container throughput update --account-name "$cosmosAccountName" --database-name "$dbName" --name "$collectionName" --resource-group "$resourceGroupName" --max-throughput "$throughput" 1>/dev/null
-            fi
+        autoscale=$(az cosmosdb sql container throughput show --account-name "$cosmosAccountName" --database-name "$dbName" --name "$collectionName" --resource-group "$resourceGroupName" --query "resource.autoscaleSettings.maxThroughput" -o tsv)
+        if [[ -n $autoscale ]]; then
+            echo "Autoscale throughput for collection '$collectionName' already enabled"
+            echo "Updating autoscale maximum throughput for collection '$collectionName'"
+            az cosmosdb sql container throughput update --account-name "$cosmosAccountName" --database-name "$dbName" --name "$collectionName" --resource-group "$resourceGroupName" --max-throughput "$throughput" 1>/dev/null
         else
-            # configure fixed throughput for dev environment
-            echo "Updating fixed throughput for collection '$collectionName'"
-            az cosmosdb sql container throughput update --account-name "$cosmosAccountName" --database-name "$dbName" --name "$collectionName" --resource-group "$resourceGroupName" --throughput "$throughput" 1>/dev/null
+            echo "Autoscale throughput for collection '$collectionName' is not enabled"
+            echo "Migrating collection '$collectionName' throughput to autoscale provision"
+            az cosmosdb sql container throughput migrate --account-name "$cosmosAccountName" --database-name "$dbName" --name "$collectionName" --resource-group "$resourceGroupName" --throughput-type "autoscale" 1>/dev/null
+
+            echo "Updating autoscale maximum throughput for collection '$collectionName'"
+            az cosmosdb sql container throughput update --account-name "$cosmosAccountName" --database-name "$dbName" --name "$collectionName" --resource-group "$resourceGroupName" --max-throughput "$throughput" 1>/dev/null
         fi
 
         echo "Successfully updated collection '$collectionName'"
     else
         echo "Collection '$collectionName' does not exist"
 
-        if [ $environment = "prod" ] || [ $environment = "ppe" ]; then
-            # create autoscale throughput collection for production environment
-            echo "Creating autoscale throughput collection '$collectionName'"
-            az cosmosdb sql container create --account-name "$cosmosAccountName" --database-name "$dbName" --name "$collectionName" --resource-group "$resourceGroupName" --partition-key-path "/partitionKey" --max-throughput "$throughput" --ttl "$ttl" 1>/dev/null
-        else
-            # create fixed throughput collection for dev environment
-            echo "Creating fixed throughput collection '$collectionName'"
-            az cosmosdb sql container create --account-name "$cosmosAccountName" --database-name "$dbName" --name "$collectionName" --resource-group "$resourceGroupName" --partition-key-path "/partitionKey" --throughput "$throughput" --ttl "$ttl" 1>/dev/null
-        fi
+        echo "Creating autoscale throughput collection '$collectionName'"
+        az cosmosdb sql container create --account-name "$cosmosAccountName" --database-name "$dbName" --name "$collectionName" --resource-group "$resourceGroupName" --partition-key-path "/partitionKey" --max-throughput "$throughput" --ttl "$ttl" 1>/dev/null
 
         echo "Successfully created collection '$collectionName'"
     fi
@@ -111,10 +97,10 @@ function setupCosmos() {
         )
     else
         cosmosSetupProcesses=(
-            "createCosmosCollection \"scanRuns\" \"$onDemandScannerDbName\" \"2592000\" \"400\""         # 30 days
-            "createCosmosCollection \"scanBatchRequests\" \"$onDemandScannerDbName\" \"604800\" \"400\"" # 7 days
-            "createCosmosCollection \"scanRequests\" \"$onDemandScannerDbName\" \"604800\" \"400\""      # 7 days
-            "createCosmosCollection \"systemData\" \"$onDemandScannerDbName\" \"-1\" \"400\""
+            "createCosmosCollection \"scanRuns\" \"$onDemandScannerDbName\" \"2592000\" \"4000\""         # 30 days
+            "createCosmosCollection \"scanBatchRequests\" \"$onDemandScannerDbName\" \"604800\" \"4000\"" # 7 days
+            "createCosmosCollection \"scanRequests\" \"$onDemandScannerDbName\" \"604800\" \"4000\""      # 7 days
+            "createCosmosCollection \"systemData\" \"$onDemandScannerDbName\" \"-1\" \"4000\""
         )
     fi
 

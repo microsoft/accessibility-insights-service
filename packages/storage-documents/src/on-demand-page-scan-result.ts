@@ -74,6 +74,7 @@ export interface OnDemandPageScanRunResult {
     error?: string | ScanError;
     pageTitle?: string;
     pageResponseCode?: number;
+    retryCount?: number;
 }
 
 export interface WebsiteScanRef {

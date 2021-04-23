@@ -18,7 +18,7 @@ import { QueueRuntimeConfig, ServiceConfiguration } from 'common';
 import * as _ from 'lodash';
 import * as mockDate from 'mockdate';
 import { BatchPoolLoadSnapshotProvider, OnDemandPageScanRunResultProvider, ScanMessage } from 'service-library';
-import { OnDemandPageScanResult, OnDemandPageScanRunState, OnDemandScanRequestMessage, StorageDocument } from 'storage-documents';
+import { OnDemandPageScanResult, OnDemandScanRequestMessage, StorageDocument } from 'storage-documents';
 import { IMock, It, Mock } from 'typemoq';
 import { MockableLogger } from '../test-utilities/mockable-logger';
 import { Worker } from './worker';
@@ -28,8 +28,7 @@ import { Worker } from './worker';
 enum EnableBaseWorkflow {
     none,
     onTasksAdded = 1 << 1,
-    excludeCompletedScans = 1 << 2,
-    handleFailedTasks = 1 << 3,
+    handleFailedTasks = 1 << 2,
 }
 
 class TestableWorker extends Worker {
@@ -65,16 +64,6 @@ class TestableWorker extends Worker {
             async () => super.onTasksAdded(tasks),
             undefined,
             tasks,
-        );
-    }
-
-    public async excludeCompletedScans(scanMessages: ScanMessage[]): Promise<ScanMessage[]> {
-        return this.invokeOverrides(
-            EnableBaseWorkflow.excludeCompletedScans,
-            this.excludeCompletedScansCallback,
-            async () => super.excludeCompletedScans(scanMessages),
-            [],
-            scanMessages,
         );
     }
 
@@ -292,12 +281,9 @@ describe(Worker, () => {
             )
             .verifiable();
 
-        testSubject.excludeCompletedScans = jest.fn().mockImplementation((m) => m);
-
         const actualMessages = await testSubject.getMessagesForTaskCreation();
 
         expect(actualMessages).toEqual(queueMessagesGenerator.scanMessages);
-        expect(testSubject.excludeCompletedScans).toHaveBeenCalledTimes(1);
     });
 
     it('update pool stats when tasks added', async () => {
@@ -439,73 +425,7 @@ describe(Worker, () => {
 
         await testSubject.handleFailedTasks(failedTasks);
     });
-
-    it('excludeCompletedScans() - keep scan request when request has `queued` run state within allowed time span threshold', async () => {
-        queueMessagesGenerator.queueMessagesGeneratorFn()();
-
-        const scanResults = createScanResults(queueMessagesGenerator.scanMessages, 'queued');
-        onDemandPageScanRunResultProviderMock
-            .setup((o) => o.readScanRuns(queueMessagesGenerator.scanMessages.map((m) => m.scanId)))
-            .returns(async () => Promise.resolve(scanResults))
-            .verifiable();
-
-        testSubject.enableBaseWorkflow = EnableBaseWorkflow.excludeCompletedScans;
-
-        const actualMessages = await testSubject.excludeCompletedScans(queueMessagesGenerator.scanMessages);
-
-        expect(actualMessages).toEqual(queueMessagesGenerator.scanMessages);
-    });
-
-    it('excludeCompletedScans() - remove scan request when request has aborted run state', async () => {
-        setupServiceConfigMock(-600); // set queue message as expired
-
-        queueMessagesGenerator.messagesPerRun = 5;
-        queueMessagesGenerator.queueMessagesGeneratorFn()();
-
-        const scanResults = createScanResults(queueMessagesGenerator.scanMessages);
-        onDemandPageScanRunResultProviderMock
-            .setup((o) => o.readScanRuns(queueMessagesGenerator.scanMessages.map((m) => m.scanId)))
-            .returns(async () => Promise.resolve(scanResults))
-            .verifiable();
-
-        const acceptedScans = scanResults.filter((r) => r.run.state !== 'completed');
-        const expectedMessages = queueMessagesGenerator.scanMessages.filter((m) => acceptedScans.find((s) => s.id === m.scanId));
-
-        testSubject.enableBaseWorkflow = EnableBaseWorkflow.excludeCompletedScans;
-
-        const actualMessages = await testSubject.excludeCompletedScans(queueMessagesGenerator.scanMessages);
-
-        expect(actualMessages).toEqual(expectedMessages);
-    });
 });
-
-function createScanResults(messages: ScanMessage[], runState?: OnDemandPageScanRunState): OnDemandPageScanResult[] {
-    const stateGeneratorFn = (seed: number): OnDemandPageScanRunState => {
-        if (seed === 2) {
-            return 'running';
-        } else if (seed === 3) {
-            return 'failed';
-        } else if (seed === 4) {
-            return 'completed';
-        }
-
-        return 'queued';
-    };
-
-    let count = 0;
-
-    return messages.map((m) => {
-        count += 1;
-
-        return {
-            id: m.scanId,
-            run: {
-                state: runState === undefined ? stateGeneratorFn(count) : runState,
-                timestamp: new Date().toISOString(),
-            },
-        } as OnDemandPageScanResult;
-    });
-}
 
 function createJobTasks(messages: ScanMessage[]): JobTask[] {
     let count = 0;
