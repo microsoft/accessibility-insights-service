@@ -2,10 +2,12 @@
 // Licensed under the MIT License.
 import { injectable } from 'inversify';
 import { Response } from 'puppeteer';
-import { BrowserError } from './browser-error';
+import { BrowserError, BrowserErrorTypes } from './browser-error';
+import { navigationErrorPatterns as errorPatterns } from './navigation-error-patterns';
 
 @injectable()
 export class PageResponseProcessor {
+    constructor(private readonly navigationErrorPatterns: Partial<Record<BrowserErrorTypes, string[]>> = errorPatterns) {}
     public getResponseError(response: Response, error: Error = new Error()): BrowserError {
         if (!response.ok()) {
             return {
@@ -31,28 +33,15 @@ export class PageResponseProcessor {
     }
 
     public getNavigationError(error: Error): BrowserError {
-        const errorMessage = error.message;
-        const browserError: BrowserError = {
-            errorType: 'NavigationError',
-            message: errorMessage,
+        const matchingErrorType = Object.keys(this.navigationErrorPatterns)
+            .map((k) => k as BrowserErrorTypes)
+            .find((errorType) => this.navigationErrorPatterns[errorType].some((errorPattern) => error.message.includes(errorPattern)));
+
+        return {
+            errorType: matchingErrorType ?? 'NavigationError',
+            message: error.message,
             stack: error.stack,
         };
-
-        if (/TimeoutError: Navigation Timeout Exceeded:/i.test(errorMessage)) {
-            browserError.errorType = 'UrlNavigationTimeout';
-        } else if (errorMessage.includes('net::ERR_CERT_AUTHORITY_INVALID') || errorMessage.includes('SSL_ERROR_UNKNOWN')) {
-            browserError.errorType = 'SslError';
-        } else if (errorMessage.includes('net::ERR_CONNECTION_REFUSED') || errorMessage.includes('NS_ERROR_CONNECTION_REFUSED')) {
-            browserError.errorType = 'ResourceLoadFailure';
-        } else if (errorMessage.includes('Cannot navigate to invalid URL') || errorMessage.includes('Invalid url')) {
-            browserError.errorType = 'InvalidUrl';
-        } else if (errorMessage.includes('net::ERR_ABORTED') || errorMessage.includes('NS_BINDING_ABORTED')) {
-            browserError.errorType = 'EmptyPage';
-        } else if (errorMessage.includes('net::ERR_NAME_NOT_RESOLVED')) {
-            browserError.errorType = 'UrlNotResolved';
-        }
-
-        return browserError;
     }
 
     private isHtmlContentType(response: Response): boolean {

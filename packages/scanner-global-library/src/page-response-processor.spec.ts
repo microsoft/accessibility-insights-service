@@ -91,61 +91,42 @@ describe(PageResponseProcessor, () => {
 });
 
 describe('handles navigation errors', () => {
+    const stubPatterns: Partial<Record<BrowserErrorTypes, string[]>> = {
+        SslError: ['SSL_ERROR_UNKNOWN'],
+        UrlNavigationTimeout: ['Navigation timeout'],
+    };
     interface NavigationErrorTestCase {
-        errorType: BrowserErrorTypes;
         message: string;
-        stack: string;
-        name?: string;
+        expectedErrorType: BrowserErrorTypes;
     }
 
     const testCaseMappings: NavigationErrorTestCase[] = [
         {
-            message: 'TimeoutError: Navigation Timeout Exceeded: 30000ms exceeded\n    at Promise.then (',
-            errorType: 'UrlNavigationTimeout',
-            stack: 'stack',
+            message: 'Navigation timeout of 60000 ms exceeded',
+            expectedErrorType: 'UrlNavigationTimeout',
         },
         {
-            message: 'Puppeteer navigation failed: net::ERR_CERT_AUTHORITY_INVALID',
-            errorType: 'SslError',
-            stack: 'stack',
+            message: 'Puppeteer navigation failed: net::SSL_ERROR_UNKNOWN',
+            expectedErrorType: 'SslError',
         },
         {
-            message: 'Puppeteer navigation failed: net::ERR_CONNECTION_REFUSED',
-            errorType: 'ResourceLoadFailure',
-            stack: 'stack',
-        },
-        {
-            message: 'Puppeteer navigation  failed: Cannot navigate to invalid URL',
-            errorType: 'InvalidUrl',
-            stack: 'stack',
-        },
-        {
-            message: 'Puppeteer navigation  failed: Cannot navigate to Invalid url',
-            errorType: 'InvalidUrl',
-            stack: 'stack',
-        },
-        {
-            message: 'Puppeteer navigation  failed: net::ERR_ABORTED',
-            errorType: 'EmptyPage',
-            stack: 'stack',
-        },
-        {
-            message: 'Puppeteer navigation  failed: net::ERR_NAME_NOT_RESOLVED',
-            errorType: 'UrlNotResolved',
-            stack: 'stack',
+            message: 'should not match any patterns',
+            expectedErrorType: 'NavigationError',
         },
     ];
 
     test.each(testCaseMappings)('should parse navigation error: %o', async (testCase: NavigationErrorTestCase) => {
-        const expectedError = {
-            errorType: testCase.errorType,
+        const pageResponseProcessor = new PageResponseProcessor(stubPatterns);
+
+        const actualError = pageResponseProcessor.getNavigationError({
             message: testCase.message,
             stack: 'stack',
-        };
-        const pageResponseProcessor = new PageResponseProcessor();
+        } as Error);
 
-        const actualError = pageResponseProcessor.getNavigationError(testCase as Error);
-
-        expect(actualError).toEqual(expectedError);
+        expect(actualError).toEqual({
+            errorType: testCase.expectedErrorType,
+            message: testCase.message,
+            stack: 'stack',
+        });
     });
 });
