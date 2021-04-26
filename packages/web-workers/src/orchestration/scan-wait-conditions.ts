@@ -8,20 +8,20 @@ export type ScanWaitCondition = {
     isFailed(requestResponse: ScanRunResultResponse): boolean;
 };
 
-export const ScanWaitConditions: { [key: string]: ScanWaitCondition } = {
+export const ScanWaitConditions = {
     baseScan: {
-        isSucceeded: (scanRunResult: ScanRunResultResponse) =>
+        isSucceeded: (scanRunResult: ScanRunResultResponse): boolean =>
             scanRunResult.scanResult?.state === 'pass' || scanRunResult.scanResult?.state === 'fail',
-        isFailed: (scanRunResult: ScanRunResultResponse) => scanRunResult.run?.state === 'failed',
+        isFailed: (scanRunResult: ScanRunResultResponse): boolean => scanRunResult.run?.state === 'failed',
     },
     scanNotification: {
         // Include sendFailed because some tests intentionally cause the notification to fail
-        isSucceeded: (scanRunResponse: ScanRunResultResponse) =>
+        isSucceeded: (scanRunResponse: ScanRunResultResponse): boolean =>
             scanRunResponse.notification?.state === 'sendFailed' || scanRunResponse.notification?.state === 'sent',
-        isFailed: (scanRunResponse: ScanRunResultResponse) => scanRunResponse.notification?.state === 'queueFailed',
+        isFailed: (scanRunResponse: ScanRunResultResponse): boolean => scanRunResponse.notification?.state === 'queueFailed',
     },
     deepScan: {
-        isSucceeded: (scanRunResult: ScanRunResultResponse) => scanRunResult.run?.state === 'completed',
-        isFailed: (scanRunResult: ScanRunResultResponse) => scanRunResult.run?.state === 'failed',
+        isSucceeded: (scanRunResult: ScanRunResultResponse): boolean => scanRunResult.run?.state === 'completed',
+        isFailed: (scanRunResult: ScanRunResultResponse): boolean => scanRunResult.run?.state === 'failed',
     },
 };

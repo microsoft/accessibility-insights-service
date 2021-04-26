@@ -4,184 +4,78 @@
 import { AvailabilityTestConfig, SerializableResponse } from 'common';
 import { IOrchestrationFunctionContext, Task, TaskSet } from 'durable-functions/lib/src/classes';
 import { TestContextData, TestEnvironment, TestGroupName } from 'functional-tests';
-import { isNil, isEmpty } from 'lodash';
-import { Logger, LogLevel } from 'logger';
-import moment from 'moment';
-import { ScanCompletedNotification, ScanRunErrorResponse, ScanRunResponse, ScanRunResultResponse } from 'service-library';
+import { LogLevel } from 'logger';
+import { ScanCompletedNotification, ScanRunResponse, ScanRunResultResponse } from 'service-library';
 import { PostScanRequestOptions } from 'web-api-client';
 import { ActivityAction } from '../contracts/activity-actions';
 import {
     ActivityRequestData,
     CreateScanRequestData,
     GetScanReportData,
-    GetScanResultData,
     LogTestRunStartData,
-    RunFunctionalTestGroupData,
     TestIdentifier,
-    TrackAvailabilityData,
 } from '../controllers/activity-request-data';
-import { OrchestrationTelemetryProperties } from './orchestration-telemetry-properties';
+import { ActivityActionDispatcher } from './activity-action-dispatcher';
+import { OrchestrationLogger } from './orchestration-logger';
+import { ScanWaitConditions } from './scan-wait-conditions';
+import { ScanWaitOrchestrator } from './scan-wait-orchestrator';
 
-export interface OrchestrationSteps {
-    invokeHealthCheckRestApi(): Generator<Task, void, SerializableResponse>;
-    invokeSubmitScanRequestRestApi(scanUrl: string, scanOptions: PostScanRequestOptions): Generator<Task, string, SerializableResponse>;
-    validateScanRequestSubmissionState(scanId: string): Generator<Task, void, SerializableResponse & void>;
-    waitForBaseScanCompletion(scanId: string): Generator<Task, ScanRunResultResponse, SerializableResponse & void>;
-    waitForScanCompletionNotification(scanId: string): Generator<Task, ScanCompletedNotification, SerializableResponse & void>;
-    waitForDeepScanCompletion(scanId: string): Generator<Task, ScanRunResultResponse, SerializableResponse & void>;
-    invokeGetScanReportRestApi(scanId: string, reportId: string): Generator<Task, void, SerializableResponse & void>;
-    runFunctionalTestGroups(
-        testScenarioName: string,
-        testContextData: TestContextData,
-        testGroupNames: TestGroupName[],
-    ): Generator<TaskSet, void, SerializableResponse & void>;
-    logTestRunStart(testsToRun: TestIdentifier[]): Generator<Task, void, SerializableResponse & void>;
-    trackScanRequestCompleted(): Generator<Task, void, SerializableResponse & void>;
-}
-
-export class OrchestrationStepsImpl implements OrchestrationSteps {
-    public static readonly activityTriggerFuncName = 'health-monitor-client-func';
-
+export class OrchestrationSteps {
     constructor(
         private readonly context: IOrchestrationFunctionContext,
         private readonly availabilityTestConfig: AvailabilityTestConfig,
-        private readonly logger: Logger,
+        private readonly logger: OrchestrationLogger,
+        private readonly activityActionDispatcher: ActivityActionDispatcher,
+        private readonly scanWaitOrchestrator: ScanWaitOrchestrator,
     ) {}
 
     public *invokeHealthCheckRestApi(): Generator<Task, void, SerializableResponse & void> {
-        yield* this.callWebRequestActivity(ActivityAction.getHealthStatus);
+        yield* this.activityActionDispatcher.callWebRequestActivity(ActivityAction.getHealthStatus);
     }
 
-    public *invokeGetScanReportRestApi(scanId: string, reportId: string): Generator<Task, void, SerializableResponse & void> {
+    public *invokeGetScanReportRestApi(
+        scanId: string,
+        reportId: string,
+    ): Generator<Task, SerializableResponse, SerializableResponse & void> {
         const activityName = ActivityAction.getScanReport;
         const requestData: GetScanReportData = {
             scanId: scanId,
             reportId: reportId,
         };
 
-        yield* this.callWebRequestActivity(activityName, requestData);
-
-        this.logOrchestrationStep('Successfully fetched scan report');
+        return yield* this.activityActionDispatcher.callWebRequestActivity(activityName, requestData);
     }
 
     public *waitForBaseScanCompletion(scanId: string): Generator<Task, ScanRunResultResponse, SerializableResponse & void> {
-        const scanRunSucceeded = (scanRunResult: ScanRunResultResponse) =>
-            scanRunResult.scanResult?.state === 'pass' || scanRunResult.scanResult?.state === 'fail';
-        const scanRunCompleted = (scanRunResult: ScanRunResultResponse) =>
-            scanRunResult.run.state === 'failed' || scanRunSucceeded(scanRunResult);
-
-        return yield* this.waitFor(
+        return yield* this.scanWaitOrchestrator.waitFor(
             scanId,
             'waitForBaseScanCompletion',
             this.availabilityTestConfig.maxScanWaitTimeInSeconds,
             this.availabilityTestConfig.scanWaitIntervalInSeconds,
-            scanRunCompleted,
-            scanRunSucceeded,
+            ScanWaitConditions.baseScan,
         );
     }
 
     public *waitForScanCompletionNotification(scanId: string): Generator<Task, ScanCompletedNotification, SerializableResponse & void> {
-        const scanNotificationCompleted = (scanRunResponse: ScanRunResultResponse) =>
-            ['sendFailed', 'queueFailed', 'sent'].includes(scanRunResponse.notification.state);
-
-        const scanStatus = yield* this.waitFor(
+        const scanStatus = yield* this.scanWaitOrchestrator.waitFor(
             scanId,
             'waitForScanCompletionNotification',
             this.availabilityTestConfig.maxScanCompletionNotificationWaitTimeInSeconds,
             this.availabilityTestConfig.scanWaitIntervalInSeconds,
-            scanNotificationCompleted,
+            ScanWaitConditions.scanNotification,
         );
 
         return scanStatus?.notification;
     }
 
     public *waitForDeepScanCompletion(scanId: string): Generator<Task, ScanRunResultResponse, SerializableResponse & void> {
-        const deepScanSucceeded = (scanRunResult: ScanRunResultResponse) => scanRunResult.run.state === 'completed';
-        const deepScanCompleted = (scanRunResult: ScanRunResultResponse) =>
-            scanRunResult.run.state === 'failed' || deepScanSucceeded(scanRunResult);
-
-        return yield* this.waitFor(
+        return yield* this.scanWaitOrchestrator.waitFor(
             scanId,
             'waitForDeepScanCompletion',
             this.availabilityTestConfig.maxDeepScanWaitTimeInSeconds,
             this.availabilityTestConfig.scanWaitIntervalInSeconds,
-            deepScanCompleted,
-            deepScanSucceeded,
+            ScanWaitConditions.deepScan,
         );
-    }
-
-    private *waitFor(
-        scanId: string,
-        activityName: string,
-        maxWaitTime: number,
-        waitTimeInterval: number,
-        isCompleted: (requestResponse: ScanRunResultResponse) => boolean,
-        isSucceeded: (requestResponse: ScanRunResultResponse) => boolean = isCompleted,
-    ): Generator<Task, ScanRunResultResponse, SerializableResponse & void> {
-        const waitStartTime = moment.utc(this.context.df.currentUtcDateTime);
-        const waitEndTime = waitStartTime.clone().add(maxWaitTime, 'seconds');
-        let scanStatusResponse: SerializableResponse;
-        let scanStatus: ScanRunResultResponse;
-        let completed: boolean = false;
-
-        this.logOrchestrationStep(`Starting ${activityName}`);
-
-        while (completed === false && moment.utc(this.context.df.currentUtcDateTime).isBefore(waitEndTime)) {
-            this.logOrchestrationStep(`Starting timer with wait time ${waitTimeInterval}`, LogLevel.info, {
-                waitStartTime: waitStartTime.toJSON(),
-                waitEndTime: waitEndTime.toJSON(),
-            });
-
-            const timerOutput = yield this.context.df.createTimer(
-                moment.utc(this.context.df.currentUtcDateTime).add(waitTimeInterval, 'seconds').toDate(),
-            );
-
-            this.logOrchestrationStep('Timer completed', LogLevel.info, {
-                requestResponse: JSON.stringify(timerOutput),
-                waitStartTime: waitStartTime.toJSON(),
-                waitEndTime: waitEndTime.toJSON(),
-            });
-
-            scanStatusResponse = yield* this.callGetScanStatusActivity(scanId);
-            scanStatus = yield* this.getScanStatus(scanStatusResponse);
-
-            completed = isCompleted(scanStatus);
-        }
-
-        const totalWaitTimeInSeconds = moment.utc(this.context.df.currentUtcDateTime).diff(moment.utc(waitStartTime), 'seconds');
-
-        if (completed === true && isSucceeded(scanStatus)) {
-            this.logOrchestrationStep(`${activityName} succeeded`, LogLevel.info, {
-                totalWaitTimeInSeconds: totalWaitTimeInSeconds.toString(),
-                waitStartTime: waitStartTime.toJSON(),
-                waitEndTime: waitEndTime.toJSON(),
-            });
-        } else {
-            const scanStatusResponseString = JSON.stringify(scanStatusResponse);
-
-            yield* this.trackAvailability(false, {
-                activityName: activityName,
-                requestResponse: scanStatusResponseString,
-            });
-
-            const traceData = {
-                requestResponse: scanStatusResponseString,
-                totalWaitTimeInSeconds: totalWaitTimeInSeconds.toString(),
-                waitStartTime: waitStartTime.toJSON(),
-                waitEndTime: waitEndTime.toJSON(),
-            };
-            this.logOrchestrationStep(`${activityName} failed`, LogLevel.error, traceData);
-
-            throw new Error(`${activityName} failed. ${JSON.stringify(traceData)}`);
-        }
-
-        return scanStatus;
-    }
-
-    public *validateScanRequestSubmissionState(scanId: string): Generator<Task, void, SerializableResponse & void> {
-        const response = yield* this.callGetScanStatusActivity(scanId);
-        yield* this.getScanStatus(response);
-        this.logOrchestrationStep('Verified scan submitted successfully', LogLevel.info, { requestResponse: JSON.stringify(response) });
     }
 
     public *invokeSubmitScanRequestRestApi(
@@ -196,9 +90,9 @@ export class OrchestrationStepsImpl implements OrchestrationSteps {
             },
         };
 
-        const response = yield* this.callWebRequestActivity(ActivityAction.createScanRequest, requestData);
+        const response = yield* this.activityActionDispatcher.callWebRequestActivity(ActivityAction.createScanRequest, requestData);
         const scanId = yield* this.getScanIdFromResponse(response, ActivityAction.createScanRequest);
-        this.logOrchestrationStep(`Orchestrator submitted scan with scan Id: ${scanId} and options ${JSON.stringify(scanOptions)}`);
+        this.logger.logOrchestrationStep(`Orchestrator submitted scan with scan Id: ${scanId} and options ${JSON.stringify(scanOptions)}`);
 
         return scanId;
     }
@@ -208,36 +102,22 @@ export class OrchestrationStepsImpl implements OrchestrationSteps {
         testContextData: TestContextData,
         testGroupNames: TestGroupName[],
     ): Generator<TaskSet, void, void> {
-        if (isEmpty(testGroupNames)) {
-            this.logOrchestrationStep('List of functional tests is empty. Skipping this test run.');
-
-            return;
-        }
-
-        const parallelTasks = testGroupNames.map((testGroupName: TestGroupName) => {
-            const testData: RunFunctionalTestGroupData = {
-                runId: this.context.df.instanceId,
-                test: {
-                    testGroupName,
-                    scenarioName: testScenarioName,
-                },
-                testContextData,
-                environment: this.getTestEnvironment(this.availabilityTestConfig.environmentDefinition),
-            };
-
-            const activityRequestData: ActivityRequestData = {
+        const activities: ActivityRequestData[] = testGroupNames.map((testGroupName: TestGroupName) => {
+            return {
                 activityName: ActivityAction.runFunctionalTestGroup,
-                data: testData,
+                data: {
+                    runId: this.context.df.instanceId,
+                    test: {
+                        testGroupName,
+                        scenarioName: testScenarioName,
+                    },
+                    testContextData,
+                    environment: this.getTestEnvironment(this.availabilityTestConfig.environmentDefinition),
+                },
             };
-
-            return this.context.df.callActivity(OrchestrationStepsImpl.activityTriggerFuncName, activityRequestData);
         });
 
-        this.logOrchestrationStep(`Starting functional tests: ${testGroupNames}`);
-
-        yield this.context.df.Task.all(parallelTasks);
-
-        this.logOrchestrationStep(`Completed functional tests: ${testGroupNames}`);
+        yield* this.activityActionDispatcher.callActivitiesInParallel(activities, `Run functional tests: ${testGroupNames}`);
     }
 
     public *logTestRunStart(testsToRun: TestIdentifier[]): Generator<Task, void, SerializableResponse & void> {
@@ -246,11 +126,11 @@ export class OrchestrationStepsImpl implements OrchestrationSteps {
             environmentName: this.availabilityTestConfig.environmentDefinition,
             testsToRun: testsToRun,
         };
-        yield* this.callActivity(ActivityAction.logTestRunStart, false, activityData);
+        yield* this.activityActionDispatcher.callActivity(ActivityAction.logTestRunStart, activityData);
     }
 
     public *trackScanRequestCompleted(): Generator<Task, void, SerializableResponse & void> {
-        yield* this.trackAvailability(true, {
+        yield* this.activityActionDispatcher.callTrackAvailability(true, {
             activityName: 'scanRequestCompleted',
         });
     }
@@ -265,119 +145,6 @@ export class OrchestrationStepsImpl implements OrchestrationSteps {
         return TestEnvironment.none;
     }
 
-    private *callGetScanStatusActivity(scanId: string): Generator<Task, SerializableResponse, SerializableResponse & void> {
-        const requestData: GetScanResultData = { scanId: scanId };
-
-        return yield* this.callWebRequestActivity(ActivityAction.getScanResult, requestData);
-    }
-
-    private *trackAvailability(
-        success: boolean,
-        properties: OrchestrationTelemetryProperties,
-    ): Generator<Task, void, SerializableResponse & void> {
-        const data: TrackAvailabilityData = {
-            name: 'workerAvailabilityTest',
-            telemetry: {
-                properties: {
-                    ...this.getDefaultLogProperties(),
-                    ...properties,
-                },
-                success: success,
-            },
-        };
-
-        yield* this.callActivity(ActivityAction.trackAvailability, false, data);
-    }
-
-    private *ensureSuccessStatusCode(
-        response: SerializableResponse,
-        activityName: string,
-    ): Generator<Task, void, SerializableResponse & void> {
-        if (response.statusCode < 200 || response.statusCode >= 300) {
-            this.logOrchestrationStep(`${activityName} activity failed`, LogLevel.error, {
-                requestResponse: JSON.stringify(response),
-                activityName,
-            });
-
-            yield* this.trackAvailability(false, {
-                requestResponse: JSON.stringify(response),
-                activityName: activityName,
-            });
-
-            throw new Error(`Request failed ${JSON.stringify(response)}`);
-        } else {
-            this.logOrchestrationStep(`${activityName} activity completed`, LogLevel.info, {
-                activityName,
-                requestResponse: JSON.stringify(response),
-            });
-        }
-    }
-
-    private getDefaultLogProperties(): OrchestrationTelemetryProperties {
-        return {
-            instanceId: this.context.df.instanceId,
-            isReplaying: this.context.df.isReplaying.toString(),
-            currentUtcDateTime: this.context.df.currentUtcDateTime.toUTCString(),
-        };
-    }
-
-    private logOrchestrationStep(message: string, logType: LogLevel = LogLevel.info, properties?: OrchestrationTelemetryProperties): void {
-        this.logger.log(message, logType, {
-            ...this.getDefaultLogProperties(),
-            ...properties,
-        });
-    }
-
-    private *callWebRequestActivity(
-        activityName: ActivityAction,
-        data?: unknown,
-    ): Generator<Task, SerializableResponse, SerializableResponse & void> {
-        return yield* this.callActivity(activityName, true, data);
-    }
-
-    private *callActivity(
-        activityName: ActivityAction,
-        isWebResponse: boolean,
-        data?: unknown,
-    ): Generator<Task, SerializableResponse, SerializableResponse & void> {
-        const activityRequestData: ActivityRequestData = {
-            activityName: activityName,
-            data: data,
-        };
-
-        this.logOrchestrationStep(`Executing '${activityName}' orchestration step.`);
-        const response = (yield this.context.df.callActivity(
-            OrchestrationStepsImpl.activityTriggerFuncName,
-            activityRequestData,
-        )) as SerializableResponse;
-
-        if (isWebResponse) {
-            yield* this.ensureSuccessStatusCode(response, activityName);
-        } else {
-            this.logOrchestrationStep(`${activityName} activity completed`);
-        }
-
-        return response;
-    }
-
-    private *getScanStatus(response: SerializableResponse): Generator<Task, ScanRunResultResponse, SerializableResponse & void> {
-        const scanErrorResultResponse = response.body as ScanRunErrorResponse;
-        if (isNil(scanErrorResultResponse.error)) {
-            return response.body as ScanRunResultResponse;
-        } else {
-            this.logOrchestrationStep('Scan request failed', LogLevel.error, {
-                requestResponse: JSON.stringify(response),
-            });
-
-            yield* this.trackAvailability(false, {
-                activityName: ActivityAction.getScanResult,
-                requestResponse: JSON.stringify(response),
-            });
-
-            throw new Error(`Request failed ${JSON.stringify(response)}`);
-        }
-    }
-
     private *getScanIdFromResponse(
         response: SerializableResponse,
         activityName: string,
@@ -385,11 +152,11 @@ export class OrchestrationStepsImpl implements OrchestrationSteps {
         const body = response.body as ScanRunResponse[];
         const scanRunResponse = body[0];
         if (scanRunResponse.error !== undefined) {
-            this.logOrchestrationStep('Scan request failed', LogLevel.error, {
+            this.logger.logOrchestrationStep('Scan request failed', LogLevel.error, {
                 requestResponse: JSON.stringify(response),
             });
 
-            yield* this.trackAvailability(false, {
+            yield* this.activityActionDispatcher.callTrackAvailability(false, {
                 activityName: activityName,
                 requestResponse: JSON.stringify(response),
             });
