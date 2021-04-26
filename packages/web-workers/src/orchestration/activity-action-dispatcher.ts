@@ -78,6 +78,8 @@ export class ActivityActionDispatcher {
         this.orchestrationLogger.logOrchestrationStep(`Starting ${taskName}`);
 
         yield this.context.df.Task.all(parallelTasks);
+
+        this.orchestrationLogger.logOrchestrationStep(`Completed ${taskName}`);
     }
 
     private *callActivityImpl(activityName: ActivityAction, logActivitySuccess: boolean, data?: unknown): Generator<Task, unknown, void> {

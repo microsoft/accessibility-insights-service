@@ -12,6 +12,7 @@ import { ActivityAction } from '../contracts/activity-actions';
 import { ActivityActionDispatcher } from './activity-action-dispatcher';
 import { OrchestrationLogger } from './orchestration-logger';
 import { OrchestrationTelemetryProperties } from './orchestration-telemetry-properties';
+import { ScanWaitCondition } from './scan-wait-conditions';
 
 export class ScanWaitOrchestrator {
     constructor(
@@ -25,8 +26,7 @@ export class ScanWaitOrchestrator {
         activityName: string,
         maxWaitTime: number,
         waitTimeInterval: number,
-        isCompleted: (requestResponse: ScanRunResultResponse) => boolean,
-        isSucceeded: (requestResponse: ScanRunResultResponse) => boolean = isCompleted,
+        waitConditions: ScanWaitCondition,
     ): Generator<Task, ScanRunResultResponse, SerializableResponse & void> {
         const waitStartTime = moment.utc(this.context.df.currentUtcDateTime);
         const waitEndTime = waitStartTime.clone().add(maxWaitTime, 'seconds');
@@ -47,12 +47,12 @@ export class ScanWaitOrchestrator {
             }
             scanStatus = scanResultResponse.body as ScanRunResultResponse;
 
-            completed = isCompleted(scanStatus);
+            completed = waitConditions.isSucceeded(scanStatus) || waitConditions.isFailed(scanStatus);
         }
 
         const totalWaitTimeInSeconds = moment.utc(this.context.df.currentUtcDateTime).diff(moment.utc(waitStartTime), 'seconds');
 
-        if (completed === true && isSucceeded(scanStatus)) {
+        if (completed === true && !waitConditions.isFailed(scanStatus)) {
             this.orchestrationLogger.logOrchestrationStep(`${activityName} succeeded`, LogLevel.info, {
                 totalWaitTimeInSeconds: totalWaitTimeInSeconds.toString(),
                 waitStartTime: waitStartTime.toJSON(),

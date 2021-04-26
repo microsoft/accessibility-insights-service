@@ -15,6 +15,7 @@ import { generatorStub } from '../test-utilities/generator-function';
 import { OrchestrationLogger } from './orchestration-logger';
 import { ScanWaitOrchestrator } from './scan-wait-orchestrator';
 import { ActivityActionDispatcher } from './activity-action-dispatcher';
+import { ScanWaitCondition } from './scan-wait-conditions';
 
 describe(ScanWaitOrchestrator, () => {
     let loggerMock: IMock<OrchestrationLogger>;
@@ -38,7 +39,7 @@ describe(ScanWaitOrchestrator, () => {
             },
         },
     } as SerializableResponse<ScanRunResultResponse>;
-    const completedScanStatusResponse = {
+    const succeededScanStatusResponse = {
         body: {
             scanId: scanId,
             run: {
@@ -46,9 +47,18 @@ describe(ScanWaitOrchestrator, () => {
             },
         },
     } as SerializableResponse<ScanRunResultResponse>;
+    const failedScanStatusResponse = {
+        body: {
+            scanId: scanId,
+            run: {
+                state: 'failed',
+            },
+        },
+    } as SerializableResponse<ScanRunResultResponse>;
     let currentScanStatusResponse: SerializableResponse<ScanResultResponse>;
     let trackAvailabilityCallback: jest.Mock;
-    const isCompletedStub = (scanStatus: ScanRunResultResponse) => scanStatus === completedScanStatusResponse.body;
+    const isSucceededStub = (scanStatus: ScanRunResultResponse) => scanStatus === succeededScanStatusResponse.body;
+    const isFailedStub = (scanStatus: ScanRunResultResponse) => scanStatus === failedScanStatusResponse.body;
 
     let testSubject: ScanWaitOrchestrator;
 
@@ -66,10 +76,14 @@ describe(ScanWaitOrchestrator, () => {
         nextTime1 = moment.utc(currentUtcDateTime).add(waitInterval, 'seconds');
         nextTime2 = nextTime1.clone().add(waitInterval, 'seconds');
         nextTime3 = nextTime2.clone().add(waitInterval, 'seconds');
+        const waitConditions: ScanWaitCondition = {
+            isSucceeded: isSucceededStub,
+            isFailed: isFailedStub,
+        };
 
         testSubject = new ScanWaitOrchestrator(context, activityActionDispatcherMock.object, loggerMock.object);
 
-        generatorExecutor = new GeneratorExecutor(testSubject.waitFor(scanId, activityName, maxWaitTime, waitInterval, isCompletedStub));
+        generatorExecutor = new GeneratorExecutor(testSubject.waitFor(scanId, activityName, maxWaitTime, waitInterval, waitConditions));
     });
 
     afterEach(() => {
@@ -99,8 +113,8 @@ describe(ScanWaitOrchestrator, () => {
         expect(trackAvailabilityCallback).toHaveBeenCalledTimes(1);
     });
 
-    it('succeeds if completed condition met before max time and no success condition provided', async () => {
-        setupWaitWithStatusChange(completedScanStatusResponse);
+    it('succeeds if success condition met before max time', async () => {
+        setupWaitWithStatusChange(succeededScanStatusResponse);
         activityActionDispatcherMock
             .setup((o) => o.callTrackAvailability(It.isAny(), It.isAny()))
             .returns(() => generatorStub(trackAvailabilityCallback))
@@ -109,55 +123,37 @@ describe(ScanWaitOrchestrator, () => {
         generatorExecutor.runTillEnd();
     });
 
-    it('succeeds if completed condition and success condition met before max time', async () => {
-        setupWaitWithStatusChange(completedScanStatusResponse);
-        activityActionDispatcherMock
-            .setup((o) => o.callTrackAvailability(It.isAny(), It.isAny()))
-            .returns(() => generatorStub(trackAvailabilityCallback))
-            .verifiable(Times.never());
-
-        generatorExecutor = new GeneratorExecutor(
-            testSubject.waitFor(scanId, activityName, maxWaitTime, waitInterval, isCompletedStub, () => true),
-        );
-        generatorExecutor.runTillEnd();
-
-        generatorExecutor.runTillEnd();
-    });
-
-    it('throws if completed with success condition not met', async () => {
-        setupWaitWithStatusChange(completedScanStatusResponse);
+    it('throws if completed with failure condition met', async () => {
+        setupWaitWithStatusChange(failedScanStatusResponse);
         activityActionDispatcherMock
             .setup((o) =>
                 o.callTrackAvailability(false, {
                     activityName: activityName,
-                    requestResponse: JSON.stringify(completedScanStatusResponse),
+                    requestResponse: JSON.stringify(failedScanStatusResponse),
                 }),
             )
             .returns(() => generatorStub(trackAvailabilityCallback))
             .verifiable(Times.once());
 
-        generatorExecutor = new GeneratorExecutor(
-            testSubject.waitFor(scanId, activityName, maxWaitTime, waitInterval, isCompletedStub, () => false),
-        );
         expect(() => generatorExecutor.runTillEnd()).toThrow();
 
         expect(trackAvailabilityCallback).toHaveBeenCalled();
     });
 
     it('throws if the scan failed with an error before max time', async () => {
-        const failedScanStatusResponse: SerializableResponse<ScanRunErrorResponse> = {
+        const errorScanStatusResponse: SerializableResponse<ScanRunErrorResponse> = {
             body: {
                 scanId: scanId,
                 error: {} as WebApiError,
             },
         } as SerializableResponse<ScanRunErrorResponse>;
 
-        setupWaitWithStatusChange(failedScanStatusResponse);
+        setupWaitWithStatusChange(errorScanStatusResponse);
         activityActionDispatcherMock
             .setup((o) =>
                 o.callTrackAvailability(false, {
                     activityName: ActivityAction.getScanResult,
-                    requestResponse: JSON.stringify(failedScanStatusResponse),
+                    requestResponse: JSON.stringify(errorScanStatusResponse),
                 }),
             )
             .returns(() => generatorStub(trackAvailabilityCallback))
