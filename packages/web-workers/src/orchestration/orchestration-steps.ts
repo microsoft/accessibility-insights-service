@@ -102,7 +102,7 @@ export class OrchestrationSteps {
         testContextData: TestContextData,
         testGroupNames: TestGroupName[],
     ): Generator<TaskSet, void, void> {
-        const activities: ActivityRequestData[] = testGroupNames.map((testGroupName: TestGroupName) => {
+        const activities: ActivityRequestData[] = testGroupNames?.map((testGroupName: TestGroupName) => {
             return {
                 activityName: ActivityAction.runFunctionalTestGroup,
                 data: {

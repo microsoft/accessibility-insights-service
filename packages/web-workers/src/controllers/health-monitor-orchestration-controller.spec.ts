@@ -8,7 +8,7 @@ import * as durableFunctions from 'durable-functions';
 import { IOrchestrationFunctionContext } from 'durable-functions/lib/src/classes';
 import { TestEnvironment } from 'functional-tests';
 import { It, Mock } from 'typemoq';
-import { OrchestrationStepsImpl } from '../orchestration/orchestration-steps';
+import { OrchestrationSteps } from '../orchestration/orchestration-steps';
 import { GeneratorExecutor } from '../test-utilities/generator-executor';
 import { MockableLogger } from '../test-utilities/mockable-logger';
 import { E2EScanScenario } from '../e2e-test-scenarios/e2e-scan-scenario';
@@ -17,19 +17,12 @@ import { generatorStub } from '../test-utilities/generator-function';
 import { HealthMonitorOrchestrationController } from './health-monitor-orchestration-controller';
 import { TestIdentifier } from './activity-request-data';
 
-/* eslint-disable
-  no-empty,
-  @typescript-eslint/no-empty-function,
-  @typescript-eslint/no-explicit-any,
-  @typescript-eslint/consistent-type-assertions
-*/
-
 describe('HealthMonitorOrchestrationController', () => {
     let testSubject: HealthMonitorOrchestrationController;
     let orchestratorIterator: GeneratorExecutor;
 
     const e2eScanScenarioMock = Mock.ofType<E2EScanScenario>();
-    const orchestrationStepsMock = Mock.ofType<OrchestrationStepsImpl>();
+    const orchestrationStepsMock = Mock.ofType<OrchestrationSteps>();
     const loggerMock = Mock.ofType(MockableLogger);
     const allTestIdentifiers: TestIdentifier[] = [{ testGroupName: 'PostScan', scenarioName: 'TestScenario' }];
 
@@ -62,6 +55,7 @@ describe('HealthMonitorOrchestrationController', () => {
             .returns(async () => availabilityTestConfig);
 
         const df = Mock.ofType<typeof durableFunctions>(undefined);
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
         const orchestratorGeneratorMock = Mock.ofInstance<(contextObj: IOrchestrationFunctionContext) => void>(() => {});
         df.setup((d) => d.orchestrator(It.isAny()))
             .callback((fn: (context: IOrchestrationFunctionContext) => IterableIterator<unknown>) => {

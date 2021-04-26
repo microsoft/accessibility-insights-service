@@ -1,8 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-/* eslint-disable import/no-internal-modules */
+
 import { AvailabilityTestConfig, SerializableResponse, ServiceConfiguration } from 'common';
 import * as durableFunctions from 'durable-functions';
+// eslint-disable-next-line import/no-internal-modules
 import { IOrchestrationFunctionContext, Task, TaskSet } from 'durable-functions/lib/src/classes';
 import { inject, injectable } from 'inversify';
 import { ContextAwareLogger } from 'logger';
@@ -11,7 +12,8 @@ import { finalizerTestGroupName } from '../e2e-test-group-names';
 import { createScenarios } from '../e2e-test-scenarios/create-scenarios';
 import { E2EScanScenario } from '../e2e-test-scenarios/e2e-scan-scenario';
 import { getTestIdentifiersForScenario } from '../e2e-test-scenarios/get-test-identifiers';
-import { OrchestrationSteps, OrchestrationStepsImpl } from '../orchestration/orchestration-steps';
+import { OrchestrationSteps } from '../orchestration/orchestration-steps';
+import { createOrchestrationSteps, OrchestrationStepsFactory } from '../orchestration/orchestration-steps-factory';
 import { WebApiConfig } from './web-api-config';
 
 @injectable()
@@ -25,7 +27,7 @@ export class HealthMonitorOrchestrationController extends WebController {
         @inject(WebApiConfig) private readonly webApiConfig: WebApiConfig,
         private readonly df = durableFunctions,
         private readonly e2eScenarioFactory: typeof createScenarios = createScenarios,
-        private readonly orchestrationStepsProvider: typeof createOrchestrationSteps = createOrchestrationSteps,
+        private readonly orchestrationStepsProvider: OrchestrationStepsFactory = createOrchestrationSteps,
         private readonly testIdentifiersProvider: typeof getTestIdentifiersForScenario = getTestIdentifiersForScenario,
     ) {
         super(logger);
@@ -107,12 +109,4 @@ export class HealthMonitorOrchestrationController extends WebController {
         // The last test group in a functional test suite to indicated a suite run completion
         yield* orchestrationSteps.runFunctionalTestGroups('Finalizer', undefined, [finalizerTestGroupName]);
     }
-}
-
-function createOrchestrationSteps(
-    context: IOrchestrationFunctionContext,
-    availabilityTestConfig: AvailabilityTestConfig,
-    logger: ContextAwareLogger,
-): OrchestrationSteps {
-    return new OrchestrationStepsImpl(context, availabilityTestConfig, logger);
 }
