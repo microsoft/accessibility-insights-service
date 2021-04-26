@@ -10,6 +10,7 @@ export class RuleExclusion {
         'aria-dialog-name',
         'aria-treeitem-name',
         'css-orientation-lock',
+        'duplicate-id',
         'empty-heading',
         'focus-order-semantics',
         'form-field-multiple-labels',
