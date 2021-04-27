@@ -9,9 +9,9 @@ import { inject, injectable } from 'inversify';
 import { ContextAwareLogger } from 'logger';
 import { WebController } from 'service-library';
 import { finalizerTestGroupName } from '../e2e-test-group-names';
-import { createScenarios } from '../e2e-test-scenarios/create-scenarios';
-import { E2EScanScenario } from '../e2e-test-scenarios/e2e-scan-scenario';
+import { createScenarioDrivers } from '../e2e-test-scenarios/create-scenarios';
 import { getTestIdentifiersForScenario } from '../e2e-test-scenarios/get-test-identifiers';
+import { ScanScenarioDriver } from '../e2e-test-scenarios/scan-scenario-driver';
 import { OrchestrationSteps } from '../orchestration/orchestration-steps';
 import { createOrchestrationSteps, OrchestrationStepsFactory } from '../orchestration/orchestration-steps-factory';
 import { WebApiConfig } from './web-api-config';
@@ -26,7 +26,7 @@ export class HealthMonitorOrchestrationController extends WebController {
         @inject(ContextAwareLogger) logger: ContextAwareLogger,
         @inject(WebApiConfig) private readonly webApiConfig: WebApiConfig,
         private readonly df = durableFunctions,
-        private readonly e2eScenarioFactory: typeof createScenarios = createScenarios,
+        private readonly e2eScenarioFactory: typeof createScenarioDrivers = createScenarioDrivers,
         private readonly orchestrationStepsProvider: OrchestrationStepsFactory = createOrchestrationSteps,
         private readonly testIdentifiersProvider: typeof getTestIdentifiersForScenario = getTestIdentifiersForScenario,
     ) {
@@ -65,7 +65,7 @@ export class HealthMonitorOrchestrationController extends WebController {
 
             const orchestrationSteps = thisObj.orchestrationStepsProvider(context, availabilityTestConfig, thisObj.logger);
 
-            const scenarios: E2EScanScenario[] = thisObj.e2eScenarioFactory(
+            const scenarios: ScanScenarioDriver[] = thisObj.e2eScenarioFactory(
                 orchestrationSteps,
                 availabilityTestConfig,
                 thisObj.webApiConfig,
@@ -99,7 +99,7 @@ export class HealthMonitorOrchestrationController extends WebController {
 
     private *beginE2ETestRun(
         orchestrationSteps: OrchestrationSteps,
-        scenarios: E2EScanScenario[],
+        scenarios: ScanScenarioDriver[],
     ): Generator<Task, void, SerializableResponse & void> {
         const testsToRun = scenarios.flatMap((scenario) => this.testIdentifiersProvider(scenario.testDefinition));
         yield* orchestrationSteps.logTestRunStart(testsToRun);

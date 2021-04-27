@@ -11,9 +11,9 @@ import { It, Mock } from 'typemoq';
 import { OrchestrationSteps } from '../orchestration/orchestration-steps';
 import { GeneratorExecutor } from '../test-utilities/generator-executor';
 import { MockableLogger } from '../test-utilities/mockable-logger';
-import { E2EScanScenario } from '../e2e-test-scenarios/e2e-scan-scenario';
 import { finalizerTestGroupName } from '../e2e-test-group-names';
 import { generatorStub } from '../test-utilities/generator-function';
+import { ScanScenarioDriver } from '../e2e-test-scenarios/scan-scenario-driver';
 import { HealthMonitorOrchestrationController } from './health-monitor-orchestration-controller';
 import { TestIdentifier } from './activity-request-data';
 
@@ -21,7 +21,7 @@ describe('HealthMonitorOrchestrationController', () => {
     let testSubject: HealthMonitorOrchestrationController;
     let orchestratorIterator: GeneratorExecutor;
 
-    const e2eScanScenarioMock = Mock.ofType<E2EScanScenario>();
+    const scanScenarioDriverMock = Mock.ofType<ScanScenarioDriver>();
     const orchestrationStepsMock = Mock.ofType<OrchestrationSteps>();
     const loggerMock = Mock.ofType(MockableLogger);
     const allTestIdentifiers: TestIdentifier[] = [{ testGroupName: 'PostScan', scenarioName: 'TestScenario' }];
@@ -70,7 +70,7 @@ describe('HealthMonitorOrchestrationController', () => {
                 baseUrl: 'some-url',
             },
             df.object,
-            (_, __, ___) => [e2eScanScenarioMock.object],
+            (_, __, ___) => [scanScenarioDriverMock.object],
             (_, __, ___) => orchestrationStepsMock.object,
             (_) => allTestIdentifiers,
         );
@@ -103,15 +103,15 @@ describe('HealthMonitorOrchestrationController', () => {
                 .returns((_) => generatorStub())
                 .verifiable();
 
-            e2eScanScenarioMock
+            scanScenarioDriverMock
                 .setup((m) => m.submitScanPhase())
                 .returns((_) => generatorStub())
                 .verifiable();
-            e2eScanScenarioMock
+            scanScenarioDriverMock
                 .setup((m) => m.waitForScanCompletionPhase())
                 .returns((_) => generatorStub())
                 .verifiable();
-            e2eScanScenarioMock
+            scanScenarioDriverMock
                 .setup((m) => m.afterScanCompletedPhase())
                 .returns((_) => generatorStub())
                 .verifiable();
@@ -119,7 +119,7 @@ describe('HealthMonitorOrchestrationController', () => {
             orchestratorIterator.runTillEnd();
 
             orchestrationStepsMock.verifyAll();
-            e2eScanScenarioMock.verifyAll();
+            scanScenarioDriverMock.verifyAll();
         });
     });
 });

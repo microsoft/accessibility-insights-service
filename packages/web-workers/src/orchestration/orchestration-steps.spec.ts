@@ -5,7 +5,7 @@ import 'reflect-metadata';
 import { AvailabilityTestConfig, SerializableResponse } from 'common';
 // eslint-disable-next-line import/no-internal-modules
 import { DurableOrchestrationContext, IOrchestrationFunctionContext } from 'durable-functions/lib/src/classes';
-import { IMock, Mock, MockBehavior } from 'typemoq';
+import { IMock, It, Mock, MockBehavior } from 'typemoq';
 import { ScanRunResponse, ScanRunResultResponse, WebApiError } from 'service-library';
 import { PostScanRequestOptions } from 'web-api-client';
 import { TestContextData, TestGroupName } from 'functional-tests';
@@ -214,6 +214,15 @@ describe(OrchestrationSteps, () => {
             generatorExecutor.runTillEnd();
 
             expect(runActivitiesCallback).toHaveBeenCalled();
+        });
+
+        it('handles undefined list', () => {
+            activityActionDispatcherMock
+                .setup((a) => a.callActivitiesInParallel(It.isAny(), It.isAny()))
+                .returns(() => generatorStub(() => null));
+
+            const generatorExecutor = new GeneratorExecutor(testSubject.runFunctionalTestGroups(scenarioName, testContextData, undefined));
+            generatorExecutor.runTillEnd();
         });
     });
 
