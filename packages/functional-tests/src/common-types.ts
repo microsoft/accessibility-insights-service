@@ -30,6 +30,7 @@ export interface TestRunLogProperties {
     testName: string;
     scenarioName: string;
     result: TestRunResult;
+    scanId?: string;
     error?: string;
 }
 
@@ -41,4 +42,5 @@ export interface TestContainerLogProperties {
     scenarioName: string;
     testContainer: string;
     result: TestRunResult;
+    scanId?: string;
 }

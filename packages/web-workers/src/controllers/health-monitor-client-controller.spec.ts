@@ -168,6 +168,7 @@ describe(HealthMonitorClientController, () => {
         });
 
         it('handles runFunctionalTestGroup', async () => {
+            const scanId = 'scan id';
             const data: RunFunctionalTestGroupData = {
                 runId: runId,
                 releaseId: releaseId,
@@ -177,6 +178,7 @@ describe(HealthMonitorClientController, () => {
                 },
                 testContextData: {
                     scanUrl: 'scanUrl',
+                    scanId: scanId,
                 },
                 environment: TestEnvironment.canary,
             };
@@ -189,6 +191,7 @@ describe(HealthMonitorClientController, () => {
                 releaseId: releaseId,
                 runId: runId,
                 scenarioName: scenarioName,
+                scanId: scanId,
             };
 
             let testContainer: any;

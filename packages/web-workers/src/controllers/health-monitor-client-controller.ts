@@ -111,6 +111,7 @@ export class HealthMonitorClientController extends WebController {
             releaseId: data.releaseId,
             runId: data.runId,
             scenarioName: data.test.scenarioName,
+            scanId: data.testContextData.scanId,
         };
 
         await this.testRunner.run(functionalTestGroup, testRunMetadata);
