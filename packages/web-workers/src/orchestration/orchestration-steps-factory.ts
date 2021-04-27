@@ -15,17 +15,21 @@ import { ScanWaitOrchestrator } from './scan-wait-orchestrator';
 export type OrchestrationStepsFactory = typeof createOrchestrationSteps;
 
 export function* createOrchestrationSteps(
-    context: IOrchestrationFunctionContext,
+    orchestrationContext: IOrchestrationFunctionContext,
     availabilityTestConfig: AvailabilityTestConfig,
     logger: Logger,
+    createActivityActionDispatcher: (context: IOrchestrationFunctionContext, logger: OrchestrationLogger) => ActivityActionDispatcher = (
+        context,
+        orchLogger,
+    ) => new ActivityActionDispatcher(context, orchLogger),
 ): Generator<Task, OrchestrationSteps, void> {
-    const orchestrationLogger = new OrchestrationLogger(context, logger);
-    const activityActionDispatcher = new ActivityActionDispatcher(context, orchestrationLogger);
-    const scanWaitOrchestrator = new ScanWaitOrchestrator(context, activityActionDispatcher, orchestrationLogger);
+    const orchestrationLogger = new OrchestrationLogger(orchestrationContext, logger);
+    const activityActionDispatcher = createActivityActionDispatcher(orchestrationContext, orchestrationLogger);
+    const scanWaitOrchestrator = new ScanWaitOrchestrator(orchestrationContext, activityActionDispatcher, orchestrationLogger);
     const webApiConfig = (yield* activityActionDispatcher.callActivity(ActivityAction.getWebApiConfig)) as WebApiConfig;
 
     return new OrchestrationSteps(
-        context,
+        orchestrationContext,
         availabilityTestConfig,
         orchestrationLogger,
         activityActionDispatcher,
