@@ -85,6 +85,10 @@ describe(OrchestrationSteps, () => {
         loggerMock.verifyAll();
     });
 
+    it('getWebApiConfig', () => {
+        expect(testSubject.getWebApiConfig()).toBe(webApiConfig);
+    });
+
     describe('invokeHealthCheckActivity', () => {
         it('triggers getHealthStatus', () => {
             const healthCheckCallback = jest.fn();

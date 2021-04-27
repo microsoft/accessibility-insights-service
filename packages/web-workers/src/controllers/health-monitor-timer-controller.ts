@@ -35,7 +35,6 @@ export class HealthMonitorTimerController extends WebController {
             {
                 FunctionName: this.orchestrationFuncName,
                 InstanceId: this.guidGenerator.createGuid(),
-                releaseId: process.env.RELEASE_VERSION,
             },
         ];
         this.context.bindings.orchestrationFunc = startArgs;
