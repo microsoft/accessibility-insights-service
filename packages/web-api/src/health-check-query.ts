@@ -19,6 +19,7 @@ customEvents
     testContainer = customDimensions.testContainer,
     testName = customDimensions.testName,
     scenarioName = customDimensions.scenarioName,
+    scanId = customDimensions.scanId,
     result = customDimensions.result,
     error = customDimensions.error
 | order by timestamp asc nulls last`;

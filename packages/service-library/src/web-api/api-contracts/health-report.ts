@@ -8,6 +8,7 @@ export interface TestRun {
     testContainer: string;
     testName: string;
     scenarioName: string;
+    scanId?: string;
     result: TestRunResult;
     error?: string;
     timestamp: Date;
