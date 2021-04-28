@@ -1,0 +1,49 @@
+version: 2
+updates:
+- package-ecosystem: npm
+  directory: "/"
+  schedule:
+    interval: weekly
+    day: wednesday
+    time: "13:00"
+  labels:
+  - "category: engineering"
+  - dependencies
+  versioning-strategy: increase
+  ignore:
+  - dependency-name: axe-core
+    versions:
+    - ">= 0"
+  - dependency-name: "@axe-core/puppeteer"
+    versions:
+    - ">= 0"
+  - dependency-name: "@types/node"
+    versions:
+    - ">= 0"
+  - dependency-name: puppeteer
+    versions:
+    - 8.0.0
+    - 9.0.0
+  - dependency-name: apify
+    versions:
+    - 1.0.0
+    - 1.0.1
+    - 1.0.2
+    - 1.1.1
+  - dependency-name: cheerio
+    versions:
+    - 1.0.0-rc.5
+  commit-message:
+    prefix: chore
+    include: scope
+- package-ecosystem: nuget
+  directory: "/packages/web-workers"
+  schedule:
+    interval: daily
+    time: "13:00"
+  labels:
+  - "category: engineering"
+  - dependencies
+  commit-message:
+    prefix: chore
+    include: scope
