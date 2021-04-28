@@ -7,7 +7,7 @@ import { TestContextData, TestGroupName } from 'functional-tests';
 import { Mock, IMock, It } from 'typemoq';
 import { PostScanRequestOptions } from 'web-api-client';
 import { E2ETestGroupNames } from '../e2e-test-group-names';
-import { OrchestrationSteps, OrchestrationStepsImpl } from '../orchestration-steps';
+import { OrchestrationSteps } from '../orchestration/orchestration-steps';
 import { GeneratorExecutor } from '../test-utilities/generator-executor';
 import { generatorStub } from '../test-utilities/generator-function';
 import { E2EScanScenarioDefinition } from './e2e-scan-scenario-definitions';
@@ -25,7 +25,7 @@ class TestableSingleScanScenario extends ScanScenarioDriver {
 }
 
 describe(ScanScenarioDriver, () => {
-    let orchestrationStepsMock: IMock<OrchestrationStepsImpl>;
+    let orchestrationStepsMock: IMock<OrchestrationSteps>;
 
     // Callback mocks to check whether or the generators created by
     // OrchestrationSteps were actually executed
@@ -64,7 +64,7 @@ describe(ScanScenarioDriver, () => {
         };
         testError = new Error('test error');
 
-        orchestrationStepsMock = Mock.ofType<OrchestrationStepsImpl>();
+        orchestrationStepsMock = Mock.ofType<OrchestrationSteps>();
         setupAllGeneratorCallbacks();
 
         testSubject = new TestableSingleScanScenario(orchestrationStepsMock.object, testDefinition);
