@@ -36,7 +36,7 @@ function waitForStablePoolNodes() {
     local nodeTypeContentSelector="[?poolId=='$pool']|[0].$nodeType"
 
     echo "Waiting for pool $pool $nodeType nodes to become stable after restart"
-    end=$((SECONDS + 1500))
+    end=$((SECONDS + 2700))
     printf " - Running .."
     while [ $SECONDS -le $end ]; do
         # Node states https://docs.microsoft.com/en-us/azure/batch/batch-get-resource-counts#node-state-counts
