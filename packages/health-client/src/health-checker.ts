@@ -2,11 +2,13 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
-import { ServiceConfiguration, System } from 'common';
+import { ensureDirectory, ResponseWithBodyType, ServiceConfiguration, System } from 'common';
 import { ConsoleLoggerClient, GlobalLogger } from 'logger';
-import { TestRunResult } from 'service-library';
+import { HealthReport, TestRunResult } from 'service-library';
 import { A11yServiceClient, A11yServiceCredential } from 'web-api-client';
 import * as yargs from 'yargs';
+import _ from 'lodash';
+import { ScanReportDownloader } from './scan-report-downloader';
 
 /* eslint-disable radix, @typescript-eslint/no-explicit-any, @typescript-eslint/strict-boolean-expressions */
 type Argv = {
@@ -17,6 +19,7 @@ type Argv = {
     evaluationIntervalInMinutes: string;
     releaseId: string;
     baseUrl: string;
+    reportDownloadDest: string;
 };
 
 const testTimeoutInMinutes = 75;
@@ -39,12 +42,13 @@ const argv: Argv = yargs.argv as any;
     await System.wait(waitTimeBeforeEvaluation);
 
     let healthStatus: TestRunResult;
+    let response: ResponseWithBodyType<HealthReport>;
     const startTime = new Date();
     while (healthStatus !== 'pass') {
         try {
             logger.logInfo('Retrieving functional tests result.');
 
-            const response = await client.checkHealth(`/release/${argv.releaseId}`);
+            response = await client.checkHealth(`/release/${argv.releaseId}`);
             if (response.statusCode !== 200) {
                 throw new Error(
                     JSON.stringify({ statusCode: response.statusCode, statusMessage: response.statusMessage, body: response.body }),
@@ -70,6 +74,21 @@ const argv: Argv = yargs.argv as any;
             await System.wait(evaluationInterval);
         } else {
             logger.logInfo('Functional tests succeeded.');
+
+            logger.logInfo('Downloading E2E scan reports...');
+            const uniqueScanTestRuns = _.compact(_.uniqBy(response.body.testRuns, (testRun) => testRun.scanId));
+            const directory = ensureDirectory(argv.reportDownloadDest);
+            const reportDownloader = new ScanReportDownloader(client, directory, logger);
+            await Promise.all(
+                uniqueScanTestRuns.map((testRun) => {
+                    const scanId = testRun.scanId;
+                    const scenarioName = testRun.scenarioName;
+
+                    // make sure directory exists!
+                    return reportDownloader.downloadReportsForScan(scanId, scenarioName);
+                }),
+            );
+            logger.logInfo('All reports downloaded.');
         }
     }
 })().catch((error) => {
