@@ -38,10 +38,12 @@ export interface RunFunctionalTestGroupData {
     test: TestIdentifier;
     testContextData: TestContextData;
     environment: TestEnvironment;
+    releaseId: string;
 }
 
 export interface LogTestRunStartData {
     testsToRun: TestIdentifier[];
     runId: string;
     environmentName: string;
+    releaseId: string;
 }

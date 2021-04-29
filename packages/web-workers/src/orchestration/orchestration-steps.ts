@@ -13,8 +13,10 @@ import {
     CreateScanRequestData,
     GetScanReportData,
     LogTestRunStartData,
+    RunFunctionalTestGroupData,
     TestIdentifier,
 } from '../controllers/activity-request-data';
+import { WebApiConfig } from '../controllers/web-api-config';
 import { ActivityActionDispatcher } from './activity-action-dispatcher';
 import { OrchestrationLogger } from './orchestration-logger';
 import { ScanWaitConditions } from './scan-wait-conditions';
@@ -27,7 +29,12 @@ export class OrchestrationSteps {
         private readonly logger: OrchestrationLogger,
         private readonly activityActionDispatcher: ActivityActionDispatcher,
         private readonly scanWaitOrchestrator: ScanWaitOrchestrator,
+        private readonly webApiConfig: WebApiConfig,
     ) {}
+
+    public getWebApiConfig(): WebApiConfig {
+        return this.webApiConfig;
+    }
 
     public *invokeHealthCheckRestApi(): Generator<Task, void, SerializableResponse & void> {
         yield* this.activityActionDispatcher.callWebRequestActivity(ActivityAction.getHealthStatus);
@@ -103,17 +110,20 @@ export class OrchestrationSteps {
         testGroupNames: TestGroupName[],
     ): Generator<TaskSet, void, void> {
         const activities: ActivityRequestData[] = testGroupNames?.map((testGroupName: TestGroupName) => {
+            const testData: RunFunctionalTestGroupData = {
+                runId: this.context.df.instanceId,
+                test: {
+                    testGroupName,
+                    scenarioName: testScenarioName,
+                },
+                testContextData,
+                environment: this.getTestEnvironment(this.availabilityTestConfig.environmentDefinition),
+                releaseId: this.webApiConfig.releaseId,
+            };
+
             return {
                 activityName: ActivityAction.runFunctionalTestGroup,
-                data: {
-                    runId: this.context.df.instanceId,
-                    test: {
-                        testGroupName,
-                        scenarioName: testScenarioName,
-                    },
-                    testContextData,
-                    environment: this.getTestEnvironment(this.availabilityTestConfig.environmentDefinition),
-                },
+                data: testData,
             };
         });
 
@@ -125,6 +135,7 @@ export class OrchestrationSteps {
             runId: this.context.df.instanceId,
             environmentName: this.availabilityTestConfig.environmentDefinition,
             testsToRun: testsToRun,
+            releaseId: this.webApiConfig.releaseId,
         };
         yield* this.activityActionDispatcher.callActivity(ActivityAction.logTestRunStart, activityData);
     }

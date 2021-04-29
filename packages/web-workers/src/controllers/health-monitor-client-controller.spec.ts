@@ -12,6 +12,7 @@ import { ActivityAction } from '../contracts/activity-actions';
 import { MockableLogger } from '../test-utilities/mockable-logger';
 import { ActivityRequestData, LogTestRunStartData, RunFunctionalTestGroupData, TrackAvailabilityData } from './activity-request-data';
 import { HealthMonitorClientController } from './health-monitor-client-controller';
+import { WebApiConfig } from './web-api-config';
 
 /* eslint-disable @typescript-eslint/consistent-type-assertions, @typescript-eslint/no-explicit-any */
 
@@ -63,8 +64,6 @@ describe(HealthMonitorClientController, () => {
         expectedResponse = {
             body: 'some body content',
         } as ResponseWithBodyType<any>;
-
-        process.env.RELEASE_VERSION = releaseId;
 
         testSubject = new HealthMonitorClientController(
             serviceConfigurationMock.object,
@@ -171,6 +170,7 @@ describe(HealthMonitorClientController, () => {
         it('handles runFunctionalTestGroup', async () => {
             const data: RunFunctionalTestGroupData = {
                 runId: runId,
+                releaseId: releaseId,
                 test: {
                     testGroupName: 'PostScan',
                     scenarioName: scenarioName,
@@ -211,6 +211,7 @@ describe(HealthMonitorClientController, () => {
         it('handles LogTestGroupStart', async () => {
             const data: LogTestRunStartData = {
                 runId: runId,
+                releaseId: releaseId,
                 testsToRun: [
                     {
                         testGroupName: 'PostScan',
@@ -247,6 +248,21 @@ describe(HealthMonitorClientController, () => {
             loggerMock.setup((l) => l.trackEvent('FunctionalTest', expectedLogProperties)).verifiable();
 
             await testSubject.invoke(context, args);
+        });
+
+        it('handles getWebApiConfig', async () => {
+            const expectedConfig: WebApiConfig = {
+                releaseId: 'release id',
+                baseUrl: 'base url',
+            };
+            process.env.RELEASE_VERSION = expectedConfig.releaseId;
+            process.env.WEB_API_BASE_URL = expectedConfig.baseUrl;
+            const args: ActivityRequestData = {
+                activityName: ActivityAction.getWebApiConfig,
+            };
+
+            const actualConfig = await testSubject.invoke(context, args);
+            expect(actualConfig).toEqual(expectedConfig);
         });
     });
 });

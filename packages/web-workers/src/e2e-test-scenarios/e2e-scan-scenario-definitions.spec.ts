@@ -16,11 +16,11 @@ describe('E2EScanScenarioDefinitions', () => {
     } as AvailabilityTestConfig;
     const webConfig: WebApiConfig = {
         baseUrl: 'base-url/',
+        releaseId: 'test-release-version',
     };
 
     it('creates request options appropriately from given configs', () => {
         const fakeDate = new Date('1/1/2000');
-        process.env.RELEASE_VERSION = 'test-release-version';
         const expectedRequestOptions = [
             {
                 scanNotificationUrl: 'base-url/scan-notify-api-endpoint',

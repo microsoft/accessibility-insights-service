@@ -19,6 +19,7 @@ import {
     RunFunctionalTestGroupData,
     TestIdentifier,
 } from '../controllers/activity-request-data';
+import { WebApiConfig } from '../controllers/web-api-config';
 import { OrchestrationSteps } from './orchestration-steps';
 import { ActivityActionDispatcher } from './activity-action-dispatcher';
 import { ScanWaitOrchestrator } from './scan-wait-orchestrator';
@@ -38,6 +39,10 @@ describe(OrchestrationSteps, () => {
     const scanUrl = 'https://www.bing.com';
     const scanId = 'test-scan-id';
     const notifyScanUrl = 'scan-notify-url-stub';
+    const webApiConfig: WebApiConfig = {
+        releaseId: 'releaseId',
+        baseUrl: 'base url',
+    };
 
     beforeEach(() => {
         orchestrationContext = Mock.ofType<DurableOrchestrationContext>();
@@ -69,6 +74,7 @@ describe(OrchestrationSteps, () => {
             loggerMock.object,
             activityActionDispatcherMock.object,
             scanWaitOrchestratorMock.object,
+            webApiConfig,
         );
     });
 
@@ -77,6 +83,10 @@ describe(OrchestrationSteps, () => {
         activityActionDispatcherMock.verifyAll();
         scanWaitOrchestratorMock.verifyAll();
         loggerMock.verifyAll();
+    });
+
+    it('getWebApiConfig', () => {
+        expect(testSubject.getWebApiConfig()).toBe(webApiConfig);
     });
 
     describe('invokeHealthCheckActivity', () => {
@@ -197,6 +207,7 @@ describe(OrchestrationSteps, () => {
                         },
                         testContextData,
                         environment: 1,
+                        releaseId: webApiConfig.releaseId,
                     } as RunFunctionalTestGroupData,
                 };
             });
@@ -239,6 +250,7 @@ describe(OrchestrationSteps, () => {
                 runId: orchestrationInstanceId,
                 environmentName: availabilityTestConfig.environmentDefinition,
                 testsToRun: testsToRun,
+                releaseId: webApiConfig.releaseId,
             };
             const logTestRunStartCallback = jest.fn();
 

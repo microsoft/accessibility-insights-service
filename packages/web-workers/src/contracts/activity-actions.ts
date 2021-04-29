@@ -9,4 +9,5 @@ export enum ActivityAction {
     trackAvailability = 'trackAvailability',
     runFunctionalTestGroup = 'runFunctionalTestGroup',
     logTestRunStart = 'logTestRunStart',
+    getWebApiConfig = 'getWebApiConfig',
 }

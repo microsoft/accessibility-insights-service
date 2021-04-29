@@ -3,23 +3,37 @@
 
 import { AvailabilityTestConfig } from 'common';
 // eslint-disable-next-line import/no-internal-modules
-import { IOrchestrationFunctionContext } from 'durable-functions/lib/src/classes';
-import { ContextAwareLogger } from 'logger';
+import { IOrchestrationFunctionContext, Task } from 'durable-functions/lib/src/classes';
+import { Logger } from 'logger';
+import { ActivityAction } from '../contracts/activity-actions';
+import { WebApiConfig } from '../controllers/web-api-config';
 import { ActivityActionDispatcher } from './activity-action-dispatcher';
 import { OrchestrationLogger } from './orchestration-logger';
 import { OrchestrationSteps } from './orchestration-steps';
 import { ScanWaitOrchestrator } from './scan-wait-orchestrator';
 
-export type OrchestrationStepsFactory = (
-    context: IOrchestrationFunctionContext,
+export type OrchestrationStepsFactory = typeof createOrchestrationSteps;
+
+export function* createOrchestrationSteps(
+    orchestrationContext: IOrchestrationFunctionContext,
     availabilityTestConfig: AvailabilityTestConfig,
-    logger: ContextAwareLogger,
-) => OrchestrationSteps;
+    logger: Logger,
+    createActivityActionDispatcher: (context: IOrchestrationFunctionContext, logger: OrchestrationLogger) => ActivityActionDispatcher = (
+        context,
+        orchLogger,
+    ) => new ActivityActionDispatcher(context, orchLogger),
+): Generator<Task, OrchestrationSteps, void> {
+    const orchestrationLogger = new OrchestrationLogger(orchestrationContext, logger);
+    const activityActionDispatcher = createActivityActionDispatcher(orchestrationContext, orchestrationLogger);
+    const scanWaitOrchestrator = new ScanWaitOrchestrator(orchestrationContext, activityActionDispatcher, orchestrationLogger);
+    const webApiConfig = (yield* activityActionDispatcher.callActivity(ActivityAction.getWebApiConfig)) as WebApiConfig;
 
-export const createOrchestrationSteps: OrchestrationStepsFactory = (context, availabilityTestConfig, logger) => {
-    const orchestrationLogger = new OrchestrationLogger(context, logger);
-    const activityActionDispatcher = new ActivityActionDispatcher(context, orchestrationLogger);
-    const scanWaitOrchestrator = new ScanWaitOrchestrator(context, activityActionDispatcher, orchestrationLogger);
-
-    return new OrchestrationSteps(context, availabilityTestConfig, orchestrationLogger, activityActionDispatcher, scanWaitOrchestrator);
-};
+    return new OrchestrationSteps(
+        orchestrationContext,
+        availabilityTestConfig,
+        orchestrationLogger,
+        activityActionDispatcher,
+        scanWaitOrchestrator,
+        webApiConfig,
+    );
+}

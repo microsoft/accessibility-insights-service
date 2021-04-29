@@ -14,7 +14,6 @@ import { getTestIdentifiersForScenario } from '../e2e-test-scenarios/get-test-id
 import { ScanScenarioDriver } from '../e2e-test-scenarios/scan-scenario-driver';
 import { OrchestrationSteps } from '../orchestration/orchestration-steps';
 import { createOrchestrationSteps, OrchestrationStepsFactory } from '../orchestration/orchestration-steps-factory';
-import { WebApiConfig } from './web-api-config';
 
 @injectable()
 export class HealthMonitorOrchestrationController extends WebController {
@@ -24,7 +23,6 @@ export class HealthMonitorOrchestrationController extends WebController {
     public constructor(
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
         @inject(ContextAwareLogger) logger: ContextAwareLogger,
-        @inject(WebApiConfig) private readonly webApiConfig: WebApiConfig,
         private readonly df = durableFunctions,
         private readonly e2eScenarioFactory: typeof createScenarioDrivers = createScenarioDrivers,
         private readonly orchestrationStepsProvider: OrchestrationStepsFactory = createOrchestrationSteps,
@@ -63,13 +61,9 @@ export class HealthMonitorOrchestrationController extends WebController {
             const thisObj = context.bindingData.controller as HealthMonitorOrchestrationController;
             const availabilityTestConfig = context.bindingData.availabilityTestConfig as AvailabilityTestConfig;
 
-            const orchestrationSteps = thisObj.orchestrationStepsProvider(context, availabilityTestConfig, thisObj.logger);
+            const orchestrationSteps = yield* thisObj.orchestrationStepsProvider(context, availabilityTestConfig, thisObj.logger);
 
-            const scenarios: ScanScenarioDriver[] = thisObj.e2eScenarioFactory(
-                orchestrationSteps,
-                availabilityTestConfig,
-                thisObj.webApiConfig,
-            );
+            const scenarios: ScanScenarioDriver[] = thisObj.e2eScenarioFactory(orchestrationSteps, availabilityTestConfig);
 
             yield* thisObj.beginE2ETestRun(orchestrationSteps, scenarios);
 

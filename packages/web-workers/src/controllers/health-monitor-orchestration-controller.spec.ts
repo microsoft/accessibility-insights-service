@@ -66,12 +66,9 @@ describe('HealthMonitorOrchestrationController', () => {
         testSubject = new HealthMonitorOrchestrationController(
             serviceConfigurationMock.object,
             loggerMock.object,
-            {
-                baseUrl: 'some-url',
-            },
             df.object,
-            (_, __, ___) => [scanScenarioDriverMock.object],
-            (_, __, ___) => orchestrationStepsMock.object,
+            (_, __) => [scanScenarioDriverMock.object],
+            (_, __, ___) => generatorStub(() => null, orchestrationStepsMock.object),
             (_) => allTestIdentifiers,
         );
     });
