@@ -14,7 +14,7 @@ import { System } from 'common';
 import { CliEntryPoint } from './cli-entry-point';
 import { ScanArguments } from './scan-arguments';
 import { setupCliContainer } from './setup-cli-container';
-import { validateCrawlArguments } from './validate-crawl-arguments';
+import { validateScanArguments } from './validate-scan-arguments';
 
 (async () => {
     const scanArguments = getScanArguments();
@@ -112,7 +112,7 @@ function getScanArguments(): ScanArguments {
             },
         })
         .check((args) => {
-            validateCrawlArguments(args as ScanArguments);
+            validateScanArguments(args as ScanArguments);
 
             return true;
         })

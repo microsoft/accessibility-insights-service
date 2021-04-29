@@ -14,4 +14,4 @@ export { setupCliContainer } from './setup-cli-container';
 export { AICombinedReportDataConverter } from './converter/ai-data-converter';
 export { CrawlerParametersBuilder } from './crawler-parameters-builder';
 export { ScanArguments } from './scan-arguments';
-export { validateCrawlArguments } from './validate-crawl-arguments';
+export { validateScanArguments } from './validate-scan-arguments';

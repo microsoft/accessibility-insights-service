@@ -1,7 +1,7 @@
 import { isEmpty } from 'lodash';
 import { ScanArguments } from './scan-arguments';
 
-export function validateCrawlArguments(args: ScanArguments): void {
+export function validateScanArguments(args: ScanArguments): void {
     if (args.crawl && isEmpty(args.url)) {
         throw new Error('The --url option is required for website crawling.');
     }
