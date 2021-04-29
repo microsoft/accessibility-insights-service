@@ -5,7 +5,7 @@ import { inject, injectable } from 'inversify';
 import { ReportDiskWriter } from '../report/report-disk-writer';
 import { ScanArguments } from '../scan-arguments';
 import { ConsolidatedReportGenerator } from '../report/consolidated-report-generator';
-import { CrawlerParametersBuilder } from '../crawler-parameters-builder';
+import { CrawlerParametersBuilder } from '../crawler/crawler-parameters-builder';
 import { AICrawler } from '../crawler/ai-crawler';
 import { CommandRunner } from './command-runner';
 

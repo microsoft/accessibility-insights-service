@@ -4,7 +4,7 @@ import fs from 'fs';
 import { injectable } from 'inversify';
 import { Url } from 'common';
 import { CrawlerRunOptions } from 'accessibility-insights-crawler';
-import { ScanArguments } from './scan-arguments';
+import { ScanArguments } from '../scan-arguments';
 
 @injectable()
 export class CrawlerParametersBuilder {

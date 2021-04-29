@@ -5,8 +5,8 @@ import 'reflect-metadata';
 import fs from 'fs';
 import { IMock, Mock } from 'typemoq';
 import { Url } from 'common';
+import { ScanArguments } from '../scan-arguments';
 import { CrawlerParametersBuilder } from './crawler-parameters-builder';
-import { ScanArguments } from './scan-arguments';
 
 let fileSystemMock: IMock<typeof fs>;
 let crawlerParametersBuilder: CrawlerParametersBuilder;
