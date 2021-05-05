@@ -39,7 +39,7 @@
     },
     "dependencies": {
         "@azure/cosmos": "^3.10.3",
-        "@azure/functions": "^1.2.2",
+        "@azure/functions": "^1.2.3",
         "axe-result-converter": "^1.0.0",
         "azure-services": "^1.0.0",
         "common": "^1.0.0",
