@@ -40,6 +40,11 @@ describe(AICrawler, () => {
         crawler = new AICrawler(crawlerMock.object, dbScanResultReaderMock.object, axeResultsReducerMock.object);
     });
 
+    afterEach(() => {
+        axeResultsReducerMock.verifyAll();
+        crawlerMock.verifyAll();
+    });
+
     it('crawl', async () => {
         const baseUrl = 'baseUrl-1';
         const scanMetadata = {
@@ -101,19 +106,14 @@ describe(AICrawler, () => {
         dbScanResultReaderMock.setup((o) => o[Symbol.asyncIterator]).returns(() => () => dbScanResultReaderMock.object);
 
         await crawler.crawl(crawlerOption);
-
-        crawlerMock.verifyAll();
-        axeResultsReducerMock.verifyAll();
     });
 
     it('crawling fail', async () => {
         crawlerMock
             .setup((o) => o.crawl(crawlerOption))
-            .returns(async () => Promise.reject())
+            .returns(() => Promise.reject('Internal error'))
             .verifiable();
 
-        await crawler.crawl(crawlerOption);
-
-        crawlerMock.verifyAll();
+        await expect(crawler.crawl(crawlerOption)).rejects.toEqual('Internal error');
     });
 });
