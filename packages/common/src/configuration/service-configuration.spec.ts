@@ -29,12 +29,12 @@ describe(ServiceConfiguration, () => {
 
     it('verifies dev config', async () => {
         setupVerifiableFileExistsCall(ServiceConfiguration.profilePath, false);
-        const keyToFetch = 'logConfig';
+        const keyToFetch = 'logConfig' as const;
         const expectedConfigValue = 'config value';
 
         setupVerifiableSchemaSetupCall();
         setupLoadCustomFileConfigCallsNotCalled();
-        configMock.setup((c) => c.get(keyToFetch)).returns(() => expectedConfigValue as any);
+        configMock.setup((c) => c.get<typeof keyToFetch>(keyToFetch)).returns(() => expectedConfigValue as any);
 
         const actualConfigValue = await testSubject.getConfigValue(keyToFetch);
 
@@ -46,11 +46,11 @@ describe(ServiceConfiguration, () => {
 
     it('loads config only once', async () => {
         setupVerifiableFileExistsCall(ServiceConfiguration.profilePath, false);
-        const keyToFetch = 'logConfig';
+        const keyToFetch = 'logConfig' as const;
         const expectedConfigValue = 'config value';
 
         setupVerifiableSchemaSetupCall();
-        configMock.setup((c) => c.get(keyToFetch)).returns(() => expectedConfigValue as any);
+        configMock.setup((c) => c.get<typeof keyToFetch>(keyToFetch)).returns(() => expectedConfigValue as any);
 
         let actualConfigValue = await testSubject.getConfigValue(keyToFetch);
         expect(actualConfigValue).toBe(expectedConfigValue);
@@ -63,13 +63,13 @@ describe(ServiceConfiguration, () => {
 
     it('verifies custom config', async () => {
         setupVerifiableFileExistsCall(ServiceConfiguration.profilePath, true);
-        const keyToFetch = 'logConfig';
+        const keyToFetch = 'logConfig' as const;
         const expectedConfigValue = 'config value';
 
         setupVerifiableSchemaSetupCall();
         setupVerifiableLoadCustomFileConfigCalls();
 
-        configMock.setup((c) => c.get(keyToFetch)).returns(() => expectedConfigValue as any);
+        configMock.setup((c) => c.get<typeof keyToFetch>(keyToFetch)).returns(() => expectedConfigValue as any);
 
         const actualConfigValue = await testSubject.getConfigValue(keyToFetch);
 
@@ -81,7 +81,7 @@ describe(ServiceConfiguration, () => {
 
     it('throws on custom config validation failure', async () => {
         setupVerifiableFileExistsCall(ServiceConfiguration.profilePath, true);
-        const keyToFetch = 'logConfig';
+        const keyToFetch = 'logConfig' as const;
         const expectedError = 'validation failed';
 
         setupVerifiableSchemaSetupCall();
