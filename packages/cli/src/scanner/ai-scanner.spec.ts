@@ -26,7 +26,7 @@ describe('AIScanner', () => {
 
     it('should launch browser page with given url and scan the page with axe-core', async () => {
         const url = 'some url';
-        const axeResultsStub = ('axe results' as any) as AxeResults;
+        const axeResultsStub = 'axe results' as any as AxeResults;
         setupNewPageCall();
         setupPageNavigateCall(url);
         setupPageScanCall(url, axeResultsStub);

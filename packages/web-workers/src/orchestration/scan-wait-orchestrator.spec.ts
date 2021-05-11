@@ -66,9 +66,9 @@ describe(ScanWaitOrchestrator, () => {
         loggerMock = Mock.ofType<OrchestrationLogger>();
         orchestrationContextMock = Mock.ofType<DurableOrchestrationContext>();
         orchestrationContextMock.setup((o) => o.currentUtcDateTime).returns(() => currentUtcDateTime);
-        context = ({
+        context = {
             df: orchestrationContextMock.object,
-        } as unknown) as IOrchestrationFunctionContext;
+        } as unknown as IOrchestrationFunctionContext;
         activityActionDispatcherMock = Mock.ofType<ActivityActionDispatcher>();
         trackAvailabilityCallback = jest.fn();
         currentScanStatusResponse = initialScanStatusResponse;

@@ -151,22 +151,19 @@ export class ServiceConfiguration {
                 messageVisibilityTimeoutInSeconds: {
                     format: 'int',
                     default: 30 * 1.5 * 60, // maxWallClockTimeInMinutes * delta termination wait time
-                    doc:
-                        'Message visibility timeout in seconds. Must correlate with jobManagerConfig.maxWallClockTimeInMinutes config value.',
+                    doc: 'Message visibility timeout in seconds. Must correlate with jobManagerConfig.maxWallClockTimeInMinutes config value.',
                 },
             },
             taskConfig: {
                 taskTimeoutInMinutes: {
                     format: 'int',
                     default: 10,
-                    doc:
-                        'Timeout value after which the task has to be terminated. Must correlate with queueConfig.messageVisibilityTimeoutInSeconds config value.',
+                    doc: 'Timeout value after which the task has to be terminated. Must correlate with queueConfig.messageVisibilityTimeoutInSeconds config value.',
                 },
                 retentionTimeInDays: {
                     format: 'int',
                     default: 3,
-                    doc:
-                        'The minimum time to retain the working directory for the task on the compute node where it ran, from the time it completes execution. After this time, the Batch service may delete the working directory and all its contents.',
+                    doc: 'The minimum time to retain the working directory for the task on the compute node where it ran, from the time it completes execution. After this time, the Batch service may delete the working directory and all its contents.',
                 },
                 maxTaskRetryCount: {
                     format: 'int',
@@ -188,8 +185,7 @@ export class ServiceConfiguration {
                 maxWallClockTimeInMinutes: {
                     format: 'int',
                     default: 30,
-                    doc:
-                        'The amount of time the job manager instance will run continuously. Must correlate with queueConfig.messageVisibilityTimeoutInSeconds config value.',
+                    doc: 'The amount of time the job manager instance will run continuously. Must correlate with queueConfig.messageVisibilityTimeoutInSeconds config value.',
                 },
                 sendNotificationTasksCount: {
                     format: 'int',
@@ -211,8 +207,7 @@ export class ServiceConfiguration {
                 failedScanRetryIntervalInMinutes: {
                     format: 'int',
                     default: 60,
-                    doc:
-                        'The minimum wait time before next retry of a failed scan request. Should be greater than queueConfig.messageVisibilityTimeoutInSeconds config value.',
+                    doc: 'The minimum wait time before next retry of a failed scan request. Should be greater than queueConfig.messageVisibilityTimeoutInSeconds config value.',
                 },
                 maxFailedScanRetryCount: {
                     format: 'int',
@@ -244,15 +239,13 @@ export class ServiceConfiguration {
                 minScanPriorityValue: {
                     format: 'int',
                     default: -1000,
-                    doc:
-                        'Priority values can range from -1000 to 1000, with -1000 being the lowest priority and 1000 being the highest priority.\
+                    doc: 'Priority values can range from -1000 to 1000, with -1000 being the lowest priority and 1000 being the highest priority.\
                         This range correlates with Azure Batch pool task priority range.',
                 },
                 maxScanPriorityValue: {
                     format: 'int',
                     default: 1000,
-                    doc:
-                        'Priority values can range from -1000 to 1000, with -1000 being the lowest priority and 1000 being the highest priority.\
+                    doc: 'Priority values can range from -1000 to 1000, with -1000 being the lowest priority and 1000 being the highest priority.\
                         This range correlates with Azure Batch pool task priority range.',
                 },
             },

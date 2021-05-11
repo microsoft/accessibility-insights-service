@@ -95,10 +95,10 @@ describe(HealthCheckController, () => {
 
     it('return internal error on app insights failure', async () => {
         context.bindingData.target = releaseTarget;
-        const failureResponse: ResponseWithBodyType<ApplicationInsightsQueryResponse> = ({
+        const failureResponse: ResponseWithBodyType<ApplicationInsightsQueryResponse> = {
             statusCode: 404,
             body: undefined,
-        } as any) as ResponseWithBodyType<ApplicationInsightsQueryResponse>;
+        } as any as ResponseWithBodyType<ApplicationInsightsQueryResponse>;
         setupAppInsightsResponse(failureResponse);
 
         await healthCheckController.handleRequest();
@@ -176,10 +176,10 @@ describe(HealthCheckController, () => {
                 },
             ],
         };
-        const successResponse: ResponseWithBodyType<ApplicationInsightsQueryResponse> = ({
+        const successResponse: ResponseWithBodyType<ApplicationInsightsQueryResponse> = {
             statusCode: 200,
             body: responseBody,
-        } as any) as ResponseWithBodyType<ApplicationInsightsQueryResponse>;
+        } as any as ResponseWithBodyType<ApplicationInsightsQueryResponse>;
         setupAppInsightsResponse(successResponse);
 
         const expectedResponseBody: HealthReport = {
@@ -251,10 +251,10 @@ describe(HealthCheckController, () => {
                 },
             ],
         };
-        const successResponse: ResponseWithBodyType<ApplicationInsightsQueryResponse> = ({
+        const successResponse: ResponseWithBodyType<ApplicationInsightsQueryResponse> = {
             statusCode: 200,
             body: responseBody,
-        } as any) as ResponseWithBodyType<ApplicationInsightsQueryResponse>;
+        } as any as ResponseWithBodyType<ApplicationInsightsQueryResponse>;
         setupAppInsightsResponse(successResponse, queryStringStub);
 
         const expectedResponseBody: HealthReport = {

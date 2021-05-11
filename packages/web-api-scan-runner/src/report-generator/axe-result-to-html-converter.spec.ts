@@ -26,9 +26,9 @@ describe('AxeResultToHtmlConverter', () => {
         reporterMock = Mock.ofType<Reporter>();
         const reporterFactory: ReporterFactory = () => reporterMock.object;
         axeHtmlResultConverter = new AxeResultToHtmlConverter(reporterFactory);
-        axeResults = ({
+        axeResults = {
             url: scanUrl,
-        } as unknown) as AxeResults;
+        } as unknown as AxeResults;
         htmlReport = {
             asHTML: () => htmlReportString,
         };

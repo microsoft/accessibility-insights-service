@@ -14,12 +14,12 @@ describe('AxeResultToSarifConverter', () => {
     let axeResults: AxeResults;
 
     beforeEach(() => {
-        sarifReport = ({ sarifLog: true } as unknown) as SarifLog;
+        sarifReport = { sarifLog: true } as unknown as SarifLog;
         convertAxeToSarifFuncMock = Mock.ofInstance((ar: AxeResults) => sarifReport);
         axeSarifResultConverter = new AxeResultToSarifConverter(convertAxeToSarifFuncMock.object);
-        axeResults = ({
+        axeResults = {
             testResults: true,
-        } as unknown) as AxeResults;
+        } as unknown as AxeResults;
     });
 
     it('has correct report type', () => {

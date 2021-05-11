@@ -33,11 +33,11 @@ describe(processWebRequest, () => {
     let context: Context;
 
     beforeEach(() => {
-        context = ({
+        context = {
             req: {
                 query: { 'api-version': '1.0' },
             },
-        } as unknown) as Context;
+        } as unknown as Context;
         process.env.APPINSIGHTS_INSTRUMENTATIONKEY = '00000000-0000-0000-0000-000000000000';
     });
 
