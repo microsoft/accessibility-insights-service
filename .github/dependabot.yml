@@ -1,0 +1,58 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
+version: 2
+updates:
+- package-ecosystem: nuget
+  directory: "/packages/web-workers"
+  schedule:
+    interval: daily
+    time: "11:00"
+    timezone: "America/Los_Angeles" # Pacific Time
+  labels:
+  - "category: engineering"
+  - dependencies
+  commit-message:
+    prefix: chore
+    include: scope
+- package-ecosystem: npm
+  directory: "/"
+  schedule:
+    interval: weekly
+    day: wednesday
+    time: "11:00"
+    timezone: "America/Los_Angeles" # Pacific Time
+  labels:
+  - "category: engineering"
+  - dependencies
+  commit-message:
+    prefix: chore
+    include: scope
+  versioning-strategy: increase
+  ignore:
+    # axe-core updates require extra validation and synchronization with
+    # accessibility-insights-web; we handle them as features, not auto-updates.
+  - dependency-name: axe-core
+    versions:
+    - ">= 0"
+  - dependency-name: "@axe-core/puppeteer"
+    versions:
+    - ">= 0"
+    # Major version of @types/node is pinned to match the version of node we
+    # use for builds (ideally, latest LTS)
+  - dependency-name: "@types/node"
+    versions:
+    - ">= 13.0.0"
+    # Updating to apify v1 requires a substantial engineering effort; auto-
+    # updates aren't useful until we've paid down that technical debt.
+  - dependency-name: apify
+    versions:
+    - ">= 1.0.0"
+    # puppeteer and cheerio versions are tightly coupled to apify; we can't
+    # take updates to them until we finish updating to apify v1
+  - dependency-name: puppeteer
+    versions:
+    - "> 5.3.1"
+  - dependency-name: cheerio
+    versions:
+    - "> 1.0.0-rc.3"
