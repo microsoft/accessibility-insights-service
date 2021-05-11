@@ -86,11 +86,11 @@ describe(Batch, () => {
         jobMock = Mock.ofType();
         taskMock = Mock.ofType();
         poolMock = Mock.ofType();
-        batchClientStub = ({
+        batchClientStub = {
             job: jobMock.object,
             task: taskMock.object,
             pool: poolMock.object,
-        } as unknown) as BatchServiceClient;
+        } as unknown as BatchServiceClient;
         loggerMock = Mock.ofType(MockableLogger);
         batchServiceClientProviderStub = async () => batchClientStub;
         storageContainerSASUrlProviderMock = Mock.ofType(StorageContainerSASUrlProvider);

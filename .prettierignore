@@ -30,3 +30,4 @@ copyright-header.txt
 **/extensions.csproj
 **/crawler_storage/
 **/ai_scan_cli_output/
+**/*.ps1

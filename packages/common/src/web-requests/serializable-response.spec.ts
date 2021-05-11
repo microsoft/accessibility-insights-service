@@ -20,21 +20,21 @@ describe('SerializableResponse', () => {
 
     beforeEach(() => {
         request = {
-            options: ({
+            options: {
                 url: new URL(urlString),
                 method,
                 headers: requestHeaders,
                 circularLink: response,
-            } as unknown) as NormalizedOptions,
+            } as unknown as NormalizedOptions,
         } as Request;
 
-        response = ({
+        response = {
             body,
             statusCode,
             headers: responseHeaders,
             request,
             unneededField: 'extra data',
-        } as unknown) as ResponseWithBodyType<string>;
+        } as unknown as ResponseWithBodyType<string>;
     });
 
     it('serializes response object', () => {

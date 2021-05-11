@@ -38,13 +38,13 @@ describe('HealthMonitorOrchestrationController', () => {
         scanNotifyFailApiEndpoint: '/some-fail-endpoint',
         maxDeepScanWaitTimeInSeconds: 40,
     };
-    const contextStub = ({
+    const contextStub = {
         bindingData: {},
         executionContext: {
             functionName: 'function-name',
             invocationId: 'id',
         },
-    } as unknown) as IOrchestrationFunctionContext;
+    } as unknown as IOrchestrationFunctionContext;
 
     beforeEach(() => {
         contextStub.bindingData = {};

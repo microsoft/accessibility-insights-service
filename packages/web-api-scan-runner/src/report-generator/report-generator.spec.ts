@@ -52,9 +52,9 @@ describe('ReportGenerator', () => {
             new AxeResultConverterStub(report2.content, report2.format),
         ];
         axeResults = {
-            results: ({
+            results: {
                 testResults: true,
-            } as unknown) as AxeResults,
+            } as unknown as AxeResults,
             pageResponseCode,
             pageTitle,
         };

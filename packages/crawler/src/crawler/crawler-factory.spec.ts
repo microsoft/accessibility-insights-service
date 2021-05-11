@@ -28,23 +28,23 @@ describe(CrawlerFactory, () => {
     });
 
     it('createPuppeteerCrawler', () => {
-        apifyMock.setup((a) => a.PuppeteerCrawler).returns(() => (PuppeteerCrawlerStub as unknown) as typeof Apify.PuppeteerCrawler);
+        apifyMock.setup((a) => a.PuppeteerCrawler).returns(() => PuppeteerCrawlerStub as unknown as typeof Apify.PuppeteerCrawler);
         const options: Apify.PuppeteerCrawlerOptions = {
             handlePageFunction: () => undefined,
         };
 
-        const crawler = (crawlerFactory.createPuppeteerCrawler(options) as unknown) as PuppeteerCrawlerStub;
+        const crawler = crawlerFactory.createPuppeteerCrawler(options) as unknown as PuppeteerCrawlerStub;
 
         expect(crawler.options).toBe(options);
     });
 
     it('createBasicCrawler', () => {
-        apifyMock.setup((a) => a.BasicCrawler).returns(() => (BasicCrawlerStub as unknown) as typeof Apify.BasicCrawler);
+        apifyMock.setup((a) => a.BasicCrawler).returns(() => BasicCrawlerStub as unknown as typeof Apify.BasicCrawler);
         const options: Apify.BasicCrawlerOptions = {
             handleRequestFunction: () => undefined,
         };
 
-        const crawler = (crawlerFactory.createBasicCrawler(options) as unknown) as BasicCrawlerStub;
+        const crawler = crawlerFactory.createBasicCrawler(options) as unknown as BasicCrawlerStub;
 
         expect(crawler.options).toBe(options);
     });

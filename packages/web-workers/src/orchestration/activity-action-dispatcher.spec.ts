@@ -29,9 +29,9 @@ describe(ActivityActionDispatcher, () => {
         orchestrationContextMock = Mock.ofType<DurableOrchestrationContext>();
         orchestrationContextMock.setup((o) => o.instanceId).returns(() => instanceId);
         orchestrationContextMock.setup((o) => o.currentUtcDateTime).returns(() => currentUtcDateTime);
-        context = ({
+        context = {
             df: orchestrationContextMock.object,
-        } as unknown) as IOrchestrationFunctionContext;
+        } as unknown as IOrchestrationFunctionContext;
 
         testSubject = new ActivityActionDispatcher(context, loggerMock.object);
     });
