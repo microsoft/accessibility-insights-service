@@ -3,18 +3,23 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
-import { ResponseWithBodyType } from 'common';
+import { ensureDirectory, ResponseWithBodyType } from 'common';
 import { Logger } from 'logger';
 import { ScanReport, ScanResultResponse, ScanRunErrorResponse, ScanRunResultResponse } from 'service-library';
 
 import { A11yServiceClient } from 'web-api-client';
 
 export class ScanReportDownloader {
+    private readonly downloadLocation: string;
     constructor(
         private readonly serviceClient: A11yServiceClient,
-        private readonly downloadLocation: string,
+        downloadLocation: string,
         private readonly logger: Logger,
-    ) {}
+        private readonly fsObj: typeof fs = fs,
+        ensureDirectoryFunc: typeof ensureDirectory = ensureDirectory,
+    ) {
+        this.downloadLocation = ensureDirectoryFunc(downloadLocation);
+    }
 
     public async downloadReportsForScan(scanId: string, fileNameBase: string): Promise<void> {
         const scanStatusResponse = await this.serviceClient.getScanStatus(scanId);
@@ -59,6 +64,6 @@ export class ScanReportDownloader {
         const filePath = path.join(this.downloadLocation, `${fileNameBase}.${report.format}`);
         this.logger.logInfo(`Writing report to ${filePath}`);
         // eslint-disable-next-line security/detect-non-literal-fs-filename
-        fs.writeFileSync(filePath, reportResponse.body);
+        this.fsObj.writeFileSync(filePath, reportResponse.body);
     }
 }
