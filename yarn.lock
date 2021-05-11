@@ -3138,10 +3138,17 @@
   dependencies:
     "@types/yargs-parser" "*"
 
-"@types/yargs@^15.0.0", "@types/yargs@^15.0.12":
+"@types/yargs@^15.0.0":
   version "15.0.12"
   resolved "https://registry.yarnpkg.com/@types/yargs/-/yargs-15.0.12.tgz#6234ce3e3e3fa32c5db301a170f96a599c960d74"
   integrity sha512-f+fD/fQAo3BCbCDlrUpznF1A5Zp9rB0noS5vnoormHSIPFKL0Z2DcUJ3Gxp5ytH4uLRNxy7AwYUC9exZzqGMAw==
+  dependencies:
+    "@types/yargs-parser" "*"
+
+"@types/yargs@^16.0.1":
+  version "16.0.1"
+  resolved "https://registry.yarnpkg.com/@types/yargs/-/yargs-16.0.1.tgz#5fc5d41f69762e00fbecbc8d4bf9dea47d8726f4"
+  integrity sha512-x4HABGLyzr5hKUzBC9dvjciOTm11WVH1NWonNjGgxapnTHu5SWUqyqn0zQ6Re0yQU0lsQ6ztLCoMAKDGZflyxA==
   dependencies:
     "@types/yargs-parser" "*"
 
@@ -11545,9 +11552,9 @@ socket.io-parser@>=3.4.1, socket.io-parser@~4.0.3:
     debug "~4.3.1"
 
 socket.io@>=2.4.0, socket.io@^2.3.0:
-  version "4.0.1"
-  resolved "https://registry.yarnpkg.com/socket.io/-/socket.io-4.0.1.tgz#d2e01cf3780d810b66182b3fbef08a04a4ccf924"
-  integrity sha512-g8eZB9lV0f4X4gndG0k7YZAywOg1VxYgCUspS4V+sDqsgI/duqd0AW84pKkbGj/wQwxrqrEq+VZrspRfTbHTAQ==
+  version "4.0.2"
+  resolved "https://registry.yarnpkg.com/socket.io/-/socket.io-4.0.2.tgz#90224ac83542b74ca7a45f8fb68dbc374b82e39d"
+  integrity sha512-1sVnsumrYTshhH2LWUtmzNvuZqkEOAG5PxcHpKu1r/sIDhzACTdo9XbvonVB2M90Y2CkTZnCWT6hlaKEkdBu5Q==
   dependencies:
     "@types/cookie" "^0.4.0"
     "@types/cors" "^2.8.8"
