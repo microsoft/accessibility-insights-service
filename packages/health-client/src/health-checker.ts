@@ -19,7 +19,7 @@ type Argv = {
     evaluationIntervalInMinutes: string;
     releaseId: string;
     baseUrl: string;
-    reportDownloadDest: string;
+    reportDownloadLocation: string;
 };
 
 const testTimeoutInMinutes = 75;
