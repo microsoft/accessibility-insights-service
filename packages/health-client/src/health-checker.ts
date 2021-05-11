@@ -77,7 +77,7 @@ const argv: Argv = yargs.argv as any;
 
             logger.logInfo('Downloading E2E scan reports...');
             const uniqueScanTestRuns = _.compact(_.uniqBy(response.body.testRuns, (testRun) => testRun.scanId));
-            const directory = ensureDirectory(argv.reportDownloadDest);
+            const directory = ensureDirectory(argv.reportDownloadLocation);
             const reportDownloader = new ScanReportDownloader(client, directory, logger);
             await Promise.all(
                 uniqueScanTestRuns.map((testRun) => {
