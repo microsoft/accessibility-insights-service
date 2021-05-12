@@ -206,8 +206,8 @@ export class ServiceConfiguration {
             scanConfig: {
                 failedScanRetryIntervalInMinutes: {
                     format: 'int',
-                    default: 60,
-                    doc: 'The minimum wait time before next retry of a failed scan request. Should be greater than queueConfig.messageVisibilityTimeoutInSeconds config value.',
+                    default: 45,
+                    doc: 'The minimum wait time before next retry of a failed scan request.',
                 },
                 maxFailedScanRetryCount: {
                     format: 'int',
