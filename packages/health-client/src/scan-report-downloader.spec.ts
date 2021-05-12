@@ -3,6 +3,7 @@
 import 'reflect-metadata';
 
 import * as fs from 'fs';
+import * as path from 'path';
 import { Logger } from 'logger';
 import { IMock, Mock, MockBehavior, Times } from 'typemoq';
 import { A11yServiceClient } from 'web-api-client';
@@ -110,7 +111,7 @@ describe(ScanReportDownloader, () => {
                 statusCode: 200,
                 body: reportContent,
             } as ResponseWithBodyType<Buffer>;
-            const filePath = `${downloadLocation}\\${fileNameBase}.${report.format}`;
+            const filePath = path.join(downloadLocation, `${fileNameBase}.${report.format}`);
 
             a11yServiceClientMock
                 .setup((a) => a.getScanReport(scanId, report.reportId))
@@ -137,7 +138,7 @@ describe(ScanReportDownloader, () => {
             statusCode: 200,
             body: reportContent,
         } as ResponseWithBodyType<Buffer>;
-        const filePath = `${downloadLocation}\\${fileNameBase}.${reports[1].format}`;
+        const filePath = path.join(downloadLocation, `${fileNameBase}.${reports[1].format}`);
 
         a11yServiceClientMock.setup((a) => a.getScanStatus(scanId)).returns(async () => scanStatusResponse);
         a11yServiceClientMock
