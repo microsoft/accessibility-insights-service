@@ -206,8 +206,8 @@ export class ServiceConfiguration {
             scanConfig: {
                 failedScanRetryIntervalInMinutes: {
                     format: 'int',
-                    default: 60,
-                    doc: 'The minimum wait time before next retry of a failed scan request. Should be greater than queueConfig.messageVisibilityTimeoutInSeconds config value.',
+                    default: 45,
+                    doc: 'The minimum wait time before next retry of a failed scan request.',
                 },
                 maxFailedScanRetryCount: {
                     format: 'int',
@@ -262,7 +262,7 @@ export class ServiceConfiguration {
                 },
                 maxScanWaitTimeInSeconds: {
                     format: 'int',
-                    default: 1800,
+                    default: 3600,
                     doc: 'Maximum wait time for scan request to complete',
                 },
                 maxScanCompletionNotificationWaitTimeInSeconds: {
@@ -277,8 +277,8 @@ export class ServiceConfiguration {
                 },
                 scanWaitIntervalInSeconds: {
                     format: 'int',
-                    default: 60,
-                    doc: 'Time to wait before checking the url scan status again',
+                    default: 180,
+                    doc: 'Time to wait before checking E2E test orchestration workflow activity result',
                 },
                 logQueryTimeRange: {
                     format: String,
