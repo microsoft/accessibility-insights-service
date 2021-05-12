@@ -29,7 +29,7 @@ Object {
       "format": "int",
     },
     "maxScanWaitTimeInSeconds": Object {
-      "default": 1800,
+      "default": 3600,
       "doc": "Maximum wait time for scan request to complete",
       "format": "int",
     },
@@ -44,8 +44,8 @@ Object {
       "format": "String",
     },
     "scanWaitIntervalInSeconds": Object {
-      "default": 60,
-      "doc": "Time to wait before checking the url scan status again",
+      "default": 180,
+      "doc": "Time to wait before checking E2E test orchestration workflow activity result",
       "format": "int",
     },
     "urlToScan": Object {
@@ -217,7 +217,7 @@ Object {
       "format": "int",
     },
     "maxScanWaitTimeInSeconds": Object {
-      "default": 1800,
+      "default": 3600,
       "doc": "Maximum wait time for scan request to complete",
       "format": "int",
     },
@@ -232,8 +232,8 @@ Object {
       "format": "String",
     },
     "scanWaitIntervalInSeconds": Object {
-      "default": 60,
-      "doc": "Time to wait before checking the url scan status again",
+      "default": 180,
+      "doc": "Time to wait before checking E2E test orchestration workflow activity result",
       "format": "int",
     },
     "urlToScan": Object {
