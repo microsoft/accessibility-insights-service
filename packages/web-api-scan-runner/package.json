@@ -53,7 +53,7 @@
         "@azure/cosmos": "^3.14.1",
         "accessibility-insights-crawler": "^1.0.0",
         "accessibility-insights-report": "4.2.0",
-        "apify": "^1.1.2",
+        "apify": "^1.2.0",
         "applicationinsights": "^2.1.8",
         "axe-core": "4.3.2",
         "axe-result-converter": "^1.0.0",
