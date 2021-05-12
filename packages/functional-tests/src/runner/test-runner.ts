@@ -14,6 +14,7 @@ export type TestRunMetadata = {
     releaseId: string;
     runId: string;
     scenarioName: string;
+    scanId?: string;
 };
 
 @injectable()

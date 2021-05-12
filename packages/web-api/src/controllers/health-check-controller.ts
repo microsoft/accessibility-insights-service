@@ -110,6 +110,7 @@ export class HealthCheckController extends ApiController {
                 testContainer: this.getColumnValue(columns, row, 'testContainer'),
                 testName: this.getColumnValue(columns, row, 'testName'),
                 scenarioName: this.getColumnValue(columns, row, 'scenarioName'),
+                scanId: this.getColumnValue(columns, row, 'scanId'),
                 result: result,
                 timestamp: new Date(this.getColumnValue(columns, row, 'timestamp')),
             };
