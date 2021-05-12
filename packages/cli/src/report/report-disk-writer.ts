@@ -5,15 +5,19 @@ import * as path from 'path';
 import filenamify from 'filenamify';
 import filenamifyUrl from 'filenamify-url';
 import { injectable } from 'inversify';
-import { isEmpty } from 'lodash';
 import normalizePath from 'normalize-path';
+import { ensureDirectory } from 'common';
 import { ReportFormats } from './report-formats';
 
 /* eslint-disable security/detect-non-literal-fs-filename */
 
 @injectable()
 export class ReportDiskWriter {
-    constructor(private readonly fileSystemObj: typeof fs = fs, private readonly pathObj: typeof path = path) {}
+    constructor(
+        private readonly fileSystemObj: typeof fs = fs,
+        private readonly pathObj: typeof path = path,
+        private readonly ensureDirectoryFunc: typeof ensureDirectory = ensureDirectory,
+    ) {}
 
     public writeToDirectory(directory: string, fileName: string, format: ReportFormats, content: string): string {
         let reportFileName;
@@ -23,25 +27,10 @@ export class ReportDiskWriter {
             reportFileName = `${filenamify(fileName, { replacement: '_' })}.${format}`;
         }
 
-        const normalizedDirectory = this.ensureDirectory(directory);
+        const normalizedDirectory = this.ensureDirectoryFunc(directory);
         const filePath = normalizePath(this.pathObj.resolve(normalizedDirectory, reportFileName));
         this.fileSystemObj.writeFileSync(filePath, content);
 
         return filePath;
-    }
-
-    private ensureDirectory(directory: string): string {
-        let normalizedDirectory: string;
-        if (isEmpty(directory)) {
-            normalizedDirectory = normalizePath(__dirname);
-        } else {
-            normalizedDirectory = normalizePath(directory);
-        }
-
-        if (!this.fileSystemObj.existsSync(normalizedDirectory)) {
-            this.fileSystemObj.mkdirSync(normalizedDirectory, { recursive: true });
-        }
-
-        return normalizedDirectory;
     }
 }
