@@ -109,7 +109,8 @@ export class Page {
 
         if (
             this.navigationResponse.request().redirectChain().length > 0 ||
-            (this.requestUrl !== undefined && this.requestUrl !== axeResults.url)
+            // comparison of encode normalized Urls is preferable
+            (this.requestUrl !== undefined && encodeURI(this.requestUrl) !== axeResults.url)
         ) {
             this.logger?.logWarn(`Scanning performed on redirected page`, { redirectedUrl: axeResults.url });
             scanResults.scannedUrl = axeResults.url;
