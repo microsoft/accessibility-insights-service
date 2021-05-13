@@ -46,7 +46,7 @@ describe(AxeScanner, () => {
         });
 
         it('should launch browser page with given url and scan the page with axe-core', async () => {
-            const axeResultsStub = ('axe results' as any) as AxeResults;
+            const axeResultsStub = 'axe results' as any as AxeResults;
 
             setupPageScanCall(axeResultsStub);
             setupWaitForPromisetoReturnOriginalPromise();

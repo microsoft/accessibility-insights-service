@@ -95,10 +95,10 @@ describe(HealthCheckController, () => {
 
     it('return internal error on app insights failure', async () => {
         context.bindingData.target = releaseTarget;
-        const failureResponse: ResponseWithBodyType<ApplicationInsightsQueryResponse> = ({
+        const failureResponse: ResponseWithBodyType<ApplicationInsightsQueryResponse> = {
             statusCode: 404,
             body: undefined,
-        } as any) as ResponseWithBodyType<ApplicationInsightsQueryResponse>;
+        } as any as ResponseWithBodyType<ApplicationInsightsQueryResponse>;
         setupAppInsightsResponse(failureResponse);
 
         await healthCheckController.handleRequest();
@@ -123,6 +123,7 @@ describe(HealthCheckController, () => {
                         { name: 'testName', type: 'dynamic' },
                         { name: 'result', type: 'dynamic' },
                         { name: 'scenarioName', type: 'dynamic' },
+                        { name: 'scanId', type: 'dynamic' },
                         { name: 'error', type: 'dynamic' },
                     ],
                     rows: [
@@ -136,6 +137,7 @@ describe(HealthCheckController, () => {
                             'testA1',
                             'pass',
                             'TestScenario1',
+                            'scan-id-1',
                         ],
                         [
                             '2020-01-13T03:11:00.352Z',
@@ -147,6 +149,7 @@ describe(HealthCheckController, () => {
                             'testB1',
                             'pass',
                             'TestScenario1',
+                            'scan-id-1',
                         ],
                         [
                             '2020-01-13T03:11:00.352Z',
@@ -169,6 +172,7 @@ describe(HealthCheckController, () => {
                             'testA3',
                             'fail',
                             'TestScenario2',
+                            'scan-id-2',
                             'error from test A3',
                         ],
                     ],
@@ -176,10 +180,10 @@ describe(HealthCheckController, () => {
                 },
             ],
         };
-        const successResponse: ResponseWithBodyType<ApplicationInsightsQueryResponse> = ({
+        const successResponse: ResponseWithBodyType<ApplicationInsightsQueryResponse> = {
             statusCode: 200,
             body: responseBody,
-        } as any) as ResponseWithBodyType<ApplicationInsightsQueryResponse>;
+        } as any as ResponseWithBodyType<ApplicationInsightsQueryResponse>;
         setupAppInsightsResponse(successResponse);
 
         const expectedResponseBody: HealthReport = {
@@ -192,6 +196,7 @@ describe(HealthCheckController, () => {
                     testContainer: 'ValidationATestGroup',
                     testName: 'testA1',
                     scenarioName: 'TestScenario1',
+                    scanId: 'scan-id-1',
                     result: 'pass',
                     timestamp: new Date('2020-01-13T03:11:00.352Z'),
                 },
@@ -199,6 +204,7 @@ describe(HealthCheckController, () => {
                     testContainer: 'ValidationBTestGroup',
                     testName: 'testB1',
                     scenarioName: 'TestScenario1',
+                    scanId: 'scan-id-1',
                     result: 'pass',
                     timestamp: new Date('2020-01-13T03:11:00.352Z'),
                 },
@@ -213,6 +219,7 @@ describe(HealthCheckController, () => {
                     testContainer: 'ValidationATestGroup',
                     testName: 'testA3',
                     scenarioName: 'TestScenario2',
+                    scanId: 'scan-id-2',
                     result: 'fail',
                     timestamp: new Date('2020-01-13T03:11:00.352Z'),
                     error: 'error from test A3',
@@ -251,10 +258,10 @@ describe(HealthCheckController, () => {
                 },
             ],
         };
-        const successResponse: ResponseWithBodyType<ApplicationInsightsQueryResponse> = ({
+        const successResponse: ResponseWithBodyType<ApplicationInsightsQueryResponse> = {
             statusCode: 200,
             body: responseBody,
-        } as any) as ResponseWithBodyType<ApplicationInsightsQueryResponse>;
+        } as any as ResponseWithBodyType<ApplicationInsightsQueryResponse>;
         setupAppInsightsResponse(successResponse, queryStringStub);
 
         const expectedResponseBody: HealthReport = {

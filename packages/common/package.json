@@ -22,7 +22,7 @@
     },
     "homepage": "https://github.com/Microsoft/accessibility-insights-service#readme",
     "devDependencies": {
-        "@types/convict": "^5.2.2",
+        "@types/convict": "^6.0.1",
         "@types/jest": "^26.0.22",
         "@types/node": "^12.12.54",
         "@types/sha.js": "^2.4.0",
@@ -41,9 +41,10 @@
         "got": "^11.8.1",
         "inversify": "^5.0.5",
         "lodash": "^4.17.21",
+        "normalize-path": "^3.0.0",
         "raw-body": "^2.4.1",
         "reflect-metadata": "^0.1.13",
-        "serialize-error": "^8.0.1",
+        "serialize-error": "^8.1.0",
         "sha.js": "^2.4.11",
         "uuid-with-v6": "^1.1.2",
         "wtfnode": "^0.8.4"

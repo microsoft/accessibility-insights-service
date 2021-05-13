@@ -6,6 +6,7 @@ import * as fs from 'fs';
 import path from 'path';
 import filenamifyUrl from 'filenamify-url';
 import { IMock, Mock, MockBehavior, Times } from 'typemoq';
+import { ensureDirectory } from 'common';
 import { ReportDiskWriter } from './report-disk-writer';
 
 /* eslint-disable no-empty,@typescript-eslint/no-empty-function, @typescript-eslint/consistent-type-assertions */
@@ -13,20 +14,23 @@ import { ReportDiskWriter } from './report-disk-writer';
 describe('ReportDiskWriter', () => {
     let fsMock: IMock<typeof fs>;
     let pathMock: IMock<typeof path>;
+    let ensureDirectoryMock: IMock<typeof ensureDirectory>;
     let testSubject: ReportDiskWriter;
 
     beforeEach(() => {
         fsMock = Mock.ofInstance(fs, MockBehavior.Strict);
         pathMock = Mock.ofInstance(path, MockBehavior.Strict);
-        testSubject = new ReportDiskWriter(fsMock.object, pathMock.object);
+        ensureDirectoryMock = Mock.ofInstance(() => null);
+        testSubject = new ReportDiskWriter(fsMock.object, pathMock.object, ensureDirectoryMock.object);
     });
 
     afterEach(() => {
         fsMock.verifyAll();
         pathMock.verifyAll();
+        ensureDirectoryMock.verifyAll();
     });
 
-    it('output directory exists', () => {
+    it('file name is url', () => {
         const directory = './root/dir1\\dir2';
         const expectedDirectory = './root/dir1/dir2';
         const fileName = 'http://www.bing.com';
@@ -40,24 +44,19 @@ describe('ReportDiskWriter', () => {
             .setup((fsm) => fsm.resolve(expectedDirectory, reportFileName))
             .returns(() => reportFilePath)
             .verifiable(Times.once());
-
-        fsMock
-            .setup((fsm) => fsm.existsSync(expectedDirectory))
-            .returns(() => true)
-            .verifiable(Times.once());
+        ensureDirectoryMock
+            .setup((ed) => ed(directory))
+            .returns(() => expectedDirectory)
+            .verifiable();
         fsMock
             .setup((fsm) => fsm.writeFileSync(reportFilePath, content))
             .returns(() => {})
             .verifiable(Times.once());
-        fsMock
-            .setup((fsm) => fsm.mkdirSync(expectedDirectory, { recursive: true }))
-            .returns(() => {})
-            .verifiable(Times.never());
 
         expect(testSubject.writeToDirectory(directory, fileName, format, content)).toEqual(reportFilePath);
     });
 
-    it('output directory does not exists/file name is not url', () => {
+    it('file name is not url', () => {
         const directory = '.';
         const fileName = 'file name';
         const format = 'json';
@@ -70,51 +69,15 @@ describe('ReportDiskWriter', () => {
             .setup((fsm) => fsm.resolve(directory, reportFileName))
             .returns(() => reportFilePath)
             .verifiable(Times.once());
-
-        fsMock
-            .setup((fsm) => fsm.existsSync('.'))
-            .returns(() => false)
-            .verifiable(Times.once());
+        ensureDirectoryMock
+            .setup((ed) => ed(directory))
+            .returns(() => directory)
+            .verifiable();
         fsMock
             .setup((fsm) => fsm.writeFileSync(reportFilePath, content))
-            .returns(() => {})
-            .verifiable(Times.once());
-        fsMock
-            .setup((fsm) => fsm.mkdirSync('.', { recursive: true }))
             .returns(() => {})
             .verifiable(Times.once());
 
         expect(testSubject.writeToDirectory(directory, fileName, format, content)).toEqual(reportFilePath);
-    });
-
-    it('output directory is empty', () => {
-        const platformSpecificDirectory = __dirname;
-        const normalizedDirectory = platformSpecificDirectory.replace(/\\/g, '/');
-        const fileName = 'http://www.bing.com';
-        const format = 'html';
-        const content = 'content';
-
-        const reportFileName = `${filenamifyUrl(fileName, { replacement: '_' })}.${format}`;
-        const reportFilePath = `${normalizedDirectory}/${reportFileName}`;
-
-        pathMock
-            .setup((fsm) => fsm.resolve(normalizedDirectory, reportFileName))
-            .returns(() => reportFilePath)
-            .verifiable(Times.once());
-
-        fsMock
-            .setup((fsm) => fsm.existsSync(normalizedDirectory))
-            .returns(() => false)
-            .verifiable(Times.once());
-        fsMock
-            .setup((fsm) => fsm.writeFileSync(reportFilePath, content))
-            .returns(() => {})
-            .verifiable(Times.once());
-        fsMock
-            .setup((fsm) => fsm.mkdirSync(normalizedDirectory, { recursive: true }))
-            .returns(() => {})
-            .verifiable(Times.once());
-
-        expect(testSubject.writeToDirectory('', fileName, format, content)).toEqual(reportFilePath);
     });
 });

@@ -33,7 +33,7 @@ import { CosmosContainerClient } from './storage/cosmos-container-client';
 import { CosmosKeyProvider } from './azure-cosmos/cosmos-key-provider';
 
 const cosmosClientFactoryStub = (options: CosmosClientOptions) => {
-    return ({ test: 'cosmosClient', options: options } as unknown) as CosmosClient;
+    return { test: 'cosmosClient', options: options } as unknown as CosmosClient;
 };
 
 describe('BatchServiceClient', () => {

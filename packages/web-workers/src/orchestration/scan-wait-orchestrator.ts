@@ -34,7 +34,7 @@ export class ScanWaitOrchestrator {
         let scanStatus: ScanRunResultResponse;
         let completed: boolean = false;
 
-        this.orchestrationLogger.logOrchestrationStep(`Starting ${activityName}`);
+        this.orchestrationLogger.logOrchestrationStep(`Starting ${activityName} orchestration activity`);
 
         while (completed !== true && moment.utc(this.context.df.currentUtcDateTime).isBefore(waitEndTime)) {
             yield* this.runTimer(waitTimeInterval, waitStartTime, waitEndTime);
@@ -53,7 +53,7 @@ export class ScanWaitOrchestrator {
         const totalWaitTimeInSeconds = moment.utc(this.context.df.currentUtcDateTime).diff(moment.utc(waitStartTime), 'seconds');
 
         if (completed === true && !waitConditions.isFailed(scanStatus)) {
-            this.orchestrationLogger.logOrchestrationStep(`${activityName} succeeded`, LogLevel.info, {
+            this.orchestrationLogger.logOrchestrationStep(`Orchestration activity ${activityName} has succeeded`, LogLevel.info, {
                 totalWaitTimeInSeconds: totalWaitTimeInSeconds.toString(),
                 waitStartTime: waitStartTime.toJSON(),
                 waitEndTime: waitEndTime.toJSON(),
@@ -103,7 +103,7 @@ export class ScanWaitOrchestrator {
         activityName: string,
         traceData?: OrchestrationTelemetryProperties,
     ): Generator<Task, void, SerializableResponse & void> {
-        this.orchestrationLogger.logOrchestrationStep(`${activityName} failed`, LogLevel.error, {
+        this.orchestrationLogger.logOrchestrationStep(`Orchestration activity ${activityName} has failed`, LogLevel.error, {
             requestResponse: JSON.stringify(response),
             ...traceData,
         });

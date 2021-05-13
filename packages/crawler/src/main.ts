@@ -29,7 +29,7 @@ interface ScanArguments {
 
 (async () => {
     dotenv.config();
-    const scanArguments = (yargs.argv as unknown) as ScanArguments;
+    const scanArguments = yargs.argv as unknown as ScanArguments;
 
     const container = new inversify.Container({ autoBindInjectable: true });
     await new Crawler(setupLocalCrawlerContainer(container)).crawl({

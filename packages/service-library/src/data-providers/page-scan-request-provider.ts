@@ -20,8 +20,7 @@ export class PageScanRequestProvider {
         itemsCount: number = 100,
     ): Promise<CosmosOperationResponse<OnDemandPageScanRequest[]>> {
         const query = {
-            query:
-                'SELECT TOP @itemsCount * FROM c WHERE c.partitionKey = @partitionKey and c.itemType = @itemType ORDER BY c.priority DESC',
+            query: 'SELECT TOP @itemsCount * FROM c WHERE c.partitionKey = @partitionKey and c.itemType = @itemType ORDER BY c.priority DESC',
             parameters: [
                 {
                     name: '@itemsCount',

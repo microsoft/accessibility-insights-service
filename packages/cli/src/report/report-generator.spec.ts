@@ -30,9 +30,9 @@ describe('ReportGenerator', () => {
         htmlReport = {
             asHTML: () => htmlReportString,
         };
-        axeResults = ({
+        axeResults = {
             url: scanUrl,
-        } as unknown) as AxeResults;
+        } as unknown as AxeResults;
 
         axeScanResults = { results: axeResults, pageTitle: 'page title', browserSpec: 'browser version' };
         reportGenerationTime = new Date(2019, 2, 3);

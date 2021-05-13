@@ -85,13 +85,13 @@ describe(Page, () => {
         loggerMock.verifyAll();
     });
 
-    function setupAxePuppeteerFactoryMock(): void {
+    function setupAxePuppeteerFactoryMock(axeResultUrl: string = 'axe result url'): void {
         puppeteerPageMock
             .setup(async (o) => o.title())
             .returns(() => Promise.resolve(scanResults.pageTitle))
             .verifiable();
 
-        axeResults = { url: 'axe result url' } as AxeResults;
+        axeResults = { url: axeResultUrl } as AxeResults;
         axePuppeteerMock
             .setup((o) => o.analyze())
             .returns(() => Promise.resolve(axeResults))
@@ -115,6 +115,25 @@ describe(Page, () => {
                 ...scanResults,
             } as AxeScanResults;
             setupPageConfigurator();
+
+            const axeScanResults = await page.scanForA11yIssues();
+
+            expect(axeScanResults).toEqual(expectedAxeScanResults);
+        });
+
+        it('scan page without redirected flag on encoded URL', async () => {
+            const requestUrl = 'http://localhost/страница';
+            const encodedRequestUrl = encodeURI(requestUrl);
+
+            setupAxePuppeteerFactoryMock(encodedRequestUrl);
+            simulatePageNavigation(puppeteerResponseMock.object);
+            const expectedAxeScanResults = {
+                results: { url: encodedRequestUrl },
+                ...scanResults,
+                scannedUrl: undefined, // redirected flag
+            } as AxeScanResults;
+            setupPageConfigurator();
+            page.requestUrl = requestUrl;
 
             const axeScanResults = await page.scanForA11yIssues();
 

@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import { inject, injectable } from 'inversify';
-import { System } from 'common';
 import { DbScanResultReader, CrawlerRunOptions, Crawler, ScanMetadata } from 'accessibility-insights-crawler';
 import { AxeResultsReducer, UrlCount, AxeCoreResults, AxeResultsList } from 'axe-result-converter';
 import { ScanResultReader } from '../scan-result-providers/scan-result-reader';
@@ -22,19 +22,11 @@ export class AICrawler {
     ) {}
 
     public async crawl(crawlerRunOptions: CrawlerRunOptions): Promise<CombinedScanResult> {
-        try {
-            await this.crawler.crawl(crawlerRunOptions);
-            const combinedAxeResult = await this.combineAxeResults();
-            combinedAxeResult.scanMetadata = await this.scanResultReader.getScanMetadata(crawlerRunOptions.baseUrl);
+        await this.crawler.crawl(crawlerRunOptions);
+        const combinedAxeResult = await this.combineAxeResults();
+        combinedAxeResult.scanMetadata = await this.scanResultReader.getScanMetadata(crawlerRunOptions.baseUrl);
 
-            return combinedAxeResult;
-        } catch (error) {
-            console.log(error, `An error occurred while scanning/crawling website page ${crawlerRunOptions.baseUrl}`);
-
-            return { error: System.serializeError(error) };
-        } finally {
-            console.log(`Accessibility scanning/crawling of URL ${crawlerRunOptions.baseUrl} completed`);
-        }
+        return combinedAxeResult;
     }
 
     private async combineAxeResults(): Promise<CombinedScanResult> {

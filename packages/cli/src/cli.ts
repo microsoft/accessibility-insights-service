@@ -28,7 +28,7 @@ import { validateScanArguments } from './validate-scan-arguments';
 function getScanArguments(): ScanArguments {
     const defaultOutputDir = 'ai_scan_cli_output';
 
-    return (yargs
+    return yargs
         .wrap(yargs.terminalWidth())
         .options({
             crawl: {
@@ -116,5 +116,5 @@ function getScanArguments(): ScanArguments {
 
             return true;
         })
-        .describe('help', 'Show help').argv as unknown) as ScanArguments;
+        .describe('help', 'Show help').argv as unknown as ScanArguments;
 }

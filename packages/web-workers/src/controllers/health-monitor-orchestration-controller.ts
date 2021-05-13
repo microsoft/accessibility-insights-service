@@ -5,6 +5,7 @@ import { AvailabilityTestConfig, SerializableResponse, ServiceConfiguration } fr
 import * as durableFunctions from 'durable-functions';
 // eslint-disable-next-line import/no-internal-modules
 import { IOrchestrationFunctionContext, Task, TaskSet } from 'durable-functions/lib/src/classes';
+import { TestContextData } from 'functional-tests';
 import { inject, injectable } from 'inversify';
 import { ContextAwareLogger } from 'logger';
 import { WebController } from 'service-library';
@@ -101,6 +102,6 @@ export class HealthMonitorOrchestrationController extends WebController {
 
     private *finalizeE2ETestRun(orchestrationSteps: OrchestrationSteps): Generator<TaskSet, void, SerializableResponse & void> {
         // The last test group in a functional test suite to indicated a suite run completion
-        yield* orchestrationSteps.runFunctionalTestGroups('Finalizer', undefined, [finalizerTestGroupName]);
+        yield* orchestrationSteps.runFunctionalTestGroups('Finalizer', {} as TestContextData, [finalizerTestGroupName]);
     }
 }

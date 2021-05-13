@@ -29,7 +29,7 @@ Object {
       "format": "int",
     },
     "maxScanWaitTimeInSeconds": Object {
-      "default": 1800,
+      "default": 3600,
       "doc": "Maximum wait time for scan request to complete",
       "format": "int",
     },
@@ -44,12 +44,12 @@ Object {
       "format": "String",
     },
     "scanWaitIntervalInSeconds": Object {
-      "default": 60,
-      "doc": "Time to wait before checking the url scan status again",
+      "default": 180,
+      "doc": "Time to wait before checking E2E test orchestration workflow activity result",
       "format": "int",
     },
     "urlToScan": Object {
-      "default": "https://teststorage57bzoqjjclekk.z13.web.core.windows.net/2021-04-13/",
+      "default": "https://teststorage57bzoqjjclekk.z13.web.core.windows.net/2021-05-04/",
       "doc": "Url to scan for availability testing",
       "format": "String",
     },
@@ -148,8 +148,8 @@ Object {
   },
   "scanConfig": Object {
     "failedScanRetryIntervalInMinutes": Object {
-      "default": 60,
-      "doc": "The minimum wait time before next retry of a failed scan request. Should be greater than queueConfig.messageVisibilityTimeoutInSeconds config value.",
+      "default": 45,
+      "doc": "The minimum wait time before next retry of a failed scan request.",
       "format": "int",
     },
     "maxFailedScanRetryCount": Object {
@@ -217,7 +217,7 @@ Object {
       "format": "int",
     },
     "maxScanWaitTimeInSeconds": Object {
-      "default": 1800,
+      "default": 3600,
       "doc": "Maximum wait time for scan request to complete",
       "format": "int",
     },
@@ -232,12 +232,12 @@ Object {
       "format": "String",
     },
     "scanWaitIntervalInSeconds": Object {
-      "default": 60,
-      "doc": "Time to wait before checking the url scan status again",
+      "default": 180,
+      "doc": "Time to wait before checking E2E test orchestration workflow activity result",
       "format": "int",
     },
     "urlToScan": Object {
-      "default": "https://teststorage57bzoqjjclekk.z13.web.core.windows.net/2021-04-13/",
+      "default": "https://teststorage57bzoqjjclekk.z13.web.core.windows.net/2021-05-04/",
       "doc": "Url to scan for availability testing",
       "format": "String",
     },
@@ -336,8 +336,8 @@ Object {
   },
   "scanConfig": Object {
     "failedScanRetryIntervalInMinutes": Object {
-      "default": 60,
-      "doc": "The minimum wait time before next retry of a failed scan request. Should be greater than queueConfig.messageVisibilityTimeoutInSeconds config value.",
+      "default": 45,
+      "doc": "The minimum wait time before next retry of a failed scan request.",
       "format": "int",
     },
     "maxFailedScanRetryCount": Object {
