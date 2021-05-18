@@ -29,6 +29,7 @@ addTagToVmss() {
 
 addResourceGroupNameTagToVMSS() {
     addTagToVmss "ResourceGroupName" "$resourceGroupName"
+    addTagToVmss "azsecpack" "nonprod"
 
     local vmssCreatedTime=$(
         az vmss show \
