@@ -16,13 +16,6 @@
                 "description": "The location in which the Azure resources should be deployed."
             }
         },
-        "enableSoftDeleteOnKeyVault": {
-            "defaultValue": true,
-            "type": "bool",
-            "metadata": {
-                "description": "Enables/Disables the soft delete option in key vault"
-            }
-        },
         "objectId": {
             "type": "string",
             "defaultValue": "f520d84c-3fd3-4cc8-88d4-2ed25b00d27a",
@@ -56,7 +49,7 @@
                 "enabledForDeployment": true,
                 "enabledForDiskEncryption": true,
                 "enabledForTemplateDeployment": true,
-                "enableSoftDelete": "[parameters('enableSoftDeleteOnKeyVault')]"
+                "enableSoftDelete": true
             }
         }
     ]

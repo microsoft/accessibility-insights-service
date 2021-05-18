@@ -8,7 +8,6 @@ set -eo pipefail
 
 export resourceGroupName
 export keyVault
-export enableSoftDeleteOnKeyVault
 
 # Set default ARM template files
 createKeyVaultTemplateFile="${0%/*}/../templates/key-vault-create.template.json"
@@ -58,7 +57,6 @@ function createKeyvaultIfNotExists() {
                 --template-file "$createKeyVaultTemplateFile" \
                 --parameters objectId=$objectId \
                 --query "properties.outputResources[].id" \
-                --parameters enableSoftDeleteOnKeyVault="$enableSoftDeleteOnKeyVault" \
                 -o tsv
         )
 
@@ -99,10 +97,9 @@ function setupKeyVaultResources() {
 }
 
 # Read script arguments
-while getopts ":r:k:c:p:e:" option; do
+while getopts ":r:c:p:e:" option; do
     case $option in
     r) resourceGroupName=${OPTARG} ;;
-    k) enableSoftDeleteOnKeyVault=${OPTARG} ;;
     c) webApiAdClientId=${OPTARG} ;;
     p) webApiAdClientSecret=${OPTARG} ;;
     e) environment=${OPTARG} ;;
@@ -111,7 +108,7 @@ while getopts ":r:k:c:p:e:" option; do
 done
 
 # Print script usage help
-if [[ -z $resourceGroupName ]] || [[ -z $enableSoftDeleteOnKeyVault ]] || [[ -z $webApiAdClientId ]] || [[ -z $webApiAdClientSecret ]]; then
+if [[ -z $resourceGroupName ]] || [[ -z $webApiAdClientId ]] || [[ -z $webApiAdClientSecret ]]; then
     exitWithUsageInfo
 fi
 

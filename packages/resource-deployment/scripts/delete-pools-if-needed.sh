@@ -8,7 +8,6 @@ set -eo pipefail
 export resourceGroupName
 export batchAccountName
 export keyVault
-export enableSoftDeleteOnKeyVault
 export pools
 
 kernelName=$(uname -s 2>/dev/null) || true
