@@ -5,6 +5,10 @@ import type { Spec } from 'axe-core';
 
 export type AxeConfiguration = Spec;
 
+// Note that @axe-core/puppeteer version range ">= 4.2.0 < 4.3.0" does not support
+// axe-core's allowedOrigins Spec property, which will cause these configurations to
+// be *silently* misapplied.
+
 export const cloudAxeConfiguration: AxeConfiguration = {
     // We allow this for our own cloud workers because we can verify *both* that they
     // only use isolated, non-privileged browser contexts *and* they run in a network

@@ -20,12 +20,12 @@
   dependencies:
     event-stream "3.3.4"
 
-"@axe-core/puppeteer@^4.2.0":
-  version "4.2.0"
-  resolved "https://registry.yarnpkg.com/@axe-core/puppeteer/-/puppeteer-4.2.0.tgz#a1edbfb5d3f96ee7819b3ed228ec1d43f91be52d"
-  integrity sha512-nInMAdv39aImtp87RmrE8L1H8neOMhF7zOfELpoxYvf1kqO+cGkSl6OPKFHA70oY8oqz04s1xej3VtMlrpp3Qg==
+"@axe-core/puppeteer@4.1.1":
+  version "4.1.1"
+  resolved "https://registry.yarnpkg.com/@axe-core/puppeteer/-/puppeteer-4.1.1.tgz#e9dd2f2f13b717c057ff68c5943dec8d4ddd8acf"
+  integrity sha512-Ao9N7HL//s26hdasx3Ba18tlJgxpoO+1SmIN6eSx5vC50dqYhiRU0xp6wBKWqzo10u1jpzl/s4RFsOAuolFMBA==
   dependencies:
-    axe-core "^4.2.0"
+    axe-core "^4.1.1"
 
 "@azure/abort-controller@^1.0.0":
   version "1.0.1"
@@ -4067,7 +4067,7 @@ aws4@^1.8.0:
   resolved "https://registry.yarnpkg.com/aws4/-/aws4-1.10.1.tgz#e1e82e4f3e999e2cfd61b161280d16a111f86428"
   integrity sha512-zg7Hz2k5lI8kb7U32998pRRFin7zJlkfezGJjUc2heaD4Pw2wObakCDVzkKztTm/Ln7eiVvYsjqak0Ed4LkMDA==
 
-axe-core@4.2.0, "axe-core@^3.2.2 || ^4.0.0", axe-core@^4.2.0:
+axe-core@4.2.0, "axe-core@^3.2.2 || ^4.0.0", axe-core@^4.1.1:
   version "4.2.0"
   resolved "https://registry.yarnpkg.com/axe-core/-/axe-core-4.2.0.tgz#6594db4ee62f78be79e32a7295d21b099b60668d"
   integrity sha512-1uIESzroqpaTzt9uX48HO+6gfnKu3RwvWdCcWSrX4csMInJfCo1yvKPNXCwXFRpJqRW25tiASb6No0YH57PXqg==

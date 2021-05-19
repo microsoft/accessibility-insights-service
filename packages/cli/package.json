@@ -57,7 +57,7 @@
         "webpack-node-externals": "^2.5.1"
     },
     "dependencies": {
-        "@axe-core/puppeteer": "^4.2.0",
+        "@axe-core/puppeteer": "4.1.1",
         "@medv/finder": "^2.0.0",
         "@sindresorhus/fnv1a": "^2.0.1",
         "accessibility-insights-report": "4.1.1",
