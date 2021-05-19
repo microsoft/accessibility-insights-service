@@ -53,10 +53,10 @@
         "@axe-core/puppeteer": "4.1.1",
         "@azure/cosmos": "^3.10.3",
         "accessibility-insights-crawler": "^1.0.0",
-        "accessibility-insights-report": "4.1.1",
+        "accessibility-insights-report": "4.1.2",
         "apify": "^0.21.8",
         "applicationinsights": "^1.8.10",
-        "axe-core": "4.2.0",
+        "axe-core": "4.2.1",
         "axe-sarif-converter": "^2.7.0",
         "axe-result-converter": "^1.0.0",
         "azure-services": "^1.0.0",
@@ -79,6 +79,6 @@
         "yargs": "^16.2.0"
     },
     "resolutions": {
-        "axe-core": "4.2.0"
+        "axe-core": "4.2.1"
     }
 }

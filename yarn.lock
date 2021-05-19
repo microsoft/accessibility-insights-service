@@ -3589,12 +3589,12 @@ accepts@~1.3.4, accepts@~1.3.7:
     mime-types "~2.1.24"
     negotiator "0.6.2"
 
-accessibility-insights-report@4.1.1:
-  version "4.1.1"
-  resolved "https://registry.yarnpkg.com/accessibility-insights-report/-/accessibility-insights-report-4.1.1.tgz#ae82b1163932fb0bc321c4181cbe235ba212b24a"
-  integrity sha512-q/SZOVti0Iy+GNQRuiOTBHa6oBKYdaFcDwgVz2g6+Uu8hqcQ+auP9DKrVdRRKbffBoisEqk4jZMlBgYrMvrW6w==
+accessibility-insights-report@4.1.2:
+  version "4.1.2"
+  resolved "https://registry.yarnpkg.com/accessibility-insights-report/-/accessibility-insights-report-4.1.2.tgz#f94df620c5e93764700ac72c97cef489f2e6e3d5"
+  integrity sha512-ONg8wlz290NtlkQbAS+aI30XY4JTxFQAPGot8MVti78fIMu4ddPslD3WSGUPKKDcyt1l6FybNa5jd4TL3j+c/w==
   dependencies:
-    axe-core "4.2.0"
+    axe-core "4.2.1"
     classnames "^2.3.1"
     lodash "^4.17.21"
     luxon "^1.26.0"
@@ -4067,10 +4067,10 @@ aws4@^1.8.0:
   resolved "https://registry.yarnpkg.com/aws4/-/aws4-1.10.1.tgz#e1e82e4f3e999e2cfd61b161280d16a111f86428"
   integrity sha512-zg7Hz2k5lI8kb7U32998pRRFin7zJlkfezGJjUc2heaD4Pw2wObakCDVzkKztTm/Ln7eiVvYsjqak0Ed4LkMDA==
 
-axe-core@4.2.0, "axe-core@^3.2.2 || ^4.0.0", axe-core@^4.1.1:
-  version "4.2.0"
-  resolved "https://registry.yarnpkg.com/axe-core/-/axe-core-4.2.0.tgz#6594db4ee62f78be79e32a7295d21b099b60668d"
-  integrity sha512-1uIESzroqpaTzt9uX48HO+6gfnKu3RwvWdCcWSrX4csMInJfCo1yvKPNXCwXFRpJqRW25tiASb6No0YH57PXqg==
+axe-core@4.2.1, "axe-core@^3.2.2 || ^4.0.0", axe-core@^4.1.1:
+  version "4.2.1"
+  resolved "https://registry.yarnpkg.com/axe-core/-/axe-core-4.2.1.tgz#2e50bcf10ee5b819014f6e342e41e45096239e34"
+  integrity sha512-evY7DN8qSIbsW2H/TWQ1bX3sXN1d4MNb5Vb4n7BzPuCwRHdkZ1H2eNLuSh73EoQqkGKUtju2G2HCcjCfhvZIAA==
 
 axe-sarif-converter@^2.7.0:
   version "2.7.0"
