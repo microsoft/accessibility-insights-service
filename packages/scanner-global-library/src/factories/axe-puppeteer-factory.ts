@@ -38,6 +38,7 @@ export class AxePuppeteerFactory {
         } else {
             // eslint-disable-next-line security/detect-non-literal-fs-filename
             const contentBuffer = this.fileSystemObj.readFileSync(contentSourcePath);
+
             return contentBuffer.toString();
         }
     }
