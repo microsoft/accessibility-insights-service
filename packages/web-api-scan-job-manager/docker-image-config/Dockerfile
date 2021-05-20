@@ -7,6 +7,7 @@ ENV NODE_VERSION 12.21.0
 
 USER ContainerAdministrator
 
+# Install Node.js
 RUN powershell Set-ExecutionPolicy RemoteSigned
 RUN powershell -Command \
     Invoke-WebRequest $('https://nodejs.org/dist/v{0}/node-v{0}-win-x64.zip' -f $env:NODE_VERSION) -OutFile 'node.zip' -UseBasicParsing ; \
