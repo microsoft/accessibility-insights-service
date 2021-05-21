@@ -1,14 +1,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
 
-# Multi-stage build
-
-FROM mcr.microsoft.com/windows:1809-amd64 as source
-
-# Copy Windows fonts to use in core image
-RUN powershell -Command \
-    Copy-Item -Path C:\Windows\Fonts -Exclude lucon.ttf -Destination C:\Fonts -Recurse
-
 FROM mcr.microsoft.com/windows/servercore:1809-amd64
 
 ENV NODE_VERSION 12.21.0
@@ -24,10 +16,10 @@ RUN powershell -Command \
 RUN setx /m PATH "%PATH%;C:\nodejs"
 
 # Install fonts to enable browser rendering
-COPY --from=source /Fonts/ /Fonts/
+ADD Fonts.tar /Fonts/
 COPY Add-Font.ps1 .
 RUN powershell -Command \
-    .\Add-Font.ps1 Fonts >$null
+    .\Add-Font.ps1 Fonts > nul
 
 # Bundle app package
 COPY . .
