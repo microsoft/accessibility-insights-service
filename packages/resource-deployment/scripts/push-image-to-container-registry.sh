@@ -30,6 +30,18 @@ if [[ -z $environment ]]; then
     environment="dev"
 fi
 
+function onExit() {
+    local exitCode=$?
+
+    if [[ $exitCode != 0 ]]; then
+        echo "Failed to push images to Azure Container Registry"
+    else
+        echo "Images successfully pushed to Azure Container Registry"
+    fi
+
+    exit $exitCode
+}
+
 pushImageToRegistry() {
     local name=$1
     local source=$2
@@ -67,6 +79,7 @@ imageBuildProcesses=(
 # Login to container registry
 az acr login --name "$containerRegistryName"
 
-echo "Pushing images to the container registry..."
+trap "onExit" EXIT
+
+echo "Pushing images to Azure Container Registry..."
 runCommandsWithoutSecretsInParallel imageBuildProcesses
-echo "Images pushed to the container registry"
