@@ -36,10 +36,15 @@ Get-AzMarketplaceTerms -Publisher 'microsoft-azure-batch' -Product 'ubuntu-serve
 
 -   Follow instructions from https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest
 
+    When installing Azure CLI for [Windows Subsystem for Linux (WSL)](https://docs.microsoft.com/en-us/windows/wsl/about) select a Linux corresponding distribution used with WSL.
+
 ### 4. Login to Azure-Cli
 
--   ```bash
+-   Login to Azure account and set the current active subscription:
+
+    ```bash
     az login
+    az account set --subscription <Name or ID of subscription>
     ```
 
 ### 5. Build repository
