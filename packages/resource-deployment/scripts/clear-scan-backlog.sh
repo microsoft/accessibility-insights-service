@@ -88,8 +88,8 @@ fi
 . "${0%/*}/get-resource-names.sh"
 . "${0%/*}/process-utilities.sh"
 
-echo "This script will delete all pending, accepted, and queued scans in resource group $resourceGroupName. DO NOT run this on production systems."
-read -p "proceed to delete in-progress scans? (y/n)" -n 1 -r
+echo "This script will delete all pending, accepted, and queued scans in resource group $resourceGroupName. DO NOT run this script on production systems."
+read -p "Proceed with deleting in-progress scans? (y/n)" -n 1 -r
 echo 
 
 if [[ $REPLY =~ ^[Yy]$ ]]; then
