@@ -19,6 +19,15 @@ This package is available on [npm](http://npmjs.com) as `accessibility-insights-
   npm install -g accessibility-insights-scan
 ```
 
+When installing package on [Windows Subsystem for Linux (WSL)](https://docs.microsoft.com/en-us/windows/wsl/about) follow the steps below.
+
+-   [Configure npm to use a different directory](https://docs.npmjs.com/resolving-eacces-permissions-errors-when-installing-packages-globally) to support global package installation.
+-   Install package globally:
+
+```sh
+  npm install --unsafe-perm=true -g accessibility-insights-scan
+```
+
 ## Example Usage
 
 ## Single URL Scan
