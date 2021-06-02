@@ -24,7 +24,7 @@
         "@types/dotenv": "^8.2.0",
         "@types/got": "^9.6.11",
         "@types/jest": "^26.0.23",
-        "@types/lodash": "^4.14.168",
+        "@types/lodash": "^4.14.170",
         "@types/node": "^12.12.54",
         "@types/puppeteer": "^3.0.0",
         "@types/sha.js": "^2.4.0",
