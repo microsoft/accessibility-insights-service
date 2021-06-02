@@ -2541,10 +2541,10 @@
   resolved "https://registry.yarnpkg.com/@types/component-emitter/-/component-emitter-1.2.10.tgz#ef5b1589b9f16544642e473db5ea5639107ef3ea"
   integrity sha512-bsjleuRKWmGqajMerkzox19aGbscQX5rmmvvXl3wlIp5gMG1HgkiwPxsN5p070fBDKTNSPgojVbuY1+HWMbFhg==
 
-"@types/convict@^6.0.1":
-  version "6.0.1"
-  resolved "https://registry.yarnpkg.com/@types/convict/-/convict-6.0.1.tgz#224832262e1e3b5a7cca5bcc88e550ca70b6b230"
-  integrity sha512-5094Bw9nSvkUNV7qqUvzDt6lgWZpKbpR/AJu8lmtojKa12nxtHHGrPFwK3YP4YZA1rCc2tbpI5TUEBU35eqVxg==
+"@types/convict@^6.0.2":
+  version "6.0.2"
+  resolved "https://registry.yarnpkg.com/@types/convict/-/convict-6.0.2.tgz#0827a974620931c69b64b3a52359f42de753e9fc"
+  integrity sha512-lYFEgTO7c36/Sq8+FKTn64jA/6B7xLeKv0/NZkWIaavMlBzlU5zgiyfJvl9rOTCxvlUT2rXTD6In5DmEGTK5+w==
   dependencies:
     "@types/node" "*"
 
