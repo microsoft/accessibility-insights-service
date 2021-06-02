@@ -24,7 +24,7 @@
     "devDependencies": {
         "@types/dotenv": "^8.2.0",
         "@types/jest": "^26.0.23",
-        "@types/lodash": "^4.14.168",
+        "@types/lodash": "^4.14.170",
         "@types/node": "^12.12.54",
         "jest": "^27.0.3",
         "jest-junit": "^12.1.0",
