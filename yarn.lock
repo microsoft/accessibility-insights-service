@@ -2541,10 +2541,10 @@
   resolved "https://registry.yarnpkg.com/@types/component-emitter/-/component-emitter-1.2.10.tgz#ef5b1589b9f16544642e473db5ea5639107ef3ea"
   integrity sha512-bsjleuRKWmGqajMerkzox19aGbscQX5rmmvvXl3wlIp5gMG1HgkiwPxsN5p070fBDKTNSPgojVbuY1+HWMbFhg==
 
-"@types/convict@^6.0.1":
-  version "6.0.1"
-  resolved "https://registry.yarnpkg.com/@types/convict/-/convict-6.0.1.tgz#224832262e1e3b5a7cca5bcc88e550ca70b6b230"
-  integrity sha512-5094Bw9nSvkUNV7qqUvzDt6lgWZpKbpR/AJu8lmtojKa12nxtHHGrPFwK3YP4YZA1rCc2tbpI5TUEBU35eqVxg==
+"@types/convict@^6.0.2":
+  version "6.0.2"
+  resolved "https://registry.yarnpkg.com/@types/convict/-/convict-6.0.2.tgz#0827a974620931c69b64b3a52359f42de753e9fc"
+  integrity sha512-lYFEgTO7c36/Sq8+FKTn64jA/6B7xLeKv0/NZkWIaavMlBzlU5zgiyfJvl9rOTCxvlUT2rXTD6In5DmEGTK5+w==
   dependencies:
     "@types/node" "*"
 
@@ -2766,10 +2766,15 @@
     "@types/node" "*"
     form-data "^3.0.0"
 
-"@types/node@*", "@types/node@>= 8", "@types/node@>=10.0.0":
+"@types/node@*", "@types/node@>= 8":
   version "15.6.1"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-15.6.1.tgz#32d43390d5c62c5b6ec486a9bc9c59544de39a08"
   integrity sha512-7EIraBEyRHEe7CH+Fm1XvgqU6uwZN8Q7jppJGcqjROMT29qhAuuOxYB1uEY5UMYQKEmA5D+5tBnhdaPXSsLONA==
+
+"@types/node@>=10.0.0":
+  version "15.6.2"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-15.6.2.tgz#c61d49f38af70da32424b5322eee21f97e627175"
+  integrity sha512-dxcOx8801kMo3KlU+C+/ctWrzREAH7YvoF3aoVpRdqgs+Kf7flp+PJDN/EX5bME3suDUZHsxes9hpvBmzYlWbA==
 
 "@types/node@^12", "@types/node@^12.12.54", "@types/node@^12.12.7":
   version "12.12.54"
@@ -8697,9 +8702,9 @@ map-visit@^1.0.0:
     object-visit "^1.0.0"
 
 marked@1.0.0, marked@>=1.1.1, marked@^2.0.0:
-  version "2.0.5"
-  resolved "https://registry.yarnpkg.com/marked/-/marked-2.0.5.tgz#2d15c759b9497b0e7b5b57f4c2edabe1002ef9e7"
-  integrity sha512-yfCEUXmKhBPLOzEC7c+tc4XZdIeTdGoRCZakFMkCxodr7wDXqoapIME4wjcpBPJLNyUnKJ3e8rb8wlAgnLnaDw==
+  version "2.0.7"
+  resolved "https://registry.yarnpkg.com/marked/-/marked-2.0.7.tgz#bc5b857a09071b48ce82a1f7304913a993d4b7d1"
+  integrity sha512-BJXxkuIfJchcXOJWTT2DOL+yFWifFv2yGYOUzvXg8Qz610QKw+sHCvTMYwA+qWGhlA2uivBezChZ/pBy1tWdkQ==
 
 match-all@^1.2.6:
   version "1.2.6"
