@@ -49,7 +49,7 @@
     "dependencies": {
         "azure-services": "^1.0.0",
         "common": "^1.0.0",
-        "inversify": "^5.0.5",
+        "inversify": "^5.1.1",
         "lodash": "^4.17.21",
         "logger": "1.0.0",
         "reflect-metadata": "^0.1.13",
