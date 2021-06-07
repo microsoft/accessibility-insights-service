@@ -62,7 +62,7 @@
         "accessibility-insights-report": "4.1.2",
         "apify": "^0.21.8",
         "apify-shared": "^0.5.0",
-        "applicationinsights": "^1.8.10",
+        "applicationinsights": "^2.1.0",
         "axe-core": "4.2.1",
         "cheerio": "^1.0.0-rc.3",
         "cli-spinner": "^0.2.10",
