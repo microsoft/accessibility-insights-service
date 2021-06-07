@@ -48,7 +48,7 @@
         "axe-core": "4.2.1",
         "cheerio": "^1.0.0-rc.3",
         "common": "^1.0.0",
-        "dotenv": "^8.2.0",
+        "dotenv": "^10.0.0",
         "encoding-down": "^7.0.0",
         "inversify": "^5.1.1",
         "leveldown": "^6.0.0",

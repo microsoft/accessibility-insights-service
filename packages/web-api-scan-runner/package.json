@@ -61,7 +61,7 @@
         "azure-services": "^1.0.0",
         "common": "^1.0.0",
         "cheerio": "^1.0.0-rc.3",
-        "dotenv": "^8.2.0",
+        "dotenv": "^10.0.0",
         "inversify": "^5.1.1",
         "leveldown": "^6.0.0",
         "lodash": "^4.17.21",

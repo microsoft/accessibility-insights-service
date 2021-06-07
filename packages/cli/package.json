@@ -67,7 +67,7 @@
         "cheerio": "^1.0.0-rc.3",
         "cli-spinner": "^0.2.10",
         "convict": "^6.1.0",
-        "dotenv": "^8.2.0",
+        "dotenv": "^10.0.0",
         "encoding-down": "^7.0.0",
         "filenamify": "^4.1.0",
         "filenamify-url": "^2.1.1",
