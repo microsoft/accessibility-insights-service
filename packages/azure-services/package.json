@@ -50,7 +50,7 @@
         "@azure/storage-queue": "^12.4.0",
         "common": "^1.0.0",
         "dotenv": "^8.2.0",
-        "got": "^11.8.1",
+        "got": "^11.8.2",
         "inversify": "^5.1.1",
         "lodash": "^4.17.21",
         "logger": "1.0.0",
