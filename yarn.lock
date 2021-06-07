@@ -2877,10 +2877,12 @@
   resolved "https://registry.yarnpkg.com/@types/stack-utils/-/stack-utils-2.0.0.tgz#7036640b4e21cc2f259ae826ce843d277dad8cff"
   integrity sha512-RJJrrySY7A8havqpGObOB4W92QXKJo63/jFLLgpvOtsGUqbQZ9Sbgl35KMm1DjC6j7AvmmU2bIno+3IyEaemaw==
 
-"@types/table@^6.0.0":
-  version "6.0.0"
-  resolved "https://registry.yarnpkg.com/@types/table/-/table-6.0.0.tgz#c3e8f1e0d80525036a7655fd650409e0230f1ead"
-  integrity sha512-RSmRiYetRzpcZcgNo4x6C1VSsPGBHCGGDO7Rbnz5esVLbGONxBP1CUcn8JhAkVzUVLO+AY8yOSkb27jvfauLyg==
+"@types/table@^6.3.2":
+  version "6.3.2"
+  resolved "https://registry.yarnpkg.com/@types/table/-/table-6.3.2.tgz#e18ad2594400d81c3da28c31b342eb5a0d87a8e7"
+  integrity sha512-GJ82z3vQbx2BhiUo12w2A3lyBpXPJrGHjQ7iS5aH925098w8ojqiWBhgOUy97JS2PKLmRCTLT0sI+gJI4futig==
+  dependencies:
+    table "*"
 
 "@types/tough-cookie@*", "@types/tough-cookie@^4.0.0":
   version "4.0.0"
@@ -11710,7 +11712,7 @@ syncpack@^5.7.11:
     read-yaml-file "2.0.0"
     semver "7.3.4"
 
-table@^6.0.9:
+table@*, table@^6.0.9:
   version "6.7.1"
   resolved "https://registry.yarnpkg.com/table/-/table-6.7.1.tgz#ee05592b7143831a8c94f3cee6aae4c1ccef33e2"
   integrity sha512-ZGum47Yi6KOOFDE8m223td53ath2enHcYLgOCjGr5ngu8bdIARQk6mN/wRMv4yMRcHnCSnHbCEha4sobQx5yWg==

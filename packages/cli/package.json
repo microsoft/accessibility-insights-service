@@ -34,7 +34,7 @@
         "@types/lodash": "^4.14.170",
         "@types/node": "^12.20.14",
         "@types/normalize-path": "^3.0.0",
-        "@types/table": "^6.0.0",
+        "@types/table": "^6.3.2",
         "accessibility-insights-crawler": "^1.0.0",
         "axe-result-converter": "^1.0.0",
         "common": "^1.0.0",
