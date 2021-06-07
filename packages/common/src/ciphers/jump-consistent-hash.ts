@@ -7,7 +7,7 @@
  * Based on whitepaper 'A Fast, Minimal Memory, Consistent Hash Algorithm' https://arxiv.org/abs/1406.2294
  */
 export class JumpConsistentHash {
-    public getBucket(key: number | string | BigInt, buckets: number): number {
+    public getBucket(key: number | string | bigint, buckets: number): number {
         let keyBigInt = BigInt(key);
         let b = -1n;
         let j = 0n;
