@@ -40,6 +40,6 @@
         "functional-tests": "1.0.0",
         "logger": "1.0.0",
         "chai": "^4.3.4",
-        "yargs": "^16.2.0"
+        "yargs": "^17.0.1"
     }
 }
