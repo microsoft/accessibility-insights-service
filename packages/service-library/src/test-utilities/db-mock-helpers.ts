@@ -21,7 +21,9 @@ const cosmosDbKey: string = undefined;
 
 export class DbMockHelper {
     public dbContainer: DbContainer;
+
     public cosmosClient: CosmosClientWrapper;
+
     private azureCosmosClient: cosmos.CosmosClient;
 
     public isDbTestSupported(): boolean {

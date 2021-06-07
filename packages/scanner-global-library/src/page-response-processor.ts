@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import { injectable } from 'inversify';
 import { Response } from 'puppeteer';
 import { BrowserError, BrowserErrorTypes } from './browser-error';
@@ -8,6 +9,7 @@ import { navigationErrorPatterns as errorPatterns } from './navigation-error-pat
 @injectable()
 export class PageResponseProcessor {
     constructor(private readonly navigationErrorPatterns: Partial<Record<BrowserErrorTypes, string[]>> = errorPatterns) {}
+
     public getResponseError(response: Response, error: Error = new Error()): BrowserError {
         if (!response.ok()) {
             return {

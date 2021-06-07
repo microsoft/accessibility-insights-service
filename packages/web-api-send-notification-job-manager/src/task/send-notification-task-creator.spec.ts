@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import 'reflect-metadata';
 
 import { Batch, BatchConfig, Message, PoolMetricsInfo, Queue, StorageConfig } from 'azure-services';

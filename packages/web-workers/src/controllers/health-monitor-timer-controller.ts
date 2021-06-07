@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import { GuidGenerator, ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
 import { ContextAwareLogger } from 'logger';
@@ -11,7 +12,9 @@ import { FunctionTimer } from '../contracts/function-timer';
 @injectable()
 export class HealthMonitorTimerController extends WebController {
     public readonly apiVersion = '1.0';
+
     public readonly apiName = 'health-monitor-timer';
+
     private readonly orchestrationFuncName = 'health-monitor-orchestration-func';
 
     public constructor(

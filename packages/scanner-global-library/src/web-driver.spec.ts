@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import 'reflect-metadata';
 
 import { ChildProcess } from 'child_process';
@@ -16,7 +17,9 @@ type puppeteerConnect = (options?: Puppeteer.ConnectOptions) => Promise<Puppetee
 
 class PuppeteerBrowserMock {
     public isClosed: boolean;
+
     public browserPages: Puppeteer.Page[];
+
     public childProcess: ChildProcess;
 
     public async close(): Promise<void> {

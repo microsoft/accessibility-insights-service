@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import { PromiseUtils } from 'common';
 import { inject, injectable, optional } from 'inversify';
 import { GlobalLogger, Logger } from 'logger';
@@ -9,6 +10,7 @@ import { defaultBrowserOptions, defaultLaunchOptions } from './puppeteer-options
 @injectable()
 export class WebDriver {
     public browser: Puppeteer.Browser;
+
     private readonly browserCloseTimeout = 60000;
 
     constructor(

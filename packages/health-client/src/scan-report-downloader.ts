@@ -11,6 +11,7 @@ import { A11yServiceClient } from 'web-api-client';
 
 export class ScanReportDownloader {
     private readonly downloadLocation: string;
+
     constructor(
         private readonly serviceClient: A11yServiceClient,
         downloadLocation: string,

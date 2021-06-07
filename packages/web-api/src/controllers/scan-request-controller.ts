@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import { GuidGenerator, RestApiConfig, ServiceConfiguration, Url } from 'common';
 import { inject, injectable } from 'inversify';
 import { isEmpty, isNil } from 'lodash';
@@ -28,7 +29,9 @@ interface RunRequestValidationResult {
 @injectable()
 export class ScanRequestController extends ApiController {
     public readonly apiVersion = '1.0';
+
     public readonly apiName = 'web-api-post-scans';
+
     private config: RestApiConfig;
 
     public constructor(

@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as crypto from 'crypto';
 import { VError } from 'verror';
@@ -23,8 +24,11 @@ export enum JobTaskExecutionResult {
 
 export class JobTask {
     public readonly id: string;
+
     public state: string = JobTaskState.new;
+
     public result: string;
+
     public error?: string;
 
     constructor(public correlationId: string = '') {

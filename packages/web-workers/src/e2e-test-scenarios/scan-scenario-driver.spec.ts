@@ -17,6 +17,7 @@ import { ScanScenarioDriver } from './scan-scenario-driver';
 
 class TestableSingleScanScenario extends ScanScenarioDriver {
     public testContextData: TestContextData;
+
     public encounteredError: boolean;
 
     constructor(orchestrationSteps: OrchestrationSteps, testDefinition: E2EScanScenarioDefinition) {

@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import { interfaces } from 'inversify';
 import { System } from '../system/system';
 

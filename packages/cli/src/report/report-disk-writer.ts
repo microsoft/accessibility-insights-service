@@ -1,8 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import * as fs from 'fs';
 import * as path from 'path';
-import filenamify from 'filenamify';
+import filenamifyCombined from 'filenamify';
 import filenamifyUrl from 'filenamify-url';
 import { injectable } from 'inversify';
 import normalizePath from 'normalize-path';
@@ -24,7 +25,7 @@ export class ReportDiskWriter {
         try {
             reportFileName = `${filenamifyUrl(fileName, { replacement: '_' })}.${format}`;
         } catch {
-            reportFileName = `${filenamify(fileName, { replacement: '_' })}.${format}`;
+            reportFileName = `${filenamifyCombined(fileName, { replacement: '_' })}.${format}`;
         }
 
         const normalizedDirectory = this.ensureDirectoryFunc(directory);

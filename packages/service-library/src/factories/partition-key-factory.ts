@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import { GuidGenerator, HashGenerator } from 'common';
 import { inject, injectable } from 'inversify';
 import { ItemType } from 'storage-documents';

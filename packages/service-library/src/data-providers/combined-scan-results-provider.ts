@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import { Readable } from 'stream';
 import { AxeResultsList, AxeCoreResults } from 'axe-result-converter';
 import { BlobContentDownloadResponse, BlobStorageClient } from 'azure-services';

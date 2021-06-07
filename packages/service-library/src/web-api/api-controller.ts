@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import { RestApiConfig, ServiceConfiguration } from 'common';
 import { injectable } from 'inversify';
 import { isEmpty } from 'lodash';

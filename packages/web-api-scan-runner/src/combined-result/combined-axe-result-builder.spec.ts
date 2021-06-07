@@ -13,6 +13,8 @@ import { MockableLogger } from '../test-utilities/mockable-logger';
 import { CombinedResultsBlob } from '../types/combined-results-blob';
 import { CombinedAxeResultBuilder } from './combined-axe-result-builder';
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 describe(CombinedAxeResultBuilder, () => {
     let combinedScanResultsProviderMock: IMock<CombinedScanResultsProvider>;
     let axeResultsReducerMock: IMock<AxeResultsReducer>;

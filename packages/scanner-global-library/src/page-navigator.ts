@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import { Page, Response } from 'puppeteer';
 import { injectable, inject } from 'inversify';
 import _ from 'lodash';
@@ -13,6 +14,7 @@ export class PageNavigator {
     // The total page navigation timeout should correlate with Batch scan task 'max wall-clock time' constrain
     // Refer to service configuration TaskRuntimeConfig.taskTimeoutInMinutes property
     public readonly gotoTimeoutMsecs = 60000;
+
     public readonly pageRenderingTimeoutMsecs = 10000;
 
     constructor(

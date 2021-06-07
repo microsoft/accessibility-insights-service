@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import Apify from 'apify';
 import { inject, injectable, optional } from 'inversify';
 import { crawlerIocTypes } from '../types/ioc-types';

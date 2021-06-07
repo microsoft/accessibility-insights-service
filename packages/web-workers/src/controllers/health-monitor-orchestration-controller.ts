@@ -19,6 +19,7 @@ import { createOrchestrationSteps, OrchestrationStepsFactory } from '../orchestr
 @injectable()
 export class HealthMonitorOrchestrationController extends WebController {
     public readonly apiVersion = '1.0';
+
     public readonly apiName = 'health-monitor-orchestration';
 
     public constructor(

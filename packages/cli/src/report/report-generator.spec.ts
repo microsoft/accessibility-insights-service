@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import 'reflect-metadata';
 
 import { AxeReportParameters, Report, Reporter, ReporterFactory, SummaryScanResults } from 'accessibility-insights-report';

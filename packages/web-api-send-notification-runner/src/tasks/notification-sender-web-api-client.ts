@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import { getForeverAgents, ResponseWithBodyType } from 'common';
 import got, { Agents, Got, Options } from 'got';
 import { injectable } from 'inversify';
@@ -11,6 +12,7 @@ import { NotificationSenderMetadata } from '../types/notification-sender-metadat
 @injectable()
 export class NotificationSenderWebAPIClient {
     private readonly defaultRequestObject: Got;
+
     private readonly defaultOptions: Options = {
         headers: {
             'Content-Type': 'application/json',

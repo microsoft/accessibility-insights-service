@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import { JobManagerConfig, ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
 import moment from 'moment';
@@ -31,11 +32,17 @@ export interface PoolLoadSnapshot {
 @injectable()
 export class PoolLoadGenerator {
     private samplingIntervalInSeconds = 1;
+
     private activeToRunningTasksRatio: number;
+
     private defaultActiveToRunningTasksRatio: number;
+
     private lastPoolLoad: PoolLoad;
+
     private lastTasksIncrementCount: number;
+
     private processingSpeed = 0;
+
     private timestamp: number;
 
     public constructor(@inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration) {}

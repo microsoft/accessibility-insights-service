@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import { AxeInfo } from './axe-info';
 
 const VERSION = 'axe.core.version';

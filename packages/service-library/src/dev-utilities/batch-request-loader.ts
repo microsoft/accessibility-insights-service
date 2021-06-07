@@ -20,7 +20,9 @@ interface BatchRequestLog {
 @injectable()
 export class BatchRequestLoader {
     private readonly baseUrl = 'https://accessibilityinsights.io/';
+
     private readonly maxConcurrencyLimit = 10;
+
     private readonly defaultBatchLogFilePath = `${__dirname}/../../batchLog.json`;
 
     constructor(

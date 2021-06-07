@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import { ApplicationInsightsQueryResponse, Column } from 'azure-services';
 import { AvailabilityTestConfig, getSerializableResponse, ResponseWithBodyType, ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
@@ -15,6 +16,7 @@ export declare type HealthTarget = 'release';
 @injectable()
 export class HealthCheckController extends ApiController {
     public readonly apiVersion = '1.0';
+
     public readonly apiName = 'web-api-health-check';
 
     public constructor(

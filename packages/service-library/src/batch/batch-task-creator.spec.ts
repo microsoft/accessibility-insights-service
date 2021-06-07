@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import 'reflect-metadata';
 
 import { Batch, BatchConfig, BatchTask, getTaskCorrelationId, JobTask, JobTaskState, PoolMetricsInfo, Queue } from 'azure-services';
@@ -31,15 +32,25 @@ class TestableBatchTaskCreator extends BatchTaskCreator {
     public enableBaseWorkflow: EnableBaseWorkflow;
 
     public getMessagesForTaskCreationCallback: () => ScanMessage[];
+
     public onTasksAddedCallback: (tasks: JobTask[]) => Promise<void>;
+
     public addTasksToJobCallback: (messages: ScanMessage[]) => Promise<JobTask[]>;
+
     public handleFailedTasksCallback: (failedTasks: BatchTask[]) => Promise<void>;
+
     public onExitCallback: () => Promise<void>;
+
     public waitForChildTasksCallback: () => Promise<void>;
+
     public validateTasksCallback: () => Promise<void>;
+
     public getJobPendingTasksCountCallback: () => Promise<void>;
+
     public deleteScanQueueMessagesForSucceededTasksCallback: (scanMessages: ScanMessage[]) => Promise<void>;
+
     public activeScanMessages: ScanMessage[];
+
     public jobId: string;
 
     public getQueueName(): string {
@@ -135,11 +146,17 @@ class TestableBatchTaskCreator extends BatchTaskCreator {
 
 class QueueMessagesGenerator {
     public scanMessagesByRun: ScanMessage[][] = [];
+
     public scanMessages: ScanMessage[] = [];
+
     public jobTasksByRun: JobTask[][] = [];
+
     public jobTasks: JobTask[] = [];
+
     public runCount = 0;
+
     public maxRunCount = 2;
+
     public messagesPerRun = 3;
 
     public queueMessagesGeneratorFn = () => () => {

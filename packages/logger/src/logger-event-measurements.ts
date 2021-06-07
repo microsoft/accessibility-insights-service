@@ -1,12 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-//
-// The measurement should include three main events by following the pattern:
-//
-// - Started event: This event is emitted once an operation has been started
-// - Completed event: This event is emitted once an operation is completed, regardless of the operation success/failure state
-// - Failed event: This event is emitted when an operation completes with a failure state
-//
+
 export interface BaseTelemetryMeasurements {
     [name: string]: number;
 }

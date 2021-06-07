@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/consistent-type-assertions, import/no-internal-modules*/
+
+/* eslint-disable import/no-internal-modules, @typescript-eslint/no-explicit-any */
 import 'reflect-metadata';
 
 import { BatchServiceClient, BatchServiceModels, Job, Pool, Task } from '@azure/batch';

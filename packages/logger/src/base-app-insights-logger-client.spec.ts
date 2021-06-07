@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import 'reflect-metadata';
 
 import * as appInsights from 'applicationinsights';
@@ -24,7 +25,9 @@ interface TrackTraceTestCase {
 
 class TestableBaseAppInsightsLoggerClient extends BaseAppInsightsLoggerClient {
     public additionalPropsToAdd = { adProp1: 'val1', adProp2: 'val2' };
+
     public telemetryClientMock: IMock<appInsights.TelemetryClient>;
+
     public appInsightsConfigMock: IMock<typeof appInsights.Configuration>;
 
     // eslint-disable-next-line no-empty,@typescript-eslint/no-empty-function

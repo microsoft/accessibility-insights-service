@@ -12,7 +12,9 @@ import pLimit from 'p-limit';
 @injectable()
 export class ScanFeedGenerator {
     public maxBatchSize = 20;
+
     private readonly maxRetryCount = 5;
+
     private readonly maxConcurrencyLimit = 5;
 
     constructor(

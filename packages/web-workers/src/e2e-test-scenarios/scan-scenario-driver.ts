@@ -11,6 +11,7 @@ import { E2EScanScenarioDefinition } from './e2e-scan-scenario-definitions';
 
 export class ScanScenarioDriver {
     protected readonly testContextData: TestContextData;
+
     protected encounteredError: boolean = false;
 
     constructor(private readonly orchestrationSteps: OrchestrationSteps, public readonly testDefinition: E2EScanScenarioDefinition) {

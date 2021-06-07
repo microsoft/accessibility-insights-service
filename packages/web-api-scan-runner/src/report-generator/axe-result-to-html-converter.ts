@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import { AxeReportParameters, ReporterFactory } from 'accessibility-insights-report';
 import { AxeResults } from 'axe-core';
 import { inject, injectable } from 'inversify';

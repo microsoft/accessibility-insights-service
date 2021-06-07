@@ -25,6 +25,7 @@ export interface ScanRequests {
 @injectable()
 export class ScanRequestSelector {
     private failedScanRetryIntervalInMinutes: number;
+
     private maxFailedScanRetryCount: number;
 
     constructor(

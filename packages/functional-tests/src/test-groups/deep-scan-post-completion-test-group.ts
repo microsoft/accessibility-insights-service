@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import { expect, use } from 'chai';
 import * as deepEqualInAnyGroup from 'deep-equal-in-any-order';
 import { ResponseWithBodyType } from 'common';

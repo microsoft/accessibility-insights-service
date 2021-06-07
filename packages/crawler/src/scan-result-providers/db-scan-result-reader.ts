@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import { injectable, inject } from 'inversify';
 import { AxeResults } from 'axe-core';
 import { DataBase } from '../level-storage/data-base';

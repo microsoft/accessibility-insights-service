@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 /* eslint-disable @typescript-eslint/tslint/config */
 import encode from 'encoding-down';
 import { inject, injectable, optional } from 'inversify';
@@ -9,8 +10,7 @@ import { crawlerIocTypes } from '../types/ioc-types';
 import { generateHash } from '../utility/crypto';
 import { DataBaseKey, ScanMetadata, ScanResult } from './storage-documents';
 
-/* eslint-enable @typescript-eslint/tslint/config */
-/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-enable @typescript-eslint/tslint/config, @typescript-eslint/no-explicit-any */
 
 export const genericKey = 'genericKey';
 

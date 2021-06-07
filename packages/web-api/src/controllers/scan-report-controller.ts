@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import { Readable } from 'stream';
 import { GuidGenerator, ServiceConfiguration, BodyParser } from 'common';
 import { inject, injectable } from 'inversify';
@@ -9,6 +10,7 @@ import { ApiController, HttpResponse, PageScanRunReportProvider, WebApiErrorCode
 @injectable()
 export class ScanReportController extends ApiController {
     public readonly apiVersion = '1.0';
+
     public readonly apiName = 'web-api-get-report';
 
     public constructor(

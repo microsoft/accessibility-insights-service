@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import { SecretClient } from '@azure/keyvault-secrets';
 import { inject, injectable } from 'inversify';
 import { AzureKeyVaultClientProvider, iocTypeNames } from '../ioc-types';

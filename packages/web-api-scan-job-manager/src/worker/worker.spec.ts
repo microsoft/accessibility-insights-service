@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import 'reflect-metadata';
 
 import {
@@ -35,8 +36,11 @@ class TestableWorker extends Worker {
     public enableBaseWorkflow: EnableBaseWorkflow;
 
     public onTasksAddedCallback: (tasks: JobTask[]) => Promise<void>;
+
     public excludeCompletedScansCallback: (scanMessages: ScanMessage[]) => Promise<ScanMessage[]>;
+
     public handleFailedTasksCallback: (failedTasks: BatchTask[]) => Promise<void>;
+
     public activeScanMessages: ScanMessage[];
 
     public async getMessagesForTaskCreation(): Promise<ScanMessage[]> {
@@ -88,11 +92,17 @@ class TestableWorker extends Worker {
 
 class QueueMessagesGenerator {
     public scanMessagesByRun: ScanMessage[][] = [];
+
     public scanMessages: ScanMessage[] = [];
+
     public jobTasksByRun: JobTask[][] = [];
+
     public jobTasks: JobTask[] = [];
+
     public runCount = 0;
+
     public maxRunCount = 2;
+
     public messagesPerRun = 3;
 
     public queueMessagesGeneratorFn = () => () => {

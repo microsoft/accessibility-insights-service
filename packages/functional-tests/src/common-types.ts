@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import { TestRunResult } from 'service-library';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */

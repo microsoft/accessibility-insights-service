@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import 'reflect-metadata';
 
 import { GlobalLogger, Logger, LoggerEvent, TelemetryMeasurements } from 'logger';
@@ -9,6 +10,7 @@ import { ScanRunnerTelemetryManager } from './scan-runner-telemetry-manager';
 
 class TestableScanRunnerTelemetryManager extends ScanRunnerTelemetryManager {
     public scanSubmitted: number;
+
     public scanStarted: number;
 
     public constructor(logger: GlobalLogger, guidGenerator: GuidGenerator, getCurrentTimestamp: () => number = Date.now) {

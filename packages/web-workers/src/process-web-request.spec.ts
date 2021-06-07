@@ -16,8 +16,11 @@ type TestRequestResponse = {
 
 class TestableController extends ApiController {
     public readonly apiVersion = '1.0';
+
     public readonly apiName = 'test api name';
+
     public readonly logger: Logger;
+
     protected readonly serviceConfig: ServiceConfiguration;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

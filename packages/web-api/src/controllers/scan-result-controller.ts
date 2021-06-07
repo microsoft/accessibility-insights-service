@@ -12,6 +12,7 @@ import { BaseScanResultController } from './base-scan-result-controller';
 @injectable()
 export class ScanResultController extends BaseScanResultController {
     public readonly apiVersion = '1.0';
+
     public readonly apiName = 'web-api-get-scan';
 
     public constructor(

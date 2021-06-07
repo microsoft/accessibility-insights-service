@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import { Container } from 'inversify';
 import { isEmpty } from 'lodash';
 import { System } from 'common';

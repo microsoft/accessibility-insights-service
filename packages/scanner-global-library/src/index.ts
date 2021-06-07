@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 export { setupCloudScannerContainer, setupLocalScannerContainer } from './setup-scanner-container';
 export { BrowserError, BrowserErrorTypes } from './browser-error';
 export { PageConfigurator } from './page-configurator';

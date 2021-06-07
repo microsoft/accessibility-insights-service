@@ -28,7 +28,9 @@ interface DbDocument {
 @injectable()
 export class WebsiteScanResultProvider {
     private readonly maxRetryCount: number = 5;
+
     private readonly msecBetweenRetries: number = 1000;
+
     public maxConcurrencyLimit = 5;
 
     constructor(
