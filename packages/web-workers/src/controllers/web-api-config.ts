@@ -8,5 +8,6 @@ so orchestration results are deterministic on retry.
 */
 export class WebApiConfig {
     public readonly baseUrl: string = process.env.WEB_API_BASE_URL;
+
     public readonly releaseId: string = process.env.RELEASE_VERSION;
 }

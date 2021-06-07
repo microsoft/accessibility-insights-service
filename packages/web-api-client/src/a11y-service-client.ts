@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import { getForeverAgents, ResponseWithBodyType, RetryHelper, System } from 'common';
 import got, { Agents, ExtendOptions, Got, Options } from 'got';
 import { injectable } from 'inversify';
@@ -13,6 +14,7 @@ import { PostScanRequestOptions } from './request-options';
 @injectable()
 export class A11yServiceClient {
     private readonly defaultRequestObject: Got;
+
     private readonly defaultOptions: ExtendOptions = {
         searchParams: {
             // eslint-disable-next-line no-invalid-this

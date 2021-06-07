@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import { reporterFactory } from 'accessibility-insights-report';
 import * as inversify from 'inversify';
 import { ApifyResourceCreator } from './apify/apify-resource-creator';

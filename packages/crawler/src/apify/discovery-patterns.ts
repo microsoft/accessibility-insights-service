@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import * as url from 'url';
 
 export type DiscoveryPatternFactory = (discoveryPatternUrl: string) => string;

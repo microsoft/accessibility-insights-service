@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import { inject, injectable } from 'inversify';
 import { CombinedReportDataConverter, ScanResultData } from 'axe-result-converter';
 import { ReporterFactory } from 'accessibility-insights-report';

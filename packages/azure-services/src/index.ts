@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 export { CosmosContainerClient } from './storage/cosmos-container-client';
 export { CosmosClientWrapper } from './azure-cosmos/cosmos-client-wrapper';
 export { CosmosOperationResponse } from './azure-cosmos/cosmos-operation-response';

@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import { inject, injectable, optional } from 'inversify';
 import { GlobalLogger } from 'logger';
 import { Page } from 'puppeteer';

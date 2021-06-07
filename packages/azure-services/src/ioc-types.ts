@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import { BatchServiceClient } from '@azure/batch';
 import { CosmosClient } from '@azure/cosmos';
 import { SecretClient } from '@azure/keyvault-secrets';

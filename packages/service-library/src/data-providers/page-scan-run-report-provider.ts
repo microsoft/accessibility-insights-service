@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import { BlobContentDownloadResponse, BlobStorageClient } from 'azure-services';
 import { inject, injectable } from 'inversify';
 import { DataProvidersCommon } from './data-providers-common';

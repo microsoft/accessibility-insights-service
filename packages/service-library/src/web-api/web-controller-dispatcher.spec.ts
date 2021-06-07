@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import 'reflect-metadata';
 
 import { Context } from '@azure/functions';
@@ -14,8 +15,11 @@ import { WebControllerDispatcher } from './web-controller-dispatcher';
 
 export class TestableWebController extends WebController {
     public static readonly handleRequestResult = 'handle-request-result';
+
     public readonly apiVersion = '1.0';
+
     public readonly apiName = 'controller-mock-api';
+
     public requestArgs: any[];
 
     public async invoke(requestContext: Context, ...args: any[]): Promise<unknown> {

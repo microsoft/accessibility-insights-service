@@ -18,6 +18,7 @@ export declare type CosmosOperation = 'upsertItem' | 'upsertItems' | 'readAllIte
 @injectable()
 export class CosmosClientWrapper {
     public static readonly PARTITION_KEY_NAME: string = '/partitionKey';
+
     public static readonly MAXIMUM_ITEM_COUNT: number = 100;
 
     constructor(

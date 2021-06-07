@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import 'reflect-metadata';
 
 import { AxeResults } from 'axe-core';
@@ -13,6 +14,7 @@ import { AxeResultToConsolidatedHtmlConverter } from './axe-result-to-consolidat
 
 class AxeResultConverterStub implements AxeResultConverter {
     public convertCallCount = 0;
+
     public readonly targetReportFormat: ReportFormat;
 
     constructor(public readonly reportValue: string, reportType: ReportFormat) {

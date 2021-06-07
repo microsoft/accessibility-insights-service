@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
 export const createHealthCheckQueryForRelease = (releaseId: string): string => `let lastRunId = toscalar(
     customEvents
     | where name == "FunctionalTest"

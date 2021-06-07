@@ -15,7 +15,9 @@ export class ApplicationInsightsClient {
     public throwOnRequestFailure: boolean = false;
 
     private readonly baseUrl = 'https://api.applicationinsights.io/v1/apps';
+
     private readonly defaultRequestObject: Got;
+
     private readonly defaultOptions: ExtendOptions = {
         responseType: 'json',
     };

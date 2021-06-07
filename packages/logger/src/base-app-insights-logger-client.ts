@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import { Contracts, TelemetryClient } from 'applicationinsights';
 import { injectable } from 'inversify';
 import { merge } from 'lodash';
@@ -14,6 +15,7 @@ import { LoggerProperties } from './logger-properties';
 @injectable()
 export abstract class BaseAppInsightsLoggerClient implements LoggerClient {
     public initialized: boolean = false;
+
     protected telemetryClient: TelemetryClient;
 
     public abstract setup(baseProperties?: BaseTelemetryProperties): Promise<void>;

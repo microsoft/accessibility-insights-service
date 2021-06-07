@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import { BatchServiceModels } from '@azure/batch';
 import { EnvironmentSettings, ServiceConfiguration, TaskRuntimeConfig } from 'common';
 import { inject, injectable } from 'inversify';
@@ -34,7 +35,9 @@ export declare type UserAccessLevels = 'admin' | 'nonadmin';
 export class BatchTaskConfigGenerator {
     // The TASK_ARGUMENTS environment variable is used by batch processor to access task run arguments
     private readonly taskArgsValueName = 'TASK_ARGUMENTS';
+
     private readonly appInsightKeyValueName = 'APPINSIGHTS_INSTRUMENTATIONKEY';
+
     private readonly keyVaultUrlValueName = 'KEY_VAULT_URL';
 
     // The --rm container option removes the container after the task finishes

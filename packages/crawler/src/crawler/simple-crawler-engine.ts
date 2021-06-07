@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import { inject, injectable } from 'inversify';
 // @ts-ignore
 import * as cheerio from 'cheerio';

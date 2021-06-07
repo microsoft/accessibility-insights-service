@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import * as inversify from 'inversify';
 import { cloudAxeConfiguration, localAxeConfiguration } from './factories/axe-configuration';
 import { AxePuppeteerFactory } from './factories/axe-puppeteer-factory';

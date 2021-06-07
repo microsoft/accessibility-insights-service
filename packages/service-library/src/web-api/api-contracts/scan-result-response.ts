@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import { ScanNotificationErrorCodeName } from '../scan-notification-error-codes';
 import { ScanRunErrorCodeName } from '../scan-run-error-codes';
 import { WebApiError } from '../web-api-error-codes';

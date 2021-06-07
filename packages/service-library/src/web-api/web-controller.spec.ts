@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import 'reflect-metadata';
 
 import { Context } from '@azure/functions';
@@ -12,10 +13,15 @@ import { WebController } from './web-controller';
 
 export class TestableWebController extends WebController {
     public static readonly handleRequestResponse = 'handle-request-response';
+
     public readonly apiVersion = '1.0';
+
     public readonly apiName = 'controller-mock-api';
+
     public validateRequestInvoked = false;
+
     public handleRequestInvoked = false;
+
     public requestArgs: any[];
 
     public getBaseTelemetryProperties(): { [name: string]: string } {

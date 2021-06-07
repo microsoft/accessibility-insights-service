@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import { isNil } from 'lodash';
 import { AuthenticationContext, TokenResponse } from 'adal-node';
 import { RetryHelper, System } from 'common';

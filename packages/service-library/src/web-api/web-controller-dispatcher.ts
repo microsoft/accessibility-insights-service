@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import { Context } from '@azure/functions';
 import { Container } from 'inversify';
 import { BaseTelemetryProperties, ContextAwareLogger, loggerTypes } from 'logger';

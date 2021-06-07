@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import { Context } from '@azure/functions';
 import { System } from 'common';
 import { inject, injectable } from 'inversify';
@@ -9,11 +10,13 @@ import { ContextAwareLogger } from 'logger';
 
 @injectable()
 export abstract class WebController {
-    public abstract readonly apiVersion: string;
-    public abstract readonly apiName: string;
     public context: Context;
 
     constructor(@inject(ContextAwareLogger) protected readonly logger: ContextAwareLogger) {}
+
+    public abstract readonly apiVersion: string;
+
+    public abstract readonly apiName: string;
 
     public async invoke(requestContext: Context, ...args: any[]): Promise<unknown> {
         this.context = requestContext;

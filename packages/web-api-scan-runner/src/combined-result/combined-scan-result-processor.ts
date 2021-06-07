@@ -15,6 +15,7 @@ import { CombinedResultsBlobProvider } from './combined-results-blob-provider';
 @injectable()
 export class CombinedScanResultProcessor {
     private readonly maxRetryCount: number = 5;
+
     private readonly msecBetweenRetries: number = 1000;
 
     constructor(

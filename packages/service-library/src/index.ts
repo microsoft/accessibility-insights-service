@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 export { OnDemandPageScanRunResultProvider } from './data-providers/on-demand-page-scan-run-result-provider';
 export { ProcessEntryPointBase } from './process-entry-point-base';
 export * from './web-api/web-api-ioc-types';

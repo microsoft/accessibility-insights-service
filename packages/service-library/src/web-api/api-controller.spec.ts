@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import 'reflect-metadata';
 
 import { Context } from '@azure/functions';
@@ -15,8 +16,11 @@ import { WebApiErrorCodes } from './web-api-error-codes';
 
 class TestableApiController extends ApiController {
     public readonly apiVersion = '1.0';
+
     public readonly apiName = 'web-api-test';
+
     public handleRequestInvoked = false;
+
     public args: any[];
 
     public constructor(logger: Logger, public requestContext: Context = null, public readonly serviceConfig: ServiceConfiguration = null) {

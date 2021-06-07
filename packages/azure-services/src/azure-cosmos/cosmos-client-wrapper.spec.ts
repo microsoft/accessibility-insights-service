@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-/* eslint-disable import/no-unassigned-import, @typescript-eslint/no-explicit-any */
+
 import 'reflect-metadata';
 
 import * as cosmos from '@azure/cosmos';
@@ -10,6 +10,8 @@ import { MockableLogger } from '../test-utilities/mockable-logger';
 import { getPromisableDynamicMock } from '../test-utilities/promisable-mock';
 import { CosmosClientWrapper } from './cosmos-client-wrapper';
 import { CosmosDocument } from './cosmos-document';
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 describe('CosmosClientWrapper', () => {
     let testSubject: CosmosClientWrapper;

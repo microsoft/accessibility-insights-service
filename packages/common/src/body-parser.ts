@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import { Readable } from 'stream';
 import getRawBody from 'raw-body';
 import { injectable } from 'inversify';

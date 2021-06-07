@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import { ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
 import * as _ from 'lodash';

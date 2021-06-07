@@ -9,6 +9,7 @@ import { GlobalLogger, ScanTaskCompletedMeasurements } from 'logger';
 @injectable()
 export class ScanRunnerTelemetryManager {
     protected scanSubmitted: number;
+
     protected scanStarted: number;
 
     public constructor(

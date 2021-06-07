@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import { expect } from 'chai';
 import { WebApiErrorCodes } from 'service-library';
 import { TestEnvironment } from '../common-types';

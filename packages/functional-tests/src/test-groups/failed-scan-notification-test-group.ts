@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import { ScanRunResultResponse } from 'service-library';
 import { expect } from 'chai';
 import { TestEnvironment } from '../common-types';

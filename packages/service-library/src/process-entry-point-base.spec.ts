@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import 'reflect-metadata';
 
 import { System } from 'common';
@@ -15,7 +16,9 @@ import { MockableLogger } from './test-utilities/mockable-logger';
 
 class TestEntryPoint extends ProcessEntryPointBase {
     public baseTelemetryProperties: BaseTelemetryProperties = { source: 'test-source', someOtherProps: 'foo' };
+
     public customActionInvoked = false;
+
     public customActionArgs: any[];
 
     public customActionToBeInvoked: () => void;

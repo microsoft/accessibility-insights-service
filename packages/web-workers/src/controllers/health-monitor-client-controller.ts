@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import { GuidGenerator, ServiceConfiguration, getSerializableResponse, ResponseSerializer, SerializableResponse } from 'common';
 import { functionalTestGroupTypes, TestGroupConstructor, TestRunner } from 'functional-tests';
 import { inject, injectable } from 'inversify';
@@ -23,50 +24,10 @@ import { WebApiConfig } from './web-api-config';
 @injectable()
 export class HealthMonitorClientController extends WebController {
     public readonly apiVersion = '1.0';
+
     public readonly apiName = 'health-monitor-client';
+
     private readonly activityCallbacks: { [activityName: string]: (args: unknown) => Promise<unknown> };
-
-    public constructor(
-        @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
-        @inject(ContextAwareLogger) logger: ContextAwareLogger,
-        @inject(a11yServiceClientTypeNames.A11yServiceClientProvider) protected readonly webApiClientProvider: A11yServiceClientProvider,
-        @inject(OnDemandPageScanRunResultProvider) protected readonly onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider,
-        @inject(GuidGenerator) protected readonly guidGenerator: GuidGenerator,
-        @inject(TestRunner) protected readonly testRunner: TestRunner,
-        protected readonly testGroupTypes: { [key: string]: TestGroupConstructor } = functionalTestGroupTypes,
-        protected readonly serializeResponse: ResponseSerializer = getSerializableResponse,
-    ) {
-        super(logger);
-
-        testRunner.setLogger(this.logger);
-
-        this.activityCallbacks = {
-            [ActivityAction.createScanRequest]: this.createScanRequest,
-            [ActivityAction.getScanResult]: this.getScanResult,
-            [ActivityAction.getScanReport]: this.getScanReport,
-            [ActivityAction.getHealthStatus]: this.getHealthStatus,
-            [ActivityAction.trackAvailability]: this.trackAvailability,
-            [ActivityAction.runFunctionalTestGroup]: this.runFunctionalTestGroup,
-            [ActivityAction.logTestRunStart]: this.logTestRunStart,
-            [ActivityAction.getWebApiConfig]: this.getWebApiConfig,
-        };
-    }
-
-    protected async handleRequest(...args: any[]): Promise<unknown> {
-        const activityRequestData = args[0] as ActivityRequestData;
-        this.logger.setCommonProperties({ source: 'healthMonitorClientFunc' });
-        this.logger.logInfo(`Executing ${activityRequestData.activityName} activity action.`);
-
-        const activityCallback = this.activityCallbacks[activityRequestData.activityName];
-        const result = await activityCallback(activityRequestData.data);
-        this.logger.logInfo(`${activityRequestData.activityName} activity action completed with result ${JSON.stringify(result)}`);
-
-        return result;
-    }
-
-    protected validateRequest(...args: any[]): boolean {
-        return true;
-    }
 
     private readonly createScanRequest = async (data: CreateScanRequestData): Promise<SerializableResponse<ScanRunResponse[]>> => {
         const webApiClient = await this.webApiClientProvider();
@@ -138,4 +99,46 @@ export class HealthMonitorClientController extends WebController {
     private readonly getWebApiConfig = async (): Promise<WebApiConfig> => {
         return new WebApiConfig();
     };
+
+    public constructor(
+        @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
+        @inject(ContextAwareLogger) logger: ContextAwareLogger,
+        @inject(a11yServiceClientTypeNames.A11yServiceClientProvider) protected readonly webApiClientProvider: A11yServiceClientProvider,
+        @inject(OnDemandPageScanRunResultProvider) protected readonly onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider,
+        @inject(GuidGenerator) protected readonly guidGenerator: GuidGenerator,
+        @inject(TestRunner) protected readonly testRunner: TestRunner,
+        protected readonly testGroupTypes: { [key: string]: TestGroupConstructor } = functionalTestGroupTypes,
+        protected readonly serializeResponse: ResponseSerializer = getSerializableResponse,
+    ) {
+        super(logger);
+
+        testRunner.setLogger(this.logger);
+
+        this.activityCallbacks = {
+            [ActivityAction.createScanRequest]: this.createScanRequest,
+            [ActivityAction.getScanResult]: this.getScanResult,
+            [ActivityAction.getScanReport]: this.getScanReport,
+            [ActivityAction.getHealthStatus]: this.getHealthStatus,
+            [ActivityAction.trackAvailability]: this.trackAvailability,
+            [ActivityAction.runFunctionalTestGroup]: this.runFunctionalTestGroup,
+            [ActivityAction.logTestRunStart]: this.logTestRunStart,
+            [ActivityAction.getWebApiConfig]: this.getWebApiConfig,
+        };
+    }
+
+    protected async handleRequest(...args: any[]): Promise<unknown> {
+        const activityRequestData = args[0] as ActivityRequestData;
+        this.logger.setCommonProperties({ source: 'healthMonitorClientFunc' });
+        this.logger.logInfo(`Executing ${activityRequestData.activityName} activity action.`);
+
+        const activityCallback = this.activityCallbacks[activityRequestData.activityName];
+        const result = await activityCallback(activityRequestData.data);
+        this.logger.logInfo(`${activityRequestData.activityName} activity action completed with result ${JSON.stringify(result)}`);
+
+        return result;
+    }
+
+    protected validateRequest(...args: any[]): boolean {
+        return true;
+    }
 }

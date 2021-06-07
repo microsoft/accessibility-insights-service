@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import Apify from 'apify';
 import { inject, injectable } from 'inversify';
 import { PageNavigator } from 'scanner-global-library';
@@ -21,33 +22,6 @@ import { PageProcessorBase } from './page-processor-base';
 @injectable()
 export class SimulatorPageProcessor extends PageProcessorBase {
     private readonly selectors: string[];
-
-    public constructor(
-        @inject(AccessibilityScanOperation) protected readonly accessibilityScanOp: AccessibilityScanOperation,
-        @inject(LocalDataStore) protected readonly dataStore: DataStore,
-        @inject(LocalBlobStore) protected readonly blobStore: BlobStore,
-        @inject(DataBase) protected readonly dataBase: DataBase,
-        @inject(EnqueueActiveElementsOperation) protected readonly enqueueActiveElementsOp: EnqueueActiveElementsOperation,
-        @inject(ClickElementOperation) protected readonly clickElementOp: ClickElementOperation,
-        @inject(PageNavigator) protected readonly pageNavigator: PageNavigator,
-        @inject(crawlerIocTypes.ApifyRequestQueueProvider) protected readonly requestQueueProvider: ApifyRequestQueueProvider,
-        @inject(CrawlerConfiguration) protected readonly crawlerConfiguration: CrawlerConfiguration,
-        protected readonly enqueueLinksExt: typeof Apify.utils.enqueueLinks = Apify.utils.enqueueLinks,
-        protected readonly saveSnapshotExt: typeof Apify.utils.puppeteer.saveSnapshot = Apify.utils.puppeteer.saveSnapshot,
-    ) {
-        super(
-            accessibilityScanOp,
-            dataStore,
-            blobStore,
-            dataBase,
-            pageNavigator,
-            requestQueueProvider,
-            crawlerConfiguration,
-            enqueueLinksExt,
-            saveSnapshotExt,
-        );
-        this.selectors = this.crawlerConfiguration.selectors();
-    }
 
     public processPage: Apify.PuppeteerHandlePage = async ({ page, request }) => {
         const operation = request.userData as Operation;
@@ -90,4 +64,31 @@ export class SimulatorPageProcessor extends PageProcessorBase {
             });
         }
     };
+
+    public constructor(
+        @inject(AccessibilityScanOperation) protected readonly accessibilityScanOp: AccessibilityScanOperation,
+        @inject(LocalDataStore) protected readonly dataStore: DataStore,
+        @inject(LocalBlobStore) protected readonly blobStore: BlobStore,
+        @inject(DataBase) protected readonly dataBase: DataBase,
+        @inject(EnqueueActiveElementsOperation) protected readonly enqueueActiveElementsOp: EnqueueActiveElementsOperation,
+        @inject(ClickElementOperation) protected readonly clickElementOp: ClickElementOperation,
+        @inject(PageNavigator) protected readonly pageNavigator: PageNavigator,
+        @inject(crawlerIocTypes.ApifyRequestQueueProvider) protected readonly requestQueueProvider: ApifyRequestQueueProvider,
+        @inject(CrawlerConfiguration) protected readonly crawlerConfiguration: CrawlerConfiguration,
+        protected readonly enqueueLinksExt: typeof Apify.utils.enqueueLinks = Apify.utils.enqueueLinks,
+        protected readonly saveSnapshotExt: typeof Apify.utils.puppeteer.saveSnapshot = Apify.utils.puppeteer.saveSnapshot,
+    ) {
+        super(
+            accessibilityScanOp,
+            dataStore,
+            blobStore,
+            dataBase,
+            pageNavigator,
+            requestQueueProvider,
+            crawlerConfiguration,
+            enqueueLinksExt,
+            saveSnapshotExt,
+        );
+        this.selectors = this.crawlerConfiguration.selectors();
+    }
 }

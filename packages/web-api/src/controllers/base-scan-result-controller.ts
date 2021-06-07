@@ -10,8 +10,11 @@ import { ScanResponseConverter } from '../converters/scan-response-converter';
 
 export abstract class BaseScanResultController extends ApiController {
     protected abstract readonly onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider;
+
     protected abstract readonly websiteScanResultProvider: WebsiteScanResultProvider;
+
     protected abstract readonly guidGenerator: GuidGenerator;
+
     protected abstract readonly scanResponseConverter: ScanResponseConverter;
 
     protected async isRequestMadeTooSoon(scanId: string): Promise<boolean> {

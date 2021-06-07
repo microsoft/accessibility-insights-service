@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import { AvailabilityTelemetry } from './availability-telemetry';
 import { LogLevel } from './logger';
 import { LoggerEvent } from './logger-event';

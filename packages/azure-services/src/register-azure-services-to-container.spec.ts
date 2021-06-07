@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import 'reflect-metadata';
 
 import { CosmosClient, CosmosClientOptions } from '@azure/cosmos';
@@ -31,6 +31,8 @@ import { SecretProvider } from './key-vault/secret-provider';
 import { registerAzureServicesToContainer } from './register-azure-services-to-container';
 import { CosmosContainerClient } from './storage/cosmos-container-client';
 import { CosmosKeyProvider } from './azure-cosmos/cosmos-key-provider';
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 const cosmosClientFactoryStub = (options: CosmosClientOptions) => {
     return { test: 'cosmosClient', options: options } as unknown as CosmosClient;

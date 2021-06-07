@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import * as appInsights from 'applicationinsights';
 import { inject, injectable } from 'inversify';
 import { isNil, omitBy } from 'lodash';

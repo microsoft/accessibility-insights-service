@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import 'reflect-metadata';
 
 import Apify from 'apify';
@@ -21,7 +22,9 @@ import { PageProcessorBase } from './page-processor-base';
 describe(PageProcessorBase, () => {
     class TestablePageProcessor extends PageProcessorBase {
         public snapshot: boolean;
+
         public baseUrl: string;
+
         public processPage = async (inputs: Apify.PuppeteerHandlePageInputs) => {
             return;
         };

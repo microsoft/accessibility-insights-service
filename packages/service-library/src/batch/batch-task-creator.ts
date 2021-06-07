@@ -22,7 +22,9 @@ export interface BatchTaskCreator {
 @injectable()
 export abstract class BatchTaskCreator {
     protected jobManagerConfig: JobManagerConfig;
+
     protected jobId: string;
+
     protected activeScanMessages: ScanMessage[];
 
     private hasInitialized = false;

@@ -21,10 +21,21 @@ export interface BrowserStartOptions {
 @injectable()
 export class Page {
     public requestUrl: string;
+
     public page: Puppeteer.Page;
+
     public browser: Puppeteer.Browser;
+
     public navigationResponse: Puppeteer.Response;
+
     public lastBrowserError: BrowserError;
+
+    constructor(
+        @inject(WebDriver) private readonly webDriver: WebDriver,
+        @inject(AxePuppeteerFactory) private readonly axePuppeteerFactory: AxePuppeteerFactory,
+        @inject(PageNavigator) private readonly pageNavigator: PageNavigator,
+        @inject(GlobalLogger) @optional() private readonly logger: GlobalLogger,
+    ) {}
 
     public get userAgent(): string {
         return this.pageNavigator.pageConfigurator.getUserAgent();
@@ -37,13 +48,6 @@ export class Page {
     public get currentPage(): Puppeteer.Page {
         return this.page;
     }
-
-    constructor(
-        @inject(WebDriver) private readonly webDriver: WebDriver,
-        @inject(AxePuppeteerFactory) private readonly axePuppeteerFactory: AxePuppeteerFactory,
-        @inject(PageNavigator) private readonly pageNavigator: PageNavigator,
-        @inject(GlobalLogger) @optional() private readonly logger: GlobalLogger,
-    ) {}
 
     public async create(options?: BrowserStartOptions): Promise<void> {
         if (options?.browserWSEndpoint !== undefined) {

@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-/* eslint-disable import/no-internal-modules,  */
+
+/* eslint-disable import/no-internal-modules */
 import { AvailabilityTestConfig, SerializableResponse } from 'common';
 import { IOrchestrationFunctionContext, Task, TaskSet } from 'durable-functions/lib/src/classes';
 import { TestContextData, TestEnvironment, TestGroupName } from 'functional-tests';

@@ -19,6 +19,7 @@ import { BaseScanResultController } from './base-scan-result-controller';
 @injectable()
 export class BatchScanResultController extends BaseScanResultController {
     public readonly apiVersion = '1.0';
+
     public readonly apiName = 'web-api-get-scans';
 
     public constructor(

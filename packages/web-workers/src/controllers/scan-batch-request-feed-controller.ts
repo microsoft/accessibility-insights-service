@@ -27,6 +27,7 @@ import {
 @injectable()
 export class ScanBatchRequestFeedController extends WebController {
     public readonly apiVersion = '1.0';
+
     public readonly apiName = 'scan-batch-request-feed';
 
     public constructor(

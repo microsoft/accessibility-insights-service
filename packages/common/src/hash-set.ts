@@ -2,10 +2,11 @@
 // Licensed under the MIT License.
 
 export class HashSet<T> implements IterableIterator<T> {
-    constructor(private readonly hashDictionary: { [key: string]: T } = {}) {}
-
     private pointer = 0;
+
     private keysSnapshot: string[];
+
+    constructor(private readonly hashDictionary: { [key: string]: T } = {}) {}
 
     public add(key: string, value: T): void {
         this.hashDictionary[key] = value;

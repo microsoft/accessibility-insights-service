@@ -11,8 +11,6 @@ import { CrawlRequestProcessor } from './crawl-request-processor';
 
 @injectable()
 export class UrlCollectionRequestProcessor implements CrawlRequestProcessor {
-    public constructor(@inject(GlobalLogger) private readonly logger: GlobalLogger, private readonly urlList: string[] = []) {}
-
     public handleRequest = async (inputs: HandleRequestInputs): Promise<void> => {
         this.urlList.push(inputs.request.url);
     };
@@ -27,4 +25,6 @@ export class UrlCollectionRequestProcessor implements CrawlRequestProcessor {
     public getResults = (): string[] => {
         return this.urlList;
     };
+
+    public constructor(@inject(GlobalLogger) private readonly logger: GlobalLogger, private readonly urlList: string[] = []) {}
 }

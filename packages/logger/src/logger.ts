@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import { System } from 'common';
 import { VError } from 'verror';
 import { AvailabilityTelemetry } from './availability-telemetry';
@@ -17,6 +18,7 @@ export enum LogLevel {
 
 export abstract class Logger {
     protected initialized: boolean = false;
+
     protected isDebugEnabled: boolean = false;
 
     constructor(

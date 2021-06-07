@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import { TestEnvironment } from '../common-types';
 import { test } from '../test-decorator';
 import { FunctionalTestGroup } from './functional-test-group';
