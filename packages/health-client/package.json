@@ -39,7 +39,7 @@
         "web-api-client": "1.0.0",
         "functional-tests": "1.0.0",
         "logger": "1.0.0",
-        "chai": "^4.3.0",
+        "chai": "^4.3.4",
         "yargs": "^16.2.0"
     }
 }
