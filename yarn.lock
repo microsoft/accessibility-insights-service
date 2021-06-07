@@ -4763,10 +4763,10 @@ convert-source-map@^1.4.0, convert-source-map@^1.6.0, convert-source-map@^1.7.0:
   dependencies:
     safe-buffer "~5.1.1"
 
-convict@^6.0.0:
-  version "6.0.0"
-  resolved "https://registry.yarnpkg.com/convict/-/convict-6.0.0.tgz#4be829f001a778d337d32ec79e9ae7f2e39df1a6"
-  integrity sha512-osfPkv5yjVoZqrTWBXuh/ABGpFoaJplbt0WXr0CodR4CSWt8UnzY4PSUyRz/+5BX5YUtWcToG29Kr0B6xhdIMg==
+convict@^6.1.0:
+  version "6.1.0"
+  resolved "https://registry.yarnpkg.com/convict/-/convict-6.1.0.tgz#5b393bd675a0e743390abd0c5bf9e2b9a2edf4b5"
+  integrity sha512-8dzppr6Z9URlm6P8N9NiydFRq2NWtQyf4RZOK5m0Q48fWWuKamHLXD7Qz/SiLvRXnjQcKCuHayIk9Fk51sax0w==
   dependencies:
     lodash.clonedeep "^4.5.0"
     yargs-parser "^18.1.3"
