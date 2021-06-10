@@ -47,7 +47,7 @@ pushImageToRegistry() {
     local source=$2
     local platform=$3
 
-    az acr build --platform $platform --image $containerRegistryName.azurecr.io/$name:latest --registry $containerRegistryName $source | sed -e "s/^/[$name $(date -u +'%Y-%m-%dT%H:%M:%SZ')] /"
+    az acr build --platform $platform --image $containerRegistryName.azurecr.io/$name:latest --registry $containerRegistryName $source | sed -e "s/^/[$name] /"
 }
 
 . "${0%/*}/get-resource-names.sh"
@@ -59,6 +59,14 @@ batchScanManagerDist="${0%/*}/../../../web-api-scan-job-manager/dist/"
 batchScanRequestSenderDist="${0%/*}/../../../web-api-scan-request-sender/dist/"
 batchScanNotificationManagerDist="${0%/*}/../../../web-api-send-notification-job-manager/dist/"
 batchScanNotificationRunnerDist="${0%/*}/../../../web-api-send-notification-runner/dist/"
+
+if [[ $environment == "dev" ]]; then
+    privateImagePath="${0%/*}/../../../../../accessibility-insights-service-private/docker-image/"
+    if [ -d "$privateImagePath" ]; then
+        echo "Found private service repository location. Build docker image content."
+        cp -a "$privateImagePath." "$batchScanRunnerDist"
+    fi
+fi
 
 echo "Copy $environment runtime configuration to the dist folder"
 cp "${0%/*}/../runtime-config/runtime-config.$environment.json" "${batchScanRunnerDist}runtime-config.json"

@@ -68,7 +68,7 @@
     "@azure/abort-controller" "^1.0.0"
     tslib "^2.0.0"
 
-"@azure/core-http@^1.1.1", "@azure/core-http@^1.1.6", "@azure/core-http@^1.2.0", "@azure/core-http@^1.2.4":
+"@azure/core-http@^1.1.1", "@azure/core-http@^1.1.6", "@azure/core-http@^1.2.0", "@azure/core-http@^1.2.5":
   version "1.2.5"
   resolved "https://registry.yarnpkg.com/@azure/core-http/-/core-http-1.2.5.tgz#de1e96482bdeb6ab361d2a088942804d33278e01"
   integrity sha512-SjjjqaO9emyn+XM0Qyzt5RsgddOIpGAfhWH6+d8X6/HbhFrtvXLJIz85EMoIO+T4rX3ISStik9MD5LMW9IZg4A==
@@ -3701,12 +3701,12 @@ apify@^0.21.8:
   optionalDependencies:
     puppeteer "5.3.1"
 
-applicationinsights@^2.1.0:
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/applicationinsights/-/applicationinsights-2.1.0.tgz#710272dd8d0de20a2d0bc8f40c22325984d4f32f"
-  integrity sha512-GQQEM3x39z8hMob10Cfsq/f73LFcI32qOqKEvluWyY1jTph5j/jzSXM9j3Hya2Lts7IMwppro+BW8TZxjuIH4A==
+applicationinsights@^2.1.1:
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/applicationinsights/-/applicationinsights-2.1.1.tgz#603c1e6575e62c20b0a5d9dc3fceca5e9c826b7b"
+  integrity sha512-XxcLIapDxiu46vnQ4AQsp7HcTHxaoV79EeubJnNqli07HwNaRnc/PCaIkzHwAfEV4Q2nNK7k41tS4C2Y1k4zpQ==
   dependencies:
-    "@azure/core-http" "^1.2.4"
+    "@azure/core-http" "^1.2.5"
     "@opentelemetry/api" "^0.18.1"
     "@opentelemetry/tracing" "^0.19.0"
     cls-hooked "^4.2.2"
