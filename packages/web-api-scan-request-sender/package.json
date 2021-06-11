@@ -38,7 +38,7 @@
         "webpack-cli": "^4.7.0"
     },
     "dependencies": {
-        "applicationinsights": "^2.1.0",
+        "applicationinsights": "^2.1.1",
         "azure-services": "^1.0.0",
         "common": "^1.0.0",
         "inversify": "^5.1.1",

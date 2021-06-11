@@ -54,7 +54,7 @@
         "accessibility-insights-crawler": "^1.0.0",
         "accessibility-insights-report": "4.1.2",
         "apify": "^0.21.8",
-        "applicationinsights": "^2.1.0",
+        "applicationinsights": "^2.1.1",
         "axe-core": "4.2.1",
         "axe-sarif-converter": "^2.7.0",
         "axe-result-converter": "^1.0.0",
