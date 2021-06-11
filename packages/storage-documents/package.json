@@ -24,7 +24,7 @@
     "devDependencies": {
         "@types/jest": "^26.0.23",
         "@types/node": "^12.20.14",
-        "jest": "^27.0.3",
+        "jest": "^27.0.4",
         "jest-junit": "^12.1.0",
         "rimraf": "^3.0.2",
         "ttypescript": "^1.5.12",
