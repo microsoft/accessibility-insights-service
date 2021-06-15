@@ -71,6 +71,8 @@
         "marked": ">=2.0.0",
         "normalize-url": ">=6.0.1",
         "glob-parent": ">=5.1.2",
-        "css-what": ">=5.0.1"
+        "css-what": ">=5.0.1",
+        "socket.io": ">=2.4.0",
+        "socket.io-parser": ">=3.4.1"
     }
 }
