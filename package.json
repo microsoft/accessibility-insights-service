@@ -66,6 +66,7 @@
     },
     "resolutions": {
         "axe-core": "4.2.1",
+        "apify-shared": ">=0.5.0",
         "axios": ">=0.21.1",
         "marked": ">=2.0.0",
         "normalize-url": ">=6.0.1",
