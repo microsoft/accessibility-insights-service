@@ -214,7 +214,7 @@ export class ServiceConfiguration {
                 },
                 maxFailedScanRetryCount: {
                     format: 'int',
-                    default: 3,
+                    default: 7,
                     doc: 'Maximum number of retries (additional times to re-run a scan) allowed for a failed scan request.',
                 },
                 maxSendNotificationRetryCount: {
