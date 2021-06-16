@@ -70,7 +70,7 @@
         "dotenv": "^10.0.0",
         "encoding-down": "^7.0.0",
         "filenamify": "^4.3.0",
-        "filenamify-url": "^2.1.1",
+        "filenamify-url": "^2.1.2",
         "got": "^11.8.2",
         "inversify": "^5.1.1",
         "leveldown": "^6.0.0",
