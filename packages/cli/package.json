@@ -42,7 +42,7 @@
         "dts-bundle-generator": "^5.9.0",
         "fork-ts-checker-webpack-plugin": "^6.2.10",
         "jest": "^27.0.4",
-        "jest-junit": "^12.1.0",
+        "jest-junit": "^12.2.0",
         "mkdirp": "^1.0.4",
         "mockdate": "^3.0.5",
         "rimraf": "^3.0.2",

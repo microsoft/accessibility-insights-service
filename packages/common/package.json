@@ -28,7 +28,7 @@
         "@types/sha.js": "^2.4.0",
         "@types/wtfnode": "^0.7.0",
         "jest": "^27.0.4",
-        "jest-junit": "^12.1.0",
+        "jest-junit": "^12.2.0",
         "rimraf": "^3.0.2",
         "ts-jest": "^27.0.3",
         "typemoq": "^2.1.0",
