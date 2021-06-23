@@ -42,6 +42,9 @@ export class Runner {
 
     public async run(): Promise<void> {
         const scanMetadata = this.scanMetadataConfig.getConfig();
+        // decode URL back from docker parameter encoding
+        scanMetadata.url = decodeURI(scanMetadata.url);
+
         this.logger.setCommonProperties({ scanId: scanMetadata.id, url: scanMetadata.url });
         this.logger.logInfo('Starting page scan task.');
 
