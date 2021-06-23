@@ -41,6 +41,7 @@ let scanRunnerTelemetryManagerMock: IMock<ScanRunnerTelemetryManager>;
 let serviceConfigMock: IMock<ServiceConfiguration>;
 let loggerMock: IMock<GlobalLogger>;
 let runner: Runner;
+let scanMetadataInput: ScanMetadata;
 let scanMetadata: ScanMetadata;
 let dateNow: Date;
 let pageScanResultDbDocument: OnDemandPageScanResult;
@@ -66,9 +67,14 @@ describe(Runner, () => {
         dateNow = new Date();
         MockDate.set(dateNow);
 
+        scanMetadataInput = {
+            id: 'scanMetadataId',
+            url: 'https://localhost/support%20page/',
+            deepScan: false,
+        } as ScanMetadata;
         scanMetadata = {
             id: 'scanMetadataId',
-            url: 'url',
+            url: 'https://localhost/support page/',
             deepScan: false,
         } as ScanMetadata;
         pageScanResultDbDocument = {} as OnDemandPageScanResult;
@@ -392,7 +398,7 @@ function setupUpdateScanRunStateToRunning(succeeded: boolean = true): void {
 function setupScanMetadataConfig(): void {
     scanMetadataConfigMock
         .setup((o) => o.getConfig())
-        .returns(() => scanMetadata)
+        .returns(() => scanMetadataInput)
         .verifiable();
     loggerMock.setup((o) => o.setCommonProperties({ scanId: scanMetadata.id, url: scanMetadata.url })).verifiable();
 }

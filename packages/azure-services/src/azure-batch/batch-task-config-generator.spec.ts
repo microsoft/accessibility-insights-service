@@ -73,6 +73,17 @@ describe(BatchTaskConfigGenerator, () => {
         );
     });
 
+    it('create container run options with encoded URL', async () => {
+        const taskArgsString = JSON.stringify({
+            url: 'https://localhost/support page/',
+        });
+        const environmentSettings = getEnvironmentSettings(taskArgsString);
+        const actualContainerRunOptions = testSubject.getContainerRunOptions(taskArgsString, environmentSettings);
+        expect(actualContainerRunOptions).toEqual(
+            "--init --rm --workdir / -e APPINSIGHTS_INSTRUMENTATIONKEY -e KEY_VAULT_URL -e TASK_ARGUMENTS -e url='https://localhost/support%20page/' --addon option",
+        );
+    });
+
     it('get environment settings', async () => {
         const taskArgsString = JSON.stringify(taskArgs);
         const expectedEnvironmentSettings = getEnvironmentSettings(taskArgsString);
