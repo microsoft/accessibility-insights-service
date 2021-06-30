@@ -2902,9 +2902,9 @@
   integrity sha512-7EIraBEyRHEe7CH+Fm1XvgqU6uwZN8Q7jppJGcqjROMT29qhAuuOxYB1uEY5UMYQKEmA5D+5tBnhdaPXSsLONA==
 
 "@types/node@>=10.0.0":
-  version "15.12.4"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-15.12.4.tgz#e1cf817d70a1e118e81922c4ff6683ce9d422e26"
-  integrity sha512-zrNj1+yqYF4WskCMOHwN+w9iuD12+dGm0rQ35HLl9/Ouuq52cEtd0CH9qMgrdNmi5ejC1/V7vKEXYubB+65DkA==
+  version "15.12.5"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-15.12.5.tgz#9a78318a45d75c9523d2396131bd3cca54b2d185"
+  integrity sha512-se3yX7UHv5Bscf8f1ERKvQOD6sTyycH3hdaoozvaLxgUiY5lIGEeH37AD0G0Qi9kPqihPn0HOfd2yaIEN9VwEg==
 
 "@types/node@^12", "@types/node@^12.12.7", "@types/node@^12.20.15":
   version "12.20.15"
@@ -3451,15 +3451,15 @@ accepts@~1.3.4, accepts@~1.3.7:
     mime-types "~2.1.24"
     negotiator "0.6.2"
 
-accessibility-insights-report@4.1.2:
-  version "4.1.2"
-  resolved "https://registry.yarnpkg.com/accessibility-insights-report/-/accessibility-insights-report-4.1.2.tgz#f94df620c5e93764700ac72c97cef489f2e6e3d5"
-  integrity sha512-ONg8wlz290NtlkQbAS+aI30XY4JTxFQAPGot8MVti78fIMu4ddPslD3WSGUPKKDcyt1l6FybNa5jd4TL3j+c/w==
+accessibility-insights-report@4.1.3:
+  version "4.1.3"
+  resolved "https://registry.yarnpkg.com/accessibility-insights-report/-/accessibility-insights-report-4.1.3.tgz#025ae6a73379e2d9305e06ff94421bb2c306def9"
+  integrity sha512-08/XmIG/aFtKrjhh0z0N6aId0KcoV/6ZveMsE+W507PoheeMAAt3G9G2dq2OX6/zKvfzX/TdyDjZmJJQG81YlA==
   dependencies:
     axe-core "4.2.1"
     classnames "^2.3.1"
     lodash "^4.17.21"
-    luxon "^1.26.0"
+    luxon "^1.27.0"
     office-ui-fabric-react "7.98.0"
     react "^16.14.0"
     react-dom "^16.14.0"
@@ -8842,10 +8842,10 @@ lunr@^2.3.8:
   resolved "https://registry.yarnpkg.com/lunr/-/lunr-2.3.9.tgz#18b123142832337dd6e964df1a5a7707b25d35e1"
   integrity sha512-zTU3DaZaF3Rt9rhN3uBMGQD3dD2/vFQqnvZCDv4dl5iOzq2IZQqTxu90r4E5J+nP70J3ilqVCrbho2eWaeW8Ow==
 
-luxon@^1.26.0:
-  version "1.26.0"
-  resolved "https://registry.yarnpkg.com/luxon/-/luxon-1.26.0.tgz#d3692361fda51473948252061d0f8561df02b578"
-  integrity sha512-+V5QIQ5f6CDXQpWNICELwjwuHdqeJM1UenlZWx5ujcRMc9venvluCjFb4t5NYLhb6IhkbMVOxzVuOqkgMxee2A==
+luxon@^1.27.0:
+  version "1.27.0"
+  resolved "https://registry.yarnpkg.com/luxon/-/luxon-1.27.0.tgz#ae10c69113d85dab8f15f5e8390d0cbeddf4f00f"
+  integrity sha512-VKsFsPggTA0DvnxtJdiExAucKdAnwbCCNlMM5ENvHlxubqWd0xhZcdb4XgZ7QFNhaRhilXCFxHuoObP5BNA4PA==
 
 magic-string@^0.25.7:
   version "0.25.7"
@@ -8952,9 +8952,9 @@ map-visit@^1.0.0:
     object-visit "^1.0.0"
 
 marked@1.0.0, marked@>=2.0.0, marked@^2.0.0:
-  version "2.1.2"
-  resolved "https://registry.yarnpkg.com/marked/-/marked-2.1.2.tgz#59579e17b02443312caa1509994d5a0b18ae38e1"
-  integrity sha512-ueJhIvklJJw04qxQbGIAu63EXwwOCYc7yKMBjgagTM4rjC5QtWyqSNgW7jCosV1/Km/1TUfs5qEpAqcGG0Mo5g==
+  version "2.1.3"
+  resolved "https://registry.yarnpkg.com/marked/-/marked-2.1.3.tgz#bd017cef6431724fd4b27e0657f5ceb14bff3753"
+  integrity sha512-/Q+7MGzaETqifOMWYEA7HVMaZb4XbcRfaOzcSsHZEith83KGlvaSG33u0SKu89Mj5h+T8V2hM+8O45Qc5XTgwA==
 
 match-all@^1.2.6:
   version "1.2.6"
