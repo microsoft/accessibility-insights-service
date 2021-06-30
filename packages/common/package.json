@@ -26,7 +26,6 @@
         "@types/jest": "^26.0.23",
         "@types/node": "^12.20.15",
         "@types/sha.js": "^2.4.0",
-        "@types/wtfnode": "^0.7.0",
         "jest": "^27.0.5",
         "jest-junit": "^12.2.0",
         "rimraf": "^3.0.2",
@@ -45,7 +44,6 @@
         "reflect-metadata": "^0.1.13",
         "serialize-error": "^8.1.0",
         "sha.js": "^2.4.11",
-        "uuid-with-v6": "^1.1.2",
-        "wtfnode": "^0.9.0"
+        "uuid-with-v6": "^1.1.2"
     }
 }
