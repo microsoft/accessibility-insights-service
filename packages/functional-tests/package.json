@@ -19,7 +19,7 @@
     },
     "homepage": "https://github.com/Microsoft/accessibility-insights-service#readme",
     "devDependencies": {
-        "@types/chai": "^4.2.14",
+        "@types/chai": "^4.2.20",
         "@types/deep-equal-in-any-order": "^1.0.1",
         "@types/dotenv": "^8.2.0",
         "@types/jest": "^26.0.23",
