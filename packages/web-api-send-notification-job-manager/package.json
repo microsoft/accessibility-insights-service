@@ -23,7 +23,7 @@
     "devDependencies": {
         "@types/dotenv": "^8.2.0",
         "@types/jest": "^26.0.23",
-        "@types/lodash": "^4.14.170",
+        "@types/lodash": "^4.14.171",
         "@types/node": "^12.20.15",
         "@types/verror": "^1.10.4",
         "copy-webpack-plugin": "^9.0.0",
