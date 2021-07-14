@@ -28,7 +28,7 @@
         "@types/cheerio": "^0.22.29",
         "@types/encoding-down": "^5.0.0",
         "@types/jest": "^26.0.23",
-        "@types/leveldown": "^4.0.2",
+        "@types/leveldown": "^4.0.3",
         "@types/levelup": "^4.3.1",
         "@types/node": "^12.20.15",
         "jest": "^27.0.5",
