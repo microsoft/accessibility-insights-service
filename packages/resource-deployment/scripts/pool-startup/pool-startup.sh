@@ -58,7 +58,7 @@ installBootstrapPackages
 
 "${0%/*}/pull-image-from-container-registry.sh"
 
-# echo "Invoking custom pool startup script"
-# "${0%/*}/custom-pool-post-startup.sh"
+echo "Invoking custom pool startup script"
+"${0%/*}/custom-pool-post-startup.sh"
 
 echo "Successfully completed pool startup script execution"
