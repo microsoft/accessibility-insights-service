@@ -37,6 +37,8 @@ export class PageNavigator {
             //
             // The 'load' event is fired when the whole page has loaded, including all dependent resources such as stylesheets and images.
             // However any dynamic contents may not be available if it is loaded after window.onload() event.
+            // Since we reuse page instance from the first navigation attempt some contents could be already loaded and available which
+            // mitigates dynamic content rendering issue above.
             navigationResult = await this.navigateToUrl(url, page, 'load');
         }
 
