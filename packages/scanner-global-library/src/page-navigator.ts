@@ -17,7 +17,7 @@ export class PageNavigator {
     // Refer to service configuration TaskRuntimeConfig.taskTimeoutInMinutes property
     public readonly gotoTimeoutMsecs = 60000;
 
-    public readonly pageRenderingTimeoutMsecs = 60000;
+    public readonly pageRenderingTimeoutMsecs = 10000;
 
     constructor(
         @inject(PageConfigurator) public readonly pageConfigurator: PageConfigurator,
