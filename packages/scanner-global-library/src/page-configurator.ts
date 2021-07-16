@@ -18,6 +18,7 @@ export class PageConfigurator {
 
     public async configurePage(page: Page): Promise<void> {
         await page.setBypassCSP(true);
+        await page.setCacheEnabled(false); // disable cache to allow page reload
         await page.setViewport({
             width: this.windowWidth,
             height: this.windowHeight,

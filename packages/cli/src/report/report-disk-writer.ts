@@ -3,7 +3,7 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
-import filenamifyCombined from 'filenamify';
+import filenamify from 'filenamify';
 import filenamifyUrl from 'filenamify-url';
 import { injectable } from 'inversify';
 import normalizePath from 'normalize-path';
@@ -25,7 +25,7 @@ export class ReportDiskWriter {
         try {
             reportFileName = `${filenamifyUrl(fileName, { replacement: '_' })}.${format}`;
         } catch {
-            reportFileName = `${filenamifyCombined(fileName, { replacement: '_' })}.${format}`;
+            reportFileName = `${filenamify(fileName, { replacement: '_' })}.${format}`;
         }
 
         const normalizedDirectory = this.ensureDirectoryFunc(directory);

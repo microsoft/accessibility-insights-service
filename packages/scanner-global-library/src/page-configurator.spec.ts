@@ -43,6 +43,10 @@ describe(PageConfigurator, () => {
             .setup(async (o) => o.setUserAgent(chromeUserAgent))
             .returns(() => Promise.resolve())
             .verifiable();
+        pageMock
+            .setup(async (o) => o.setCacheEnabled(false))
+            .returns(() => Promise.resolve())
+            .verifiable();
 
         pageConfigurator = new PageConfigurator();
     });
