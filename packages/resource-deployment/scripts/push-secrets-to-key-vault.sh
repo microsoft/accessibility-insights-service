@@ -18,7 +18,7 @@ export tenantId
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -r <resource group> -c <webApiAdClientId> -p <webApiAdClientSecret>
+Usage: $0 -r <resource group> -c <web API AAD client Id> -p <web API AAD client secret>
 "
     exit 1
 }
@@ -119,6 +119,40 @@ createAppInsightsApiKey() {
     echo "App Insights API key created '$appInsightsApiKey'"
 }
 
+# function runs in a subshell to isolate trap handler
+pushSecretsToKeyVault() (
+    echo "Pushing secrets to keyvault $keyVault in resourceGroup $resourceGroupName"
+
+    getLoggedInUserDetails
+
+    trap 'revokePermissionsToKeyVault' EXIT
+    grantWritePermissionToKeyVault
+
+    getCosmosDbUrl
+    pushSecretToKeyVault "cosmosDbUrl" "$cosmosDbUrl"
+
+    getCosmosDbApiUrl
+    pushSecretToKeyVault "cosmosDbApiUrl" "$cosmosDbApiUrl"
+
+    pushSecretToKeyVault "storageAccountName" "$storageAccountName"
+
+    getStorageAccessKey
+    pushSecretToKeyVault "storageAccountKey" "$storageAccountKey"
+
+    pushSecretToKeyVault "restApiSpAppId" "$webApiAdClientId"
+    pushSecretToKeyVault "restApiSpSecret" "$webApiAdClientSecret"
+    getTenantId
+    pushSecretToKeyVault "authorityUrl" "https://login.microsoftonline.com/${tenantId}"
+
+    createAppInsightsApiKey
+    pushSecretToKeyVault "appInsightsApiKey" "$appInsightsApiKey"
+
+    getContainerRegistryLogin
+    pushSecretToKeyVault "containerRegistryUsername" "$containerRegistryUsername"
+    pushSecretToKeyVault "containerRegistryPassword" "$containerRegistryPassword"
+
+)
+
 # Read script arguments
 while getopts ":r:c:p:" option; do
     case $option in
@@ -131,10 +165,6 @@ done
 
 # Print script usage help
 if [[ -z $resourceGroupName ]] || [[ -z $webApiAdClientId ]] || [[ -z $webApiAdClientSecret ]]; then
-    echo "
-    resourceGroupName: $resourceGroupName 
-    webApiAdClientId: $webApiAdClientId
-    "
     exitWithUsageInfo
 fi
 
@@ -143,32 +173,4 @@ subscription=$(az account show --query "id" -o tsv)
 
 . "${0%/*}/get-resource-names.sh"
 
-echo "Pushing secrets to keyvault $keyVault in resourceGroup $resourceGroupName"
-
-getLoggedInUserDetails
-
-trap 'revokePermissionsToKeyVault' EXIT
-grantWritePermissionToKeyVault
-
-getCosmosDbUrl
-pushSecretToKeyVault "cosmosDbUrl" "$cosmosDbUrl"
-
-getCosmosDbApiUrl
-pushSecretToKeyVault "cosmosDbApiUrl" "$cosmosDbApiUrl"
-
-pushSecretToKeyVault "storageAccountName" "$storageAccountName"
-
-getStorageAccessKey
-pushSecretToKeyVault "storageAccountKey" "$storageAccountKey"
-
-pushSecretToKeyVault "restApiSpAppId" "$webApiAdClientId"
-pushSecretToKeyVault "restApiSpSecret" "$webApiAdClientSecret"
-getTenantId
-pushSecretToKeyVault "authorityUrl" "https://login.microsoftonline.com/${tenantId}"
-
-createAppInsightsApiKey
-pushSecretToKeyVault "appInsightsApiKey" "$appInsightsApiKey"
-
-getContainerRegistryLogin
-pushSecretToKeyVault "containerRegistryUsername" "$containerRegistryUsername"
-pushSecretToKeyVault "containerRegistryPassword" "$containerRegistryPassword"
+pushSecretsToKeyVault
