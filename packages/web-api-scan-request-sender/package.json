@@ -23,7 +23,7 @@
     "devDependencies": {
         "@types/jest": "^26.0.23",
         "copy-webpack-plugin": "^9.0.0",
-        "fork-ts-checker-webpack-plugin": "^6.2.10",
+        "fork-ts-checker-webpack-plugin": "^6.2.13",
         "jest": "^27.0.5",
         "jest-junit": "^12.2.0",
         "mockdate": "^3.0.5",
