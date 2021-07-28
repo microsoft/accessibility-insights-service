@@ -50,7 +50,7 @@
     "dependencies": {
         "azure-services": "^1.0.0",
         "common": "^1.0.0",
-        "durable-functions": "^1.4.6",
+        "durable-functions": "^1.5.2",
         "functional-tests": "1.0.0",
         "inversify": "^5.1.1",
         "lodash": "^4.17.21",
