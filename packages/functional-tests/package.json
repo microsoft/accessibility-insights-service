@@ -23,7 +23,7 @@
         "@types/deep-equal-in-any-order": "^1.0.1",
         "@types/dotenv": "^8.2.0",
         "@types/jest": "^26.0.23",
-        "@types/lodash": "^4.14.170",
+        "@types/lodash": "^4.14.172",
         "@types/node": "^12.20.15",
         "jest": "^27.0.5",
         "jest-junit": "^12.2.0",
