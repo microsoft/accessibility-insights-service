@@ -46,7 +46,7 @@
         "webpack-cli": "^4.7.2"
     },
     "dependencies": {
-        "@azure/cosmos": "^3.11.5",
+        "@azure/cosmos": "^3.13.0",
         "azure-services": "^1.0.0",
         "common": "^1.0.0",
         "dotenv": "^10.0.0",
