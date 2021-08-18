@@ -22,7 +22,7 @@
         "@types/chai": "^4.2.14",
         "@types/deep-equal-in-any-order": "^1.0.1",
         "@types/dotenv": "^8.2.0",
-        "@types/jest": "^26.0.23",
+        "@types/jest": "^27.0.1",
         "@types/lodash": "^4.14.170",
         "@types/node": "^12.20.15",
         "jest": "^27.0.5",
