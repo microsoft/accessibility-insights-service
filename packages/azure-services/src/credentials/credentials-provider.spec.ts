@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+import { DefaultAzureCredential } from '@azure/identity';
 import 'reflect-metadata';
 
 import { IMock, Mock, Times } from 'typemoq';
@@ -18,7 +19,7 @@ describe(CredentialsProvider, () => {
         msiCredProviderMock = Mock.ofType(MSICredentialsProvider);
     });
 
-    it('gets batch credentials with MSI auth', async () => {
+    it('getCredentialForBatch gets batch credentials with MSI auth', async () => {
         testSubject = new CredentialsProvider(msiCredProviderMock.object);
 
         msiCredProviderMock
@@ -30,5 +31,9 @@ describe(CredentialsProvider, () => {
 
         expect(actualCredentials).toBe(credentialsStub);
         msiCredProviderMock.verifyAll();
+    });
+
+    it('getDefaultAzureCredential creates new default credential', () => {
+        expect(testSubject.getDefaultAzureCredential()).toBeInstanceOf(DefaultAzureCredential);
     });
 });

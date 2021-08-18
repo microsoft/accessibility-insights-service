@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+import { DefaultAzureCredential, TokenCredential } from '@azure/identity';
 import { inject, injectable } from 'inversify';
 import { Credentials, MSICredentialsProvider } from './msi-credential-provider';
 
@@ -12,6 +13,10 @@ export class CredentialsProvider {
         // eslint-disable-next-line max-len
         // referred https://docs.microsoft.com/en-us/rest/api/batchservice/authenticate-requests-to-the-azure-batch-service#authentication-via-azure-ad
         return this.getCredentialsForResource('https://batch.core.windows.net/');
+    }
+
+    public getDefaultAzureCredential(): TokenCredential {
+        return new DefaultAzureCredential();
     }
 
     private async getCredentialsForResource(resource: string): Promise<Credentials> {
