@@ -166,6 +166,21 @@ function enableCosmosAccess() {
 
     role="DocumentDB Account Contributor"
     . "${0%/*}/role-assign-for-sp.sh"
+
+    # Create and assign custom RBAC role
+    customRoleName="CosmosDocumentRW"
+    RBACRoleId=$(az cosmosdb sql role definition list --account-name $cosmosAccountName --resource-group $resourceGroupName --query "[?roleName=='$customRoleName'].id" -o tsv)
+    if [[ -z "$RBACRoleId" ]]; then
+        RBACRoleId=$(az cosmosdb sql role definition create --account-name $cosmosAccountName \
+            --resource-group $resourceGroupName \
+            --body @../templates/cosmos-db-rw-role.json \
+            --query "[?roleName=='$customRoleName'].id" -o tsv)
+    fi
+    az cosmosdb sql role assignment create --account-name $cosmosAccountName \
+        --resource-group $resourceGroupName \
+        --scope "/" \
+        --principal-id $principalId \
+        --role-definition-id $RBACRoleId 1>/dev/null
 }
 
 function enableManagedIdentityOnFunctions() {
