@@ -66,10 +66,10 @@
     },
     "resolutions": {
         "axe-core": "4.2.1",
+        "normalize-url": "6.1.0",
         "apify-shared": ">=0.5.0",
         "axios": ">=0.21.1",
         "marked": ">=2.0.0",
-        "normalize-url": ">=6.0.1",
         "glob-parent": ">=5.1.2",
         "css-what": ">=5.0.1",
         "socket.io": ">=2.4.0",

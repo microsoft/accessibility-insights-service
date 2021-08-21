@@ -104,7 +104,6 @@ module.exports = {
         'eol-last': 'error',
         eqeqeq: ['error', 'smart'],
         'guard-for-in': 'error',
-        'id-blacklist': 'error',
         'id-match': 'error',
         'import/no-default-export': 'error',
         'import/no-deprecated': 'off',
