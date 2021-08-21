@@ -41,7 +41,7 @@
         "webpack-cli": "^4.8.0"
     },
     "dependencies": {
-        "@azure/batch": "^8.0.0",
+        "@azure/batch": "^10.0.0",
         "@azure/cosmos": "^3.13.0",
         "@azure/identity": "^1.5.1",
         "@azure/keyvault-secrets": "^4.1.0",
