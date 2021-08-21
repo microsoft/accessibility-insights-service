@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-/* eslint-disable @typescript-eslint/no-extraneous-class, @typescript-eslint/naming-convention,no-underscore-dangle,id-blacklist,id-match */
+/* eslint-disable @typescript-eslint/no-extraneous-class, @typescript-eslint/naming-convention,no-underscore-dangle,id-match */
 
 export declare type ScanRunErrorCodeName =
     | 'InternalError'
