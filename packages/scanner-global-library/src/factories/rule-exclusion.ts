@@ -43,6 +43,7 @@ export class RuleExclusion {
         'presentation-role-conflict',
         'region',
         'scope-attr-valid',
+        'scrollable-region-focusable',
         'skip-link',
         'tabindex',
         'table-duplicate-name',
