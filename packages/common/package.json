@@ -34,7 +34,7 @@
         "typescript": "^4.3.2"
     },
     "dependencies": {
-        "@sindresorhus/fnv1a": "^2.0.1",
+        "@sindresorhus/fnv1a": "^3.0.0",
         "convict": "^6.1.0",
         "got": "^11.8.2",
         "inversify": "^5.1.1",
