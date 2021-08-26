@@ -25,7 +25,7 @@
         "@types/got": "^9.6.11",
         "@types/jest": "^27.0.1",
         "@types/lodash": "^4.14.170",
-        "@types/node": "^12.20.15",
+        "@types/node": "^12.20.20",
         "@types/puppeteer": "^3.0.0",
         "@types/sha.js": "^2.4.0",
         "@types/verror": "^1.10.4",
@@ -46,7 +46,7 @@
         "webpack-cli": "^4.8.0"
     },
     "dependencies": {
-        "@azure/cosmos": "^3.13.0",
+        "@azure/cosmos": "^3.13.1",
         "azure-services": "^1.0.0",
         "common": "^1.0.0",
         "dotenv": "^10.0.0",
