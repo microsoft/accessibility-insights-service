@@ -49,13 +49,13 @@
         "webpack-cli": "^4.8.0"
     },
     "dependencies": {
-        "@axe-core/puppeteer": "4.1.1",
+        "@axe-core/puppeteer": "4.2.2",
         "@azure/cosmos": "^3.13.1",
         "accessibility-insights-crawler": "^1.0.0",
-        "accessibility-insights-report": "4.1.2",
+        "accessibility-insights-report": "4.1.5",
         "apify": "^0.21.8",
         "applicationinsights": "^2.1.1",
-        "axe-core": "4.2.1",
+        "axe-core": "4.3.2",
         "axe-sarif-converter": "^2.7.0",
         "axe-result-converter": "^1.0.0",
         "azure-services": "^1.0.0",
@@ -78,6 +78,6 @@
         "yargs": "^17.1.1"
     },
     "resolutions": {
-        "axe-core": "4.2.1"
+        "axe-core": "4.3.2"
     }
 }

@@ -51,15 +51,6 @@ describe('package.json dependencies', () => {
         expect(missingDependencyExplanations).toStrictEqual([]);
     });
 
-    // See discussion in https://github.com/dequelabs/axe-core-npm/pull/255.
-    //
-    // @axe-core/puppeteer is planned to include feature work that will obsolete allowedOrigins in
-    // v4.3.0 (see https://github.com/dequelabs/axe-core/issues/2936); this test will be obsolete
-    // once that happens.
-    it('pins to an @axe-core/puppeteer version which supports allowedOrigins with configure()', () => {
-        expect(packageJson.dependencies['@axe-core/puppeteer']).toBe('4.1.1');
-    });
-
     function formatDependencyListing(depName: string, dependencies: { [x: string]: string }): string {
         return `${JSON.stringify(depName)}: ${JSON.stringify(dependencies[depName])}`;
     }

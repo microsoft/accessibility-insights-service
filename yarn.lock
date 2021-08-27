@@ -20,12 +20,12 @@
   dependencies:
     event-stream "3.3.4"
 
-"@axe-core/puppeteer@4.1.1":
-  version "4.1.1"
-  resolved "https://registry.yarnpkg.com/@axe-core/puppeteer/-/puppeteer-4.1.1.tgz#e9dd2f2f13b717c057ff68c5943dec8d4ddd8acf"
-  integrity sha512-Ao9N7HL//s26hdasx3Ba18tlJgxpoO+1SmIN6eSx5vC50dqYhiRU0xp6wBKWqzo10u1jpzl/s4RFsOAuolFMBA==
+"@axe-core/puppeteer@4.2.2":
+  version "4.2.2"
+  resolved "https://registry.yarnpkg.com/@axe-core/puppeteer/-/puppeteer-4.2.2.tgz#97cf74ee4b2ee95f181b4e1adc05e7ba4df66c96"
+  integrity sha512-kBB+e0ndxuIWSF7kLEmsPVhxHh6nRKKP7OgZbBbS3HobZ4h7hyg+q9Lu8N4WOWN6jlqEcrJC95ORT7ZZkGbYBg==
   dependencies:
-    axe-core "^4.1.1"
+    axe-core "^4.2.3"
 
 "@azure/abort-controller@^1.0.0":
   version "1.0.1"
@@ -3482,15 +3482,15 @@ accepts@~1.3.4, accepts@~1.3.7:
     mime-types "~2.1.24"
     negotiator "0.6.2"
 
-accessibility-insights-report@4.1.2:
-  version "4.1.2"
-  resolved "https://registry.yarnpkg.com/accessibility-insights-report/-/accessibility-insights-report-4.1.2.tgz#f94df620c5e93764700ac72c97cef489f2e6e3d5"
-  integrity sha512-ONg8wlz290NtlkQbAS+aI30XY4JTxFQAPGot8MVti78fIMu4ddPslD3WSGUPKKDcyt1l6FybNa5jd4TL3j+c/w==
+accessibility-insights-report@4.1.5:
+  version "4.1.5"
+  resolved "https://registry.yarnpkg.com/accessibility-insights-report/-/accessibility-insights-report-4.1.5.tgz#703b5672b6baffd5e6f0a7ef7d42301168123f00"
+  integrity sha512-Yu2MAJJukzBByj3EK22UVj4sAe9WfgRfib2zf/Gvpq2LZ7K88ZzdUboL6lKmCueJmPkY7AGKvLxbPf4dyfu+OQ==
   dependencies:
-    axe-core "4.2.1"
+    axe-core "4.3.2"
     classnames "^2.3.1"
     lodash "^4.17.21"
-    luxon "^1.26.0"
+    luxon "^2.0.2"
     office-ui-fabric-react "7.98.0"
     react "^16.14.0"
     react-dom "^16.14.0"
@@ -3949,10 +3949,10 @@ aws4@^1.8.0:
   resolved "https://registry.yarnpkg.com/aws4/-/aws4-1.10.1.tgz#e1e82e4f3e999e2cfd61b161280d16a111f86428"
   integrity sha512-zg7Hz2k5lI8kb7U32998pRRFin7zJlkfezGJjUc2heaD4Pw2wObakCDVzkKztTm/Ln7eiVvYsjqak0Ed4LkMDA==
 
-axe-core@4.2.1, "axe-core@^3.2.2 || ^4.0.0", axe-core@^4.1.1:
-  version "4.2.1"
-  resolved "https://registry.yarnpkg.com/axe-core/-/axe-core-4.2.1.tgz#2e50bcf10ee5b819014f6e342e41e45096239e34"
-  integrity sha512-evY7DN8qSIbsW2H/TWQ1bX3sXN1d4MNb5Vb4n7BzPuCwRHdkZ1H2eNLuSh73EoQqkGKUtju2G2HCcjCfhvZIAA==
+axe-core@4.3.2, "axe-core@^3.2.2 || ^4.0.0", axe-core@^4.2.3:
+  version "4.3.2"
+  resolved "https://registry.yarnpkg.com/axe-core/-/axe-core-4.3.2.tgz#fcf8777b82c62cfc69c7e9f32c0d2226287680e7"
+  integrity sha512-5LMaDRWm8ZFPAEdzTYmgjjEdj1YnQcpfrVajO/sn/LhbpGp0Y0H64c2hLZI1gRMxfA+w1S71Uc/nHaOXgcCvGg==
 
 axe-sarif-converter@^2.7.0:
   version "2.7.0"
@@ -8887,10 +8887,10 @@ lunr@^2.3.8:
   resolved "https://registry.yarnpkg.com/lunr/-/lunr-2.3.9.tgz#18b123142832337dd6e964df1a5a7707b25d35e1"
   integrity sha512-zTU3DaZaF3Rt9rhN3uBMGQD3dD2/vFQqnvZCDv4dl5iOzq2IZQqTxu90r4E5J+nP70J3ilqVCrbho2eWaeW8Ow==
 
-luxon@^1.26.0:
-  version "1.26.0"
-  resolved "https://registry.yarnpkg.com/luxon/-/luxon-1.26.0.tgz#d3692361fda51473948252061d0f8561df02b578"
-  integrity sha512-+V5QIQ5f6CDXQpWNICELwjwuHdqeJM1UenlZWx5ujcRMc9venvluCjFb4t5NYLhb6IhkbMVOxzVuOqkgMxee2A==
+luxon@^2.0.2:
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/luxon/-/luxon-2.0.2.tgz#11f2cd4a11655fdf92e076b5782d7ede5bcdd133"
+  integrity sha512-ZRioYLCgRHrtTORaZX1mx+jtxKtKuI5ZDvHNAmqpUzGqSrR+tL4FVLn/CUGMA3h0+AKD1MAxGI5GnCqR5txNqg==
 
 magic-string@^0.25.7:
   version "0.25.7"
