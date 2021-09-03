@@ -7,6 +7,8 @@ import { Credentials, MSICredentialsProvider } from './msi-credential-provider';
 
 @injectable()
 export class CredentialsProvider {
+    private defaultCredential: DefaultAzureCredential;
+
     constructor(@inject(MSICredentialsProvider) private readonly msiCredentialProvider: MSICredentialsProvider) {}
 
     public async getCredentialsForBatch(): Promise<Credentials> {
@@ -16,7 +18,11 @@ export class CredentialsProvider {
     }
 
     public getDefaultAzureCredential(): TokenCredential {
-        return new DefaultAzureCredential();
+        if (!this.defaultCredential) {
+            this.defaultCredential = new DefaultAzureCredential();
+        }
+
+        return this.defaultCredential;
     }
 
     private async getCredentialsForResource(resource: string): Promise<Credentials> {

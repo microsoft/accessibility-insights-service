@@ -33,7 +33,10 @@ describe(CredentialsProvider, () => {
         msiCredProviderMock.verifyAll();
     });
 
-    it('getDefaultAzureCredential creates new default credential', () => {
-        expect(testSubject.getDefaultAzureCredential()).toBeInstanceOf(DefaultAzureCredential);
+    it('getDefaultAzureCredential creates singleton default credential', () => {
+        const defaultCredential = testSubject.getDefaultAzureCredential();
+
+        expect(defaultCredential).toBeInstanceOf(DefaultAzureCredential);
+        expect(testSubject.getDefaultAzureCredential()).toBe(defaultCredential);
     });
 });

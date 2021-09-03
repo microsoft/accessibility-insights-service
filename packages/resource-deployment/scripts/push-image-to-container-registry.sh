@@ -93,11 +93,11 @@ pushImagesToRegistry() (
     runCommandsWithoutSecretsInParallel imageBuildProcesses
 )
 
-# Login to container registry
-az acr login --name "$containerRegistryName"
-
 . "${0%/*}/get-resource-names.sh"
 . "${0%/*}/process-utilities.sh"
+
+# Login to container registry
+az acr login --name "$containerRegistryName"
 
 setImageBuildSource
 prepareImageBuildSource
