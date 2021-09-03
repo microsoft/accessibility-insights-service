@@ -9,7 +9,6 @@ import { QueueServiceClient } from '@azure/storage-queue';
 import { IoC } from 'common';
 import { Container, interfaces } from 'inversify';
 import { ContextAwareLogger } from 'logger';
-import { DefaultAzureCredential } from '@azure/identity';
 import { SecretClient } from '@azure/keyvault-secrets';
 import { Batch } from './azure-batch/batch';
 import { BatchConfig } from './azure-batch/batch-config';
@@ -23,7 +22,6 @@ import { cosmosContainerClientTypes, iocTypeNames } from './ioc-types';
 import { secretNames } from './key-vault/secret-names';
 import { SecretProvider } from './key-vault/secret-provider';
 import { CosmosContainerClient } from './storage/cosmos-container-client';
-import { CosmosKeyProvider } from './azure-cosmos/cosmos-key-provider';
 
 export function registerAzureServicesToContainer(
     container: Container,
@@ -40,8 +38,6 @@ export function registerAzureServicesToContainer(
     container.bind(SecretProvider).toSelf().inSingletonScope();
 
     container.bind(StorageConfig).toSelf().inSingletonScope();
-
-    container.bind(CosmosKeyProvider).toSelf().inSingletonScope();
 
     setupSingletonCosmosClientProvider(container, cosmosClientFactory);
 
@@ -100,7 +96,8 @@ async function getStorageAccountName(context: interfaces.Context): Promise<strin
 function setupBlobServiceClientProvider(container: interfaces.Container): void {
     IoC.setupSingletonProvider<BlobServiceClient>(iocTypeNames.BlobServiceClientProvider, container, async (context) => {
         const accountName = await getStorageAccountName(context);
-        const defaultAzureCredential = new DefaultAzureCredential();
+        const credentialProvider = container.get(CredentialsProvider);
+        const defaultAzureCredential = credentialProvider.getDefaultAzureCredential();
 
         return new BlobServiceClient(`https://${accountName}.blob.core.windows.net`, defaultAzureCredential);
     });
@@ -119,7 +116,8 @@ function setupAuthenticationMethod(container: interfaces.Container): void {
 
 function setupSingletonAzureKeyVaultClientProvider(container: interfaces.Container): void {
     IoC.setupSingletonProvider<SecretClient>(iocTypeNames.AzureKeyVaultClientProvider, container, async (context) => {
-        const credentials = new DefaultAzureCredential();
+        const credentialProvider = container.get(CredentialsProvider);
+        const credentials = credentialProvider.getDefaultAzureCredential();
 
         return new SecretClient(process.env.KEY_VAULT_URL, credentials);
     });
@@ -128,9 +126,10 @@ function setupSingletonAzureKeyVaultClientProvider(container: interfaces.Contain
 function setupSingletonQueueServiceClientProvider(container: interfaces.Container): void {
     IoC.setupSingletonProvider<QueueServiceClient>(iocTypeNames.QueueServiceClientProvider, container, async (context) => {
         const accountName = await getStorageAccountName(context);
-        const credential = new DefaultAzureCredential();
+        const credentialProvider = container.get(CredentialsProvider);
+        const credentials = credentialProvider.getDefaultAzureCredential();
 
-        return new QueueServiceClient(`https://${accountName}.queue.core.windows.net`, credential);
+        return new QueueServiceClient(`https://${accountName}.queue.core.windows.net`, credentials);
     });
 }
 
@@ -140,18 +139,15 @@ function setupSingletonCosmosClientProvider(
 ): void {
     IoC.setupSingletonProvider<CosmosClient>(iocTypeNames.CosmosClientProvider, container, async (context) => {
         let cosmosDbUrl: string;
-        let cosmosDbApiUrl: string;
         if (process.env.COSMOS_DB_URL !== undefined && process.env.COSMOS_DB_KEY !== undefined) {
             return cosmosClientFactory({ endpoint: process.env.COSMOS_DB_URL, key: process.env.COSMOS_DB_KEY });
         } else {
             const secretProvider = context.container.get(SecretProvider);
             cosmosDbUrl = await secretProvider.getSecret(secretNames.cosmosDbUrl);
-            cosmosDbApiUrl = await secretProvider.getSecret(secretNames.cosmosDbApiUrl);
+            const credentialProvider = container.get(CredentialsProvider);
+            const credentials = credentialProvider.getDefaultAzureCredential();
 
-            const cosmosKeyProvider = context.container.get(CosmosKeyProvider);
-            const cosmosDbKey = await cosmosKeyProvider.getCosmosKey(cosmosDbApiUrl);
-
-            return cosmosClientFactory({ endpoint: cosmosDbUrl, key: cosmosDbKey });
+            return cosmosClientFactory({ endpoint: cosmosDbUrl, aadCredentials: credentials });
         }
     });
 }

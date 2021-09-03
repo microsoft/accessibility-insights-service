@@ -3,7 +3,6 @@
 
 export const secretNames = {
     cosmosDbUrl: 'cosmosDbUrl',
-    cosmosDbApiUrl: 'cosmosDbApiUrl',
     storageAccountName: 'storageAccountName',
     storageAccountKey: 'storageAccountKey',
     restApiSpAppId: 'restApiSpAppId',
