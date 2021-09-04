@@ -47,7 +47,7 @@ enableCosmosAccess() {
     if [[ -z "$RBACRoleId" ]]; then
         RBACRoleId=$(az cosmosdb sql role definition create --account-name $cosmosAccountName \
             --resource-group $resourceGroupName \
-            --body @../templates/cosmos-db-rw-role.json \
+            --body @${0%/*}/../templates/cosmos-db-rw-role.json \
             --query "[?roleName=='$customRoleName'].id" -o tsv)
     fi
     az cosmosdb sql role assignment create --account-name $cosmosAccountName \
