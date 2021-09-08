@@ -2994,9 +2994,9 @@
   integrity sha512-7EIraBEyRHEe7CH+Fm1XvgqU6uwZN8Q7jppJGcqjROMT29qhAuuOxYB1uEY5UMYQKEmA5D+5tBnhdaPXSsLONA==
 
 "@types/node@>=10.0.0":
-  version "16.7.13"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-16.7.13.tgz#86fae356b03b5a12f2506c6cf6cd9287b205973f"
-  integrity sha512-pLUPDn+YG3FYEt/pHI74HmnJOWzeR+tOIQzUx93pi9M7D8OE7PSLr97HboXwk5F+JS+TLtWuzCOW97AHjmOXXA==
+  version "16.9.0"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-16.9.0.tgz#d9512fe037472dcb58931ce19f837348db828a62"
+  integrity sha512-nmP+VR4oT0pJUPFbKE4SXj3Yb4Q/kz3M9dSAO1GGMebRKWHQxLfDNmU/yh3xxCJha3N60nQ/JwXWwOE/ZSEVag==
 
 "@types/node@^12", "@types/node@^12.12.7", "@types/node@^12.20.23":
   version "12.20.23"
@@ -6422,6 +6422,15 @@ filenamify@^4.3.0:
     strip-outer "^1.0.1"
     trim-repeated "^1.0.0"
 
+filenamify@^5.0.1:
+  version "5.0.1"
+  resolved "https://registry.yarnpkg.com/filenamify/-/filenamify-5.0.1.tgz#dca105c0d610ecc6f3249957fd11733019d1f64b"
+  integrity sha512-JaWJHplckZTbg9jgZmOeXq1Sm7GiylBTSacyW45YO9QGsQSELlC9PTKkDBOo+3VHdS2a7dvgyaHe7XcVlEitxw==
+  dependencies:
+    filename-reserved-regex "^2.0.0"
+    strip-outer "^1.0.1"
+    trim-repeated "^1.0.0"
+
 fill-range@^4.0.0:
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/fill-range/-/fill-range-4.0.0.tgz#d544811d428f98eb06a63dc402d2403c328c38f7"
@@ -9087,9 +9096,9 @@ map-visit@^1.0.0:
     object-visit "^1.0.0"
 
 marked@1.0.0, marked@>=2.0.0, marked@^2.0.0:
-  version "3.0.2"
-  resolved "https://registry.yarnpkg.com/marked/-/marked-3.0.2.tgz#60ce97d6aec34dd882ab4bb4df82494666854e17"
-  integrity sha512-TMJQQ79Z0e3rJYazY0tIoMsFzteUGw9fB3FD+gzuIT3zLuG9L9ckIvUfF51apdJkcqc208jJN2KbtPbOvXtbjA==
+  version "3.0.3"
+  resolved "https://registry.yarnpkg.com/marked/-/marked-3.0.3.tgz#d81ff0f9e29cef0a177327fe009b460f31aa5862"
+  integrity sha512-4oIDhVSQ2s+xNCfek9OnZgCQR/WykGCom02JzIIvi4Pme+MIwPYqvGVW8CQWOXeoZu0TtVB6pTxIuoLm+dKqDA==
 
 match-all@^1.2.6:
   version "1.2.6"
