@@ -27,6 +27,8 @@ export class NotificationSender {
 
     public async sendNotification(): Promise<void> {
         const senderMetadata = this.notificationSenderConfig.getConfig();
+        this.logger.logInfo(`Notification runner task parameters`, { params: JSON.stringify(senderMetadata) });
+
         this.logger.setCommonProperties({ scanId: senderMetadata.scanId });
         this.logger.logInfo(`Starting scan notification task.`);
 
