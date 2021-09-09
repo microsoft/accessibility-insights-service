@@ -64,7 +64,7 @@ function getScanArguments(): LoadTestArgs {
 }
 
 function getRequestOptions(requestId: number, scanArguments: LoadTestArgs): nodeFetch.RequestInit {
-    const myHeaders: nodeFetch.HeaderInit = {
+    const myHeaders: nodeFetch.HeadersInit = {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${scanArguments.adAuthToken}`,
     };
