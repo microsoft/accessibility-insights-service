@@ -27,6 +27,9 @@ export class NotificationSender {
 
     public async sendNotification(): Promise<void> {
         const senderMetadata = this.notificationSenderConfig.getConfig();
+        // decode notification URL back from docker parameter encoding
+        senderMetadata.scanNotifyUrl = decodeURI(senderMetadata.scanNotifyUrl);
+
         this.logger.setCommonProperties({ scanId: senderMetadata.scanId });
         this.logger.logInfo(`Starting scan notification task.`);
 

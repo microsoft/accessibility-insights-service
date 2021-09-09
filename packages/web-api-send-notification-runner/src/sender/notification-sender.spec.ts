@@ -37,9 +37,16 @@ describe(NotificationSender, () => {
     let systemMock: IMock<typeof System>;
     let scanConfig: ScanRunTimeConfig;
 
+    const notificationSenderMetadataInput: NotificationSenderMetadata = {
+        scanId: 'id',
+        scanNotifyUrl: 'scanNotifyUrl%20token',
+        runStatus: 'completed',
+        scanStatus: 'pass',
+    };
+
     const notificationSenderMetadata: NotificationSenderMetadata = {
         scanId: 'id',
-        scanNotifyUrl: 'scanNotifyUrl',
+        scanNotifyUrl: 'scanNotifyUrl token',
         runStatus: 'completed',
         scanStatus: 'pass',
     };
@@ -74,7 +81,7 @@ describe(NotificationSender, () => {
         systemMock = Mock.ofInstance(System, MockBehavior.Strict);
         clientMock = Mock.ofInstance(client);
         notificationSenderMetadataMock = Mock.ofType(NotificationSenderConfig);
-        notificationSenderMetadataMock.setup((s) => s.getConfig()).returns(() => notificationSenderMetadata);
+        notificationSenderMetadataMock.setup((s) => s.getConfig()).returns(() => notificationSenderMetadataInput);
 
         sender = new NotificationSender(
             onDemandPageScanRunResultProviderMock.object,
