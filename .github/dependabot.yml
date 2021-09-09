@@ -58,3 +58,15 @@ updates:
   - dependency-name: cheerio
     versions:
     - "> 1.0.0-rc.3"
+  - dependency-name: normalize-url
+    versions:
+    - "> 6.1.0"
+    - dependency-name: filenamify-url
+    versions:
+    - "> 2.1.2"
+  - dependency-name: "@sindresorhus/fnv1a"
+    versions:
+    - "> 2.0.1"
+  - dependency-name: filenamify
+    versions:
+    - "> 4.3.0"
