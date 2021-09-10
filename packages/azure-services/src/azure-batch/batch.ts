@@ -4,12 +4,12 @@
 /* eslint-disable import/no-internal-modules */
 import * as crypto from 'crypto';
 import { BatchServiceModels } from '@azure/batch';
-import { CloudJob, CloudTask, JobListOptions, OutputFile, TaskListOptions } from '@azure/batch/esm/models';
 import { System } from 'common';
 import { inject, injectable, optional } from 'inversify';
 import * as _ from 'lodash';
 import { GlobalLogger } from 'logger';
 import { VError } from 'verror';
+import { CloudTask, TaskListOptions, JobListOptions, CloudJob, OutputFile } from '@azure/batch/types/src/models';
 import { StorageContainerSASUrlProvider } from '../azure-blob/storage-container-sas-url-provider';
 import { Message } from '../azure-queue/message';
 import { BatchServiceClientProvider, iocTypeNames } from '../ioc-types';

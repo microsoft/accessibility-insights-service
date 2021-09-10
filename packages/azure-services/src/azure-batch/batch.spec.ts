@@ -5,17 +5,17 @@
 import 'reflect-metadata';
 
 import { BatchServiceClient, BatchServiceModels, Job, Pool, Task } from '@azure/batch';
-import {
-    ErrorCategory,
-    JobListResponse,
-    PoolGetResponse,
-    TaskExecutionInformation,
-    TaskFailureInformation,
-    TaskListResponse,
-} from '@azure/batch/esm/models';
 import { ServiceConfiguration, TaskRuntimeConfig } from 'common';
 import moment from 'moment';
 import { IMock, It, Mock, Times } from 'typemoq';
+import {
+    TaskExecutionInformation,
+    TaskListResponse,
+    ErrorCategory,
+    TaskFailureInformation,
+    PoolGetResponse,
+    JobListResponse,
+} from '@azure/batch/types/src/models';
 import { StorageContainerSASUrlProvider } from '../azure-blob/storage-container-sas-url-provider';
 import { Message } from '../azure-queue/message';
 import { BatchServiceClientProvider } from '../ioc-types';
