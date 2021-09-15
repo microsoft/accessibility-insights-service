@@ -73,7 +73,7 @@
         "filenamify-url": "^2.1.2",
         "got": "^11.8.2",
         "inversify": "^5.1.1",
-        "leveldown": "^6.0.0",
+        "leveldown": "^6.0.2",
         "levelup": "^5.0.1",
         "lodash": "^4.17.21",
         "moment": "^2.29.1",
