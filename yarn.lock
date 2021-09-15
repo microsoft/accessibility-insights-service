@@ -157,6 +157,16 @@
     events "^3.0.0"
     tslib "^1.10.0"
 
+"@azure/core-lro@^2.2.0":
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/@azure/core-lro/-/core-lro-2.2.0.tgz#82252566b811c255989f90e639f00f177f02ec55"
+  integrity sha512-TJo95eNT1dwYOPCb0m1C2zyxVlHuRRkKGeg9TKu8XMF2qh4v6c1weD63r9RVIrLdHdnSqS0n6PTXBpWoB8NqMw==
+  dependencies:
+    "@azure/abort-controller" "^1.0.0"
+    "@azure/core-tracing" "1.0.0-preview.13"
+    "@azure/logger" "^1.0.0"
+    tslib "^2.2.0"
+
 "@azure/core-paging@^1.1.1":
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/@azure/core-paging/-/core-paging-1.1.1.tgz#9639d2d5b6631d481d81040504e0e26c003f47b1"
@@ -335,19 +345,19 @@
     jsonwebtoken "^8.5.1"
     uuid "^8.3.0"
 
-"@azure/storage-blob@^12.6.0":
-  version "12.6.0"
-  resolved "https://registry.yarnpkg.com/@azure/storage-blob/-/storage-blob-12.6.0.tgz#9905d80e5f908a573cc65e1cb8302abc32818844"
-  integrity sha512-cAzsae+5ZdhugQfIT7o5SlVyF2Sc+HygZdPO41ZYdXklfGUyEt+5K4PyM5HQDc0MTVt6x7+waXcaAXT2eF9E6A==
+"@azure/storage-blob@^12.8.0":
+  version "12.8.0"
+  resolved "https://registry.yarnpkg.com/@azure/storage-blob/-/storage-blob-12.8.0.tgz#97b7ecc6c7b17bcbaf0281c79c16af6f512d6130"
+  integrity sha512-c8+Wz19xauW0bGkTCoqZH4dYfbtBniPiGiRQOn1ca6G5jsjr4azwaTk9gwjVY8r3vY2Taf95eivLzipfIfiS4A==
   dependencies:
     "@azure/abort-controller" "^1.0.0"
-    "@azure/core-http" "^1.2.0"
-    "@azure/core-lro" "^1.0.2"
+    "@azure/core-http" "^2.0.0"
+    "@azure/core-lro" "^2.2.0"
     "@azure/core-paging" "^1.1.1"
-    "@azure/core-tracing" "1.0.0-preview.11"
+    "@azure/core-tracing" "1.0.0-preview.13"
     "@azure/logger" "^1.0.0"
     events "^3.0.0"
-    tslib "^2.0.0"
+    tslib "^2.2.0"
 
 "@azure/storage-queue@^12.5.0":
   version "12.5.0"
