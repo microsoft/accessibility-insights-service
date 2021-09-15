@@ -8887,10 +8887,10 @@ level-supports@^2.0.0:
   resolved "https://registry.yarnpkg.com/level-supports/-/level-supports-2.0.0.tgz#b0b9f63f30c4175fb2612217144f03f3b77580d9"
   integrity sha512-8UJgzo1pvWP1wq80ZlkL19fPeK7tlyy0sBY90+2pj0x/kvzHCoLDWyuFJJMrsTn33oc7hbMkS3SkjCxMRPHWaw==
 
-leveldown@^6.0.0:
-  version "6.0.0"
-  resolved "https://registry.yarnpkg.com/leveldown/-/leveldown-6.0.0.tgz#3ec7f00463c45f8f7c8e68248d10ab299059c7ca"
-  integrity sha512-NEsyqpfdDhpFO49Zm9htNSsWixMa9Q9sUXgrBTaQNPyPo2Kx1wRctgIXMzc7tduXJqNff8QAwulv2eZDboghxQ==
+leveldown@^6.0.2:
+  version "6.0.2"
+  resolved "https://registry.yarnpkg.com/leveldown/-/leveldown-6.0.2.tgz#994779b2848df02e0aa6e1646213cf30f5b98883"
+  integrity sha512-jZ2SQvyWcNmNzBzvtVN9rq8zPFHBm/VriukyE+wH82z/nKzp4J1ln7G9LBYi6BJQs6K00jqu3PfZXGQbvJyWkQ==
   dependencies:
     abstract-leveldown "^7.0.0"
     napi-macros "~2.0.0"
