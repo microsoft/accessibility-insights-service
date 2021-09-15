@@ -126,7 +126,7 @@
     uuid "^8.3.0"
     xml2js "^0.4.19"
 
-"@azure/core-http@^2.0.0":
+"@azure/core-http@^2.2.0":
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/@azure/core-http/-/core-http-2.2.0.tgz#a8edfeb31bbd65172e2455fde3e607fd9300c064"
   integrity sha512-DCXm8OTNhPxErNvwuNgd9r/W+LjMrHHNc9/q4QgIOpCaoBvpJd1O5Nl2gbAhrwfiwmEBNWHMeGoe5+g3Lx2H/A==
@@ -2643,10 +2643,10 @@
   dependencies:
     "@opentelemetry/context-base" "^0.10.2"
 
-"@opentelemetry/api@^1.0.0", "@opentelemetry/api@^1.0.1":
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/@opentelemetry/api/-/api-1.0.2.tgz#921e1f2b2484b762d77225a8a25074482d93fccf"
-  integrity sha512-DCF9oC89ao8/EJUqrp/beBlDR8Bp2R43jqtzayqCoomIvkwTuPfLcHdVhIGRR69GFlkykFjcDW+V92t0AS7Tww==
+"@opentelemetry/api@^1.0.0", "@opentelemetry/api@^1.0.1", "@opentelemetry/api@^1.0.3":
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/@opentelemetry/api/-/api-1.0.3.tgz#13a12ae9e05c2a782f7b5e84c3cbfda4225eaf80"
+  integrity sha512-puWxACExDe9nxbBB3lOymQFrLYml2dVOrd7USiVRnSbgXE+KwBu+HxFvxrzfqsiSda9IWsXJG1ef7C1O2/GmKQ==
 
 "@opentelemetry/context-base@^0.10.2":
   version "0.10.2"
@@ -2669,7 +2669,7 @@
     "@opentelemetry/core" "0.23.0"
     "@opentelemetry/semantic-conventions" "0.23.0"
 
-"@opentelemetry/semantic-conventions@0.23.0", "@opentelemetry/semantic-conventions@^0.23.0":
+"@opentelemetry/semantic-conventions@0.23.0":
   version "0.23.0"
   resolved "https://registry.yarnpkg.com/@opentelemetry/semantic-conventions/-/semantic-conventions-0.23.0.tgz#ec1467fd71f6551628b60cd2107acc923b9b77cc"
   integrity sha512-Tzo+VGR1zlzLbjVI+7mlDJ2xuaUsue4scWvFlK+fzcUfn9siF4NWbxoC2X6Br2B/g4dsq1OAwAYsPVYIEoY2rQ==
@@ -3870,14 +3870,13 @@ apify@^0.21.8:
   optionalDependencies:
     puppeteer "5.3.1"
 
-applicationinsights@^2.1.6:
-  version "2.1.6"
-  resolved "https://registry.yarnpkg.com/applicationinsights/-/applicationinsights-2.1.6.tgz#ded415ded7b0ce9a99b3b51be3f8575ea50a9cc7"
-  integrity sha512-iXdWfHMAdPADCSJjjAiP+eoIga6LLTQ6CgoqXg0BRAiZTqWS28CiFGB1CSNHlmfpb5d4wIXkTA9Vj4OdAAP+FQ==
+applicationinsights@^2.1.7:
+  version "2.1.7"
+  resolved "https://registry.yarnpkg.com/applicationinsights/-/applicationinsights-2.1.7.tgz#fb398fa3666407d679f327b99156cfee4b255ffd"
+  integrity sha512-AMCu0Nct0pINwdo0TwMuGoTA1vhv2UIDHFFi/kBoVlNRHdV4oBJ1BODVUDvxr7+mLWhDtJQpXanDe//3ZNW1tQ==
   dependencies:
-    "@azure/core-http" "^2.0.0"
-    "@opentelemetry/api" "^1.0.0"
-    "@opentelemetry/semantic-conventions" "^0.23.0"
+    "@azure/core-http" "^2.2.0"
+    "@opentelemetry/api" "^1.0.3"
     "@opentelemetry/tracing" "^0.23.0"
     cls-hooked "^4.2.2"
     continuation-local-storage "^3.2.1"
