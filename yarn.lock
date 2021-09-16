@@ -105,7 +105,7 @@
     "@azure/core-tracing" "1.0.0-preview.13"
     tslib "^2.2.0"
 
-"@azure/core-http@^1.1.1", "@azure/core-http@^1.1.6", "@azure/core-http@^1.2.0":
+"@azure/core-http@^1.1.1", "@azure/core-http@^1.1.6":
   version "1.2.6"
   resolved "https://registry.yarnpkg.com/@azure/core-http/-/core-http-1.2.6.tgz#9cd508418572d2062fd3175274219438772bdb65"
   integrity sha512-odtH7UMKtekc5YQ86xg9GlVHNXR6pq2JgJ5FBo7/jbOjNGdBqcrIVrZx2bevXVJz/uUTSx6vUf62gzTXTfqYSQ==
@@ -126,7 +126,7 @@
     uuid "^8.3.0"
     xml2js "^0.4.19"
 
-"@azure/core-http@^2.2.0":
+"@azure/core-http@^2.0.0", "@azure/core-http@^2.2.0":
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/@azure/core-http/-/core-http-2.2.0.tgz#a8edfeb31bbd65172e2455fde3e607fd9300c064"
   integrity sha512-DCXm8OTNhPxErNvwuNgd9r/W+LjMrHHNc9/q4QgIOpCaoBvpJd1O5Nl2gbAhrwfiwmEBNWHMeGoe5+g3Lx2H/A==
@@ -359,17 +359,17 @@
     events "^3.0.0"
     tslib "^2.2.0"
 
-"@azure/storage-queue@^12.5.0":
-  version "12.5.0"
-  resolved "https://registry.yarnpkg.com/@azure/storage-queue/-/storage-queue-12.5.0.tgz#9af56d2cd1a03feebb8201bc3c6ab73609d0a999"
-  integrity sha512-e6/wncYKfhlwm+oS1M0Uqtujot9/zCTBSBfHoWum/Nj0pA1aGUrE0KCy5WwLpC0xWwzW1OPmaRJwoB/QI9033Q==
+"@azure/storage-queue@^12.7.0":
+  version "12.7.0"
+  resolved "https://registry.yarnpkg.com/@azure/storage-queue/-/storage-queue-12.7.0.tgz#ab25d3c5a050ce0ae5faedcd7c907621e124ec85"
+  integrity sha512-yS27do9Dn3ohaOHWIwZfyu+I3gG0QJWNCl+qTLmsyWxBz5KO3O+clQ+NYo9tvovPBkBftf3kY2K705AeH0o0SQ==
   dependencies:
     "@azure/abort-controller" "^1.0.0"
-    "@azure/core-http" "^1.2.0"
+    "@azure/core-http" "^2.0.0"
     "@azure/core-paging" "^1.1.1"
-    "@azure/core-tracing" "1.0.0-preview.11"
+    "@azure/core-tracing" "1.0.0-preview.13"
     "@azure/logger" "^1.0.0"
-    tslib "^2.0.0"
+    tslib "^2.2.0"
 
 "@babel/code-frame@7.12.11":
   version "7.12.11"
@@ -3079,9 +3079,9 @@
   integrity sha512-7EIraBEyRHEe7CH+Fm1XvgqU6uwZN8Q7jppJGcqjROMT29qhAuuOxYB1uEY5UMYQKEmA5D+5tBnhdaPXSsLONA==
 
 "@types/node@>=10.0.0":
-  version "16.9.1"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-16.9.1.tgz#0611b37db4246c937feef529ddcc018cf8e35708"
-  integrity sha512-QpLcX9ZSsq3YYUUnD3nFDY8H7wctAhQj/TFKL8Ya8v5fMm3CFXxo8zStsLAl780ltoYoo1WvKUVGBQK+1ifr7g==
+  version "16.9.2"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-16.9.2.tgz#81f5a039d6ed1941f8cc57506c74e7c2b8fc64b9"
+  integrity sha512-ZHty/hKoOLZvSz6BtP1g7tc7nUeJhoCf3flLjh8ZEv1vFKBWHXcnMbJMyN/pftSljNyy0kNW/UqI3DccnBnZ8w==
 
 "@types/node@^12", "@types/node@^12.12.7", "@types/node@^12.20.24":
   version "12.20.24"
@@ -10769,17 +10769,7 @@ pretty-format@^25.2.1, pretty-format@^25.5.0:
     ansi-styles "^4.0.0"
     react-is "^16.12.0"
 
-pretty-format@^27.0.0, pretty-format@^27.0.6, pretty-format@^27.1.1, pretty-format@^27.2.0:
-  version "27.2.0"
-  resolved "https://registry.yarnpkg.com/pretty-format/-/pretty-format-27.2.0.tgz#ee37a94ce2a79765791a8649ae374d468c18ef19"
-  integrity sha512-KyJdmgBkMscLqo8A7K77omgLx5PWPiXJswtTtFV7XgVZv2+qPk6UivpXXO+5k6ZEbWIbLoKdx1pZ6ldINzbwTA==
-  dependencies:
-    "@jest/types" "^27.1.1"
-    ansi-regex "^5.0.0"
-    ansi-styles "^5.0.0"
-    react-is "^17.0.1"
-
-pretty-format@^27.2.0:
+pretty-format@^27.0.0, pretty-format@^27.0.6, pretty-format@^27.2.0:
   version "27.2.0"
   resolved "https://registry.yarnpkg.com/pretty-format/-/pretty-format-27.2.0.tgz#ee37a94ce2a79765791a8649ae374d468c18ef19"
   integrity sha512-KyJdmgBkMscLqo8A7K77omgLx5PWPiXJswtTtFV7XgVZv2+qPk6UivpXXO+5k6ZEbWIbLoKdx1pZ6ldINzbwTA==
