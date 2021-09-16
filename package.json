@@ -37,7 +37,7 @@
         "@typescript-eslint/parser": "^4.31.0",
         "codecov": "^3.8.2",
         "combine-dependabot-prs": "^1.0.4",
-        "commander": "^7.2.0",
+        "commander": "^8.2.0",
         "eslint": "^7.32.0",
         "eslint-plugin-import": "^2.24.2",
         "eslint-plugin-jest": "^24.3.6",
