@@ -68,6 +68,7 @@
     },
     "resolutions": {
         "@npmcli/git": ">=2.1.0",
+        "adal-node": ">=0.2.3",
         "axe-core": "4.3.2",
         "normalize-url": "6.1.0",
         "apify-shared": ">=0.5.0",
