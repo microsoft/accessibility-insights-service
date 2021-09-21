@@ -6,6 +6,7 @@ import { injectable } from 'inversify';
 import { Url } from 'common';
 import { CrawlerRunOptions } from 'accessibility-insights-crawler';
 import { ScanArguments } from '../scan-arguments';
+import { BaselineFormat } from '../baseline/baseline-format';
 
 @injectable()
 export class CrawlerParametersBuilder {
@@ -26,6 +27,11 @@ export class CrawlerParametersBuilder {
             urls.forEach((url) => inputUrlSet.add(url));
         }
 
+        let baselineContent: BaselineFormat = undefined;
+        if (scanArguments.baselineFile) {
+            const baselineContent = this.validateBaselineFile(scanArguments.baselineFile);
+        }
+
         return {
             crawl: scanArguments.crawl,
             baseUrl: scanArguments.url,
@@ -42,6 +48,7 @@ export class CrawlerParametersBuilder {
             chromePath: scanArguments.chromePath,
             axeSourcePath: scanArguments.axeSourcePath,
             debug: scanArguments.debug,
+            baseline: baselineContent,
         };
     }
 

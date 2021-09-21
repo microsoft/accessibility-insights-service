@@ -5,12 +5,19 @@ import { inject, injectable } from 'inversify';
 import { DbScanResultReader, CrawlerRunOptions, Crawler, ScanMetadata } from 'accessibility-insights-crawler';
 import { AxeResultsReducer, UrlCount, AxeCoreResults, AxeResultsList } from 'axe-result-converter';
 import { ScanResultReader } from '../scan-result-providers/scan-result-reader';
+import { BaselineFormat } from '../baseline/baseline-format';
 
 export interface CombinedScanResult {
     urlCount?: UrlCount;
     combinedAxeResults?: AxeCoreResults;
+    baselineEvaluation?: BaselineEvaluation;
     scanMetadata?: ScanMetadata;
     error?: string;
+}
+
+export interface BaselineOptions {
+    useBaseline: boolean;
+    baseline?: BaselineFormat;
 }
 
 @injectable()
@@ -19,12 +26,17 @@ export class AICrawler {
         @inject(Crawler) private readonly crawler: Crawler<unknown>,
         @inject(DbScanResultReader) private readonly scanResultReader: ScanResultReader,
         @inject(AxeResultsReducer) private readonly axeResultsReducer: AxeResultsReducer,
+        @inject(BaselineEngine) private readonly baselineEngine: BaselineEngine,
     ) {}
 
-    public async crawl(crawlerRunOptions: CrawlerRunOptions): Promise<CombinedScanResult> {
+    public async crawl(crawlerRunOptions: CrawlerRunOptions, baselineOptions?: BaselineOptions): Promise<CombinedScanResult> {
         await this.crawler.crawl(crawlerRunOptions);
         const combinedAxeResult = await this.combineAxeResults();
         combinedAxeResult.scanMetadata = await this.scanResultReader.getScanMetadata(crawlerRunOptions.baseUrl);
+
+        if (baselineOptions?.useBaseline) {
+            combinedAxeResult.baselineEvaluation = await this.baselineEngine.evaluateInPlace(baselineOptions.baseline, combinedAxeResult.combinedAxeResults);            
+        }
 
         return combinedAxeResult;
     }
@@ -47,6 +59,8 @@ export class AICrawler {
             if (scanResult.scanState === 'pass') {
                 urlCount.passed++;
             } else if (scanResult.scanState === 'fail') {
+                // Are URLs with all baselined results "failed", "passed", or a new state?
+                // What about URLs with a mix of baseline and new-failure results?
                 urlCount.failed++;
             }
 

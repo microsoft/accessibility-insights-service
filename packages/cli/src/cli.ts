@@ -104,6 +104,16 @@ function getScanArguments(): ScanArguments {
                 describe: `List of RegEx patterns to crawl in addition to the provided URL, separated by space.`,
                 alias: 'discoverypatterns',
             },
+            baselineFile: {
+                type: 'string',
+                describe: 'TODO',
+                alias: 'baselinefile',
+            },
+            updateBaseline: {
+                type: 'boolean',
+                describe: 'TODO',
+                alias: 'updatebaseline',
+            },
             debug: {
                 type: 'boolean',
                 describe: 'Enables crawler engine debug mode.',
