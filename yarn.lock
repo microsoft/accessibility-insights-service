@@ -2638,7 +2638,7 @@
     estree-walker "^1.0.1"
     picomatch "^2.2.2"
 
-"@sindresorhus/fnv1a@^2.0.1":
+"@sindresorhus/fnv1a@2.0.1", "@sindresorhus/fnv1a@^2.0.1":
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/@sindresorhus/fnv1a/-/fnv1a-2.0.1.tgz#2aefdfa7eb5b7f29a7936978218e986c70c603fc"
   integrity sha512-suq9tRQ6bkpMukTG5K5z0sPWB7t0zExMzZCdmYm6xTSSIm/yCKNm7VCL36wVeyTsFr597/UhU1OAYdHGMDiHrw==
@@ -6440,7 +6440,7 @@ filename-reserved-regex@^2.0.0:
   resolved "https://registry.yarnpkg.com/filename-reserved-regex/-/filename-reserved-regex-2.0.0.tgz#abf73dfab735d045440abfea2d91f389ebbfa229"
   integrity sha1-q/c9+rc10EVECr/qLZHzieu/oik=
 
-filenamify-url@^2.1.2:
+filenamify-url@2.1.2, filenamify-url@^2.1.2:
   version "2.1.2"
   resolved "https://registry.yarnpkg.com/filenamify-url/-/filenamify-url-2.1.2.tgz#844607d5e86919617340ba0fad4b458dae247100"
   integrity sha512-3rMbAr7vDNMOGsj1aMniQFl749QjgM+lMJ/77ZRSPTIgxvolZwoQbn8dXLs7xfd+hAdli+oTnSWZNkJJLWQFEQ==
@@ -6448,7 +6448,7 @@ filenamify-url@^2.1.2:
     filenamify "^4.3.0"
     humanize-url "^2.1.1"
 
-filenamify@^4.3.0:
+filenamify@4.3.0, filenamify@^4.3.0:
   version "4.3.0"
   resolved "https://registry.yarnpkg.com/filenamify/-/filenamify-4.3.0.tgz#62391cb58f02b09971c9d4f9d63b3cf9aba03106"
   integrity sha512-hcFKyUG57yWGAzu1CMt/dPzYZuv+jAJUT85bL8mrXvNe6hWj6yEHEc4EdcgiA6Z3oi1/9wXJdZPXF2dZNgwgOg==
