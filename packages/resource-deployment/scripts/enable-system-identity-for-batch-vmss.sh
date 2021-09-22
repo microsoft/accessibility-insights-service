@@ -45,7 +45,7 @@ enableCosmosAccess() {
     customRoleName="CosmosDocumentRW"
     RBACRoleId=$(az cosmosdb sql role definition list --account-name $cosmosAccountName --resource-group $resourceGroupName --query "[?roleName=='$customRoleName'].id" -o tsv)
     if [[ -z "$RBACRoleId" ]]; then
-        echo "Creating a custom RBAC role with R/W permissions"
+        echo "Creating a custom RBAC role with read-write permissions"
         RBACRoleId=$(az cosmosdb sql role definition create --account-name "${cosmosAccountName}" \
             --resource-group "${resourceGroupName}" \
             --body "@${0%/*}/../templates/cosmos-db-rw-role.json" \
