@@ -99,7 +99,7 @@ describe(SimpleCrawlerEngine, () => {
     it.each([true, false])('returns list of urls with singleWorker = %s', async (singleWorker) => {
         crawlerRunOptions.singleWorker = singleWorker;
         setupCrawlerConfig();
-       
+
         requestQueueProviderMock
             .setup((rqp) => rqp())
             .returns(() => Promise.resolve(requestQueueStub))

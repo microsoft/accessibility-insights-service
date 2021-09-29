@@ -114,7 +114,7 @@ function getScanArguments(): ScanArguments {
                 type: 'boolean',
                 describe: 'Uses a single crawler worker.',
                 default: false,
-                alias: 'singleworker'
+                alias: 'singleworker',
             },
         })
         .check((args) => {
