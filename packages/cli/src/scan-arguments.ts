@@ -20,4 +20,5 @@ export interface ScanArguments {
     chromePath?: string;
     axeSourcePath?: string;
     debug?: boolean;
+    singleWorker?: boolean;
 }

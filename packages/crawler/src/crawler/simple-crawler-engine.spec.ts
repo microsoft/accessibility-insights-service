@@ -59,6 +59,7 @@ describe(SimpleCrawlerEngine, () => {
             memoryMBytes: 100,
             silentMode: true,
             debug: false,
+            singleWorker: false,
             baseCrawlPage: pageStub,
         };
     });
@@ -81,7 +82,30 @@ describe(SimpleCrawlerEngine, () => {
             .returns(() => Promise.resolve(requestQueueStub))
             .verifiable();
 
-        const expectedCrawlOptions = getCrawlerOptions(debug);
+        const expectedCrawlOptions = getCrawlerOptions(debug, false);
+        crawlerFactoryMock
+            .setup((cf) => cf.createBasicCrawler(It.isObjectWith(expectedCrawlOptions)))
+            .returns(() => basicCrawlerMock.object)
+            .verifiable();
+        basicCrawlerMock.setup((bc) => bc.run()).verifiable();
+
+        const expectedUrls: string[] = crawlResults;
+
+        const discoveredUrls = await testSubject.start(crawlerRunOptions);
+
+        expect(discoveredUrls).toEqual(expectedUrls);
+    });
+
+    it.each([true, false])('returns list of urls with singleWorker = %s', async (singleWorker) => {
+        crawlerRunOptions.singleWorker = singleWorker;
+        setupCrawlerConfig();
+       
+        requestQueueProviderMock
+            .setup((rqp) => rqp())
+            .returns(() => Promise.resolve(requestQueueStub))
+            .verifiable();
+
+        const expectedCrawlOptions = getCrawlerOptions(false, singleWorker);
         crawlerFactoryMock
             .setup((cf) => cf.createBasicCrawler(It.isObjectWith(expectedCrawlOptions)))
             .returns(() => basicCrawlerMock.object)
@@ -146,7 +170,7 @@ describe(SimpleCrawlerEngine, () => {
         crawlerConfigurationMock.setup((cc) => cc.maxRequestsPerCrawl()).returns(() => maxRequestsPerCrawl);
     }
 
-    function getCrawlerOptions(debug: boolean): Partial<Apify.BasicCrawlerOptions> {
+    function getCrawlerOptions(debug: boolean, singleWorker: boolean): Partial<Apify.BasicCrawlerOptions> {
         const options: Partial<Apify.BasicCrawlerOptions> = {
             handleRequestTimeoutSecs: 300,
             requestQueue: requestQueueStub,
@@ -154,6 +178,11 @@ describe(SimpleCrawlerEngine, () => {
         };
 
         if (debug) {
+            options.maxConcurrency = 1;
+        }
+
+        if (singleWorker) {
+            options.minConcurrency = 1;
             options.maxConcurrency = 1;
         }
 

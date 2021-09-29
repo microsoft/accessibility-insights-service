@@ -110,6 +110,12 @@ function getScanArguments(): ScanArguments {
                 default: false,
                 hidden: true,
             },
+            singleWorker: {
+                type: 'boolean',
+                describe: 'Uses a single crawler worker.',
+                default: false,
+                alias: 'singleworker'
+            },
         })
         .check((args) => {
             validateScanArguments(args as ScanArguments);

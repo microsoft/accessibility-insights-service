@@ -60,6 +60,11 @@ export class PuppeteerCrawlerEngine {
             this.crawlerConfiguration.setChromePath(crawlerRunOptions.chromePath);
         }
 
+        if (crawlerRunOptions.singleWorker === true) {
+            puppeteerCrawlerOptions.minConcurrency = 1;
+            puppeteerCrawlerOptions.maxConcurrency = 1;
+        }
+
         if (crawlerRunOptions.debug === true) {
             this.crawlerConfiguration.setSilentMode(false);
 
