@@ -5,7 +5,7 @@ import { inject, injectable } from 'inversify';
 import { DbScanResultReader, CrawlerRunOptions, Crawler, ScanMetadata } from 'accessibility-insights-crawler';
 import { AxeResultsReducer, UrlCount, AxeCoreResults, AxeResultsList } from 'axe-result-converter';
 import { ScanResultReader } from '../scan-result-providers/scan-result-reader';
-import { BaselineFormat } from '../baseline/baseline-format';
+import { BaselineEngine, BaselineEvaluation, BaselineOptions } from '../baseline/baseline-engine';
 
 export interface CombinedScanResult {
     urlCount?: UrlCount;
@@ -13,11 +13,6 @@ export interface CombinedScanResult {
     baselineEvaluation?: BaselineEvaluation;
     scanMetadata?: ScanMetadata;
     error?: string;
-}
-
-export interface BaselineOptions {
-    useBaseline: boolean;
-    baseline?: BaselineFormat;
 }
 
 @injectable()
@@ -34,8 +29,9 @@ export class AICrawler {
         const combinedAxeResult = await this.combineAxeResults();
         combinedAxeResult.scanMetadata = await this.scanResultReader.getScanMetadata(crawlerRunOptions.baseUrl);
 
-        if (baselineOptions?.useBaseline) {
-            combinedAxeResult.baselineEvaluation = await this.baselineEngine.evaluateInPlace(baselineOptions.baseline, combinedAxeResult.combinedAxeResults);            
+        if (baselineOptions != null) {
+            combinedAxeResult.baselineEvaluation =
+                await this.baselineEngine.updateResultsInPlace(combinedAxeResult.combinedAxeResults, baselineOptions);
         }
 
         return combinedAxeResult;
@@ -52,6 +48,7 @@ export class AICrawler {
             total: 0,
             failed: 0,
             passed: 0,
+            // TODO: should there be a separate category for baselined failures?
         };
 
         for await (const scanResult of this.scanResultReader) {

@@ -8,8 +8,8 @@ import { ScanArguments } from '../scan-arguments';
 import { ConsolidatedReportGenerator } from '../report/consolidated-report-generator';
 import { CrawlerParametersBuilder } from '../crawler/crawler-parameters-builder';
 import { AICrawler } from '../crawler/ai-crawler';
-import { BaselineApplier } from '../baseline/baseline-applier';
 import { CommandRunner } from './command-runner';
+import { CrawlerCommandBaselineHandler } from './crawler-command-baseline-handler';
 
 @injectable()
 export class CrawlerCommandRunner implements CommandRunner {
@@ -18,6 +18,7 @@ export class CrawlerCommandRunner implements CommandRunner {
         @inject(CrawlerParametersBuilder) private readonly crawlerParametersBuilder: CrawlerParametersBuilder,
         @inject(ConsolidatedReportGenerator) private readonly consolidatedReportGenerator: ConsolidatedReportGenerator,
         @inject(ReportDiskWriter) private readonly reportDiskWriter: ReportDiskWriter,
+        @inject(CrawlerCommandBaselineHandler) private readonly crawlerCommandBaselineHandler: CrawlerCommandBaselineHandler,
         private readonly filesystem: typeof fs = fs,
     ) {}
 
@@ -27,10 +28,10 @@ export class CrawlerCommandRunner implements CommandRunner {
         }
 
         const crawlerRunOptions = await this.crawlerParametersBuilder.build(scanArguments);
-        const baseline = await this.readBaseline(scanArguments);
+        const baselineOptions = await this.crawlerCommandBaselineHandler.buildBaselineOptions(scanArguments);
 
         const scanStarted = new Date();
-        const combinedScanResult = await this.crawler.crawl(crawlerRunOptions, baseline);
+        const combinedScanResult = await this.crawler.crawl(crawlerRunOptions, baselineOptions);
         const scanEnded = new Date();
 
         console.log('Generating summary scan report...');
@@ -38,33 +39,7 @@ export class CrawlerCommandRunner implements CommandRunner {
         const reportLocation = this.reportDiskWriter.writeToDirectory(scanArguments.output, 'index', 'html', reportContent);
         console.log(`Summary report was saved as ${reportLocation}`);
 
-        await this.updateBaseline(scanArguments, console.log, combinedScanResult.baselineDiff);
-    }
-
-    private async readBaseline(scanArguments: ScanArguments): Promise<BaselineFormat> {
-        if (scanArguments.baselineFile == null) { return {}; }
-
-        return await this.baselineDiskReader.readFromFile(scanArguments.baselineFile);
-    }
-
-    private async updateBaseline(scanArguments: ScanArguments, outputLogger: typeof console.log, baselineDiff?: BaselineDiff): Promise<void> {
-        if (!baselineDiff?.updateRequired) {
-            return;
-        }
-        
-        const { newBaselineContent } = baselineDiff;
-        outputLogger(baselineDiff.summaryMessage);
-
-        if (scanArguments.updateBaseline) {
-            outputLogger(`Updating baseline file ${scanArguments.baselineFile}...`);
-            await this.baselineDiskWriter.writeToFile(scanArguments.baselineFile, newBaselineContent);
-        } else {
-            const updatedBaselineLocation = await this.baselineDiskWriter.writeToDirectory(
-                scanArguments.output, scanArguments.baselineFile, newBaselineContent);
-
-            outputLogger(`Updated baseline file was saved as ${updatedBaselineLocation}`);
-            outputLogger(`To update the baseline with these changes, either rerun with --updateBaseline or copy the updated baseline file to ${scanArguments.baselineFile}`);
-        }
+        await this.crawlerCommandBaselineHandler.updateBaseline(scanArguments, combinedScanResult);
     }
 
     private canRunCommand(scanArguments: ScanArguments): boolean {

@@ -11,9 +11,9 @@ export type BaselineResult = {
     urls: string[];
 };
 
-export type BaselineFormat = {
+export type BaselineFileContent = {
     metadata: { fileFormatVersion: '1' };
 
-    // Invariant: must be sorted by ['rule', 'cssSelector', 'xpathSelector', 'htmlSnippet', 'urls']
+    // Invariant: must be sorted by ['rule', 'cssSelector', 'xpathSelector', 'htmlSnippet']
     results: BaselineResult[];
 };

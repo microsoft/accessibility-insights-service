@@ -1,13 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { AxeResult } from 'axe-result-converter';
+import { AxeResult, AxeResultsList } from 'axe-result-converter';
 import { inject, injectable } from 'inversify';
 import JSON5 from 'json5';
 import { sortBy } from 'lodash';
 import format from 'pretty-format';
-import { CombinedScanResult } from '../crawler/ai-crawler';
-import { BaselineFormat, BaselineResult } from './baseline-format';
+import { BaselineFileContent, BaselineResult } from './baseline-format';
 import { BaselineSchemaValidator } from './baseline-schema';
 
 @injectable()
@@ -32,12 +31,12 @@ export class BaselineGenerator {
         @inject(BaselineSchemaValidator) private readonly baselineSchemaValidator: BaselineSchemaValidator,
     ) {}
 
-    public generateBaseline(combinedScanResult: CombinedScanResult): BaselineFormat {
-        const combinedViolations = combinedScanResult.combinedAxeResults.violations.values();
+    public generateBaseline(axeResultsList: AxeResultsList): BaselineFileContent {
+        const combinedViolations = axeResultsList.values();
         const unsortedBaselineResults = combinedViolations.map(this.combinedViolationToBaselineResult);
         const sortedBaselineResults = this.sortBaselineResults(unsortedBaselineResults);
 
-        const baselineContent: BaselineFormat = {
+        const baselineContent: BaselineFileContent = {
             metadata: { fileFormatVersion: '1' },
             results: sortedBaselineResults,
         };
@@ -45,7 +44,7 @@ export class BaselineGenerator {
         return baselineContent;
     }
 
-    public formatBaseline(baselineContent: BaselineFormat): string {
+    public formatBaseline(baselineContent: BaselineFileContent): string {
         const formatOptions = {
             indent: 2,
             printBasicPrototype: false,
@@ -54,7 +53,7 @@ export class BaselineGenerator {
         return format(baselineContent, formatOptions);
     }
 
-    public parseBaseline(rawBaselineContent: string): BaselineFormat {
+    public parseBaseline(rawBaselineContent: string): BaselineFileContent {
         const unvalidatedData = JSON5.parse(rawBaselineContent);
 
         return this.baselineSchemaValidator.validate(unvalidatedData);

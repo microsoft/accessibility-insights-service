@@ -4,7 +4,7 @@
 import Ajv, { Schema, ValidateFunction } from 'ajv';
 import { inject, injectable } from 'inversify';
 import { iocTypes } from '../ioc-types';
-import { BaselineFormat } from './baseline-format';
+import { BaselineFileContent } from './baseline-format';
 
 export const baselineSchema: Schema = {
     type: 'object',
@@ -12,8 +12,9 @@ export const baselineSchema: Schema = {
         metadata: {
             type: 'object',
             properties: {
-                fileFormatVersion: { const: '1' },
+                fileFormatVersion: { const: '1' }
             },
+            required: ['fileFormatVersion'],
             additionalProperties: false,
         },
         results: {
@@ -21,22 +22,25 @@ export const baselineSchema: Schema = {
             items: {
                 type: 'object',
                 properties: {
-                    rule: { type: 'string' },
+                    rule: { type: 'number' },
+                    urls: { type: 'array', items: { type: 'string' } },
                     cssSelector: { type: 'string' },
                     xpathSelector: { type: 'string' },
                     htmlSnippet: { type: 'string' },
-                    urls: { type: 'array', items: { type: 'string' } },
-                    additionalProperties: false,
                 },
-            },
+                // xpathSelector is intentionally optional
+                required: ['rule', 'cssSelector', 'htmlSnippet', 'urls'],
+                additionalProperties: false,
+            }
         },
-        additionalProperties: false,
     },
+    required: ['metadata', 'results'],
+    additionalProperties: false,
 };
 
 @injectable()
 export class BaselineSchemaValidator {
-    private readonly ajvValidator: ValidateFunction<BaselineFormat>;
+    private readonly ajvValidator: ValidateFunction<BaselineFileContent>;
 
     public constructor(
         @inject(iocTypes.ajv) private readonly ajvInstance: Ajv,
@@ -44,12 +48,12 @@ export class BaselineSchemaValidator {
         this.ajvValidator = this.ajvInstance.compile(baselineSchema);
     }
 
-    public validate(unvalidatedObject: unknown): BaselineFormat {
+    public validate(unvalidatedObject: unknown): BaselineFileContent {
         const isValid = this.ajvValidator(unvalidatedObject);
         if (isValid) {
             return unvalidatedObject;
         } else {
-            throw new Error(`Baseline content did not match expected format. Errors: ${JSON.stringify(this.ajvValidator.errors)}`);
+            throw new Error(`Baseline content did not match expected format. Error(s):\n\n${JSON.stringify(this.ajvValidator.errors)}`);
         }
     }
 }
