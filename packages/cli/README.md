@@ -211,3 +211,10 @@ describe: List of URLs to crawl in addition to URLs discovered from crawling the
 type: array
 describe: List of RegEx patterns to crawl in addition to the provided URL, separated by space.
 ```
+
+-   singleWorker: --singleWorker
+
+```sh
+type: boolean
+describe: Uses a single crawler worker.
+```
