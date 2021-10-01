@@ -20,4 +20,5 @@ export interface CrawlerRunOptions {
     baseCrawlPage?: Page;
     chromePath?: string;
     axeSourcePath?: string;
+    singleWorker?: boolean;
 }

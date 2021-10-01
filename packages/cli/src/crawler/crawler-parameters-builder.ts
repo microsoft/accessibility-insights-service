@@ -42,6 +42,7 @@ export class CrawlerParametersBuilder {
             chromePath: scanArguments.chromePath,
             axeSourcePath: scanArguments.axeSourcePath,
             debug: scanArguments.debug,
+            singleWorker: scanArguments.singleWorker,
         };
     }
 

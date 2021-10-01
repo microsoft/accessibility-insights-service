@@ -26,6 +26,7 @@ interface ScanArguments {
     discoveryPatterns: string[];
     debug: boolean;
     crawl: boolean;
+    singleWorker: boolean;
 }
 
 (async () => {
@@ -47,6 +48,7 @@ interface ScanArguments {
         inputUrls: scanArguments.inputUrls,
         discoveryPatterns: scanArguments.discoveryPatterns,
         debug: scanArguments.debug,
+        singleWorker: scanArguments.singleWorker,
     });
 })().catch((error) => {
     console.log('Exception: ', System.serializeError(error));

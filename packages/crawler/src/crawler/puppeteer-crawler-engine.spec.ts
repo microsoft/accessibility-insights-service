@@ -114,6 +114,22 @@ describe(PuppeteerCrawlerEngine, () => {
         await crawlerEngine.start(crawlerRunOptions);
     });
 
+    it.each([true, false])('returns list of urls with singleWorker = %s', async (singleWorker) => {
+        crawlerRunOptions.singleWorker = singleWorker;
+
+        if (singleWorker) {
+            baseCrawlerOptions.minConcurrency = 1;
+            baseCrawlerOptions.maxConcurrency = 1;
+        }
+
+        crawlerFactoryMock
+            .setup((o) => o.createPuppeteerCrawler(baseCrawlerOptions))
+            .returns(() => puppeteerCrawlerMock.object)
+            .verifiable();
+
+        await crawlerEngine.start(crawlerRunOptions);
+    });
+
     afterEach(() => {
         crawlerFactoryMock.verifyAll();
         puppeteerCrawlerMock.verifyAll();
