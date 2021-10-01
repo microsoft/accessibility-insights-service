@@ -2,38 +2,15 @@
 // Licensed under the MIT License.
 
 import { AxeResult, AxeResultsList } from 'axe-result-converter';
-import { inject, injectable } from 'inversify';
-import JSON5 from 'json5';
-import { sortBy } from 'lodash';
-import format from 'pretty-format';
-import { BaselineFileContent, BaselineResult } from './baseline-format';
-import { BaselineSchemaValidator } from './baseline-schema';
+import { injectable } from 'inversify';
+import { identity, sortBy } from 'lodash';
+import { BaselineFileContent, BaselineResult, UrlNormalizer } from './baseline-types';
 
 @injectable()
 export class BaselineGenerator {
-    private readonly combinedViolationToBaselineResult = (result: AxeResult): BaselineResult => {
-        // The order in which properties are specified is important because it will be
-        // reflected in generated baseline files. Changing the order is a breaking change.
-        return {
-            cssSelector: result.junctionNode.selectors[0].selector,
-            htmlSnippet: result.junctionNode.html,
-            rule: result.id,
-            urls: [...result.urls].sort(),
-            xpathSelector: result.junctionNode.selectors[1]?.selector,
-        };
-    };
-
-    private readonly sortBaselineResults = (results: BaselineResult[]): BaselineResult[] => {
-        return sortBy(results, ['rule', 'cssSelector', 'xpathSelector', 'htmlSnippet']);
-    };
-
-    public constructor(
-        @inject(BaselineSchemaValidator) private readonly baselineSchemaValidator: BaselineSchemaValidator,
-    ) {}
-
-    public generateBaseline(axeResultsList: AxeResultsList): BaselineFileContent {
+    public generateBaseline(axeResultsList: AxeResultsList, urlNormalizer?: UrlNormalizer): BaselineFileContent {
         const combinedViolations = axeResultsList.values();
-        const unsortedBaselineResults = combinedViolations.map(this.combinedViolationToBaselineResult);
+        const unsortedBaselineResults = combinedViolations.map(result => this.combinedViolationToBaselineResult(result, urlNormalizer));
         const sortedBaselineResults = this.sortBaselineResults(unsortedBaselineResults);
 
         const baselineContent: BaselineFileContent = {
@@ -44,18 +21,32 @@ export class BaselineGenerator {
         return baselineContent;
     }
 
-    public formatBaseline(baselineContent: BaselineFileContent): string {
-        const formatOptions = {
-            indent: 2,
-            printBasicPrototype: false,
-        };
+    private combinedViolationToBaselineResult(result: AxeResult, urlNormalizer?: UrlNormalizer): BaselineResult {
+        const node = result.junctionNode;
+        if (node == null) {
+            throw new Error('Invalid input result; does not contain a junctionNode');
+        }
 
-        return format(baselineContent, formatOptions);
+        const cssSelector = node.selectors.find(s => s.type === 'css')?.selector;
+        const xpathSelector = node.selectors.find(s => s.type === 'xpath')?.selector;
+        const urls = result.urls.map(urlNormalizer ?? identity).sort();
+
+        if (cssSelector == null) {
+            throw new Error('Invalid input result; does not contain a css selector');
+        }
+
+        // The order in which properties are specified is important because it will be
+        // reflected in generated baseline files. Changing the order is a breaking change.
+        return {
+            cssSelector,
+            htmlSnippet: node.html,
+            rule: result.id,
+            urls,
+            xpathSelector,
+        };
     }
 
-    public parseBaseline(rawBaselineContent: string): BaselineFileContent {
-        const unvalidatedData = JSON5.parse(rawBaselineContent);
-
-        return this.baselineSchemaValidator.validate(unvalidatedData);
+    private sortBaselineResults(results: BaselineResult[]): BaselineResult[] {
+        return sortBy(results, ['rule', 'cssSelector', 'xpathSelector', 'htmlSnippet']);
     }
 }

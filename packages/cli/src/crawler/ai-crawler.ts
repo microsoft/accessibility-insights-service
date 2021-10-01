@@ -5,7 +5,8 @@ import { inject, injectable } from 'inversify';
 import { DbScanResultReader, CrawlerRunOptions, Crawler, ScanMetadata } from 'accessibility-insights-crawler';
 import { AxeResultsReducer, UrlCount, AxeCoreResults, AxeResultsList } from 'axe-result-converter';
 import { ScanResultReader } from '../scan-result-providers/scan-result-reader';
-import { BaselineEngine, BaselineEvaluation, BaselineOptions } from '../baseline/baseline-engine';
+import { BaselineEvaluation, BaselineOptions } from '../baseline/baseline-types';
+import { BaselineEngine } from '../baseline/baseline-engine';
 
 export interface CombinedScanResult {
     urlCount?: UrlCount;
@@ -48,7 +49,6 @@ export class AICrawler {
             total: 0,
             failed: 0,
             passed: 0,
-            // TODO: should there be a separate category for baselined failures?
         };
 
         for await (const scanResult of this.scanResultReader) {
@@ -56,8 +56,6 @@ export class AICrawler {
             if (scanResult.scanState === 'pass') {
                 urlCount.passed++;
             } else if (scanResult.scanState === 'fail') {
-                // Are URLs with all baselined results "failed", "passed", or a new state?
-                // What about URLs with a mix of baseline and new-failure results?
                 urlCount.failed++;
             }
 

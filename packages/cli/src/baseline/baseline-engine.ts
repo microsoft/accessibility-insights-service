@@ -1,25 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+import { isDeepStrictEqual } from 'util';
 import { AxeCoreResults } from 'axe-result-converter';
 import { inject, injectable } from 'inversify';
-import { BaselineFileContent, BaselineResult } from './baseline-format';
+import { BaselineEvaluation, BaselineOptions, BaselineResult } from './baseline-types';
 import { BaselineGenerator } from './baseline-generator';
-
-export type BaselineOptions = {
-    baselineContent: BaselineFileContent | null;
-    urlNormalizationPatterns: string[]; // regular expressions
-};
-
-export type CountsByRule = { [ruleId in string]: number };
-
-export type BaselineEvaluation = {
-    suggestedBaselineUpdate: null | BaselineFileContent; // null implies "no update required"
-    newViolationsByRule: CountsByRule;
-    fixedViolationsByRule: CountsByRule;
-    totalNewViolations: number;
-    totalFixedViolations: number;
-};
 
 @injectable()
 export class BaselineEngine {
@@ -35,9 +21,19 @@ export class BaselineEngine {
     //   filled in appropriately
     public updateResultsInPlace(axeResults: AxeCoreResults, baselineOptions: BaselineOptions): BaselineEvaluation {
         const oldBaselineResults: BaselineResult[] = baselineOptions.baselineContent?.results ?? [];
-        const newBaseline = this.baselineGenerator.generateBaseline(axeResults.violations);
+        const newBaseline = this.baselineGenerator.generateBaseline(axeResults.violations, baselineOptions.urlNormalizer);
         const newBaselineResults: BaselineResult[] = newBaseline.results;
 
-        throw new Error('TODO: Not implemented yet');
+        if (isDeepStrictEqual(oldBaselineResults, newBaselineResults)) {
+            return {
+                suggestedBaselineUpdate: null,
+                fixedViolationsByRule: {},
+                newViolationsByRule: {},
+                totalFixedViolations: 0,
+                totalNewViolations: 0,
+            };
+        }
+
+        throw new Error('TODO: There is a difference between the baseline and the new results, but BaselineEngine is not implemented yet');
     }
 }

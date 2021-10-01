@@ -4,7 +4,7 @@
 import Ajv, { Schema, ValidateFunction } from 'ajv';
 import { inject, injectable } from 'inversify';
 import { iocTypes } from '../ioc-types';
-import { BaselineFileContent } from './baseline-format';
+import { BaselineFileContent } from './baseline-types';
 
 export const baselineSchema: Schema = {
     type: 'object',
@@ -12,7 +12,7 @@ export const baselineSchema: Schema = {
         metadata: {
             type: 'object',
             properties: {
-                fileFormatVersion: { const: '1' }
+                fileFormatVersion: { const: '1' },
             },
             required: ['fileFormatVersion'],
             additionalProperties: false,
@@ -31,7 +31,7 @@ export const baselineSchema: Schema = {
                 // xpathSelector is intentionally optional
                 required: ['rule', 'cssSelector', 'htmlSnippet', 'urls'],
                 additionalProperties: false,
-            }
+            },
         },
     },
     required: ['metadata', 'results'],

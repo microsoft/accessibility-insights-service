@@ -3,13 +3,14 @@
 
 import * as fs from 'fs';
 import { inject, injectable } from 'inversify';
-import { ReportDiskWriter } from '../report/report-disk-writer';
 import { ScanArguments } from '../scan-arguments';
 import { ConsolidatedReportGenerator } from '../report/consolidated-report-generator';
 import { CrawlerParametersBuilder } from '../crawler/crawler-parameters-builder';
 import { AICrawler } from '../crawler/ai-crawler';
+import { BaselineOptionsBuilder } from '../baseline/baseline-options-builder';
+import { OutputFileWriter } from '../files/output-file-writer';
+import { BaselineFileUpdater } from '../baseline/baseline-file-updater';
 import { CommandRunner } from './command-runner';
-import { CrawlerCommandBaselineHandler } from './crawler-command-baseline-handler';
 
 @injectable()
 export class CrawlerCommandRunner implements CommandRunner {
@@ -17,8 +18,9 @@ export class CrawlerCommandRunner implements CommandRunner {
         @inject(AICrawler) private readonly crawler: AICrawler,
         @inject(CrawlerParametersBuilder) private readonly crawlerParametersBuilder: CrawlerParametersBuilder,
         @inject(ConsolidatedReportGenerator) private readonly consolidatedReportGenerator: ConsolidatedReportGenerator,
-        @inject(ReportDiskWriter) private readonly reportDiskWriter: ReportDiskWriter,
-        @inject(CrawlerCommandBaselineHandler) private readonly crawlerCommandBaselineHandler: CrawlerCommandBaselineHandler,
+        @inject(OutputFileWriter) private readonly outputFileWriter: OutputFileWriter,
+        @inject(BaselineOptionsBuilder) private readonly baselineOptionsBuilder: BaselineOptionsBuilder,
+        @inject(BaselineFileUpdater) private readonly baselineFileUpdater: BaselineFileUpdater,
         private readonly filesystem: typeof fs = fs,
     ) {}
 
@@ -28,7 +30,7 @@ export class CrawlerCommandRunner implements CommandRunner {
         }
 
         const crawlerRunOptions = await this.crawlerParametersBuilder.build(scanArguments);
-        const baselineOptions = await this.crawlerCommandBaselineHandler.buildBaselineOptions(scanArguments);
+        const baselineOptions = await this.baselineOptionsBuilder.build(scanArguments);
 
         const scanStarted = new Date();
         const combinedScanResult = await this.crawler.crawl(crawlerRunOptions, baselineOptions);
@@ -36,10 +38,10 @@ export class CrawlerCommandRunner implements CommandRunner {
 
         console.log('Generating summary scan report...');
         const reportContent = await this.consolidatedReportGenerator.generateReport(combinedScanResult, scanStarted, scanEnded);
-        const reportLocation = this.reportDiskWriter.writeToDirectory(scanArguments.output, 'index', 'html', reportContent);
+        const reportLocation = this.outputFileWriter.writeToDirectory(scanArguments.output, 'index', 'html', reportContent);
         console.log(`Summary report was saved as ${reportLocation}`);
 
-        await this.crawlerCommandBaselineHandler.updateBaseline(scanArguments, combinedScanResult);
+        await this.baselineFileUpdater.updateBaseline(scanArguments, combinedScanResult.baselineEvaluation);
     }
 
     private canRunCommand(scanArguments: ScanArguments): boolean {

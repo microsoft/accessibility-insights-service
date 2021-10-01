@@ -15,3 +15,5 @@ export { setupCliContainer } from './setup-cli-container';
 export { AICombinedReportDataConverter } from './converter/ai-data-converter';
 export { ScanArguments } from './scan-arguments';
 export { validateScanArguments } from './validate-scan-arguments';
+export { BaselineOptions, BaselineEvaluation } from './baseline/baseline-types';
+
