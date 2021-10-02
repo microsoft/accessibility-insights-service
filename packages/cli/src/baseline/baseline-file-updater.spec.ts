@@ -67,7 +67,7 @@ describe(BaselineFileUpdater, () => {
                 Array [
                   "Found 1 new violations compared to the baseline.",
                   "Found 0 cases where a previously baselined violation was fixed.",
-                  "Updated existing baseline file at /path/from/output-file-writer",
+                  "Saved updated baseline file at /path/from/output-file-writer",
                 ]
             `);
         });

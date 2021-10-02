@@ -30,7 +30,7 @@ export class BaselineFileUpdater {
         if (scanArguments.updateBaseline) {
             const updatedBaselineLocation = await this.outputFileWriter.writeToFile(scanArguments.baselineFile, rawBaselineFileContent);
 
-            this.stdoutWriter(`Updated existing baseline file at ${updatedBaselineLocation}`);
+            this.stdoutWriter(`Saved updated baseline file at ${updatedBaselineLocation}`);
         } else {
             const updatedBaselineLocation = await this.outputFileWriter.writeToDirectoryWithOriginalFilename(
                 scanArguments.output,
