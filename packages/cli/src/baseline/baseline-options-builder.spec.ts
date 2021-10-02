@@ -20,6 +20,10 @@ describe(BaselineOptionsBuilder, () => {
         testSubject = new BaselineOptionsBuilder(baselineFileFormatterMock.object, fsMock.object);
     });
 
+    it('produces null options if no baseline scanArguments are specified', () => {
+        expect(testSubject.build({ })).toBeNull();
+    });
+
     it('throws an Error if updateBaseline is specified without baselineFile', () => {
         expect(() => testSubject.build({ updateBaseline: true })).toThrowErrorMatchingInlineSnapshot(
             `"updateBaseline is only supported when baselineFile is specified"`,
