@@ -37,6 +37,11 @@ export class SimpleCrawlerEngine implements CrawlerEngine<string[]> {
             maxRequestsPerCrawl: this.crawlerConfiguration.maxRequestsPerCrawl(),
         };
 
+        if (crawlerRunOptions.singleWorker === true) {
+            basicCrawlerOptions.minConcurrency = 1;
+            basicCrawlerOptions.maxConcurrency = 1;
+        }
+
         if (crawlerRunOptions.debug === true) {
             this.crawlerConfiguration.setSilentMode(false);
 

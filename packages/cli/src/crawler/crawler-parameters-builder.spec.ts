@@ -44,6 +44,7 @@ describe(CrawlerParametersBuilder, () => {
             continue: true,
             chromePath: 'chrome path',
             axeSourcePath: 'axe path',
+            singleWorker: false,
         };
         fileSystemMock
             .setup((o) => o.existsSync(scanArguments.inputFile))
@@ -68,6 +69,7 @@ describe(CrawlerParametersBuilder, () => {
             discoveryPatterns: ['regex'],
             chromePath: 'chrome path',
             axeSourcePath: 'axe path',
+            singleWorker: false,
         };
         const actualCrawlOptions = crawlerParametersBuilder.build(scanArguments);
         expect(actualCrawlOptions).toEqual(expectedCrawlOptions);
