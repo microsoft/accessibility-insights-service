@@ -3,7 +3,6 @@
 
 import { inject, injectable } from 'inversify';
 import JSON5 from 'json5';
-import { format } from 'pretty-format';
 import { BaselineSchemaValidator } from './baseline-schema';
 import { BaselineFileContent } from './baseline-types';
 
@@ -11,8 +10,7 @@ import { BaselineFileContent } from './baseline-types';
 export class BaselineFileFormatter {
     constructor(
         @inject(BaselineSchemaValidator) private readonly baselineSchemaValidator: BaselineSchemaValidator,
-        private readonly json5: typeof JSON5 = JSON5,
-        private readonly prettyFormat: typeof format = format,
+        private readonly json5: typeof JSON5 = JSON5
     ) {}
 
     public parse(rawBaselineContent: string): BaselineFileContent {
@@ -22,11 +20,6 @@ export class BaselineFileFormatter {
     }
 
     public format(baselineContent: BaselineFileContent): string {
-        const formatOptions = {
-            indent: 2,
-            printBasicPrototype: false,
-        };
-
-        return this.prettyFormat(baselineContent, formatOptions);
+        return this.json5.stringify(baselineContent, null, 2);
     }
 }

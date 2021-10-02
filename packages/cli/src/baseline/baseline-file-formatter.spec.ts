@@ -4,7 +4,6 @@
 import 'reflect-metadata';
 
 import JSON5 from 'json5';
-import { format } from 'pretty-format';
 import { IMock, It, Mock } from 'typemoq';
 import { BaselineFileContent } from './baseline-types';
 import { BaselineFileFormatter } from './baseline-file-formatter';
@@ -15,43 +14,45 @@ describe(BaselineFileFormatter, () => {
         metadata: { fileFormatVersion: '1' },
         results: [
             {
-                rule: 'rule-1',
                 cssSelector: 'css-selector-1',
                 htmlSnippet: '<div id="1" />',
+                rule: 'rule-1',
                 urls: ['url-1-a', 'url-1-b'],
             },
             {
-                rule: 'rule-2',
                 cssSelector: 'css-selector-2',
-                xpathSelector: '/xpath/selector/2',
-                htmlSnippet: '<div id="2" />',
+                htmlSnippet: `<div id="2">
+newline!
+</div>`,
+                rule: 'rule-2',
                 urls: ['url-2-a'],
+                xpathSelector: '/xpath/selector/2',
             },
         ],
     };
 
     const validInputFile: string = `{
-  "metadata": {
-    "fileFormatVersion": "1",
+  metadata: {
+    fileFormatVersion: '1',
   },
-  "results": [
+  results: [
     {
-      "cssSelector": "css-selector-1",
-      "htmlSnippet": "<div id=\\"1\\" />",
-      "rule": "rule-1",
-      "urls": [
-        "url-1-a",
-        "url-1-b",
+      cssSelector: 'css-selector-1',
+      htmlSnippet: '<div id="1" />',
+      rule: 'rule-1',
+      urls: [
+        'url-1-a',
+        'url-1-b',
       ],
     },
     {
-      "cssSelector": "css-selector-2",
-      "htmlSnippet": "<div id=\\"2\\" />",
-      "rule": "rule-2",
-      "urls": [
-        "url-2-a",
+      cssSelector: 'css-selector-2',
+      htmlSnippet: '<div id="2">\\nnewline!\\n</div>',
+      rule: 'rule-2',
+      urls: [
+        'url-2-a',
       ],
-      "xpathSelector": "/xpath/selector/2",
+      xpathSelector: '/xpath/selector/2',
     },
   ],
 }`;
@@ -65,7 +66,7 @@ describe(BaselineFileFormatter, () => {
 
         // This test is more valuable as an integration test with json5/pretty-format, so we're
         // using real instances of them.
-        testSubject = new BaselineFileFormatter(mockBaselineSchemaValidator.object, JSON5, format);
+        testSubject = new BaselineFileFormatter(mockBaselineSchemaValidator.object, JSON5);
     });
 
     describe('format', () => {

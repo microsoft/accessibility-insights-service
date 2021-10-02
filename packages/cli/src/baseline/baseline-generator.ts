@@ -35,6 +35,8 @@ export class BaselineGenerator {
             throw new Error('Invalid input result; does not contain a css selector');
         }
 
+        // The order in which properties are added to the result matters; it affects the serialized baseline file,
+        // which must be byte-for-byte consistent over time.
         const baselineResult: BaselineResult = {
             cssSelector,
             htmlSnippet: node.html,
@@ -43,8 +45,7 @@ export class BaselineGenerator {
         };
 
         // It's important to do this rather than just allowing "xpathSelector: undefined" in the output object.
-        // This is because the serializer we use serializes those cases differently, and we want to be byte-precise
-        // about the baseline output format.
+        // This is because, again, to ensure that we serialize consistently.
         if (xpathSelector != null) {
             baselineResult.xpathSelector = xpathSelector;
         }
