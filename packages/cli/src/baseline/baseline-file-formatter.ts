@@ -10,7 +10,7 @@ import { BaselineFileContent } from './baseline-types';
 export class BaselineFileFormatter {
     constructor(
         @inject(BaselineSchemaValidator) private readonly baselineSchemaValidator: BaselineSchemaValidator,
-        private readonly json5: typeof JSON5 = JSON5
+        private readonly json5: typeof JSON5 = JSON5,
     ) {}
 
     public parse(rawBaselineContent: string): BaselineFileContent {

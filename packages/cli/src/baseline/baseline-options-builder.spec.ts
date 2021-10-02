@@ -21,7 +21,7 @@ describe(BaselineOptionsBuilder, () => {
     });
 
     it('produces null options if no baseline scanArguments are specified', () => {
-        expect(testSubject.build({ })).toBeNull();
+        expect(testSubject.build({})).toBeNull();
     });
 
     it('throws an Error if updateBaseline is specified without baselineFile', () => {

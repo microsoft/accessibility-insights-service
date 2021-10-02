@@ -113,7 +113,8 @@ function getScanArguments(): ScanArguments {
             },
             updateBaseline: {
                 type: 'boolean',
-                describe: 'Use with --baselineFile to update the baseline file in-place, rather than writing any updated baseline to the output directory.',
+                describe:
+                    'Use with --baselineFile to update the baseline file in-place, rather than writing any updated baseline to the output directory.',
                 alias: 'updatebaseline',
                 default: false,
                 hidden: true, // Should be unhidden and documented in README before completing #1819114
