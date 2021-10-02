@@ -22,7 +22,7 @@ export const baselineSchema: Schema = {
             items: {
                 type: 'object',
                 properties: {
-                    rule: { type: 'number' },
+                    rule: { type: 'string' },
                     urls: { type: 'array', items: { type: 'string' } },
                     cssSelector: { type: 'string' },
                     xpathSelector: { type: 'string' },
