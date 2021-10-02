@@ -27,11 +27,13 @@ export class OutputFileWriter {
             fileName = `${filenamifyCombined(fileBaseName, { replacement: '_' })}.${fileExtension}`;
         }
 
-        const normalizedDirectory = this.ensureDirectoryFunc(directory);
-        const filePath = normalizePath(this.pathObj.resolve(normalizedDirectory, fileName));
-        this.fileSystemObj.writeFileSync(filePath, content);
+        return this.writeToDirectoryWithPreSanitizedFilename(directory, fileName, content);
+    }
 
-        return filePath;
+    public writeToDirectoryWithOriginalFilename(directory: string, originalFilePath: string, content: string): string {
+        const originalFileName = this.pathObj.basename(originalFilePath);
+
+        return this.writeToDirectoryWithPreSanitizedFilename(directory, originalFileName, content);
     }
 
     // Returns a normalized, absolute version of the original filePath
@@ -43,5 +45,13 @@ export class OutputFileWriter {
         this.fileSystemObj.writeFileSync(normalizedPath, content);
 
         return normalizedPath;
+    }
+
+    private writeToDirectoryWithPreSanitizedFilename(directory: string, fileName: string, content: string): string {
+        const normalizedDirectory = this.ensureDirectoryFunc(directory);
+        const filePath = normalizePath(this.pathObj.resolve(normalizedDirectory, fileName));
+        this.fileSystemObj.writeFileSync(filePath, content);
+
+        return filePath;
     }
 }

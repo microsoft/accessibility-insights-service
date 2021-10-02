@@ -10,14 +10,14 @@ import { BaselineOptionsBuilder } from './baseline-options-builder';
 import { BaselineFileFormatter } from './baseline-file-formatter';
 
 describe(BaselineOptionsBuilder, () => {
-    let mockBaselineFileFormatter: IMock<BaselineFileFormatter>;
-    let mockFs: IMock<typeof fs>;
+    let baselineFileFormatterMock: IMock<BaselineFileFormatter>;
+    let fsMock: IMock<typeof fs>;
     let testSubject: BaselineOptionsBuilder;
 
     beforeEach(() => {
-        mockBaselineFileFormatter = Mock.ofType<BaselineFileFormatter>();
-        mockFs = Mock.ofInstance(fs);
-        testSubject = new BaselineOptionsBuilder(mockBaselineFileFormatter.object, mockFs.object);
+        baselineFileFormatterMock = Mock.ofType<BaselineFileFormatter>();
+        fsMock = Mock.ofInstance(fs);
+        testSubject = new BaselineOptionsBuilder(baselineFileFormatterMock.object, fsMock.object);
     });
 
     it('throws an Error if updateBaseline is specified without baselineFile', () => {
@@ -31,8 +31,8 @@ describe(BaselineOptionsBuilder, () => {
         const readFileSyncOutput = 'readFileSync output';
         const parseError = new Error('from parse');
 
-        mockFs.setup((f) => f.readFileSync(baselineFileInput, { encoding: 'utf8' })).returns(() => readFileSyncOutput);
-        mockBaselineFileFormatter.setup((f) => f.parse(readFileSyncOutput)).throws(parseError);
+        fsMock.setup((f) => f.readFileSync(baselineFileInput, { encoding: 'utf8' })).returns(() => readFileSyncOutput);
+        baselineFileFormatterMock.setup((f) => f.parse(readFileSyncOutput)).throws(parseError);
 
         expect(() => testSubject.build({ baselineFile: baselineFileInput })).toThrowError(parseError);
     });
@@ -42,8 +42,8 @@ describe(BaselineOptionsBuilder, () => {
         const readFileSyncOutput = 'readFileSync output';
         const parseOutput = {} as BaselineFileContent;
 
-        mockFs.setup((f) => f.readFileSync(baselineFileInput, { encoding: 'utf8' })).returns(() => readFileSyncOutput);
-        mockBaselineFileFormatter.setup((f) => f.parse(readFileSyncOutput)).returns(() => parseOutput);
+        fsMock.setup((f) => f.readFileSync(baselineFileInput, { encoding: 'utf8' })).returns(() => readFileSyncOutput);
+        baselineFileFormatterMock.setup((f) => f.parse(readFileSyncOutput)).returns(() => parseOutput);
 
         const output = testSubject.build({ baselineFile: baselineFileInput });
         expect(output.baselineContent).toBe(parseOutput);
