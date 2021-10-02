@@ -3,19 +3,16 @@
 
 import * as fs from 'fs';
 import { inject, injectable } from 'inversify';
-import JSON5 from 'json5';
 import { BaselineOptions, ScanArguments } from '..';
-import { BaselineSchemaValidator } from './baseline-schema';
-import { BaselineFileContent } from './baseline-types';
+import { BaselineFileFormatter } from './baseline-file-formatter';
 
 /* eslint-disable security/detect-non-literal-fs-filename */
 
 @injectable()
 export class BaselineOptionsBuilder {
     constructor(
-        @inject(BaselineSchemaValidator) private readonly baselineSchemaValidator: BaselineSchemaValidator,
+        @inject(BaselineFileFormatter) private readonly baselineFileFormatter: BaselineFileFormatter,
         private readonly fileSystem: typeof fs = fs,
-        private readonly json5: typeof JSON5 = JSON5,
     ) {}
 
     public build(scanArguments: ScanArguments): BaselineOptions | null {
@@ -27,19 +24,11 @@ export class BaselineOptionsBuilder {
             return null;
         }
 
-        const baselineContent = this.readBaselineFileSync(scanArguments.baselineFile);
+        const rawBaselineContent = this.fileSystem.readFileSync(scanArguments.baselineFile, { encoding: 'utf8' });
+        const baselineContent = this.baselineFileFormatter.parse(rawBaselineContent);
 
         return {
             baselineContent,
-            urlNormalizer: null,
         };
-    }
-
-    private readBaselineFileSync(filePath: string): BaselineFileContent {
-        const rawBaselineContent = this.fileSystem.readFileSync(filePath, { encoding: 'utf8' });
-
-        const unvalidatedContent = this.json5.parse(rawBaselineContent);
-
-        return this.baselineSchemaValidator.validate(unvalidatedContent);
     }
 }
