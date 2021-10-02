@@ -22,6 +22,7 @@ export class CrawlerCommandRunner implements CommandRunner {
         @inject(BaselineOptionsBuilder) private readonly baselineOptionsBuilder: BaselineOptionsBuilder,
         @inject(BaselineFileUpdater) private readonly baselineFileUpdater: BaselineFileUpdater,
         private readonly filesystem: typeof fs = fs,
+        private readonly stdoutWriter: ((output: string) => void) = console.log,
     ) {}
 
     public async runCommand(scanArguments: ScanArguments): Promise<void> {
@@ -29,17 +30,17 @@ export class CrawlerCommandRunner implements CommandRunner {
             return;
         }
 
-        const crawlerRunOptions = await this.crawlerParametersBuilder.build(scanArguments);
-        const baselineOptions = await this.baselineOptionsBuilder.build(scanArguments);
+        const crawlerRunOptions = this.crawlerParametersBuilder.build(scanArguments);
+        const baselineOptions = this.baselineOptionsBuilder.build(scanArguments);
 
         const scanStarted = new Date();
         const combinedScanResult = await this.crawler.crawl(crawlerRunOptions, baselineOptions);
         const scanEnded = new Date();
 
-        console.log('Generating summary scan report...');
+        this.stdoutWriter('Generating summary scan report...');
         const reportContent = await this.consolidatedReportGenerator.generateReport(combinedScanResult, scanStarted, scanEnded);
         const reportLocation = this.outputFileWriter.writeToDirectory(scanArguments.output, 'index', 'html', reportContent);
-        console.log(`Summary report was saved as ${reportLocation}`);
+        this.stdoutWriter(`Summary report was saved as ${reportLocation}`);
 
         await this.baselineFileUpdater.updateBaseline(scanArguments, combinedScanResult.baselineEvaluation);
     }
@@ -47,7 +48,7 @@ export class CrawlerCommandRunner implements CommandRunner {
     private canRunCommand(scanArguments: ScanArguments): boolean {
         // eslint-disable-next-line security/detect-non-literal-fs-filename
         if (this.filesystem.existsSync(scanArguments.output) && !scanArguments.restart && !scanArguments.continue) {
-            console.log(
+            this.stdoutWriter(
                 'The last scan result was found on a disk. Use --continue option to continue scan for the last URL provided, or --restart option to delete the last scan result.',
             );
 

@@ -6,17 +6,17 @@ import 'reflect-metadata';
 import { AxeResults } from 'axe-core';
 import { AxeScanResults } from 'scanner-global-library';
 import { IMock, Mock, Times } from 'typemoq';
-import { ReportDiskWriter } from '../report/report-disk-writer';
 import { ReportGenerator } from '../report/report-generator';
 import { AIScanner } from '../scanner/ai-scanner';
 import { ScanArguments } from '../scan-arguments';
+import { OutputFileWriter } from '../files/output-file-writer';
 import { UrlCommandRunner } from './url-command-runner';
 
 /* eslint-disable no-empty, @typescript-eslint/no-empty-function */
 describe('URLCommandRunner', () => {
     let scannerMock: IMock<AIScanner>;
     let reportGeneratorMock: IMock<ReportGenerator>;
-    let reportDiskWriterMock: IMock<ReportDiskWriter>;
+    let outputFileWriterMock: IMock<OutputFileWriter>;
     let scanResults: AxeScanResults;
     let testSubject: UrlCommandRunner;
     const testUrl = 'http://www.bing.com';
@@ -26,7 +26,7 @@ describe('URLCommandRunner', () => {
     beforeEach(() => {
         scannerMock = Mock.ofType<AIScanner>();
         reportGeneratorMock = Mock.ofType<ReportGenerator>();
-        reportDiskWriterMock = Mock.ofType<ReportDiskWriter>();
+        outputFileWriterMock = Mock.ofType<OutputFileWriter>();
 
         scanResults = {
             // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
@@ -34,7 +34,7 @@ describe('URLCommandRunner', () => {
             pageTitle: 'page title',
             browserSpec: 'browser version',
         };
-        testSubject = new UrlCommandRunner(scannerMock.object, reportGeneratorMock.object, reportDiskWriterMock.object);
+        testSubject = new UrlCommandRunner(scannerMock.object, reportGeneratorMock.object, outputFileWriterMock.object);
     });
 
     it('Run Command', async () => {
@@ -46,13 +46,13 @@ describe('URLCommandRunner', () => {
             .setup((rg) => rg.generateReport(scanResults))
             .returns(() => htmlReportString)
             .verifiable(Times.once());
-        reportDiskWriterMock
-            .setup((rdwm) => rdwm.writeToDirectory(testInput.output, testInput.url, 'html', htmlReportString))
+        outputFileWriterMock
+            .setup((ofwm) => ofwm.writeToDirectory(testInput.output, testInput.url, 'html', htmlReportString))
             .verifiable(Times.once());
         await testSubject.runCommand(testInput);
 
         scannerMock.verifyAll();
         reportGeneratorMock.verifyAll();
-        reportDiskWriterMock.verifyAll();
+        outputFileWriterMock.verifyAll();
     });
 });

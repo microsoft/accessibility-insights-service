@@ -37,7 +37,7 @@ export class OutputFileWriter {
     // Returns a normalized, absolute version of the original filePath
     public writeToFile(filePath: string, content: string): string {
         const normalizedPath = normalizePath(this.pathObj.resolve(filePath));
-        const dirName = path.dirname(normalizedPath);
+        const dirName = this.pathObj.dirname(normalizedPath);
         this.ensureDirectoryFunc(dirName);
 
         this.fileSystemObj.writeFileSync(normalizedPath, content);
