@@ -42,9 +42,7 @@ export const baselineSchema: Schema = {
 export class BaselineSchemaValidator {
     private readonly ajvValidator: ValidateFunction<BaselineFileContent>;
 
-    public constructor(
-        @inject(iocTypes.ajv) private readonly ajvInstance: Ajv,
-    ) {
+    public constructor(@inject(iocTypes.ajv) private readonly ajvInstance: Ajv) {
         this.ajvValidator = this.ajvInstance.compile(baselineSchema);
     }
 

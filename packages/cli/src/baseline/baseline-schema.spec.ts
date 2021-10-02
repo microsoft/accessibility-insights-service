@@ -24,31 +24,31 @@ describe(BaselineSchemaValidator, () => {
     };
 
     it.each`
-        caseName | invalidValue
-        ${'null'} | ${null}
-        ${'undefined'} | ${undefined}
-        ${'empty object'} | ${ {} }
-        ${'non-object (string)'} | ${ 'string' }
-        ${'non-object (number)'} | ${ 1 }
-        ${'non-object (boolean)'} | ${ false }
-        ${'missing metadata'} | ${ { results: [] } }
-        ${'missing fileFormatVersion'} | ${ { metadata: { }, results: [] } }
-        ${'unrecognized fileFormatVersion'} | ${ { metadata: { fileFormatVersion: '2' }, results: [] } }
-        ${'missing cssSelector'} | ${ { metadata: { fileFormatVersion: '1' }, results: [{ ...validResult, cssSelector: undefined }] } }
-        ${'missing htmlSnippet'} | ${ { metadata: { fileFormatVersion: '1' }, results: [{ ...validResult, htmlSnippet: undefined }] } }
-        ${'missing rule'} | ${ { metadata: { fileFormatVersion: '1' }, results: [{ ...validResult, rule: undefined }] } }
-        ${'missing urls'} | ${ { metadata: { fileFormatVersion: '1' }, results: [{ ...validResult, urls: undefined }] } }
+        caseName                            | invalidValue
+        ${'null'}                           | ${null}
+        ${'undefined'}                      | ${undefined}
+        ${'empty object'}                   | ${{}}
+        ${'non-object (string)'}            | ${'string'}
+        ${'non-object (number)'}            | ${1}
+        ${'non-object (boolean)'}           | ${false}
+        ${'missing metadata'}               | ${{ results: [] }}
+        ${'missing fileFormatVersion'}      | ${{ metadata: {}, results: [] }}
+        ${'unrecognized fileFormatVersion'} | ${{ metadata: { fileFormatVersion: '2' }, results: [] }}
+        ${'missing cssSelector'}            | ${{ metadata: { fileFormatVersion: '1' }, results: [{ ...validResult, cssSelector: undefined }] }}
+        ${'missing htmlSnippet'}            | ${{ metadata: { fileFormatVersion: '1' }, results: [{ ...validResult, htmlSnippet: undefined }] }}
+        ${'missing rule'}                   | ${{ metadata: { fileFormatVersion: '1' }, results: [{ ...validResult, rule: undefined }] }}
+        ${'missing urls'}                   | ${{ metadata: { fileFormatVersion: '1' }, results: [{ ...validResult, urls: undefined }] }}
     `('rejects invalid input ($caseName)', ({ invalidValue }) => {
         expect(() => testSubject.validate(invalidValue)).toThrow();
     });
 
     it.each`
-        caseName | validValue
-        ${'empty results'} | ${ { metadata: { fileFormatVersion: '1' }, results: [] } }
-        ${'result without xpathSelector'} | ${ { metadata: { fileFormatVersion: '1' }, results: [{ ...validResult, xpathSelector: undefined }] } }
-        ${'result with xpathSelector'} | ${ { metadata: { fileFormatVersion: '1' }, results: [{ ...validResult, xpathSelector: '/xpath' }] } }
-        ${'multiple results'} | ${ { metadata: { fileFormatVersion: '1' }, results: [validResult, validResult, validResult] } }
-    `('accepts valid input ($caseName)', ({validValue}) => {
+        caseName                          | validValue
+        ${'empty results'}                | ${{ metadata: { fileFormatVersion: '1' }, results: [] }}
+        ${'result without xpathSelector'} | ${{ metadata: { fileFormatVersion: '1' }, results: [{ ...validResult, xpathSelector: undefined }] }}
+        ${'result with xpathSelector'}    | ${{ metadata: { fileFormatVersion: '1' }, results: [{ ...validResult, xpathSelector: '/xpath' }] }}
+        ${'multiple results'}             | ${{ metadata: { fileFormatVersion: '1' }, results: [validResult, validResult, validResult] }}
+    `('accepts valid input ($caseName)', ({ validValue }) => {
         expect(testSubject.validate(validValue)).toBe(validValue);
     });
 });

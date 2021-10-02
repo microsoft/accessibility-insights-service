@@ -13,7 +13,7 @@ export class BaselineFileUpdater {
     constructor(
         @inject(BaselineFileFormatter) private readonly baselineFileFormatter: BaselineFileFormatter,
         @inject(OutputFileWriter) private readonly outputFileWriter: OutputFileWriter,
-        private readonly stdoutWriter: ((output: string) => void) = console.log,
+        private readonly stdoutWriter: (output: string) => void = console.log,
     ) {}
 
     public async updateBaseline(scanArguments: ScanArguments, baselineEvaluation: BaselineEvaluation): Promise<void> {
@@ -33,10 +33,15 @@ export class BaselineFileUpdater {
             this.stdoutWriter(`Updated existing baseline file at ${updatedBaselineLocation}`);
         } else {
             const updatedBaselineLocation = await this.outputFileWriter.writeToDirectoryWithOriginalFilename(
-                scanArguments.output, scanArguments.baselineFile, rawBaselineFileContent);
+                scanArguments.output,
+                scanArguments.baselineFile,
+                rawBaselineFileContent,
+            );
 
             this.stdoutWriter(`Saved new baseline file at ${updatedBaselineLocation}`);
-            this.stdoutWriter(`To update the baseline with these changes, either rerun with --updateBaseline or copy the updated baseline file to ${scanArguments.baselineFile}`);
+            this.stdoutWriter(
+                `To update the baseline with these changes, either rerun with --updateBaseline or copy the updated baseline file to ${scanArguments.baselineFile}`,
+            );
         }
     }
 }

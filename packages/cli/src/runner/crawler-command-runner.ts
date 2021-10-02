@@ -22,7 +22,7 @@ export class CrawlerCommandRunner implements CommandRunner {
         @inject(BaselineOptionsBuilder) private readonly baselineOptionsBuilder: BaselineOptionsBuilder,
         @inject(BaselineFileUpdater) private readonly baselineFileUpdater: BaselineFileUpdater,
         private readonly filesystem: typeof fs = fs,
-        private readonly stdoutWriter: ((output: string) => void) = console.log,
+        private readonly stdoutWriter: (output: string) => void = console.log,
     ) {}
 
     public async runCommand(scanArguments: ScanArguments): Promise<void> {

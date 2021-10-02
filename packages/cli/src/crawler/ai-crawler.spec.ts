@@ -109,9 +109,7 @@ describe(AICrawler, () => {
                 .setup((o) => o.getScanMetadata(baseUrl))
                 .returns(() => Promise.resolve(scanMetadata))
                 .verifiable();
-            dbScanResultReaderMock
-                .setup((o) => o[Symbol.asyncIterator])
-                .returns(() => () => dbScanResultReaderMock.object);
+            dbScanResultReaderMock.setup((o) => o[Symbol.asyncIterator]).returns(() => () => dbScanResultReaderMock.object);
         });
 
         it('coordinates underlying Crawler and results reader (without baselining)', async () => {
@@ -129,20 +127,19 @@ describe(AICrawler, () => {
         });
 
         it('coordinates underlying Crawler, results reader, and baselining engine', async () => {
-            const stubBaselineContent: BaselineFileContent = { } as BaselineFileContent;
+            const stubBaselineContent: BaselineFileContent = {} as BaselineFileContent;
             const baselineOptions: BaselineOptions = {
                 baselineContent: stubBaselineContent,
                 urlNormalizer: (url) => `${url} (normalized)`,
             };
-            const baselineEvaluationFromEngine: BaselineEvaluation = { } as BaselineEvaluation;
+            const baselineEvaluationFromEngine: BaselineEvaluation = {} as BaselineEvaluation;
 
             baselineEngineMock
-                .setup(bem => bem.updateResultsInPlace(It.isAny(), baselineOptions))
+                .setup((bem) => bem.updateResultsInPlace(It.isAny(), baselineOptions))
                 .returns(() => baselineEvaluationFromEngine)
                 .verifiable();
 
             const output = await crawler.crawl(crawlerOption, baselineOptions);
-
 
             expect(output.error).toBeUndefined();
             expect(output.baselineEvaluation).toBe(baselineEvaluationFromEngine);

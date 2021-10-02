@@ -9,9 +9,7 @@ import { BaselineGenerator } from './baseline-generator';
 
 @injectable()
 export class BaselineEngine {
-    constructor(
-        @inject(BaselineGenerator) private readonly baselineGenerator: BaselineGenerator,
-    ) {}
+    constructor(@inject(BaselineGenerator) private readonly baselineGenerator: BaselineGenerator) {}
 
     public updateResultsInPlace(axeResults: AxeCoreResults, baselineOptions: BaselineOptions): BaselineEvaluation {
         const oldBaselineResults: BaselineResult[] = baselineOptions.baselineContent?.results ?? [];

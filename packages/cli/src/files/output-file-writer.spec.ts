@@ -93,9 +93,7 @@ describe('OutputFileWriter', () => {
             const fileBasenameFromPath = 'path.ext';
             const filePathFromPathResolve = `${directory}/${fileBasenameFromPath}`;
 
-            pathMock
-                .setup(pm => pm.basename(originalFilePath))
-                .returns(() => fileBasenameFromPath);
+            pathMock.setup((pm) => pm.basename(originalFilePath)).returns(() => fileBasenameFromPath);
             pathMock
                 .setup((pm) => pm.resolve(directory, fileBasenameFromPath))
                 .returns(() => filePathFromPathResolve)
@@ -109,8 +107,7 @@ describe('OutputFileWriter', () => {
                 .returns(() => {})
                 .verifiable(Times.once());
 
-            expect(testSubject.writeToDirectoryWithOriginalFilename(directory, originalFilePath, content))
-                .toEqual(filePathFromPathResolve);
+            expect(testSubject.writeToDirectoryWithOriginalFilename(directory, originalFilePath, content)).toEqual(filePathFromPathResolve);
         });
     });
 

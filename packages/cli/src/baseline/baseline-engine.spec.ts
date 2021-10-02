@@ -24,24 +24,28 @@ describe(BaselineEngine, () => {
 
         oldBaseline = {
             metadata: { fileFormatVersion: '1' },
-            results: [{
-                cssSelector: '#some-id',
-                htmlSnippet: '<div id="some-id" />',
-                rule: 'rule-1',
-                urls: ['url-1'],
-            }],
+            results: [
+                {
+                    cssSelector: '#some-id',
+                    htmlSnippet: '<div id="some-id" />',
+                    rule: 'rule-1',
+                    urls: ['url-1'],
+                },
+            ],
         };
         newBaseline = {
             metadata: { fileFormatVersion: '1' },
-            results: [{
-                cssSelector: '#some-id',
-                htmlSnippet: '<div id="some-id" />',
-                rule: 'rule-1',
-                urls: ['url-1', 'url-2'], // new URL
-            }],
+            results: [
+                {
+                    cssSelector: '#some-id',
+                    htmlSnippet: '<div id="some-id" />',
+                    rule: 'rule-1',
+                    urls: ['url-1', 'url-2'], // new URL
+                },
+            ],
         };
 
-        inputUrlNormalizer = x => x;
+        inputUrlNormalizer = (x) => x;
         inputOptions = {
             baselineContent: oldBaseline,
             urlNormalizer: inputUrlNormalizer,
@@ -61,34 +65,26 @@ describe(BaselineEngine, () => {
     describe('updateResultsInPlace', () => {
         it('propagates errors from the generator', () => {
             const generatorError = new Error('from BaselineGenerator');
-            baselineGeneratorMock
-                .setup(m => m.generateBaseline(inputViolations, inputUrlNormalizer))
-                .throws(generatorError);
+            baselineGeneratorMock.setup((m) => m.generateBaseline(inputViolations, inputUrlNormalizer)).throws(generatorError);
 
             expect(() => testSubject.updateResultsInPlace(inputResults, inputOptions)).toThrowError(generatorError);
         });
 
         it("suggests the generator's output as a new baseline if there was no original baseline content", () => {
             inputOptions.baselineContent = null;
-            baselineGeneratorMock
-                .setup(m => m.generateBaseline(inputViolations, inputUrlNormalizer))
-                .returns(() => newBaseline);
+            baselineGeneratorMock.setup((m) => m.generateBaseline(inputViolations, inputUrlNormalizer)).returns(() => newBaseline);
             const evaluation = testSubject.updateResultsInPlace(inputResults, inputOptions);
             expect(evaluation.suggestedBaselineUpdate).toBe(newBaseline);
         });
 
         it("suggests the generator's output as a new baseline if it differs from the input baseline", () => {
-            baselineGeneratorMock
-                .setup(m => m.generateBaseline(inputViolations, inputUrlNormalizer))
-                .returns(() => newBaseline);
+            baselineGeneratorMock.setup((m) => m.generateBaseline(inputViolations, inputUrlNormalizer)).returns(() => newBaseline);
             const evaluation = testSubject.updateResultsInPlace(inputResults, inputOptions);
             expect(evaluation.suggestedBaselineUpdate).toBe(newBaseline);
         });
 
         it('suggests no baseline update if the baseline generator produces results identical to the input baseline', () => {
-            baselineGeneratorMock
-                .setup(m => m.generateBaseline(inputViolations, inputUrlNormalizer))
-                .returns(() => oldBaseline);
+            baselineGeneratorMock.setup((m) => m.generateBaseline(inputViolations, inputUrlNormalizer)).returns(() => oldBaseline);
             const evaluation = testSubject.updateResultsInPlace(inputResults, inputOptions);
             expect(evaluation.suggestedBaselineUpdate).toBeNull();
         });

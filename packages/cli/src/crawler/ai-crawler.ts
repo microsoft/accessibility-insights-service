@@ -31,8 +31,10 @@ export class AICrawler {
         combinedAxeResult.scanMetadata = await this.scanResultReader.getScanMetadata(crawlerRunOptions.baseUrl);
 
         if (baselineOptions != null) {
-            combinedAxeResult.baselineEvaluation =
-                await this.baselineEngine.updateResultsInPlace(combinedAxeResult.combinedAxeResults, baselineOptions);
+            combinedAxeResult.baselineEvaluation = await this.baselineEngine.updateResultsInPlace(
+                combinedAxeResult.combinedAxeResults,
+                baselineOptions,
+            );
         }
 
         return combinedAxeResult;

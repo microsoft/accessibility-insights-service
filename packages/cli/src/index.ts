@@ -18,4 +18,3 @@ export { validateScanArguments } from './validate-scan-arguments';
 export { BaselineOptions, BaselineEvaluation } from './baseline/baseline-types';
 export { BaselineOptionsBuilder } from './baseline/baseline-options-builder';
 export { BaselineFileUpdater } from './baseline/baseline-file-updater';
-

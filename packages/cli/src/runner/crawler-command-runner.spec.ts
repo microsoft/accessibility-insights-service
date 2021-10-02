@@ -104,9 +104,7 @@ describe('CrawlerCommandRunner', () => {
             .returns(() => true)
             .verifiable();
 
-        crawlerMock
-            .setup((o) => o.crawl(It.isAny(), It.isAny()))
-            .verifiable(Times.never());
+        crawlerMock.setup((o) => o.crawl(It.isAny(), It.isAny())).verifiable(Times.never());
 
         await testSubject.runCommand(scanArguments);
 

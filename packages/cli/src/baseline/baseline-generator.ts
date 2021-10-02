@@ -10,7 +10,7 @@ import { BaselineFileContent, BaselineResult, UrlNormalizer } from './baseline-t
 export class BaselineGenerator {
     public generateBaseline(axeResultsList: AxeResultsList, urlNormalizer?: UrlNormalizer): BaselineFileContent {
         const combinedViolations = axeResultsList.values();
-        const unsortedBaselineResults = combinedViolations.map(result => this.combinedViolationToBaselineResult(result, urlNormalizer));
+        const unsortedBaselineResults = combinedViolations.map((result) => this.combinedViolationToBaselineResult(result, urlNormalizer));
         const sortedBaselineResults = this.sortBaselineResults(unsortedBaselineResults);
 
         const baselineContent: BaselineFileContent = {
@@ -27,8 +27,8 @@ export class BaselineGenerator {
             throw new Error('Invalid input result; does not contain a junctionNode');
         }
 
-        const cssSelector = node.selectors.find(s => s.type === 'css')?.selector;
-        const xpathSelector = node.selectors.find(s => s.type === 'xpath')?.selector;
+        const cssSelector = node.selectors.find((s) => s.type === 'css')?.selector;
+        const xpathSelector = node.selectors.find((s) => s.type === 'xpath')?.selector;
         const urls = result.urls.map(urlNormalizer ?? identity).sort();
 
         if (cssSelector == null) {
