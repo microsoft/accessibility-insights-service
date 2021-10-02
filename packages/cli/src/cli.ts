@@ -106,13 +106,17 @@ function getScanArguments(): ScanArguments {
             },
             baselineFile: {
                 type: 'string',
-                describe: 'TODO',
+                describe: `Baseline file path. If specified, scan results will be compared to baseline results and the summary report will denote which results are new.
+                           If the results do not match the baseline file, a new baseline will be written to the output directory. To update the existing baseline file instead, use --updateBaseline.`,
                 alias: 'baselinefile',
+                hidden: true, // Should be unhidden and documented in README before completing #1819114
             },
             updateBaseline: {
                 type: 'boolean',
-                describe: 'TODO',
+                describe: 'Use with --baselineFile to update the baseline file in-place, rather than writing any updated baseline to the output directory.',
                 alias: 'updatebaseline',
+                default: false,
+                hidden: true, // Should be unhidden and documented in README before completing #1819114
             },
             debug: {
                 type: 'boolean',
