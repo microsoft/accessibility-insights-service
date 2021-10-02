@@ -26,6 +26,15 @@ describe(BaselineOptionsBuilder, () => {
         );
     });
 
+    it('propagates non-ENOENT filesystem errors', () => {
+        const baselineFileInput = '/path/to/baseline';
+        const nonEnoentError = new Error('from readFileSync');
+
+        fsMock.setup((f) => f.readFileSync(baselineFileInput, { encoding: 'utf8' })).throws(nonEnoentError);
+
+        expect(() => testSubject.build({ baselineFile: baselineFileInput })).toThrowError(nonEnoentError);
+    });
+
     it('propagates parse errors', () => {
         const baselineFileInput = '/path/to/baseline';
         const readFileSyncOutput = 'readFileSync output';
@@ -37,7 +46,7 @@ describe(BaselineOptionsBuilder, () => {
         expect(() => testSubject.build({ baselineFile: baselineFileInput })).toThrowError(parseError);
     });
 
-    it('parses scanArguments to produce output', () => {
+    it('parses scanArguments to produce output when baselineFile exists', () => {
         const baselineFileInput = '/path/to/baseline';
         const readFileSyncOutput = 'readFileSync output';
         const parseOutput = {} as BaselineFileContent;
@@ -47,6 +56,21 @@ describe(BaselineOptionsBuilder, () => {
 
         const output = testSubject.build({ baselineFile: baselineFileInput });
         expect(output.baselineContent).toBe(parseOutput);
+
+        expect(output.urlNormalizer).toBeUndefined();
+    });
+
+    it('parses scanArguments to produce output when baselineFile does not exist', () => {
+        const baselineFileInput = '/path/to/baseline';
+
+        const enoentError = new Error('ENOENT from readFileSync');
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (enoentError as any).code = 'ENOENT';
+
+        fsMock.setup((f) => f.readFileSync(baselineFileInput, { encoding: 'utf8' })).throws(enoentError);
+
+        const output = testSubject.build({ baselineFile: baselineFileInput });
+        expect(output.baselineContent).toBeNull();
 
         expect(output.urlNormalizer).toBeUndefined();
     });
