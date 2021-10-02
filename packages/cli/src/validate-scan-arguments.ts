@@ -17,6 +17,10 @@ export function validateScanArguments(args: ScanArguments): void {
         throw new Error('Options --restart and --continue are mutually exclusive.');
     }
 
+    if (!args.crawl && !isEmpty(args.baselineFile)) {
+        throw new Error('Option --baselineFile is only supported with --crawl.');
+    }
+
     if (args.updateBaseline === true && isEmpty(args.baselineFile)) {
         throw new Error('Option --updateBaseline requires option --baselineFile.');
     }
