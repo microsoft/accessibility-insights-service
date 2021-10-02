@@ -35,15 +35,21 @@ export class BaselineGenerator {
             throw new Error('Invalid input result; does not contain a css selector');
         }
 
-        // The order in which properties are specified is important because it will be
-        // reflected in generated baseline files. Changing the order is a breaking change.
-        return {
+        const baselineResult: BaselineResult = {
             cssSelector,
             htmlSnippet: node.html,
             rule: result.id,
             urls,
-            xpathSelector,
         };
+
+        // It's important to do this rather than just allowing "xpathSelector: undefined" in the output object.
+        // This is because the serializer we use serializes those cases differently, and we want to be byte-precise
+        // about the baseline output format.
+        if (xpathSelector != null) {
+            baselineResult.xpathSelector = xpathSelector;
+        }
+
+        return baselineResult;
     }
 
     private sortBaselineResults(results: BaselineResult[]): BaselineResult[] {
