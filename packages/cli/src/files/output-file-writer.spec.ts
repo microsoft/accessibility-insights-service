@@ -84,6 +84,36 @@ describe('OutputFileWriter', () => {
         });
     });
 
+    describe('writeToDirectoryWithOriginalFilename', () => {
+        it('uses original filename as-is', () => {
+            const directory = '.';
+            const content = 'content';
+
+            const originalFilePath = '/original/file/path.ext';
+            const fileBasenameFromPath = 'path.ext';
+            const filePathFromPathResolve = `${directory}/${fileBasenameFromPath}`;
+
+            pathMock
+                .setup(pm => pm.basename(originalFilePath))
+                .returns(() => fileBasenameFromPath);
+            pathMock
+                .setup((pm) => pm.resolve(directory, fileBasenameFromPath))
+                .returns(() => filePathFromPathResolve)
+                .verifiable(Times.once());
+            ensureDirectoryMock
+                .setup((ed) => ed(directory))
+                .returns(() => directory)
+                .verifiable();
+            fsMock
+                .setup((fsm) => fsm.writeFileSync(filePathFromPathResolve, content))
+                .returns(() => {})
+                .verifiable(Times.once());
+
+            expect(testSubject.writeToDirectoryWithOriginalFilename(directory, originalFilePath, content))
+                .toEqual(filePathFromPathResolve);
+        });
+    });
+
     describe('writeToFile', () => {
         it('writes and returns against a normalized version of the filePath', () => {
             const content = 'content';
