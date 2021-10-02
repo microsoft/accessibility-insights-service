@@ -13,27 +13,22 @@ export class BaselineEngine {
         @inject(BaselineGenerator) private readonly baselineGenerator: BaselineGenerator,
     ) {}
 
-    // Should do 2 things (they're combined because the processing will be similar):
-    // * Update combinedAxeResults inline (either marking individual URLs as "new" vs "baselined" or by splitting out a new
-    //   baselinedViolations grouping, depending what we decide to do for the report)
-    // * Return a BaselineEvaluation where suggestedBaselineUpdate is either null (if no baseline update is required) or
-    //   the suggested new baseline content (if a baseline update is required), and all the other "count" properties are
-    //   filled in appropriately
     public updateResultsInPlace(axeResults: AxeCoreResults, baselineOptions: BaselineOptions): BaselineEvaluation {
         const oldBaselineResults: BaselineResult[] = baselineOptions.baselineContent?.results ?? [];
         const newBaseline = this.baselineGenerator.generateBaseline(axeResults.violations, baselineOptions.urlNormalizer);
         const newBaselineResults: BaselineResult[] = newBaseline.results;
 
-        if (isDeepStrictEqual(oldBaselineResults, newBaselineResults)) {
-            return {
-                suggestedBaselineUpdate: null,
-                fixedViolationsByRule: {},
-                newViolationsByRule: {},
-                totalFixedViolations: 0,
-                totalNewViolations: 0,
-            };
-        }
+        const suggestedBaselineUpdate = isDeepStrictEqual(oldBaselineResults, newBaselineResults) ? null : newBaseline;
 
-        throw new Error('TODO: There is a difference between the baseline and the new results, but BaselineEngine is not implemented yet');
+        // TODO: update axeResults in-place, adding "new" vs "existing" annotations for each URL
+        // TODO: calculate assorted total/by-rule counts
+
+        return {
+            suggestedBaselineUpdate,
+            fixedViolationsByRule: {},
+            newViolationsByRule: {},
+            totalFixedViolations: -1,
+            totalNewViolations: -1,
+        };
     }
 }

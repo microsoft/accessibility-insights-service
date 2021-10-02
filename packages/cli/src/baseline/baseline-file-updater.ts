@@ -6,14 +6,14 @@ import { isEmpty } from 'lodash';
 import { OutputFileWriter } from '../files/output-file-writer';
 import { ScanArguments } from '../scan-arguments';
 import { BaselineFileFormatter } from './baseline-file-formatter';
-import { BaselineEvaluation, BaselineFileContent } from './baseline-types';
+import { BaselineEvaluation } from './baseline-types';
 
 @injectable()
 export class BaselineFileUpdater {
     constructor(
         @inject(BaselineFileFormatter) private readonly baselineFileFormatter: BaselineFileFormatter,
         @inject(OutputFileWriter) private readonly outputFileWriter: OutputFileWriter,
-        private readonly consoleObj: typeof console = console,
+        private readonly stdoutWriter: ((output: string) => void) = console.log,
     ) {}
 
     public async updateBaseline(scanArguments: ScanArguments, baselineEvaluation: BaselineEvaluation): Promise<void> {
@@ -21,35 +21,22 @@ export class BaselineFileUpdater {
             return;
         }
 
-        const newBaselineContent = baselineEvaluation.suggestedBaselineUpdate;
+        this.stdoutWriter(`Found ${baselineEvaluation.totalNewViolations} new violations compared to the baseline.`);
+        this.stdoutWriter(`Found ${baselineEvaluation.totalFixedViolations} cases where a previously baselined violation was fixed.`);
 
-        this.consoleObj.log(`Found ${baselineEvaluation.totalNewViolations} new violations compared to the baseline.`);
-        this.consoleObj.log(`Found ${baselineEvaluation.totalFixedViolations} cases where a previously baselined violation was fixed.`);
+        const newBaselineContent = baselineEvaluation.suggestedBaselineUpdate;
+        const rawBaselineFileContent = this.baselineFileFormatter.format(newBaselineContent);
 
         if (scanArguments.updateBaseline) {
-            const updatedBaselineLocation = await this.writeToFile(scanArguments.baselineFile, newBaselineContent);
+            const updatedBaselineLocation = await this.outputFileWriter.writeToFile(scanArguments.baselineFile, rawBaselineFileContent);
 
-            this.consoleObj.log(`Updated existing baseline file ${updatedBaselineLocation}`);
+            this.stdoutWriter(`Updated existing baseline file at ${updatedBaselineLocation}`);
         } else {
-            const updatedBaselineLocation = await this.writeToDirectory(
-                scanArguments.output, scanArguments.baselineFile, newBaselineContent);
+            const updatedBaselineLocation = await this.outputFileWriter.writeToDirectory(
+                scanArguments.output, scanArguments.baselineFile, 'baseline', rawBaselineFileContent);
 
-            this.consoleObj.log(`Updated baseline file was saved as ${updatedBaselineLocation}`);
-            this.consoleObj.log(`To update the baseline with these changes, either rerun with --updateBaseline or copy the updated baseline file to ${scanArguments.baselineFile}`);
+            this.stdoutWriter(`Saved new baseline file at ${updatedBaselineLocation}`);
+            this.stdoutWriter(`To update the baseline with these changes, either rerun with --updateBaseline or copy the updated baseline file to ${scanArguments.baselineFile}`);
         }
-    }
-
-    private writeToDirectory(directory: string, fileName: string, baseline: BaselineFileContent): string {
-        const rawBaselineFileContent = this.baselineFileFormatter.format(baseline);
-        const filePath = this.outputFileWriter.writeToDirectory(directory, fileName, 'baseline', rawBaselineFileContent);
-
-        return filePath;
-    }
-
-    private writeToFile(filePath: string, baseline: BaselineFileContent): string {
-        const rawBaselineFileContent = this.baselineFileFormatter.format(baseline);
-        const normalizedFilePath = this.outputFileWriter.writeToFile(filePath, rawBaselineFileContent);
-
-        return normalizedFilePath;
     }
 }
