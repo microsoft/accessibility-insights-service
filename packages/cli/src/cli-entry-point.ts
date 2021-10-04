@@ -4,12 +4,12 @@
 import { Container } from 'inversify';
 import { isEmpty } from 'lodash';
 import { System } from 'common';
-import { ReportDiskWriter } from './report/report-disk-writer';
 import { ReportNameGenerator } from './report/report-name-generator';
 import { CommandRunner } from './runner/command-runner';
 import { CrawlerCommandRunner } from './runner/crawler-command-runner';
 import { UrlCommandRunner } from './runner/url-command-runner';
 import { ScanArguments } from './scan-arguments';
+import { OutputFileWriter } from './files/output-file-writer';
 
 export class CliEntryPoint {
     constructor(private readonly container: Container) {}
@@ -19,9 +19,9 @@ export class CliEntryPoint {
             const commandRunner = this.getCommandRunner(scanArguments);
             await commandRunner.runCommand(scanArguments);
         } catch (error) {
-            const reportDiskWriter = this.container.get(ReportDiskWriter);
+            const outputFileWriter = this.container.get(OutputFileWriter);
             const reportNameGenerator = this.container.get(ReportNameGenerator);
-            const errorLog = reportDiskWriter.writeToDirectory(
+            const errorLog = outputFileWriter.writeToDirectory(
                 scanArguments.output,
                 reportNameGenerator.generateName('ai-cli-errors', new Date()),
                 'log',

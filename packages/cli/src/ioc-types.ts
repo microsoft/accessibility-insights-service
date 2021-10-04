@@ -3,4 +3,5 @@
 
 export const iocTypes = {
     ReporterFactory: 'ReporterFactory',
+    ajv: 'ajv',
 };

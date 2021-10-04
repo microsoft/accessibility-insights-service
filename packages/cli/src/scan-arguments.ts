@@ -15,6 +15,8 @@ export interface ScanArguments {
     silentMode?: boolean;
     inputUrls?: string[];
     discoveryPatterns?: string[];
+    baselineFile?: string;
+    updateBaseline?: boolean;
     // eslint-disable-next-line
     continue?: boolean;
     chromePath?: string;

@@ -3,7 +3,7 @@
 
 import { Spinner } from 'cli-spinner';
 import { inject, injectable } from 'inversify';
-import { ReportDiskWriter } from '../report/report-disk-writer';
+import { OutputFileWriter } from '../files/output-file-writer';
 import { ReportGenerator } from '../report/report-generator';
 import { AIScanner } from '../scanner/ai-scanner';
 import { ScanArguments } from '../scan-arguments';
@@ -14,7 +14,7 @@ export class UrlCommandRunner implements CommandRunner {
     constructor(
         @inject(AIScanner) private readonly scanner: AIScanner,
         @inject(ReportGenerator) private readonly reportGenerator: ReportGenerator,
-        @inject(ReportDiskWriter) private readonly reportDiskWriter: ReportDiskWriter,
+        @inject(OutputFileWriter) private readonly outputFileWriter: OutputFileWriter,
     ) {}
 
     public async runCommand(scanArguments: ScanArguments): Promise<void> {
@@ -29,7 +29,7 @@ export class UrlCommandRunner implements CommandRunner {
             }
 
             const reportContent = this.reportGenerator.generateReport(axeResults);
-            this.reportDiskWriter.writeToDirectory(scanArguments.output, scanArguments.url, 'html', reportContent);
+            this.outputFileWriter.writeToDirectory(scanArguments.output, scanArguments.url, 'html', reportContent);
         } finally {
             spinner.stop();
         }

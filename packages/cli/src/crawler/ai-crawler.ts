@@ -5,10 +5,13 @@ import { inject, injectable } from 'inversify';
 import { DbScanResultReader, CrawlerRunOptions, Crawler, ScanMetadata } from 'accessibility-insights-crawler';
 import { AxeResultsReducer, UrlCount, AxeCoreResults, AxeResultsList } from 'axe-result-converter';
 import { ScanResultReader } from '../scan-result-providers/scan-result-reader';
+import { BaselineEvaluation, BaselineOptions } from '../baseline/baseline-types';
+import { BaselineEngine } from '../baseline/baseline-engine';
 
 export interface CombinedScanResult {
     urlCount?: UrlCount;
     combinedAxeResults?: AxeCoreResults;
+    baselineEvaluation?: BaselineEvaluation;
     scanMetadata?: ScanMetadata;
     error?: string;
 }
@@ -19,12 +22,20 @@ export class AICrawler {
         @inject(Crawler) private readonly crawler: Crawler<unknown>,
         @inject(DbScanResultReader) private readonly scanResultReader: ScanResultReader,
         @inject(AxeResultsReducer) private readonly axeResultsReducer: AxeResultsReducer,
+        @inject(BaselineEngine) private readonly baselineEngine: BaselineEngine,
     ) {}
 
-    public async crawl(crawlerRunOptions: CrawlerRunOptions): Promise<CombinedScanResult> {
+    public async crawl(crawlerRunOptions: CrawlerRunOptions, baselineOptions?: BaselineOptions): Promise<CombinedScanResult> {
         await this.crawler.crawl(crawlerRunOptions);
         const combinedAxeResult = await this.combineAxeResults();
         combinedAxeResult.scanMetadata = await this.scanResultReader.getScanMetadata(crawlerRunOptions.baseUrl);
+
+        if (baselineOptions != null) {
+            combinedAxeResult.baselineEvaluation = await this.baselineEngine.updateResultsInPlace(
+                combinedAxeResult.combinedAxeResults,
+                baselineOptions,
+            );
+        }
 
         return combinedAxeResult;
     }

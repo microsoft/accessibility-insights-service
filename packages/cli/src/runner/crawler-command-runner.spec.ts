@@ -6,11 +6,14 @@ import 'reflect-metadata';
 import * as fs from 'fs';
 import { CrawlerRunOptions } from 'accessibility-insights-crawler';
 import { IMock, It, Mock, Times } from 'typemoq';
-import { ReportDiskWriter } from '../report/report-disk-writer';
 import { ScanArguments } from '../scan-arguments';
 import { ConsolidatedReportGenerator } from '../report/consolidated-report-generator';
 import { CrawlerParametersBuilder } from '../crawler/crawler-parameters-builder';
-import { AICrawler } from '../crawler/ai-crawler';
+import { AICrawler, CombinedScanResult } from '../crawler/ai-crawler';
+import { OutputFileWriter } from '../files/output-file-writer';
+import { BaselineOptionsBuilder } from '../baseline/baseline-options-builder';
+import { BaselineOptions } from '../baseline/baseline-types';
+import { BaselineFileUpdater } from '../baseline/baseline-file-updater';
 import { CrawlerCommandRunner } from './crawler-command-runner';
 
 /* eslint-disable @typescript-eslint/consistent-type-assertions */
@@ -19,17 +22,22 @@ describe('CrawlerCommandRunner', () => {
     const testUrl = 'http://localhost/';
 
     let scanArguments: ScanArguments;
-    let crawlerOption: CrawlerRunOptions;
+    let crawlerOptions: CrawlerRunOptions;
+    let baselineOptions: BaselineOptions;
     let crawlerMock: IMock<AICrawler>;
     let crawlerParametersBuilderMock: IMock<CrawlerParametersBuilder>;
-    let reportDiskWriterMock: IMock<ReportDiskWriter>;
+    let outputFileWriterMock: IMock<OutputFileWriter>;
     let consolidatedReportGeneratorMock: IMock<ConsolidatedReportGenerator>;
+    let baselineOptionsBuilderMock: IMock<BaselineOptionsBuilder>;
+    let baselineFileUpdaterMock: IMock<BaselineFileUpdater>;
     let fsMock: IMock<typeof fs>;
     let testSubject: CrawlerCommandRunner;
+    let stubCombinedScanResults: CombinedScanResult;
+    let stdout: string[];
 
     beforeEach(() => {
         scanArguments = { url: testUrl, output: './dir' };
-        crawlerOption = {
+        crawlerOptions = {
             baseUrl: scanArguments.url,
             localOutputDir: scanArguments.output,
             inputUrls: undefined,
@@ -42,11 +50,16 @@ describe('CrawlerCommandRunner', () => {
             memoryMBytes: undefined,
             silentMode: undefined,
         };
+        baselineOptions = undefined;
+
+        stubCombinedScanResults = {} as CombinedScanResult;
 
         crawlerMock = Mock.ofType<AICrawler>();
         crawlerParametersBuilderMock = Mock.ofType<CrawlerParametersBuilder>();
-        reportDiskWriterMock = Mock.ofType<ReportDiskWriter>();
+        outputFileWriterMock = Mock.ofType<OutputFileWriter>();
         consolidatedReportGeneratorMock = Mock.ofType<ConsolidatedReportGenerator>();
+        baselineOptionsBuilderMock = Mock.ofType<BaselineOptionsBuilder>();
+        baselineFileUpdaterMock = Mock.ofType<BaselineFileUpdater>();
         fsMock = Mock.ofInstance(fs);
 
         fsMock
@@ -54,26 +67,32 @@ describe('CrawlerCommandRunner', () => {
             .returns(() => false)
             .verifiable();
         crawlerParametersBuilderMock
-            .setup(async (o) => o.build(It.isAny()))
-            .returns(() => Promise.resolve(crawlerOption))
+            .setup((o) => o.build(It.isAny()))
+            .returns(() => crawlerOptions)
             .verifiable();
-        crawlerMock
-            .setup((o) => o.crawl(crawlerOption))
-            .returns(async () => Promise.resolve({}))
+        baselineOptionsBuilderMock
+            .setup((o) => o.build(It.isAny()))
+            .returns(() => undefined)
             .verifiable();
+
+        stdout = [];
+        const stdoutWriter = (s: string) => stdout.push(s);
 
         testSubject = new CrawlerCommandRunner(
             crawlerMock.object,
             crawlerParametersBuilderMock.object,
             consolidatedReportGeneratorMock.object,
-            reportDiskWriterMock.object,
+            outputFileWriterMock.object,
+            baselineOptionsBuilderMock.object,
+            baselineFileUpdaterMock.object,
             fsMock.object,
+            stdoutWriter,
         );
     });
 
     afterEach(() => {
         crawlerMock.verifyAll();
-        reportDiskWriterMock.verifyAll();
+        outputFileWriterMock.verifyAll();
         consolidatedReportGeneratorMock.verifyAll();
         fsMock.verifyAll();
     });
@@ -85,15 +104,22 @@ describe('CrawlerCommandRunner', () => {
             .returns(() => true)
             .verifiable();
 
-        crawlerMock.reset();
-        crawlerMock.setup((o) => o.crawl(It.isAny())).verifiable(Times.never());
+        crawlerMock.setup((o) => o.crawl(It.isAny(), It.isAny())).verifiable(Times.never());
 
         await testSubject.runCommand(scanArguments);
+
+        expect(stdout).toMatchInlineSnapshot(`
+            Array [
+              "The last scan result was found on a disk. Use --continue option to continue scan for the last URL provided, or --restart option to delete the last scan result.",
+            ]
+        `);
     });
 
     it('continue run with --restart when last scan data persisted', async () => {
+        setupReportOutput('/path/to/report');
+
         scanArguments = { url: testUrl, output: './dir', restart: true };
-        crawlerOption.restartCrawl = true;
+        crawlerOptions.restartCrawl = true;
 
         fsMock.reset();
         fsMock
@@ -101,15 +127,24 @@ describe('CrawlerCommandRunner', () => {
             .returns(() => true)
             .verifiable();
 
-        crawlerMock.reset();
         crawlerMock
-            .setup((o) => o.crawl(crawlerOption))
-            .returns(async () => Promise.resolve({}))
+            .setup((o) => o.crawl(crawlerOptions, baselineOptions))
+            .returns(async () => stubCombinedScanResults)
             .verifiable();
+
         await testSubject.runCommand(scanArguments);
+
+        expect(stdout).toMatchInlineSnapshot(`
+Array [
+  "Generating summary scan report...",
+  "Summary report was saved as /path/to/report",
+]
+`);
     });
 
     it('continue run with --continue when last scan data persisted', async () => {
+        setupReportOutput('/path/to/report');
+
         scanArguments = { url: testUrl, output: './dir', continue: true };
 
         fsMock.reset();
@@ -118,19 +153,75 @@ describe('CrawlerCommandRunner', () => {
             .returns(() => true)
             .verifiable();
 
+        crawlerMock
+            .setup((o) => o.crawl(crawlerOptions, baselineOptions))
+            .returns(async () => stubCombinedScanResults)
+            .verifiable();
+
         await testSubject.runCommand(scanArguments);
+
+        expect(stdout).toMatchInlineSnapshot(`
+Array [
+  "Generating summary scan report...",
+  "Summary report was saved as /path/to/report",
+]
+`);
     });
 
     it('run crawler', async () => {
+        setupReportOutput('/path/to/report');
+
+        crawlerMock
+            .setup((o) => o.crawl(crawlerOptions, baselineOptions))
+            .returns(async () => stubCombinedScanResults)
+            .verifiable();
+
+        await testSubject.runCommand(scanArguments);
+
+        expect(stdout).toMatchInlineSnapshot(`
+            Array [
+              "Generating summary scan report...",
+              "Summary report was saved as /path/to/report",
+            ]
+        `);
+    });
+
+    it('runs crawler with baseline options', async () => {
+        setupReportOutput('/path/to/report');
+
+        baselineOptions = {
+            baselineContent: null,
+        };
+
+        baselineOptionsBuilderMock.reset();
+        baselineOptionsBuilderMock
+            .setup((o) => o.build(scanArguments))
+            .returns(() => baselineOptions)
+            .verifiable();
+
+        crawlerMock
+            .setup((o) => o.crawl(crawlerOptions, baselineOptions))
+            .returns(async () => stubCombinedScanResults)
+            .verifiable();
+
+        await testSubject.runCommand(scanArguments);
+
+        expect(stdout).toMatchInlineSnapshot(`
+            Array [
+              "Generating summary scan report...",
+              "Summary report was saved as /path/to/report",
+            ]
+        `);
+    });
+
+    function setupReportOutput(outputPath: string): void {
         consolidatedReportGeneratorMock
             .setup(async (o) => o.generateReport({}, It.isAny(), It.isAny()))
             .returns(() => Promise.resolve('report'))
             .verifiable();
-        reportDiskWriterMock
+        outputFileWriterMock
             .setup((o) => o.writeToDirectory(scanArguments.output, 'index', 'html', 'report'))
-            .returns(() => 'path')
+            .returns(() => '/path/to/report')
             .verifiable();
-
-        await testSubject.runCommand(scanArguments);
-    });
+    }
 });
