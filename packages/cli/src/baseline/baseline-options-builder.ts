@@ -18,7 +18,7 @@ export class BaselineOptionsBuilder {
 
     public build(scanArguments: ScanArguments): BaselineOptions | null {
         if (scanArguments.baselineFile == null) {
-            if (scanArguments.updateBaseline != null) {
+            if (scanArguments.updateBaseline) {
                 throw new Error('updateBaseline is only supported when baselineFile is specified');
             }
 
