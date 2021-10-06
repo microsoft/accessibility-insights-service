@@ -47,7 +47,7 @@ steps:
       displayName: 'Copy files to staging directory'
 
     - task: ManifestGeneratorTask@0
-      displayName: 'Generation Task'
+      displayName: 'SBOM Generation Task'
       inputs:
           BuildDropPath: '$(Build.ArtifactStagingDirectory)'
 
