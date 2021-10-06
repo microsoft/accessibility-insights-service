@@ -3505,15 +3505,16 @@ abort-controller@^3.0.0:
   dependencies:
     event-target-shim "^5.0.0"
 
-abstract-leveldown@^7.0.0:
-  version "7.0.0"
-  resolved "https://registry.yarnpkg.com/abstract-leveldown/-/abstract-leveldown-7.0.0.tgz#1a8bc3b07f502793804d456a881dc15cedb9bc5d"
-  integrity sha512-mFAi5sB/UjpNYglrQ4irzdmr2mbQtE94OJbrAYuK2yRARjH/OACinN1meOAorfnaLPMQdFymSQMlkiDm9AXXKQ==
+abstract-leveldown@^7.0.0, abstract-leveldown@^7.2.0:
+  version "7.2.0"
+  resolved "https://registry.yarnpkg.com/abstract-leveldown/-/abstract-leveldown-7.2.0.tgz#08d19d4e26fb5be426f7a57004851b39e1795a2e"
+  integrity sha512-DnhQwcFEaYsvYDnACLZhMmCWd3rkOeEvglpa4q5i/5Jlm3UIsWaxVzuXvDLFCSCWRO3yy2/+V/G7FusFgejnfQ==
   dependencies:
     buffer "^6.0.3"
+    catering "^2.0.0"
     is-buffer "^2.0.5"
     level-concat-iterator "^3.0.0"
-    level-supports "^2.0.0"
+    level-supports "^2.0.1"
     queue-microtask "^1.2.3"
 
 accepts@~1.3.4, accepts@~1.3.7:
@@ -5650,12 +5651,12 @@ encodeurl@~1.0.2:
   resolved "https://registry.yarnpkg.com/encodeurl/-/encodeurl-1.0.2.tgz#ad3ff4c86ec2d029322f5a02c3a9a606c95b3f59"
   integrity sha1-rT/0yG7C0CkyL1oCw6mmBslbP1k=
 
-encoding-down@^7.0.0:
-  version "7.0.0"
-  resolved "https://registry.yarnpkg.com/encoding-down/-/encoding-down-7.0.0.tgz#63357e0f44b4a85664d9539bd711500da70f0c63"
-  integrity sha512-hor6z2W/ZrVqDYMawQp7VtfEt6BrvYw+mgjWLauUMZsIBjMt1/k5aa+JreLbtjwJdkjrZ39TU+pV5GpHPGRpog==
+encoding-down@^7.1.0:
+  version "7.1.0"
+  resolved "https://registry.yarnpkg.com/encoding-down/-/encoding-down-7.1.0.tgz#8d55b5a20d50eb6f0edaf7233f6aee0ff562386a"
+  integrity sha512-ky47X5jP84ryk5EQmvedQzELwVJPjCgXDQZGeb9F6r4PdChByCGHTBrVcF3h8ynKVJ1wVbkxTsDC8zBROPypgQ==
   dependencies:
-    abstract-leveldown "^7.0.0"
+    abstract-leveldown "^7.2.0"
     inherits "^2.0.3"
     level-codec "^10.0.0"
     level-errors "^3.0.0"
@@ -8708,6 +8709,11 @@ level-supports@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/level-supports/-/level-supports-2.0.0.tgz#b0b9f63f30c4175fb2612217144f03f3b77580d9"
   integrity sha512-8UJgzo1pvWP1wq80ZlkL19fPeK7tlyy0sBY90+2pj0x/kvzHCoLDWyuFJJMrsTn33oc7hbMkS3SkjCxMRPHWaw==
+
+level-supports@^2.0.1:
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/level-supports/-/level-supports-2.0.1.tgz#a59a0e95d7a80bb377469d63e1ca991a4af7c187"
+  integrity sha512-GHRdL9Gi5ReMwhKE4swGj08sIOvVyp+lZUXI3qcMXSF/qcDaKDBv8bduXUUpjO42GFec5bCt3O8Xum47e/h1wQ==
 
 leveldown@^6.0.2:
   version "6.0.2"
