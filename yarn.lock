@@ -2573,7 +2573,7 @@
   resolved "https://registry.yarnpkg.com/@opentelemetry/context-base/-/context-base-0.10.2.tgz#55bea904b2b91aa8a8675df9eaba5961bddb1def"
   integrity sha512-hZNKjKOYsckoOEgBziGMnBcX0M7EtstnCmwz5jZUOUYwlZ+/xxX6z3jPu1XVO2Jivk0eLfuP9GP+vFD49CMetw==
 
-"@opentelemetry/core@0.23.0":
+"@opentelemetry/core@0.23.0", "@opentelemetry/core@^0.23.0":
   version "0.23.0"
   resolved "https://registry.yarnpkg.com/@opentelemetry/core/-/core-0.23.0.tgz#611a39255ac8296a79fbc6548a6d3b1bc87ee17e"
   integrity sha512-7COVsnGEW96ITjc0waWYo/R27sFqjPUg4SCoP8XL48zAGr9zjzeuJoQe/xVchs7op//qOeeEEeBxiBvXy2QS0Q==
@@ -2593,6 +2593,11 @@
   version "0.23.0"
   resolved "https://registry.yarnpkg.com/@opentelemetry/semantic-conventions/-/semantic-conventions-0.23.0.tgz#ec1467fd71f6551628b60cd2107acc923b9b77cc"
   integrity sha512-Tzo+VGR1zlzLbjVI+7mlDJ2xuaUsue4scWvFlK+fzcUfn9siF4NWbxoC2X6Br2B/g4dsq1OAwAYsPVYIEoY2rQ==
+
+"@opentelemetry/semantic-conventions@^0.24.0":
+  version "0.24.0"
+  resolved "https://registry.yarnpkg.com/@opentelemetry/semantic-conventions/-/semantic-conventions-0.24.0.tgz#1028ef0e0923b24916158d80d2ddfd67ea8b6740"
+  integrity sha512-a/szuMQV0Quy0/M7kKdglcbRSoorleyyOwbTNNJ32O+RBN766wbQlMTvdimImTmwYWGr+NJOni1EcC242WlRcA==
 
 "@opentelemetry/tracing@^0.23.0":
   version "0.23.0"
@@ -3767,13 +3772,15 @@ apify@^0.21.8:
   optionalDependencies:
     puppeteer "5.3.1"
 
-applicationinsights@^2.1.7:
-  version "2.1.7"
-  resolved "https://registry.yarnpkg.com/applicationinsights/-/applicationinsights-2.1.7.tgz#fb398fa3666407d679f327b99156cfee4b255ffd"
-  integrity sha512-AMCu0Nct0pINwdo0TwMuGoTA1vhv2UIDHFFi/kBoVlNRHdV4oBJ1BODVUDvxr7+mLWhDtJQpXanDe//3ZNW1tQ==
+applicationinsights@^2.1.8:
+  version "2.1.8"
+  resolved "https://registry.yarnpkg.com/applicationinsights/-/applicationinsights-2.1.8.tgz#3b6b6d12c3b41b044ac7afd274d572da6300df20"
+  integrity sha512-ehdYEKMkpm/1CPFX5UwvEUmI45U4v8EnPnvRIGC5hqkGDt7ARMfivwneK+ArbSabotUYWOYdvogmB8CrdJye/g==
   dependencies:
     "@azure/core-http" "^2.2.0"
     "@opentelemetry/api" "^1.0.3"
+    "@opentelemetry/core" "^0.23.0"
+    "@opentelemetry/semantic-conventions" "^0.24.0"
     "@opentelemetry/tracing" "^0.23.0"
     cls-hooked "^4.2.2"
     continuation-local-storage "^3.2.1"
