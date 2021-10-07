@@ -3510,7 +3510,7 @@ abort-controller@^3.0.0:
   dependencies:
     event-target-shim "^5.0.0"
 
-abstract-leveldown@^7.0.0, abstract-leveldown@^7.2.0:
+abstract-leveldown@^7.2.0:
   version "7.2.0"
   resolved "https://registry.yarnpkg.com/abstract-leveldown/-/abstract-leveldown-7.2.0.tgz#08d19d4e26fb5be426f7a57004851b39e1795a2e"
   integrity sha512-DnhQwcFEaYsvYDnACLZhMmCWd3rkOeEvglpa4q5i/5Jlm3UIsWaxVzuXvDLFCSCWRO3yy2/+V/G7FusFgejnfQ==
@@ -8698,14 +8698,14 @@ level-supports@^2.0.1:
   resolved "https://registry.yarnpkg.com/level-supports/-/level-supports-2.0.1.tgz#a59a0e95d7a80bb377469d63e1ca991a4af7c187"
   integrity sha512-GHRdL9Gi5ReMwhKE4swGj08sIOvVyp+lZUXI3qcMXSF/qcDaKDBv8bduXUUpjO42GFec5bCt3O8Xum47e/h1wQ==
 
-leveldown@^6.0.2:
-  version "6.0.2"
-  resolved "https://registry.yarnpkg.com/leveldown/-/leveldown-6.0.2.tgz#994779b2848df02e0aa6e1646213cf30f5b98883"
-  integrity sha512-jZ2SQvyWcNmNzBzvtVN9rq8zPFHBm/VriukyE+wH82z/nKzp4J1ln7G9LBYi6BJQs6K00jqu3PfZXGQbvJyWkQ==
+leveldown@^6.1.0:
+  version "6.1.0"
+  resolved "https://registry.yarnpkg.com/leveldown/-/leveldown-6.1.0.tgz#7ab1297706f70c657d1a72b31b40323aa612b9ee"
+  integrity sha512-8C7oJDT44JXxh04aSSsfcMI8YiaGRhOFI9/pMEL7nWJLVsWajDPTRxsSHTM2WcTVY5nXM+SuRHzPPi0GbnDX+w==
   dependencies:
-    abstract-leveldown "^7.0.0"
+    abstract-leveldown "^7.2.0"
     napi-macros "~2.0.0"
-    node-gyp-build "~4.2.1"
+    node-gyp-build "^4.3.0"
 
 levelup@^5.1.1:
   version "5.1.1"
@@ -9550,10 +9550,10 @@ node-fetch@^3.0.0:
     data-uri-to-buffer "^3.0.1"
     fetch-blob "^3.1.2"
 
-node-gyp-build@~4.2.1:
-  version "4.2.3"
-  resolved "https://registry.yarnpkg.com/node-gyp-build/-/node-gyp-build-4.2.3.tgz#ce6277f853835f718829efb47db20f3e4d9c4739"
-  integrity sha512-MN6ZpzmfNCRM+3t57PTJHgHyw/h4OWnZ6mR8P5j/uZtqQr46RRuDE/P+g3n0YR/AiYXeWixZZzaip77gdICfRg==
+node-gyp-build@^4.3.0:
+  version "4.3.0"
+  resolved "https://registry.yarnpkg.com/node-gyp-build/-/node-gyp-build-4.3.0.tgz#9f256b03e5826150be39c764bf51e993946d71a3"
+  integrity sha512-iWjXZvmboq0ja1pUGULQBexmxq8CV4xBhX7VDOTbL7ZR4FOowwY/VOtRxBN/yKxmdGoIp4j5ysNT4u3S2pDQ3Q==
 
 node-gyp@^5.0.2:
   version "5.1.1"
