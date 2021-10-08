@@ -92,11 +92,6 @@ describe(AICrawler, () => {
                 },
             ] as ScanResult[];
 
-            crawlerMock
-                .setup((o) => o.crawl(crawlerOption))
-                .returns(async () => Promise.resolve())
-                .verifiable();
-
             for (let index = 0; index <= scanResults.length; index++) {
                 const next = index === scanResults.length ? { done: true, value: undefined } : { done: false, value: scanResults[index] };
                 dbScanResultReaderMock
@@ -113,6 +108,11 @@ describe(AICrawler, () => {
         });
 
         it('coordinates underlying Crawler and results reader (without baselining)', async () => {
+            crawlerMock
+                .setup((o) => o.crawl(crawlerOption))
+                .returns(async () => Promise.resolve())
+                .verifiable();
+
             const output = await crawler.crawl(crawlerOption);
 
             expect(output.error).toBeUndefined();
@@ -127,6 +127,11 @@ describe(AICrawler, () => {
         });
 
         it('coordinates underlying Crawler, results reader, and baselining engine', async () => {
+            crawlerMock
+                .setup((o) => o.crawl(crawlerOption))
+                .returns(async () => Promise.resolve())
+                .verifiable();
+
             const stubBaselineContent: BaselineFileContent = {} as BaselineFileContent;
             const baselineOptions: BaselineOptions = {
                 baselineContent: stubBaselineContent,
@@ -150,6 +155,26 @@ describe(AICrawler, () => {
                 failed: 1,
             });
             expect(output.combinedAxeResults.urls).toStrictEqual(['url-1', 'url-2', 'url-3']);
+        });
+
+        it('coordinates underlying Crawler, results reader, and baselining engine, single worker true, non-deterministic', async () => {
+            const stubBaselineContent: BaselineFileContent = {} as BaselineFileContent;
+            const baselineOptions: BaselineOptions = {
+                baselineContent: stubBaselineContent,
+                urlNormalizer: (url) => `${url} (normalized)`,
+            };
+
+            crawlerOption.singleWorker = false;
+            crawlerOption.maxRequestsPerCrawl = 2;
+
+            crawlerMock
+                .setup((o) => o.crawl(crawlerOption))
+                .returns(async () => Promise.resolve())
+                .verifiable();
+
+            await expect(crawler.crawl(crawlerOption, baselineOptions)).rejects.toEqual(
+                new Error(AICrawler.NON_DETERMINISTIC_ERROR_MESSAGE),
+            );
         });
     });
 
