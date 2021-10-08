@@ -19,7 +19,7 @@ export interface CombinedScanResult {
 @injectable()
 export class AICrawler {
     public static readonly NON_DETERMINISTIC_ERROR_MESSAGE =
-        'Please increase the maxRequestsPerCrawl or use a single worker to get a deterministic result';
+        'Please increase the maxUrls or use a single worker to get a deterministic result';
 
     constructor(
         @inject(Crawler) private readonly crawler: Crawler<unknown>,
