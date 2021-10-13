@@ -26,7 +26,7 @@
         "@types/cheerio": "^0.22.29",
         "@types/dotenv": "^8.2.0",
         "@types/jest": "^27.0.2",
-        "@types/lodash": "^4.14.173",
+        "@types/lodash": "^4.14.175",
         "@types/node": "^12.20.28",
         "@types/puppeteer": "^3.0.0",
         "@types/sha.js": "^2.4.0",
@@ -34,7 +34,7 @@
         "@types/yargs": "^17.0.0",
         "copy-webpack-plugin": "^9.0.0",
         "fork-ts-checker-webpack-plugin": "^6.3.4",
-        "jest": "^27.2.1",
+        "jest": "^27.2.4",
         "jest-junit": "^12.3.0",
         "mockdate": "^3.0.5",
         "node-loader": "^2.0.0",
@@ -63,7 +63,7 @@
         "common": "^1.0.0",
         "dotenv": "^10.0.0",
         "inversify": "^5.1.1",
-        "leveldown": "^6.0.2",
+        "leveldown": "^6.1.0",
         "lodash": "^4.17.21",
         "logger": "1.0.0",
         "moment": "^2.29.1",
@@ -75,7 +75,7 @@
         "sha.js": "^2.4.11",
         "storage-documents": "1.0.0",
         "verror": "^1.10.0",
-        "yargs": "^17.1.1"
+        "yargs": "^17.2.1"
     },
     "resolutions": {
         "axe-core": "4.3.2"
