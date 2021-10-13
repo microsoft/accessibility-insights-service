@@ -18,6 +18,9 @@ export interface CombinedScanResult {
 
 @injectable()
 export class AICrawler {
+    public static readonly NON_DETERMINISTIC_ERROR_MESSAGE =
+        'Please increase the maxUrls or use a single worker to get a deterministic result';
+
     constructor(
         @inject(Crawler) private readonly crawler: Crawler<unknown>,
         @inject(DbScanResultReader) private readonly scanResultReader: ScanResultReader,
@@ -31,6 +34,9 @@ export class AICrawler {
         combinedAxeResult.scanMetadata = await this.scanResultReader.getScanMetadata(crawlerRunOptions.baseUrl);
 
         if (baselineOptions != null) {
+            if (!crawlerRunOptions.singleWorker && crawlerRunOptions.maxRequestsPerCrawl <= combinedAxeResult.urlCount.total) {
+                throw new Error(AICrawler.NON_DETERMINISTIC_ERROR_MESSAGE);
+            }
             combinedAxeResult.baselineEvaluation = await this.baselineEngine.updateResultsInPlace(
                 combinedAxeResult.combinedAxeResults,
                 baselineOptions,
