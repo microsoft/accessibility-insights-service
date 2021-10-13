@@ -24,7 +24,7 @@
         "@types/dotenv": "^8.2.0",
         "@types/jest": "^27.0.2",
         "@types/lodash": "^4.14.175",
-        "@types/node": "^12.20.28",
+        "@types/node": "^12.20.31",
         "jest": "^27.2.4",
         "jest-junit": "^12.3.0",
         "mockdate": "^3.0.5",
