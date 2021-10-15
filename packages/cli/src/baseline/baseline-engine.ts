@@ -33,9 +33,9 @@ export class BaselineEngine {
             totalNewViolations: 0,
         };
 
-        while(oldResultIndex < oldBaselineResults.length && newResultIndex < newBaselineResults.length) {
-            const oldBaselineResult = oldBaselineResults[oldResultIndex];
-            const newBaselineResult = newBaselineResults[newResultIndex];
+        while(oldResultIndex < oldBaselineResults.length || newResultIndex < newBaselineResults.length) {
+            const oldBaselineResult = oldResultIndex < oldBaselineResults.length ? oldBaselineResults[oldResultIndex] : null;
+            const newBaselineResult = newResultIndex < newBaselineResults.length ? newBaselineResults[newResultIndex] : null;
 
             const resultDetailComparison = this.compareResultDetails(oldBaselineResult, newBaselineResult);
 
@@ -45,10 +45,7 @@ export class BaselineEngine {
             } else if (resultDetailComparison > 0) { // exists in newBaselineResults but not oldBaselineResults
                 this.addNewViolationsToEvaluation(newBaselineResult, evaluation);
                 newResultIndex++;
-            } else { // exists in both oldBaselineResults and newBaselineResults
-
-                // TODO: Update URL's for report
-                
+            } else { // exists in both oldBaselineResults and newBaselineResults, check urls
                 const urlComparison: UrlComparison = this.getUrlComparison(oldBaselineResult.urls, newBaselineResult.urls);
                 if (urlComparison.fixedCount) {
                     this.updateCountsByRule(evaluation.fixedViolationsByRule, oldBaselineResult.rule, urlComparison.fixedCount);
@@ -58,17 +55,12 @@ export class BaselineEngine {
                     this.updateCountsByRule(evaluation.newViolationsByRule, oldBaselineResult.rule, urlComparison.newUrls.size);
                     evaluation.totalNewViolations += urlComparison.newUrls.size;
                 }
+
+                // TODO: Update URL's in axeReport
+                
                 oldResultIndex++;
                 newResultIndex++;
             }
-        }
-
-        while(oldResultIndex < oldBaselineResults.length) {
-            this.addFixedViolationsToEvaluation(oldBaselineResults[oldResultIndex++], evaluation);
-        }
-
-        while(newResultIndex < newBaselineResults.length) {
-            this.addNewViolationsToEvaluation(newBaselineResults[newResultIndex++], evaluation);
         }
 
         if(evaluation.totalFixedViolations || evaluation.totalNewViolations) {
@@ -87,15 +79,19 @@ export class BaselineEngine {
         evaluation.totalNewViolations += newViolation.urls.length;
     }
 
-    private compareResultDetails = (oldResult: BaselineResult, newResult: BaselineResult): number => {
-        // Compare the results in the order that they're sorted (rule, cssSelector, xPathSelector, htmlSnippet))
-        return this.safelyCompareStrings(oldResult.rule, newResult.rule) ||
-        this.safelyCompareStrings(oldResult.cssSelector, newResult.cssSelector) ||
-        this.safelyCompareStrings(oldResult.xpathSelector, newResult.xpathSelector) ||
-        this.safelyCompareStrings(oldResult.htmlSnippet, newResult.htmlSnippet);
+    private compareResultDetails = (oldResult: BaselineResult | null, newResult: BaselineResult | null): number => {
+        if (oldResult && newResult) {
+            // Compare the results in the order that they're sorted (rule, cssSelector, xPathSelector, htmlSnippet))
+            return this.safelyCompareStrings(oldResult.rule, newResult.rule) ||
+                this.safelyCompareStrings(oldResult.cssSelector, newResult.cssSelector) ||
+                this.safelyCompareStrings(oldResult.xpathSelector, newResult.xpathSelector) ||
+                this.safelyCompareStrings(oldResult.htmlSnippet, newResult.htmlSnippet);
+        }
+
+        return oldResult ? 1 : -1;
     }
 
-    private safelyCompareStrings(oldString: string | null, newString: string | null) : number {
+    private safelyCompareStrings(oldString: string | undefined, newString: string | undefined) : number {
         if (oldString && newString) {
             return oldString.localeCompare(oldString, newString);
         }
