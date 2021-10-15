@@ -56,7 +56,7 @@ export class BaselineEngine {
                     evaluation.totalNewViolations += urlComparison.newUrls.size;
                 }
 
-                // TODO: Update URL's in axeReport
+                // TODO: Update URL's in axeResults
                 
                 oldResultIndex++;
                 newResultIndex++;
