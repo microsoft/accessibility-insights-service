@@ -16,10 +16,10 @@ describe(getProcessLifeCycleContainer, () => {
     let secretProviderMock: IMock<SecretProvider>;
 
     beforeEach(() => {
-        testSubject = getProcessLifeCycleContainer();
         process.env.APPINSIGHTS_APPID = 'app insights app id';
+        testSubject = getProcessLifeCycleContainer();
+        secretProviderMock = Mock.ofType(SecretProvider);
 
-        secretProviderMock = Mock.ofType<SecretProvider>();
         testSubject.unbind(SecretProvider);
         testSubject.bind(SecretProvider).toConstantValue(secretProviderMock.object);
     });
