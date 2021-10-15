@@ -157,9 +157,7 @@ describe(CombinedScanResultsProvider, () => {
             const actualResults = await testSubject.readCombinedResults(fileId);
 
             expect(actualResults.error.errorCode).toEqual('jsonParseError');
-            expect(actualResults.error.data).toStartWith(
-                `{\n  name: 'SyntaxError',\n  message: 'Unexpected token u in JSON at position 2',`,
-            );
+            expect(actualResults.error.data).toContain(`{\n  name: 'SyntaxError',\n  message: 'Unexpected token u in JSON at position 2',`);
         });
     });
 
