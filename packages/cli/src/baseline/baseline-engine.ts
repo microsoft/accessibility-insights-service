@@ -45,7 +45,7 @@ export class BaselineEngine {
             } else if (resultDetailComparison > 0) { // exists in newBaselineResults but not oldBaselineResults
                 this.addNewViolationsToEvaluation(newBaselineResult, evaluation);
                 newResultIndex++;
-            } else { // exists in both oldBaselineResults and newBaselineResults, check urls
+            } else { // exists in both oldBaselineResults and newBaselineResults, so compare urls
                 const urlComparison: UrlComparison = this.getUrlComparison(oldBaselineResult.urls, newBaselineResult.urls);
                 if (urlComparison.fixedCount) {
                     this.updateCountsByRule(evaluation.fixedViolationsByRule, oldBaselineResult.rule, urlComparison.fixedCount);
