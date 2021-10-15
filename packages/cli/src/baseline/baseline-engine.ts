@@ -1,11 +1,16 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { isDeepStrictEqual } from 'util';
 import { AxeCoreResults } from 'axe-result-converter';
 import { inject, injectable } from 'inversify';
-import { BaselineEvaluation, BaselineOptions, BaselineResult } from './baseline-types';
+import { BaselineEvaluation, BaselineOptions, BaselineResult, CountsByRule } from './baseline-types';
 import { BaselineGenerator } from './baseline-generator';
+
+interface UrlComparison {
+    fixedCount: number,
+    intersectingCount: number,
+    newUrls: Set<string>,
+};
 
 @injectable()
 export class BaselineEngine {
@@ -16,17 +21,112 @@ export class BaselineEngine {
         const newBaseline = this.baselineGenerator.generateBaseline(axeResults.violations, baselineOptions.urlNormalizer);
         const newBaselineResults: BaselineResult[] = newBaseline.results;
 
-        const suggestedBaselineUpdate = isDeepStrictEqual(oldBaselineResults, newBaselineResults) ? null : newBaseline;
+        // Take advantage of the fact that baseline results are always sorted
+        let oldResultIndex = 0;
+        let newResultIndex = 0;
 
-        // TODO: update axeResults in-place, adding "new" vs "existing" annotations for each URL
-        // TODO: calculate assorted total/by-rule counts
-
-        return {
-            suggestedBaselineUpdate,
+        const evaluation: BaselineEvaluation = {
+            suggestedBaselineUpdate: null,
             fixedViolationsByRule: {},
             newViolationsByRule: {},
-            totalFixedViolations: -1,
-            totalNewViolations: -1,
+            totalFixedViolations: 0,
+            totalNewViolations: 0,
         };
+
+        while(oldResultIndex < oldBaselineResults.length && newResultIndex < newBaselineResults.length) {
+            const oldBaselineResult = oldBaselineResults[oldResultIndex];
+            const newBaselineResult = newBaselineResults[newResultIndex];
+
+            const resultDetailComparison = this.compareResultDetails(oldBaselineResult, newBaselineResult);
+
+            if (resultDetailComparison < 0) { // exists in oldBaselineResults but not newBaselineResults
+                this.addFixedViolationsToEvaluation(oldBaselineResult, evaluation);
+                oldResultIndex++;
+            } else if (resultDetailComparison > 0) { // exists in newBaselineResults but not oldBaselineResults
+                this.addNewViolationsToEvaluation(newBaselineResult, evaluation);
+                newResultIndex++;
+            } else { // exists in both oldBaselineResults and newBaselineResults
+
+                // TODO: Update URL's for report
+                
+                const urlComparison: UrlComparison = this.getUrlComparison(oldBaselineResult.urls, newBaselineResult.urls);
+                if (urlComparison.fixedCount) {
+                    this.updateCountsByRule(evaluation.fixedViolationsByRule, oldBaselineResult.rule, urlComparison.fixedCount);
+                    evaluation.totalFixedViolations += urlComparison.fixedCount;
+                }
+                if (urlComparison.newUrls.size) {
+                    this.updateCountsByRule(evaluation.newViolationsByRule, oldBaselineResult.rule, urlComparison.newUrls.size);
+                    evaluation.totalNewViolations += urlComparison.newUrls.size;
+                }
+                oldResultIndex++;
+                newResultIndex++;
+            }
+        }
+
+        while(oldResultIndex < oldBaselineResults.length) {
+            this.addFixedViolationsToEvaluation(oldBaselineResults[oldResultIndex++], evaluation);
+        }
+
+        while(newResultIndex < newBaselineResults.length) {
+            this.addNewViolationsToEvaluation(newBaselineResults[newResultIndex++], evaluation);
+        }
+
+        if(evaluation.totalFixedViolations || evaluation.totalNewViolations) {
+            evaluation.suggestedBaselineUpdate = newBaseline;
+        }
+        return  evaluation;
+    }
+
+    private addFixedViolationsToEvaluation = (fixedViolation: BaselineResult, evaluation: BaselineEvaluation): void => {
+        this.updateCountsByRule(evaluation.fixedViolationsByRule, fixedViolation.rule, fixedViolation.urls.length);
+        evaluation.totalFixedViolations += fixedViolation.urls.length;
+    }
+
+    private addNewViolationsToEvaluation = (newViolation: BaselineResult, evaluation: BaselineEvaluation): void => {
+        this.updateCountsByRule(evaluation.newViolationsByRule, newViolation.rule, newViolation.urls.length);
+        evaluation.totalNewViolations += newViolation.urls.length;
+    }
+
+    private compareResultDetails = (oldResult: BaselineResult, newResult: BaselineResult): number => {
+        // Compare the results in the order that they're sorted (rule, cssSelector, xPathSelector, htmlSnippet))
+        return this.safelyCompareStrings(oldResult.rule, newResult.rule) ||
+        this.safelyCompareStrings(oldResult.cssSelector, newResult.cssSelector) ||
+        this.safelyCompareStrings(oldResult.xpathSelector, newResult.xpathSelector) ||
+        this.safelyCompareStrings(oldResult.htmlSnippet, newResult.htmlSnippet);
+    }
+
+    private safelyCompareStrings(oldString: string | null, newString: string | null) : number {
+        if (oldString && newString) {
+            return oldString.localeCompare(oldString, newString);
+        }
+
+        return oldString ? 1 : -1;
+    }
+
+    private updateCountsByRule = (countsByRule: CountsByRule, rule: string, count: number): void => {
+        const oldCount = countsByRule[rule] || 0;
+
+        countsByRule[rule] = oldCount + count;
+    }
+
+    private getUrlComparison = (oldUrls: string[], newUrls: string[]): UrlComparison => {
+        const urlComparison: UrlComparison = {
+            fixedCount: 0,
+            intersectingCount: 0,
+            newUrls: new Set(),
+        };
+        
+        const oldSet: Set<string> = new Set(oldUrls);
+
+        newUrls.map((url) => {
+            if (oldSet.has(url)) {
+                urlComparison.intersectingCount++;
+            } else {
+                urlComparison.newUrls.add(url)
+            }});
+
+        urlComparison.fixedCount = oldSet.size - urlComparison.intersectingCount;
+
+        return urlComparison;
     }
 }
