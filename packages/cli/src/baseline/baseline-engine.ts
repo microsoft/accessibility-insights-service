@@ -7,10 +7,10 @@ import { BaselineEvaluation, BaselineOptions, BaselineResult, CountsByRule } fro
 import { BaselineGenerator } from './baseline-generator';
 
 interface UrlComparison {
-    fixedCount: number,
-    intersectingCount: number,
-    newUrls: Set<string>,
-};
+    fixedCount: number;
+    intersectingCount: number;
+    newUrls: Set<string>;
+}
 
 @injectable()
 export class BaselineEngine {
@@ -33,7 +33,7 @@ export class BaselineEngine {
             totalNewViolations: 0,
         };
 
-        while(oldResultIndex < oldBaselineResults.length || newResultIndex < newBaselineResults.length) {
+        while (oldResultIndex < oldBaselineResults.length || newResultIndex < newBaselineResults.length) {
             const oldBaselineResult = oldResultIndex < oldBaselineResults.length ? oldBaselineResults[oldResultIndex] : null;
             const newBaselineResult = newResultIndex < newBaselineResults.length ? newBaselineResults[newResultIndex] : null;
 
@@ -57,29 +57,30 @@ export class BaselineEngine {
                 }
 
                 // TODO: Update URL's in axeResults
-                
+
                 oldResultIndex++;
                 newResultIndex++;
             }
         }
 
-        if(evaluation.totalFixedViolations || evaluation.totalNewViolations) {
+        if (evaluation.totalFixedViolations || evaluation.totalNewViolations) {
             evaluation.suggestedBaselineUpdate = newBaseline;
         }
-        return  evaluation;
+
+        return evaluation;
     }
 
-    private addFixedViolationsToEvaluation = (fixedViolation: BaselineResult, evaluation: BaselineEvaluation): void => {
+    private addFixedViolationsToEvaluation(fixedViolation: BaselineResult, evaluation: BaselineEvaluation): void {
         this.updateCountsByRule(evaluation.fixedViolationsByRule, fixedViolation.rule, fixedViolation.urls.length);
         evaluation.totalFixedViolations += fixedViolation.urls.length;
     }
 
-    private addNewViolationsToEvaluation = (newViolation: BaselineResult, evaluation: BaselineEvaluation): void => {
+    private addNewViolationsToEvaluation(newViolation: BaselineResult, evaluation: BaselineEvaluation): void {
         this.updateCountsByRule(evaluation.newViolationsByRule, newViolation.rule, newViolation.urls.length);
         evaluation.totalNewViolations += newViolation.urls.length;
     }
 
-    private compareResultDetails = (oldResult: BaselineResult | null, newResult: BaselineResult | null): number => {
+    private compareResultDetails(oldResult: BaselineResult | null, newResult: BaselineResult | null): number {
         if (oldResult && newResult) {
             // Compare the results in the order that they're sorted (rule, cssSelector, xPathSelector, htmlSnippet))
             return this.safelyCompareStrings(oldResult.rule, newResult.rule) ||
@@ -99,27 +100,28 @@ export class BaselineEngine {
         return oldString ? 1 : -1;
     }
 
-    private updateCountsByRule = (countsByRule: CountsByRule, rule: string, count: number): void => {
+    private updateCountsByRule(countsByRule: CountsByRule, rule: string, count: number): void {
         const oldCount = countsByRule[rule] || 0;
 
         countsByRule[rule] = oldCount + count;
     }
 
-    private getUrlComparison = (oldUrls: string[], newUrls: string[]): UrlComparison => {
+    private getUrlComparison(oldUrls: string[], newUrls: string[]): UrlComparison {
         const urlComparison: UrlComparison = {
             fixedCount: 0,
             intersectingCount: 0,
             newUrls: new Set(),
         };
-        
+
         const oldSet: Set<string> = new Set(oldUrls);
 
         newUrls.map((url) => {
             if (oldSet.has(url)) {
                 urlComparison.intersectingCount++;
             } else {
-                urlComparison.newUrls.add(url)
-            }});
+                urlComparison.newUrls.add(url);
+            }
+        });
 
         urlComparison.fixedCount = oldSet.size - urlComparison.intersectingCount;
 
