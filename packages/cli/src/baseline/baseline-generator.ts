@@ -54,6 +54,6 @@ export class BaselineGenerator {
     }
 
     private sortBaselineResults(results: BaselineResult[]): BaselineResult[] {
-        return sortBy(results, ['rule', 'htmlSelector', 'xpathSelector', 'htmlSnippet']);
+        return sortBy(results, ['rule', 'cssSelector', 'xpathSelector', 'htmlSnippet']);
     }
 }
