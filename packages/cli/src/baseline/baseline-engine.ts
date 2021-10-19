@@ -39,13 +39,16 @@ export class BaselineEngine {
 
             const resultDetailComparison = this.compareResultDetails(oldBaselineResult, newBaselineResult);
 
-            if (resultDetailComparison < 0) { // exists in oldBaselineResults but not newBaselineResults
+            if (resultDetailComparison < 0) {
+                // exists in oldBaselineResults but not newBaselineResults
                 this.addFixedViolationsToEvaluation(oldBaselineResult, evaluation);
                 oldResultIndex++;
-            } else if (resultDetailComparison > 0) { // exists in newBaselineResults but not oldBaselineResults
+            } else if (resultDetailComparison > 0) {
+                // exists in newBaselineResults but not oldBaselineResults
                 this.addNewViolationsToEvaluation(newBaselineResult, evaluation);
                 newResultIndex++;
-            } else { // exists in both oldBaselineResults and newBaselineResults, so compare urls
+            } else {
+                // exists in both oldBaselineResults and newBaselineResults, so compare urls
                 const urlComparison: UrlComparison = this.getUrlComparison(oldBaselineResult.urls, newBaselineResult.urls);
                 if (urlComparison.fixedCount) {
                     this.updateCountsByRule(evaluation.fixedViolationsByRule, oldBaselineResult.rule, urlComparison.fixedCount);
@@ -83,16 +86,18 @@ export class BaselineEngine {
     private compareResultDetails(oldResult: BaselineResult | null, newResult: BaselineResult | null): number {
         if (oldResult && newResult) {
             // Compare the results in the order that they're sorted (rule, cssSelector, xPathSelector, htmlSnippet))
-            return this.safelyCompareStrings(oldResult.rule, newResult.rule) ||
+            return (
+                this.safelyCompareStrings(oldResult.rule, newResult.rule) ||
                 this.safelyCompareStrings(oldResult.cssSelector, newResult.cssSelector) ||
                 this.safelyCompareStrings(oldResult.xpathSelector, newResult.xpathSelector) ||
-                this.safelyCompareStrings(oldResult.htmlSnippet, newResult.htmlSnippet);
+                this.safelyCompareStrings(oldResult.htmlSnippet, newResult.htmlSnippet)
+            );
         }
 
         return oldResult ? 1 : -1;
     }
 
-    private safelyCompareStrings(oldString: string | undefined, newString: string | undefined) : number {
+    private safelyCompareStrings(oldString: string | undefined, newString: string | undefined): number {
         if (oldString && newString) {
             return oldString.localeCompare(oldString, newString);
         }
