@@ -1,10 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { AxeCoreResults } from 'axe-result-converter';
+import { AxeCoreResults, AxeResult } from 'axe-result-converter';
 import { inject, injectable } from 'inversify';
 import { BaselineEvaluation, BaselineOptions, BaselineResult, CountsByRule } from './baseline-types';
 import { BaselineGenerator } from './baseline-generator';
+import { FingerprintGenerator } from '../../../axe-result-converter/src/fingerprint-generator';
 
 interface UrlComparison {
     fixedCount: number;
@@ -14,7 +15,10 @@ interface UrlComparison {
 
 @injectable()
 export class BaselineEngine {
-    constructor(@inject(BaselineGenerator) private readonly baselineGenerator: BaselineGenerator) {}
+    constructor(
+        @inject(BaselineGenerator) private readonly baselineGenerator: BaselineGenerator,
+        @inject(FingerprintGenerator) private readonly fingerprintGenerator: FingerprintGenerator,
+    ) {}
 
     public updateResultsInPlace(axeResults: AxeCoreResults, baselineOptions: BaselineOptions): BaselineEvaluation {
         const oldBaselineResults: BaselineResult[] = baselineOptions.baselineContent?.results ?? [];
@@ -46,6 +50,7 @@ export class BaselineEngine {
             } else if (resultDetailComparison > 0) {
                 // exists in newBaselineResults but not oldBaselineResults
                 this.addNewViolationsToEvaluation(newBaselineResult, evaluation);
+                this.updateAxeResults(axeResults, newBaselineResult);
                 newResultIndex++;
             } else {
                 // exists in both oldBaselineResults and newBaselineResults, so compare urls
@@ -59,7 +64,7 @@ export class BaselineEngine {
                     evaluation.totalNewViolations += urlComparison.newUrls.size;
                 }
 
-                // TODO: Update URL's in axeResults
+                this.updateAxeResults(axeResults, newBaselineResult, urlComparison.newUrls);
 
                 oldResultIndex++;
                 newResultIndex++;
@@ -71,6 +76,17 @@ export class BaselineEngine {
         }
 
         return evaluation;
+    }
+
+    private updateAxeResults(axeResults: AxeCoreResults, baselineResult: BaselineResult, newUrls?: HashSet<string): void {
+        const fingerprint = this.fingerprintGenerator.getFingerprint({
+            rule: baselineResult.rule,
+            snippet: baselineResult.htmlSnippet,
+            cssSelector: baselineResult.cssSelector,
+            xpathSelector: baselineResult.xpathSelector,
+        });
+
+        // TODO
     }
 
     private addFixedViolationsToEvaluation(fixedViolation: BaselineResult, evaluation: BaselineEvaluation): void {
