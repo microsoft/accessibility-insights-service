@@ -143,4 +143,20 @@ describe(AxeResultsReducer, () => {
 
         expect(accumulatedResults.values()).toEqual(expectedResults.values());
     });
+
+    it('calculates same fingerprints after object creation', () => {
+        const currentUrl = 'url-1';
+        const accumulatedResults = new AxeResultsList();
+        const currentResults = getCurrentResults('rule-1', 'node-1');
+
+        axeResultsReducer.reduce(
+            { violations: accumulatedResults } as AxeCoreResults,
+            { url: currentUrl, violations: currentResults } as axe.AxeResults,
+        );
+
+        const fingerprint = axeResultsReducer.getFingerprint('id-rule-1', 'snippet-node-1', 'selector-node-1');
+        const node = accumulatedResults.get(fingerprint);
+        expect(node.urls.length).toBe(1);
+        expect(node.urls[0]).toBe(currentUrl);
+    });
 });
