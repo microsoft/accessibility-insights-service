@@ -5,11 +5,13 @@ import { AxeCoreResults } from 'axe-result-converter';
 import { inject, injectable } from 'inversify';
 import { BaselineEvaluation, BaselineOptions, BaselineResult, CountsByRule } from './baseline-types';
 import { BaselineGenerator } from './baseline-generator';
+import { UrlInfo } from 'accessibility-insights-report';
 
 interface UrlComparison {
     fixedCount: number;
     intersectingCount: number;
     newUrls: Set<string>;
+    urlInfos: UrlInfo[];
 }
 
 @injectable()
@@ -45,6 +47,9 @@ export class BaselineEngine {
             } else if (resultDetailComparison > 0) { // exists in newBaselineResults but not oldBaselineResults
                 this.addNewViolationsToEvaluation(newBaselineResult, evaluation);
                 newResultIndex++;
+
+                // TODO: Update URL's in axeResults
+
             } else { // exists in both oldBaselineResults and newBaselineResults, so compare urls
                 const urlComparison: UrlComparison = this.getUrlComparison(oldBaselineResult.urls, newBaselineResult.urls);
                 if (urlComparison.fixedCount) {
@@ -111,6 +116,7 @@ export class BaselineEngine {
             fixedCount: 0,
             intersectingCount: 0,
             newUrls: new Set(),
+            urlInfos: [],
         };
 
         const oldSet: Set<string> = new Set(oldUrls);
@@ -118,8 +124,14 @@ export class BaselineEngine {
         newUrls.map((url) => {
             if (oldSet.has(url)) {
                 urlComparison.intersectingCount++;
+                urlComparison.urlInfos.push({
+                    url, baselineStatus: 'existing',
+                });
             } else {
                 urlComparison.newUrls.add(url);
+                urlComparison.urlInfos.push({
+                    url, baselineStatus: 'new',
+                });
             }
         });
 

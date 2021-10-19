@@ -4,6 +4,7 @@
 import { injectable, inject } from 'inversify';
 import axe from 'axe-core';
 import { HashGenerator } from 'common';
+import { UrlInfo } from 'accessibility-insights-report';
 import { Selector, AxeCoreResults, AxeResultsList, AxeResult } from './axe-result-types';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -29,15 +30,18 @@ export class AxeResultsReducer {
                             const selectors = this.getElementSelectors(node);
                             const fingerprint = this.getElementFingerprint(currentResult, node, selectors);
                             const matchingResult = accumulatedResults.get(fingerprint);
+
                             if (matchingResult !== undefined) {
-                                if (!matchingResult.urls.some((u) => u === url)) {
+                                if (!matchingResult.urls.some((u) => this.getUrlFromVariableInput(u) === url)) {
                                     matchingResult.urls.push(url);
+                                    matchingResult.urlInfos.push({url});
                                 }
                             } else {
                                 const result: AxeResult = {
                                     ...currentResult,
                                     nodes: [],
                                     urls: [url],
+                                    urlInfos: [{url}],
                                     junctionNode: {
                                         ...node,
                                         selectors,
@@ -53,6 +57,16 @@ export class AxeResultsReducer {
         }
     }
 
+    private getUrlFromVariableInput(input: string | UrlInfo): string {
+        const inputAsUrlInfo = input as UrlInfo;
+
+        if (inputAsUrlInfo.url) {
+            return inputAsUrlInfo.url;
+        }
+
+        return input as string;
+    }
+
     private reduceResultsWithoutNodes(url: string, accumulatedResults: AxeResultsList, currentResults: axe.Result[]): void {
         if (currentResults) {
             for (const currentResult of currentResults) {
@@ -62,12 +76,14 @@ export class AxeResultsReducer {
                     if (matchingResult !== undefined) {
                         if (!matchingResult.urls.some((u) => u === url)) {
                             matchingResult.urls.push(url);
+                            matchingResult.urlInfos.push({url});
                         }
                     } else {
                         const result: AxeResult = {
                             ...currentResult,
                             nodes: [],
                             urls: [url],
+                            urlInfos: [{url}],
                             fingerprint,
                         };
                         accumulatedResults.add(fingerprint, result);
