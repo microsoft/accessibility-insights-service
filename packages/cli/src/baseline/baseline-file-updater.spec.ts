@@ -23,6 +23,7 @@ describe(BaselineFileUpdater, () => {
         totalFixedViolations: 0,
         newViolationsByRule: {},
         fixedViolationsByRule: {},
+        totalBaselineViolations: 0,
     };
     const updateSuggestedEvaluation: BaselineEvaluation = {
         suggestedBaselineUpdate: {} as BaselineFileContent,
@@ -30,6 +31,7 @@ describe(BaselineFileUpdater, () => {
         totalFixedViolations: 0,
         newViolationsByRule: { 'rule-1': 1 },
         fixedViolationsByRule: {},
+        totalBaselineViolations: 0,
     };
 
     beforeEach(() => {
