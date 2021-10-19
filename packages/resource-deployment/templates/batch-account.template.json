@@ -217,7 +217,7 @@
                             "sku": "16-04-lts",
                             "version": "latest"
                         },
-                        "nodeAgentSkuId": "batch.node.ubuntu 20.04",
+                        "nodeAgentSkuId": "batch.node.ubuntu 16.04",
                         "diskEncryptionConfiguration": {
                             "targets": ["TemporaryDisk"]
                         },
