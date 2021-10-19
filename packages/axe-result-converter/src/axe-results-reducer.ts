@@ -4,7 +4,6 @@
 import { injectable, inject } from 'inversify';
 import axe from 'axe-core';
 import { HashGenerator } from 'common';
-import { UrlInfo } from 'accessibility-insights-report';
 import { Selector, AxeCoreResults, AxeResultsList, AxeResult } from './axe-result-types';
 import { FingerprintGenerator } from './fingerprint-generator';
 
@@ -42,16 +41,15 @@ export class AxeResultsReducer {
                             const matchingResult = accumulatedResults.get(fingerprint);
 
                             if (matchingResult !== undefined) {
-                                if (!matchingResult.urls.some((u) => this.getUrlFromVariableInput(u) === url)) {
+                                if (!matchingResult.urls.some((u) => u === url)) {
                                     matchingResult.urls.push(url);
-                                    matchingResult.urlInfos.push({ url });
                                 }
                             } else {
                                 const result: AxeResult = {
                                     ...currentResult,
                                     nodes: [],
                                     urls: [url],
-                                    urlInfos: [{ url }],
+                                    urlInfos: [], // This will get populated downstream
                                     junctionNode: {
                                         ...node,
                                         selectors: selectorInfo.selectors,
@@ -67,16 +65,6 @@ export class AxeResultsReducer {
         }
     }
 
-    private getUrlFromVariableInput(input: string | UrlInfo): string {
-        const inputAsUrlInfo = input as UrlInfo;
-
-        if (inputAsUrlInfo.url) {
-            return inputAsUrlInfo.url;
-        }
-
-        return input as string;
-    }
-
     private reduceResultsWithoutNodes(url: string, accumulatedResults: AxeResultsList, currentResults: axe.Result[]): void {
         if (currentResults) {
             for (const currentResult of currentResults) {
@@ -86,14 +74,13 @@ export class AxeResultsReducer {
                     if (matchingResult !== undefined) {
                         if (!matchingResult.urls.some((u) => u === url)) {
                             matchingResult.urls.push(url);
-                            matchingResult.urlInfos.push({ url });
                         }
                     } else {
                         const result: AxeResult = {
                             ...currentResult,
                             nodes: [],
                             urls: [url],
-                            urlInfos: [{ url }],
+                            urlInfos: [], // This will get populated downstream
                             fingerprint,
                         };
                         accumulatedResults.add(fingerprint, result);
