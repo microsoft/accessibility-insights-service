@@ -3,10 +3,10 @@
 
 import { AxeCoreResults, AxeResult } from 'axe-result-converter';
 import { inject, injectable } from 'inversify';
-import { BaselineEvaluation, BaselineOptions, BaselineResult, CountsByRule } from './baseline-types';
-import { BaselineGenerator } from './baseline-generator';
 import { UrlInfo } from 'accessibility-insights-report';
 import { FingerprintGenerator } from '../../../axe-result-converter/src/fingerprint-generator';
+import { BaselineEvaluation, BaselineOptions, BaselineResult, CountsByRule } from './baseline-types';
+import { BaselineGenerator } from './baseline-generator';
 
 interface UrlComparison {
     fixedCount: number;
@@ -37,6 +37,7 @@ export class BaselineEngine {
             newViolationsByRule: {},
             totalFixedViolations: 0,
             totalNewViolations: 0,
+            totalBaselineViolations: 0,
         };
 
         while (oldResultIndex < oldBaselineResults.length || newResultIndex < newBaselineResults.length) {
@@ -45,11 +46,11 @@ export class BaselineEngine {
 
             const resultDetailComparison = this.compareResultDetails(oldBaselineResult, newBaselineResult);
 
-            if (resultDetailComparison < 0) {
+            if (resultDetailComparison > 0) {
                 // exists in oldBaselineResults but not newBaselineResults
                 this.addFixedViolationsToEvaluation(oldBaselineResult, evaluation);
                 oldResultIndex++;
-            } else if (resultDetailComparison > 0) {
+            } else if (resultDetailComparison < 0) {
                 // exists in newBaselineResults but not oldBaselineResults
                 this.addNewViolationsToEvaluation(newBaselineResult, evaluation);
                 this.updateAxeResults(axeResults, newBaselineResult);
@@ -65,6 +66,7 @@ export class BaselineEngine {
                     this.updateCountsByRule(evaluation.newViolationsByRule, oldBaselineResult.rule, urlComparison.newUrls.size);
                     evaluation.totalNewViolations += urlComparison.newUrls.size;
                 }
+                evaluation.totalBaselineViolations += oldBaselineResult.urls.length;
 
                 this.updateAxeResults(axeResults, newBaselineResult, urlComparison.newUrls);
 
@@ -80,7 +82,7 @@ export class BaselineEngine {
         return evaluation;
     }
 
-    private updateAxeResults(axeResults: AxeCoreResults, baselineResult: BaselineResult, newUrls?: HashSet<string): void {
+    private updateAxeResults(axeResults: AxeCoreResults, baselineResult: BaselineResult, newUrls?: Set<string>): void {
         const fingerprint = this.fingerprintGenerator.getFingerprint({
             rule: baselineResult.rule,
             snippet: baselineResult.htmlSnippet,
@@ -88,12 +90,30 @@ export class BaselineEngine {
             xpathSelector: baselineResult.xpathSelector,
         });
 
-        // TODO
+        const resultToUpdate: AxeResult = axeResults.violations.get(fingerprint);
+        resultToUpdate.urlInfos = this.buildUrlInfos(baselineResult, newUrls);
+    }
+
+    private buildUrlInfos(newBaselineResult: BaselineResult, newUrls?: Set<string>): UrlInfo[] {
+        const urlInfos: UrlInfo[] = [];
+        newBaselineResult.urls.map((url) => urlInfos.push(this.buildUrlInfo(url, newUrls)));
+
+        return urlInfos;
+    }
+
+    private buildUrlInfo(url: string, newUrls?: Set<string>): UrlInfo {
+        const isNew: boolean = !newUrls || newUrls.has(url);
+
+        return {
+            url,
+            baselineStatus: isNew ? 'new' : 'existing',
+        };
     }
 
     private addFixedViolationsToEvaluation(fixedViolation: BaselineResult, evaluation: BaselineEvaluation): void {
         this.updateCountsByRule(evaluation.fixedViolationsByRule, fixedViolation.rule, fixedViolation.urls.length);
         evaluation.totalFixedViolations += fixedViolation.urls.length;
+        evaluation.totalBaselineViolations += fixedViolation.urls.length;
     }
 
     private addNewViolationsToEvaluation(newViolation: BaselineResult, evaluation: BaselineEvaluation): void {
@@ -117,7 +137,11 @@ export class BaselineEngine {
 
     private safelyCompareStrings(oldString: string | undefined, newString: string | undefined): number {
         if (oldString && newString) {
-            return oldString.localeCompare(oldString, newString);
+            return oldString.localeCompare(newString);
+        }
+
+        if (!oldString && !newString) {
+            return 0;
         }
 
         return oldString ? 1 : -1;
@@ -143,12 +167,14 @@ export class BaselineEngine {
             if (oldSet.has(url)) {
                 urlComparison.intersectingCount++;
                 urlComparison.urlInfos.push({
-                    url, baselineStatus: 'existing',
+                    url,
+                    baselineStatus: 'existing',
                 });
             } else {
                 urlComparison.newUrls.add(url);
                 urlComparison.urlInfos.push({
-                    url, baselineStatus: 'new',
+                    url,
+                    baselineStatus: 'new',
                 });
             }
         });

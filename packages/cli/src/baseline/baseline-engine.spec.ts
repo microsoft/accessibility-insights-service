@@ -3,14 +3,16 @@
 
 import 'reflect-metadata';
 
-import { IMock, Mock, MockBehavior } from 'typemoq';
-import { AxeCoreResults, AxeResultsList } from 'axe-result-converter';
+import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
+import { AxeCoreResults, AxeResult, AxeResultsList } from 'axe-result-converter';
+import { FingerprintGenerator, FingerprintParameters } from 'axe-result-converter/src/fingerprint-generator';
 import { BaselineFileContent, BaselineOptions, UrlNormalizer } from './baseline-types';
 import { BaselineEngine } from './baseline-engine';
 import { BaselineGenerator } from './baseline-generator';
 
 describe(BaselineEngine, () => {
     let baselineGeneratorMock: IMock<BaselineGenerator>;
+    let fingerprintGeneratorMock: IMock<FingerprintGenerator>;
     let inputViolations: AxeResultsList;
     let inputResults: AxeCoreResults;
     let inputUrlNormalizer: UrlNormalizer;
@@ -21,6 +23,7 @@ describe(BaselineEngine, () => {
 
     beforeEach(() => {
         baselineGeneratorMock = Mock.ofType<BaselineGenerator>(null, MockBehavior.Strict);
+        fingerprintGeneratorMock = Mock.ofType<FingerprintGenerator>(null, MockBehavior.Strict);
 
         oldBaseline = {
             metadata: { fileFormatVersion: '1' },
@@ -55,12 +58,35 @@ describe(BaselineEngine, () => {
             violations: inputViolations,
         } as AxeCoreResults;
 
-        testSubject = new BaselineEngine(baselineGeneratorMock.object);
+        testSubject = new BaselineEngine(baselineGeneratorMock.object, fingerprintGeneratorMock.object);
     });
 
     afterEach(() => {
         baselineGeneratorMock.verifyAll();
+        fingerprintGeneratorMock.verifyAll();
     });
+
+    const setupFingerprintMock = (): void => {
+        fingerprintGeneratorMock
+            .setup((m) => m.getFingerprint(It.isAny()))
+            .returns((args: FingerprintParameters) => {
+                const xpathPortion: string = args.xpathSelector ? `|${args.xpathSelector}` : '';
+
+                return `${args.rule}|${args.snippet}|${args.cssSelector}${xpathPortion}`;
+            })
+            .verifiable(Times.atLeastOnce());
+    };
+
+    const setupBaselineResults = (baseline: BaselineFileContent): void => {
+        const fingerprint = 'rule-1|<div id="some-id" />|#some-id';
+        inputResults.violations.add(fingerprint, {
+            urls: baseline.results[0].urls,
+            urlInfos: [],
+            fingerprint,
+        } as AxeResult);
+
+        baselineGeneratorMock.setup((m) => m.generateBaseline(inputResults.violations, inputUrlNormalizer)).returns(() => baseline);
+    };
 
     describe('updateResultsInPlace', () => {
         it('propagates errors from the generator', () => {
@@ -71,20 +97,23 @@ describe(BaselineEngine, () => {
         });
 
         it("suggests the generator's output as a new baseline if there was no original baseline content", () => {
+            setupFingerprintMock();
             inputOptions.baselineContent = null;
-            baselineGeneratorMock.setup((m) => m.generateBaseline(inputViolations, inputUrlNormalizer)).returns(() => newBaseline);
+            setupBaselineResults(newBaseline);
             const evaluation = testSubject.updateResultsInPlace(inputResults, inputOptions);
             expect(evaluation.suggestedBaselineUpdate).toBe(newBaseline);
         });
 
         it("suggests the generator's output as a new baseline if it differs from the input baseline", () => {
-            baselineGeneratorMock.setup((m) => m.generateBaseline(inputViolations, inputUrlNormalizer)).returns(() => newBaseline);
+            setupFingerprintMock();
+            setupBaselineResults(newBaseline);
             const evaluation = testSubject.updateResultsInPlace(inputResults, inputOptions);
             expect(evaluation.suggestedBaselineUpdate).toBe(newBaseline);
         });
 
         it('suggests no baseline update if the baseline generator produces results identical to the input baseline', () => {
-            baselineGeneratorMock.setup((m) => m.generateBaseline(inputViolations, inputUrlNormalizer)).returns(() => oldBaseline);
+            setupFingerprintMock();
+            setupBaselineResults(oldBaseline);
             const evaluation = testSubject.updateResultsInPlace(inputResults, inputOptions);
             expect(evaluation.suggestedBaselineUpdate).toBeNull();
         });
