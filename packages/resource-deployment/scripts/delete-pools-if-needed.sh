@@ -177,7 +177,7 @@ function deletePoolsWhenNodesAreIdle() {
     local commandName="Delete pool VMSS"
     . "${0%/*}/run-command-when-batch-nodes-are-idle.sh"
 
-    echo "Successfully deleted Batch pools"
+    echo "Successfully deleted Btach pools"
 }
 
 function deletePoolsIfNeeded() {

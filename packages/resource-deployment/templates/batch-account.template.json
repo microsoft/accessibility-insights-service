@@ -214,7 +214,7 @@
                         "imageReference": {
                             "publisher": "microsoft-azure-batch",
                             "offer": "ubuntu-server-container",
-                            "sku": "20-04-lts",
+                            "sku": "16-04-lts",
                             "version": "latest"
                         },
                         "nodeAgentSkuId": "batch.node.ubuntu 20.04",
