@@ -44,14 +44,14 @@ export class AxeResultsReducer {
                             if (matchingResult !== undefined) {
                                 if (!matchingResult.urls.some((u) => this.getUrlFromVariableInput(u) === url)) {
                                     matchingResult.urls.push(url);
-                                    matchingResult.urlInfos.push({url});
+                                    matchingResult.urlInfos.push({ url });
                                 }
                             } else {
                                 const result: AxeResult = {
                                     ...currentResult,
                                     nodes: [],
                                     urls: [url],
-                                    urlInfos: [{url}],
+                                    urlInfos: [{ url }],
                                     junctionNode: {
                                         ...node,
                                         selectors: selectorInfo.selectors,
@@ -86,14 +86,14 @@ export class AxeResultsReducer {
                     if (matchingResult !== undefined) {
                         if (!matchingResult.urls.some((u) => u === url)) {
                             matchingResult.urls.push(url);
-                            matchingResult.urlInfos.push({url});
+                            matchingResult.urlInfos.push({ url });
                         }
                     } else {
                         const result: AxeResult = {
                             ...currentResult,
                             nodes: [],
                             urls: [url],
-                            urlInfos: [{url}],
+                            urlInfos: [{ url }],
                             fingerprint,
                         };
                         accumulatedResults.add(fingerprint, result);
