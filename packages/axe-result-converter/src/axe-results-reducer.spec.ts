@@ -8,8 +8,10 @@ import { HashGenerator } from 'common';
 import axe from 'axe-core';
 import { AxeResultsReducer } from './axe-results-reducer';
 import { AxeResult, AxeNodeResult, AxeCoreResults, AxeResultsList } from './axe-result-types';
+import { FingerprintGenerator, FingerprintParameters } from './fingerprint-generator';
 
 let hashGeneratorMock: IMock<HashGenerator>;
+let fingerprintGeneratorMock: IMock<FingerprintGenerator>;
 let axeResultsReducer: AxeResultsReducer;
 
 const getAccumulatedNode = (nodeId: string) => {
@@ -46,21 +48,29 @@ const getCurrentResults = (ruleId: string, ...nodeIds: string[]) =>
             nodes: nodeIds?.map(getCurrentNode),
         },
     ] as axe.Result[];
-
+const setupRuleHash = () => {
+    hashGeneratorMock
+        .setup((o) => o.generateBase64Hash(It.isAny()))
+        .returns((args: string) => {
+            return args;
+        })
+        .verifiable(Times.atLeastOnce());
+};
 describe(AxeResultsReducer, () => {
     beforeEach(() => {
         hashGeneratorMock = Mock.ofType<HashGenerator>();
-        hashGeneratorMock
-            .setup((o) => o.generateBase64Hash(It.isAny(), It.isAny(), It.isAny()))
-            .returns((...args: string[]) => {
-                return args.join('|');
-            })
-            .verifiable(Times.atLeastOnce());
-        axeResultsReducer = new AxeResultsReducer(hashGeneratorMock.object);
+        fingerprintGeneratorMock = Mock.ofType<FingerprintGenerator>();
+        fingerprintGeneratorMock
+            .setup((o) => o.getFingerprint(It.isAny()))
+            .returns((args: FingerprintParameters) => {
+                return `${args.rule}|${args.snippet}|${args.cssSelector}`;
+            });
+        axeResultsReducer = new AxeResultsReducer(hashGeneratorMock.object, fingerprintGeneratorMock.object);
     });
 
     afterEach(() => {
         hashGeneratorMock.verifyAll();
+        fingerprintGeneratorMock.verifyAll();
     });
 
     it('reduce axe result', () => {
@@ -81,6 +91,8 @@ describe(AxeResultsReducer, () => {
         const expectedIncomplete = [getAccumulatedResult('rule-3', { urls: [url], nodeId: 'node-31' })];
         const expectedInapplicable = [getAccumulatedResult('rule-4', { urls: [url] })];
 
+        setupRuleHash();
+
         axeResultsReducer.reduce(accumulatedResults, { url, violations, passes, incomplete, inapplicable } as axe.AxeResults);
 
         expect(accumulatedResults.violations.values()).toEqual(expectedViolations);
@@ -94,6 +106,8 @@ describe(AxeResultsReducer, () => {
         const accumulatedResults = addAxeResult(new AxeResultsList(), getAccumulatedResult('rule-1', { urls: ['url-1'] }));
         const currentResults = getCurrentResults('rule-1');
         const expectedResults = [getAccumulatedResult('rule-1', { urls: ['url-1', currentUrl] })];
+
+        setupRuleHash();
 
         axeResultsReducer.reduce(
             { inapplicable: accumulatedResults } as AxeCoreResults,
@@ -142,21 +156,5 @@ describe(AxeResultsReducer, () => {
         );
 
         expect(accumulatedResults.values()).toEqual(expectedResults.values());
-    });
-
-    it('calculates same fingerprints after object creation', () => {
-        const currentUrl = 'url-1';
-        const accumulatedResults = new AxeResultsList();
-        const currentResults = getCurrentResults('rule-1', 'node-1');
-
-        axeResultsReducer.reduce(
-            { violations: accumulatedResults } as AxeCoreResults,
-            { url: currentUrl, violations: currentResults } as axe.AxeResults,
-        );
-
-        const fingerprint = axeResultsReducer.getFingerprint('id-rule-1', 'snippet-node-1', 'selector-node-1');
-        const node = accumulatedResults.get(fingerprint);
-        expect(node.urls.length).toBe(1);
-        expect(node.urls[0]).toBe(currentUrl);
     });
 });

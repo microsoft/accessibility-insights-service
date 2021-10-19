@@ -5,6 +5,7 @@ import { injectable, inject } from 'inversify';
 import axe from 'axe-core';
 import { HashGenerator } from 'common';
 import { Selector, AxeCoreResults, AxeResultsList, AxeResult } from './axe-result-types';
+import { FingerprintGenerator } from './fingerprint-generator';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -16,7 +17,10 @@ type SelectorInfo = {
 
 @injectable()
 export class AxeResultsReducer {
-    constructor(@inject(HashGenerator) private readonly hashGenerator: HashGenerator) {}
+    constructor(
+        @inject(HashGenerator) private readonly hashGenerator: HashGenerator,
+        @inject(FingerprintGenerator) private readonly fingerprintGenerator: FingerprintGenerator,
+    ) {}
 
     public reduce(accumulatedAxeResults: AxeCoreResults, currentAxeResults: axe.AxeResults): void {
         this.setUrl(accumulatedAxeResults, currentAxeResults);
@@ -84,26 +88,17 @@ export class AxeResultsReducer {
     }
 
     private getElementFingerprint(result: axe.Result, node: axe.NodeResult, selectorInfo: SelectorInfo): string {
-        return this.getFingerprint(result.id, node.html, selectorInfo.css, selectorInfo.xpath);
-    }
-
-    public getFingerprint(rule: string, snippet: string, cssSelector: string, xpathSelector?: string): string {
-        const valuesToHash = [
-            rule,
-            snippet,
-            cssSelector,
-        ];
-
-        if (xpathSelector) {
-            valuesToHash.push(xpathSelector);
-        }
-
-        return this.hashGenerator.generateBase64Hash(...valuesToHash);
+        return this.fingerprintGenerator.getFingerprint({
+            rule: result.id,
+            snippet: node.html,
+            cssSelector: selectorInfo.css,
+            xpathSelector: selectorInfo.xpath,
+        });
     }
 
     private getSelectorInfo(node: axe.NodeResult): SelectorInfo {
         const css = node.target.join(';');
-        const selectors: Selector[] = [ { selector: css, type: 'css'}];
+        const selectors: Selector[] = [{ selector: css, type: 'css' }];
 
         let xpath;
         if ((node as any).xpath) {
