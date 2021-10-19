@@ -1,11 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { AxeCoreResults } from 'axe-result-converter';
+import { AxeCoreResults, AxeResult } from 'axe-result-converter';
 import { inject, injectable } from 'inversify';
 import { BaselineEvaluation, BaselineOptions, BaselineResult, CountsByRule } from './baseline-types';
 import { BaselineGenerator } from './baseline-generator';
 import { UrlInfo } from 'accessibility-insights-report';
+import { FingerprintGenerator } from '../../../axe-result-converter/src/fingerprint-generator';
 
 interface UrlComparison {
     fixedCount: number;
@@ -16,7 +17,10 @@ interface UrlComparison {
 
 @injectable()
 export class BaselineEngine {
-    constructor(@inject(BaselineGenerator) private readonly baselineGenerator: BaselineGenerator) {}
+    constructor(
+        @inject(BaselineGenerator) private readonly baselineGenerator: BaselineGenerator,
+        @inject(FingerprintGenerator) private readonly fingerprintGenerator: FingerprintGenerator,
+    ) {}
 
     public updateResultsInPlace(axeResults: AxeCoreResults, baselineOptions: BaselineOptions): BaselineEvaluation {
         const oldBaselineResults: BaselineResult[] = baselineOptions.baselineContent?.results ?? [];
@@ -41,16 +45,17 @@ export class BaselineEngine {
 
             const resultDetailComparison = this.compareResultDetails(oldBaselineResult, newBaselineResult);
 
-            if (resultDetailComparison < 0) { // exists in oldBaselineResults but not newBaselineResults
+            if (resultDetailComparison < 0) {
+                // exists in oldBaselineResults but not newBaselineResults
                 this.addFixedViolationsToEvaluation(oldBaselineResult, evaluation);
                 oldResultIndex++;
-            } else if (resultDetailComparison > 0) { // exists in newBaselineResults but not oldBaselineResults
+            } else if (resultDetailComparison > 0) {
+                // exists in newBaselineResults but not oldBaselineResults
                 this.addNewViolationsToEvaluation(newBaselineResult, evaluation);
+                this.updateAxeResults(axeResults, newBaselineResult);
                 newResultIndex++;
-
-                // TODO: Update URL's in axeResults
-
-            } else { // exists in both oldBaselineResults and newBaselineResults, so compare urls
+            } else {
+                // exists in both oldBaselineResults and newBaselineResults, so compare urls
                 const urlComparison: UrlComparison = this.getUrlComparison(oldBaselineResult.urls, newBaselineResult.urls);
                 if (urlComparison.fixedCount) {
                     this.updateCountsByRule(evaluation.fixedViolationsByRule, oldBaselineResult.rule, urlComparison.fixedCount);
@@ -61,7 +66,7 @@ export class BaselineEngine {
                     evaluation.totalNewViolations += urlComparison.newUrls.size;
                 }
 
-                // TODO: Update URL's in axeResults
+                this.updateAxeResults(axeResults, newBaselineResult, urlComparison.newUrls);
 
                 oldResultIndex++;
                 newResultIndex++;
@@ -73,6 +78,17 @@ export class BaselineEngine {
         }
 
         return evaluation;
+    }
+
+    private updateAxeResults(axeResults: AxeCoreResults, baselineResult: BaselineResult, newUrls?: HashSet<string): void {
+        const fingerprint = this.fingerprintGenerator.getFingerprint({
+            rule: baselineResult.rule,
+            snippet: baselineResult.htmlSnippet,
+            cssSelector: baselineResult.cssSelector,
+            xpathSelector: baselineResult.xpathSelector,
+        });
+
+        // TODO
     }
 
     private addFixedViolationsToEvaluation(fixedViolation: BaselineResult, evaluation: BaselineEvaluation): void {
@@ -88,16 +104,18 @@ export class BaselineEngine {
     private compareResultDetails(oldResult: BaselineResult | null, newResult: BaselineResult | null): number {
         if (oldResult && newResult) {
             // Compare the results in the order that they're sorted (rule, cssSelector, xPathSelector, htmlSnippet))
-            return this.safelyCompareStrings(oldResult.rule, newResult.rule) ||
+            return (
+                this.safelyCompareStrings(oldResult.rule, newResult.rule) ||
                 this.safelyCompareStrings(oldResult.cssSelector, newResult.cssSelector) ||
                 this.safelyCompareStrings(oldResult.xpathSelector, newResult.xpathSelector) ||
-                this.safelyCompareStrings(oldResult.htmlSnippet, newResult.htmlSnippet);
+                this.safelyCompareStrings(oldResult.htmlSnippet, newResult.htmlSnippet)
+            );
         }
 
         return oldResult ? 1 : -1;
     }
 
-    private safelyCompareStrings(oldString: string | undefined, newString: string | undefined) : number {
+    private safelyCompareStrings(oldString: string | undefined, newString: string | undefined): number {
         if (oldString && newString) {
             return oldString.localeCompare(oldString, newString);
         }
