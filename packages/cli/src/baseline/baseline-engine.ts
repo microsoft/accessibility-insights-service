@@ -15,6 +15,9 @@ interface UrlComparison {
     urlInfos: UrlInfo[];
 }
 
+const newComesFirst = -1;
+const oldComesFirst = 1;
+
 @injectable()
 export class BaselineEngine {
     constructor(
@@ -49,11 +52,11 @@ export class BaselineEngine {
 
             const resultDetailComparison = this.compareResultDetails(oldBaselineResult, newBaselineResult);
 
-            if (resultDetailComparison > 0) {
+            if (resultDetailComparison < 0) {
                 // exists in oldBaselineResults but not newBaselineResults
                 this.addFixedViolationsToEvaluation(oldBaselineResult, evaluation);
                 oldResultIndex++;
-            } else if (resultDetailComparison < 0) {
+            } else if (resultDetailComparison > 0) {
                 // exists in newBaselineResults but not oldBaselineResults
                 this.addNewViolationsToEvaluation(newBaselineResult, evaluation);
                 this.updateAxeResults(axeResults, newBaselineResult);
@@ -135,7 +138,7 @@ export class BaselineEngine {
             );
         }
 
-        return oldResult ? 1 : -1;
+        return oldResult ? newComesFirst : oldComesFirst;
     }
 
     private safelyCompareStrings(oldString: string | undefined, newString: string | undefined): number {
@@ -147,7 +150,7 @@ export class BaselineEngine {
             return 0;
         }
 
-        return oldString ? 1 : -1;
+        return oldString ? newComesFirst : oldComesFirst;
     }
 
     private updateCountsByRule(countsByRule: CountsByRule, rule: string, count: number): void {

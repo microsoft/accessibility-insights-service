@@ -17,8 +17,9 @@ describe(BaselineEngine, () => {
     let inputResults: AxeCoreResults;
     let inputUrlNormalizer: UrlNormalizer;
     let inputOptions: BaselineOptions;
-    let baselineContentWithZeroViolations: BaselineFileContent;
-    let baselineContentWithOneRuleViolationOnOneUrl: BaselineFileContent;
+    let baselineContentWithNoViolations: BaselineFileContent;
+    let baselineContentWithSingleViolation: BaselineFileContent;
+    let baselineContentWithRuleViolationsBeforeAndAfterSingleViolation: BaselineFileContent;
     let baselineContentWithMultipleRuleViolations: BaselineFileContent;
     let baselineContentWithMutipleComplexChanges: BaselineFileContent;
     let testSubject: BaselineEngine;
@@ -27,11 +28,11 @@ describe(BaselineEngine, () => {
         baselineGeneratorMock = Mock.ofType<BaselineGenerator>(null, MockBehavior.Strict);
         fingerprintGeneratorMock = Mock.ofType<FingerprintGenerator>(null, MockBehavior.Strict);
 
-        baselineContentWithZeroViolations = {
+        baselineContentWithNoViolations = {
             metadata: { fileFormatVersion: '1' },
             results: [],
         };
-        baselineContentWithOneRuleViolationOnOneUrl = {
+        baselineContentWithSingleViolation = {
             metadata: { fileFormatVersion: '1' },
             results: [
                 {
@@ -75,6 +76,29 @@ describe(BaselineEngine, () => {
                     htmlSnippet: '<div id-"yet-another-id" />',
                     rule: 'rule-3',
                     urls: ['url-3'],
+                },
+            ],
+        };
+        baselineContentWithRuleViolationsBeforeAndAfterSingleViolation = {
+            metadata: { fileFormatVersion: '1' },
+            results: [
+                {
+                    cssSelector: '#some-id-0',
+                    htmlSnippet: '<div id="some-id-0" />',
+                    rule: 'rule-0',
+                    urls: ['url-0'],
+                },
+                {
+                    cssSelector: '#some-id',
+                    htmlSnippet: '<div id="some-id" />',
+                    rule: 'rule-1',
+                    urls: ['url-1'],
+                },
+                {
+                    cssSelector: '#some-id-2',
+                    htmlSnippet: '<div id="some-id-2" />',
+                    rule: 'rule-2',
+                    urls: ['url-2'],
                 },
             ],
         };
@@ -134,12 +158,12 @@ describe(BaselineEngine, () => {
         });
 
         it('Scan with no violations when no baseline content exists', () => {
-            setupCurrentScanContents(baselineContentWithZeroViolations);
+            setupCurrentScanContents(baselineContentWithNoViolations);
             setupBaselineScanContents(null);
 
             const evaluation = testSubject.updateResultsInPlace(inputResults, inputOptions);
 
-            expect(evaluation.suggestedBaselineUpdate).toBe(baselineContentWithZeroViolations);
+            expect(evaluation.suggestedBaselineUpdate).toBe(baselineContentWithNoViolations);
             expect({ evaluation: evaluation, axeResults: inputResults }).toMatchSnapshot();
         });
 
@@ -156,7 +180,7 @@ describe(BaselineEngine, () => {
 
         it('current scan has more errors than baseline content', () => {
             setupCurrentScanContents(baselineContentWithMultipleRuleViolations);
-            setupBaselineScanContents(baselineContentWithOneRuleViolationOnOneUrl);
+            setupBaselineScanContents(baselineContentWithSingleViolation);
             setupFingerprintMock();
 
             const evaluation = testSubject.updateResultsInPlace(inputResults, inputOptions);
@@ -177,13 +201,13 @@ describe(BaselineEngine, () => {
         });
 
         it('current scan content has fewer errors than baseline content', () => {
-            setupCurrentScanContents(baselineContentWithOneRuleViolationOnOneUrl);
+            setupCurrentScanContents(baselineContentWithSingleViolation);
             setupBaselineScanContents(baselineContentWithMultipleRuleViolations);
             setupFingerprintMock();
 
             const evaluation = testSubject.updateResultsInPlace(inputResults, inputOptions);
 
-            expect(evaluation.suggestedBaselineUpdate).toBe(baselineContentWithOneRuleViolationOnOneUrl);
+            expect(evaluation.suggestedBaselineUpdate).toBe(baselineContentWithSingleViolation);
             expect({ evaluation: evaluation, axeResults: inputResults }).toMatchSnapshot();
         });
 
@@ -195,6 +219,17 @@ describe(BaselineEngine, () => {
             const evaluation = testSubject.updateResultsInPlace(inputResults, inputOptions);
 
             expect(evaluation.suggestedBaselineUpdate).toBe(baselineContentWithMutipleComplexChanges);
+            expect({ evaluation: evaluation, axeResults: inputResults }).toMatchSnapshot();
+        });
+
+        it('current scan content has new failures before and after baseline content', () => {
+            setupCurrentScanContents(baselineContentWithRuleViolationsBeforeAndAfterSingleViolation);
+            setupBaselineScanContents(baselineContentWithSingleViolation);
+            setupFingerprintMock();
+
+            const evaluation = testSubject.updateResultsInPlace(inputResults, inputOptions);
+
+            expect(evaluation.suggestedBaselineUpdate).toBe(baselineContentWithRuleViolationsBeforeAndAfterSingleViolation);
             expect({ evaluation: evaluation, axeResults: inputResults }).toMatchSnapshot();
         });
     });

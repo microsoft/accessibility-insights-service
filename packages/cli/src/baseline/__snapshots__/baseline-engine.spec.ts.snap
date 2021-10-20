@@ -217,6 +217,92 @@ Object {
 }
 `;
 
+exports[`BaselineEngine updateResultsInPlace current scan content has new failures before and after baseline content 1`] = `
+Object {
+  "axeResults": Object {
+    "violations": Object {
+      "rule-0|<div id=\\"some-id-0\\" />|#some-id-0": Object {
+        "fingerprint": "rule-0|<div id=\\"some-id-0\\" />|#some-id-0",
+        "urlInfos": Array [
+          Object {
+            "baselineStatus": "new",
+            "url": "url-0",
+          },
+        ],
+        "urls": Array [
+          "url-0",
+        ],
+      },
+      "rule-1|<div id=\\"some-id\\" />|#some-id": Object {
+        "fingerprint": "rule-1|<div id=\\"some-id\\" />|#some-id",
+        "urlInfos": Array [
+          Object {
+            "baselineStatus": "existing",
+            "url": "url-1",
+          },
+        ],
+        "urls": Array [
+          "url-1",
+        ],
+      },
+      "rule-2|<div id=\\"some-id-2\\" />|#some-id-2": Object {
+        "fingerprint": "rule-2|<div id=\\"some-id-2\\" />|#some-id-2",
+        "urlInfos": Array [
+          Object {
+            "baselineStatus": "new",
+            "url": "url-2",
+          },
+        ],
+        "urls": Array [
+          "url-2",
+        ],
+      },
+    },
+  },
+  "evaluation": Object {
+    "fixedViolationsByRule": Object {},
+    "newViolationsByRule": Object {
+      "rule-0": 1,
+      "rule-2": 1,
+    },
+    "suggestedBaselineUpdate": Object {
+      "metadata": Object {
+        "fileFormatVersion": "1",
+      },
+      "results": Array [
+        Object {
+          "cssSelector": "#some-id-0",
+          "htmlSnippet": "<div id=\\"some-id-0\\" />",
+          "rule": "rule-0",
+          "urls": Array [
+            "url-0",
+          ],
+        },
+        Object {
+          "cssSelector": "#some-id",
+          "htmlSnippet": "<div id=\\"some-id\\" />",
+          "rule": "rule-1",
+          "urls": Array [
+            "url-1",
+          ],
+        },
+        Object {
+          "cssSelector": "#some-id-2",
+          "htmlSnippet": "<div id=\\"some-id-2\\" />",
+          "rule": "rule-2",
+          "urls": Array [
+            "url-2",
+          ],
+        },
+      ],
+    },
+    "totalBaselineViolations": 1,
+    "totalFixedViolations": 0,
+    "totalNewViolations": 2,
+  },
+}
+`;
+
 exports[`BaselineEngine updateResultsInPlace current scan content is identical to baseline content 1`] = `
 Object {
   "axeResults": Object {
