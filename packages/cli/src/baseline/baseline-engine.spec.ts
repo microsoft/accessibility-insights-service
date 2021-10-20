@@ -17,15 +17,16 @@ describe(BaselineEngine, () => {
     let inputResults: AxeCoreResults;
     let inputUrlNormalizer: UrlNormalizer;
     let inputOptions: BaselineOptions;
-    let oldBaseline: BaselineFileContent;
-    let newBaseline: BaselineFileContent;
+    let baselineWithOneRuleViolationOnOneUrl: BaselineFileContent;
+    let baselineWithMultipleRuleViolations: BaselineFileContent;
+    let baselineWithMutipleComplexChanges: BaselineFileContent;
     let testSubject: BaselineEngine;
 
     beforeEach(() => {
         baselineGeneratorMock = Mock.ofType<BaselineGenerator>(null, MockBehavior.Strict);
         fingerprintGeneratorMock = Mock.ofType<FingerprintGenerator>(null, MockBehavior.Strict);
 
-        oldBaseline = {
+        baselineWithOneRuleViolationOnOneUrl = {
             metadata: { fileFormatVersion: '1' },
             results: [
                 {
@@ -36,7 +37,7 @@ describe(BaselineEngine, () => {
                 },
             ],
         };
-        newBaseline = {
+        baselineWithMultipleRuleViolations = {
             metadata: { fileFormatVersion: '1' },
             results: [
                 {
@@ -45,12 +46,37 @@ describe(BaselineEngine, () => {
                     rule: 'rule-1',
                     urls: ['url-1', 'url-2'], // new URL
                 },
+                {
+                    // new rule
+                    cssSelector: '#another-id',
+                    htmlSnippet: '<div id-"another-id" />',
+                    rule: 'rule-2',
+                    urls: ['url-2'],
+                },
+            ],
+        };
+        baselineWithMutipleComplexChanges = {
+            metadata: { fileFormatVersion: '1' },
+            results: [
+                {
+                    cssSelector: '#some-id',
+                    htmlSnippet: '<div id="some-id" />',
+                    rule: 'rule-1',
+                    urls: ['url-1', 'url-2', 'url-3'], // new URL
+                },
+                {
+                    // this rule replaces rule-2
+                    cssSelector: '#yet-another-id',
+                    htmlSnippet: '<div id-"yet-another-id" />',
+                    rule: 'rule-3',
+                    urls: ['url-3'],
+                },
             ],
         };
 
         inputUrlNormalizer = (x) => x;
         inputOptions = {
-            baselineContent: oldBaseline,
+            baselineContent: null,
             urlNormalizer: inputUrlNormalizer,
         };
         inputViolations = new AxeResultsList();
@@ -77,15 +103,21 @@ describe(BaselineEngine, () => {
             .verifiable(Times.atLeastOnce());
     };
 
-    const setupBaselineResults = (baseline: BaselineFileContent): void => {
-        const fingerprint = 'rule-1|<div id="some-id" />|#some-id';
-        inputResults.violations.add(fingerprint, {
-            urls: baseline.results[0].urls,
-            urlInfos: [],
-            fingerprint,
-        } as AxeResult);
+    const setupCurrentScanContents = (baseline: BaselineFileContent): void => {
+        for (const result of baseline.results) {
+            const fingerprint = `${result.rule}|${result.htmlSnippet}|${result.cssSelector}`;
+            inputResults.violations.add(fingerprint, {
+                urls: result.urls,
+                urlInfos: [],
+                fingerprint,
+            } as AxeResult);
+        }
 
         baselineGeneratorMock.setup((m) => m.generateBaseline(inputResults.violations, inputUrlNormalizer)).returns(() => baseline);
+    };
+
+    const setupBaselineScanContents = (baseline: BaselineFileContent): void => {
+        inputOptions.baselineContent = baseline;
     };
 
     describe('updateResultsInPlace', () => {
@@ -96,26 +128,59 @@ describe(BaselineEngine, () => {
             expect(() => testSubject.updateResultsInPlace(inputResults, inputOptions)).toThrowError(generatorError);
         });
 
-        it("suggests the generator's output as a new baseline if there was no original baseline content", () => {
+        it('Scan when no baseline content exists', () => {
+            setupCurrentScanContents(baselineWithMultipleRuleViolations);
+            setupBaselineScanContents(null);
             setupFingerprintMock();
-            inputOptions.baselineContent = null;
-            setupBaselineResults(newBaseline);
+
             const evaluation = testSubject.updateResultsInPlace(inputResults, inputOptions);
-            expect(evaluation.suggestedBaselineUpdate).toBe(newBaseline);
+
+            expect(evaluation.suggestedBaselineUpdate).toBe(baselineWithMultipleRuleViolations);
+            expect({ evaluation: evaluation, axeResults: inputResults }).toMatchSnapshot();
         });
 
-        it("suggests the generator's output as a new baseline if it differs from the input baseline", () => {
+        it('current scan has more errors than baseline content', () => {
+            setupCurrentScanContents(baselineWithMultipleRuleViolations);
+            setupBaselineScanContents(baselineWithOneRuleViolationOnOneUrl);
             setupFingerprintMock();
-            setupBaselineResults(newBaseline);
+
             const evaluation = testSubject.updateResultsInPlace(inputResults, inputOptions);
-            expect(evaluation.suggestedBaselineUpdate).toBe(newBaseline);
+
+            expect(evaluation.suggestedBaselineUpdate).toBe(baselineWithMultipleRuleViolations);
+            expect({ evaluation: evaluation, axeResults: inputResults }).toMatchSnapshot();
         });
 
-        it('suggests no baseline update if the baseline generator produces results identical to the input baseline', () => {
+        it('current scan content is identical to baseline content', () => {
+            setupCurrentScanContents(baselineWithMultipleRuleViolations);
+            setupBaselineScanContents(baselineWithMultipleRuleViolations);
             setupFingerprintMock();
-            setupBaselineResults(oldBaseline);
+
             const evaluation = testSubject.updateResultsInPlace(inputResults, inputOptions);
+
             expect(evaluation.suggestedBaselineUpdate).toBeNull();
+            expect({ evaluation: evaluation, axeResults: inputResults }).toMatchSnapshot();
+        });
+
+        it('current scan content has fewer errors than baseline content', () => {
+            setupCurrentScanContents(baselineWithOneRuleViolationOnOneUrl);
+            setupBaselineScanContents(baselineWithMultipleRuleViolations);
+            setupFingerprintMock();
+
+            const evaluation = testSubject.updateResultsInPlace(inputResults, inputOptions);
+
+            expect(evaluation.suggestedBaselineUpdate).toBe(baselineWithOneRuleViolationOnOneUrl);
+            expect({ evaluation: evaluation, axeResults: inputResults }).toMatchSnapshot();
+        });
+
+        it('current scan content has complex differences compared to baseline content', () => {
+            setupCurrentScanContents(baselineWithMutipleComplexChanges);
+            setupBaselineScanContents(baselineWithMultipleRuleViolations);
+            setupFingerprintMock();
+
+            const evaluation = testSubject.updateResultsInPlace(inputResults, inputOptions);
+
+            expect(evaluation.suggestedBaselineUpdate).toBe(baselineWithMutipleComplexChanges);
+            expect({ evaluation: evaluation, axeResults: inputResults }).toMatchSnapshot();
         });
     });
 });
