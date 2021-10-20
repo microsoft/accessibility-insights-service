@@ -6,7 +6,8 @@ updates:
 - package-ecosystem: nuget
   directory: "/packages/web-workers"
   schedule:
-    interval: daily
+    interval: monthly
+    day: tuesday
     time: "11:00"
     timezone: "America/Los_Angeles" # Pacific Time
   open-pull-requests-limit: 10
@@ -19,11 +20,11 @@ updates:
 - package-ecosystem: npm
   directory: "/"
   schedule:
-    interval: weekly
-    day: wednesday
+    interval: monthly
+    day: tuesday
     time: "11:00"
     timezone: "America/Los_Angeles" # Pacific Time
-  open-pull-requests-limit: 20
+  open-pull-requests-limit: 30
   labels:
   - "category: engineering"
   - dependencies
