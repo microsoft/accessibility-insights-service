@@ -17,6 +17,7 @@ describe(BaselineEngine, () => {
     let inputResults: AxeCoreResults;
     let inputUrlNormalizer: UrlNormalizer;
     let inputOptions: BaselineOptions;
+    let baselineWithZeroViolations: BaselineFileContent;
     let baselineWithOneRuleViolationOnOneUrl: BaselineFileContent;
     let baselineWithMultipleRuleViolations: BaselineFileContent;
     let baselineWithMutipleComplexChanges: BaselineFileContent;
@@ -26,6 +27,11 @@ describe(BaselineEngine, () => {
         baselineGeneratorMock = Mock.ofType<BaselineGenerator>(null, MockBehavior.Strict);
         fingerprintGeneratorMock = Mock.ofType<FingerprintGenerator>(null, MockBehavior.Strict);
 
+        baselineWithZeroViolations = {
+            metadata: { fileFormatVersion: '1' },
+            results: [
+            ],
+        };
         baselineWithOneRuleViolationOnOneUrl = {
             metadata: { fileFormatVersion: '1' },
             results: [
@@ -128,7 +134,17 @@ describe(BaselineEngine, () => {
             expect(() => testSubject.updateResultsInPlace(inputResults, inputOptions)).toThrowError(generatorError);
         });
 
-        it('Scan when no baseline content exists', () => {
+        it('Scan with no violations when no baseline content exists', () => {
+            setupCurrentScanContents(baselineWithZeroViolations);
+            setupBaselineScanContents(null);
+
+            const evaluation = testSubject.updateResultsInPlace(inputResults, inputOptions);
+
+            expect(evaluation.suggestedBaselineUpdate).toBe(baselineWithZeroViolations);
+            expect({ evaluation: evaluation, axeResults: inputResults }).toMatchSnapshot();
+        });
+
+        it('Scan with violations when no baseline content exists', () => {
             setupCurrentScanContents(baselineWithMultipleRuleViolations);
             setupBaselineScanContents(null);
             setupFingerprintMock();

@@ -1,6 +1,27 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`BaselineEngine updateResultsInPlace Scan when no baseline content exists 1`] = `
+exports[`BaselineEngine updateResultsInPlace Scan with no violations when no baseline content exists 1`] = `
+Object {
+  "axeResults": Object {
+    "violations": Object {},
+  },
+  "evaluation": Object {
+    "fixedViolationsByRule": Object {},
+    "newViolationsByRule": Object {},
+    "suggestedBaselineUpdate": Object {
+      "metadata": Object {
+        "fileFormatVersion": "1",
+      },
+      "results": Array [],
+    },
+    "totalBaselineViolations": 0,
+    "totalFixedViolations": 0,
+    "totalNewViolations": 0,
+  },
+}
+`;
+
+exports[`BaselineEngine updateResultsInPlace Scan with violations when no baseline content exists 1`] = `
 Object {
   "axeResults": Object {
     "violations": Object {

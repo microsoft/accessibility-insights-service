@@ -32,7 +32,7 @@ export class BaselineEngine {
         let newResultIndex = 0;
 
         const evaluation: BaselineEvaluation = {
-            suggestedBaselineUpdate: null,
+            suggestedBaselineUpdate: baselineOptions.baselineContent ? null : newBaseline,
             fixedViolationsByRule: {},
             newViolationsByRule: {},
             totalFixedViolations: 0,
