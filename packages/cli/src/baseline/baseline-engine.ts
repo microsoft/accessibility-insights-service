@@ -27,18 +27,21 @@ export class BaselineEngine {
         const newBaseline = this.baselineGenerator.generateBaseline(axeResults.violations, baselineOptions.urlNormalizer);
         const newBaselineResults: BaselineResult[] = newBaseline.results;
 
-        // Take advantage of the fact that baseline results are always sorted
-        let oldResultIndex = 0;
-        let newResultIndex = 0;
-
         const evaluation: BaselineEvaluation = {
             suggestedBaselineUpdate: baselineOptions.baselineContent ? null : newBaseline,
             fixedViolationsByRule: {},
             newViolationsByRule: {},
             totalFixedViolations: 0,
             totalNewViolations: 0,
-            totalBaselineViolations: 0,
         };
+
+        if (baselineOptions.baselineContent) {
+            evaluation.totalBaselineViolations = 0;
+        }
+
+        // Take advantage of the fact that baseline results are always sorted
+        let oldResultIndex = 0;
+        let newResultIndex = 0;
 
         while (oldResultIndex < oldBaselineResults.length || newResultIndex < newBaselineResults.length) {
             const oldBaselineResult = oldResultIndex < oldBaselineResults.length ? oldBaselineResults[oldResultIndex] : null;
