@@ -29,8 +29,7 @@ describe(BaselineEngine, () => {
 
         baselineContentWithZeroViolations = {
             metadata: { fileFormatVersion: '1' },
-            results: [
-            ],
+            results: [],
         };
         baselineContentWithOneRuleViolationOnOneUrl = {
             metadata: { fileFormatVersion: '1' },

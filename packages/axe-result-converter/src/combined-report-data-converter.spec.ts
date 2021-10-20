@@ -78,7 +78,14 @@ describe(CombinedReportDataConverter, () => {
             getAccumulatedResult('rule-3', { urls: ['url-31', 'url-32', 'url-33'], nodeId: 'node-31' }),
             getAccumulatedResult('rule-3', { urls: ['url-31', 'url-32'], nodeId: 'node-32' }),
             getAccumulatedResult('rule-3', { urls: ['url-31'], nodeId: 'node-33' }),
-            getAccumulatedResult('rule-4', { urls: ['url-41', 'url-42'], urlInfos: [{url: 'url-41', baselineStatus: 'existing'}, {url: 'url-42', baselineStatus: 'new'}], nodeId: 'node-41'}),
+            getAccumulatedResult('rule-4', {
+                urls: ['url-41', 'url-42'],
+                urlInfos: [
+                    { url: 'url-41', baselineStatus: 'existing' },
+                    { url: 'url-42', baselineStatus: 'new' },
+                ],
+                nodeId: 'node-41',
+            }),
         );
         const passes = addAxeResult(
             new AxeResultsList(),
