@@ -88,7 +88,7 @@ export class CombinedReportDataConverter {
         for (const result of results) {
             if (result) {
                 failureData.push({
-                    urls: result.urls,
+                    urls: result.urlInfos ?? result.urls,
                     elementSelector: this.getElementSelector(result.junctionNode),
                     snippet: result.junctionNode.html,
                     fix: this.getNodeResult(result.junctionNode),
