@@ -3,6 +3,7 @@
 
 import 'reflect-metadata';
 
+import { UrlInfo } from 'accessibility-insights-report';
 import { CombinedReportDataConverter } from './combined-report-data-converter';
 import { AxeResult, AxeNodeResult, AxeCoreResults, AxeResultsList } from './axe-result-types';
 import { ScanResultData } from './scan-result-data';
@@ -43,13 +44,14 @@ const getAccumulatedNode = (nodeId: string) => {
     } as AxeNodeResult;
 };
 
-const getAccumulatedResult = (ruleId: string, data: { urls: string[]; nodeId?: string }) => {
+const getAccumulatedResult = (ruleId: string, data: { urls: string[]; urlInfos?: UrlInfo[]; nodeId?: string }) => {
     return {
         id: ruleId,
         tags: [`tag-${ruleId}`],
         description: `description-${ruleId}`,
         helpUrl: `helpUrl-${ruleId}`,
         urls: data.urls,
+        urlInfos: data.urlInfos || [],
         nodes: [],
         junctionNode: data.nodeId ? getAccumulatedNode(data.nodeId) : undefined,
         fingerprint: data.nodeId ? `id-${ruleId}|snippet-${data.nodeId}|selector-${data.nodeId}` : `id-${ruleId}`,
@@ -76,6 +78,14 @@ describe(CombinedReportDataConverter, () => {
             getAccumulatedResult('rule-3', { urls: ['url-31', 'url-32', 'url-33'], nodeId: 'node-31' }),
             getAccumulatedResult('rule-3', { urls: ['url-31', 'url-32'], nodeId: 'node-32' }),
             getAccumulatedResult('rule-3', { urls: ['url-31'], nodeId: 'node-33' }),
+            getAccumulatedResult('rule-4', {
+                urls: ['url-41', 'url-42'],
+                urlInfos: [
+                    { url: 'url-41', baselineStatus: 'existing' },
+                    { url: 'url-42', baselineStatus: 'new' },
+                ],
+                nodeId: 'node-41',
+            }),
         );
         const passes = addAxeResult(
             new AxeResultsList(),

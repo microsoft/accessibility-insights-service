@@ -1,0 +1,422 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`BaselineEngine updateResultsInPlace Scan with no violations when no baseline content exists 1`] = `
+Object {
+  "axeResults": Object {
+    "violations": Object {},
+  },
+  "evaluation": Object {
+    "fixedViolationsByRule": Object {},
+    "newViolationsByRule": Object {},
+    "suggestedBaselineUpdate": Object {
+      "metadata": Object {
+        "fileFormatVersion": "1",
+      },
+      "results": Array [],
+    },
+    "totalFixedViolations": 0,
+    "totalNewViolations": 0,
+  },
+}
+`;
+
+exports[`BaselineEngine updateResultsInPlace Scan with violations when no baseline content exists 1`] = `
+Object {
+  "axeResults": Object {
+    "violations": Object {
+      "rule-1|<div id=\\"some-id\\" />|#some-id": Object {
+        "fingerprint": "rule-1|<div id=\\"some-id\\" />|#some-id",
+        "urlInfos": Array [
+          Object {
+            "baselineStatus": "new",
+            "url": "url-1",
+          },
+          Object {
+            "baselineStatus": "new",
+            "url": "url-2",
+          },
+        ],
+        "urls": Array [
+          "url-1",
+          "url-2",
+        ],
+      },
+      "rule-2|<div id-\\"another-id\\" />|#another-id": Object {
+        "fingerprint": "rule-2|<div id-\\"another-id\\" />|#another-id",
+        "urlInfos": Array [
+          Object {
+            "baselineStatus": "new",
+            "url": "url-2",
+          },
+        ],
+        "urls": Array [
+          "url-2",
+        ],
+      },
+    },
+  },
+  "evaluation": Object {
+    "fixedViolationsByRule": Object {},
+    "newViolationsByRule": Object {
+      "rule-1": 2,
+      "rule-2": 1,
+    },
+    "suggestedBaselineUpdate": Object {
+      "metadata": Object {
+        "fileFormatVersion": "1",
+      },
+      "results": Array [
+        Object {
+          "cssSelector": "#some-id",
+          "htmlSnippet": "<div id=\\"some-id\\" />",
+          "rule": "rule-1",
+          "urls": Array [
+            "url-1",
+            "url-2",
+          ],
+        },
+        Object {
+          "cssSelector": "#another-id",
+          "htmlSnippet": "<div id-\\"another-id\\" />",
+          "rule": "rule-2",
+          "urls": Array [
+            "url-2",
+          ],
+        },
+      ],
+    },
+    "totalFixedViolations": 0,
+    "totalNewViolations": 3,
+  },
+}
+`;
+
+exports[`BaselineEngine updateResultsInPlace current scan content has complex differences compared to baseline content 1`] = `
+Object {
+  "axeResults": Object {
+    "violations": Object {
+      "rule-1|<div id=\\"some-id\\" />|#some-id": Object {
+        "fingerprint": "rule-1|<div id=\\"some-id\\" />|#some-id",
+        "urlInfos": Array [
+          Object {
+            "baselineStatus": "existing",
+            "url": "url-1",
+          },
+          Object {
+            "baselineStatus": "existing",
+            "url": "url-2",
+          },
+          Object {
+            "baselineStatus": "new",
+            "url": "url-3",
+          },
+        ],
+        "urls": Array [
+          "url-1",
+          "url-2",
+          "url-3",
+        ],
+      },
+      "rule-3|<div id-\\"yet-another-id\\" />|#yet-another-id": Object {
+        "fingerprint": "rule-3|<div id-\\"yet-another-id\\" />|#yet-another-id",
+        "urlInfos": Array [
+          Object {
+            "baselineStatus": "new",
+            "url": "url-3",
+          },
+        ],
+        "urls": Array [
+          "url-3",
+        ],
+      },
+    },
+  },
+  "evaluation": Object {
+    "fixedViolationsByRule": Object {
+      "rule-2": 1,
+    },
+    "newViolationsByRule": Object {
+      "rule-1": 1,
+      "rule-3": 1,
+    },
+    "suggestedBaselineUpdate": Object {
+      "metadata": Object {
+        "fileFormatVersion": "1",
+      },
+      "results": Array [
+        Object {
+          "cssSelector": "#some-id",
+          "htmlSnippet": "<div id=\\"some-id\\" />",
+          "rule": "rule-1",
+          "urls": Array [
+            "url-1",
+            "url-2",
+            "url-3",
+          ],
+        },
+        Object {
+          "cssSelector": "#yet-another-id",
+          "htmlSnippet": "<div id-\\"yet-another-id\\" />",
+          "rule": "rule-3",
+          "urls": Array [
+            "url-3",
+          ],
+        },
+      ],
+    },
+    "totalBaselineViolations": 3,
+    "totalFixedViolations": 1,
+    "totalNewViolations": 2,
+  },
+}
+`;
+
+exports[`BaselineEngine updateResultsInPlace current scan content has fewer errors than baseline content 1`] = `
+Object {
+  "axeResults": Object {
+    "violations": Object {
+      "rule-1|<div id=\\"some-id\\" />|#some-id": Object {
+        "fingerprint": "rule-1|<div id=\\"some-id\\" />|#some-id",
+        "urlInfos": Array [
+          Object {
+            "baselineStatus": "existing",
+            "url": "url-1",
+          },
+        ],
+        "urls": Array [
+          "url-1",
+        ],
+      },
+    },
+  },
+  "evaluation": Object {
+    "fixedViolationsByRule": Object {
+      "rule-1": 1,
+      "rule-2": 1,
+    },
+    "newViolationsByRule": Object {},
+    "suggestedBaselineUpdate": Object {
+      "metadata": Object {
+        "fileFormatVersion": "1",
+      },
+      "results": Array [
+        Object {
+          "cssSelector": "#some-id",
+          "htmlSnippet": "<div id=\\"some-id\\" />",
+          "rule": "rule-1",
+          "urls": Array [
+            "url-1",
+          ],
+        },
+      ],
+    },
+    "totalBaselineViolations": 3,
+    "totalFixedViolations": 2,
+    "totalNewViolations": 0,
+  },
+}
+`;
+
+exports[`BaselineEngine updateResultsInPlace current scan content has new failures before and after baseline content 1`] = `
+Object {
+  "axeResults": Object {
+    "violations": Object {
+      "rule-0|<div id=\\"some-id-0\\" />|#some-id-0": Object {
+        "fingerprint": "rule-0|<div id=\\"some-id-0\\" />|#some-id-0",
+        "urlInfos": Array [
+          Object {
+            "baselineStatus": "new",
+            "url": "url-0",
+          },
+        ],
+        "urls": Array [
+          "url-0",
+        ],
+      },
+      "rule-1|<div id=\\"some-id\\" />|#some-id": Object {
+        "fingerprint": "rule-1|<div id=\\"some-id\\" />|#some-id",
+        "urlInfos": Array [
+          Object {
+            "baselineStatus": "existing",
+            "url": "url-1",
+          },
+        ],
+        "urls": Array [
+          "url-1",
+        ],
+      },
+      "rule-2|<div id=\\"some-id-2\\" />|#some-id-2": Object {
+        "fingerprint": "rule-2|<div id=\\"some-id-2\\" />|#some-id-2",
+        "urlInfos": Array [
+          Object {
+            "baselineStatus": "new",
+            "url": "url-2",
+          },
+        ],
+        "urls": Array [
+          "url-2",
+        ],
+      },
+    },
+  },
+  "evaluation": Object {
+    "fixedViolationsByRule": Object {},
+    "newViolationsByRule": Object {
+      "rule-0": 1,
+      "rule-2": 1,
+    },
+    "suggestedBaselineUpdate": Object {
+      "metadata": Object {
+        "fileFormatVersion": "1",
+      },
+      "results": Array [
+        Object {
+          "cssSelector": "#some-id-0",
+          "htmlSnippet": "<div id=\\"some-id-0\\" />",
+          "rule": "rule-0",
+          "urls": Array [
+            "url-0",
+          ],
+        },
+        Object {
+          "cssSelector": "#some-id",
+          "htmlSnippet": "<div id=\\"some-id\\" />",
+          "rule": "rule-1",
+          "urls": Array [
+            "url-1",
+          ],
+        },
+        Object {
+          "cssSelector": "#some-id-2",
+          "htmlSnippet": "<div id=\\"some-id-2\\" />",
+          "rule": "rule-2",
+          "urls": Array [
+            "url-2",
+          ],
+        },
+      ],
+    },
+    "totalBaselineViolations": 1,
+    "totalFixedViolations": 0,
+    "totalNewViolations": 2,
+  },
+}
+`;
+
+exports[`BaselineEngine updateResultsInPlace current scan content is identical to baseline content 1`] = `
+Object {
+  "axeResults": Object {
+    "violations": Object {
+      "rule-1|<div id=\\"some-id\\" />|#some-id": Object {
+        "fingerprint": "rule-1|<div id=\\"some-id\\" />|#some-id",
+        "urlInfos": Array [
+          Object {
+            "baselineStatus": "existing",
+            "url": "url-1",
+          },
+          Object {
+            "baselineStatus": "existing",
+            "url": "url-2",
+          },
+        ],
+        "urls": Array [
+          "url-1",
+          "url-2",
+        ],
+      },
+      "rule-2|<div id-\\"another-id\\" />|#another-id": Object {
+        "fingerprint": "rule-2|<div id-\\"another-id\\" />|#another-id",
+        "urlInfos": Array [
+          Object {
+            "baselineStatus": "existing",
+            "url": "url-2",
+          },
+        ],
+        "urls": Array [
+          "url-2",
+        ],
+      },
+    },
+  },
+  "evaluation": Object {
+    "fixedViolationsByRule": Object {},
+    "newViolationsByRule": Object {},
+    "suggestedBaselineUpdate": null,
+    "totalBaselineViolations": 3,
+    "totalFixedViolations": 0,
+    "totalNewViolations": 0,
+  },
+}
+`;
+
+exports[`BaselineEngine updateResultsInPlace current scan has more errors than baseline content 1`] = `
+Object {
+  "axeResults": Object {
+    "violations": Object {
+      "rule-1|<div id=\\"some-id\\" />|#some-id": Object {
+        "fingerprint": "rule-1|<div id=\\"some-id\\" />|#some-id",
+        "urlInfos": Array [
+          Object {
+            "baselineStatus": "existing",
+            "url": "url-1",
+          },
+          Object {
+            "baselineStatus": "new",
+            "url": "url-2",
+          },
+        ],
+        "urls": Array [
+          "url-1",
+          "url-2",
+        ],
+      },
+      "rule-2|<div id-\\"another-id\\" />|#another-id": Object {
+        "fingerprint": "rule-2|<div id-\\"another-id\\" />|#another-id",
+        "urlInfos": Array [
+          Object {
+            "baselineStatus": "new",
+            "url": "url-2",
+          },
+        ],
+        "urls": Array [
+          "url-2",
+        ],
+      },
+    },
+  },
+  "evaluation": Object {
+    "fixedViolationsByRule": Object {},
+    "newViolationsByRule": Object {
+      "rule-1": 1,
+      "rule-2": 1,
+    },
+    "suggestedBaselineUpdate": Object {
+      "metadata": Object {
+        "fileFormatVersion": "1",
+      },
+      "results": Array [
+        Object {
+          "cssSelector": "#some-id",
+          "htmlSnippet": "<div id=\\"some-id\\" />",
+          "rule": "rule-1",
+          "urls": Array [
+            "url-1",
+            "url-2",
+          ],
+        },
+        Object {
+          "cssSelector": "#another-id",
+          "htmlSnippet": "<div id-\\"another-id\\" />",
+          "rule": "rule-2",
+          "urls": Array [
+            "url-2",
+          ],
+        },
+      ],
+    },
+    "totalBaselineViolations": 1,
+    "totalFixedViolations": 0,
+    "totalNewViolations": 2,
+  },
+}
+`;

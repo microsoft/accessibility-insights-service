@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+import { UrlInfo } from 'accessibility-insights-report';
 import axe from 'axe-core';
 import { HashSet } from 'common';
 
@@ -18,6 +19,7 @@ export class AxeResultsList extends HashSet<AxeResult> {}
 
 export interface AxeResult extends axe.Result {
     urls: string[];
+    urlInfos: UrlInfo[];
     junctionNode?: AxeNodeResult;
     fingerprint: string;
 }

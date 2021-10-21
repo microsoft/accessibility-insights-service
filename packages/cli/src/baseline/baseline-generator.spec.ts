@@ -33,6 +33,7 @@ describe(BaselineGenerator, () => {
     };
     const validCssOnlyAxeResult: AxeResult = {
         urls: originalUrls,
+        urlInfos: [],
         description: 'description',
         help: 'help',
         fingerprint: 'fingerprint',

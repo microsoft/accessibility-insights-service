@@ -5,12 +5,22 @@ import { injectable, inject } from 'inversify';
 import axe from 'axe-core';
 import { HashGenerator } from 'common';
 import { Selector, AxeCoreResults, AxeResultsList, AxeResult } from './axe-result-types';
+import { FingerprintGenerator } from './fingerprint-generator';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+type SelectorInfo = {
+    css: string;
+    xpath?: string;
+    selectors: Selector[];
+};
+
 @injectable()
 export class AxeResultsReducer {
-    constructor(@inject(HashGenerator) private readonly hashGenerator: HashGenerator) {}
+    constructor(
+        @inject(HashGenerator) private readonly hashGenerator: HashGenerator,
+        @inject(FingerprintGenerator) private readonly fingerprintGenerator: FingerprintGenerator,
+    ) {}
 
     public reduce(accumulatedAxeResults: AxeCoreResults, currentAxeResults: axe.AxeResults): void {
         this.setUrl(accumulatedAxeResults, currentAxeResults);
@@ -26,9 +36,10 @@ export class AxeResultsReducer {
                 if (currentResult) {
                     for (const node of currentResult.nodes) {
                         if (node) {
-                            const selectors = this.getElementSelectors(node);
-                            const fingerprint = this.getElementFingerprint(currentResult, node, selectors);
+                            const selectorInfo = this.getSelectorInfo(node);
+                            const fingerprint = this.getElementFingerprint(currentResult, node, selectorInfo);
                             const matchingResult = accumulatedResults.get(fingerprint);
+
                             if (matchingResult !== undefined) {
                                 if (!matchingResult.urls.some((u) => u === url)) {
                                     matchingResult.urls.push(url);
@@ -38,9 +49,10 @@ export class AxeResultsReducer {
                                     ...currentResult,
                                     nodes: [],
                                     urls: [url],
+                                    urlInfos: [], // This will get populated downstream
                                     junctionNode: {
                                         ...node,
-                                        selectors,
+                                        selectors: selectorInfo.selectors,
                                     },
                                     fingerprint,
                                 };
@@ -68,6 +80,7 @@ export class AxeResultsReducer {
                             ...currentResult,
                             nodes: [],
                             urls: [url],
+                            urlInfos: [], // This will get populated downstream
                             fingerprint,
                         };
                         accumulatedResults.add(fingerprint, result);
@@ -77,18 +90,26 @@ export class AxeResultsReducer {
         }
     }
 
-    private getElementFingerprint(result: axe.Result, node: axe.NodeResult, selectors: Selector[]): string {
-        return this.hashGenerator.generateBase64Hash(result.id, node.html, ...selectors.map((s) => s.selector));
+    private getElementFingerprint(result: axe.Result, node: axe.NodeResult, selectorInfo: SelectorInfo): string {
+        return this.fingerprintGenerator.getFingerprint({
+            rule: result.id,
+            snippet: node.html,
+            cssSelector: selectorInfo.css,
+            xpathSelector: selectorInfo.xpath,
+        });
     }
 
-    private getElementSelectors(node: axe.NodeResult): Selector[] {
-        const selectors: Selector[] = [{ selector: node.target.join(';'), type: 'css' }];
+    private getSelectorInfo(node: axe.NodeResult): SelectorInfo {
+        const css = node.target.join(';');
+        const selectors: Selector[] = [{ selector: css, type: 'css' }];
+
+        let xpath;
         if ((node as any).xpath) {
-            const xpath = (node as any).xpath.join(';');
+            xpath = (node as any).xpath.join(';');
             selectors.push({ selector: xpath, type: 'xpath' });
         }
 
-        return selectors;
+        return { css, xpath, selectors };
     }
 
     private setUrl(accumulatedAxeResults: AxeCoreResults, currentAxeResults: axe.AxeResults): void {
