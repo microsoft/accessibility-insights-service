@@ -1,10 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { AxeCoreResults, AxeResult } from 'axe-result-converter';
+import { AxeCoreResults, AxeResult, FingerprintGenerator } from 'axe-result-converter';
 import { inject, injectable } from 'inversify';
 import { UrlInfo } from 'accessibility-insights-report';
-import { FingerprintGenerator } from '../../../axe-result-converter/src/fingerprint-generator';
 import { BaselineEvaluation, BaselineOptions, BaselineResult, CountsByRule } from './baseline-types';
 import { BaselineGenerator } from './baseline-generator';
 
