@@ -3,7 +3,6 @@
 
 import 'reflect-metadata';
 
-import JSON5 from 'json5';
 import { IMock, It, Mock } from 'typemoq';
 import { BaselineFileContent } from './baseline-types';
 import { BaselineFileFormatter } from './baseline-file-formatter';
@@ -64,9 +63,9 @@ newline!
         mockBaselineSchemaValidator = Mock.ofType<BaselineSchemaValidator>();
         mockBaselineSchemaValidator.setup((m) => m.validate(It.isAny())).returns((x) => x);
 
-        // This test is more valuable as an integration test with json5/pretty-format, so we're
+        // This test is more valuable as an integration test with json5, so we're
         // using real instances of them.
-        testSubject = new BaselineFileFormatter(mockBaselineSchemaValidator.object, JSON5);
+        testSubject = new BaselineFileFormatter(mockBaselineSchemaValidator.object);
     });
 
     describe('format', () => {
