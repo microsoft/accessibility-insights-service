@@ -71,21 +71,23 @@ function getCommonConfig(version, generateTypings) {
                     ? {
                           apply: (compiler) => {
                               compiler.hooks.afterEmit.tapPromise('BundleDtsFiles', (_) => {
-                                  return new Promise((resolve, reject) => exec(
-                                      'dts-bundle-generator --project tsconfig.sdk.json src/index.ts -o dist/index.d.ts',
-                                      (error, stdout, stderr) => {
-                                          if (stdout) {
-                                              process.stdout.write(stdout);
-                                          }
-                                          if (stderr) {
-                                              process.stderr.write(stderr);
-                                          }
-                                          if (error != null && error.code !== 0) {
-                                              reject(new Error(`dts-bundle-generator exited with code ${error.code}`));
-                                          }
-                                          resolve();
-                                      },
-                                  ));
+                                  return new Promise((resolve, reject) =>
+                                      exec(
+                                          'dts-bundle-generator --project tsconfig.sdk.json src/index.ts -o dist/index.d.ts',
+                                          (error, stdout, stderr) => {
+                                              if (stdout) {
+                                                  process.stdout.write(stdout);
+                                              }
+                                              if (stderr) {
+                                                  process.stderr.write(stderr);
+                                              }
+                                              if (error != null && error.code !== 0) {
+                                                  reject(new Error(`dts-bundle-generator exited with code ${error.code}`));
+                                              }
+                                              resolve();
+                                          },
+                                      ),
+                                  );
                               });
                           },
                       }
