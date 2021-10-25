@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 const path = require('path');
 const { exec } = require('child_process');
 const webpack = require('webpack');
@@ -69,18 +70,22 @@ function getCommonConfig(version, generateTypings) {
                 generateTypings
                     ? {
                           apply: (compiler) => {
-                              compiler.hooks.afterEmit.tap('BundleDtsFiles', (_) => {
-                                  exec(
+                              compiler.hooks.afterEmit.tapPromise('BundleDtsFiles', (_) => {
+                                  return new Promise((resolve, reject) => exec(
                                       'dts-bundle-generator --project tsconfig.sdk.json src/index.ts -o dist/index.d.ts',
-                                      (_, out, err) => {
-                                          if (out) {
-                                              process.stdout.write(out);
+                                      (error, stdout, stderr) => {
+                                          if (stdout) {
+                                              process.stdout.write(stdout);
                                           }
-                                          if (err) {
-                                              process.stderr.write(err);
+                                          if (stderr) {
+                                              process.stderr.write(stderr);
                                           }
+                                          if (error != null && error.code !== 0) {
+                                              reject(new Error(`dts-bundle-generator exited with code ${error.code}`));
+                                          }
+                                          resolve();
                                       },
-                                  );
+                                  ));
                               });
                           },
                       }
