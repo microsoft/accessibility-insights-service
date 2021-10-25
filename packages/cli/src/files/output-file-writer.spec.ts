@@ -5,10 +5,12 @@ import 'reflect-metadata';
 
 import * as fs from 'fs';
 import path from 'path';
-import filenamifyUrl from 'filenamify-url';
 import { IMock, Mock, MockBehavior, Times } from 'typemoq';
 import { ensureDirectory } from 'common';
 import { OutputFileWriter } from './output-file-writer';
+
+/* eslint-disable @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires */
+const filenamifyUrl = require('filenamify-url');
 
 /* eslint-disable no-empty,@typescript-eslint/no-empty-function, @typescript-eslint/consistent-type-assertions */
 

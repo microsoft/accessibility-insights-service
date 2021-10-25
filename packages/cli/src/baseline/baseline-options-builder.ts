@@ -3,9 +3,9 @@
 
 import * as fs from 'fs';
 import { inject, injectable } from 'inversify';
-import { BaselineOptions, ScanArguments } from '..';
+import { ScanArguments } from '../scan-arguments';
 import { BaselineFileFormatter } from './baseline-file-formatter';
-import { BaselineFileContent } from './baseline-types';
+import { BaselineFileContent, BaselineOptions } from './baseline-types';
 
 /* eslint-disable security/detect-non-literal-fs-filename */
 
