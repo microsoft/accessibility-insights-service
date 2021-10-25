@@ -8,9 +8,7 @@ import { BaselineFileContent } from './baseline-types';
 
 @injectable()
 export class BaselineFileFormatter {
-    constructor(
-        @inject(BaselineSchemaValidator) private readonly baselineSchemaValidator: BaselineSchemaValidator,
-    ) {}
+    constructor(@inject(BaselineSchemaValidator) private readonly baselineSchemaValidator: BaselineSchemaValidator) {}
 
     public parse(rawBaselineContent: string): BaselineFileContent {
         const unvalidatedContent = json5.parse(rawBaselineContent);
