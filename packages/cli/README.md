@@ -223,12 +223,13 @@ describe: Uses a single crawler worker.
 
 ```sh
 type: string
-describe: Path to file that serves as a baseline. Violations that do not exist in this file will be flagged as new violations in the report.
+describe: Baseline file path. If specified, scan results will be compared to baseline results and the summary report will denote which results are new.
+If the results do not match the baseline file, a new baseline will be written to the output directory. To update the existing baseline file instead, use --updateBaseline.
 ```
 
 -   updateBaseline: --updateBaseline
 
 ```sh
 type: boolean
-describe: If true, update the file specified by the baselineFile option to reflect the most recent scan results.
+describe: Use with --baselineFile to update the baseline file in-place, rather than writing any updated baseline to the output directory.
 ```
