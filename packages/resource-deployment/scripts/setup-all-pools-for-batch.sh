@@ -20,13 +20,6 @@ function setupPools() {
     # Enable managed identity on Batch pools
     pools=$(az batch pool list --query "[].id" -o tsv)
 
-    echo "Setup system identity for created pools"
-    for pool in $pools; do
-        command=". ${0%/*}/enable-system-identity-for-batch-vmss.sh"
-        commandName="Enable system identity for pool $pool"
-        . "${0%/*}/run-command-on-all-vmss-for-pool.sh"
-    done
-
     echo "Setup tags for Batch VMSS"
     parallelProcesses=()
     for pool in $pools; do
@@ -36,6 +29,14 @@ function setupPools() {
         parallelProcesses+=("$!")
     done
     waitForProcesses parallelProcesses
+
+    echo "Setup system identity for created pools"
+    for pool in $pools; do
+        command=". ${0%/*}/enable-system-identity-for-batch-vmss.sh"
+        commandName="Enable system identity for pool $pool"
+        . "${0%/*}/run-command-on-all-vmss-for-pool.sh"
+    done
+
 }
 
 # Read script arguments

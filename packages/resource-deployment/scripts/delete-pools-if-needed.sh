@@ -37,11 +37,11 @@ function checkIfVmssAreOld() {
         hasCreatedDateTags=true
 
         if [[ $kernelName == "Darwin" ]]; then
-            local recycleDate=$(date -j -v +"$recycleVmssIntervalDays"d -f "%Y-%m-%d" "$createdDate" "+%Y-%m-%d")
-            local currentDate=$(date "+%Y-%m-%d")
+            local recycleDate=$(date -j -v +"$recycleVmssIntervalDays"d -f "%Y.%m.%d" "$createdDate" "+%Y.%m.%d")
+            local currentDate=$(date "+%Y.%m.%d")
         else
-            local recycleDate=$(date -d "$createdDate+$recycleVmssIntervalDays days" "+%Y-%m-%d")
-            local currentDate=$(date "+%Y-%m-%d")
+            local recycleDate=$(date -d "$createdDate+$recycleVmssIntervalDays days" "+%Y.%m.%d")
+            local currentDate=$(date "+%Y.%m.%d")
         fi
 
         if [[ "$currentDate" > "$recycleDate" ]] || [[ "$currentDate" == "$recycleDate" ]]; then
