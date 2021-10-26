@@ -156,6 +156,20 @@ describe(BaselineEngine, () => {
             expect(() => testSubject.updateResultsInPlace(inputResults, inputOptions)).toThrowError(generatorError);
         });
 
+        it('reports a different output if the file format version changes', () => {
+            const baselineContentWithDifferentFileFormatVersion: BaselineFileContent = {
+                metadata: { fileFormatVersion: '1.1' },
+                results: [],
+            } as unknown as BaselineFileContent;
+            setupCurrentScanContents(baselineContentWithDifferentFileFormatVersion);
+            setupBaselineScanContents(baselineContentWithNoViolations);
+
+            const evaluation = testSubject.updateResultsInPlace(inputResults, inputOptions);
+
+            expect(evaluation.suggestedBaselineUpdate).toBe(baselineContentWithDifferentFileFormatVersion);
+            expect({ evaluation: evaluation, axeResults: inputResults }).toMatchSnapshot();
+        });
+
         it('Scan with no violations when no baseline content exists', () => {
             setupCurrentScanContents(baselineContentWithNoViolations);
             setupBaselineScanContents(null);
