@@ -218,3 +218,17 @@ describe: List of RegEx patterns to crawl in addition to the provided URL, separ
 type: boolean
 describe: Uses a single crawler worker.
 ```
+
+-   baselineFile: --baselineFile
+
+```sh
+type: string
+describe: Path to file that serves as a baseline. Violations that do not exist in this file will be flagged as new violations in the report.
+```
+
+-   updateBaseline: --updateBaseline
+
+```sh
+type: boolean
+describe: If true, update the file specified by the baselineFile option to reflect the most recent scan results.
+```
