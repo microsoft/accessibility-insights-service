@@ -38,7 +38,7 @@ addResourceGroupNameTagToVMSS() {
             -o tsv
     )
     if [[ -z $vmssCreatedTime ]]; then
-        local currentDate=$(date "+%Y.%m.%d")
+        local currentDate=$(date "+%Y/%m/%d")
         addTagToVmss "VmssCreatedDate" "$currentDate"
     fi
 }
