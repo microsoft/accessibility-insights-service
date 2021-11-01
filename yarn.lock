@@ -4774,10 +4774,10 @@ columnify@^1.5.4:
     strip-ansi "^3.0.0"
     wcwidth "^1.0.0"
 
-combine-dependabot-prs@^1.0.4:
-  version "1.0.4"
-  resolved "https://registry.yarnpkg.com/combine-dependabot-prs/-/combine-dependabot-prs-1.0.4.tgz#deb47db299180ce990b89ee5c23b42c593dc6820"
-  integrity sha512-62yEOcPblxe8DNRpfpMWNRGK++SrfaF7HsOKTX4Lc1csDzSjn+Si6GFwKY2eWrtDt8HM/DuEmgqjTtuf3io0Jg==
+combine-dependabot-prs@^1.0.5:
+  version "1.0.5"
+  resolved "https://registry.yarnpkg.com/combine-dependabot-prs/-/combine-dependabot-prs-1.0.5.tgz#b8646df3a4979d17149ce9845d416a96253b02ce"
+  integrity sha512-7l6efzkg0IugZnTSFXsg4M6L6fd9neobt/ddp9Um9Jc+vyExtLH8iHDPk/GiTxK2Kl57G+Eh6YfousXrgqUrrQ==
   dependencies:
     "@actions/core" "^1.3.0"
     "@actions/github" "^5.0.0"
@@ -6159,22 +6159,7 @@ events@^3.0.0, events@^3.2.0:
   resolved "https://registry.yarnpkg.com/events/-/events-3.2.0.tgz#93b87c18f8efcd4202a461aec4dfc0556b639379"
   integrity sha512-/46HWwbfCX2xTawVfkKLGxMifJYQBWMwY1mjywRtb4c9x8l5NP3KoJtnIOiL1hfdRkIuYhETxQlo62IF8tcnlg==
 
-execa@^5.0.0:
-  version "5.0.0"
-  resolved "https://registry.yarnpkg.com/execa/-/execa-5.0.0.tgz#4029b0007998a841fbd1032e5f4de86a3c1e3376"
-  integrity sha512-ov6w/2LCiuyO4RLYGdpFGjkcs0wMTgGE8PrkTHikeUy5iJekXyPIKUjifk5CsE0pt7sMCrMZ3YNqoCj6idQOnQ==
-  dependencies:
-    cross-spawn "^7.0.3"
-    get-stream "^6.0.0"
-    human-signals "^2.1.0"
-    is-stream "^2.0.0"
-    merge-stream "^2.0.0"
-    npm-run-path "^4.0.1"
-    onetime "^5.1.2"
-    signal-exit "^3.0.3"
-    strip-final-newline "^2.0.0"
-
-execa@^5.1.1:
+execa@^5.0.0, execa@^5.1.1:
   version "5.1.1"
   resolved "https://registry.yarnpkg.com/execa/-/execa-5.1.1.tgz#f80ad9cbf4298f7bd1d4c9555c21e93741c411dd"
   integrity sha512-8uSpZZocAZRBAPIEINJj3Lo9HyGitllczc27Eh5YYojjMFMn8yHMDMaUHE2Jqfq05D/wucwI4JGURyXt1vchyg==
