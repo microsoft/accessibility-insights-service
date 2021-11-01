@@ -22,7 +22,7 @@
         "@types/chai": "^4.2.22",
         "@types/jest": "^27.0.2",
         "@types/lodash": "^4.14.175",
-        "@types/node": "^12.20.33",
+        "@types/node": "^12.20.36",
         "jest": "^27.2.5",
         "jest-junit": "^12.3.0",
         "rimraf": "^3.0.2",
