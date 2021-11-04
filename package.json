@@ -82,7 +82,8 @@
         "socket.io-parser": ">=3.4.1",
         "set-value": ">=4.0.1",
         "nth-check": ">=2.0.1",
-        "ansi-regex": "^5.0.1"
+        "ansi-regex": "^5.0.1",
+        "validator": ">=13.7.0"
     },
     "dependencies": {
         "accessibility-insights-report": "4.2.0"
