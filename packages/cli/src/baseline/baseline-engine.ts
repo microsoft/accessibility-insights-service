@@ -80,7 +80,11 @@ export class BaselineEngine {
             }
         }
 
-        if (evaluation.totalFixedViolations || evaluation.totalNewViolations) {
+        if (
+            evaluation.totalFixedViolations ||
+            evaluation.totalNewViolations ||
+            baselineOptions.baselineContent?.metadata?.fileFormatVersion !== newBaseline.metadata.fileFormatVersion
+        ) {
             evaluation.suggestedBaselineUpdate = newBaseline;
         }
 
