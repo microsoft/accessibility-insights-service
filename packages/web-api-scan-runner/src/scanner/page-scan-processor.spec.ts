@@ -30,7 +30,7 @@ describe(PageScanProcessor, () => {
         axeScannerMock = Mock.ofType<AxeScanner>();
         deepScannerMock = Mock.ofType<DeepScanner>();
 
-        testSubject = new PageScanProcessor(pageMock.object, axeScannerMock.object, deepScannerMock.object, loggerMock.object);
+        testSubject = new PageScanProcessor(pageMock.object, deepScannerMock.object, loggerMock.object);
     });
 
     afterEach(() => {
