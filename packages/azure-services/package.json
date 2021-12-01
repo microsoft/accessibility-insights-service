@@ -59,6 +59,6 @@
         "pretty-format": "^27.3.1",
         "reflect-metadata": "^0.1.13",
         "storage-documents": "1.0.0",
-        "verror": "^1.10.0"
+        "verror": "^1.10.1"
     }
 }
