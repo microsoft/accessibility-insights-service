@@ -61,10 +61,10 @@
   dependencies:
     tslib "^1.9.3"
 
-"@azure/batch@^10.0.1":
-  version "10.0.1"
-  resolved "https://registry.yarnpkg.com/@azure/batch/-/batch-10.0.1.tgz#4033894758811e9cc8fe30aa0490c2ef39ade766"
-  integrity sha512-X399cKeWTa2ruystB1yrZ7cDFy2eSQoNtxFaSADGvFdpxH6eN+RXAN/xjCQIaBADR9WQKmjKq5V6Iqn0o6p3IQ==
+"@azure/batch@^10.0.2":
+  version "10.0.2"
+  resolved "https://registry.yarnpkg.com/@azure/batch/-/batch-10.0.2.tgz#2f3a0bfa2404e19777363cf5d0b114ab450c8eaa"
+  integrity sha512-U2Vuty/uQbKnjtLEvlEnpgivmXQUTMneLnA/iNA8/MwcL0VyWok+Jf201db89erbNkdBjmQa9LSeLK7xf5lJnw==
   dependencies:
     "@azure/ms-rest-azure-js" "^2.1.0"
     "@azure/ms-rest-js" "^2.2.0"

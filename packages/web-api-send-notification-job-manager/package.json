@@ -41,7 +41,7 @@
         "webpack-cli": "^4.9.1"
     },
     "dependencies": {
-        "@azure/batch": "^10.0.1",
+        "@azure/batch": "^10.0.2",
         "@azure/ms-rest-nodeauth": "^3.1.0",
         "azure-services": "^1.0.0",
         "common": "^1.0.0",
