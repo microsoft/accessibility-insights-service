@@ -27,7 +27,7 @@
         "jest": "^27.2.5",
         "jest-junit": "^12.3.0",
         "rimraf": "^3.0.2",
-        "ttypescript": "^1.5.12",
+        "ttypescript": "^1.5.13",
         "ts-transformer-keys": "^0.4.3",
         "ts-jest": "^27.0.7",
         "typemoq": "^2.1.0",
