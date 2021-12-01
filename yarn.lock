@@ -231,10 +231,15 @@
     universal-user-agent "^6.0.0"
     uuid "^8.3.0"
 
-"@azure/functions@^1.0.2-beta2", "@azure/functions@^1.2.3":
+"@azure/functions@^1.0.2-beta2":
   version "1.2.3"
   resolved "https://registry.yarnpkg.com/@azure/functions/-/functions-1.2.3.tgz#65765837e7319eedffbf8a971cb2f78d4e043d54"
   integrity sha512-dZITbYPNg6ay6ngcCOjRUh1wDhlFITS0zIkqplyH5KfKEAVPooaoaye5mUFnR+WP9WdGRjlNXyl/y2tgWKHcRg==
+
+"@azure/functions@^3.0.0":
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/@azure/functions/-/functions-3.0.0.tgz#1466371562591d17232d39eea2126fb5deb60beb"
+  integrity sha512-nxOdQdYoy9JEdAPsQlBWavsRvbH5qT2fpwMcY64s1sLIT8QwtW7ebh/MJNgzeAac+JaC6IED7plDiizq8oZUNw==
 
 "@azure/identity@^2.0.1":
   version "2.0.1"
