@@ -9,6 +9,7 @@ import { System } from 'common';
 import * as dotenv from 'dotenv';
 import * as yargs from 'yargs';
 import * as inversify from 'inversify';
+import { setupLocalScannerContainer } from 'scanner-global-library';
 import { Crawler } from './crawler';
 import { setupLocalCrawlerContainer } from './setup-crawler-container';
 
@@ -34,7 +35,9 @@ interface ScanArguments {
     const scanArguments = yargs.argv as unknown as ScanArguments;
 
     const container = new inversify.Container({ autoBindInjectable: true });
-    await new Crawler(setupLocalCrawlerContainer(container)).crawl({
+    setupLocalScannerContainer(container);
+    setupLocalCrawlerContainer(container);
+    await new Crawler(container).crawl({
         crawl: scanArguments.crawl,
         baseUrl: scanArguments.url,
         simulate: scanArguments.simulate,
