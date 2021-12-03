@@ -73,4 +73,7 @@ updates:
     - "> 4.3.0"
   - dependency-name: serialize-error
     versions:
-    - "> 8.1.0"
+    - "> 8.1.0"  
+  - dependency-name: uuid-with-v6
+    versions:
+    - "> 1.1.2"
