@@ -23,7 +23,7 @@
     "homepage": "https://github.com/Microsoft/accessibility-insights-service#readme",
     "devDependencies": {
         "@types/convict": "^6.0.2",
-        "@types/jest": "^27.0.2",
+        "@types/jest": "^27.0.3",
         "@types/node": "^12.20.37",
         "@types/sha.js": "^2.4.0",
         "jest": "^27.2.5",
