@@ -71,3 +71,6 @@ updates:
   - dependency-name: filenamify
     versions:
     - "> 4.3.0"
+  - dependency-name: serialize-error
+    versions:
+    - "> 8.1.0"

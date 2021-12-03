@@ -3,7 +3,7 @@
 
 import { AxePuppeteer } from '@axe-core/puppeteer';
 import { inject, injectable } from 'inversify';
-import { Page } from 'puppeteer';
+import * as Puppeteer from 'puppeteer';
 import { AxePuppeteerFactory } from 'scanner-global-library';
 import { AxeResults } from 'axe-core';
 
@@ -11,7 +11,7 @@ import { AxeResults } from 'axe-core';
 export class PageScanner {
     public constructor(@inject(AxePuppeteerFactory) private readonly axePuppeteerFactory: AxePuppeteerFactory) {}
 
-    public async scan(page: Page, axeSourcePath?: string): Promise<AxeResults> {
+    public async scan(page: Puppeteer.Page, axeSourcePath?: string): Promise<AxeResults> {
         const axePuppeteer: AxePuppeteer = await this.axePuppeteerFactory.createAxePuppeteer(page, axeSourcePath);
 
         return axePuppeteer.analyze();

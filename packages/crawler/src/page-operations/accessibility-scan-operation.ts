@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 import { inject, injectable } from 'inversify';
-import { Page } from 'puppeteer';
+import * as Puppeteer from 'puppeteer';
 import { AxeResults } from 'axe-core';
 import { PageScanner } from '../scanners/page-scanner';
 import { BlobStore } from '../storage/store-types';
@@ -17,7 +17,7 @@ export class AccessibilityScanOperation {
         @inject(LocalBlobStore) protected readonly blobStore: BlobStore,
     ) {}
 
-    public async run(page: Page, id: string, axeSourcePath?: string): Promise<AxeResults> {
+    public async run(page: Puppeteer.Page, id: string, axeSourcePath?: string): Promise<AxeResults> {
         const axeResults = await this.scanner.scan(page, axeSourcePath);
         const report = this.reportGenerator.generateReport(axeResults, page.url(), await page.title());
 

@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { Page, Response, LoadEvent } from 'puppeteer';
+import * as Puppeteer from 'puppeteer';
 import { injectable, inject } from 'inversify';
 import { isNil } from 'lodash';
 import { PageConfigurator } from './page-configurator';
@@ -25,7 +25,11 @@ export class PageNavigator {
         @inject(PageHandler) protected readonly pageRenderingHandler: PageHandler,
     ) {}
 
-    public async navigate(url: string, page: Page, onNavigationError: OnNavigationError = () => Promise.resolve()): Promise<Response> {
+    public async navigate(
+        url: string,
+        page: Puppeteer.Page,
+        onNavigationError: OnNavigationError = () => Promise.resolve(),
+    ): Promise<Puppeteer.Response> {
         // Configure page settings before navigating to URL
         await this.pageConfigurator.configurePage(page);
 
@@ -73,10 +77,10 @@ export class PageNavigator {
 
     private async navigateToUrl(
         url: string,
-        page: Page,
-        condition: LoadEvent,
-    ): Promise<{ response: Response; browserError?: BrowserError; error?: unknown }> {
-        let response: Response;
+        page: Puppeteer.Page,
+        condition: Puppeteer.LoadEvent,
+    ): Promise<{ response: Puppeteer.Response; browserError?: BrowserError; error?: unknown }> {
+        let response: Puppeteer.Response;
         let browserError: BrowserError;
         try {
             const options = {
