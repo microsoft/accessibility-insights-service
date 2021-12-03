@@ -42,21 +42,21 @@
         "eslint-plugin-header": "^3.1.1",
         "eslint-plugin-import": "^2.25.3",
         "eslint-plugin-jest": "^25.3.0",
-        "eslint-plugin-jsdoc": "^37.0.3",
+        "eslint-plugin-jsdoc": "^37.1.0",
         "eslint-plugin-prefer-arrow": "^1.2.3",
         "eslint-plugin-security": "^1.4.0",
         "eslint-plugin-sort-class-members": "^1.14.0",
         "eslint-plugin-unicorn": "^39.0.0",
-        "jest": "^27.2.5",
+        "jest": "^27.4.3",
         "jest-extended": "^1.2.0",
-        "jest-html-reporter": "^3.4.1",
+        "jest-html-reporter": "^3.4.2",
         "jest-junit": "^12.3.0",
         "lerna": "^4.0.0",
         "lerna-audit": "^1.3.3",
         "license-check-and-add": "^4.0.3",
         "npm-run-all": "^4.1.5",
         "prettier": "2.5.0",
-        "simple-git": "^2.47.0",
+        "simple-git": "^2.48.0",
         "syncpack": "^5.8.15",
         "tslint": "^6.1.3",
         "typescript": "^4.5.2"
@@ -84,7 +84,9 @@
         "nth-check": ">=2.0.1",
         "ansi-regex": "^5.0.1",
         "validator": ">=13.7.0",
-        "serialize-error": "8.1.0"
+        "serialize-error": "8.1.0",
+        "uuid-with-v6": "1.1.2",
+        "json-schema": ">=0.4.0"
     },
     "dependencies": {
         "accessibility-insights-report": "4.2.0"
