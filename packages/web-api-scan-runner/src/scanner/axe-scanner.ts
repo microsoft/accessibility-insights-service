@@ -17,15 +17,17 @@ export class AxeScanner {
     public async scan(page: Page): Promise<AxeScanResults> {
         const scanConfig = await this.serviceConfig.getConfigValue('scanConfig');
 
-        return this.promiseUtils.waitFor(this.scanImpl(page), scanConfig.scanTimeoutInMin * 60000, () =>
-            Promise.resolve({
+        return this.promiseUtils.waitFor(this.scanImpl(page), scanConfig.scanTimeoutInMin * 60000, () => {
+            this.logger.logError(`Accessibility scan timed out after ${scanConfig.scanTimeoutInMin} minutes`);
+
+            return Promise.resolve({
                 error: {
                     errorType: 'ScanTimeout',
                     message: `Scan timed out after ${scanConfig.scanTimeoutInMin} minutes`,
                     stack: new Error().stack,
                 },
-            } as AxeScanResults),
-        );
+            } as AxeScanResults);
+        });
     }
 
     private async scanImpl(page: Page): Promise<AxeScanResults> {
