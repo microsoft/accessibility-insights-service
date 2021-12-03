@@ -9,6 +9,7 @@ import * as durableFunctions from 'durable-functions';
 import { IOrchestrationFunctionContext } from 'durable-functions/lib/src/classes';
 import { TestEnvironment } from 'functional-tests';
 import { It, Mock } from 'typemoq';
+import { ContextBindingData } from '@azure/functions';
 import { OrchestrationSteps } from '../orchestration/orchestration-steps';
 import { GeneratorExecutor } from '../test-utilities/generator-executor';
 import { MockableLogger } from '../test-utilities/mockable-logger';
@@ -33,7 +34,7 @@ describe('HealthMonitorOrchestrationController', () => {
         maxScanWaitTimeInSeconds: 20,
         logQueryTimeRange: 'P1D',
         environmentDefinition: TestEnvironment[TestEnvironment.canary],
-        consolidatedIdBase: 'somereportid',
+        consolidatedIdBase: 'some-report-id',
         scanNotifyApiEndpoint: '/some-endpoint',
         maxScanCompletionNotificationWaitTimeInSeconds: 30,
         scanNotifyFailApiEndpoint: '/some-fail-endpoint',
@@ -48,7 +49,7 @@ describe('HealthMonitorOrchestrationController', () => {
     } as unknown as IOrchestrationFunctionContext;
 
     beforeEach(() => {
-        contextStub.bindingData = {};
+        contextStub.bindingData = {} as unknown as ContextBindingData;
 
         const serviceConfigurationMock = Mock.ofType(ServiceConfiguration);
         serviceConfigurationMock

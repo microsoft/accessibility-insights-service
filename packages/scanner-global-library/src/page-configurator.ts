@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 import { injectable } from 'inversify';
-import { Page } from 'puppeteer';
+import * as Puppeteer from 'puppeteer';
 
 @injectable()
 export class PageConfigurator {
@@ -16,7 +16,7 @@ export class PageConfigurator {
         return this.userAgent;
     }
 
-    public async configurePage(page: Page): Promise<void> {
+    public async configurePage(page: Puppeteer.Page): Promise<void> {
         await page.setBypassCSP(true);
         await page.setCacheEnabled(false); // disable cache to allow page reload
         await page.setViewport({
@@ -32,7 +32,7 @@ export class PageConfigurator {
         return `${this.windowWidth}x${this.windowHeight}`;
     }
 
-    private async setUserAgent(page: Page): Promise<void> {
+    private async setUserAgent(page: Puppeteer.Page): Promise<void> {
         const browser = page.browser();
         this.userAgent = (await browser.userAgent()).replace('HeadlessChrome', 'Chrome');
         await page.setUserAgent(this.userAgent);

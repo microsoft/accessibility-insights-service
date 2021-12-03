@@ -3,7 +3,7 @@
 
 import Apify from 'apify';
 import { injectable } from 'inversify';
-import { Page } from 'puppeteer';
+import * as Puppeteer from 'puppeteer';
 
 export declare type ElementClickAction = 'navigation' | 'page-action';
 
@@ -20,7 +20,7 @@ export class ClickElementOperation {
     ) {}
 
     public async click(
-        page: Page,
+        page: Puppeteer.Page,
         selector: string,
         requestQueue: Apify.RequestQueue,
         discoveryPatterns: string[],

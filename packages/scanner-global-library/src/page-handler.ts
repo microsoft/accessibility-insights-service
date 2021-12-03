@@ -3,14 +3,18 @@
 
 import { inject, injectable, optional } from 'inversify';
 import { GlobalLogger } from 'logger';
-import { Page } from 'puppeteer';
+import * as Puppeteer from 'puppeteer';
 import { System } from 'common';
 
 @injectable()
 export class PageHandler {
     constructor(@inject(GlobalLogger) @optional() private readonly logger: GlobalLogger) {}
 
-    public async waitForPageToCompleteRendering(page: Page, timeoutMsecs: number, checkIntervalMsecs: number = 200): Promise<void> {
+    public async waitForPageToCompleteRendering(
+        page: Puppeteer.Page,
+        timeoutMsecs: number,
+        checkIntervalMsecs: number = 200,
+    ): Promise<void> {
         const maxCheckCount = timeoutMsecs / checkIntervalMsecs;
         const minCheckBreakCount = 3;
 

@@ -3,7 +3,7 @@
 
 import Apify from 'apify';
 import { inject, injectable } from 'inversify';
-import { Page } from 'puppeteer';
+import * as Puppeteer from 'puppeteer';
 import { ActiveElementsFinder } from '../browser-components/active-elements-finder';
 import { Operation } from './operation';
 
@@ -14,7 +14,7 @@ const apifyUtilities = require('apify-shared/utilities');
 export class EnqueueActiveElementsOperation {
     constructor(@inject(ActiveElementsFinder) private readonly activeElementFinder: ActiveElementsFinder) {}
 
-    public async find(page: Page, selectors: string[], requestQueue: Apify.RequestQueue): Promise<void> {
+    public async find(page: Puppeteer.Page, selectors: string[], requestQueue: Apify.RequestQueue): Promise<void> {
         const url = page.url();
         const elements = await this.activeElementFinder.getActiveElements(page, selectors);
         await Promise.all(
