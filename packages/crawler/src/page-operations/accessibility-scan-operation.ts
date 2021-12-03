@@ -26,7 +26,7 @@ export class AccessibilityScanOperation {
     ) {}
 
     public async run(page: Puppeteer.Page, id: string, axeSourcePath?: string): Promise<AxeResults> {
-        const axeResults = await this.scanner.scan(page, axeSourcePath);
+        const axeResults = await this.scanForA11yIssues(page, axeSourcePath);
         const report = this.reportGenerator.generateReport(axeResults, page.url(), await page.title());
 
         await this.blobStore.setValue(`${id}.axe`, axeResults);
@@ -39,7 +39,7 @@ export class AccessibilityScanOperation {
         return axeResults;
     }
 
-    private async scanForA11yIssues(page: Page, axeSourcePath?: string): Promise<AxeResults> {
+    private async scanForA11yIssues(page: Puppeteer.Page, axeSourcePath?: string): Promise<AxeResults> {
         let axeResults = await this.runA11yScan(page, axeSourcePath);
         if (axeResults === 'ScanTimeout') {
             console.log(
@@ -62,7 +62,7 @@ export class AccessibilityScanOperation {
         return axeResults;
     }
 
-    private async runA11yScan(page: Page, axeSourcePath?: string): Promise<AxeResults | AxeScanError> {
+    private async runA11yScan(page: Puppeteer.Page, axeSourcePath?: string): Promise<AxeResults | AxeScanError> {
         return this.promiseUtils.waitFor(
             this.scanner.scan(page, axeSourcePath),
             AccessibilityScanOperation.axeScanTimeoutSec * 1000,
