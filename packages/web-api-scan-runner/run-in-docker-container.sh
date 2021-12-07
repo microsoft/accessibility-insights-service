@@ -11,4 +11,4 @@ cp ./.env ./dist/
 yarn build &&
     cd ./dist &&
     docker build --tag runner . &&
-    docker run --init --cap-add=SYS_ADMIN --ipc=host -e id="'1ec570df-6ba0-6421-85ef-81ec2263f760'" -e url='https://teststorage57bzoqjjclekk.z13.web.core.windows.net/2021-05-04/' runner
+    docker run --init --cap-add=SYS_ADMIN --ipc=host runner

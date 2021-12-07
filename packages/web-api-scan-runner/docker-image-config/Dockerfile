@@ -1,37 +1,30 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
-FROM node:12-slim
 
-# Install latest chrome dev package and fonts to support major charsets (Chinese, Japanese, Arabic, Hebrew, Thai and a few others)
-# Note: this installs the necessary libs to make the bundled version of Chromium that Puppeteer
-# installs, work.
-RUN apt-get update \
-    && apt-get install -y wget gnupg \
-    && wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
-    && sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list' \
-    && apt-get update \
-    && apt-get install -y google-chrome-stable fonts-ipafont-gothic fonts-wqy-zenhei fonts-thai-tlwg fonts-kacst fonts-freefont-ttf libxss1 libxtst6 procps \
-    --no-install-recommends \
-    && rm -rf /var/lib/apt/lists/*
+FROM mcr.microsoft.com/windows/servercore:1809-amd64
 
-# Install app dependencies
-COPY package.json ./
+ENV NODE_VERSION 12.21.0
 
-RUN npm install \
-    # Force npm package resolution
-    && npx npm-force-resolutions@0.0.3 \
-    && npm install \
-    # Add user so we don't need --no-sandbox.
-    # same layer as npm install to keep re-chowned files from using up several hundred MBs more space
-    && groupadd -r pptruser && useradd -r -g pptruser -G audio,video pptruser \
-    && mkdir -p /home/pptruser/Downloads \
-    && chown -R pptruser:pptruser /home/pptruser \
-    && chown -R pptruser:pptruser /node_modules
+USER ContainerAdministrator
 
-# Run everything after as non-privileged user.
-USER pptruser
+# Install Node.js
+RUN powershell Set-ExecutionPolicy RemoteSigned
+RUN powershell -Command \
+    Invoke-WebRequest $('https://nodejs.org/dist/v{0}/node-v{0}-win-x64.zip' -f $env:NODE_VERSION) -OutFile 'node.zip' -UseBasicParsing ; \
+    Expand-Archive node.zip -DestinationPath C:\ ; \
+    Rename-Item -Path $('C:\node-v{0}-win-x64' -f $env:NODE_VERSION) -NewName 'C:\nodejs'
+RUN setx /m PATH "%PATH%;C:\nodejs"
 
-# Bundle app source
+# Install fonts to enable browser rendering
+ADD Fonts.tar /Fonts/
+COPY Add-Font.ps1 .
+RUN powershell -Command \
+    .\Add-Font.ps1 Fonts > nul
+
+# Bundle app package
 COPY . .
 
-ENTRYPOINT [ "node", "./web-api-scan-runner.js" ]
+# Install app dependencies
+RUN npm install
+
+ENTRYPOINT ["powershell.exe", "./web-api-scan-runner.ps1"]
