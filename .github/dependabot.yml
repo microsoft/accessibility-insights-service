@@ -73,7 +73,9 @@ updates:
     - "> 4.3.0"
   - dependency-name: serialize-error
     versions:
-    - "> 8.1.0"  
-  - dependency-name: uuid-with-v6
+    - "> 8.1.0"
+    # may break contract with any version update
+    # update with extreme caution
+  - dependency-name: yargs
     versions:
-    - "> 1.1.2"
+    - "> 17.2.1"

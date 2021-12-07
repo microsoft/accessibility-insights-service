@@ -85,8 +85,8 @@
         "ansi-regex": "^5.0.1",
         "validator": ">=13.7.0",
         "serialize-error": "8.1.0",
-        "uuid-with-v6": "1.1.2",
-        "json-schema": ">=0.4.0"
+        "json-schema": ">=0.4.0",
+        "yargs": "17.2.1"
     },
     "dependencies": {
         "accessibility-insights-report": "4.2.0"
