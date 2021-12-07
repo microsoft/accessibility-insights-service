@@ -42,10 +42,11 @@ export class Runner {
 
     public async run(): Promise<void> {
         const scanMetadata = this.scanMetadataConfig.getConfig();
-        this.logger.logInfo(`Input data --> ${JSON.stringify(scanMetadata, undefined, '  ')}`);
+        this.logger.logInfo(`Input raw data --> ${JSON.stringify(scanMetadata, undefined, '  ')}`);
 
         // decode URL back from docker parameter encoding
         scanMetadata.url = decodeURI(scanMetadata.url);
+        this.logger.logInfo(`Input decoded data --> ${JSON.stringify(scanMetadata, undefined, '  ')}`);
 
         this.logger.setCommonProperties({ scanId: scanMetadata.id, url: scanMetadata.url });
         this.logger.logInfo('Starting page scan task.');
