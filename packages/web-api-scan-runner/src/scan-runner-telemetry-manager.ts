@@ -21,10 +21,8 @@ export class ScanRunnerTelemetryManager {
     public trackScanStarted(scanId: string): void {
         this.scanStarted = this.getCurrentTimestamp();
         this.logger.logInfo(`Input scan id --> ${scanId}`);
-
         this.scanSubmitted = this.guidGenerator.getGuidTimestamp(scanId).getTime();
         this.logger.logInfo(`Parsed scan id --> ${this.scanSubmitted}`);
-
         this.logger.trackEvent('ScanRequestRunning', undefined, { runningScanRequests: 1 });
         this.logger.trackEvent('ScanTaskStarted', undefined, {
             scanWaitTime: this.asSeconds(this.scanStarted - this.scanSubmitted),
