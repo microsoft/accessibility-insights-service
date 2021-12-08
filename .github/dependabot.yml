@@ -74,8 +74,3 @@ updates:
   - dependency-name: serialize-error
     versions:
     - "> 8.1.0"
-    # may break contract with any version update
-    # update with extreme caution
-  - dependency-name: yargs
-    versions:
-    - "> 17.2.1"
