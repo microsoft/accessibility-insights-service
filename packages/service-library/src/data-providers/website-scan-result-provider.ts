@@ -156,7 +156,7 @@ export class WebsiteScanResultProvider {
         );
 
         // compact new document before writing to database
-        const mergedDocument = this.websiteScanResultAggregator.mergePartDocument(partDocument, operationResponse.item ?? {});
+        const mergedDocument = await this.websiteScanResultAggregator.mergePartDocument(partDocument, operationResponse.item ?? {});
         await this.cosmosContainerClient.writeDocument(mergedDocument);
     }
 
@@ -179,7 +179,7 @@ export class WebsiteScanResultProvider {
             ],
         };
 
-        let partDocument: Partial<WebsiteScanResultPart>;
+        let partDocument: Partial<WebsiteScanResultPart> = {};
         let continuationToken;
         do {
             const response = (await this.cosmosContainerClient.queryDocuments<WebsiteScanResultPart>(
@@ -189,10 +189,14 @@ export class WebsiteScanResultProvider {
 
             client.ensureSuccessStatusCode(response);
             continuationToken = response.continuationToken;
-            partDocument = response.item.reduce(
-                (prev, next) => this.websiteScanResultAggregator.mergePartDocument(next, prev),
-                partDocument ?? {},
-            );
+            const start = new Date().valueOf();
+            partDocument = await this.websiteScanResultAggregator.mergePartDocuments(response.item, partDocument);
+            // partDocument = response.item.reduce(
+            //     (prev, next) => this.websiteScanResultAggregator.mergePartDocument(next, prev),
+            //     partDocument ?? {},
+            // );
+            const end = new Date().valueOf();
+            console.log(`Items: ${response.item.length} Duration: ${(end - start) / 1000}`);
         } while (continuationToken !== undefined);
 
         return partDocument;
@@ -257,7 +261,7 @@ export class WebsiteScanResultProvider {
     // set initial deep scan limit based on provided know list size
     private async setDeepScanLimit(dbDocument: DbDocument): Promise<void> {
         // compact known list
-        const partDocument = this.websiteScanResultAggregator.mergePartDocument(dbDocument.partDocument, {});
+        const partDocument = await this.websiteScanResultAggregator.mergePartDocument(dbDocument.partDocument, {});
         const config = await this.serviceConfig.getConfigValue('crawlConfig');
 
         if (partDocument.knownPages?.length >= config.deepScanDiscoveryLimit) {

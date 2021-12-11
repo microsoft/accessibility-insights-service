@@ -48,20 +48,20 @@ az account set --subscription "$subscription"
 # Generate service principal name
 user=$(az ad signed-in-user show --query "mailNickname" -o tsv)
 displayName="$user-$resourceGroupName"
-servicePrincipalName="http://$displayName"
 
 # Create or update service principal object
 # Use display name instead of service principal name to prevent az cli assiging a random display name
 echo "Creating service principal..."
 password=$(az ad sp create-for-rbac --role contributor --scopes "/subscriptions/$subscription/resourceGroups/$resourceGroupName" --name "$displayName" --query "password" -o tsv)
 
+# Retrieve service principal object properties
+tenant=$(az ad sp list --display-name "${displayName}" --query "[0].appOwnerTenantId" -o tsv)
+clientId=$(az ad sp list --display-name "${displayName}" --query "[0].appId" -o tsv)
+objectId=$(az ad sp list --display-name "${displayName}" --query "[0].objectId" -o tsv)
+
 # Set key vault access policy
 echo "Granting service principal permissions to the '$keyVault' key vault"
-az keyvault set-policy --name "$keyVault" --spn "$servicePrincipalName" --secret-permissions get list 1>/dev/null
-
-# Retrieve service principal object properties
-tenant=$(az ad sp show --id "$servicePrincipalName" --query "appOwnerTenantId" -o tsv)
-clientId=$(az ad sp show --id "$servicePrincipalName" --query "appId" -o tsv)
+az keyvault set-policy --name "${keyVault}" --object-id "${objectId}" --secret-permissions get list 1>/dev/null
 
 # Granting access to storage blob
 echo "Granting service principal permissions to the '$storageAccountName' Blob storage"

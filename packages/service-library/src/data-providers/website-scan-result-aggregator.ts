@@ -3,17 +3,22 @@
 
 import { injectable } from 'inversify';
 import { WebsiteScanResultBase, WebsiteScanResultPart } from 'storage-documents';
-import _ from 'lodash';
-import moment from 'moment';
+import Parallel from 'paralleljs';
+import { System } from 'common';
+import { mergeWith, uniqBy, uniq, isEmpty, isArray, compact } from 'lodash';
+
+/* eslint-disable @typescript-eslint/no-var-requires, @typescript-eslint/no-require-imports, @typescript-eslint/no-explicit-any */
 
 @injectable()
 export class WebsiteScanResultAggregator {
+    public static parallelBlockSize = 5;
+
     public mergeBaseDocument(
         sourceDocument: Partial<WebsiteScanResultBase>,
         targetDocument: Partial<WebsiteScanResultBase>,
     ): Partial<WebsiteScanResultBase> {
         const propertiesToKeep = ['_etag', 'deepScanId', 'deepScanLimit'];
-        const mergedDocument = _.mergeWith(targetDocument, sourceDocument, (target, source, key) => {
+        const mergedDocument = mergeWith(targetDocument, sourceDocument, (target, source, key) => {
             // preserve the targe value if defined
             if (propertiesToKeep.includes(key)) {
                 return target;
@@ -23,55 +28,125 @@ export class WebsiteScanResultAggregator {
         });
 
         if (mergedDocument.reports !== undefined) {
-            mergedDocument.reports = _.uniqBy(mergedDocument.reports, (r) => r.reportId);
+            mergedDocument.reports = uniqBy(mergedDocument.reports, (r) => r.reportId);
         }
 
         if (mergedDocument.discoveryPatterns !== undefined) {
-            mergedDocument.discoveryPatterns = _.uniq(mergedDocument.discoveryPatterns);
+            mergedDocument.discoveryPatterns = uniq(mergedDocument.discoveryPatterns);
         }
 
         return mergedDocument;
     }
 
-    public mergePartDocument(
+    public async mergePartDocument(
         sourceDocument: Partial<WebsiteScanResultPart>,
         targetDocument: Partial<WebsiteScanResultPart>,
-    ): Partial<WebsiteScanResultPart> {
-        const mergedDocument = _.mergeWith(targetDocument, sourceDocument, (target, source, key) => {
-            return this.mergeArray(target, source, key, ['pageScans', 'knownPages']);
-        });
-
-        if (mergedDocument.knownPages !== undefined) {
-            mergedDocument.knownPages = _.uniqWith(mergedDocument.knownPages, (a, b) => {
-                if (a === undefined || b === undefined) {
-                    return false;
-                }
-
-                return a.toLocaleLowerCase() === b.toLocaleLowerCase();
-            });
-        }
-
-        if (mergedDocument.pageScans !== undefined) {
-            const pageScansByUrl = _.groupBy(mergedDocument.pageScans, (scan) => scan.url.toLocaleLowerCase());
-            mergedDocument.pageScans = Object.keys(pageScansByUrl).map((url) => {
-                return _.maxBy(pageScansByUrl[url], (scan) => moment.utc(scan.timestamp).valueOf());
-            });
-        }
-
-        return mergedDocument;
+    ): Promise<Partial<WebsiteScanResultPart>> {
+        return this.mergePartDocuments([sourceDocument], targetDocument);
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    public async mergePartDocuments(
+        documents: Partial<WebsiteScanResultPart>[],
+        baseDocument?: Partial<WebsiteScanResultPart>,
+    ): Promise<Partial<WebsiteScanResultPart>> {
+        if (isEmpty(documents)) {
+            return baseDocument ?? {};
+        }
+
+        if (documents.length === 1 && isEmpty(baseDocument)) {
+            return documents[0];
+        }
+
+        let mergeResult: Partial<WebsiteScanResultPart>[] = [];
+        mergeResult.push(baseDocument);
+        mergeResult.push(...documents);
+
+        do {
+            mergeResult = await this.mergePartDocumentsParallel(mergeResult);
+        } while (mergeResult.length > 1);
+
+        return mergeResult[0];
+    }
+
+    private async mergePartDocumentsParallel(documents: Partial<WebsiteScanResultPart>[]): Promise<Partial<WebsiteScanResultPart>[]> {
+        const partResults = await new Promise<Partial<WebsiteScanResultPart>[][]>((resolve, reject) => {
+            const parts = System.chunkArray(documents, WebsiteScanResultAggregator.parallelBlockSize);
+            const parallel = new Parallel(parts);
+
+            parallel
+                .map((part: Partial<WebsiteScanResultPart>[]) => {
+                    const _ = require('lodash');
+                    const moment = require('moment');
+
+                    const mergeArray = function (target: any, source: any, key: string, supportedKeys: string[]): any {
+                        if (_.isArray(target) || _.isArray(source)) {
+                            if (!supportedKeys.includes(key)) {
+                                throw new Error(`Merge of ${key} array is not implemented.`);
+                            }
+
+                            if (target) {
+                                return _.compact(target.concat(source));
+                            } else {
+                                return _.compact(source);
+                            }
+                        }
+
+                        return undefined;
+                    };
+
+                    const mergePartDocument = function (
+                        sourceDocument: Partial<WebsiteScanResultPart>,
+                        targetDocument: Partial<WebsiteScanResultPart>,
+                    ): Partial<WebsiteScanResultPart> {
+                        const mergedDocument = _.mergeWith(targetDocument, sourceDocument, (target: any, source: any, key: any) => {
+                            return mergeArray(target, source, key, ['pageScans', 'knownPages']);
+                        });
+
+                        if (mergedDocument.knownPages !== undefined) {
+                            mergedDocument.knownPages = _.uniqWith(mergedDocument.knownPages, (a: any, b: any) => {
+                                if (a === undefined || b === undefined) {
+                                    return false;
+                                }
+
+                                return a.toLocaleLowerCase() === b.toLocaleLowerCase();
+                            });
+                        }
+
+                        if (mergedDocument.pageScans !== undefined) {
+                            const pageScansByUrl = _.groupBy(mergedDocument.pageScans, (scan: any) => scan.url.toLocaleLowerCase());
+                            mergedDocument.pageScans = Object.keys(pageScansByUrl).map((url) => {
+                                return _.maxBy(pageScansByUrl[url], (scan: any) => moment.utc(scan.timestamp).valueOf());
+                            });
+                        }
+
+                        return mergedDocument;
+                    };
+
+                    return [part.reduce((prev, next) => mergePartDocument(next, prev), {}) as Partial<WebsiteScanResultPart>];
+                })
+                .then(
+                    (data) => {
+                        resolve(data);
+                    },
+                    (error) => {
+                        reject(error);
+                    },
+                );
+        });
+
+        return partResults.map((p) => p[0]);
+    }
+
     private mergeArray(target: any, source: any, key: string, supportedKeys: string[]): any {
-        if (_.isArray(target) || _.isArray(source)) {
+        if (isArray(target) || isArray(source)) {
             if (!supportedKeys.includes(key)) {
                 throw new Error(`Merge of ${key} array is not implemented.`);
             }
 
             if (target) {
-                return _.compact(target.concat(source));
+                return compact(target.concat(source));
             } else {
-                return _.compact(source);
+                return compact(source);
             }
         }
 

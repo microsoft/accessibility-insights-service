@@ -3055,6 +3055,11 @@
   resolved "https://registry.yarnpkg.com/@types/normalize-path/-/normalize-path-3.0.0.tgz#bb5c46cab77b93350b4cf8d7ff1153f47189ae31"
   integrity sha512-Nd8y/5t/7CRakPYiyPzr/IAfYusy1FkcZYFEAcoMZkwpJv2n4Wm+olW+e7xBdHEXhOnWdG9ddbar0gqZWS4x5Q==
 
+"@types/paralleljs@^0.0.21":
+  version "0.0.21"
+  resolved "https://registry.yarnpkg.com/@types/paralleljs/-/paralleljs-0.0.21.tgz#4f522bb050911149b86c7e8213865b96644f012f"
+  integrity sha512-6DA//BIBHnUAgkwkqhvBfIQqHtHk8z68NiNt5oMlMrnC6lC2hq4lU2lJGD3pA8FdOf2Aj/XmwhuqZIvGdIbBrw==
+
 "@types/parse-json@^4.0.0":
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/@types/parse-json/-/parse-json-4.0.0.tgz#2f8bb441434d163b35fb8ffdccd7138927ffb8c0"
@@ -10274,6 +10279,11 @@ pacote@^11.2.6:
     rimraf "^3.0.2"
     ssri "^8.0.1"
     tar "^6.1.0"
+
+paralleljs@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/paralleljs/-/paralleljs-1.1.0.tgz#d0cd5540fe4dd8e80fa94d3cb6a530510dbe6e70"
+  integrity sha512-5sYLAEzM+qMDYzQeVWyNdqINU4h+/Fhr0CrZs3+HCYPIhOWuA2BCzn74js2qzX+LKFwRQR6sSJBZhgT+WWhbfw==
 
 parent-module@^1.0.0:
   version "1.0.1"
