@@ -189,14 +189,7 @@ export class WebsiteScanResultProvider {
 
             client.ensureSuccessStatusCode(response);
             continuationToken = response.continuationToken;
-            const start = new Date().valueOf();
             partDocument = await this.websiteScanResultAggregator.mergePartDocuments(response.item, partDocument);
-            // partDocument = response.item.reduce(
-            //     (prev, next) => this.websiteScanResultAggregator.mergePartDocument(next, prev),
-            //     partDocument ?? {},
-            // );
-            const end = new Date().valueOf();
-            console.log(`Items: ${response.item.length} Duration: ${(end - start) / 1000}`);
         } while (continuationToken !== undefined);
 
         return partDocument;

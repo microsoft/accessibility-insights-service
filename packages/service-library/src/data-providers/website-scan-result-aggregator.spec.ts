@@ -76,7 +76,7 @@ describe(WebsiteScanResultAggregator, () => {
         expect(actualDocument).toEqual(expectedDocument);
     });
 
-    it('merge website part document', () => {
+    it('merge website part document', async () => {
         const source = {
             knownPages: ['new page', 'existing page', undefined, null /* should remove falsey value */, 'Various Case Page'],
             pageScans: [
@@ -138,8 +138,8 @@ describe(WebsiteScanResultAggregator, () => {
             ],
         } as WebsiteScanResultPart;
 
-        const actualDocument = websiteScanResultAggregator.mergePartDocument(source, target);
+        const actualDocument = await websiteScanResultAggregator.mergePartDocument(source, target);
 
         expect(actualDocument).toEqual(expectedDocument);
-    });
+    }, 12000);
 });

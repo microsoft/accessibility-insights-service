@@ -68,11 +68,13 @@ export class WebsiteScanResultAggregator {
         return mergeResult[0];
     }
 
+    /* istanbul ignore file */
     private async mergePartDocumentsParallel(documents: Partial<WebsiteScanResultPart>[]): Promise<Partial<WebsiteScanResultPart>[]> {
         const partResults = await new Promise<Partial<WebsiteScanResultPart>[][]>((resolve, reject) => {
             const parts = System.chunkArray(documents, WebsiteScanResultAggregator.parallelBlockSize);
             const parallel = new Parallel(parts);
 
+            // The scope of a parallel function should include all dependencies to run as a child process
             parallel
                 .map((part: Partial<WebsiteScanResultPart>[]) => {
                     const _ = require('lodash');
