@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 const path = require('path');
 const webpack = require('webpack');
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
@@ -79,6 +80,11 @@ module.exports = (env) => {
                     {
                         context: './docker-image-config',
                         from: 'web-api-scan-runner.ps1',
+                        to: '',
+                    },
+                    {
+                        context: '../../node_modules/paralleljs/lib/',
+                        from: '**/*.js',
                         to: '',
                     },
                 ],
