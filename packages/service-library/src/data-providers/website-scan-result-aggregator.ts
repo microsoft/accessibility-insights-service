@@ -11,7 +11,7 @@ import { mergeWith, uniqBy, uniq, isEmpty, isArray, compact } from 'lodash';
 
 @injectable()
 export class WebsiteScanResultAggregator {
-    public static parallelBlockSize = 5;
+    public static parallelBlockSize = 6;
 
     public mergeBaseDocument(
         sourceDocument: Partial<WebsiteScanResultBase>,

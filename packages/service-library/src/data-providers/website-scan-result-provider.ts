@@ -17,6 +17,7 @@ import {
 import { GlobalLogger } from 'logger';
 import _ from 'lodash';
 import pLimit from 'p-limit';
+import moment from 'moment';
 import { PartitionKeyFactory } from '../factories/partition-key-factory';
 import { WebsiteScanResultAggregator } from './website-scan-result-aggregator';
 
@@ -179,6 +180,8 @@ export class WebsiteScanResultProvider {
             ],
         };
 
+        let documentCount = 0;
+        let elapsedToAggregate = 0;
         let partDocument: Partial<WebsiteScanResultPart> = {};
         let continuationToken;
         do {
@@ -189,8 +192,20 @@ export class WebsiteScanResultProvider {
 
             client.ensureSuccessStatusCode(response);
             continuationToken = response.continuationToken;
+
+            documentCount = documentCount + response.item.length;
+            const start = process.hrtime();
             partDocument = await this.websiteScanResultAggregator.mergePartDocuments(response.item, partDocument);
+            const elapsed = process.hrtime(start);
+            elapsedToAggregate = elapsedToAggregate + elapsed[0] * 1000 + elapsed[1] / 1000000;
         } while (continuationToken !== undefined);
+
+        this.logger.logInfo(
+            `Elapsed ${moment
+                .utc(moment.duration(elapsedToAggregate).asMilliseconds())
+                .format('mm:ss.SSS')} while merged ${documentCount} website scan result partials documents`,
+            { elapsed: `${elapsedToAggregate}`, documentCount: `${documentCount}` },
+        );
 
         return partDocument;
     }
