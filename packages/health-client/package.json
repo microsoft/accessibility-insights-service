@@ -33,6 +33,7 @@
     "dependencies": {
         "inversify": "^6.0.1",
         "lodash": "^4.17.21",
+        "paralleljs": "^1.1.0",
         "reflect-metadata": "^0.1.13",
         "common": "^1.0.0",
         "service-library": "1.0.0",

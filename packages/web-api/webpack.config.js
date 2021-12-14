@@ -85,7 +85,27 @@ module.exports = (env) => {
                     {
                         context: '../../node_modules/paralleljs/lib/',
                         from: '**/*.js',
+                        to: 'check-health-func',
+                    },
+                    {
+                        context: '../../node_modules/paralleljs/lib/',
+                        from: '**/*.js',
+                        to: 'get-report-func',
+                    },
+                    {
+                        context: '../../node_modules/paralleljs/lib/',
+                        from: '**/*.js',
                         to: 'get-scan-func',
+                    },
+                    {
+                        context: '../../node_modules/paralleljs/lib/',
+                        from: '**/*.js',
+                        to: 'get-scans-batch-func',
+                    },
+                    {
+                        context: '../../node_modules/paralleljs/lib/',
+                        from: '**/*.js',
+                        to: 'post-scans-func',
                     },
                 ],
             }),

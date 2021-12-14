@@ -44,6 +44,7 @@
         "inversify": "^6.0.1",
         "logger": "1.0.0",
         "moment": "^2.29.1",
+        "paralleljs": "^1.1.0",
         "reflect-metadata": "^0.1.13",
         "service-library": "1.0.0",
         "storage-documents": "1.0.0",

@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 const path = require('path');
 const webpack = require('webpack');
 
@@ -8,9 +9,10 @@ const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 module.exports = (env) => {
     const version = env ? env.version : 'dev';
     console.log(`Building for version : ${version}`);
+
     return {
         devtool: 'cheap-source-map',
-        externals: ['yargs'],
+        externals: ['yargs', 'paralleljs'],
         entry: {
             ['health-checker']: path.resolve('./src/health-checker.ts'),
         },
