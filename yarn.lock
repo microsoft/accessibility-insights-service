@@ -13023,6 +13023,11 @@ webpack-cli@^4.9.1:
     rechoir "^0.7.0"
     webpack-merge "^5.7.3"
 
+webpack-ignore-dynamic-require@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/webpack-ignore-dynamic-require/-/webpack-ignore-dynamic-require-1.0.0.tgz#b8629d67c881fe0ff3f09cc21c40474b488b13d2"
+  integrity sha512-WeGFPgwDochKPwizAu5XsHcPq3aaQLl2E+n1piD/VPGNUo5HIwrtURWNMfrPDfkHVOx+flkAihXbUiILAv5x4Q==
+
 webpack-merge@^5.7.3:
   version "5.7.3"
   resolved "https://registry.yarnpkg.com/webpack-merge/-/webpack-merge-5.7.3.tgz#2a0754e1877a25a8bbab3d2475ca70a052708213"
