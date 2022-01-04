@@ -33,6 +33,10 @@
             "path": "../packages/service-library"
         },
         {
+            "name": "parallel-workers",
+            "path": "../packages/parallel-workers"
+        },
+        {
             "name": "azure-services",
             "path": "../packages/azure-services"
         },
@@ -102,7 +106,10 @@
         "files.eol": "\n",
         "files.insertFinalNewline": true,
         "prettier.requireConfig": true,
-        "eslint.validate": ["typescript", "javascript"],
+        "eslint.validate": [
+            "typescript",
+            "javascript"
+        ],
         "eslint.enable": true,
         "editor.codeActionsOnSave": {
             "source.fixAll.eslint": true
