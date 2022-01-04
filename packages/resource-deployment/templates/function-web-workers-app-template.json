@@ -100,7 +100,7 @@
                         },
                         {
                             "name": "WEBSITE_NODE_DEFAULT_VERSION",
-                            "value": "12.13.0"
+                            "value": "~12"
                         },
                         {
                             "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
@@ -131,7 +131,9 @@
                     "apiVersion": "2016-08-01",
                     "type": "Microsoft.Web/sites/config",
                     "location": "[parameters('location')]",
-                    "dependsOn": ["[resourceId('Microsoft.Web/sites', parameters('name'))]"],
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Web/sites', parameters('name'))]"
+                    ],
                     "properties": {
                         "enabled": true
                     }
