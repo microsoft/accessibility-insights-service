@@ -131,9 +131,7 @@
                     "apiVersion": "2016-08-01",
                     "type": "Microsoft.Web/sites/config",
                     "location": "[parameters('location')]",
-                    "dependsOn": [
-                        "[resourceId('Microsoft.Web/sites', parameters('name'))]"
-                    ],
+                    "dependsOn": ["[resourceId('Microsoft.Web/sites', parameters('name'))]"],
                     "properties": {
                         "enabled": true
                     }
