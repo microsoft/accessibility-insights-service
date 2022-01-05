@@ -3,7 +3,7 @@
 
 import { inject, injectable } from 'inversify';
 import _ from 'lodash';
-import { Page, Response } from 'puppeteer';
+import * as Puppeteer from 'puppeteer';
 import { BrowserError } from './browser-error';
 import { PageConfigurator } from './page-configurator';
 import { PageHandler } from './page-handler';
@@ -18,14 +18,14 @@ export class NavigationHooks {
         private readonly pageRenderingTimeoutMsecs: number = 10000,
     ) {}
 
-    public async preNavigation(page: Page): Promise<void> {
+    public async preNavigation(page: Puppeteer.Page): Promise<void> {
         // Configure page settings before navigating to URL
         await this.pageConfigurator.configurePage(page);
     }
 
     public async postNavigation(
-        page: Page,
-        response: Response,
+        page: Puppeteer.Page,
+        response: Puppeteer.Response,
         onNavigationError: (browserError: BrowserError, error?: unknown) => Promise<void> = () => Promise.resolve(),
     ): Promise<void> {
         if (_.isNil(response)) {

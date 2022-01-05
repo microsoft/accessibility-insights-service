@@ -2,8 +2,6 @@
 // Licensed under the MIT License.
 
 import { inject, injectable } from 'inversify';
-// @ts-ignore
-import * as cheerio from 'cheerio';
 import Apify from 'apify';
 import { ApifyRequestQueueProvider, crawlerIocTypes } from '../types/ioc-types';
 import { CrawlRequestProcessor } from '../page-processors/crawl-request-processor';

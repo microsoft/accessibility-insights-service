@@ -23,7 +23,6 @@
     },
     "homepage": "https://github.com/Microsoft/accessibility-insights-service#readme",
     "devDependencies": {
-        "@types/cheerio": "^0.22.28",
         "@types/dotenv": "^8.2.0",
         "@types/jest": "^27.0.3",
         "@types/lodash": "^4.14.177",
@@ -59,7 +58,6 @@
         "axe-result-converter": "^1.0.0",
         "axe-sarif-converter": "^2.7.0",
         "azure-services": "^1.0.0",
-        "cheerio": "^1.0.0-rc.3",
         "common": "^1.0.0",
         "dotenv": "^10.0.0",
         "inversify": "^6.0.1",

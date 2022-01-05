@@ -4,7 +4,7 @@
 import { GlobalLogger } from 'logger';
 import { inject, injectable } from 'inversify';
 import { Crawler, CrawlerRunOptions, crawlerIocTypes } from 'accessibility-insights-crawler';
-import { Page } from 'puppeteer';
+import * as Puppeteer from 'puppeteer';
 import { BatchConfig } from 'azure-services';
 
 type CrawlerProvider = () => Promise<Crawler<string[]>>;
@@ -19,7 +19,7 @@ export class CrawlRunner {
         @inject(BatchConfig) private readonly batchConfig: BatchConfig,
     ) {}
 
-    public async run(baseUrl: string, discoveryPatterns: string[], page: Page): Promise<string[] | undefined> {
+    public async run(baseUrl: string, discoveryPatterns: string[], page: Puppeteer.Page): Promise<string[] | undefined> {
         const crawler = await this.getCrawler();
         if (crawler == null) {
             this.logger.logInfo('No crawler instance created by crawler provider.');

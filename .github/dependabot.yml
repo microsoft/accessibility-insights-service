@@ -46,23 +46,10 @@ updates:
   - dependency-name: "@types/node"
     versions:
     - ">= 13.0.0"
-    # Updating to apify v1 requires a substantial engineering effort; auto-
-    # updates aren't useful until we've paid down that technical debt.
-  - dependency-name: apify
-    versions:
-    - ">= 1.0.0"
-    # puppeteer and cheerio versions are tightly coupled to apify; we can't
-    # take updates to them until we finish updating to apify v1
-  - dependency-name: puppeteer
-    versions:
-    - "> 5.3.1"
-  - dependency-name: cheerio
-    versions:
-    - "> 1.0.0-rc.3"
   - dependency-name: normalize-url
     versions:
     - "> 6.1.0"
-    - dependency-name: filenamify-url
+  - dependency-name: filenamify-url
     versions:
     - "> 2.1.2"
   - dependency-name: "@sindresorhus/fnv1a"

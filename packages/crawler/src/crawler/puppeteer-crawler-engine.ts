@@ -3,8 +3,6 @@
 
 import Apify from 'apify';
 import { inject, injectable } from 'inversify';
-// @ts-ignore
-import * as cheerio from 'cheerio';
 import { isEmpty } from 'lodash';
 import { CrawlerRunOptions } from '../types/crawler-run-options';
 import { ApifyRequestQueueProvider, crawlerIocTypes, PageProcessorFactory } from '../types/ioc-types';
