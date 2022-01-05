@@ -114,7 +114,7 @@ export class BatchTaskConfigGenerator {
         let options = '';
         const taskArgs = JSON.parse(taskArgsString) as { [key: string]: string };
         // encode parameters to pass into docker hosted process
-        Object.keys(taskArgs).forEach((arg) => (options += `-e ${arg}='${encodeURI(taskArgs[arg])}' `));
+        Object.keys(taskArgs).forEach((arg) => (options += `-e ${arg}=${encodeURI(taskArgs[arg])} `));
 
         return options.trimRight();
     }

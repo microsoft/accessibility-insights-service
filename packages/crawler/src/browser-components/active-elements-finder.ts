@@ -3,7 +3,7 @@
 
 import * as path from 'path';
 import { injectable } from 'inversify';
-import { Page } from 'puppeteer';
+import * as Puppeteer from 'puppeteer';
 import * as utilities from '../utility/crypto';
 
 export interface ActiveElement {
@@ -19,7 +19,7 @@ interface ElementData {
 
 @injectable()
 export class ActiveElementsFinder {
-    public async getActiveElements(page: Page, selectors: string[]): Promise<ActiveElement[]> {
+    public async getActiveElements(page: Puppeteer.Page, selectors: string[]): Promise<ActiveElement[]> {
         const selector = selectors.join(',');
 
         await this.importLibToPage(page);
@@ -30,7 +30,7 @@ export class ActiveElementsFinder {
         });
     }
 
-    private async getPageActiveElements(page: Page, selector: string): Promise<ElementData[]> {
+    private async getPageActiveElements(page: Puppeteer.Page, selector: string): Promise<ElementData[]> {
         return page.evaluate((elementSelector) => {
             const activeElements: ElementData[] = [];
             function visible(element: HTMLElement): boolean {
@@ -85,7 +85,7 @@ export class ActiveElementsFinder {
         }, selector);
     }
 
-    private async importLibToPage(page: Page): Promise<void> {
+    private async importLibToPage(page: Puppeteer.Page): Promise<void> {
         // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
         const rootDir = path.dirname(require.main.filename || process.mainModule.filename);
         await page.addScriptTag({ path: path.resolve(rootDir, 'browser-imports.js') });

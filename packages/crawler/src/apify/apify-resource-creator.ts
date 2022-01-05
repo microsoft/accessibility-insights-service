@@ -4,7 +4,7 @@
 import * as fs from 'fs';
 import Apify from 'apify';
 import { injectable } from 'inversify';
-import { Page } from 'puppeteer';
+import * as Puppeteer from 'puppeteer';
 import { ApifySettingsHandler, apifySettingsHandler } from '../apify/apify-settings';
 import { RequestQueueOptions, ResourceCreator } from '../types/resource-creator';
 
@@ -44,7 +44,11 @@ export class ApifyResourceCreator implements ResourceCreator {
         }
     }
 
-    private async addUrlsDiscoveredInPage(requestQueue: Apify.RequestQueue, page?: Page, discoveryPatterns?: string[]): Promise<void> {
+    private async addUrlsDiscoveredInPage(
+        requestQueue: Apify.RequestQueue,
+        page?: Puppeteer.Page,
+        discoveryPatterns?: string[],
+    ): Promise<void> {
         if (page === undefined || discoveryPatterns === undefined) {
             return;
         }

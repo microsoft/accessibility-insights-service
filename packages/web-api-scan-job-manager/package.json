@@ -22,28 +22,29 @@
     "homepage": "https://github.com/Microsoft/accessibility-insights-service#readme",
     "devDependencies": {
         "@types/dotenv": "^8.2.0",
-        "@types/jest": "^27.0.2",
-        "@types/lodash": "^4.14.175",
-        "@types/node": "^12.20.33",
+        "@types/jest": "^27.0.3",
+        "@types/lodash": "^4.14.177",
+        "@types/node": "^12.20.37",
         "@types/verror": "^1.10.4",
-        "copy-webpack-plugin": "^9.0.0",
-        "fork-ts-checker-webpack-plugin": "^6.3.4",
-        "jest": "^27.2.5",
+        "copy-webpack-plugin": "^10.0.0",
+        "fork-ts-checker-webpack-plugin": "^6.5.0",
+        "jest": "^27.4.3",
         "jest-junit": "^12.3.0",
         "mockdate": "^3.0.5",
         "node-loader": "^2.0.0",
         "npm-run-all": "^4.1.5",
         "rimraf": "^3.0.2",
-        "ts-jest": "^27.0.6",
+        "ts-jest": "^27.0.7",
         "ts-loader": "^9.2.6",
         "typemoq": "^2.1.0",
-        "typescript": "^4.4.4",
-        "webpack": "^5.58.2",
-        "webpack-cli": "^4.8.0"
+        "typescript": "^4.5.2",
+        "webpack": "^5.64.4",
+        "webpack-cli": "^4.9.1"
     },
     "dependencies": {
-        "@azure/batch": "^10.0.1",
+        "@azure/batch": "^10.0.2",
         "@azure/ms-rest-nodeauth": "^3.1.0",
+        "applicationinsights": "^2.1.9",
         "azure-services": "^1.0.0",
         "common": "^1.0.0",
         "dotenv": "^10.0.0",
@@ -53,9 +54,8 @@
         "moment": "^2.29.1",
         "reflect-metadata": "^0.1.13",
         "service-library": "1.0.0",
-        "verror": "^1.10.0",
+        "verror": "^1.10.1",
         "storage-documents": "1.0.0",
-        "yargs": "^17.2.1",
-        "applicationinsights": "^2.1.8"
+        "yargs": "^17.3.0"
     }
 }

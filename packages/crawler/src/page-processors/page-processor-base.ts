@@ -3,7 +3,7 @@
 
 import Apify from 'apify';
 import { inject, injectable } from 'inversify';
-import { Page } from 'puppeteer';
+import * as Puppeteer from 'puppeteer';
 import { BrowserError, NavigationHooks } from 'scanner-global-library';
 import { System } from 'common';
 import { CrawlerConfiguration } from '../crawler/crawler-configuration';
@@ -29,18 +29,11 @@ export interface PageProcessor {
     postNavigation(crawlingContext: PuppeteerCrawlingContext): Promise<void>;
 }
 
-export type PuppeteerCrawlingContext = Apify.CrawlingContext & { page: Page };
+export type PuppeteerCrawlingContext = Apify.CrawlingContext & { page: Puppeteer.Page };
 export type PuppeteerHandlePageInputs = Apify.CrawlingContext & Apify.BrowserCrawlingContext & Apify.PuppeteerHandlePageFunctionParam;
 
 @injectable()
 export abstract class PageProcessorBase implements PageProcessor {
-    /**
-     * Timeout in which page navigation needs to finish, in seconds.
-     */
-    public readonly gotoTimeoutMsecs = 30000;
-
-    public readonly pageRenderingTimeoutMsecs = 5000;
-
     protected readonly baseUrl: string;
 
     protected readonly snapshot: boolean;
@@ -155,7 +148,7 @@ export abstract class PageProcessorBase implements PageProcessor {
      */
     protected abstract processPage: Apify.PuppeteerHandlePage;
 
-    protected async saveSnapshot(page: Page, id: string): Promise<void> {
+    protected async saveSnapshot(page: Puppeteer.Page, id: string): Promise<void> {
         if (this.snapshot) {
             await this.saveSnapshotExt(page, {
                 key: `${id}.screenshot`,
@@ -165,7 +158,7 @@ export abstract class PageProcessorBase implements PageProcessor {
         }
     }
 
-    protected async enqueueLinks(page: Page): Promise<Apify.QueueOperationInfo[]> {
+    protected async enqueueLinks(page: Puppeteer.Page): Promise<Apify.QueueOperationInfo[]> {
         if (!this.discoverLinks) {
             return [];
         }

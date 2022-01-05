@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { Page, Response, LoadEvent } from 'puppeteer';
+import * as Puppeteer from 'puppeteer';
 import { injectable, inject } from 'inversify';
 import _ from 'lodash';
 import { PageResponseProcessor } from './page-response-processor';
@@ -30,9 +30,9 @@ export class PageNavigator {
 
     public async navigate(
         url: string,
-        page: Page,
+        page: Puppeteer.Page,
         onNavigationError: (browserError: BrowserError, error?: unknown) => Promise<void> = () => Promise.resolve(),
-    ): Promise<Response> {
+    ): Promise<Puppeteer.Response> {
         await this.navigationHooks.preNavigation(page);
 
         // Try load all page resources
@@ -61,10 +61,10 @@ export class PageNavigator {
 
     private async navigateToUrl(
         url: string,
-        page: Page,
-        condition: LoadEvent,
-    ): Promise<{ response: Response; browserError?: BrowserError; error?: unknown }> {
-        let response: Response;
+        page: Puppeteer.Page,
+        condition: Puppeteer.LoadEvent,
+    ): Promise<{ response: Puppeteer.Response; browserError?: BrowserError; error?: unknown }> {
+        let response: Puppeteer.Response;
         let browserError: BrowserError;
         try {
             const options = {

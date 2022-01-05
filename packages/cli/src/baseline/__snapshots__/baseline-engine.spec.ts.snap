@@ -420,3 +420,24 @@ Object {
   },
 }
 `;
+
+exports[`BaselineEngine updateResultsInPlace reports a different output if the file format version changes 1`] = `
+Object {
+  "axeResults": Object {
+    "violations": Object {},
+  },
+  "evaluation": Object {
+    "fixedViolationsByRule": Object {},
+    "newViolationsByRule": Object {},
+    "suggestedBaselineUpdate": Object {
+      "metadata": Object {
+        "fileFormatVersion": "1.1",
+      },
+      "results": Array [],
+    },
+    "totalBaselineViolations": 0,
+    "totalFixedViolations": 0,
+    "totalNewViolations": 0,
+  },
+}
+`;

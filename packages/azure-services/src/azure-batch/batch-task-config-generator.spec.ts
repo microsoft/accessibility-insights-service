@@ -69,7 +69,7 @@ describe(BatchTaskConfigGenerator, () => {
         const environmentSettings = getEnvironmentSettings(taskArgsString);
         const actualContainerRunOptions = testSubject.getContainerRunOptions(taskArgsString, environmentSettings);
         expect(actualContainerRunOptions).toEqual(
-            "--init --rm --workdir / -e APPINSIGHTS_INSTRUMENTATIONKEY -e KEY_VAULT_URL -e TASK_ARGUMENTS -e arg1='arg1Value' -e arg2='arg2Value' -e arg3='arg3Value' --addon option",
+            '--init --rm --workdir / -e APPINSIGHTS_INSTRUMENTATIONKEY -e KEY_VAULT_URL -e TASK_ARGUMENTS -e arg1=arg1Value -e arg2=arg2Value -e arg3=arg3Value --addon option',
         );
     });
 
@@ -80,7 +80,7 @@ describe(BatchTaskConfigGenerator, () => {
         const environmentSettings = getEnvironmentSettings(taskArgsString);
         const actualContainerRunOptions = testSubject.getContainerRunOptions(taskArgsString, environmentSettings);
         expect(actualContainerRunOptions).toEqual(
-            "--init --rm --workdir / -e APPINSIGHTS_INSTRUMENTATIONKEY -e KEY_VAULT_URL -e TASK_ARGUMENTS -e url='https://localhost/support%20page/' --addon option",
+            '--init --rm --workdir / -e APPINSIGHTS_INSTRUMENTATIONKEY -e KEY_VAULT_URL -e TASK_ARGUMENTS -e url=https://localhost/support%20page/ --addon option',
         );
     });
 
@@ -111,7 +111,7 @@ describe(BatchTaskConfigGenerator, () => {
             containerSettings: {
                 imageName: 'allyContainerRegistry.azurecr.io/imageNameValue',
                 containerRunOptions:
-                    "--init --rm --workdir / -e APPINSIGHTS_INSTRUMENTATIONKEY -e KEY_VAULT_URL -e TASK_ARGUMENTS -e arg1='arg1Value' -e arg2='arg2Value' -e arg3='arg3Value' --addon option",
+                    '--init --rm --workdir / -e APPINSIGHTS_INSTRUMENTATIONKEY -e KEY_VAULT_URL -e TASK_ARGUMENTS -e arg1=arg1Value -e arg2=arg2Value -e arg3=arg3Value --addon option',
             },
             constraints: {
                 maxWallClockTime: `PT${taskRuntimeConfig.taskTimeoutInMinutes}M`,

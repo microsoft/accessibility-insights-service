@@ -2,12 +2,12 @@
 // Licensed under the MIT License.
 
 import Apify from 'apify';
-import { Page } from 'puppeteer';
+import * as Puppeteer from 'puppeteer';
 
 export type RequestQueueOptions = {
     clear?: boolean;
     inputUrls?: string[];
-    page?: Page;
+    page?: Puppeteer.Page;
     discoveryPatterns?: string[]; // Only needed if page is provided
 };
 

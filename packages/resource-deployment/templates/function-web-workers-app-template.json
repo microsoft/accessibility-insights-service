@@ -100,7 +100,7 @@
                         },
                         {
                             "name": "WEBSITE_NODE_DEFAULT_VERSION",
-                            "value": "12.13.0"
+                            "value": "~12"
                         },
                         {
                             "name": "APPINSIGHTS_INSTRUMENTATIONKEY",

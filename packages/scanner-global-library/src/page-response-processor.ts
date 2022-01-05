@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 import { injectable } from 'inversify';
-import { Response } from 'puppeteer';
+import * as Puppeteer from 'puppeteer';
 import { BrowserError, BrowserErrorTypes } from './browser-error';
 import { navigationErrorPatterns as errorPatterns } from './navigation-error-patterns';
 
@@ -10,7 +10,7 @@ import { navigationErrorPatterns as errorPatterns } from './navigation-error-pat
 export class PageResponseProcessor {
     constructor(private readonly navigationErrorPatterns: Partial<Record<BrowserErrorTypes, string[]>> = errorPatterns) {}
 
-    public getResponseError(response: Response, error: Error = new Error()): BrowserError {
+    public getResponseError(response: Puppeteer.Response, error: Error = new Error()): BrowserError {
         if (!response.ok()) {
             return {
                 errorType: 'HttpErrorCode',
@@ -46,7 +46,7 @@ export class PageResponseProcessor {
         };
     }
 
-    private isHtmlContentType(response: Response): boolean {
+    private isHtmlContentType(response: Puppeteer.Response): boolean {
         const contentType = this.getContentType(response.headers());
 
         return contentType !== undefined && contentType.indexOf('text/html') !== -1;
