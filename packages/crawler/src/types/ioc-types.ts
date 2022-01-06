@@ -6,7 +6,6 @@ import { PageProcessorBase } from '../page-processors/page-processor-base';
 
 export const crawlerIocTypes = {
     ReporterFactory: 'ReporterFactory',
-    CrawlerRunOptions: 'CrawlerRunOptions',
     PageProcessorFactory: 'Factory<PageProcessor>',
     ApifyRequestQueueProvider: 'Provider<ApifyRequestQueue>',
     ApifyKeyValueStore: 'ApifyKeyValueStore',

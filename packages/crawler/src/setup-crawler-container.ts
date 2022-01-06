@@ -5,6 +5,7 @@ import { reporterFactory } from 'accessibility-insights-report';
 import * as inversify from 'inversify';
 import { ApifyResourceCreator } from './apify/apify-resource-creator';
 import { Crawler } from './crawler';
+import { CrawlerConfiguration } from './crawler/crawler-configuration';
 import { PuppeteerCrawlerEngine } from './crawler/puppeteer-crawler-engine';
 import { SimpleCrawlerEngine } from './crawler/simple-crawler-engine';
 import { DataBase } from './level-storage/data-base';
@@ -12,33 +13,28 @@ import { ClassicPageProcessor } from './page-processors/classic-page-processor';
 import { PageProcessor } from './page-processors/page-processor-base';
 import { SimulatorPageProcessor } from './page-processors/simulator-page-processor';
 import { UrlCollectionRequestProcessor } from './page-processors/url-collection-request-processor';
-import { CrawlerRunOptions } from './types/crawler-run-options';
 import { crawlerIocTypes } from './types/ioc-types';
 
 export function setupLocalCrawlerContainer(container: inversify.Container): inversify.Container {
     container.bind(DataBase).toSelf().inSingletonScope();
+    container.bind(CrawlerConfiguration).toSelf().inSingletonScope();
     container.bind(crawlerIocTypes.ReporterFactory).toConstantValue(reporterFactory);
     container.bind(crawlerIocTypes.CrawlerEngine).to(PuppeteerCrawlerEngine);
 
     setupSingletonProvider(crawlerIocTypes.ApifyRequestQueueProvider, container, async (context: inversify.interfaces.Context) => {
         const apifyResourceCreator = context.container.get(ApifyResourceCreator);
-        const crawlerRunOptions = context.container.get<CrawlerRunOptions>(crawlerIocTypes.CrawlerRunOptions);
+        const crawlerConfiguration = context.container.get(CrawlerConfiguration);
 
-        return apifyResourceCreator.createRequestQueue(crawlerRunOptions.baseUrl, {
-            clear: crawlerRunOptions.restartCrawl,
-            inputUrls: crawlerRunOptions.inputUrls,
-            page: crawlerRunOptions.baseCrawlPage,
-            discoveryPatterns: crawlerRunOptions.discoveryPatterns,
-        });
+        return apifyResourceCreator.createRequestQueue(crawlerConfiguration.baseUrl(), crawlerConfiguration.requestQueueOptions());
     });
 
     container
         .bind<inversify.interfaces.Factory<PageProcessor>>(crawlerIocTypes.PageProcessorFactory)
         .toFactory<PageProcessor>((context: inversify.interfaces.Context) => {
-            const crawlerRunOptions = context.container.get<CrawlerRunOptions>(crawlerIocTypes.CrawlerRunOptions);
+            const crawlerConfiguration = context.container.get(CrawlerConfiguration);
 
             return () => {
-                if (crawlerRunOptions.simulate) {
+                if (crawlerConfiguration.simulate()) {
                     return context.container.get(SimulatorPageProcessor);
                 } else {
                     return context.container.get(ClassicPageProcessor);
@@ -51,16 +47,12 @@ export function setupLocalCrawlerContainer(container: inversify.Container): inve
 
 export function setupCloudCrawlerContainer(container: inversify.Container): inversify.Container {
     container.bind(crawlerIocTypes.CrawlerEngine).to(SimpleCrawlerEngine);
+    container.bind(CrawlerConfiguration).toSelf().inSingletonScope();
     setupSingletonProvider(crawlerIocTypes.ApifyRequestQueueProvider, container, async (context: inversify.interfaces.Context) => {
         const apifyResourceCreator = context.container.get(ApifyResourceCreator);
-        const crawlerRunOptions = context.container.get<CrawlerRunOptions>(crawlerIocTypes.CrawlerRunOptions);
+        const crawlerConfig = context.container.get(CrawlerConfiguration);
 
-        return apifyResourceCreator.createRequestQueue(crawlerRunOptions.baseUrl, {
-            clear: crawlerRunOptions.restartCrawl,
-            inputUrls: crawlerRunOptions.inputUrls,
-            page: crawlerRunOptions.baseCrawlPage,
-            discoveryPatterns: crawlerRunOptions.discoveryPatterns,
-        });
+        return apifyResourceCreator.createRequestQueue(crawlerConfig.baseUrl(), crawlerConfig.requestQueueOptions());
     });
 
     container.bind(crawlerIocTypes.RequestProcessor).to(UrlCollectionRequestProcessor);
@@ -70,10 +62,6 @@ export function setupCloudCrawlerContainer(container: inversify.Container): inve
     });
 
     return container;
-}
-
-export function registerCrawlerRunOptions(container: inversify.interfaces.Container, crawlerRunOptions: CrawlerRunOptions): void {
-    container.bind(crawlerIocTypes.CrawlerRunOptions).toConstantValue(crawlerRunOptions);
 }
 
 function setupSingletonProvider<T>(
