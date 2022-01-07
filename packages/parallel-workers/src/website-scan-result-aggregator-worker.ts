@@ -5,7 +5,7 @@ import { WebsiteScanResultPart } from 'storage-documents';
 import { mergeWith, uniqWith, groupBy, maxBy, isArray, compact } from 'lodash';
 import moment from 'moment';
 
-export function websiteScanResultAggregatorWorker(part: Partial<WebsiteScanResultPart>[]): Partial<WebsiteScanResultPart>[] {
+export function reducePartDocuments(part: Partial<WebsiteScanResultPart>[]): Partial<WebsiteScanResultPart>[] {
     return [part.reduce((prev, next) => mergePartDocument(next, prev), {}) as Partial<WebsiteScanResultPart>];
 }
 

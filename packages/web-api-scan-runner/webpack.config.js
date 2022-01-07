@@ -21,7 +21,6 @@ module.exports = (env) => {
             'accessibility-insights-report',
             'apify',
             'leveldown',
-            'paralleljs',
         ],
         entry: {
             ['web-api-scan-runner']: path.resolve('./src/index.ts'),
@@ -82,6 +81,11 @@ module.exports = (env) => {
                         context: './docker-image-config',
                         from: 'web-api-scan-runner.ps1',
                         to: '',
+                    },
+                    {
+                        context: '../../packages/parallel-workers/dist',
+                        from: '**/*.js',
+                        to: 'parallel-workers',
                     },
                 ],
             }),

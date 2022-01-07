@@ -4,6 +4,7 @@
 const path = require('path');
 const webpack = require('webpack');
 const forkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
+const fileManagerPlugin = require('filemanager-webpack-plugin');
 
 module.exports = (env) => {
     const version = env ? env.version : 'dev';
@@ -54,6 +55,18 @@ module.exports = (env) => {
                 __IMAGE_VERSION__: JSON.stringify(version),
             }),
             new forkTsCheckerWebpackPlugin(),
+            new fileManagerPlugin({
+                events: {
+                    onEnd: {
+                        copy: [
+                            {
+                                source: '../../node_modules/paralleljs/lib/**/*.js',
+                                destination: './dist/',
+                            },
+                        ],
+                    },
+                },
+            }),
         ],
         resolve: {
             extensions: ['.ts', '.js', '.json'],
