@@ -3,8 +3,9 @@
 
 const path = require('path');
 const webpack = require('webpack');
-const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
+const forkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 const copyWebpackPlugin = require('copy-webpack-plugin');
+const ignoreDynamicRequire = require('webpack-ignore-dynamic-require');
 
 module.exports = (env) => {
     const version = env ? env.version : 'dev';
@@ -64,7 +65,8 @@ module.exports = (env) => {
             new webpack.DefinePlugin({
                 __IMAGE_VERSION__: JSON.stringify(version),
             }),
-            new ForkTsCheckerWebpackPlugin(),
+            new forkTsCheckerWebpackPlugin(),
+            new ignoreDynamicRequire(),
             new copyWebpackPlugin({
                 patterns: [
                     {
