@@ -73,7 +73,7 @@ export class WebsiteScanResultAggregator {
     private async mergePartDocumentsParallel(documents: Partial<WebsiteScanResultPart>[]): Promise<Partial<WebsiteScanResultPart>[]> {
         const partResults = await new Promise<Partial<WebsiteScanResultPart>[][]>((resolve, reject) => {
             const parts = System.chunkArray(documents, WebsiteScanResultAggregator.parallelBlockSize);
-            const parallel = new Parallel(parts, { evalPath: `${__dirname}/../parallel-workers/eval.js` });
+            const parallel = new Parallel(parts, { evalPath: `${__dirname}/../eval.js` });
 
             parallel
                 .map((part: Partial<WebsiteScanResultPart>[]) => {

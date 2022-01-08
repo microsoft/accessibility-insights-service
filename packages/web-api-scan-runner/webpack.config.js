@@ -87,7 +87,7 @@ module.exports = (env) => {
                     {
                         context: '../../packages/parallel-workers/dist',
                         from: '**/*.js',
-                        to: 'parallel-workers',
+                        to: '',
                     },
                 ],
             }),
