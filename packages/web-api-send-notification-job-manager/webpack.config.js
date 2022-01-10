@@ -3,8 +3,9 @@
 
 const path = require('path');
 const webpack = require('webpack');
-const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
+const forkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 const copyWebpackPlugin = require('copy-webpack-plugin');
+const ignoreDynamicRequire = require('webpack-ignore-dynamic-require');
 
 module.exports = (env) => {
     const version = env ? env.version : 'dev';
@@ -12,7 +13,7 @@ module.exports = (env) => {
 
     return {
         devtool: 'cheap-source-map',
-        externals: ['yargs', 'applicationinsights', 'paralleljs'],
+        externals: ['yargs', 'applicationinsights'],
         entry: {
             ['web-api-send-notification-job-manager']: path.resolve('./src/index.ts'),
         },
@@ -55,7 +56,8 @@ module.exports = (env) => {
             new webpack.DefinePlugin({
                 __IMAGE_VERSION__: JSON.stringify(version),
             }),
-            new ForkTsCheckerWebpackPlugin(),
+            new forkTsCheckerWebpackPlugin(),
+            new ignoreDynamicRequire(),
             new copyWebpackPlugin({
                 patterns: [
                     {
@@ -66,6 +68,11 @@ module.exports = (env) => {
                     {
                         context: './docker-image-config',
                         from: 'Dockerfile',
+                        to: '',
+                    },
+                    {
+                        context: '../../packages/parallel-workers/dist',
+                        from: '**/*.js',
                         to: '',
                     },
                 ],

@@ -3,9 +3,9 @@
 
 const path = require('path');
 const webpack = require('webpack');
-const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
+const forkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 const copyWebpackPlugin = require('copy-webpack-plugin');
-const IgnoreDynamicRequire = require('webpack-ignore-dynamic-require');
+const ignoreDynamicRequire = require('webpack-ignore-dynamic-require');
 
 module.exports = (env) => {
     const version = env ? env.version : 'dev';
@@ -59,8 +59,8 @@ module.exports = (env) => {
             new webpack.DefinePlugin({
                 __IMAGE_VERSION__: JSON.stringify(version),
             }),
-            new ForkTsCheckerWebpackPlugin(),
-            new IgnoreDynamicRequire(),
+            new forkTsCheckerWebpackPlugin(),
+            new ignoreDynamicRequire(),
             new copyWebpackPlugin({
                 patterns: [
                     {
@@ -88,22 +88,22 @@ module.exports = (env) => {
                         to: '',
                     },
                     {
-                        context: '../../node_modules/paralleljs/lib/',
+                        context: '../parallel-workers/dist/',
                         from: '**/*.js',
                         to: 'health-monitor-client-func',
                     },
                     {
-                        context: '../../node_modules/paralleljs/lib/',
+                        context: '../parallel-workers/dist/',
                         from: '**/*.js',
                         to: 'health-monitor-orchestration-func',
                     },
                     {
-                        context: '../../node_modules/paralleljs/lib/',
+                        context: '../parallel-workers/dist/',
                         from: '**/*.js',
                         to: 'health-monitor-timer-func',
                     },
                     {
-                        context: '../../node_modules/paralleljs/lib/',
+                        context: '../parallel-workers/dist/',
                         from: '**/*.js',
                         to: 'scan-batch-requests-feed-func',
                     },

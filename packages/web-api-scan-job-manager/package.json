@@ -39,7 +39,8 @@
         "typemoq": "^2.1.0",
         "typescript": "^4.5.2",
         "webpack": "^5.64.4",
-        "webpack-cli": "^4.9.1"
+        "webpack-cli": "^4.9.1",
+        "webpack-ignore-dynamic-require": "^1.0.0"
     },
     "dependencies": {
         "@azure/batch": "^10.0.2",
@@ -52,7 +53,6 @@
         "lodash": "^4.17.21",
         "logger": "1.0.0",
         "moment": "^2.29.1",
-        "paralleljs": "^1.1.0",
         "reflect-metadata": "^0.1.13",
         "service-library": "1.0.0",
         "verror": "^1.10.1",
