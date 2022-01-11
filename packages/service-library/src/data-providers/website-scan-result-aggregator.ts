@@ -78,10 +78,9 @@ export class WebsiteScanResultAggregator {
             parallel
                 .map((part: Partial<WebsiteScanResultPart>[]) => {
                     // The function runs as part of a child process instantiated by paralleljs npm worker.js module
-                    // and should include all dependencies as a standalone module. The parallel-workers.js module
-                    // location is relative to worker.js module location. Using dynamic require to bypass webpack
-                    // processing.
-
+                    // and should include all dependencies to be able run as a standalone module.
+                    // The parallel-workers.js module location is relative to paralleljs npm worker.js module location.
+                    // Dynamic module location let bypass webpack module path modification.
                     const worker = require(`${__dirname}/parallel-workers.js`);
 
                     return worker.reducePartDocuments(part);

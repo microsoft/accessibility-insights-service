@@ -1,26 +1,18 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import 'reflect-metadata';
 
 import { WebsiteScanResultBase, WebsiteScanResultPart } from 'storage-documents';
-import moment from 'moment';
-import * as MockDate from 'mockdate';
+import Parallel from 'paralleljs';
 import { WebsiteScanResultAggregator } from './website-scan-result-aggregator';
 
 let websiteScanResultAggregator: WebsiteScanResultAggregator;
-let dateNow: Date;
 
 describe(WebsiteScanResultAggregator, () => {
     beforeEach(() => {
-        dateNow = new Date();
-        MockDate.set(dateNow);
-
         websiteScanResultAggregator = new WebsiteScanResultAggregator();
-    });
-
-    afterEach(() => {
-        MockDate.reset();
     });
 
     it('merge website base document', () => {
@@ -77,69 +69,19 @@ describe(WebsiteScanResultAggregator, () => {
     });
 
     it('merge website part document', async () => {
-        const source = {
-            knownPages: ['new page', 'existing page', undefined, null /* should remove falsey value */, 'Various Case Page'],
-            pageScans: [
-                {
-                    url: 'new url',
-                    timestamp: moment(dateNow).toJSON(),
-                },
-                {
-                    url: 'existing url',
-                    timestamp: moment(dateNow).toJSON(),
-                },
-                {
-                    url: 'updated url',
-                    timestamp: moment(dateNow).add(11, 'minute').toJSON(), // new timestamp to update target value
-                },
-                {
-                    url: 'old url',
-                    timestamp: moment(dateNow).add(-7, 'minute').toJSON(), // old timestamp to keep target value
-                },
-                null, // should remove falsey value
-            ],
-        } as WebsiteScanResultPart;
-        const target = {
-            knownPages: ['existing page', 'old page', null, undefined /* should remove falsey value */, 'various case page'],
-            pageScans: [
-                {
-                    url: 'existing url',
-                    timestamp: moment(dateNow).toJSON(),
-                },
-                {
-                    url: 'updated url',
-                    timestamp: moment(dateNow).add(3, 'minute').toJSON(),
-                },
-                {
-                    url: 'old url',
-                    timestamp: moment(dateNow).add(1, 'minute').toJSON(),
-                },
-            ],
-        } as WebsiteScanResultPart;
-        const expectedDocument = {
-            knownPages: ['existing page', 'old page', 'various case page', 'new page'],
-            pageScans: [
-                {
-                    url: 'existing url',
-                    timestamp: moment(dateNow).toJSON(),
-                },
-                {
-                    url: 'updated url',
-                    timestamp: moment(dateNow).add(11, 'minute').toJSON(),
-                },
-                {
-                    url: 'old url',
-                    timestamp: moment(dateNow).add(1, 'minute').toJSON(),
-                },
-                {
-                    url: 'new url',
-                    timestamp: moment(dateNow).toJSON(),
-                },
-            ],
-        } as WebsiteScanResultPart;
+        const source = { knownPages: ['source'] } as WebsiteScanResultPart;
+        const target = { knownPages: ['target'] } as WebsiteScanResultPart;
+        const expectedDocument = { knownPages: ['expected'] } as WebsiteScanResultPart;
+
+        const parallel = new Parallel([]);
+        Parallel.prototype.map = (fn: (data: any) => any): Parallel<any> => {
+            parallel.data = [[expectedDocument]];
+
+            return parallel;
+        };
 
         const actualDocument = await websiteScanResultAggregator.mergePartDocument(source, target);
 
         expect(actualDocument).toEqual(expectedDocument);
-    }, 12000);
+    });
 });
