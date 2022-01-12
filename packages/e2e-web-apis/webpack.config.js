@@ -84,6 +84,11 @@ module.exports = (env) => {
                     {
                         context: '../parallel-workers/dist/',
                         from: '**/*.js',
+                        to: '',
+                    },
+                    {
+                        context: '../parallel-workers/dist/',
+                        from: '**/*.js',
                         to: 'scan-notification-client-func',
                     },
                     {
