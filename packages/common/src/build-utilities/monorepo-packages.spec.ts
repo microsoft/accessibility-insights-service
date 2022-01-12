@@ -17,6 +17,7 @@ describe('listMonorepoPackageNames', () => {
               "functional-tests",
               "health-client",
               "logger",
+              "parallel-workers",
               "resource-deployment",
               "scanner-global-library",
               "service-library",

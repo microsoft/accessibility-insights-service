@@ -240,12 +240,12 @@ describe(WebsiteScanResultProvider, () => {
             .verifiable();
 
         websiteScanResultAggregatorMock
-            .setup((o) => o.mergePartDocument(partDocuments[0], {}))
-            .returns(() => partMergedDocuments[0])
+            .setup((o) => o.mergePartDocuments(It.isValue([partDocuments[0]]), {}))
+            .returns(() => Promise.resolve(partMergedDocuments[0]))
             .verifiable();
         websiteScanResultAggregatorMock
-            .setup((o) => o.mergePartDocument(partDocuments[1], partMergedDocuments[0]))
-            .returns(() => partMergedDocuments[1])
+            .setup((o) => o.mergePartDocuments(It.isValue([partDocuments[1]]), partMergedDocuments[0]))
+            .returns(() => Promise.resolve(partMergedDocuments[1]))
             .verifiable();
 
         const actualWebsiteScanResult = await websiteScanResultProvider.read(websiteScanResultBaseId, true);
@@ -353,7 +353,7 @@ function setupWebsiteScanResultAggregatorMock(workflow: TestWorkflow): void {
             .verifiable();
         websiteScanResultAggregatorMock
             .setup((o) => o.mergePartDocument(getSourceDocument(websiteScanResultPartDbDocumentExisting), {}))
-            .returns(() => websiteScanResultPartDbDocumentMerged)
+            .returns(() => Promise.resolve(websiteScanResultPartDbDocumentMerged))
             .verifiable(Times.exactly(2));
     }
     if (workflow === 'merge') {
@@ -365,7 +365,7 @@ function setupWebsiteScanResultAggregatorMock(workflow: TestWorkflow): void {
             .setup((o) =>
                 o.mergePartDocument(getSourceDocument(websiteScanResultPartDbDocumentExisting), websiteScanResultPartDbDocumentExisting),
             )
-            .returns(() => websiteScanResultPartDbDocumentMerged)
+            .returns(() => Promise.resolve(websiteScanResultPartDbDocumentMerged))
             .verifiable();
     }
     if (workflow === 'skip-merge') {
@@ -377,7 +377,7 @@ function setupWebsiteScanResultAggregatorMock(workflow: TestWorkflow): void {
             .verifiable();
         websiteScanResultAggregatorMock
             .setup((o) => o.mergePartDocument(getSourceDocument(websiteScanResultPartDbDocumentExisting), {}))
-            .returns(() => websiteScanResultPartDbDocumentMerged)
+            .returns(() => Promise.resolve(websiteScanResultPartDbDocumentMerged))
             .verifiable();
     }
 }

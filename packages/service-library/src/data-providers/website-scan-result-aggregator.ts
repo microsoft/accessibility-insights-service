@@ -3,11 +3,17 @@
 
 import { injectable } from 'inversify';
 import { WebsiteScanResultBase, WebsiteScanResultPart } from 'storage-documents';
+import Parallel from 'paralleljs';
+import { System } from 'common';
 import _ from 'lodash';
-import moment from 'moment';
+
+/* eslint-disable security/detect-non-literal-require, @typescript-eslint/no-var-requires */
+/* eslint-disable @typescript-eslint/no-require-imports, @typescript-eslint/no-explicit-any */
 
 @injectable()
 export class WebsiteScanResultAggregator {
+    public static parallelBlockSize = 6;
+
     public mergeBaseDocument(
         sourceDocument: Partial<WebsiteScanResultBase>,
         targetDocument: Partial<WebsiteScanResultBase>,
@@ -33,35 +39,65 @@ export class WebsiteScanResultAggregator {
         return mergedDocument;
     }
 
-    public mergePartDocument(
+    public async mergePartDocument(
         sourceDocument: Partial<WebsiteScanResultPart>,
         targetDocument: Partial<WebsiteScanResultPart>,
-    ): Partial<WebsiteScanResultPart> {
-        const mergedDocument = _.mergeWith(targetDocument, sourceDocument, (target, source, key) => {
-            return this.mergeArray(target, source, key, ['pageScans', 'knownPages']);
-        });
-
-        if (mergedDocument.knownPages !== undefined) {
-            mergedDocument.knownPages = _.uniqWith(mergedDocument.knownPages, (a, b) => {
-                if (a === undefined || b === undefined) {
-                    return false;
-                }
-
-                return a.toLocaleLowerCase() === b.toLocaleLowerCase();
-            });
-        }
-
-        if (mergedDocument.pageScans !== undefined) {
-            const pageScansByUrl = _.groupBy(mergedDocument.pageScans, (scan) => scan.url.toLocaleLowerCase());
-            mergedDocument.pageScans = Object.keys(pageScansByUrl).map((url) => {
-                return _.maxBy(pageScansByUrl[url], (scan) => moment.utc(scan.timestamp).valueOf());
-            });
-        }
-
-        return mergedDocument;
+    ): Promise<Partial<WebsiteScanResultPart>> {
+        return this.mergePartDocuments([sourceDocument], targetDocument);
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    public async mergePartDocuments(
+        documents: Partial<WebsiteScanResultPart>[],
+        baseDocument?: Partial<WebsiteScanResultPart>,
+    ): Promise<Partial<WebsiteScanResultPart>> {
+        if (_.isEmpty(documents)) {
+            return baseDocument ?? {};
+        }
+
+        if (documents.length === 1 && _.isEmpty(baseDocument)) {
+            return documents[0];
+        }
+
+        let mergeResult: Partial<WebsiteScanResultPart>[] = [];
+        mergeResult.push(baseDocument);
+        mergeResult.push(...documents);
+
+        do {
+            mergeResult = await this.mergePartDocumentsParallel(mergeResult);
+        } while (mergeResult.length > 1);
+
+        return mergeResult[0];
+    }
+
+    /* istanbul ignore file */
+    private async mergePartDocumentsParallel(documents: Partial<WebsiteScanResultPart>[]): Promise<Partial<WebsiteScanResultPart>[]> {
+        const partResults = await new Promise<Partial<WebsiteScanResultPart>[][]>((resolve, reject) => {
+            const parts = System.chunkArray(documents, WebsiteScanResultAggregator.parallelBlockSize);
+            const parallel = new Parallel(parts, { evalPath: `${__dirname}/../eval.js` });
+
+            parallel
+                .map((part: Partial<WebsiteScanResultPart>[]) => {
+                    // The function runs as part of a child process instantiated by paralleljs npm worker.js module
+                    // and should include all dependencies to be able run as a standalone module.
+                    // The parallel-workers.js module location is relative to paralleljs npm worker.js module location.
+                    // Dynamic module location let bypass webpack module path modification.
+                    const worker = require(`${__dirname}/parallel-workers.js`);
+
+                    return worker.reducePartDocuments(part);
+                })
+                .then(
+                    (data) => {
+                        resolve(data);
+                    },
+                    (error) => {
+                        reject(error);
+                    },
+                );
+        });
+
+        return partResults.map((p) => p[0]);
+    }
+
     private mergeArray(target: any, source: any, key: string, supportedKeys: string[]): any {
         if (_.isArray(target) || _.isArray(source)) {
             if (!supportedKeys.includes(key)) {

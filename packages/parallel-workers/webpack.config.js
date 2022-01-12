@@ -4,8 +4,7 @@
 const path = require('path');
 const webpack = require('webpack');
 const forkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
-const copyWebpackPlugin = require('copy-webpack-plugin');
-const ignoreDynamicRequire = require('webpack-ignore-dynamic-require');
+const fileManagerPlugin = require('filemanager-webpack-plugin');
 
 module.exports = (env) => {
     const version = env ? env.version : 'dev';
@@ -13,9 +12,8 @@ module.exports = (env) => {
 
     return {
         devtool: 'cheap-source-map',
-        externals: ['yargs', 'applicationinsights'],
         entry: {
-            ['web-api-scan-job-manager']: path.resolve('./src/index.ts'),
+            ['parallel-workers']: path.resolve('./src/index.ts'),
         },
         mode: 'development',
         module: {
@@ -43,7 +41,7 @@ module.exports = (env) => {
                 },
             ],
         },
-        name: 'web-api-scan-job-manager',
+        name: 'parallel-workers',
         node: {
             __dirname: false,
         },
@@ -57,30 +55,17 @@ module.exports = (env) => {
                 __IMAGE_VERSION__: JSON.stringify(version),
             }),
             new forkTsCheckerWebpackPlugin(),
-            new ignoreDynamicRequire(),
-            new copyWebpackPlugin({
-                patterns: [
-                    {
-                        context: './docker-image-config',
-                        from: '.dockerignore',
-                        to: '',
+            new fileManagerPlugin({
+                events: {
+                    onEnd: {
+                        copy: [
+                            {
+                                source: '../../node_modules/paralleljs/lib/**/*.js',
+                                destination: './dist/',
+                            },
+                        ],
                     },
-                    {
-                        context: './docker-image-config',
-                        from: 'Dockerfile',
-                        to: '',
-                    },
-                    {
-                        context: './docker-image-config',
-                        from: 'web-api-scan-job-manager.ps1',
-                        to: '',
-                    },
-                    {
-                        context: '../../packages/parallel-workers/dist',
-                        from: '**/*.js',
-                        to: '',
-                    },
-                ],
+                },
             }),
         ],
         resolve: {

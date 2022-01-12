@@ -5,7 +5,7 @@ const path = require('path');
 const { exec } = require('child_process');
 const webpack = require('webpack');
 const nodeExternals = require('webpack-node-externals');
-const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
+const forkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 const copyFilesPlugin = require('copy-webpack-plugin');
 const { listMonorepoPackageNames } = require('common/dist/build-utilities/monorepo-packages');
 
@@ -93,7 +93,7 @@ function getCommonConfig(version, generateTypings) {
                       }
                     : [],
             )
-            .concat(generateTypings ? [] : new ForkTsCheckerWebpackPlugin()), // only add if transpileOnly is true
+            .concat(generateTypings ? [] : new forkTsCheckerWebpackPlugin()), // only add if transpileOnly is true
         resolve: {
             extensions: ['.ts', '.js', '.json'],
             mainFields: ['main'], //This is fix for this issue https://www.gitmemory.com/issue/bitinn/node-fetch/450/494475397

@@ -1,17 +1,15 @@
 {
-    "name": "web-api",
+    "name": "parallel-workers",
     "version": "1.0.0",
     "description": "This project welcomes contributions and suggestions.  Most contributions require you to agree to a Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us the rights to use your contribution. For details, visit https://cla.microsoft.com.",
+    "main": "dist/index.js",
     "scripts": {
-        "build": "webpack --config ./webpack.config.js --config-name web-api",
+        "build": "webpack --config ./webpack.config.js",
         "cbuild": "npm-run-all --serial clean build",
         "clean": "rimraf dist test-results",
         "lint": "eslint -c ../../.eslintrc.js --ext .ts ./",
         "lint:fix": "eslint --fix -c ../../.eslintrc.js --ext .ts ./",
-        "test": "jest --coverage --colors",
-        "watch": "tsc --w",
-        "start:host": "func start",
-        "start": "npm-run-all --parallel start:host watch"
+        "test": "jest --coverage --colors"
     },
     "repository": {
         "type": "git",
@@ -24,39 +22,23 @@
     },
     "homepage": "https://github.com/Microsoft/accessibility-insights-service#readme",
     "devDependencies": {
-        "@azure/functions": "^3.0.0",
-        "@types/dotenv": "^8.2.0",
         "@types/jest": "^27.0.3",
         "@types/lodash": "^4.14.177",
         "@types/node": "^12.20.37",
-        "@types/sha.js": "^2.4.0",
-        "@types/verror": "^1.10.4",
-        "@types/yargs": "^17.0.7",
-        "copy-webpack-plugin": "^10.0.0",
+        "filemanager-webpack-plugin": "^6.1.7",
         "fork-ts-checker-webpack-plugin": "^6.5.0",
         "jest": "^27.4.3",
         "jest-junit": "^12.3.0",
-        "node-loader": "^2.0.0",
-        "npm-run-all": "^4.1.5",
         "rimraf": "^3.0.2",
         "ts-jest": "^27.0.7",
-        "ts-loader": "^9.2.6",
         "typemoq": "^2.1.0",
         "typescript": "^4.5.2",
         "webpack": "^5.64.4",
-        "webpack-cli": "^4.9.1",
-        "webpack-ignore-dynamic-require": "^1.0.0"
+        "webpack-cli": "^4.9.1"
     },
     "dependencies": {
-        "azure-services": "^1.0.0",
-        "common": "^1.0.0",
-        "inversify": "^6.0.1",
         "lodash": "^4.17.21",
-        "logger": "1.0.0",
-        "reflect-metadata": "^0.1.13",
-        "service-library": "1.0.0",
-        "storage-documents": "1.0.0",
         "moment": "^2.29.1",
-        "functional-tests": "1.0.0"
+        "storage-documents": "1.0.0"
     }
 }
