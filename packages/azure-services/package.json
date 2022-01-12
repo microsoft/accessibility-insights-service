@@ -24,7 +24,7 @@
     "devDependencies": {
         "@types/got": "^9.6.11",
         "@types/jest": "^27.0.3",
-        "@types/lodash": "^4.14.177",
+        "@types/lodash": "^4.14.178",
         "@types/verror": "^1.10.4",
         "@types/yargs": "^17.0.7",
         "fork-ts-checker-webpack-plugin": "^6.5.0",
