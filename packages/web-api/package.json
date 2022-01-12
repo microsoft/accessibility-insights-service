@@ -28,7 +28,7 @@
         "@types/dotenv": "^8.2.0",
         "@types/jest": "^27.0.3",
         "@types/lodash": "^4.14.177",
-        "@types/node": "^12.20.37",
+        "@types/node": "^12.20.41",
         "@types/sha.js": "^2.4.0",
         "@types/verror": "^1.10.4",
         "@types/yargs": "^17.0.7",
