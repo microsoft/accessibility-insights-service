@@ -1,9 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import Apify from 'apify';
-import { injectable } from 'inversify';
+import { RequestOptions, RequestQueue } from 'apify';
+import { inject, injectable } from 'inversify';
 import * as Puppeteer from 'puppeteer';
+import { ApifySdkWrapper } from '../apify/apify-sdk-wrapper';
 
 export declare type ElementClickAction = 'navigation' | 'page-action';
 
@@ -14,25 +15,22 @@ export interface ElementClickOperationResult {
 
 @injectable()
 export class ClickElementOperation {
-    constructor(
-        private readonly enqueueLinksByClickingElementsExt: typeof Apify.utils.puppeteer.enqueueLinksByClickingElements = Apify.utils
-            .puppeteer.enqueueLinksByClickingElements,
-    ) {}
+    constructor(@inject(ApifySdkWrapper) private readonly apifyWrapper: ApifySdkWrapper) {}
 
     public async click(
         page: Puppeteer.Page,
         selector: string,
-        requestQueue: Apify.RequestQueue,
+        requestQueue: RequestQueue,
         discoveryPatterns: string[],
     ): Promise<ElementClickOperationResult> {
         let navigated = false;
         let navigationUrl: string;
-        await this.enqueueLinksByClickingElementsExt({
+        await this.apifyWrapper.enqueueLinksByClickingElements({
             page,
             requestQueue,
             selector,
             pseudoUrls: discoveryPatterns?.length > 0 ? discoveryPatterns : undefined, // prevents from crawling all links
-            transformRequestFunction: (request: Apify.RequestOptions) => {
+            transformRequestFunction: (request: RequestOptions) => {
                 navigated = true;
                 navigationUrl = request.url;
                 console.log(

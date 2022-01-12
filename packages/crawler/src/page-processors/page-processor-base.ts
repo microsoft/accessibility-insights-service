@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import Apify from 'apify';
 import { inject, injectable } from 'inversify';
 import * as Puppeteer from 'puppeteer';
 import { BrowserError, NavigationHooks } from 'scanner-global-library';
 import { System } from 'common';
+import Apify from 'apify';
 import { CrawlerConfiguration } from '../crawler/crawler-configuration';
 import { DataBase } from '../level-storage/data-base';
 import { AccessibilityScanOperation } from '../page-operations/accessibility-scan-operation';
@@ -14,6 +14,7 @@ import { LocalDataStore } from '../storage/local-data-store';
 import { BlobStore, DataStore, scanResultStorageName } from '../storage/store-types';
 import { ApifyRequestQueueProvider, crawlerIocTypes } from '../types/ioc-types';
 import { ScanData } from '../types/scan-data';
+import { ApifySdkWrapper } from '../apify/apify-sdk-wrapper';
 
 /* eslint-disable no-invalid-this, @typescript-eslint/no-explicit-any */
 
@@ -132,8 +133,7 @@ export abstract class PageProcessorBase implements PageProcessor {
         @inject(NavigationHooks) protected readonly navigationHooks: NavigationHooks,
         @inject(crawlerIocTypes.ApifyRequestQueueProvider) protected readonly requestQueueProvider: ApifyRequestQueueProvider,
         @inject(CrawlerConfiguration) protected readonly crawlerConfiguration: CrawlerConfiguration,
-        protected readonly enqueueLinksExt: typeof Apify.utils.enqueueLinks = Apify.utils.enqueueLinks,
-        protected readonly saveSnapshotExt: typeof Apify.utils.puppeteer.saveSnapshot = Apify.utils.puppeteer.saveSnapshot,
+        @inject(ApifySdkWrapper) protected readonly apifySdkWrapper: ApifySdkWrapper,
     ) {
         this.baseUrl = this.crawlerConfiguration.baseUrl();
         this.snapshot = this.crawlerConfiguration.snapshot();
@@ -150,7 +150,7 @@ export abstract class PageProcessorBase implements PageProcessor {
 
     protected async saveSnapshot(page: Puppeteer.Page, id: string): Promise<void> {
         if (this.snapshot) {
-            await this.saveSnapshotExt(page, {
+            await this.apifySdkWrapper.saveSnapshot(page, {
                 key: `${id}.screenshot`,
                 saveHtml: false,
                 keyValueStoreName: scanResultStorageName,
@@ -164,7 +164,7 @@ export abstract class PageProcessorBase implements PageProcessor {
         }
 
         const requestQueue = await this.requestQueueProvider();
-        const enqueued = await this.enqueueLinksExt({
+        const enqueued = await this.apifySdkWrapper.enqueueLinks({
             page,
             requestQueue,
             pseudoUrls: this.discoveryPatterns?.length > 0 ? this.discoveryPatterns : undefined, // prevents from crawling all links

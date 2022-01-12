@@ -13,6 +13,7 @@ import { DataBase } from '../level-storage/data-base';
 import { AccessibilityScanOperation } from '../page-operations/accessibility-scan-operation';
 import { BlobStore, DataStore } from '../storage/store-types';
 import { ApifyRequestQueueProvider } from '../types/ioc-types';
+import { ApifySdkWrapper } from '../apify/apify-sdk-wrapper';
 import { ClassicPageProcessor } from './classic-page-processor';
 import { PartialScanData, PuppeteerHandlePageInputs } from './page-processor-base';
 
@@ -28,7 +29,7 @@ describe(ClassicPageProcessor, () => {
     let dataStoreMock: IMock<DataStore>;
     let blobStoreMock: IMock<BlobStore>;
     let dataBaseMock: IMock<DataBase>;
-    let enqueueLinksExtMock: IMock<typeof Apify.utils.enqueueLinks>;
+    let apifyWrapperMock: IMock<ApifySdkWrapper>;
     let navigationHooks: IMock<NavigationHooks>;
     let crawlerConfigurationMock: IMock<CrawlerConfiguration>;
     let requestStub: Apify.Request;
@@ -43,7 +44,7 @@ describe(ClassicPageProcessor, () => {
         dataStoreMock = Mock.ofType<DataStore>();
         blobStoreMock = Mock.ofType<BlobStore>();
         dataBaseMock = Mock.ofType<DataBase>();
-        enqueueLinksExtMock = Mock.ofType<typeof Apify.utils.enqueueLinks>();
+        apifyWrapperMock = Mock.ofType<ApifySdkWrapper>();
         navigationHooks = Mock.ofType<NavigationHooks>();
         crawlerConfigurationMock = Mock.ofType(CrawlerConfiguration);
         crawlerConfigurationMock
@@ -86,12 +87,12 @@ describe(ClassicPageProcessor, () => {
             navigationHooks.object,
             requestQueueProvider,
             crawlerConfigurationMock.object,
-            enqueueLinksExtMock.object,
+            apifyWrapperMock.object,
         );
     });
 
     afterEach(() => {
-        enqueueLinksExtMock.verifyAll();
+        apifyWrapperMock.verifyAll();
         accessibilityScanOpMock.verifyAll();
         blobStoreMock.verifyAll();
     });
@@ -120,8 +121,8 @@ describe(ClassicPageProcessor, () => {
             requestQueue: requestQueueStub,
             pseudoUrls: discoveryPatterns,
         };
-        enqueueLinksExtMock
-            .setup((el) => el(options))
+        apifyWrapperMock
+            .setup((a) => a.enqueueLinks(options))
             .returns(async () => [])
             .verifiable();
     }

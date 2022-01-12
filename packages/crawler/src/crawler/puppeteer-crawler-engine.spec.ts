@@ -59,9 +59,7 @@ describe(PuppeteerCrawlerEngine, () => {
             .setup((o) => o.maxRequestsPerCrawl())
             .returns(() => maxRequestsPerCrawl)
             .verifiable();
-        crawlerConfigurationMock.setup((o) => o.setDefaultApifySettings()).verifiable();
-        crawlerConfigurationMock.setup((o) => o.setMemoryMBytes(crawlerRunOptions.memoryMBytes)).verifiable();
-        crawlerConfigurationMock.setup((o) => o.setSilentMode(crawlerRunOptions.silentMode)).verifiable();
+        crawlerConfigurationMock.setup((o) => o.configureApify()).verifiable();
 
         baseCrawlerOptions = {
             handlePageTimeoutSecs: 300,
@@ -79,6 +77,7 @@ describe(PuppeteerCrawlerEngine, () => {
                         height: 1080,
                         deviceScaleFactor: 1,
                     },
+                    headless: true,
                 },
             },
         };
@@ -106,9 +105,9 @@ describe(PuppeteerCrawlerEngine, () => {
 
     it('Run crawler while chrome path is set', async () => {
         crawlerRunOptions.chromePath = 'chrome path';
-        crawlerConfigurationMock.setup((o) => o.setChromePath(crawlerRunOptions.chromePath)).verifiable();
 
         baseCrawlerOptions.launchContext.useChrome = true;
+        baseCrawlerOptions.launchContext.launchOptions.executablePath = 'chrome path';
         crawlerFactoryMock
             .setup((o) => o.createPuppeteerCrawler(baseCrawlerOptions))
             .returns(() => puppeteerCrawlerMock.object)

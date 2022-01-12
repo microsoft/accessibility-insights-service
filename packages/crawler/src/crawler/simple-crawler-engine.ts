@@ -20,9 +20,7 @@ export class SimpleCrawlerEngine implements CrawlerEngine<string[]> {
     ) {}
 
     public async start(crawlerRunOptions: CrawlerRunOptions): Promise<string[]> {
-        this.crawlerConfiguration.setDefaultApifySettings();
-        this.crawlerConfiguration.setMemoryMBytes(crawlerRunOptions.memoryMBytes);
-        this.crawlerConfiguration.setSilentMode(crawlerRunOptions.silentMode);
+        this.crawlerConfiguration.configureApify();
 
         const requestQueue = await this.requestQueueProvider();
 
@@ -40,8 +38,6 @@ export class SimpleCrawlerEngine implements CrawlerEngine<string[]> {
         }
 
         if (crawlerRunOptions.debug === true) {
-            this.crawlerConfiguration.setSilentMode(false);
-
             basicCrawlerOptions.maxConcurrency = 1;
         }
 

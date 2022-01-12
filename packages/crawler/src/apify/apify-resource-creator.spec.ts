@@ -7,16 +7,16 @@ import * as fs from 'fs';
 import Apify from 'apify';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { Page } from 'puppeteer';
-import { apifySettingsHandler, ApifySettingsHandler } from '../apify/apify-settings';
 import { getPromisableDynamicMock } from '../test-utilities/promisable-mock';
+import { CrawlerConfiguration } from '../crawler/crawler-configuration';
 import { ApifyResourceCreator } from './apify-resource-creator';
+import { ApifySdkWrapper } from './apify-sdk-wrapper';
 
 describe(ApifyResourceCreator, () => {
-    let apifyMock: IMock<typeof Apify>;
-    let settingsHandlerMock: IMock<typeof apifySettingsHandler>;
+    let apifyWrapperMock: IMock<ApifySdkWrapper>;
+    let crawlerConfigMock: IMock<CrawlerConfiguration>;
     let fsMock: IMock<typeof fs>;
     let queueMock: IMock<Apify.RequestQueue>;
-    let enqueueLinksMock: IMock<typeof Apify.utils.enqueueLinks>;
 
     let apifyResourceCreator: ApifyResourceCreator;
 
@@ -24,24 +24,17 @@ describe(ApifyResourceCreator, () => {
     const requestQueueName = 'scanRequests';
 
     beforeEach(() => {
-        apifyMock = Mock.ofType<typeof Apify>();
-        settingsHandlerMock = Mock.ofType<ApifySettingsHandler>();
+        apifyWrapperMock = Mock.ofType<ApifySdkWrapper>();
+        crawlerConfigMock = Mock.ofType<CrawlerConfiguration>();
         fsMock = Mock.ofType<typeof fs>();
         queueMock = getPromisableDynamicMock(Mock.ofType<Apify.RequestQueue>());
-        enqueueLinksMock = Mock.ofType<typeof Apify.utils.enqueueLinks>();
-        apifyResourceCreator = new ApifyResourceCreator(
-            apifyMock.object,
-            settingsHandlerMock.object,
-            fsMock.object,
-            enqueueLinksMock.object,
-        );
+        apifyResourceCreator = new ApifyResourceCreator(apifyWrapperMock.object, crawlerConfigMock.object, fsMock.object);
     });
 
     afterEach(() => {
-        apifyMock.verifyAll();
-        settingsHandlerMock.verifyAll();
+        apifyWrapperMock.verifyAll();
+        crawlerConfigMock.verifyAll();
         fsMock.verifyAll();
-        enqueueLinksMock.verifyAll();
     });
 
     describe('createRequestQueue', () => {
@@ -93,7 +86,7 @@ describe(ApifyResourceCreator, () => {
                 pseudoUrls: discoveryPatterns,
             };
             setupCreateRequestQueue();
-            enqueueLinksMock.setup((el) => el(expectedEnqueueLinksOpts)).verifiable();
+            apifyWrapperMock.setup((a) => a.enqueueLinks(expectedEnqueueLinksOpts)).verifiable();
 
             const queue = await apifyResourceCreator.createRequestQueue(url, { page, discoveryPatterns });
 
@@ -103,17 +96,13 @@ describe(ApifyResourceCreator, () => {
 
     function setupClearRequestQueue(dirExists: boolean): void {
         const localStorageDir = 'storage dir';
-        settingsHandlerMock
-            .setup((sh) => sh.getApifySettings())
-            .returns(() => {
-                return { APIFY_LOCAL_STORAGE_DIR: localStorageDir };
-            });
+        crawlerConfigMock.setup((cc) => cc.localOutputDir()).returns(() => localStorageDir);
         fsMock.setup((fsm) => fsm.existsSync(localStorageDir)).returns(() => dirExists);
         fsMock.setup((fsm) => fsm.rmdirSync(localStorageDir, { recursive: true })).verifiable(dirExists ? Times.once() : Times.never());
     }
 
     function setupCreateRequestQueue(): void {
-        apifyMock
+        apifyWrapperMock
             .setup((a) => a.openRequestQueue(requestQueueName))
             .returns(async () => Promise.resolve(queueMock.object))
             .verifiable();

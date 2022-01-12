@@ -9,6 +9,7 @@ import { CrawlerConfiguration } from './crawler/crawler-configuration';
 import { DataBase } from './level-storage/data-base';
 import { setupCloudCrawlerContainer, setupLocalCrawlerContainer } from './setup-crawler-container';
 import { crawlerIocTypes } from './types/ioc-types';
+import { ApifySdkWrapper } from './apify/apify-sdk-wrapper';
 
 /* eslint-disable @typescript-eslint/consistent-type-assertions */
 
@@ -18,6 +19,7 @@ describe(setupLocalCrawlerContainer, () => {
         setupLocalCrawlerContainer(container);
 
         expect(container.get(CrawlerConfiguration)).toBeDefined();
+        expect(container.get(ApifySdkWrapper)).toBeDefined();
         expect(container.get(DataBase)).toBeDefined();
         expect(container.get(crawlerIocTypes.ReporterFactory)).toBeDefined();
         expect(container.get(crawlerIocTypes.ApifyRequestQueueProvider)).toBeDefined();
@@ -33,6 +35,7 @@ describe(setupCloudCrawlerContainer, () => {
         setupCloudCrawlerContainer(container);
 
         expect(container.get(CrawlerConfiguration)).toBeDefined();
+        expect(container.get(ApifySdkWrapper)).toBeDefined();
         expect(container.get(crawlerIocTypes.ApifyRequestQueueProvider)).toBeDefined();
         expect(container.get(crawlerIocTypes.RequestProcessor)).toBeDefined();
         expect(container.get(crawlerIocTypes.CrawlerEngine)).toBeDefined();

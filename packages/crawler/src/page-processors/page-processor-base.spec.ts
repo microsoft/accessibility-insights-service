@@ -15,6 +15,7 @@ import { BlobStore, DataStore } from '../storage/store-types';
 import { ApifyRequestQueueProvider } from '../types/ioc-types';
 import { ScanData } from '../types/scan-data';
 import { ScanResult } from '../level-storage/storage-documents';
+import { ApifySdkWrapper } from '../apify/apify-sdk-wrapper';
 import { PageProcessorBase, PuppeteerCrawlingContext, PuppeteerHandlePageInputs } from './page-processor-base';
 
 /* eslint-disable @typescript-eslint/no-explicit-any, , @typescript-eslint/consistent-type-assertions */
@@ -48,8 +49,7 @@ describe(PageProcessorBase, () => {
     let dataStoreMock: IMock<DataStore>;
     let blobStoreMock: IMock<BlobStore>;
     let dataBaseMock: IMock<DataBase>;
-    let enqueueLinksExtMock: IMock<typeof Apify.utils.enqueueLinks>;
-    let saveSnapshotMock: IMock<typeof Apify.utils.puppeteer.saveSnapshot>;
+    let apifyWrapperMock: IMock<ApifySdkWrapper>;
     let processPageMock: IMock<Apify.PuppeteerHandlePage>;
     let navigationHooksMock: IMock<NavigationHooks>;
     let pageConfiguratorMock: IMock<PageConfigurator>;
@@ -65,8 +65,7 @@ describe(PageProcessorBase, () => {
         dataStoreMock = Mock.ofType<DataStore>();
         blobStoreMock = Mock.ofType<BlobStore>();
         dataBaseMock = Mock.ofType<DataBase>();
-        enqueueLinksExtMock = Mock.ofType<typeof Apify.utils.enqueueLinks>();
-        saveSnapshotMock = Mock.ofType<typeof Apify.utils.puppeteer.saveSnapshot>();
+        apifyWrapperMock = Mock.ofType<ApifySdkWrapper>();
         processPageMock = Mock.ofType<Apify.PuppeteerHandlePage>();
         navigationHooksMock = Mock.ofType<NavigationHooks>();
         pageConfiguratorMock = Mock.ofType<PageConfigurator>();
@@ -104,8 +103,7 @@ describe(PageProcessorBase, () => {
             navigationHooksMock.object,
             requestQueueProvider,
             crawlerConfigurationMock.object,
-            enqueueLinksExtMock.object,
-            saveSnapshotMock.object,
+            apifyWrapperMock.object,
         );
         pageProcessorBase.processPage = processPageMock.object;
     });
@@ -114,7 +112,7 @@ describe(PageProcessorBase, () => {
         blobStoreMock.verifyAll();
         dataStoreMock.verifyAll();
         processPageMock.verifyAll();
-        saveSnapshotMock.verifyAll();
+        apifyWrapperMock.verifyAll();
         navigationHooksMock.verifyAll();
         dataBaseMock.verifyAll();
         crawlerConfigurationMock.verifyAll();
@@ -252,10 +250,10 @@ describe(PageProcessorBase, () => {
     });
 
     function setupSaveSnapshot(): void {
-        saveSnapshotMock.reset();
-        saveSnapshotMock
-            .setup((ssm) =>
-                ssm(pageStub, {
+        apifyWrapperMock.reset();
+        apifyWrapperMock
+            .setup((a) =>
+                a.saveSnapshot(pageStub, {
                     key: `${testId}.screenshot`,
                     saveHtml: false,
                     keyValueStoreName: 'scan-results',

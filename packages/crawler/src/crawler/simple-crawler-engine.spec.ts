@@ -15,6 +15,7 @@ import { CrawlRequestProcessor } from '../page-processors/crawl-request-processo
 import { UrlCollectionRequestProcessor } from '../page-processors/url-collection-request-processor';
 import { CrawlerRunOptions } from '../types/crawler-run-options';
 import { ApifyRequestQueueProvider } from '../types/ioc-types';
+import { ApifySdkWrapper } from '../apify/apify-sdk-wrapper';
 import { CrawlerConfiguration } from './crawler-configuration';
 import { CrawlerFactory } from './crawler-factory';
 import { SimpleCrawlerEngine } from './simple-crawler-engine';
@@ -74,9 +75,6 @@ describe(SimpleCrawlerEngine, () => {
     it.each([true, false])('returns list of urls with debug = %s', async (debug) => {
         crawlerRunOptions.debug = debug;
         setupCrawlerConfig();
-        if (debug) {
-            crawlerConfigurationMock.setup((cc) => cc.setSilentMode(false)).verifiable();
-        }
         requestQueueProviderMock
             .setup((rqp) => rqp())
             .returns(() => Promise.resolve(requestQueueStub))
@@ -120,7 +118,6 @@ describe(SimpleCrawlerEngine, () => {
     });
 
     it.skip('run e2e website crawl', async () => {
-        const apifyResourceCreator = new ApifyResourceCreator();
         const testBaseUrl = 'http://accessibilityinsights.io';
         const logger = new GlobalLogger([new ConsoleLoggerClient(new ServiceConfiguration(), console)], process);
         logger.setup();
@@ -138,8 +135,10 @@ describe(SimpleCrawlerEngine, () => {
             debug: true,
         };
 
-        const testCrawlerConfiguration = new CrawlerConfiguration();
+        const apifySdkWrapper = new ApifySdkWrapper();
+        const testCrawlerConfiguration = new CrawlerConfiguration(apifySdkWrapper);
         testCrawlerConfiguration.setCrawlerRunOptions(testCrawlerRunOptions);
+        const apifyResourceCreator = new ApifyResourceCreator(apifySdkWrapper, testCrawlerConfiguration);
         const requestQueueProvider = () =>
             apifyResourceCreator.createRequestQueue(testBaseUrl, {
                 clear: true,
@@ -164,9 +163,7 @@ describe(SimpleCrawlerEngine, () => {
     }, 50000000);
 
     function setupCrawlerConfig(): void {
-        crawlerConfigurationMock.setup((cc) => cc.setDefaultApifySettings()).verifiable();
-        crawlerConfigurationMock.setup((cc) => cc.setMemoryMBytes(crawlerRunOptions.memoryMBytes)).verifiable();
-        crawlerConfigurationMock.setup((cc) => cc.setSilentMode(crawlerRunOptions.silentMode)).verifiable();
+        crawlerConfigurationMock.setup((cc) => cc.configureApify()).verifiable();
         crawlerConfigurationMock.setup((cc) => cc.maxRequestsPerCrawl()).returns(() => maxRequestsPerCrawl);
     }
 

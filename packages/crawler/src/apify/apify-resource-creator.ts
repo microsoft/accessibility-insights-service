@@ -2,29 +2,29 @@
 // Licensed under the MIT License.
 
 import * as fs from 'fs';
-import Apify from 'apify';
-import { injectable } from 'inversify';
+import { RequestQueue } from 'apify';
+import { inject, injectable } from 'inversify';
 import * as Puppeteer from 'puppeteer';
-import { ApifySettingsHandler, apifySettingsHandler } from '../apify/apify-settings';
 import { RequestQueueOptions, ResourceCreator } from '../types/resource-creator';
+import { CrawlerConfiguration } from '../crawler/crawler-configuration';
+import { ApifySdkWrapper } from './apify-sdk-wrapper';
 
 @injectable()
 export class ApifyResourceCreator implements ResourceCreator {
     private readonly requestQueueName = 'scanRequests';
 
     public constructor(
-        private readonly apify: typeof Apify = Apify,
-        private readonly settingsHandler: ApifySettingsHandler = apifySettingsHandler,
+        @inject(ApifySdkWrapper) private readonly apifyWrapper: ApifySdkWrapper,
+        @inject(CrawlerConfiguration) private readonly crawlerConfig: CrawlerConfiguration,
         private readonly filesystem: typeof fs = fs,
-        private readonly enqueueLinksExt: typeof Apify.utils.enqueueLinks = Apify.utils.enqueueLinks,
     ) {}
 
-    public async createRequestQueue(baseUrl: string, options?: RequestQueueOptions): Promise<Apify.RequestQueue> {
+    public async createRequestQueue(baseUrl: string, options?: RequestQueueOptions): Promise<RequestQueue> {
         if (options?.clear === true) {
             this.clearRequestQueue();
         }
 
-        const requestQueue = await this.apify.openRequestQueue(this.requestQueueName);
+        const requestQueue = await this.apifyWrapper.openRequestQueue(this.requestQueueName);
         if (baseUrl) {
             await requestQueue.addRequest({ url: baseUrl.trim() });
         }
@@ -34,7 +34,7 @@ export class ApifyResourceCreator implements ResourceCreator {
         return requestQueue;
     }
 
-    private async addUrlsFromList(requestQueue: Apify.RequestQueue, inputUrls?: string[]): Promise<void> {
+    private async addUrlsFromList(requestQueue: RequestQueue, inputUrls?: string[]): Promise<void> {
         if (inputUrls === undefined) {
             return Promise.resolve();
         }
@@ -44,16 +44,12 @@ export class ApifyResourceCreator implements ResourceCreator {
         }
     }
 
-    private async addUrlsDiscoveredInPage(
-        requestQueue: Apify.RequestQueue,
-        page?: Puppeteer.Page,
-        discoveryPatterns?: string[],
-    ): Promise<void> {
+    private async addUrlsDiscoveredInPage(requestQueue: RequestQueue, page?: Puppeteer.Page, discoveryPatterns?: string[]): Promise<void> {
         if (page === undefined || discoveryPatterns === undefined) {
             return;
         }
 
-        await this.enqueueLinksExt({
+        await this.apifyWrapper.enqueueLinks({
             page: page,
             requestQueue: requestQueue,
             pseudoUrls: discoveryPatterns?.length > 0 ? discoveryPatterns : undefined, // prevents from crawling all links
@@ -61,7 +57,7 @@ export class ApifyResourceCreator implements ResourceCreator {
     }
 
     private clearRequestQueue(): void {
-        const outputDir = this.settingsHandler.getApifySettings().APIFY_LOCAL_STORAGE_DIR;
+        const outputDir = this.crawlerConfig.localOutputDir();
         // eslint-disable-next-line security/detect-non-literal-fs-filename
         if (this.filesystem.existsSync(outputDir)) {
             // eslint-disable-next-line security/detect-non-literal-fs-filename

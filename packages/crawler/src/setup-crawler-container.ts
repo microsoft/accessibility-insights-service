@@ -4,6 +4,7 @@
 import { reporterFactory } from 'accessibility-insights-report';
 import * as inversify from 'inversify';
 import { ApifyResourceCreator } from './apify/apify-resource-creator';
+import { ApifySdkWrapper } from './apify/apify-sdk-wrapper';
 import { Crawler } from './crawler';
 import { CrawlerConfiguration } from './crawler/crawler-configuration';
 import { PuppeteerCrawlerEngine } from './crawler/puppeteer-crawler-engine';
@@ -18,6 +19,7 @@ import { crawlerIocTypes } from './types/ioc-types';
 export function setupLocalCrawlerContainer(container: inversify.Container): inversify.Container {
     container.bind(DataBase).toSelf().inSingletonScope();
     container.bind(CrawlerConfiguration).toSelf().inSingletonScope();
+    container.bind(ApifySdkWrapper).toSelf().inSingletonScope();
     container.bind(crawlerIocTypes.ReporterFactory).toConstantValue(reporterFactory);
     container.bind(crawlerIocTypes.CrawlerEngine).to(PuppeteerCrawlerEngine);
 
@@ -48,6 +50,7 @@ export function setupLocalCrawlerContainer(container: inversify.Container): inve
 export function setupCloudCrawlerContainer(container: inversify.Container): inversify.Container {
     container.bind(crawlerIocTypes.CrawlerEngine).to(SimpleCrawlerEngine);
     container.bind(CrawlerConfiguration).toSelf().inSingletonScope();
+    container.bind(ApifySdkWrapper).toSelf().inSingletonScope();
     setupSingletonProvider(crawlerIocTypes.ApifyRequestQueueProvider, container, async (context: inversify.interfaces.Context) => {
         const apifyResourceCreator = context.container.get(ApifyResourceCreator);
         const crawlerConfig = context.container.get(CrawlerConfiguration);
