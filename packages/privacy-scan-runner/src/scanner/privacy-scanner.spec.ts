@@ -5,7 +5,7 @@ import 'reflect-metadata';
 
 import { fail } from 'assert';
 import { PromiseUtils, ScanRunTimeConfig, ServiceConfiguration, System } from 'common';
-import { AxePuppeteerFactory, AxeScanResults, BrowserError, Page, PrivacyScanResult } from 'scanner-global-library';
+import { BrowserError, Page, PrivacyScanResult } from 'scanner-global-library';
 import { IMock, It, Mock } from 'typemoq';
 import { MockableLogger } from '../test-utilities/mockable-logger';
 import { PrivacyScanner } from './privacy-scanner';
@@ -15,15 +15,13 @@ import { PrivacyScanner } from './privacy-scanner';
 describe(PrivacyScanner, () => {
     let privacyScanner: PrivacyScanner;
     let pageMock: IMock<Page>;
-    let axeBrowserFactoryMock: IMock<AxePuppeteerFactory>;
     let loggerMock: IMock<MockableLogger>;
     let serviceConfigMock: IMock<ServiceConfiguration>;
     let promiseUtilsMock: IMock<PromiseUtils>;
     let scanConfig: ScanRunTimeConfig;
 
     beforeEach(() => {
-        axeBrowserFactoryMock = Mock.ofType();
-        pageMock = Mock.ofType2<Page>(Page, [axeBrowserFactoryMock.object]);
+        pageMock = Mock.ofType(Page);
         loggerMock = Mock.ofType(MockableLogger);
         serviceConfigMock = Mock.ofType(ServiceConfiguration);
         promiseUtilsMock = Mock.ofType(PromiseUtils);
@@ -83,7 +81,7 @@ describe(PrivacyScanner, () => {
                 message: `Privacy scan timed out after ${scanConfig.scanTimeoutInMin} minutes`,
                 stack: 'stack',
             },
-        } as AxeScanResults);
+        } as PrivacyScanResult);
     });
 
     function setupWaitForPromisetoReturnOriginalPromise(): void {
