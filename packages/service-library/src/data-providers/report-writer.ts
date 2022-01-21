@@ -3,9 +3,14 @@
 
 import { inject, injectable } from 'inversify';
 import { GlobalLogger } from 'logger';
-import { PageScanRunReportProvider } from 'service-library';
-import { OnDemandPageScanReport } from 'storage-documents';
-import { GeneratedReport } from './report-generator';
+import { OnDemandPageScanReport, ReportFormat } from 'storage-documents';
+import { PageScanRunReportProvider } from './page-scan-run-report-provider';
+
+export type GeneratedReport = {
+    content: string;
+    id: string;
+    format: ReportFormat;
+};
 
 @injectable()
 export class ReportWriter {

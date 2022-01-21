@@ -5,6 +5,10 @@
             "path": "../packages/axe-result-converter"
         },
         {
+            "name": "privacy-scan-runner",
+            "path": "../packages/privacy-scan-runner"
+        },
+        {
             "name": "scanner-global-library",
             "path": "../packages/scanner-global-library"
         },
