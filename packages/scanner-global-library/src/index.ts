@@ -11,3 +11,4 @@ export { Page } from './page';
 export { AxeScanResults } from './axe-scan-results';
 export { WebDriver } from './web-driver';
 export { PageNavigator, OnNavigationError } from './page-navigator';
+export { PrivacyScanResult } from './privacy-scan-result';

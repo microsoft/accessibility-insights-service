@@ -3,25 +3,15 @@
 
 import { inject, injectable } from 'inversify';
 import { GlobalLogger } from 'logger';
-import { AxeScanResults } from 'scanner-global-library';
-import { OnDemandPageScanRunResultProvider, WebsiteScanResultProvider, ReportWriter } from 'service-library';
-import {
-    OnDemandPageScanReport,
-    OnDemandPageScanResult,
-    OnDemandPageScanRunState,
-    OnDemandScanResult,
-    ScanError,
-    WebsiteScanResult,
-} from 'storage-documents';
+import { PrivacyScanResult } from 'scanner-global-library';
+import { OnDemandPageScanRunResultProvider, WebsiteScanResultProvider, ReportWriter, GeneratedReport } from 'service-library';
+import { OnDemandPageScanReport, OnDemandPageScanResult, OnDemandPageScanRunState, ScanError, WebsiteScanResult } from 'storage-documents';
 import { System, ServiceConfiguration } from 'common';
 import _ from 'lodash';
-import { ReportGenerator } from '../report-generator/report-generator';
 import { ScanMetadataConfig } from '../scan-metadata-config';
 import { ScanRunnerTelemetryManager } from '../scan-runner-telemetry-manager';
-import { CombinedScanResultProcessor } from '../combined-result/combined-scan-result-processor';
 import { PageScanProcessor } from '../scanner/page-scan-processor';
-import { ScanMetadata } from '../types/scan-metadata';
-import { ScanNotificationProcessor } from '../sender/scan-notification-processor';
+import { PrivacyScanMetadata } from '../types/privacy-scan-metadata';
 
 @injectable()
 export class Runner {
@@ -31,9 +21,6 @@ export class Runner {
         @inject(WebsiteScanResultProvider) protected readonly websiteScanResultProvider: WebsiteScanResultProvider,
         @inject(PageScanProcessor) private readonly pageScanProcessor: PageScanProcessor,
         @inject(ReportWriter) protected readonly reportWriter: ReportWriter,
-        @inject(ReportGenerator) private readonly reportGenerator: ReportGenerator,
-        @inject(CombinedScanResultProcessor) private readonly combinedScanResultProcessor: CombinedScanResultProcessor,
-        @inject(ScanNotificationProcessor) protected readonly scanNotificationProcessor: ScanNotificationProcessor,
         @inject(ScanRunnerTelemetryManager) private readonly telemetryManager: ScanRunnerTelemetryManager,
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
         @inject(GlobalLogger) private readonly logger: GlobalLogger,
@@ -45,7 +32,7 @@ export class Runner {
         scanMetadata.url = decodeURI(scanMetadata.url);
 
         this.logger.setCommonProperties({ scanId: scanMetadata.id, url: scanMetadata.url });
-        this.logger.logInfo('Starting page scan task.');
+        this.logger.logInfo('Start privacy scan runner.');
 
         const pageScanResult = await this.updateScanRunState(scanMetadata.id);
         if (pageScanResult === undefined) {
@@ -54,26 +41,25 @@ export class Runner {
 
         this.telemetryManager.trackScanStarted(scanMetadata.id);
         try {
-            const axeScanResults = await this.pageScanProcessor.scan(scanMetadata, pageScanResult);
-            await this.processScanResult(axeScanResults, pageScanResult);
+            const privacyScanResults = await this.pageScanProcessor.scan(scanMetadata);
+            await this.processScanResult(privacyScanResults, pageScanResult);
         } catch (error) {
             const errorMessage = System.serializeError(error);
             this.setRunResult(pageScanResult, 'failed', errorMessage);
 
-            this.logger.logError(`The scanner failed to scan a page.`, { error: errorMessage });
+            this.logger.logError(`The privacy scan processor failed to scan a webpage.`, { error: errorMessage });
             this.telemetryManager.trackScanTaskFailed();
         } finally {
             this.telemetryManager.trackScanCompleted();
         }
 
-        const websiteScanResult = await this.updateScanResult(scanMetadata, pageScanResult);
-        await this.scanNotificationProcessor.sendScanCompletionNotification(scanMetadata, pageScanResult, websiteScanResult);
+        await this.updateScanResult(scanMetadata, pageScanResult);
 
-        this.logger.logInfo('Page scan task completed.');
+        this.logger.logInfo('Stop privacy scan runner.');
     }
 
     private async updateScanRunState(scanId: string): Promise<OnDemandPageScanResult> {
-        this.logger.logInfo(`Updating page scan run state to 'running'.`);
+        this.logger.logInfo(`Updating webpage scan run state to 'running'.`);
         const partialPageScanResult: Partial<OnDemandPageScanResult> = {
             id: scanId,
             run: {
@@ -87,7 +73,7 @@ export class Runner {
         const response = await this.onDemandPageScanRunResultProvider.tryUpdateScanRun(partialPageScanResult);
         if (!response.succeeded) {
             this.logger.logWarn(
-                `Update page scan run state to 'running' failed due to merge conflict with other process. Exiting page scan task.`,
+                `Update webpage scan run state to 'running' failed due to merge conflict with other process. Exiting webpage scan task.`,
             );
 
             return undefined;
@@ -96,31 +82,33 @@ export class Runner {
         return response.result;
     }
 
-    private async processScanResult(axeScanResults: AxeScanResults, pageScanResult: OnDemandPageScanResult): Promise<AxeScanResults> {
-        if (_.isNil(axeScanResults.error)) {
+    private async processScanResult(
+        privacyScanResult: PrivacyScanResult,
+        pageScanResult: OnDemandPageScanResult,
+    ): Promise<PrivacyScanResult> {
+        if (_.isEmpty(privacyScanResult.error)) {
             this.setRunResult(pageScanResult, 'completed');
-            pageScanResult.scanResult = this.getScanStatus(axeScanResults);
-            pageScanResult.reports = await this.generateScanReports(axeScanResults);
-            if (axeScanResults.scannedUrl !== undefined) {
-                pageScanResult.scannedUrl = axeScanResults.scannedUrl;
+            pageScanResult.scanResult = {
+                state: 'pass', // TBD
+            };
+            pageScanResult.reports = await this.generateScanReports(privacyScanResult);
+            if (privacyScanResult.scannedUrl !== undefined) {
+                pageScanResult.scannedUrl = privacyScanResult.scannedUrl;
             }
-
-            await this.combinedScanResultProcessor.generateCombinedScanResults(axeScanResults, pageScanResult);
         } else {
-            this.setRunResult(pageScanResult, 'failed', axeScanResults.error);
+            this.setRunResult(pageScanResult, 'failed', privacyScanResult.error);
 
-            this.logger.logError('Browser has failed to scan a page.', { error: JSON.stringify(axeScanResults.error) });
+            this.logger.logError('Browser has failed to scan a webpage.', { error: JSON.stringify(privacyScanResult.error) });
             this.telemetryManager.trackBrowserScanFailed();
         }
 
-        pageScanResult.run.pageTitle = axeScanResults.pageTitle;
-        pageScanResult.run.pageResponseCode = axeScanResults.pageResponseCode;
+        pageScanResult.run.pageResponseCode = privacyScanResult.pageResponseCode;
 
-        return axeScanResults.error ? undefined : axeScanResults;
+        return privacyScanResult.error ? undefined : privacyScanResult;
     }
 
     private async updateScanResult(
-        scanMetadata: ScanMetadata,
+        scanMetadata: PrivacyScanMetadata,
         pageScanResult: Partial<OnDemandPageScanResult>,
     ): Promise<WebsiteScanResult> {
         await this.onDemandPageScanRunResultProvider.updateScanRun(pageScanResult);
@@ -152,9 +140,9 @@ export class Runner {
         return undefined;
     }
 
-    private async generateScanReports(axeResults: AxeScanResults): Promise<OnDemandPageScanReport[]> {
-        this.logger.logInfo(`Generating reports from scan results.`);
-        const reports = this.reportGenerator.generateReports(axeResults);
+    private async generateScanReports(privacyScanResult: PrivacyScanResult): Promise<OnDemandPageScanReport[]> {
+        this.logger.logInfo(`Generating privacy scan report for a webpage scan.`);
+        const reports = [{}] as GeneratedReport[]; // TBD
 
         return this.reportWriter.writeBatch(reports);
     }
@@ -166,18 +154,5 @@ export class Runner {
             timestamp: new Date().toJSON(),
             error: _.isString(error) ? error.substring(0, 2048) : error,
         };
-    }
-
-    private getScanStatus(axeResults: AxeScanResults): OnDemandScanResult {
-        if (axeResults?.results?.violations !== undefined && axeResults.results.violations.length > 0) {
-            return {
-                state: 'fail',
-                issueCount: axeResults.results.violations.reduce((a, b) => a + b.nodes.length, 0),
-            };
-        } else {
-            return {
-                state: 'pass',
-            };
-        }
     }
 }
