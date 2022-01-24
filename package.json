@@ -13,6 +13,7 @@
         "build": "npx lerna run build --stream",
         "pack": "npx lerna run pack --stream",
         "test": "npx jest",
+        "test:nc": "npx jest --collectCoverage=false",
         "test:ci": "npx jest --config jest.ci.js --totalTestSlices=4 --testSlicesToRun=[1,2,3]",
         "publish-code-coverage": "npx codecov",
         "test:e2e": "npx jest functional-tests.local.spec.ts",
@@ -85,8 +86,7 @@
         "ansi-regex": "^5.0.1",
         "validator": ">=13.7.0",
         "serialize-error": "^8.1.0",
-        "json-schema": ">=0.4.0",
-        "node-fetch": "^3.1.1"
+        "json-schema": ">=0.4.0"
     },
     "dependencies": {
         "accessibility-insights-report": "4.2.0"
