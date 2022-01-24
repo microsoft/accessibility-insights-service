@@ -41,7 +41,7 @@
         "eslint": "^7.32.0",
         "eslint-plugin-header": "^3.1.1",
         "eslint-plugin-import": "^2.25.3",
-        "eslint-plugin-jest": "^25.3.4",
+        "eslint-plugin-jest": "^26.0.0",
         "eslint-plugin-jsdoc": "^37.5.0",
         "eslint-plugin-prefer-arrow": "^1.2.3",
         "eslint-plugin-security": "^1.4.0",
@@ -85,7 +85,8 @@
         "ansi-regex": "^5.0.1",
         "validator": ">=13.7.0",
         "serialize-error": "^8.1.0",
-        "json-schema": ">=0.4.0"
+        "json-schema": ">=0.4.0",
+        "node-fetch": "^3.1.1"
     },
     "dependencies": {
         "accessibility-insights-report": "4.2.0"
