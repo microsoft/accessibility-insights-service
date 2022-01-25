@@ -11,5 +11,5 @@ cp ../resource-deployment/runtime-config/runtime-config.dev.json ./dist/runtime-
 cp ./.env ./dist/
 yarn build &&
     cd ./dist &&
-    docker build --tag runner . &&
-    docker run --init --cap-add=SYS_ADMIN --ipc=host runner
+    docker build --tag a11y-scan-runner . &&
+    docker run --init --cap-add=SYS_ADMIN --ipc=host a11y-scan-runner

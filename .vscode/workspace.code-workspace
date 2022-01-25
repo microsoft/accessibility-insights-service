@@ -9,6 +9,10 @@
             "path": "../packages/privacy-scan-runner"
         },
         {
+            "name": "privacy-scan-job-manager",
+            "path": "../packages/privacy-scan-job-manager"
+        },
+        {
             "name": "scanner-global-library",
             "path": "../packages/scanner-global-library"
         },

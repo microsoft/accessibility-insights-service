@@ -89,6 +89,11 @@ Object {
       "doc": "The amount of time the job manager instance will run continuously. Must correlate with queueConfig.messageVisibilityTimeoutInSeconds config value.",
       "format": "int",
     },
+    "privacyScanRunnerTaskImageName": Object {
+      "default": "batch-privacy-scan-runner",
+      "doc": "The Docker image name used for task creation.",
+      "format": "String",
+    },
     "scanRunnerTaskImageName": Object {
       "default": "batch-scan-runner",
       "doc": "The Docker image name used for task creation.",
@@ -276,6 +281,11 @@ Object {
       "default": 30,
       "doc": "The amount of time the job manager instance will run continuously. Must correlate with queueConfig.messageVisibilityTimeoutInSeconds config value.",
       "format": "int",
+    },
+    "privacyScanRunnerTaskImageName": Object {
+      "default": "batch-privacy-scan-runner",
+      "doc": "The Docker image name used for task creation.",
+      "format": "String",
     },
     "scanRunnerTaskImageName": Object {
       "default": "batch-scan-runner",

@@ -10,5 +10,5 @@ cp ../resource-deployment/runtime-config/runtime-config.dev.json ./dist/runtime-
 cp ./.env ./dist/
 yarn build &&
     cd ./dist &&
-    docker build --tag job-manager . &&
-    docker run job-manager
+    docker build --tag a11y-scan-job-manager . &&
+    docker run a11y-scan-job-manager

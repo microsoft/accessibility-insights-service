@@ -1,5 +1,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
+
 [CmdletBinding()]
 Param(
     [Parameter()]
@@ -78,7 +79,7 @@ function getSecretValue($key) {
 function loginToContainerRegistry() {
     $containerRegistryUsername = getSecretValue "containerRegistryUsername"
     $containerRegistryPassword = getSecretValue "containerRegistryPassword"
-    $global:azurecr="$containerRegistryUsername.azurecr.io"
+    $global:azurecr = "$containerRegistryUsername.azurecr.io"
 
     Write-Output "Login to the container registry $azurecr..."
     echo "$containerRegistryPassword" | docker login -u "$containerRegistryUsername" --password-stdin "$azurecr"
@@ -86,8 +87,8 @@ function loginToContainerRegistry() {
 
 function pullDockerImages() {
     Write-Output "Pulling Batch images from container registry..."
-    $scanManagerImage="$azurecr/batch-scan-manager:latest"
-    $scanRunnerImage="$azurecr/batch-scan-runner:latest"
+    $scanManagerImage = "$azurecr/batch-scan-manager:latest"
+    $scanRunnerImage = "$azurecr/batch-scan-runner:latest"
 
     Write-Output "Pulling image $scanManagerImage"
     docker pull $scanManagerImage
