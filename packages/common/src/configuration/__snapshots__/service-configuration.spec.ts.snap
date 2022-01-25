@@ -91,17 +91,17 @@ Object {
     },
     "privacyScanRunnerTaskImageName": Object {
       "default": "batch-privacy-scan-runner",
-      "doc": "The Docker image name used for task creation.",
+      "doc": "The container image name used for task creation.",
       "format": "String",
     },
     "scanRunnerTaskImageName": Object {
       "default": "batch-scan-runner",
-      "doc": "The Docker image name used for task creation.",
+      "doc": "The container image name used for task creation.",
       "format": "String",
     },
     "sendNotificationTaskImageName": Object {
       "default": "batch-scan-notification-runner",
-      "doc": "The Docker image name used for task creation.",
+      "doc": "The container image name used for task creation.",
       "format": "String",
     },
     "sendNotificationTasksCount": Object {
@@ -284,17 +284,17 @@ Object {
     },
     "privacyScanRunnerTaskImageName": Object {
       "default": "batch-privacy-scan-runner",
-      "doc": "The Docker image name used for task creation.",
+      "doc": "The container image name used for task creation.",
       "format": "String",
     },
     "scanRunnerTaskImageName": Object {
       "default": "batch-scan-runner",
-      "doc": "The Docker image name used for task creation.",
+      "doc": "The container image name used for task creation.",
       "format": "String",
     },
     "sendNotificationTaskImageName": Object {
       "default": "batch-scan-notification-runner",
-      "doc": "The Docker image name used for task creation.",
+      "doc": "The container image name used for task creation.",
       "format": "String",
     },
     "sendNotificationTasksCount": Object {

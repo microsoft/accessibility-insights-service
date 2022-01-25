@@ -25,11 +25,11 @@ describe(ScannerBatchTaskPropertyProvider, () => {
     it('get image name', async () => {
         serviceConfigMock
             .setup(async (o) => o.getConfigValue('jobManagerConfig'))
-            .returns(() => Promise.resolve({ scanRunnerTaskImageName: 'scanRunnerTaskImageName' } as JobManagerConfig))
+            .returns(() => Promise.resolve({ privacyScanRunnerTaskImageName: 'privacyScanRunnerTaskImageName' } as JobManagerConfig))
             .verifiable();
 
         const actualImageName = await testSubject.getImageName();
-        expect(actualImageName).toEqual('scanRunnerTaskImageName');
+        expect(actualImageName).toEqual('privacyScanRunnerTaskImageName');
     });
 
     it('get additional container run options', () => {
