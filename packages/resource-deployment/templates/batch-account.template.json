@@ -80,7 +80,7 @@
             }
         },
         "onDemandUrlScanPoolNodes": {
-            "defaultValue": "3",
+            "defaultValue": "2",
             "type": "string",
             "metadata": {
                 "description": "Number of dedicated nodes for on-demand-url-scan-pool pool"
@@ -101,7 +101,7 @@
             }
         },
         "privacyScanPoolNodes": {
-            "defaultValue": "3",
+            "defaultValue": "2",
             "type": "string",
             "metadata": {
                 "description": "Number of dedicated nodes for privacy-scan-pool pool"

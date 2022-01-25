@@ -66,7 +66,6 @@ loginToContainerRegistry() {
 
     getSecretValue "containerRegistryUsername" containerRegistryUsername
     getSecretValue "containerRegistryPassword" containerRegistryPassword
-    containerRegistryName=$containerRegistryUsername
 
     azurecr="$containerRegistryUsername.azurecr.io"
     echo "Login to the container registry $azurecr..."

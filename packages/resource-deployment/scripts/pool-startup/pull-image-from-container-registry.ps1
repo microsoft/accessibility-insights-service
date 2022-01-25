@@ -38,7 +38,6 @@ function getCurrentUserDetails() {
     catch {
     }
     
-
     if ( $global:userType -eq "user" ) {
         Write-Output "Running script using current user credentials"
     }
@@ -82,13 +81,24 @@ function loginToContainerRegistry() {
     $global:azurecr = "$containerRegistryUsername.azurecr.io"
 
     Write-Output "Login to the container registry $azurecr..."
-    echo "$containerRegistryPassword" | docker login -u "$containerRegistryUsername" --password-stdin "$azurecr"
+    Write-Output "$containerRegistryPassword" | docker login -u "$containerRegistryUsername" --password-stdin "$azurecr"
 }
 
 function pullDockerImages() {
-    Write-Output "Pulling Batch images from container registry..."
-    $scanManagerImage = "$azurecr/batch-scan-manager:latest"
-    $scanRunnerImage = "$azurecr/batch-scan-runner:latest"
+    $pool = $env:AZ_BATCH_POOL_ID;
+    Write-Output "Pulling container images from a registry for the $pool pool..."
+    if ( $pool -eq "on-demand-url-scan-pool" ) {
+        $scanManagerImage = "$azurecr/batch-scan-manager:latest"
+        $scanRunnerImage = "$azurecr/batch-scan-runner:latest"    
+    }
+    elseif ( $pool -eq "privacy-scan-pool" ) {
+        $scanManagerImage = "$azurecr/batch-privacy-scan-manager:latest"
+        $scanRunnerImage = "$azurecr/batch-privacy-scan-runner:latest"    
+    }
+    else {
+        Write-Output "Unable to pull container images. Environment variable AZ_BATCH_POOL_ID is not defined or $pool pool is not supported."
+        exit 1
+    }
 
     Write-Output "Pulling image $scanManagerImage"
     docker pull $scanManagerImage
@@ -115,5 +125,3 @@ try {
 catch {
     revokeUserAccessToKeyVault
 }
-
-

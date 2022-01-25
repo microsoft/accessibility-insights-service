@@ -19,6 +19,15 @@
         },
         "onDemandUrlScanPoolTaskSlotsPerNode": {
             "value": "2"
+        },
+        "privacyScanPoolNodes": {
+            "value": "1"
+        },
+        "privacyScanPoolVmSize": {
+            "value": "standard_d11_v2"
+        },
+        "privacyScanPoolTaskSlotsPerNode": {
+            "value": "2"
         }
     }
 }

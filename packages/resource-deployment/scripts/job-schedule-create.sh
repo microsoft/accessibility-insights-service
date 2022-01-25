@@ -22,6 +22,9 @@ parsedOnDemandSendNotificationFileName="on-demand-send-notification.generated.te
 onDemandScanScheduleJobName="on-demand-url-scan-schedule"
 parsedOnDemandScanScheduleFileName="on-demand-url-scan-schedule.generated.template.json"
 
+privacyScanScheduleJobName="privacy-scan-schedule"
+parsedPrivacyScanScheduleFileName="privacy-scan-schedule.generated.template.json"
+
 adjustJob() {
     local jobName=$1
     local jobTemplate=$2
@@ -78,6 +81,7 @@ appInsightsKey=$(az monitor app-insights component show --app "$appInsightsName"
 sed -e "s@%APP_INSIGHTS_TOKEN%@$appInsightsKey@" -e "s@%KEY_VAULT_TOKEN%@$keyVaultUrl@" -e "s@%CONTAINER_REGISTRY_TOKEN%@$containerRegistryName@" "$templatesFolder/on-demand-url-scan-schedule.template.json" >"$parsedOnDemandScanScheduleFileName"
 sed -e "s@%APP_INSIGHTS_TOKEN%@$appInsightsKey@" -e "s@%KEY_VAULT_TOKEN%@$keyVaultUrl@" -e "s@%CONTAINER_REGISTRY_TOKEN%@$containerRegistryName@" "$templatesFolder/on-demand-scan-req-schedule.template.json" >"$parsedOnDemandScanReqScheduleFileName"
 sed -e "s@%APP_INSIGHTS_TOKEN%@$appInsightsKey@" -e "s@%KEY_VAULT_TOKEN%@$keyVaultUrl@" -e "s@%CONTAINER_REGISTRY_TOKEN%@$containerRegistryName@" "$templatesFolder/on-demand-send-notification-schedule.template.json" >"$parsedOnDemandSendNotificationFileName"
+sed -e "s@%APP_INSIGHTS_TOKEN%@$appInsightsKey@" -e "s@%KEY_VAULT_TOKEN%@$keyVaultUrl@" -e "s@%CONTAINER_REGISTRY_TOKEN%@$containerRegistryName@" "$templatesFolder/privacy-scan-schedule.template.json" >"$parsedPrivacyScanScheduleFileName"
 
 echo "Logging into batch account '$batchAccountName' in resource group '$resourceGroupName'..."
 az batch account login --name "$batchAccountName" --resource-group "$resourceGroupName"
@@ -88,5 +92,6 @@ allJobsScheduleList=$(az batch job-schedule list --query "[*].id" -o tsv)
 adjustJob "$onDemandScanScheduleJobName" "$parsedOnDemandScanScheduleFileName" "$allJobsScheduleList"
 adjustJob "$onDemandScanReqScheduleJobName" "$parsedOnDemandScanReqScheduleFileName" "$allJobsScheduleList"
 adjustJob "$onDemandSendNotificationJobName" "$parsedOnDemandSendNotificationFileName" "$allJobsScheduleList"
+adjustJob "$privacyScanScheduleJobName" "$parsedPrivacyScanScheduleFileName" "$allJobsScheduleList"
 
 echo "Job schedules were created successfully."
