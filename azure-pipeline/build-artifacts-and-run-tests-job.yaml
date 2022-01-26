@@ -33,6 +33,8 @@ steps:
               web-api-scan-runner/dist/**/*
               web-api-send-notification-runner/dist/**/*
               web-api-scan-request-sender/dist/**/*
+              privacy-scan-runner/dist/**/*
+              privacy-scan-job-manager/dist/**/*
               resource-deployment/dist/**/*
               web-api/dist/**/*
               web-workers/dist/**/*

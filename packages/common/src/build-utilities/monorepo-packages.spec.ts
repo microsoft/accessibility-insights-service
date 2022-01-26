@@ -18,6 +18,7 @@ describe('listMonorepoPackageNames', () => {
               "health-client",
               "logger",
               "parallel-workers",
+              "privacy-scan-job-manager",
               "privacy-scan-runner",
               "resource-deployment",
               "scanner-global-library",

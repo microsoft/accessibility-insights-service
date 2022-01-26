@@ -28,6 +28,7 @@ export interface JobManagerConfig {
     sendNotificationTasksCount: number;
     scanRunnerTaskImageName: string;
     sendNotificationTaskImageName: string;
+    privacyScanRunnerTaskImageName: string;
 }
 
 export interface ScanRunTimeConfig {
@@ -198,12 +199,17 @@ export class ServiceConfiguration {
                 scanRunnerTaskImageName: {
                     format: 'String',
                     default: 'batch-scan-runner',
-                    doc: 'The Docker image name used for task creation.',
+                    doc: 'The container image name used for task creation.',
                 },
                 sendNotificationTaskImageName: {
                     format: 'String',
                     default: 'batch-scan-notification-runner',
-                    doc: 'The Docker image name used for task creation.',
+                    doc: 'The container image name used for task creation.',
+                },
+                privacyScanRunnerTaskImageName: {
+                    format: 'String',
+                    default: 'batch-privacy-scan-runner',
+                    doc: 'The container image name used for task creation.',
                 },
             },
             scanConfig: {
