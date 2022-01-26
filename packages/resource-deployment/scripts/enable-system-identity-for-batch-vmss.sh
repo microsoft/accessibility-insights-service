@@ -37,13 +37,13 @@ enableStorageAccess() {
 enableCosmosAccess() {
     cosmosAccountId=$(az cosmosdb show --name "$cosmosAccountName" --resource-group "$resourceGroupName" --query id -o tsv)
     scope="--scope $cosmosAccountId"
-    
+
     role="DocumentDB Account Contributor"
     . "${0%/*}/role-assign-for-sp.sh"
 
     # Create and assign custom RBAC role
     customRoleName="CosmosDocumentRW"
-    RBACRoleId=$(az cosmosdb sql role definition list --account-name $cosmosAccountName --resource-group $resourceGroupName --query "[?roleName=='$customRoleName'].id" -o tsv)
+    RBACRoleId=$(az cosmosdb sql role definition list --account-name "$cosmosAccountName" --resource-group "$resourceGroupName" --query "[?roleName=='$customRoleName'].id" -o tsv)
     if [[ -z "$RBACRoleId" ]]; then
         echo "Creating a custom RBAC role with read-write permissions"
         RBACRoleId=$(az cosmosdb sql role definition create --account-name "${cosmosAccountName}" \
@@ -55,11 +55,28 @@ enableCosmosAccess() {
             --id "${RBACRoleId}" \
             --exists 1>/dev/null
     fi
-    az cosmosdb sql role assignment create --account-name $cosmosAccountName \
-        --resource-group $resourceGroupName \
-        --scope "/" \
-        --principal-id $principalId \
-        --role-definition-id $RBACRoleId 1>/dev/null
+
+    local end=$((SECONDS + 300))
+    echo "Creating a custom role assignment $customRoleName under $cosmosAccountName Cosmos DB account"
+    printf " - Running .."
+    while [ $SECONDS -le $end ]; do
+        response=$(az cosmosdb sql role assignment create --account-name "$cosmosAccountName" --resource-group "$resourceGroupName" --scope "/" --principal-id "$principalId" --role-definition-id "$RBACRoleId") || true
+        if [[ -n $response ]]; then
+            break
+        else
+            printf "."
+        fi
+
+        sleep 5
+    done
+    echo "  ended"
+
+    if [[ -z $response ]]; then
+        echo "Unable to create a custom role assignment $customRoleName under $cosmosAccountName Cosmos DB account"
+        exit 1
+    fi
+
+    echo "Successfully created a custom role assignment $customRoleName under $cosmosAccountName Cosmos DB account"
 }
 
 assignSystemIdentity() {
