@@ -8,8 +8,5 @@ export enum ItemType {
     onDemandPageScanRunResult = 'pageScanRunResult',
     websiteScanResult = 'websiteScanResult',
     websiteScanResultPart = 'websiteScanResultPart',
-    privacyPageScanBatchRequest = 'privacyPageScanBatchRequest',
-    privacyPageScanRequest = 'privacyPageScanRequest',
-    privacyScanRunResult = 'privacyScanRunResult',
     privacyScanConfiguration = 'privacyScanConfiguration',
 }

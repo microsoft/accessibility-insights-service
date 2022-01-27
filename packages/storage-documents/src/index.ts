@@ -14,7 +14,3 @@ export * from './on-demand-notification-request-message';
 export * from './batch-pool-load-snapshot';
 export * from './website-scan-result';
 export * from './combined-scan-results';
-export * from './privacy-scan-types/privacy-page-scan-batch-request';
-export * from './privacy-scan-types/privacy-page-scan-request';
-export * from './privacy-scan-types/privacy-page-scan-result';
-export * from './privacy-scan-types/privacy-scan-configuration';

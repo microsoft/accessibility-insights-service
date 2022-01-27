@@ -28,5 +28,3 @@ export { WebsiteScanResultProvider } from './data-providers/website-scan-result-
 export * from './data-providers/combined-scan-results-provider';
 export { BatchRequestLoader } from './dev-utilities/batch-request-loader';
 export { ReportWriter, GeneratedReport } from './data-providers/report-writer';
-export * from './web-api/api-contracts/privacy-scan-types/privacy-result-response';
-export * from './web-api/api-contracts/privacy-scan-types/privacy-scan-run-request';
