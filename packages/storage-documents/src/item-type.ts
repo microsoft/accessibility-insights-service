@@ -8,4 +8,5 @@ export enum ItemType {
     onDemandPageScanRunResult = 'pageScanRunResult',
     websiteScanResult = 'websiteScanResult',
     websiteScanResultPart = 'websiteScanResultPart',
+    privacyScanConfiguration = 'privacyScanConfiguration',
 }
