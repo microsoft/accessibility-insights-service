@@ -31,4 +31,3 @@ export { ReportWriter, GeneratedReport } from './data-providers/report-writer';
 export * from './web-api/api-contracts/privacy-scan-types/privacy-result-response';
 export * from './web-api/api-contracts/privacy-scan-types/privacy-scan-report';
 export * from './web-api/api-contracts/privacy-scan-types/privacy-scan-run-request';
-export * from './web-api/api-contracts/privacy-scan-types/privacy-scan-configuration';

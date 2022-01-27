@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { PrivacyScanConfiguration } from 'service-library';
 import { StorageDocument } from '../storage-document';
 import { ItemType } from '../item-type';
 import { ReportGroupRequest, WebsiteRequest } from '../on-demand-page-scan-batch-request';
+import { PrivacyScanConfiguration } from './privacy-scan-configuration';
 
 /**
  * The client page scan run batch request document.
@@ -12,7 +12,7 @@ import { ReportGroupRequest, WebsiteRequest } from '../on-demand-page-scan-batch
 export interface PrivacyPageScanBatchRequest extends StorageDocument {
     itemType: ItemType.privacyPageScanBatchRequest;
     scanRunBatchRequest: PrivacyScanRunBatchRequest[];
-    privacyScanConfig: ServiceLibrary.PrivacyScanConfig;
+    privacyScanConfig: PrivacyScanConfiguration;
 }
 
 export interface PrivacyScanRunBatchRequest {
