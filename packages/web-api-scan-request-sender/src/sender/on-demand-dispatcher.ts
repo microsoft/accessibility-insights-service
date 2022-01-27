@@ -56,9 +56,15 @@ export class OnDemandDispatcher {
                     url: scanRequest.request.url,
                     deepScan: scanRequest.request.deepScan,
                 };
-                const response = await this.queue.createMessage(this.storageConfig.scanQueue, message);
 
-                if (response === true) {
+                let success = false;
+                if (scanRequest.request.isPrivacyScan) {
+                    this.logger.logError('Privacy scan queue is not implemented');
+                } else {
+                    success = await this.queue.createMessage(this.storageConfig.scanQueue, message);
+                }
+
+                if (success === true) {
                     count++;
                     await this.updateScanResultState(scanRequest.result, 'queued');
                     await this.trace(scanRequest);

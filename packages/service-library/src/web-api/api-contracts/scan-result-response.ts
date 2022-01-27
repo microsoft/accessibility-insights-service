@@ -25,6 +25,7 @@ export interface ScanRunResultResponse {
     reports?: ScanReport[];
     run: ScanRun;
     notification?: ScanCompletedNotification;
+    isPrivacyScan?: boolean;
 }
 
 export interface ScanRunErrorResponse {

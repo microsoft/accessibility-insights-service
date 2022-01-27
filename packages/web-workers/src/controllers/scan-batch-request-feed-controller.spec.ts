@@ -146,11 +146,13 @@ describe(ScanBatchRequestFeedController, () => {
                         },
                         reportGroups: [{ consolidatedId: 'consolidated-id-2' }],
                         deepScan: true,
+                        isPrivacyScan: false,
                     },
                     {
                         scanId: 'scan-5',
                         url: 'url-5',
                         priority: 0,
+                        isPrivacyScan: true,
                     },
                     {
                         url: 'url-6',
@@ -272,6 +274,7 @@ function setupOnDemandPageScanRunResultProviderMock(
                               },
                           }),
                     websiteScanRefs: websiteScanRefs.length > 0 ? websiteScanRefs : undefined,
+                    ...(request.isPrivacyScan === undefined ? {} : { isPrivacyScan: request.isPrivacyScan }),
                 };
 
                 return result;

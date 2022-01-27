@@ -43,6 +43,7 @@ export interface OnDemandPageScanResult extends StorageDocument {
     reports?: OnDemandPageScanReport[];
     run: OnDemandPageScanRunResult;
     notification?: ScanCompletedNotification;
+    isPrivacyScan?: boolean;
 }
 
 export interface ScanCompletedNotification {

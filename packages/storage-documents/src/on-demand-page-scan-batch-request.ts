@@ -30,4 +30,5 @@ export interface ScanRunBatchRequest {
     reportGroups?: ReportGroupRequest[];
     scanNotifyUrl?: string;
     deepScan?: boolean;
+    isPrivacyScan?: boolean;
 }

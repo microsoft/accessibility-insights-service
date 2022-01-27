@@ -156,6 +156,34 @@ describe(OnDemandDispatcher, () => {
 
         await onDemandDispatcher.dispatchScanRequests();
     });
+
+    it('Does not add privacy scans to a11y scan queue', async () => {
+        const error: ScanError = {
+            errorType: 'InternalError',
+            message: 'Failed to create a scan request queue message.',
+        };
+        const scanRequests = {
+            toDelete: [],
+            toQueue: [
+                {
+                    request: { id: 'id1', url: 'url1', isPrivacyScan: true, created: false, error },
+                    result: {},
+                    condition: 'accepted',
+                },
+            ],
+        } as any;
+
+        setupServiceConfiguration();
+        queueMock
+            .setup((o) => o.getMessageCount(scanQueueName))
+            .returns(() => Promise.resolve(messageCount))
+            .verifiable();
+        queueMock.setup((o) => o.createMessage(scanQueueName, It.isAny())).verifiable(Times.never());
+        setupOnDemandPageScanRunResultProvider(scanRequests);
+        setupScanRequestSelector(scanRequests);
+
+        await onDemandDispatcher.dispatchScanRequests();
+    });
 });
 
 function setupOnDemandPageScanRunResultProvider(scanRequests: ScanRequests): void {

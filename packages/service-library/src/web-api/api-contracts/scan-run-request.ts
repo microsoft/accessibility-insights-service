@@ -15,6 +15,7 @@ export interface ScanRunRequest {
      * The default value is 0.
      */
     priority?: number;
+    isPrivacyScan?: boolean;
 }
 
 export interface Website {
