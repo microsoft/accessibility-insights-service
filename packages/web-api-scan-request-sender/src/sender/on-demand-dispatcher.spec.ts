@@ -166,7 +166,7 @@ describe(OnDemandDispatcher, () => {
             toDelete: [],
             toQueue: [
                 {
-                    request: { id: 'id1', url: 'url1', isPrivacyScan: true, created: false, error },
+                    request: { id: 'id1', url: 'url1', privacyScan: true, created: false, error },
                     result: {},
                     condition: 'accepted',
                 },

@@ -122,7 +122,7 @@ export class ScanBatchRequestFeedController extends WebController {
                           },
                       }),
                 websiteScanRefs: websiteScanRefs ? [websiteScanRefs] : undefined,
-                ...(request.isPrivacyScan === undefined ? {} : { isPrivacyScan: request.isPrivacyScan }),
+                ...(request.privacyScan === undefined ? {} : { privacyScan: request.privacyScan }),
             };
         });
 

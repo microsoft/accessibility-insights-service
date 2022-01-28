@@ -7,7 +7,7 @@ import { Context } from '@azure/functions';
 import { GuidGenerator, RestApiConfig, ServiceConfiguration } from 'common';
 import { ScanRequestReceivedMeasurements } from 'logger';
 import { HttpResponse, ScanDataProvider, ScanRunResponse, WebApiErrorCodes } from 'service-library';
-import { ScanRunBatchRequest } from 'storage-documents';
+import { ScanRunBatchRequest, PrivacyScan } from 'storage-documents';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { MockableLogger } from '../test-utilities/mockable-logger';
 
@@ -253,15 +253,17 @@ describe(ScanRequestController, () => {
             guidGeneratorMock.verifyAll();
         });
 
-        it.each([true, false])('accepts request with isPrivacyScan=%s', async (isPrivacyScan) => {
+        it.each([{ cookieBannerType: 'standard' }, undefined])('accepts request with privacyScan=%s', async (privacyScan: PrivacyScan) => {
             const guid1 = '1e9cefa6-538a-6df0-aaaa-ffffffffffff';
             const guid2 = '1e9cefa6-538a-6df0-bbbb-ffffffffffff';
             guidGeneratorMock.setup((g) => g.createGuid()).returns(() => guid1);
             guidGeneratorMock.setup((g) => g.createGuidFromBaseGuid(guid1)).returns(() => guid2);
 
-            context.req.rawBody = JSON.stringify([{ url: 'https://abs/path/', isPrivacyScan }]);
+            context.req.rawBody = JSON.stringify([{ url: 'https://abs/path/', privacyScan }]);
             const expectedResponse = [{ scanId: guid2, url: 'https://abs/path/' }];
-            const expectedSavedRequest: ScanRunBatchRequest[] = [{ scanId: guid2, url: 'https://abs/path/', priority: 0, isPrivacyScan }];
+            const expectedSavedRequest: ScanRunBatchRequest[] = privacyScan
+                ? [{ scanId: guid2, url: 'https://abs/path/', priority: 0, privacyScan }]
+                : [{ scanId: guid2, url: 'https://abs/path/', priority: 0 }];
             scanDataProviderMock.setup(async (o) => o.writeScanRunBatchRequest(guid1, expectedSavedRequest)).verifiable(Times.once());
 
             scanRequestController = createScanRequestController(context);

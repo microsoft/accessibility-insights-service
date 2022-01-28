@@ -15,6 +15,7 @@ Array [
       "state": "pending",
     },
     "scanId": "requested-too-soon-scan-id",
+    "scanType": undefined,
     "url": undefined,
   },
   Object {
@@ -30,6 +31,7 @@ Array [
       "state": "running",
     },
     "scanId": "valid-scan-id",
+    "scanType": "accessibility",
     "url": "url",
   },
 ]

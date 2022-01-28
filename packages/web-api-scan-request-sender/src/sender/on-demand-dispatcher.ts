@@ -58,7 +58,7 @@ export class OnDemandDispatcher {
                 };
 
                 let success = false;
-                if (scanRequest.request.isPrivacyScan) {
+                if (scanRequest.request.privacyScan) {
                     this.logger.logError('Privacy scan queue is not implemented');
                 } else {
                     success = await this.queue.createMessage(this.storageConfig.scanQueue, message);

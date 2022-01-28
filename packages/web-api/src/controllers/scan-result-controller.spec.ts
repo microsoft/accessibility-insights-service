@@ -35,6 +35,7 @@ describe(ScanResultController, () => {
     const tooSoonRequestResponse: ScanResultResponse = {
         scanId,
         url: undefined,
+        scanType: undefined,
         run: {
             state: 'pending',
         },
@@ -59,6 +60,7 @@ describe(ScanResultController, () => {
     const scanClientResponseForDbResponse: ScanResultResponse = {
         scanId: scanId,
         url: 'url',
+        scanType: 'accessibility',
         run: {
             state: 'running',
         },
@@ -66,6 +68,7 @@ describe(ScanResultController, () => {
     const scanResponse: ScanResultResponse = {
         scanId,
         url: 'url',
+        scanType: 'accessibility',
         run: {
             state: 'running',
         },
