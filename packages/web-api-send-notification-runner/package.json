@@ -51,7 +51,7 @@
         "applicationinsights": "^2.2.0",
         "azure-services": "^1.0.0",
         "common": "^1.0.0",
-        "dotenv": "^10.0.0",
+        "dotenv": "^15.0.0",
         "got": "^11.8.3",
         "inversify": "^6.0.1",
         "lodash": "^4.17.21",
