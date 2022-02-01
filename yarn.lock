@@ -214,17 +214,17 @@
   dependencies:
     tslib "^2.0.0"
 
-"@azure/cosmos@^3.15.0":
-  version "3.15.0"
-  resolved "https://registry.yarnpkg.com/@azure/cosmos/-/cosmos-3.15.0.tgz#639f22cd1dd28797a7d7ba8b76d1b249b6e94e7e"
-  integrity sha512-H6oRyUXN1bsxQLRqVGT8kF5JLBsEfWclybJCmlbLokr3J9B4SJ3ixAbr7goZW0t4aiHBY81u8GMsQXjb/68Zxg==
+"@azure/cosmos@^3.15.1":
+  version "3.15.1"
+  resolved "https://registry.yarnpkg.com/@azure/cosmos/-/cosmos-3.15.1.tgz#5b206f061cdf0bb387cf92ac13e25c9190f929c4"
+  integrity sha512-Pjn9CcoipUSsm/r9ZqAeyrqIQnh0AOeIDwYs/3pcLumK9ezCVFrfeLoOfas4Dm2X8bwL+/9puKAM55LJEaQwWg==
   dependencies:
     "@azure/core-auth" "^1.3.0"
     "@azure/core-rest-pipeline" "^1.2.0"
     debug "^4.1.1"
     fast-json-stable-stringify "^2.1.0"
     jsbi "^3.1.3"
-    node-abort-controller "^1.2.0"
+    node-abort-controller "^3.0.0"
     priorityqueuejs "^1.0.0"
     semaphore "^1.0.5"
     tslib "^2.2.0"
@@ -3230,9 +3230,9 @@
   integrity sha512-Y1kCfTShKcJH4CsG5+m5RMA+0tQKa8TrxyMczy0zE8QeDKbuOAJMF8JRM5ouCFyakaSoAhhgy2beCSKLVz+daw==
 
 "@types/node@>=10.0.0":
-  version "17.0.12"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-17.0.12.tgz#f7aa331b27f08244888c47b7df126184bc2339c5"
-  integrity sha512-4YpbAsnJXWYK/fpTVFlMIcUIho2AYCi4wg5aNPrG1ng7fn/1/RZfCIpRCiBX+12RVa34RluilnvCqD+g3KiSiA==
+  version "17.0.14"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-17.0.14.tgz#33b9b94f789a8fedd30a68efdbca4dbb06b61f20"
+  integrity sha512-SbjLmERksKOGzWzPNuW7fJM7fk3YXVTFiZWB/Hs99gwhk+/dnrQRPBQjPW9aO+fi1tAffi9PrwFvsmOKmDTyng==
 
 "@types/node@^12", "@types/node@^12.12.7":
   version "12.20.33"
@@ -9591,9 +9591,9 @@ map-visit@^1.0.0:
     object-visit "^1.0.0"
 
 marked@1.0.0, marked@>=2.0.0, marked@^2.0.0:
-  version "4.0.10"
-  resolved "https://registry.yarnpkg.com/marked/-/marked-4.0.10.tgz#423e295385cc0c3a70fa495e0df68b007b879423"
-  integrity sha512-+QvuFj0nGgO970fySghXGmuw+Fd0gD2x3+MqCWLIPf5oxdv1Ka6b2q+z9RP01P/IaKPMEramy+7cNy/Lw8c3hw==
+  version "4.0.12"
+  resolved "https://registry.yarnpkg.com/marked/-/marked-4.0.12.tgz#2262a4e6fd1afd2f13557726238b69a48b982f7d"
+  integrity sha512-hgibXWrEDNBWgGiK18j/4lkS6ihTe9sxtV4Q1OQppb/0zzyPSzoFANBa5MfsG/zgsWklmNnhm0XACZOH/0HBiQ==
 
 match-all@^1.2.6:
   version "1.2.6"
@@ -10019,10 +10019,10 @@ nise@^4.0.4:
     just-extend "^4.0.2"
     path-to-regexp "^1.7.0"
 
-node-abort-controller@^1.2.0:
-  version "1.2.1"
-  resolved "https://registry.yarnpkg.com/node-abort-controller/-/node-abort-controller-1.2.1.tgz#1eddb57eb8fea734198b11b28857596dc6165708"
-  integrity sha512-79PYeJuj6S9+yOHirR0JBLFOgjB6sQCir10uN6xRx25iD+ZD4ULqgRn3MwWBRaQGB0vEgReJzWwJo42T1R6YbQ==
+node-abort-controller@^3.0.0:
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/node-abort-controller/-/node-abort-controller-3.0.1.tgz#f91fa50b1dee3f909afabb7e261b1e1d6b0cb74e"
+  integrity sha512-/ujIVxthRs+7q6hsdjHMaj8hRG9NuWmwrz+JdRwZ14jdFoKSkm+vDsCbF9PLpnSqjaWQJuTmVtcWHNLr+vrOFw==
 
 node-domexception@^1.0.0:
   version "1.0.0"

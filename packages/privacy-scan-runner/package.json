@@ -48,7 +48,7 @@
         "webpack-ignore-dynamic-require": "^1.0.0"
     },
     "dependencies": {
-        "@azure/cosmos": "^3.15.0",
+        "@azure/cosmos": "^3.15.1",
         "applicationinsights": "^2.2.0",
         "azure-services": "^1.0.0",
         "common": "^1.0.0",
