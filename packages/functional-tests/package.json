@@ -36,7 +36,7 @@
     "dependencies": {
         "@azure/cosmos": "^3.15.0",
         "azure-services": "^1.0.0",
-        "chai": "^4.3.4",
+        "chai": "^4.3.6",
         "common": "^1.0.0",
         "deep-equal-in-any-order": "^1.1.15",
         "dotenv": "^10.0.0",
