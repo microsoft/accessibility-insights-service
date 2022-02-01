@@ -55,6 +55,7 @@ export interface RuntimeConfig {
     restApiConfig: RestApiConfig;
     availabilityTestConfig: AvailabilityTestConfig;
     crawlConfig: CrawlConfig;
+    privacyScanConfig: PrivacyScanConfig;
 }
 
 export interface FeatureFlags {
@@ -77,6 +78,11 @@ export interface AvailabilityTestConfig {
 export interface CrawlConfig {
     deepScanDiscoveryLimit: number;
     deepScanUpperLimit: number;
+}
+
+export interface PrivacyScanConfig {
+    bannerXPath: string;
+    bannerDetectionTimeout: number;
 }
 
 export declare type ResourceType = 'batch' | 'registry';
@@ -320,6 +326,18 @@ export class ServiceConfiguration {
                     format: 'int',
                     default: 10,
                     doc: 'The maximum number of URLs that will be processed for a deep scan request',
+                },
+            },
+            privacyScanConfig: {
+                bannerXPath: {
+                    format: 'String',
+                    default: '//div[@id="wcpConsentBannerCtrl"]',
+                    doc: 'The default XPath to use for consent banner detection',
+                },
+                bannerDetectionTimeout: {
+                    format: 'int',
+                    default: 100,
+                    doc: 'The maximum time in milliseconds to wait for the banner XPath after the initial page load has completed',
                 },
             },
         };

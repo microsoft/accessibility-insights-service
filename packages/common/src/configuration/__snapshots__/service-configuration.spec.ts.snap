@@ -117,6 +117,18 @@ Object {
       "format": "Boolean",
     },
   },
+  "privacyScanConfig": Object {
+    "bannerDetectionTimeout": Object {
+      "default": 100,
+      "doc": "The maximum time in milliseconds to wait for the banner XPath after the initial page load has completed",
+      "format": "int",
+    },
+    "bannerXPath": Object {
+      "default": "//div[@id=\\"wcpConsentBannerCtrl\\"]",
+      "doc": "The default XPath to use for consent banner detection",
+      "format": "String",
+    },
+  },
   "queueConfig": Object {
     "maxQueueSize": Object {
       "default": 10,
@@ -308,6 +320,18 @@ Object {
       "default": true,
       "doc": "Property to decide if console logging is enabled",
       "format": "Boolean",
+    },
+  },
+  "privacyScanConfig": Object {
+    "bannerDetectionTimeout": Object {
+      "default": 100,
+      "doc": "The maximum time in milliseconds to wait for the banner XPath after the initial page load has completed",
+      "format": "int",
+    },
+    "bannerXPath": Object {
+      "default": "//div[@id=\\"wcpConsentBannerCtrl\\"]",
+      "doc": "The default XPath to use for consent banner detection",
+      "format": "String",
     },
   },
   "queueConfig": Object {
