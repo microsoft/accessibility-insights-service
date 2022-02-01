@@ -24,26 +24,34 @@ export class OnDemandDispatcher {
 
     public async dispatchScanRequests(): Promise<void> {
         const configQueueSize = (await this.serviceConfig.getConfigValue('queueConfig')).maxQueueSize;
-        this.logger.logInfo(`Maximum scan task queue size configuration set to ${configQueueSize}.`);
+        this.logger.logInfo(`Maximum target scan queue size: ${configQueueSize}.`);
 
-        const currentQueueSize = await this.getCurrentQueueSize();
-        this.logger.logInfo(`Current scan task queue size is ${currentQueueSize}.`);
-        if (currentQueueSize >= configQueueSize) {
-            this.logger.logInfo('Skip adding new scan requests as scan task queue already reached to its maximum capacity.');
+        const accessibilityCurrentQueueSize = await this.queue.getMessageCount(this.storageConfig.scanQueue);
+        const privacyCurrentQueueSize = await this.queue.getMessageCount(this.storageConfig.privacyScanQueue);
+        this.logger.logInfo(
+            `Current accessibility scan queue size: ${accessibilityCurrentQueueSize}. Current privacy scan queue size: ${privacyCurrentQueueSize}.`,
+        );
+
+        if (accessibilityCurrentQueueSize >= configQueueSize && privacyCurrentQueueSize >= configQueueSize) {
+            this.logger.logInfo('Skip adding new scan requests as all scan queues already reached maximum capacity.');
 
             return;
         }
 
-        const scanRequests = await this.scanRequestSelector.getRequests(configQueueSize - currentQueueSize);
-        await this.addScanRequests(scanRequests.toQueue);
-        await this.deleteScanRequests(scanRequests.toDelete);
+        const scanRequests = await this.scanRequestSelector.getRequests(
+            configQueueSize - accessibilityCurrentQueueSize,
+            configQueueSize - privacyCurrentQueueSize,
+        );
+        await this.addScanRequests(scanRequests.accessibilityRequestsToQueue, this.storageConfig.scanQueue);
+        await this.addScanRequests(scanRequests.privacyRequestsToQueue, this.storageConfig.privacyScanQueue);
+        await this.deleteScanRequests(scanRequests.requestsToDelete);
 
-        this.logger.logInfo(`Adding scan requests to the task scan queue completed. Current queue size ${currentQueueSize}.`);
+        this.logger.logInfo(`Adding scan requests to the scan queue completed.`);
     }
 
-    private async addScanRequests(scanRequests: ScanRequest[]): Promise<void> {
+    private async addScanRequests(scanRequests: ScanRequest[], scanQueue: string): Promise<void> {
         if (scanRequests.length === 0) {
-            this.logger.logInfo(`No new scan requests available in a request queue.`);
+            this.logger.logInfo(`No pending scan requests available for a ${scanQueue} scan queue.`);
 
             return;
         }
@@ -58,11 +66,7 @@ export class OnDemandDispatcher {
                 };
 
                 let success = false;
-                if (scanRequest.request.privacyScan) {
-                    this.logger.logError('Privacy scan queue is not implemented');
-                } else {
-                    success = await this.queue.createMessage(this.storageConfig.scanQueue, message);
-                }
+                success = await this.queue.createMessage(scanQueue, message);
 
                 if (success === true) {
                     count++;
@@ -71,10 +75,10 @@ export class OnDemandDispatcher {
                 } else {
                     const error: ScanError = {
                         errorType: 'InternalError',
-                        message: 'Failed to create a scan request queue message.',
+                        message: `Failed to add a scan request message to the ${scanQueue} scan queue.`,
                     };
                     await this.updateScanResultState(scanRequest.result, 'failed', error);
-                    this.logger.logError('Failed to add scan request to the scan task queue.', {
+                    this.logger.logError(`Failed to add a scan request message to the ${scanQueue} scan queue.`, {
                         scanId: scanRequest.request.id,
                     });
                 }
@@ -156,9 +160,5 @@ export class OnDemandDispatcher {
                 throw new Error(`The '${scanRequest.condition}' operation condition not supported.`);
             }
         }
-    }
-
-    private async getCurrentQueueSize(): Promise<number> {
-        return this.queue.getMessageCount(this.storageConfig.scanQueue);
     }
 }
