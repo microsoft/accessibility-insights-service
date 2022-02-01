@@ -47,7 +47,7 @@
         "eslint-plugin-prefer-arrow": "^1.2.3",
         "eslint-plugin-security": "^1.4.0",
         "eslint-plugin-sort-class-members": "^1.14.0",
-        "eslint-plugin-unicorn": "^40.0.0",
+        "eslint-plugin-unicorn": "^40.1.0",
         "jest": "^27.4.7",
         "jest-extended": "^2.0.0",
         "jest-html-reporter": "^3.4.2",
