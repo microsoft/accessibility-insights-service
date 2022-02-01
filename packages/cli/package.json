@@ -32,7 +32,7 @@
         "@types/escape-html": "^1.0.1",
         "@types/jest": "^27.4.0",
         "@types/lodash": "^4.14.178",
-        "@types/node": "^12.20.41",
+        "@types/node": "^12.20.43",
         "@types/normalize-path": "^3.0.0",
         "@types/table": "^6.3.2",
         "accessibility-insights-crawler": "^1.0.0",
