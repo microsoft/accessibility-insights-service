@@ -42,6 +42,6 @@
         "logger": "1.0.0",
         "puppeteer": "^5.5.0",
         "reflect-metadata": "^0.1.13",
-        "storage-documents": "^1.0.0"
+        "storage-documents": "1.0.0"
     }
 }
