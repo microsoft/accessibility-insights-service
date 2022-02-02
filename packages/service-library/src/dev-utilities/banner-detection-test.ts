@@ -107,24 +107,24 @@ async function scanAllUrls(urls: string[]): Promise<BannerDetectionResults> {
         errors: [],
     };
 
-    await Promise.all(
-        urls.map(async (url) => {
-            const page = await openUrl(url);
-            const privacyScanResult = await privacyPageScanner.scanPageForPrivacy(page);
+    for (const url of urls) {
+        const page = await openUrl(url);
+        const privacyScanResult = await privacyPageScanner.scanPageForPrivacy(page);
 
-            if (privacyScanResult.error !== undefined || privacyScanResult.results === undefined) {
-                results.errors.push({
-                    url,
-                    error: privacyScanResult.error,
-                    pageResponseCode: privacyScanResult.pageResponseCode,
-                });
-            } else if (privacyScanResult.results.BannerDetected) {
-                results.urlsWithBanner.push(url);
-            } else {
-                results.urlsWithoutBanner.push(url);
-            }
-        }),
-    );
+        if (privacyScanResult.error !== undefined || privacyScanResult.results === undefined) {
+            results.errors.push({
+                url,
+                error: privacyScanResult.error,
+                pageResponseCode: privacyScanResult.pageResponseCode,
+            });
+        } else if (privacyScanResult.results.BannerDetected) {
+            results.urlsWithBanner.push(url);
+        } else {
+            results.urlsWithoutBanner.push(url);
+        }
+
+        page.currentPage.close();
+    }
 
     return results;
 }
