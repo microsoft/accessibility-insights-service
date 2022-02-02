@@ -7,6 +7,7 @@ import { PrivacyScanConfig, ServiceConfiguration } from 'common';
 import { IMock, Mock } from 'typemoq';
 import * as Puppeteer from 'puppeteer';
 import { ConsentResult, PrivacyPageScanReport } from 'storage-documents';
+import * as MockDate from 'mockdate';
 import { BrowserError } from './browser-error';
 import { Page } from './page';
 import { PrivacyScanResult } from './privacy-scan-result';
@@ -32,8 +33,9 @@ describe(PrivacyPageScanner, () => {
         serviceConfigMock.setup((c) => c.getConfigValue('privacyScanConfig')).returns(async () => privacyConfig);
         pageMock.setup((p) => p.currentPage).returns(() => puppeteerPageMock.object);
         puppeteerPageMock.setup((p) => p.url()).returns(() => url);
+        MockDate.set(currentDate);
 
-        testSubject = new PrivacyPageScanner(serviceConfigMock.object, () => currentDate);
+        testSubject = new PrivacyPageScanner(serviceConfigMock.object);
     });
 
     afterEach(() => {

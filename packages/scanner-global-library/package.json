@@ -28,6 +28,7 @@
         "@types/puppeteer": "^3.0.0",
         "jest": "^27.4.7",
         "jest-junit": "^12.3.0",
+        "mockdate": "^3.0.5",
         "rimraf": "^3.0.2",
         "ts-jest": "^27.1.2",
         "typemoq": "^2.1.0",

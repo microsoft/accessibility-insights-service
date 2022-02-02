@@ -10,10 +10,7 @@ import { Page } from './page';
 
 @injectable()
 export class PrivacyPageScanner {
-    constructor(
-        @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
-        private readonly getCurrentDate: () => Date = () => new Date(),
-    ) {}
+    constructor(@inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration) {}
 
     public async scanPageForPrivacy(page: Page): Promise<PrivacyScanResult> {
         if (!_.isNil(page.lastBrowserError)) {
@@ -33,7 +30,7 @@ export class PrivacyPageScanner {
             pageResponseCode: page.navigationResponse.status(),
             scannedUrl: page.currentPage.url(),
             results: {
-                FinishDateTime: this.getCurrentDate(),
+                FinishDateTime: new Date(),
                 NavigationalUri: page.currentPage.url(),
                 SeedUri: page.currentPage.url(),
                 HttpStatusCode: page.navigationResponse.status(),

@@ -106,6 +106,8 @@ async function scanAllUrls(urls: string[]): Promise<BannerDetectionResults> {
         errors: [],
     };
 
+    // Process urls sequentially because opening all URLs in parallel can affect load times
+    // and prevent the banner from being detected
     for (const url of urls) {
         const page = await openUrl(url);
         const privacyScanResult = await privacyPageScanner.scanPageForPrivacy(page);
