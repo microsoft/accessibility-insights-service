@@ -122,7 +122,7 @@ async function scanAllUrls(urls: string[]): Promise<BannerDetectionResults> {
             results.urlsWithoutBanner.push(url);
         }
 
-        page.currentPage.close();
+        page.close();
     }
 
     return results;
@@ -153,6 +153,4 @@ function saveResults(results: BannerDetectionResults, filename: string): void {
     logger.logInfo(`Saving JSON results to ${args.outputPath}`);
 
     saveResults(results, args.outputPath);
-
-    webDriver.close();
 })().catch((e) => logger.logError(e));
