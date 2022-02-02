@@ -308,6 +308,10 @@ function setupPageScanRequestProviderMock(documents: OnDemandPageScanBatchReques
                     request.reportGroups = scanRequest.reportGroups;
                 }
 
+                if (!isEmpty(scanRequest.privacyScan)) {
+                    request.privacyScan = scanRequest.privacyScan;
+                }
+
                 return request;
             });
         pageScanRequestProviderMock.setup(async (o) => o.insertRequests(dbDocuments)).verifiable(Times.once());
