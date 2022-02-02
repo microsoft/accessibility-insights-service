@@ -18,8 +18,9 @@ export interface ScanRequest {
 }
 
 export interface ScanRequests {
-    toQueue: ScanRequest[];
-    toDelete: ScanRequest[];
+    accessibilityRequestsToQueue: ScanRequest[];
+    privacyRequestsToQueue: ScanRequest[];
+    requestsToDelete: ScanRequest[];
 }
 
 @injectable()
@@ -34,15 +35,16 @@ export class ScanRequestSelector {
         @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
     ) {}
 
-    public async getRequests(itemsCount: number): Promise<ScanRequests> {
+    public async getRequests(accessibilityRequestCount: number, privacyRequestCount: number): Promise<ScanRequests> {
         await this.init();
 
         const scanRequests: ScanRequests = {
-            toQueue: [],
-            toDelete: [],
+            accessibilityRequestsToQueue: [],
+            privacyRequestsToQueue: [],
+            requestsToDelete: [],
         };
 
-        const queryCount = itemsCount * 10;
+        const queryCount = (accessibilityRequestCount + privacyRequestCount) * 10;
         let continuationToken: string;
         do {
             const response: CosmosOperationResponse<OnDemandPageScanRequest[]> = await this.pageScanRequestProvider.getRequests(
@@ -55,9 +57,14 @@ export class ScanRequestSelector {
             if (response.item?.length > 0) {
                 await this.filterRequests(scanRequests, response.item);
             }
-        } while (scanRequests.toQueue.length < itemsCount && continuationToken !== undefined);
+        } while (
+            scanRequests.accessibilityRequestsToQueue.length < accessibilityRequestCount &&
+            scanRequests.privacyRequestsToQueue.length < privacyRequestCount &&
+            continuationToken !== undefined
+        );
 
-        scanRequests.toQueue = scanRequests.toQueue.slice(0, itemsCount);
+        scanRequests.accessibilityRequestsToQueue = scanRequests.accessibilityRequestsToQueue.slice(0, accessibilityRequestCount);
+        scanRequests.privacyRequestsToQueue = scanRequests.privacyRequestsToQueue.slice(0, privacyRequestCount);
 
         return scanRequests;
     }
@@ -68,19 +75,19 @@ export class ScanRequestSelector {
                 const scanResult = await this.onDemandPageScanRunResultProvider.readScanRun(scanRequest.id);
 
                 if (scanResult === undefined) {
-                    filteredScanRequests.toDelete.push({ request: scanRequest, condition: 'notFound' });
+                    filteredScanRequests.requestsToDelete.push({ request: scanRequest, condition: 'notFound' });
 
                     return;
                 }
 
                 if (scanResult.run.state === 'completed') {
-                    filteredScanRequests.toDelete.push({ request: scanRequest, condition: 'completed' });
+                    filteredScanRequests.requestsToDelete.push({ request: scanRequest, condition: 'completed' });
 
                     return;
                 }
 
                 if (scanResult.run.retryCount >= this.maxFailedScanRetryCount) {
-                    filteredScanRequests.toDelete.push({ request: scanRequest, condition: 'noRetry' });
+                    filteredScanRequests.requestsToDelete.push({ request: scanRequest, condition: 'noRetry' });
 
                     return;
                 }
@@ -89,7 +96,7 @@ export class ScanRequestSelector {
                     scanResult.run.state === 'accepted' &&
                     (scanResult.run.retryCount === undefined || scanResult.run.retryCount < this.maxFailedScanRetryCount)
                 ) {
-                    filteredScanRequests.toQueue.push({ request: scanRequest, result: scanResult, condition: 'accepted' });
+                    this.addRequestToScanQueue(filteredScanRequests, { request: scanRequest, result: scanResult, condition: 'accepted' });
 
                     return;
                 }
@@ -99,12 +106,20 @@ export class ScanRequestSelector {
                     (scanResult.run.retryCount === undefined || scanResult.run.retryCount < this.maxFailedScanRetryCount) && // retry threshold
                     moment.utc(scanResult.run.timestamp).add(this.failedScanRetryIntervalInMinutes, 'minutes') <= moment.utc() // retry delay
                 ) {
-                    filteredScanRequests.toQueue.push({ request: scanRequest, result: scanResult, condition: 'retry' });
+                    this.addRequestToScanQueue(filteredScanRequests, { request: scanRequest, result: scanResult, condition: 'retry' });
 
                     return;
                 }
             }),
         );
+    }
+
+    private addRequestToScanQueue(queue: ScanRequests, scanRequest: ScanRequest): void {
+        if (scanRequest.request.privacyScan) {
+            queue.privacyRequestsToQueue.push(scanRequest);
+        } else {
+            queue.accessibilityRequestsToQueue.push(scanRequest);
+        }
     }
 
     private async init(): Promise<void> {

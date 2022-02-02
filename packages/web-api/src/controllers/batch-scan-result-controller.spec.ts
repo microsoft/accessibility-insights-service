@@ -55,6 +55,7 @@ describe(BatchScanResultController, () => {
     const scanClientResponseForFetchedResponse: ScanResultResponse = {
         scanId: validScanId,
         url: 'url',
+        scanType: 'accessibility',
         run: {
             state: 'running',
         },

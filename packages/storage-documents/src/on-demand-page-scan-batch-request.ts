@@ -4,6 +4,8 @@
 import { StorageDocument } from './storage-document';
 import { ItemType } from './item-type';
 
+export declare type CookieBannerType = 'standard';
+
 /**
  * The client page scan run batch request document.
  */
@@ -22,6 +24,10 @@ export interface ReportGroupRequest {
     consolidatedId: string;
 }
 
+export interface PrivacyScan {
+    cookieBannerType: CookieBannerType;
+}
+
 export interface ScanRunBatchRequest {
     scanId: string;
     url: string;
@@ -30,4 +36,5 @@ export interface ScanRunBatchRequest {
     reportGroups?: ReportGroupRequest[];
     scanNotifyUrl?: string;
     deepScan?: boolean;
+    privacyScan?: PrivacyScan;
 }

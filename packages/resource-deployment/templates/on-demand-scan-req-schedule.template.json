@@ -40,6 +40,10 @@
                 "value": "ondemand-scanrequest"
             },
             {
+                "name": "AZURE_STORAGE_PRIVACY_SCAN_QUEUE",
+                "value": "privacy-scan-request"
+            },
+            {
                 "name": "KEY_VAULT_URL",
                 "value": "%KEY_VAULT_TOKEN%"
             }

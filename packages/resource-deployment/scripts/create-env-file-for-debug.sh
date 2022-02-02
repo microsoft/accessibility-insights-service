@@ -97,6 +97,7 @@ AZ_BATCH_TASK_ID=on-demand-url-scan-job-manager-task
 
 COMMON_VARIABLES=
 AZURE_STORAGE_SCAN_QUEUE=ondemand-scanrequest
+AZURE_STORAGE_PRIVACY_SCAN_QUEUE=privacy-scan-request
 KEY_VAULT_URL=https://$keyVault.vault.azure.net/
 APPINSIGHTS_INSTRUMENTATIONKEY=$appInsightInstrumentationKey
 
