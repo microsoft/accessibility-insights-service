@@ -61,7 +61,7 @@ function getArguments(): BannerDetectionTestArgs {
     return yargs.argv as yargs.Arguments<BannerDetectionTestArgs>;
 }
 
-function validateArguments(args: BannerDetectionTestArgs): boolean {
+async function validateArguments(args: BannerDetectionTestArgs): Promise<boolean> {
     // eslint-disable-next-line security/detect-non-literal-fs-filename
     if (!fs.existsSync(args.urlsListPath)) {
         logger.logError(`Input file path ${args.urlsListPath} does not exist`);
@@ -71,15 +71,14 @@ function validateArguments(args: BannerDetectionTestArgs): boolean {
     // eslint-disable-next-line security/detect-non-literal-fs-filename
     if (fs.existsSync(args.outputPath)) {
         const rl = readline.createInterface(process.stdin, process.stdout);
-        let shouldContinue = false;
-        rl.question(`File ${args.outputPath} already exists. Continue and overwrite the file? (y/n)`, (response) => {
-            if (response.toLowerCase() === 'y') {
-                shouldContinue = true;
-            }
-            rl.close();
+        const userResponse = await new Promise<string>((resolve) => {
+            rl.question(`File ${args.outputPath} already exists. Continue and overwrite the file? (y/n)`, (response) => {
+                rl.close();
+                resolve(response);
+            });
         });
 
-        return shouldContinue;
+        return userResponse.toLowerCase() === 'y';
     }
 
     return true;
@@ -136,7 +135,7 @@ function saveResults(results: BannerDetectionResults, filename: string): void {
 
 (async () => {
     const args = getArguments();
-    if (!validateArguments(args)) {
+    if (!(await validateArguments(args))) {
         return;
     }
 
