@@ -4,13 +4,9 @@
 export interface PrivacyPageScanReport {
     FinishDateTime: Date;
     NavigationalUri: string;
-    SeedUrl: string;
+    SeedUri: string;
     HttpStatusCode: number;
-    Cookies: CookieByDomain[];
-    CookiesBeforeConsent: CookieByDomain;
-    CookiesAfterConsent: CookieByDomain;
     CookieCollectionConsentResults: ConsentResult[];
-    MultiLoadResults?: MultiLoadResult[];
     BannerDetected: boolean;
     BannerDetectionXpathExpression: string;
     ConsentModalValidationResult?: ConsentModalValidationResult;
