@@ -217,7 +217,7 @@ describe(Page, () => {
 
         beforeEach(() => {
             simulatePageLaunch();
-            privacyScannerMock.setup((s) => s.scanPageForPrivacy(puppeteerPageMock.object)).returns(async () => privacyResults);
+            privacyScannerMock.setup((s) => s.scanPageForPrivacy(puppeteerPageMock.object, It.isAny())).returns(async () => privacyResults);
         });
 
         it('scan page', async () => {

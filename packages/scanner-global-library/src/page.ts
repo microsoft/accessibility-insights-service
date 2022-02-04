@@ -64,6 +64,7 @@ export class Page {
 
     public async navigateToUrl(url: string): Promise<void> {
         this.requestUrl = url;
+        this.lastBrowserError = undefined;
         const response = await this.pageNavigator.navigate(url, this.page, async (browserError) => {
             this.logger?.logError('Page navigation error', { browserError: System.serializeError(browserError) });
             this.lastBrowserError = browserError;
@@ -138,7 +139,17 @@ export class Page {
 
     private async scanPageForCookies(): Promise<PrivacyScanResult> {
         const navigationStatusCode = this.navigationResponse.status();
-        const privacyResult = await this.privacyPageScanner.scanPageForPrivacy(this.page);
+        const reloadPage = async (page: Puppeteer.Page) => {
+            const response = await this.pageNavigator.navigate(page.url(), page, async (browserError) => {
+                this.logger?.logError('Page navigation error', { browserError: System.serializeError(browserError) });
+                throw browserError;
+            });
+            if (!response.ok()) {
+                // TODO: better error handling
+                throw new Error();
+            }
+        };
+        const privacyResult = await this.privacyPageScanner.scanPageForPrivacy(this.page, reloadPage);
         const scanResult: PrivacyScanResult = {
             results: {
                 ...privacyResult,

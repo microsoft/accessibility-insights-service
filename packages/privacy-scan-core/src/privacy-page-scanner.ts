@@ -9,18 +9,24 @@ import { inject, injectable } from 'inversify';
 import _ from 'lodash';
 import { ConsentResult, PrivacyPageScanReport } from 'storage-documents';
 import * as Puppeteer from 'puppeteer';
+import { CookieScenario, getAllCookieScenarios } from './cookie-scenarios';
+import { CookieCollector } from './cookie-collector';
 
 export type PrivacyResults = Omit<PrivacyPageScanReport, 'HttpStatusCode'>;
 
 @injectable()
 export class PrivacyPageScanner {
-    constructor(@inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration) {}
+    constructor(
+        @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
+        @inject(CookieCollector) private readonly cookieCollector: CookieCollector,
+        private readonly getCookieScenarios: () => CookieScenario[] = getAllCookieScenarios,
+    ) {}
 
-    public async scanPageForPrivacy(page: Puppeteer.Page): Promise<PrivacyResults> {
+    public async scanPageForPrivacy(page: Puppeteer.Page, reloadPage: (page: Puppeteer.Page) => Promise<void>): Promise<PrivacyResults> {
         const privacyScanConfig = await this.serviceConfig.getConfigValue('privacyScanConfig');
 
         const hasBanner = await this.hasBanner(page, privacyScanConfig);
-        const cookieCollectionResults: ConsentResult[] = []; // TBD
+        const cookieCollectionResults = await this.getAllConsentResults(page, reloadPage);
 
         return {
             FinishDateTime: new Date(),
@@ -42,5 +48,20 @@ export class PrivacyPageScanner {
         } catch (e) {
             return false;
         }
+    }
+
+    private async getAllConsentResults(
+        page: Puppeteer.Page,
+        reloadPage: (page: Puppeteer.Page) => Promise<void>,
+    ): Promise<ConsentResult[]> {
+        const results: ConsentResult[] = [];
+        const scenarios = this.getCookieScenarios();
+
+        // Test sequentially so that cookie values don't interfere with each other
+        for (const scenario of scenarios) {
+            results.push(await this.cookieCollector.getCookiesForScenario(page, scenario, reloadPage));
+        }
+
+        return results;
     }
 }

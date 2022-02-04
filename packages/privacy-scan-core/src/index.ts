@@ -2,3 +2,4 @@
 // Licensed under the MIT License.
 
 export { PrivacyResults, PrivacyPageScanner } from './privacy-page-scanner';
+export { CookieCollector } from './cookie-collector';

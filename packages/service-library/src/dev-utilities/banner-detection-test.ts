@@ -10,7 +10,7 @@ import { ConsoleLoggerClient, GlobalLogger } from 'logger';
 import { PromiseUtils, ServiceConfiguration } from 'common';
 import yargs from 'yargs';
 import _ from 'lodash';
-import { PrivacyPageScanner } from 'privacy-scan-core';
+import { PrivacyPageScanner, CookieCollector } from 'privacy-scan-core';
 
 type BannerDetectionTestArgs = {
     urlsListPath: string;
@@ -33,7 +33,7 @@ const serviceConfig = new ServiceConfiguration();
 const logger = new GlobalLogger([new ConsoleLoggerClient(serviceConfig, console)], process);
 const webDriver = new WebDriver(new PromiseUtils(), logger);
 const pageNavigator = new PageNavigator(new PageConfigurator(), new PageResponseProcessor(), new PageHandler(logger));
-const privacyPageScanner = new PrivacyPageScanner(serviceConfig);
+const privacyPageScanner = new PrivacyPageScanner(serviceConfig, new CookieCollector());
 const page = new Page(webDriver, undefined, pageNavigator, privacyPageScanner, logger);
 
 function getArguments(): BannerDetectionTestArgs {
