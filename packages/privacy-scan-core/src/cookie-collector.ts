@@ -13,16 +13,16 @@ export class CookieCollector {
     public async getCookiesForScenario(
         page: Puppeteer.Page,
         cookieScenario: CookieScenario,
-        reloadPage: ReloadPageFunc,
+        reloadPageFunc: ReloadPageFunc,
     ): Promise<ConsentResult> {
-        let reloadResponse = await this.clearCookies(page, reloadPage);
+        let reloadResponse = await this.clearCookies(page, reloadPageFunc);
         if (!reloadResponse.success) {
             return { Error: reloadResponse.error };
         }
 
         const cookiesBeforeConsent = await this.getCurrentCookies(page);
 
-        reloadResponse = await this.reloadWithCookie(page, cookieScenario, reloadPage);
+        reloadResponse = await this.reloadWithCookie(page, cookieScenario, reloadPageFunc);
         if (!reloadResponse.success) {
             return { Error: reloadResponse.error };
         }
@@ -56,19 +56,19 @@ export class CookieCollector {
         return results;
     }
 
-    private async clearCookies(page: Puppeteer.Page, reloadPage: ReloadPageFunc): Promise<ReloadPageResponse> {
+    private async clearCookies(page: Puppeteer.Page, reloadPageFunc: ReloadPageFunc): Promise<ReloadPageResponse> {
         await page.deleteCookie(...(await page.cookies()));
 
-        return reloadPage(page);
+        return reloadPageFunc(page);
     }
 
     private async reloadWithCookie(
         page: Puppeteer.Page,
         cookieScenario: CookieScenario,
-        reloadPage: ReloadPageFunc,
+        reloadPageFunc: ReloadPageFunc,
     ): Promise<ReloadPageResponse> {
         await page.setCookie(cookieScenario);
 
-        return reloadPage(page);
+        return reloadPageFunc(page);
     }
 }
