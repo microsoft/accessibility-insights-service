@@ -9,9 +9,11 @@ import * as Puppeteer from 'puppeteer';
 import { ConsentResult } from 'storage-documents';
 import * as MockDate from 'mockdate';
 import _ from 'lodash';
-import { PrivacyPageScanner, PrivacyResults } from './privacy-page-scanner';
+import { PrivacyPageScanner } from './privacy-page-scanner';
 import { CookieCollector } from './cookie-collector';
 import { CookieScenario } from './cookie-scenarios';
+import { PrivacyResults } from './types';
+import { ReloadPageFunc } from '.';
 
 describe(PrivacyPageScanner, () => {
     const privacyConfig: PrivacyScanConfig = {
@@ -36,7 +38,7 @@ describe(PrivacyPageScanner, () => {
             value: 'cookie value 2',
         },
     ];
-    const reloadPageStub: (page: Puppeteer.Page) => Promise<void> = async () => undefined;
+    const reloadPageStub: ReloadPageFunc = async () => undefined;
 
     let serviceConfigMock: IMock<ServiceConfiguration>;
     let puppeteerPageMock: IMock<Puppeteer.Page>;

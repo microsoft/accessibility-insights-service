@@ -7,12 +7,12 @@
 import { PrivacyScanConfig, ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
 import _ from 'lodash';
-import { ConsentResult, PrivacyPageScanReport } from 'storage-documents';
+import { ConsentResult } from 'storage-documents';
 import * as Puppeteer from 'puppeteer';
 import { CookieScenario, getAllCookieScenarios } from './cookie-scenarios';
 import { CookieCollector } from './cookie-collector';
-
-export type PrivacyResults = Omit<PrivacyPageScanReport, 'HttpStatusCode'>;
+import { PrivacyResults } from './types';
+import { ReloadPageFunc } from '.';
 
 @injectable()
 export class PrivacyPageScanner {
@@ -22,7 +22,7 @@ export class PrivacyPageScanner {
         private readonly getCookieScenarios: () => CookieScenario[] = getAllCookieScenarios,
     ) {}
 
-    public async scanPageForPrivacy(page: Puppeteer.Page, reloadPage: (page: Puppeteer.Page) => Promise<void>): Promise<PrivacyResults> {
+    public async scanPageForPrivacy(page: Puppeteer.Page, reloadPage: ReloadPageFunc): Promise<PrivacyResults> {
         const privacyScanConfig = await this.serviceConfig.getConfigValue('privacyScanConfig');
 
         const hasBanner = await this.hasBanner(page, privacyScanConfig);
@@ -50,10 +50,7 @@ export class PrivacyPageScanner {
         }
     }
 
-    private async getAllConsentResults(
-        page: Puppeteer.Page,
-        reloadPage: (page: Puppeteer.Page) => Promise<void>,
-    ): Promise<ConsentResult[]> {
+    private async getAllConsentResults(page: Puppeteer.Page, reloadPage: ReloadPageFunc): Promise<ConsentResult[]> {
         const results: ConsentResult[] = [];
         const scenarios = this.getCookieScenarios();
 

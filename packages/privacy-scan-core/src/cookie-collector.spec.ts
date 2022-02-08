@@ -9,6 +9,7 @@ import { ConsentResult, CookieByDomain } from 'storage-documents';
 import _ from 'lodash';
 import { CookieCollector } from './cookie-collector';
 import { CookieScenario } from './cookie-scenarios';
+import { ReloadPageFunc, ReloadPageResponse } from '.';
 
 describe(CookieCollector, () => {
     const cookieScenario: CookieScenario = {
@@ -21,7 +22,7 @@ describe(CookieCollector, () => {
     let pageCookies: Puppeteer.Cookie[];
     let pageCookiesByDomain: CookieByDomain[];
     let puppeteerPageMock: IMock<Puppeteer.Page>;
-    let reloadPageMock: IMock<(page: Puppeteer.Page) => Promise<void>>;
+    let reloadPageMock: IMock<ReloadPageFunc>;
 
     let testSubject: CookieCollector;
 
@@ -69,6 +70,37 @@ describe(CookieCollector, () => {
         reloadPageMock.verifyAll();
     });
 
+    it('Returns error if first reload fails', async () => {
+        const failedReloadResponse: ReloadPageResponse = {
+            success: false,
+            error: { message: 'test error' },
+        };
+        const expectedResult: ConsentResult = {
+            Error: failedReloadResponse.error,
+        };
+        setupClearCookies(failedReloadResponse);
+
+        const actualResults = await testSubject.getCookiesForScenario(puppeteerPageMock.object, cookieScenario, reloadPageMock.object);
+
+        expect(actualResults).toEqual(expectedResult);
+    });
+
+    it('Returns error if second reload fails', async () => {
+        const failedReloadResponse: ReloadPageResponse = {
+            success: false,
+            error: { message: 'test error' },
+        };
+        const expectedResult: ConsentResult = {
+            Error: failedReloadResponse.error,
+        };
+        setupClearCookies({ success: true });
+        setupLoadPageWithCookie([], failedReloadResponse);
+
+        const actualResults = await testSubject.getCookiesForScenario(puppeteerPageMock.object, cookieScenario, reloadPageMock.object);
+
+        expect(actualResults).toEqual(expectedResult);
+    });
+
     it('Gets cookies before and after consent', async () => {
         const newCookie = {
             name: 'new cookie',
@@ -92,25 +124,32 @@ describe(CookieCollector, () => {
                 },
             ],
         };
-        setupClearCookies();
-        setupLoadPageWithCookie([newCookie]);
-        reloadPageMock.setup((r) => r(puppeteerPageMock.object)).verifiable(Times.exactly(2));
+        setupClearCookies({ success: true });
+        setupLoadPageWithCookie([newCookie], { success: true });
+        reloadPageMock
+            .setup((r) => r(puppeteerPageMock.object))
+            .returns(async () => {
+                return { success: true };
+            })
+            .verifiable(Times.exactly(2));
 
         const actualResults = await testSubject.getCookiesForScenario(puppeteerPageMock.object, cookieScenario, reloadPageMock.object);
 
         expect(actualResults).toEqual(expectedResult);
     });
 
-    function setupClearCookies(): void {
+    function setupClearCookies(reloadResponse: ReloadPageResponse): void {
         puppeteerPageMock.setup((p) => p.deleteCookie(...pageCookies)).verifiable();
+        reloadPageMock.setup((r) => r(puppeteerPageMock.object)).returns(async () => reloadResponse);
     }
 
-    function setupLoadPageWithCookie(newCookiesAfterLoad: Puppeteer.Cookie[]): void {
+    function setupLoadPageWithCookie(newCookiesAfterLoad: Puppeteer.Cookie[], reloadResponse: ReloadPageResponse): void {
         puppeteerPageMock
             .setup((p) => p.setCookie(cookieScenario))
             .returns(async () => {
                 pageCookies.push(...newCookiesAfterLoad);
             })
             .verifiable();
+        reloadPageMock.setup((r) => r(puppeteerPageMock.object)).returns(async () => reloadResponse);
     }
 });

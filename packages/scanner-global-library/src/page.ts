@@ -7,7 +7,7 @@ import { GlobalLogger } from 'logger';
 import * as Puppeteer from 'puppeteer';
 import axe from 'axe-core';
 import { isNil } from 'lodash';
-import { PrivacyPageScanner } from 'privacy-scan-core';
+import { PrivacyPageScanner, PrivacyResults } from 'privacy-scan-core';
 import { AxeScanResults } from './axe-scan-results';
 import { AxePuppeteerFactory } from './factories/axe-puppeteer-factory';
 import { WebDriver } from './web-driver';
@@ -140,16 +140,20 @@ export class Page {
     private async scanPageForCookies(): Promise<PrivacyScanResult> {
         const navigationStatusCode = this.navigationResponse.status();
         const reloadPage = async (page: Puppeteer.Page) => {
-            const response = await this.pageNavigator.navigate(page.url(), page, async (browserError) => {
-                this.logger?.logError('Page navigation error', { browserError: System.serializeError(browserError) });
-                throw browserError;
-            });
-            if (!response.ok()) {
-                // TODO: better error handling
-                throw new Error();
-            }
+            await this.navigateToUrl(page.url());
+
+            return { success: this.navigationResponse.ok(), error: this.lastBrowserError };
         };
-        const privacyResult = await this.privacyPageScanner.scanPageForPrivacy(this.page, reloadPage);
+
+        let privacyResult: PrivacyResults;
+        try {
+            privacyResult = await this.privacyPageScanner.scanPageForPrivacy(this.page, reloadPage);
+        } catch (error) {
+            this.logger?.logError('Privacy scan engine error', { browserError: System.serializeError(error), url: this.page.url() });
+
+            return { error: `Privacy scan engine error. ${System.serializeError(error)}`, scannedUrl: this.page.url() };
+        }
+
         const scanResult: PrivacyScanResult = {
             results: {
                 ...privacyResult,

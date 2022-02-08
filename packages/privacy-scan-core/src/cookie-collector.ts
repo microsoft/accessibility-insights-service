@@ -6,19 +6,26 @@ import _ from 'lodash';
 import { ConsentResult, CookieByDomain } from 'storage-documents';
 import * as Puppeteer from 'puppeteer';
 import { CookieScenario } from './cookie-scenarios';
+import { ReloadPageFunc, ReloadPageResponse } from '.';
 
 @injectable()
 export class CookieCollector {
     public async getCookiesForScenario(
         page: Puppeteer.Page,
         cookieScenario: CookieScenario,
-        reloadPage: (page: Puppeteer.Page) => Promise<void>,
+        reloadPage: ReloadPageFunc,
     ): Promise<ConsentResult> {
-        await this.clearCookies(page, reloadPage);
+        let reloadResponse = await this.clearCookies(page, reloadPage);
+        if (!reloadResponse.success) {
+            return { Error: reloadResponse.error };
+        }
 
         const cookiesBeforeConsent = await this.getCurrentCookies(page);
 
-        await this.reloadWithCookie(page, cookieScenario, reloadPage);
+        reloadResponse = await this.reloadWithCookie(page, cookieScenario, reloadPage);
+        if (!reloadResponse.success) {
+            return { Error: reloadResponse.error };
+        }
 
         const cookiesAfterConsent = await this.getCurrentCookies(page);
 
@@ -49,17 +56,19 @@ export class CookieCollector {
         return results;
     }
 
-    private async clearCookies(page: Puppeteer.Page, reloadPage: (page: Puppeteer.Page) => Promise<void>): Promise<void> {
+    private async clearCookies(page: Puppeteer.Page, reloadPage: ReloadPageFunc): Promise<ReloadPageResponse> {
         await page.deleteCookie(...(await page.cookies()));
-        await reloadPage(page);
+
+        return reloadPage(page);
     }
 
     private async reloadWithCookie(
         page: Puppeteer.Page,
         cookieScenario: CookieScenario,
-        reloadPage: (page: Puppeteer.Page) => Promise<void>,
-    ): Promise<void> {
+        reloadPage: ReloadPageFunc,
+    ): Promise<ReloadPageResponse> {
         await page.setCookie(cookieScenario);
-        await reloadPage(page);
+
+        return reloadPage(page);
     }
 }
