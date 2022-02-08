@@ -51,6 +51,7 @@
         "node-fetch": "^3.1.1",
         "paralleljs": "^1.1.0",
         "p-limit": "^3.1.0",
+        "privacy-scan-core": "1.0.0",
         "puppeteer": "^5.5.0",
         "reflect-metadata": "^0.1.13",
         "sha.js": "^2.4.11",
