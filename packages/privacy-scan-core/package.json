@@ -1,5 +1,5 @@
 {
-    "name": "scanner-global-library",
+    "name": "privacy-scan-core",
     "version": "1.0.0",
     "description": "This project welcomes contributions and suggestions.  Most contributions require you to agree to a Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us the rights to use your contribution. For details, visit https://cla.microsoft.com.",
     "main": "dist/index.js",
@@ -28,19 +28,16 @@
         "@types/puppeteer": "^3.0.0",
         "jest": "^27.4.7",
         "jest-junit": "^12.3.0",
+        "mockdate": "^3.0.5",
         "rimraf": "^3.0.2",
         "ts-jest": "^27.1.3",
         "typemoq": "^2.1.0",
         "typescript": "^4.5.5"
     },
     "dependencies": {
-        "@axe-core/puppeteer": "4.2.2",
-        "axe-core": "4.3.2",
         "common": "^1.0.0",
         "inversify": "^6.0.1",
         "lodash": "^4.17.21",
-        "logger": "1.0.0",
-        "privacy-scan-core": "1.0.0",
         "puppeteer": "^5.5.0",
         "reflect-metadata": "^0.1.13",
         "storage-documents": "1.0.0"

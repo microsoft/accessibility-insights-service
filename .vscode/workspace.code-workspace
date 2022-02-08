@@ -105,6 +105,10 @@
             "path": "../packages/crawler"
         },
         {
+            "name": "privacy-scan-core",
+            "path": "../packages/privacy-scan-core"
+        },
+        {
             "name": "root",
             "path": "../"
         }
