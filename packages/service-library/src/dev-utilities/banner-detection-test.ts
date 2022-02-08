@@ -5,20 +5,12 @@ import 'reflect-metadata';
 
 import fs from 'fs';
 import readline from 'readline';
-import {
-    BrowserError,
-    Page,
-    PageConfigurator,
-    PageHandler,
-    PageNavigator,
-    PageResponseProcessor,
-    PrivacyPageScanner,
-    WebDriver,
-} from 'scanner-global-library';
+import { BrowserError, Page, PageConfigurator, PageHandler, PageNavigator, PageResponseProcessor, WebDriver } from 'scanner-global-library';
 import { ConsoleLoggerClient, GlobalLogger } from 'logger';
 import { PromiseUtils, ServiceConfiguration } from 'common';
 import yargs from 'yargs';
 import _ from 'lodash';
+import { PrivacyPageScanner } from 'privacy-scan-core';
 
 type BannerDetectionTestArgs = {
     urlsListPath: string;
@@ -42,6 +34,7 @@ const logger = new GlobalLogger([new ConsoleLoggerClient(serviceConfig, console)
 const webDriver = new WebDriver(new PromiseUtils(), logger);
 const pageNavigator = new PageNavigator(new PageConfigurator(), new PageResponseProcessor(), new PageHandler(logger));
 const privacyPageScanner = new PrivacyPageScanner(serviceConfig);
+const page = new Page(webDriver, undefined, pageNavigator, privacyPageScanner, logger);
 
 function getArguments(): BannerDetectionTestArgs {
     yargs.option<keyof BannerDetectionTestArgs, yargs.Options>('urlsListPath', {
@@ -84,14 +77,6 @@ async function validateArguments(args: BannerDetectionTestArgs): Promise<boolean
     return true;
 }
 
-async function openUrl(url: string): Promise<Page> {
-    const page = new Page(webDriver, undefined, pageNavigator, logger);
-    await page.create();
-    await page.navigateToUrl(url);
-
-    return page;
-}
-
 function readUrlsList(filename: string): string[] {
     // eslint-disable-next-line security/detect-non-literal-fs-filename
     const lines = fs.readFileSync(filename).toString().split('\n');
@@ -105,12 +90,13 @@ async function scanAllUrls(urls: string[]): Promise<BannerDetectionResults> {
         urlsWithoutBanner: [],
         errors: [],
     };
+    await page.create();
 
     // Process urls sequentially because opening all URLs in parallel can affect load times
     // and prevent the banner from being detected
     for (const url of urls) {
-        const page = await openUrl(url);
-        const privacyScanResult = await privacyPageScanner.scanPageForPrivacy(page);
+        await page.navigateToUrl(url);
+        const privacyScanResult = await page.scanForPrivacy();
 
         if (privacyScanResult.error !== undefined || privacyScanResult.results === undefined) {
             results.errors.push({
@@ -123,9 +109,8 @@ async function scanAllUrls(urls: string[]): Promise<BannerDetectionResults> {
         } else {
             results.urlsWithoutBanner.push(url);
         }
-
-        page.close();
     }
+    await page.close();
 
     return results;
 }
