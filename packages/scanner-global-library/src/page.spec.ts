@@ -125,6 +125,22 @@ describe(Page, () => {
             expect(axeScanResults).toEqual(expectedAxeScanResults);
         });
 
+        it('handles error thrown by scan engine', async () => {
+            const scanError = new Error('Test error');
+            const expectedResult = { error: `Axe core engine error. ${System.serializeError(scanError)}`, scannedUrl: url };
+
+            puppeteerPageMock.setup((p) => p.url()).returns(() => url);
+            setupAxePuppeteerFactoryMock();
+            axePuppeteerMock.reset();
+            axePuppeteerMock = getPromisableDynamicMock(axePuppeteerMock);
+            axePuppeteerMock.setup((ap) => ap.analyze()).throws(scanError);
+            simulatePageNavigation(puppeteerResponseMock.object);
+
+            const axeScanResults = await page.scanForA11yIssues();
+
+            expect(axeScanResults).toEqual(expectedResult);
+        });
+
         it('scan page without redirected flag on encoded URL', async () => {
             const requestUrl = 'http://localhost/страница';
             const encodedRequestUrl = encodeURI(requestUrl);
@@ -233,6 +249,20 @@ describe(Page, () => {
             const privacyScanResults = await page.scanForPrivacy();
 
             expect(privacyScanResults).toEqual(expectedPrivacyScanResults);
+        });
+
+        it('handles error thrown by scan engine', async () => {
+            const scanError = new Error('Test error');
+            const expectedResult = { error: `Privacy scan engine error. ${System.serializeError(scanError)}`, scannedUrl: url };
+
+            puppeteerPageMock.setup((p) => p.url()).returns(() => url);
+            simulatePageNavigation(puppeteerResponseMock.object);
+            privacyScannerMock.reset();
+            privacyScannerMock.setup((p) => p.scanPageForPrivacy(It.isAny(), It.isAny())).throws(scanError);
+
+            const privacyScanResults = await page.scanForPrivacy();
+
+            expect(privacyScanResults).toEqual(expectedResult);
         });
 
         it('scan page with navigation error', async () => {
