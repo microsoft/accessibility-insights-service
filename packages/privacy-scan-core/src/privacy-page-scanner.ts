@@ -7,20 +7,26 @@
 import { PrivacyScanConfig, ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
 import _ from 'lodash';
-import { ConsentResult, PrivacyPageScanReport } from 'storage-documents';
+import { ConsentResult } from 'storage-documents';
 import * as Puppeteer from 'puppeteer';
-
-export type PrivacyResults = Omit<PrivacyPageScanReport, 'HttpStatusCode'>;
+import { CookieScenario, getAllCookieScenarios } from './cookie-scenarios';
+import { CookieCollector } from './cookie-collector';
+import { PrivacyResults } from './types';
+import { ReloadPageFunc } from '.';
 
 @injectable()
 export class PrivacyPageScanner {
-    constructor(@inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration) {}
+    constructor(
+        @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
+        @inject(CookieCollector) private readonly cookieCollector: CookieCollector,
+        private readonly getCookieScenarios: () => CookieScenario[] = getAllCookieScenarios,
+    ) {}
 
-    public async scanPageForPrivacy(page: Puppeteer.Page): Promise<PrivacyResults> {
+    public async scanPageForPrivacy(page: Puppeteer.Page, reloadPageFunc: ReloadPageFunc): Promise<PrivacyResults> {
         const privacyScanConfig = await this.serviceConfig.getConfigValue('privacyScanConfig');
 
         const hasBanner = await this.hasBanner(page, privacyScanConfig);
-        const cookieCollectionResults: ConsentResult[] = []; // TBD
+        const cookieCollectionResults = await this.getAllConsentResults(page, reloadPageFunc);
 
         return {
             FinishDateTime: new Date(),
@@ -42,5 +48,17 @@ export class PrivacyPageScanner {
         } catch (e) {
             return false;
         }
+    }
+
+    private async getAllConsentResults(page: Puppeteer.Page, reloadPageFunc: ReloadPageFunc): Promise<ConsentResult[]> {
+        const results: ConsentResult[] = [];
+        const scenarios = this.getCookieScenarios();
+
+        // Test sequentially so that cookie values don't interfere with each other
+        for (const scenario of scenarios) {
+            results.push(await this.cookieCollector.getCookiesForScenario(page, scenario, reloadPageFunc));
+        }
+
+        return results;
     }
 }

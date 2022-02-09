@@ -25,9 +25,10 @@ export interface CookieByDomain {
 }
 
 export interface ConsentResult {
-    CookiesUsedForConsent: string;
-    CookiesBeforeConsent: CookieByDomain[];
-    CookiesAfterConsent: CookieByDomain[];
+    CookiesUsedForConsent?: string;
+    CookiesBeforeConsent?: CookieByDomain[];
+    CookiesAfterConsent?: CookieByDomain[];
+    Error?: unknown;
 }
 
 export interface MultiLoadResult {
