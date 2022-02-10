@@ -6,7 +6,7 @@ import { inject, injectable, optional } from 'inversify';
 import { GlobalLogger } from 'logger';
 import * as Puppeteer from 'puppeteer';
 import axe from 'axe-core';
-import { isNil } from 'lodash';
+import _, { isNil } from 'lodash';
 import { PrivacyPageScanner, PrivacyResults } from 'privacy-scan-core';
 import { AxeScanResults } from './axe-scan-results';
 import { AxePuppeteerFactory } from './factories/axe-puppeteer-factory';
@@ -168,6 +168,19 @@ export class Page {
         ) {
             this.logger?.logWarn(`Scanning performed on redirected page`, { redirectedUrl: this.page.url() });
             scanResult.scannedUrl = this.page.url();
+        }
+
+        const failedConsentResults = _.filter(
+            privacyResult.CookieCollectionConsentResults,
+            (consentResult) => consentResult.Error !== undefined,
+        );
+        if (!_.isEmpty(failedConsentResults)) {
+            const errorMessage = `Failed to collect cookies for ${failedConsentResults.length} test cases`;
+            this.logger.logError(errorMessage, {
+                url: this.requestUrl,
+                failures: JSON.stringify(failedConsentResults),
+            });
+            scanResult.error = errorMessage;
         }
 
         return scanResult;

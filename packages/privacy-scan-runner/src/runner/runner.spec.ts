@@ -13,9 +13,9 @@ import {
 } from 'service-library';
 import { GlobalLogger } from 'logger';
 import * as MockDate from 'mockdate';
-import { OnDemandPageScanResult, OnDemandPageScanReport, WebsiteScanResult } from 'storage-documents';
+import { OnDemandPageScanResult, OnDemandPageScanReport, WebsiteScanResult, PrivacyPageScanReport } from 'storage-documents';
 import { PrivacyScanResult } from 'scanner-global-library';
-import { System, ServiceConfiguration, ScanRunTimeConfig } from 'common';
+import { System, ServiceConfiguration, ScanRunTimeConfig, GuidGenerator } from 'common';
 import { ScanMetadataConfig } from '../scan-metadata-config';
 import { PageScanProcessor } from '../scanner/page-scan-processor';
 import { ScanRunnerTelemetryManager } from '../scan-runner-telemetry-manager';
@@ -32,6 +32,7 @@ let reportWriterMock: IMock<ReportWriter>;
 let scanRunnerTelemetryManagerMock: IMock<ScanRunnerTelemetryManager>;
 let serviceConfigMock: IMock<ServiceConfiguration>;
 let loggerMock: IMock<GlobalLogger>;
+let guidGeneratorMock: IMock<GuidGenerator>;
 let runner: Runner;
 let scanMetadataInput: PrivacyScanMetadata;
 let scanMetadata: PrivacyScanMetadata;
@@ -52,6 +53,7 @@ describe(Runner, () => {
         scanRunnerTelemetryManagerMock = Mock.ofType<ScanRunnerTelemetryManager>();
         serviceConfigMock = Mock.ofType(ServiceConfiguration);
         loggerMock = Mock.ofType<GlobalLogger>();
+        guidGeneratorMock = Mock.ofType<GuidGenerator>();
 
         dateNow = new Date();
         MockDate.set(dateNow);
@@ -69,6 +71,9 @@ describe(Runner, () => {
         privacyScanResults = {
             scannedUrl: 'scannedUrl',
             pageResponseCode: 200,
+            results: {
+                HttpStatusCode: 200,
+            } as PrivacyPageScanReport,
         } as PrivacyScanResult;
         reports = [{}] as OnDemandPageScanReport[];
         serviceConfigMock
@@ -87,6 +92,7 @@ describe(Runner, () => {
             scanRunnerTelemetryManagerMock.object,
             serviceConfigMock.object,
             loggerMock.object,
+            guidGeneratorMock.object,
         );
     });
 
@@ -117,23 +123,29 @@ describe(Runner, () => {
         await runner.run();
     });
 
-    it('execute runner with page scanner exception', async () => {
-        const error = new Error('page scan processor error');
-        const errorMessage = System.serializeError(error);
-        pageScanResult.run = {
-            state: 'failed',
-            timestamp: dateNow.toJSON(),
-            error: errorMessage.substring(0, 2048),
-        };
-        loggerMock.setup((o) => o.logError(`The privacy scan processor failed to scan a webpage.`, { error: errorMessage })).verifiable();
+    it.each([undefined, { HttpStatusCode: 200 }] as PrivacyPageScanReport[])(
+        'execute runner with page scanner exception and scan results = %s',
+        async (scanResults) => {
+            const error = new Error('page scan processor error');
+            const errorMessage = System.serializeError(error);
+            privacyScanResults.results = scanResults;
+            pageScanResult.run = {
+                state: 'failed',
+                timestamp: dateNow.toJSON(),
+                error: errorMessage.substring(0, 2048),
+            };
+            loggerMock
+                .setup((o) => o.logError(`The privacy scan processor failed to scan a webpage.`, { error: errorMessage }))
+                .verifiable();
 
-        setupScanMetadataConfig();
-        setupUpdateScanRunStateToRunning();
-        setupScanRunnerTelemetryManager(false);
-        setupPageScanProcessor(true, error);
-        setupUpdateScanResult();
-        await runner.run();
-    });
+            setupScanMetadataConfig();
+            setupUpdateScanRunStateToRunning();
+            setupScanRunnerTelemetryManager(false);
+            setupPageScanProcessor(true, error);
+            setupUpdateScanResult();
+            await runner.run();
+        },
+    );
 
     it('handle scanner browser navigation error', async () => {
         privacyScanResults.error = 'browser navigation error';
@@ -190,29 +202,32 @@ function setupProcessScanResult(): void {
             .setup((o) => o.logError(`Browser has failed to scan a webpage.`, { error: JSON.stringify(privacyScanResults.error) }))
             .verifiable();
     } else {
+        pageScanResult.scanResult = {
+            state: 'pass',
+        };
         pageScanResult.run = {
             state: 'completed',
             timestamp: dateNow.toJSON(),
             error: undefined,
         };
-        pageScanResult.reports = reports;
+    }
+
+    if (privacyScanResults.results) {
         pageScanResult.scannedUrl = privacyScanResults.scannedUrl;
-
-        if (privacyScanResults.results) {
-            pageScanResult.scanResult = {
-                state: 'fail',
-            };
-        } else {
-            pageScanResult.scanResult = {
-                state: 'pass',
-            };
-        }
-
-        const generatedReports = [{}] as GeneratedReport[];
+        const reportId = 'page report id';
+        const generatedReports: GeneratedReport[] = [
+            {
+                content: JSON.stringify(privacyScanResults.results),
+                id: reportId,
+                format: 'json',
+            },
+        ];
+        guidGeneratorMock.setup((gg) => gg.createGuid()).returns(() => reportId);
         reportWriterMock
             .setup((o) => o.writeBatch(generatedReports))
             .returns(() => Promise.resolve(reports))
             .verifiable();
+        pageScanResult.reports = reports;
     }
 
     pageScanResult.run.pageResponseCode = privacyScanResults.pageResponseCode;

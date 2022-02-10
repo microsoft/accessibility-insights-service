@@ -6,7 +6,7 @@ import { GlobalLogger } from 'logger';
 import { PrivacyScanResult } from 'scanner-global-library';
 import { OnDemandPageScanRunResultProvider, WebsiteScanResultProvider, ReportWriter, GeneratedReport } from 'service-library';
 import { OnDemandPageScanReport, OnDemandPageScanResult, OnDemandPageScanRunState, ScanError, WebsiteScanResult } from 'storage-documents';
-import { System, ServiceConfiguration } from 'common';
+import { System, ServiceConfiguration, GuidGenerator } from 'common';
 import _ from 'lodash';
 import { ScanMetadataConfig } from '../scan-metadata-config';
 import { ScanRunnerTelemetryManager } from '../scan-runner-telemetry-manager';
@@ -24,6 +24,7 @@ export class Runner {
         @inject(ScanRunnerTelemetryManager) private readonly telemetryManager: ScanRunnerTelemetryManager,
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
         @inject(GlobalLogger) private readonly logger: GlobalLogger,
+        @inject(GuidGenerator) private readonly guidGenerator: GuidGenerator,
     ) {}
 
     public async run(): Promise<void> {
@@ -91,15 +92,18 @@ export class Runner {
             pageScanResult.scanResult = {
                 state: 'pass', // TBD
             };
-            pageScanResult.reports = await this.generateScanReports(privacyScanResult);
-            if (privacyScanResult.scannedUrl !== undefined) {
-                pageScanResult.scannedUrl = privacyScanResult.scannedUrl;
-            }
         } else {
             this.setRunResult(pageScanResult, 'failed', privacyScanResult.error);
 
             this.logger.logError('Browser has failed to scan a webpage.', { error: JSON.stringify(privacyScanResult.error) });
             this.telemetryManager.trackBrowserScanFailed();
+        }
+
+        if (!_.isEmpty(privacyScanResult.results)) {
+            pageScanResult.reports = await this.generateScanReports(privacyScanResult);
+            if (privacyScanResult.scannedUrl !== undefined) {
+                pageScanResult.scannedUrl = privacyScanResult.scannedUrl;
+            }
         }
 
         pageScanResult.run.pageResponseCode = privacyScanResult.pageResponseCode;
@@ -142,7 +146,13 @@ export class Runner {
 
     private async generateScanReports(privacyScanResult: PrivacyScanResult): Promise<OnDemandPageScanReport[]> {
         this.logger.logInfo(`Generating privacy scan report for a webpage scan.`);
-        const reports = [{}] as GeneratedReport[]; // TBD
+        const reports: GeneratedReport[] = [
+            {
+                content: JSON.stringify(privacyScanResult.results),
+                format: 'json',
+                id: this.guidGenerator.createGuid(),
+            },
+        ];
 
         return this.reportWriter.writeBatch(reports);
     }
