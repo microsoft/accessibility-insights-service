@@ -157,7 +157,7 @@ describe(SimulatorPageProcessor, () => {
 
     function setupEnqueueLinks(page: Page): void {
         const options = {
-            page: page,
+            page,
             requestQueue: requestQueueStub,
             pseudoUrls: discoveryPatterns,
         };

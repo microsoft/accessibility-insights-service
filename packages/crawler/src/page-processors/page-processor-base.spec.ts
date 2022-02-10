@@ -120,13 +120,16 @@ describe(PageProcessorBase, () => {
         crawlerConfigurationMock.verifyAll();
     });
 
-    it('gotoFunction', async () => {
+    it('gotoFunction()', async () => {
         pageProcessorBase.baseUrl = testUrl;
         const userAgent = 'userAgent';
         const browserResolution = '1920x1080';
         const inputs: Apify.PuppeteerGotoInputs = {
             page: pageStub,
             request: requestStub,
+            session: {
+                userData: [],
+            },
         } as any;
         const response = {} as Response;
         pageConfiguratorMock
@@ -152,10 +155,47 @@ describe(PageProcessorBase, () => {
         await pageProcessorBase.gotoFunction(inputs);
     });
 
-    it('gotoFunction logs errors', async () => {
+    it('invoke gotoFunction() with web browser navigation error', async () => {
+        pageProcessorBase.baseUrl = testUrl;
+        const browserError = {
+            errorType: 'HttpErrorCode',
+            message: 'message',
+            stack: 'stack',
+        };
         const inputs: Apify.PuppeteerGotoInputs = {
             page: pageStub,
             request: requestStub,
+            session: {
+                userData: [],
+            },
+        } as any;
+        const response = {} as Response;
+        pageNavigatorMock
+            .setup(async (o) => o.navigate(testUrl, inputs.page, It.isAny()))
+            .callback((url, page, errorCallback) => errorCallback(browserError, undefined))
+            .returns(() => Promise.resolve(response))
+            .verifiable();
+        dataBaseMock
+            .setup((o) =>
+                o.addScanResult(requestStub.id, {
+                    id: requestStub.id,
+                    url: requestStub.url,
+                    scanState: 'browserError',
+                    error: JSON.stringify(browserError),
+                }),
+            )
+            .verifiable();
+
+        await pageProcessorBase.gotoFunction(inputs);
+    });
+
+    it('gotoFunction() logs errors', async () => {
+        const inputs: Apify.PuppeteerGotoInputs = {
+            page: pageStub,
+            request: requestStub,
+            session: {
+                userData: [],
+            },
         } as any;
         setupScanErrorLogging();
 
@@ -171,7 +211,6 @@ describe(PageProcessorBase, () => {
             })
             .returns(() => Promise.reject(error))
             .verifiable();
-
         const scanResult = {
             id: requestStub.id as string,
             url: requestStub.url,
@@ -188,7 +227,7 @@ describe(PageProcessorBase, () => {
         }
     });
 
-    it('pageErrorProcessor', () => {
+    it('pageErrorProcessor()', () => {
         const expectedScanData: ScanData = {
             id: requestStub.id as string,
             url: requestStub.url,
@@ -204,20 +243,44 @@ describe(PageProcessorBase, () => {
         pageProcessorBase.pageErrorProcessor({ request: requestStub, error });
     });
 
-    it('pageProcessor', async () => {
+    it('invoke processPage()', async () => {
         const inputs: Apify.PuppeteerHandlePageInputs = {
             page: pageStub,
             request: requestStub,
+            session: {
+                userData: [],
+            },
         } as any;
         processPageMock.setup((pp) => pp(inputs)).verifiable();
 
         await pageProcessorBase.pageHandler(inputs);
     });
 
-    it('pageProcessor logs errors', async () => {
+    it('skip invoking processPage() when web browser failed to load web page', async () => {
+        const inputs: Apify.PuppeteerHandlePageInputs = {
+            request: {
+                id: 'requestId',
+            },
+            session: {
+                userData: [
+                    {
+                        requestId: 'requestId',
+                    },
+                ],
+            },
+        } as any;
+        processPageMock.setup((pp) => pp(inputs)).verifiable(Times.never());
+
+        await pageProcessorBase.pageHandler(inputs);
+    });
+
+    it('processPage() logs errors', async () => {
         const inputs: Apify.PuppeteerHandlePageInputs = {
             page: pageStub,
             request: requestStub,
+            session: {
+                userData: [],
+            },
         } as any;
         processPageMock
             .setup((pp) => pp(inputs))
@@ -233,7 +296,7 @@ describe(PageProcessorBase, () => {
         }
     });
 
-    it('saveSnapshot', async () => {
+    it('saveSnapshot()', async () => {
         setupSaveSnapshot();
         pageProcessorBase.snapshot = true;
 

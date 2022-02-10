@@ -35,6 +35,7 @@ export class SimpleCrawlerEngine implements CrawlerEngine<string[]> {
             handleRequestFunction: this.requestProcessor.handleRequest,
             handleFailedRequestFunction: this.requestProcessor.handleRequestError,
             maxRequestsPerCrawl: this.crawlerConfiguration.maxRequestsPerCrawl(),
+            useSessionPool: true,
         };
 
         if (crawlerRunOptions.singleWorker === true) {

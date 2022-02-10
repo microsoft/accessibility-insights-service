@@ -6,6 +6,7 @@ import { inject, injectable } from 'inversify';
 import * as Puppeteer from 'puppeteer';
 import { BrowserError, PageNavigator } from 'scanner-global-library';
 import { System } from 'common';
+import { isArray } from 'lodash';
 import { CrawlerConfiguration } from '../crawler/crawler-configuration';
 import { DataBase } from '../level-storage/data-base';
 import { AccessibilityScanOperation } from '../page-operations/accessibility-scan-operation';
@@ -28,6 +29,11 @@ export interface PageProcessor {
     pageErrorProcessor: Apify.HandleFailedRequest;
 }
 
+export interface SessionData {
+    requestId: string;
+    browserError: BrowserError;
+}
+
 @injectable()
 export abstract class PageProcessorBase implements PageProcessor {
     protected readonly baseUrl: string;
@@ -45,6 +51,13 @@ export abstract class PageProcessorBase implements PageProcessor {
      */
     public pageHandler: Apify.PuppeteerHandlePage = async (inputs: Apify.PuppeteerHandlePageInputs) => {
         try {
+            if (
+                isArray(inputs.session?.userData) &&
+                (inputs.session.userData as SessionData[]).find((s) => s.requestId === inputs.request.id)
+            ) {
+                return;
+            }
+
             await this.processPage(inputs);
         } catch (err) {
             await this.pushScanData({ succeeded: false, id: inputs.request.id as string, url: inputs.request.url });
@@ -60,31 +73,43 @@ export abstract class PageProcessorBase implements PageProcessor {
      * Overrides the function that opens the page in Puppeteer.
      * Return the result of Puppeteer's [page.goto()](https://pptr.dev/#?product=Puppeteer&show=api-pagegotourl-options) function.
      */
-    public gotoFunction: Apify.PuppeteerGoto = async (inputs: Apify.PuppeteerGotoInputs) => {
+    public gotoFunction: Apify.PuppeteerGoto = async ({ request, page, session }) => {
         let navigationError: BrowserError;
         let runError: unknown;
+        let puppeteerError: unknown;
         try {
-            return await this.pageNavigator.navigate(inputs.request.url, inputs.page, async (browserError, error) => {
-                if (error !== undefined) {
-                    throw error;
-                } else {
-                    navigationError = browserError;
-                }
+            if (!isArray(session.userData)) {
+                session.userData = [];
+            }
+
+            const response = await this.pageNavigator.navigate(request.url, page, async (browserError, error) => {
+                (session.userData as SessionData[]).push({
+                    requestId: request.id,
+                    browserError,
+                });
+                navigationError = browserError;
+                puppeteerError = error;
             });
+
+            if (puppeteerError) {
+                throw puppeteerError;
+            }
+
+            return response;
         } catch (err) {
-            await this.pushScanData({ succeeded: false, id: inputs.request.id as string, url: inputs.request.url });
-            await this.logPageError(inputs.request, err as Error);
+            await this.pushScanData({ succeeded: false, id: request.id as string, url: request.url });
+            await this.logPageError(request, err as Error);
             runError = err;
 
             // Throw the error so Apify puts it back into the queue to retry
             throw err;
         } finally {
             if (runError !== undefined) {
-                await this.saveRunError(inputs.request, runError);
+                await this.saveRunError(request, runError);
             } else if (navigationError !== undefined) {
-                await this.saveBrowserError(inputs.request, navigationError);
+                await this.saveBrowserError(request, navigationError);
             } else {
-                await this.saveScanMetadata(inputs.request.url, await inputs.page.title());
+                await this.saveScanMetadata(request.url, await page.title());
             }
         }
     };

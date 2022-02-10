@@ -70,6 +70,7 @@ describe(PuppeteerCrawlerEngine, () => {
             gotoFunction: pageProcessorStub.gotoFunction,
             handleFailedRequestFunction: pageProcessorStub.pageErrorProcessor,
             maxRequestsPerCrawl: maxRequestsPerCrawl,
+            useSessionPool: true,
             launchPuppeteerOptions: {
                 args: puppeteerDefaultOptions,
                 defaultViewport: {

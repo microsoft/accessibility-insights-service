@@ -42,6 +42,7 @@ export class PuppeteerCrawlerEngine {
             gotoFunction: pageProcessor.gotoFunction,
             handleFailedRequestFunction: pageProcessor.pageErrorProcessor,
             maxRequestsPerCrawl: this.crawlerConfiguration.maxRequestsPerCrawl(),
+            useSessionPool: true,
             launchPuppeteerOptions: {
                 args: puppeteerDefaultOptions,
                 defaultViewport: {
