@@ -98,7 +98,6 @@ function getScanArguments(): ScanArguments {
                 type: 'array',
                 describe: `List of URLs to crawl in addition to URLs discovered from crawling the provided URL, separated by space.`,
                 alias: 'inputurls',
-                normalize: true,
             },
             discoveryPatterns: {
                 type: 'array',
