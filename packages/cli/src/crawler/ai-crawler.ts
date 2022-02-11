@@ -4,16 +4,22 @@
 import { inject, injectable } from 'inversify';
 import { DbScanResultReader, CrawlerRunOptions, Crawler, ScanMetadata } from 'accessibility-insights-crawler';
 import { AxeResultsReducer, UrlCount, AxeCoreResults, AxeResultsList } from 'axe-result-converter';
+import { isEmpty } from 'lodash';
 import { ScanResultReader } from '../scan-result-providers/scan-result-reader';
 import { BaselineEvaluation, BaselineOptions } from '../baseline/baseline-types';
 import { BaselineEngine } from '../baseline/baseline-engine';
+
+export interface ScanError {
+    url: string;
+    error: string;
+}
 
 export interface CombinedScanResult {
     urlCount?: UrlCount;
     combinedAxeResults?: AxeCoreResults;
     baselineEvaluation?: BaselineEvaluation;
     scanMetadata?: ScanMetadata;
-    error?: string;
+    errors?: ScanError[];
 }
 
 @injectable()
@@ -30,7 +36,12 @@ export class AICrawler {
 
     public async crawl(crawlerRunOptions: CrawlerRunOptions, baselineOptions?: BaselineOptions): Promise<CombinedScanResult> {
         await this.crawler.crawl(crawlerRunOptions);
+
         const combinedAxeResult = await this.combineAxeResults();
+        if (combinedAxeResult.urlCount.total === 0) {
+            return combinedAxeResult;
+        }
+
         combinedAxeResult.scanMetadata = await this.scanResultReader.getScanMetadata(crawlerRunOptions.baseUrl);
 
         if (baselineOptions != null) {
@@ -58,8 +69,22 @@ export class AICrawler {
             failed: 0,
             passed: 0,
         };
+        const errors: ScanError[] = [];
 
         for await (const scanResult of this.scanResultReader) {
+            if (scanResult.scanState === 'browserError' || scanResult.scanState === 'runError') {
+                errors.push({
+                    url: scanResult.url,
+                    error: typeof scanResult.error === 'string' ? scanResult.error : JSON.stringify(scanResult.error),
+                });
+
+                continue;
+            }
+
+            if (isEmpty(scanResult.axeResults)) {
+                continue;
+            }
+
             urlCount.total++;
             if (scanResult.scanState === 'pass') {
                 urlCount.passed++;
@@ -67,14 +92,13 @@ export class AICrawler {
                 urlCount.failed++;
             }
 
-            if (scanResult.axeResults) {
-                this.axeResultsReducer.reduce(combinedAxeResults, scanResult.axeResults);
-            }
+            this.axeResultsReducer.reduce(combinedAxeResults, scanResult.axeResults);
         }
 
         return {
             urlCount,
             combinedAxeResults,
+            errors,
         };
     }
 }

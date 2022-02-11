@@ -89,6 +89,19 @@ describe(AICrawler, () => {
                 {
                     id: 'id-4',
                     scanState: 'runError',
+                    url: 'url-4',
+                    error: 'error 4',
+                },
+                {
+                    id: 'id-5',
+                    scanState: 'browserError',
+                    url: 'url-5',
+                    error: {
+                        errorType: 'HttpErrorCode',
+                        statusCode: 404,
+                        message: 'message',
+                        stack: 'stack',
+                    },
                 },
             ] as ScanResult[];
 
@@ -107,7 +120,7 @@ describe(AICrawler, () => {
             dbScanResultReaderMock.setup((o) => o[Symbol.asyncIterator]).returns(() => () => dbScanResultReaderMock.object);
         });
 
-        it('coordinates underlying Crawler and results reader (without baselining)', async () => {
+        it('coordinates underlying crawler and results reader (without baselining)', async () => {
             crawlerMock
                 .setup((o) => o.crawl(crawlerOption))
                 .returns(async () => Promise.resolve())
@@ -115,18 +128,17 @@ describe(AICrawler, () => {
 
             const output = await crawler.crawl(crawlerOption);
 
-            expect(output.error).toBeUndefined();
             expect(output.baselineEvaluation).toBeUndefined();
             expect(output.scanMetadata).toBe(scanMetadata);
             expect(output.urlCount).toStrictEqual({
-                total: 4,
+                total: 3,
                 passed: 2,
                 failed: 1,
             });
             expect(output.combinedAxeResults.urls).toStrictEqual(['url-1', 'url-2', 'url-3']);
         });
 
-        it('coordinates underlying Crawler, results reader, and baselining engine', async () => {
+        it('coordinates underlying crawler, results reader, and baselining engine', async () => {
             crawlerMock
                 .setup((o) => o.crawl(crawlerOption))
                 .returns(async () => Promise.resolve())
@@ -146,18 +158,17 @@ describe(AICrawler, () => {
 
             const output = await crawler.crawl(crawlerOption, baselineOptions);
 
-            expect(output.error).toBeUndefined();
             expect(output.baselineEvaluation).toBe(baselineEvaluationFromEngine);
             expect(output.scanMetadata).toBe(scanMetadata);
             expect(output.urlCount).toStrictEqual({
-                total: 4,
+                total: 3,
                 passed: 2,
                 failed: 1,
             });
             expect(output.combinedAxeResults.urls).toStrictEqual(['url-1', 'url-2', 'url-3']);
         });
 
-        it('coordinates underlying Crawler, results reader, and baselining engine, single worker true, non-deterministic', async () => {
+        it('coordinates underlying crawler, results reader, and baselining engine, single worker true, non-deterministic', async () => {
             const stubBaselineContent: BaselineFileContent = {} as BaselineFileContent;
             const baselineOptions: BaselineOptions = {
                 baselineContent: stubBaselineContent,
@@ -176,14 +187,29 @@ describe(AICrawler, () => {
                 new Error(AICrawler.NON_DETERMINISTIC_ERROR_MESSAGE),
             );
         });
-    });
 
-    it('propagates exceptions from the underlying Crawler as-is', async () => {
-        crawlerMock
-            .setup((o) => o.crawl(crawlerOption))
-            .returns(() => Promise.reject('Internal error'))
-            .verifiable();
+        it('propagates exceptions from the web browser', async () => {
+            crawlerMock
+                .setup((o) => o.crawl(crawlerOption))
+                .returns(() => Promise.resolve())
+                .verifiable();
+            const expectedErrors = [
+                { error: 'error 4', url: 'url-4' },
+                { error: '{"errorType":"HttpErrorCode","statusCode":404,"message":"message","stack":"stack"}', url: 'url-5' },
+            ];
 
-        await expect(crawler.crawl(crawlerOption)).rejects.toEqual('Internal error');
+            const output = await crawler.crawl(crawlerOption);
+
+            expect(output.errors).toEqual(expectedErrors);
+        });
+
+        it('propagates exceptions from the underlying crawler as-is', async () => {
+            crawlerMock
+                .setup((o) => o.crawl(crawlerOption))
+                .returns(() => Promise.reject('Internal error'))
+                .verifiable();
+
+            await expect(crawler.crawl(crawlerOption)).rejects.toEqual('Internal error');
+        });
     });
 });
