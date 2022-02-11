@@ -251,6 +251,7 @@ describe(Page, () => {
                     ...privacyResults,
                     HttpStatusCode: 200,
                 },
+                pageResponseCode: 200,
             } as PrivacyScanResult;
 
             const privacyScanResults = await page.scanForPrivacy();
@@ -299,6 +300,7 @@ describe(Page, () => {
                     ...privacyResults,
                     HttpStatusCode: 200,
                 },
+                pageResponseCode: 200,
                 scannedUrl: redirectUrl,
             } as PrivacyScanResult;
             loggerMock.setup((o) => o.logWarn(`Scanning performed on redirected page`, { redirectedUrl: redirectUrl })).verifiable();
@@ -321,6 +323,7 @@ describe(Page, () => {
                     ...privacyResults,
                     HttpStatusCode: 200,
                 },
+                pageResponseCode: 200,
                 scannedUrl: redirectUrl,
             } as PrivacyScanResult;
             loggerMock.setup((o) => o.logWarn(`Scanning performed on redirected page`, { redirectedUrl: redirectUrl })).verifiable();
@@ -348,6 +351,7 @@ describe(Page, () => {
                     ...privacyResults,
                     HttpStatusCode: 200,
                 },
+                pageResponseCode: 200,
                 error: 'Failed to collect cookies for 1 test cases',
             } as PrivacyScanResult;
 

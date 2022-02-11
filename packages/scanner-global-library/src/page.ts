@@ -159,6 +159,7 @@ export class Page {
                 ...privacyResult,
                 HttpStatusCode: navigationStatusCode,
             },
+            pageResponseCode: navigationStatusCode,
         };
 
         if (
