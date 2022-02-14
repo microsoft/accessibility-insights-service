@@ -21,6 +21,8 @@ describe('listMonorepoPackageNames', () => {
               "privacy-scan-core",
               "privacy-scan-job-manager",
               "privacy-scan-runner",
+              "report-generator-job-manager",
+              "report-generator-runner",
               "resource-deployment",
               "scanner-global-library",
               "service-library",

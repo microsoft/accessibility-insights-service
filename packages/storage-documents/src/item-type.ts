@@ -9,4 +9,5 @@ export enum ItemType {
     websiteScanResult = 'websiteScanResult',
     websiteScanResultPart = 'websiteScanResultPart',
     privacyScanConfiguration = 'privacyScanConfiguration',
+    reportGeneratorRequest = 'reportGeneratorRequest',
 }
