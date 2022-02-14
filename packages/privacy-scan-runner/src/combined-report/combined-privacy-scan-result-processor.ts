@@ -101,7 +101,7 @@ export class CombinedPrivacyScanResultProcessor {
             return undefined;
         }
 
-        const readResponse = await this.combinedReportProvider.readCombinedResults(blobId);
+        const readResponse = await this.combinedReportProvider.readCombinedReport(blobId);
         if (readResponse.error) {
             if (readResponse.error.errorCode === 'blobNotFound') {
                 this.logger.logWarn('Combined axe scan results not found in a blob storage. Creating a new blob.');

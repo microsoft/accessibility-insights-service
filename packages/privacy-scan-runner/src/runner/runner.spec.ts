@@ -20,6 +20,7 @@ import { ScanMetadataConfig } from '../scan-metadata-config';
 import { PageScanProcessor } from '../scanner/page-scan-processor';
 import { ScanRunnerTelemetryManager } from '../scan-runner-telemetry-manager';
 import { PrivacyScanMetadata } from '../types/privacy-scan-metadata';
+import { CombinedPrivacyScanResultProcessor } from '../combined-report/combined-privacy-scan-result-processor';
 import { Runner } from './runner';
 
 const maxFailedScanRetryCount = 1;
@@ -33,6 +34,7 @@ let scanRunnerTelemetryManagerMock: IMock<ScanRunnerTelemetryManager>;
 let serviceConfigMock: IMock<ServiceConfiguration>;
 let loggerMock: IMock<GlobalLogger>;
 let guidGeneratorMock: IMock<GuidGenerator>;
+let combinedResultsProcessorMock: IMock<CombinedPrivacyScanResultProcessor>;
 let runner: Runner;
 let scanMetadataInput: PrivacyScanMetadata;
 let scanMetadata: PrivacyScanMetadata;
@@ -54,6 +56,7 @@ describe(Runner, () => {
         serviceConfigMock = Mock.ofType(ServiceConfiguration);
         loggerMock = Mock.ofType<GlobalLogger>();
         guidGeneratorMock = Mock.ofType<GuidGenerator>();
+        combinedResultsProcessorMock = Mock.ofType<CombinedPrivacyScanResultProcessor>();
 
         dateNow = new Date();
         MockDate.set(dateNow);
@@ -93,6 +96,7 @@ describe(Runner, () => {
             serviceConfigMock.object,
             loggerMock.object,
             guidGeneratorMock.object,
+            combinedResultsProcessorMock.object,
         );
     });
 
@@ -105,6 +109,7 @@ describe(Runner, () => {
         reportWriterMock.verifyAll();
         scanRunnerTelemetryManagerMock.verifyAll();
         loggerMock.verifyAll();
+        combinedResultsProcessorMock.verifyAll();
     });
 
     it('exit runner if unable to update db document state to `running`', async () => {
@@ -229,6 +234,8 @@ function setupProcessScanResult(): void {
             .verifiable();
         pageScanResult.reports = reports;
     }
+
+    combinedResultsProcessorMock.setup((c) => c.generateCombinedScanResults(privacyScanResults, pageScanResult)).verifiable();
 
     pageScanResult.run.pageResponseCode = privacyScanResults.pageResponseCode;
 }

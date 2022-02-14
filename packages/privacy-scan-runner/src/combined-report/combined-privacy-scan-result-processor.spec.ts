@@ -129,7 +129,7 @@ describe(CombinedPrivacyScanResultProcessor, () => {
         };
         websiteScanResultProviderMock.setup((w) => w.read(websiteScanResult.id)).returns(async () => websiteScanResult);
         combinedReportProviderMock
-            .setup((c) => c.readCombinedResults(reportId))
+            .setup((c) => c.readCombinedReport(reportId))
             .returns(async () => errorReadResponse)
             .verifiable();
 
@@ -143,7 +143,7 @@ describe(CombinedPrivacyScanResultProcessor, () => {
             .returns(() => reportId)
             .verifiable();
         websiteScanResultProviderMock.setup((w) => w.read(websiteScanResult.id)).returns(async () => websiteScanResult);
-        combinedReportProviderMock.setup((c) => c.readCombinedResults(It.isAny())).verifiable(Times.never());
+        combinedReportProviderMock.setup((c) => c.readCombinedReport(It.isAny())).verifiable(Times.never());
         setupCombineReports(undefined);
         setupWriteReport();
         setupUpdateWebsiteScanResult();
@@ -160,7 +160,7 @@ describe(CombinedPrivacyScanResultProcessor, () => {
             },
         };
         websiteScanResultProviderMock.setup((w) => w.read(websiteScanResult.id)).returns(async () => websiteScanResult);
-        combinedReportProviderMock.setup((c) => c.readCombinedResults(reportId)).returns(async () => blobNotFoundResponse);
+        combinedReportProviderMock.setup((c) => c.readCombinedReport(reportId)).returns(async () => blobNotFoundResponse);
         setupCombineReports(undefined);
         setupWriteReport();
         setupUpdateWebsiteScanResult();
@@ -241,7 +241,7 @@ describe(CombinedPrivacyScanResultProcessor, () => {
             etag: etag,
         };
         combinedReportProviderMock
-            .setup((c) => c.readCombinedResults(reportId))
+            .setup((c) => c.readCombinedReport(reportId))
             .returns(async () => readResponse)
             .verifiable();
     }
