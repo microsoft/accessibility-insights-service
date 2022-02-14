@@ -8,9 +8,7 @@
             "name": "Start debugging report-generator-job-manager",
             "type": "node",
             "request": "launch",
-            "outFiles": [
-                "${workspaceFolder}/dist/**/*.js"
-            ],
+            "outFiles": ["${workspaceFolder}/dist/**/*.js"],
             "cwd": "${workspaceFolder}",
             "program": "${workspaceFolder}/src/index.ts",
             "preLaunchTask": "run",
