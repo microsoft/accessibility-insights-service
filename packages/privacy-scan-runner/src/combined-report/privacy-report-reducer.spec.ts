@@ -112,8 +112,6 @@ describe(PrivacyReportReducer, () => {
         it('with successful scan result', () => {
             const expectedReport: PrivacyScanCombinedReport = {
                 ScanId: metadata.websiteScanId,
-                ScanTeamId: 0,
-                ResultScanId: 0,
                 Status: 'Completed',
                 Urls: [metadata.url],
                 FailedUrls: [],
@@ -145,8 +143,6 @@ describe(PrivacyReportReducer, () => {
 
             const expectedReport: PrivacyScanCombinedReport = {
                 ScanId: metadata.websiteScanId,
-                ScanTeamId: 0,
-                ResultScanId: 0,
                 Status: 'Failed',
                 Urls: [metadata.url],
                 FailedUrls: [failedUrl],
@@ -183,8 +179,6 @@ describe(PrivacyReportReducer, () => {
 
             const expectedReport: PrivacyScanCombinedReport = {
                 ScanId: metadata.websiteScanId,
-                ScanTeamId: 0,
-                ResultScanId: 0,
                 Status: 'Failed',
                 Urls: [metadata.url],
                 FailedUrls: [failedUrl],
@@ -206,8 +200,6 @@ describe(PrivacyReportReducer, () => {
         beforeEach(() => {
             existingReport = {
                 ScanId: 'report scan id',
-                ScanTeamId: 0,
-                ResultScanId: 0,
                 Status: 'Completed',
                 Urls: ['url1', 'url2'],
                 FailedUrls: [],

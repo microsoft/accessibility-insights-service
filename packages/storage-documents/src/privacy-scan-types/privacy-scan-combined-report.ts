@@ -8,8 +8,6 @@ export type PrivacyScanStatus = 'Completed' | 'Failed';
 // Data type used by WCP
 export interface PrivacyScanCombinedReport {
     ScanId: string;
-    ScanTeamId: number;
-    ResultScanId: number;
     Status: PrivacyScanStatus;
     Urls: string[];
     FailedUrls: FailedUrl[];

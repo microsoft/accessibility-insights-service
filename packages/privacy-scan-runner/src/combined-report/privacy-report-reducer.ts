@@ -81,8 +81,6 @@ export class PrivacyReportReducer {
     private createNewCombinedReport(metadata: PrivacyReportMetadata): PrivacyScanCombinedReport {
         return {
             ScanId: metadata.websiteScanId,
-            ScanTeamId: 0, //?
-            ResultScanId: 0, //?
             Status: 'Completed',
             Urls: [],
             FailedUrls: [],
