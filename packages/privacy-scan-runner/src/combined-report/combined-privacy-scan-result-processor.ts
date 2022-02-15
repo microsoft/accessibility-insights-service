@@ -96,7 +96,7 @@ export class CombinedPrivacyScanResultProcessor {
 
     private async getCombinedReport(blobId: string | undefined): Promise<PrivacyReportReadResponse | undefined> {
         if (blobId === undefined) {
-            this.logger.logInfo('No combined axe scan results blob associated with this website scan. Creating a new blob.');
+            this.logger.logInfo('No combined privacy scan results blob associated with this website scan. Creating a new blob.');
 
             return undefined;
         }
@@ -104,19 +104,21 @@ export class CombinedPrivacyScanResultProcessor {
         const readResponse = await this.combinedReportProvider.readCombinedReport(blobId);
         if (readResponse.error) {
             if (readResponse.error.errorCode === 'blobNotFound') {
-                this.logger.logWarn('Combined axe scan results not found in a blob storage. Creating a new blob.');
+                this.logger.logWarn('Combined privacy scan results not found in a blob storage. Creating a new blob.');
 
                 return undefined;
             }
 
-            this.logger.logError('Failed to read combined axe results blob.', {
+            this.logger.logError('Failed to read combined privacy results blob.', {
                 error: JSON.stringify(readResponse.error),
             });
 
-            throw new Error(`Failed to read combined axe results blob. Blob Id: ${blobId} Error: ${JSON.stringify(readResponse.error)}`);
+            throw new Error(
+                `Failed to read combined privacy results blob. Blob Id: ${blobId} Error: ${JSON.stringify(readResponse.error)}`,
+            );
         }
 
-        this.logger.logInfo('Successfully retrieved combined axe scan results from a blob storage.');
+        this.logger.logInfo('Successfully retrieved combined privacy scan results from a blob storage.');
 
         return readResponse;
     }
@@ -135,12 +137,14 @@ export class CombinedPrivacyScanResultProcessor {
             etag,
         );
         if (writeResponse.error) {
-            this.logger.logError('Failed to write new combined axe scan results blob.', {
+            this.logger.logError('Failed to write new combined privacy scan results blob.', {
                 error: JSON.stringify(writeResponse.error),
             });
 
             throw new Error(
-                `Failed to write new combined axe scan results blob. Blob Id: ${reportId} Error: ${JSON.stringify(writeResponse.error)}`,
+                `Failed to write new combined privacy scan results blob. Blob Id: ${reportId} Error: ${JSON.stringify(
+                    writeResponse.error,
+                )}`,
             );
         }
 
