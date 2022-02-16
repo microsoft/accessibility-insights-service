@@ -43,6 +43,7 @@ describe(PrivacyScanner, () => {
     it('should launch browser page with given url and scan the page', async () => {
         const expectedResult = { state: 'pass' } as PrivacyScanResult;
         setupWaitForPromisetoReturnOriginalPromise();
+        pageMock.setup((p) => p.scanForPrivacy()).returns(async () => expectedResult);
 
         const actualResult = await privacyScanner.scan(pageMock.object);
         expect(actualResult).toEqual(expectedResult);
@@ -50,9 +51,8 @@ describe(PrivacyScanner, () => {
 
     it('should throw errors', async () => {
         const scanError = { error: 'scan error', pageResponseCode: 101 };
-        privacyScanner = new PrivacyScanner(promiseUtilsMock.object, serviceConfigMock.object, loggerMock.object, () => {
-            throw scanError;
-        });
+        pageMock.setup((p) => p.scanForPrivacy()).throws(scanError as unknown as Error);
+        privacyScanner = new PrivacyScanner(promiseUtilsMock.object, serviceConfigMock.object, loggerMock.object);
 
         setupWaitForPromisetoReturnOriginalPromise();
         loggerMock

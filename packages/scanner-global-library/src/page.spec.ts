@@ -226,12 +226,19 @@ describe(Page, () => {
     });
 
     describe('scanForPrivacy', () => {
-        const privacyResults = {
-            BannerDetected: true,
-            CookieCollectionConsentResults: [],
-        } as PrivacyResults;
+        let privacyResults: PrivacyResults;
 
         beforeEach(() => {
+            privacyResults = {
+                BannerDetected: true,
+                CookieCollectionConsentResults: [
+                    {
+                        CookiesUsedForConsent: 'cookie=value',
+                        CookiesAfterConsent: [],
+                        CookiesBeforeConsent: [],
+                    },
+                ],
+            } as PrivacyResults;
             simulatePageLaunch();
             privacyScannerMock.setup((s) => s.scanPageForPrivacy(puppeteerPageMock.object, It.isAny())).returns(async () => privacyResults);
         });
@@ -244,6 +251,7 @@ describe(Page, () => {
                     ...privacyResults,
                     HttpStatusCode: 200,
                 },
+                pageResponseCode: 200,
             } as PrivacyScanResult;
 
             const privacyScanResults = await page.scanForPrivacy();
@@ -292,6 +300,7 @@ describe(Page, () => {
                     ...privacyResults,
                     HttpStatusCode: 200,
                 },
+                pageResponseCode: 200,
                 scannedUrl: redirectUrl,
             } as PrivacyScanResult;
             loggerMock.setup((o) => o.logWarn(`Scanning performed on redirected page`, { redirectedUrl: redirectUrl })).verifiable();
@@ -314,6 +323,7 @@ describe(Page, () => {
                     ...privacyResults,
                     HttpStatusCode: 200,
                 },
+                pageResponseCode: 200,
                 scannedUrl: redirectUrl,
             } as PrivacyScanResult;
             loggerMock.setup((o) => o.logWarn(`Scanning performed on redirected page`, { redirectedUrl: redirectUrl })).verifiable();
@@ -328,6 +338,26 @@ describe(Page, () => {
             pageNavigatorMock.setup(async (o) => o.navigate(It.isAny(), It.isAny(), It.isAny())).verifiable(Times.never());
 
             await expect(page.scanForPrivacy()).rejects.toThrow();
+        });
+
+        it('Returns result with error if results contain an error in ConsentCollectionResults', async () => {
+            privacyResults.CookieCollectionConsentResults.push({
+                Error: 'Error reloading page',
+            });
+            puppeteerPageMock.setup((p) => p.url()).returns(() => url);
+            simulatePageNavigation(puppeteerResponseMock.object);
+            const expectedPrivacyScanResults = {
+                results: {
+                    ...privacyResults,
+                    HttpStatusCode: 200,
+                },
+                pageResponseCode: 200,
+                error: 'Failed to collect cookies for 1 test cases',
+            } as PrivacyScanResult;
+
+            const privacyScanResults = await page.scanForPrivacy();
+
+            expect(privacyScanResults).toEqual(expectedPrivacyScanResults);
         });
     });
 

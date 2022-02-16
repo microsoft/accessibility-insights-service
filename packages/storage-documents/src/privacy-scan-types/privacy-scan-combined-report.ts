@@ -8,13 +8,11 @@ export type PrivacyScanStatus = 'Completed' | 'Failed';
 // Data type used by WCP
 export interface PrivacyScanCombinedReport {
     ScanId: string;
-    ScanTeamId: number;
-    ResultScanId: number;
     Status: PrivacyScanStatus;
     Urls: string[];
     FailedUrls: FailedUrl[];
     ScanCookies: Cookie[];
-    CookieCollectionUrlResults: PrivacyPageScanReport;
+    CookieCollectionUrlResults: PrivacyPageScanReport[];
     StartDateTime: Date;
     FinishDateTime: Date;
 }
@@ -24,6 +22,6 @@ export interface FailedUrl {
     SeedUri: string;
     Reason: string; // "error=Error message"
     HttpStatusCode: number;
-    BannerDetected: boolean;
-    BannerDetectionXpathExpression: string;
+    BannerDetected?: boolean;
+    BannerDetectionXpathExpression?: string;
 }

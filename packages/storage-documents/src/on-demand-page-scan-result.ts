@@ -6,7 +6,7 @@ import { StorageDocument } from './storage-document';
 import { ScanGroupType } from './website-scan-result';
 import { PrivacyScan } from './on-demand-page-scan-batch-request';
 
-export declare type ReportFormat = 'sarif' | 'html' | 'consolidated.html' | 'json';
+export declare type ReportFormat = 'sarif' | 'html' | 'consolidated.html' | 'json' | 'consolidated.json';
 export declare type ScanState = 'pending' | 'pass' | 'fail';
 export declare type OnDemandPageScanRunState = 'pending' | 'accepted' | 'queued' | 'running' | 'completed' | 'failed';
 export declare type NotificationState = 'pending' | 'queued' | 'queueFailed' | 'sending' | 'sent' | 'sendFailed';
