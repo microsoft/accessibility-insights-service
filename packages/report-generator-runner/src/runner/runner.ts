@@ -11,45 +11,42 @@ import _ from 'lodash';
 import { RunMetadataConfig } from '../run-metadata-config';
 import { ReportGeneratorRunnerTelemetryManager } from '../report-generator-runner-telemetry-manager';
 import { ReportGeneratorMetadata } from '../types/report-generator-metadata';
+import { RequestSelector } from './request-selector';
 
 @injectable()
 export class Runner {
     constructor(
-        @inject(RunMetadataConfig) private readonly scanMetadataConfig: RunMetadataConfig,
+        @inject(RunMetadataConfig) private readonly runMetadataConfig: RunMetadataConfig,
         @inject(OnDemandPageScanRunResultProvider) private readonly onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider,
         @inject(WebsiteScanResultProvider) protected readonly websiteScanResultProvider: WebsiteScanResultProvider,
         @inject(ReportWriter) protected readonly reportWriter: ReportWriter,
+        @inject(RequestSelector) protected readonly requestSelector: RequestSelector,
         @inject(ReportGeneratorRunnerTelemetryManager) private readonly telemetryManager: ReportGeneratorRunnerTelemetryManager,
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
         @inject(GlobalLogger) private readonly logger: GlobalLogger,
     ) {}
 
     public async run(): Promise<void> {
-        const scanMetadata = this.scanMetadataConfig.getConfig();
+        const runMetadata = this.runMetadataConfig.getConfig();
 
-        this.logger.setCommonProperties({ scanId: scanMetadata.scanGroupId });
+        this.logger.setCommonProperties({ scanGroupId: runMetadata.scanGroupId });
         this.logger.logInfo('Start report generator runner.');
 
-        const pageScanResult = await this.updateScanRunState(scanMetadata.scanGroupId);
-        if (pageScanResult === undefined) {
-            return;
-        }
-
-        this.telemetryManager.trackScanStarted(scanMetadata.scanGroupId);
+        this.telemetryManager.trackRequestStarted(runMetadata.scanGroupId);
         try {
-            const privacyScanResults = {}; // TBD
+            const requests = await this.requestSelector.getRequests();
             await this.processScanResult(privacyScanResults, pageScanResult);
         } catch (error) {
             const errorMessage = System.serializeError(error);
             this.setRunResult(pageScanResult, 'failed', errorMessage);
 
             this.logger.logError(`The report generator processor failed to scan a webpage.`, { error: errorMessage });
-            this.telemetryManager.trackScanTaskFailed();
+            this.telemetryManager.trackRequestFailed();
         } finally {
-            this.telemetryManager.trackScanCompleted();
+            this.telemetryManager.trackRequestCompleted();
         }
 
-        await this.updateScanResult(scanMetadata, pageScanResult);
+        await this.updateScanResult(runMetadata, pageScanResult);
 
         this.logger.logInfo('Stop report generator runner.');
     }

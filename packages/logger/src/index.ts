@@ -7,17 +7,7 @@ export { ContextAwareLogger } from './context-aware-logger';
 export { loggerTypes } from './logger-types';
 export { registerLoggerToContainer, registerContextAwareLoggerToContainer } from './register-logger-to-container';
 export { BaseTelemetryProperties } from './base-telemetry-properties';
-export {
-    BaseTelemetryMeasurements,
-    ScanRequestReceivedMeasurements,
-    BatchPoolMeasurements,
-    ScanTaskStartedMeasurements,
-    ScanTaskCompletedMeasurements,
-    TelemetryMeasurements,
-    ScanRequestAcceptedMeasurements,
-    ScanRequestQueuedMeasurements,
-    BrowserScanFailedMeasurements,
-} from './logger-event-measurements';
+export * from './logger-event-measurements';
 export { AvailabilityTelemetry } from './availability-telemetry';
 export { LoggerProperties } from './logger-properties';
 export { ConsoleLoggerClient } from './console-logger-client';

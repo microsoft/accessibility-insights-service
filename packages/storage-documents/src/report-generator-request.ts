@@ -7,9 +7,11 @@ import { ItemType } from './item-type';
 
 export interface ReportGeneratorRequest extends StorageDocument {
     itemType: ItemType.reportGeneratorRequest;
-    scanId: string;
     scanGroupId: string;
     priority: number;
     reportsRef: OnDemandPageScanReport;
+    /**
+     * Supported run states: pending, running, completed, failed
+     */
     run: OnDemandPageScanRunResult;
 }
