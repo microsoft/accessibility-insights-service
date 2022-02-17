@@ -48,6 +48,10 @@ describe('E2EScanScenarioDefinitions', () => {
                     discoveryPatterns: [`url-to-scan/linked1[.*]`],
                 },
             },
+            {
+                consolidatedId: `consolidated-id-base-test-release-version-privacy-${fakeDate.getTime()}`,
+                privacyScan: true,
+            },
         ];
 
         MockDate.set(fakeDate);

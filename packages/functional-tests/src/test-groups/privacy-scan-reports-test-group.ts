@@ -10,24 +10,20 @@ import { FunctionalTestGroup } from './functional-test-group';
 
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 
-export class ConsolidatedScanReportsTestGroup extends FunctionalTestGroup {
+export class PrivacyScanReportsTestGroup extends FunctionalTestGroup {
     @test(TestEnvironment.all)
     public async testReportFormats(): Promise<void> {
         const response = await this.a11yServiceClient.getScanStatus(this.testContextData.scanId);
         const reports = (<ScanRunResultResponse>response.body).reports;
 
-        expect(reports, 'Expected three reports to be returned').to.have.lengthOf(3);
+        expect(reports, 'Expected three reports to be returned').to.have.lengthOf(2);
         expect(
-            _.some(reports, (report) => report.format === 'sarif'),
-            'Expected at least one sarif report',
+            _.some(reports, (report) => report.format === 'json'),
+            'Expected at least one json report',
         ).to.be.true;
         expect(
-            _.some(reports, (report) => report.format === 'html'),
-            'Expected at least one html report',
-        ).to.be.true;
-        expect(
-            _.some(reports, (report) => report.format === 'html'),
-            'Expected at least one consolidated.html report',
+            _.some(reports, (report) => report.format === 'consolidated.json'),
+            'Expected at least one consolidated report',
         ).to.be.true;
     }
 

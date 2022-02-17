@@ -252,6 +252,32 @@ describe(A11yServiceClient, () => {
             expect(actualResponse).toEqual(response);
         });
 
+        it('with privacyScan=true', async () => {
+            const scanOptions: PostScanRequestOptions = {
+                privacyScan: true,
+                priority,
+            };
+            const requestBody: ScanRunRequest = {
+                url: scanUrl,
+                priority,
+                privacyScan: {
+                    cookieBannerType: 'standard',
+                },
+            };
+            const requestOptions = { json: createPostScanRequestObj(requestBody) };
+
+            setupVerifiableSignRequestCall();
+            setupRetryHelperMock(false);
+            postMock
+                .setup((req) => req(`${baseUrl}/scans`, requestOptions))
+                .returns(async () => Promise.resolve(response))
+                .verifiable(Times.once());
+
+            const actualResponse = await testSubject.postScanUrl(scanUrl, scanOptions);
+
+            expect(actualResponse).toEqual(response);
+        });
+
         function createPostScanRequestObj(scanRunRequest: ScanRunRequest): ScanRunRequest[] {
             // fills in undefined fields
             return [
