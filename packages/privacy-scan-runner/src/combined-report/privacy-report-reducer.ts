@@ -24,7 +24,12 @@ export class PrivacyReportReducer {
     ): PrivacyScanCombinedReport {
         let combinedReport = existingCombinedReport ?? this.createNewCombinedReport(metadata);
 
-        combinedReport.Urls.push(metadata.url);
+        if (combinedReport.Urls.includes(metadata.url)) {
+            combinedReport = this.removeUrlResultsFromReport(combinedReport, metadata.url, scanResults.results?.NavigationalUri);
+        } else {
+            combinedReport.Urls.push(metadata.url);
+        }
+
         if (scanResults.error) {
             combinedReport = this.addFailedUrl(scanResults, combinedReport, metadata.url);
         }
@@ -89,5 +94,25 @@ export class PrivacyReportReducer {
             StartDateTime: this.guidGenerator.getGuidTimestamp(metadata.scanId),
             FinishDateTime: new Date(),
         };
+    }
+
+    private removeUrlResultsFromReport(
+        report: PrivacyScanCombinedReport,
+        url: string,
+        navigationalUrl?: string,
+    ): PrivacyScanCombinedReport {
+        _.remove(
+            report.FailedUrls,
+            (failedUrl) => failedUrl.Url === url || (navigationalUrl !== undefined && failedUrl.Url === navigationalUrl),
+        );
+        _.remove(
+            report.CookieCollectionUrlResults,
+            (cookieCollectionResult) =>
+                cookieCollectionResult.NavigationalUri === url ||
+                (navigationalUrl !== undefined && cookieCollectionResult.NavigationalUri === navigationalUrl),
+        );
+        report.Status = _.isEmpty(report.FailedUrls) ? 'Completed' : 'Failed';
+
+        return report;
     }
 }

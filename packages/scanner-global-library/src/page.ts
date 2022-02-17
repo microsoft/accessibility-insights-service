@@ -142,7 +142,7 @@ export class Page {
         const reloadPageFunc = async (page: Puppeteer.Page) => {
             await this.navigateToUrl(page.url());
 
-            return { success: this.navigationResponse.ok(), error: this.lastBrowserError };
+            return { success: this.navigationResponse?.ok() === true, error: this.lastBrowserError };
         };
 
         let privacyResult: PrivacyResults;
