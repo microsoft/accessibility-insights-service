@@ -302,5 +302,97 @@ describe(PrivacyReportReducer, () => {
                 expect(actualReport).toEqual(expectedReport);
             },
         );
+
+        it.each([metadata.url, successfulScanResult.results.NavigationalUri])(
+            'Replace existing failed results for failed url="%s" if retried scan succeeded',
+            (url) => {
+                const expectedReport: PrivacyScanCombinedReport = {
+                    ..._.cloneDeep(existingReport),
+                    Urls: [...existingReport.Urls, metadata.url],
+                    Status: 'Completed',
+                    ScanCookies: [
+                        ...existingReport.ScanCookies,
+                        { Name: 'domain1cookie2', Domain: 'domain1' },
+                        { Name: 'domain2cookie2', Domain: 'domain2' },
+                    ],
+                    CookieCollectionUrlResults: [...existingReport.CookieCollectionUrlResults, successfulScanResult.results],
+                    FailedUrls: [],
+                    FinishDateTime: currentDate,
+                };
+
+                existingReport.Urls.push(metadata.url);
+                existingReport.FailedUrls.push({
+                    Url: url,
+                } as FailedUrl);
+                existingReport.CookieCollectionUrlResults.push({
+                    NavigationalUri: successfulScanResult.results.NavigationalUri,
+                    CookieCollectionConsentResults: [{ Error: 'browser error' }],
+                } as PrivacyPageScanReport);
+                existingReport.Status = 'Failed';
+
+                const actualReport = testSubject.reduceResults(successfulScanResult, existingReport, metadata);
+
+                expect(actualReport).toEqual(expectedReport);
+            },
+        );
+
+        it('Replace existing failed results if retried scan also failed', () => {
+            existingReport.Urls.push(metadata.url);
+            existingReport.FailedUrls.push({
+                Url: metadata.url,
+            } as FailedUrl);
+
+            const failedScanResult: PrivacyScanResult = {
+                error: 'Browser error',
+                pageResponseCode: 404,
+            };
+            const failedUrl: FailedUrl = {
+                Url: metadata.url,
+                SeedUri: metadata.url,
+                HttpStatusCode: 404,
+                Reason: 'error="Browser error"',
+            };
+
+            const expectedReport: PrivacyScanCombinedReport = {
+                ..._.cloneDeep(existingReport),
+                Status: 'Failed',
+                FailedUrls: [failedUrl],
+                FinishDateTime: currentDate,
+            };
+
+            const actualReport = testSubject.reduceResults(failedScanResult, existingReport, metadata);
+
+            expect(actualReport).toEqual(expectedReport);
+        });
+
+        it('Replace existing failed results if retried scan succeeded but other scans have failed', () => {
+            const existingFailedUrl = { Url: 'some other url' } as FailedUrl;
+
+            const expectedReport: PrivacyScanCombinedReport = {
+                ..._.cloneDeep(existingReport),
+                Urls: [...existingReport.Urls, metadata.url],
+                Status: 'Failed',
+                ScanCookies: [
+                    ...existingReport.ScanCookies,
+                    { Name: 'domain1cookie2', Domain: 'domain1' },
+                    { Name: 'domain2cookie2', Domain: 'domain2' },
+                ],
+                CookieCollectionUrlResults: [...existingReport.CookieCollectionUrlResults, successfulScanResult.results],
+                FailedUrls: [existingFailedUrl],
+                FinishDateTime: currentDate,
+            };
+
+            existingReport.Urls.push(metadata.url);
+            existingReport.FailedUrls = [{ Url: metadata.url }, existingFailedUrl] as FailedUrl[];
+            existingReport.CookieCollectionUrlResults.push({
+                NavigationalUri: successfulScanResult.results.NavigationalUri,
+                CookieCollectionConsentResults: [{ Error: 'browser error' }],
+            } as PrivacyPageScanReport);
+            existingReport.Status = 'Failed';
+
+            const actualReport = testSubject.reduceResults(successfulScanResult, existingReport, metadata);
+
+            expect(actualReport).toEqual(expectedReport);
+        });
     });
 });
