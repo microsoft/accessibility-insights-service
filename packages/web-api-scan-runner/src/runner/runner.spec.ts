@@ -4,7 +4,7 @@
 import 'reflect-metadata';
 
 import { IMock, Mock, It } from 'typemoq';
-import { OnDemandPageScanRunResultProvider, WebsiteScanResultProvider, OperationResult } from 'service-library';
+import { OnDemandPageScanRunResultProvider, WebsiteScanResultProvider, OperationResult, ReportWriter } from 'service-library';
 import { GlobalLogger } from 'logger';
 import * as MockDate from 'mockdate';
 import {
@@ -19,7 +19,6 @@ import { System, ServiceConfiguration, ScanRunTimeConfig } from 'common';
 import { AxeResults } from 'axe-core';
 import { ScanMetadataConfig } from '../scan-metadata-config';
 import { PageScanProcessor } from '../scanner/page-scan-processor';
-import { ReportWriter } from '../report-generator/report-writer';
 import { ReportGenerator, GeneratedReport } from '../report-generator/report-generator';
 import { CombinedScanResultProcessor } from '../combined-result/combined-scan-result-processor';
 import { ScanNotificationProcessor } from '../sender/scan-notification-processor';

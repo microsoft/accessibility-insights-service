@@ -3,12 +3,11 @@
 
 import 'reflect-metadata';
 
-import { PageScanRunReportProvider } from 'service-library';
 import { IMock, Mock, MockBehavior } from 'typemoq';
 import { OnDemandPageScanReport } from 'storage-documents';
 import { MockableLogger } from '../test-utilities/mockable-logger';
-import { GeneratedReport } from './report-generator';
-import { ReportWriter } from './report-writer';
+import { PageScanRunReportProvider } from './page-scan-run-report-provider';
+import { GeneratedReport, ReportWriter } from './report-writer';
 
 describe(ReportWriter, () => {
     let loggerMock: IMock<MockableLogger>;

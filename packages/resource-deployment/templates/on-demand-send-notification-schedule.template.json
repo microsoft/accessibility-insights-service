@@ -1,7 +1,7 @@
 {
     "id": "on-demand-send-notification-schedule",
     "schedule": {
-        "recurrenceInterval": "PT2M"
+        "recurrenceInterval": "PT1M"
     },
     "jobSpecification": {
         "priority": 0,

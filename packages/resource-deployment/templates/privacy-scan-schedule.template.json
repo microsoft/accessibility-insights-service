@@ -1,0 +1,51 @@
+{
+    "id": "privacy-scan-schedule",
+    "schedule": {
+        "recurrenceInterval": "PT1M"
+    },
+    "jobSpecification": {
+        "priority": 0,
+        "constraints": {
+            "maxWallClockTime": "PT1H",
+            "maxTaskRetryCount": 0
+        },
+        "jobManagerTask": {
+            "id": "privacy-scan-job-manager-task",
+            "commandLine": "",
+            "containerSettings": {
+                "containerRunOptions": "--init --rm --workdir / -e APPINSIGHTS_INSTRUMENTATIONKEY -e AZURE_STORAGE_SCAN_QUEUE -e KEY_VAULT_URL",
+                "imageName": "%CONTAINER_REGISTRY_TOKEN%.azurecr.io/batch-privacy-scan-manager"
+            },
+            "constraints": {
+                "maxWallClockTime": "PT1H",
+                "retentionTime": "P3D",
+                "maxTaskRetryCount": 0
+            },
+            "killJobOnCompletion": true,
+            "userIdentity": {
+                "autoUser": {
+                    "scope": "task",
+                    "elevationLevel": "admin"
+                }
+            },
+            "runExclusive": false
+        },
+        "commonEnvironmentSettings": [
+            {
+                "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
+                "value": "%APP_INSIGHTS_TOKEN%"
+            },
+            {
+                "name": "AZURE_STORAGE_SCAN_QUEUE",
+                "value": "privacy-scan-request"
+            },
+            {
+                "name": "KEY_VAULT_URL",
+                "value": "%KEY_VAULT_TOKEN%"
+            }
+        ],
+        "poolInfo": {
+            "poolId": "privacy-scan-pool"
+        }
+    }
+}

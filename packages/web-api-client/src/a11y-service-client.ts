@@ -60,6 +60,11 @@ export class A11yServiceClient {
                 ...options.deepScanOptions,
             };
         }
+        if (options?.privacyScan) {
+            scanRequestData.privacyScan = {
+                cookieBannerType: 'standard',
+            };
+        }
 
         return this.postScanUrlWithRequest(scanRequestData);
     }

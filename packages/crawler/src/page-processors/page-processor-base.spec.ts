@@ -3,11 +3,11 @@
 
 import 'reflect-metadata';
 
-import Apify from 'apify';
 import { Page, Response } from 'puppeteer';
 import { BrowserError, PageConfigurator, NavigationHooks } from 'scanner-global-library';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { System } from 'common';
+import { PuppeteerHandlePage, RequestQueue, Request, HandleFailedRequestInput } from 'apify';
 import { CrawlerConfiguration } from '../crawler/crawler-configuration';
 import { DataBase } from '../level-storage/data-base';
 import { AccessibilityScanOperation } from '../page-operations/accessibility-scan-operation';
@@ -44,29 +44,29 @@ describe(PageProcessorBase, () => {
         stack: 'stack',
     };
 
-    let requestQueueStub: Apify.RequestQueue;
+    let requestQueueStub: RequestQueue;
     let accessibilityScanOpMock: IMock<AccessibilityScanOperation>;
     let dataStoreMock: IMock<DataStore>;
     let blobStoreMock: IMock<BlobStore>;
     let dataBaseMock: IMock<DataBase>;
     let apifyWrapperMock: IMock<ApifySdkWrapper>;
-    let processPageMock: IMock<Apify.PuppeteerHandlePage>;
+    let processPageMock: IMock<PuppeteerHandlePage>;
     let navigationHooksMock: IMock<NavigationHooks>;
     let pageConfiguratorMock: IMock<PageConfigurator>;
     let crawlerConfigurationMock: IMock<CrawlerConfiguration>;
     let requestQueueProvider: ApifyRequestQueueProvider;
-    let requestStub: Apify.Request;
+    let requestStub: Request;
     let pageStub: Page;
     let pageProcessorBase: TestablePageProcessor;
 
     beforeEach(() => {
-        requestQueueStub = {} as Apify.RequestQueue;
+        requestQueueStub = {} as RequestQueue;
         accessibilityScanOpMock = Mock.ofType<AccessibilityScanOperation>();
         dataStoreMock = Mock.ofType<DataStore>();
         blobStoreMock = Mock.ofType<BlobStore>();
         dataBaseMock = Mock.ofType<DataBase>();
         apifyWrapperMock = Mock.ofType<ApifySdkWrapper>();
-        processPageMock = Mock.ofType<Apify.PuppeteerHandlePage>();
+        processPageMock = Mock.ofType<PuppeteerHandlePage>();
         navigationHooksMock = Mock.ofType<NavigationHooks>();
         pageConfiguratorMock = Mock.ofType<PageConfigurator>();
         crawlerConfigurationMock = Mock.ofType(CrawlerConfiguration);
@@ -123,6 +123,9 @@ describe(PageProcessorBase, () => {
             page: pageStub,
             request: requestStub,
             response: {} as Response,
+            session: {
+                userData: [],
+            },
         } as any;
         const gotoOptions = {};
 
@@ -161,9 +164,45 @@ describe(PageProcessorBase, () => {
     });
 
     it('postNavigationHook logs errors', async () => {
+        pageProcessorBase.baseUrl = testUrl;
+        const browserError = {
+            errorType: 'HttpErrorCode',
+            message: 'message',
+            stack: 'stack',
+        };
         const crawlingContext: PuppeteerCrawlingContext = {
             page: pageStub,
             request: requestStub,
+            session: {
+                userData: [],
+            },
+            response: {},
+        } as any;
+        navigationHooksMock
+            .setup(async (nh) => nh.postNavigation(crawlingContext.page, crawlingContext.response, It.isAny()))
+            .callback((page, response, errorCallback) => errorCallback(browserError, undefined))
+            .verifiable();
+        dataBaseMock
+            .setup((o) =>
+                o.addScanResult(requestStub.id, {
+                    id: requestStub.id,
+                    url: requestStub.url,
+                    scanState: 'browserError',
+                    error: JSON.stringify(browserError),
+                }),
+            )
+            .verifiable();
+
+        await pageProcessorBase.postNavigation(crawlingContext);
+    });
+
+    it('gotoFunction() logs errors', async () => {
+        const crawlingContext: PuppeteerCrawlingContext = {
+            page: pageStub,
+            request: requestStub,
+            session: {
+                userData: [],
+            },
         } as any;
         setupScanErrorLogging();
 
@@ -179,7 +218,6 @@ describe(PageProcessorBase, () => {
             })
             .returns(() => Promise.reject(error))
             .verifiable();
-
         const scanResult = {
             id: requestStub.id as string,
             url: requestStub.url,
@@ -196,7 +234,7 @@ describe(PageProcessorBase, () => {
         }
     });
 
-    it('pageErrorProcessor', () => {
+    it('pageErrorProcessor()', () => {
         const expectedScanData: ScanData = {
             id: requestStub.id as string,
             url: requestStub.url,
@@ -209,23 +247,47 @@ describe(PageProcessorBase, () => {
         dataStoreMock.setup((ds) => ds.pushData(expectedScanData)).verifiable();
         setupScanErrorLogging();
 
-        pageProcessorBase.pageErrorProcessor({ request: requestStub, error } as Apify.HandleFailedRequestInput);
+        pageProcessorBase.pageErrorProcessor({ request: requestStub, error } as HandleFailedRequestInput);
     });
 
-    it('pageProcessor', async () => {
+    it('invoke processPage()', async () => {
         const inputs: PuppeteerHandlePageInputs = {
             page: pageStub,
             request: requestStub,
+            session: {
+                userData: [],
+            },
         } as any;
         processPageMock.setup((pp) => pp(inputs)).verifiable();
 
         await pageProcessorBase.pageHandler(inputs);
     });
 
-    it('pageProcessor logs errors', async () => {
+    it('skip invoking processPage() when web browser failed to load web page', async () => {
+        const inputs: PuppeteerHandlePageInputs = {
+            request: {
+                id: 'requestId',
+            },
+            session: {
+                userData: [
+                    {
+                        requestId: 'requestId',
+                    },
+                ],
+            },
+        } as any;
+        processPageMock.setup((pp) => pp(inputs)).verifiable(Times.never());
+
+        await pageProcessorBase.pageHandler(inputs);
+    });
+
+    it('processPage() logs errors', async () => {
         const inputs: PuppeteerHandlePageInputs = {
             page: pageStub,
             request: requestStub,
+            session: {
+                userData: [],
+            },
         } as any;
         processPageMock
             .setup((pp) => pp(inputs))
@@ -241,7 +303,7 @@ describe(PageProcessorBase, () => {
         }
     });
 
-    it('saveSnapshot', async () => {
+    it('saveSnapshot()', async () => {
         setupSaveSnapshot();
         pageProcessorBase.snapshot = true;
 

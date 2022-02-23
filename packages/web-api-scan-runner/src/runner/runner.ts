@@ -4,7 +4,7 @@
 import { inject, injectable } from 'inversify';
 import { GlobalLogger } from 'logger';
 import { AxeScanResults } from 'scanner-global-library';
-import { OnDemandPageScanRunResultProvider, WebsiteScanResultProvider } from 'service-library';
+import { OnDemandPageScanRunResultProvider, WebsiteScanResultProvider, ReportWriter } from 'service-library';
 import {
     OnDemandPageScanReport,
     OnDemandPageScanResult,
@@ -20,7 +20,6 @@ import { ScanMetadataConfig } from '../scan-metadata-config';
 import { ScanRunnerTelemetryManager } from '../scan-runner-telemetry-manager';
 import { CombinedScanResultProcessor } from '../combined-result/combined-scan-result-processor';
 import { PageScanProcessor } from '../scanner/page-scan-processor';
-import { ReportWriter } from '../report-generator/report-writer';
 import { ScanMetadata } from '../types/scan-metadata';
 import { ScanNotificationProcessor } from '../sender/scan-notification-processor';
 

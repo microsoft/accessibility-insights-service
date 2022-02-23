@@ -4,10 +4,9 @@
 import { inject, injectable } from 'inversify';
 import { GlobalLogger } from 'logger';
 import { RetryHelper, System } from 'common';
-import { WebsiteScanResultProvider } from 'service-library';
+import { ReportWriter, WebsiteScanResultProvider } from 'service-library';
 import { AxeScanResults } from 'scanner-global-library';
 import { OnDemandPageScanResult, WebsiteScanResult, WebsiteScanRef } from 'storage-documents';
-import { ReportWriter } from '../report-generator/report-writer';
 import { CombinedAxeResultBuilder } from './combined-axe-result-builder';
 import { CombinedReportGenerator } from './combined-report-generator';
 import { CombinedResultsBlobProvider } from './combined-results-blob-provider';

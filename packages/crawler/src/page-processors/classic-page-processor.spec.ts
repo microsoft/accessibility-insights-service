@@ -117,7 +117,7 @@ describe(ClassicPageProcessor, () => {
 
     function setupEnqueueLinks(page: Page): void {
         const options = {
-            page: pageStub,
+            page,
             requestQueue: requestQueueStub,
             pseudoUrls: discoveryPatterns,
         };

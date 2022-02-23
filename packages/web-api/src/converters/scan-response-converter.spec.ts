@@ -92,6 +92,13 @@ describe(ScanResponseConverter, () => {
         expect(response).toEqual(responseExpected);
     });
 
+    it('return completed privacy scan result', () => {
+        const pageScanDbResult = getPageScanResult('completed', false, false);
+        const responseExpected = getScanResultClientResponseFull('completed', false, false);
+        const response = scanResponseConverter.getScanResultResponse(baseUrl, apiVersion, pageScanDbResult, websiteScanResult);
+        expect(response).toEqual(responseExpected);
+    });
+
     test.each(['pending', 'completed', 'failed'])(
         'return completed result, when deepScan is enabled and overall deep scan state = %s',
         (deepScanOverallState: RunState) => {
@@ -239,6 +246,7 @@ function getScanResultClientResponseFull(
     state: RunStateRestApi,
     isNotificationEnabled = false,
     isDeepScanEnabled = false,
+    isPrivacyScan = false,
 ): ScanResultResponse {
     if (!isDeepScanEnabled) {
         websiteScanResult = undefined;
@@ -247,6 +255,7 @@ function getScanResultClientResponseFull(
     return {
         scanId: 'id',
         url: 'url',
+        scanType: isPrivacyScan ? 'privacy' : 'accessibility',
         scanResult: {
             state: 'fail',
             issueCount: 1,
@@ -283,6 +292,7 @@ function getScanResultClientResponseShort(state: RunStateRestApi, isNotification
     const response: ScanRunResultResponse = {
         scanId: 'id',
         url: 'url',
+        scanType: 'accessibility',
         run: {
             state: state,
             error: state === 'failed' ? ScanRunErrorCodes.internalError : undefined,

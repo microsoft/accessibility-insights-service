@@ -4,7 +4,7 @@
 export * from './item-type';
 export * from './on-demand-page-scan-result';
 export * from './states';
-export * from './run-result';
+export * from './report-generator-request';
 export * from './storage-document';
 export * from './on-demand-page-scan-batch-request';
 export * from './partition-key';
@@ -14,3 +14,5 @@ export * from './on-demand-notification-request-message';
 export * from './batch-pool-load-snapshot';
 export * from './website-scan-result';
 export * from './combined-scan-results';
+export * from './privacy-scan-types/privacy-page-scan-report';
+export * from './privacy-scan-types/privacy-scan-combined-report';

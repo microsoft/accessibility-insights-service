@@ -41,6 +41,7 @@ export class ScanResponseConverter {
         return {
             scanId: pageScanResult.id,
             url: pageScanResult.url,
+            scanType: pageScanResult.privacyScan ? 'privacy' : 'accessibility',
             run: {
                 state: pageScanResult.run.state,
             },
@@ -52,6 +53,7 @@ export class ScanResponseConverter {
         return {
             scanId: pageScanResult.id,
             url: pageScanResult.url,
+            scanType: pageScanResult.privacyScan ? 'privacy' : 'accessibility',
             run: {
                 state: pageScanResult.run.state,
                 timestamp: pageScanResult.run.timestamp,
@@ -72,6 +74,7 @@ export class ScanResponseConverter {
         const scanResultResponse: ScanResultResponse = {
             scanId: pageScanResult.id,
             url: pageScanResult.url,
+            scanType: pageScanResult.privacyScan ? 'privacy' : 'accessibility',
             scanResult: {
                 state: pageScanResult.scanResult.state,
                 issueCount: pageScanResult.scanResult.issueCount,

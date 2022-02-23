@@ -62,6 +62,7 @@ describe(PuppeteerCrawlerEngine, () => {
         crawlerConfigurationMock.setup((o) => o.configureApify()).verifiable();
 
         baseCrawlerOptions = {
+            useSessionPool: true,
             handlePageTimeoutSecs: 300,
             requestQueue: requestQueueStub,
             handlePageFunction: pageProcessorStub.pageHandler,

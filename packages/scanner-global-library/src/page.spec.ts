@@ -8,6 +8,7 @@ import { AxeResults } from 'axe-core';
 import Puppeteer from 'puppeteer';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { System } from 'common';
+import { PrivacyPageScanner, PrivacyResults } from 'privacy-scan-core';
 import { AxeScanResults } from './axe-scan-results';
 import { BrowserError } from './browser-error';
 import { AxePuppeteerFactory } from './factories/axe-puppeteer-factory';
@@ -17,8 +18,10 @@ import { MockableLogger } from './test-utilities/mockable-logger';
 import { getPromisableDynamicMock } from './test-utilities/promisable-mock';
 import { WebDriver } from './web-driver';
 import { PageNavigator } from './page-navigator';
+import { PrivacyScanResult } from '.';
 
 const url = 'url';
+const redirectUrl = 'redirect url';
 const userAgent = 'user agent';
 const browserResolution = '1920x1080';
 
@@ -35,6 +38,7 @@ let puppeteerPageMock: IMock<Puppeteer.Page>;
 let puppeteerResponseMock: IMock<Puppeteer.Response>;
 let puppeteerRequestMock: IMock<Puppeteer.Request>;
 let axePuppeteerMock: IMock<AxePuppeteer>;
+let privacyScannerMock: IMock<PrivacyPageScanner>;
 
 describe(Page, () => {
     beforeEach(() => {
@@ -56,25 +60,23 @@ describe(Page, () => {
         puppeteerResponseMock = getPromisableDynamicMock(Mock.ofType<Puppeteer.Response>());
         puppeteerRequestMock = getPromisableDynamicMock(Mock.ofType<Puppeteer.Request>());
         axePuppeteerMock = getPromisableDynamicMock(Mock.ofType<AxePuppeteer>());
+        privacyScannerMock = Mock.ofType<PrivacyPageScanner>();
 
         browserMock
             .setup(async (o) => o.version())
             .returns(() => Promise.resolve(scanResults.browserSpec))
             .verifiable();
-        puppeteerRequestMock
-            .setup((o) => o.redirectChain())
-            .returns(() => [] as Puppeteer.Request[])
-            .verifiable();
-        puppeteerResponseMock
-            .setup((o) => o.request())
-            .returns(() => puppeteerRequestMock.object)
-            .verifiable();
-        puppeteerResponseMock
-            .setup((o) => o.status())
-            .returns(() => scanResults.pageResponseCode)
-            .verifiable();
+        puppeteerRequestMock.setup((o) => o.redirectChain()).returns(() => [] as Puppeteer.Request[]);
+        puppeteerResponseMock.setup((o) => o.request()).returns(() => puppeteerRequestMock.object);
+        puppeteerResponseMock.setup((o) => o.status()).returns(() => scanResults.pageResponseCode);
 
-        page = new Page(webDriverMock.object, axePuppeteerFactoryMock.object, pageNavigatorMock.object, loggerMock.object);
+        page = new Page(
+            webDriverMock.object,
+            axePuppeteerFactoryMock.object,
+            pageNavigatorMock.object,
+            privacyScannerMock.object,
+            loggerMock.object,
+        );
     });
 
     afterEach(() => {
@@ -84,9 +86,10 @@ describe(Page, () => {
         pageConfiguratorMock.verifyAll();
         axePuppeteerMock.verifyAll();
         loggerMock.verifyAll();
+        puppeteerRequestMock.verifyAll();
     });
 
-    function setupAxePuppeteerFactoryMock(axeResultUrl: string = 'axe result url'): void {
+    function setupAxePuppeteerFactoryMock(axeResultUrl: string = redirectUrl): void {
         puppeteerPageMock
             .setup(async (o) => o.title())
             .returns(() => Promise.resolve(scanResults.pageTitle))
@@ -120,6 +123,22 @@ describe(Page, () => {
             const axeScanResults = await page.scanForA11yIssues();
 
             expect(axeScanResults).toEqual(expectedAxeScanResults);
+        });
+
+        it('handles error thrown by scan engine', async () => {
+            const scanError = new Error('Test error');
+            const expectedResult = { error: `Axe core engine error. ${System.serializeError(scanError)}`, scannedUrl: url };
+
+            puppeteerPageMock.setup((p) => p.url()).returns(() => url);
+            setupAxePuppeteerFactoryMock();
+            axePuppeteerMock.reset();
+            axePuppeteerMock = getPromisableDynamicMock(axePuppeteerMock);
+            axePuppeteerMock.setup((ap) => ap.analyze()).throws(scanError);
+            simulatePageNavigation(puppeteerResponseMock.object);
+
+            const axeScanResults = await page.scanForA11yIssues();
+
+            expect(axeScanResults).toEqual(expectedResult);
         });
 
         it('scan page without redirected flag on encoded URL', async () => {
@@ -174,7 +193,6 @@ describe(Page, () => {
             const axeScanResults = await page.scanForA11yIssues();
 
             expect(axeScanResults).toEqual(expectedAxeScanResults);
-            puppeteerRequestMock.verifyAll();
         });
 
         it('scan page with redirect but no response chain', async () => {
@@ -198,13 +216,148 @@ describe(Page, () => {
             const axeScanResults = await page.scanForA11yIssues();
 
             expect(axeScanResults).toEqual(expectedAxeScanResults);
-            puppeteerRequestMock.verifyAll();
         });
 
         it('scan throws error if navigateToUrl was not called first', async () => {
             pageNavigatorMock.setup(async (o) => o.navigate(It.isAny(), It.isAny(), It.isAny())).verifiable(Times.never());
 
             await expect(page.scanForA11yIssues(url)).rejects.toThrow();
+        });
+    });
+
+    describe('scanForPrivacy', () => {
+        let privacyResults: PrivacyResults;
+
+        beforeEach(() => {
+            privacyResults = {
+                BannerDetected: true,
+                CookieCollectionConsentResults: [
+                    {
+                        CookiesUsedForConsent: 'cookie=value',
+                        CookiesAfterConsent: [],
+                        CookiesBeforeConsent: [],
+                    },
+                ],
+            } as PrivacyResults;
+            simulatePageLaunch();
+            privacyScannerMock.setup((s) => s.scanPageForPrivacy(puppeteerPageMock.object, It.isAny())).returns(async () => privacyResults);
+        });
+
+        it('scan page', async () => {
+            puppeteerPageMock.setup((p) => p.url()).returns(() => url);
+            simulatePageNavigation(puppeteerResponseMock.object);
+            const expectedPrivacyScanResults = {
+                results: {
+                    ...privacyResults,
+                    HttpStatusCode: 200,
+                },
+                pageResponseCode: 200,
+            } as PrivacyScanResult;
+
+            const privacyScanResults = await page.scanForPrivacy();
+
+            expect(privacyScanResults).toEqual(expectedPrivacyScanResults);
+        });
+
+        it('handles error thrown by scan engine', async () => {
+            const scanError = new Error('Test error');
+            const expectedResult = { error: `Privacy scan engine error. ${System.serializeError(scanError)}`, scannedUrl: url };
+
+            puppeteerPageMock.setup((p) => p.url()).returns(() => url);
+            simulatePageNavigation(puppeteerResponseMock.object);
+            privacyScannerMock.reset();
+            privacyScannerMock.setup((p) => p.scanPageForPrivacy(It.isAny(), It.isAny())).throws(scanError);
+
+            const privacyScanResults = await page.scanForPrivacy();
+
+            expect(privacyScanResults).toEqual(expectedResult);
+        });
+
+        it('scan page with navigation error', async () => {
+            const browserError = { errorType: 'SslError', statusCode: 500 } as BrowserError;
+            puppeteerPageMock.setup((p) => p.url()).returns(() => url);
+            simulatePageNavigation(undefined, browserError);
+            const expectedPrivacyScanResults = {
+                error: browserError,
+                pageResponseCode: browserError.statusCode,
+            } as PrivacyScanResult;
+
+            const privacyScanResults = await page.scanForPrivacy();
+
+            expect(privacyScanResults).toEqual(expectedPrivacyScanResults);
+        });
+
+        it('scan page with redirect', async () => {
+            puppeteerRequestMock.reset();
+            puppeteerRequestMock
+                .setup((o) => o.redirectChain())
+                .returns(() => [{}] as Puppeteer.Request[])
+                .verifiable();
+            puppeteerPageMock.setup((p) => p.url()).returns(() => redirectUrl);
+            simulatePageNavigation(puppeteerResponseMock.object);
+            const expectedPrivacyScanResults = {
+                results: {
+                    ...privacyResults,
+                    HttpStatusCode: 200,
+                },
+                pageResponseCode: 200,
+                scannedUrl: redirectUrl,
+            } as PrivacyScanResult;
+            loggerMock.setup((o) => o.logWarn(`Scanning performed on redirected page`, { redirectedUrl: redirectUrl })).verifiable();
+
+            const privacyScanResults = await page.scanForPrivacy();
+
+            expect(privacyScanResults).toEqual(expectedPrivacyScanResults);
+        });
+
+        it('scan page with redirect but no response chain', async () => {
+            puppeteerRequestMock.reset();
+            puppeteerRequestMock
+                .setup((o) => o.redirectChain())
+                .returns(() => [] as Puppeteer.Request[])
+                .verifiable();
+            puppeteerPageMock.setup((p) => p.url()).returns(() => redirectUrl);
+            simulatePageNavigation(puppeteerResponseMock.object);
+            const expectedPrivacyScanResults = {
+                results: {
+                    ...privacyResults,
+                    HttpStatusCode: 200,
+                },
+                pageResponseCode: 200,
+                scannedUrl: redirectUrl,
+            } as PrivacyScanResult;
+            loggerMock.setup((o) => o.logWarn(`Scanning performed on redirected page`, { redirectedUrl: redirectUrl })).verifiable();
+            page.requestUrl = 'request page';
+
+            const privacyScanResults = await page.scanForPrivacy();
+
+            expect(privacyScanResults).toEqual(expectedPrivacyScanResults);
+        });
+
+        it('scan throws error if navigateToUrl was not called first', async () => {
+            pageNavigatorMock.setup(async (o) => o.navigate(It.isAny(), It.isAny(), It.isAny())).verifiable(Times.never());
+
+            await expect(page.scanForPrivacy()).rejects.toThrow();
+        });
+
+        it('Returns result with error if results contain an error in ConsentCollectionResults', async () => {
+            privacyResults.CookieCollectionConsentResults.push({
+                Error: 'Error reloading page',
+            });
+            puppeteerPageMock.setup((p) => p.url()).returns(() => url);
+            simulatePageNavigation(puppeteerResponseMock.object);
+            const expectedPrivacyScanResults = {
+                results: {
+                    ...privacyResults,
+                    HttpStatusCode: 200,
+                },
+                pageResponseCode: 200,
+                error: 'Failed to collect cookies for 1 test cases',
+            } as PrivacyScanResult;
+
+            const privacyScanResults = await page.scanForPrivacy();
+
+            expect(privacyScanResults).toEqual(expectedPrivacyScanResults);
         });
     });
 

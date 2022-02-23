@@ -4,13 +4,12 @@
 import 'reflect-metadata';
 
 import { IMock, Mock, It, Times } from 'typemoq';
-import { WebsiteScanResultProvider } from 'service-library';
+import { ReportWriter, WebsiteScanResultProvider } from 'service-library';
 import { RetryHelper } from 'common';
 import { AxeScanResults } from 'scanner-global-library';
 import { AxeResults } from 'axe-core';
 import { OnDemandPageScanResult, WebsiteScanResult, CombinedScanResults, OnDemandPageScanReport } from 'storage-documents';
 import { MockableLogger } from '../test-utilities/mockable-logger';
-import { ReportWriter } from '../report-generator/report-writer';
 import { CombinedResultsBlob } from '../types/combined-results-blob';
 import { GeneratedReport } from '../report-generator/report-generator';
 import { CombinedScanResultProcessor } from './combined-scan-result-processor';

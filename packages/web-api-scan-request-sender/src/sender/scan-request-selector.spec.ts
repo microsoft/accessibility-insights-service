@@ -7,7 +7,7 @@ import { IMock, Mock, It, Times } from 'typemoq';
 import { PageScanRequestProvider, OnDemandPageScanRunResultProvider } from 'service-library';
 import { ServiceConfiguration, ScanRunTimeConfig } from 'common';
 import { CosmosOperationResponse } from 'azure-services';
-import { OnDemandPageScanRequest, OnDemandPageScanResult } from 'storage-documents';
+import { OnDemandPageScanRequest, OnDemandPageScanResult, PrivacyScan } from 'storage-documents';
 import * as MockDate from 'mockdate';
 import _ from 'lodash';
 import moment from 'moment';
@@ -21,7 +21,8 @@ let serviceConfigMock: IMock<ServiceConfiguration>;
 let scanRequestSelector: ScanRequestSelector;
 let scanRequests: OnDemandPageScanRequest[];
 let scanResults: OnDemandPageScanResult[];
-let itemsCount: number;
+let accessibilityMessageCount: number;
+let privacyMessageCount: number;
 let filteredScanRequests: ScanRequests;
 let dateNow: Date;
 
@@ -34,12 +35,14 @@ describe(ScanRequestSelector, () => {
         onDemandPageScanRunResultProviderMock = Mock.ofType<OnDemandPageScanRunResultProvider>();
         serviceConfigMock = Mock.ofType<ServiceConfiguration>();
 
-        itemsCount = 10;
+        accessibilityMessageCount = 10;
+        privacyMessageCount = 10;
         scanRequests = [];
         scanResults = [];
         filteredScanRequests = {
-            toQueue: [],
-            toDelete: [],
+            accessibilityRequestsToQueue: [],
+            privacyRequestsToQueue: [],
+            requestsToDelete: [],
         };
 
         scanRequestSelector = new ScanRequestSelector(
@@ -62,28 +65,52 @@ describe(ScanRequestSelector, () => {
     it('no op', async () => {
         setupPageScanRequestProvider();
 
-        const result = await scanRequestSelector.getRequests(itemsCount);
+        const result = await scanRequestSelector.getRequests(accessibilityMessageCount, privacyMessageCount);
 
         expect(result).toEqual(filteredScanRequests);
     });
 
     it('queue accepted scan requests with fixed requested count', async () => {
-        itemsCount = 3;
+        accessibilityMessageCount = 3;
         createScanResults([{}, {}, {}, {}, {}]);
         createScanRequests();
         setupPageScanRequestProvider();
         setupOnDemandPageScanRunResultProvider();
-
         createFilteredScanRequests(
             'accepted',
             scanRequests.map((scanRequest) => scanRequest.id),
         );
         const expectedResult = _.cloneDeep(filteredScanRequests);
-        expectedResult.toQueue = expectedResult.toQueue.slice(0, 3);
+        expectedResult.accessibilityRequestsToQueue = expectedResult.accessibilityRequestsToQueue.slice(0, 3);
 
-        const result = await scanRequestSelector.getRequests(itemsCount);
+        const result = await scanRequestSelector.getRequests(accessibilityMessageCount, privacyMessageCount);
 
         expect(result).toEqual(expectedResult);
+    });
+
+    it('queue with privacy scan requests', async () => {
+        createScanResults([
+            {},
+            {
+                privacyScan: {} as PrivacyScan,
+            },
+            {
+                privacyScan: {} as PrivacyScan,
+            },
+        ]);
+        accessibilityMessageCount = 1;
+        privacyMessageCount = 2;
+        createScanRequests();
+        setupPageScanRequestProvider();
+        setupOnDemandPageScanRunResultProvider();
+        createFilteredScanRequests(
+            'accepted',
+            scanRequests.map((scanRequest) => scanRequest.id),
+        );
+
+        const result = await scanRequestSelector.getRequests(accessibilityMessageCount, privacyMessageCount);
+
+        expect(result).toEqual(filteredScanRequests);
     });
 
     it('queue failed with retry scan requests', async () => {
@@ -98,7 +125,7 @@ describe(ScanRequestSelector, () => {
                 run: { state: 'failed' },
             },
         ]);
-        itemsCount = scanResults.length;
+        accessibilityMessageCount = scanResults.length;
         createScanRequests();
         setupPageScanRequestProvider();
         setupOnDemandPageScanRunResultProvider();
@@ -107,7 +134,7 @@ describe(ScanRequestSelector, () => {
             scanRequests.map((scanRequest) => scanRequest.id),
         );
 
-        const result = await scanRequestSelector.getRequests(itemsCount);
+        const result = await scanRequestSelector.getRequests(accessibilityMessageCount, privacyMessageCount);
 
         expect(result).toEqual(filteredScanRequests);
     });
@@ -118,7 +145,7 @@ describe(ScanRequestSelector, () => {
                 run: { state: 'completed' },
             },
         ]);
-        itemsCount = scanResults.length;
+        accessibilityMessageCount = scanResults.length;
         createScanRequests();
         setupPageScanRequestProvider();
         setupOnDemandPageScanRunResultProvider();
@@ -128,7 +155,7 @@ describe(ScanRequestSelector, () => {
             scanRequests.map((scanRequest) => scanRequest.id),
         );
 
-        const result = await scanRequestSelector.getRequests(itemsCount);
+        const result = await scanRequestSelector.getRequests(accessibilityMessageCount, privacyMessageCount);
 
         expect(result).toEqual(filteredScanRequests);
     });
@@ -142,7 +169,7 @@ describe(ScanRequestSelector, () => {
                 },
             },
         ]);
-        itemsCount = scanResults.length;
+        accessibilityMessageCount = scanResults.length;
         createScanRequests();
         setupPageScanRequestProvider();
         setupOnDemandPageScanRunResultProvider();
@@ -152,7 +179,7 @@ describe(ScanRequestSelector, () => {
             scanRequests.map((scanRequest) => scanRequest.id),
         );
 
-        const result = await scanRequestSelector.getRequests(itemsCount);
+        const result = await scanRequestSelector.getRequests(accessibilityMessageCount, privacyMessageCount);
 
         expect(result).toEqual(filteredScanRequests);
     });
@@ -161,13 +188,21 @@ describe(ScanRequestSelector, () => {
 function createFilteredScanRequests(condition: DispatchCondition, toQueueIds: string[], toDeleteIds: string[] = []): void {
     scanRequests.map((scanRequest) => {
         if (toQueueIds.includes(scanRequest.id)) {
-            filteredScanRequests.toQueue.push({
-                request: scanRequest,
-                result: scanResults.find((scanResult) => scanResult.id === scanRequest.id),
-                condition,
-            });
+            if (scanRequest.privacyScan) {
+                filteredScanRequests.privacyRequestsToQueue.push({
+                    request: scanRequest,
+                    result: scanResults.find((scanResult) => scanResult.id === scanRequest.id),
+                    condition,
+                });
+            } else {
+                filteredScanRequests.accessibilityRequestsToQueue.push({
+                    request: scanRequest,
+                    result: scanResults.find((scanResult) => scanResult.id === scanRequest.id),
+                    condition,
+                });
+            }
         } else if (toDeleteIds.includes(scanRequest.id)) {
-            filteredScanRequests.toDelete.push({
+            filteredScanRequests.requestsToDelete.push({
                 request: scanRequest,
                 condition,
             });
@@ -180,6 +215,7 @@ function createScanRequests(requests: OnDemandPageScanRequest[] = []): void {
     scanRequests = scanResults.map((scanResult) => {
         return {
             id: scanResult.id,
+            privacyScan: scanResult.privacyScan,
         } as OnDemandPageScanRequest;
     });
 
@@ -204,7 +240,7 @@ function createScanResults(scans: Partial<OnDemandPageScanResult>[]): void {
 }
 
 function setupOnDemandPageScanRunResultProvider(): void {
-    scanRequests.slice(0, itemsCount).map((scanRequest) => {
+    scanRequests.slice(0, accessibilityMessageCount + privacyMessageCount).map((scanRequest) => {
         onDemandPageScanRunResultProviderMock
             .setup((o) => o.readScanRun(scanRequest.id))
             .returns(() => Promise.resolve(scanResults.find((scanResult) => scanResult.id === scanRequest.id)))
@@ -214,17 +250,17 @@ function setupOnDemandPageScanRunResultProvider(): void {
 
 function setupPageScanRequestProvider(): void {
     pageScanRequestProviderMock
-        .setup((o) => o.getRequests(undefined, itemsCount * 10))
+        .setup((o) => o.getRequests(undefined, (accessibilityMessageCount + privacyMessageCount) * 10))
         .returns(() =>
             Promise.resolve({
-                item: scanRequests.slice(0, itemsCount),
+                item: scanRequests.slice(0, accessibilityMessageCount + privacyMessageCount),
                 continuationToken,
                 statusCode: 200,
             } as CosmosOperationResponse<OnDemandPageScanRequest[]>),
         )
         .verifiable();
 
-    if (itemsCount >= scanRequests.length) {
+    if (accessibilityMessageCount + privacyMessageCount >= scanRequests.length) {
         pageScanRequestProviderMock
             .setup((o) => o.getRequests(continuationToken, It.isAnyNumber()))
             .returns(() => Promise.resolve({ item: [], statusCode: 200 } as CosmosOperationResponse<OnDemandPageScanRequest[]>));

@@ -7,5 +7,7 @@ import { injectable } from 'inversify';
 export class StorageConfig {
     public readonly scanQueue: string = process.env.AZURE_STORAGE_SCAN_QUEUE;
 
+    public readonly privacyScanQueue: string = process.env.AZURE_STORAGE_PRIVACY_SCAN_QUEUE;
+
     public readonly notificationQueue: string = process.env.AZURE_STORAGE_NOTIFICATION_QUEUE;
 }

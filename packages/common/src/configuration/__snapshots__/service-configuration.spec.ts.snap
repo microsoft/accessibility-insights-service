@@ -89,14 +89,19 @@ Object {
       "doc": "The amount of time the job manager instance will run continuously. Must correlate with queueConfig.messageVisibilityTimeoutInSeconds config value.",
       "format": "int",
     },
+    "privacyScanRunnerTaskImageName": Object {
+      "default": "batch-privacy-scan-runner",
+      "doc": "The container image name used for task creation.",
+      "format": "String",
+    },
     "scanRunnerTaskImageName": Object {
       "default": "batch-scan-runner",
-      "doc": "The Docker image name used for task creation.",
+      "doc": "The container image name used for task creation.",
       "format": "String",
     },
     "sendNotificationTaskImageName": Object {
       "default": "batch-scan-notification-runner",
-      "doc": "The Docker image name used for task creation.",
+      "doc": "The container image name used for task creation.",
       "format": "String",
     },
     "sendNotificationTasksCount": Object {
@@ -110,6 +115,18 @@ Object {
       "default": true,
       "doc": "Property to decide if console logging is enabled",
       "format": "Boolean",
+    },
+  },
+  "privacyScanConfig": Object {
+    "bannerDetectionTimeout": Object {
+      "default": 100,
+      "doc": "The maximum time in milliseconds to wait for the banner XPath after the initial page load has completed",
+      "format": "int",
+    },
+    "bannerXPath": Object {
+      "default": "//div[@id=\\"wcpConsentBannerCtrl\\"]",
+      "doc": "The default XPath to use for consent banner detection",
+      "format": "String",
     },
   },
   "queueConfig": Object {
@@ -277,14 +294,19 @@ Object {
       "doc": "The amount of time the job manager instance will run continuously. Must correlate with queueConfig.messageVisibilityTimeoutInSeconds config value.",
       "format": "int",
     },
+    "privacyScanRunnerTaskImageName": Object {
+      "default": "batch-privacy-scan-runner",
+      "doc": "The container image name used for task creation.",
+      "format": "String",
+    },
     "scanRunnerTaskImageName": Object {
       "default": "batch-scan-runner",
-      "doc": "The Docker image name used for task creation.",
+      "doc": "The container image name used for task creation.",
       "format": "String",
     },
     "sendNotificationTaskImageName": Object {
       "default": "batch-scan-notification-runner",
-      "doc": "The Docker image name used for task creation.",
+      "doc": "The container image name used for task creation.",
       "format": "String",
     },
     "sendNotificationTasksCount": Object {
@@ -298,6 +320,18 @@ Object {
       "default": true,
       "doc": "Property to decide if console logging is enabled",
       "format": "Boolean",
+    },
+  },
+  "privacyScanConfig": Object {
+    "bannerDetectionTimeout": Object {
+      "default": 100,
+      "doc": "The maximum time in milliseconds to wait for the banner XPath after the initial page load has completed",
+      "format": "int",
+    },
+    "bannerXPath": Object {
+      "default": "//div[@id=\\"wcpConsentBannerCtrl\\"]",
+      "doc": "The default XPath to use for consent banner detection",
+      "format": "String",
     },
   },
   "queueConfig": Object {

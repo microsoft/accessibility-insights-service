@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 import { expect } from 'chai';
+import _ from 'lodash';
 import { ScanReport, ScanRunResultResponse } from 'service-library';
 import { TestEnvironment } from '../common-types';
 import { test } from '../test-decorator';
@@ -11,10 +12,23 @@ import { FunctionalTestGroup } from './functional-test-group';
 
 export class ConsolidatedScanReportsTestGroup extends FunctionalTestGroup {
     @test(TestEnvironment.all)
-    public async testReportCount(): Promise<void> {
+    public async testReportFormats(): Promise<void> {
         const response = await this.a11yServiceClient.getScanStatus(this.testContextData.scanId);
+        const reports = (<ScanRunResultResponse>response.body).reports;
 
-        expect((<ScanRunResultResponse>response.body).reports, 'Expected three reports to be returned').to.have.lengthOf(3);
+        expect(reports, 'Expected three reports to be returned').to.have.lengthOf(3);
+        expect(
+            _.some(reports, (report) => report.format === 'sarif'),
+            'Expected at least one sarif report',
+        ).to.be.true;
+        expect(
+            _.some(reports, (report) => report.format === 'html'),
+            'Expected at least one html report',
+        ).to.be.true;
+        expect(
+            _.some(reports, (report) => report.format === 'html'),
+            'Expected at least one consolidated.html report',
+        ).to.be.true;
     }
 
     @test(TestEnvironment.all)

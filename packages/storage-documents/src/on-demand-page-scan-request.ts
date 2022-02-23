@@ -3,7 +3,7 @@
 
 import { ItemType } from './item-type';
 import { StorageDocument } from './storage-document';
-import { WebsiteRequest, ReportGroupRequest } from './on-demand-page-scan-batch-request';
+import { WebsiteRequest, ReportGroupRequest, PrivacyScan } from './on-demand-page-scan-batch-request';
 
 export interface OnDemandPageScanRequest extends StorageDocument {
     itemType: ItemType.onDemandPageScanRequest;
@@ -13,4 +13,5 @@ export interface OnDemandPageScanRequest extends StorageDocument {
     reportGroups?: ReportGroupRequest[];
     scanNotifyUrl?: string;
     deepScan?: boolean;
+    privacyScan?: PrivacyScan;
 }

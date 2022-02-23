@@ -6,11 +6,12 @@ import { ScanRunErrorCodeName } from '../scan-run-error-codes';
 import { WebApiError } from '../web-api-error-codes';
 
 export declare type LinkType = 'self';
-export declare type ReportFormat = 'sarif' | 'html' | 'consolidated.html';
+export declare type ReportFormat = 'sarif' | 'html' | 'consolidated.html' | 'json' | 'consolidated.json';
 export declare type ScanState = 'pending' | 'pass' | 'fail';
 export declare type RunState = 'pending' | 'accepted' | 'queued' | 'running' | 'completed' | 'failed';
 export declare type NotificationState = 'pending' | 'queued' | 'queueFailed' | 'sending' | 'sent' | 'sendFailed';
 export declare type NotificationErrorTypes = 'InternalError' | 'HttpErrorCode';
+export declare type ScanType = 'accessibility' | 'privacy';
 export declare type ScanResultResponse = ScanRunResultResponse | ScanRunErrorResponse;
 
 /**
@@ -25,6 +26,7 @@ export interface ScanRunResultResponse {
     reports?: ScanReport[];
     run: ScanRun;
     notification?: ScanCompletedNotification;
+    scanType: ScanType;
 }
 
 export interface ScanRunErrorResponse {

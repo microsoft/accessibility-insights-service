@@ -6,6 +6,7 @@ import 'reflect-metadata';
 import * as fs from 'fs';
 import { CrawlerRunOptions } from 'accessibility-insights-crawler';
 import { IMock, It, Mock, Times } from 'typemoq';
+import * as MockDate from 'mockdate';
 import { ScanArguments } from '../scan-arguments';
 import { ConsolidatedReportGenerator } from '../report/consolidated-report-generator';
 import { CrawlerParametersBuilder } from '../crawler/crawler-parameters-builder';
@@ -14,6 +15,7 @@ import { OutputFileWriter } from '../files/output-file-writer';
 import { BaselineOptionsBuilder } from '../baseline/baseline-options-builder';
 import { BaselineOptions } from '../baseline/baseline-types';
 import { BaselineFileUpdater } from '../baseline/baseline-file-updater';
+import { ReportNameGenerator } from '../report/report-name-generator';
 import { CrawlerCommandRunner } from './crawler-command-runner';
 
 /* eslint-disable @typescript-eslint/consistent-type-assertions */
@@ -24,18 +26,23 @@ describe('CrawlerCommandRunner', () => {
     let scanArguments: ScanArguments;
     let crawlerOptions: CrawlerRunOptions;
     let baselineOptions: BaselineOptions;
-    let crawlerMock: IMock<AICrawler>;
+    let aiCrawlerMock: IMock<AICrawler>;
     let crawlerParametersBuilderMock: IMock<CrawlerParametersBuilder>;
     let outputFileWriterMock: IMock<OutputFileWriter>;
     let consolidatedReportGeneratorMock: IMock<ConsolidatedReportGenerator>;
     let baselineOptionsBuilderMock: IMock<BaselineOptionsBuilder>;
     let baselineFileUpdaterMock: IMock<BaselineFileUpdater>;
     let fsMock: IMock<typeof fs>;
+    let reportNameGeneratorMock: IMock<ReportNameGenerator>;
     let testSubject: CrawlerCommandRunner;
     let stubCombinedScanResults: CombinedScanResult;
     let stdout: string[];
+    let dateNow: Date;
 
     beforeEach(() => {
+        dateNow = new Date();
+        MockDate.set(dateNow);
+
         scanArguments = { url: testUrl, output: './dir' };
         crawlerOptions = {
             baseUrl: scanArguments.url,
@@ -52,14 +59,15 @@ describe('CrawlerCommandRunner', () => {
         };
         baselineOptions = undefined;
 
-        stubCombinedScanResults = {} as CombinedScanResult;
+        stubCombinedScanResults = { urlCount: { total: 1 } } as CombinedScanResult;
 
-        crawlerMock = Mock.ofType<AICrawler>();
+        aiCrawlerMock = Mock.ofType<AICrawler>();
         crawlerParametersBuilderMock = Mock.ofType<CrawlerParametersBuilder>();
         outputFileWriterMock = Mock.ofType<OutputFileWriter>();
         consolidatedReportGeneratorMock = Mock.ofType<ConsolidatedReportGenerator>();
         baselineOptionsBuilderMock = Mock.ofType<BaselineOptionsBuilder>();
         baselineFileUpdaterMock = Mock.ofType<BaselineFileUpdater>();
+        reportNameGeneratorMock = Mock.ofType(ReportNameGenerator);
         fsMock = Mock.ofInstance(fs);
 
         fsMock
@@ -79,21 +87,24 @@ describe('CrawlerCommandRunner', () => {
         const stdoutWriter = (s: string) => stdout.push(s);
 
         testSubject = new CrawlerCommandRunner(
-            crawlerMock.object,
+            aiCrawlerMock.object,
             crawlerParametersBuilderMock.object,
             consolidatedReportGeneratorMock.object,
             outputFileWriterMock.object,
             baselineOptionsBuilderMock.object,
             baselineFileUpdaterMock.object,
+            reportNameGeneratorMock.object,
             fsMock.object,
             stdoutWriter,
         );
     });
 
     afterEach(() => {
-        crawlerMock.verifyAll();
+        MockDate.reset();
+        aiCrawlerMock.verifyAll();
         outputFileWriterMock.verifyAll();
         consolidatedReportGeneratorMock.verifyAll();
+        reportNameGeneratorMock.verifyAll();
         fsMock.verifyAll();
     });
 
@@ -104,7 +115,7 @@ describe('CrawlerCommandRunner', () => {
             .returns(() => true)
             .verifiable();
 
-        crawlerMock.setup((o) => o.crawl(It.isAny(), It.isAny())).verifiable(Times.never());
+        aiCrawlerMock.setup((o) => o.crawl(It.isAny(), It.isAny())).verifiable(Times.never());
 
         await testSubject.runCommand(scanArguments);
 
@@ -116,7 +127,7 @@ describe('CrawlerCommandRunner', () => {
     });
 
     it('continue run with --restart when last scan data persisted', async () => {
-        setupReportOutput('/path/to/report');
+        setupReportOutput();
 
         scanArguments = { url: testUrl, output: './dir', restart: true };
         crawlerOptions.restartCrawl = true;
@@ -127,7 +138,7 @@ describe('CrawlerCommandRunner', () => {
             .returns(() => true)
             .verifiable();
 
-        crawlerMock
+        aiCrawlerMock
             .setup((o) => o.crawl(crawlerOptions, baselineOptions))
             .returns(async () => stubCombinedScanResults)
             .verifiable();
@@ -143,7 +154,7 @@ Array [
     });
 
     it('continue run with --continue when last scan data persisted', async () => {
-        setupReportOutput('/path/to/report');
+        setupReportOutput();
 
         scanArguments = { url: testUrl, output: './dir', continue: true };
 
@@ -153,7 +164,7 @@ Array [
             .returns(() => true)
             .verifiable();
 
-        crawlerMock
+        aiCrawlerMock
             .setup((o) => o.crawl(crawlerOptions, baselineOptions))
             .returns(async () => stubCombinedScanResults)
             .verifiable();
@@ -169,9 +180,9 @@ Array [
     });
 
     it('run crawler', async () => {
-        setupReportOutput('/path/to/report');
+        setupReportOutput();
 
-        crawlerMock
+        aiCrawlerMock
             .setup((o) => o.crawl(crawlerOptions, baselineOptions))
             .returns(async () => stubCombinedScanResults)
             .verifiable();
@@ -186,8 +197,47 @@ Array [
         `);
     });
 
+    it('log browser errors and skip report generation when no scan result generated', async () => {
+        stubCombinedScanResults = {
+            urlCount: {
+                total: 0,
+                failed: 0,
+                passed: 0,
+            },
+            errors: [
+                {
+                    url: 'url',
+                    error: 'error',
+                },
+            ],
+        };
+        reportNameGeneratorMock
+            .setup((o) => o.generateName('ai-cli-browser-errors', dateNow))
+            .returns(() => 'logName')
+            .verifiable();
+        outputFileWriterMock
+            .setup((o) =>
+                o.writeToDirectory(scanArguments.output, 'logName', 'log', JSON.stringify(stubCombinedScanResults.errors, undefined, 2)),
+            )
+            .returns(() => '/path/to/log')
+            .verifiable();
+        aiCrawlerMock
+            .setup((o) => o.crawl(crawlerOptions, baselineOptions))
+            .returns(async () => stubCombinedScanResults)
+            .verifiable();
+
+        await testSubject.runCommand(scanArguments);
+
+        expect(stdout).toMatchInlineSnapshot(`
+            Array [
+              "Web browser failed to open URL(s). Please check error log for details that was saved as /path/to/log",
+              "No scan result found. If this persists, check error log(s), search for a known issue, or file a new one at https://github.com/microsoft/accessibility-insights-service/issues.",
+            ]
+        `);
+    });
+
     it('runs crawler with baseline options', async () => {
-        setupReportOutput('/path/to/report');
+        setupReportOutput();
 
         baselineOptions = {
             baselineContent: null,
@@ -199,7 +249,7 @@ Array [
             .returns(() => baselineOptions)
             .verifiable();
 
-        crawlerMock
+        aiCrawlerMock
             .setup((o) => o.crawl(crawlerOptions, baselineOptions))
             .returns(async () => stubCombinedScanResults)
             .verifiable();
@@ -214,9 +264,9 @@ Array [
         `);
     });
 
-    function setupReportOutput(outputPath: string): void {
+    function setupReportOutput(): void {
         consolidatedReportGeneratorMock
-            .setup(async (o) => o.generateReport({}, It.isAny(), It.isAny()))
+            .setup(async (o) => o.generateReport(stubCombinedScanResults, It.isAny(), It.isAny()))
             .returns(() => Promise.resolve('report'))
             .verifiable();
         outputFileWriterMock

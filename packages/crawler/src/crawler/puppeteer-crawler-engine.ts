@@ -31,6 +31,7 @@ export class PuppeteerCrawlerEngine {
         ];
         const pageProcessor = this.pageProcessorFactory();
         const puppeteerCrawlerOptions: PuppeteerCrawlerOptions = {
+            useSessionPool: true,
             handlePageTimeoutSecs: 300, // timeout includes all page processing activity (navigation, rendering, accessibility scan, etc.)
             requestQueue: await this.requestQueueProvider(),
             handlePageFunction: pageProcessor.pageHandler,
@@ -39,6 +40,7 @@ export class PuppeteerCrawlerEngine {
             handleFailedRequestFunction: pageProcessor.pageErrorProcessor,
             maxRequestsPerCrawl: this.crawlerConfiguration.maxRequestsPerCrawl(),
             launchContext: {
+                // useSessionPool
                 launchOptions: {
                     args: puppeteerDefaultOptions,
                     defaultViewport: {

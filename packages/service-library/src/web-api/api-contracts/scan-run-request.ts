@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+export declare type CookieBannerType = 'standard';
+
 /**
  * Defines REST API HTTP POST scan request contract
  */
@@ -15,6 +17,10 @@ export interface ScanRunRequest {
      * The default value is 0.
      */
     priority?: number;
+    /**
+     * Privacy scan request takes precedence over accessibility scan request
+     */
+    privacyScan?: PrivacyScan;
 }
 
 export interface Website {
@@ -25,4 +31,8 @@ export interface Website {
 
 export interface ReportGroup {
     consolidatedId: string;
+}
+
+export interface PrivacyScan {
+    cookieBannerType: CookieBannerType;
 }

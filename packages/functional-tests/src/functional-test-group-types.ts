@@ -18,6 +18,7 @@ import { ScanQueuingTestGroup } from './test-groups/scan-queuing-test-group';
 import { ScanReportTestGroup } from './test-groups/scan-reports-test-group';
 import { ScanStatusTestGroup } from './test-groups/scan-status-test-group';
 import { DeepScanPreCompletionNotificationTestGroup } from './test-groups/deep-scan-pre-completion-notification-test-group';
+import { PrivacyScanReportsTestGroup } from './test-groups/privacy-scan-reports-test-group';
 
 export type TestGroupName =
     | 'PostScan'
@@ -32,6 +33,7 @@ export type TestGroupName =
     | 'DeepScanPostCompletion'
     | 'DeepScanReports'
     | 'DeepScanStatusConsistency'
+    | 'PrivacyScanReports'
     | 'Finalizer';
 
 export type TestGroupConstructor = new (
@@ -53,5 +55,6 @@ export const functionalTestGroupTypes: { [key in TestGroupName]: TestGroupConstr
     DeepScanPostCompletion: DeepScanPostCompletionTestGroup,
     DeepScanReports: DeepScanReportsTestGroup,
     DeepScanStatusConsistency: DeepScanStatusConsistencyTestGroup,
+    PrivacyScanReports: PrivacyScanReportsTestGroup,
     Finalizer: FinalizerTestGroup,
 };

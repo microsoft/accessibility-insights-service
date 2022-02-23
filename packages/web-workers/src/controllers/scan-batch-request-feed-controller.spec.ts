@@ -151,6 +151,7 @@ describe(ScanBatchRequestFeedController, () => {
                         scanId: 'scan-5',
                         url: 'url-5',
                         priority: 0,
+                        privacyScan: { cookieBannerType: 'standard' },
                     },
                     {
                         url: 'url-6',
@@ -272,6 +273,7 @@ function setupOnDemandPageScanRunResultProviderMock(
                               },
                           }),
                     websiteScanRefs: websiteScanRefs.length > 0 ? websiteScanRefs : undefined,
+                    ...(request.privacyScan === undefined ? {} : { privacyScan: request.privacyScan }),
                 };
 
                 return result;
@@ -304,6 +306,10 @@ function setupPageScanRequestProviderMock(documents: OnDemandPageScanBatchReques
 
                 if (!isEmpty(scanRequest.reportGroups)) {
                     request.reportGroups = scanRequest.reportGroups;
+                }
+
+                if (!isEmpty(scanRequest.privacyScan)) {
+                    request.privacyScan = scanRequest.privacyScan;
                 }
 
                 return request;

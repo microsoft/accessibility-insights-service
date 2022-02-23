@@ -27,3 +27,5 @@ export { OperationResult } from './data-providers/operation-result';
 export { WebsiteScanResultProvider } from './data-providers/website-scan-result-provider';
 export * from './data-providers/combined-scan-results-provider';
 export { BatchRequestLoader } from './dev-utilities/batch-request-loader';
+export { ReportWriter, GeneratedReport } from './data-providers/report-writer';
+export * from './data-providers/privacy-scan-combined-report-provider';

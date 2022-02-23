@@ -6,12 +6,14 @@ import { inject, injectable, optional } from 'inversify';
 import { GlobalLogger } from 'logger';
 import * as Puppeteer from 'puppeteer';
 import axe from 'axe-core';
-import { isNil } from 'lodash';
+import _, { isNil } from 'lodash';
+import { PrivacyPageScanner, PrivacyResults } from 'privacy-scan-core';
 import { AxeScanResults } from './axe-scan-results';
 import { AxePuppeteerFactory } from './factories/axe-puppeteer-factory';
 import { WebDriver } from './web-driver';
 import { PageNavigator } from './page-navigator';
 import { BrowserError } from './browser-error';
+import { PrivacyScanResult } from './privacy-scan-result';
 
 export interface BrowserStartOptions {
     browserExecutablePath?: string;
@@ -34,6 +36,7 @@ export class Page {
         @inject(WebDriver) private readonly webDriver: WebDriver,
         @inject(AxePuppeteerFactory) private readonly axePuppeteerFactory: AxePuppeteerFactory,
         @inject(PageNavigator) private readonly pageNavigator: PageNavigator,
+        @inject(PrivacyPageScanner) private readonly privacyPageScanner: PrivacyPageScanner,
         @inject(GlobalLogger) @optional() private readonly logger: GlobalLogger,
     ) {}
 
@@ -61,6 +64,7 @@ export class Page {
 
     public async navigateToUrl(url: string): Promise<void> {
         this.requestUrl = url;
+        this.lastBrowserError = undefined;
         const response = await this.pageNavigator.navigate(url, this.page, async (browserError) => {
             this.logger?.logError('Page navigation error', { browserError: System.serializeError(browserError) });
             this.lastBrowserError = browserError;
@@ -70,15 +74,11 @@ export class Page {
     }
 
     public async scanForA11yIssues(contentSourcePath?: string): Promise<AxeScanResults> {
-        if (!isNil(this.lastBrowserError)) {
-            return { error: this.lastBrowserError, pageResponseCode: this.lastBrowserError.statusCode };
-        }
+        return this.runIfNavigationSucceeded(async () => this.scanPageForIssues(contentSourcePath));
+    }
 
-        if (!this.isOpen()) {
-            throw new Error(`Page is not ready. Call create() and navigateToUrl() before scan.`);
-        }
-
-        return this.scanPageForIssues(contentSourcePath);
+    public async scanForPrivacy(): Promise<PrivacyScanResult> {
+        return this.runIfNavigationSucceeded(async () => this.scanPageForCookies());
     }
 
     public async close(): Promise<void> {
@@ -89,6 +89,20 @@ export class Page {
 
     public isOpen(): boolean {
         return !isNil(this.page) && !this.page.isClosed() && isNil(this.lastBrowserError) && !isNil(this.navigationResponse);
+    }
+
+    private async runIfNavigationSucceeded<T>(
+        action: () => Promise<T>,
+    ): Promise<T | { error?: BrowserError | string; pageResponseCode?: number }> {
+        if (!isNil(this.lastBrowserError)) {
+            return { error: this.lastBrowserError, pageResponseCode: this.lastBrowserError.statusCode };
+        }
+
+        if (!this.isOpen()) {
+            throw new Error(`Page is not ready. Call create() and navigateToUrl() before scan.`);
+        }
+
+        return action();
     }
 
     private async scanPageForIssues(contentSourcePath?: string): Promise<AxeScanResults> {
@@ -121,5 +135,55 @@ export class Page {
         }
 
         return scanResults;
+    }
+
+    private async scanPageForCookies(): Promise<PrivacyScanResult> {
+        const navigationStatusCode = this.navigationResponse.status();
+        const reloadPageFunc = async (page: Puppeteer.Page) => {
+            await this.navigateToUrl(page.url());
+
+            return { success: this.navigationResponse?.ok() === true, error: this.lastBrowserError };
+        };
+
+        let privacyResult: PrivacyResults;
+        try {
+            privacyResult = await this.privacyPageScanner.scanPageForPrivacy(this.page, reloadPageFunc);
+        } catch (error) {
+            this.logger?.logError('Privacy scan engine error', { browserError: System.serializeError(error), url: this.page.url() });
+
+            return { error: `Privacy scan engine error. ${System.serializeError(error)}`, scannedUrl: this.page.url() };
+        }
+
+        const scanResult: PrivacyScanResult = {
+            results: {
+                ...privacyResult,
+                HttpStatusCode: navigationStatusCode,
+            },
+            pageResponseCode: navigationStatusCode,
+        };
+
+        if (
+            this.navigationResponse.request().redirectChain().length > 0 ||
+            // comparison of encode normalized Urls is preferable
+            (this.requestUrl !== undefined && encodeURI(this.requestUrl) !== this.page.url())
+        ) {
+            this.logger?.logWarn(`Scanning performed on redirected page`, { redirectedUrl: this.page.url() });
+            scanResult.scannedUrl = this.page.url();
+        }
+
+        const failedConsentResults = _.filter(
+            privacyResult.CookieCollectionConsentResults,
+            (consentResult) => consentResult.Error !== undefined,
+        );
+        if (!_.isEmpty(failedConsentResults)) {
+            const errorMessage = `Failed to collect cookies for ${failedConsentResults.length} test cases`;
+            this.logger.logError(errorMessage, {
+                url: this.requestUrl,
+                failures: JSON.stringify(failedConsentResults),
+            });
+            scanResult.error = errorMessage;
+        }
+
+        return scanResult;
     }
 }
