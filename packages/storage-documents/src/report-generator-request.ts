@@ -9,7 +9,7 @@ export interface ReportGeneratorRequest extends StorageDocument {
     itemType: ItemType.reportGeneratorRequest;
     scanGroupId: string;
     priority: number;
-    reportsRef: OnDemandPageScanReport;
+    reports?: OnDemandPageScanReport[];
     /**
      * Supported run states: pending, running, completed, failed
      */

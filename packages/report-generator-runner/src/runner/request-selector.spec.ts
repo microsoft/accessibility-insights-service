@@ -49,8 +49,8 @@ describe(RequestSelector, () => {
         serviceConfigMock.verifyAll();
     });
 
-    it('filter requests', async () => {
-        const requests = [
+    it('filter queued requests', async () => {
+        const queuedRequests = [
             {
                 id: 'id1',
                 run: {
@@ -81,7 +81,7 @@ describe(RequestSelector, () => {
         ] as ReportGeneratorRequest[];
 
         const response1 = {
-            item: [requests[0]],
+            item: [queuedRequests[0]],
             statusCode: 200,
             continuationToken,
         };
@@ -91,7 +91,7 @@ describe(RequestSelector, () => {
             .verifiable();
 
         const response2 = {
-            item: requests.slice(1),
+            item: queuedRequests.slice(1),
             statusCode: 200,
         };
         reportGeneratorRequestProviderMock
@@ -99,19 +99,19 @@ describe(RequestSelector, () => {
             .returns(() => Promise.resolve(response2 as CosmosOperationResponse<ReportGeneratorRequest[]>))
             .verifiable();
 
-        const filteredScanRequests = {
+        const filteredRequests = {
             requestsToProcess: [
-                { request: requests[2], condition: 'pending' },
-                { request: requests[3], condition: 'retry' },
+                { request: queuedRequests[2], condition: 'pending' },
+                { request: queuedRequests[3], condition: 'retry' },
             ],
             requestsToDelete: [
-                { request: requests[0], condition: 'completed' },
-                { request: requests[1], condition: 'noRetry' },
+                { request: queuedRequests[0], condition: 'completed' },
+                { request: queuedRequests[1], condition: 'failed' },
             ],
         };
 
-        const result = await requestSelector.getRequests(queryCount);
+        const result = await requestSelector.getQueuedRequests(queryCount);
 
-        expect(result).toEqual(filteredScanRequests);
+        expect(result).toEqual(filteredRequests);
     });
 });

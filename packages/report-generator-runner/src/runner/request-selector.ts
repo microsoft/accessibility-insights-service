@@ -8,16 +8,17 @@ import { ServiceConfiguration } from 'common';
 import { client, CosmosOperationResponse } from 'azure-services';
 import moment from 'moment';
 
-export declare type DispatchCondition = 'pending' | 'completed' | 'noRetry' | 'retry';
+export declare type DispatchCondition = 'pending' | 'completed' | 'failed' | 'retry';
 
-export interface Request {
+export interface QueuedRequest {
     request: ReportGeneratorRequest;
     condition: DispatchCondition;
+    error?: string;
 }
 
-export interface Requests {
-    requestsToProcess: Request[];
-    requestsToDelete: Request[];
+export interface QueuedRequests {
+    requestsToProcess: QueuedRequest[];
+    requestsToDelete: QueuedRequest[];
 }
 
 @injectable()
@@ -31,10 +32,10 @@ export class RequestSelector {
         @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
     ) {}
 
-    public async getRequests(queryCount: number = 50): Promise<Requests> {
+    public async getQueuedRequests(queryCount: number = 50): Promise<QueuedRequests> {
         await this.init();
 
-        const requests: Requests = {
+        const queuedRequests: QueuedRequests = {
             requestsToProcess: [],
             requestsToDelete: [],
         };
@@ -49,50 +50,48 @@ export class RequestSelector {
 
             continuationToken = response.continuationToken;
             if (response.item?.length > 0) {
-                await this.filterRequests(requests, response.item);
+                await this.filterRequests(queuedRequests, response.item);
             }
-        } while (requests.requestsToProcess.length < queryCount && continuationToken !== undefined);
+        } while (queuedRequests.requestsToProcess.length < queryCount && continuationToken !== undefined);
 
-        return requests;
+        return queuedRequests;
     }
 
-    private async filterRequests(filteredRequests: Requests, requests: ReportGeneratorRequest[]): Promise<void> {
-        await Promise.all(
-            requests.map(async (request) => {
-                // Supported run states: pending, running, completed, failed
+    private filterRequests(filteredRequests: QueuedRequests, queuedRequests: ReportGeneratorRequest[]): void {
+        queuedRequests.map((queuedRequest) => {
+            // Supported run states: pending, running, completed, failed
 
-                if (request.run.state === 'completed') {
-                    filteredRequests.requestsToDelete.push({ request: request, condition: 'completed' });
+            if (queuedRequest.run.state === 'completed') {
+                filteredRequests.requestsToDelete.push({ request: queuedRequest, condition: 'completed' });
 
-                    return;
-                }
+                return;
+            }
 
-                if (request.run.retryCount >= this.maxFailedScanRetryCount) {
-                    filteredRequests.requestsToDelete.push({ request: request, condition: 'noRetry' });
+            if (queuedRequest.run.state === 'failed' && queuedRequest.run.retryCount >= this.maxFailedScanRetryCount) {
+                filteredRequests.requestsToDelete.push({ request: queuedRequest, condition: 'failed' });
 
-                    return;
-                }
+                return;
+            }
 
-                if (
-                    request.run.state === 'pending' &&
-                    (request.run?.retryCount === undefined || request.run.retryCount < this.maxFailedScanRetryCount)
-                ) {
-                    filteredRequests.requestsToProcess.push({ request: request, condition: 'pending' });
+            if (queuedRequest.run.state === 'pending') {
+                filteredRequests.requestsToProcess.push({ request: queuedRequest, condition: 'pending' });
 
-                    return;
-                }
+                return;
+            }
 
-                if (
-                    (request.run.state === 'running' || request.run.state === 'failed') && // terminated or failed
-                    (request.run?.retryCount === undefined || request.run.retryCount < this.maxFailedScanRetryCount) && // retry threshold
-                    moment.utc(request.run.timestamp).add(this.failedScanRetryIntervalInMinutes, 'minutes') <= moment.utc() // retry delay
-                ) {
-                    filteredRequests.requestsToProcess.push({ request: request, condition: 'retry' });
+            if (
+                // task was terminated or failed
+                (queuedRequest.run.state === 'running' || queuedRequest.run.state === 'failed') &&
+                // check retry threshold
+                (queuedRequest.run?.retryCount === undefined || queuedRequest.run.retryCount < this.maxFailedScanRetryCount) &&
+                // check retry delay
+                moment.utc(queuedRequest.run.timestamp).add(this.failedScanRetryIntervalInMinutes, 'minutes') <= moment.utc()
+            ) {
+                filteredRequests.requestsToProcess.push({ request: queuedRequest, condition: 'retry' });
 
-                    return;
-                }
-            }),
-        );
+                return;
+            }
+        });
     }
 
     private async init(): Promise<void> {
