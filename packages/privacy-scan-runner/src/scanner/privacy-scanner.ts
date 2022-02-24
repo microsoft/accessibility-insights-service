@@ -12,7 +12,6 @@ export class PrivacyScanner {
         @inject(PromiseUtils) private readonly promiseUtils: PromiseUtils,
         @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
         @inject(GlobalLogger) private readonly logger: GlobalLogger,
-        private readonly scannerImpl: () => Promise<PrivacyScanResult> = () => Promise.resolve({ state: 'pass' } as PrivacyScanResult), // TBD
     ) {}
 
     public async scan(page: Page): Promise<PrivacyScanResult> {
@@ -34,7 +33,7 @@ export class PrivacyScanner {
     private async scanImpl(page: Page): Promise<PrivacyScanResult> {
         try {
             this.logger.logInfo(`Starting privacy scan of a webpage.`);
-            const scanResult = await this.scannerImpl(); // TDB
+            const scanResult = await page.scanForPrivacy();
             this.logger.logInfo(`Privacy scanning of a webpage successfully completed.`);
 
             return scanResult;

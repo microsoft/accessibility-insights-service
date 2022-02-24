@@ -43,6 +43,7 @@ export const E2EScanFactories: E2EScanScenarioDefinitionFactory[] = [
             },
         };
     },
+    // Deep scan
     (availabilityConfig: AvailabilityTestConfig, webApiConfig: WebApiConfig): E2EScanScenarioDefinition => {
         const baseUrl = availabilityConfig.urlToScan;
 
@@ -69,6 +70,7 @@ export const E2EScanFactories: E2EScanScenarioDefinitionFactory[] = [
             },
         };
     },
+    // Deep scan with knownPages
     (availabilityConfig: AvailabilityTestConfig, webApiConfig: WebApiConfig): E2EScanScenarioDefinition => {
         const baseUrl = availabilityConfig.urlToScan;
 
@@ -98,6 +100,7 @@ export const E2EScanFactories: E2EScanScenarioDefinitionFactory[] = [
             },
         };
     },
+    // Deep scan with discovery pattern
     (availabilityConfig: AvailabilityTestConfig, webApiConfig: WebApiConfig): E2EScanScenarioDefinition => {
         const baseUrl = availabilityConfig.urlToScan;
 
@@ -119,6 +122,22 @@ export const E2EScanFactories: E2EScanScenarioDefinitionFactory[] = [
             testGroups: {
                 postScanCompletionTests: ['DeepScanStatusConsistency'],
                 postDeepScanCompletionTests: ['DeepScanPostCompletion', 'DeepScanReports', 'ConsolidatedScanReports'],
+            },
+        };
+    },
+    // privacy scan with consolidated report
+    (availabilityConfig: AvailabilityTestConfig, webApiConfig: WebApiConfig): E2EScanScenarioDefinition => {
+        return {
+            readableName: 'PrivacyScan',
+            scanOptions: {
+                consolidatedId: `${availabilityConfig.consolidatedIdBase}-${webApiConfig.releaseId}-privacy-${Date.now()}`,
+                privacyScan: true,
+            },
+            initialTestContextData: {
+                scanUrl: availabilityConfig.urlToScan,
+            },
+            testGroups: {
+                scanReportTests: ['PrivacyScanReports'],
             },
         };
     },

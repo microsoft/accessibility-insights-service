@@ -7,6 +7,7 @@ export type PostScanRequestOptions = {
     consolidatedId?: string;
     deepScan?: boolean;
     deepScanOptions?: DeepScanOptions;
+    privacyScan?: boolean;
 };
 
 export type DeepScanOptions = {
