@@ -6,9 +6,9 @@ import 'reflect-metadata';
 import { IMock, Mock, It } from 'typemoq';
 import { ReportGeneratorRequestProvider, OnDemandPageScanRunResultProvider, OperationResult } from 'service-library';
 import { GlobalLogger } from 'logger';
-import { ReportGeneratorRequest, OnDemandPageScanResult } from 'storage-documents';
+import { ReportGeneratorRequest, OnDemandPageScanResult, OnDemandPageScanRunState } from 'storage-documents';
 import * as MockDate from 'mockdate';
-import { isEmpty } from 'lodash';
+import { isEmpty, cloneDeep } from 'lodash';
 import { RunMetadataConfig } from '../run-metadata-config';
 import { ReportGeneratorRunnerTelemetryManager } from '../report-generator-runner-telemetry-manager';
 import { ReportGeneratorMetadata } from '../types/report-generator-metadata';
@@ -110,10 +110,10 @@ describe(Runner, () => {
         const queuedRequests = createQueuedRequests(reportGeneratorRequests);
         setupGetQueuedRequests(queuedRequests);
         setupTryUpdateRequestsWithRunningState(reportGeneratorRequests);
-        setupReportProcessorMock(reportGeneratorRequests);
-        setupTryUpdateRequestsWithFailedState(reportGeneratorRequests);
-        setupDeleteRequests(reportGeneratorRequests);
-        setupSetScanRunStatesToCompleted(reportGeneratorRequests);
+        const reportRequestsWithReportProcessorResult = setupReportProcessorMock(reportGeneratorRequests);
+        setupTryUpdateRequestsWithFailedState(reportRequestsWithReportProcessorResult);
+        setupDeleteRequests(reportRequestsWithReportProcessorResult);
+        setupSetScanRunStatesToCompleted(reportRequestsWithReportProcessorResult);
 
         await runner.run();
     });
@@ -140,10 +140,61 @@ describe(Runner, () => {
         const queuedRequests = createQueuedRequests(reportGeneratorRequests);
         setupGetQueuedRequests(queuedRequests);
         setupTryUpdateRequestsWithRunningState(reportGeneratorRequests, resultRequestsUpdateWithRunningState);
-        setupReportProcessorMock(resultRequestsUpdateWithRunningState);
-        setupTryUpdateRequestsWithFailedState(resultRequestsUpdateWithRunningState);
-        setupDeleteRequests(resultRequestsUpdateWithRunningState);
-        setupSetScanRunStatesToCompleted(resultRequestsUpdateWithRunningState);
+        const reportRequestsWithReportProcessorResult = setupReportProcessorMock(resultRequestsUpdateWithRunningState);
+        setupTryUpdateRequestsWithFailedState(reportRequestsWithReportProcessorResult);
+        setupDeleteRequests(reportRequestsWithReportProcessorResult);
+        setupSetScanRunStatesToCompleted(reportRequestsWithReportProcessorResult);
+
+        await runner.run();
+    });
+
+    it('should set state to `failed` for failed report processing requests', async () => {
+        reportGeneratorRequests = [
+            {
+                id: 'id-1',
+                scanGroupId: 'scanGroupId-1',
+                reports: [{}],
+                run: {
+                    state: 'pending',
+                },
+            },
+            {
+                id: 'id-3',
+                scanGroupId: 'scanGroupId-1',
+                reports: [{}],
+                run: {
+                    state: 'pending',
+                },
+            },
+        ] as ReportGeneratorRequest[];
+        const resultRequestsUpdateByReportProcessor = [
+            {
+                id: 'id-1',
+                scanGroupId: 'scanGroupId-1',
+                reports: [{}],
+                run: {
+                    state: 'failed',
+                },
+            },
+            {
+                id: 'id-3',
+                scanGroupId: 'scanGroupId-1',
+                reports: [{}],
+                run: {
+                    state: 'completed',
+                },
+            },
+        ] as ReportGeneratorRequest[];
+        const queuedRequests = createQueuedRequests(reportGeneratorRequests);
+        setupGetQueuedRequests(queuedRequests);
+        setupTryUpdateRequestsWithRunningState(reportGeneratorRequests);
+        const reportRequestsWithReportProcessorResult = setupReportProcessorMock(
+            reportGeneratorRequests,
+            resultRequestsUpdateByReportProcessor,
+        );
+        setupTryUpdateRequestsWithFailedState(reportRequestsWithReportProcessorResult);
+        setupDeleteRequests(reportRequestsWithReportProcessorResult);
+        setupSetScanRunStatesToCompleted(reportRequestsWithReportProcessorResult);
 
         await runner.run();
     });
@@ -230,7 +281,7 @@ function setupTryUpdateRequestsWithFailedState(
 }
 
 function setupSetScanRunStatesToCompleted(queuedRequests: ReportGeneratorRequest[]): void {
-    const requestsToProcess = queuedRequests.filter((r) => r.run.state === 'completed' || r.run.state === 'failed');
+    const requestsToProcess = queuedRequests.filter((r) => r.run.state === 'completed');
     const requestsToUpdate = requestsToProcess.map((request) => {
         return {
             id: request.id,
@@ -263,7 +314,10 @@ function setupGetQueuedRequests(queuedRequests: QueuedRequests): void {
         .verifiable();
 }
 
-function setupReportProcessorMock(requests: ReportGeneratorRequest[], resultRequests: ReportGeneratorRequest[] = undefined): void {
+function setupReportProcessorMock(
+    requests: ReportGeneratorRequest[],
+    resultRequests: ReportGeneratorRequest[] = undefined,
+): ReportGeneratorRequest[] {
     const requestsToProcess = requests.filter((r) => r.run.state !== 'completed');
     const requestsToUpdate = requestsToProcess.map((request) => {
         return {
@@ -272,15 +326,39 @@ function setupReportProcessorMock(requests: ReportGeneratorRequest[], resultRequ
             error: request.run.error,
         } as QueuedRequest;
     });
-    const updatedRequests = (resultRequests ?? requests).map((request) => {
-        return {
-            request,
-            condition: request.run.state,
-            error: request.run.error,
-        } as QueuedRequest;
-    });
+    let updatedRequests: QueuedRequest[];
+    if (resultRequests) {
+        updatedRequests = resultRequests.map((request) => {
+            return {
+                request,
+                condition: request.run.state,
+                error: request.run.error,
+            } as QueuedRequest;
+        });
+    } else {
+        updatedRequests = requestsToProcess.map((request) => {
+            return {
+                request,
+                condition: 'completed',
+                error: request.run.error,
+            } as QueuedRequest;
+        });
+    }
     reportProcessorMock
         .setup((o) => o.generate(It.isValue(requestsToUpdate)))
         .returns(() => updatedRequests)
         .verifiable();
+
+    // set incoming state in sync with oncoming
+    const projectedReportGeneratorRequests = requests.map((request) => {
+        const projectedRequest = cloneDeep(request);
+        const updatedRequest = updatedRequests.find((r) => r.request.id === projectedRequest.id);
+        if (updatedRequest) {
+            projectedRequest.run.state = updatedRequest.condition as OnDemandPageScanRunState;
+        }
+
+        return projectedRequest;
+    });
+
+    return projectedReportGeneratorRequests;
 }

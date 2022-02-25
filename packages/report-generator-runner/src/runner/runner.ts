@@ -48,8 +48,8 @@ export class Runner {
         try {
             const queuedRequests = await this.requestSelector.getQueuedRequests(this.maxQueuedRequests);
             await this.updateRequestStateToRunning(queuedRequests);
-            this.reportProcessor.generate(queuedRequests.requestsToProcess);
-            this.selectCompletedRequestsToDelete(queuedRequests);
+            queuedRequests.requestsToProcess = this.reportProcessor.generate(queuedRequests.requestsToProcess);
+            this.moveCompletedRequestsForDeletion(queuedRequests);
             await this.updateRequestStateToFailed(queuedRequests.requestsToProcess);
             await this.deleteRequests(queuedRequests.requestsToDelete);
             await this.updateScanRunStatesToCompleted(queuedRequests.requestsToDelete);
@@ -62,9 +62,12 @@ export class Runner {
         }
     }
 
-    private selectCompletedRequestsToDelete(queuedRequests: QueuedRequests): void {
+    private moveCompletedRequestsForDeletion(queuedRequests: QueuedRequests): void {
         const completedRequests = queuedRequests.requestsToProcess.filter((queuedRequest) => queuedRequest.condition === 'completed');
-        queuedRequests.requestsToDelete.push(...completedRequests);
+        queuedRequests.requestsToDelete = [...completedRequests, ...queuedRequests.requestsToDelete];
+        queuedRequests.requestsToProcess = queuedRequests.requestsToProcess.filter(
+            (queuedRequest) => queuedRequest.condition !== 'completed',
+        );
     }
 
     private async updateRequestStateToRunning(queuedRequests: QueuedRequests): Promise<void> {
