@@ -3,152 +3,128 @@
 
 import { inject, injectable } from 'inversify';
 import { GlobalLogger } from 'logger';
-import { PrivacyScanResult } from 'scanner-global-library';
-import { OnDemandPageScanRunResultProvider, WebsiteScanResultProvider, ReportWriter, GeneratedReport } from 'service-library';
-import { OnDemandPageScanReport, OnDemandPageScanResult, OnDemandPageScanRunState, ScanError, WebsiteScanResult } from 'storage-documents';
-import { System, ServiceConfiguration } from 'common';
-import _ from 'lodash';
+import { OnDemandPageScanRunResultProvider, ReportGeneratorRequestProvider } from 'service-library';
+import { OnDemandPageScanResult, ReportGeneratorRequest } from 'storage-documents';
+import { System } from 'common';
+import { isEmpty } from 'lodash';
 import { RunMetadataConfig } from '../run-metadata-config';
 import { ReportGeneratorRunnerTelemetryManager } from '../report-generator-runner-telemetry-manager';
-import { ReportGeneratorMetadata } from '../types/report-generator-metadata';
+import { ReportProcessor } from '../report-processor/report-processor';
+import { RequestSelector, QueuedRequest, QueuedRequests } from './request-selector';
+
+/**
+ * Runner workflow
+ *
+ * - Select report requests in a batch
+ * - Filter requests for processing and deletion
+ * - Set processing requests state to running
+ * - Process report requests
+ * - Delete succeeded requests
+ * - Set failed requests state to failed for the next retry run
+ * - Set scan run results state to completed/failed
+ */
 
 @injectable()
 export class Runner {
+    public maxQueuedRequests = 20;
+
     constructor(
-        @inject(RunMetadataConfig) private readonly scanMetadataConfig: RunMetadataConfig,
+        @inject(RunMetadataConfig) private readonly runMetadataConfig: RunMetadataConfig,
+        @inject(ReportGeneratorRequestProvider) private readonly reportGeneratorRequestProvider: ReportGeneratorRequestProvider,
         @inject(OnDemandPageScanRunResultProvider) private readonly onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider,
-        @inject(WebsiteScanResultProvider) protected readonly websiteScanResultProvider: WebsiteScanResultProvider,
-        @inject(ReportWriter) protected readonly reportWriter: ReportWriter,
+        @inject(RequestSelector) protected readonly requestSelector: RequestSelector,
+        @inject(ReportProcessor) protected readonly reportProcessor: ReportProcessor,
         @inject(ReportGeneratorRunnerTelemetryManager) private readonly telemetryManager: ReportGeneratorRunnerTelemetryManager,
-        @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
         @inject(GlobalLogger) private readonly logger: GlobalLogger,
     ) {}
 
     public async run(): Promise<void> {
-        const scanMetadata = this.scanMetadataConfig.getConfig();
+        const runMetadata = this.runMetadataConfig.getConfig();
 
-        this.logger.setCommonProperties({ scanId: scanMetadata.scanGroupId });
+        this.logger.setCommonProperties({ scanGroupId: runMetadata.scanGroupId });
         this.logger.logInfo('Start report generator runner.');
 
-        const pageScanResult = await this.updateScanRunState(scanMetadata.scanGroupId);
-        if (pageScanResult === undefined) {
-            return;
-        }
-
-        this.telemetryManager.trackScanStarted(scanMetadata.scanGroupId);
+        this.telemetryManager.trackRequestStarted(runMetadata.scanGroupId);
         try {
-            const privacyScanResults = {}; // TBD
-            await this.processScanResult(privacyScanResults, pageScanResult);
+            const queuedRequests = await this.requestSelector.getQueuedRequests(this.maxQueuedRequests);
+            await this.updateRequestStateToRunning(queuedRequests);
+            queuedRequests.requestsToProcess = this.reportProcessor.generate(queuedRequests.requestsToProcess);
+            this.moveCompletedRequestsForDeletion(queuedRequests);
+            await this.updateRequestStateToFailed(queuedRequests.requestsToProcess);
+            await this.deleteRequests(queuedRequests.requestsToDelete);
+            await this.updateScanRunStatesToCompleted(queuedRequests.requestsToDelete);
         } catch (error) {
-            const errorMessage = System.serializeError(error);
-            this.setRunResult(pageScanResult, 'failed', errorMessage);
-
-            this.logger.logError(`The report generator processor failed to scan a webpage.`, { error: errorMessage });
-            this.telemetryManager.trackScanTaskFailed();
+            this.logger.logError(`The report generator processor failed.`, { error: System.serializeError(error) });
+            this.telemetryManager.trackRequestFailed();
         } finally {
-            this.telemetryManager.trackScanCompleted();
+            this.telemetryManager.trackRequestCompleted();
+            this.logger.logInfo('Stop report generator runner.');
         }
-
-        await this.updateScanResult(scanMetadata, pageScanResult);
-
-        this.logger.logInfo('Stop report generator runner.');
     }
 
-    private async updateScanRunState(scanId: string): Promise<OnDemandPageScanResult> {
-        this.logger.logInfo(`Updating webpage scan run state to 'running'.`);
-        const partialPageScanResult: Partial<OnDemandPageScanResult> = {
-            id: scanId,
-            run: {
-                state: 'running',
-                timestamp: new Date().toJSON(),
-                error: null,
-            },
-            scanResult: null,
-            reports: null,
-        };
-        const response = await this.onDemandPageScanRunResultProvider.tryUpdateScanRun(partialPageScanResult);
-        if (!response.succeeded) {
-            this.logger.logWarn(
-                `Update webpage scan run state to 'running' failed due to merge conflict with other process. Exiting webpage scan task.`,
-            );
-
-            return undefined;
-        }
-
-        return response.result;
+    private moveCompletedRequestsForDeletion(queuedRequests: QueuedRequests): void {
+        const completedRequests = queuedRequests.requestsToProcess.filter((queuedRequest) => queuedRequest.condition === 'completed');
+        queuedRequests.requestsToDelete = [...completedRequests, ...queuedRequests.requestsToDelete];
+        queuedRequests.requestsToProcess = queuedRequests.requestsToProcess.filter(
+            (queuedRequest) => queuedRequest.condition !== 'completed',
+        );
     }
 
-    private async processScanResult(
-        privacyScanResult: PrivacyScanResult,
-        pageScanResult: OnDemandPageScanResult,
-    ): Promise<PrivacyScanResult> {
-        if (_.isEmpty(privacyScanResult.error)) {
-            this.setRunResult(pageScanResult, 'completed');
-            pageScanResult.scanResult = {
-                state: 'pass', // TBD
-            };
-            pageScanResult.reports = await this.generateScanReports(privacyScanResult);
-            if (privacyScanResult.scannedUrl !== undefined) {
-                pageScanResult.scannedUrl = privacyScanResult.scannedUrl;
-            }
-        } else {
-            this.setRunResult(pageScanResult, 'failed', privacyScanResult.error);
+    private async updateRequestStateToRunning(queuedRequests: QueuedRequests): Promise<void> {
+        const requestsToUpdate = queuedRequests.requestsToProcess.map((queuedRequest) => {
+            return {
+                id: queuedRequest.request.id,
+                run: {
+                    state: 'running',
+                    timestamp: new Date().toJSON(),
+                    error: null,
+                    retryCount: queuedRequest.request.run?.retryCount !== undefined ? queuedRequest.request.run.retryCount + 1 : 0,
+                },
+            } as Partial<ReportGeneratorRequest>;
+        });
 
-            this.logger.logError('Browser has failed to scan a webpage.', { error: JSON.stringify(privacyScanResult.error) });
-            this.telemetryManager.trackBrowserScanFailed();
-        }
+        const updatedRequestsResponse = await this.reportGeneratorRequestProvider.tryUpdateRequests(requestsToUpdate);
 
-        pageScanResult.run.pageResponseCode = privacyScanResult.pageResponseCode;
-
-        return privacyScanResult.error ? undefined : privacyScanResult;
+        // remove failed update requests
+        const updatedRequests = queuedRequests.requestsToProcess.filter((queuedRequest) =>
+            updatedRequestsResponse.some((response) => response.succeeded === true && response.result.id === queuedRequest.request.id),
+        );
+        queuedRequests.requestsToProcess = updatedRequests;
     }
 
-    private async updateScanResult(
-        scanMetadata: ReportGeneratorMetadata,
-        pageScanResult: Partial<OnDemandPageScanResult>,
-    ): Promise<WebsiteScanResult> {
-        await this.onDemandPageScanRunResultProvider.updateScanRun(pageScanResult);
+    private async updateRequestStateToFailed(queuedRequests: QueuedRequest[]): Promise<void> {
+        const requestsToUpdate = queuedRequests.map((queuedRequest) => {
+            return {
+                id: queuedRequest.request.id,
+                run: {
+                    state: 'failed',
+                    timestamp: new Date().toJSON(),
+                    error: isEmpty(queuedRequest.error) ? null : queuedRequest.error.substring(0, 2048),
+                },
+            } as Partial<ReportGeneratorRequest>;
+        });
 
-        const websiteScanRef = pageScanResult.websiteScanRefs?.find((ref) => ref.scanGroupType === 'deep-scan');
-        if (websiteScanRef) {
-            const scanConfig = await this.serviceConfig.getConfigValue('scanConfig');
-            const runState =
-                pageScanResult.run.state === 'completed' || pageScanResult.run.retryCount >= scanConfig.maxFailedScanRetryCount
-                    ? pageScanResult.run.state
-                    : undefined;
-
-            const updatedWebsiteScanResult: Partial<WebsiteScanResult> = {
-                id: websiteScanRef.id,
-                pageScans: [
-                    {
-                        scanId: scanMetadata.scanGroupId,
-                        url: '', // TBD
-                        scanState: pageScanResult.scanResult?.state,
-                        runState,
-                        timestamp: new Date().toJSON(),
-                    },
-                ],
-            };
-
-            return this.websiteScanResultProvider.mergeOrCreate(scanMetadata.scanGroupId, updatedWebsiteScanResult, true);
-        }
-
-        return undefined;
+        await this.reportGeneratorRequestProvider.tryUpdateRequests(requestsToUpdate);
     }
 
-    private async generateScanReports(privacyScanResult: PrivacyScanResult): Promise<OnDemandPageScanReport[]> {
-        this.logger.logInfo(`Generating privacy scan report for a webpage scan.`);
-        const reports = [{}] as GeneratedReport[]; // TBD
+    private async updateScanRunStatesToCompleted(queuedRequests: QueuedRequest[]): Promise<void> {
+        const scansToUpdate = queuedRequests.map((queuedRequest) => {
+            return {
+                id: queuedRequest.request.id,
+                run: {
+                    state: queuedRequest.condition,
+                    timestamp: new Date().toJSON(),
+                    error: isEmpty(queuedRequest.error) ? null : queuedRequest.error.toString().substring(0, 2048),
+                },
+                // we need to write entire reports[] array when merge with existing DB document due to internal merge logic
+                reports: queuedRequest.request.reports,
+            } as Partial<OnDemandPageScanResult>;
+        });
 
-        return this.reportWriter.writeBatch(reports);
+        await this.onDemandPageScanRunResultProvider.tryUpdateScanRuns(scansToUpdate);
     }
 
-    private setRunResult(pageScanResult: OnDemandPageScanResult, state: OnDemandPageScanRunState, error?: string | ScanError): void {
-        pageScanResult.run = {
-            ...pageScanResult.run,
-            state,
-            timestamp: new Date().toJSON(),
-            error: _.isString(error) ? error.substring(0, 2048) : error,
-        };
+    private async deleteRequests(queuedRequests: QueuedRequest[]): Promise<void> {
+        await this.reportGeneratorRequestProvider.deleteRequests(queuedRequests.map((r) => r.request.id));
     }
 }

@@ -4,14 +4,14 @@
 import 'reflect-metadata';
 
 import { GlobalLogger, Logger, LoggerEvent, TelemetryMeasurements } from 'logger';
-import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
+import { IMock, It, Mock, Times } from 'typemoq';
 import { GuidGenerator } from 'common';
 import { ReportGeneratorRunnerTelemetryManager } from './report-generator-runner-telemetry-manager';
 
 class TestableReportGeneratorRunnerTelemetryManager extends ReportGeneratorRunnerTelemetryManager {
-    public scanSubmitted: number;
+    public requestsSubmitted: number;
 
-    public scanStarted: number;
+    public requestsStarted: number;
 
     public constructor(logger: GlobalLogger, guidGenerator: GuidGenerator, getCurrentTimestamp: () => number = Date.now) {
         super(logger, guidGenerator, getCurrentTimestamp);
@@ -20,23 +20,22 @@ class TestableReportGeneratorRunnerTelemetryManager extends ReportGeneratorRunne
 
 describe(ReportGeneratorRunnerTelemetryManager, () => {
     const scanId = 'scan id';
-    const scanWaitTimeMilliseconds = 10000;
-    const scanExecutionTimeMilliseconds = 15000;
-    const scanSubmittedTimestamp = 12345678;
-    const scanStartedTimestamp = scanSubmittedTimestamp + scanWaitTimeMilliseconds;
-    const scanCompletedTimestamp = scanStartedTimestamp + scanExecutionTimeMilliseconds;
+    const waitTimeMilliseconds = 10000;
+    const executionTimeMilliseconds = 15000;
+    const submittedTimestamp = 12345678;
+    const startedTimestamp = submittedTimestamp + waitTimeMilliseconds;
+    const completedTimestamp = startedTimestamp + executionTimeMilliseconds;
 
     let loggerMock: IMock<GlobalLogger>;
     let getCurrentDateMock: IMock<() => number>;
     let guidGeneratorMock: IMock<GuidGenerator>;
-
     let testSubject: TestableReportGeneratorRunnerTelemetryManager;
 
     beforeEach(() => {
         loggerMock = Mock.ofType<Logger>();
         getCurrentDateMock = Mock.ofInstance(() => null);
-        guidGeneratorMock = Mock.ofType<GuidGenerator>(GuidGenerator, MockBehavior.Strict);
-        guidGeneratorMock.setup((gg) => gg.getGuidTimestamp(scanId)).returns(() => new Date(scanSubmittedTimestamp));
+        guidGeneratorMock = Mock.ofType<GuidGenerator>(GuidGenerator);
+        guidGeneratorMock.setup((o) => o.getGuidTimestamp(scanId)).returns(() => new Date(submittedTimestamp));
 
         testSubject = new TestableReportGeneratorRunnerTelemetryManager(
             loggerMock.object,
@@ -49,66 +48,60 @@ describe(ReportGeneratorRunnerTelemetryManager, () => {
         loggerMock.verifyAll();
     });
 
-    it('trackScanStarted', () => {
-        const scanRunningMeasurements = { runningScanRequests: 1 };
-        const scanStartedMeasurements = {
-            scanWaitTime: scanWaitTimeMilliseconds / 1000,
-            startedScanTasks: 1,
+    it('track request started', () => {
+        const reportGeneratorRequestRunningMeasurements = { runningRequests: 1 };
+        const reportGeneratorTaskStartedMeasurements = {
+            waitTime: waitTimeMilliseconds / 1000,
+            startedTasks: 1,
         };
-        getCurrentDateMock.setup((g) => g()).returns(() => scanStartedTimestamp);
-        setupTrackEvent('ScanRequestRunning', scanRunningMeasurements);
-        setupTrackEvent('ScanTaskStarted', scanStartedMeasurements);
+        getCurrentDateMock.setup((g) => g()).returns(() => startedTimestamp);
+        setupTrackEvent('ReportGeneratorRequestRunning', reportGeneratorRequestRunningMeasurements);
+        setupTrackEvent('ReportGeneratorTaskStarted', reportGeneratorTaskStartedMeasurements);
 
-        testSubject.trackScanStarted(scanId);
+        testSubject.trackRequestStarted(scanId);
 
-        expect(testSubject.scanStarted).toBe(scanStartedTimestamp);
-        expect(testSubject.scanSubmitted).toBe(scanSubmittedTimestamp);
+        expect(testSubject.requestsStarted).toBe(startedTimestamp);
+        expect(testSubject.requestsSubmitted).toBe(submittedTimestamp);
     });
 
-    it('trackBrowserScanFailed', () => {
-        setupTrackEvent('BrowserScanFailed', { failedBrowserScans: 1 });
+    it('track request failed', () => {
+        setupTrackEvent('ReportGeneratorRequestFailed', { failedRequests: 1 });
+        setupTrackEvent('ReportGeneratorTaskFailed', { failedTasks: 1 });
 
-        testSubject.trackBrowserScanFailed();
+        testSubject.trackRequestFailed();
     });
 
-    it('trackScanTaskFailed', () => {
-        setupTrackEvent('ScanRequestFailed', { failedScanRequests: 1 });
-        setupTrackEvent('ScanTaskFailed', { failedScanTasks: 1 });
-
-        testSubject.trackScanTaskFailed();
-    });
-
-    it('trackScanCompleted', () => {
-        getCurrentDateMock.setup((g) => g()).returns(() => scanCompletedTimestamp);
-        const scanTaskCompletedMeasurements = {
-            scanExecutionTime: scanExecutionTimeMilliseconds / 1000,
-            scanTotalTime: (scanExecutionTimeMilliseconds + scanWaitTimeMilliseconds) / 1000,
-            completedScanTasks: 1,
+    it('track request completed', () => {
+        getCurrentDateMock.setup((o) => o()).returns(() => completedTimestamp);
+        const telemetryMeasurements = {
+            executionTime: executionTimeMilliseconds / 1000,
+            totalTime: (executionTimeMilliseconds + waitTimeMilliseconds) / 1000,
+            completedTasks: 1,
         };
-        const ScanRequestCompletedMeasurements = { completedScanRequests: 1 };
-        setupTrackEvent('ScanTaskCompleted', scanTaskCompletedMeasurements);
-        setupTrackEvent('ScanRequestCompleted', ScanRequestCompletedMeasurements);
-        testSubject.scanSubmitted = scanSubmittedTimestamp;
-        testSubject.scanStarted = scanStartedTimestamp;
+        const reportGeneratorRequestCompletedMeasurements = { completedRequests: 1 };
+        setupTrackEvent('ReportGeneratorTaskCompleted', telemetryMeasurements);
+        setupTrackEvent('ReportGeneratorRequestCompleted', reportGeneratorRequestCompletedMeasurements);
+        testSubject.requestsSubmitted = submittedTimestamp;
+        testSubject.requestsStarted = startedTimestamp;
 
-        testSubject.trackScanCompleted();
+        testSubject.trackRequestCompleted();
     });
 
-    it('trackScanCompleted does nothing if there is no scan start time set', () => {
-        loggerMock.setup((l) => l.trackEvent(It.isAny(), It.isAny(), It.isAny())).verifiable(Times.never());
-        testSubject.scanSubmitted = scanSubmittedTimestamp;
+    it('track request completed is skipped if there is no scan start time set', () => {
+        loggerMock.setup((o) => o.trackEvent(It.isAny(), It.isAny(), It.isAny())).verifiable(Times.never());
+        testSubject.requestsSubmitted = submittedTimestamp;
 
-        testSubject.trackScanCompleted();
+        testSubject.trackRequestCompleted();
     });
 
-    it('trackScanCompleted does nothing if there is no scan submitted time set', () => {
-        loggerMock.setup((l) => l.trackEvent(It.isAny(), It.isAny(), It.isAny())).verifiable(Times.never());
-        testSubject.scanStarted = scanStartedTimestamp;
+    it('track request completed is skipped if there is no scan submitted time set', () => {
+        loggerMock.setup((o) => o.trackEvent(It.isAny(), It.isAny(), It.isAny())).verifiable(Times.never());
+        testSubject.requestsStarted = startedTimestamp;
 
-        testSubject.trackScanCompleted();
+        testSubject.trackRequestCompleted();
     });
 
     function setupTrackEvent(eventName: LoggerEvent, measurements: TelemetryMeasurements[LoggerEvent]): void {
-        loggerMock.setup((l) => l.trackEvent(eventName, undefined, measurements)).verifiable();
+        loggerMock.setup((o) => o.trackEvent(eventName, undefined, measurements)).verifiable();
     }
 });

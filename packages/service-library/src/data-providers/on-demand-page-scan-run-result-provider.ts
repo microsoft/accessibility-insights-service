@@ -7,6 +7,8 @@ import { flatMap, groupBy } from 'lodash';
 import { ItemType, OnDemandPageScanResult } from 'storage-documents';
 import * as cosmos from '@azure/cosmos';
 import pLimit from 'p-limit';
+import { GlobalLogger } from 'logger';
+import { System } from 'common';
 import { PartitionKeyFactory } from '../factories/partition-key-factory';
 import { OperationResult } from './operation-result';
 
@@ -18,6 +20,7 @@ export class OnDemandPageScanRunResultProvider {
         @inject(cosmosContainerClientTypes.OnDemandScanRunsCosmosContainerClient)
         private readonly cosmosContainerClient: CosmosContainerClient,
         @inject(PartitionKeyFactory) private readonly partitionKeyFactory: PartitionKeyFactory,
+        @inject(GlobalLogger) private readonly logger: GlobalLogger,
     ) {}
 
     public async readScanRun(scanId: string): Promise<OnDemandPageScanResult> {
@@ -51,6 +54,30 @@ export class OnDemandPageScanRunResultProvider {
         );
 
         return flatMap(response);
+    }
+
+    public async tryUpdateScanRuns(requests: Partial<OnDemandPageScanResult>[]): Promise<OperationResult<OnDemandPageScanResult>[]> {
+        const limit = pLimit(this.maxConcurrencyLimit);
+
+        return Promise.all(
+            requests.map(async (request) => {
+                return limit(async () => {
+                    let operationResponse: OperationResult<OnDemandPageScanResult>;
+                    try {
+                        operationResponse = await this.tryUpdateScanRun(request);
+                    } catch (error) {
+                        this.logger.logError('Failed to update scan result document in a batch.', {
+                            error: System.serializeError(error),
+                        });
+                        operationResponse = { succeeded: false };
+                    }
+
+                    return operationResponse.succeeded === true
+                        ? operationResponse
+                        : { succeeded: false, result: request as OnDemandPageScanResult };
+                });
+            }),
+        );
     }
 
     /**
