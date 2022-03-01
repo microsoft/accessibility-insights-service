@@ -3797,15 +3797,15 @@ accepts@~1.3.4, accepts@~1.3.7:
     mime-types "~2.1.24"
     negotiator "0.6.2"
 
-accessibility-insights-report@4.2.0:
-  version "4.2.0"
-  resolved "https://registry.yarnpkg.com/accessibility-insights-report/-/accessibility-insights-report-4.2.0.tgz#3b454debf9e752504511ed880bbefabd2c1d5240"
-  integrity sha512-6UOH1WehCG8xdESpFa9l1CPhzLmN9Xp+G23CD2qNED3ErLvicCaJ+ymE2sRaBhtxia2twUx+k6A+jqznb1H2Ag==
+accessibility-insights-report@4.2.1:
+  version "4.2.1"
+  resolved "https://registry.yarnpkg.com/accessibility-insights-report/-/accessibility-insights-report-4.2.1.tgz#8da0fdea79e1a2d419f4538067d65ee09547c183"
+  integrity sha512-OJe/pO/Dvyk9iZ28pV9ScXQu/77iLdVqaNMpfiOSnWEcbK5VdE6i6o5XL0Wf0zDWUBuKpJOLmQuTIINDRW/BYg==
   dependencies:
     axe-core "4.3.2"
     classnames "^2.3.1"
     lodash "^4.17.21"
-    luxon "^2.0.2"
+    luxon "^2.3.0"
     office-ui-fabric-react "7.98.1"
     react "^16.14.0"
     react-dom "^16.14.0"
@@ -9370,10 +9370,10 @@ lru-cache@^6.0.0:
   dependencies:
     yallist "^4.0.0"
 
-luxon@^2.0.2:
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/luxon/-/luxon-2.0.2.tgz#11f2cd4a11655fdf92e076b5782d7ede5bcdd133"
-  integrity sha512-ZRioYLCgRHrtTORaZX1mx+jtxKtKuI5ZDvHNAmqpUzGqSrR+tL4FVLn/CUGMA3h0+AKD1MAxGI5GnCqR5txNqg==
+luxon@^2.3.0:
+  version "2.3.1"
+  resolved "https://registry.yarnpkg.com/luxon/-/luxon-2.3.1.tgz#f276b1b53fd9a740a60e666a541a7f6dbed4155a"
+  integrity sha512-I8vnjOmhXsMSlNMZlMkSOvgrxKJl0uOsEzdGgGNZuZPaS9KlefpE9KV95QFftlJSC+1UyCC9/I69R02cz/zcCA==
 
 magic-string@^0.25.7:
   version "0.25.7"
