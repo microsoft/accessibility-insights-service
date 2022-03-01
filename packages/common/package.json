@@ -41,7 +41,7 @@
         "inversify": "^6.0.1",
         "lodash": "^4.17.21",
         "normalize-path": "^3.0.0",
-        "raw-body": "^2.4.2",
+        "raw-body": "^2.5.1",
         "reflect-metadata": "^0.1.13",
         "serialize-error": "^8.1.0",
         "sha.js": "^2.4.11",
