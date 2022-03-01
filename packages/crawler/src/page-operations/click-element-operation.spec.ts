@@ -3,15 +3,15 @@
 
 import 'reflect-metadata';
 
+import Apify from 'apify';
 import { Page } from 'puppeteer';
 import { IMock, It, Mock } from 'typemoq';
-import { ApifySdkWrapper } from '../apify/apify-sdk-wrapper';
 import { ClickElementOperation } from './click-element-operation';
 
 /* eslint-disable @typescript-eslint/no-explicit-any, no-empty,@typescript-eslint/no-empty-function */
 describe(ClickElementOperation, () => {
     let clickElementOp: ClickElementOperation;
-    let apifyWrapperMock: IMock<ApifySdkWrapper>;
+    let enqueueLinksByClickingElementsExtMock: IMock<typeof Apify.utils.puppeteer.enqueueLinksByClickingElements>;
     let pageStub: Page;
 
     beforeEach(() => {
@@ -19,13 +19,13 @@ describe(ClickElementOperation, () => {
         pageStub = {
             url: () => 'pageUrl',
         } as any;
-        apifyWrapperMock = Mock.ofType<ApifySdkWrapper>();
-        clickElementOp = new ClickElementOperation(apifyWrapperMock.object);
+        enqueueLinksByClickingElementsExtMock = Mock.ofType<typeof Apify.utils.puppeteer.enqueueLinksByClickingElements>();
+        clickElementOp = new ClickElementOperation(enqueueLinksByClickingElementsExtMock.object);
     });
 
     it('Click', async () => {
-        apifyWrapperMock
-            .setup((a) => a.enqueueLinksByClickingElements(It.isAny()))
+        enqueueLinksByClickingElementsExtMock
+            .setup((elm) => elm(It.isAny()))
             .returns(async () => [])
             .verifiable();
 
@@ -33,6 +33,6 @@ describe(ClickElementOperation, () => {
     });
 
     afterEach(() => {
-        apifyWrapperMock.verifyAll();
+        enqueueLinksByClickingElementsExtMock.verifyAll();
     });
 });

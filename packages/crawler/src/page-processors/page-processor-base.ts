@@ -1,20 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+import Apify from 'apify';
 import { inject, injectable } from 'inversify';
 import * as Puppeteer from 'puppeteer';
 import { BrowserError, NavigationHooks } from 'scanner-global-library';
 import { System } from 'common';
-import {
-    BrowserCrawlingContext,
-    CrawlingContext,
-    HandleFailedRequest,
-    HandleFailedRequestInput,
-    PuppeteerHandlePage,
-    PuppeteerHandlePageFunctionParam,
-    QueueOperationInfo,
-    Request,
-} from 'apify';
 import _ from 'lodash';
 import { CrawlerConfiguration } from '../crawler/crawler-configuration';
 import { DataBase } from '../level-storage/data-base';
@@ -24,7 +15,6 @@ import { LocalDataStore } from '../storage/local-data-store';
 import { BlobStore, DataStore, scanResultStorageName } from '../storage/store-types';
 import { ApifyRequestQueueProvider, crawlerIocTypes } from '../types/ioc-types';
 import { ScanData } from '../types/scan-data';
-import { ApifySdkWrapper } from '../apify/apify-sdk-wrapper';
 
 /* eslint-disable no-invalid-this, @typescript-eslint/no-explicit-any */
 
@@ -34,14 +24,14 @@ export type PartialScanData = {
 } & Partial<ScanData>;
 
 export interface PageProcessor {
-    pageHandler: PuppeteerHandlePage;
-    pageErrorProcessor: HandleFailedRequest;
+    pageHandler: Apify.PuppeteerHandlePage;
+    pageErrorProcessor: Apify.HandleFailedRequest;
     preNavigation(crawlingContext: PuppeteerCrawlingContext, gotoOptions: any): Promise<void>;
     postNavigation(crawlingContext: PuppeteerCrawlingContext): Promise<void>;
 }
 
-export type PuppeteerCrawlingContext = CrawlingContext & { page: Puppeteer.Page };
-export type PuppeteerHandlePageInputs = CrawlingContext & BrowserCrawlingContext & PuppeteerHandlePageFunctionParam;
+export type PuppeteerCrawlingContext = Apify.CrawlingContext & { page: Puppeteer.Page };
+export type PuppeteerHandlePageInputs = Apify.CrawlingContext & Apify.BrowserCrawlingContext & Apify.PuppeteerHandlePageFunctionParam;
 
 export interface SessionData {
     requestId: string;
@@ -63,7 +53,7 @@ export abstract class PageProcessorBase implements PageProcessor {
     /**
      * Function that is called to process each request.
      */
-    public pageHandler: PuppeteerHandlePage = async (inputs: PuppeteerHandlePageInputs) => {
+    public pageHandler: Apify.PuppeteerHandlePage = async (inputs: PuppeteerHandlePageInputs) => {
         try {
             if (
                 _.isArray(inputs.session?.userData) &&
@@ -135,7 +125,7 @@ export abstract class PageProcessorBase implements PageProcessor {
     /**
      * This function is called when the crawling of a request failed after several reties
      */
-    public pageErrorProcessor: HandleFailedRequest = async ({ request, error }: HandleFailedRequestInput) => {
+    public pageErrorProcessor: Apify.HandleFailedRequest = async ({ request, error }: Apify.HandleFailedRequestInput) => {
         const scanData: ScanData = {
             id: request.id as string,
             url: request.url,
@@ -159,7 +149,8 @@ export abstract class PageProcessorBase implements PageProcessor {
         @inject(NavigationHooks) protected readonly navigationHooks: NavigationHooks,
         @inject(crawlerIocTypes.ApifyRequestQueueProvider) protected readonly requestQueueProvider: ApifyRequestQueueProvider,
         @inject(CrawlerConfiguration) protected readonly crawlerConfiguration: CrawlerConfiguration,
-        @inject(ApifySdkWrapper) protected readonly apifySdkWrapper: ApifySdkWrapper,
+        protected readonly enqueueLinksExt: typeof Apify.utils.enqueueLinks = Apify.utils.enqueueLinks,
+        protected readonly saveSnapshotExt: typeof Apify.utils.puppeteer.saveSnapshot = Apify.utils.puppeteer.saveSnapshot,
     ) {
         this.baseUrl = this.crawlerConfiguration.baseUrl();
         this.snapshot = this.crawlerConfiguration.snapshot();
@@ -172,11 +163,11 @@ export abstract class PageProcessorBase implements PageProcessor {
      * 'page' is an instance of Puppeteer.Page with page.goto(request.url) already called
      * 'request' is an instance of Request class with information about the page to load
      */
-    protected abstract processPage: PuppeteerHandlePage;
+    protected abstract processPage: Apify.PuppeteerHandlePage;
 
     protected async saveSnapshot(page: Puppeteer.Page, id: string): Promise<void> {
         if (this.snapshot) {
-            await this.apifySdkWrapper.saveSnapshot(page, {
+            await this.saveSnapshotExt(page, {
                 key: `${id}.screenshot`,
                 saveHtml: false,
                 keyValueStoreName: scanResultStorageName,
@@ -184,13 +175,13 @@ export abstract class PageProcessorBase implements PageProcessor {
         }
     }
 
-    protected async enqueueLinks(page: Puppeteer.Page): Promise<QueueOperationInfo[]> {
+    protected async enqueueLinks(page: Puppeteer.Page): Promise<Apify.QueueOperationInfo[]> {
         if (!this.discoverLinks) {
             return [];
         }
 
         const requestQueue = await this.requestQueueProvider();
-        const enqueued = await this.apifySdkWrapper.enqueueLinks({
+        const enqueued = await this.enqueueLinksExt({
             page,
             requestQueue,
             pseudoUrls: this.discoveryPatterns?.length > 0 ? this.discoveryPatterns : undefined, // prevents from crawling all links
@@ -204,7 +195,7 @@ export abstract class PageProcessorBase implements PageProcessor {
         await this.blobStore.setValue(`${scanData.id}.data`, scanData);
     }
 
-    protected async saveRunError(request: Request, error: unknown): Promise<void> {
+    protected async saveRunError(request: Apify.Request, error: unknown): Promise<void> {
         await this.dataBase.addScanResult(request.id as string, {
             id: request.id,
             url: request.url,
@@ -213,7 +204,7 @@ export abstract class PageProcessorBase implements PageProcessor {
         });
     }
 
-    protected async saveBrowserError(request: Request, error: BrowserError): Promise<void> {
+    protected async saveBrowserError(request: Apify.Request, error: BrowserError): Promise<void> {
         await this.dataBase.addScanResult(request.id as string, {
             id: request.id,
             url: request.url,
@@ -222,7 +213,7 @@ export abstract class PageProcessorBase implements PageProcessor {
         });
     }
 
-    protected async saveScanResult(request: Request, issueCount: number, selector?: string): Promise<void> {
+    protected async saveScanResult(request: Apify.Request, issueCount: number, selector?: string): Promise<void> {
         // add CSS selector of simulated element as URL bookmark part
         const url = selector === undefined ? request.url : `${request.url}#selector|${selector}`;
         await this.dataBase.addScanResult(request.id as string, {
@@ -247,11 +238,11 @@ export abstract class PageProcessorBase implements PageProcessor {
         }
     }
 
-    protected async logBrowserFailure(request: Request, browserError: BrowserError): Promise<void> {
+    protected async logBrowserFailure(request: Apify.Request, browserError: BrowserError): Promise<void> {
         await this.blobStore.setValue(`${request.id}.browser.err`, `${browserError.stack}`, { contentType: 'text/plain' });
     }
 
-    protected async logPageError(request: Request, error: Error): Promise<void> {
+    protected async logPageError(request: Apify.Request, error: Error): Promise<void> {
         await this.blobStore.setValue(`${request.id}.err`, `${error.stack}`, { contentType: 'text/plain' });
     }
 }

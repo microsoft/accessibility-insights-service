@@ -4,7 +4,6 @@
 import Apify from 'apify';
 import { inject, injectable } from 'inversify';
 import { NavigationHooks } from 'scanner-global-library';
-import { ApifySdkWrapper } from '../apify/apify-sdk-wrapper';
 import { ActiveElement } from '../browser-components/active-elements-finder';
 import { CrawlerConfiguration } from '../crawler/crawler-configuration';
 import { DataBase } from '../level-storage/data-base';
@@ -76,7 +75,8 @@ export class SimulatorPageProcessor extends PageProcessorBase {
         @inject(NavigationHooks) protected readonly navigationHooks: NavigationHooks,
         @inject(crawlerIocTypes.ApifyRequestQueueProvider) protected readonly requestQueueProvider: ApifyRequestQueueProvider,
         @inject(CrawlerConfiguration) protected readonly crawlerConfiguration: CrawlerConfiguration,
-        @inject(ApifySdkWrapper) protected readonly apifySdkWrapper: ApifySdkWrapper,
+        protected readonly enqueueLinksExt: typeof Apify.utils.enqueueLinks = Apify.utils.enqueueLinks,
+        protected readonly saveSnapshotExt: typeof Apify.utils.puppeteer.saveSnapshot = Apify.utils.puppeteer.saveSnapshot,
     ) {
         super(
             accessibilityScanOp,
@@ -86,7 +86,8 @@ export class SimulatorPageProcessor extends PageProcessorBase {
             navigationHooks,
             requestQueueProvider,
             crawlerConfiguration,
-            apifySdkWrapper,
+            enqueueLinksExt,
+            saveSnapshotExt,
         );
         this.selectors = this.crawlerConfiguration.selectors();
     }

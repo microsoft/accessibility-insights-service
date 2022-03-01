@@ -4,38 +4,35 @@
 import 'reflect-metadata';
 
 import * as Puppeteer from 'puppeteer';
-import { IMock, It, Mock, Times } from 'typemoq';
-import _ from 'lodash';
+import { IMock, Mock, Times } from 'typemoq';
+import { ApifySettings, ApifySettingsHandler } from '../apify/apify-settings';
 import { DiscoveryPatternFactory } from '../apify/discovery-patterns';
 import { CrawlerRunOptions } from '../types/crawler-run-options';
 import { RequestQueueOptions } from '../types/resource-creator';
-import { ApifySdkWrapper } from '../apify/apify-sdk-wrapper';
 import { CrawlerConfiguration } from './crawler-configuration';
 
 describe(CrawlerConfiguration, () => {
-    const defaultApifyStorageDir = './ai_scan_cli_output';
-
-    let apifyWrapperMock: IMock<ApifySdkWrapper>;
+    let apifySettingsHandlerMock: IMock<ApifySettingsHandler>;
     let crawlerRunOptionsMock: IMock<CrawlerRunOptions>;
     let crawlerConfiguration: CrawlerConfiguration;
     let createDiscoveryPatternMock: IMock<DiscoveryPatternFactory>;
 
     beforeEach(() => {
-        apifyWrapperMock = Mock.ofType<ApifySdkWrapper>();
+        apifySettingsHandlerMock = Mock.ofType<ApifySettingsHandler>();
         crawlerRunOptionsMock = Mock.ofType<CrawlerRunOptions>();
         createDiscoveryPatternMock = Mock.ofType<DiscoveryPatternFactory>();
 
-        crawlerConfiguration = new CrawlerConfiguration(apifyWrapperMock.object, createDiscoveryPatternMock.object);
+        crawlerConfiguration = new CrawlerConfiguration(apifySettingsHandlerMock.object, createDiscoveryPatternMock.object);
         crawlerConfiguration.setCrawlerRunOptions(crawlerRunOptionsMock.object);
     });
 
     afterEach(() => {
         crawlerRunOptionsMock.verifyAll();
-        apifyWrapperMock.verifyAll();
+        apifySettingsHandlerMock.verifyAll();
     });
 
     it('setCrawlerRunOptions', () => {
-        crawlerConfiguration = new CrawlerConfiguration(apifyWrapperMock.object, createDiscoveryPatternMock.object);
+        crawlerConfiguration = new CrawlerConfiguration(apifySettingsHandlerMock.object, createDiscoveryPatternMock.object);
         expect(crawlerConfiguration.baseUrl).toThrow();
         crawlerRunOptionsMock.verify((o) => o.baseUrl, Times.never());
 
@@ -63,15 +60,6 @@ describe(CrawlerConfiguration, () => {
             .verifiable();
 
         expect(crawlerConfiguration.localOutputDir()).toEqual('outputDir');
-    });
-
-    it('localOutputDir returns default directory if none is set', () => {
-        crawlerRunOptionsMock
-            .setup((o) => o.localOutputDir)
-            .returns(() => undefined)
-            .verifiable();
-
-        expect(crawlerConfiguration.localOutputDir()).toEqual(defaultApifyStorageDir);
     });
 
     it.each([true, false, undefined])('simulate = %s', (simulate) => {
@@ -238,34 +226,65 @@ describe(CrawlerConfiguration, () => {
         });
     });
 
-    describe('configure apify', () => {
-        it('sets default local storage dir if none is provided', () => {
-            crawlerRunOptionsMock.setup((c) => c.localOutputDir).returns(() => undefined);
-            crawlerRunOptionsMock.setup((c) => c.memoryMBytes).returns(() => undefined);
-            apifyWrapperMock.setup((a) => a.setLocalStorageDir(defaultApifyStorageDir)).verifiable();
-            apifyWrapperMock.setup((a) => a.setMemoryMBytes(It.isAny())).verifiable(Times.never());
+    describe('apify settings', () => {
+        let existingSettings: ApifySettings;
 
-            crawlerConfiguration.configureApify();
+        const prevApifyHeadless = 'prev apify headless value';
+        const prevApifyStorageDir = 'prev apify storage dir';
+        const prevChromePath = 'chrome path';
+
+        const defaultApifyHeadless = '1';
+        const defaultApifyStorageDir = './ai_scan_cli_output';
+
+        beforeEach(() => {
+            existingSettings = {
+                APIFY_HEADLESS: prevApifyHeadless,
+                APIFY_LOCAL_STORAGE_DIR: prevApifyStorageDir,
+                APIFY_CHROME_EXECUTABLE_PATH: prevChromePath,
+            };
+            apifySettingsHandlerMock.setup((ash) => ash.getApifySettings()).returns(() => existingSettings);
         });
 
-        it('sets local storage dir set by user', () => {
-            const outputDir = './output';
-            crawlerRunOptionsMock.setup((c) => c.localOutputDir).returns(() => outputDir);
-            crawlerRunOptionsMock.setup((c) => c.memoryMBytes).returns(() => undefined);
-            apifyWrapperMock.setup((a) => a.setLocalStorageDir(outputDir)).verifiable();
-            apifyWrapperMock.setup((a) => a.setMemoryMBytes(It.isAny())).verifiable(Times.never());
+        it('setDefaultApifySettings does not override existing APIFY_LOCAL_STORAGE_DIR', () => {
+            const expectedSettings = {
+                APIFY_HEADLESS: defaultApifyHeadless,
+                APIFY_LOCAL_STORAGE_DIR: prevApifyStorageDir,
+            };
+            apifySettingsHandlerMock.setup((ash) => ash.setApifySettings(expectedSettings)).verifiable();
 
-            crawlerConfiguration.configureApify();
+            crawlerConfiguration.setDefaultApifySettings();
         });
 
-        it('sets memoryMBytes if set by user', () => {
-            const memoryMBytes = 1024;
-            crawlerRunOptionsMock.setup((c) => c.localOutputDir).returns(() => undefined);
-            crawlerRunOptionsMock.setup((c) => c.memoryMBytes).returns(() => memoryMBytes);
-            apifyWrapperMock.setup((a) => a.setLocalStorageDir(defaultApifyStorageDir)).verifiable();
-            apifyWrapperMock.setup((a) => a.setMemoryMBytes(memoryMBytes)).verifiable();
+        it('setDefaultApifySettings sets APIFY_LOCAL_STORAGE_DIR, APIFY_HEADLESS and APIFY_CHROME_EXECUTABLE_PATH', () => {
+            const expectedSettings = {
+                APIFY_HEADLESS: defaultApifyHeadless,
+                APIFY_LOCAL_STORAGE_DIR: defaultApifyStorageDir,
+            };
+            apifySettingsHandlerMock.setup((ash) => ash.setApifySettings(expectedSettings)).verifiable();
+            existingSettings.APIFY_LOCAL_STORAGE_DIR = undefined;
+            existingSettings.APIFY_HEADLESS = undefined;
 
-            crawlerConfiguration.configureApify();
+            crawlerConfiguration.setDefaultApifySettings();
+        });
+
+        it('setChromePath', () => {
+            const chromePath = 'new chrome path';
+            const expectedSettings = {
+                APIFY_CHROME_EXECUTABLE_PATH: chromePath,
+            };
+            apifySettingsHandlerMock.setup((ash) => ash.setApifySettings(expectedSettings)).verifiable();
+
+            crawlerConfiguration.setChromePath(chromePath);
+        });
+
+        it('setSilentMode', () => {
+            const silentMode = false;
+            const expectedSettings = {
+                APIFY_HEADLESS: '0',
+            };
+            apifySettingsHandlerMock.setup((ash) => ash.setApifySettings(expectedSettings)).verifiable();
+
+            crawlerConfiguration.setSilentMode(silentMode);
         });
     });
 });

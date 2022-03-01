@@ -15,7 +15,6 @@ import { ClickElementOperation } from '../page-operations/click-element-operatio
 import { EnqueueActiveElementsOperation } from '../page-operations/enqueue-active-elements-operation';
 import { BlobStore, DataStore } from '../storage/store-types';
 import { ApifyRequestQueueProvider } from '../types/ioc-types';
-import { ApifySdkWrapper } from '../apify/apify-sdk-wrapper';
 import { SimulatorPageProcessor } from './simulator-page-processor';
 import { PuppeteerHandlePageInputs } from './page-processor-base';
 
@@ -32,7 +31,7 @@ describe(SimulatorPageProcessor, () => {
     let dataStoreMock: IMock<DataStore>;
     let blobStoreMock: IMock<BlobStore>;
     let dataBaseMock: IMock<DataBase>;
-    let apifyWrapperMock: IMock<ApifySdkWrapper>;
+    let enqueueLinksExtMock: IMock<typeof Apify.utils.enqueueLinks>;
     let clickElementOpMock: IMock<ClickElementOperation>;
     let enqueueActiveElementsOpExtMock: IMock<EnqueueActiveElementsOperation>;
     let navigationHooks: IMock<NavigationHooks>;
@@ -49,7 +48,7 @@ describe(SimulatorPageProcessor, () => {
         dataStoreMock = Mock.ofType<DataStore>();
         blobStoreMock = Mock.ofType<BlobStore>();
         dataBaseMock = Mock.ofType<DataBase>();
-        apifyWrapperMock = Mock.ofType<ApifySdkWrapper>();
+        enqueueLinksExtMock = Mock.ofType<typeof Apify.utils.enqueueLinks>();
         clickElementOpMock = Mock.ofType<ClickElementOperation>();
         enqueueActiveElementsOpExtMock = Mock.ofType<EnqueueActiveElementsOperation>();
         navigationHooks = Mock.ofType<NavigationHooks>();
@@ -99,12 +98,12 @@ describe(SimulatorPageProcessor, () => {
             navigationHooks.object,
             requestQueueProvider,
             crawlerConfigurationMock.object,
-            apifyWrapperMock.object,
+            enqueueLinksExtMock.object,
         );
     });
 
     afterEach(() => {
-        apifyWrapperMock.verifyAll();
+        enqueueLinksExtMock.verifyAll();
         accessibilityScanOpMock.verifyAll();
         blobStoreMock.verifyAll();
         enqueueActiveElementsOpExtMock.verifyAll();
@@ -163,8 +162,8 @@ describe(SimulatorPageProcessor, () => {
             requestQueue: requestQueueStub,
             pseudoUrls: discoveryPatterns,
         };
-        apifyWrapperMock
-            .setup((a) => a.enqueueLinks(options))
+        enqueueLinksExtMock
+            .setup((el) => el(options))
             .returns(async () => [])
             .verifiable();
     }

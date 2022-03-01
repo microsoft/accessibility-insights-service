@@ -7,7 +7,7 @@ import { Page, Response } from 'puppeteer';
 import { BrowserError, PageConfigurator, NavigationHooks } from 'scanner-global-library';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { System } from 'common';
-import { PuppeteerHandlePage, RequestQueue, Request, HandleFailedRequestInput } from 'apify';
+import Apify from 'apify';
 import { CrawlerConfiguration } from '../crawler/crawler-configuration';
 import { DataBase } from '../level-storage/data-base';
 import { AccessibilityScanOperation } from '../page-operations/accessibility-scan-operation';
@@ -15,7 +15,6 @@ import { BlobStore, DataStore } from '../storage/store-types';
 import { ApifyRequestQueueProvider } from '../types/ioc-types';
 import { ScanData } from '../types/scan-data';
 import { ScanResult } from '../level-storage/storage-documents';
-import { ApifySdkWrapper } from '../apify/apify-sdk-wrapper';
 import { PageProcessorBase, PuppeteerCrawlingContext, PuppeteerHandlePageInputs } from './page-processor-base';
 
 /* eslint-disable @typescript-eslint/no-explicit-any, , @typescript-eslint/consistent-type-assertions */
@@ -44,29 +43,31 @@ describe(PageProcessorBase, () => {
         stack: 'stack',
     };
 
-    let requestQueueStub: RequestQueue;
+    let requestQueueStub: Apify.RequestQueue;
     let accessibilityScanOpMock: IMock<AccessibilityScanOperation>;
     let dataStoreMock: IMock<DataStore>;
     let blobStoreMock: IMock<BlobStore>;
     let dataBaseMock: IMock<DataBase>;
-    let apifyWrapperMock: IMock<ApifySdkWrapper>;
-    let processPageMock: IMock<PuppeteerHandlePage>;
+    let enqueueLinksExtMock: IMock<typeof Apify.utils.enqueueLinks>;
+    let saveSnapshotMock: IMock<typeof Apify.utils.puppeteer.saveSnapshot>;
+    let processPageMock: IMock<Apify.PuppeteerHandlePage>;
     let navigationHooksMock: IMock<NavigationHooks>;
     let pageConfiguratorMock: IMock<PageConfigurator>;
     let crawlerConfigurationMock: IMock<CrawlerConfiguration>;
     let requestQueueProvider: ApifyRequestQueueProvider;
-    let requestStub: Request;
+    let requestStub: Apify.Request;
     let pageStub: Page;
     let pageProcessorBase: TestablePageProcessor;
 
     beforeEach(() => {
-        requestQueueStub = {} as RequestQueue;
+        requestQueueStub = {} as Apify.RequestQueue;
         accessibilityScanOpMock = Mock.ofType<AccessibilityScanOperation>();
         dataStoreMock = Mock.ofType<DataStore>();
         blobStoreMock = Mock.ofType<BlobStore>();
         dataBaseMock = Mock.ofType<DataBase>();
-        apifyWrapperMock = Mock.ofType<ApifySdkWrapper>();
-        processPageMock = Mock.ofType<PuppeteerHandlePage>();
+        enqueueLinksExtMock = Mock.ofType<typeof Apify.utils.enqueueLinks>();
+        saveSnapshotMock = Mock.ofType<typeof Apify.utils.puppeteer.saveSnapshot>();
+        processPageMock = Mock.ofType<Apify.PuppeteerHandlePage>();
         navigationHooksMock = Mock.ofType<NavigationHooks>();
         pageConfiguratorMock = Mock.ofType<PageConfigurator>();
         crawlerConfigurationMock = Mock.ofType(CrawlerConfiguration);
@@ -103,7 +104,8 @@ describe(PageProcessorBase, () => {
             navigationHooksMock.object,
             requestQueueProvider,
             crawlerConfigurationMock.object,
-            apifyWrapperMock.object,
+            enqueueLinksExtMock.object,
+            saveSnapshotMock.object,
         );
         pageProcessorBase.processPage = processPageMock.object;
     });
@@ -112,7 +114,7 @@ describe(PageProcessorBase, () => {
         blobStoreMock.verifyAll();
         dataStoreMock.verifyAll();
         processPageMock.verifyAll();
-        apifyWrapperMock.verifyAll();
+        saveSnapshotMock.verifyAll();
         navigationHooksMock.verifyAll();
         dataBaseMock.verifyAll();
         crawlerConfigurationMock.verifyAll();
@@ -247,7 +249,7 @@ describe(PageProcessorBase, () => {
         dataStoreMock.setup((ds) => ds.pushData(expectedScanData)).verifiable();
         setupScanErrorLogging();
 
-        pageProcessorBase.pageErrorProcessor({ request: requestStub, error } as HandleFailedRequestInput);
+        pageProcessorBase.pageErrorProcessor({ request: requestStub, error } as Apify.HandleFailedRequestInput);
     });
 
     it('invoke processPage()', async () => {
@@ -312,10 +314,10 @@ describe(PageProcessorBase, () => {
     });
 
     function setupSaveSnapshot(): void {
-        apifyWrapperMock.reset();
-        apifyWrapperMock
-            .setup((a) =>
-                a.saveSnapshot(pageStub, {
+        saveSnapshotMock.reset();
+        saveSnapshotMock
+            .setup((ssm) =>
+                ssm(pageStub, {
                     key: `${testId}.screenshot`,
                     saveHtml: false,
                     keyValueStoreName: 'scan-results',

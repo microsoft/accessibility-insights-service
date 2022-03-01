@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { PuppeteerCrawlerOptions } from 'apify';
+import Apify from 'apify';
 import { inject, injectable } from 'inversify';
 import { isEmpty } from 'lodash';
 import { CrawlerRunOptions } from '../types/crawler-run-options';
@@ -21,7 +21,9 @@ export class PuppeteerCrawlerEngine {
     ) {}
 
     public async start(crawlerRunOptions: CrawlerRunOptions): Promise<void> {
-        this.crawlerConfiguration.configureApify();
+        this.crawlerConfiguration.setDefaultApifySettings();
+        this.crawlerConfiguration.setMemoryMBytes(crawlerRunOptions.memoryMBytes);
+        this.crawlerConfiguration.setSilentMode(crawlerRunOptions.silentMode);
 
         const puppeteerDefaultOptions = [
             '--disable-dev-shm-usage',
@@ -30,7 +32,7 @@ export class PuppeteerCrawlerEngine {
             '--js-flags=--max-old-space-size=8192',
         ];
         const pageProcessor = this.pageProcessorFactory();
-        const puppeteerCrawlerOptions: PuppeteerCrawlerOptions = {
+        const puppeteerCrawlerOptions: Apify.PuppeteerCrawlerOptions = {
             useSessionPool: true,
             handlePageTimeoutSecs: 300, // timeout includes all page processing activity (navigation, rendering, accessibility scan, etc.)
             requestQueue: await this.requestQueueProvider(),
@@ -40,7 +42,6 @@ export class PuppeteerCrawlerEngine {
             handleFailedRequestFunction: pageProcessor.pageErrorProcessor,
             maxRequestsPerCrawl: this.crawlerConfiguration.maxRequestsPerCrawl(),
             launchContext: {
-                // useSessionPool
                 launchOptions: {
                     args: puppeteerDefaultOptions,
                     defaultViewport: {
@@ -48,14 +49,13 @@ export class PuppeteerCrawlerEngine {
                         height: 1080,
                         deviceScaleFactor: 1,
                     },
-                    headless: crawlerRunOptions.silentMode,
                 },
             },
         };
 
         if (!isEmpty(crawlerRunOptions.chromePath)) {
             puppeteerCrawlerOptions.launchContext.useChrome = true;
-            puppeteerCrawlerOptions.launchContext.launchOptions.executablePath = crawlerRunOptions.chromePath;
+            this.crawlerConfiguration.setChromePath(crawlerRunOptions.chromePath);
         }
 
         if (crawlerRunOptions.singleWorker === true) {
@@ -64,6 +64,8 @@ export class PuppeteerCrawlerEngine {
         }
 
         if (crawlerRunOptions.debug === true) {
+            this.crawlerConfiguration.setSilentMode(false);
+
             puppeteerCrawlerOptions.handlePageTimeoutSecs = 3600;
             puppeteerCrawlerOptions.navigationTimeoutSecs = 3600;
             puppeteerCrawlerOptions.maxConcurrency = 1;
@@ -73,10 +75,7 @@ export class PuppeteerCrawlerEngine {
                     maxAgeSecs: 3600,
                 },
             };
-            puppeteerCrawlerOptions.launchContext.launchOptions = {
-                headless: false,
-                args: ['--auto-open-devtools-for-tabs', ...puppeteerDefaultOptions],
-            };
+            puppeteerCrawlerOptions.launchContext.launchOptions.args = ['--auto-open-devtools-for-tabs', ...puppeteerDefaultOptions];
             puppeteerCrawlerOptions.browserPoolOptions = {
                 puppeteerOperationTimeoutSecs: 3600,
                 instanceKillerIntervalSecs: 3600,

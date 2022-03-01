@@ -1,18 +1,19 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { inject, injectable } from 'inversify';
+import { injectable } from 'inversify';
+import { isEmpty } from 'lodash';
+import { ApifySettings, ApifySettingsHandler, apifySettingsHandler } from '../apify/apify-settings';
 import { CrawlerRunOptions } from '../types/crawler-run-options';
 import { DiscoveryPatternFactory, getDiscoveryPatternForUrl } from '../apify/discovery-patterns';
 import { RequestQueueOptions } from '../types/resource-creator';
-import { ApifySdkWrapper } from '../apify/apify-sdk-wrapper';
 
 @injectable()
 export class CrawlerConfiguration {
     private _crawlerRunOptions: CrawlerRunOptions;
 
     public constructor(
-        @inject(ApifySdkWrapper) private readonly apifySdkWrapper: ApifySdkWrapper,
+        private readonly settingsHandler: ApifySettingsHandler = apifySettingsHandler,
         private readonly createDiscoveryPattern: DiscoveryPatternFactory = getDiscoveryPatternForUrl,
     ) {}
 
@@ -61,7 +62,7 @@ export class CrawlerConfiguration {
     }
 
     public localOutputDir(): string {
-        return this.crawlerRunOptions.localOutputDir ?? './ai_scan_cli_output';
+        return this.crawlerRunOptions.localOutputDir;
     }
 
     public simulate(): boolean {
@@ -77,11 +78,20 @@ export class CrawlerConfiguration {
         };
     }
 
-    public configureApify(): void {
-        this.apifySdkWrapper.setLocalStorageDir(this.localOutputDir());
-        if (this.crawlerRunOptions.memoryMBytes) {
-            this.apifySdkWrapper.setMemoryMBytes(this.crawlerRunOptions.memoryMBytes);
-        }
+    public setDefaultApifySettings(): void {
+        this.settingsHandler.setApifySettings(this.getDefaultApifySettings());
+    }
+
+    public setMemoryMBytes(memoryMBytes: number): void {
+        this.settingsHandler.setApifySettings({ APIFY_MEMORY_MBYTES: memoryMBytes?.toString() });
+    }
+
+    public setSilentMode(silentMode: boolean): void {
+        this.settingsHandler.setApifySettings({ APIFY_HEADLESS: silentMode === undefined ? undefined : silentMode ? '1' : '0' });
+    }
+
+    public setChromePath(chromePath: string): void {
+        this.settingsHandler.setApifySettings({ APIFY_CHROME_EXECUTABLE_PATH: chromePath });
     }
 
     private getMaxRequestsPerCrawl(maxRequestsPerCrawl: number): number {
@@ -106,5 +116,16 @@ export class CrawlerConfiguration {
 
     private getDiscoveryPattern(baseUrl: string, discoveryPatterns: string[]): string[] {
         return discoveryPatterns ?? this.getDefaultDiscoveryPattern(baseUrl);
+    }
+
+    private getDefaultApifySettings(): ApifySettings {
+        const currentSettings = this.settingsHandler.getApifySettings();
+
+        return {
+            APIFY_HEADLESS: '1',
+            APIFY_LOCAL_STORAGE_DIR: isEmpty(currentSettings.APIFY_LOCAL_STORAGE_DIR)
+                ? './ai_scan_cli_output'
+                : currentSettings.APIFY_LOCAL_STORAGE_DIR,
+        };
     }
 }
