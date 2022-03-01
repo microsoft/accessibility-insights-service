@@ -24,7 +24,7 @@
     "devDependencies": {
         "@types/jest": "^27.4.0",
         "@types/lodash": "^4.14.178",
-        "@types/node": "^12.20.43",
+        "@types/node": "^12.20.46",
         "filemanager-webpack-plugin": "^6.1.7",
         "fork-ts-checker-webpack-plugin": "^7.0.0",
         "jest": "^27.4.7",
