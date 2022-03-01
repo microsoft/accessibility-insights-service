@@ -21,7 +21,7 @@
     },
     "homepage": "https://github.com/Microsoft/accessibility-insights-service/tree/main/packages/web-api-scan-request-sender#readme",
     "devDependencies": {
-        "@types/jest": "^27.4.0",
+        "@types/jest": "^27.4.1",
         "copy-webpack-plugin": "^10.2.4",
         "fork-ts-checker-webpack-plugin": "^7.0.0",
         "jest": "^27.4.7",
