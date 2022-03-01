@@ -48,7 +48,7 @@
         "lodash": "^4.17.21",
         "logger": "1.0.0",
         "moment": "^2.29.1",
-        "node-fetch": "^3.1.1",
+        "node-fetch": "^3.2.1",
         "paralleljs": "^1.1.0",
         "p-limit": "^3.1.0",
         "privacy-scan-core": "1.0.0",
