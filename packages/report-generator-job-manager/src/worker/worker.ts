@@ -1,13 +1,32 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { Batch, BatchConfig, BatchTask, JobTask, Message, PoolLoadGenerator, PoolLoadSnapshot, Queue, StorageConfig } from 'azure-services';
-import { ServiceConfiguration, System } from 'common';
+import {
+    Batch,
+    BatchConfig,
+    BatchTask,
+    JobTask,
+    PoolLoadGenerator,
+    PoolLoadSnapshot,
+    client,
+    CosmosOperationResponse,
+} from 'azure-services';
+import { System, GuidGenerator, ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
-import { isNil, mergeWith } from 'lodash';
+import { mergeWith, isEmpty } from 'lodash';
 import { GlobalLogger } from 'logger';
-import { BatchPoolLoadSnapshotProvider, BatchTaskCreator, OnDemandPageScanRunResultProvider, ScanMessage } from 'service-library';
-import { OnDemandScanRequestMessage, StorageDocument } from 'storage-documents';
+import {
+    BatchPoolLoadSnapshotProvider,
+    BatchTaskCreator,
+    ScanMessage,
+    ReportGeneratorRequestProvider,
+    ScanReportGroup,
+} from 'service-library';
+import { StorageDocument } from 'storage-documents';
+
+export interface BatchTaskArguments {
+    scanGroupId: string;
+}
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -15,21 +34,16 @@ import { OnDemandScanRequestMessage, StorageDocument } from 'storage-documents';
 export class Worker extends BatchTaskCreator {
     public constructor(
         @inject(Batch) batch: Batch,
-        @inject(Queue) queue: Queue,
         @inject(PoolLoadGenerator) private readonly poolLoadGenerator: PoolLoadGenerator,
         @inject(BatchPoolLoadSnapshotProvider) private readonly batchPoolLoadSnapshotProvider: BatchPoolLoadSnapshotProvider,
-        @inject(OnDemandPageScanRunResultProvider) private readonly onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider,
+        @inject(ReportGeneratorRequestProvider) private readonly reportGeneratorRequestProvider: ReportGeneratorRequestProvider,
         @inject(BatchConfig) batchConfig: BatchConfig,
         @inject(ServiceConfiguration) serviceConfig: ServiceConfiguration,
-        @inject(StorageConfig) private readonly storageConfig: StorageConfig,
         @inject(GlobalLogger) logger: GlobalLogger,
+        @inject(GuidGenerator) protected readonly guidGenerator: GuidGenerator,
         system: typeof System = System,
     ) {
-        super(batch, queue, batchConfig, serviceConfig, logger, system);
-    }
-
-    public getQueueName(): string {
-        return this.storageConfig.scanQueue;
+        super(batch, batchConfig, serviceConfig, logger, system);
     }
 
     public async getMessagesForTaskCreation(): Promise<ScanMessage[]> {
@@ -38,11 +52,10 @@ export class Worker extends BatchTaskCreator {
         await this.writePoolLoadSnapshot(poolLoadSnapshot);
 
         let messages: ScanMessage[] = [];
-        const queueName = this.getQueueName();
         if (poolLoadSnapshot.tasksIncrementCountPerInterval > 0) {
-            const queueMessages = await this.queue.getMessagesWithTotalCount(queueName, poolLoadSnapshot.tasksIncrementCountPerInterval);
-            if (queueMessages?.length > 0) {
-                messages = this.convertToScanMessages(queueMessages);
+            const reportMessages = await this.readReportMessages(poolLoadSnapshot.tasksIncrementCountPerInterval);
+            if (reportMessages?.length > 0) {
+                messages = this.convertToScanMessages(reportMessages);
             }
         }
 
@@ -69,39 +82,43 @@ export class Worker extends BatchTaskCreator {
     public async handleFailedTasks(failedTasks: BatchTask[]): Promise<void> {
         await Promise.all(
             failedTasks.map(async (failedTask) => {
-                const taskArguments = JSON.parse(failedTask.taskArguments) as OnDemandScanRequestMessage;
-                if (!isNil(taskArguments?.id)) {
-                    let error = `Task was terminated unexpectedly. Exit code: ${failedTask.exitCode}`;
+                const taskArguments = JSON.parse(failedTask.taskArguments) as BatchTaskArguments;
+                if (!isEmpty(taskArguments?.scanGroupId)) {
+                    let error = `Report generator batch task was terminated unexpectedly. Exit code: ${failedTask.exitCode}`;
                     error =
                         failedTask.failureInfo !== undefined
                             ? // eslint-disable-next-line max-len
                               `${error}, Error category: ${failedTask.failureInfo.category}, Error details: ${failedTask.failureInfo.message}`
                             : error;
 
-                    const pageScanResult = await this.onDemandPageScanRunResultProvider.readScanRun(taskArguments.id);
-                    if (pageScanResult !== undefined) {
-                        pageScanResult.run = {
-                            state: 'failed',
-                            timestamp: failedTask.timestamp.toJSON(),
-                            error,
-                        };
-                        await this.onDemandPageScanRunResultProvider.updateScanRun(pageScanResult);
-                    } else {
-                        this.logger.logError(`Unable to find corresponding scan document in a result storage.`, {
-                            correlatedBatchTaskId: failedTask.id,
-                            taskProperties: JSON.stringify(failedTask),
-                        });
-                    }
-
                     this.logger.logError(error, { correlatedBatchTaskId: failedTask.id, taskProperties: JSON.stringify(failedTask) });
                 } else {
-                    this.logger.logError(`Unable to update failed scan run result. Task has no scan id run arguments defined.`, {
+                    this.logger.logError(`Report generator batch task was terminated unexpectedly.`, {
                         correlatedBatchTaskId: failedTask.id,
                         taskProperties: JSON.stringify(failedTask),
                     });
                 }
             }),
         );
+    }
+
+    private async readReportMessages(requestCount: number): Promise<ScanReportGroup[]> {
+        const reportMessages: ScanReportGroup[] = [];
+        let continuationToken: string;
+        do {
+            const response: CosmosOperationResponse<ScanReportGroup[]> = await this.reportGeneratorRequestProvider.readScanGroupIds(
+                requestCount,
+                continuationToken,
+            );
+            client.ensureSuccessStatusCode(response);
+
+            continuationToken = response.continuationToken;
+            if (response.item?.length > 0) {
+                reportMessages.push(...response.item);
+            }
+        } while (reportMessages.length < requestCount && continuationToken !== undefined);
+
+        return reportMessages;
     }
 
     private async writePoolLoadSnapshot(poolLoadSnapshot: PoolLoadSnapshot): Promise<void> {
@@ -113,17 +130,19 @@ export class Worker extends BatchTaskCreator {
         });
     }
 
-    private convertToScanMessages(messages: Message[]): ScanMessage[] {
-        return messages.map((message) => {
+    private convertToScanMessages(reportRequests: ScanReportGroup[]): ScanMessage[] {
+        return reportRequests.map((reportRequest) => {
+            const batchTaskScanData = {
+                messageId: this.guidGenerator.createGuid(),
+                // batch task parameters passed to container
+                messageText: JSON.stringify({ scanGroupId: reportRequest.scanGroupId } as BatchTaskArguments),
+            };
+
             return {
-                scanId: this.parseMessageBody(message).id,
-                messageId: message.messageId,
-                message: message,
+                scanId: reportRequest.scanGroupId,
+                messageId: batchTaskScanData.messageId,
+                message: batchTaskScanData,
             };
         });
-    }
-
-    private parseMessageBody(message: Message): OnDemandScanRequestMessage {
-        return message.messageText === undefined ? undefined : (JSON.parse(message.messageText) as OnDemandScanRequestMessage);
     }
 }

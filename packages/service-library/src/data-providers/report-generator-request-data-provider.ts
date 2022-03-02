@@ -10,6 +10,11 @@ import { System } from 'common';
 import { PartitionKeyFactory } from '../factories/partition-key-factory';
 import { OperationResult } from './operation-result';
 
+export interface ScanReportGroup {
+    scanCount: number;
+    scanGroupId: string;
+}
+
 @injectable()
 export class ReportGeneratorRequestProvider {
     public maxConcurrencyLimit = 5;
@@ -22,15 +27,41 @@ export class ReportGeneratorRequestProvider {
     ) {}
 
     public async readRequests(
+        scanGroupId: string,
+        itemCount: number = 100,
         continuationToken?: string,
-        itemsCount: number = 100,
     ): Promise<CosmosOperationResponse<ReportGeneratorRequest[]>> {
         const query = {
-            query: 'SELECT TOP @itemsCount * FROM c WHERE c.itemType = @itemType ORDER BY c.priority DESC',
+            query: 'SELECT TOP @itemCount * FROM c WHERE c.itemType = @itemType AND c.scanGroupId = @scanGroupId ORDER BY c.priority DESC',
             parameters: [
                 {
-                    name: '@itemsCount',
-                    value: itemsCount,
+                    name: '@itemCount',
+                    value: itemCount,
+                },
+                {
+                    name: '@itemType',
+                    value: ItemType.reportGeneratorRequest,
+                },
+                {
+                    name: '@scanGroupId',
+                    value: scanGroupId,
+                },
+            ],
+        };
+
+        return this.cosmosContainerClient.queryDocuments<ReportGeneratorRequest>(query, continuationToken);
+    }
+
+    public async readScanGroupIds(
+        itemCount: number = 100,
+        continuationToken?: string,
+    ): Promise<CosmosOperationResponse<ScanReportGroup[]>> {
+        const query = {
+            query: 'SELECT TOP @itemCount COUNT(1) as scanCount, t.scanGroupId FROM (SELECT * FROM c WHERE c.itemType = @itemType ORDER BY c.priority DESC) t GROUP BY t.scanGroupId',
+            parameters: [
+                {
+                    name: '@itemCount',
+                    value: itemCount,
                 },
                 {
                     name: '@itemType',
@@ -39,7 +70,7 @@ export class ReportGeneratorRequestProvider {
             ],
         };
 
-        return this.cosmosContainerClient.queryDocuments<ReportGeneratorRequest>(query, continuationToken);
+        return this.cosmosContainerClient.queryDocuments<ScanReportGroup>(query, continuationToken);
     }
 
     public async writeRequest(request: ReportGeneratorRequest): Promise<ReportGeneratorRequest> {

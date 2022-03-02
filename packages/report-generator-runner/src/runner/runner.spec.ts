@@ -309,7 +309,7 @@ function setupDeleteRequests(queuedRequests: ReportGeneratorRequest[]): void {
 
 function setupGetQueuedRequests(queuedRequests: QueuedRequests): void {
     requestSelectorMock
-        .setup((o) => o.getQueuedRequests(maxQueuedRequests))
+        .setup((o) => o.getQueuedRequests(reportGeneratorMetadata.scanGroupId, maxQueuedRequests))
         .returns(() => Promise.resolve(queuedRequests))
         .verifiable();
 }

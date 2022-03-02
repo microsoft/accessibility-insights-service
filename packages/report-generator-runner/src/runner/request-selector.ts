@@ -32,7 +32,7 @@ export class RequestSelector {
         @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
     ) {}
 
-    public async getQueuedRequests(queryCount: number = 50): Promise<QueuedRequests> {
+    public async getQueuedRequests(scanGroupId: string, queryCount: number = 50): Promise<QueuedRequests> {
         await this.init();
 
         const queuedRequests: QueuedRequests = {
@@ -43,8 +43,9 @@ export class RequestSelector {
         let continuationToken: string;
         do {
             const response: CosmosOperationResponse<ReportGeneratorRequest[]> = await this.reportGeneratorRequestProvider.readRequests(
-                continuationToken,
+                scanGroupId,
                 queryCount,
+                continuationToken,
             );
             client.ensureSuccessStatusCode(response);
 

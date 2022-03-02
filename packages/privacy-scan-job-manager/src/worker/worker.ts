@@ -15,7 +15,7 @@ import { OnDemandScanRequestMessage, StorageDocument } from 'storage-documents';
 export class Worker extends BatchTaskCreator {
     public constructor(
         @inject(Batch) batch: Batch,
-        @inject(Queue) queue: Queue,
+        @inject(Queue) private readonly queue: Queue,
         @inject(PoolLoadGenerator) private readonly poolLoadGenerator: PoolLoadGenerator,
         @inject(BatchPoolLoadSnapshotProvider) private readonly batchPoolLoadSnapshotProvider: BatchPoolLoadSnapshotProvider,
         @inject(OnDemandPageScanRunResultProvider) private readonly onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider,
@@ -25,11 +25,7 @@ export class Worker extends BatchTaskCreator {
         @inject(GlobalLogger) logger: GlobalLogger,
         system: typeof System = System,
     ) {
-        super(batch, queue, batchConfig, serviceConfig, logger, system);
-    }
-
-    public getQueueName(): string {
-        return this.storageConfig.scanQueue;
+        super(batch, batchConfig, serviceConfig, logger, system);
     }
 
     public async getMessagesForTaskCreation(): Promise<ScanMessage[]> {
@@ -60,10 +56,6 @@ export class Worker extends BatchTaskCreator {
         });
 
         return messages;
-    }
-
-    public async onTasksAdded(tasks: JobTask[]): Promise<void> {
-        this.poolLoadGenerator.setLastTasksIncrementCount(tasks.length);
     }
 
     public async handleFailedTasks(failedTasks: BatchTask[]): Promise<void> {
@@ -102,6 +94,18 @@ export class Worker extends BatchTaskCreator {
                 }
             }),
         );
+    }
+
+    public getQueueName(): string {
+        return this.storageConfig.scanQueue;
+    }
+
+    public async deleteSucceededRequest?(scanMessage: ScanMessage): Promise<void> {
+        await this.queue.deleteMessage(this.getQueueName(), scanMessage.message);
+    }
+
+    public async onTasksAdded(tasks: JobTask[]): Promise<void> {
+        this.poolLoadGenerator.setLastTasksIncrementCount(tasks.length);
     }
 
     private async writePoolLoadSnapshot(poolLoadSnapshot: PoolLoadSnapshot): Promise<void> {

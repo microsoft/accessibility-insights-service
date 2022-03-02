@@ -12,18 +12,14 @@ import { OnDemandNotificationRequestMessage } from 'storage-documents';
 export class SendNotificationTaskCreator extends BatchTaskCreator {
     public constructor(
         @inject(Batch) batch: Batch,
-        @inject(Queue) queue: Queue,
+        @inject(Queue) private readonly queue: Queue,
         @inject(BatchConfig) batchConfig: BatchConfig,
         @inject(ServiceConfiguration) serviceConfig: ServiceConfiguration,
         @inject(StorageConfig) private readonly storageConfig: StorageConfig,
         @inject(GlobalLogger) logger: GlobalLogger,
         system: typeof System = System,
     ) {
-        super(batch, queue, batchConfig, serviceConfig, logger, system);
-    }
-
-    public getQueueName(): string {
-        return this.storageConfig.notificationQueue;
+        super(batch, batchConfig, serviceConfig, logger, system);
     }
 
     public async getMessagesForTaskCreation(): Promise<ScanMessage[]> {
@@ -36,6 +32,14 @@ export class SendNotificationTaskCreator extends BatchTaskCreator {
         const queueMessages = await this.queue.getMessagesWithTotalCount(this.getQueueName(), messagesCount);
 
         return this.convertToScanMessages(queueMessages);
+    }
+
+    public getQueueName(): string {
+        return this.storageConfig.notificationQueue;
+    }
+
+    public async deleteSucceededRequest?(scanMessage: ScanMessage): Promise<void> {
+        await this.queue.deleteMessage(this.getQueueName(), scanMessage.message);
     }
 
     private convertToScanMessages(messages: Message[]): ScanMessage[] {

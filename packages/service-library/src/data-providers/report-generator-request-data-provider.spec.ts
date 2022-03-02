@@ -9,7 +9,7 @@ import { IMock, Mock } from 'typemoq';
 import * as cosmos from '@azure/cosmos';
 import { PartitionKeyFactory } from '../factories/partition-key-factory';
 import { MockableLogger } from '../test-utilities/mockable-logger';
-import { ReportGeneratorRequestProvider } from './report-generator-request-data-provider';
+import { ReportGeneratorRequestProvider, ScanReportGroup } from './report-generator-request-data-provider';
 
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/consistent-type-assertions */
 
@@ -39,17 +39,35 @@ describe(ReportGeneratorRequestProvider, () => {
 
     it('read requests', async () => {
         const itemCount = 5;
+        const scanGroupId = 'scanGroupId';
         const continuationToken = 'continuationToken';
         const response = {
             item: [{ id: 'id1' } as ReportGeneratorRequest],
             statusCode: 200,
         } as CosmosOperationResponse<ReportGeneratorRequest[]>;
         cosmosContainerClientMock
-            .setup((o) => o.queryDocuments(getQuery(itemCount), continuationToken))
+            .setup((o) => o.queryDocuments(getQueryForReadRequests(scanGroupId, itemCount), continuationToken))
             .returns(() => Promise.resolve(response))
             .verifiable();
 
-        const actualResponse = await reportGeneratorRequestProvider.readRequests(continuationToken, itemCount);
+        const actualResponse = await reportGeneratorRequestProvider.readRequests(scanGroupId, itemCount, continuationToken);
+
+        expect(actualResponse).toEqual(response);
+    });
+
+    it('read scan group ids', async () => {
+        const itemCount = 5;
+        const continuationToken = 'continuationToken';
+        const response = {
+            item: [{ scanCount: 1, scanGroupId: 'scanGroupId' } as ScanReportGroup],
+            statusCode: 200,
+        } as CosmosOperationResponse<ScanReportGroup[]>;
+        cosmosContainerClientMock
+            .setup((o) => o.queryDocuments(getQueryForReadScanGroupIds(itemCount), continuationToken))
+            .returns(() => Promise.resolve(response))
+            .verifiable();
+
+        const actualResponse = await reportGeneratorRequestProvider.readScanGroupIds(itemCount, continuationToken);
 
         expect(actualResponse).toEqual(response);
     });
@@ -250,17 +268,37 @@ describe(ReportGeneratorRequestProvider, () => {
             .verifiable();
     }
 
-    function getQuery(itemsCount: number): cosmos.SqlQuerySpec {
+    function getQueryForReadScanGroupIds(itemCount: number): cosmos.SqlQuerySpec {
         return {
-            query: 'SELECT TOP @itemsCount * FROM c WHERE c.itemType = @itemType ORDER BY c.priority DESC',
+            query: 'SELECT TOP @itemCount COUNT(1) as scanCount, t.scanGroupId FROM (SELECT * FROM c WHERE c.itemType = @itemType ORDER BY c.priority DESC) t GROUP BY t.scanGroupId',
             parameters: [
                 {
-                    name: '@itemsCount',
-                    value: itemsCount,
+                    name: '@itemCount',
+                    value: itemCount,
                 },
                 {
                     name: '@itemType',
                     value: ItemType.reportGeneratorRequest,
+                },
+            ],
+        };
+    }
+
+    function getQueryForReadRequests(scanGroupId: string, itemCount: number): cosmos.SqlQuerySpec {
+        return {
+            query: 'SELECT TOP @itemCount * FROM c WHERE c.itemType = @itemType AND c.scanGroupId = @scanGroupId ORDER BY c.priority DESC',
+            parameters: [
+                {
+                    name: '@itemCount',
+                    value: itemCount,
+                },
+                {
+                    name: '@itemType',
+                    value: ItemType.reportGeneratorRequest,
+                },
+                {
+                    name: '@scanGroupId',
+                    value: scanGroupId,
                 },
             ],
         };

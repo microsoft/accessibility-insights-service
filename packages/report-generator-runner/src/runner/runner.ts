@@ -46,7 +46,7 @@ export class Runner {
 
         this.telemetryManager.trackRequestStarted(runMetadata.scanGroupId);
         try {
-            const queuedRequests = await this.requestSelector.getQueuedRequests(this.maxQueuedRequests);
+            const queuedRequests = await this.requestSelector.getQueuedRequests(runMetadata.scanGroupId, this.maxQueuedRequests);
             await this.updateRequestStateToRunning(queuedRequests);
             queuedRequests.requestsToProcess = this.reportProcessor.generate(queuedRequests.requestsToProcess);
             this.moveCompletedRequestsForDeletion(queuedRequests);
