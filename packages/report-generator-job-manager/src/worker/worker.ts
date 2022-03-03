@@ -25,6 +25,7 @@ import {
 import { StorageDocument } from 'storage-documents';
 
 export interface BatchTaskArguments {
+    id: string;
     scanGroupId: string;
 }
 
@@ -132,15 +133,20 @@ export class Worker extends BatchTaskCreator {
 
     private convertToScanMessages(reportRequests: ScanReportGroup[]): ScanMessage[] {
         return reportRequests.map((reportRequest) => {
+            const id = this.guidGenerator.createGuid();
+            const batchTaskArguments: BatchTaskArguments = {
+                id,
+                scanGroupId: reportRequest.scanGroupId,
+            };
             const batchTaskScanData = {
-                messageId: this.guidGenerator.createGuid(),
+                messageId: id,
                 // batch task parameters passed to container
-                messageText: JSON.stringify({ scanGroupId: reportRequest.scanGroupId } as BatchTaskArguments),
+                messageText: JSON.stringify(batchTaskArguments),
             };
 
             return {
                 scanId: reportRequest.scanGroupId,
-                messageId: batchTaskScanData.messageId,
+                messageId: id,
                 message: batchTaskScanData,
             };
         });

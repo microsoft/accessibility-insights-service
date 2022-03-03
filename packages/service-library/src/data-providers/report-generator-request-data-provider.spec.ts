@@ -270,7 +270,7 @@ describe(ReportGeneratorRequestProvider, () => {
 
     function getQueryForReadScanGroupIds(itemCount: number): cosmos.SqlQuerySpec {
         return {
-            query: 'SELECT TOP @itemCount COUNT(1) as scanCount, t.scanGroupId FROM (SELECT * FROM c WHERE c.itemType = @itemType ORDER BY c.priority DESC) t GROUP BY t.scanGroupId',
+            query: 'SELECT TOP @itemCount COUNT(1) as scanCount, t.scanGroupId FROM (SELECT * FROM c WHERE c.itemType = @itemType) t GROUP BY t.scanGroupId',
             parameters: [
                 {
                     name: '@itemCount',

@@ -57,7 +57,7 @@ export class ReportGeneratorRequestProvider {
         continuationToken?: string,
     ): Promise<CosmosOperationResponse<ScanReportGroup[]>> {
         const query = {
-            query: 'SELECT TOP @itemCount COUNT(1) as scanCount, t.scanGroupId FROM (SELECT * FROM c WHERE c.itemType = @itemType ORDER BY c.priority DESC) t GROUP BY t.scanGroupId',
+            query: 'SELECT TOP @itemCount COUNT(1) as scanCount, t.scanGroupId FROM (SELECT * FROM c WHERE c.itemType = @itemType) t GROUP BY t.scanGroupId',
             parameters: [
                 {
                     name: '@itemCount',
@@ -80,10 +80,10 @@ export class ReportGeneratorRequestProvider {
         return (await operationResponse).item;
     }
 
-    public async deleteRequests(scanIds: string[]): Promise<void> {
+    public async deleteRequests(ids: string[]): Promise<void> {
         const limit = pLimit(this.maxConcurrencyLimit);
         await Promise.all(
-            scanIds.map(async (id) => {
+            ids.map(async (id) => {
                 return limit(async () => this.cosmosContainerClient.deleteDocument(id, this.getPartitionKey(id)));
             }),
         );

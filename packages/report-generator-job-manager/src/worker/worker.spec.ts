@@ -388,6 +388,7 @@ function createScanMessages(count: number, shift: number = 0): ScanMessage[] {
             message: {
                 messageId: `guid`,
                 messageText: JSON.stringify(<BatchTaskArguments>{
+                    id: `guid`,
                     scanGroupId: `scan-id-${i}`,
                 }),
             },

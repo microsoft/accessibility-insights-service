@@ -79,6 +79,9 @@ describe(RequestSelector, () => {
                     timestamp: moment(dateNow).add(-10, 'minutes').toJSON(),
                 },
             },
+            {
+                id: 'id5',
+            },
         ] as ReportGeneratorRequest[];
 
         const response1 = {
@@ -104,6 +107,7 @@ describe(RequestSelector, () => {
             requestsToProcess: [
                 { request: queuedRequests[2], condition: 'pending' },
                 { request: queuedRequests[3], condition: 'retry' },
+                { request: queuedRequests[4], condition: 'pending' },
             ],
             requestsToDelete: [
                 { request: queuedRequests[0], condition: 'completed' },
