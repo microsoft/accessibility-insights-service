@@ -7,6 +7,11 @@ import { QueuedRequest } from '../runner/request-selector';
 @injectable()
 export class ReportProcessor {
     public generate(queuedRequest: QueuedRequest[]): QueuedRequest[] {
-        return queuedRequest;
+        return queuedRequest.map((r) => {
+            return {
+                ...r,
+                condition: 'completed',
+            };
+        });
     }
 }
