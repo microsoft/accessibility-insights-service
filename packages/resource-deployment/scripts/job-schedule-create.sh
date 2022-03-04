@@ -25,6 +25,9 @@ parsedOnDemandScanScheduleFileName="on-demand-url-scan-schedule.generated.templa
 privacyScanScheduleJobName="privacy-scan-schedule"
 parsedPrivacyScanScheduleFileName="privacy-scan-schedule.generated.template.json"
 
+reportGeneratorScheduleJobName="report-generator-schedule"
+parsedReportGeneratorScheduleFileName="report-generator-schedule.generated.template.json"
+
 adjustJob() {
     local jobName=$1
     local jobTemplate=$2
@@ -82,6 +85,7 @@ sed -e "s@%APP_INSIGHTS_TOKEN%@$appInsightsKey@" -e "s@%KEY_VAULT_TOKEN%@$keyVau
 sed -e "s@%APP_INSIGHTS_TOKEN%@$appInsightsKey@" -e "s@%KEY_VAULT_TOKEN%@$keyVaultUrl@" -e "s@%CONTAINER_REGISTRY_TOKEN%@$containerRegistryName@" "$templatesFolder/on-demand-scan-req-schedule.template.json" >"$parsedOnDemandScanReqScheduleFileName"
 sed -e "s@%APP_INSIGHTS_TOKEN%@$appInsightsKey@" -e "s@%KEY_VAULT_TOKEN%@$keyVaultUrl@" -e "s@%CONTAINER_REGISTRY_TOKEN%@$containerRegistryName@" "$templatesFolder/on-demand-send-notification-schedule.template.json" >"$parsedOnDemandSendNotificationFileName"
 sed -e "s@%APP_INSIGHTS_TOKEN%@$appInsightsKey@" -e "s@%KEY_VAULT_TOKEN%@$keyVaultUrl@" -e "s@%CONTAINER_REGISTRY_TOKEN%@$containerRegistryName@" "$templatesFolder/privacy-scan-schedule.template.json" >"$parsedPrivacyScanScheduleFileName"
+sed -e "s@%APP_INSIGHTS_TOKEN%@$appInsightsKey@" -e "s@%KEY_VAULT_TOKEN%@$keyVaultUrl@" -e "s@%CONTAINER_REGISTRY_TOKEN%@$containerRegistryName@" "$templatesFolder/report-generator-schedule.template.json" >"$parsedReportGeneratorScheduleFileName"
 
 echo "Logging into batch account '$batchAccountName' in resource group '$resourceGroupName'..."
 az batch account login --name "$batchAccountName" --resource-group "$resourceGroupName"
@@ -93,5 +97,6 @@ adjustJob "$onDemandScanScheduleJobName" "$parsedOnDemandScanScheduleFileName" "
 adjustJob "$onDemandScanReqScheduleJobName" "$parsedOnDemandScanReqScheduleFileName" "$allJobsScheduleList"
 adjustJob "$onDemandSendNotificationJobName" "$parsedOnDemandSendNotificationFileName" "$allJobsScheduleList"
 adjustJob "$privacyScanScheduleJobName" "$parsedPrivacyScanScheduleFileName" "$allJobsScheduleList"
+adjustJob "$reportGeneratorScheduleJobName" "$parsedReportGeneratorScheduleFileName" "$allJobsScheduleList"
 
 echo "Job schedules were created successfully."
