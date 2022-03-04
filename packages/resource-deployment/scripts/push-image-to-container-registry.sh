@@ -58,6 +58,8 @@ setImageBuildSource() {
     batchScanNotificationRunnerDist="${0%/*}/../../../web-api-send-notification-runner/dist/"
     batchPrivacyScanRunnerDist="${0%/*}/../../../privacy-scan-runner/dist/"
     batchPrivacyScanJobManagerDist="${0%/*}/../../../privacy-scan-job-manager/dist/"
+    batchReportGeneratorRunnerDist="${0%/*}/../../../report-generator-runner/dist/"
+    batchReportGeneratorJobManagerDist="${0%/*}/../../../report-generator-job-manager/dist/"
 }
 
 prepareImageBuildSource() {
@@ -77,6 +79,8 @@ prepareImageBuildSource() {
     cp "${0%/*}/../runtime-config/runtime-config.$environment.json" "${batchScanNotificationRunnerDist}runtime-config.json"
     cp "${0%/*}/../runtime-config/runtime-config.$environment.json" "${batchPrivacyScanRunnerDist}runtime-config.json"
     cp "${0%/*}/../runtime-config/runtime-config.$environment.json" "${batchPrivacyScanJobManagerDist}runtime-config.json"
+    cp "${0%/*}/../runtime-config/runtime-config.$environment.json" "${batchReportGeneratorRunnerDist}runtime-config.json"
+    cp "${0%/*}/../runtime-config/runtime-config.$environment.json" "${batchReportGeneratorJobManagerDist}runtime-config.json"
     echo "Runtime configuration copied successfully."
 }
 
@@ -93,6 +97,8 @@ pushImagesToRegistry() (
         "pushImageToRegistry \"batch-scan-notification-runner\" $batchScanNotificationRunnerDist linux"
         "pushImageToRegistry \"batch-privacy-scan-runner\" $batchPrivacyScanRunnerDist windows"
         "pushImageToRegistry \"batch-privacy-scan-manager\" $batchPrivacyScanJobManagerDist windows"
+        "pushImageToRegistry \"batch-report-generator-runner\" $batchReportGeneratorRunnerDist linux"
+        "pushImageToRegistry \"batch-report-generator-manager\" $batchReportGeneratorJobManagerDist linux"
     )
 
     echo "Pushing images to Azure Container Registry."
