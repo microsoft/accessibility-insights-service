@@ -4,7 +4,7 @@
 import 'reflect-metadata';
 
 import { IMock, Mock, Times } from 'typemoq';
-import { Page, Response } from 'puppeteer';
+import { Page, HTTPResponse } from 'puppeteer';
 import { PageResponseProcessor } from './page-response-processor';
 import { PageNavigator } from './page-navigator';
 import { BrowserError } from './browser-error';
@@ -41,7 +41,7 @@ describe(PageNavigator, () => {
     });
 
     it('navigate', async () => {
-        const response = {} as Response;
+        const response = {} as HTTPResponse;
         const onNavigationErrorMock = jest.fn();
 
         pageMock

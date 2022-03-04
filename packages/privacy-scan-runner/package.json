@@ -57,7 +57,7 @@
         "lodash": "^4.17.21",
         "logger": "1.0.0",
         "moment": "^2.29.1",
-        "puppeteer": "^6.0.0",
+        "puppeteer": "^10.0.0",
         "reflect-metadata": "^0.1.13",
         "scanner-global-library": "1.0.0",
         "service-library": "1.0.0",

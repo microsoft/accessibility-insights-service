@@ -4,6 +4,7 @@
 import Apify from 'apify';
 import { inject, injectable } from 'inversify';
 import { isEmpty } from 'lodash';
+import Puppeteer from 'puppeteer';
 import { CrawlerRunOptions } from '../types/crawler-run-options';
 import { ApifyRequestQueueProvider, crawlerIocTypes, PageProcessorFactory } from '../types/ioc-types';
 import { CrawlerConfiguration } from './crawler-configuration';
@@ -43,13 +44,13 @@ export class PuppeteerCrawlerEngine {
             maxRequestsPerCrawl: this.crawlerConfiguration.maxRequestsPerCrawl(),
             launchContext: {
                 launchOptions: {
-                    args: puppeteerDefaultOptions,
+                    ignoreDefaultArgs: puppeteerDefaultOptions,
                     defaultViewport: {
                         width: 1920,
                         height: 1080,
                         deviceScaleFactor: 1,
                     },
-                },
+                } as Puppeteer.LaunchOptions,
             },
         };
 
@@ -75,7 +76,10 @@ export class PuppeteerCrawlerEngine {
                     maxAgeSecs: 3600,
                 },
             };
-            puppeteerCrawlerOptions.launchContext.launchOptions.args = ['--auto-open-devtools-for-tabs', ...puppeteerDefaultOptions];
+            puppeteerCrawlerOptions.launchContext.launchOptions.ignoreDefaultArgs = [
+                '--auto-open-devtools-for-tabs',
+                ...puppeteerDefaultOptions,
+            ];
             puppeteerCrawlerOptions.browserPoolOptions = {
                 puppeteerOperationTimeoutSecs: 3600,
                 instanceKillerIntervalSecs: 3600,

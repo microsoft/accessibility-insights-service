@@ -5,6 +5,7 @@ import 'reflect-metadata';
 
 import Apify from 'apify';
 import { IMock, Mock } from 'typemoq';
+import Puppeteer from 'puppeteer';
 import { PageProcessor, PageProcessorBase } from '../page-processors/page-processor-base';
 import { CrawlerRunOptions } from '../types/crawler-run-options';
 import { ApifyRequestQueueProvider } from '../types/ioc-types';
@@ -74,13 +75,13 @@ describe(PuppeteerCrawlerEngine, () => {
             maxRequestsPerCrawl: maxRequestsPerCrawl,
             launchContext: {
                 launchOptions: {
-                    args: puppeteerDefaultOptions,
+                    ignoreDefaultArgs: puppeteerDefaultOptions,
                     defaultViewport: {
                         width: 1920,
                         height: 1080,
                         deviceScaleFactor: 1,
                     },
-                },
+                } as Puppeteer.LaunchOptions,
             },
         };
 

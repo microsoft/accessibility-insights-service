@@ -25,7 +25,7 @@ export class NavigationHooks {
 
     public async postNavigation(
         page: Puppeteer.Page,
-        response: Puppeteer.Response,
+        response: Puppeteer.HTTPResponse,
         onNavigationError: (browserError: BrowserError, error?: unknown) => Promise<void> = () => Promise.resolve(),
     ): Promise<void> {
         if (_.isNil(response)) {

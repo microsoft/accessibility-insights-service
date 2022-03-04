@@ -3,7 +3,7 @@
 
 import 'reflect-metadata';
 
-import { Page, Response } from 'puppeteer';
+import { Page } from 'puppeteer';
 import { BrowserError, PageConfigurator, NavigationHooks } from 'scanner-global-library';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { System } from 'common';
@@ -124,7 +124,7 @@ describe(PageProcessorBase, () => {
         const crawlingContext: PuppeteerCrawlingContext = {
             page: pageStub,
             request: requestStub,
-            response: {} as Response,
+            response: {},
             session: {
                 userData: [],
             },

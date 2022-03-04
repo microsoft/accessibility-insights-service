@@ -35,8 +35,8 @@ let pageNavigatorMock: IMock<PageNavigator>;
 let loggerMock: IMock<MockableLogger>;
 let browserMock: IMock<Puppeteer.Browser>;
 let puppeteerPageMock: IMock<Puppeteer.Page>;
-let puppeteerResponseMock: IMock<Puppeteer.Response>;
-let puppeteerRequestMock: IMock<Puppeteer.Request>;
+let puppeteerResponseMock: IMock<Puppeteer.HTTPResponse>;
+let puppeteerRequestMock: IMock<Puppeteer.HTTPRequest>;
 let axePuppeteerMock: IMock<AxePuppeteer>;
 let privacyScannerMock: IMock<PrivacyPageScanner>;
 
@@ -57,8 +57,8 @@ describe(Page, () => {
         loggerMock = Mock.ofType(MockableLogger);
         browserMock = getPromisableDynamicMock(Mock.ofType<Puppeteer.Browser>());
         puppeteerPageMock = getPromisableDynamicMock(Mock.ofType<Puppeteer.Page>());
-        puppeteerResponseMock = getPromisableDynamicMock(Mock.ofType<Puppeteer.Response>());
-        puppeteerRequestMock = getPromisableDynamicMock(Mock.ofType<Puppeteer.Request>());
+        puppeteerResponseMock = getPromisableDynamicMock(Mock.ofType<Puppeteer.HTTPResponse>());
+        puppeteerRequestMock = getPromisableDynamicMock(Mock.ofType<Puppeteer.HTTPRequest>());
         axePuppeteerMock = getPromisableDynamicMock(Mock.ofType<AxePuppeteer>());
         privacyScannerMock = Mock.ofType<PrivacyPageScanner>();
 
@@ -66,7 +66,7 @@ describe(Page, () => {
             .setup(async (o) => o.version())
             .returns(() => Promise.resolve(scanResults.browserSpec))
             .verifiable();
-        puppeteerRequestMock.setup((o) => o.redirectChain()).returns(() => [] as Puppeteer.Request[]);
+        puppeteerRequestMock.setup((o) => o.redirectChain()).returns(() => [] as Puppeteer.HTTPRequest[]);
         puppeteerResponseMock.setup((o) => o.request()).returns(() => puppeteerRequestMock.object);
         puppeteerResponseMock.setup((o) => o.status()).returns(() => scanResults.pageResponseCode);
 
@@ -179,7 +179,7 @@ describe(Page, () => {
             puppeteerRequestMock.reset();
             puppeteerRequestMock
                 .setup((o) => o.redirectChain())
-                .returns(() => [{}] as Puppeteer.Request[])
+                .returns(() => [{}] as Puppeteer.HTTPRequest[])
                 .verifiable();
             setupPageConfigurator();
             simulatePageNavigation(puppeteerResponseMock.object);
@@ -201,7 +201,7 @@ describe(Page, () => {
             puppeteerRequestMock.reset();
             puppeteerRequestMock
                 .setup((o) => o.redirectChain())
-                .returns(() => [] as Puppeteer.Request[])
+                .returns(() => [] as Puppeteer.HTTPRequest[])
                 .verifiable();
             setupPageConfigurator();
             simulatePageNavigation(puppeteerResponseMock.object);
@@ -291,7 +291,7 @@ describe(Page, () => {
             puppeteerRequestMock.reset();
             puppeteerRequestMock
                 .setup((o) => o.redirectChain())
-                .returns(() => [{}] as Puppeteer.Request[])
+                .returns(() => [{}] as Puppeteer.HTTPRequest[])
                 .verifiable();
             puppeteerPageMock.setup((p) => p.url()).returns(() => redirectUrl);
             simulatePageNavigation(puppeteerResponseMock.object);
@@ -314,7 +314,7 @@ describe(Page, () => {
             puppeteerRequestMock.reset();
             puppeteerRequestMock
                 .setup((o) => o.redirectChain())
-                .returns(() => [] as Puppeteer.Request[])
+                .returns(() => [] as Puppeteer.HTTPRequest[])
                 .verifiable();
             puppeteerPageMock.setup((p) => p.url()).returns(() => redirectUrl);
             simulatePageNavigation(puppeteerResponseMock.object);
@@ -508,7 +508,7 @@ describe(Page, () => {
             .verifiable(Times.atLeastOnce());
     }
 
-    function simulatePageNavigation(response: Puppeteer.Response, browserError?: BrowserError): void {
+    function simulatePageNavigation(response: Puppeteer.HTTPResponse, browserError?: BrowserError): void {
         page.navigationResponse = response;
         page.lastBrowserError = browserError;
     }

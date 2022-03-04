@@ -32,7 +32,7 @@ export class PageNavigator {
         url: string,
         page: Puppeteer.Page,
         onNavigationError: (browserError: BrowserError, error?: unknown) => Promise<void> = () => Promise.resolve(),
-    ): Promise<Puppeteer.Response> {
+    ): Promise<Puppeteer.HTTPResponse> {
         await this.navigationHooks.preNavigation(page);
 
         // Try load all page resources
@@ -62,9 +62,9 @@ export class PageNavigator {
     private async navigateToUrl(
         url: string,
         page: Puppeteer.Page,
-        condition: Puppeteer.LoadEvent,
-    ): Promise<{ response: Puppeteer.Response; browserError?: BrowserError; error?: unknown }> {
-        let response: Puppeteer.Response;
+        condition: Puppeteer.PuppeteerLifeCycleEvent,
+    ): Promise<{ response: Puppeteer.HTTPResponse; browserError?: BrowserError; error?: unknown }> {
+        let response: Puppeteer.HTTPResponse;
         let browserError: BrowserError;
         try {
             const options = {

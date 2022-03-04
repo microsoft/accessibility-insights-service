@@ -45,7 +45,7 @@ export class PageHandler {
                 break;
             }
 
-            await page.waitFor(checkIntervalMsecs);
+            await page.waitForTimeout(checkIntervalMsecs);
             checkCount += 1;
         }
 

@@ -3,7 +3,7 @@
 
 import Puppeteer from 'puppeteer';
 
-export const defaultBrowserOptions: Puppeteer.BrowserOptions = {
+export const defaultBrowserOptions: Puppeteer.BrowserConnectOptions = {
     defaultViewport: {
         width: 1920,
         height: 1080,
@@ -11,7 +11,7 @@ export const defaultBrowserOptions: Puppeteer.BrowserOptions = {
     },
 };
 
-export const defaultLaunchOptions: Puppeteer.LaunchOptions = {
+export const defaultLaunchOptions: Puppeteer.PuppeteerNodeLaunchOptions = {
     headless: true,
     args: ['--disable-dev-shm-usage', '--no-sandbox', '--disable-setuid-sandbox', '--js-flags=--max-old-space-size=8192'],
     ...defaultBrowserOptions,

@@ -1,9 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import 'reflect-metadata';
 
 import { IMock, Mock } from 'typemoq';
-import { Page, Response } from 'puppeteer';
+import { Page, HTTPResponse } from 'puppeteer';
 import { PageResponseProcessor } from './page-response-processor';
 import { PageConfigurator } from './page-configurator';
 import { PageHandler } from './page-handler';
@@ -48,7 +49,7 @@ describe(NavigationHooks, () => {
     });
 
     it('postNavigation with successful response', async () => {
-        const response = {} as Response;
+        const response = {} as HTTPResponse;
         pageResponseProcessorMock
             .setup((o) => o.getResponseError(response))
             .returns(() => undefined)
@@ -58,7 +59,7 @@ describe(NavigationHooks, () => {
             .returns(() => Promise.resolve())
             .verifiable();
 
-        await navigationHooks.postNavigation(pageMock.object, {} as Response);
+        await navigationHooks.postNavigation(pageMock.object, {} as HTTPResponse);
     });
 
     it('postNavigation with undefined response', async () => {
@@ -77,7 +78,7 @@ describe(NavigationHooks, () => {
     });
 
     it('postNavigation with response error', async () => {
-        const response = {} as Response;
+        const response = {} as HTTPResponse;
         const browserError = {
             errorType: 'EmptyPage',
             message: 'message',
