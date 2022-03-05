@@ -29,6 +29,7 @@ export interface JobManagerConfig {
     scanRunnerTaskImageName: string;
     sendNotificationTaskImageName: string;
     privacyScanRunnerTaskImageName: string;
+    reportGeneratorRunnerTaskImageName: string;
 }
 
 export interface ScanRunTimeConfig {
@@ -215,6 +216,11 @@ export class ServiceConfiguration {
                 privacyScanRunnerTaskImageName: {
                     format: 'String',
                     default: 'batch-privacy-scan-runner',
+                    doc: 'The container image name used for task creation.',
+                },
+                reportGeneratorRunnerTaskImageName: {
+                    format: 'String',
+                    default: 'batch-report-generator-runner',
                     doc: 'The container image name used for task creation.',
                 },
             },
