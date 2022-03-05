@@ -48,15 +48,10 @@ describe(UrlCollectionRequestProcessor, () => {
                 url: 'url.xml',
             },
         } as Apify.HandleRequestInputs;
+        await testSubject.handleRequest(requestInputs);
         await testSubject.handleRequest(requestInputs2);
 
-        requestInputs2.request.url = 'url.htm';
-        await testSubject.handleRequest(requestInputs2);
-
-        requestInputs2.request.url = 'url.html';
-        await testSubject.handleRequest(requestInputs2);
-
-        expect(await testSubject.getResults()).toEqual(['url.htm', 'url.html']);
+        expect(await testSubject.getResults()).toEqual(['url']);
     });
 
     it('handleFailedRequest logs error', async () => {

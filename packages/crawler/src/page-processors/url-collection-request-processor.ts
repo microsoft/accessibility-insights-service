@@ -6,7 +6,6 @@ import { HandleRequestInputs, HandleFailedRequestInput } from 'apify';
 import { System } from 'common';
 import { inject, injectable } from 'inversify';
 import { GlobalLogger } from 'logger';
-import { isEmpty } from 'lodash';
 import { CrawlRequestProcessor } from './crawl-request-processor';
 
 /* eslint-disable no-invalid-this */
@@ -14,11 +13,16 @@ import { CrawlRequestProcessor } from './crawl-request-processor';
 @injectable()
 export class UrlCollectionRequestProcessor implements CrawlRequestProcessor {
     public handleRequest = async (inputs: HandleRequestInputs): Promise<void> => {
-        // filter out non-html link
+        // workaround to skip known non-html content to unblock WCP
+        // the web page content type can be detected only after receiving HTTP Content-Type header value
+        // after page content type is detected the page should be marked as non-scannable and processed respectively
+        // this will be implemented in web insights service
         const ext = path.extname(inputs.request.url);
-        if (isEmpty(ext) || ext === '.htm' || ext === '.html' || ext.length > 4) {
-            this.urlList.push(inputs.request.url);
+        if (ext === '.xml') {
+            return;
         }
+
+        this.urlList.push(inputs.request.url);
     };
 
     public handleRequestError = async (inputs: HandleFailedRequestInput): Promise<void> => {
