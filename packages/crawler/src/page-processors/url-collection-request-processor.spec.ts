@@ -1,9 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+import 'reflect-metadata';
+
 import Apify from 'apify';
 import { GlobalLogger } from 'logger';
-import 'reflect-metadata';
 import { IMock, It, Mock } from 'typemoq';
 import { UrlCollectionRequestProcessor } from './url-collection-request-processor';
 
@@ -13,13 +14,12 @@ describe(UrlCollectionRequestProcessor, () => {
             url: 'url',
         },
     } as Apify.HandleRequestInputs;
-    let loggerMock: IMock<GlobalLogger>;
 
+    let loggerMock: IMock<GlobalLogger>;
     let testSubject: UrlCollectionRequestProcessor;
 
     beforeEach(() => {
         loggerMock = Mock.ofType<GlobalLogger>();
-
         testSubject = new UrlCollectionRequestProcessor(loggerMock.object);
     });
 
@@ -40,6 +40,18 @@ describe(UrlCollectionRequestProcessor, () => {
         await testSubject.handleRequest(requestInputs2);
 
         expect(await testSubject.getResults()).toEqual(['url', 'url2']);
+    });
+
+    it('handleRequest adds only html links to list', async () => {
+        const requestInputs2 = {
+            request: {
+                url: 'url.xml',
+            },
+        } as Apify.HandleRequestInputs;
+        await testSubject.handleRequest(requestInputs);
+        await testSubject.handleRequest(requestInputs2);
+
+        expect(await testSubject.getResults()).toEqual(['url']);
     });
 
     it('handleFailedRequest logs error', async () => {
