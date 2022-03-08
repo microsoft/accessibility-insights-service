@@ -33,6 +33,8 @@ export interface BatchTaskArguments {
 
 @injectable()
 export class Worker extends BatchTaskCreator {
+    protected jobGroup: string;
+
     public constructor(
         @inject(Batch) batch: Batch,
         @inject(PoolLoadGenerator) private readonly poolLoadGenerator: PoolLoadGenerator,
@@ -47,8 +49,13 @@ export class Worker extends BatchTaskCreator {
         super(batch, batchConfig, serviceConfig, logger, system);
     }
 
+    public async init(): Promise<void> {
+        await super.init();
+        this.jobGroup = this.jobManagerConfig.reportGeneratorJobGroup;
+    }
+
     public async getMessagesForTaskCreation(): Promise<ScanMessage[]> {
-        const poolMetricsInfo = await this.batch.getPoolMetricsInfo();
+        const poolMetricsInfo = await this.batch.getPoolMetricsInfo(this.jobGroup);
         const poolLoadSnapshot = await this.poolLoadGenerator.getPoolLoadSnapshot(poolMetricsInfo);
         await this.writePoolLoadSnapshot(poolLoadSnapshot);
 

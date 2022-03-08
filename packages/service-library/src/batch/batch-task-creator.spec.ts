@@ -56,6 +56,8 @@ class TestableBatchTaskCreator extends BatchTaskCreator {
 
     public jobId: string;
 
+    public jobGroup: string = 'jobGroup';
+
     public async getQueueConfig(): Promise<QueueRuntimeConfig> {
         return super.getQueueConfig();
     }
@@ -193,6 +195,7 @@ class QueueMessagesGenerator {
     };
 }
 
+const jobGroup = 'jobGroup';
 const dateNowIso = '2019-12-12T12:00:00.000Z';
 mockDate.set(dateNowIso);
 
@@ -241,7 +244,7 @@ describe(BatchTaskCreator, () => {
                 runningTasks: 1,
             },
         };
-        batchMock.setup((o) => o.getPoolMetricsInfo()).returns(async () => Promise.resolve(poolMetricsInfo));
+        batchMock.setup((o) => o.getPoolMetricsInfo(jobGroup)).returns(async () => Promise.resolve(poolMetricsInfo));
         queueMessagesGenerator = new QueueMessagesGenerator();
 
         testSubject = new TestableBatchTaskCreator(
@@ -389,7 +392,7 @@ describe(BatchTaskCreator, () => {
             },
         };
         batchMock.reset();
-        batchMock.setup((o) => o.getPoolMetricsInfo()).returns(async () => Promise.resolve(poolMetricsInfo));
+        batchMock.setup((o) => o.getPoolMetricsInfo(jobGroup)).returns(async () => Promise.resolve(poolMetricsInfo));
 
         testSubject.enableBaseWorkflow = EnableBaseWorkflow.getJobPendingTasksCount;
 

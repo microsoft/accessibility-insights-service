@@ -4,7 +4,7 @@
 import 'reflect-metadata';
 
 import { Batch, BatchConfig, BatchTask, JobTask, JobTaskState, PoolLoadGenerator, PoolLoadSnapshot, PoolMetricsInfo } from 'azure-services';
-import { ServiceConfiguration, GuidGenerator } from 'common';
+import { ServiceConfiguration, GuidGenerator, JobManagerConfig } from 'common';
 import _ from 'lodash';
 import * as mockDate from 'mockdate';
 import { BatchPoolLoadSnapshotProvider, ScanMessage, ReportGeneratorRequestProvider, ScanReportGroup } from 'service-library';
@@ -119,6 +119,7 @@ class ReportRequestGenerator {
     };
 }
 
+const jobGroup = 'jobGroup';
 const dateNowIso = '2019-12-12T12:00:00.000Z';
 mockDate.set(dateNowIso);
 
@@ -135,7 +136,7 @@ let batchConfig: BatchConfig;
 let reportRequestGenerator: ReportRequestGenerator;
 
 describe(Worker, () => {
-    beforeEach(() => {
+    beforeEach(async () => {
         batchConfig = {
             accountName: 'batch-account-name',
             accountUrl: '',
@@ -160,8 +161,13 @@ describe(Worker, () => {
         guidGeneratorMock = Mock.ofType(GuidGenerator);
         serviceConfigMock = Mock.ofType(ServiceConfiguration);
 
-        batchMock.setup((o) => o.getPoolMetricsInfo()).returns(async () => Promise.resolve(poolMetricsInfo));
+        batchMock.setup((o) => o.getPoolMetricsInfo(jobGroup)).returns(async () => Promise.resolve(poolMetricsInfo));
         guidGeneratorMock.setup((o) => o.createGuid()).returns(() => 'guid');
+
+        serviceConfigMock
+            .setup((o) => o.getConfigValue('jobManagerConfig'))
+            .returns(() => Promise.resolve({ reportGeneratorJobGroup: jobGroup } as JobManagerConfig))
+            .verifiable();
 
         reportRequestGenerator = new ReportRequestGenerator();
 
@@ -175,6 +181,7 @@ describe(Worker, () => {
             loggerMock.object,
             guidGeneratorMock.object,
         );
+        await testSubject.init();
     });
 
     afterEach(() => {

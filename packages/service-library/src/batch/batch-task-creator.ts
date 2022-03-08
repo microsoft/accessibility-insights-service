@@ -59,6 +59,8 @@ export abstract class BatchTaskCreator {
         protected readonly system: typeof System = System,
     ) {}
 
+    protected abstract jobGroup: string;
+
     /**
      * The batch task may be retried when a task has failed.
      * Implement a task lock logic to prevent task reentrancy.
@@ -143,7 +145,7 @@ export abstract class BatchTaskCreator {
     }
 
     protected async getJobPendingTasksCount(): Promise<number> {
-        const poolMetricsInfo = await this.batch.getPoolMetricsInfo();
+        const poolMetricsInfo = await this.batch.getPoolMetricsInfo(this.jobGroup);
         const taskCount = poolMetricsInfo.load.activeTasks + poolMetricsInfo.load.runningTasks - 1; // exclude the job manager task
 
         return taskCount < 0 ? 0 : taskCount;

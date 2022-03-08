@@ -10,6 +10,8 @@ import { OnDemandNotificationRequestMessage } from 'storage-documents';
 
 @injectable()
 export class SendNotificationTaskCreator extends BatchTaskCreator {
+    protected jobGroup: string;
+
     public constructor(
         @inject(Batch) batch: Batch,
         @inject(Queue) private readonly queue: Queue,
@@ -20,6 +22,11 @@ export class SendNotificationTaskCreator extends BatchTaskCreator {
         system: typeof System = System,
     ) {
         super(batch, batchConfig, serviceConfig, logger, system);
+    }
+
+    public async init(): Promise<void> {
+        await super.init();
+        this.jobGroup = this.jobManagerConfig.sendNotificationJobGroup;
     }
 
     public async getMessagesForTaskCreation(): Promise<ScanMessage[]> {

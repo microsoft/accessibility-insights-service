@@ -74,6 +74,11 @@ Object {
     },
   },
   "jobManagerConfig": Object {
+    "accessibilityScanJobGroup": Object {
+      "default": "on-demand-url-scan-schedule",
+      "doc": "The prefix for accessibility scan batch job id.",
+      "format": "String",
+    },
     "activeToRunningTasksRatio": Object {
       "default": 3,
       "doc": "The target overload ratio of queued to running tasks. Higher ratio value will result higher queued tasks count.",
@@ -89,9 +94,19 @@ Object {
       "doc": "The amount of time the job manager instance will run continuously. Must correlate with queueConfig.messageVisibilityTimeoutInSeconds config value.",
       "format": "int",
     },
+    "privacyScanJobGroup": Object {
+      "default": "privacy-scan-schedule",
+      "doc": "The prefix for privacy scan batch job id.",
+      "format": "String",
+    },
     "privacyScanRunnerTaskImageName": Object {
       "default": "batch-privacy-scan-runner",
       "doc": "The container image name used for task creation.",
+      "format": "String",
+    },
+    "reportGeneratorJobGroup": Object {
+      "default": "report-generator-schedule",
+      "doc": "The prefix for report generator batch job id.",
       "format": "String",
     },
     "reportGeneratorRunnerTaskImageName": Object {
@@ -102,6 +117,11 @@ Object {
     "scanRunnerTaskImageName": Object {
       "default": "batch-scan-runner",
       "doc": "The container image name used for task creation.",
+      "format": "String",
+    },
+    "sendNotificationJobGroup": Object {
+      "default": "on-demand-send-notification-schedule",
+      "doc": "The prefix for send notification batch job id.",
       "format": "String",
     },
     "sendNotificationTaskImageName": Object {
@@ -284,6 +304,11 @@ Object {
     },
   },
   "jobManagerConfig": Object {
+    "accessibilityScanJobGroup": Object {
+      "default": "on-demand-url-scan-schedule",
+      "doc": "The prefix for accessibility scan batch job id.",
+      "format": "String",
+    },
     "activeToRunningTasksRatio": Object {
       "default": 3,
       "doc": "The target overload ratio of queued to running tasks. Higher ratio value will result higher queued tasks count.",
@@ -299,9 +324,19 @@ Object {
       "doc": "The amount of time the job manager instance will run continuously. Must correlate with queueConfig.messageVisibilityTimeoutInSeconds config value.",
       "format": "int",
     },
+    "privacyScanJobGroup": Object {
+      "default": "privacy-scan-schedule",
+      "doc": "The prefix for privacy scan batch job id.",
+      "format": "String",
+    },
     "privacyScanRunnerTaskImageName": Object {
       "default": "batch-privacy-scan-runner",
       "doc": "The container image name used for task creation.",
+      "format": "String",
+    },
+    "reportGeneratorJobGroup": Object {
+      "default": "report-generator-schedule",
+      "doc": "The prefix for report generator batch job id.",
       "format": "String",
     },
     "reportGeneratorRunnerTaskImageName": Object {
@@ -312,6 +347,11 @@ Object {
     "scanRunnerTaskImageName": Object {
       "default": "batch-scan-runner",
       "doc": "The container image name used for task creation.",
+      "format": "String",
+    },
+    "sendNotificationJobGroup": Object {
+      "default": "on-demand-send-notification-schedule",
+      "doc": "The prefix for send notification batch job id.",
       "format": "String",
     },
     "sendNotificationTaskImageName": Object {

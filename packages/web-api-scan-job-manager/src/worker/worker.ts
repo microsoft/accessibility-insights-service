@@ -13,6 +13,8 @@ import { OnDemandScanRequestMessage, StorageDocument } from 'storage-documents';
 
 @injectable()
 export class Worker extends BatchTaskCreator {
+    protected jobGroup: string;
+
     public constructor(
         @inject(Batch) batch: Batch,
         @inject(Queue) private readonly queue: Queue,
@@ -28,8 +30,13 @@ export class Worker extends BatchTaskCreator {
         super(batch, batchConfig, serviceConfig, logger, system);
     }
 
+    public async init(): Promise<void> {
+        await super.init();
+        this.jobGroup = this.jobManagerConfig.accessibilityScanJobGroup;
+    }
+
     public async getMessagesForTaskCreation(): Promise<ScanMessage[]> {
-        const poolMetricsInfo = await this.batch.getPoolMetricsInfo();
+        const poolMetricsInfo = await this.batch.getPoolMetricsInfo(this.jobGroup);
         const poolLoadSnapshot = await this.poolLoadGenerator.getPoolLoadSnapshot(poolMetricsInfo);
         await this.writePoolLoadSnapshot(poolLoadSnapshot);
 
