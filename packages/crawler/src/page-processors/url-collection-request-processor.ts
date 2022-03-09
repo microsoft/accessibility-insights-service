@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+import path from 'path';
 import { HandleRequestInputs, HandleFailedRequestInput } from 'apify';
 import { System } from 'common';
 import { inject, injectable } from 'inversify';
@@ -12,6 +13,15 @@ import { CrawlRequestProcessor } from './crawl-request-processor';
 @injectable()
 export class UrlCollectionRequestProcessor implements CrawlRequestProcessor {
     public handleRequest = async (inputs: HandleRequestInputs): Promise<void> => {
+        // workaround to skip known non-html content to unblock WCP
+        // the web page content type can be detected only after receiving HTTP Content-Type header value
+        // after page content type is detected the page should be marked as non-scannable and processed respectively
+        // this will be implemented in web insights service
+        const ext = path.extname(inputs.request.url);
+        if (ext === '.xml') {
+            return;
+        }
+
         this.urlList.push(inputs.request.url);
     };
 
