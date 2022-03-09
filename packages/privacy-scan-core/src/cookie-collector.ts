@@ -8,6 +8,8 @@ import * as Puppeteer from 'puppeteer';
 import { CookieScenario } from './cookie-scenarios';
 import { ReloadPageFunc, ReloadPageResponse } from '.';
 
+type GetAllCookiesResponse = { cookies: Puppeteer.Cookie[] };
+
 @injectable()
 export class CookieCollector {
     public async getCookiesForScenario(
@@ -38,7 +40,7 @@ export class CookieCollector {
 
     private async getCurrentCookies(page: Puppeteer.Page): Promise<CookieByDomain[]> {
         const results: CookieByDomain[] = [];
-        const cookies = await page.cookies();
+        const cookies = await this.getAllCookies(page);
         const groupedCookies = _.groupBy(cookies, (cookie) => cookie.domain);
         Object.keys(groupedCookies).forEach((domain) => {
             results.push({
@@ -56,8 +58,16 @@ export class CookieCollector {
         return results;
     }
 
+    private async getAllCookies(page: Puppeteer.Page): Promise<Puppeteer.Cookie[]> {
+        const client = await page.target().createCDPSession();
+        const response = (await client.send('Network.getAllCookies')) as GetAllCookiesResponse;
+        await client.detach();
+
+        return response.cookies;
+    }
+
     private async clearCookies(page: Puppeteer.Page, reloadPageFunc: ReloadPageFunc): Promise<ReloadPageResponse> {
-        await page.deleteCookie(...(await page.cookies()));
+        await page.deleteCookie(...(await this.getAllCookies(page)));
 
         return reloadPageFunc(page);
     }
