@@ -15,7 +15,7 @@ export class CrawlerConfiguration {
     public constructor(
         private readonly settingsHandler: ApifySettingsHandler = apifySettingsHandler,
         private readonly createDiscoveryPattern: DiscoveryPatternFactory = getDiscoveryPatternForUrl,
-    ) {}
+    ) { }
 
     private get crawlerRunOptions(): CrawlerRunOptions {
         if (!this._crawlerRunOptions) {
@@ -61,10 +61,6 @@ export class CrawlerConfiguration {
         return this.crawlerRunOptions.chromePath;
     }
 
-    public localOutputDir(): string {
-        return this.crawlerRunOptions.localOutputDir;
-    }
-
     public simulate(): boolean {
         return this.crawlerRunOptions.simulate ?? false;
     }
@@ -80,6 +76,10 @@ export class CrawlerConfiguration {
 
     public setDefaultApifySettings(): void {
         this.settingsHandler.setApifySettings(this.getDefaultApifySettings());
+    }
+
+    public setLocalOutputDir(outputDir: string): void {
+        this.settingsHandler.setApifySettings({ APIFY_LOCAL_STORAGE_DIR: outputDir });
     }
 
     public setMemoryMBytes(memoryMBytes: number): void {

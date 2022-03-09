@@ -25,6 +25,6 @@ export const apifySettingsHandler: ApifySettingsHandler = {
     getApifySettings(): ApifySettings {
         return {
             ...process.env,
-        };
+        } as ApifySettings;
     },
 };

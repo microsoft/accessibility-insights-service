@@ -53,15 +53,6 @@ describe(CrawlerConfiguration, () => {
         expect(crawlerConfiguration.baseUrl()).toEqual('baseUrl');
     });
 
-    it('localOutputDir', () => {
-        crawlerRunOptionsMock
-            .setup((o) => o.localOutputDir)
-            .returns(() => 'outputDir')
-            .verifiable();
-
-        expect(crawlerConfiguration.localOutputDir()).toEqual('outputDir');
-    });
-
     it.each([true, false, undefined])('simulate = %s', (simulate) => {
         crawlerRunOptionsMock
             .setup((o) => o.simulate)

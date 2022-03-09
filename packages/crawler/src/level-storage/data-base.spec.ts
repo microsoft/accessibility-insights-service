@@ -6,30 +6,23 @@ import 'reflect-metadata';
 import { LevelUp } from 'levelup';
 import { IMock, Mock, Times } from 'typemoq';
 import { generateHash } from '../utility/crypto';
-import { CrawlerConfiguration } from '../crawler/crawler-configuration';
 import { DataBase } from './data-base';
 import { DataBaseKey, ScanMetadata, ScanResult } from './storage-documents';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 describe(DataBase, () => {
-    let crawlerConfigMock: IMock<CrawlerConfiguration>;
     let dbMock: IMock<LevelUp>;
     let asyncIteratorMock: IMock<AsyncIterableIterator<string | Buffer>>;
     let readableStreamMock: IMock<NodeJS.ReadableStream>;
     let testSubject: DataBase;
 
-    const outputDir = './outputDir';
-
     beforeEach(() => {
-        crawlerConfigMock = Mock.ofType<CrawlerConfiguration>();
         dbMock = Mock.ofType<LevelUp>();
         asyncIteratorMock = Mock.ofType<AsyncIterableIterator<string | Buffer>>();
         readableStreamMock = Mock.ofType<NodeJS.ReadableStream>();
 
-        crawlerConfigMock.setup((c) => c.localOutputDir()).returns(() => outputDir);
-
-        testSubject = new DataBase(crawlerConfigMock.object, dbMock.object);
+        testSubject = new DataBase(dbMock.object);
     });
 
     afterEach(() => {

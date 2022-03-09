@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 import Apify from 'apify';
+import { PuppeteerPlugin } from 'browser-pool';
 import { inject, injectable } from 'inversify';
 import { isEmpty } from 'lodash';
 import Puppeteer from 'puppeteer';
@@ -19,10 +20,11 @@ export class PuppeteerCrawlerEngine {
         @inject(crawlerIocTypes.ApifyRequestQueueProvider) protected readonly requestQueueProvider: ApifyRequestQueueProvider,
         @inject(CrawlerFactory) private readonly crawlerFactory: CrawlerFactory,
         @inject(CrawlerConfiguration) private readonly crawlerConfiguration: CrawlerConfiguration,
-    ) {}
+    ) { }
 
     public async start(crawlerRunOptions: CrawlerRunOptions): Promise<void> {
         this.crawlerConfiguration.setDefaultApifySettings();
+        this.crawlerConfiguration.setLocalOutputDir(crawlerRunOptions.localOutputDir);
         this.crawlerConfiguration.setMemoryMBytes(crawlerRunOptions.memoryMBytes);
         this.crawlerConfiguration.setSilentMode(crawlerRunOptions.silentMode);
 
@@ -81,10 +83,10 @@ export class PuppeteerCrawlerEngine {
                 ...puppeteerDefaultOptions,
             ];
             puppeteerCrawlerOptions.browserPoolOptions = {
-                puppeteerOperationTimeoutSecs: 3600,
-                instanceKillerIntervalSecs: 3600,
-                killInstanceAfterSecs: 3600,
-                maxOpenPagesPerInstance: 1,
+                browserPlugins: [new PuppeteerPlugin(Puppeteer)],
+                operationTimeoutSecs: 3600,
+                closeInactiveBrowserAfterSecs: 3600,
+                maxOpenPagesPerBrowser: 1,
             };
         }
 
