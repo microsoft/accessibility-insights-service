@@ -50,7 +50,7 @@ export class TestOnDemandController extends WebController {
                 scanId: '', // set scanId
             },
             test: {
-                testGroupName: 'ScanReports', // set functionalTestGroupTypes
+                testGroupName: 'ScanReports', // set functionalTestGroupTypes value that match to test group class (under functional-tests package) to run
                 scenarioName: '',
             },
         };
