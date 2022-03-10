@@ -4,7 +4,13 @@
 import 'reflect-metadata';
 
 import { IMock, Mock, It } from 'typemoq';
-import { OnDemandPageScanRunResultProvider, WebsiteScanResultProvider, OperationResult, ReportWriter } from 'service-library';
+import {
+    OnDemandPageScanRunResultProvider,
+    WebsiteScanResultProvider,
+    OperationResult,
+    ReportWriter,
+    ReportGeneratorRequestProvider,
+} from 'service-library';
 import { GlobalLogger } from 'logger';
 import * as MockDate from 'mockdate';
 import {
@@ -15,7 +21,7 @@ import {
     OnDemandPageScanRunResult,
 } from 'storage-documents';
 import { AxeScanResults } from 'scanner-global-library';
-import { System, ServiceConfiguration, ScanRunTimeConfig } from 'common';
+import { System, ServiceConfiguration, ScanRunTimeConfig, GuidGenerator } from 'common';
 import { AxeResults } from 'axe-core';
 import { ScanMetadataConfig } from '../scan-metadata-config';
 import { PageScanProcessor } from '../scanner/page-scan-processor';
@@ -39,6 +45,8 @@ let scanNotificationProcessorMock: IMock<ScanNotificationProcessor>;
 let scanRunnerTelemetryManagerMock: IMock<ScanRunnerTelemetryManager>;
 let serviceConfigMock: IMock<ServiceConfiguration>;
 let loggerMock: IMock<GlobalLogger>;
+let guidGeneratorMock: IMock<GuidGenerator>;
+let reportGeneratorRequestProviderMock: IMock<ReportGeneratorRequestProvider>;
 let runner: Runner;
 let scanMetadataInput: ScanMetadata;
 let scanMetadata: ScanMetadata;
@@ -62,6 +70,8 @@ describe(Runner, () => {
         scanRunnerTelemetryManagerMock = Mock.ofType<ScanRunnerTelemetryManager>();
         serviceConfigMock = Mock.ofType(ServiceConfiguration);
         loggerMock = Mock.ofType<GlobalLogger>();
+        guidGeneratorMock = Mock.ofType<GuidGenerator>();
+        reportGeneratorRequestProviderMock = Mock.ofType<ReportGeneratorRequestProvider>();
 
         dateNow = new Date();
         MockDate.set(dateNow);
@@ -76,7 +86,15 @@ describe(Runner, () => {
             url: 'https://localhost/support page/',
             deepScan: false,
         } as ScanMetadata;
-        pageScanResultDbDocument = {} as OnDemandPageScanResult;
+        pageScanResultDbDocument = {
+            id: scanMetadata.id,
+            websiteScanRefs: [
+                {
+                    id: 'websiteScanId',
+                    scanGroupType: 'consolidated-scan-report',
+                },
+            ],
+        } as OnDemandPageScanResult;
         pageScanResult = {} as OnDemandPageScanResult;
         axeScanResults = {
             scannedUrl: 'scannedUrl',
@@ -95,6 +113,7 @@ describe(Runner, () => {
             scanMetadataConfigMock.object,
             onDemandPageScanRunResultProviderMock.object,
             WebsiteScanResultProviderMock.object,
+            reportGeneratorRequestProviderMock.object,
             pageScanProcessorMock.object,
             reportWriterMock.object,
             reportGeneratorMock.object,
@@ -102,6 +121,7 @@ describe(Runner, () => {
             scanNotificationProcessorMock.object,
             scanRunnerTelemetryManagerMock.object,
             serviceConfigMock.object,
+            guidGeneratorMock.object,
             loggerMock.object,
         );
     });
@@ -111,12 +131,14 @@ describe(Runner, () => {
         scanMetadataConfigMock.verifyAll();
         onDemandPageScanRunResultProviderMock.verifyAll();
         WebsiteScanResultProviderMock.verifyAll();
+        reportGeneratorRequestProviderMock.verifyAll();
         pageScanProcessorMock.verifyAll();
         reportWriterMock.verifyAll();
         reportGeneratorMock.verifyAll();
         combinedScanResultProcessorMock.verifyAll();
         scanNotificationProcessorMock.verifyAll();
         scanRunnerTelemetryManagerMock.verifyAll();
+        guidGeneratorMock.verifyAll();
         loggerMock.verifyAll();
     });
 
@@ -134,6 +156,17 @@ describe(Runner, () => {
         setupProcessScanResult();
         setupUpdateScanResult();
         setupScanNotificationProcessor();
+        await runner.run();
+    });
+
+    it('execute runner with sending generate combined report request', async () => {
+        pageScanResultDbDocument.websiteScanRefs[0].scanGroupId = 'scanGroupId';
+        setupScanMetadataConfig();
+        setupUpdateScanRunStateToRunning();
+        setupScanRunnerTelemetryManager();
+        setupPageScanProcessor();
+        setupProcessScanResult(true);
+        setupUpdateScanResult();
         await runner.run();
     });
 
@@ -236,6 +269,21 @@ describe(Runner, () => {
     });
 });
 
+function setupReportGeneratorRequestProvider(): void {
+    guidGeneratorMock
+        .setup((o) => o.createGuidFromBaseGuid(scanMetadata.id))
+        .returns(() => 'guid')
+        .verifiable();
+    const reportGeneratorRequest = {
+        id: 'guid',
+        scanId: pageScanResult.id,
+        scanGroupId: pageScanResultDbDocument.websiteScanRefs[0].scanGroupId,
+        priority: pageScanResult.priority,
+        reports: pageScanResult.reports,
+    };
+    reportGeneratorRequestProviderMock.setup((o) => o.writeRequest(It.isValue(reportGeneratorRequest))).verifiable();
+}
+
 function setupPageScanResultDbDocumentForDeepScan(): void {
     pageScanResultDbDocument.websiteScanRefs = [
         {
@@ -281,7 +329,7 @@ function setupUpdateScanResult(): void {
     }
 }
 
-function setupProcessScanResult(): void {
+function setupProcessScanResult(useReportGeneratorWorkflow: boolean = false): void {
     if (axeScanResults.error) {
         pageScanResult.run = {
             state: 'failed',
@@ -320,9 +368,14 @@ function setupProcessScanResult(): void {
             .setup((o) => o.writeBatch(generatedReports))
             .returns(() => Promise.resolve(reports))
             .verifiable();
-        combinedScanResultProcessorMock
-            .setup((o) => o.generateCombinedScanResults(It.isValue(axeScanResults), It.isValue(pageScanResult)))
-            .verifiable();
+
+        if (useReportGeneratorWorkflow) {
+            setupReportGeneratorRequestProvider();
+        } else {
+            combinedScanResultProcessorMock
+                .setup((o) => o.generateCombinedScanResults(It.isValue(axeScanResults), It.isValue(pageScanResult)))
+                .verifiable();
+        }
     }
 
     pageScanResult.run.pageTitle = axeScanResults.pageTitle;

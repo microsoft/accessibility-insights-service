@@ -42,10 +42,6 @@ export class CombinedScanResultProcessor {
 
     private async generateCombinedScanResultsImpl(axeScanResults: AxeScanResults, pageScanResult: OnDemandPageScanResult): Promise<void> {
         const websiteScanRef = this.getWebsiteScanRefs(pageScanResult);
-        if (!websiteScanRef) {
-            return;
-        }
-
         const websiteScanResult = await this.websiteScanResultProvider.read(websiteScanRef.id);
         const combinedResultsBlob = await this.combinedResultsBlobProvider.getBlob(websiteScanResult.combinedResultsBlobId);
         const combinedResultsBlobId = combinedResultsBlob.blobId;
@@ -81,10 +77,6 @@ export class CombinedScanResultProcessor {
     }
 
     private getWebsiteScanRefs(pageScanResult: OnDemandPageScanResult): WebsiteScanRef {
-        if (!pageScanResult.websiteScanRefs) {
-            return undefined;
-        }
-
         return pageScanResult.websiteScanRefs.find(
             (ref) => ref.scanGroupType === 'consolidated-scan-report' || ref.scanGroupType === 'deep-scan',
         );

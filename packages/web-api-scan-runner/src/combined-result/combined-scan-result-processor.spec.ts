@@ -91,10 +91,6 @@ describe(CombinedScanResultProcessor, () => {
         loggerMock.verifyAll();
     });
 
-    it('skip generating combined report if no scan group is defined', async () => {
-        await combinedScanResultProcessor.generateCombinedScanResults(axeScanResults, pageScanResult);
-    });
-
     it('generate combined report for consolidated scan request', async () => {
         pageScanResult = {
             id: 'id',

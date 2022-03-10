@@ -73,9 +73,14 @@ export class ReportGeneratorRequestProvider {
         return this.cosmosContainerClient.queryDocuments<ScanReportGroup>(query, continuationToken);
     }
 
-    public async writeRequest(request: ReportGeneratorRequest): Promise<ReportGeneratorRequest> {
-        this.setSystemProperties(request);
-        const operationResponse = this.cosmosContainerClient.mergeOrWriteDocument(request);
+    public async writeRequest(request: Partial<ReportGeneratorRequest>): Promise<ReportGeneratorRequest> {
+        if (request.id === undefined) {
+            throw new Error(`Cannot write report generator request document without id: ${JSON.stringify(request)}`);
+        }
+
+        const persistedResult = request as ReportGeneratorRequest;
+        this.setSystemProperties(persistedResult);
+        const operationResponse = this.cosmosContainerClient.mergeOrWriteDocument(persistedResult);
 
         return (await operationResponse).item;
     }

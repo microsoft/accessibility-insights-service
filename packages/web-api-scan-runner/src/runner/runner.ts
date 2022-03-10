@@ -4,7 +4,12 @@
 import { inject, injectable } from 'inversify';
 import { GlobalLogger } from 'logger';
 import { AxeScanResults } from 'scanner-global-library';
-import { OnDemandPageScanRunResultProvider, WebsiteScanResultProvider, ReportWriter } from 'service-library';
+import {
+    OnDemandPageScanRunResultProvider,
+    WebsiteScanResultProvider,
+    ReportWriter,
+    ReportGeneratorRequestProvider,
+} from 'service-library';
 import {
     OnDemandPageScanReport,
     OnDemandPageScanResult,
@@ -12,9 +17,10 @@ import {
     OnDemandScanResult,
     ScanError,
     WebsiteScanResult,
+    WebsiteScanRef,
 } from 'storage-documents';
-import { System, ServiceConfiguration } from 'common';
-import _ from 'lodash';
+import { System, ServiceConfiguration, GuidGenerator } from 'common';
+import { isEmpty, isString } from 'lodash';
 import { ReportGenerator } from '../report-generator/report-generator';
 import { ScanMetadataConfig } from '../scan-metadata-config';
 import { ScanRunnerTelemetryManager } from '../scan-runner-telemetry-manager';
@@ -29,6 +35,7 @@ export class Runner {
         @inject(ScanMetadataConfig) private readonly scanMetadataConfig: ScanMetadataConfig,
         @inject(OnDemandPageScanRunResultProvider) private readonly onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider,
         @inject(WebsiteScanResultProvider) protected readonly websiteScanResultProvider: WebsiteScanResultProvider,
+        @inject(ReportGeneratorRequestProvider) private readonly reportGeneratorRequestProvider: ReportGeneratorRequestProvider,
         @inject(PageScanProcessor) private readonly pageScanProcessor: PageScanProcessor,
         @inject(ReportWriter) protected readonly reportWriter: ReportWriter,
         @inject(ReportGenerator) private readonly reportGenerator: ReportGenerator,
@@ -36,6 +43,7 @@ export class Runner {
         @inject(ScanNotificationProcessor) protected readonly scanNotificationProcessor: ScanNotificationProcessor,
         @inject(ScanRunnerTelemetryManager) private readonly telemetryManager: ScanRunnerTelemetryManager,
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
+        @inject(GuidGenerator) protected readonly guidGenerator: GuidGenerator,
         @inject(GlobalLogger) private readonly logger: GlobalLogger,
     ) {}
 
@@ -47,7 +55,7 @@ export class Runner {
         this.logger.setCommonProperties({ scanId: scanMetadata.id, url: scanMetadata.url });
         this.logger.logInfo('Starting page scan task.');
 
-        const pageScanResult = await this.updateScanRunState(scanMetadata.id);
+        const pageScanResult = await this.updateScanRunStateToRunning(scanMetadata.id);
         if (pageScanResult === undefined) {
             return;
         }
@@ -67,37 +75,16 @@ export class Runner {
         }
 
         const websiteScanResult = await this.updateScanResult(scanMetadata, pageScanResult);
-        await this.scanNotificationProcessor.sendScanCompletionNotification(scanMetadata, pageScanResult, websiteScanResult);
+
+        if (this.isScanCompleted(pageScanResult)) {
+            await this.scanNotificationProcessor.sendScanCompletionNotification(scanMetadata, pageScanResult, websiteScanResult);
+        }
 
         this.logger.logInfo('Page scan task completed.');
     }
 
-    private async updateScanRunState(scanId: string): Promise<OnDemandPageScanResult> {
-        this.logger.logInfo(`Updating page scan run state to 'running'.`);
-        const partialPageScanResult: Partial<OnDemandPageScanResult> = {
-            id: scanId,
-            run: {
-                state: 'running',
-                timestamp: new Date().toJSON(),
-                error: null,
-            },
-            scanResult: null,
-            reports: null,
-        };
-        const response = await this.onDemandPageScanRunResultProvider.tryUpdateScanRun(partialPageScanResult);
-        if (!response.succeeded) {
-            this.logger.logWarn(
-                `Update page scan run state to 'running' failed due to merge conflict with other process. Exiting page scan task.`,
-            );
-
-            return undefined;
-        }
-
-        return response.result;
-    }
-
     private async processScanResult(axeScanResults: AxeScanResults, pageScanResult: OnDemandPageScanResult): Promise<AxeScanResults> {
-        if (_.isNil(axeScanResults.error)) {
+        if (isEmpty(axeScanResults.error)) {
             this.setRunResult(pageScanResult, 'completed');
             pageScanResult.scanResult = this.getScanStatus(axeScanResults);
             pageScanResult.reports = await this.generateScanReports(axeScanResults);
@@ -105,7 +92,7 @@ export class Runner {
                 pageScanResult.scannedUrl = axeScanResults.scannedUrl;
             }
 
-            await this.combinedScanResultProcessor.generateCombinedScanResults(axeScanResults, pageScanResult);
+            await this.sendGenerateConsolidatedReportRequest(axeScanResults, pageScanResult);
         } else {
             this.setRunResult(pageScanResult, 'failed', axeScanResults.error);
 
@@ -152,6 +139,30 @@ export class Runner {
         return undefined;
     }
 
+    private async updateScanRunStateToRunning(scanId: string): Promise<OnDemandPageScanResult> {
+        this.logger.logInfo(`Updating page scan run state to 'running'.`);
+        const partialPageScanResult: Partial<OnDemandPageScanResult> = {
+            id: scanId,
+            run: {
+                state: 'running',
+                timestamp: new Date().toJSON(),
+                error: null,
+            },
+            scanResult: null,
+            reports: null,
+        };
+        const response = await this.onDemandPageScanRunResultProvider.tryUpdateScanRun(partialPageScanResult);
+        if (!response.succeeded) {
+            this.logger.logWarn(
+                `Update page scan run state to 'running' failed due to merge conflict with other process. Exiting page scan task.`,
+            );
+
+            return undefined;
+        }
+
+        return response.result;
+    }
+
     private async generateScanReports(axeResults: AxeScanResults): Promise<OnDemandPageScanReport[]> {
         this.logger.logInfo(`Generating reports from scan results.`);
         const reports = this.reportGenerator.generateReports(axeResults);
@@ -164,7 +175,7 @@ export class Runner {
             ...pageScanResult.run,
             state,
             timestamp: new Date().toJSON(),
-            error: _.isString(error) ? error.substring(0, 2048) : error,
+            error: isString(error) ? error.substring(0, 2048) : error,
         };
     }
 
@@ -179,5 +190,59 @@ export class Runner {
                 state: 'pass',
             };
         }
+    }
+
+    private async sendGenerateConsolidatedReportRequest(
+        axeScanResults: AxeScanResults,
+        pageScanResult: OnDemandPageScanResult,
+    ): Promise<void> {
+        const websiteScanRef = this.getWebsiteScanRefs(pageScanResult);
+        if (!websiteScanRef) {
+            return;
+        }
+
+        // TODO remove after transition phase
+        // The transition workflow to support old report generation logic while
+        // new scan request documents will be created with websiteScanRef.scanGroupId metadata
+        if (websiteScanRef.scanGroupId === undefined) {
+            await this.combinedScanResultProcessor.generateCombinedScanResults(axeScanResults, pageScanResult);
+
+            return;
+        }
+
+        const reportGeneratorRequest = {
+            id: this.guidGenerator.createGuidFromBaseGuid(pageScanResult.id),
+            scanId: pageScanResult.id,
+            scanGroupId: websiteScanRef.scanGroupId,
+            priority: pageScanResult.priority,
+            reports: pageScanResult.reports,
+        };
+        await this.reportGeneratorRequestProvider.writeRequest(reportGeneratorRequest);
+
+        this.logger.logInfo('Sending request to generate consolidated report.', {
+            id: reportGeneratorRequest.id,
+            scanGroupId: websiteScanRef.scanGroupId,
+        });
+    }
+
+    private getWebsiteScanRefs(pageScanResult: OnDemandPageScanResult): WebsiteScanRef {
+        if (!pageScanResult.websiteScanRefs) {
+            return undefined;
+        }
+
+        return pageScanResult.websiteScanRefs.find(
+            (ref) => ref.scanGroupType === 'consolidated-scan-report' || ref.scanGroupType === 'deep-scan',
+        );
+    }
+
+    /**
+     * The scan is completed if there is no combined report generated
+     * or combined report generated via old workflow
+     */
+    private isScanCompleted(pageScanResult: OnDemandPageScanResult): boolean {
+        const websiteScanRef = this.getWebsiteScanRefs(pageScanResult);
+
+        // TODO remove websiteScanRef.scanGroupId === undefined condition
+        return websiteScanRef === undefined || websiteScanRef.scanGroupId === undefined;
     }
 }

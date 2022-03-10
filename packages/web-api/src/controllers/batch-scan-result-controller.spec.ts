@@ -48,6 +48,7 @@ describe(BatchScanResultController, () => {
         websiteScanRefs: [
             {
                 id: 'websiteScanId',
+                scanGroupId: 'scanGroupId',
                 scanGroupType: 'deep-scan',
             },
         ],

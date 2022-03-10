@@ -251,7 +251,11 @@ function setupOnDemandPageScanRunResultProviderMock(
                 const websiteScanRefs = websiteScanResults
                     .filter((r) => r.pageScans[0].scanId === request.scanId)
                     .map((r) => {
-                        return { id: r.id, scanGroupType: r.scanGroupType } as WebsiteScanRef;
+                        return {
+                            id: r.id,
+                            scanGroupId: r.scanGroupId,
+                            scanGroupType: r.scanGroupType,
+                        } as WebsiteScanRef;
                     });
                 const result: OnDemandPageScanResult = {
                     id: request.scanId,

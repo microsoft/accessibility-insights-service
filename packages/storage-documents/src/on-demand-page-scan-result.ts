@@ -81,5 +81,6 @@ export interface OnDemandPageScanRunResult {
 
 export interface WebsiteScanRef {
     id: string;
+    scanGroupId: string;
     scanGroupType: ScanGroupType;
 }
