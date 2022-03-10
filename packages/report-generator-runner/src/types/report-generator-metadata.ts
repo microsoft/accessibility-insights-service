@@ -2,5 +2,6 @@
 // Licensed under the MIT License.
 
 export interface ReportGeneratorMetadata {
+    id: string;
     scanGroupId: string;
 }

@@ -14,6 +14,7 @@ import { ReportGeneratorRequest } from 'storage-documents';
 import { RequestSelector } from './request-selector';
 
 const continuationToken = 'continuationToken';
+const scanGroupId = 'scanGroupId';
 
 let reportGeneratorRequestProviderMock: IMock<ReportGeneratorRequestProvider>;
 let serviceConfigMock: IMock<ServiceConfiguration>;
@@ -78,6 +79,9 @@ describe(RequestSelector, () => {
                     timestamp: moment(dateNow).add(-10, 'minutes').toJSON(),
                 },
             },
+            {
+                id: 'id5',
+            },
         ] as ReportGeneratorRequest[];
 
         const response1 = {
@@ -86,7 +90,7 @@ describe(RequestSelector, () => {
             continuationToken,
         };
         reportGeneratorRequestProviderMock
-            .setup((o) => o.readRequests(undefined, queryCount))
+            .setup((o) => o.readRequests(scanGroupId, queryCount, undefined))
             .returns(() => Promise.resolve(response1 as CosmosOperationResponse<ReportGeneratorRequest[]>))
             .verifiable();
 
@@ -95,7 +99,7 @@ describe(RequestSelector, () => {
             statusCode: 200,
         };
         reportGeneratorRequestProviderMock
-            .setup((o) => o.readRequests(continuationToken, queryCount))
+            .setup((o) => o.readRequests(scanGroupId, queryCount, continuationToken))
             .returns(() => Promise.resolve(response2 as CosmosOperationResponse<ReportGeneratorRequest[]>))
             .verifiable();
 
@@ -103,6 +107,7 @@ describe(RequestSelector, () => {
             requestsToProcess: [
                 { request: queuedRequests[2], condition: 'pending' },
                 { request: queuedRequests[3], condition: 'retry' },
+                { request: queuedRequests[4], condition: 'pending' },
             ],
             requestsToDelete: [
                 { request: queuedRequests[0], condition: 'completed' },
@@ -110,7 +115,7 @@ describe(RequestSelector, () => {
             ],
         };
 
-        const result = await requestSelector.getQueuedRequests(queryCount);
+        const result = await requestSelector.getQueuedRequests(scanGroupId, queryCount);
 
         expect(result).toEqual(filteredRequests);
     });
