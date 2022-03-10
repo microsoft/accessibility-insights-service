@@ -13,7 +13,7 @@ import { RunFunctionalTestGroupData } from './activity-request-data';
 
 /**
  * The ad-hoc controller to run e2e tests on demand when testing locally
- * Use with health-monitor-timer-func function to run
+ * Replace HealthMonitorTimerController on this controller in health-monitor-timer-func/index.js to run
  */
 
 @injectable()
