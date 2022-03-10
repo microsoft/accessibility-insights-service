@@ -77,7 +77,7 @@ describe(Runner, () => {
             .setup((o) => o.getConfig())
             .returns(() => reportGeneratorMetadata)
             .verifiable();
-        reportGeneratorRunnerTelemetryManagerMock.setup((o) => o.trackRequestStarted(reportGeneratorMetadata.scanGroupId)).verifiable();
+        reportGeneratorRunnerTelemetryManagerMock.setup((o) => o.trackRequestStarted(reportGeneratorMetadata.id)).verifiable();
         reportGeneratorRunnerTelemetryManagerMock.setup((o) => o.trackRequestCompleted()).verifiable();
         loggerMock.setup((o) => o.setCommonProperties({ scanGroupId: reportGeneratorMetadata.scanGroupId })).verifiable();
         loggerMock.setup((o) => o.logInfo('Start report generator runner.')).verifiable();
@@ -309,7 +309,7 @@ function setupDeleteRequests(queuedRequests: ReportGeneratorRequest[]): void {
 
 function setupGetQueuedRequests(queuedRequests: QueuedRequests): void {
     requestSelectorMock
-        .setup((o) => o.getQueuedRequests(maxQueuedRequests))
+        .setup((o) => o.getQueuedRequests(reportGeneratorMetadata.scanGroupId, maxQueuedRequests))
         .returns(() => Promise.resolve(queuedRequests))
         .verifiable();
 }

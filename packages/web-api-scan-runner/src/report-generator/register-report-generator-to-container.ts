@@ -7,6 +7,7 @@ import { Container } from 'inversify';
 import { iocTypeNames } from '../ioc-types';
 import { AxeResultToHtmlConverter } from './axe-result-to-html-converter';
 import { AxeResultToSarifConverter } from './axe-result-to-sarif-converter';
+import { AxeResultEchoConverter } from './axe-result-echo-converter';
 
 export function registerReportGeneratorToContainer(container: Container): void {
     container.bind(iocTypeNames.ConvertAxeToSarifFunc).toConstantValue(convertAxeToSarif);
@@ -16,5 +17,6 @@ export function registerReportGeneratorToContainer(container: Container): void {
         .toConstantValue([
             container.get<AxeResultToSarifConverter>(AxeResultToSarifConverter),
             container.get<AxeResultToHtmlConverter>(AxeResultToHtmlConverter),
+            container.get<AxeResultEchoConverter>(AxeResultEchoConverter),
         ]);
 }

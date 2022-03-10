@@ -355,6 +355,7 @@ describe(Batch, () => {
 
     describe('getPoolMetricsInfo()', () => {
         it('get pool metrics info', async () => {
+            const jobPrefix = 'job-id';
             const poolMetricsInfoExpected = {
                 id: 'poolId',
                 maxTasksPerPool: 32,
@@ -377,7 +378,7 @@ describe(Batch, () => {
             const jobOptions = {
                 jobListOptions: { filter: `state eq 'active' and executionInfo/poolId eq '${batchConfigStub.poolId}'` },
             };
-            const jobListItems1 = new JobListStub([{ id: 'job-id-11' }]);
+            const jobListItems1 = new JobListStub([{ id: 'job-id-11' }, { id: 'other-job-to-be-excluded-12' }]);
             jobListItems1.odatanextLink = 'odatanextLink-1';
             const jobListItems2 = new JobListStub([{ id: 'job-id-22' }]);
             jobMock
@@ -430,7 +431,7 @@ describe(Batch, () => {
                 .returns(async () => Promise.resolve(<TaskListResponse>(<unknown>taskListItems2)))
                 .verifiable();
 
-            const poolMetricsInfo = await batch.getPoolMetricsInfo();
+            const poolMetricsInfo = await batch.getPoolMetricsInfo(jobPrefix);
 
             expect(poolMetricsInfo).toEqual(poolMetricsInfoExpected);
             poolMock.verifyAll();

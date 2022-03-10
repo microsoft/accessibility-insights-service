@@ -35,6 +35,8 @@ steps:
               web-api-scan-request-sender/dist/**/*
               privacy-scan-runner/dist/**/*
               privacy-scan-job-manager/dist/**/*
+              report-generator-job-manager/dist/**/*
+              report-generator-runner/dist/**/*
               resource-deployment/dist/**/*
               web-api/dist/**/*
               web-workers/dist/**/*

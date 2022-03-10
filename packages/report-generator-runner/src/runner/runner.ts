@@ -44,9 +44,9 @@ export class Runner {
         this.logger.setCommonProperties({ scanGroupId: runMetadata.scanGroupId });
         this.logger.logInfo('Start report generator runner.');
 
-        this.telemetryManager.trackRequestStarted(runMetadata.scanGroupId);
+        this.telemetryManager.trackRequestStarted(runMetadata.id);
         try {
-            const queuedRequests = await this.requestSelector.getQueuedRequests(this.maxQueuedRequests);
+            const queuedRequests = await this.requestSelector.getQueuedRequests(runMetadata.scanGroupId, this.maxQueuedRequests);
             await this.updateRequestStateToRunning(queuedRequests);
             queuedRequests.requestsToProcess = this.reportProcessor.generate(queuedRequests.requestsToProcess);
             this.moveCompletedRequestsForDeletion(queuedRequests);

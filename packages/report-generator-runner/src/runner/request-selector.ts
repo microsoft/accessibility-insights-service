@@ -32,7 +32,7 @@ export class RequestSelector {
         @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
     ) {}
 
-    public async getQueuedRequests(queryCount: number = 50): Promise<QueuedRequests> {
+    public async getQueuedRequests(scanGroupId: string, queryCount: number = 50): Promise<QueuedRequests> {
         await this.init();
 
         const queuedRequests: QueuedRequests = {
@@ -43,8 +43,9 @@ export class RequestSelector {
         let continuationToken: string;
         do {
             const response: CosmosOperationResponse<ReportGeneratorRequest[]> = await this.reportGeneratorRequestProvider.readRequests(
-                continuationToken,
+                scanGroupId,
                 queryCount,
+                continuationToken,
             );
             client.ensureSuccessStatusCode(response);
 
@@ -60,6 +61,12 @@ export class RequestSelector {
     private filterRequests(filteredRequests: QueuedRequests, queuedRequests: ReportGeneratorRequest[]): void {
         queuedRequests.map((queuedRequest) => {
             // Supported run states: pending, running, completed, failed
+
+            if (queuedRequest.run === undefined) {
+                filteredRequests.requestsToProcess.push({ request: queuedRequest, condition: 'pending' });
+
+                return;
+            }
 
             if (queuedRequest.run.state === 'completed') {
                 filteredRequests.requestsToDelete.push({ request: queuedRequest, condition: 'completed' });
@@ -83,7 +90,7 @@ export class RequestSelector {
                 // task was terminated or failed
                 (queuedRequest.run.state === 'running' || queuedRequest.run.state === 'failed') &&
                 // check retry threshold
-                (queuedRequest.run?.retryCount === undefined || queuedRequest.run.retryCount < this.maxFailedScanRetryCount) &&
+                (queuedRequest.run.retryCount === undefined || queuedRequest.run.retryCount < this.maxFailedScanRetryCount) &&
                 // check retry delay
                 moment.utc(queuedRequest.run.timestamp).add(this.failedScanRetryIntervalInMinutes, 'minutes') <= moment.utc()
             ) {
