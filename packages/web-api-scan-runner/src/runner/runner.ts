@@ -9,6 +9,8 @@ import {
     WebsiteScanResultProvider,
     ReportWriter,
     ReportGeneratorRequestProvider,
+    ScanNotificationProcessor,
+    RunnerScanMetadata,
 } from 'service-library';
 import {
     OnDemandPageScanReport,
@@ -22,17 +24,15 @@ import {
 import { System, ServiceConfiguration, GuidGenerator } from 'common';
 import { isEmpty, isString } from 'lodash';
 import { ReportGenerator } from '../report-generator/report-generator';
-import { ScanMetadataConfig } from '../scan-metadata-config';
+import { RunnerScanMetadataConfig } from '../runner-scan-metadata-config';
 import { ScanRunnerTelemetryManager } from '../scan-runner-telemetry-manager';
 import { CombinedScanResultProcessor } from '../combined-result/combined-scan-result-processor';
 import { PageScanProcessor } from '../scanner/page-scan-processor';
-import { ScanMetadata } from '../types/scan-metadata';
-import { ScanNotificationProcessor } from '../sender/scan-notification-processor';
 
 @injectable()
 export class Runner {
     constructor(
-        @inject(ScanMetadataConfig) private readonly scanMetadataConfig: ScanMetadataConfig,
+        @inject(RunnerScanMetadataConfig) private readonly runnerScanMetadataConfig: RunnerScanMetadataConfig,
         @inject(OnDemandPageScanRunResultProvider) private readonly onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider,
         @inject(WebsiteScanResultProvider) protected readonly websiteScanResultProvider: WebsiteScanResultProvider,
         @inject(ReportGeneratorRequestProvider) private readonly reportGeneratorRequestProvider: ReportGeneratorRequestProvider,
@@ -48,21 +48,21 @@ export class Runner {
     ) {}
 
     public async run(): Promise<void> {
-        const scanMetadata = this.scanMetadataConfig.getConfig();
+        const runnerScanMetadata = this.runnerScanMetadataConfig.getConfig();
         // decode URL back from docker parameter encoding
-        scanMetadata.url = decodeURI(scanMetadata.url);
+        runnerScanMetadata.url = decodeURI(runnerScanMetadata.url);
 
-        this.logger.setCommonProperties({ scanId: scanMetadata.id, url: scanMetadata.url });
+        this.logger.setCommonProperties({ scanId: runnerScanMetadata.id, url: runnerScanMetadata.url });
         this.logger.logInfo('Starting page scan task.');
 
-        const pageScanResult = await this.updateScanRunStateToRunning(scanMetadata.id);
+        const pageScanResult = await this.updateScanRunStateToRunning(runnerScanMetadata.id);
         if (pageScanResult === undefined) {
             return;
         }
 
-        this.telemetryManager.trackScanStarted(scanMetadata.id);
+        this.telemetryManager.trackScanStarted(runnerScanMetadata.id);
         try {
-            const axeScanResults = await this.pageScanProcessor.scan(scanMetadata, pageScanResult);
+            const axeScanResults = await this.pageScanProcessor.scan(runnerScanMetadata, pageScanResult);
             await this.processScanResult(axeScanResults, pageScanResult);
         } catch (error) {
             const errorMessage = System.serializeError(error);
@@ -74,10 +74,10 @@ export class Runner {
             this.telemetryManager.trackScanCompleted();
         }
 
-        const websiteScanResult = await this.updateScanResult(scanMetadata, pageScanResult);
+        const websiteScanResult = await this.updateScanResult(runnerScanMetadata, pageScanResult);
 
         if (this.isScanCompleted(pageScanResult)) {
-            await this.scanNotificationProcessor.sendScanCompletionNotification(scanMetadata, pageScanResult, websiteScanResult);
+            await this.scanNotificationProcessor.sendScanCompletionNotification(runnerScanMetadata, pageScanResult, websiteScanResult);
         }
 
         this.logger.logInfo('Page scan task completed.');
@@ -107,7 +107,7 @@ export class Runner {
     }
 
     private async updateScanResult(
-        scanMetadata: ScanMetadata,
+        runnerScanMetadata: RunnerScanMetadata,
         pageScanResult: Partial<OnDemandPageScanResult>,
     ): Promise<WebsiteScanResult> {
         await this.onDemandPageScanRunResultProvider.updateScanRun(pageScanResult);
@@ -124,8 +124,8 @@ export class Runner {
                 id: websiteScanRef.id,
                 pageScans: [
                     {
-                        scanId: scanMetadata.id,
-                        url: scanMetadata.url,
+                        scanId: runnerScanMetadata.id,
+                        url: runnerScanMetadata.url,
                         scanState: pageScanResult.scanResult?.state,
                         runState,
                         timestamp: new Date().toJSON(),
@@ -133,7 +133,7 @@ export class Runner {
                 ],
             };
 
-            return this.websiteScanResultProvider.mergeOrCreate(scanMetadata.id, updatedWebsiteScanResult, true);
+            return this.websiteScanResultProvider.mergeOrCreate(runnerScanMetadata.id, updatedWebsiteScanResult, true);
         }
 
         return undefined;

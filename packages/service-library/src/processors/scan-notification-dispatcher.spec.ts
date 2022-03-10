@@ -7,7 +7,6 @@ import { Queue, StorageConfig } from 'azure-services';
 import { RetryHelper, ScanRunTimeConfig, ServiceConfiguration } from 'common';
 import { cloneDeep } from 'lodash';
 import { Logger } from 'logger';
-import { OnDemandPageScanRunResultProvider } from 'service-library';
 import {
     ItemType,
     NotificationError,
@@ -18,14 +17,15 @@ import {
     ScanCompletedNotification,
 } from 'storage-documents';
 import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
-import { NotificationMessageDispatcher } from './notification-message-dispatcher';
+import { OnDemandPageScanRunResultProvider } from '../data-providers/on-demand-page-scan-run-result-provider';
+import { ScanNotificationDispatcher } from './scan-notification-dispatcher';
 
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/consistent-type-assertions */
 
 class MockableLogger extends Logger {}
 
-describe(NotificationMessageDispatcher, () => {
-    let notificationMessageDispatcher: NotificationMessageDispatcher;
+describe(ScanNotificationDispatcher, () => {
+    let notificationMessageDispatcher: ScanNotificationDispatcher;
     let onDemandPageScanRunResultProviderMock: IMock<OnDemandPageScanRunResultProvider>;
     let queueMock: IMock<Queue>;
     let loggerMock: IMock<MockableLogger>;
@@ -77,7 +77,7 @@ describe(NotificationMessageDispatcher, () => {
             .verifiable(Times.once());
         retryHelperMock = Mock.ofType<RetryHelper<void>>();
 
-        notificationMessageDispatcher = new NotificationMessageDispatcher(
+        notificationMessageDispatcher = new ScanNotificationDispatcher(
             onDemandPageScanRunResultProviderMock.object,
             serviceConfigMock.object,
             storageConfigStub,

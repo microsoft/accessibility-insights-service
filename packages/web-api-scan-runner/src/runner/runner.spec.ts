@@ -10,6 +10,8 @@ import {
     OperationResult,
     ReportWriter,
     ReportGeneratorRequestProvider,
+    ScanNotificationProcessor,
+    RunnerScanMetadata,
 } from 'service-library';
 import { GlobalLogger } from 'logger';
 import * as MockDate from 'mockdate';
@@ -23,18 +25,16 @@ import {
 import { AxeScanResults } from 'scanner-global-library';
 import { System, ServiceConfiguration, ScanRunTimeConfig, GuidGenerator } from 'common';
 import { AxeResults } from 'axe-core';
-import { ScanMetadataConfig } from '../scan-metadata-config';
+import { RunnerScanMetadataConfig } from '../runner-scan-metadata-config';
 import { PageScanProcessor } from '../scanner/page-scan-processor';
 import { ReportGenerator, GeneratedReport } from '../report-generator/report-generator';
 import { CombinedScanResultProcessor } from '../combined-result/combined-scan-result-processor';
-import { ScanNotificationProcessor } from '../sender/scan-notification-processor';
 import { ScanRunnerTelemetryManager } from '../scan-runner-telemetry-manager';
-import { ScanMetadata } from '../types/scan-metadata';
 import { Runner } from './runner';
 
 const maxFailedScanRetryCount = 1;
 
-let scanMetadataConfigMock: IMock<ScanMetadataConfig>;
+let scanMetadataConfigMock: IMock<RunnerScanMetadataConfig>;
 let onDemandPageScanRunResultProviderMock: IMock<OnDemandPageScanRunResultProvider>;
 let WebsiteScanResultProviderMock: IMock<WebsiteScanResultProvider>;
 let pageScanProcessorMock: IMock<PageScanProcessor>;
@@ -48,8 +48,8 @@ let loggerMock: IMock<GlobalLogger>;
 let guidGeneratorMock: IMock<GuidGenerator>;
 let reportGeneratorRequestProviderMock: IMock<ReportGeneratorRequestProvider>;
 let runner: Runner;
-let scanMetadataInput: ScanMetadata;
-let scanMetadata: ScanMetadata;
+let runnerScanMetadataInput: RunnerScanMetadata;
+let runnerScanMetadata: RunnerScanMetadata;
 let dateNow: Date;
 let pageScanResultDbDocument: OnDemandPageScanResult;
 let pageScanResult: OnDemandPageScanResult;
@@ -59,7 +59,7 @@ let websiteScanResult: WebsiteScanResult;
 
 describe(Runner, () => {
     beforeEach(() => {
-        scanMetadataConfigMock = Mock.ofType<ScanMetadataConfig>();
+        scanMetadataConfigMock = Mock.ofType<RunnerScanMetadataConfig>();
         onDemandPageScanRunResultProviderMock = Mock.ofType<OnDemandPageScanRunResultProvider>();
         WebsiteScanResultProviderMock = Mock.ofType<WebsiteScanResultProvider>();
         pageScanProcessorMock = Mock.ofType<PageScanProcessor>();
@@ -76,18 +76,18 @@ describe(Runner, () => {
         dateNow = new Date();
         MockDate.set(dateNow);
 
-        scanMetadataInput = {
+        runnerScanMetadataInput = {
             id: 'scanMetadataId',
             url: 'https://localhost/support%20page/',
             deepScan: false,
-        } as ScanMetadata;
-        scanMetadata = {
+        } as RunnerScanMetadata;
+        runnerScanMetadata = {
             id: 'scanMetadataId',
             url: 'https://localhost/support page/',
             deepScan: false,
-        } as ScanMetadata;
+        } as RunnerScanMetadata;
         pageScanResultDbDocument = {
-            id: scanMetadata.id,
+            id: runnerScanMetadata.id,
             websiteScanRefs: [
                 {
                     id: 'websiteScanId',
@@ -271,7 +271,7 @@ describe(Runner, () => {
 
 function setupReportGeneratorRequestProvider(): void {
     guidGeneratorMock
-        .setup((o) => o.createGuidFromBaseGuid(scanMetadata.id))
+        .setup((o) => o.createGuidFromBaseGuid(runnerScanMetadata.id))
         .returns(() => 'guid')
         .verifiable();
     const reportGeneratorRequest = {
@@ -295,7 +295,9 @@ function setupPageScanResultDbDocumentForDeepScan(): void {
 
 function setupScanNotificationProcessor(): void {
     scanNotificationProcessorMock
-        .setup((o) => o.sendScanCompletionNotification(It.isValue(scanMetadata), It.isValue(pageScanResult), It.isValue(websiteScanResult)))
+        .setup((o) =>
+            o.sendScanCompletionNotification(It.isValue(runnerScanMetadata), It.isValue(pageScanResult), It.isValue(websiteScanResult)),
+        )
         .verifiable();
 }
 
@@ -308,8 +310,8 @@ function setupUpdateScanResult(): void {
             id: websiteScanRef.id,
             pageScans: [
                 {
-                    scanId: scanMetadata.id,
-                    url: scanMetadata.url,
+                    scanId: runnerScanMetadata.id,
+                    url: runnerScanMetadata.url,
                     scanState: pageScanResult.scanResult?.state,
                     runState:
                         pageScanResult.run.state === 'failed' &&
@@ -323,7 +325,7 @@ function setupUpdateScanResult(): void {
         websiteScanResult = {
             id: 'websiteScanResultId',
         } as WebsiteScanResult;
-        WebsiteScanResultProviderMock.setup((o) => o.mergeOrCreate(scanMetadata.id, It.isValue(updatedWebsiteScanResult), true))
+        WebsiteScanResultProviderMock.setup((o) => o.mergeOrCreate(runnerScanMetadata.id, It.isValue(updatedWebsiteScanResult), true))
             .returns(() => Promise.resolve(websiteScanResult))
             .verifiable();
     }
@@ -388,7 +390,7 @@ function setupPageScanProcessor(succeeded: boolean = true, error: Error = undefi
     }
 
     pageScanProcessorMock
-        .setup((o) => o.scan(scanMetadata, pageScanResultDbDocument))
+        .setup((o) => o.scan(runnerScanMetadata, pageScanResultDbDocument))
         .returns(() => {
             if (error) {
                 return Promise.reject(error);
@@ -400,7 +402,7 @@ function setupPageScanProcessor(succeeded: boolean = true, error: Error = undefi
 }
 
 function setupScanRunnerTelemetryManager(taskSucceeded: boolean = true, scanSucceeded: boolean = true): void {
-    scanRunnerTelemetryManagerMock.setup((o) => o.trackScanStarted(scanMetadata.id)).verifiable();
+    scanRunnerTelemetryManagerMock.setup((o) => o.trackScanStarted(runnerScanMetadata.id)).verifiable();
     scanRunnerTelemetryManagerMock.setup((o) => o.trackScanCompleted()).verifiable();
     if (!taskSucceeded) {
         scanRunnerTelemetryManagerMock.setup((o) => o.trackScanTaskFailed()).verifiable();
@@ -414,7 +416,7 @@ function setupScanRunnerTelemetryManager(taskSucceeded: boolean = true, scanSucc
 function setupUpdateScanRunStateToRunning(succeeded: boolean = true): void {
     pageScanResult = { ...pageScanResult, ...pageScanResultDbDocument };
     const partialPageScanResult: Partial<OnDemandPageScanResult> = {
-        id: scanMetadata.id,
+        id: runnerScanMetadata.id,
         run: {
             state: 'running',
             timestamp: dateNow.toJSON(),
@@ -450,7 +452,7 @@ function setupUpdateScanRunStateToRunning(succeeded: boolean = true): void {
 function setupScanMetadataConfig(): void {
     scanMetadataConfigMock
         .setup((o) => o.getConfig())
-        .returns(() => scanMetadataInput)
+        .returns(() => runnerScanMetadataInput)
         .verifiable();
-    loggerMock.setup((o) => o.setCommonProperties({ scanId: scanMetadata.id, url: scanMetadata.url })).verifiable();
+    loggerMock.setup((o) => o.setCommonProperties({ scanId: runnerScanMetadata.id, url: runnerScanMetadata.url })).verifiable();
 }
