@@ -12,6 +12,7 @@ import {
     ReportGeneratorRequestProvider,
     ScanNotificationProcessor,
     RunnerScanMetadata,
+    CombinedScanResultProcessor,
 } from 'service-library';
 import { GlobalLogger } from 'logger';
 import * as MockDate from 'mockdate';
@@ -28,7 +29,6 @@ import { AxeResults } from 'axe-core';
 import { RunnerScanMetadataConfig } from '../runner-scan-metadata-config';
 import { PageScanProcessor } from '../scanner/page-scan-processor';
 import { ReportGenerator, GeneratedReport } from '../report-generator/report-generator';
-import { CombinedScanResultProcessor } from '../combined-result/combined-scan-result-processor';
 import { ScanRunnerTelemetryManager } from '../scan-runner-telemetry-manager';
 import { Runner } from './runner';
 

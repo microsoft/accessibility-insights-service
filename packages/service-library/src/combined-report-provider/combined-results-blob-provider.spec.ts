@@ -4,11 +4,10 @@
 import 'reflect-metadata';
 
 import { GuidGenerator } from 'common';
-import { CombinedScanResultsProvider, CombinedScanResultsReadResponse } from 'service-library';
 import { IMock, Mock } from 'typemoq';
 import { MockableLogger } from '../test-utilities/mockable-logger';
-import { CombinedResultsBlob } from '../types/combined-results-blob';
-import { CombinedResultsBlobProvider } from './combined-results-blob-provider';
+import { CombinedScanResultsProvider, CombinedScanResultsReadResponse } from '../data-providers/combined-scan-results-provider';
+import { CombinedResultsBlobProvider, CombinedResultsBlob } from './combined-results-blob-provider';
 
 describe(CombinedResultsBlobProvider, () => {
     let combinedScanResultsProviderMock: IMock<CombinedScanResultsProvider>;

@@ -33,3 +33,4 @@ export * from './data-providers/report-generator-request-data-provider';
 export { ScanNotificationDispatcher } from './processors/scan-notification-dispatcher';
 export { ScanNotificationProcessor } from './processors/scan-notification-processor';
 export { RunnerScanMetadata } from './types/runner-scan-metadata';
+export { CombinedScanResultProcessor } from './combined-report-provider/combined-scan-result-processor';

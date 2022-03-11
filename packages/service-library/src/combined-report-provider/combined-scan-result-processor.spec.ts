@@ -4,18 +4,17 @@
 import 'reflect-metadata';
 
 import { IMock, Mock, It, Times } from 'typemoq';
-import { ReportWriter, WebsiteScanResultProvider } from 'service-library';
 import { RetryHelper } from 'common';
 import { AxeScanResults } from 'scanner-global-library';
 import { AxeResults } from 'axe-core';
 import { OnDemandPageScanResult, WebsiteScanResult, CombinedScanResults, OnDemandPageScanReport } from 'storage-documents';
 import { MockableLogger } from '../test-utilities/mockable-logger';
-import { CombinedResultsBlob } from '../types/combined-results-blob';
-import { GeneratedReport } from '../report-generator/report-generator';
+import { WebsiteScanResultProvider } from '../data-providers/website-scan-result-provider';
+import { GeneratedReport, ReportWriter } from '../data-providers/report-writer';
 import { CombinedScanResultProcessor } from './combined-scan-result-processor';
 import { CombinedAxeResultBuilder } from './combined-axe-result-builder';
 import { CombinedReportGenerator } from './combined-report-generator';
-import { CombinedResultsBlobProvider } from './combined-results-blob-provider';
+import { CombinedResultsBlobProvider, CombinedResultsBlob } from './combined-results-blob-provider';
 
 let combinedAxeResultBuilderMock: IMock<CombinedAxeResultBuilder>;
 let combinedReportGeneratorMock: IMock<CombinedReportGenerator>;

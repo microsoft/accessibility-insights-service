@@ -3,26 +3,26 @@
 
 import 'reflect-metadata';
 
-import { Report, Reporter, ReporterFactory, CombinedReportParameters } from 'accessibility-insights-report';
+import { Report, Reporter, CombinedReportParameters, ReporterFactory } from 'accessibility-insights-report';
 import { IMock, Mock } from 'typemoq';
 import { AxeResultsList, AxeCoreResults, CombinedReportDataConverter, ScanResultData } from 'axe-result-converter';
 import axe from 'axe-core';
 import { CombinedScanResults } from 'storage-documents';
 import * as MockDate from 'mockdate';
-import { AxeResultConverterOptions } from './axe-result-converter';
-import { AxeResultToConsolidatedHtmlConverter } from './axe-result-to-consolidated-html-converter';
-import { htmlReportStrings } from './html-report-strings';
+import { AxeResultToConsolidatedHtmlConverter, ReportMetadata } from './axe-result-to-consolidated-html-converter';
 
 describe('AxeResultToConsolidatedHtmlConverter', () => {
     let axeConsolidatedHtmlResultConverter: AxeResultToConsolidatedHtmlConverter;
     let combinedReportDataConverterMock: IMock<CombinedReportDataConverter>;
     let reporterMock: IMock<Reporter>;
-    let htmlReport: Report;
+    let reporterFactory: ReporterFactory;
+    let htmlReportMock: Report;
     let axeCore: typeof axe;
     let time: Date;
 
     const htmlReportString = 'html report';
-    const options: AxeResultConverterOptions = {
+    const options: ReportMetadata = {
+        serviceName: 'service name report title',
         baseUrl: 'base URL',
         userAgent: 'user agent',
         scanStarted: new Date(2020, 11, 1),
@@ -31,10 +31,9 @@ describe('AxeResultToConsolidatedHtmlConverter', () => {
 
     beforeEach(() => {
         reporterMock = Mock.ofType<Reporter>();
-        const reporterFactory: ReporterFactory = () => reporterMock.object;
-
+        reporterFactory = () => reporterMock.object;
         combinedReportDataConverterMock = Mock.ofType<CombinedReportDataConverter>();
-        htmlReport = {
+        htmlReportMock = {
             asHTML: () => htmlReportString,
         };
         axeCore = {
@@ -52,6 +51,7 @@ describe('AxeResultToConsolidatedHtmlConverter', () => {
     });
 
     afterEach(() => {
+        MockDate.reset();
         combinedReportDataConverterMock.verifyAll();
         reporterMock.verifyAll();
     });
@@ -78,7 +78,7 @@ describe('AxeResultToConsolidatedHtmlConverter', () => {
         const scanResultData: ScanResultData = {
             baseUrl: options.baseUrl,
             basePageTitle: '',
-            scanEngineName: htmlReportStrings.serviceName,
+            scanEngineName: options.serviceName,
             axeCoreVersion: '1.0.0',
             browserUserAgent: options.userAgent,
             browserResolution: options.browserResolution,
@@ -93,7 +93,7 @@ describe('AxeResultToConsolidatedHtmlConverter', () => {
             .verifiable();
         reporterMock
             .setup((o) => o.fromCombinedResults(combinedReportData))
-            .returns(() => htmlReport)
+            .returns(() => htmlReportMock)
             .verifiable();
 
         const report = axeConsolidatedHtmlResultConverter.convert(combinedScanResults, options);

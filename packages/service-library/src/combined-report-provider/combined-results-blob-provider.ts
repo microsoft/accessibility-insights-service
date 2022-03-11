@@ -4,8 +4,12 @@
 import { GuidGenerator } from 'common';
 import { inject, injectable } from 'inversify';
 import { GlobalLogger } from 'logger';
-import { CombinedScanResultsProvider, CombinedScanResultsReadResponse } from 'service-library';
-import { CombinedResultsBlob } from '../types/combined-results-blob';
+import { CombinedScanResultsReadResponse, CombinedScanResultsProvider } from '../data-providers/combined-scan-results-provider';
+
+export interface CombinedResultsBlob {
+    response: CombinedScanResultsReadResponse;
+    blobId: string;
+}
 
 @injectable()
 export class CombinedResultsBlobProvider {
@@ -21,7 +25,7 @@ export class CombinedResultsBlobProvider {
 
         if (existingCombinedResultsBlobId === undefined) {
             actualBlobId = this.guidGenerator.createGuid();
-            this.logger.logInfo('No combined axe scan results blob associated with this website scan. Creating a new blob.');
+            this.logger.logInfo('Combined axe scan results not found in a blob storage. Creating a new blob.');
             blobReadResponse = this.combinedScanResultsProvider.getEmptyResponse();
         } else {
             blobReadResponse = await this.getCombinedResultsBlob(actualBlobId);
@@ -35,7 +39,6 @@ export class CombinedResultsBlobProvider {
 
     private async getCombinedResultsBlob(combinedResultsBlobId: string | undefined): Promise<CombinedScanResultsReadResponse> {
         const response = await this.combinedScanResultsProvider.readCombinedResults(combinedResultsBlobId);
-
         if (response.error) {
             if (response.error.errorCode === 'blobNotFound') {
                 this.logger.logWarn('Combined axe scan results not found in a blob storage. Creating a new blob.');

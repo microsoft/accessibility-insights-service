@@ -5,9 +5,9 @@ import axe from 'axe-core';
 import { AxeResultsReducer } from 'axe-result-converter';
 import { inject, injectable } from 'inversify';
 import { GlobalLogger } from 'logger';
-import { CombinedScanResultsProvider } from 'service-library';
 import { CombinedScanResults } from 'storage-documents';
-import { CombinedResultsBlob } from '../types/combined-results-blob';
+import { CombinedScanResultsProvider } from '../data-providers/combined-scan-results-provider';
+import { CombinedResultsBlob } from './combined-results-blob-provider';
 
 @injectable()
 export class CombinedAxeResultBuilder {

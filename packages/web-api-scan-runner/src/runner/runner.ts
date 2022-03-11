@@ -11,6 +11,7 @@ import {
     ReportGeneratorRequestProvider,
     ScanNotificationProcessor,
     RunnerScanMetadata,
+    CombinedScanResultProcessor,
 } from 'service-library';
 import {
     OnDemandPageScanReport,
@@ -26,7 +27,6 @@ import { isEmpty, isString } from 'lodash';
 import { ReportGenerator } from '../report-generator/report-generator';
 import { RunnerScanMetadataConfig } from '../runner-scan-metadata-config';
 import { ScanRunnerTelemetryManager } from '../scan-runner-telemetry-manager';
-import { CombinedScanResultProcessor } from '../combined-result/combined-scan-result-processor';
 import { PageScanProcessor } from '../scanner/page-scan-processor';
 
 @injectable()
