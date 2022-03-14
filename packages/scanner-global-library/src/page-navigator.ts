@@ -17,8 +17,6 @@ export class PageNavigator {
     // Refer to service configuration TaskRuntimeConfig.taskTimeoutInMinutes property
     public readonly gotoTimeoutMsecs = 60000;
 
-    public readonly pageRenderingTimeoutMsecs = 10000;
-
     constructor(
         @inject(PageResponseProcessor) public readonly pageResponseProcessor: PageResponseProcessor,
         @inject(NavigationHooks) public readonly navigationHooks: NavigationHooks,
@@ -35,19 +33,7 @@ export class PageNavigator {
     ): Promise<Puppeteer.HTTPResponse> {
         await this.navigationHooks.preNavigation(page);
 
-        // Try load all page resources
-        let navigationResult = await this.navigateToUrl(url, page, 'networkidle0');
-        if (navigationResult.browserError?.errorType === 'UrlNavigationTimeout') {
-            // Fallback to load partial page resources on navigation timeout.
-            // This will help in cases when page has a streaming video controls.
-            //
-            // The 'load' event is fired when the whole page has loaded, including all dependent resources such as stylesheets and images.
-            // However any dynamic contents may not be available if it is loaded after window.onload() event.
-            // Since we reuse page instance from the first navigation attempt some contents could be already loaded and available which
-            // mitigates dynamic content rendering issue above.
-            navigationResult = await this.navigateToUrl(url, page, 'load');
-        }
-
+        const navigationResult = await this.navigateToUrl(url, page, 'load');
         if (!_.isNil(navigationResult.browserError)) {
             onNavigationError(navigationResult.browserError, navigationResult.error);
 

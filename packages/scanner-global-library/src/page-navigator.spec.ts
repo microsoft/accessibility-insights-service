@@ -3,7 +3,7 @@
 
 import 'reflect-metadata';
 
-import { IMock, Mock, Times } from 'typemoq';
+import { IMock, Mock } from 'typemoq';
 import { Page, HTTPResponse } from 'puppeteer';
 import { PageResponseProcessor } from './page-response-processor';
 import { PageNavigator } from './page-navigator';
@@ -47,7 +47,7 @@ describe(PageNavigator, () => {
         pageMock
             .setup(async (o) =>
                 o.goto(url, {
-                    waitUntil: 'networkidle0',
+                    waitUntil: 'load',
                     timeout: pageNavigator.gotoTimeoutMsecs,
                 }),
             )
@@ -61,22 +61,12 @@ describe(PageNavigator, () => {
         expect(onNavigationErrorMock).toBeCalledTimes(0);
     });
 
-    it('navigate with timeout', async () => {
-        const timeoutError = new Error('navigation timeout');
+    it('navigate with browser error', async () => {
+        const error = new Error('navigation timeout');
         const browserError = {
-            errorType: 'UrlNavigationTimeout',
-            message: timeoutError.message,
-            stack: 'stack',
+            errorType: 'NavigationError',
+            message: 'navigation error',
         } as BrowserError;
-        pageMock
-            .setup(async (o) =>
-                o.goto(url, {
-                    waitUntil: 'networkidle0',
-                    timeout: pageNavigator.gotoTimeoutMsecs,
-                }),
-            )
-            .returns(() => Promise.reject(timeoutError))
-            .verifiable();
         pageMock
             .setup(async (o) =>
                 o.goto(url, {
@@ -84,17 +74,17 @@ describe(PageNavigator, () => {
                     timeout: pageNavigator.gotoTimeoutMsecs,
                 }),
             )
-            .returns(() => Promise.reject(timeoutError))
+            .returns(() => Promise.reject(error))
             .verifiable();
         navigationHooksMock.setup((o) => o.preNavigation(pageMock.object)).verifiable();
         pageResponseProcessorMock
-            .setup((o) => o.getNavigationError(timeoutError))
+            .setup((o) => o.getNavigationError(error))
             .returns(() => browserError)
-            .verifiable(Times.exactly(2));
+            .verifiable();
         const onNavigationErrorMock = jest.fn();
         onNavigationErrorMock.mockImplementation((browserErr, err) => Promise.resolve());
 
         await pageNavigator.navigate(url, pageMock.object, onNavigationErrorMock);
-        expect(onNavigationErrorMock).toHaveBeenCalledWith(browserError, timeoutError);
+        expect(onNavigationErrorMock).toHaveBeenCalledWith(browserError, error);
     });
 });
