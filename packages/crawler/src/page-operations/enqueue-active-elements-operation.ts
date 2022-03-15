@@ -8,11 +8,11 @@ import { ActiveElementsFinder } from '../browser-components/active-elements-find
 import { Operation } from './operation';
 
 /* eslint-disable @typescript-eslint/no-var-requires, import/no-internal-modules, @typescript-eslint/no-require-imports,  */
-const apifyUtilities = require('apify-shared/utilities');
+const apifyUtilities = require('@apify/utilities');
 
 @injectable()
 export class EnqueueActiveElementsOperation {
-    constructor(@inject(ActiveElementsFinder) private readonly activeElementFinder: ActiveElementsFinder) {}
+    constructor(@inject(ActiveElementsFinder) private readonly activeElementFinder: ActiveElementsFinder) { }
 
     public async find(page: Puppeteer.Page, selectors: string[], requestQueue: Apify.RequestQueue): Promise<void> {
         const url = page.url();
