@@ -2,8 +2,8 @@
 // Licensed under the MIT License.
 
 import 'reflect-metadata';
-import { flatten } from 'lodash';
 import { listMonorepoPackageNames } from 'common';
+import _ from 'lodash';
 import * as packageJson from '../package.json';
 
 describe('package.json dependencies', () => {
@@ -64,6 +64,9 @@ describe('package.json dependencies', () => {
     // then getEdgeNonMonorepoDependencies('monorepo-foo') returns ['"external-a": "2"', '"external-b": "3"']
     async function getEdgeNonMonorepoDependencies(monorepoPackageName: string): Promise<string[]> {
         const monorepoPackageJson = await import(`${monorepoPackageName}/package.json`);
+        if (_.isEmpty(monorepoPackageJson.dependencies)) {
+            return [];
+        }
         const deps: string[] = Object.keys(monorepoPackageJson.dependencies);
         const directNonMonorepoDepNames = deps.filter((d) => !isMonorepoPackage(d));
         const directNonMonorepoDeps = directNonMonorepoDepNames.map((name) =>
@@ -71,7 +74,7 @@ describe('package.json dependencies', () => {
         );
         const directMonorepoDeps = deps.filter(isMonorepoPackage);
         const indirectNonMonorepoDepGroups = await Promise.all(directMonorepoDeps.map(getEdgeNonMonorepoDependencies));
-        const edgeNonMonorepoDeps = [...directNonMonorepoDeps, ...flatten(indirectNonMonorepoDepGroups)];
+        const edgeNonMonorepoDeps = [...directNonMonorepoDeps, ..._.flatten(indirectNonMonorepoDepGroups)];
         const dedupedEdgeNonMonorepoDeps = [...new Set(edgeNonMonorepoDeps)];
 
         return dedupedEdgeNonMonorepoDeps;
