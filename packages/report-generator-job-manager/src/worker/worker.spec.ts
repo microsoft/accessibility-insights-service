@@ -264,6 +264,7 @@ describe(Worker, () => {
         const scanReportGroups = reportRequestGenerator.scanMessages.map((m) => {
             return {
                 scanGroupId: m.scanId,
+                targetReport: 'accessibility',
             } as ScanReportGroup;
         });
         const cosmosOperationResponse = {
@@ -397,6 +398,7 @@ function createScanMessages(count: number, shift: number = 0): ScanMessage[] {
                 messageText: JSON.stringify(<BatchTaskArguments>{
                     id: `guid`,
                     scanGroupId: `scan-id-${i}`,
+                    targetReport: 'accessibility',
                 }),
             },
         });

@@ -22,6 +22,7 @@ import {
     WebsiteScanResult,
     WebsiteScanRef,
     OnDemandPageScanRunResult,
+    ReportGeneratorRequest,
 } from 'storage-documents';
 import { AxeScanResults } from 'scanner-global-library';
 import { System, ServiceConfiguration, ScanRunTimeConfig, GuidGenerator } from 'common';
@@ -166,6 +167,7 @@ describe(Runner, () => {
         setupScanRunnerTelemetryManager();
         setupPageScanProcessor();
         setupProcessScanResult(true);
+        pageScanResult.run.state = 'report';
         setupUpdateScanResult();
         await runner.run();
     });
@@ -274,10 +276,11 @@ function setupReportGeneratorRequestProvider(): void {
         .setup((o) => o.createGuidFromBaseGuid(runnerScanMetadata.id))
         .returns(() => 'guid')
         .verifiable();
-    const reportGeneratorRequest = {
+    const reportGeneratorRequest: Partial<ReportGeneratorRequest> = {
         id: 'guid',
         scanId: pageScanResult.id,
         scanGroupId: pageScanResultDbDocument.websiteScanRefs[0].scanGroupId,
+        targetReport: 'accessibility',
         priority: pageScanResult.priority,
         reports: pageScanResult.reports,
     };

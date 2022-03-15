@@ -3,7 +3,7 @@
 
 import { CosmosContainerClient, cosmosContainerClientTypes, CosmosOperationResponse, client } from 'azure-services';
 import { inject, injectable } from 'inversify';
-import { ItemType, ReportGeneratorRequest } from 'storage-documents';
+import { ItemType, ReportGeneratorRequest, TargetReport } from 'storage-documents';
 import pLimit from 'p-limit';
 import { GlobalLogger } from 'logger';
 import { System } from 'common';
@@ -13,6 +13,7 @@ import { OperationResult } from './operation-result';
 export interface ScanReportGroup {
     scanCount: number;
     scanGroupId: string;
+    targetReport: TargetReport;
 }
 
 @injectable()
@@ -57,7 +58,7 @@ export class ReportGeneratorRequestProvider {
         continuationToken?: string,
     ): Promise<CosmosOperationResponse<ScanReportGroup[]>> {
         const query = {
-            query: 'SELECT TOP @itemCount COUNT(1) as scanCount, t.scanGroupId FROM (SELECT * FROM c WHERE c.itemType = @itemType) t GROUP BY t.scanGroupId',
+            query: 'SELECT TOP @itemCount COUNT(1) as scanCount, t.scanGroupId, t.targetReport FROM (SELECT * FROM c WHERE c.itemType = @itemType) t GROUP BY t.scanGroupId, t.targetReport',
             parameters: [
                 {
                     name: '@itemCount',

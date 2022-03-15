@@ -9,7 +9,7 @@ import { AxeScanResults } from 'scanner-global-library';
 import { ReportFormat } from 'storage-documents';
 import { IMock, Mock } from 'typemoq';
 import { GeneratedReport, ReportGenerator } from './report-generator';
-import { AxeResultConverter, AxeResultConverterOptions } from './axe-result-converter';
+import { AxeResultConverter } from './axe-result-converter';
 
 class AxeResultConverterStub implements AxeResultConverter {
     public convertCallCount = 0;
@@ -20,7 +20,7 @@ class AxeResultConverterStub implements AxeResultConverter {
         this.targetReportFormat = reportType;
     }
 
-    public convert(axeResults: AxeResults, options: AxeResultConverterOptions): string {
+    public convert(axeScanResults: AxeScanResults): string {
         this.convertCallCount += 1;
 
         return this.reportValue;
@@ -31,7 +31,7 @@ describe('ReportGenerator', () => {
     let reportGenerator: ReportGenerator;
     let axeResultConverters: AxeResultConverterStub[];
     let guidGeneratorMock: IMock<GuidGenerator>;
-    let axeResults: AxeScanResults;
+    let axeScanResults: AxeScanResults;
 
     const pageTitle = 'test page title';
     const pageResponseCode = 101;
@@ -51,9 +51,9 @@ describe('ReportGenerator', () => {
             new AxeResultConverterStub(report1.content, report1.format),
             new AxeResultConverterStub(report2.content, report2.format),
         ];
-        axeResults = {
+        axeScanResults = {
             results: {
-                testResults: true,
+                url: 'url',
             } as unknown as AxeResults,
             pageResponseCode,
             pageTitle,
@@ -69,7 +69,7 @@ describe('ReportGenerator', () => {
     });
 
     it('calls convert on all axeResultConverters', () => {
-        reportGenerator.generateReports(axeResults);
+        reportGenerator.generateReports(axeScanResults);
 
         // eslint-disable-next-line prefer-const
         axeResultConverters.forEach((axeResultConverter: AxeResultConverterStub) => {
@@ -78,7 +78,7 @@ describe('ReportGenerator', () => {
     });
 
     it('generates reports', () => {
-        const reports: GeneratedReport[] = reportGenerator.generateReports(axeResults);
+        const reports: GeneratedReport[] = reportGenerator.generateReports(axeScanResults);
         expect(reports[0]).toEqual(report1);
         expect(reports[1]).toEqual(report2);
     });

@@ -21,6 +21,7 @@ import {
     ScanError,
     WebsiteScanResult,
     WebsiteScanRef,
+    ReportGeneratorRequest,
 } from 'storage-documents';
 import { System, ServiceConfiguration, GuidGenerator } from 'common';
 import { isEmpty, isString } from 'lodash';
@@ -63,7 +64,16 @@ export class Runner {
         this.telemetryManager.trackScanStarted(runnerScanMetadata.id);
         try {
             const axeScanResults = await this.pageScanProcessor.scan(runnerScanMetadata, pageScanResult);
-            await this.processScanResult(axeScanResults, pageScanResult);
+            if (isEmpty(axeScanResults.error)) {
+                // axe scan completed successfully
+                await this.onCompletedScan(axeScanResults, pageScanResult);
+            } else {
+                // axe scan has failed
+                await this.onFailedScan(axeScanResults, pageScanResult);
+            }
+
+            pageScanResult.run.pageTitle = axeScanResults.pageTitle;
+            pageScanResult.run.pageResponseCode = axeScanResults.pageResponseCode;
         } catch (error) {
             const errorMessage = System.serializeError(error);
             this.setRunResult(pageScanResult, 'failed', errorMessage);
@@ -83,27 +93,35 @@ export class Runner {
         this.logger.logInfo('Page scan task completed.');
     }
 
-    private async processScanResult(axeScanResults: AxeScanResults, pageScanResult: OnDemandPageScanResult): Promise<AxeScanResults> {
-        if (isEmpty(axeScanResults.error)) {
-            this.setRunResult(pageScanResult, 'completed');
-            pageScanResult.scanResult = this.getScanStatus(axeScanResults);
-            pageScanResult.reports = await this.generateScanReports(axeScanResults);
-            if (axeScanResults.scannedUrl !== undefined) {
-                pageScanResult.scannedUrl = axeScanResults.scannedUrl;
-            }
-
-            await this.sendGenerateConsolidatedReportRequest(axeScanResults, pageScanResult);
-        } else {
-            this.setRunResult(pageScanResult, 'failed', axeScanResults.error);
-
-            this.logger.logError('Browser has failed to scan a page.', { error: JSON.stringify(axeScanResults.error) });
-            this.telemetryManager.trackBrowserScanFailed();
+    private async onCompletedScan(axeScanResults: AxeScanResults, pageScanResult: OnDemandPageScanResult): Promise<void> {
+        pageScanResult.scanResult = this.getScanStatus(axeScanResults);
+        if (axeScanResults.scannedUrl !== undefined) {
+            pageScanResult.scannedUrl = axeScanResults.scannedUrl;
         }
+        pageScanResult.reports = await this.generateScanReports(axeScanResults);
 
-        pageScanResult.run.pageTitle = axeScanResults.pageTitle;
-        pageScanResult.run.pageResponseCode = axeScanResults.pageResponseCode;
+        const websiteScanRef = this.getWebsiteScanRefs(pageScanResult);
+        if (this.isScanCompleted(pageScanResult)) {
+            this.setRunResult(pageScanResult, 'completed');
 
-        return axeScanResults.error ? undefined : axeScanResults;
+            // TODO remove below after transition phase
+            // The transition workflow is to support old report generation logic while
+            // new scan request documents will be created with websiteScanRef.scanGroupId metadata
+            if (websiteScanRef.scanGroupId === undefined) {
+                await this.combinedScanResultProcessor.generateCombinedScanResults(axeScanResults, pageScanResult);
+
+                return;
+            }
+        } else {
+            this.setRunResult(pageScanResult, 'report');
+            await this.sendGenerateConsolidatedReportRequest(pageScanResult, websiteScanRef);
+        }
+    }
+
+    private async onFailedScan(axeScanResults: AxeScanResults, pageScanResult: OnDemandPageScanResult): Promise<void> {
+        this.setRunResult(pageScanResult, 'failed', axeScanResults.error);
+        this.logger.logError('Browser has failed to scan a page.', { error: JSON.stringify(axeScanResults.error) });
+        this.telemetryManager.trackBrowserScanFailed();
     }
 
     private async updateScanResult(
@@ -193,33 +211,20 @@ export class Runner {
     }
 
     private async sendGenerateConsolidatedReportRequest(
-        axeScanResults: AxeScanResults,
         pageScanResult: OnDemandPageScanResult,
+        websiteScanRef: WebsiteScanRef,
     ): Promise<void> {
-        const websiteScanRef = this.getWebsiteScanRefs(pageScanResult);
-        if (!websiteScanRef) {
-            return;
-        }
-
-        // TODO remove after transition phase
-        // The transition workflow to support old report generation logic while
-        // new scan request documents will be created with websiteScanRef.scanGroupId metadata
-        if (websiteScanRef.scanGroupId === undefined) {
-            await this.combinedScanResultProcessor.generateCombinedScanResults(axeScanResults, pageScanResult);
-
-            return;
-        }
-
-        const reportGeneratorRequest = {
+        const reportGeneratorRequest: Partial<ReportGeneratorRequest> = {
             id: this.guidGenerator.createGuidFromBaseGuid(pageScanResult.id),
             scanId: pageScanResult.id,
             scanGroupId: websiteScanRef.scanGroupId,
+            targetReport: 'accessibility',
             priority: pageScanResult.priority,
             reports: pageScanResult.reports,
         };
         await this.reportGeneratorRequestProvider.writeRequest(reportGeneratorRequest);
 
-        this.logger.logInfo('Sending request to generate consolidated report.', {
+        this.logger.logInfo('Request to generate consolidated report was sent.', {
             id: reportGeneratorRequest.id,
             scanGroupId: websiteScanRef.scanGroupId,
         });

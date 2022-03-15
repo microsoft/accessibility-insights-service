@@ -9,7 +9,7 @@ export { ApiController } from './web-api/api-controller';
 export { WebControllerDispatcher } from './web-api/web-controller-dispatcher';
 export { PageScanRequestProvider } from './data-providers/page-scan-request-provider';
 export { getGlobalWebControllerDispatcher } from './web-api/get-global-web-controller-dispatcher';
-export { PageScanRunReportProvider } from './data-providers/page-scan-run-report-provider';
+export * from './data-providers/page-scan-run-report-provider';
 export { ScanDataProvider } from './data-providers/scan-data-provider';
 export { PartitionKeyFactory } from './factories/partition-key-factory';
 export * from './web-api/web-api-error-codes';
