@@ -25,7 +25,7 @@ describe('AxeResultToHtmlConverter', () => {
         const reporterFactory: ReporterFactory = () => reporterMock.object;
         axeHtmlResultConverter = new AxeResultToHtmlConverter(reporterFactory);
         axeScanResults = {
-            result: {
+            results: {
                 url: scanUrl,
             },
             pageTitle: 'page title',
