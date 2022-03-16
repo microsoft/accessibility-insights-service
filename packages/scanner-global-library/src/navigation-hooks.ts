@@ -15,10 +15,11 @@ export class NavigationHooks {
         @inject(PageConfigurator) public readonly pageConfigurator: PageConfigurator,
         @inject(PageResponseProcessor) protected readonly pageResponseProcessor: PageResponseProcessor,
         @inject(PageHandler) protected readonly pageRenderingHandler: PageHandler,
+        private readonly scrollTimeoutMsecs = 15000,
         private readonly pageRenderingTimeoutMsecs: number = 10000,
-        private readonly timeoutMsecs = 60000,
-        private readonly networkIdleTime = 500,
-    ) {}
+        private readonly networkTimeoutMsecs = 60000,
+        private readonly networkIdleTimeMsecs = 500,
+    ) { }
 
     public async preNavigation(page: Puppeteer.Page): Promise<void> {
         // Configure page settings before navigating to URL
@@ -32,7 +33,7 @@ export class NavigationHooks {
     ): Promise<void> {
         try {
             // Equivalent to 'networkidle0'
-            await page.waitForNetworkIdle({ timeout: this.timeoutMsecs, idleTime: this.networkIdleTime });
+            await page.waitForNetworkIdle({ timeout: this.networkTimeoutMsecs, idleTime: this.networkIdleTimeMsecs });
         } catch (error) {
             const browserError = this.pageResponseProcessor.getNavigationError(error as Error);
 
@@ -66,9 +67,9 @@ export class NavigationHooks {
         if (responseError !== undefined) {
             onNavigationError(responseError);
 
-            return undefined;
+            return;
         }
 
-        await this.pageRenderingHandler.waitForPageToCompleteRendering(page, this.pageRenderingTimeoutMsecs);
+        await this.pageRenderingHandler.waitForPageToCompleteRendering(page, this.scrollTimeoutMsecs, this.pageRenderingTimeoutMsecs);
     }
 }

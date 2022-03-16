@@ -12,8 +12,9 @@ import { BrowserError } from './browser-error';
 import { NavigationHooks } from './navigation-hooks';
 
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/consistent-type-assertions */
+const scrollTimeoutMsecs = 15000;
 const pageRenderingTimeoutMsecs = 1000;
-const networkIdleTime = 500;
+const networkIdleTimeMsecs = 500;
 const networkWaitTimeout = 60000;
 
 let pageConfiguratorMock: IMock<PageConfigurator>;
@@ -34,9 +35,10 @@ describe(NavigationHooks, () => {
             pageConfiguratorMock.object,
             pageResponseProcessorMock.object,
             pageHandlerMock.object,
+            scrollTimeoutMsecs,
             pageRenderingTimeoutMsecs,
             networkWaitTimeout,
-            networkIdleTime,
+            networkIdleTimeMsecs,
         );
     });
 
@@ -56,7 +58,7 @@ describe(NavigationHooks, () => {
     it('postNavigation with successful response', async () => {
         const response = {} as HTTPResponse;
         pageMock
-            .setup((p) => p.waitForNetworkIdle({ idleTime: networkIdleTime, timeout: networkWaitTimeout }))
+            .setup((p) => p.waitForNetworkIdle({ idleTime: networkIdleTimeMsecs, timeout: networkWaitTimeout }))
             .returns(async () => null)
             .verifiable();
         pageResponseProcessorMock
@@ -64,7 +66,7 @@ describe(NavigationHooks, () => {
             .returns(() => undefined)
             .verifiable();
         pageHandlerMock
-            .setup(async (o) => o.waitForPageToCompleteRendering(pageMock.object, pageRenderingTimeoutMsecs))
+            .setup(async (o) => o.waitForPageToCompleteRendering(pageMock.object, scrollTimeoutMsecs, pageRenderingTimeoutMsecs))
             .returns(() => Promise.resolve())
             .verifiable();
 
@@ -82,7 +84,7 @@ describe(NavigationHooks, () => {
             navigationError = browserError;
         };
         pageMock
-            .setup((p) => p.waitForNetworkIdle({ idleTime: networkIdleTime, timeout: networkWaitTimeout }))
+            .setup((p) => p.waitForNetworkIdle({ idleTime: networkIdleTimeMsecs, timeout: networkWaitTimeout }))
             .returns(async () => null)
             .verifiable();
 
@@ -98,7 +100,7 @@ describe(NavigationHooks, () => {
             stack: 'stack',
         } as BrowserError;
         pageMock
-            .setup((p) => p.waitForNetworkIdle({ idleTime: networkIdleTime, timeout: networkWaitTimeout }))
+            .setup((p) => p.waitForNetworkIdle({ idleTime: networkIdleTimeMsecs, timeout: networkWaitTimeout }))
             .returns(async () => null)
             .verifiable();
         pageResponseProcessorMock
@@ -118,7 +120,7 @@ describe(NavigationHooks, () => {
             errorType: 'NavigationError',
             message: 'Unable to get a page response from the browser.',
         } as BrowserError;
-        pageMock.setup((p) => p.waitForNetworkIdle({ idleTime: networkIdleTime, timeout: networkWaitTimeout })).throws(error);
+        pageMock.setup((p) => p.waitForNetworkIdle({ idleTime: networkIdleTimeMsecs, timeout: networkWaitTimeout })).throws(error);
         pageResponseProcessorMock
             .setup((o) => o.getNavigationError(error))
             .returns(() => browserError)
@@ -137,7 +139,7 @@ describe(NavigationHooks, () => {
             errorType: 'UrlNavigationTimeout',
             message: 'Unable to get a page response from the browser.',
         } as BrowserError;
-        pageMock.setup((p) => p.waitForNetworkIdle({ idleTime: networkIdleTime, timeout: networkWaitTimeout })).throws(error);
+        pageMock.setup((p) => p.waitForNetworkIdle({ idleTime: networkIdleTimeMsecs, timeout: networkWaitTimeout })).throws(error);
         pageResponseProcessorMock
             .setup((o) => o.getNavigationError(error))
             .returns(() => browserError)
@@ -149,7 +151,7 @@ describe(NavigationHooks, () => {
             .returns(() => undefined)
             .verifiable();
         pageHandlerMock
-            .setup(async (o) => o.waitForPageToCompleteRendering(pageMock.object, pageRenderingTimeoutMsecs))
+            .setup(async (o) => o.waitForPageToCompleteRendering(pageMock.object, scrollTimeoutMsecs, pageRenderingTimeoutMsecs))
             .returns(() => Promise.resolve())
             .verifiable();
 

@@ -7,54 +7,109 @@ import { Page } from 'puppeteer';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { PageHandler } from './page-handler';
 import { MockableLogger } from './test-utilities/mockable-logger';
+import _ from 'lodash';
+
+type Writeable<T> = { -readonly [P in keyof T]: Writeable<T[P]> };
 
 describe(PageHandler, () => {
+    let windowStub: Partial<Writeable<Window & typeof globalThis>>;
     let pageHandler: PageHandler;
     let loggerMock: IMock<MockableLogger>;
     let pageMock: IMock<Page>;
+    let scrollByMock: IMock<typeof window.scrollBy>;
+    let originalWindow: Window & typeof globalThis;
 
+    const windowHeight = 100;
     const checkIntervalMsecs = 10;
     const minCheckBreakCount = 3;
 
     beforeEach(() => {
-        loggerMock = Mock.ofType(MockableLogger);
+        loggerMock = Mock.ofType<MockableLogger>();
         pageMock = Mock.ofType<Page>();
+        scrollByMock = Mock.ofType<typeof window.scrollBy>();
 
-        pageHandler = new PageHandler(loggerMock.object);
+        pageMock.setup(p => p.evaluate(It.isAny())).returns(async (action) => action());
+
+        windowStub = {
+            innerHeight: windowHeight,
+            document: {
+                body: {
+                    innerHTML: "content",
+                },
+                scrollingElement: {
+                    scrollTop: 0,
+                    scrollHeight: windowHeight,
+                }
+            } as Writeable<Document>,
+            scrollBy: scrollByMock.object,
+        };
+        originalWindow = global.window;
+        global.window = windowStub as any as Window & typeof globalThis;
+
+        pageHandler = new PageHandler(loggerMock.object, checkIntervalMsecs);
     });
 
     afterEach(() => {
+        global.window = originalWindow;
         pageMock.verifyAll();
+        scrollByMock.verifyAll();
+        loggerMock.verifyAll();
     });
 
-    it('stop wait if page is fully rendered', async () => {
-        pageMock
-            .setup(async (o) => o.evaluate(It.isAny()))
-            .returns(() => Promise.resolve(1024))
-            .verifiable(Times.exactly(minCheckBreakCount + 1));
+    it.each([0, 1, 3])('scroll %s times to reach bottom of page and wait until page is fully rendered', async (scrollCount) => {
+        setupScrollToBottom(scrollCount);
         pageMock
             .setup(async (o) => o.waitForTimeout(checkIntervalMsecs))
             .returns(() => Promise.resolve())
-            .verifiable(Times.exactly(minCheckBreakCount));
+            .verifiable(Times.exactly(minCheckBreakCount + _.max([1, scrollCount])));
 
-        await pageHandler.waitForPageToCompleteRendering(pageMock.object, 2000, checkIntervalMsecs);
+        await pageHandler.waitForPageToCompleteRendering(pageMock.object, 1000, 2000);
     });
 
-    it('terminate wait if page is not fully rendered', async () => {
-        let contentSize = 1024;
+    it('terminate wait and warn if scrolling exceeds timeout', async () => {
+        const scrollCount = 3;
+        const scrollTimeout = scrollCount * checkIntervalMsecs
+        setupScrollWithTimeout(scrollCount);
+        pageMock
+            .setup(async (o) => o.waitForTimeout(checkIntervalMsecs))
+            .returns(() => Promise.resolve())
+            .verifiable(Times.exactly(minCheckBreakCount + scrollCount));
+        loggerMock.setup(l => l.logWarn(It.isAny())).verifiable();
+
+        await pageHandler.waitForPageToCompleteRendering(pageMock.object, scrollTimeout, 2000);
+    });
+
+    it('terminate wait and warn if page is not fully rendered', async () => {
         const timeoutMsecs = 200;
         const validationCallCount = timeoutMsecs / checkIntervalMsecs;
 
-        pageMock
-            .setup(async (o) => o.evaluate(It.isAny()))
-            .callback(() => (contentSize += 1024))
-            .returns(() => Promise.resolve(contentSize))
-            .verifiable(Times.exactly(validationCallCount));
+        const scrollCount = 1;
+        setupScrollToBottom(scrollCount);
+
+        pageMock.reset();
+        pageMock.setup(p => p.evaluate(It.isAny())).returns(async (action) => {
+            windowStub.document.body.innerHTML += " more content";
+            return action();
+        });
         pageMock
             .setup(async (o) => o.waitForTimeout(checkIntervalMsecs))
             .returns(() => Promise.resolve())
-            .verifiable(Times.exactly(validationCallCount));
+            .verifiable(Times.exactly(validationCallCount + scrollCount));
+        loggerMock.setup(l => l.logWarn(It.isAny())).verifiable();
 
-        await pageHandler.waitForPageToCompleteRendering(pageMock.object, timeoutMsecs, checkIntervalMsecs);
+        await pageHandler.waitForPageToCompleteRendering(pageMock.object, 1000, timeoutMsecs);
     });
+
+    function setupScrollToBottom(scrollCount: number) {
+        setupScroll((scrollCount + 1) * windowHeight, scrollCount);
+    }
+
+    function setupScrollWithTimeout(scrollCount: number): void {
+        setupScroll((scrollCount + 2) * windowHeight, scrollCount)
+    }
+
+    function setupScroll(scrollHeight: number, scrollCount: number): void {
+        windowStub.document.scrollingElement.scrollHeight = scrollHeight
+        scrollByMock.setup(s => s(0, windowHeight)).returns(() => windowStub.document.scrollingElement.scrollTop += windowHeight).verifiable(Times.exactly(_.max([1, scrollCount])));
+    }
 });
