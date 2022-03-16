@@ -247,6 +247,8 @@
                             "containerImageNames": [
                                 "[concat(variables('containerRegistryServerName'), '/batch-scan-notification-manager')]",
                                 "[concat(variables('containerRegistryServerName'), '/batch-scan-notification-runner')]",
+                                "[concat(variables('containerRegistryServerName'), '/batch-report-generator-manager')]",
+                                "[concat(variables('containerRegistryServerName'), '/batch-report-generator-runner')]",
                                 "[concat(variables('containerRegistryServerName'), '/batch-scan-request-sender')]"
                             ],
                             "containerRegistries": [

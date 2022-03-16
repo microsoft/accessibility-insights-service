@@ -9,6 +9,7 @@ import { ConsentResult, CookieByDomain } from 'storage-documents';
 import _ from 'lodash';
 import { CookieCollector } from './cookie-collector';
 import { CookieScenario } from './cookie-scenarios';
+import { getPromisableDynamicMock } from './test-utilities/promisable-mock';
 import { ReloadPageFunc, ReloadPageResponse } from '.';
 
 describe(CookieCollector, () => {
@@ -23,12 +24,14 @@ describe(CookieCollector, () => {
     let pageCookiesByDomain: CookieByDomain[];
     let puppeteerPageMock: IMock<Puppeteer.Page>;
     let reloadPageMock: IMock<ReloadPageFunc>;
+    let targetClientMock: IMock<Puppeteer.CDPSession>;
 
     let testSubject: CookieCollector;
 
     beforeEach(() => {
         puppeteerPageMock = Mock.ofType<Puppeteer.Page>();
         reloadPageMock = Mock.ofInstance(() => undefined);
+        targetClientMock = getPromisableDynamicMock(Mock.ofType<Puppeteer.CDPSession>());
         pageCookies = [
             {
                 name: 'domain1cookie1',
@@ -59,7 +62,7 @@ describe(CookieCollector, () => {
                 Cookies: [{ Name: 'domain2cookie', Domain: 'domain2', Expires: expiryDate }],
             },
         ];
-        puppeteerPageMock.setup((p) => p.cookies()).returns(async () => pageCookies);
+        setupGetCookies(pageCookies);
         puppeteerPageMock.setup((p) => p.url()).returns(() => url);
 
         testSubject = new CookieCollector();
@@ -68,6 +71,7 @@ describe(CookieCollector, () => {
     afterEach(() => {
         puppeteerPageMock.verifyAll();
         reloadPageMock.verifyAll();
+        targetClientMock.verifyAll();
     });
 
     it('Returns error if first reload fails', async () => {
@@ -151,5 +155,19 @@ describe(CookieCollector, () => {
             })
             .verifiable();
         reloadPageMock.setup((r) => r(puppeteerPageMock.object)).returns(async () => reloadResponse);
+    }
+
+    function setupGetCookies(cookies: Puppeteer.Protocol.Network.Cookie[]): void {
+        const clientMock = getPromisableDynamicMock(Mock.ofType<Puppeteer.CDPSession>());
+        const targetStub = {
+            createCDPSession: async () => clientMock.object,
+        } as Puppeteer.Target;
+        const getCookiesResponse = { cookies };
+        puppeteerPageMock.setup((p) => p.target()).returns(() => targetStub);
+        clientMock.setup((c) => c.send('Network.getAllCookies')).returns(async () => getCookiesResponse);
+        clientMock
+            .setup((c) => c.detach())
+            .returns(async () => null)
+            .verifiable();
     }
 });

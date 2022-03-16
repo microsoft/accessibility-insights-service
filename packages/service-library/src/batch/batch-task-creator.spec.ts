@@ -3,9 +3,9 @@
 
 import 'reflect-metadata';
 
-import { Batch, BatchConfig, BatchTask, getTaskCorrelationId, JobTask, JobTaskState, PoolMetricsInfo, Queue } from 'azure-services';
+import { Batch, BatchConfig, BatchTask, getTaskCorrelationId, JobTask, JobTaskState, PoolMetricsInfo } from 'azure-services';
 import { JobManagerConfig, QueueRuntimeConfig, ServiceConfiguration, System } from 'common';
-import * as _ from 'lodash';
+import _ from 'lodash';
 import { Logger } from 'logger';
 import * as mockDate from 'mockdate';
 import { OnDemandScanRequestMessage } from 'storage-documents';
@@ -26,6 +26,7 @@ enum EnableBaseWorkflow {
     onExit = 1 << 7,
     getJobPendingTasksCount = 1 << 8,
     deleteScanQueueMessagesForSucceededTasks = 1 << 9,
+    deleteSucceededRequest = 1 << 10,
 }
 
 class TestableBatchTaskCreator extends BatchTaskCreator {
@@ -49,13 +50,13 @@ class TestableBatchTaskCreator extends BatchTaskCreator {
 
     public deleteScanQueueMessagesForSucceededTasksCallback: (scanMessages: ScanMessage[]) => Promise<void>;
 
+    public deleteSucceededRequestCallback: (scanMessage: ScanMessage) => Promise<void>;
+
     public activeScanMessages: ScanMessage[];
 
     public jobId: string;
 
-    public getQueueName(): string {
-        return 'queue-name';
-    }
+    public jobGroup: string = 'jobGroup';
 
     public async getQueueConfig(): Promise<QueueRuntimeConfig> {
         return super.getQueueConfig();
@@ -108,6 +109,16 @@ class TestableBatchTaskCreator extends BatchTaskCreator {
             async () => super.onTasksAdded(tasks),
             undefined,
             tasks,
+        );
+    }
+
+    public async deleteSucceededRequest(scanMessage: ScanMessage): Promise<void> {
+        await this.invokeOverrides(
+            EnableBaseWorkflow.deleteSucceededRequest,
+            this.deleteSucceededRequestCallback,
+            async () => super.deleteSucceededRequest(scanMessage),
+            undefined,
+            scanMessage,
         );
     }
 
@@ -184,11 +195,11 @@ class QueueMessagesGenerator {
     };
 }
 
+const jobGroup = 'jobGroup';
 const dateNowIso = '2019-12-12T12:00:00.000Z';
 mockDate.set(dateNowIso);
 
 let batchMock: IMock<Batch>;
-let queueMock: IMock<Queue>;
 let serviceConfigMock: IMock<ServiceConfiguration>;
 let loggerMock: IMock<Logger>;
 let systemMock: IMock<typeof System>;
@@ -209,7 +220,6 @@ describe(BatchTaskCreator, () => {
             jobId: 'job-id',
         } as BatchConfig;
         batchMock = Mock.ofType(Batch);
-        queueMock = Mock.ofType(Queue);
         serviceConfigMock = Mock.ofType(ServiceConfiguration);
         loggerMock = Mock.ofType(MockableLogger);
         systemMock = Mock.ofInstance({
@@ -234,12 +244,11 @@ describe(BatchTaskCreator, () => {
                 runningTasks: 1,
             },
         };
-        batchMock.setup((o) => o.getPoolMetricsInfo()).returns(async () => Promise.resolve(poolMetricsInfo));
+        batchMock.setup((o) => o.getPoolMetricsInfo(jobGroup)).returns(async () => Promise.resolve(poolMetricsInfo));
         queueMessagesGenerator = new QueueMessagesGenerator();
 
         testSubject = new TestableBatchTaskCreator(
             batchMock.object,
-            queueMock.object,
             batchConfig,
             serviceConfigMock.object,
             loggerMock.object,
@@ -250,7 +259,6 @@ describe(BatchTaskCreator, () => {
 
     afterEach(() => {
         batchMock.verifyAll();
-        queueMock.verifyAll();
         serviceConfigMock.verifyAll();
         loggerMock.verifyAll();
     });
@@ -384,7 +392,7 @@ describe(BatchTaskCreator, () => {
             },
         };
         batchMock.reset();
-        batchMock.setup((o) => o.getPoolMetricsInfo()).returns(async () => Promise.resolve(poolMetricsInfo));
+        batchMock.setup((o) => o.getPoolMetricsInfo(jobGroup)).returns(async () => Promise.resolve(poolMetricsInfo));
 
         testSubject.enableBaseWorkflow = EnableBaseWorkflow.getJobPendingTasksCount;
 
@@ -533,7 +541,6 @@ describe(BatchTaskCreator, () => {
         batchTasks.map((task) => {
             const scanMessage = queueMessagesGenerator.scanMessages.find((m) => m.messageId === task.correlationId);
             expectScanMessages.splice(expectScanMessages.indexOf(scanMessage), 1);
-            queueMock.setup((o) => o.deleteMessage(testSubject.getQueueName(), scanMessage.message)).verifiable();
             loggerMock
                 .setup((o) =>
                     o.logInfo(
@@ -544,7 +551,8 @@ describe(BatchTaskCreator, () => {
                 .verifiable();
         });
 
-        testSubject.enableBaseWorkflow = EnableBaseWorkflow.deleteScanQueueMessagesForSucceededTasks;
+        testSubject.enableBaseWorkflow =
+            EnableBaseWorkflow.deleteScanQueueMessagesForSucceededTasks | EnableBaseWorkflow.deleteSucceededRequest;
         testSubject.activeScanMessages = queueMessagesGenerator.scanMessages;
 
         await testSubject.deleteScanQueueMessagesForSucceededTasks(queueMessagesGenerator.scanMessages);

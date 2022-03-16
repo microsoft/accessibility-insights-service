@@ -18,7 +18,7 @@ import { MockableLogger } from './test-utilities/mockable-logger';
 import { getPromisableDynamicMock } from './test-utilities/promisable-mock';
 import { WebDriver } from './web-driver';
 import { PageNavigator } from './page-navigator';
-import { PrivacyScanResult } from '.';
+import { PrivacyScanResult } from './privacy-scan-result';
 
 const url = 'url';
 const redirectUrl = 'redirect url';

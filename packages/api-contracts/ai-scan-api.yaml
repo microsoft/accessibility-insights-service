@@ -175,6 +175,17 @@ components:
                             consolidatedId:
                                 description: The unique report ID for the given reporting period
                                 type: string
+                privacyScan:
+                    type: object
+                    description: If present, the url will be scanned for cookies instead of accessibility issues. In this case, the deepScan and scanNotifyUrl fields will be ignored.
+                    required:
+                        - cookieBannerType
+                    properties:
+                        cookieBannerType:
+                            description: The type of consent banner in the target page
+                            type: string
+                            enum:
+                                - standard
         ScanRunResponse:
             type: object
             required:
@@ -242,6 +253,10 @@ components:
                         https://www.oasis-open.org/committees/sarif/charter.php
                     enum:
                         - sarif
+                        - html
+                        - consolidated.html
+                        - json
+                        - consolidated.json
                 links:
                     $ref: '#/components/schemas/Links'
         DeepScanResultItem:

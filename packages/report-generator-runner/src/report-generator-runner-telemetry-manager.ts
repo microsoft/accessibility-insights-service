@@ -4,13 +4,13 @@
 import { GuidGenerator } from 'common';
 import { inject, injectable } from 'inversify';
 import { isNil } from 'lodash';
-import { GlobalLogger, ScanTaskCompletedMeasurements } from 'logger';
+import { GlobalLogger, ReportGeneratorTaskCompletedMeasurements } from 'logger';
 
 @injectable()
 export class ReportGeneratorRunnerTelemetryManager {
-    protected scanSubmitted: number;
+    protected requestsSubmitted: number;
 
-    protected scanStarted: number;
+    protected requestsStarted: number;
 
     public constructor(
         @inject(GlobalLogger) private readonly logger: GlobalLogger,
@@ -18,37 +18,33 @@ export class ReportGeneratorRunnerTelemetryManager {
         private readonly getCurrentTimestamp: () => number = Date.now,
     ) {}
 
-    public trackScanStarted(scanId: string): void {
-        this.scanStarted = this.getCurrentTimestamp();
-        this.scanSubmitted = this.guidGenerator.getGuidTimestamp(scanId).getTime();
-        this.logger.trackEvent('ScanRequestRunning', undefined, { runningScanRequests: 1 });
-        this.logger.trackEvent('ScanTaskStarted', undefined, {
-            scanWaitTime: this.asSeconds(this.scanStarted - this.scanSubmitted),
-            startedScanTasks: 1,
+    public trackRequestStarted(scanId: string): void {
+        this.requestsStarted = this.getCurrentTimestamp();
+        this.requestsSubmitted = this.guidGenerator.getGuidTimestamp(scanId).getTime();
+        this.logger.trackEvent('ReportGeneratorRequestRunning', undefined, { runningRequests: 1 });
+        this.logger.trackEvent('ReportGeneratorTaskStarted', undefined, {
+            waitTime: this.asSeconds(this.requestsStarted - this.requestsSubmitted),
+            startedTasks: 1,
         });
     }
 
-    public trackBrowserScanFailed(): void {
-        this.logger.trackEvent('BrowserScanFailed', undefined, { failedBrowserScans: 1 });
+    public trackRequestFailed(): void {
+        this.logger.trackEvent('ReportGeneratorRequestFailed', undefined, { failedRequests: 1 });
+        this.logger.trackEvent('ReportGeneratorTaskFailed', undefined, { failedTasks: 1 });
     }
 
-    public trackScanTaskFailed(): void {
-        this.logger.trackEvent('ScanRequestFailed', undefined, { failedScanRequests: 1 });
-        this.logger.trackEvent('ScanTaskFailed', undefined, { failedScanTasks: 1 });
-    }
-
-    public trackScanCompleted(): void {
-        if (isNil(this.scanStarted) || isNil(this.scanSubmitted)) {
+    public trackRequestCompleted(): void {
+        if (isNil(this.requestsStarted) || isNil(this.requestsSubmitted)) {
             return;
         }
-        const scanCompletedTimestamp: number = this.getCurrentTimestamp();
-        const telemetryMeasurements: ScanTaskCompletedMeasurements = {
-            scanExecutionTime: this.asSeconds(scanCompletedTimestamp - this.scanStarted),
-            scanTotalTime: this.asSeconds(scanCompletedTimestamp - this.scanSubmitted),
-            completedScanTasks: 1,
+        const requestCompletedTimestamp: number = this.getCurrentTimestamp();
+        const telemetryMeasurements: ReportGeneratorTaskCompletedMeasurements = {
+            executionTime: this.asSeconds(requestCompletedTimestamp - this.requestsStarted),
+            totalTime: this.asSeconds(requestCompletedTimestamp - this.requestsSubmitted),
+            completedTasks: 1,
         };
-        this.logger.trackEvent('ScanTaskCompleted', undefined, telemetryMeasurements);
-        this.logger.trackEvent('ScanRequestCompleted', undefined, { completedScanRequests: 1 });
+        this.logger.trackEvent('ReportGeneratorTaskCompleted', undefined, telemetryMeasurements);
+        this.logger.trackEvent('ReportGeneratorRequestCompleted', undefined, { completedRequests: 1 });
     }
 
     private asSeconds(milliseconds: number): number {

@@ -15,7 +15,7 @@ import {
     Queue,
     StorageConfig,
 } from 'azure-services';
-import { QueueRuntimeConfig, ServiceConfiguration } from 'common';
+import { QueueRuntimeConfig, ServiceConfiguration, JobManagerConfig } from 'common';
 import * as _ from 'lodash';
 import * as mockDate from 'mockdate';
 import { BatchPoolLoadSnapshotProvider, OnDemandPageScanRunResultProvider, ScanMessage } from 'service-library';
@@ -130,6 +130,7 @@ class QueueMessagesGenerator {
     };
 }
 
+const jobGroup = 'jobGroup';
 const messageVisibilityTimeout = 600;
 const dateNowIso = '2019-12-12T12:00:00.000Z';
 mockDate.set(dateNowIso);
@@ -148,7 +149,7 @@ let batchConfig: BatchConfig;
 let queueMessagesGenerator: QueueMessagesGenerator;
 
 describe(Worker, () => {
-    beforeEach(() => {
+    beforeEach(async () => {
         batchConfig = {
             accountName: 'batch-account-name',
             accountUrl: '',
@@ -179,7 +180,13 @@ describe(Worker, () => {
         } as StorageConfig;
         loggerMock = Mock.ofType(MockableLogger);
 
-        batchMock.setup((o) => o.getPoolMetricsInfo()).returns(async () => Promise.resolve(poolMetricsInfo));
+        batchMock.setup((o) => o.getPoolMetricsInfo(jobGroup)).returns(async () => Promise.resolve(poolMetricsInfo));
+
+        serviceConfigMock
+            .setup((o) => o.getConfigValue('jobManagerConfig'))
+            .returns(() => Promise.resolve({ privacyScanJobGroup: jobGroup } as JobManagerConfig))
+            .verifiable();
+
         queueMessagesGenerator = new QueueMessagesGenerator();
 
         testSubject = new TestableWorker(
@@ -193,6 +200,7 @@ describe(Worker, () => {
             storageConfigStub,
             loggerMock.object,
         );
+        await testSubject.init();
     });
 
     afterEach(() => {

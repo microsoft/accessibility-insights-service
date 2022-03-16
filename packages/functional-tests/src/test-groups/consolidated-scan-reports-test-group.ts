@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 import { expect } from 'chai';
-import _ from 'lodash';
 import { ScanReport, ScanRunResultResponse } from 'service-library';
 import { TestEnvironment } from '../common-types';
 import { test } from '../test-decorator';
@@ -16,19 +15,23 @@ export class ConsolidatedScanReportsTestGroup extends FunctionalTestGroup {
         const response = await this.a11yServiceClient.getScanStatus(this.testContextData.scanId);
         const reports = (<ScanRunResultResponse>response.body).reports;
 
-        expect(reports, 'Expected three reports to be returned').to.have.lengthOf(3);
+        expect(reports, 'Expected a valid reports response result').to.not.be.undefined;
         expect(
-            _.some(reports, (report) => report.format === 'sarif'),
-            'Expected at least one sarif report',
-        ).to.be.true;
+            reports.find((r) => r.format === 'sarif'),
+            `Expected 'sarif' report to be returned`,
+        ).to.not.be.undefined;
         expect(
-            _.some(reports, (report) => report.format === 'html'),
-            'Expected at least one html report',
-        ).to.be.true;
+            reports.find((r) => r.format === 'html'),
+            `Expected 'html' report to be returned`,
+        ).to.not.be.undefined;
         expect(
-            _.some(reports, (report) => report.format === 'html'),
-            'Expected at least one consolidated.html report',
-        ).to.be.true;
+            reports.find((r) => r.format === 'axe'),
+            `Expected 'axe' report to be returned`,
+        ).to.not.be.undefined;
+        expect(
+            reports.find((r) => r.format === 'consolidated.html'),
+            `Expected 'consolidated.html' report to be returned`,
+        ).to.not.be.undefined;
     }
 
     @test(TestEnvironment.all)

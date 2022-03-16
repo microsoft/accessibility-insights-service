@@ -1,22 +1,44 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { Batch, BatchConfig, BatchTask, JobTask, JobTaskState, Message, Queue } from 'azure-services';
+import { Batch, BatchConfig, BatchTask, JobTask, JobTaskState } from 'azure-services';
 import { JobManagerConfig, QueueRuntimeConfig, ServiceConfiguration, System } from 'common';
 import { inject, injectable } from 'inversify';
 import { GlobalLogger } from 'logger';
 import moment from 'moment';
 
+/**
+ * The batch task scan data used for task configuration.
+ */
+export interface BatchTaskScanData {
+    /**
+     * JSON string object representation defining a batch task container parameters.
+     */
+    messageText: string;
+    /*
+     * Batch task correlation id. Azure storage queue message id when data retrieved from a storage queue.
+     */
+    messageId: string;
+    /**
+     * Azure storage queue message pop receipt used when data retrieved from a storage queue.
+     */
+    popReceipt?: string;
+}
+
 export interface ScanMessage {
     scanId: string;
+    /**
+     * Batch task correlation id.
+     */
     messageId: string;
-    message: Message;
+    message: BatchTaskScanData;
 }
 
 export interface BatchTaskCreator {
     onTasksAdded?(tasks: JobTask[]): Promise<void>;
     handleFailedTasks?(failedTasks: BatchTask[]): Promise<void>;
     onExit?(): Promise<void>;
+    deleteSucceededRequest?(scanMessage: ScanMessage): Promise<void>;
 }
 
 @injectable()
@@ -31,12 +53,13 @@ export abstract class BatchTaskCreator {
 
     public constructor(
         @inject(Batch) protected readonly batch: Batch,
-        @inject(Queue) protected readonly queue: Queue,
         @inject(BatchConfig) protected readonly batchConfig: BatchConfig,
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
         @inject(GlobalLogger) protected readonly logger: GlobalLogger,
         protected readonly system: typeof System = System,
     ) {}
+
+    protected abstract jobGroup: string;
 
     /**
      * The batch task may be retried when a task has failed.
@@ -87,8 +110,6 @@ export abstract class BatchTaskCreator {
         this.hasInitialized = true;
     }
 
-    public abstract getQueueName(): string;
-
     public abstract getMessagesForTaskCreation(): Promise<ScanMessage[]>;
 
     public async onTasksAdded?(tasks: JobTask[]): Promise<void> {
@@ -100,6 +121,10 @@ export abstract class BatchTaskCreator {
     }
 
     public async onExit?(): Promise<void> {
+        return;
+    }
+
+    public async deleteSucceededRequest?(scanMessage: ScanMessage): Promise<void> {
         return;
     }
 
@@ -120,7 +145,7 @@ export abstract class BatchTaskCreator {
     }
 
     protected async getJobPendingTasksCount(): Promise<number> {
-        const poolMetricsInfo = await this.batch.getPoolMetricsInfo();
+        const poolMetricsInfo = await this.batch.getPoolMetricsInfo(this.jobGroup);
         const taskCount = poolMetricsInfo.load.activeTasks + poolMetricsInfo.load.runningTasks - 1; // exclude the job manager task
 
         return taskCount < 0 ? 0 : taskCount;
@@ -183,7 +208,7 @@ export abstract class BatchTaskCreator {
         await Promise.all(
             unprocessedTasks.map(async (task) => {
                 const scanMessage = this.activeScanMessages.find((m) => m.messageId === task.correlationId);
-                await this.queue.deleteMessage(this.getQueueName(), scanMessage.message);
+                await this.deleteSucceededRequest(scanMessage);
                 // remove processed task from the current active tasks list
                 this.activeScanMessages.splice(this.activeScanMessages.indexOf(scanMessage), 1);
                 this.logger.logInfo('The scan request deleted from the scan task queue.', {
