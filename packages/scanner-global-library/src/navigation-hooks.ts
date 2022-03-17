@@ -19,7 +19,7 @@ export class NavigationHooks {
         private readonly pageRenderingTimeoutMsecs: number = 10000,
         private readonly networkTimeoutMsecs = 60000,
         private readonly networkIdleTimeMsecs = 500,
-    ) { }
+    ) {}
 
     public async preNavigation(page: Puppeteer.Page): Promise<void> {
         // Configure page settings before navigating to URL

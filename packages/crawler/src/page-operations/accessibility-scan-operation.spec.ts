@@ -109,11 +109,11 @@ describe(AccessibilityScanOperation, () => {
     function setMocks(axeResult: AxeResults): void {
         blobStoreMock
             .setup((s) => s.setValue(`${id}.axe`, axeResults))
-            .returns(async () => { })
+            .returns(async () => {})
             .verifiable(Times.once());
         blobStoreMock
             .setup((s) => s.setValue(`${id}.report`, report.asHTML(), { contentType: 'text/html' }))
-            .returns(async () => { })
+            .returns(async () => {})
             .verifiable(Times.once());
         scannerMock
             .setup((s) => s.scan(It.isAny(), It.isAny()))

@@ -15,7 +15,7 @@ export class CrawlerConfiguration {
     public constructor(
         private readonly settingsHandler: ApifySettingsHandler = apifySettingsHandler,
         private readonly createDiscoveryPattern: DiscoveryPatternFactory = getDiscoveryPatternForUrl,
-    ) { }
+    ) {}
 
     private get crawlerRunOptions(): CrawlerRunOptions {
         if (!this._crawlerRunOptions) {

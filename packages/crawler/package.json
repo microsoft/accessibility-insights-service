@@ -45,6 +45,7 @@
         "accessibility-insights-report": "4.2.0",
         "apify": "^2.2.2",
         "axe-core": "4.3.2",
+        "browser-pool": "^3.1.0",
         "common": "^1.0.0",
         "dotenv": "^16.0.0",
         "encoding-down": "^7.1.0",

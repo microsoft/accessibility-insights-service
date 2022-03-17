@@ -24,7 +24,7 @@ export class DataBase implements AsyncIterable<ScanResult> {
         protected readonly levelupObj: typeof levelup = levelup,
         protected readonly leveldownObj: typeof leveldown = leveldown,
         protected readonly encodeObj: typeof encode = encode,
-    ) { }
+    ) {}
 
     public [Symbol.asyncIterator](): AsyncIterator<ScanResult> {
         return this;

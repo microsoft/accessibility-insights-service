@@ -20,7 +20,7 @@ export class PuppeteerCrawlerEngine {
         @inject(crawlerIocTypes.ApifyRequestQueueProvider) protected readonly requestQueueProvider: ApifyRequestQueueProvider,
         @inject(CrawlerFactory) private readonly crawlerFactory: CrawlerFactory,
         @inject(CrawlerConfiguration) private readonly crawlerConfiguration: CrawlerConfiguration,
-    ) { }
+    ) {}
 
     public async start(crawlerRunOptions: CrawlerRunOptions): Promise<void> {
         this.crawlerConfiguration.setDefaultApifySettings();

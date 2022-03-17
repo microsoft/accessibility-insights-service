@@ -68,7 +68,9 @@
         "packages": [
             "packages/*"
         ],
-        "nohoist": ["packages/typings"]
+        "nohoist": [
+            "packages/typings"
+        ]
     },
     "resolutions": {
         "@types/node": "^16.11.7",

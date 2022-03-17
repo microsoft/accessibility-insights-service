@@ -12,13 +12,12 @@ import { DeepScanner } from './deep-scanner';
 
 @injectable()
 export class PageScanProcessor {
-
     public constructor(
         @inject(Page) private readonly page: Page,
         @inject(AxeScanner) private readonly axeScanner: AxeScanner,
         @inject(DeepScanner) private readonly deepScanner: DeepScanner,
         @inject(GlobalLogger) private readonly logger: GlobalLogger,
-    ) { }
+    ) {}
 
     public async scan(scanMetadata: ScanMetadata, pageScanResult: OnDemandPageScanResult): Promise<AxeScanResults> {
         let axeScanResults: AxeScanResults;

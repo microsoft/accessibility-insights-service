@@ -21,7 +21,7 @@ export class AccessibilityScanOperation {
         @inject(ReportGenerator) private readonly reportGenerator: ReportGenerator,
         @inject(LocalBlobStore) protected readonly blobStore: BlobStore,
         @inject(PromiseUtils) private readonly promiseUtils: PromiseUtils,
-    ) { }
+    ) {}
 
     public async run(page: Puppeteer.Page, id: string, axeSourcePath?: string): Promise<AxeResults> {
         const axeResults = await this.scanForA11yIssues(page, axeSourcePath);
@@ -38,7 +38,7 @@ export class AccessibilityScanOperation {
     }
 
     private async scanForA11yIssues(page: Puppeteer.Page, axeSourcePath?: string): Promise<AxeResults> {
-        let axeResults = await this.runA11yScan(page, axeSourcePath);
+        const axeResults = await this.runA11yScan(page, axeSourcePath);
 
         if (axeResults === 'ScanTimeout') {
             throw new Error(`Accessibility scan timed out after ${AccessibilityScanOperation.axeScanTimeoutSec} seconds.`);

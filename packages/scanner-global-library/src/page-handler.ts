@@ -8,7 +8,10 @@ import { System } from 'common';
 
 @injectable()
 export class PageHandler {
-    constructor(@inject(GlobalLogger) @optional() private readonly logger: GlobalLogger, private readonly checkIntervalMsecs: number = 200) { }
+    constructor(
+        @inject(GlobalLogger) @optional() private readonly logger: GlobalLogger,
+        private readonly checkIntervalMsecs: number = 200,
+    ) {}
 
     public async waitForPageToCompleteRendering(
         page: Puppeteer.Page,
@@ -32,7 +35,7 @@ export class PageHandler {
                 scrollingComplete = await page.evaluate(async () => {
                     window.scrollBy(0, window.innerHeight);
 
-                    return window.document.scrollingElement.scrollTop + window.innerHeight >= window.document.scrollingElement.scrollHeight
+                    return window.document.scrollingElement.scrollTop + window.innerHeight >= window.document.scrollingElement.scrollHeight;
                 });
             } catch (error) {
                 this.logger?.logError(`Page evaluation failed.`, { error: System.serializeError(error) });
