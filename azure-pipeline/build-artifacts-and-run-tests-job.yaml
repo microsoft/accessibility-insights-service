@@ -11,15 +11,15 @@ steps:
           yarn copyright:check
       displayName: check for copyright headers
 
+    - script: |
+          yarn syncpack:check
+      displayName: check for package version inconsistencies
+
     - template: ./build-steps.yaml
 
     - script: |
           yarn lint:check
       displayName: run linter
-
-    - script: |
-          yarn syncpack:check
-      displayName: check for package version inconsistencies
 
     - template: ./test-steps.yaml
       parameters: { totalTestSlices: '${{ parameters.totalTestSlices }}', testSlicesToRun: '${{ parameters.testSlicesToRun }}' }
