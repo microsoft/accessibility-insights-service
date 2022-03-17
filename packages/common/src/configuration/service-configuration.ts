@@ -29,6 +29,11 @@ export interface JobManagerConfig {
     scanRunnerTaskImageName: string;
     sendNotificationTaskImageName: string;
     privacyScanRunnerTaskImageName: string;
+    reportGeneratorRunnerTaskImageName: string;
+    accessibilityScanJobGroup: string;
+    sendNotificationJobGroup: string;
+    privacyScanJobGroup: string;
+    reportGeneratorJobGroup: string;
 }
 
 export interface ScanRunTimeConfig {
@@ -216,6 +221,31 @@ export class ServiceConfiguration {
                     format: 'String',
                     default: 'batch-privacy-scan-runner',
                     doc: 'The container image name used for task creation.',
+                },
+                reportGeneratorRunnerTaskImageName: {
+                    format: 'String',
+                    default: 'batch-report-generator-runner',
+                    doc: 'The container image name used for task creation.',
+                },
+                accessibilityScanJobGroup: {
+                    format: 'String',
+                    default: 'on-demand-url-scan-schedule',
+                    doc: 'The prefix for accessibility scan batch job id.',
+                },
+                sendNotificationJobGroup: {
+                    format: 'String',
+                    default: 'on-demand-send-notification-schedule',
+                    doc: 'The prefix for send notification batch job id.',
+                },
+                privacyScanJobGroup: {
+                    format: 'String',
+                    default: 'privacy-scan-schedule',
+                    doc: 'The prefix for privacy scan batch job id.',
+                },
+                reportGeneratorJobGroup: {
+                    format: 'String',
+                    default: 'report-generator-schedule',
+                    doc: 'The prefix for report generator batch job id.',
                 },
             },
             scanConfig: {

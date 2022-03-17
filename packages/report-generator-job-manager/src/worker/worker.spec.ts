@@ -3,26 +3,15 @@
 
 import 'reflect-metadata';
 
-import {
-    Batch,
-    BatchConfig,
-    BatchTask,
-    JobTask,
-    JobTaskState,
-    PoolLoadGenerator,
-    PoolLoadSnapshot,
-    PoolMetricsInfo,
-    Queue,
-    StorageConfig,
-} from 'azure-services';
-import { QueueRuntimeConfig, ServiceConfiguration } from 'common';
-import * as _ from 'lodash';
+import { Batch, BatchConfig, BatchTask, JobTask, JobTaskState, PoolLoadGenerator, PoolLoadSnapshot, PoolMetricsInfo } from 'azure-services';
+import { ServiceConfiguration, GuidGenerator, JobManagerConfig } from 'common';
+import _ from 'lodash';
 import * as mockDate from 'mockdate';
-import { BatchPoolLoadSnapshotProvider, OnDemandPageScanRunResultProvider, ScanMessage } from 'service-library';
-import { OnDemandPageScanResult, OnDemandScanRequestMessage, StorageDocument } from 'storage-documents';
+import { BatchPoolLoadSnapshotProvider, ScanMessage, ReportGeneratorRequestProvider, ScanReportGroup } from 'service-library';
+import { OnDemandPageScanResult, StorageDocument } from 'storage-documents';
 import { IMock, It, Mock } from 'typemoq';
 import { MockableLogger } from '../test-utilities/mockable-logger';
-import { Worker } from './worker';
+import { Worker, BatchTaskArguments } from './worker';
 
 /* eslint-disable no-invalid-this, @typescript-eslint/consistent-type-assertions, @typescript-eslint/no-explicit-any, no-bitwise */
 
@@ -90,7 +79,7 @@ class TestableWorker extends Worker {
     }
 }
 
-class QueueMessagesGenerator {
+class ReportRequestGenerator {
     public scanMessagesByRun: ScanMessage[][] = [];
 
     public scanMessages: ScanMessage[] = [];
@@ -130,25 +119,24 @@ class QueueMessagesGenerator {
     };
 }
 
-const messageVisibilityTimeout = 600;
+const jobGroup = 'jobGroup';
 const dateNowIso = '2019-12-12T12:00:00.000Z';
 mockDate.set(dateNowIso);
 
 let testSubject: TestableWorker;
 let batchMock: IMock<Batch>;
-let queueMock: IMock<Queue>;
 let poolLoadGeneratorMock: IMock<PoolLoadGenerator>;
 let serviceConfigMock: IMock<ServiceConfiguration>;
 let loggerMock: IMock<MockableLogger>;
 let batchPoolLoadSnapshotProviderMock: IMock<BatchPoolLoadSnapshotProvider>;
-let onDemandPageScanRunResultProviderMock: IMock<OnDemandPageScanRunResultProvider>;
-let storageConfigStub: StorageConfig;
+let reportGeneratorRequestProviderMock: IMock<ReportGeneratorRequestProvider>;
+let guidGeneratorMock: IMock<GuidGenerator>;
 let poolMetricsInfo: PoolMetricsInfo;
 let batchConfig: BatchConfig;
-let queueMessagesGenerator: QueueMessagesGenerator;
+let reportRequestGenerator: ReportRequestGenerator;
 
 describe(Worker, () => {
-    beforeEach(() => {
+    beforeEach(async () => {
         batchConfig = {
             accountName: 'batch-account-name',
             accountUrl: '',
@@ -166,43 +154,44 @@ describe(Worker, () => {
         };
 
         batchMock = Mock.ofType(Batch);
-        queueMock = Mock.ofType(Queue);
         poolLoadGeneratorMock = Mock.ofType(PoolLoadGenerator);
         batchPoolLoadSnapshotProviderMock = Mock.ofType(BatchPoolLoadSnapshotProvider);
-        onDemandPageScanRunResultProviderMock = Mock.ofType(OnDemandPageScanRunResultProvider);
-
-        serviceConfigMock = Mock.ofType(ServiceConfiguration);
-        setupServiceConfigMock(messageVisibilityTimeout);
-
-        storageConfigStub = {
-            scanQueue: 'scan-queue',
-        } as StorageConfig;
+        reportGeneratorRequestProviderMock = Mock.ofType(ReportGeneratorRequestProvider);
         loggerMock = Mock.ofType(MockableLogger);
+        guidGeneratorMock = Mock.ofType(GuidGenerator);
+        serviceConfigMock = Mock.ofType(ServiceConfiguration);
 
-        batchMock.setup((o) => o.getPoolMetricsInfo()).returns(async () => Promise.resolve(poolMetricsInfo));
-        queueMessagesGenerator = new QueueMessagesGenerator();
+        batchMock.setup((o) => o.getPoolMetricsInfo(jobGroup)).returns(async () => Promise.resolve(poolMetricsInfo));
+        guidGeneratorMock.setup((o) => o.createGuid()).returns(() => 'guid');
+
+        serviceConfigMock
+            .setup((o) => o.getConfigValue('jobManagerConfig'))
+            .returns(() => Promise.resolve({ reportGeneratorJobGroup: jobGroup } as JobManagerConfig))
+            .verifiable();
+
+        reportRequestGenerator = new ReportRequestGenerator();
 
         testSubject = new TestableWorker(
             batchMock.object,
-            queueMock.object,
             poolLoadGeneratorMock.object,
             batchPoolLoadSnapshotProviderMock.object,
-            onDemandPageScanRunResultProviderMock.object,
+            reportGeneratorRequestProviderMock.object,
             batchConfig,
             serviceConfigMock.object,
-            storageConfigStub,
             loggerMock.object,
+            guidGeneratorMock.object,
         );
+        await testSubject.init();
     });
 
     afterEach(() => {
         batchMock.verifyAll();
-        queueMock.verifyAll();
         poolLoadGeneratorMock.verifyAll();
         batchPoolLoadSnapshotProviderMock.verifyAll();
-        onDemandPageScanRunResultProviderMock.verifyAll();
+        reportGeneratorRequestProviderMock.verifyAll();
         serviceConfigMock.verifyAll();
         loggerMock.verifyAll();
+        guidGeneratorMock.verifyAll();
     });
 
     afterAll(() => {
@@ -249,7 +238,7 @@ describe(Worker, () => {
         expect(actualMessages).toEqual([]);
     });
 
-    it('get messages from a queue', async () => {
+    it('get report requests', async () => {
         const poolLoadSnapshot = {
             tasksIncrementCountPerInterval: 10,
             samplingIntervalInSeconds: 15,
@@ -271,10 +260,19 @@ describe(Worker, () => {
             )
             .verifiable();
 
-        queueMessagesGenerator.queueMessagesGeneratorFn()();
-        queueMock
-            .setup((o) => o.getMessagesWithTotalCount(testSubject.getQueueName(), poolLoadSnapshot.tasksIncrementCountPerInterval))
-            .returns(async () => Promise.resolve(queueMessagesGenerator.scanMessages.map((m) => m.message)))
+        reportRequestGenerator.queueMessagesGeneratorFn()();
+        const scanReportGroups = reportRequestGenerator.scanMessages.map((m) => {
+            return {
+                scanGroupId: m.scanId,
+            } as ScanReportGroup;
+        });
+        const cosmosOperationResponse = {
+            item: scanReportGroups,
+            statusCode: 200,
+        };
+        reportGeneratorRequestProviderMock
+            .setup((o) => o.readScanGroupIds(poolLoadSnapshot.tasksIncrementCountPerInterval, undefined))
+            .returns(() => Promise.resolve(cosmosOperationResponse))
             .verifiable();
 
         loggerMock
@@ -293,7 +291,7 @@ describe(Worker, () => {
 
         const actualMessages = await testSubject.getMessagesForTaskCreation();
 
-        expect(actualMessages).toEqual(queueMessagesGenerator.scanMessages);
+        expect(actualMessages).toEqual(reportRequestGenerator.scanMessages);
     });
 
     it('update pool stats when tasks added', async () => {
@@ -304,7 +302,7 @@ describe(Worker, () => {
         await testSubject.onTasksAdded(tasks as JobTask[]);
     });
 
-    it('handleFailedTasks() - skip if task has no scan id argument', async () => {
+    it('handleFailedTasks() - skip if task has no scan group id argument', async () => {
         const failedTasks = [
             {
                 id: 'id',
@@ -315,7 +313,7 @@ describe(Worker, () => {
         loggerMock
             .setup((o) =>
                 o.logError(
-                    `Unable to update failed scan run result. Task has no scan id run arguments defined.`,
+                    `Report generator batch task was terminated unexpectedly.`,
                     It.isValue({
                         correlatedBatchTaskId: failedTasks[0].id,
                         taskProperties: JSON.stringify(failedTasks[0]),
@@ -329,69 +327,7 @@ describe(Worker, () => {
         await testSubject.handleFailedTasks(failedTasks);
     });
 
-    it('handleFailedTasks() - skip if task has no scan id argument', async () => {
-        const failedTasks = [
-            {
-                id: 'task-id-1',
-                taskArguments: '{}',
-            },
-            {
-                id: 'task-id-2',
-                taskArguments: '{}',
-            },
-        ] as BatchTask[];
-
-        failedTasks.map((task) => {
-            loggerMock
-                .setup((o) =>
-                    o.logError(
-                        `Unable to update failed scan run result. Task has no scan id run arguments defined.`,
-                        It.isValue({
-                            correlatedBatchTaskId: task.id,
-                            taskProperties: JSON.stringify(task),
-                        }),
-                    ),
-                )
-                .verifiable();
-        });
-
-        testSubject.enableBaseWorkflow = EnableBaseWorkflow.handleFailedTasks;
-
-        await testSubject.handleFailedTasks(failedTasks);
-    });
-
-    it('handleFailedTasks() - skip if scan document not found in a storage', async () => {
-        const failedTasks = [
-            {
-                id: 'task-id-1',
-                taskArguments: JSON.stringify({ id: 'scan-id-1' }),
-            },
-            {
-                id: 'task-id-2',
-                taskArguments: JSON.stringify({ id: 'scan-id-2' }),
-            },
-        ] as BatchTask[];
-
-        failedTasks.map((task) => {
-            loggerMock
-                .setup((o) =>
-                    o.logError(
-                        `Unable to find corresponding scan document in a result storage.`,
-                        It.isValue({
-                            correlatedBatchTaskId: task.id,
-                            taskProperties: JSON.stringify(task),
-                        }),
-                    ),
-                )
-                .verifiable();
-        });
-
-        testSubject.enableBaseWorkflow = EnableBaseWorkflow.handleFailedTasks;
-
-        await testSubject.handleFailedTasks(failedTasks);
-    });
-
-    it('handleFailedTasks() - update scan document with task error', async () => {
+    it('handleFailedTasks() - log task error', async () => {
         const failedTasks: BatchTask[] = [];
         const pageScanResults: OnDemandPageScanResult[] = [];
 
@@ -419,17 +355,6 @@ describe(Worker, () => {
                 },
             } as OnDemandPageScanResult);
         }
-
-        failedTasks.map((task) => {
-            onDemandPageScanRunResultProviderMock
-                .setup((o) => o.readScanRun(task.correlationId))
-                .returns(async () => Promise.resolve({} as OnDemandPageScanResult))
-                .verifiable();
-        });
-
-        pageScanResults.map((scan) => {
-            onDemandPageScanRunResultProviderMock.setup((o) => o.updateScanRun(scan)).verifiable();
-        });
 
         testSubject.enableBaseWorkflow = EnableBaseWorkflow.handleFailedTasks;
 
@@ -466,24 +391,16 @@ function createScanMessages(count: number, shift: number = 0): ScanMessage[] {
     for (let i = shift; i < count + shift; i += 1) {
         scanMessages.push({
             scanId: `scan-id-${i}`,
-            messageId: `message-id-${i}`,
+            messageId: `guid`,
             message: {
-                messageId: `message-id-${i}`,
-                messageText: JSON.stringify(<OnDemandScanRequestMessage>{
-                    id: `scan-id-${i}`,
-                    url: 'https://localhost/',
+                messageId: `guid`,
+                messageText: JSON.stringify(<BatchTaskArguments>{
+                    id: `guid`,
+                    scanGroupId: `scan-id-${i}`,
                 }),
-                popReceipt: `pop-receipt-${i}`,
             },
         });
     }
 
     return scanMessages;
-}
-
-function setupServiceConfigMock(timeout: number): void {
-    serviceConfigMock.reset();
-    serviceConfigMock
-        .setup(async (o) => o.getConfigValue('queueConfig'))
-        .returns(async () => Promise.resolve(<QueueRuntimeConfig>(<unknown>{ messageVisibilityTimeoutInSeconds: timeout })));
 }

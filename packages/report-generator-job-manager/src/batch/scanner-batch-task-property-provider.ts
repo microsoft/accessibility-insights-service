@@ -12,7 +12,7 @@ export class ScannerBatchTaskPropertyProvider extends BatchTaskPropertyProvider 
     }
 
     public async getImageName(): Promise<string> {
-        return (await this.serviceConfig.getConfigValue('jobManagerConfig')).privacyScanRunnerTaskImageName;
+        return (await this.serviceConfig.getConfigValue('jobManagerConfig')).reportGeneratorRunnerTaskImageName;
     }
 
     public getAdditionalContainerRunOptions?(): string {

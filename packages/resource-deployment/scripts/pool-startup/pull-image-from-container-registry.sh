@@ -77,6 +77,8 @@ pullDockerImages() {
     notificationManagerImage="$azurecr/batch-scan-notification-manager:latest"
     notificationRunnerImage="$azurecr/batch-scan-notification-runner:latest"
     requestSenderImage="$azurecr/batch-scan-request-sender:latest"
+    reportGeneratorManagerImage="$azurecr/batch-report-generator-manager:latest"
+    reportGeneratorRunnerImage="$azurecr/batch-report-generator-runner:latest"
 
     echo "Pulling image $notificationManagerImage"
     docker pull $notificationManagerImage
@@ -86,6 +88,12 @@ pullDockerImages() {
 
     echo "Pulling image $requestSenderImage"
     docker pull $requestSenderImage
+
+    echo "Pulling image $reportGeneratorManagerImage"
+    docker pull $reportGeneratorManagerImage
+
+    echo "Pulling image $reportGeneratorRunnerImage"
+    docker pull $reportGeneratorRunnerImage
 }
 
 # Read script arguments

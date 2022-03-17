@@ -94,9 +94,9 @@ export class Batch {
         return batchTasks;
     }
 
-    public async getPoolMetricsInfo(): Promise<PoolMetricsInfo> {
+    public async getPoolMetricsInfo(jobGroup: string): Promise<PoolMetricsInfo> {
         const maxTasksPerPool = await this.getMaxTasksPerPool();
-        const currentPoolLoad = await this.getCurrentPoolLoad();
+        const currentPoolLoad = await this.getCurrentPoolLoad(jobGroup);
 
         return {
             id: this.config.poolId,
@@ -160,8 +160,8 @@ export class Batch {
         return poolInfo.taskSlotsPerNode * (poolInfo.currentDedicatedNodes + poolInfo.currentLowPriorityNodes);
     }
 
-    private async getCurrentPoolLoad(): Promise<PoolLoad> {
-        const activeJobIds = await this.getActiveJobIds();
+    private async getCurrentPoolLoad(jobGroup: string): Promise<PoolLoad> {
+        const activeJobIds = await this.getActiveJobIds(jobGroup);
 
         let activeTasks = 0;
         let runningTasks = 0;
@@ -221,11 +221,11 @@ export class Batch {
         return tasks;
     }
 
-    private async getActiveJobIds(): Promise<string[]> {
+    private async getActiveJobIds(jobGroup: string): Promise<string[]> {
         const filterClause = `state eq 'active' and executionInfo/poolId eq '${this.config.poolId}'`;
         const jobs = await this.getJobList({ filter: filterClause });
 
-        return jobs.map((i) => i.id);
+        return jobs.filter((j) => j.id.startsWith(jobGroup)).map((i) => i.id);
     }
 
     private async getJobList(options?: JobListOptions): Promise<CloudJob[]> {
