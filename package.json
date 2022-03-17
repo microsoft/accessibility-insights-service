@@ -9,7 +9,7 @@
     "scripts": {
         "bootstrap": "npx lerna bootstrap",
         "clean": "npx lerna run clean --stream && rimraf dist test-results",
-        "cbuild": "npx syncpack fix-mismatches format --indent '    ' && yarn install && npx lerna run cbuild --stream",
+        "cbuild": "npx lerna run cbuild --stream",
         "build": "npx lerna run build --stream",
         "pack": "npx lerna run pack --stream",
         "test": "npx jest",
@@ -19,13 +19,15 @@
         "test:e2e": "npx jest functional-tests.local.spec.ts",
         "lint:check": "npx lerna run lint --stream",
         "lint:fix": "npx lerna run lint:fix --stream",
-        "precheckin": "npm-run-all --serial format:check lint:check copyright:check cbuild test",
-        "format:fix": "npx prettier --write \"**/*\"",
+        "precheckin": "npm-run-all --serial format:check lint:check copyright:check syncpack:check cbuild test",
+        "format:fix": "npx syncpack format --indent \"    \" && npx prettier --write \"**/*\"",
         "format:check": "npx prettier --check \"**/*\"",
         "copyright:check": "license-check-and-add check -f ./license-check-and-add-config.json",
         "copyright:fix": "license-check-and-add add -f ./license-check-and-add-config.json",
         "audit": "lerna-audit",
-        "pr:combine": "git push origin :combined-prs ; npx combine-dependabot-prs microsoft/accessibility-insights-service"
+        "pr:combine": "git push origin :combined-prs ; npx combine-dependabot-prs microsoft/accessibility-insights-service",
+        "syncpack:check": "npx syncpack list-mismatches",
+        "syncpack:fix": "npx syncpack fix-mismatches"
     },
     "author": "Microsoft",
     "license": "MIT",

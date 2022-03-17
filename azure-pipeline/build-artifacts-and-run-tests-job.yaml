@@ -17,6 +17,10 @@ steps:
           yarn lint:check
       displayName: run linter
 
+    - script: |
+          yarn syncpack:check
+      displayName: check for package version inconsistencies
+
     - template: ./test-steps.yaml
       parameters: { totalTestSlices: '${{ parameters.totalTestSlices }}', testSlicesToRun: '${{ parameters.testSlicesToRun }}' }
 
