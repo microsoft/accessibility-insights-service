@@ -66,6 +66,7 @@ describe(CombinedScanResultProcessor, () => {
         } as GeneratedReport;
         pageScanReport = {
             reportId: 'reportId',
+            href: 'href',
         } as OnDemandPageScanReport;
 
         setupRetryHelperMock();
@@ -121,6 +122,30 @@ describe(CombinedScanResultProcessor, () => {
 
         await combinedScanResultProcessor.generateCombinedScanResults(axeScanResults, pageScanResult);
 
+        expect(pageScanResult.reports[0]).toEqual(pageScanReport);
+    });
+
+    it('should replace report reference if already exists', async () => {
+        pageScanResult = {
+            id: 'id',
+            websiteScanRefs: [
+                {
+                    id: websiteScanId,
+                    scanGroupType: 'deep-scan',
+                },
+            ],
+            reports: [
+                {
+                    reportId: 'reportId',
+                    href: 'old href',
+                },
+            ],
+        } as OnDemandPageScanResult;
+        setupFullPass();
+
+        await combinedScanResultProcessor.generateCombinedScanResults(axeScanResults, pageScanResult);
+
+        expect(pageScanResult.reports.length).toEqual(1);
         expect(pageScanResult.reports[0]).toEqual(pageScanReport);
     });
 });

@@ -86,7 +86,7 @@ export class Runner {
 
         const websiteScanResult = await this.updateScanResult(runnerScanMetadata, pageScanResult);
 
-        if (this.isScanCompleted(pageScanResult)) {
+        if (this.isReportRequestNeeded(pageScanResult)) {
             await this.scanNotificationProcessor.sendScanCompletionNotification(runnerScanMetadata, pageScanResult, websiteScanResult);
         }
 
@@ -101,7 +101,7 @@ export class Runner {
         pageScanResult.reports = await this.generateScanReports(axeScanResults);
 
         const websiteScanRef = this.getWebsiteScanRefs(pageScanResult);
-        if (this.isScanCompleted(pageScanResult)) {
+        if (this.isReportRequestNeeded(pageScanResult)) {
             this.setRunResult(pageScanResult, 'completed');
 
             // TODO remove below after transition phase
@@ -244,7 +244,7 @@ export class Runner {
      * The scan is completed if there is no combined report generated
      * or combined report generated via old workflow
      */
-    private isScanCompleted(pageScanResult: OnDemandPageScanResult): boolean {
+    private isReportRequestNeeded(pageScanResult: OnDemandPageScanResult): boolean {
         const websiteScanRef = this.getWebsiteScanRefs(pageScanResult);
 
         // TODO remove websiteScanRef.scanGroupId === undefined condition

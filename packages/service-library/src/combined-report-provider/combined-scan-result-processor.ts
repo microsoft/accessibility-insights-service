@@ -70,7 +70,14 @@ export class CombinedScanResultProcessor {
 
         if (pageScanReport) {
             if (pageScanResult.reports) {
-                pageScanResult.reports.push(pageScanReport);
+                if (pageScanResult.reports.some((report) => report.reportId === pageScanReport.reportId)) {
+                    // replace report if already exists
+                    pageScanResult.reports = pageScanResult.reports.map((report) =>
+                        report.reportId === pageScanReport.reportId ? pageScanReport : report,
+                    );
+                } else {
+                    pageScanResult.reports.push(pageScanReport);
+                }
             } else {
                 pageScanResult.reports = [pageScanReport];
             }

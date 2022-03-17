@@ -81,9 +81,9 @@ export class ReportGeneratorRequestProvider {
 
         const persistedResult = request as ReportGeneratorRequest;
         this.setSystemProperties(persistedResult);
-        const operationResponse = this.cosmosContainerClient.mergeOrWriteDocument(persistedResult);
+        const operationResponse = await this.cosmosContainerClient.mergeOrWriteDocument(persistedResult);
 
-        return (await operationResponse).item;
+        return operationResponse.item;
     }
 
     public async deleteRequests(ids: string[]): Promise<void> {

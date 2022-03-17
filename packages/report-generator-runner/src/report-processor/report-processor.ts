@@ -22,7 +22,7 @@ export interface TargetReportProcessor {
 
 @injectable()
 export class ReportProcessor {
-    public maxConcurrencyLimit = 1; // 5
+    public maxConcurrencyLimit = 5;
 
     constructor(
         @inject(OnDemandPageScanRunResultProvider) private readonly onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider,
@@ -78,7 +78,7 @@ export class ReportProcessor {
             const runnerScanMetadata: RunnerScanMetadata = {
                 id: pageScanResult.id,
                 url: pageScanResult.url,
-                deepScan: websiteScanResult.deepScanId !== undefined ? true : false,
+                deepScan: websiteScanResult?.deepScanId !== undefined ? true : false,
             };
             // the scan notification processor will detect if notification should be sent
             await this.scanNotificationProcessor.sendScanCompletionNotification(runnerScanMetadata, pageScanResult, websiteScanResult);
@@ -90,6 +90,7 @@ export class ReportProcessor {
     private async updateScanResult(pageScanResult: Partial<OnDemandPageScanResult>): Promise<WebsiteScanResult> {
         await this.onDemandPageScanRunResultProvider.updateScanRun(pageScanResult);
 
+        // deep-scan request type requires update of website scan result
         const websiteScanRef = pageScanResult.websiteScanRefs?.find((ref) => ref.scanGroupType === 'deep-scan');
         if (websiteScanRef) {
             const scanConfig = await this.serviceConfig.getConfigValue('scanConfig');
