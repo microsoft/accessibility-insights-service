@@ -3,7 +3,7 @@
     "version": "1.0.0",
     "description": "This project welcomes contributions and suggestions.  Most contributions require you to agree to a Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us the rights to use your contribution. For details, visit https://cla.microsoft.com.",
     "scripts": {
-        "build": "cpy \"./site-content/**\" \"./dist\" --parents && echo",
+        "build": "cpy \"./site-content\" \"./dist\" && echo",
         "cbuild": "npm-run-all --serial clean build",
         "clean": "rimraf dist test-results"
     },
@@ -14,7 +14,7 @@
     },
     "homepage": "https://github.com/Microsoft/accessibility-insights-service#readme",
     "devDependencies": {
-        "cpy-cli": "^3.1.1",
+        "cpy-cli": "^4.0.0",
         "rimraf": "^3.0.2"
     },
     "dependencies": {}
