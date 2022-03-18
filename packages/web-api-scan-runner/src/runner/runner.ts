@@ -107,7 +107,7 @@ export class Runner {
             // TODO remove below after transition phase
             // The transition workflow is to support old report generation logic while
             // new scan request documents will be created with websiteScanRef.scanGroupId metadata
-            if (websiteScanRef?.scanGroupId === undefined) {
+            if (websiteScanRef && websiteScanRef.scanGroupId === undefined) {
                 await this.combinedScanResultProcessor.generateCombinedScanResults(axeScanResults, pageScanResult);
 
                 return;
