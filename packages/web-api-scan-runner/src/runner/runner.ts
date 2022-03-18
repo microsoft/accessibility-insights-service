@@ -86,7 +86,7 @@ export class Runner {
 
         const websiteScanResult = await this.updateScanResult(runnerScanMetadata, pageScanResult);
 
-        if (this.isReportRequestNeeded(pageScanResult)) {
+        if (this.isPageScanCompleted(pageScanResult)) {
             await this.scanNotificationProcessor.sendScanCompletionNotification(runnerScanMetadata, pageScanResult, websiteScanResult);
         }
 
@@ -101,13 +101,13 @@ export class Runner {
         pageScanResult.reports = await this.generateScanReports(axeScanResults);
 
         const websiteScanRef = this.getWebsiteScanRefs(pageScanResult);
-        if (this.isReportRequestNeeded(pageScanResult)) {
+        if (this.isPageScanCompleted(pageScanResult)) {
             this.setRunResult(pageScanResult, 'completed');
 
             // TODO remove below after transition phase
             // The transition workflow is to support old report generation logic while
             // new scan request documents will be created with websiteScanRef.scanGroupId metadata
-            if (websiteScanRef.scanGroupId === undefined) {
+            if (websiteScanRef?.scanGroupId === undefined) {
                 await this.combinedScanResultProcessor.generateCombinedScanResults(axeScanResults, pageScanResult);
 
                 return;
@@ -224,7 +224,7 @@ export class Runner {
         };
         await this.reportGeneratorRequestProvider.writeRequest(reportGeneratorRequest);
 
-        this.logger.logInfo('Request to generate consolidated report was sent.', {
+        this.logger.logInfo('Sending request to generate consolidated report.', {
             id: reportGeneratorRequest.id,
             scanGroupId: websiteScanRef.scanGroupId,
         });
@@ -244,7 +244,7 @@ export class Runner {
      * The scan is completed if there is no combined report generated
      * or combined report generated via old workflow
      */
-    private isReportRequestNeeded(pageScanResult: OnDemandPageScanResult): boolean {
+    private isPageScanCompleted(pageScanResult: OnDemandPageScanResult): boolean {
         const websiteScanRef = this.getWebsiteScanRefs(pageScanResult);
 
         // TODO remove websiteScanRef.scanGroupId === undefined condition

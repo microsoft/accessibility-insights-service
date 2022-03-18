@@ -39,7 +39,11 @@ export class ReportProcessor {
         return Promise.all(
             queuedRequests.map(async (queuedRequest) => {
                 return limit(async () => {
-                    this.logger.logInfo(`Generating '${targetReport}' report for ${queuedRequest.request.scanGroupId} report group id.`);
+                    this.logger.logInfo(`Generating consolidated report for a report group.`, {
+                        scanId: queuedRequest.request.scanId,
+                        scanGroupId: queuedRequest.request.scanGroupId,
+                        targetReport,
+                    });
 
                     if (targetReport === 'accessibility') {
                         return this.generateReport(this.accessibilityReportProcessor, queuedRequest);
@@ -70,7 +74,11 @@ export class ReportProcessor {
             }
             queuedRequest.condition = 'failed';
             queuedRequest.error = errorMessage;
-            this.logger.logError(`The report generator has failed.`, { error: errorMessage });
+            this.logger.logError(`The report generator has failed.`, {
+                error: errorMessage,
+                scanId: queuedRequest.request.scanId,
+                scanGroupId: queuedRequest.request.scanGroupId,
+            });
         }
 
         if (pageScanResult) {
