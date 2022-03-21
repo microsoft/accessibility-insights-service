@@ -28,6 +28,7 @@ export class ScanResponseConverter {
             case 'accepted':
             case 'queued':
             case 'running':
+            case 'report':
             default:
                 return this.createIncompleteScanResponse(pageScanResult);
             case 'failed':

@@ -6,12 +6,16 @@ import 'reflect-metadata';
 import axe, { AxeResults } from 'axe-core';
 import { AxeResultsReducer } from 'axe-result-converter';
 import { cloneDeep } from 'lodash';
-import { CombinedScanResultsProvider, CombinedScanResultsReadResponse, CombinedScanResultsWriteResponse } from 'service-library';
 import { CombinedScanResults } from 'storage-documents';
 import { IMock, It, Mock } from 'typemoq';
 import { MockableLogger } from '../test-utilities/mockable-logger';
-import { CombinedResultsBlob } from '../types/combined-results-blob';
+import {
+    CombinedScanResultsProvider,
+    CombinedScanResultsReadResponse,
+    CombinedScanResultsWriteResponse,
+} from '../data-providers/combined-scan-results-provider';
 import { CombinedAxeResultBuilder } from './combined-axe-result-builder';
+import { CombinedResultsBlob } from './combined-results-blob-provider';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 

@@ -59,7 +59,7 @@ describe(ReportGeneratorRequestProvider, () => {
         const itemCount = 5;
         const continuationToken = 'continuationToken';
         const response = {
-            item: [{ scanCount: 1, scanGroupId: 'scanGroupId' } as ScanReportGroup],
+            item: [{ scanCount: 1, scanGroupId: 'scanGroupId', targetReport: 'accessibility' } as ScanReportGroup],
             statusCode: 200,
         } as CosmosOperationResponse<ScanReportGroup[]>;
         cosmosContainerClientMock
@@ -270,7 +270,7 @@ describe(ReportGeneratorRequestProvider, () => {
 
     function getQueryForReadScanGroupIds(itemCount: number): cosmos.SqlQuerySpec {
         return {
-            query: 'SELECT TOP @itemCount COUNT(1) as scanCount, t.scanGroupId FROM (SELECT * FROM c WHERE c.itemType = @itemType) t GROUP BY t.scanGroupId',
+            query: 'SELECT TOP @itemCount COUNT(1) as scanCount, t.scanGroupId, t.targetReport FROM (SELECT * FROM c WHERE c.itemType = @itemType) t GROUP BY t.scanGroupId, t.targetReport',
             parameters: [
                 {
                     name: '@itemCount',

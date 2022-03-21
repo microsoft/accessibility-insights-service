@@ -5,9 +5,13 @@ import { OnDemandPageScanReport, OnDemandPageScanRunResult } from './on-demand-p
 import { StorageDocument } from './storage-document';
 import { ItemType } from './item-type';
 
+export declare type TargetReport = 'accessibility' | 'privacy';
+
 export interface ReportGeneratorRequest extends StorageDocument {
     itemType: ItemType.reportGeneratorRequest;
+    scanId: string;
     scanGroupId: string;
+    targetReport: TargetReport;
     priority: number;
     reports?: OnDemandPageScanReport[];
     /**

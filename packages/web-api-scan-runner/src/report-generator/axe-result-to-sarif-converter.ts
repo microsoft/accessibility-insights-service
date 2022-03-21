@@ -5,6 +5,7 @@ import { AxeResults } from 'axe-core';
 import { SarifLog } from 'axe-sarif-converter';
 import { inject, injectable } from 'inversify';
 import { ReportFormat } from 'storage-documents';
+import { AxeScanResults } from 'scanner-global-library';
 import { iocTypeNames } from '../ioc-types';
 import { AxeResultConverter } from './axe-result-converter';
 
@@ -14,8 +15,8 @@ export class AxeResultToSarifConverter implements AxeResultConverter {
 
     constructor(@inject(iocTypeNames.ConvertAxeToSarifFunc) private readonly convertAxeToSarifFunc: (axeResults: AxeResults) => SarifLog) {}
 
-    public convert(results: AxeResults): string {
-        const sarifResults = this.convertAxeToSarifFunc(results);
+    public convert(axeScanResults: AxeScanResults): string {
+        const sarifResults = this.convertAxeToSarifFunc(axeScanResults.results);
 
         return JSON.stringify(sarifResults);
     }

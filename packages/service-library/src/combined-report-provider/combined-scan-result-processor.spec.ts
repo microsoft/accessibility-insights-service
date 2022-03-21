@@ -4,18 +4,17 @@
 import 'reflect-metadata';
 
 import { IMock, Mock, It, Times } from 'typemoq';
-import { ReportWriter, WebsiteScanResultProvider } from 'service-library';
 import { RetryHelper } from 'common';
 import { AxeScanResults } from 'scanner-global-library';
 import { AxeResults } from 'axe-core';
 import { OnDemandPageScanResult, WebsiteScanResult, CombinedScanResults, OnDemandPageScanReport } from 'storage-documents';
 import { MockableLogger } from '../test-utilities/mockable-logger';
-import { CombinedResultsBlob } from '../types/combined-results-blob';
-import { GeneratedReport } from '../report-generator/report-generator';
+import { WebsiteScanResultProvider } from '../data-providers/website-scan-result-provider';
+import { GeneratedReport, ReportWriter } from '../data-providers/report-writer';
 import { CombinedScanResultProcessor } from './combined-scan-result-processor';
 import { CombinedAxeResultBuilder } from './combined-axe-result-builder';
 import { CombinedReportGenerator } from './combined-report-generator';
-import { CombinedResultsBlobProvider } from './combined-results-blob-provider';
+import { CombinedResultsBlobProvider, CombinedResultsBlob } from './combined-results-blob-provider';
 
 let combinedAxeResultBuilderMock: IMock<CombinedAxeResultBuilder>;
 let combinedReportGeneratorMock: IMock<CombinedReportGenerator>;
@@ -67,6 +66,7 @@ describe(CombinedScanResultProcessor, () => {
         } as GeneratedReport;
         pageScanReport = {
             reportId: 'reportId',
+            href: 'href',
         } as OnDemandPageScanReport;
 
         setupRetryHelperMock();
@@ -89,10 +89,6 @@ describe(CombinedScanResultProcessor, () => {
         reportWriterMock.verifyAll();
         retryHelperMock.verifyAll();
         loggerMock.verifyAll();
-    });
-
-    it('skip generating combined report if no scan group is defined', async () => {
-        await combinedScanResultProcessor.generateCombinedScanResults(axeScanResults, pageScanResult);
     });
 
     it('generate combined report for consolidated scan request', async () => {
@@ -126,6 +122,30 @@ describe(CombinedScanResultProcessor, () => {
 
         await combinedScanResultProcessor.generateCombinedScanResults(axeScanResults, pageScanResult);
 
+        expect(pageScanResult.reports[0]).toEqual(pageScanReport);
+    });
+
+    it('should replace report reference if already exists', async () => {
+        pageScanResult = {
+            id: 'id',
+            websiteScanRefs: [
+                {
+                    id: websiteScanId,
+                    scanGroupType: 'deep-scan',
+                },
+            ],
+            reports: [
+                {
+                    reportId: 'reportId',
+                    href: 'old href',
+                },
+            ],
+        } as OnDemandPageScanResult;
+        setupFullPass();
+
+        await combinedScanResultProcessor.generateCombinedScanResults(axeScanResults, pageScanResult);
+
+        expect(pageScanResult.reports.length).toEqual(1);
         expect(pageScanResult.reports[0]).toEqual(pageScanReport);
     });
 });

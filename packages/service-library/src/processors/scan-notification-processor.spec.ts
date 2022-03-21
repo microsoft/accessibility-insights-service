@@ -7,24 +7,24 @@ import { IMock, Mock } from 'typemoq';
 import { ServiceConfiguration, FeatureFlags, ScanRunTimeConfig } from 'common';
 import { GlobalLogger } from 'logger';
 import { OnDemandPageScanResult, WebsiteScanResult, PageScan, OnDemandNotificationRequestMessage } from 'storage-documents';
-import { ScanMetadata } from '../types/scan-metadata';
+import { RunnerScanMetadata } from '../types/runner-scan-metadata';
 import { ScanNotificationProcessor } from './scan-notification-processor';
-import { NotificationMessageDispatcher } from './notification-message-dispatcher';
+import { ScanNotificationDispatcher } from './scan-notification-dispatcher';
 
 let serviceConfigMock: IMock<ServiceConfiguration>;
-let notificationQueueMessageSenderMock: IMock<NotificationMessageDispatcher>;
+let notificationQueueMessageSenderMock: IMock<ScanNotificationDispatcher>;
 let loggerMock: IMock<GlobalLogger>;
 let scanNotificationProcessor: ScanNotificationProcessor;
 let featureFlagsConfig: FeatureFlags;
 let scanConfig: ScanRunTimeConfig;
-let scanMetadata: ScanMetadata;
+let runnerScanMetadata: RunnerScanMetadata;
 let pageScanResult: OnDemandPageScanResult;
 let websiteScanResult: WebsiteScanResult;
 
 describe(ScanNotificationProcessor, () => {
     beforeEach(() => {
         serviceConfigMock = Mock.ofType(ServiceConfiguration);
-        notificationQueueMessageSenderMock = Mock.ofType(NotificationMessageDispatcher);
+        notificationQueueMessageSenderMock = Mock.ofType(ScanNotificationDispatcher);
         loggerMock = Mock.ofType<GlobalLogger>();
 
         featureFlagsConfig = {
@@ -41,10 +41,10 @@ describe(ScanNotificationProcessor, () => {
             .setup(async (s) => s.getConfigValue('scanConfig'))
             .returns(async () => scanConfig)
             .verifiable();
-        scanMetadata = {
+        runnerScanMetadata = {
             id: 'scanMetadataId',
             deepScan: false,
-        } as ScanMetadata;
+        } as RunnerScanMetadata;
         websiteScanResult = {
             id: 'websiteScanResultId',
             deepScanId: 'deepScanId',
@@ -84,7 +84,7 @@ describe(ScanNotificationProcessor, () => {
         websiteScanResult = {} as WebsiteScanResult;
         setupLoggerForSingleScan();
         setupNotificationQueueMessageSender();
-        await scanNotificationProcessor.sendScanCompletionNotification(scanMetadata, pageScanResult, websiteScanResult);
+        await scanNotificationProcessor.sendScanCompletionNotification(runnerScanMetadata, pageScanResult, websiteScanResult);
     });
 
     it('send scan notification for a failed scan', async () => {
@@ -101,7 +101,7 @@ describe(ScanNotificationProcessor, () => {
         } as OnDemandPageScanResult;
         setupLoggerForSingleScan();
         setupNotificationQueueMessageSender();
-        await scanNotificationProcessor.sendScanCompletionNotification(scanMetadata, pageScanResult, websiteScanResult);
+        await scanNotificationProcessor.sendScanCompletionNotification(runnerScanMetadata, pageScanResult, websiteScanResult);
     });
 
     it('skip notification for a failed scan with available retry', async () => {
@@ -116,53 +116,53 @@ describe(ScanNotificationProcessor, () => {
                 retryCount: 0,
             },
         } as OnDemandPageScanResult;
-        await scanNotificationProcessor.sendScanCompletionNotification(scanMetadata, pageScanResult, websiteScanResult);
+        await scanNotificationProcessor.sendScanCompletionNotification(runnerScanMetadata, pageScanResult, websiteScanResult);
     });
 
     it('skip notification if feature flag is disabled', async () => {
         featureFlagsConfig.sendNotification = false;
         loggerMock
-            .setup((o) => o.logInfo('The send scan completion feature flag is disabled.', { sendNotificationFlag: 'false' }))
+            .setup((o) => o.logInfo('The scan result notification feature flag is disabled.', { sendNotificationFlag: 'false' }))
             .verifiable();
-        await scanNotificationProcessor.sendScanCompletionNotification(scanMetadata, pageScanResult, websiteScanResult);
+        await scanNotificationProcessor.sendScanCompletionNotification(runnerScanMetadata, pageScanResult, websiteScanResult);
     });
 
     it('skip notification if notification URL is not defined', async () => {
         loggerMock
-            .setup((o) => o.logInfo('The send scan completion feature flag is enabled.', { sendNotificationFlag: 'true' }))
+            .setup((o) => o.logInfo('The scan result notification feature flag is enabled.', { sendNotificationFlag: 'true' }))
             .verifiable();
         loggerMock
-            .setup((o) => o.logInfo(`Scan notification URL was not provided. Skip sending scan completion notification queue message.`))
+            .setup((o) => o.logInfo(`Scan result notification URL was not provided. Skip sending scan result notification message.`))
             .verifiable();
         pageScanResult.notification = undefined;
-        await scanNotificationProcessor.sendScanCompletionNotification(scanMetadata, pageScanResult, websiteScanResult);
+        await scanNotificationProcessor.sendScanCompletionNotification(runnerScanMetadata, pageScanResult, websiteScanResult);
     });
 
     it('skip notification if deep scan is not completed', async () => {
         loggerMock
-            .setup((o) => o.logInfo('The send scan completion feature flag is enabled.', { sendNotificationFlag: 'true' }))
+            .setup((o) => o.logInfo('The scan result notification feature flag is enabled.', { sendNotificationFlag: 'true' }))
             .verifiable();
-        scanMetadata.deepScan = true;
+        runnerScanMetadata.deepScan = true;
         websiteScanResult.pageScans = [
             {
                 scanId: 'scanId',
             } as PageScan,
         ];
-        await scanNotificationProcessor.sendScanCompletionNotification(scanMetadata, pageScanResult, websiteScanResult);
+        await scanNotificationProcessor.sendScanCompletionNotification(runnerScanMetadata, pageScanResult, websiteScanResult);
     });
 
     it('send scan notification for a deep scan', async () => {
-        scanMetadata.deepScan = true;
+        runnerScanMetadata.deepScan = true;
         setupLoggerForDeepScan();
         setupNotificationQueueMessageSender();
-        await scanNotificationProcessor.sendScanCompletionNotification(scanMetadata, pageScanResult, websiteScanResult);
+        await scanNotificationProcessor.sendScanCompletionNotification(runnerScanMetadata, pageScanResult, websiteScanResult);
     });
 });
 
 function setupLoggerForDeepScan(): void {
     loggerMock
         .setup((o) =>
-            o.logInfo('Sending scan completion notification message for a deep scan.', {
+            o.logInfo('Sending scan result notification message for a deep scan.', {
                 deepScanId: websiteScanResult?.deepScanId,
                 scannedPages: websiteScanResult.pageScans.length.toString(),
                 scanNotifyUrl: pageScanResult.notification.scanNotifyUrl,
@@ -174,7 +174,7 @@ function setupLoggerForDeepScan(): void {
 function setupLoggerForSingleScan(): void {
     loggerMock
         .setup((o) =>
-            o.logInfo('Sending scan completion notification message for a single scan.', {
+            o.logInfo('Sending scan result notification message for a single scan.', {
                 scanNotifyUrl: pageScanResult.notification.scanNotifyUrl,
             }),
         )

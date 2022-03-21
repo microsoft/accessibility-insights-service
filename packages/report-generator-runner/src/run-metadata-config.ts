@@ -13,12 +13,17 @@ export class RunMetadataConfig {
                 type: 'string',
                 alias: 'scangroupid',
             },
+            targetReport: {
+                type: 'string',
+                alias: 'targetreport',
+            },
         });
     }
 
     public getConfig(): ReportGeneratorMetadata {
         this.argvObj.env().demandOption(['id']);
         this.argvObj.env().demandOption(['scanGroupId']);
+        this.argvObj.env().demandOption(['targetReport']);
 
         return this.argvObj.argv as Arguments<ReportGeneratorMetadata>;
     }

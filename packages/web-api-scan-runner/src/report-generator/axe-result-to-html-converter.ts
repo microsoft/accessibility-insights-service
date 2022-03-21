@@ -5,8 +5,9 @@ import { AxeReportParameters, ReporterFactory } from 'accessibility-insights-rep
 import { AxeResults } from 'axe-core';
 import { inject, injectable } from 'inversify';
 import { ReportFormat } from 'storage-documents';
+import { AxeScanResults } from 'scanner-global-library';
 import { iocTypeNames } from '../ioc-types';
-import { AxeResultConverter, AxeResultConverterOptions } from './axe-result-converter';
+import { AxeResultConverter } from './axe-result-converter';
 import { htmlReportStrings } from './html-report-strings';
 
 @injectable()
@@ -15,15 +16,15 @@ export class AxeResultToHtmlConverter implements AxeResultConverter {
 
     constructor(@inject(iocTypeNames.ReporterFactory) private readonly reporterFactoryFunc: ReporterFactory) {}
 
-    public convert(results: AxeResults, options: AxeResultConverterOptions): string {
+    public convert(axeScanResults: AxeScanResults): string {
         const reporter = this.reporterFactoryFunc();
 
         const htmlReportParams: AxeReportParameters = {
-            results: results,
-            description: this.createDescription(results),
+            results: axeScanResults.results,
+            description: this.createDescription(axeScanResults.results),
             serviceName: htmlReportStrings.serviceName,
             scanContext: {
-                pageTitle: options.pageTitle,
+                pageTitle: axeScanResults.pageTitle,
             },
         };
 
