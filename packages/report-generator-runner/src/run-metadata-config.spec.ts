@@ -32,12 +32,14 @@ describe(RunMetadataConfig, () => {
         expect(testSubject.getConfig()).toBe(argvVal);
         argvMock.verify((a) => a.demandOption(['id']), Times.once());
         argvMock.verify((a) => a.demandOption(['scanGroupId']), Times.once());
+        argvMock.verify((a) => a.demandOption(['targetReport']), Times.once());
     });
 
     describe('yargs integration', () => {
         const args: ReportGeneratorMetadata = {
             id: 'id',
             scanGroupId: 'scanGroupId',
+            targetReport: 'accessibility',
         };
 
         beforeEach(() => {

@@ -91,7 +91,11 @@ export class ScanBatchRequestFeedController extends WebController {
             let websiteScanRefs: WebsiteScanRef;
             const websiteScanResult = this.createWebsiteScanResult(request);
             if (websiteScanResult) {
-                websiteScanRefs = { id: websiteScanResult.id, scanGroupType: websiteScanResult.scanGroupType };
+                websiteScanRefs = {
+                    id: websiteScanResult.id,
+                    scanGroupId: websiteScanResult.scanGroupId,
+                    scanGroupType: websiteScanResult.scanGroupType,
+                };
                 websiteScanResults.push({ scanId: request.scanId, websiteScanResult });
                 this.logger.logInfo('Referenced website scan result document to the new scan result document.', {
                     batchRequestId,

@@ -31,7 +31,7 @@
         "@types/levelup": "^4.3.3",
         "@types/node": "^16.11.7",
         "@types/puppeteer": "^5.4.0",
-        "jest": "^27.4.7",
+        "jest": "^27.5.1",
         "jest-junit": "^12.3.0",
         "rimraf": "^3.0.2",
         "rollup": "^2.68.0",
@@ -42,7 +42,7 @@
     "dependencies": {
         "@axe-core/puppeteer": "4.2.2",
         "@medv/finder": "^2.1.0",
-        "accessibility-insights-report": "4.2.0",
+        "accessibility-insights-report": "4.2.2",
         "apify": "^2.2.2",
         "axe-core": "4.3.2",
         "browser-pool": "^3.1.0",

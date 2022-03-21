@@ -4,10 +4,9 @@
 import 'reflect-metadata';
 
 import { Report, Reporter, ReporterFactory } from 'accessibility-insights-report';
-import { AxeResults } from 'axe-core';
 import * as MockDate from 'mockdate';
 import { IMock, Mock, Times } from 'typemoq';
-import { AxeResultConverterOptions } from './axe-result-converter';
+import { AxeScanResults } from 'scanner-global-library';
 import { AxeResultToHtmlConverter } from './axe-result-to-html-converter';
 import { htmlReportStrings } from './html-report-strings';
 
@@ -15,21 +14,22 @@ describe('AxeResultToHtmlConverter', () => {
     let axeHtmlResultConverter: AxeResultToHtmlConverter;
     let reporterMock: IMock<Reporter>;
     let htmlReport: Report;
+    let axeScanResults: AxeScanResults;
+    let time: Date;
+
     const htmlReportString = 'html report';
     const scanUrl = 'scan url';
-    let axeResults: AxeResults;
-    const axeResultConverterOptions: AxeResultConverterOptions = {
-        pageTitle: 'page title',
-    };
-    let time: Date;
 
     beforeEach(() => {
         reporterMock = Mock.ofType<Reporter>();
         const reporterFactory: ReporterFactory = () => reporterMock.object;
         axeHtmlResultConverter = new AxeResultToHtmlConverter(reporterFactory);
-        axeResults = {
-            url: scanUrl,
-        } as unknown as AxeResults;
+        axeScanResults = {
+            results: {
+                url: scanUrl,
+            },
+            pageTitle: 'page title',
+        } as unknown as AxeScanResults;
         htmlReport = {
             asHTML: () => htmlReportString,
         };
@@ -43,20 +43,19 @@ describe('AxeResultToHtmlConverter', () => {
 
     it('convert', () => {
         const reportParameters = {
-            results: axeResults,
+            results: axeScanResults.results,
             description: `Automated report for accessibility scan of url ${scanUrl} completed at ${time.toUTCString()}.`,
             serviceName: htmlReportStrings.serviceName,
             scanContext: {
-                pageTitle: axeResultConverterOptions.pageTitle,
+                pageTitle: axeScanResults.pageTitle,
             },
         };
-
         reporterMock
-            .setup((rm) => rm.fromAxeResult(reportParameters))
+            .setup((o) => o.fromAxeResult(reportParameters))
             .returns(() => htmlReport)
             .verifiable(Times.once());
 
-        const report = axeHtmlResultConverter.convert(axeResults, axeResultConverterOptions);
+        const report = axeHtmlResultConverter.convert(axeScanResults);
 
         reporterMock.verifyAll();
         expect(report).toEqual(htmlReportString);

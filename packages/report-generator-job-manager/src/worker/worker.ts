@@ -22,11 +22,12 @@ import {
     ReportGeneratorRequestProvider,
     ScanReportGroup,
 } from 'service-library';
-import { StorageDocument } from 'storage-documents';
+import { StorageDocument, TargetReport } from 'storage-documents';
 
 export interface BatchTaskArguments {
     id: string;
     scanGroupId: string;
+    targetReport: TargetReport;
 }
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -144,6 +145,7 @@ export class Worker extends BatchTaskCreator {
             const batchTaskArguments: BatchTaskArguments = {
                 id,
                 scanGroupId: reportRequest.scanGroupId,
+                targetReport: reportRequest.targetReport,
             };
             const batchTaskScanData = {
                 messageId: id,

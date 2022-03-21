@@ -3,10 +3,10 @@
 
 import { injectable } from 'inversify';
 import yargs, { Arguments, Argv } from 'yargs';
-import { ScanMetadata } from './types/scan-metadata';
+import { RunnerScanMetadata } from 'service-library';
 
 @injectable()
-export class ScanMetadataConfig {
+export class RunnerScanMetadataConfig {
     constructor(private readonly argvObj: Argv = yargs) {
         argvObj.options({
             deepScan: {
@@ -16,9 +16,9 @@ export class ScanMetadataConfig {
         });
     }
 
-    public getConfig(): ScanMetadata {
+    public getConfig(): RunnerScanMetadata {
         this.argvObj.env().demandOption(['id', 'url']);
 
-        return this.argvObj.argv as Arguments<ScanMetadata>;
+        return this.argvObj.argv as Arguments<RunnerScanMetadata>;
     }
 }

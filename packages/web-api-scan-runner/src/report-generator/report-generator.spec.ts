@@ -6,11 +6,10 @@ import 'reflect-metadata';
 import { AxeResults } from 'axe-core';
 import { GuidGenerator } from 'common';
 import { AxeScanResults } from 'scanner-global-library';
-import { ReportFormat, CombinedScanResults } from 'storage-documents';
+import { ReportFormat } from 'storage-documents';
 import { IMock, Mock } from 'typemoq';
 import { GeneratedReport, ReportGenerator } from './report-generator';
-import { AxeResultConverter, AxeResultConverterOptions } from './axe-result-converter';
-import { AxeResultToConsolidatedHtmlConverter } from './axe-result-to-consolidated-html-converter';
+import { AxeResultConverter } from './axe-result-converter';
 
 class AxeResultConverterStub implements AxeResultConverter {
     public convertCallCount = 0;
@@ -21,7 +20,7 @@ class AxeResultConverterStub implements AxeResultConverter {
         this.targetReportFormat = reportType;
     }
 
-    public convert(axeResults: AxeResults, options: AxeResultConverterOptions): string {
+    public convert(axeScanResults: AxeScanResults): string {
         this.convertCallCount += 1;
 
         return this.reportValue;
@@ -32,8 +31,7 @@ describe('ReportGenerator', () => {
     let reportGenerator: ReportGenerator;
     let axeResultConverters: AxeResultConverterStub[];
     let guidGeneratorMock: IMock<GuidGenerator>;
-    let axeResultToConsolidatedHtmlConverterMock: IMock<AxeResultToConsolidatedHtmlConverter>;
-    let axeResults: AxeScanResults;
+    let axeScanResults: AxeScanResults;
 
     const pageTitle = 'test page title';
     const pageResponseCode = 101;
@@ -53,9 +51,9 @@ describe('ReportGenerator', () => {
             new AxeResultConverterStub(report1.content, report1.format),
             new AxeResultConverterStub(report2.content, report2.format),
         ];
-        axeResults = {
+        axeScanResults = {
             results: {
-                testResults: true,
+                url: 'url',
             } as unknown as AxeResults,
             pageResponseCode,
             pageTitle,
@@ -63,21 +61,15 @@ describe('ReportGenerator', () => {
         guidGeneratorMock = Mock.ofType<GuidGenerator>();
         guidGeneratorMock.setup((g) => g.createGuid()).returns(() => report1.id);
         guidGeneratorMock.setup((g) => g.createGuid()).returns(() => report2.id);
-        axeResultToConsolidatedHtmlConverterMock = Mock.ofType<AxeResultToConsolidatedHtmlConverter>();
-        reportGenerator = new ReportGenerator(
-            guidGeneratorMock.object,
-            axeResultConverters,
-            axeResultToConsolidatedHtmlConverterMock.object,
-        );
+        reportGenerator = new ReportGenerator(guidGeneratorMock.object, axeResultConverters);
     });
 
     afterEach(() => {
         guidGeneratorMock.verifyAll();
-        axeResultToConsolidatedHtmlConverterMock.verifyAll();
     });
 
     it('calls convert on all axeResultConverters', () => {
-        reportGenerator.generateReports(axeResults);
+        reportGenerator.generateReports(axeScanResults);
 
         // eslint-disable-next-line prefer-const
         axeResultConverters.forEach((axeResultConverter: AxeResultConverterStub) => {
@@ -86,31 +78,8 @@ describe('ReportGenerator', () => {
     });
 
     it('generates reports', () => {
-        const reports: GeneratedReport[] = reportGenerator.generateReports(axeResults);
+        const reports: GeneratedReport[] = reportGenerator.generateReports(axeScanResults);
         expect(reports[0]).toEqual(report1);
         expect(reports[1]).toEqual(report2);
-    });
-
-    it('generate consolidated report', () => {
-        const combinedScanResults = { urlCount: {} } as CombinedScanResults;
-        const options = { reportId: 'reportId' } as AxeResultConverterOptions;
-
-        axeResultToConsolidatedHtmlConverterMock
-            .setup((o) => o.convert(combinedScanResults, options))
-            .returns(() => 'content')
-            .verifiable();
-        axeResultToConsolidatedHtmlConverterMock
-            .setup((o) => o.targetReportFormat)
-            .returns(() => 'consolidated.html')
-            .verifiable();
-        const expectedReport = {
-            content: 'content',
-            id: 'reportId',
-            format: 'consolidated.html',
-        };
-
-        const report = reportGenerator.generateConsolidatedReport(combinedScanResults, options);
-
-        expect(report).toEqual(expectedReport);
     });
 });

@@ -51,7 +51,7 @@ export class RequestSelector {
 
             continuationToken = response.continuationToken;
             if (response.item?.length > 0) {
-                await this.filterRequests(queuedRequests, response.item);
+                this.filterRequests(queuedRequests, response.item);
             }
         } while (queuedRequests.requestsToProcess.length < queryCount && continuationToken !== undefined);
 

@@ -21,9 +21,9 @@
     "devDependencies": {
         "@types/got": "^9.6.11",
         "@types/jest": "^27.4.1",
-        "@types/lodash": "^4.14.178",
+        "@types/lodash": "^4.14.179",
         "@types/node": "^16.11.7",
-        "jest": "^27.4.7",
+        "jest": "^27.5.1",
         "jest-junit": "^12.3.0",
         "rimraf": "^3.0.2",
         "ts-jest": "^27.1.3",

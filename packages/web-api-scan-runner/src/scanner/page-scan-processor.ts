@@ -6,8 +6,8 @@ import { inject, injectable } from 'inversify';
 import { GlobalLogger } from 'logger';
 import { AxeScanResults, Page } from 'scanner-global-library';
 import { OnDemandPageScanResult } from 'storage-documents';
+import { RunnerScanMetadata } from 'service-library';
 import { AxeScanner } from '../scanner/axe-scanner';
-import { ScanMetadata } from '../types/scan-metadata';
 import { DeepScanner } from './deep-scanner';
 
 @injectable()
@@ -19,16 +19,16 @@ export class PageScanProcessor {
         @inject(GlobalLogger) private readonly logger: GlobalLogger,
     ) {}
 
-    public async scan(scanMetadata: ScanMetadata, pageScanResult: OnDemandPageScanResult): Promise<AxeScanResults> {
+    public async scan(runnerScanMetadata: RunnerScanMetadata, pageScanResult: OnDemandPageScanResult): Promise<AxeScanResults> {
         let axeScanResults: AxeScanResults;
         try {
-            await this.openPage(scanMetadata.url);
+            await this.openPage(runnerScanMetadata.url);
 
             axeScanResults = await this.axeScanner.scan(this.page);
 
-            if (scanMetadata.deepScan) {
+            if (runnerScanMetadata.deepScan) {
                 if (this.page.isOpen()) {
-                    await this.deepScanner.runDeepScan(scanMetadata, pageScanResult, this.page);
+                    await this.deepScanner.runDeepScan(runnerScanMetadata, pageScanResult, this.page);
                     this.logger.logInfo('The deep scanner completed a page scan.');
                 } else {
                     this.logger.logError('Page is not ready. Unable to perform deep scan.');

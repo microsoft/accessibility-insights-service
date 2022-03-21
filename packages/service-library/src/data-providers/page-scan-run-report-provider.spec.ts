@@ -3,33 +3,60 @@
 
 import 'reflect-metadata';
 
+import { Readable } from 'stream';
 import { BlobContentDownloadResponse, BlobStorageClient } from 'azure-services';
 import { IMock, Mock } from 'typemoq';
-import { PageScanRunReportProvider } from './page-scan-run-report-provider';
+import { BodyParser, System } from 'common';
+import { AxeScanResults } from 'scanner-global-library';
+import { AxeResults } from 'axe-core';
+import { AxeResultsList, AxeResult } from 'axe-result-converter';
 import { DataProvidersCommon } from './data-providers-common';
+import { PageScanRunReportProvider } from './page-scan-run-report-provider';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+let testSubject: PageScanRunReportProvider;
+let blobStorageClientMock: IMock<BlobStorageClient>;
+let dataProvidersCommonMock: IMock<DataProvidersCommon>;
+let bodyParserMock: IMock<BodyParser>;
+
+const time = new Date(2019, 2, 1, 10, 20, 30);
+const etag = 'etag';
+const fileId = 'fileId';
+const blobFilePath = `${time.getUTCFullYear()}/${time.getUTCMonth() + 1}/${time.getUTCDate()}/${time.getUTCHours()}/${fileId}`;
+const readableStream = {
+    readable: true,
+} as NodeJS.ReadableStream;
+const createAxeResult = (key: string, value: string) => {
+    const list = new AxeResultsList();
+    list.add(key, { description: value } as unknown as AxeResult);
+
+    return list;
+};
+const axeScanResults = {
+    scannedUrl: 'scannedUrl',
+    pageTitle: 'pageTitle',
+    results: {
+        url: 'url',
+        passes: createAxeResult('1', 'a'),
+        violations: createAxeResult('2', 'b'),
+        incomplete: createAxeResult('3', 'c'),
+        inapplicable: createAxeResult('4', 'd'),
+    } as unknown as AxeResults,
+} as AxeScanResults;
+const resultsString = JSON.stringify(axeScanResults);
+
 describe(PageScanRunReportProvider, () => {
-    let testSubject: PageScanRunReportProvider;
-    let blobStorageClientMock: IMock<BlobStorageClient>;
-    let dataProvidersCommonMock: IMock<DataProvidersCommon>;
-
-    const time = new Date(2019, 2, 1, 10, 20, 30);
-    const guid = 'some guid';
-    const expectedSarifBlobFilePath = `${time.getUTCFullYear()}/${
-        time.getUTCMonth() + 1
-    }/${time.getUTCDate()}/${time.getUTCHours()}/${guid}`;
-
     beforeEach(() => {
         blobStorageClientMock = Mock.ofType(BlobStorageClient);
         dataProvidersCommonMock = Mock.ofType(DataProvidersCommon);
+        bodyParserMock = Mock.ofType<BodyParser>();
         dataProvidersCommonMock
-            .setup((o) => o.getBlobName(guid))
-            .returns(() => expectedSarifBlobFilePath)
+            .setup((o) => o.getBlobName(fileId))
+            .returns(() => blobFilePath)
             .verifiable();
 
-        testSubject = new PageScanRunReportProvider(blobStorageClientMock.object, dataProvidersCommonMock.object);
+        testSubject = new PageScanRunReportProvider(blobStorageClientMock.object, dataProvidersCommonMock.object, bodyParserMock.object);
     });
 
     afterEach(() => {
@@ -41,21 +68,99 @@ describe(PageScanRunReportProvider, () => {
         const blobContent = 'blob content1';
 
         blobStorageClientMock
-            .setup(async (b) => b.uploadBlobContent(DataProvidersCommon.reportBlobContainerName, expectedSarifBlobFilePath, blobContent))
+            .setup(async (b) => b.uploadBlobContent(DataProvidersCommon.reportBlobContainerName, blobFilePath, blobContent))
             .returns(async () => Promise.resolve(undefined))
             .verifiable();
 
-        expect(await testSubject.saveReport(guid, blobContent)).toEqual(expectedSarifBlobFilePath);
+        expect(await testSubject.saveReport(fileId, blobContent)).toEqual(blobFilePath);
     });
 
     it('read report', async () => {
         const expectedResponse: BlobContentDownloadResponse = { content: 'blob content1' as any, notFound: false };
 
         blobStorageClientMock
-            .setup(async (b) => b.getBlobContent(DataProvidersCommon.reportBlobContainerName, expectedSarifBlobFilePath))
+            .setup(async (b) => b.getBlobContent(DataProvidersCommon.reportBlobContainerName, blobFilePath))
             .returns(async () => Promise.resolve(expectedResponse))
             .verifiable();
 
-        await expect(testSubject.readReport(guid)).resolves.toBe(expectedResponse);
+        await expect(testSubject.readReport(fileId)).resolves.toBe(expectedResponse);
+    });
+
+    describe('readReportContent()', () => {
+        it('read report content', async () => {
+            setupReadBlob();
+            setupReadStream(resultsString);
+            const expectedResults = {
+                content: axeScanResults,
+                etag: etag,
+            };
+
+            const actualResults = await testSubject.readReportContent(fileId);
+
+            expect(actualResults).toEqual(expectedResults);
+        });
+
+        it('handles blob not found', async () => {
+            setupDocumentNotFound();
+            const expectedResults = {
+                errorCode: 'blobNotFound',
+            };
+
+            const actualResults = await testSubject.readReportContent(fileId);
+
+            expect(actualResults).toEqual(expectedResults);
+        });
+
+        it('handles blob stream read failure', async () => {
+            setupReadBlob();
+            const error = new Error('error');
+            bodyParserMock.setup((o) => o.getRawBody(readableStream as Readable)).throws(error);
+            const expectedResults = {
+                errorCode: 'streamError',
+                error: System.serializeError(error),
+            };
+
+            const actualResults = await testSubject.readReportContent(fileId);
+
+            expect(actualResults).toEqual(expectedResults);
+        });
+
+        it('handles JSON parsing error', async () => {
+            const invalidContent = '{ invalid content string';
+            setupReadBlob();
+            setupReadStream(invalidContent);
+
+            const actualResults = await testSubject.readReportContent(fileId);
+
+            expect(actualResults.errorCode).toEqual('jsonParseError');
+            expect(actualResults.error).toContain(`{\n  name: 'SyntaxError',\n  message: 'Unexpected token i in JSON at position 2',`);
+        });
     });
 });
+
+function setupReadStream(content: string): void {
+    bodyParserMock.setup((o) => o.getRawBody(readableStream as Readable)).returns(() => Promise.resolve(Buffer.from(content)));
+}
+
+function setupReadBlob(): void {
+    const response = {
+        notFound: false,
+        content: readableStream,
+        etag: etag,
+    } as BlobContentDownloadResponse;
+    blobStorageClientMock
+        .setup((o) => o.getBlobContent(DataProvidersCommon.reportBlobContainerName, blobFilePath))
+        .returns(async () => response)
+        .verifiable();
+}
+
+function setupDocumentNotFound(): void {
+    const response = {
+        notFound: true,
+        content: null,
+    } as BlobContentDownloadResponse;
+    blobStorageClientMock
+        .setup((o) => o.getBlobContent(DataProvidersCommon.reportBlobContainerName, blobFilePath))
+        .returns(async () => response)
+        .verifiable();
+}

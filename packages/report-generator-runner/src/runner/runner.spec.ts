@@ -71,6 +71,7 @@ describe(Runner, () => {
         loggerMock = Mock.ofType<GlobalLogger>();
 
         reportGeneratorMetadata = {
+            targetReport: 'accessibility',
             scanGroupId: 'scanGroupId',
         } as ReportGeneratorMetadata;
         runMetadataConfigMock
@@ -345,8 +346,8 @@ function setupReportProcessorMock(
         });
     }
     reportProcessorMock
-        .setup((o) => o.generate(It.isValue(requestsToUpdate)))
-        .returns(() => updatedRequests)
+        .setup((o) => o.generate(reportGeneratorMetadata.targetReport, It.isValue(requestsToUpdate)))
+        .returns(() => Promise.resolve(updatedRequests))
         .verifiable();
 
     // set incoming state in sync with oncoming

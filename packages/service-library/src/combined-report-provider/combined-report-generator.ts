@@ -3,16 +3,16 @@
 
 import { GuidGenerator } from 'common';
 import { inject, injectable } from 'inversify';
-import { GlobalLogger } from 'logger';
 import { CombinedScanResults, WebsiteScanResult } from 'storage-documents';
-import { GeneratedReport, ReportGenerator } from '../report-generator/report-generator';
+import { GeneratedReport } from '../data-providers/report-writer';
+import { AxeResultToConsolidatedHtmlConverter, ReportMetadata } from './axe-result-to-consolidated-html-converter';
 
 @injectable()
 export class CombinedReportGenerator {
     public constructor(
-        @inject(ReportGenerator) private readonly reportGenerator: ReportGenerator,
+        @inject(AxeResultToConsolidatedHtmlConverter)
+        private readonly axeResultToConsolidatedHtmlConverter: AxeResultToConsolidatedHtmlConverter,
         @inject(GuidGenerator) private readonly guidGenerator: GuidGenerator,
-        @inject(GlobalLogger) private readonly logger: GlobalLogger,
     ) {}
 
     public generate(
@@ -25,17 +25,20 @@ export class CombinedReportGenerator {
         if (websiteScanResult.reports) {
             reportId = websiteScanResult.reports.find((ref) => ref.format === 'consolidated.html')?.reportId;
         }
-
         reportId = reportId ?? this.guidGenerator.createGuid();
 
-        this.logger.logInfo(`Generating combined reports from scan results.`);
-        const report = this.reportGenerator.generateConsolidatedReport(combinedAxeResults, {
-            reportId,
+        const options: ReportMetadata = {
+            serviceName: 'Accessibility Insights Service',
             baseUrl: websiteScanResult.baseUrl,
             userAgent,
             browserResolution,
             scanStarted: new Date(websiteScanResult.created),
-        });
+        };
+        const report = {
+            content: this.axeResultToConsolidatedHtmlConverter.convert(combinedAxeResults, options),
+            id: reportId,
+            format: this.axeResultToConsolidatedHtmlConverter.targetReportFormat,
+        };
 
         return report;
     }
