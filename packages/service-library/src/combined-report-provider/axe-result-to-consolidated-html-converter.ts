@@ -1,14 +1,19 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { ReporterFactory } from 'accessibility-insights-report';
+import { reporterFactory } from 'accessibility-insights-report';
 import axe from 'axe-core';
 import { inject, injectable } from 'inversify';
 import { ReportFormat, CombinedScanResults } from 'storage-documents';
 import { CombinedReportDataConverter, ScanResultData } from 'axe-result-converter';
-import { iocTypeNames } from '../ioc-types';
-import { htmlReportStrings } from './html-report-strings';
-import { AxeResultConverterOptions } from './axe-result-converter';
+
+export interface ReportMetadata {
+    serviceName: string;
+    baseUrl: string;
+    userAgent: string;
+    browserResolution: string;
+    scanStarted: Date;
+}
 
 @injectable()
 export class AxeResultToConsolidatedHtmlConverter {
@@ -16,16 +21,16 @@ export class AxeResultToConsolidatedHtmlConverter {
 
     constructor(
         @inject(CombinedReportDataConverter) private readonly combinedReportDataConverter: CombinedReportDataConverter,
-        @inject(iocTypeNames.ReporterFactory) private readonly reporterFactoryFunc: ReporterFactory,
+        private readonly reporterFactoryFunc: typeof reporterFactory = reporterFactory,
         private readonly axeCore: typeof axe = axe,
     ) {}
 
-    public convert(combinedScanResults: CombinedScanResults, options: AxeResultConverterOptions): string {
+    public convert(combinedScanResults: CombinedScanResults, options: ReportMetadata): string {
         const reporter = this.reporterFactoryFunc();
         const scanResultData: ScanResultData = {
             baseUrl: options.baseUrl ?? 'n/a',
             basePageTitle: '', // not used
-            scanEngineName: htmlReportStrings.serviceName,
+            scanEngineName: options.serviceName,
             axeCoreVersion: this.axeCore.version,
             browserUserAgent: options.userAgent,
             browserResolution: options.browserResolution,

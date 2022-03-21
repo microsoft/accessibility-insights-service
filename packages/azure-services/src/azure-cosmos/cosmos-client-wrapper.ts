@@ -46,7 +46,7 @@ export class CosmosClientWrapper {
                         const itemT = <T>(<unknown>response.resource);
                         responses.push({
                             item: itemT,
-                            statusCode: 200,
+                            statusCode: response.statusCode,
                         });
                     } catch (error) {
                         this.logFailedResponse('upsertItems', error, {
@@ -81,7 +81,7 @@ export class CosmosClientWrapper {
 
             return {
                 item: itemT,
-                statusCode: 200,
+                statusCode: response.statusCode,
             };
         } catch (error) {
             this.logFailedResponse('upsertItem', error, {
@@ -189,7 +189,7 @@ export class CosmosClientWrapper {
 
             return {
                 item: itemT,
-                statusCode: 200,
+                statusCode: response.statusCode,
             };
         } catch (error) {
             this.logFailedResponse('readItem', error, {
@@ -217,7 +217,7 @@ export class CosmosClientWrapper {
 
             return {
                 item: itemT,
-                statusCode: 200,
+                statusCode: response.statusCode,
             };
         } catch (error) {
             this.logFailedResponse('deleteItem', error, {

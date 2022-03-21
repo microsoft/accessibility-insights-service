@@ -131,7 +131,7 @@ describe('CosmosClientWrapper', () => {
             collectionMock.setup((c) => c.item(responseItem.id, partitionKey)).returns(() => itemMock.object);
             itemMock
                 .setup(async (i) => i.read())
-                .returns(async () => Promise.resolve({ resource: responseItem as any, item: undefined } as any));
+                .returns(async () => Promise.resolve({ resource: responseItem as any, item: undefined, statusCode: 200 } as any));
 
             const result = await testSubject.readItem(responseItem.id, dbName, collectionName, partitionKey);
 
@@ -154,7 +154,7 @@ describe('CosmosClientWrapper', () => {
             collectionMock.setup((c) => c.item(responseItem.id, undefined)).returns(() => itemMock.object);
             itemMock
                 .setup(async (i) => i.read())
-                .returns(async () => Promise.resolve({ resource: responseItem as any, item: undefined } as any));
+                .returns(async () => Promise.resolve({ resource: responseItem as any, item: undefined, statusCode: 200 } as any));
 
             const result = await testSubject.readItem(responseItem.id, dbName, collectionName, undefined);
 
@@ -331,7 +331,7 @@ describe('CosmosClientWrapper', () => {
             };
             itemMock
                 .setup(async (i) => i.delete())
-                .returns(async () => Promise.resolve({ resource: responseItem } as any))
+                .returns(async () => Promise.resolve({ resource: responseItem, statusCode: 200 } as any))
                 .verifiable();
 
             const result = await testSubject.deleteItem('id', dbName, collectionName, partitionKey);
@@ -392,7 +392,7 @@ describe('CosmosClientWrapper', () => {
 
             itemsMock
                 .setup(async (i) => i.upsert<DbItemMock>(item, options))
-                .returns(async () => Promise.resolve({ resource: responseItem as any, item: undefined } as any));
+                .returns(async () => Promise.resolve({ resource: responseItem as any, item: undefined, statusCode: 200 } as any));
 
             const result = await testSubject.upsertItem<DbItemMock>(item, dbName, collectionName, partitionKey);
 
@@ -418,7 +418,7 @@ describe('CosmosClientWrapper', () => {
             };
             itemsMock
                 .setup(async (i) => i.upsert<DbItemMock>(item, undefined))
-                .returns(async () => Promise.resolve({ resource: responseItem as any, item: undefined } as any));
+                .returns(async () => Promise.resolve({ resource: responseItem as any, item: undefined, statusCode: 200 } as any));
 
             const result = await testSubject.upsertItem<DbItemMock>(item, dbName, collectionName, partitionKey);
 
@@ -640,7 +640,7 @@ describe('CosmosClientWrapper', () => {
     function setupVerifiableUpsertItemCallWithOptions(item: any, options: cosmos.RequestOptions): void {
         itemsMock
             .setup(async (i) => i.upsert(item, options))
-            .returns(async () => Promise.resolve({ resource: 'stored data' as any, item: undefined } as any));
+            .returns(async () => Promise.resolve({ resource: 'stored data' as any, item: undefined, statusCode: 200 } as any));
     }
 });
 

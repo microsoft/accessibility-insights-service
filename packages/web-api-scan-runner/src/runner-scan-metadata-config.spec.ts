@@ -5,19 +5,19 @@ import 'reflect-metadata';
 
 import { IMock, Mock, Times } from 'typemoq';
 import { Argv } from 'yargs';
-import { ScanMetadataConfig } from './scan-metadata-config';
-import { ScanMetadata } from './types/scan-metadata';
+import { RunnerScanMetadata } from 'service-library';
+import { RunnerScanMetadataConfig } from './runner-scan-metadata-config';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-describe(ScanMetadataConfig, () => {
-    let testSubject: ScanMetadataConfig;
+describe(RunnerScanMetadataConfig, () => {
+    let testSubject: RunnerScanMetadataConfig;
     let argvMock: IMock<Argv>;
     const argvVal = { foo: 'test' };
 
     beforeEach(() => {
         argvMock = Mock.ofType<Argv>();
-        testSubject = new ScanMetadataConfig(argvMock.object);
+        testSubject = new RunnerScanMetadataConfig(argvMock.object);
         argvMock
             .setup((a) => a.env())
             .returns(() => argvMock.object as any)
@@ -34,21 +34,21 @@ describe(ScanMetadataConfig, () => {
     });
 
     describe('yargs integration', () => {
-        const args: ScanMetadata = {
+        const args: RunnerScanMetadata = {
             id: 'scan id',
             url: 'url',
             deepScan: true,
         };
 
         beforeEach(() => {
-            testSubject = new ScanMetadataConfig();
-            Object.keys(args).forEach((varName: keyof ScanMetadata) => {
+            testSubject = new RunnerScanMetadataConfig();
+            Object.keys(args).forEach((varName: keyof RunnerScanMetadata) => {
                 process.env[varName] = `${args[varName]}`;
             });
         });
 
         afterEach(() => {
-            Object.keys(args).forEach((varName: keyof ScanMetadata) => {
+            Object.keys(args).forEach((varName: keyof RunnerScanMetadata) => {
                 process.env[varName] = undefined;
             });
         });

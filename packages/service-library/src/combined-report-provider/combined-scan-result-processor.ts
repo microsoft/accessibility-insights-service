@@ -4,9 +4,10 @@
 import { inject, injectable } from 'inversify';
 import { GlobalLogger } from 'logger';
 import { RetryHelper, System } from 'common';
-import { ReportWriter, WebsiteScanResultProvider } from 'service-library';
 import { AxeScanResults } from 'scanner-global-library';
 import { OnDemandPageScanResult, WebsiteScanResult, WebsiteScanRef } from 'storage-documents';
+import { WebsiteScanResultProvider } from '../data-providers/website-scan-result-provider';
+import { ReportWriter } from '../data-providers/report-writer';
 import { CombinedAxeResultBuilder } from './combined-axe-result-builder';
 import { CombinedReportGenerator } from './combined-report-generator';
 import { CombinedResultsBlobProvider } from './combined-results-blob-provider';
@@ -42,10 +43,6 @@ export class CombinedScanResultProcessor {
 
     private async generateCombinedScanResultsImpl(axeScanResults: AxeScanResults, pageScanResult: OnDemandPageScanResult): Promise<void> {
         const websiteScanRef = this.getWebsiteScanRefs(pageScanResult);
-        if (!websiteScanRef) {
-            return;
-        }
-
         const websiteScanResult = await this.websiteScanResultProvider.read(websiteScanRef.id);
         const combinedResultsBlob = await this.combinedResultsBlobProvider.getBlob(websiteScanResult.combinedResultsBlobId);
         const combinedResultsBlobId = combinedResultsBlob.blobId;
@@ -73,7 +70,14 @@ export class CombinedScanResultProcessor {
 
         if (pageScanReport) {
             if (pageScanResult.reports) {
-                pageScanResult.reports.push(pageScanReport);
+                if (pageScanResult.reports.some((report) => report.reportId === pageScanReport.reportId)) {
+                    // replace report if already exists
+                    pageScanResult.reports = pageScanResult.reports.map((report) =>
+                        report.reportId === pageScanReport.reportId ? pageScanReport : report,
+                    );
+                } else {
+                    pageScanResult.reports.push(pageScanReport);
+                }
             } else {
                 pageScanResult.reports = [pageScanReport];
             }
@@ -81,10 +85,6 @@ export class CombinedScanResultProcessor {
     }
 
     private getWebsiteScanRefs(pageScanResult: OnDemandPageScanResult): WebsiteScanRef {
-        if (!pageScanResult.websiteScanRefs) {
-            return undefined;
-        }
-
         return pageScanResult.websiteScanRefs.find(
             (ref) => ref.scanGroupType === 'consolidated-scan-report' || ref.scanGroupType === 'deep-scan',
         );

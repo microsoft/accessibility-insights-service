@@ -7,11 +7,10 @@ import { DiscoveryPatternFactory } from 'accessibility-insights-crawler';
 import { CrawlConfig, ServiceConfiguration } from 'common';
 import { GlobalLogger } from 'logger';
 import { Page } from 'scanner-global-library';
-import { WebsiteScanResultProvider } from 'service-library';
+import { WebsiteScanResultProvider, RunnerScanMetadata } from 'service-library';
 import { OnDemandPageScanResult, WebsiteScanResult } from 'storage-documents';
 import { IMock, It, Mock } from 'typemoq';
 import * as Puppeteer from 'puppeteer';
-import { ScanMetadata } from '../types/scan-metadata';
 import { DiscoveredUrlProcessor } from '../crawl-runner/discovered-url-processor';
 import { CrawlRunner } from '../crawl-runner/crawl-runner';
 import { ScanFeedGenerator } from '../crawl-runner/scan-feed-generator';
@@ -35,7 +34,7 @@ let urlProcessorMock: IMock<DiscoveredUrlProcessor>;
 let discoveryPatternGeneratorMock: IMock<DiscoveryPatternFactory>;
 let pageMock: IMock<Page>;
 let scanFeedGeneratorMock: IMock<ScanFeedGenerator>;
-let scanMetadata: ScanMetadata;
+let runnerScanMetadata: RunnerScanMetadata;
 let pageScanResult: OnDemandPageScanResult;
 let websiteScanResult: WebsiteScanResult;
 let websiteScanResultDbDocument: WebsiteScanResult;
@@ -58,7 +57,7 @@ describe(DeepScanner, () => {
             .setup((sc) => sc.getConfigValue('crawlConfig'))
             .returns(() => Promise.resolve({ deepScanDiscoveryLimit } as CrawlConfig));
         pageMock.setup((p) => p.currentPage).returns(() => puppeteerPageStub);
-        scanMetadata = {
+        runnerScanMetadata = {
             url,
             deepScan: true,
             id: 'scan id',
@@ -121,7 +120,7 @@ describe(DeepScanner, () => {
         setupUpdateWebsiteScanResult(discoveryPatterns);
         setupScanFeedGeneratorMock();
 
-        await testSubject.runDeepScan(scanMetadata, pageScanResult, pageMock.object);
+        await testSubject.runDeepScan(runnerScanMetadata, pageScanResult, pageMock.object);
     });
 
     it('skip deep scan if maximum discovered pages limit was reached', async () => {
@@ -140,7 +139,7 @@ describe(DeepScanner, () => {
             )
             .verifiable();
 
-        await testSubject.runDeepScan(scanMetadata, pageScanResult, pageMock.object);
+        await testSubject.runDeepScan(runnerScanMetadata, pageScanResult, pageMock.object);
     });
 
     it('logs and throws if websiteScanRefs is missing', () => {
@@ -148,7 +147,7 @@ describe(DeepScanner, () => {
 
         loggerMock.setup((l) => l.logError(It.isAny(), It.isAny())).verifiable();
 
-        expect(testSubject.runDeepScan(scanMetadata, pageScanResult, pageMock.object)).rejects.toThrow();
+        expect(testSubject.runDeepScan(runnerScanMetadata, pageScanResult, pageMock.object)).rejects.toThrow();
     });
 
     it('crawls and updates results with generated discovery pattern', async () => {
@@ -165,7 +164,7 @@ describe(DeepScanner, () => {
         setupUpdateWebsiteScanResult([generatedDiscoveryPattern]);
         setupScanFeedGeneratorMock();
 
-        await testSubject.runDeepScan(scanMetadata, pageScanResult, pageMock.object);
+        await testSubject.runDeepScan(runnerScanMetadata, pageScanResult, pageMock.object);
     });
 
     it('crawls and updates results with previously existing discovery pattern', async () => {
@@ -176,7 +175,7 @@ describe(DeepScanner, () => {
         setupUpdateWebsiteScanResult(discoveryPatterns);
         setupScanFeedGeneratorMock();
 
-        await testSubject.runDeepScan(scanMetadata, pageScanResult, pageMock.object);
+        await testSubject.runDeepScan(runnerScanMetadata, pageScanResult, pageMock.object);
     });
 });
 
@@ -207,7 +206,7 @@ function setupProcessUrls(deepScanLimit: number = deepScanDiscoveryLimit): void 
 function setupUpdateWebsiteScanResult(crawlDiscoveryPatterns: string[]): void {
     updatedWebsiteScanResult.discoveryPatterns = crawlDiscoveryPatterns;
     websiteScanResultProviderMock
-        .setup((o) => o.mergeOrCreate(scanMetadata.id, It.isValue(updatedWebsiteScanResult), true))
+        .setup((o) => o.mergeOrCreate(runnerScanMetadata.id, It.isValue(updatedWebsiteScanResult), true))
         .returns(() => Promise.resolve(websiteScanResultDbDocument))
         .verifiable();
 }

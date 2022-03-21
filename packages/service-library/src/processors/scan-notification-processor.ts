@@ -6,23 +6,23 @@ import { OnDemandPageScanResult, OnDemandNotificationRequestMessage, WebsiteScan
 import { ServiceConfiguration } from 'common';
 import { isEmpty } from 'lodash';
 import { GlobalLogger } from 'logger';
-import { ScanMetadata } from '../types/scan-metadata';
-import { NotificationMessageDispatcher } from './notification-message-dispatcher';
+import { RunnerScanMetadata } from '../types/runner-scan-metadata';
+import { ScanNotificationDispatcher } from './scan-notification-dispatcher';
 
 @injectable()
 export class ScanNotificationProcessor {
     constructor(
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
-        @inject(NotificationMessageDispatcher) protected readonly notificationMessageDispatcher: NotificationMessageDispatcher,
+        @inject(ScanNotificationDispatcher) protected readonly scanNotificationDispatcher: ScanNotificationDispatcher,
         @inject(GlobalLogger) private readonly logger: GlobalLogger,
     ) {}
 
     public async sendScanCompletionNotification(
-        scanMetadata: ScanMetadata,
+        runnerScanMetadata: RunnerScanMetadata,
         pageScanResult: OnDemandPageScanResult,
         websiteScanResult: WebsiteScanResult,
     ): Promise<void> {
-        if ((await this.canSendNotification(scanMetadata, pageScanResult, websiteScanResult)) !== true) {
+        if ((await this.canSendNotification(runnerScanMetadata, pageScanResult, websiteScanResult)) !== true) {
             return;
         }
 
@@ -34,18 +34,18 @@ export class ScanNotificationProcessor {
             deepScanId: websiteScanResult?.deepScanId,
         };
 
-        await this.notificationMessageDispatcher.sendNotificationMessage(notificationRequestMessage);
+        await this.scanNotificationDispatcher.sendNotificationMessage(notificationRequestMessage);
     }
 
     private async canSendNotification(
-        scanMetadata: ScanMetadata,
+        runnerScanMetadata: RunnerScanMetadata,
         pageScanResult: OnDemandPageScanResult,
         websiteScanResult: WebsiteScanResult,
     ): Promise<boolean> {
         const featureFlags = await this.serviceConfig.getConfigValue('featureFlags');
         const scanConfig = await this.serviceConfig.getConfigValue('scanConfig');
 
-        this.logger.logInfo(`The send scan completion feature flag is ${featureFlags.sendNotification ? 'enabled' : 'disabled'}.`, {
+        this.logger.logInfo(`The scan result notification feature flag is ${featureFlags.sendNotification ? 'enabled' : 'disabled'}.`, {
             sendNotificationFlag: featureFlags.sendNotification.toString(),
         });
 
@@ -54,17 +54,17 @@ export class ScanNotificationProcessor {
         }
 
         if (isEmpty(pageScanResult?.notification?.scanNotifyUrl)) {
-            this.logger.logInfo(`Scan notification URL was not provided. Skip sending scan completion notification queue message.`);
+            this.logger.logInfo(`Scan result notification URL was not provided. Skip sending scan result notification message.`);
 
             return false;
         }
 
-        if (scanMetadata.deepScan !== true) {
+        if (runnerScanMetadata.deepScan !== true) {
             if (
                 pageScanResult.run.state === 'completed' ||
                 (pageScanResult.run.state === 'failed' && pageScanResult.run.retryCount >= scanConfig.maxFailedScanRetryCount)
             ) {
-                this.logger.logInfo(`Sending scan completion notification message for a single scan.`, {
+                this.logger.logInfo(`Sending scan result notification message for a single scan.`, {
                     scanNotifyUrl: pageScanResult.notification.scanNotifyUrl,
                 });
 
@@ -78,7 +78,7 @@ export class ScanNotificationProcessor {
             websiteScanResult.pageScans.every((pageScan) => pageScan.runState === 'completed' || pageScan.runState === 'failed');
 
         if (deepScanCompleted === true) {
-            this.logger.logInfo('Sending scan completion notification message for a deep scan.', {
+            this.logger.logInfo('Sending scan result notification message for a deep scan.', {
                 deepScanId: websiteScanResult?.deepScanId,
                 scannedPages: websiteScanResult.pageScans.length.toString(),
                 scanNotifyUrl: pageScanResult.notification.scanNotifyUrl,

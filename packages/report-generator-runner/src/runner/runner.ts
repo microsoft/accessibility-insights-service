@@ -48,7 +48,10 @@ export class Runner {
         try {
             const queuedRequests = await this.requestSelector.getQueuedRequests(runMetadata.scanGroupId, this.maxQueuedRequests);
             await this.updateRequestStateToRunning(queuedRequests);
-            queuedRequests.requestsToProcess = this.reportProcessor.generate(queuedRequests.requestsToProcess);
+            queuedRequests.requestsToProcess = await this.reportProcessor.generate(
+                runMetadata.targetReport,
+                queuedRequests.requestsToProcess,
+            );
             this.moveCompletedRequestsForDeletion(queuedRequests);
             await this.updateRequestStateToFailed(queuedRequests.requestsToProcess);
             await this.deleteRequests(queuedRequests.requestsToDelete);

@@ -7,9 +7,8 @@ import { inject, injectable } from 'inversify';
 import { isNil } from 'lodash';
 import { GlobalLogger } from 'logger';
 import { Page } from 'scanner-global-library';
-import { WebsiteScanResultProvider } from 'service-library';
+import { WebsiteScanResultProvider, RunnerScanMetadata } from 'service-library';
 import { OnDemandPageScanResult, WebsiteScanResult } from 'storage-documents';
-import { ScanMetadata } from '../types/scan-metadata';
 import { DiscoveredUrlProcessor, discoveredUrlProcessor } from '../crawl-runner/discovered-url-processor';
 import { CrawlRunner } from '../crawl-runner/crawl-runner';
 import { ScanFeedGenerator } from '../crawl-runner/scan-feed-generator';
@@ -26,7 +25,7 @@ export class DeepScanner {
         private readonly discoveryPatternGenerator: DiscoveryPatternFactory = getDiscoveryPatternForUrl,
     ) {}
 
-    public async runDeepScan(scanMetadata: ScanMetadata, pageScanResult: OnDemandPageScanResult, page: Page): Promise<void> {
+    public async runDeepScan(runnerScanMetadata: RunnerScanMetadata, pageScanResult: OnDemandPageScanResult, page: Page): Promise<void> {
         const websiteScanResult = await this.readWebsiteScanResult(pageScanResult);
         this.logger.setCommonProperties({
             websiteScanId: websiteScanResult.id,
@@ -44,10 +43,10 @@ export class DeepScanner {
         }
 
         const discoveryPatterns = websiteScanResult.discoveryPatterns ?? [this.discoveryPatternGenerator(websiteScanResult.baseUrl)];
-        const discoveredUrls = await this.crawlRunner.run(scanMetadata.url, discoveryPatterns, page.currentPage);
+        const discoveredUrls = await this.crawlRunner.run(runnerScanMetadata.url, discoveryPatterns, page.currentPage);
         const processedUrls = this.processUrls(discoveredUrls, deepScanDiscoveryLimit, websiteScanResult.knownPages);
         const websiteScanResultUpdated = await this.updateWebsiteScanResult(
-            scanMetadata.id,
+            runnerScanMetadata.id,
             websiteScanResult,
             processedUrls,
             discoveryPatterns,
