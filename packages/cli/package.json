@@ -95,6 +95,6 @@
         "ai-scan": "dist/ai-scan-cli.js"
     },
     "engines": {
-        "node": ">=10.18"
+        "node": ">=16"
     }
 }

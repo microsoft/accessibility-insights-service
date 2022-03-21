@@ -4,7 +4,7 @@
 FROM sbidprod.azurecr.io/quinault
 
 # Install Node.js
-ARG NODE_VERSION=12.21.0
+ARG NODE_VERSION=16.14.0
 ARG NODE_PACKAGE=node-v$NODE_VERSION-linux-x64
 ARG NODE_HOME=/opt/$NODE_PACKAGE
 
