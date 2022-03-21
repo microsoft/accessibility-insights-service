@@ -31,7 +31,7 @@
         "@types/cli-spinner": "^0.2.0",
         "@types/escape-html": "^1.0.1",
         "@types/jest": "^27.4.1",
-        "@types/lodash": "^4.14.179",
+        "@types/lodash": "^4.14.180",
         "@types/node": "^12.20.46",
         "@types/normalize-path": "^3.0.0",
         "@types/table": "^6.3.2",
