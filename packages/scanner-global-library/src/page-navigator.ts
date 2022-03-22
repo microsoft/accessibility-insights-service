@@ -34,7 +34,7 @@ export class PageNavigator {
         await this.pageConfigurator.configurePage(page);
 
         // Try load all page resources
-        let navigationResult = await this.navigateToUrl(url, page, 'networkidle0');
+        let navigationResult = await this.navigateToUrl(url, page, 'networkidle2');
         if (navigationResult.browserError?.errorType === 'UrlNavigationTimeout') {
             // Fallback to load partial page resources on navigation timeout.
             // This will help in cases when page has a streaming video controls.
