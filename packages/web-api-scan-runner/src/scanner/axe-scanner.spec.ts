@@ -3,7 +3,6 @@
 
 import 'reflect-metadata';
 
-import { fail } from 'assert';
 import { AxeResults } from 'axe-core';
 import { PromiseUtils, ScanRunTimeConfig, ServiceConfiguration, System } from 'common';
 import { AxePuppeteerFactory, AxeScanResults, BrowserError, Page } from 'scanner-global-library';
@@ -79,9 +78,9 @@ describe(AxeScanner, () => {
         });
 
         it('should return timeout promise', async () => {
-            const errorMessage: string = 'An error occurred while scanning website page';
+            const axeResultsStub = 'axe results' as any as AxeResults;
 
-            setupPageErrorScanCall(errorMessage);
+            setupPageScanCall(axeResultsStub);
             setupWaitForPromiseToReturnTimeoutPromise();
 
             const scanResult = await axeScanner.scan(pageMock.object);
@@ -112,9 +111,7 @@ describe(AxeScanner, () => {
         function setupWaitForPromiseToReturnTimeoutPromise(): void {
             promiseUtilsMock
                 .setup((s) => s.waitFor(It.isAny(), scanConfig.scanTimeoutInMin * 60000, It.isAny()))
-                .returns(async (scanPromiseObj, timeout, timeoutCb) => {
-                    return timeoutCb();
-                })
+                .returns(async (scanPromiseObj, timeout, timeoutCb) => timeoutCb())
                 .verifiable();
         }
     });
