@@ -5,7 +5,16 @@ import 'reflect-metadata';
 
 import fs from 'fs';
 import readline from 'readline';
-import { BrowserError, Page, PageConfigurator, PageHandler, PageNavigator, PageResponseProcessor, WebDriver } from 'scanner-global-library';
+import {
+    BrowserError,
+    NavigationHooks,
+    Page,
+    PageConfigurator,
+    PageHandler,
+    PageNavigator,
+    PageResponseProcessor,
+    WebDriver,
+} from 'scanner-global-library';
 import { ConsoleLoggerClient, GlobalLogger } from 'logger';
 import { PromiseUtils, ServiceConfiguration } from 'common';
 import yargs from 'yargs';
@@ -32,7 +41,11 @@ type BannerDetectionResults = {
 const serviceConfig = new ServiceConfiguration();
 const logger = new GlobalLogger([new ConsoleLoggerClient(serviceConfig, console)], process);
 const webDriver = new WebDriver(new PromiseUtils(), logger);
-const pageNavigator = new PageNavigator(new PageConfigurator(), new PageResponseProcessor(), new PageHandler(logger));
+const pageResponseProcessor = new PageResponseProcessor();
+const pageNavigator = new PageNavigator(
+    pageResponseProcessor,
+    new NavigationHooks(new PageConfigurator(), pageResponseProcessor, new PageHandler(logger)),
+);
 const privacyPageScanner = new PrivacyPageScanner(serviceConfig, new CookieCollector());
 const page = new Page(webDriver, undefined, pageNavigator, privacyPageScanner, logger);
 

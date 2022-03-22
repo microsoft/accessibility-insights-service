@@ -3,11 +3,11 @@
 
 import * as Puppeteer from 'puppeteer';
 import { injectable, inject } from 'inversify';
-import { isNil } from 'lodash';
-import { PageConfigurator } from './page-configurator';
+import _ from 'lodash';
 import { PageResponseProcessor } from './page-response-processor';
 import { BrowserError } from './browser-error';
-import { PageHandler } from './page-handler';
+import { NavigationHooks } from './navigation-hooks';
+import { PageConfigurator } from './page-configurator';
 
 export type OnNavigationError = (browserError: BrowserError, error?: unknown) => Promise<void>;
 
@@ -17,21 +17,21 @@ export class PageNavigator {
     // Refer to service configuration TaskRuntimeConfig.taskTimeoutInMinutes property
     public readonly gotoTimeoutMsecs = 60000;
 
-    public readonly pageRenderingTimeoutMsecs = 10000;
-
     constructor(
-        @inject(PageConfigurator) public readonly pageConfigurator: PageConfigurator,
-        @inject(PageResponseProcessor) protected readonly pageResponseProcessor: PageResponseProcessor,
-        @inject(PageHandler) protected readonly pageRenderingHandler: PageHandler,
+        @inject(PageResponseProcessor) public readonly pageResponseProcessor: PageResponseProcessor,
+        @inject(NavigationHooks) public readonly navigationHooks: NavigationHooks,
     ) {}
+
+    public get pageConfigurator(): PageConfigurator {
+        return this.navigationHooks.pageConfigurator;
+    }
 
     public async navigate(
         url: string,
         page: Puppeteer.Page,
-        onNavigationError: OnNavigationError = () => Promise.resolve(),
+        onNavigationError: (browserError: BrowserError, error?: unknown) => Promise<void> = () => Promise.resolve(),
     ): Promise<Puppeteer.Response> {
-        // Configure page settings before navigating to URL
-        await this.pageConfigurator.configurePage(page);
+        await this.navigationHooks.preNavigation(page);
 
         // Try load all page resources
         let navigationResult = await this.navigateToUrl(url, page, 'networkidle0');
@@ -46,31 +46,13 @@ export class PageNavigator {
             navigationResult = await this.navigateToUrl(url, page, 'load');
         }
 
-        if (!isNil(navigationResult.browserError)) {
+        if (!_.isNil(navigationResult.browserError)) {
             onNavigationError(navigationResult.browserError, navigationResult.error);
 
             return undefined;
         }
 
-        if (isNil(navigationResult.response)) {
-            onNavigationError({
-                errorType: 'NavigationError',
-                message: 'Unable to get a page response from the browser.',
-                stack: new Error().stack,
-            });
-
-            return undefined;
-        }
-
-        // Validate HTTP response
-        const responseError = this.pageResponseProcessor.getResponseError(navigationResult.response);
-        if (responseError !== undefined) {
-            onNavigationError(responseError);
-
-            return undefined;
-        }
-
-        await this.pageRenderingHandler.waitForPageToCompleteRendering(page, this.pageRenderingTimeoutMsecs);
+        this.navigationHooks.postNavigation(page, navigationResult.response, onNavigationError);
 
         return navigationResult.response;
     }
