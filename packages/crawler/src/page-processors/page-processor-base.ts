@@ -84,7 +84,6 @@ export abstract class PageProcessorBase implements PageProcessor {
     public postNavigation = async (crawlingContext: PuppeteerCrawlingContext): Promise<void> => {
         let navigationError: BrowserError;
         let runError: unknown;
-        // let puppeteerError: unknown;
         try {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             if ((crawlingContext as any).page) {
@@ -114,7 +113,7 @@ export abstract class PageProcessorBase implements PageProcessor {
             if (runError !== undefined) {
                 await this.saveRunError(crawlingContext.request, runError);
             } else if (navigationError !== undefined) {
-                await this.saveBrowserError(crawlingContext.request, navigationError);
+                await this.saveBrowserError(crawlingContext.request, navigationError, crawlingContext.session);
             } else {
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 await this.saveScanMetadata(crawlingContext.request.url, await (crawlingContext as any).page.title());
@@ -125,7 +124,7 @@ export abstract class PageProcessorBase implements PageProcessor {
     /**
      * This function is called when the crawling of a request failed after several reties
      */
-    public pageErrorProcessor: Apify.HandleFailedRequest = async ({ request, error }: Apify.HandleFailedRequestInput) => {
+    public pageErrorProcessor: Apify.HandleFailedRequest = async ({ request, error, session }: Apify.HandleFailedRequestInput) => {
         const scanData: ScanData = {
             id: request.id as string,
             url: request.url,
@@ -204,7 +203,11 @@ export abstract class PageProcessorBase implements PageProcessor {
         });
     }
 
-    protected async saveBrowserError(request: Apify.Request, error: BrowserError): Promise<void> {
+    protected async saveBrowserError(request: Apify.Request, error: BrowserError, session: Apify.Session): Promise<void> {
+        (session.userData as SessionData[]).push({
+            requestId: request.id,
+            browserError: error,
+        });
         await this.dataBase.addScanResult(request.id as string, {
             id: request.id,
             url: request.url,

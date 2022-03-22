@@ -4,7 +4,7 @@
 import 'reflect-metadata';
 
 import { Page } from 'puppeteer';
-import { BrowserError, PageConfigurator, NavigationHooks } from 'scanner-global-library';
+import { BrowserError, NavigationHooks, PageConfigurator } from 'scanner-global-library';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { System } from 'common';
 import Apify from 'apify';
@@ -17,7 +17,7 @@ import { ScanData } from '../types/scan-data';
 import { ScanResult } from '../level-storage/storage-documents';
 import { PageProcessorBase, PuppeteerCrawlingContext, PuppeteerHandlePageInputs } from './page-processor-base';
 
-/* eslint-disable @typescript-eslint/no-explicit-any, , @typescript-eslint/consistent-type-assertions */
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/consistent-type-assertions */
 
 describe(PageProcessorBase, () => {
     class TestablePageProcessor extends PageProcessorBase {
@@ -165,7 +165,7 @@ describe(PageProcessorBase, () => {
         await pageProcessorBase.postNavigation(crawlingContext);
     });
 
-    it('postNavigationHook logs errors', async () => {
+    it('postNavigationHook logs browser errors', async () => {
         pageProcessorBase.baseUrl = testUrl;
         const browserError = {
             errorType: 'HttpErrorCode',
@@ -182,7 +182,7 @@ describe(PageProcessorBase, () => {
         } as any;
         navigationHooksMock
             .setup(async (nh) => nh.postNavigation(crawlingContext.page, crawlingContext.response, It.isAny()))
-            .callback((page, response, errorCallback) => errorCallback(browserError, undefined))
+            .returns((page, response, errorCallback) => errorCallback(browserError, undefined))
             .verifiable();
         dataBaseMock
             .setup((o) =>
@@ -196,9 +196,10 @@ describe(PageProcessorBase, () => {
             .verifiable();
 
         await pageProcessorBase.postNavigation(crawlingContext);
+        expect(crawlingContext.session.userData).toContainEqual({ requestId: requestStub.id, browserError: browserError });
     });
 
-    it('gotoFunction() logs errors', async () => {
+    it('postNavigationHook throws errors', async () => {
         const crawlingContext: PuppeteerCrawlingContext = {
             page: pageStub,
             request: requestStub,
@@ -215,10 +216,7 @@ describe(PageProcessorBase, () => {
         } as BrowserError;
         navigationHooksMock
             .setup(async (o) => o.postNavigation(crawlingContext.page, It.isAny(), It.isAny()))
-            .callback(async (url, page, fn) => {
-                await fn(browserError, error);
-            })
-            .returns(() => Promise.reject(error))
+            .returns((url, page, errorCallback) => errorCallback(browserError, error))
             .verifiable();
         const scanResult = {
             id: requestStub.id as string,
@@ -230,9 +228,9 @@ describe(PageProcessorBase, () => {
 
         try {
             await pageProcessorBase.postNavigation(crawlingContext);
-            expect('').toBe('postNavigation() should throw an error');
-        } catch (err) {
-            expect(err).toBe(error);
+            fail('postNavigation() should throw an error');
+        } catch (e) {
+            expect(e).toEqual(error);
         }
     });
 
