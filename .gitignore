@@ -20,3 +20,6 @@ yarn-error.log
 
 **/bin
 **/obj
+
+codecov
+codecov.*
