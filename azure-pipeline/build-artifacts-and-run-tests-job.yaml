@@ -11,6 +11,10 @@ steps:
           yarn copyright:check
       displayName: check for copyright headers
 
+    - script: |
+          yarn syncpack:check
+      displayName: check for package version inconsistencies
+
     - template: ./build-steps.yaml
 
     - script: |
