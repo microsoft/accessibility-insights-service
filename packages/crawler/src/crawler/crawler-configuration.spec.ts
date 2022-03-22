@@ -3,10 +3,12 @@
 
 import 'reflect-metadata';
 
-import { IMock, Mock } from 'typemoq';
+import * as Puppeteer from 'puppeteer';
+import { IMock, Mock, Times } from 'typemoq';
 import { ApifySettings, ApifySettingsHandler } from '../apify/apify-settings';
 import { DiscoveryPatternFactory } from '../apify/discovery-patterns';
 import { CrawlerRunOptions } from '../types/crawler-run-options';
+import { RequestQueueOptions } from '../types/resource-creator';
 import { CrawlerConfiguration } from './crawler-configuration';
 
 describe(CrawlerConfiguration, () => {
@@ -20,16 +22,27 @@ describe(CrawlerConfiguration, () => {
         crawlerRunOptionsMock = Mock.ofType<CrawlerRunOptions>();
         createDiscoveryPatternMock = Mock.ofType<DiscoveryPatternFactory>();
 
-        crawlerConfiguration = new CrawlerConfiguration(
-            crawlerRunOptionsMock.object,
-            apifySettingsHandlerMock.object,
-            createDiscoveryPatternMock.object,
-        );
+        crawlerConfiguration = new CrawlerConfiguration(apifySettingsHandlerMock.object, createDiscoveryPatternMock.object);
+        crawlerConfiguration.setCrawlerRunOptions(crawlerRunOptionsMock.object);
     });
 
     afterEach(() => {
         crawlerRunOptionsMock.verifyAll();
         apifySettingsHandlerMock.verifyAll();
+    });
+
+    it('setCrawlerRunOptions', () => {
+        crawlerConfiguration = new CrawlerConfiguration(apifySettingsHandlerMock.object, createDiscoveryPatternMock.object);
+        expect(crawlerConfiguration.baseUrl).toThrow();
+        crawlerRunOptionsMock.verify((o) => o.baseUrl, Times.never());
+
+        crawlerRunOptionsMock.reset();
+        crawlerRunOptionsMock
+            .setup((o) => o.baseUrl)
+            .returns(() => 'base url')
+            .verifiable();
+        crawlerConfiguration.setCrawlerRunOptions(crawlerRunOptionsMock.object);
+        expect(crawlerConfiguration.baseUrl()).toBeDefined();
     });
 
     it('baseUrl', () => {
@@ -38,6 +51,35 @@ describe(CrawlerConfiguration, () => {
             .returns(() => 'baseUrl')
             .verifiable();
         expect(crawlerConfiguration.baseUrl()).toEqual('baseUrl');
+    });
+
+    it.each([true, false, undefined])('simulate = %s', (simulate) => {
+        crawlerRunOptionsMock
+            .setup((o) => o.simulate)
+            .returns(() => simulate)
+            .verifiable();
+
+        expect(crawlerConfiguration.simulate()).toEqual(simulate === true);
+    });
+
+    it('requestQueueOptions', () => {
+        const restartCrawl = true;
+        const inputUrls = ['input url'];
+        const baseCrawlPage = {} as Puppeteer.Page;
+        const discoveryPatterns = ['discoveryPatterh'];
+        const expectedOptions: RequestQueueOptions = {
+            clear: restartCrawl,
+            inputUrls: inputUrls,
+            page: baseCrawlPage,
+            discoveryPatterns: discoveryPatterns,
+        };
+
+        crawlerRunOptionsMock.setup((o) => o.restartCrawl).returns(() => restartCrawl);
+        crawlerRunOptionsMock.setup((o) => o.inputUrls).returns(() => inputUrls);
+        crawlerRunOptionsMock.setup((o) => o.baseCrawlPage).returns(() => baseCrawlPage);
+        crawlerRunOptionsMock.setup((o) => o.discoveryPatterns).returns(() => discoveryPatterns);
+
+        expect(crawlerConfiguration.requestQueueOptions()).toEqual(expectedOptions);
     });
 
     describe('getDiscoveryPattern', () => {
@@ -214,16 +256,6 @@ describe(CrawlerConfiguration, () => {
             existingSettings.APIFY_HEADLESS = undefined;
 
             crawlerConfiguration.setDefaultApifySettings();
-        });
-
-        it('setLocalOutputDir', () => {
-            const localOutputDir = 'new local output dir';
-            const expectedSettings = {
-                APIFY_LOCAL_STORAGE_DIR: localOutputDir,
-            };
-            apifySettingsHandlerMock.setup((ash) => ash.setApifySettings(expectedSettings)).verifiable();
-
-            crawlerConfiguration.setLocalOutputDir(localOutputDir);
         });
 
         it('setChromePath', () => {
