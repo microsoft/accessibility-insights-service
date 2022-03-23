@@ -183,6 +183,17 @@ describe(CrawlerConfiguration, () => {
         });
     });
 
+    describe('getChromePath', () => {
+        it('explicitly set chromePath', () => {
+            crawlerRunOptionsMock
+                .setup((o) => o.chromePath)
+                .returns(() => 'chrome path')
+                .verifiable();
+
+            expect(crawlerConfiguration.chromePath()).toEqual('chrome path');
+        });
+    });
+
     describe('getMaxRequestsPerCrawl', () => {
         it('with no value provided', () => {
             crawlerRunOptionsMock
@@ -256,6 +267,26 @@ describe(CrawlerConfiguration, () => {
             existingSettings.APIFY_HEADLESS = undefined;
 
             crawlerConfiguration.setDefaultApifySettings();
+        });
+
+        it('setLocalOutputDir', () => {
+            const outputDir = 'localOutputDir';
+            const expectedSettings = {
+                APIFY_LOCAL_STORAGE_DIR: outputDir,
+            };
+            apifySettingsHandlerMock.setup((ash) => ash.setApifySettings(expectedSettings)).verifiable();
+
+            crawlerConfiguration.setLocalOutputDir(outputDir);
+        });
+
+        it('setMemoryMBytes', () => {
+            const memoryMBytes = 1024;
+            const expectedSettings = {
+                APIFY_MEMORY_MBYTES: `${memoryMBytes}`,
+            };
+            apifySettingsHandlerMock.setup((ash) => ash.setApifySettings(expectedSettings)).verifiable();
+
+            crawlerConfiguration.setMemoryMBytes(memoryMBytes);
         });
 
         it('setChromePath', () => {

@@ -12,7 +12,6 @@ import { BrowserError } from './browser-error';
 import { NavigationHooks } from './navigation-hooks';
 
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/consistent-type-assertions */
-const scrollTimeoutMsecs = 15000;
 const pageRenderingTimeoutMsecs = 1000;
 
 let pageConfiguratorMock: IMock<PageConfigurator>;
@@ -33,7 +32,6 @@ describe(NavigationHooks, () => {
             pageConfiguratorMock.object,
             pageResponseProcessorMock.object,
             pageHandlerMock.object,
-            scrollTimeoutMsecs,
             pageRenderingTimeoutMsecs,
         );
     });
@@ -58,7 +56,7 @@ describe(NavigationHooks, () => {
             .returns(() => undefined)
             .verifiable();
         pageHandlerMock
-            .setup(async (o) => o.waitForPageToCompleteRendering(pageMock.object, scrollTimeoutMsecs, pageRenderingTimeoutMsecs))
+            .setup(async (o) => o.waitForPageToCompleteRendering(pageMock.object, pageRenderingTimeoutMsecs))
             .returns(() => Promise.resolve())
             .verifiable();
 

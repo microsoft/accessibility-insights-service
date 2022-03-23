@@ -15,7 +15,6 @@ export class NavigationHooks {
         @inject(PageConfigurator) public readonly pageConfigurator: PageConfigurator,
         @inject(PageResponseProcessor) protected readonly pageResponseProcessor: PageResponseProcessor,
         @inject(PageHandler) protected readonly pageRenderingHandler: PageHandler,
-        private readonly scrollTimeoutMsecs = 15000,
         private readonly pageRenderingTimeoutMsecs: number = 10000,
     ) {}
 
@@ -47,6 +46,6 @@ export class NavigationHooks {
             return;
         }
 
-        await this.pageRenderingHandler.waitForPageToCompleteRendering(page, this.scrollTimeoutMsecs, this.pageRenderingTimeoutMsecs);
+        await this.pageRenderingHandler.waitForPageToCompleteRendering(page, this.pageRenderingTimeoutMsecs);
     }
 }
