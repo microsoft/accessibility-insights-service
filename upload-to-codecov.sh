@@ -51,7 +51,7 @@ if [[ -z "${token}" ]]; then
 fi
 
 if [[ -z "${codecovVersion}" ]]; then
-    codecovVersion = "${defaultCodecovVersion}"
+    codecovVersion="${defaultCodecovVersion}"
 fi
 
 importPublicKey
