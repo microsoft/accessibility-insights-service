@@ -8,9 +8,11 @@
 
 set -eo pipefail
 
+defaultCodecovVersion="v0.1.20"
+
 exitWithUsageInfo() {
     echo "
-Usage: $0 -t <upload token>
+Usage: $0 -t <upload token> [-v <codecov version, defaults to ${defaultCodecovVersion}>]
 "
     exit 1
 }
@@ -20,9 +22,9 @@ function importPublicKey() {
 }
 
 function downloadCodecov() {
-    curl -Os https://uploader.codecov.io/latest/linux/codecov
-    curl -Os https://uploader.codecov.io/latest/linux/codecov.SHA256SUM
-    curl -Os https://uploader.codecov.io/latest/linux/codecov.SHA256SUM.sig
+    curl -Os "https://uploader.codecov.io/${codecovVersion}/linux/codecov"
+    curl -Os "https://uploader.codecov.io/${codecovVersion}/linux/codecov.SHA256SUM"
+    curl -Os "https://uploader.codecov.io/${codecovVersion}/linux/codecov.SHA256SUM.sig"
 }
 
 function verifySHASUM() {
@@ -36,15 +38,20 @@ function runCodecovUploader() {
 }
 
 # Read script arguments
-while getopts ":t:" option; do
+while getopts ":t:v:" option; do
     case $option in
     t) token=${OPTARG} ;;
+    v) codecovVersion=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
 
 if [[ -z "${token}" ]]; then
     exitWithUsageInfo
+fi
+
+if [[ -z "${codecovVersion}" ]]; then
+    codecovVersion = "${defaultCodecovVersion}"
 fi
 
 importPublicKey
