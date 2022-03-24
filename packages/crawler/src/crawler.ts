@@ -2,8 +2,8 @@
 // Licensed under the MIT License.
 
 import { interfaces } from 'inversify';
+import { CrawlerConfiguration } from './crawler/crawler-configuration';
 import { CrawlerEngine } from './crawler/crawler-engine';
-import { registerCrawlerRunOptions } from './setup-crawler-container';
 import { CrawlerRunOptions } from './types/crawler-run-options';
 import { crawlerIocTypes } from './types/ioc-types';
 
@@ -11,7 +11,8 @@ export class Crawler<T> {
     constructor(private readonly container: interfaces.Container) {}
 
     public async crawl(crawlerRunOptions: CrawlerRunOptions): Promise<T> {
-        registerCrawlerRunOptions(this.container, crawlerRunOptions);
+        const crawlerConfig = this.container.get(CrawlerConfiguration);
+        crawlerConfig.setCrawlerRunOptions(crawlerRunOptions);
 
         return (this.container.get(crawlerIocTypes.CrawlerEngine) as CrawlerEngine<T>).start(crawlerRunOptions);
     }

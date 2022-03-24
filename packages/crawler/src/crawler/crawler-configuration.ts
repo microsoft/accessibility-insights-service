@@ -1,20 +1,33 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { inject, injectable } from 'inversify';
+import { injectable } from 'inversify';
 import { isEmpty } from 'lodash';
 import { ApifySettings, ApifySettingsHandler, apifySettingsHandler } from '../apify/apify-settings';
 import { CrawlerRunOptions } from '../types/crawler-run-options';
-import { crawlerIocTypes } from '../types/ioc-types';
 import { DiscoveryPatternFactory, getDiscoveryPatternForUrl } from '../apify/discovery-patterns';
+import { RequestQueueOptions } from '../types/resource-creator';
 
 @injectable()
 export class CrawlerConfiguration {
+    private _crawlerRunOptions: CrawlerRunOptions;
+
     public constructor(
-        @inject(crawlerIocTypes.CrawlerRunOptions) private readonly crawlerRunOptions: CrawlerRunOptions,
         private readonly settingsHandler: ApifySettingsHandler = apifySettingsHandler,
         private readonly createDiscoveryPattern: DiscoveryPatternFactory = getDiscoveryPatternForUrl,
     ) {}
+
+    private get crawlerRunOptions(): CrawlerRunOptions {
+        if (!this._crawlerRunOptions) {
+            throw new Error('crawlerRunOptions has not been set for CrawlerConfiguration');
+        }
+
+        return this._crawlerRunOptions;
+    }
+
+    public setCrawlerRunOptions(options: CrawlerRunOptions): void {
+        this._crawlerRunOptions = options;
+    }
 
     public baseUrl(): string {
         return this.crawlerRunOptions.baseUrl;
@@ -46,6 +59,19 @@ export class CrawlerConfiguration {
 
     public chromePath(): string {
         return this.crawlerRunOptions.chromePath;
+    }
+
+    public simulate(): boolean {
+        return this.crawlerRunOptions.simulate ?? false;
+    }
+
+    public requestQueueOptions(): RequestQueueOptions {
+        return {
+            clear: this.crawlerRunOptions.restartCrawl,
+            inputUrls: this.crawlerRunOptions.inputUrls,
+            page: this.crawlerRunOptions.baseCrawlPage,
+            discoveryPatterns: this.crawlerRunOptions.discoveryPatterns,
+        };
     }
 
     public setDefaultApifySettings(): void {

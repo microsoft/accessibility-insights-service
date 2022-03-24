@@ -138,7 +138,8 @@ describe(SimpleCrawlerEngine, () => {
             debug: true,
         };
 
-        const testCrawlerConfiguration = new CrawlerConfiguration(testCrawlerRunOptions);
+        const testCrawlerConfiguration = new CrawlerConfiguration();
+        testCrawlerConfiguration.setCrawlerRunOptions(testCrawlerRunOptions);
         const requestQueueProvider = () =>
             apifyResourceCreator.createRequestQueue(testBaseUrl, {
                 clear: true,
