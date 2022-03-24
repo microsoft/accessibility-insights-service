@@ -13,7 +13,7 @@
             "id": "report-generator-job-manager-task",
             "commandLine": "",
             "containerSettings": {
-                "containerRunOptions": "--init --rm --workdir / -e APPINSIGHTS_INSTRUMENTATIONKEY -e KEY_VAULT_URL -e AZURE_STORAGE_NOTIFICATION_QUEUE",
+                "containerRunOptions": "--init --rm --workdir /app -e APPINSIGHTS_INSTRUMENTATIONKEY -e KEY_VAULT_URL -e AZURE_STORAGE_NOTIFICATION_QUEUE",
                 "imageName": "%CONTAINER_REGISTRY_TOKEN%.azurecr.io/batch-report-generator-manager"
             },
             "constraints": {
