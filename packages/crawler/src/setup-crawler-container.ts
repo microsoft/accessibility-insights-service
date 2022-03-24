@@ -50,9 +50,9 @@ export function setupCloudCrawlerContainer(container: inversify.Container): inve
     container.bind(CrawlerConfiguration).toSelf().inSingletonScope();
     setupSingletonProvider(crawlerIocTypes.ApifyRequestQueueProvider, container, async (context: inversify.interfaces.Context) => {
         const apifyResourceCreator = context.container.get(ApifyResourceCreator);
-        const crawlerConfig = context.container.get(CrawlerConfiguration);
+        const crawlerConfiguration = context.container.get(CrawlerConfiguration);
 
-        return apifyResourceCreator.createRequestQueue(crawlerConfig.baseUrl(), crawlerConfig.requestQueueOptions());
+        return apifyResourceCreator.createRequestQueue(crawlerConfiguration.baseUrl(), crawlerConfiguration.requestQueueOptions());
     });
 
     container.bind(crawlerIocTypes.RequestProcessor).to(UrlCollectionRequestProcessor);
