@@ -21,6 +21,7 @@ export class SimpleCrawlerEngine implements CrawlerEngine<string[]> {
 
     public async start(crawlerRunOptions: CrawlerRunOptions): Promise<string[]> {
         this.crawlerConfiguration.setDefaultApifySettings();
+        this.crawlerConfiguration.setLocalOutputDir(crawlerRunOptions.localOutputDir);
         this.crawlerConfiguration.setMemoryMBytes(crawlerRunOptions.memoryMBytes);
         this.crawlerConfiguration.setSilentMode(crawlerRunOptions.silentMode);
 
