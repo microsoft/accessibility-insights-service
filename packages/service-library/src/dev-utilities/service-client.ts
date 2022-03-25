@@ -18,7 +18,7 @@ import { ScanRunResultResponse } from '../web-api/api-contracts/scan-result-resp
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable security/detect-non-literal-fs-filename */
 
-type ClientOperation = 'submitScan' | 'getResult';
+type ClientOperation = 'submit-scan' | 'get-result';
 
 interface ClientArgs {
     operation: ClientOperation;
@@ -79,7 +79,7 @@ async function main(): Promise<void> {
 
 async function dispatchOperation(): Promise<void> {
     switch (clientArgs.operation) {
-        case 'submitScan':
+        case 'submit-scan':
             if (!isEmpty(clientArgs.scanUrl)) {
                 await sendRequestOperation([{ scanUrl: clientArgs.scanUrl }]);
             } else if (!isEmpty(clientArgs.scanFile)) {
@@ -89,7 +89,7 @@ async function dispatchOperation(): Promise<void> {
                 console.log(`Scan URL input not found. Provide either --scanUrl or --scanFile option.`);
             }
             break;
-        case 'getResult':
+        case 'get-result':
             await getScanResultOperation();
             break;
         default:
@@ -327,6 +327,8 @@ function getClientArguments(): ClientArgs {
 
 async function readScanFile(): Promise<ScanUrlData[]> {
     if (!fs.existsSync(getScanFileName())) {
+        console.log(`File not found ${getScanFileName()}`);
+
         return [];
     }
 
@@ -347,6 +349,12 @@ async function readScanFile(): Promise<ScanUrlData[]> {
 }
 
 function readPendingResultsScanIds(): string[] {
+    if (!fs.existsSync(getDataFolderName())) {
+        console.log(`Folder not found ${getDataFolderName()}`);
+
+        return [];
+    }
+
     const dataFiles = fs.readdirSync(getDataFolderName());
     const submitted = dataFiles.filter((f) => f.endsWith('.request.json')).map((s) => s.substring(0, 36));
     const completed = dataFiles.filter((f) => f.endsWith('.failed.json') || f.endsWith('.completed.json')).map((s) => s.substring(0, 36));
