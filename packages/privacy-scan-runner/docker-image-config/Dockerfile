@@ -7,11 +7,13 @@ ENV NODE_VERSION 12.21.0
 
 USER ContainerAdministrator
 
+WORKDIR /app
+
 # Install Node.js
 RUN powershell Set-ExecutionPolicy RemoteSigned
 RUN powershell -Command \
     Invoke-WebRequest $('https://nodejs.org/dist/v{0}/node-v{0}-win-x64.zip' -f $env:NODE_VERSION) -OutFile 'node.zip' -UseBasicParsing ; \
-    Expand-Archive node.zip -DestinationPath C:\ ; \
+    Expand-Archive node.zip -DestinationPath / ; \
     Rename-Item -Path $('C:\node-v{0}-win-x64' -f $env:NODE_VERSION) -NewName 'C:\nodejs'
 RUN setx /m PATH "%PATH%;C:\nodejs"
 
@@ -19,7 +21,7 @@ RUN setx /m PATH "%PATH%;C:\nodejs"
 ADD Fonts.tar /Fonts/
 COPY Add-Font.ps1 .
 RUN powershell -Command \
-    .\Add-Font.ps1 Fonts > nul
+    .\Add-Font.ps1 /Fonts/ > nul
 
 # Bundle app package
 COPY . .
