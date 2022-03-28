@@ -131,7 +131,7 @@ describe(PageProcessorBase, () => {
         } as any;
         const gotoOptions = {};
 
-        navigationHooksMock.setup((o) => o.preNavigation(crawlingContext.page));
+        navigationHooksMock.setup((o) => o.preNavigation(crawlingContext.page)).verifiable();
 
         await pageProcessorBase.preNavigation(crawlingContext, gotoOptions);
     });

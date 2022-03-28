@@ -85,23 +85,17 @@ export abstract class PageProcessorBase implements PageProcessor {
         let navigationError: BrowserError;
         let runError: unknown;
         try {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            if ((crawlingContext as any).page) {
-                await this.navigationHooks.postNavigation(
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    (crawlingContext as any).page,
-                    crawlingContext.response,
-                    async (browserError: BrowserError, error?: unknown) => {
-                        if (error !== undefined) {
-                            throw error;
-                        } else {
-                            navigationError = browserError;
-                        }
-                    },
-                );
-            } else {
-                console.log('WARNING: CrawlingContext has no page');
-            }
+            await this.navigationHooks.postNavigation(
+                crawlingContext.page,
+                crawlingContext.response,
+                async (browserError: BrowserError, error?: unknown) => {
+                    if (error !== undefined) {
+                        throw error;
+                    } else {
+                        navigationError = browserError;
+                    }
+                },
+            );
         } catch (err) {
             await this.pushScanData({ succeeded: false, id: crawlingContext.request.id as string, url: crawlingContext.request.url });
             await this.logPageError(crawlingContext.request, err as Error);

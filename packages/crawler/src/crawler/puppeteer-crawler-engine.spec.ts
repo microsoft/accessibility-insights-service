@@ -61,6 +61,7 @@ describe(PuppeteerCrawlerEngine, () => {
             .returns(() => maxRequestsPerCrawl)
             .verifiable();
         crawlerConfigurationMock.setup((o) => o.setDefaultApifySettings()).verifiable();
+        crawlerConfigurationMock.setup((o) => o.setLocalOutputDir(crawlerRunOptions.localOutputDir)).verifiable();
         crawlerConfigurationMock.setup((o) => o.setMemoryMBytes(crawlerRunOptions.memoryMBytes)).verifiable();
         crawlerConfigurationMock.setup((o) => o.setSilentMode(crawlerRunOptions.silentMode)).verifiable();
 
