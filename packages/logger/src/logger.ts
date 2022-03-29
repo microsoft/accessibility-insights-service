@@ -108,6 +108,7 @@ export abstract class Logger {
     private async initializeClients(baseProperties?: { [property: string]: string }): Promise<void> {
         const threshold = new Date().valueOf() + this.initializationTimeout;
         while (this.loggerClients.some((client) => !client.initialized) && new Date().valueOf() <= threshold) {
+            // eslint-disable-next-line @typescript-eslint/no-floating-promises
             this.invokeLoggerClientAsync(async (client) => client.setup(baseProperties));
             await System.wait(100);
         }
