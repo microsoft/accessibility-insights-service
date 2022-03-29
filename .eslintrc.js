@@ -60,7 +60,7 @@ module.exports = {
         ],
         '@typescript-eslint/naming-convention': 'off',
         '@typescript-eslint/no-extraneous-class': 'error',
-        "@typescript-eslint/no-floating-promises": "error",
+        '@typescript-eslint/no-floating-promises': 'error',
         '@typescript-eslint/no-inferrable-types': 'off',
         '@typescript-eslint/no-namespace': 'off',
         '@typescript-eslint/no-parameter-properties': 'off',
