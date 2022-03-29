@@ -227,7 +227,7 @@ describe(PageProcessorBase, () => {
         }
     });
 
-    it('pageErrorProcessor()', () => {
+    it('pageErrorProcessor()', async () => {
         const expectedScanData: ScanData = {
             id: requestStub.id as string,
             url: requestStub.url,
@@ -240,7 +240,7 @@ describe(PageProcessorBase, () => {
         dataStoreMock.setup((ds) => ds.pushData(expectedScanData)).verifiable();
         setupScanErrorLogging();
 
-        pageProcessorBase.pageErrorProcessor({ request: requestStub, error });
+        await pageProcessorBase.pageErrorProcessor({ request: requestStub, error });
     });
 
     it('invoke processPage()', async () => {
