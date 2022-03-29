@@ -46,7 +46,7 @@ export class NavigationHooks {
             // Since we reuse page instance from the first navigation attempt some contents could be already loaded and available which
             // mitigates dynamic content rendering issue above.
             if (browserError.errorType !== 'UrlNavigationTimeout') {
-                onNavigationError(browserError, error);
+                await onNavigationError(browserError, error);
 
                 return;
             }
