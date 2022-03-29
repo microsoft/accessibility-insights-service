@@ -53,7 +53,7 @@ export class NavigationHooks {
         }
 
         if (_.isNil(response)) {
-            onNavigationError({
+            await onNavigationError({
                 errorType: 'NavigationError',
                 message: 'Unable to get a page response from the browser.',
                 stack: new Error().stack,
@@ -65,7 +65,7 @@ export class NavigationHooks {
         // Validate HTTP response
         const responseError = this.pageResponseProcessor.getResponseError(response);
         if (responseError !== undefined) {
-            onNavigationError(responseError);
+            await onNavigationError(responseError);
 
             return;
         }

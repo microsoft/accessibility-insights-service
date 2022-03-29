@@ -234,7 +234,7 @@ describe(PageProcessorBase, () => {
         }
     });
 
-    it('pageErrorProcessor()', () => {
+    it('pageErrorProcessor()', async () => {
         const expectedScanData: ScanData = {
             id: requestStub.id as string,
             url: requestStub.url,
@@ -247,7 +247,7 @@ describe(PageProcessorBase, () => {
         dataStoreMock.setup((ds) => ds.pushData(expectedScanData)).verifiable();
         setupScanErrorLogging();
 
-        pageProcessorBase.pageErrorProcessor({ request: requestStub, error } as Apify.HandleFailedRequestInput);
+        await pageProcessorBase.pageErrorProcessor({ request: requestStub, error } as Apify.HandleFailedRequestInput);
     });
 
     it('invoke processPage()', async () => {

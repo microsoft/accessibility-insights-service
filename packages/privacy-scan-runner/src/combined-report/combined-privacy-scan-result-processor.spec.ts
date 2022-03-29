@@ -121,7 +121,7 @@ describe(CombinedPrivacyScanResultProcessor, () => {
         await testSubject.generateCombinedScanResults(privacyResults, pageScanResult);
     });
 
-    it('Throws if blob read fails', () => {
+    it('Throws if blob read fails', async () => {
         const errorReadResponse: PrivacyReportReadResponse = {
             error: {
                 errorCode: 'jsonParseError',
@@ -133,7 +133,7 @@ describe(CombinedPrivacyScanResultProcessor, () => {
             .returns(async () => errorReadResponse)
             .verifiable();
 
-        expect(async () => testSubject.generateCombinedScanResults(privacyResults, pageScanResult)).rejects.toThrow();
+        await expect(async () => testSubject.generateCombinedScanResults(privacyResults, pageScanResult)).rejects.toThrow();
     });
 
     it('Creates a new report if none exists', async () => {
@@ -198,7 +198,7 @@ describe(CombinedPrivacyScanResultProcessor, () => {
             .verifiable();
         websiteScanResultProviderMock.setup((w) => w.mergeOrCreate(It.isAny(), It.isAny())).verifiable(Times.never());
 
-        expect(async () => testSubject.generateCombinedScanResults(privacyResults, pageScanResult)).rejects.toThrow();
+        await expect(async () => testSubject.generateCombinedScanResults(privacyResults, pageScanResult)).rejects.toThrow();
     });
 
     it('Handles pageScanResult with undefined report array', async () => {

@@ -123,7 +123,7 @@ describe(SimpleCrawlerEngine, () => {
         const apifyResourceCreator = new ApifyResourceCreator();
         const testBaseUrl = 'http://accessibilityinsights.io';
         const logger = new GlobalLogger([new ConsoleLoggerClient(new ServiceConfiguration(), console)], process);
-        logger.setup();
+        await logger.setup();
         const crawlerFactory = new CrawlerFactory();
 
         const webDriver = new WebDriver(new PromiseUtils(), logger);
