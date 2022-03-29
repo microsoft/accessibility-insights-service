@@ -45,7 +45,7 @@ updates:
     # use for builds (ideally, latest LTS)
   - dependency-name: "@types/node"
     versions:
-    - ">= 13.0.0"
+    - ">= 16.0.0"
   - dependency-name: normalize-url
     versions:
     - "> 6.1.0"
