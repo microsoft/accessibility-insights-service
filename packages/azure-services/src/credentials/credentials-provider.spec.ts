@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { DefaultAzureCredential } from '@azure/identity';
 import 'reflect-metadata';
 
 import { IMock, Mock, Times } from 'typemoq';
+import { ChainedTokenCredential, ManagedIdentityCredential, EnvironmentCredential } from '@azure/identity';
 import { CredentialsProvider } from './credentials-provider';
 import { MSICredentialsProvider } from './msi-credential-provider';
 
@@ -33,10 +33,20 @@ describe(CredentialsProvider, () => {
         msiCredProviderMock.verifyAll();
     });
 
-    it('getDefaultAzureCredential creates singleton default credential', () => {
-        const defaultCredential = testSubject.getDefaultAzureCredential();
+    it('getAzureCredential creates singleton credential', () => {
+        const credential = testSubject.getAzureCredential();
+        //_sources:
 
-        expect(defaultCredential).toBeInstanceOf(DefaultAzureCredential);
-        expect(testSubject.getDefaultAzureCredential()).toBe(defaultCredential);
+        expect(credential).toBeInstanceOf(ChainedTokenCredential);
+        expect(testSubject.getAzureCredential()).toBe(credential);
+    });
+
+    it('getAzureCredential creates credential with limited providers', () => {
+        const credential = testSubject.getAzureCredential() as any;
+        //_sources:
+
+        expect(credential._sources.length).toEqual(2);
+        expect(credential._sources[0]).toBeInstanceOf(ManagedIdentityCredential);
+        expect(credential._sources[1]).toBeInstanceOf(EnvironmentCredential);
     });
 });

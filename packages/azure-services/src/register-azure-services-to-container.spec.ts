@@ -243,7 +243,7 @@ describe(registerAzureServicesToContainer, () => {
             const testCredential = {} as TokenCredential;
             const expectedOptions = { endpoint: cosmosDbUrl, aadCredentials: testCredential };
 
-            credentialsProviderMock.setup((cp) => cp.getDefaultAzureCredential()).returns(() => testCredential);
+            credentialsProviderMock.setup((cp) => cp.getAzureCredential()).returns(() => testCredential);
 
             runCosmosClientTest(container, secretProviderMock);
             stubBinding(container, CredentialsProvider, credentialsProviderMock.object);
