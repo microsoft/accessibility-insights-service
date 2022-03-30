@@ -43,7 +43,6 @@ describe(CredentialsProvider, () => {
 
     it('getAzureCredential creates credential with limited providers', () => {
         const credential = testSubject.getAzureCredential() as any;
-        //_sources:
 
         expect(credential._sources.length).toEqual(2);
         // credential providers sequence should match
