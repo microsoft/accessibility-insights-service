@@ -142,12 +142,12 @@ describe(DeepScanner, () => {
         await testSubject.runDeepScan(runnerScanMetadata, pageScanResult, pageMock.object);
     });
 
-    it('logs and throws if websiteScanRefs is missing', () => {
+    it('logs and throws if websiteScanRefs is missing', async () => {
         pageScanResult.websiteScanRefs = undefined;
 
         loggerMock.setup((l) => l.logError(It.isAny(), It.isAny())).verifiable();
 
-        expect(testSubject.runDeepScan(runnerScanMetadata, pageScanResult, pageMock.object)).rejects.toThrow();
+        await expect(testSubject.runDeepScan(runnerScanMetadata, pageScanResult, pageMock.object)).rejects.toThrow();
     });
 
     it('crawls and updates results with generated discovery pattern', async () => {

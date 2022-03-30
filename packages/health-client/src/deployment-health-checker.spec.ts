@@ -66,7 +66,7 @@ describe(DeploymentHealthChecker, () => {
         setupWait(waitTimeBeforeEvaluationInMinutes);
         setupWait(evaluationIntervalInMinutes);
 
-        expect(
+        await expect(
             testSubject.run(testTimeoutInMinutes, waitTimeBeforeEvaluationInMinutes, evaluationIntervalInMinutes, releaseId),
         ).rejects.toThrow(expectedFailureMessage);
     });
@@ -82,7 +82,7 @@ describe(DeploymentHealthChecker, () => {
         setupWait(waitTimeBeforeEvaluationInMinutes);
         setupWait(evaluationIntervalInMinutes);
 
-        expect(
+        await expect(
             testSubject.run(testTimeoutInMinutes, waitTimeBeforeEvaluationInMinutes, evaluationIntervalInMinutes, releaseId),
         ).rejects.toThrow(expectedFailureMessage);
     });
@@ -93,7 +93,7 @@ describe(DeploymentHealthChecker, () => {
         setupWait(waitTimeBeforeEvaluationInMinutes);
         setupWait(evaluationIntervalInMinutes);
 
-        expect(
+        await expect(
             testSubject.run(testTimeoutInMinutes, waitTimeBeforeEvaluationInMinutes, evaluationIntervalInMinutes, releaseId),
         ).rejects.toThrow(expectedFailureMessage);
     });

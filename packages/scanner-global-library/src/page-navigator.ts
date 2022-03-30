@@ -47,12 +47,12 @@ export class PageNavigator {
         }
 
         if (!_.isNil(navigationResult.browserError)) {
-            onNavigationError(navigationResult.browserError, navigationResult.error);
+            await onNavigationError(navigationResult.browserError, navigationResult.error);
 
             return undefined;
         }
 
-        this.navigationHooks.postNavigation(page, navigationResult.response, onNavigationError);
+        await this.navigationHooks.postNavigation(page, navigationResult.response, onNavigationError);
 
         return navigationResult.response;
     }
