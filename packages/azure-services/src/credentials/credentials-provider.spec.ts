@@ -46,6 +46,7 @@ describe(CredentialsProvider, () => {
         //_sources:
 
         expect(credential._sources.length).toEqual(2);
+        // credential providers sequence should match
         expect(credential._sources[0]).toBeInstanceOf(ManagedIdentityCredential);
         expect(credential._sources[1]).toBeInstanceOf(EnvironmentCredential);
     });
