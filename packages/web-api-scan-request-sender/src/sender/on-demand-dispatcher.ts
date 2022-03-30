@@ -130,7 +130,7 @@ export class OnDemandDispatcher {
                 break;
             }
             case 'completed': {
-                this.logger.logError('The scan request has been completed. Removing scan request from a request queue.', {
+                this.logger.logInfo('The scan request has been completed. Removing scan request from a request queue.', {
                     scanId: scanRequest.request.id,
                 });
                 break;
