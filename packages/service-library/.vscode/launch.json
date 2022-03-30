@@ -8,9 +8,7 @@
             "name": "Start debugging service-client",
             "type": "node",
             "request": "launch",
-            "outFiles": [
-                "${workspaceFolder}/dist/**/*.js"
-            ],
+            "outFiles": ["${workspaceFolder}/dist/**/*.js"],
             "cwd": "${workspaceFolder}",
             "program": "${workspaceFolder}/src/dev-utilities/service-client.ts",
             "preLaunchTask": "run",

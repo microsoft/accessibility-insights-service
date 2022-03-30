@@ -11,7 +11,7 @@
         "clean": "npx lerna run clean --stream && rimraf dist test-results",
         "build": "npx lerna run build --stream",
         "cbuild": "npx lerna run cbuild --stream",
-        "dbuild": "yarn install && yarn syncpack:fix && yarn clean && yarn build",
+        "dbuild": "yarn install && npm-run-all --serial --npm-path npm 'syncpack:fix' 'format:fix' 'build'",
         "pack": "npx lerna run pack --stream",
         "test": "npx jest",
         "test:nc": "npx jest --collectCoverage=false",

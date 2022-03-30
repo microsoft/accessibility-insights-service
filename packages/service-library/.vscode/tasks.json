@@ -19,9 +19,7 @@
             "label": "tsc",
             "dependsOn": "clean",
             "command": "tsc",
-            "problemMatcher": [
-                "$tsc"
-            ]
+            "problemMatcher": ["$tsc"]
         },
         {
             "type": "shell",
