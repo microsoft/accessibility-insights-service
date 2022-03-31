@@ -63,7 +63,7 @@ describe(AzureManagedCredential, () => {
             .setup((o) => o.set(requestUrl, JSON.parse(imdsTokenString), expires_in - 600 * 2))
             .returns(() => true)
             .verifiable();
-        const response = { body: imdsTokenString } as unknown as CancelableRequest<Response<string>>;
+        const response = { statusCode: 200, body: imdsTokenString } as unknown as CancelableRequest<Response<string>>;
         httpClientBaseMock
             .setup((o) => o.get(requestUrl, { timeout: getTokenOptions.requestOptions.timeout }))
             .returns(() => response)
@@ -103,13 +103,32 @@ describe(AzureManagedCredential, () => {
             .setup((o) => o.set(requestUrl, JSON.parse(imdsTokenString), expires_in - 600 * 2))
             .returns(() => true)
             .verifiable(Times.never());
-        const response = {} as unknown as CancelableRequest<Response<string>>;
+        const response = { statusCode: 200 } as unknown as CancelableRequest<Response<string>>;
         httpClientBaseMock
             .setup((o) => o.get(requestUrl, { timeout: getTokenOptions.requestOptions.timeout }))
             .returns(() => response)
             .verifiable();
 
-        await expect(azureManagedCredential.getToken(scopes, getTokenOptions)).rejects.toThrow();
+        await expect(azureManagedCredential.getToken(scopes, getTokenOptions)).rejects.toThrowError(/IMDS return no access token/);
+    });
+
+    it('failed to get success response a service', async () => {
+        tokenCacheMock
+            .setup((o) => o.get(requestUrl))
+            .returns(() => undefined)
+            .verifiable();
+        tokenCacheMock
+            .setup((o) => o.set(requestUrl, JSON.parse(imdsTokenString), expires_in - 600 * 2))
+            .returns(() => true)
+            .verifiable(Times.never());
+        const response = { statusCode: 429, body: imdsTokenString } as unknown as CancelableRequest<Response<string>>;
+
+        httpClientBaseMock
+            .setup((o) => o.get(requestUrl, { timeout: getTokenOptions.requestOptions.timeout }))
+            .returns(() => response)
+            .verifiable();
+
+        await expect(azureManagedCredential.getToken(scopes, getTokenOptions)).rejects.toThrowError(/Failed request response/);
     });
 
     it('synchronize get token async calls', async () => {
@@ -142,7 +161,7 @@ describe(AzureManagedCredential, () => {
             .returns(() => true)
             .verifiable(Times.once());
 
-        const response = { body: imdsTokenString } as unknown as CancelableRequest<Response<string>>;
+        const response = { statusCode: 200, body: imdsTokenString } as unknown as CancelableRequest<Response<string>>;
         httpClientBaseMock
             .setup((o) => o.get(requestUrl, { timeout: getTokenOptions.requestOptions.timeout }))
             .returns(() => response)

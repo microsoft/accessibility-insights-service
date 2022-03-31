@@ -8,6 +8,7 @@ import { TokenCredential, GetTokenOptions } from '@azure/identity';
 import got, { Got, Options } from 'got';
 import NodeCache from 'node-cache';
 import { Mutex } from 'async-mutex';
+import { client } from '../storage/client';
 
 export interface ImdsToken {
     access_token: string;
@@ -64,6 +65,7 @@ export class AzureManagedCredential implements TokenCredential {
         }
 
         const response = await this.httpClient.get(requestUrl, { timeout });
+        client.ensureSuccessStatusCode(response);
         if (response.body === undefined) {
             throw new Error(
                 `IMDS return no access token for ${process.env.AZURE_PRINCIPAL_ID} principal id and resource ${JSON.stringify(scopes)}.`,
