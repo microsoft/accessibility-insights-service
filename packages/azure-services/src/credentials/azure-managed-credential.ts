@@ -8,7 +8,9 @@ import { TokenCredential, GetTokenOptions } from '@azure/identity';
 import got, { Got, Options } from 'got';
 import NodeCache from 'node-cache';
 import { Mutex } from 'async-mutex';
-import { client } from '../storage/client';
+import { backOff, IBackOffOptions } from 'exponential-backoff';
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 export interface ImdsToken {
     access_token: string;
@@ -25,9 +27,18 @@ export interface ImdsToken {
 
 @injectable()
 export class AzureManagedCredential implements TokenCredential {
-    private static readonly imdsEndpoint = 'http://169.254.169.254/metadata/identity/oauth2/token?api-version=2019-08-01';
+    private static readonly imdsEndpoint = 'http://169.254.169.254/metadata/identity/oauth2/token?api-version=2021-10-01';
 
     private static readonly cacheCheckPeriod = 600;
+
+    public lastErrors: any[] = [];
+
+    public backOffOptions: Partial<IBackOffOptions> = {
+        delayFirstAttempt: false,
+        numOfAttempts: 5,
+        maxDelay: 6000,
+        startingDelay: 0,
+    };
 
     private readonly httpClient: Got;
 
@@ -64,19 +75,39 @@ export class AzureManagedCredential implements TokenCredential {
             return cachedImdsToken;
         }
 
-        const response = await this.httpClient.get(requestUrl, { timeout });
-        client.ensureSuccessStatusCode(response);
-        if (response.body === undefined) {
-            throw new Error(
-                `IMDS return no access token for ${process.env.AZURE_PRINCIPAL_ID} principal id and resource ${JSON.stringify(scopes)}.`,
-            );
-        }
-
-        const imdsToken = JSON.parse(response.body) as ImdsToken;
+        const imdsToken = await this.getImdsToken(scopes, requestUrl, timeout);
         // Add token to the cache with reduced TTL to ensure that a cache item is deleted before token expiration time
         this.tokenCache.set<ImdsToken>(requestUrl, imdsToken, imdsToken.expires_in - AzureManagedCredential.cacheCheckPeriod * 2);
 
         return imdsToken;
+    }
+
+    private async getImdsToken(scopes: string | string[], requestUrl: string, timeout: number): Promise<ImdsToken> {
+        this.lastErrors = [];
+        this.backOffOptions.retry = (e) => {
+            this.lastErrors.push(e);
+
+            return true;
+        };
+
+        const response = await backOff(async () => {
+            const imdsResponse = await this.httpClient.get(requestUrl, { timeout });
+
+            if (
+                imdsResponse.statusCode === undefined ||
+                imdsResponse.statusCode < 200 ||
+                imdsResponse.statusCode > 299 ||
+                imdsResponse.body === undefined
+            ) {
+                throw new Error(
+                    `IMDS has return failed response. Resource: ${JSON.stringify(scopes)} Response: ${JSON.stringify(imdsResponse)}`,
+                );
+            }
+
+            return imdsResponse;
+        }, this.backOffOptions);
+
+        return JSON.parse(response.body) as ImdsToken;
     }
 
     private getRequestUrl(scopes: string | string[]): string {
@@ -89,6 +120,6 @@ export class AzureManagedCredential implements TokenCredential {
         const scopeUrl = nodeUrl.parse(scope);
         const resource = `https://${scopeUrl.hostname}`;
 
-        return `${AzureManagedCredential.imdsEndpoint}&resource=${encodeURI(resource)}&principal_id=${process.env.AZURE_PRINCIPAL_ID}`;
+        return `${AzureManagedCredential.imdsEndpoint}&resource=${encodeURI(resource)}`;
     }
 }

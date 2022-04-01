@@ -11,13 +11,12 @@ import { AccessToken } from '@azure/core-auth';
 import { System } from 'common';
 import { AzureManagedCredential } from './azure-managed-credential';
 
-const servicePrincipalId = 'sp-id';
 const resource = 'https://vault.azure.net';
-const requestUrlBase = 'http://169.254.169.254/metadata/identity/oauth2/token?api-version=2019-08-01';
+const requestUrlBase = 'http://169.254.169.254/metadata/identity/oauth2/token?api-version=2021-10-01';
 
 describe(AzureManagedCredential, () => {
     let scopes = 'https://vault.azure.net/default';
-    let requestUrl = `${requestUrlBase}&resource=${resource}&principal_id=${servicePrincipalId}`;
+    let requestUrl = `${requestUrlBase}&resource=${resource}`;
     const getTokenOptions = {
         requestOptions: {
             timeout: 30,
@@ -40,13 +39,18 @@ describe(AzureManagedCredential, () => {
     beforeEach(() => {
         httpClientBaseMock = Mock.ofType<Got>();
         tokenCacheMock = Mock.ofType<NodeCache>();
-        process.env.AZURE_PRINCIPAL_ID = servicePrincipalId;
         httpClientBaseMock
             .setup((o) => o.extend({ ...httpClientOptions }))
             .returns(() => httpClientBaseMock.object)
             .verifiable();
 
         azureManagedCredential = new AzureManagedCredential(httpClientBaseMock.object, tokenCacheMock.object, new Mutex());
+        azureManagedCredential.backOffOptions = {
+            delayFirstAttempt: false,
+            numOfAttempts: 2,
+            maxDelay: 10,
+            startingDelay: 0,
+        };
     });
 
     afterEach(() => {
@@ -107,9 +111,10 @@ describe(AzureManagedCredential, () => {
         httpClientBaseMock
             .setup((o) => o.get(requestUrl, { timeout: getTokenOptions.requestOptions.timeout }))
             .returns(() => response)
-            .verifiable();
+            .verifiable(Times.exactly(2));
 
-        await expect(azureManagedCredential.getToken(scopes, getTokenOptions)).rejects.toThrowError(/IMDS return no access token/);
+        await expect(azureManagedCredential.getToken(scopes, getTokenOptions)).rejects.toThrowError(/IMDS has return failed response./);
+        expect(azureManagedCredential.lastErrors.length).toEqual(2);
     });
 
     it('failed to get success response a service', async () => {
@@ -126,9 +131,10 @@ describe(AzureManagedCredential, () => {
         httpClientBaseMock
             .setup((o) => o.get(requestUrl, { timeout: getTokenOptions.requestOptions.timeout }))
             .returns(() => response)
-            .verifiable();
+            .verifiable(Times.exactly(2));
 
-        await expect(azureManagedCredential.getToken(scopes, getTokenOptions)).rejects.toThrowError(/Failed request response/);
+        await expect(azureManagedCredential.getToken(scopes, getTokenOptions)).rejects.toThrowError(/IMDS has return failed response./);
+        expect(azureManagedCredential.lastErrors.length).toEqual(2);
     });
 
     it('synchronize get token async calls', async () => {
@@ -185,5 +191,5 @@ describe(AzureManagedCredential, () => {
 function getRequestUrl(resourceId: number): string {
     const resourceWithId = `https://${resourceId}.vault.azure.net`;
 
-    return `${requestUrlBase}&resource=${resourceWithId}&principal_id=${servicePrincipalId}`;
+    return `${requestUrlBase}&resource=${resourceWithId}`;
 }
