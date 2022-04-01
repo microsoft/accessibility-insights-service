@@ -13,7 +13,7 @@ import { backOff, IBackOffOptions } from 'exponential-backoff';
 // https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/how-to-use-vm-token#get-a-token-using-http
 
 @injectable()
-export class AzureManagedCredential implements TokenCredential {
+export class ManagedIdentityCredentialCache implements TokenCredential {
     private static readonly cacheCheckPeriodInSeconds = 60;
 
     public backOffOptions: Partial<IBackOffOptions> = {
@@ -26,7 +26,7 @@ export class AzureManagedCredential implements TokenCredential {
 
     constructor(
         private readonly managedIdentityCredential: ManagedIdentityCredential = new ManagedIdentityCredential(),
-        private readonly tokenCache: NodeCache = new NodeCache({ checkperiod: AzureManagedCredential.cacheCheckPeriodInSeconds }),
+        private readonly tokenCache: NodeCache = new NodeCache({ checkperiod: ManagedIdentityCredentialCache.cacheCheckPeriodInSeconds }),
         private readonly mutex: Mutex = new Mutex(),
     ) {}
 
@@ -50,7 +50,7 @@ export class AzureManagedCredential implements TokenCredential {
         this.tokenCache.set<AccessToken>(
             resourceUrl,
             accessToken,
-            accessToken.expiresOnTimestamp - AzureManagedCredential.cacheCheckPeriodInSeconds * 1000 * 3,
+            accessToken.expiresOnTimestamp - ManagedIdentityCredentialCache.cacheCheckPeriodInSeconds * 1000 * 3,
         );
 
         return accessToken;

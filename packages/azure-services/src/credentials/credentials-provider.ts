@@ -4,7 +4,7 @@
 import { TokenCredential, ChainedTokenCredential, EnvironmentCredential } from '@azure/identity';
 import { inject, injectable } from 'inversify';
 import { Credentials, MSICredentialsProvider } from './msi-credential-provider';
-import { AzureManagedCredential } from './azure-managed-credential';
+import { ManagedIdentityCredentialCache } from './managed-identity-credential-cache';
 
 @injectable()
 export class CredentialsProvider {
@@ -23,7 +23,7 @@ export class CredentialsProvider {
             // The following credential providers will be tried, in order:
             // - AzureManagedCredential
             // - EnvironmentCredential
-            this.chainedTokenCredential = new ChainedTokenCredential(new AzureManagedCredential(), new EnvironmentCredential());
+            this.chainedTokenCredential = new ChainedTokenCredential(new ManagedIdentityCredentialCache(), new EnvironmentCredential());
         }
 
         return this.chainedTokenCredential;

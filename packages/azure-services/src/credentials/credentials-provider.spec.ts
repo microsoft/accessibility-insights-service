@@ -7,7 +7,7 @@ import { IMock, Mock, Times } from 'typemoq';
 import { ChainedTokenCredential, EnvironmentCredential } from '@azure/identity';
 import { CredentialsProvider } from './credentials-provider';
 import { MSICredentialsProvider } from './msi-credential-provider';
-import { AzureManagedCredential } from './azure-managed-credential';
+import { ManagedIdentityCredentialCache } from './managed-identity-credential-cache';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -47,7 +47,7 @@ describe(CredentialsProvider, () => {
 
         expect(credential._sources.length).toEqual(2);
         // credential providers sequence should match
-        expect(credential._sources[0]).toBeInstanceOf(AzureManagedCredential);
+        expect(credential._sources[0]).toBeInstanceOf(ManagedIdentityCredentialCache);
         expect(credential._sources[1]).toBeInstanceOf(EnvironmentCredential);
     });
 });

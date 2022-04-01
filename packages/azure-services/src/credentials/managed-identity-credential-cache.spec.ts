@@ -7,7 +7,7 @@ import NodeCache from 'node-cache';
 import { IMock, Mock, Times } from 'typemoq';
 import { Mutex } from 'async-mutex';
 import { ManagedIdentityCredential } from '@azure/identity';
-import { AzureManagedCredential } from './azure-managed-credential';
+import { ManagedIdentityCredentialCache } from './managed-identity-credential-cache';
 
 const scopes = 'https://vault.azure.net/default';
 const resourceUrl = 'vault.azure.net';
@@ -15,15 +15,19 @@ const accessToken = { token: 'eyJ0e_3g', expiresOnTimestamp: 1633500000 };
 const accessTokenOptions = {};
 const cacheCheckPeriodInSeconds = 60;
 
-describe(AzureManagedCredential, () => {
+describe(ManagedIdentityCredentialCache, () => {
     let tokenCacheMock: IMock<NodeCache>;
     let managedIdentityCredentialMock: IMock<ManagedIdentityCredential>;
-    let azureManagedCredential: AzureManagedCredential;
+    let azureManagedCredential: ManagedIdentityCredentialCache;
 
     beforeEach(() => {
         tokenCacheMock = Mock.ofType<NodeCache>();
         managedIdentityCredentialMock = Mock.ofType<ManagedIdentityCredential>();
-        azureManagedCredential = new AzureManagedCredential(managedIdentityCredentialMock.object, tokenCacheMock.object, new Mutex());
+        azureManagedCredential = new ManagedIdentityCredentialCache(
+            managedIdentityCredentialMock.object,
+            tokenCacheMock.object,
+            new Mutex(),
+        );
         azureManagedCredential.backOffOptions = {
             delayFirstAttempt: false,
             numOfAttempts: 2,
