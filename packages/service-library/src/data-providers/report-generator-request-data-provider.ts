@@ -7,6 +7,7 @@ import { ItemType, ReportGeneratorRequest, TargetReport } from 'storage-document
 import pLimit from 'p-limit';
 import { GlobalLogger } from 'logger';
 import { System } from 'common';
+import moment from 'moment';
 import { PartitionKeyFactory } from '../factories/partition-key-factory';
 import { OperationResult } from './operation-result';
 
@@ -54,11 +55,14 @@ export class ReportGeneratorRequestProvider {
     }
 
     public async readScanGroupIds(
+        runDurationInMinutes: number,
         itemCount: number = 100,
         continuationToken?: string,
     ): Promise<CosmosOperationResponse<ScanReportGroup[]>> {
         const query = {
-            query: 'SELECT TOP @itemCount COUNT(1) as scanCount, t.scanGroupId, t.targetReport FROM (SELECT * FROM c WHERE c.itemType = @itemType) t GROUP BY t.scanGroupId, t.targetReport',
+            query: `SELECT TOP @itemCount COUNT(1) as scanCount, t.scanGroupId, t.targetReport FROM (
+                SELECT * FROM c WHERE c.itemType = @itemType AND (NOT IS_DEFINED(c.run.state) OR c.run.state != "running" OR (c.run.state = "running" AND DateTimeToTimestamp(c.run.timestamp) < @availabilityTimestamp))
+                ) t GROUP BY t.scanGroupId, t.targetReport`,
             parameters: [
                 {
                     name: '@itemCount',
@@ -67,6 +71,10 @@ export class ReportGeneratorRequestProvider {
                 {
                     name: '@itemType',
                     value: ItemType.reportGeneratorRequest,
+                },
+                {
+                    name: '@availabilityTimestamp',
+                    value: moment.utc().add(-runDurationInMinutes, 'minutes').valueOf(),
                 },
             ],
         };

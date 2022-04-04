@@ -11,7 +11,7 @@
         "clean": "npx lerna run clean --stream && rimraf dist test-results",
         "build": "npx lerna run build --stream",
         "cbuild": "npx lerna run cbuild --stream",
-        "dbuild": "yarn install && yarn syncpack:fix && yarn clean && yarn build",
+        "dbuild": "yarn install && npm-run-all --serial --npm-path npm 'syncpack:fix' 'build'",
         "pack": "npx lerna run pack --stream",
         "test": "npx jest",
         "test:nc": "npx jest --collectCoverage=false",
@@ -89,7 +89,8 @@
         "ansi-regex": "^5.0.1",
         "validator": ">=13.7.0",
         "serialize-error": "^8.1.0",
-        "json-schema": ">=0.4.0"
+        "json-schema": ">=0.4.0",
+        "node-fetch": "^2.6.7"
     },
     "dependencies": {
         "accessibility-insights-report": "4.2.2"

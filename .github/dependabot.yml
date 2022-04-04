@@ -74,3 +74,6 @@ updates:
   - dependency-name: serialize-error
     versions:
     - "> 8.1.0"
+  - dependency-name: node-fetch
+    versions:
+    - "> 2.6.7"
