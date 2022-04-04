@@ -3308,9 +3308,9 @@
   integrity sha512-Y1kCfTShKcJH4CsG5+m5RMA+0tQKa8TrxyMczy0zE8QeDKbuOAJMF8JRM5ouCFyakaSoAhhgy2beCSKLVz+daw==
 
 "@types/node@>=10.0.0":
-  version "17.0.22"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-17.0.22.tgz#38b6c4b9b2f3ed9f2e376cce42a298fb2375251e"
-  integrity sha512-8FwbVoG4fy+ykY86XCAclKZDORttqE5/s7dyWZKLXTdv3vRy5HozBEinG5IqhvPXXzIZEcTVbuHlQEI6iuwcmw==
+  version "17.0.23"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-17.0.23.tgz#3b41a6e643589ac6442bdbd7a4a3ded62f33f7da"
+  integrity sha512-UxDxWn7dl97rKVeVS61vErvw086aCYhDLyvRQZ5Rk65rZKepaFdm53GeqXaKBuOhED4e9uWq34IC3TdSdJJ2Gw==
 
 "@types/node@^12", "@types/node@^12.12.7":
   version "12.20.43"
@@ -4624,6 +4624,13 @@ builtins@^1.0.3:
   resolved "https://registry.yarnpkg.com/builtins/-/builtins-1.0.3.tgz#cb94faeb61c8696451db36534e1422f94f0aee88"
   integrity sha1-y5T662HIaWRR2zZTThQi+U8K7og=
 
+builtins@^5.0.0:
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/builtins/-/builtins-5.0.0.tgz#20d87e7f95d46481b1abe4adc616a9cb6b492cba"
+  integrity sha512-aizhtbxgT1Udg0Fj6GssXshAVK+nxbtCV+1OtTrMNy67jffDFBY6CUBAkhO4owbleAx6fdbnWdpsmmcXydbzNw==
+  dependencies:
+    semver "^7.0.0"
+
 byline@^5.0.0:
   version "5.0.0"
   resolved "https://registry.yarnpkg.com/byline/-/byline-5.0.0.tgz#741c5216468eadc457b03410118ad77de8c1ddb1"
@@ -5532,9 +5539,9 @@ css-select@~1.2.0:
     nth-check "~1.0.1"
 
 css-what@2.1, css-what@>=5.0.1:
-  version "6.0.1"
-  resolved "https://registry.yarnpkg.com/css-what/-/css-what-6.0.1.tgz#3be33be55b9f302f710ba3a9c3abc1e2a63fc7eb"
-  integrity sha512-z93ZGFLNc6yaoXAmVhqoSIb+BduplteCt1fepvwhBUQK6MNE4g6fgjpuZKJKp0esUe+vXWlIkwZZjNWoOKw0ZA==
+  version "6.1.0"
+  resolved "https://registry.yarnpkg.com/css-what/-/css-what-6.1.0.tgz#fb5effcf76f1ddea2c81bdfaa4de44e79bac70f4"
+  integrity sha512-HTUrgRJ7r4dsZKU6GjmpfRK1O76h97Z8MfS1G0FozR+oF2kG6Vfe8JE6zwrkbxigziPHinCJ+gCPjA9EaBDtRw==
 
 cssom@^0.4.4:
   version "0.4.4"
@@ -5980,10 +5987,10 @@ dotenv@*, dotenv@^16.0.0:
   resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-16.0.0.tgz#c619001253be89ebb638d027b609c75c26e47411"
   integrity sha512-qD9WU0MPM4SWLPJy/r2Be+2WgQj8plChsyrCNQzW/0WjvcJQiKQJ9mH3ZgB3fxbUUxgc/11ZJ0Fi5KiimWGz2Q==
 
-dts-bundle-generator@^6.5.0:
-  version "6.5.0"
-  resolved "https://registry.yarnpkg.com/dts-bundle-generator/-/dts-bundle-generator-6.5.0.tgz#5f4871a04da7f17edfae1bec852390e8182abcc8"
-  integrity sha512-PvJxvy0xALNuBjjSlUWlFFjlimlCzMBUG2QNlkavTIKvLY55F2XOVJ/M0EoVIFafrWzQk/uV6UyIod9MtpmRNw==
+dts-bundle-generator@^6.6.0:
+  version "6.6.0"
+  resolved "https://registry.yarnpkg.com/dts-bundle-generator/-/dts-bundle-generator-6.6.0.tgz#33ed9eb17fb121f9cff6735b4da072038efbd125"
+  integrity sha512-1AvBQ808RCdJ4obf+Omdt7RkDc0DGDTvvtZl8+BHRivD0CSA9ZUz1E6tSlqEiQxk5s9AMiMNIek74tiQ6H/S4g==
   dependencies:
     typescript ">=3.0.1"
     yargs "^17.2.1"
@@ -9473,9 +9480,9 @@ lru-cache@^6.0.0:
     yallist "^4.0.0"
 
 lru-cache@^7.3.1, lru-cache@^7.5.1:
-  version "7.7.1"
-  resolved "https://registry.yarnpkg.com/lru-cache/-/lru-cache-7.7.1.tgz#03d2846b1ad2dcc7931a9340b8711d9798fcb0c6"
-  integrity sha512-cRffBiTW8s73eH4aTXqBcTLU0xQnwGV3/imttRHGWCrbergmnK4D6JXQd8qin5z43HnDwRI+o7mVW0LEB+tpAw==
+  version "7.7.3"
+  resolved "https://registry.yarnpkg.com/lru-cache/-/lru-cache-7.7.3.tgz#98cd19eef89ce6a4a3c4502c17c833888677c252"
+  integrity sha512-WY9wjJNQt9+PZilnLbuFKM+SwDull9+6IAguOrarOMoOHTcJ9GnXSO11+Gw6c7xtDkBkthR57OZMtZKYr+1CEw==
 
 luxon@^2.3.1:
   version "2.3.1"
@@ -10185,13 +10192,13 @@ npm-package-arg@^8.0.0, npm-package-arg@^8.0.1, npm-package-arg@^8.1.0, npm-pack
     validate-npm-package-name "^3.0.0"
 
 npm-package-arg@^9.0.0:
-  version "9.0.1"
-  resolved "https://registry.yarnpkg.com/npm-package-arg/-/npm-package-arg-9.0.1.tgz#db9c6379c45d79db88ee6dd40d3ec6a9d9a4d13a"
-  integrity sha512-Xs9wznfEAmZAR61qsYH3iN24V/qMYYkvAR5CRQNMvC6PjN2fHtO8y9XP/xdp5K+Icx+u1wMBMgWRPCmAEChSog==
+  version "9.0.2"
+  resolved "https://registry.yarnpkg.com/npm-package-arg/-/npm-package-arg-9.0.2.tgz#f3ef7b1b3b02e82564af2d5228b4c36567dcd389"
+  integrity sha512-v/miORuX8cndiOheW8p2moNuPJ7QhcFh9WGlTorruG8hXSA23vMTEp5hTCmDxic0nD8KHhj/NQgFuySD3GYY3g==
   dependencies:
     hosted-git-info "^5.0.0"
     semver "^7.3.5"
-    validate-npm-package-name "^3.0.0"
+    validate-npm-package-name "^4.0.0"
 
 npm-packlist@^2.1.4:
   version "2.1.5"
@@ -10955,9 +10962,9 @@ priorityqueuejs@^1.0.0:
   integrity sha1-LuTyPCVgkT4IwHzlzN1t498sWvg=
 
 proc-log@^2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/proc-log/-/proc-log-2.0.0.tgz#25f8cb346a5d08e27f2422b3ca6ba8379bcbf8ba"
-  integrity sha512-I/35MfCX2H8jBUhKN8JB8nmqvQo/nKdrBodBY7L3RhDSPPyvOHwLYNmPuhwuJq7a7C3vgFKWGQM+ecPStcvOHA==
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/proc-log/-/proc-log-2.0.1.tgz#8f3f69a1f608de27878f91f5c688b225391cb685"
+  integrity sha512-Kcmo2FhfDTXdcbfDH76N7uBYHINxc/8GW7UAVuVP9I+Va3uHSerrnKV6dLooga/gh7GlgzuCCr/eoldnL1muGw==
 
 process-nextick-args@~2.0.0:
   version "2.0.1"
@@ -11812,7 +11819,7 @@ semver@7.0.0:
   resolved "https://registry.yarnpkg.com/semver/-/semver-7.0.0.tgz#5f3ca35761e47e05b206c6daff2cf814f0316b8e"
   integrity sha512-+GB6zVA9LWh6zovYQLALHwv5rb2PHGlJi3lfiqIHxR0uuwCgefcOJc59v9fv1w8GbStwxuuqqAjI9NMAOOgq1A==
 
-semver@7.3.5, semver@7.x, semver@^7.1.1, semver@^7.1.3, semver@^7.2.1, semver@^7.3.2, semver@^7.3.4, semver@^7.3.5:
+semver@7.3.5, semver@7.x, semver@^7.0.0, semver@^7.1.1, semver@^7.1.3, semver@^7.2.1, semver@^7.3.2, semver@^7.3.4, semver@^7.3.5:
   version "7.3.5"
   resolved "https://registry.yarnpkg.com/semver/-/semver-7.3.5.tgz#0b621c879348d8998e4b0e4be94b3f12e6018ef7"
   integrity sha512-PoeGJYh8HK4BTO/a9Tf6ZG3veo/A7ZVsYrSA6J8ny9nb3B1VrpkuN+z9OE5wfE5p6H4LchYZsegiQgbJD94ZFQ==
@@ -13312,6 +13319,13 @@ validate-npm-package-name@^3.0.0:
   integrity sha1-X6kS2B630MdK/BQN5zF/DKffQ34=
   dependencies:
     builtins "^1.0.3"
+
+validate-npm-package-name@^4.0.0:
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/validate-npm-package-name/-/validate-npm-package-name-4.0.0.tgz#fe8f1c50ac20afdb86f177da85b3600f0ac0d747"
+  integrity sha512-mzR0L8ZDktZjpX4OB46KT+56MAhl4EIazWP/+G/HPGuvfdaqg4YsCdtOm6U9+LOFyYDoh4dpnpxZRB9MQQns5Q==
+  dependencies:
+    builtins "^5.0.0"
 
 validator@>=13.7.0, validator@~13.7.0:
   version "13.7.0"
