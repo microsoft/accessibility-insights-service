@@ -4,7 +4,7 @@
 import 'reflect-metadata';
 
 import { Batch, BatchConfig, BatchTask, JobTask, JobTaskState, PoolLoadGenerator, PoolLoadSnapshot, PoolMetricsInfo } from 'azure-services';
-import { ServiceConfiguration, GuidGenerator, JobManagerConfig } from 'common';
+import { ServiceConfiguration, GuidGenerator, JobManagerConfig, ScanRunTimeConfig } from 'common';
 import _ from 'lodash';
 import * as mockDate from 'mockdate';
 import { BatchPoolLoadSnapshotProvider, ScanMessage, ReportGeneratorRequestProvider, ScanReportGroup } from 'service-library';
@@ -121,6 +121,7 @@ class ReportRequestGenerator {
 
 const jobGroup = 'jobGroup';
 const dateNowIso = '2019-12-12T12:00:00.000Z';
+const failedScanRetryIntervalInMinutes = 5;
 mockDate.set(dateNowIso);
 
 let testSubject: TestableWorker;
@@ -167,6 +168,10 @@ describe(Worker, () => {
         serviceConfigMock
             .setup((o) => o.getConfigValue('jobManagerConfig'))
             .returns(() => Promise.resolve({ reportGeneratorJobGroup: jobGroup } as JobManagerConfig))
+            .verifiable();
+        serviceConfigMock
+            .setup((o) => o.getConfigValue('scanConfig'))
+            .returns(() => Promise.resolve({ failedScanRetryIntervalInMinutes } as ScanRunTimeConfig))
             .verifiable();
 
         reportRequestGenerator = new ReportRequestGenerator();
@@ -272,7 +277,7 @@ describe(Worker, () => {
             statusCode: 200,
         };
         reportGeneratorRequestProviderMock
-            .setup((o) => o.readScanGroupIds(poolLoadSnapshot.tasksIncrementCountPerInterval, undefined))
+            .setup((o) => o.readScanGroupIds(failedScanRetryIntervalInMinutes, poolLoadSnapshot.tasksIncrementCountPerInterval, undefined))
             .returns(() => Promise.resolve(cosmosOperationResponse))
             .verifiable();
 

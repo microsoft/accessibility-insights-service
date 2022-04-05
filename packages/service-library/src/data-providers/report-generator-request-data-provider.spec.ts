@@ -5,21 +5,29 @@ import 'reflect-metadata';
 
 import { CosmosContainerClient, CosmosOperationResponse } from 'azure-services';
 import { ItemType, ReportGeneratorRequest } from 'storage-documents';
-import { IMock, Mock } from 'typemoq';
+import { IMock, Mock, It } from 'typemoq';
 import * as cosmos from '@azure/cosmos';
+import moment from 'moment';
+import * as MockDate from 'mockdate';
 import { PartitionKeyFactory } from '../factories/partition-key-factory';
 import { MockableLogger } from '../test-utilities/mockable-logger';
 import { ReportGeneratorRequestProvider, ScanReportGroup } from './report-generator-request-data-provider';
 
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/consistent-type-assertions */
 
+const runDurationInMinutes = 5;
+
 describe(ReportGeneratorRequestProvider, () => {
     let reportGeneratorRequestProvider: ReportGeneratorRequestProvider;
     let cosmosContainerClientMock: IMock<CosmosContainerClient>;
     let partitionKeyFactoryMock: IMock<PartitionKeyFactory>;
     let loggerMock: IMock<MockableLogger>;
+    let dateNow: Date;
 
     beforeEach(() => {
+        dateNow = new Date();
+        MockDate.set(dateNow);
+
         partitionKeyFactoryMock = Mock.ofType<PartitionKeyFactory>();
         cosmosContainerClientMock = Mock.ofType<CosmosContainerClient>();
         loggerMock = Mock.ofType(MockableLogger);
@@ -32,6 +40,7 @@ describe(ReportGeneratorRequestProvider, () => {
     });
 
     afterEach(() => {
+        MockDate.reset();
         cosmosContainerClientMock.verifyAll();
         partitionKeyFactoryMock.verifyAll();
         loggerMock.verifyAll();
@@ -63,11 +72,11 @@ describe(ReportGeneratorRequestProvider, () => {
             statusCode: 200,
         } as CosmosOperationResponse<ScanReportGroup[]>;
         cosmosContainerClientMock
-            .setup((o) => o.queryDocuments(getQueryForReadScanGroupIds(itemCount), continuationToken))
+            .setup((o) => o.queryDocuments(It.isValue(getQueryForReadScanGroupIds(runDurationInMinutes, itemCount)), continuationToken))
             .returns(() => Promise.resolve(response))
             .verifiable();
 
-        const actualResponse = await reportGeneratorRequestProvider.readScanGroupIds(itemCount, continuationToken);
+        const actualResponse = await reportGeneratorRequestProvider.readScanGroupIds(runDurationInMinutes, itemCount, continuationToken);
 
         expect(actualResponse).toEqual(response);
     });
@@ -268,9 +277,11 @@ describe(ReportGeneratorRequestProvider, () => {
             .verifiable();
     }
 
-    function getQueryForReadScanGroupIds(itemCount: number): cosmos.SqlQuerySpec {
+    function getQueryForReadScanGroupIds(runDuration: number, itemCount: number): cosmos.SqlQuerySpec {
         return {
-            query: 'SELECT TOP @itemCount COUNT(1) as scanCount, t.scanGroupId, t.targetReport FROM (SELECT * FROM c WHERE c.itemType = @itemType) t GROUP BY t.scanGroupId, t.targetReport',
+            query: `SELECT TOP @itemCount COUNT(1) as scanCount, t.scanGroupId, t.targetReport FROM (
+                SELECT * FROM c WHERE c.itemType = @itemType AND (NOT IS_DEFINED(c.run.state) OR c.run.state != "running" OR (c.run.state = "running" AND DateTimeToTimestamp(c.run.timestamp) < @availabilityTimestamp))
+                ) t GROUP BY t.scanGroupId, t.targetReport`,
             parameters: [
                 {
                     name: '@itemCount',
@@ -279,6 +290,10 @@ describe(ReportGeneratorRequestProvider, () => {
                 {
                     name: '@itemType',
                     value: ItemType.reportGeneratorRequest,
+                },
+                {
+                    name: '@availabilityTimestamp',
+                    value: moment.utc().add(-runDuration, 'minutes').valueOf(),
                 },
             ],
         };

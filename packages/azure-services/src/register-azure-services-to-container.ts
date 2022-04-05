@@ -83,7 +83,7 @@ async function getStorageAccountName(context: interfaces.Context): Promise<strin
     }
 }
 
-// DefaultAzureCredential will first look for Azure Active Directory (AAD)
+// CredentialsProvider will first look for Azure Active Directory (AAD)
 // client secret credentials in the following environment variables:
 //
 // - AZURE_TENANT_ID: The ID of your AAD tenant
@@ -97,9 +97,9 @@ function setupBlobServiceClientProvider(container: interfaces.Container): void {
     IoC.setupSingletonProvider<BlobServiceClient>(iocTypeNames.BlobServiceClientProvider, container, async (context) => {
         const accountName = await getStorageAccountName(context);
         const credentialProvider = container.get(CredentialsProvider);
-        const defaultAzureCredential = credentialProvider.getDefaultAzureCredential();
+        const credential = credentialProvider.getAzureCredential();
 
-        return new BlobServiceClient(`https://${accountName}.blob.core.windows.net`, defaultAzureCredential);
+        return new BlobServiceClient(`https://${accountName}.blob.core.windows.net`, credential);
     });
 }
 
@@ -117,7 +117,7 @@ function setupAuthenticationMethod(container: interfaces.Container): void {
 function setupSingletonAzureKeyVaultClientProvider(container: interfaces.Container): void {
     IoC.setupSingletonProvider<SecretClient>(iocTypeNames.AzureKeyVaultClientProvider, container, async (context) => {
         const credentialProvider = container.get(CredentialsProvider);
-        const credentials = credentialProvider.getDefaultAzureCredential();
+        const credentials = credentialProvider.getAzureCredential();
 
         return new SecretClient(process.env.KEY_VAULT_URL, credentials);
     });
@@ -127,7 +127,7 @@ function setupSingletonQueueServiceClientProvider(container: interfaces.Containe
     IoC.setupSingletonProvider<QueueServiceClient>(iocTypeNames.QueueServiceClientProvider, container, async (context) => {
         const accountName = await getStorageAccountName(context);
         const credentialProvider = container.get(CredentialsProvider);
-        const credentials = credentialProvider.getDefaultAzureCredential();
+        const credentials = credentialProvider.getAzureCredential();
 
         return new QueueServiceClient(`https://${accountName}.queue.core.windows.net`, credentials);
     });
@@ -145,7 +145,7 @@ function setupSingletonCosmosClientProvider(
             const secretProvider = context.container.get(SecretProvider);
             cosmosDbUrl = await secretProvider.getSecret(secretNames.cosmosDbUrl);
             const credentialProvider = container.get(CredentialsProvider);
-            const credentials = credentialProvider.getDefaultAzureCredential();
+            const credentials = credentialProvider.getAzureCredential();
 
             return cosmosClientFactory({ endpoint: cosmosDbUrl, aadCredentials: credentials });
         }
