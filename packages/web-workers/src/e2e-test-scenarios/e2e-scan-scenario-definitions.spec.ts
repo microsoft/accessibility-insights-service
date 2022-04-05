@@ -30,6 +30,10 @@ describe('E2EScanScenarioDefinitions', () => {
                 consolidatedId: `consolidated-id-base-test-release-version-consolidated-${fakeDate.getTime()}`,
             },
             {
+                scanNotificationUrl: 'base-url/scan-notify-api-endpoint',
+                consolidatedId: `consolidated-id-base-test-release-version-failed-${fakeDate.getTime()}`,
+            },
+            {
                 deepScan: true,
                 scanNotificationUrl: 'base-url/scan-notify-api-endpoint',
                 consolidatedId: `consolidated-id-base-test-release-version-deepScan-${fakeDate.getTime()}`,
