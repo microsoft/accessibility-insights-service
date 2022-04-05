@@ -4,7 +4,7 @@
 import { BrowserErrorTypes } from './browser-error';
 
 export const navigationErrorPatterns: Partial<Record<BrowserErrorTypes, string[]>> = {
-    UrlNavigationTimeout: ['Navigation timeout', 'net::ERR_CONNECTION_TIMED_OUT'],
+    UrlNavigationTimeout: ['Navigation timeout', 'net::ERR_CONNECTION_TIMED_OUT', 'Timeout exceeded'],
     SslError: [
         'net::ERR_CERT_AUTHORITY_INVALID',
         'net::ERR_CERT_DATE_INVALID',
