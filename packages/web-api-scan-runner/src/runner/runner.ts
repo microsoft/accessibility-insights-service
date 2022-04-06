@@ -72,6 +72,7 @@ export class Runner {
                 await this.onFailedScan(axeScanResults, pageScanResult);
             }
 
+            console.log('SETTING PAGE TITLE');
             pageScanResult.run.pageTitle = axeScanResults.pageTitle;
             pageScanResult.run.pageResponseCode = axeScanResults.pageResponseCode;
         } catch (error) {
@@ -84,10 +85,15 @@ export class Runner {
             this.telemetryManager.trackScanCompleted();
         }
 
-        const websiteScanResult = await this.updateScanResult(runnerScanMetadata, pageScanResult);
-
         if (this.isPageScanCompleted(pageScanResult)) {
+            const websiteScanResult = await this.updateScanResult(runnerScanMetadata, pageScanResult);
             await this.scanNotificationProcessor.sendScanCompletionNotification(runnerScanMetadata, pageScanResult, websiteScanResult);
+        } else {
+            this.setRunResult(pageScanResult, 'report');
+            await this.updateScanResult(runnerScanMetadata, pageScanResult);
+
+            const websiteScanRef = this.getWebsiteScanRefs(pageScanResult);
+            await this.sendGenerateConsolidatedReportRequest(pageScanResult, websiteScanRef);
         }
 
         this.logger.logInfo('Page scan task completed.');
@@ -101,20 +107,14 @@ export class Runner {
         pageScanResult.reports = await this.generateScanReports(axeScanResults);
 
         const websiteScanRef = this.getWebsiteScanRefs(pageScanResult);
-        if (this.isPageScanCompleted(pageScanResult)) {
-            this.setRunResult(pageScanResult, 'completed');
+        this.setRunResult(pageScanResult, 'completed');
+        // TODO remove below after transition phase
+        // The transition workflow is to support old report generation logic while
+        // new scan request documents will be created with websiteScanRef.scanGroupId metadata
+        if (websiteScanRef && websiteScanRef.scanGroupId === undefined) {
+            await this.combinedScanResultProcessor.generateCombinedScanResults(axeScanResults, pageScanResult);
 
-            // TODO remove below after transition phase
-            // The transition workflow is to support old report generation logic while
-            // new scan request documents will be created with websiteScanRef.scanGroupId metadata
-            if (websiteScanRef && websiteScanRef.scanGroupId === undefined) {
-                await this.combinedScanResultProcessor.generateCombinedScanResults(axeScanResults, pageScanResult);
-
-                return;
-            }
-        } else {
-            this.setRunResult(pageScanResult, 'report');
-            await this.sendGenerateConsolidatedReportRequest(pageScanResult, websiteScanRef);
+            return;
         }
     }
 
@@ -189,12 +189,18 @@ export class Runner {
     }
 
     private setRunResult(pageScanResult: OnDemandPageScanResult, state: OnDemandPageScanRunState, error?: string | ScanError): void {
+        console.log('BEFORE UPDATE');
+        console.log(JSON.stringify(pageScanResult, undefined, 2));
+
         pageScanResult.run = {
             ...pageScanResult.run,
             state,
             timestamp: new Date().toJSON(),
-            error: isString(error) ? error.substring(0, 2048) : error,
+            error: isString(error) ? error.substring(0, 2048) : error ?? pageScanResult.run?.error,
         };
+
+        console.log('AFTER UPDATE');
+        console.log(JSON.stringify(pageScanResult, undefined, 2));
     }
 
     private getScanStatus(axeResults: AxeScanResults): OnDemandScanResult {

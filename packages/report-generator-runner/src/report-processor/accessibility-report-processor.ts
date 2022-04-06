@@ -27,7 +27,12 @@ export class AccessibilityReportProcessor implements TargetReportProcessor {
     }
 
     private async getAxeScanResults(queuedRequest: QueuedRequest): Promise<AxeScanResults> {
-        const axeReport = queuedRequest.request.reports.find((r) => r.format === 'axe');
+        const axeReport = queuedRequest.request.reports?.find((r) => r.format === 'axe');
+        if (!axeReport) {
+            this.logger.logError('No axe report blobs found for this scan report group');
+
+            throw new Error(`No axe report blobs found. Scan group ID: ${queuedRequest.request.scanGroupId}`);
+        }
         const reportContent = await this.pageScanRunReportProvider.readReportContent(axeReport.reportId);
         if (reportContent.errorCode) {
             this.logger.logError('Failure to read axe report blob.', {

@@ -86,6 +86,14 @@ describe(AccessibilityReportProcessor, () => {
         );
     });
 
+    it('Generate report with no axe blob refs', async () => {
+        queuedRequest.request.reports = [];
+
+        await expect(accessibilityReportProcessor.generate(pageScanResult, queuedRequest)).rejects.toThrowError(
+            /No axe report blobs found. Scan group ID: scanGroupId/,
+        );
+    });
+
     function setupCombinedScanResultProcessor(): void {
         combinedScanResultProcessorMock
             .setup((o) => o.generateCombinedScanResults(It.isValue(axeScanResults), It.isValue(pageScanResult)))

@@ -191,6 +191,27 @@ describe(Runner, () => {
         await runner.run();
     });
 
+    it('handle page scanner exception and generate combined report request', async () => {
+        pageScanResultDbDocument.websiteScanRefs[0].scanGroupId = 'scanGroupId';
+        const error = new Error('page scan processor error');
+        const errorMessage = System.serializeError(error);
+        pageScanResult.run = {
+            state: 'failed',
+            timestamp: dateNow.toJSON(),
+            error: errorMessage.substring(0, 2048),
+        };
+        loggerMock.setup((o) => o.logError(`The scanner failed to scan a page.`, { error: errorMessage })).verifiable();
+
+        setupScanMetadataConfig();
+        setupUpdateScanRunStateToRunning();
+        setupScanRunnerTelemetryManager(false);
+        setupPageScanProcessor(true, error);
+        setupReportGeneratorRequestProvider();
+        pageScanResult.run.state = 'report';
+        setupUpdateScanResult();
+        await runner.run();
+    });
+
     it('handle scanner browser navigation error', async () => {
         axeScanResults.error = 'browser navigation error';
 
@@ -201,6 +222,20 @@ describe(Runner, () => {
         setupProcessScanResult();
         setupUpdateScanResult();
         setupScanNotificationProcessor();
+        await runner.run();
+    });
+
+    it('handle scanner browser navigation error and generate combined report request', async () => {
+        pageScanResultDbDocument.websiteScanRefs[0].scanGroupId = 'scanGroupId';
+        axeScanResults.error = 'browser navigation error';
+
+        setupScanMetadataConfig();
+        setupUpdateScanRunStateToRunning();
+        setupScanRunnerTelemetryManager(true, false);
+        setupPageScanProcessor();
+        setupProcessScanResult(true);
+        pageScanResult.run.state = 'report';
+        setupUpdateScanResult();
         await runner.run();
     });
 
