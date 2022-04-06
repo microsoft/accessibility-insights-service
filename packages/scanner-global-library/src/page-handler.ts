@@ -28,7 +28,7 @@ export class PageHandler {
         let checkCount = 0;
         let scrollingComplete = false;
 
-        // Scroll incrementally so everything is inside the window at at some point
+        // Scroll incrementally so everything is inside the window at some point
         while (!scrollingComplete && checkCount < maxCheckCount) {
             // Page evaluation may fail because of a navigation
             try {
