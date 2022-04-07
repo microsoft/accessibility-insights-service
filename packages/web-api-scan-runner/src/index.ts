@@ -4,8 +4,6 @@
 import 'reflect-metadata';
 // eslint-disable-next-line import/no-unassigned-import
 import './module-name-mapper';
-// @ts-ignore
-import * as cheerio from 'cheerio';
 
 import { System } from 'common';
 import { setupWebApiScanRunnerContainer } from './setup-web-api-scan-runner-container';

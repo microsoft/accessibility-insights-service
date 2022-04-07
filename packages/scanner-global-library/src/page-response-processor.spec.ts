@@ -3,7 +3,7 @@
 
 import 'reflect-metadata';
 
-import { Response } from 'puppeteer';
+import { HTTPResponse } from 'puppeteer';
 import { IMock, Mock, Times } from 'typemoq';
 import { BrowserErrorTypes } from './browser-error';
 import { PageResponseProcessor } from './page-response-processor';
@@ -12,10 +12,10 @@ import { PageResponseProcessor } from './page-response-processor';
 
 describe(PageResponseProcessor, () => {
     let pageResponseProcessor: PageResponseProcessor;
-    let responseMock: IMock<Response>;
+    let responseMock: IMock<HTTPResponse>;
 
     beforeEach(() => {
-        responseMock = Mock.ofType<Response>();
+        responseMock = Mock.ofType<HTTPResponse>();
         pageResponseProcessor = new PageResponseProcessor();
     });
 

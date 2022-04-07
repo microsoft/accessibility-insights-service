@@ -3,11 +3,11 @@
 
 import 'reflect-metadata';
 
-import Apify from 'apify';
-import { Page, Response } from 'puppeteer';
-import { BrowserError, PageNavigator, PageConfigurator } from 'scanner-global-library';
+import { Page } from 'puppeteer';
+import { BrowserError, NavigationHooks, PageConfigurator } from 'scanner-global-library';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { System } from 'common';
+import Apify from 'apify';
 import { CrawlerConfiguration } from '../crawler/crawler-configuration';
 import { DataBase } from '../level-storage/data-base';
 import { AccessibilityScanOperation } from '../page-operations/accessibility-scan-operation';
@@ -15,9 +15,9 @@ import { BlobStore, DataStore } from '../storage/store-types';
 import { ApifyRequestQueueProvider } from '../types/ioc-types';
 import { ScanData } from '../types/scan-data';
 import { ScanResult } from '../level-storage/storage-documents';
-import { PageProcessorBase } from './page-processor-base';
+import { PageProcessorBase, PuppeteerCrawlingContext, PuppeteerHandlePageInputs } from './page-processor-base';
 
-/* eslint-disable @typescript-eslint/no-explicit-any, , @typescript-eslint/consistent-type-assertions */
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/consistent-type-assertions */
 
 describe(PageProcessorBase, () => {
     class TestablePageProcessor extends PageProcessorBase {
@@ -25,7 +25,7 @@ describe(PageProcessorBase, () => {
 
         public baseUrl: string;
 
-        public processPage = async (inputs: Apify.PuppeteerHandlePageInputs) => {
+        public processPage = async (inputs: PuppeteerHandlePageInputs) => {
             return;
         };
 
@@ -51,7 +51,7 @@ describe(PageProcessorBase, () => {
     let enqueueLinksExtMock: IMock<typeof Apify.utils.enqueueLinks>;
     let saveSnapshotMock: IMock<typeof Apify.utils.puppeteer.saveSnapshot>;
     let processPageMock: IMock<Apify.PuppeteerHandlePage>;
-    let pageNavigatorMock: IMock<PageNavigator>;
+    let navigationHooksMock: IMock<NavigationHooks>;
     let pageConfiguratorMock: IMock<PageConfigurator>;
     let crawlerConfigurationMock: IMock<CrawlerConfiguration>;
     let requestQueueProvider: ApifyRequestQueueProvider;
@@ -68,7 +68,7 @@ describe(PageProcessorBase, () => {
         enqueueLinksExtMock = Mock.ofType<typeof Apify.utils.enqueueLinks>();
         saveSnapshotMock = Mock.ofType<typeof Apify.utils.puppeteer.saveSnapshot>();
         processPageMock = Mock.ofType<Apify.PuppeteerHandlePage>();
-        pageNavigatorMock = Mock.ofType<PageNavigator>();
+        navigationHooksMock = Mock.ofType<NavigationHooks>();
         pageConfiguratorMock = Mock.ofType<PageConfigurator>();
         crawlerConfigurationMock = Mock.ofType(CrawlerConfiguration);
         crawlerConfigurationMock
@@ -101,7 +101,7 @@ describe(PageProcessorBase, () => {
             dataStoreMock.object,
             blobStoreMock.object,
             dataBaseMock.object,
-            pageNavigatorMock.object,
+            navigationHooksMock.object,
             requestQueueProvider,
             crawlerConfigurationMock.object,
             enqueueLinksExtMock.object,
@@ -115,23 +115,36 @@ describe(PageProcessorBase, () => {
         dataStoreMock.verifyAll();
         processPageMock.verifyAll();
         saveSnapshotMock.verifyAll();
-        pageNavigatorMock.verifyAll();
+        navigationHooksMock.verifyAll();
         dataBaseMock.verifyAll();
         crawlerConfigurationMock.verifyAll();
     });
 
-    it('gotoFunction()', async () => {
-        pageProcessorBase.baseUrl = testUrl;
-        const userAgent = 'userAgent';
-        const browserResolution = '1920x1080';
-        const inputs: Apify.PuppeteerGotoInputs = {
+    it('preNavigation', async () => {
+        const crawlingContext: PuppeteerCrawlingContext = {
             page: pageStub,
             request: requestStub,
+            response: {},
             session: {
                 userData: [],
             },
         } as any;
-        const response = {} as Response;
+        const gotoOptions = {};
+
+        navigationHooksMock.setup((o) => o.preNavigation(crawlingContext.page)).verifiable();
+
+        await pageProcessorBase.preNavigation(crawlingContext, gotoOptions);
+    });
+
+    it('postNavigation', async () => {
+        pageProcessorBase.baseUrl = testUrl;
+        const userAgent = 'userAgent';
+        const browserResolution = '1920x1080';
+        const crawlingContext: PuppeteerCrawlingContext = {
+            page: pageStub,
+            request: requestStub,
+            response: {} as Response,
+        } as any;
         pageConfiguratorMock
             .setup((o) => o.getUserAgent())
             .returns(() => userAgent)
@@ -140,40 +153,36 @@ describe(PageProcessorBase, () => {
             .setup((o) => o.getBrowserResolution())
             .returns(() => browserResolution)
             .verifiable();
-        pageNavigatorMock
+        navigationHooksMock
             .setup((o) => o.pageConfigurator)
             .returns(() => pageConfiguratorMock.object)
             .verifiable(Times.atLeastOnce());
-        pageNavigatorMock
-            .setup(async (o) => o.navigate(testUrl, inputs.page, It.isAny()))
-            .returns(() => Promise.resolve(response))
-            .verifiable();
+        navigationHooksMock.setup(async (o) => o.postNavigation(crawlingContext.page, It.isAny(), It.isAny())).verifiable();
         dataBaseMock
             .setup((o) => o.addScanMetadata({ baseUrl: testUrl, basePageTitle: 'title', userAgent, browserResolution }))
             .verifiable();
 
-        await pageProcessorBase.gotoFunction(inputs);
+        await pageProcessorBase.postNavigation(crawlingContext);
     });
 
-    it('invoke gotoFunction() with web browser navigation error', async () => {
+    it('postNavigationHook logs browser errors', async () => {
         pageProcessorBase.baseUrl = testUrl;
         const browserError = {
             errorType: 'HttpErrorCode',
             message: 'message',
             stack: 'stack',
         };
-        const inputs: Apify.PuppeteerGotoInputs = {
+        const crawlingContext: PuppeteerCrawlingContext = {
             page: pageStub,
             request: requestStub,
             session: {
                 userData: [],
             },
+            response: {},
         } as any;
-        const response = {} as Response;
-        pageNavigatorMock
-            .setup(async (o) => o.navigate(testUrl, inputs.page, It.isAny()))
-            .callback((url, page, errorCallback) => errorCallback(browserError, undefined))
-            .returns(() => Promise.resolve(response))
+        navigationHooksMock
+            .setup(async (nh) => nh.postNavigation(crawlingContext.page, crawlingContext.response, It.isAny()))
+            .returns((page, response, errorCallback) => errorCallback(browserError, undefined))
             .verifiable();
         dataBaseMock
             .setup((o) =>
@@ -186,11 +195,12 @@ describe(PageProcessorBase, () => {
             )
             .verifiable();
 
-        await pageProcessorBase.gotoFunction(inputs);
+        await pageProcessorBase.postNavigation(crawlingContext);
+        expect(crawlingContext.session.userData).toContainEqual({ requestId: requestStub.id, browserError: browserError });
     });
 
-    it('gotoFunction() logs errors', async () => {
-        const inputs: Apify.PuppeteerGotoInputs = {
+    it('postNavigationHook throws errors', async () => {
+        const crawlingContext: PuppeteerCrawlingContext = {
             page: pageStub,
             request: requestStub,
             session: {
@@ -204,12 +214,9 @@ describe(PageProcessorBase, () => {
             message: error.message,
             stack: 'stack',
         } as BrowserError;
-        pageNavigatorMock
-            .setup(async (o) => o.navigate(testUrl, inputs.page, It.isAny()))
-            .callback(async (url, page, fn) => {
-                await fn(browserError, error);
-            })
-            .returns(() => Promise.reject(error))
+        navigationHooksMock
+            .setup(async (o) => o.postNavigation(crawlingContext.page, It.isAny(), It.isAny()))
+            .returns((url, page, errorCallback) => errorCallback(browserError, error))
             .verifiable();
         const scanResult = {
             id: requestStub.id as string,
@@ -220,10 +227,10 @@ describe(PageProcessorBase, () => {
         dataBaseMock.setup((o) => o.addScanResult(testId, scanResult)).verifiable();
 
         try {
-            await pageProcessorBase.gotoFunction(inputs);
-            expect('').toBe('gotoFunction() should throw an error');
-        } catch (err) {
-            expect(err).toBe(error);
+            await pageProcessorBase.postNavigation(crawlingContext);
+            fail('postNavigation() should throw an error');
+        } catch (e) {
+            expect(e).toEqual(error);
         }
     });
 
@@ -240,11 +247,11 @@ describe(PageProcessorBase, () => {
         dataStoreMock.setup((ds) => ds.pushData(expectedScanData)).verifiable();
         setupScanErrorLogging();
 
-        await pageProcessorBase.pageErrorProcessor({ request: requestStub, error });
+        await pageProcessorBase.pageErrorProcessor({ request: requestStub, error } as Apify.HandleFailedRequestInput);
     });
 
     it('invoke processPage()', async () => {
-        const inputs: Apify.PuppeteerHandlePageInputs = {
+        const inputs: PuppeteerHandlePageInputs = {
             page: pageStub,
             request: requestStub,
             session: {
@@ -257,7 +264,7 @@ describe(PageProcessorBase, () => {
     });
 
     it('skip invoking processPage() when web browser failed to load web page', async () => {
-        const inputs: Apify.PuppeteerHandlePageInputs = {
+        const inputs: PuppeteerHandlePageInputs = {
             request: {
                 id: 'requestId',
             },
@@ -275,7 +282,7 @@ describe(PageProcessorBase, () => {
     });
 
     it('processPage() logs errors', async () => {
-        const inputs: Apify.PuppeteerHandlePageInputs = {
+        const inputs: PuppeteerHandlePageInputs = {
             page: pageStub,
             request: requestStub,
             session: {

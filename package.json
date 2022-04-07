@@ -36,6 +36,7 @@
         "url": "https://github.com/Microsoft/accessibility-insights-service/issues"
     },
     "devDependencies": {
+        "@types/node": "^16.11.7",
         "@typescript-eslint/eslint-plugin": "^4.33.0",
         "@typescript-eslint/eslint-plugin-tslint": "^5.13.0",
         "@typescript-eslint/parser": "^4.33.0",
@@ -68,9 +69,13 @@
     "workspaces": {
         "packages": [
             "packages/*"
+        ],
+        "nohoist": [
+            "packages/typings"
         ]
     },
     "resolutions": {
+        "@types/node": "^16.11.7",
         "@npmcli/git": ">=2.1.0",
         "adal-node": ">=0.2.3",
         "axe-core": "4.3.2",
@@ -78,7 +83,6 @@
         "filenamify-url": "^2.1.2",
         "filenamify": "^4.3.0",
         "@sindresorhus/fnv1a": "^2.0.1",
-        "apify-shared": ">=0.5.0",
         "marked": ">=2.0.0",
         "glob-parent": ">=5.1.2",
         "css-what": ">=5.0.1",

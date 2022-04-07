@@ -4,7 +4,7 @@
 import { inject, injectable } from 'inversify';
 import * as Puppeteer from 'puppeteer';
 import { AxeResults } from 'axe-core';
-import { System, PromiseUtils } from 'common';
+import { PromiseUtils } from 'common';
 import { PageScanner } from '../scanners/page-scanner';
 import { BlobStore } from '../storage/store-types';
 import { ReportGenerator } from '../reports/report-generator';
@@ -15,8 +15,6 @@ declare type AxeScanError = 'ScanTimeout';
 @injectable()
 export class AccessibilityScanOperation {
     public static axeScanTimeoutSec = 180;
-
-    public static waitForPageScrollSec = 15;
 
     constructor(
         @inject(PageScanner) private readonly scanner: PageScanner,
@@ -40,20 +38,7 @@ export class AccessibilityScanOperation {
     }
 
     private async scanForA11yIssues(page: Puppeteer.Page, axeSourcePath?: string): Promise<AxeResults> {
-        let axeResults = await this.runA11yScan(page, axeSourcePath);
-        if (axeResults === 'ScanTimeout') {
-            console.log(
-                'The accessibility scanner has timed out. Scrolling down to the bottom of the page to resolve pending page operations.',
-            );
-
-            // Scrolling down to the bottom of the page to resolve pending page operations that prevent axe engine from completing the scan
-            await page.evaluate(() => {
-                window.scrollBy(0, window.document.body.scrollHeight);
-            });
-            await System.wait(AccessibilityScanOperation.waitForPageScrollSec * 1000);
-
-            axeResults = await this.runA11yScan(page, axeSourcePath);
-        }
+        const axeResults = await this.runA11yScan(page, axeSourcePath);
 
         if (axeResults === 'ScanTimeout') {
             throw new Error(`Accessibility scan timed out after ${AccessibilityScanOperation.axeScanTimeoutSec} seconds.`);

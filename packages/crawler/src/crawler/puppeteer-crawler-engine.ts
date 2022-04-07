@@ -2,10 +2,10 @@
 // Licensed under the MIT License.
 
 import Apify from 'apify';
+import { PuppeteerPlugin } from 'browser-pool';
 import { inject, injectable } from 'inversify';
-// @ts-ignore
-import * as cheerio from 'cheerio';
 import { isEmpty } from 'lodash';
+import Puppeteer from 'puppeteer';
 import { CrawlerRunOptions } from '../types/crawler-run-options';
 import { ApifyRequestQueueProvider, crawlerIocTypes, PageProcessorFactory } from '../types/ioc-types';
 import { CrawlerConfiguration } from './crawler-configuration';
@@ -36,28 +36,28 @@ export class PuppeteerCrawlerEngine {
         ];
         const pageProcessor = this.pageProcessorFactory();
         const puppeteerCrawlerOptions: Apify.PuppeteerCrawlerOptions = {
+            useSessionPool: true,
             handlePageTimeoutSecs: 300, // timeout includes all page processing activity (navigation, rendering, accessibility scan, etc.)
             requestQueue: await this.requestQueueProvider(),
             handlePageFunction: pageProcessor.pageHandler,
-            gotoFunction: pageProcessor.gotoFunction,
+            preNavigationHooks: [pageProcessor.preNavigation],
+            postNavigationHooks: [pageProcessor.postNavigation],
             handleFailedRequestFunction: pageProcessor.pageErrorProcessor,
             maxRequestsPerCrawl: this.crawlerConfiguration.maxRequestsPerCrawl(),
-            useSessionPool: true,
-            launchPuppeteerOptions: {
-                args: puppeteerDefaultOptions,
-                defaultViewport: {
-                    width: 1920,
-                    height: 1080,
-                    deviceScaleFactor: 1,
-                },
-            } as Apify.LaunchPuppeteerOptions,
+            launchContext: {
+                launchOptions: {
+                    ignoreDefaultArgs: puppeteerDefaultOptions,
+                    defaultViewport: {
+                        width: 1920,
+                        height: 1080,
+                        deviceScaleFactor: 1,
+                    },
+                } as Puppeteer.LaunchOptions,
+            },
         };
 
         if (!isEmpty(crawlerRunOptions.chromePath)) {
-            puppeteerCrawlerOptions.launchPuppeteerOptions = {
-                ...puppeteerCrawlerOptions.launchPuppeteerOptions,
-                useChrome: true,
-            } as Apify.LaunchPuppeteerOptions;
+            puppeteerCrawlerOptions.launchContext.useChrome = true;
             this.crawlerConfiguration.setChromePath(crawlerRunOptions.chromePath);
         }
 
@@ -70,7 +70,7 @@ export class PuppeteerCrawlerEngine {
             this.crawlerConfiguration.setSilentMode(false);
 
             puppeteerCrawlerOptions.handlePageTimeoutSecs = 3600;
-            puppeteerCrawlerOptions.gotoTimeoutSecs = 3600;
+            puppeteerCrawlerOptions.navigationTimeoutSecs = 3600;
             puppeteerCrawlerOptions.maxConcurrency = 1;
             puppeteerCrawlerOptions.sessionPoolOptions = {
                 sessionOptions: {
@@ -78,15 +78,15 @@ export class PuppeteerCrawlerEngine {
                     maxAgeSecs: 3600,
                 },
             };
-            puppeteerCrawlerOptions.launchPuppeteerOptions = {
-                ...puppeteerCrawlerOptions.launchPuppeteerOptions,
-                args: ['--auto-open-devtools-for-tabs', ...puppeteerDefaultOptions],
-            } as Apify.LaunchPuppeteerOptions;
-            puppeteerCrawlerOptions.puppeteerPoolOptions = {
-                puppeteerOperationTimeoutSecs: 3600,
-                instanceKillerIntervalSecs: 3600,
-                killInstanceAfterSecs: 3600,
-                maxOpenPagesPerInstance: 1,
+            puppeteerCrawlerOptions.launchContext.launchOptions.ignoreDefaultArgs = [
+                '--auto-open-devtools-for-tabs',
+                ...puppeteerDefaultOptions,
+            ];
+            puppeteerCrawlerOptions.browserPoolOptions = {
+                browserPlugins: [new PuppeteerPlugin(Puppeteer)],
+                operationTimeoutSecs: 3600,
+                closeInactiveBrowserAfterSecs: 3600,
+                maxOpenPagesPerBrowser: 1,
             };
         }
 

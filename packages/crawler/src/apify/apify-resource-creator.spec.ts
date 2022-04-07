@@ -47,7 +47,7 @@ describe(ApifyResourceCreator, () => {
     describe('createRequestQueue', () => {
         it('with clear=false', async () => {
             setupCreateRequestQueue();
-            fsMock.setup((fsm) => fsm.rmdirSync(It.isAny(), It.isAny())).verifiable(Times.never());
+            fsMock.setup((fsm) => fsm.rmSync(It.isAny(), It.isAny())).verifiable(Times.never());
 
             const queue = await apifyResourceCreator.createRequestQueue(url);
 
@@ -109,7 +109,7 @@ describe(ApifyResourceCreator, () => {
                 return { APIFY_LOCAL_STORAGE_DIR: localStorageDir };
             });
         fsMock.setup((fsm) => fsm.existsSync(localStorageDir)).returns(() => dirExists);
-        fsMock.setup((fsm) => fsm.rmdirSync(localStorageDir, { recursive: true })).verifiable(dirExists ? Times.once() : Times.never());
+        fsMock.setup((fsm) => fsm.rmSync(localStorageDir, { recursive: true })).verifiable(dirExists ? Times.once() : Times.never());
     }
 
     function setupCreateRequestQueue(): void {

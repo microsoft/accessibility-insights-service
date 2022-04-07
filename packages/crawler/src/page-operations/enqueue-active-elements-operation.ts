@@ -7,8 +7,8 @@ import * as Puppeteer from 'puppeteer';
 import { ActiveElementsFinder } from '../browser-components/active-elements-finder';
 import { Operation } from './operation';
 
-/* eslint-disable @typescript-eslint/no-var-requires, import/no-internal-modules, @typescript-eslint/no-require-imports,  */
-const apifyUtilities = require('apify-shared/utilities');
+/* eslint-disable @typescript-eslint/no-var-requires, @typescript-eslint/no-require-imports, import/no-extraneous-dependencies */
+const apifyUtilities = require('@apify/utilities');
 
 @injectable()
 export class EnqueueActiveElementsOperation {

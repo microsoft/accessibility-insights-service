@@ -4,7 +4,7 @@
 import { System } from 'common';
 import { inject, injectable } from 'inversify';
 import { GlobalLogger } from 'logger';
-import { AxeScanResults, Page, BrowserError } from 'scanner-global-library';
+import { AxeScanResults, Page } from 'scanner-global-library';
 import { OnDemandPageScanResult } from 'storage-documents';
 import { RunnerScanMetadata } from 'service-library';
 import { AxeScanner } from '../scanner/axe-scanner';
@@ -12,8 +12,6 @@ import { DeepScanner } from './deep-scanner';
 
 @injectable()
 export class PageScanProcessor {
-    public static waitForPageScrollSec = 15;
-
     public constructor(
         @inject(Page) private readonly page: Page,
         @inject(AxeScanner) private readonly axeScanner: AxeScanner,
@@ -26,7 +24,7 @@ export class PageScanProcessor {
         try {
             await this.openPage(runnerScanMetadata.url);
 
-            axeScanResults = await this.scanForA11yIssues();
+            axeScanResults = await this.axeScanner.scan(this.page);
 
             if (runnerScanMetadata.deepScan) {
                 if (this.page.isOpen()) {
@@ -39,27 +37,6 @@ export class PageScanProcessor {
         } finally {
             await this.closePage();
         }
-
-        return axeScanResults;
-    }
-
-    private async scanForA11yIssues(): Promise<AxeScanResults> {
-        let axeScanResults = await this.axeScanner.scan(this.page);
-        if ((axeScanResults?.error as BrowserError)?.errorType === 'ScanTimeout') {
-            this.logger.logWarn(
-                'The accessibility scanner has timed out. Scrolling down to the bottom of the page to resolve pending page operations.',
-            );
-
-            // Scrolling down to the bottom of the page to resolve pending page operations that prevent axe engine from completing the scan
-            await this.page.page.evaluate(() => {
-                window.scrollBy(0, window.document.body.scrollHeight);
-            });
-            await System.wait(PageScanProcessor.waitForPageScrollSec * 1000);
-
-            axeScanResults = await this.axeScanner.scan(this.page);
-        }
-
-        this.logger.logInfo('The axe scanner completed a page scan.');
 
         return axeScanResults;
     }

@@ -28,7 +28,7 @@ export class Page {
 
     public browser: Puppeteer.Browser;
 
-    public navigationResponse: Puppeteer.Response;
+    public navigationResponse: Puppeteer.HTTPResponse;
 
     public lastBrowserError: BrowserError;
 

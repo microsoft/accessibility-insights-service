@@ -7,8 +7,6 @@ import 'reflect-metadata';
 // eslint-disable-next-line import/no-unassigned-import
 import './module-name-mapper';
 
-// @ts-ignore
-import * as cheerio from 'cheerio';
 import yargs from 'yargs';
 import { System } from 'common';
 import { CliEntryPoint } from './cli-entry-point';

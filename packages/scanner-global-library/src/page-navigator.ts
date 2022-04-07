@@ -30,22 +30,10 @@ export class PageNavigator {
         url: string,
         page: Puppeteer.Page,
         onNavigationError: (browserError: BrowserError, error?: unknown) => Promise<void> = () => Promise.resolve(),
-    ): Promise<Puppeteer.Response> {
+    ): Promise<Puppeteer.HTTPResponse> {
         await this.navigationHooks.preNavigation(page);
 
-        // Try load all page resources
-        let navigationResult = await this.navigateToUrl(url, page, 'networkidle0');
-        if (navigationResult.browserError?.errorType === 'UrlNavigationTimeout') {
-            // Fallback to load partial page resources on navigation timeout.
-            // This will help in cases when page has a streaming video controls.
-            //
-            // The 'load' event is fired when the whole page has loaded, including all dependent resources such as stylesheets and images.
-            // However any dynamic contents may not be available if it is loaded after window.onload() event.
-            // Since we reuse page instance from the first navigation attempt some contents could be already loaded and available which
-            // mitigates dynamic content rendering issue above.
-            navigationResult = await this.navigateToUrl(url, page, 'load');
-        }
-
+        const navigationResult = await this.navigateToUrl(url, page, 'load');
         if (!_.isNil(navigationResult.browserError)) {
             await onNavigationError(navigationResult.browserError, navigationResult.error);
 
@@ -60,9 +48,9 @@ export class PageNavigator {
     private async navigateToUrl(
         url: string,
         page: Puppeteer.Page,
-        condition: Puppeteer.LoadEvent,
-    ): Promise<{ response: Puppeteer.Response; browserError?: BrowserError; error?: unknown }> {
-        let response: Puppeteer.Response;
+        condition: Puppeteer.PuppeteerLifeCycleEvent,
+    ): Promise<{ response: Puppeteer.HTTPResponse; browserError?: BrowserError; error?: unknown }> {
+        let response: Puppeteer.HTTPResponse;
         let browserError: BrowserError;
         try {
             const options = {

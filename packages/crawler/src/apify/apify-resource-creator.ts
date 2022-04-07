@@ -65,7 +65,7 @@ export class ApifyResourceCreator implements ResourceCreator {
         // eslint-disable-next-line security/detect-non-literal-fs-filename
         if (this.filesystem.existsSync(outputDir)) {
             // eslint-disable-next-line security/detect-non-literal-fs-filename
-            this.filesystem.rmdirSync(outputDir, { recursive: true });
+            this.filesystem.rmSync(outputDir, { recursive: true });
         }
     }
 }

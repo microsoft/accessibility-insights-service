@@ -3,8 +3,8 @@
 steps:
     - task: NodeTool@0
       inputs:
-          versionSpec: '12.x'
-      displayName: Use node 12.x
+          versionSpec: '16.x'
+      displayName: Use node 16.x
 
     - script: |
           yarn install --frozen-lockfile

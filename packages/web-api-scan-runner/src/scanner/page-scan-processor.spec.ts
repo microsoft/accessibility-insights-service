@@ -27,8 +27,6 @@ describe(PageScanProcessor, () => {
     let testSubject: PageScanProcessor;
 
     beforeEach(() => {
-        PageScanProcessor.waitForPageScrollSec = 1;
-
         loggerMock = Mock.ofType<GlobalLogger>();
         pageMock = Mock.ofType<Page>();
         axeScannerMock = Mock.ofType<AxeScanner>();
@@ -142,42 +140,6 @@ describe(PageScanProcessor, () => {
         loggerMock.setup((l) => l.logError(It.isAny(), { error: System.serializeError(error) })).verifiable();
 
         await testSubject.scan(scanMetadata, pageScanResult);
-    });
-
-    it('scans successfully with timeout', async () => {
-        let runsWithTimeoutCount = 1;
-        const scanMetadata = {
-            url: url,
-            id: 'id',
-            deepScan: false,
-        };
-
-        setupOpenPage();
-        setupClosePage();
-        axeScannerMock
-            .setup((s) => s.scan(pageMock.object))
-            .returns(() => {
-                if (runsWithTimeoutCount > 0) {
-                    runsWithTimeoutCount--;
-
-                    return Promise.resolve({ error: { errorType: 'ScanTimeout' } } as AxeScanResults);
-                } else {
-                    return Promise.resolve(axeScanResults);
-                }
-            })
-            .verifiable(Times.exactly(2));
-        browserPageMock
-            .setup(async (o) => o.evaluate(It.isAny()))
-            .returns(() => Promise.resolve())
-            .verifiable(Times.atLeastOnce());
-        pageMock
-            .setup((o) => o.page)
-            .returns(() => browserPageMock.object)
-            .verifiable();
-
-        const results = await testSubject.scan(scanMetadata, pageScanResult);
-
-        expect(results).toEqual(axeScanResults);
     });
 
     function setupOpenPage(): void {

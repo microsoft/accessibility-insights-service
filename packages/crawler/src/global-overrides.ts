@@ -6,19 +6,24 @@ export {};
 /* eslint-disable @typescript-eslint/no-explicit-any, , @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires */
 function overrideCheckPrototypeUtilsFunc(exports: any): any {
     const originalFunc = exports.checkParamPrototypeOrThrow;
-    exports.checkParamPrototypeOrThrow = function (...args: any): any {
-        if (args[3] === 'Apify.RequestQueue') {
-            return true;
-        } else {
-            return originalFunc(...args);
-        }
-    };
+    Reflect.set(
+        exports,
+        'checkParamPrototypeOrThrow',
+        function (...args: any): any {
+            if (args[3] === 'Apify.RequestQueue') {
+                return true;
+            } else {
+                return originalFunc(...args);
+            }
+        },
+        exports,
+    );
 
     return exports;
 }
 
 function overrideExports(moduleName: string, exports: any): any {
-    if (moduleName === 'apify-shared/utilities') {
+    if (moduleName === '@apify/utilities') {
         return overrideCheckPrototypeUtilsFunc(exports);
     }
 

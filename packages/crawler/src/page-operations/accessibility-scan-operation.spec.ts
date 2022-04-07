@@ -3,6 +3,7 @@
 
 import 'reflect-metadata';
 
+import { AxePuppeteerFactory } from 'scanner-global-library';
 import { Page } from 'puppeteer';
 import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
 import { AxeResults } from 'axe-core';
@@ -33,12 +34,11 @@ describe(AccessibilityScanOperation, () => {
 
     beforeEach(() => {
         AccessibilityScanOperation.axeScanTimeoutSec = 1;
-        AccessibilityScanOperation.waitForPageScrollSec = 1;
 
         pageMock = Mock.ofType<Page>();
-        blobStoreMock = Mock.ofType();
+        blobStoreMock = Mock.ofType<BlobStore>();
         reportGeneratorMock = Mock.ofType<ReportGenerator>();
-        scannerMock = Mock.ofType(PageScanner, MockBehavior.Strict);
+        scannerMock = Mock.ofType(PageScanner, MockBehavior.Strict, true, Mock.ofType<AxePuppeteerFactory>().object);
         promiseUtilsMock = Mock.ofType(PromiseUtils);
 
         accessibilityScanOp = new AccessibilityScanOperation(
@@ -87,26 +87,6 @@ describe(AccessibilityScanOperation, () => {
         await accessibilityScanOp.run(pageMock.object, id);
     });
 
-    it('Run page scan operation with timeout and success', async () => {
-        axeResults = {
-            url: 'url',
-            passes: [],
-            violations: [],
-            incomplete: [],
-            inapplicable: [],
-        } as AxeResults;
-
-        setMocks(axeResults, 2);
-        setupWaitForFn(1);
-
-        pageMock
-            .setup(async (o) => o.evaluate(It.isAny()))
-            .returns(() => Promise.resolve())
-            .verifiable();
-
-        await accessibilityScanOp.run(pageMock.object, id);
-    });
-
     it('Run page scan operation with timeout and exception', async () => {
         axeResults = {
             url: 'url',
@@ -116,21 +96,17 @@ describe(AccessibilityScanOperation, () => {
             inapplicable: [],
         } as AxeResults;
 
-        setMocks(axeResults, 2);
+        setMocks(axeResults);
         setupWaitForFn(2);
 
         blobStoreMock.reset();
         pageMock.reset();
         reportGeneratorMock.reset();
-        pageMock
-            .setup(async (o) => o.evaluate(It.isAny()))
-            .returns(() => Promise.resolve())
-            .verifiable();
 
         await expect(() => accessibilityScanOp.run(pageMock.object, id)).rejects.toThrowError(`Accessibility scan timed out`);
     });
 
-    function setMocks(axeResult: AxeResults, scanRetryCount: number = 1): void {
+    function setMocks(axeResult: AxeResults): void {
         blobStoreMock
             .setup((s) => s.setValue(`${id}.axe`, axeResults))
             .returns(async () => {})
@@ -142,7 +118,7 @@ describe(AccessibilityScanOperation, () => {
         scannerMock
             .setup((s) => s.scan(It.isAny(), It.isAny()))
             .returns(async () => axeResult)
-            .verifiable(Times.exactly(scanRetryCount));
+            .verifiable();
         reportGeneratorMock
             .setup((o) => o.generateReport(axeResult, pageUrl, pageTitle))
             .returns(() => report)

@@ -27,6 +27,7 @@ describe('listMonorepoPackageNames', () => {
               "scanner-global-library",
               "service-library",
               "storage-documents",
+              "@types/fingerprint-generator",
               "web-api",
               "web-api-client",
               "web-api-scan-job-manager",

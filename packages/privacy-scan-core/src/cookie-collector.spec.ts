@@ -20,7 +20,7 @@ describe(CookieCollector, () => {
     const url = 'test url';
     const expiryDate = new Date(0, 1, 2, 3);
 
-    let pageCookies: Puppeteer.Cookie[];
+    let pageCookies: Puppeteer.Protocol.Network.Cookie[];
     let pageCookiesByDomain: CookieByDomain[];
     let puppeteerPageMock: IMock<Puppeteer.Page>;
     let reloadPageMock: IMock<ReloadPageFunc>;
@@ -48,7 +48,7 @@ describe(CookieCollector, () => {
                 domain: 'domain2',
                 expires: expiryDate.getTime(),
             },
-        ] as Puppeteer.Cookie[];
+        ] as Puppeteer.Protocol.Network.Cookie[];
         pageCookiesByDomain = [
             {
                 Domain: 'domain1',
@@ -110,7 +110,7 @@ describe(CookieCollector, () => {
             name: 'new cookie',
             domain: 'new domain',
             expires: expiryDate.getTime(),
-        } as Puppeteer.Cookie;
+        } as Puppeteer.Protocol.Network.Cookie;
         const expectedResult: ConsentResult = {
             CookiesUsedForConsent: `${cookieScenario.name}=${cookieScenario.value}`,
             CookiesBeforeConsent: pageCookiesByDomain,
@@ -147,7 +147,7 @@ describe(CookieCollector, () => {
         reloadPageMock.setup((r) => r(puppeteerPageMock.object)).returns(async () => reloadResponse);
     }
 
-    function setupLoadPageWithCookie(newCookiesAfterLoad: Puppeteer.Cookie[], reloadResponse: ReloadPageResponse): void {
+    function setupLoadPageWithCookie(newCookiesAfterLoad: Puppeteer.Protocol.Network.Cookie[], reloadResponse: ReloadPageResponse): void {
         puppeteerPageMock
             .setup((p) => p.setCookie(cookieScenario))
             .returns(async () => {
@@ -157,7 +157,7 @@ describe(CookieCollector, () => {
         reloadPageMock.setup((r) => r(puppeteerPageMock.object)).returns(async () => reloadResponse);
     }
 
-    function setupGetCookies(cookies: Puppeteer.Cookie[]): void {
+    function setupGetCookies(cookies: Puppeteer.Protocol.Network.Cookie[]): void {
         const clientMock = getPromisableDynamicMock(Mock.ofType<Puppeteer.CDPSession>());
         const targetStub = {
             createCDPSession: async () => clientMock.object,

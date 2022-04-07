@@ -3,7 +3,7 @@
 
 FROM mcr.microsoft.com/windows/servercore:1809-amd64
 
-ENV NODE_VERSION 12.21.0
+ENV NODE_VERSION 16.14.0
 
 USER ContainerAdministrator
 

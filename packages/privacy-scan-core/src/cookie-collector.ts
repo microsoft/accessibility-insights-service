@@ -8,7 +8,7 @@ import * as Puppeteer from 'puppeteer';
 import { CookieScenario } from './cookie-scenarios';
 import { ReloadPageFunc, ReloadPageResponse } from '.';
 
-type GetAllCookiesResponse = { cookies: Puppeteer.Cookie[] };
+type GetAllCookiesResponse = { cookies: Puppeteer.Protocol.Network.Cookie[] };
 
 @injectable()
 export class CookieCollector {
@@ -58,7 +58,7 @@ export class CookieCollector {
         return results;
     }
 
-    private async getAllCookies(page: Puppeteer.Page): Promise<Puppeteer.Cookie[]> {
+    private async getAllCookies(page: Puppeteer.Page): Promise<Puppeteer.Protocol.Network.Cookie[]> {
         const client = await page.target().createCDPSession();
         const response = (await client.send('Network.getAllCookies')) as GetAllCookiesResponse;
         await client.detach();

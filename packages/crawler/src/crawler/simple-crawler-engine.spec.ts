@@ -165,7 +165,7 @@ describe(SimpleCrawlerEngine, () => {
 
     function setupCrawlerConfig(): void {
         crawlerConfigurationMock.setup((cc) => cc.setDefaultApifySettings()).verifiable();
-        crawlerConfigurationMock.setup((cc) => cc.setLocalOutputDir(localOutputDir)).verifiable();
+        crawlerConfigurationMock.setup((cc) => cc.setLocalOutputDir(crawlerRunOptions.localOutputDir)).verifiable();
         crawlerConfigurationMock.setup((cc) => cc.setMemoryMBytes(crawlerRunOptions.memoryMBytes)).verifiable();
         crawlerConfigurationMock.setup((cc) => cc.setSilentMode(crawlerRunOptions.silentMode)).verifiable();
         crawlerConfigurationMock.setup((cc) => cc.maxRequestsPerCrawl()).returns(() => maxRequestsPerCrawl);

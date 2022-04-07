@@ -4,9 +4,9 @@
 import Apify from 'apify';
 import { inject, injectable } from 'inversify';
 import * as Puppeteer from 'puppeteer';
-import { BrowserError, PageNavigator } from 'scanner-global-library';
+import { BrowserError, NavigationHooks } from 'scanner-global-library';
 import { System } from 'common';
-import { isArray } from 'lodash';
+import _ from 'lodash';
 import { CrawlerConfiguration } from '../crawler/crawler-configuration';
 import { DataBase } from '../level-storage/data-base';
 import { AccessibilityScanOperation } from '../page-operations/accessibility-scan-operation';
@@ -16,7 +16,7 @@ import { BlobStore, DataStore, scanResultStorageName } from '../storage/store-ty
 import { ApifyRequestQueueProvider, crawlerIocTypes } from '../types/ioc-types';
 import { ScanData } from '../types/scan-data';
 
-/* eslint-disable no-invalid-this */
+/* eslint-disable no-invalid-this, @typescript-eslint/no-explicit-any */
 
 export type PartialScanData = {
     url: string;
@@ -25,9 +25,13 @@ export type PartialScanData = {
 
 export interface PageProcessor {
     pageHandler: Apify.PuppeteerHandlePage;
-    gotoFunction: Apify.PuppeteerGoto;
     pageErrorProcessor: Apify.HandleFailedRequest;
+    preNavigation(crawlingContext: PuppeteerCrawlingContext, gotoOptions: any): Promise<void>;
+    postNavigation(crawlingContext: PuppeteerCrawlingContext): Promise<void>;
 }
+
+export type PuppeteerCrawlingContext = Apify.CrawlingContext & { page: Puppeteer.Page };
+export type PuppeteerHandlePageInputs = Apify.CrawlingContext & Apify.BrowserCrawlingContext & Apify.PuppeteerHandlePageFunctionParam;
 
 export interface SessionData {
     requestId: string;
@@ -49,10 +53,10 @@ export abstract class PageProcessorBase implements PageProcessor {
     /**
      * Function that is called to process each request.
      */
-    public pageHandler: Apify.PuppeteerHandlePage = async (inputs: Apify.PuppeteerHandlePageInputs) => {
+    public pageHandler: Apify.PuppeteerHandlePage = async (inputs: PuppeteerHandlePageInputs) => {
         try {
             if (
-                isArray(inputs.session?.userData) &&
+                _.isArray(inputs.session?.userData) &&
                 (inputs.session.userData as SessionData[]).find((s) => s.requestId === inputs.request.id)
             ) {
                 return;
@@ -69,47 +73,44 @@ export abstract class PageProcessorBase implements PageProcessor {
         }
     };
 
-    /**
-     * Overrides the function that opens the page in Puppeteer.
-     * Return the result of Puppeteer's [page.goto()](https://pptr.dev/#?product=Puppeteer&show=api-pagegotourl-options) function.
-     */
-    public gotoFunction: Apify.PuppeteerGoto = async ({ request, page, session }) => {
+    // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+    public preNavigation = async (crawlingContext: PuppeteerCrawlingContext, gotoOptions: any): Promise<void> => {
+        if (!_.isArray(crawlingContext.session.userData)) {
+            crawlingContext.session.userData = [];
+        }
+        await this.navigationHooks.preNavigation(crawlingContext.page);
+    };
+
+    public postNavigation = async (crawlingContext: PuppeteerCrawlingContext): Promise<void> => {
         let navigationError: BrowserError;
         let runError: unknown;
-        let puppeteerError: unknown;
         try {
-            if (!isArray(session.userData)) {
-                session.userData = [];
-            }
-
-            const response = await this.pageNavigator.navigate(request.url, page, async (browserError, error) => {
-                (session.userData as SessionData[]).push({
-                    requestId: request.id,
-                    browserError,
-                });
-                navigationError = browserError;
-                puppeteerError = error;
-            });
-
-            if (puppeteerError) {
-                throw puppeteerError;
-            }
-
-            return response;
+            await this.navigationHooks.postNavigation(
+                crawlingContext.page,
+                crawlingContext.response,
+                async (browserError: BrowserError, error?: unknown) => {
+                    if (error !== undefined) {
+                        throw error;
+                    } else {
+                        navigationError = browserError;
+                    }
+                },
+            );
         } catch (err) {
-            await this.pushScanData({ succeeded: false, id: request.id as string, url: request.url });
-            await this.logPageError(request, err as Error);
+            await this.pushScanData({ succeeded: false, id: crawlingContext.request.id as string, url: crawlingContext.request.url });
+            await this.logPageError(crawlingContext.request, err as Error);
             runError = err;
 
             // Throw the error so Apify puts it back into the queue to retry
             throw err;
         } finally {
             if (runError !== undefined) {
-                await this.saveRunError(request, runError);
+                await this.saveRunError(crawlingContext.request, runError);
             } else if (navigationError !== undefined) {
-                await this.saveBrowserError(request, navigationError);
+                await this.saveBrowserError(crawlingContext.request, navigationError, crawlingContext.session);
             } else {
-                await this.saveScanMetadata(request.url, await page.title());
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                await this.saveScanMetadata(crawlingContext.request.url, await (crawlingContext as any).page.title());
             }
         }
     };
@@ -117,7 +118,7 @@ export abstract class PageProcessorBase implements PageProcessor {
     /**
      * This function is called when the crawling of a request failed after several reties
      */
-    public pageErrorProcessor: Apify.HandleFailedRequest = async ({ request, error }: Apify.HandleFailedRequestInput) => {
+    public pageErrorProcessor: Apify.HandleFailedRequest = async ({ request, error, session }: Apify.HandleFailedRequestInput) => {
         const scanData: ScanData = {
             id: request.id as string,
             url: request.url,
@@ -138,7 +139,7 @@ export abstract class PageProcessorBase implements PageProcessor {
         @inject(LocalDataStore) protected readonly dataStore: DataStore,
         @inject(LocalBlobStore) protected readonly blobStore: BlobStore,
         @inject(DataBase) protected readonly dataBase: DataBase,
-        @inject(PageNavigator) protected readonly pageNavigator: PageNavigator,
+        @inject(NavigationHooks) protected readonly navigationHooks: NavigationHooks,
         @inject(crawlerIocTypes.ApifyRequestQueueProvider) protected readonly requestQueueProvider: ApifyRequestQueueProvider,
         @inject(CrawlerConfiguration) protected readonly crawlerConfiguration: CrawlerConfiguration,
         protected readonly enqueueLinksExt: typeof Apify.utils.enqueueLinks = Apify.utils.enqueueLinks,
@@ -196,7 +197,11 @@ export abstract class PageProcessorBase implements PageProcessor {
         });
     }
 
-    protected async saveBrowserError(request: Apify.Request, error: BrowserError): Promise<void> {
+    protected async saveBrowserError(request: Apify.Request, error: BrowserError, session: Apify.Session): Promise<void> {
+        (session.userData as SessionData[]).push({
+            requestId: request.id,
+            browserError: error,
+        });
         await this.dataBase.addScanResult(request.id as string, {
             id: request.id,
             url: request.url,
@@ -219,11 +224,12 @@ export abstract class PageProcessorBase implements PageProcessor {
     protected async saveScanMetadata(url: string, pageTitle: string): Promise<void> {
         // save metadata for any url first to support the case when base url is not processed
         if ((this.baseUrl && this.baseUrl === url) || !this.scanMetadataSaved) {
+            const pageConfigurator = this.navigationHooks.pageConfigurator;
             await this.dataBase.addScanMetadata({
                 baseUrl: this.baseUrl,
                 basePageTitle: this.baseUrl === url ? pageTitle : '',
-                userAgent: this.pageNavigator.pageConfigurator.getUserAgent(),
-                browserResolution: this.pageNavigator.pageConfigurator.getBrowserResolution(),
+                userAgent: pageConfigurator.getUserAgent(),
+                browserResolution: pageConfigurator.getBrowserResolution(),
             });
             this.scanMetadataSaved = true;
         }
