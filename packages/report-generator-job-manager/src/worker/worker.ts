@@ -34,6 +34,8 @@ export interface BatchTaskArguments {
 
 @injectable()
 export class Worker extends BatchTaskCreator {
+    private runDurationInMinutes: number;
+
     protected jobGroup: string;
 
     public constructor(
@@ -53,6 +55,8 @@ export class Worker extends BatchTaskCreator {
     public async init(): Promise<void> {
         await super.init();
         this.jobGroup = this.jobManagerConfig.reportGeneratorJobGroup;
+        const scanConfig = await this.serviceConfig.getConfigValue('scanConfig');
+        this.runDurationInMinutes = scanConfig.failedScanRetryIntervalInMinutes;
     }
 
     public async getMessagesForTaskCreation(): Promise<ScanMessage[]> {
@@ -116,6 +120,7 @@ export class Worker extends BatchTaskCreator {
         let continuationToken: string;
         do {
             const response: CosmosOperationResponse<ScanReportGroup[]> = await this.reportGeneratorRequestProvider.readScanGroupIds(
+                this.runDurationInMinutes,
                 requestCount,
                 continuationToken,
             );

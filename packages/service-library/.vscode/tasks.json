@@ -4,12 +4,27 @@
     "version": "2.0.0",
     "tasks": [
         {
+            "type": "shell",
+            "label": "run",
+            "dependsOn": "tsc",
+            "windows": {
+                "command": "xcopy .env ./dist/dev-utilities /y"
+            },
+            "osx": {
+                "command": "cp .env ./dist/dev-utilities"
+            }
+        },
+        {
+            "type": "shell",
             "label": "tsc",
+            "dependsOn": "clean",
             "command": "tsc",
-            "isShellCommand": true,
-            "showOutput": "silent",
-            "args": [],
             "problemMatcher": ["$tsc"]
+        },
+        {
+            "type": "shell",
+            "label": "clean",
+            "command": "npx rimraf dist"
         }
     ]
 }
