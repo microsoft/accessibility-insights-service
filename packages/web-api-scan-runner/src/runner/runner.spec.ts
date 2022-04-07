@@ -22,6 +22,7 @@ import {
     WebsiteScanResult,
     WebsiteScanRef,
     OnDemandPageScanRunResult,
+    OnDemandPageScanRunState,
     ReportGeneratorRequest,
 } from 'storage-documents';
 import { AxeScanResults } from 'scanner-global-library';
@@ -206,7 +207,7 @@ describe(Runner, () => {
         setupUpdateScanRunStateToRunning();
         setupScanRunnerTelemetryManager(false);
         setupPageScanProcessor(true, error);
-        setupReportGeneratorRequestProvider();
+        setupReportGeneratorRequestProvider('failed');
         pageScanResult.run.state = 'report';
         setupUpdateScanResult();
         await runner.run();
@@ -306,7 +307,7 @@ describe(Runner, () => {
     });
 });
 
-function setupReportGeneratorRequestProvider(): void {
+function setupReportGeneratorRequestProvider(scanState: OnDemandPageScanRunState = 'completed'): void {
     guidGeneratorMock
         .setup((o) => o.createGuidFromBaseGuid(runnerScanMetadata.id))
         .returns(() => 'guid')
@@ -318,6 +319,7 @@ function setupReportGeneratorRequestProvider(): void {
         targetReport: 'accessibility',
         priority: pageScanResult.priority,
         reports: pageScanResult.reports,
+        scanRunState: scanState,
     };
     reportGeneratorRequestProviderMock.setup((o) => o.writeRequest(It.isValue(reportGeneratorRequest))).verifiable();
 }
@@ -410,7 +412,7 @@ function setupProcessScanResult(useReportGeneratorWorkflow: boolean = false): vo
             .verifiable();
 
         if (useReportGeneratorWorkflow) {
-            setupReportGeneratorRequestProvider();
+            setupReportGeneratorRequestProvider(pageScanResult.run.state);
         } else {
             combinedScanResultProcessorMock
                 .setup((o) => o.generateCombinedScanResults(It.isValue(axeScanResults), It.isValue(pageScanResult)))

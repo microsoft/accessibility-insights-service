@@ -43,6 +43,7 @@ describe(Runner, () => {
                 run: {
                     state: 'pending',
                 },
+                scanRunState: 'completed',
             },
             {
                 id: 'id-2',
@@ -51,6 +52,7 @@ describe(Runner, () => {
                 run: {
                     state: 'pending',
                 },
+                scanRunState: 'completed',
             },
             {
                 id: 'id-3',
@@ -59,6 +61,7 @@ describe(Runner, () => {
                 run: {
                     state: 'completed',
                 },
+                scanRunState: 'failed',
             },
         ] as ReportGeneratorRequest[];
 
@@ -128,6 +131,7 @@ describe(Runner, () => {
                 run: {
                     state: 'pending',
                 },
+                scanRunState: 'completed',
             },
             {
                 id: 'id-3',
@@ -136,6 +140,7 @@ describe(Runner, () => {
                 run: {
                     state: 'completed',
                 },
+                scanRunState: 'failed',
             },
         ] as ReportGeneratorRequest[];
         const queuedRequests = createQueuedRequests(reportGeneratorRequests);
@@ -158,6 +163,7 @@ describe(Runner, () => {
                 run: {
                     state: 'pending',
                 },
+                scanRunState: 'completed',
             },
             {
                 id: 'id-3',
@@ -166,6 +172,7 @@ describe(Runner, () => {
                 run: {
                     state: 'pending',
                 },
+                scanRunState: 'completed',
             },
         ] as ReportGeneratorRequest[];
         const resultRequestsUpdateByReportProcessor = [
@@ -176,6 +183,7 @@ describe(Runner, () => {
                 run: {
                     state: 'failed',
                 },
+                scanRunState: 'completed',
             },
             {
                 id: 'id-3',
@@ -184,6 +192,7 @@ describe(Runner, () => {
                 run: {
                     state: 'completed',
                 },
+                scanRunState: 'completed',
             },
         ] as ReportGeneratorRequest[];
         const queuedRequests = createQueuedRequests(reportGeneratorRequests);
@@ -287,7 +296,7 @@ function setupSetScanRunStatesToCompleted(queuedRequests: ReportGeneratorRequest
         return {
             id: request.id,
             run: {
-                state: request.run.state,
+                state: request.scanRunState === 'completed' ? request.run.state : request.scanRunState,
                 timestamp: dateNow.toJSON(),
                 error: isEmpty(request.run.error) ? null : request.run.error.toString().substring(0, 2048),
             },

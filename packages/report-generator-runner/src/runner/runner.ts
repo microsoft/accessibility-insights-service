@@ -112,10 +112,13 @@ export class Runner {
 
     private async updateScanRunStatesToCompleted(queuedRequests: QueuedRequest[]): Promise<void> {
         const scansToUpdate = queuedRequests.map((queuedRequest) => {
+            const scanState =
+                queuedRequest.request.scanRunState === 'completed' ? queuedRequest.condition : queuedRequest.request.scanRunState;
+
             return {
                 id: queuedRequest.request.id,
                 run: {
-                    state: queuedRequest.condition,
+                    state: scanState,
                     timestamp: new Date().toJSON(),
                     error: isEmpty(queuedRequest.error) ? null : queuedRequest.error.toString().substring(0, 2048),
                 },

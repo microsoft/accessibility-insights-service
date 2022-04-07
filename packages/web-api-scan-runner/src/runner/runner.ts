@@ -72,7 +72,6 @@ export class Runner {
                 await this.onFailedScan(axeScanResults, pageScanResult);
             }
 
-            console.log('SETTING PAGE TITLE');
             pageScanResult.run.pageTitle = axeScanResults.pageTitle;
             pageScanResult.run.pageResponseCode = axeScanResults.pageResponseCode;
         } catch (error) {
@@ -89,11 +88,8 @@ export class Runner {
             const websiteScanResult = await this.updateScanResult(runnerScanMetadata, pageScanResult);
             await this.scanNotificationProcessor.sendScanCompletionNotification(runnerScanMetadata, pageScanResult, websiteScanResult);
         } else {
-            this.setRunResult(pageScanResult, 'report');
-            await this.updateScanResult(runnerScanMetadata, pageScanResult);
-
             const websiteScanRef = this.getWebsiteScanRefs(pageScanResult);
-            await this.sendGenerateConsolidatedReportRequest(pageScanResult, websiteScanRef);
+            await this.updateScanRunAndSendReportGeneratorRequest(pageScanResult, websiteScanRef, runnerScanMetadata);
         }
 
         this.logger.logInfo('Page scan task completed.');
@@ -189,18 +185,12 @@ export class Runner {
     }
 
     private setRunResult(pageScanResult: OnDemandPageScanResult, state: OnDemandPageScanRunState, error?: string | ScanError): void {
-        console.log('BEFORE UPDATE');
-        console.log(JSON.stringify(pageScanResult, undefined, 2));
-
         pageScanResult.run = {
             ...pageScanResult.run,
             state,
             timestamp: new Date().toJSON(),
             error: isString(error) ? error.substring(0, 2048) : error ?? pageScanResult.run?.error,
         };
-
-        console.log('AFTER UPDATE');
-        console.log(JSON.stringify(pageScanResult, undefined, 2));
     }
 
     private getScanStatus(axeResults: AxeScanResults): OnDemandScanResult {
@@ -216,10 +206,15 @@ export class Runner {
         }
     }
 
-    private async sendGenerateConsolidatedReportRequest(
+    private async updateScanRunAndSendReportGeneratorRequest(
         pageScanResult: OnDemandPageScanResult,
         websiteScanRef: WebsiteScanRef,
+        runnerScanMetadata: RunnerScanMetadata,
     ): Promise<void> {
+        const scanRunState = pageScanResult.run.state;
+        this.setRunResult(pageScanResult, 'report');
+        await this.updateScanResult(runnerScanMetadata, pageScanResult);
+
         const reportGeneratorRequest: Partial<ReportGeneratorRequest> = {
             id: this.guidGenerator.createGuidFromBaseGuid(pageScanResult.id),
             scanId: pageScanResult.id,
@@ -227,6 +222,7 @@ export class Runner {
             targetReport: 'accessibility',
             priority: pageScanResult.priority,
             reports: pageScanResult.reports,
+            scanRunState: scanRunState,
         };
         await this.reportGeneratorRequestProvider.writeRequest(reportGeneratorRequest);
 
