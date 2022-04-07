@@ -3208,10 +3208,10 @@
     "@types/abstract-leveldown" "*"
     "@types/node" "*"
 
-"@types/levelup@^4.3.3":
-  version "4.3.3"
-  resolved "https://registry.npmjs.org/@types/levelup/-/levelup-4.3.3.tgz"
-  integrity sha512-K+OTIjJcZHVlZQN1HmU64VtrC0jC3dXWQozuEIR9zVvltIk90zaGPM2AgT+fIkChpzHhFE3YnvFLCbLtzAmexA==
+"@types/levelup@^5.1.1":
+  version "5.1.1"
+  resolved "https://registry.yarnpkg.com/@types/levelup/-/levelup-5.1.1.tgz#1b3b16f68062f6a812ebcb9cfe9759fe1b4a93f2"
+  integrity sha512-VITfjLp6apbz6IHxBb+8px455J+7KKWxY4mgbXlSWtiXJKiiYwnl0c6ViKrBp02SHadPxvTb5BUe44TzQmBpiQ==
   dependencies:
     "@types/abstract-leveldown" "*"
     "@types/level-errors" "*"
