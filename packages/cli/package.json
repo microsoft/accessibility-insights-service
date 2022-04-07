@@ -62,7 +62,7 @@
         "@medv/finder": "^2.1.0",
         "@sindresorhus/fnv1a": "^2.0.1",
         "accessibility-insights-report": "4.2.2",
-        "ajv": "^8.10.0",
+        "ajv": "^8.11.0",
         "apify": "^2.2.2",
         "applicationinsights": "^2.2.2",
         "axe-core": "4.3.2",
