@@ -15,8 +15,8 @@ export class NavigationHooks {
         @inject(PageConfigurator) public readonly pageConfigurator: PageConfigurator,
         @inject(PageResponseProcessor) protected readonly pageResponseProcessor: PageResponseProcessor,
         @inject(PageHandler) protected readonly pageRenderingHandler: PageHandler,
-        private readonly scrollTimeoutMsecs = 15000,
-        private readonly pageRenderingTimeoutMsecs: number = 10000,
+        private readonly scrollTimeoutMsecs = 30000,
+        private readonly pageRenderingTimeoutMsecs: number = 30000,
         private readonly networkTimeoutMsecs = 60000,
         private readonly networkIdleTimeMsecs = 500,
     ) {}

@@ -30,7 +30,7 @@ export class PageHandler {
 
         // Scroll incrementally so everything is inside the window at at some point
         while (!scrollingComplete && checkCount < maxCheckCount) {
-            // Page evaluation may fail because of a navigation
+            // Use try/catch because navigation issues may cause page.evaluate to throw
             try {
                 scrollingComplete = await page.evaluate(async () => {
                     window.scrollBy(0, window.innerHeight);
@@ -62,7 +62,7 @@ export class PageHandler {
 
         while (checkCount < maxCheckCount) {
             try {
-                // Page evaluation may fail because of a navigation
+                // Use try/catch because navigation issues may cause page.evaluate to throw
                 pageHtmlContentSize = await page.evaluate(() => window.document.body.innerHTML.length);
             } catch (error) {
                 pageHtmlContentSize = 0;
