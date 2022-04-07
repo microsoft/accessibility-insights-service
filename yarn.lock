@@ -145,27 +145,6 @@
     "@azure/logger" "^1.0.0"
     tslib "^2.2.0"
 
-"@azure/core-http@^1.1.1", "@azure/core-http@^1.1.6":
-  version "1.2.6"
-  resolved "https://registry.npmjs.org/@azure/core-http/-/core-http-1.2.6.tgz"
-  integrity sha512-odtH7UMKtekc5YQ86xg9GlVHNXR6pq2JgJ5FBo7/jbOjNGdBqcrIVrZx2bevXVJz/uUTSx6vUf62gzTXTfqYSQ==
-  dependencies:
-    "@azure/abort-controller" "^1.0.0"
-    "@azure/core-asynciterator-polyfill" "^1.0.0"
-    "@azure/core-auth" "^1.3.0"
-    "@azure/core-tracing" "1.0.0-preview.11"
-    "@azure/logger" "^1.0.0"
-    "@types/node-fetch" "^2.5.0"
-    "@types/tunnel" "^0.0.1"
-    form-data "^3.0.0"
-    node-fetch "^2.6.0"
-    process "^0.11.10"
-    tough-cookie "^4.0.0"
-    tslib "^2.2.0"
-    tunnel "^0.0.6"
-    uuid "^8.3.0"
-    xml2js "^0.4.19"
-
 "@azure/core-http@^2.0.0", "@azure/core-http@^2.2.3":
   version "2.2.4"
   resolved "https://registry.yarnpkg.com/@azure/core-http/-/core-http-2.2.4.tgz#df5a5b4138dbbc4299879f2fc6f257d0a5f0401e"
@@ -186,16 +165,6 @@
     tunnel "^0.0.6"
     uuid "^8.3.0"
     xml2js "^0.4.19"
-
-"@azure/core-lro@^1.0.2":
-  version "1.0.2"
-  resolved "https://registry.npmjs.org/@azure/core-lro/-/core-lro-1.0.2.tgz"
-  integrity sha512-Yr0JD7GKryOmbcb5wHCQoQ4KCcH5QJWRNorofid+UvudLaxnbCfvKh/cUfQsGUqRjO9L/Bw4X7FP824DcHdMxw==
-  dependencies:
-    "@azure/abort-controller" "^1.0.0"
-    "@azure/core-http" "^1.1.1"
-    events "^3.0.0"
-    tslib "^1.10.0"
 
 "@azure/core-lro@^2.2.0":
   version "2.2.0"
@@ -229,15 +198,6 @@
     tslib "^2.2.0"
     uuid "^8.3.0"
 
-"@azure/core-tracing@1.0.0-preview.11":
-  version "1.0.0-preview.11"
-  resolved "https://registry.npmjs.org/@azure/core-tracing/-/core-tracing-1.0.0-preview.11.tgz"
-  integrity sha512-frF0pJc9HTmKncVokhBxCqipjbql02DThQ1ZJ9wLi7SDMLdPAFyDI5xZNzX5guLz+/DtPkY+SGK2li9FIXqshQ==
-  dependencies:
-    "@opencensus/web-types" "0.0.7"
-    "@opentelemetry/api" "1.0.0-rc.0"
-    tslib "^2.0.0"
-
 "@azure/core-tracing@1.0.0-preview.13":
   version "1.0.0-preview.13"
   resolved "https://registry.npmjs.org/@azure/core-tracing/-/core-tracing-1.0.0-preview.13.tgz"
@@ -245,15 +205,6 @@
   dependencies:
     "@opentelemetry/api" "^1.0.1"
     tslib "^2.2.0"
-
-"@azure/core-tracing@1.0.0-preview.9":
-  version "1.0.0-preview.9"
-  resolved "https://registry.npmjs.org/@azure/core-tracing/-/core-tracing-1.0.0-preview.9.tgz"
-  integrity sha512-zczolCLJ5QG42AEPQ+Qg9SRYNUyB+yZ5dzof4YEc+dyWczO9G2sBqbAjLB7IqrsdHN2apkiB2oXeDKCsq48jug==
-  dependencies:
-    "@opencensus/web-types" "0.0.7"
-    "@opentelemetry/api" "^0.10.2"
-    tslib "^2.0.0"
 
 "@azure/core-util@^1.0.0-beta.1":
   version "1.0.0-beta.1"
@@ -311,19 +262,18 @@
     tslib "^2.2.0"
     uuid "^8.3.0"
 
-"@azure/keyvault-secrets@^4.1.0":
-  version "4.1.0"
-  resolved "https://registry.npmjs.org/@azure/keyvault-secrets/-/keyvault-secrets-4.1.0.tgz"
-  integrity sha512-26ARU97svPkv8q6QbIdwdky8ntn+Q5mxTTCjpp9FUIyA2LTXmEL0wZDPBeM3mxZLHKnMEXQxEo+KYutrJW5xPQ==
+"@azure/keyvault-secrets@^4.4.0":
+  version "4.4.0"
+  resolved "https://registry.yarnpkg.com/@azure/keyvault-secrets/-/keyvault-secrets-4.4.0.tgz#93edb591338a2f663da085b7224be30adea47e0f"
+  integrity sha512-D7s5f+YDJYBLjjAY25Bl0P32h0ztFdHExViqbydsx8QjcrRgq62DJfbYBC4+9/M80BSBH5jRzKw5VWNFFp++AA==
   dependencies:
     "@azure/abort-controller" "^1.0.0"
-    "@azure/core-http" "^1.1.6"
-    "@azure/core-lro" "^1.0.2"
+    "@azure/core-http" "^2.0.0"
+    "@azure/core-lro" "^2.2.0"
     "@azure/core-paging" "^1.1.1"
-    "@azure/core-tracing" "1.0.0-preview.9"
+    "@azure/core-tracing" "1.0.0-preview.13"
     "@azure/logger" "^1.0.0"
-    "@opentelemetry/api" "^0.10.2"
-    tslib "^2.0.0"
+    tslib "^2.2.0"
 
 "@azure/logger@^1.0.0":
   version "1.0.3"
@@ -2858,32 +2808,10 @@
   dependencies:
     "@octokit/openapi-types" "^10.2.2"
 
-"@opencensus/web-types@0.0.7":
-  version "0.0.7"
-  resolved "https://registry.npmjs.org/@opencensus/web-types/-/web-types-0.0.7.tgz"
-  integrity sha512-xB+w7ZDAu3YBzqH44rCmG9/RlrOmFuDPt/bpf17eJr8eZSrLt7nc7LnWdxM9Mmoj/YKMHpxRg28txu3TcpiL+g==
-
-"@opentelemetry/api@1.0.0-rc.0":
-  version "1.0.0-rc.0"
-  resolved "https://registry.npmjs.org/@opentelemetry/api/-/api-1.0.0-rc.0.tgz"
-  integrity sha512-iXKByCMfrlO5S6Oh97BuM56tM2cIBB0XsL/vWF/AtJrJEKx4MC/Xdu0xDsGXMGcNWpqF7ujMsjjnp0+UHBwnDQ==
-
-"@opentelemetry/api@^0.10.2":
-  version "0.10.2"
-  resolved "https://registry.npmjs.org/@opentelemetry/api/-/api-0.10.2.tgz"
-  integrity sha512-GtpMGd6vkzDMYcpu2t9LlhEgMy/SzBwRnz48EejlRArYqZzqSzAsKmegUK7zHgl+EOIaK9mKHhnRaQu3qw20cA==
-  dependencies:
-    "@opentelemetry/context-base" "^0.10.2"
-
 "@opentelemetry/api@^1.0.1", "@opentelemetry/api@^1.0.4":
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/@opentelemetry/api/-/api-1.0.4.tgz#a167e46c10d05a07ab299fc518793b0cff8f6924"
   integrity sha512-BuJuXRSJNQ3QoKA6GWWDyuLpOUck+9hAXNMCnrloc1aWVoy6Xq6t9PUV08aBZ4Lutqq2LEHM486bpZqoViScog==
-
-"@opentelemetry/context-base@^0.10.2":
-  version "0.10.2"
-  resolved "https://registry.npmjs.org/@opentelemetry/context-base/-/context-base-0.10.2.tgz"
-  integrity sha512-hZNKjKOYsckoOEgBziGMnBcX0M7EtstnCmwz5jZUOUYwlZ+/xxX6z3jPu1XVO2Jivk0eLfuP9GP+vFD49CMetw==
 
 "@opentelemetry/core@1.0.1", "@opentelemetry/core@^1.0.1":
   version "1.0.1"
@@ -3413,13 +3341,6 @@
   version "4.0.0"
   resolved "https://registry.npmjs.org/@types/tough-cookie/-/tough-cookie-4.0.0.tgz"
   integrity sha512-I99sngh224D0M7XgW1s120zxCt3VYQ3IQsuw3P3jbq5GG4yc79+ZjyKznyOGIQrflfylLgcfekeZW/vk0yng6A==
-
-"@types/tunnel@^0.0.1":
-  version "0.0.1"
-  resolved "https://registry.npmjs.org/@types/tunnel/-/tunnel-0.0.1.tgz"
-  integrity sha512-AOqu6bQu5MSWwYvehMXLukFHnupHrpZ8nvgae5Ggie9UwzDR1CCwoXgSSWNZJuyOlCdfdsWMA5F2LlmvyoTv8A==
-  dependencies:
-    "@types/node" "*"
 
 "@types/tunnel@^0.0.3":
   version "0.0.3"
