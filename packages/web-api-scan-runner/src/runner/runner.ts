@@ -86,7 +86,7 @@ export class Runner {
 
         const websiteScanResult = await this.updateScanResult(runnerScanMetadata, pageScanResult);
 
-        if (this.isPageScanCompleted(pageScanResult)) {
+        if (this.isPageScanCompleted(pageScanResult) || pageScanResult.run.state === 'failed') {
             await this.scanNotificationProcessor.sendScanCompletionNotification(runnerScanMetadata, pageScanResult, websiteScanResult);
         }
 
