@@ -47,7 +47,7 @@
         "@azure/identity": "^2.0.4",
         "@azure/keyvault-secrets": "^4.1.0",
         "@azure/ms-rest-nodeauth": "^3.1.1",
-        "@azure/storage-blob": "^12.8.0",
+        "@azure/storage-blob": "^12.9.0",
         "@azure/storage-queue": "^12.7.0",
         "async-mutex": "^0.3.2",
         "common": "^1.0.0",
