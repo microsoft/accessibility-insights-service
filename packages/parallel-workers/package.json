@@ -39,7 +39,7 @@
     },
     "dependencies": {
         "lodash": "^4.17.21",
-        "moment": "^2.29.1",
+        "moment": "^2.29.2",
         "storage-documents": "1.0.0"
     }
 }
