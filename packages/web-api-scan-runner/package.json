@@ -65,7 +65,7 @@
         "leveldown": "^6.1.0",
         "lodash": "^4.17.21",
         "logger": "1.0.0",
-        "moment": "^2.29.1",
+        "moment": "^2.29.2",
         "p-limit": "^3.1.0",
         "puppeteer": "^10.0.0",
         "reflect-metadata": "^0.1.13",
