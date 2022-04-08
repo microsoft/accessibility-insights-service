@@ -172,37 +172,45 @@ describe(Runner, () => {
         await runner.run();
     });
 
-    it('execute runner with page scanner exception', async () => {
-        const error = new Error('page scan processor error');
-        const errorMessage = System.serializeError(error);
-        pageScanResult.run = {
-            state: 'failed',
-            timestamp: dateNow.toJSON(),
-            error: errorMessage.substring(0, 2048),
-        };
-        loggerMock.setup((o) => o.logError(`The scanner failed to scan a page.`, { error: errorMessage })).verifiable();
+    it.each([true, false])(
+        'execute runner with page scanner exception with useReportGeneratorWorkflow=%s',
+        async (useReportGeneratorWorkflow) => {
+            pageScanResultDbDocument.websiteScanRefs[0].scanGroupId = useReportGeneratorWorkflow ? 'scanGroupId' : undefined;
+            const error = new Error('page scan processor error');
+            const errorMessage = System.serializeError(error);
+            pageScanResult.run = {
+                state: 'failed',
+                timestamp: dateNow.toJSON(),
+                error: errorMessage.substring(0, 2048),
+            };
+            loggerMock.setup((o) => o.logError(`The scanner failed to scan a page.`, { error: errorMessage })).verifiable();
 
-        setupScanMetadataConfig();
-        setupUpdateScanRunStateToRunning();
-        setupScanRunnerTelemetryManager(false);
-        setupPageScanProcessor(true, error);
-        setupUpdateScanResult();
-        setupScanNotificationProcessor();
-        await runner.run();
-    });
+            setupScanMetadataConfig();
+            setupUpdateScanRunStateToRunning();
+            setupScanRunnerTelemetryManager(false);
+            setupPageScanProcessor(true, error);
+            setupUpdateScanResult();
+            setupScanNotificationProcessor();
+            await runner.run();
+        },
+    );
 
-    it('handle scanner browser navigation error', async () => {
-        axeScanResults.error = 'browser navigation error';
+    it.each([true, false])(
+        'handle scanner browser navigation error with useReportGeneratorWorkflow=%s',
+        async (useReportGeneratorWorkflow: boolean) => {
+            pageScanResultDbDocument.websiteScanRefs[0].scanGroupId = useReportGeneratorWorkflow ? 'scanGroupId' : undefined;
+            axeScanResults.error = 'browser navigation error';
 
-        setupScanMetadataConfig();
-        setupUpdateScanRunStateToRunning();
-        setupScanRunnerTelemetryManager(true, false);
-        setupPageScanProcessor();
-        setupProcessScanResult();
-        setupUpdateScanResult();
-        setupScanNotificationProcessor();
-        await runner.run();
-    });
+            setupScanMetadataConfig();
+            setupUpdateScanRunStateToRunning();
+            setupScanRunnerTelemetryManager(true, false);
+            setupPageScanProcessor();
+            setupProcessScanResult();
+            setupUpdateScanResult();
+            setupScanNotificationProcessor();
+            await runner.run();
+        },
+    );
 
     it('handle scan result violations', async () => {
         axeScanResults.results = {
