@@ -7,6 +7,7 @@
         {
             "name": "Start debugging health client",
             "type": "node",
+            "runtimeVersion": "16",
             "request": "launch",
             "outFiles": ["${workspaceFolder}/dist/**/*.js"],
             "cwd": "${workspaceFolder}",

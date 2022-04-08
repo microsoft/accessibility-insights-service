@@ -4,15 +4,9 @@
 import 'reflect-metadata';
 
 import Apify from 'apify';
-import { PromiseUtils, ServiceConfiguration } from 'common';
-import { ConsoleLoggerClient, GlobalLogger } from 'logger';
 import { Page } from 'puppeteer';
-import { WebDriver } from 'scanner-global-library';
-
 import { IMock, It, Mock } from 'typemoq';
-import { ApifyResourceCreator } from '../apify/apify-resource-creator';
 import { CrawlRequestProcessor } from '../page-processors/crawl-request-processor';
-import { UrlCollectionRequestProcessor } from '../page-processors/url-collection-request-processor';
 import { CrawlerRunOptions } from '../types/crawler-run-options';
 import { ApifyRequestQueueProvider } from '../types/ioc-types';
 import { CrawlerConfiguration } from './crawler-configuration';
@@ -118,50 +112,6 @@ describe(SimpleCrawlerEngine, () => {
 
         expect(discoveredUrls).toEqual(expectedUrls);
     });
-
-    it.skip('run e2e website crawl', async () => {
-        const apifyResourceCreator = new ApifyResourceCreator();
-        const testBaseUrl = 'http://accessibilityinsights.io';
-        const logger = new GlobalLogger([new ConsoleLoggerClient(new ServiceConfiguration(), console)], process);
-        await logger.setup();
-        const crawlerFactory = new CrawlerFactory();
-
-        const webDriver = new WebDriver(new PromiseUtils(), logger);
-        const browser = await webDriver.launch();
-        const page = await browser.newPage();
-        await page.goto(testBaseUrl);
-
-        const testCrawlerRunOptions: CrawlerRunOptions = {
-            baseUrl: testBaseUrl,
-            baseCrawlPage: page,
-            selectors: ['a'],
-            debug: true,
-        };
-
-        const testCrawlerConfiguration = new CrawlerConfiguration();
-        testCrawlerConfiguration.setCrawlerRunOptions(testCrawlerRunOptions);
-        const requestQueueProvider = () =>
-            apifyResourceCreator.createRequestQueue(testBaseUrl, {
-                clear: true,
-                page: page,
-                discoveryPatterns: testCrawlerConfiguration.discoveryPatterns(),
-            });
-
-        const crawlerEngine = new SimpleCrawlerEngine(
-            requestQueueProvider,
-            crawlerFactory,
-            testCrawlerConfiguration,
-            new UrlCollectionRequestProcessor(logger),
-        );
-
-        const urls = await crawlerEngine.start(testCrawlerRunOptions);
-
-        await webDriver.close();
-
-        expect(urls.length).toBeGreaterThan(1);
-
-        console.log(urls);
-    }, 50000000);
 
     function setupCrawlerConfig(): void {
         crawlerConfigurationMock.setup((cc) => cc.setDefaultApifySettings()).verifiable();

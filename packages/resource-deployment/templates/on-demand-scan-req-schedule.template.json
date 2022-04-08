@@ -1,7 +1,7 @@
 {
     "id": "on-demand-scan-req-schedule",
     "schedule": {
-        "recurrenceInterval": "PT2M"
+        "recurrenceInterval": "PT1M"
     },
     "jobSpecification": {
         "priority": 1000,
