@@ -18,7 +18,7 @@
             "type": "shell",
             "label": "imports",
             "dependsOn": "tsc",
-            "command": "rollup -c"
+            "command": "npx rollup -c"
         },
         {
             "type": "shell",
