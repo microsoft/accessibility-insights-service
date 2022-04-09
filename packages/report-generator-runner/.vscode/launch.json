@@ -5,9 +5,8 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Start debugging report-generator-runner",
-            "type": "pwa-node",
-            "runtimeVersion": "16",
+            "name": "Debug report-generator-runner",
+            "type": "node",
             "request": "launch",
             "outFiles": ["${workspaceFolder}/dist/**/*.js"],
             "cwd": "${workspaceFolder}",

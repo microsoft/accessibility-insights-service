@@ -5,8 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "type": "pwa-node",
-            "runtimeVersion": "16",
+            "type": "node",
             "request": "launch",
             "name": "Debug current unit test file",
             "program": "${workspaceFolder:root}/node_modules/jest/bin/jest",
