@@ -79,6 +79,7 @@
         "@npmcli/git": ">=2.1.0",
         "adal-node": ">=0.2.3",
         "ansi-regex": "^5.0.1",
+        "async": ">=3.2.2",
         "axe-core": "4.3.2",
         "glob-parent": ">=5.1.2",
         "json-schema": ">=0.4.0",
