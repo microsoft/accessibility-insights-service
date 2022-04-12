@@ -8,7 +8,7 @@
         "pack": "npm-run-all --serial --npm-path npm 'create-drop-dir' 'pack-to-drop-dir'",
         "pack-to-drop-dir": "yarn pack --filename drop/cli.tgz",
         "create-drop-dir": "npx mkdirp drop",
-        "clean": "rimraf dist drop test-results",
+        "clean": "rimraf dist drop test-results ai_scan_cli_output",
         "lint": "eslint -c ../../.eslintrc.js --ext .ts ./",
         "lint:fix": "eslint --fix -c ../../.eslintrc.js --ext .ts ./",
         "test": "jest --coverage --colors"
