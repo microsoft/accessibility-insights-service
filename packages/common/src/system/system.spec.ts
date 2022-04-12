@@ -7,7 +7,7 @@ import * as utils from 'util';
 import { serializeError as serializeErrorExt } from 'serialize-error';
 import { System } from './system';
 
-/* eslint-disable @typescript-eslint/no-floating-promises, @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-floating-promises */
 
 describe('create instance if nil', () => {
     test.each([null, undefined])('creates instance when nil - %o', (testCase) => {
@@ -81,51 +81,5 @@ describe('serializeError()', () => {
         const error = new Error('Error message');
         const errorStr = System.serializeError(error);
         expect(errorStr).toEqual(utils.inspect(serializeErrorExt(error), false, null));
-    });
-
-    it('serialize HTTP response error object', () => {
-        const httpResponse = {
-            statusCode: 412,
-            request: {
-                url: 'request url',
-                method: 'PUT',
-                body: 'request body',
-            },
-            response: {
-                body: 'response body',
-            },
-        } as any;
-        const { request, ...httpResponseExpected } = httpResponse;
-        httpResponseExpected.request = {
-            url: 'request url',
-            method: 'PUT',
-        };
-
-        const errorStr = System.serializeError(httpResponse);
-        expect(errorStr).toEqual(utils.inspect(serializeErrorExt(System.normalizeHttpResponse(httpResponseExpected)), false, null));
-    });
-});
-
-describe('normalizeHttpResponse()', () => {
-    it('should normalize request object', () => {
-        const httpResponse = {
-            statusCode: 412,
-            request: {
-                url: 'request url',
-                method: 'PUT',
-                body: 'request body',
-            },
-            response: {
-                body: 'response body',
-            },
-        } as any;
-        const { request, ...httpResponseExpected } = httpResponse;
-        httpResponseExpected.request = {
-            url: 'request url',
-            method: 'PUT',
-        };
-
-        const actualResponse = System.normalizeHttpResponse(httpResponse);
-        expect(actualResponse).toEqual(httpResponseExpected);
     });
 });

@@ -4,56 +4,50 @@
 import 'reflect-metadata';
 
 import { IMock, Mock, Times } from 'typemoq';
-import { EnvironmentCredential } from '@azure/identity';
+import { ChainedTokenCredential, EnvironmentCredential } from '@azure/identity';
 import { CredentialsProvider } from './credentials-provider';
-import { MSICredentialsProvider, AuthenticationMethod } from './msi-credential-provider';
+import { MSICredentialsProvider } from './msi-credential-provider';
 import { ManagedIdentityCredentialCache } from './managed-identity-credential-cache';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-const credentialsStub = 'test credentials' as any;
-
 describe(CredentialsProvider, () => {
     let testSubject: CredentialsProvider;
     let msiCredProviderMock: IMock<MSICredentialsProvider>;
-    let managedIdentityCredentialCacheMock: IMock<ManagedIdentityCredentialCache>;
+    const credentialsStub = 'test credentials' as any;
 
     beforeEach(() => {
         msiCredProviderMock = Mock.ofType(MSICredentialsProvider);
-        managedIdentityCredentialCacheMock = Mock.ofType(ManagedIdentityCredentialCache);
-        testSubject = new CredentialsProvider(
-            msiCredProviderMock.object,
-            managedIdentityCredentialCacheMock.object,
-            AuthenticationMethod.managedIdentity,
-        );
-    });
-
-    afterEach(() => {
-        msiCredProviderMock.verifyAll();
     });
 
     it('getCredentialForBatch gets batch credentials with MSI auth', async () => {
+        testSubject = new CredentialsProvider(msiCredProviderMock.object);
+
         msiCredProviderMock
             .setup(async (r) => r.getCredentials('https://batch.core.windows.net/'))
             .returns(async () => Promise.resolve(credentialsStub))
             .verifiable(Times.once());
 
         const actualCredentials = await testSubject.getCredentialsForBatch();
+
         expect(actualCredentials).toBe(credentialsStub);
+        msiCredProviderMock.verifyAll();
     });
 
-    it('getAzureCredential creates ManagedIdentityCredentialCache instance', () => {
+    it('getAzureCredential creates singleton credential', () => {
         const credential = testSubject.getAzureCredential();
-        expect(credential).toBe(managedIdentityCredentialCacheMock.object);
+        //_sources:
+
+        expect(credential).toBeInstanceOf(ChainedTokenCredential);
+        expect(testSubject.getAzureCredential()).toBe(credential);
     });
 
-    it('getAzureCredential creates EnvironmentCredential instance', () => {
-        testSubject = new CredentialsProvider(
-            msiCredProviderMock.object,
-            managedIdentityCredentialCacheMock.object,
-            AuthenticationMethod.servicePrincipal,
-        );
-        const credential = testSubject.getAzureCredential();
-        expect(credential).toBeInstanceOf(EnvironmentCredential);
+    it('getAzureCredential creates credential with limited providers', () => {
+        const credential = testSubject.getAzureCredential() as any;
+
+        expect(credential._sources.length).toEqual(2);
+        // credential providers sequence should match
+        expect(credential._sources[0]).toBeInstanceOf(ManagedIdentityCredentialCache);
+        expect(credential._sources[1]).toBeInstanceOf(EnvironmentCredential);
     });
 });

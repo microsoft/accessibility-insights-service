@@ -5,7 +5,7 @@
     "scripts": {
         "build": "tsc && rollup -c && echo",
         "cbuild": "npm-run-all --serial --npm-path npm 'clean' 'build'",
-        "clean": "rimraf dist test-results ai_scan_cli_output",
+        "clean": "rimraf dist test-results",
         "lint": "eslint -c ../../.eslintrc.js --ext .ts ./",
         "lint:fix": "eslint --fix -c ../../.eslintrc.js --ext .ts ./",
         "test": "jest --coverage --colors",

@@ -50,8 +50,7 @@ export class ManagedIdentityCredentialCache implements TokenCredential {
         this.tokenCache.set<AccessToken>(
             resourceUrl,
             accessToken,
-            // cache item TTL in seconds
-            accessToken.expiresOnTimestamp / 1000 - ManagedIdentityCredentialCache.cacheCheckPeriodInSeconds * 3,
+            accessToken.expiresOnTimestamp - ManagedIdentityCredentialCache.cacheCheckPeriodInSeconds * 1000 * 3,
         );
 
         return accessToken;
