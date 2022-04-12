@@ -11,7 +11,6 @@ import {
     ReportGeneratorRequestProvider,
     ScanNotificationProcessor,
     RunnerScanMetadata,
-    CombinedScanResultProcessor,
 } from 'service-library';
 import {
     OnDemandPageScanReport,
@@ -40,7 +39,6 @@ export class Runner {
         @inject(PageScanProcessor) private readonly pageScanProcessor: PageScanProcessor,
         @inject(ReportWriter) protected readonly reportWriter: ReportWriter,
         @inject(ReportGenerator) private readonly reportGenerator: ReportGenerator,
-        @inject(CombinedScanResultProcessor) private readonly combinedScanResultProcessor: CombinedScanResultProcessor,
         @inject(ScanNotificationProcessor) protected readonly scanNotificationProcessor: ScanNotificationProcessor,
         @inject(ScanRunnerTelemetryManager) private readonly telemetryManager: ScanRunnerTelemetryManager,
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
@@ -103,15 +101,6 @@ export class Runner {
         const websiteScanRef = this.getWebsiteScanRefs(pageScanResult);
         if (this.isPageScanCompleted(pageScanResult)) {
             this.setRunResult(pageScanResult, 'completed');
-
-            // TODO remove below after transition phase
-            // The transition workflow is to support old report generation logic while
-            // new scan request documents will be created with websiteScanRef.scanGroupId metadata
-            if (websiteScanRef && websiteScanRef.scanGroupId === undefined) {
-                await this.combinedScanResultProcessor.generateCombinedScanResults(axeScanResults, pageScanResult);
-
-                return;
-            }
         } else {
             this.setRunResult(pageScanResult, 'report');
             await this.sendGenerateConsolidatedReportRequest(pageScanResult, websiteScanRef);
@@ -241,13 +230,9 @@ export class Runner {
     }
 
     /**
-     * The scan is completed if there is no combined report generated
-     * or combined report generated via old workflow
+     * The scan is completed if there is no combined report to generate
      */
     private isPageScanCompleted(pageScanResult: OnDemandPageScanResult): boolean {
-        const websiteScanRef = this.getWebsiteScanRefs(pageScanResult);
-
-        // TODO remove websiteScanRef.scanGroupId === undefined condition
-        return websiteScanRef === undefined || websiteScanRef.scanGroupId === undefined;
+        return this.getWebsiteScanRefs(pageScanResult) === undefined;
     }
 }

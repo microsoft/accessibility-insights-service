@@ -47,7 +47,7 @@ describe(ManagedIdentityCredentialCache, () => {
             .returns(() => undefined)
             .verifiable();
         tokenCacheMock
-            .setup((o) => o.set(resourceUrl, accessToken, accessToken.expiresOnTimestamp - cacheCheckPeriodInSeconds * 1000 * 3))
+            .setup((o) => o.set(resourceUrl, accessToken, accessToken.expiresOnTimestamp / 1000 - cacheCheckPeriodInSeconds * 3))
             .returns(() => true)
             .verifiable();
         managedIdentityCredentialMock

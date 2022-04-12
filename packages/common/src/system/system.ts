@@ -6,7 +6,7 @@ import * as utils from 'util';
 import { isNil } from 'lodash';
 import { serializeError as serializeErrorExt } from 'serialize-error';
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types */
 
 export namespace System {
     export function createInstanceIfNil<T>(instance: T, factory: () => T): T {
@@ -40,8 +40,25 @@ export namespace System {
         return crypto.randomBytes(bytes).toString('hex').substr(0, length);
     }
 
-    // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
     export function serializeError(error: any): string {
-        return utils.inspect(serializeErrorExt(error), false, null);
+        return utils.inspect(serializeErrorExt(normalizeHttpResponse(error)), false, null);
+    }
+
+    /**
+     * Normalizes request object from the HTTP response object. The request object will have the `url` and `method` properties only.
+     * @param responseObj The HTTP response object
+     */
+    export function normalizeHttpResponse(responseObj: any): any {
+        if (responseObj === undefined || responseObj.request === undefined) {
+            return responseObj;
+        }
+
+        const { request, ...responseCopy } = responseObj;
+        responseCopy.request = {
+            url: responseObj.request?.url,
+            method: responseObj.request?.method,
+        };
+
+        return responseCopy;
     }
 }
