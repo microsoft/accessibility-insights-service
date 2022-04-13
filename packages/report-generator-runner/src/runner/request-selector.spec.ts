@@ -82,6 +82,13 @@ describe(RequestSelector, () => {
             {
                 id: 'id5',
             },
+            {
+                id: 'id6',
+                run: {
+                    state: 'running',
+                    retryCount: 10,
+                },
+            },
         ] as ReportGeneratorRequest[];
 
         const response1 = {
@@ -112,6 +119,7 @@ describe(RequestSelector, () => {
             requestsToDelete: [
                 { request: queuedRequests[0], condition: 'completed' },
                 { request: queuedRequests[1], condition: 'failed' },
+                { request: queuedRequests[5], condition: 'failed' },
             ],
         };
 
