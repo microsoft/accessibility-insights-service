@@ -5,12 +5,12 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Debug service-client",
+            "name": "Debug dev tools",
             "type": "node",
             "request": "launch",
             "outFiles": ["${workspaceFolder}/dist/**/*.js"],
             "cwd": "${workspaceFolder}",
-            "program": "${workspaceFolder}/src/dev-utilities/service-client.ts",
+            "program": "${workspaceFolder}/src/dev-utilities/wcp-result-reader.ts",
             "preLaunchTask": "run",
             "console": "integratedTerminal",
             "internalConsoleOptions": "neverOpen",

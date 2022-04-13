@@ -14,9 +14,9 @@ import { isEmpty } from 'lodash';
 import { ScanRunRequest } from '../web-api/api-contracts/scan-run-request';
 import { ScanRunResponse } from '../web-api/api-contracts/scan-run-response';
 import { ScanRunResultResponse } from '../web-api/api-contracts/scan-result-response';
+import { getOAuthToken, ensureHttpResponse, createGetHttpRequest, createPostHttpRequest } from './common-lib';
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable security/detect-non-literal-fs-filename */
+/* eslint-disable @typescript-eslint/no-explicit-any, security/detect-non-literal-fs-filename */
 
 type ClientOperation = 'submit-scan' | 'get-result';
 
@@ -29,10 +29,6 @@ interface ClientArgs {
     oauthClientSecret: string;
     serviceBaseUrl: string;
     dataFolder: string;
-}
-
-interface OAuthToken {
-    access_token: string;
 }
 
 interface FileData {
@@ -73,7 +69,7 @@ const getReportUrl = (scanId: string, reportId: string) => {
 
 async function main(): Promise<void> {
     clientArgs = getClientArguments();
-    token = await getOAuthToken();
+    token = await getOAuthToken(clientArgs);
     await dispatchOperation();
 }
 
@@ -170,7 +166,7 @@ async function getReportOperation(scanResult: ScanRunResultResponse): Promise<vo
 }
 
 async function sendGetReportRequest(scanId: string, reportId: string): Promise<any> {
-    const httpRequest = createGetHttpRequest();
+    const httpRequest = createGetHttpRequest(token);
     const httpResponse = await nodeFetch.default(getReportUrl(scanId, reportId), httpRequest);
     await ensureHttpResponse(httpResponse);
     const body = await httpResponse.json();
@@ -179,7 +175,7 @@ async function sendGetReportRequest(scanId: string, reportId: string): Promise<a
 }
 
 async function sendGetScanStatusRequest(scanId: string): Promise<ScanRunResultResponse> {
-    const httpRequest = createGetHttpRequest();
+    const httpRequest = createGetHttpRequest(token);
     const httpResponse = await nodeFetch.default(getScanStatusUrl(scanId), httpRequest);
     await ensureHttpResponse(httpResponse);
     const body = await httpResponse.json();
@@ -193,7 +189,7 @@ async function sendPrivacyScanRequest(requests: ScanUrlData[]): Promise<ScanRunR
     return Promise.all(
         await asyncLimit(async () => {
             const scanRequests = requests.map((request) => createPrivacyScanRequest(request.scanUrl, request.knownPages));
-            const httpRequest = createPostHttpRequest(scanRequests);
+            const httpRequest = createPostHttpRequest(scanRequests, token);
             const httpResponse = await nodeFetch.default(getPostScanUrl(), httpRequest);
             await ensureHttpResponse(httpResponse);
             const body = await httpResponse.json();
@@ -219,58 +215,6 @@ function createPrivacyScanRequest(scanUrl: string, knownPages?: string[]): ScanR
         privacyScan: {
             cookieBannerType: 'standard',
         },
-    };
-}
-
-async function getOAuthToken(): Promise<string> {
-    const url = `https://login.microsoftonline.com/microsoft.onmicrosoft.com/oauth2/token`;
-    const httpRequest = createGetTokenHttpRequest();
-    const httpResponse = await nodeFetch.default(url, httpRequest);
-    await ensureHttpResponse(httpResponse);
-    const body = await httpResponse.json();
-
-    return (body as OAuthToken).access_token;
-}
-
-function createGetTokenHttpRequest(): nodeFetch.RequestInit {
-    const headers: nodeFetch.HeadersInit = {
-        'Content-Type': 'application/x-www-form-urlencoded',
-    };
-
-    const body = `grant_type=client_credentials&client_id=${clientArgs.oauthClientId}&resource=${
-        clientArgs.oauthResourceId
-    }&client_secret=${encodeURI(clientArgs.oauthClientSecret)}`;
-
-    return {
-        method: 'POST',
-        headers,
-        body,
-    };
-}
-
-function createGetHttpRequest(): nodeFetch.RequestInit {
-    const headers: nodeFetch.HeadersInit = {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-    };
-
-    return {
-        method: 'GET',
-        headers,
-    };
-}
-
-function createPostHttpRequest(scanRequests: ScanRunRequest[]): nodeFetch.RequestInit {
-    const headers: nodeFetch.HeadersInit = {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-    };
-    const body = JSON.stringify(scanRequests);
-
-    return {
-        method: 'POST',
-        headers,
-        body,
     };
 }
 
@@ -371,14 +315,6 @@ function writeDataFile(data: any, fileName: string): void {
     const filePath = `${getDataFolderName()}/${fileName}.json`;
     const content = JSON.stringify(data, undefined, '    ');
     fs.writeFileSync(filePath, content);
-}
-
-async function ensureHttpResponse(response: nodeFetch.Response): Promise<void> {
-    if (response.status < 200 || response.status > 299) {
-        const body = await response.text();
-
-        throw new Error(body);
-    }
 }
 
 (async () => {
