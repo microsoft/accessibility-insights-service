@@ -26,7 +26,7 @@ import { RequestSelector, QueuedRequest, QueuedRequests } from './request-select
 
 @injectable()
 export class Runner {
-    public maxQueuedRequests = 20;
+    public maxQueuedRequests = 10;
 
     constructor(
         @inject(RunMetadataConfig) private readonly runMetadataConfig: RunMetadataConfig,
@@ -47,7 +47,7 @@ export class Runner {
         this.telemetryManager.trackRequestStarted(runMetadata.id);
         try {
             const queuedRequests = await this.requestSelector.getQueuedRequests(runMetadata.scanGroupId, this.maxQueuedRequests);
-            this.logger.logInfo('Selecting report requests from a queue.', {
+            this.logger.logInfo('Selecting report generator requests from a queue.', {
                 toProcess: queuedRequests.requestsToProcess.length.toString(),
                 toDelete: queuedRequests.requestsToDelete.length.toString(),
             });
