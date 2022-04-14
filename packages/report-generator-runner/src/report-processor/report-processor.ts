@@ -39,12 +39,6 @@ export class ReportProcessor {
         return Promise.all(
             queuedRequests.map(async (queuedRequest) => {
                 return limit(async () => {
-                    this.logger.logInfo(`Generating consolidated report for a report group.`, {
-                        scanId: queuedRequest.request.scanId,
-                        scanGroupId: queuedRequest.request.scanGroupId,
-                        targetReport,
-                    });
-
                     if (targetReport === 'accessibility') {
                         return this.generateReport(this.accessibilityReportProcessor, queuedRequest);
                     } else {
@@ -62,11 +56,20 @@ export class ReportProcessor {
     private async generateReport(targetReportProcessor: TargetReportProcessor, queuedRequest: QueuedRequest): Promise<QueuedRequest> {
         let pageScanResult: OnDemandPageScanResult;
         try {
+            this.logger.logInfo(`Generating accessibility consolidated report.`, {
+                scanId: queuedRequest.request.scanId,
+                scanGroupId: queuedRequest.request.scanGroupId,
+            });
+
             pageScanResult = await this.onDemandPageScanRunResultProvider.readScanRun(queuedRequest.request.scanId);
             await targetReportProcessor.generate(pageScanResult, queuedRequest);
 
             this.setRunResult(pageScanResult, 'completed');
             queuedRequest.condition = 'completed';
+            this.logger.logError(`The accessibility consolidated report generated successfully.`, {
+                scanId: queuedRequest.request.scanId,
+                scanGroupId: queuedRequest.request.scanGroupId,
+            });
         } catch (error) {
             const errorMessage = System.serializeError(error);
             if (pageScanResult) {
@@ -74,7 +77,7 @@ export class ReportProcessor {
             }
             queuedRequest.condition = 'failed';
             queuedRequest.error = errorMessage;
-            this.logger.logError(`The report generator has failed.`, {
+            this.logger.logError(`The consolidated report generation has failed.`, {
                 error: errorMessage,
                 scanId: queuedRequest.request.scanId,
                 scanGroupId: queuedRequest.request.scanGroupId,

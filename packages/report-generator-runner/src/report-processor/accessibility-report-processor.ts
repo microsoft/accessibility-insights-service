@@ -18,8 +18,6 @@ export class AccessibilityReportProcessor implements TargetReportProcessor {
     ) {}
 
     public async generate(pageScanResult: OnDemandPageScanResult, queuedRequest: QueuedRequest): Promise<QueuedRequest> {
-        this.logger.logInfo(`Generating accessibility report for ${queuedRequest.request.scanGroupId} report group id.`);
-
         const axeScanResults = await this.getAxeScanResults(queuedRequest);
         await this.combinedScanResultProcessor.generateCombinedScanResults(axeScanResults, pageScanResult);
 
@@ -31,6 +29,8 @@ export class AccessibilityReportProcessor implements TargetReportProcessor {
         const reportContent = await this.pageScanRunReportProvider.readReportContent(axeReport.reportId);
         if (reportContent.errorCode) {
             this.logger.logError('Failure to read axe report blob.', {
+                scanId: queuedRequest.request.scanId,
+                scanGroupId: queuedRequest.request.scanGroupId,
                 reportId: axeReport.reportId,
                 errorCode: reportContent.errorCode,
                 error: reportContent.error,

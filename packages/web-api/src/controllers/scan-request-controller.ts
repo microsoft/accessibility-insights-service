@@ -142,13 +142,22 @@ export class ScanRequestController extends ApiController {
                     url: scanRunRequest.url,
                 });
 
-                this.logger.logInfo('Generated new scan id for the scan request URL.', { batchId, scanId, url: scanRunRequest.url });
+                this.logger.logInfo('Generated new scan id for the scan request URL.', {
+                    batchId,
+                    scanId,
+                    url: scanRunRequest.url,
+                    jsonRequest: JSON.stringify(scanRunRequest),
+                });
             } else {
                 scanResponses.push({
                     url: scanRunRequest.url,
                     error: runRequestValidationResult.error,
                 });
-                this.logger.logInfo('The posted scan request URL is rejected as malformed.', { batchId, url: scanRunRequest.url });
+                this.logger.logInfo('The posted scan request URL is rejected as malformed.', {
+                    batchId,
+                    url: scanRunRequest.url,
+                    jsonRequest: JSON.stringify(scanRunRequest),
+                });
             }
         });
 

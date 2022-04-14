@@ -107,25 +107,31 @@ describe('serializeError()', () => {
 });
 
 describe('normalizeHttpResponse()', () => {
-    it('should normalize request object', () => {
+    it('should normalize HTTP request object', () => {
+        const requestObj = {
+            url: 'url',
+            method: 'PUT',
+            headers: [{ name: 'Accept', value: 'application/xml' }],
+            body: 'body',
+            operationSpec: { path: '/{containerName}/{blob}' },
+        } as any;
         const httpResponse = {
+            name: 'RestError',
+            code: 'ConditionNotMet',
             statusCode: 412,
-            request: {
-                url: 'request url',
-                method: 'PUT',
-                body: 'request body',
-            },
+            request: requestObj,
             response: {
-                body: 'response body',
+                headers: [{ name: 'content-length', value: '255' }],
+                request: requestObj,
+                status: 412,
+                bodyAsText: 'bodyAsText',
             },
         } as any;
-        const { request, ...httpResponseExpected } = httpResponse;
-        httpResponseExpected.request = {
-            url: 'request url',
-            method: 'PUT',
-        };
+        const expectedResponse = JSON.parse(
+            `{"name":"RestError","code":"ConditionNotMet","statusCode":412,"request":{"url":"url","method":"PUT"},"response":{"status":412,"bodyAsText":"bodyAsText"}}`,
+        );
 
         const actualResponse = System.normalizeHttpResponse(httpResponse);
-        expect(actualResponse).toEqual(httpResponseExpected);
+        expect(actualResponse).toEqual(expectedResponse);
     });
 });
