@@ -82,38 +82,38 @@ getAppInsightKey
 getBatchAccountEndpoint
 
 echo -e "
-Copy below output into .env file. Update AZ_BATCH_*, URL, and ID variables as needed.
+Copy below output into .env file
 START of .env file >>> \033[32m
 
 SUBSCRIPTION=$subscription
 RESOURCE_GROUP=$resourceGroupName
 
-JOB-MANAGER_VARIABLES=
 AZ_BATCH_ACCOUNT_NAME=$batchAccountName
 AZ_BATCH_ACCOUNT_URL=https://$batchAccountEndpoint/
-AZ_BATCH_POOL_ID=on-demand-url-scan-pool
-AZ_BATCH_JOB_ID=1-on-demand-url-scan-schedule-job
-AZ_BATCH_TASK_ID=on-demand-url-scan-job-manager-task
-
-COMMON_VARIABLES=
 AZURE_STORAGE_SCAN_QUEUE=ondemand-scanrequest
 AZURE_STORAGE_PRIVACY_SCAN_QUEUE=privacy-scan-request
+AZURE_STORAGE_NAME=$storageAccountName
 KEY_VAULT_URL=https://$keyVault.vault.azure.net/
 APPINSIGHTS_INSTRUMENTATIONKEY=$appInsightInstrumentationKey
-
 COSMOS_DB_URL=$cosmosDbUrl
 COSMOS_DB_KEY=$cosmosDbAccessKey
-
-AZURE_STORAGE_NAME=$storageAccountName
 
 AZURE_TENANT_ID=$tenant
 AZURE_CLIENT_ID=$clientId
 AZURE_CLIENT_SECRET=$password
 
-RUNNER_PARAMETERS=
+!!! Update variables below if required !!!
+
+Available pools: on-demand-scan-request-pool, on-demand-url-scan-pool, privacy-scan-pool
+AZ_BATCH_POOL_ID=
+AZ_BATCH_JOB_ID=1-dev-test-job
+AZ_BATCH_TASK_ID=dev-test-task
+
 URL=
 ID=
-DEEPSCAN=false
+DEEPSCAN=
+SCANGROUPID=
+TARGETREPORT=
 
 \033[0m <<< END of .env file
 

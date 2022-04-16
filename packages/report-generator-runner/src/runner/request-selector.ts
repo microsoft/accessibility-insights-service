@@ -74,7 +74,10 @@ export class RequestSelector {
                 return;
             }
 
-            if (queuedRequest.run.state === 'failed' && queuedRequest.run.retryCount >= this.maxFailedScanRetryCount) {
+            if (
+                (queuedRequest.run.state === 'failed' || queuedRequest.run.state === 'running') &&
+                queuedRequest.run.retryCount >= this.maxFailedScanRetryCount
+            ) {
                 filteredRequests.requestsToDelete.push({ request: queuedRequest, condition: 'failed' });
 
                 return;

@@ -45,20 +45,35 @@ export namespace System {
     }
 
     /**
-     * Normalizes request object from the HTTP response object. The request object will have the `url` and `method` properties only.
-     * @param responseObj The HTTP response object
+     * Normalizes request object from the HTTP response object
+     * @param httpResponse The HTTP response object
      */
-    export function normalizeHttpResponse(responseObj: any): any {
-        if (responseObj === undefined || responseObj.request === undefined) {
-            return responseObj;
+    export function normalizeHttpResponse(httpResponse: any): any {
+        if (httpResponse === undefined || (httpResponse.request === undefined && httpResponse.response === undefined)) {
+            return httpResponse;
         }
 
-        const { request, ...responseCopy } = responseObj;
-        responseCopy.request = {
-            url: responseObj.request?.url,
-            method: responseObj.request?.method,
+        const getRequest = (request: any) => {
+            const { headers, body, operationSpec, ...requestCopy } = request;
+
+            return requestCopy;
         };
 
-        return responseCopy;
+        const getResponse = (response: any) => {
+            const { headers, request, ...responseCopy } = response;
+
+            return responseCopy;
+        };
+
+        const { request, response, ...httpResponseCopy } = httpResponse;
+        if (request) {
+            httpResponseCopy.request = getRequest(request);
+        }
+
+        if (response) {
+            httpResponseCopy.response = getResponse(response);
+        }
+
+        return httpResponseCopy;
     }
 }

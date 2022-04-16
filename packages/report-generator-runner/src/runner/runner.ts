@@ -26,7 +26,7 @@ import { RequestSelector, QueuedRequest, QueuedRequests } from './request-select
 
 @injectable()
 export class Runner {
-    public maxQueuedRequests = 20;
+    public maxQueuedRequests = 10;
 
     constructor(
         @inject(RunMetadataConfig) private readonly runMetadataConfig: RunMetadataConfig,
@@ -47,6 +47,11 @@ export class Runner {
         this.telemetryManager.trackRequestStarted(runMetadata.id);
         try {
             const queuedRequests = await this.requestSelector.getQueuedRequests(runMetadata.scanGroupId, this.maxQueuedRequests);
+            this.logger.logInfo('Selecting report generator requests from a queue.', {
+                toProcess: queuedRequests.requestsToProcess.length.toString(),
+                toDelete: queuedRequests.requestsToDelete.length.toString(),
+            });
+
             await this.updateRequestStateToRunning(queuedRequests);
             queuedRequests.requestsToProcess = await this.reportProcessor.generate(
                 runMetadata.targetReport,
@@ -75,6 +80,11 @@ export class Runner {
 
     private async updateRequestStateToRunning(queuedRequests: QueuedRequests): Promise<void> {
         const requestsToUpdate = queuedRequests.requestsToProcess.map((queuedRequest) => {
+            this.logger.logInfo(`Updating report request run state to running.`, {
+                id: queuedRequest.request.id,
+                scanId: queuedRequest.request.scanId,
+            });
+
             return {
                 id: queuedRequest.request.id,
                 run: {
@@ -97,6 +107,11 @@ export class Runner {
 
     private async updateRequestStateToFailed(queuedRequests: QueuedRequest[]): Promise<void> {
         const requestsToUpdate = queuedRequests.map((queuedRequest) => {
+            this.logger.logInfo(`Updating report request run state to failed.`, {
+                id: queuedRequest.request.id,
+                scanId: queuedRequest.request.scanId,
+            });
+
             return {
                 id: queuedRequest.request.id,
                 run: {
@@ -112,6 +127,11 @@ export class Runner {
 
     private async updateScanRunStatesToCompleted(queuedRequests: QueuedRequest[]): Promise<void> {
         const scansToUpdate = queuedRequests.map((queuedRequest) => {
+            this.logger.logInfo(`Updating report request run state to ${queuedRequest.condition}.`, {
+                id: queuedRequest.request.id,
+                scanId: queuedRequest.request.scanId,
+            });
+
             return {
                 id: queuedRequest.request.id,
                 run: {
@@ -128,6 +148,15 @@ export class Runner {
     }
 
     private async deleteRequests(queuedRequests: QueuedRequest[]): Promise<void> {
-        await this.reportGeneratorRequestProvider.deleteRequests(queuedRequests.map((r) => r.request.id));
+        await this.reportGeneratorRequestProvider.deleteRequests(
+            queuedRequests.map((queuedRequest) => {
+                this.logger.logInfo(`Deleting report request from a queue.`, {
+                    id: queuedRequest.request.id,
+                    scanId: queuedRequest.request.scanId,
+                });
+
+                return queuedRequest.request.id;
+            }),
+        );
     }
 }
