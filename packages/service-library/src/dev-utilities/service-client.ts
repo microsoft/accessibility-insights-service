@@ -14,7 +14,7 @@ import { isEmpty } from 'lodash';
 import { ScanRunRequest } from '../web-api/api-contracts/scan-run-request';
 import { ScanRunResponse } from '../web-api/api-contracts/scan-run-response';
 import { ScanRunResultResponse } from '../web-api/api-contracts/scan-result-response';
-import { getOAuthToken, ensureHttpResponse, createGetHttpRequest, createPostHttpRequest } from './common-lib';
+import { getOAuthToken, ensureHttpResponse, createGetHttpRequest, createPostHttpRequest, writeToFile } from './common-lib';
 
 /* eslint-disable @typescript-eslint/no-explicit-any, security/detect-non-literal-fs-filename */
 
@@ -43,11 +43,12 @@ interface ScanUrlData {
 }
 
 const maxConcurrencyLimit = 10;
+
 let clientArgs: ClientArgs;
 let token: string;
 const guidGenerator = new GuidGenerator();
 const getDataFolderName = () => `${__dirname}/${clientArgs.dataFolder}`;
-const getScanFileName = () => `${__dirname}/${clientArgs.scanFile}`;
+const getScanFileName = () => `${getDataFolderName()}/${clientArgs.scanFile}`;
 const getPostScanUrl = () => {
     const url = new URL(`${clientArgs.serviceBaseUrl}/scans`);
     url.searchParams.append('api-version', '1.0');
@@ -123,7 +124,7 @@ async function getScanResultOperation(): Promise<void> {
                 } else {
                     console.log(`Scan ${scanId} is pending`);
                 }
-                writeDataFile(fileData, dataFileName);
+                writeToFile(fileData, getDataFolderName(), dataFileName);
             });
         }),
     );
@@ -151,7 +152,7 @@ async function sendRequestOperation(requests: ScanUrlData[]): Promise<void> {
                     data: scanResponse,
                 };
             }
-            writeDataFile(fileData, dataFileName);
+            writeToFile(fileData, getDataFolderName(), dataFileName);
         });
     });
 }
@@ -160,7 +161,7 @@ async function getReportOperation(scanResult: ScanRunResultResponse): Promise<vo
     const privacyReport = scanResult.reports.find((r) => r.format === 'consolidated.json');
     if (privacyReport) {
         const report = await sendGetReportRequest(scanResult.scanId, privacyReport.reportId);
-        writeDataFile(report, `${scanResult.scanId}.privacy`);
+        writeToFile(report, getDataFolderName(), `${scanResult.scanId}.privacy`);
         console.log(`Privacy scan report for scan ${scanResult.scanId} downloaded.`);
     }
 }
@@ -231,39 +232,39 @@ function getClientArguments(): ClientArgs {
                 type: 'string',
                 describe: 'The URL to scan.',
                 default: undefined,
-                alias: 'scanurl',
+                alias: ['scanurl', 'scan-url'],
             },
             scanFile: {
                 type: 'string',
                 describe: 'The file with URL(s) to scan.',
                 default: undefined,
-                alias: 'scanfile',
+                alias: ['scanfile', 'scan-file'],
             },
             oauthClientId: {
                 type: 'string',
                 describe: 'The OAuth2 client id.',
-                alias: 'oauthclientid',
+                alias: ['oauthclientid', 'ai-oauth-client-id'],
             },
             oauthResourceId: {
                 type: 'string',
                 describe: 'The OAuth2 resource id.',
-                alias: 'oauthresourceid',
+                alias: ['oauthresourceid, ai-oauth-resource-id'],
             },
             oauthClientSecret: {
                 type: 'string',
                 describe: 'The OAuth2 client secret.',
-                alias: 'oauthclientsecret',
+                alias: ['oauthclientsecret', 'ai-oauth-client-secret'],
             },
             serviceBaseUrl: {
                 type: 'string',
                 describe: 'The accessibility service base URL.',
-                alias: 'servicebaseurl',
+                alias: ['servicebaseurl', 'ai-service-base-url'],
             },
             dataFolder: {
                 type: 'string',
                 describe: 'The data folder relative location.',
                 default: './data',
-                alias: 'datafolder',
+                alias: ['datafolder', 'data-folder'],
             },
         })
         .describe('help', 'Show help').argv as unknown as ClientArgs;
@@ -305,16 +306,6 @@ function readPendingResultsScanIds(): string[] {
     const pendingRequests = submitted.filter((f) => !completed.includes(f));
 
     return pendingRequests;
-}
-
-function writeDataFile(data: any, fileName: string): void {
-    if (!fs.existsSync(getDataFolderName())) {
-        fs.mkdirSync(getDataFolderName());
-    }
-
-    const filePath = `${getDataFolderName()}/${fileName}.json`;
-    const content = JSON.stringify(data, undefined, '    ');
-    fs.writeFileSync(filePath, content);
 }
 
 (async () => {

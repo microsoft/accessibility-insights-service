@@ -10,7 +10,7 @@
             "request": "launch",
             "outFiles": ["${workspaceFolder}/dist/**/*.js"],
             "cwd": "${workspaceFolder}",
-            "program": "${workspaceFolder}/src/dev-utilities/wcp-result-reader.ts",
+            "program": "${workspaceFolder}/src/dev-utilities/wcp-data-parser.ts",
             "preLaunchTask": "run",
             "console": "integratedTerminal",
             "internalConsoleOptions": "neverOpen",

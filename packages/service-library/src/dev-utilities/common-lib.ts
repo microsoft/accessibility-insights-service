@@ -1,9 +1,16 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+import { Readable } from 'stream';
+import fs from 'fs';
 import * as nodeFetch from 'node-fetch';
+import { BlobServiceClient } from '@azure/storage-blob';
+import { EnvironmentCredential } from '@azure/identity';
+import { BlobStorageClient } from 'azure-services';
+import { BodyParser } from 'common';
 
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types */
+/* eslint-disable security/detect-non-literal-fs-filename */
 
 export interface OAuthToken {
     access_token: string;
@@ -58,6 +65,33 @@ export function createPostHttpRequest(bodyObj: any, token: string): nodeFetch.Re
         body,
     };
 }
+
+export async function downloadBlob<T>(accountName: string, blobContainerName: string, blobName: string): Promise<T> {
+    const credential = new EnvironmentCredential();
+    const blobServiceClient = new BlobServiceClient(`https://${accountName}.blob.core.windows.net`, credential);
+    const blobStorageClient = new BlobStorageClient(() => Promise.resolve(blobServiceClient));
+    const blobContentStream = await blobStorageClient.getBlobContent(blobContainerName, blobName);
+
+    if (blobContentStream.notFound) {
+        return undefined;
+    }
+
+    const bodyParser = new BodyParser();
+    const blobContent = (await bodyParser.getRawBody(blobContentStream.content as Readable)).toString();
+
+    return JSON.parse(blobContent) as T;
+}
+
+export function writeToFile(data: any, folderName: string, fileName: string): void {
+    if (!fs.existsSync(folderName)) {
+        fs.mkdirSync(folderName);
+    }
+
+    const content = typeof data === 'string' ? data : JSON.stringify(data, undefined, '    ');
+    const filePath = `${folderName}/${fileName}.json`;
+    fs.writeFileSync(filePath, content);
+}
+
 function createGetTokenHttpRequest(options: OAuthOptions): nodeFetch.RequestInit {
     const headers: nodeFetch.HeadersInit = {
         'Content-Type': 'application/x-www-form-urlencoded',
