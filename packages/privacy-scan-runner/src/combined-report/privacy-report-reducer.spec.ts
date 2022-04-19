@@ -22,50 +22,50 @@ describe(PrivacyReportReducer, () => {
     const successfulScanResult: PrivacyScanResult = {
         pageResponseCode: 200,
         results: {
-            HttpStatusCode: 200,
-            FinishDateTime: currentDate,
-            NavigationalUri: 'navigational url',
-            SeedUri: 'seed url',
-            CookieCollectionConsentResults: [
+            httpStatusCode: 200,
+            finishDateTime: currentDate,
+            navigationalUri: 'navigational url',
+            seedUri: 'seed url',
+            cookieCollectionConsentResults: [
                 {
-                    CookiesUsedForConsent: 'cookie1=value',
-                    CookiesBeforeConsent: [
+                    cookiesUsedForConsent: 'cookie1=value',
+                    cookiesBeforeConsent: [
                         {
-                            Domain: 'domain1',
-                            Cookies: [{ Name: 'domain1cookie1', Domain: 'domain1' }],
+                            domain: 'domain1',
+                            cookies: [{ name: 'domain1cookie1', domain: 'domain1' }],
                         },
                     ],
-                    CookiesAfterConsent: [
+                    cookiesAfterConsent: [
                         {
-                            Domain: 'domain1',
-                            Cookies: [
-                                { Name: 'domain1cookie1', Domain: 'domain1' },
-                                { Name: 'domain1cookie2', Domain: 'domain1' },
+                            domain: 'domain1',
+                            cookies: [
+                                { name: 'domain1cookie1', domain: 'domain1' },
+                                { name: 'domain1cookie2', domain: 'domain1' },
                             ],
                         },
                         {
-                            Domain: 'domain2',
-                            Cookies: [{ Name: 'domain2cookie1', Domain: 'domain2' }],
+                            domain: 'domain2',
+                            cookies: [{ name: 'domain2cookie1', domain: 'domain2' }],
                         },
                     ],
                 },
                 {
-                    CookiesUsedForConsent: 'cookie2=value',
-                    CookiesBeforeConsent: [],
-                    CookiesAfterConsent: [
+                    cookiesUsedForConsent: 'cookie2=value',
+                    cookiesBeforeConsent: [],
+                    cookiesAfterConsent: [
                         {
-                            Domain: 'domain2',
-                            Cookies: [{ Name: 'domain2cookie1', Domain: 'domain2' }],
+                            domain: 'domain2',
+                            cookies: [{ name: 'domain2cookie1', domain: 'domain2' }],
                         },
                         {
-                            Domain: 'domain2',
-                            Cookies: [{ Name: 'domain2cookie2', Domain: 'domain2' }],
+                            domain: 'domain2',
+                            cookies: [{ name: 'domain2cookie2', domain: 'domain2' }],
                         },
                     ],
                 },
             ],
-            BannerDetected: true,
-            BannerDetectionXpathExpression: 'banner xpath',
+            bannerDetected: true,
+            bannerDetectionXpathExpression: 'banner xpath',
         },
     };
     const partialScanResult: PrivacyScanResult = {
@@ -73,19 +73,19 @@ describe(PrivacyReportReducer, () => {
         error: 'Page reload error',
         results: {
             ..._.cloneDeep(successfulScanResult.results),
-            CookieCollectionConsentResults: [
-                ..._.cloneDeep(successfulScanResult.results.CookieCollectionConsentResults),
+            cookieCollectionConsentResults: [
+                ..._.cloneDeep(successfulScanResult.results.cookieCollectionConsentResults),
                 {
-                    CookiesUsedForConsent: 'cookie3=value',
-                    Error: 'First page reload failed',
+                    cookiesUsedForConsent: 'cookie3=value',
+                    error: 'First page reload failed',
                 },
                 {
-                    CookiesUsedForConsent: 'cookie4=value',
-                    Error: 'Second page reload failed',
-                    CookiesBeforeConsent: [
+                    cookiesUsedForConsent: 'cookie4=value',
+                    error: 'Second page reload failed',
+                    cookiesBeforeConsent: [
                         {
-                            Domain: 'domain3',
-                            Cookies: [{ Name: 'domain3cookie1', Domain: 'domain3' }],
+                            domain: 'domain3',
+                            cookies: [{ name: 'domain3cookie1', domain: 'domain3' }],
                         },
                     ],
                 },
@@ -111,19 +111,19 @@ describe(PrivacyReportReducer, () => {
     describe('Creates new combined report if none is provided', () => {
         it('with successful scan result', () => {
             const expectedReport: PrivacyScanCombinedReport = {
-                ScanId: metadata.websiteScanId,
-                Status: 'Completed',
-                Urls: [metadata.url],
-                FailedUrls: [],
-                ScanCookies: [
-                    { Name: 'domain1cookie1', Domain: 'domain1' },
-                    { Name: 'domain1cookie2', Domain: 'domain1' },
-                    { Name: 'domain2cookie1', Domain: 'domain2' },
-                    { Name: 'domain2cookie2', Domain: 'domain2' },
+                scanId: metadata.websiteScanId,
+                status: 'Completed',
+                urls: [metadata.url],
+                failedUrls: [],
+                scanCookies: [
+                    { name: 'domain1cookie1', domain: 'domain1' },
+                    { name: 'domain1cookie2', domain: 'domain1' },
+                    { name: 'domain2cookie1', domain: 'domain2' },
+                    { name: 'domain2cookie2', domain: 'domain2' },
                 ],
-                CookieCollectionUrlResults: [successfulScanResult.results],
-                StartDateTime: startDate,
-                FinishDateTime: currentDate,
+                cookieCollectionUrlResults: [successfulScanResult.results],
+                startDateTime: startDate,
+                finishDateTime: currentDate,
             };
 
             const actualReport = testSubject.reduceResults(successfulScanResult, undefined, metadata);
@@ -133,29 +133,29 @@ describe(PrivacyReportReducer, () => {
 
         it('with failed partial scan result', () => {
             const failedUrl: FailedUrl = {
-                Url: partialScanResult.results.NavigationalUri,
-                SeedUri: partialScanResult.results.SeedUri,
-                HttpStatusCode: partialScanResult.pageResponseCode,
-                Reason: 'error="Page reload error"',
-                BannerDetected: partialScanResult.results.BannerDetected,
-                BannerDetectionXpathExpression: partialScanResult.results.BannerDetectionXpathExpression,
+                url: partialScanResult.results.navigationalUri,
+                seedUri: partialScanResult.results.seedUri,
+                httpStatusCode: partialScanResult.pageResponseCode,
+                reason: 'error="Page reload error"',
+                bannerDetected: partialScanResult.results.bannerDetected,
+                bannerDetectionXpathExpression: partialScanResult.results.bannerDetectionXpathExpression,
             };
 
             const expectedReport: PrivacyScanCombinedReport = {
-                ScanId: metadata.websiteScanId,
-                Status: 'Failed',
-                Urls: [metadata.url],
-                FailedUrls: [failedUrl],
-                ScanCookies: [
-                    { Name: 'domain1cookie1', Domain: 'domain1' },
-                    { Name: 'domain1cookie2', Domain: 'domain1' },
-                    { Name: 'domain2cookie1', Domain: 'domain2' },
-                    { Name: 'domain2cookie2', Domain: 'domain2' },
-                    { Name: 'domain3cookie1', Domain: 'domain3' },
+                scanId: metadata.websiteScanId,
+                status: 'Failed',
+                urls: [metadata.url],
+                failedUrls: [failedUrl],
+                scanCookies: [
+                    { name: 'domain1cookie1', domain: 'domain1' },
+                    { name: 'domain1cookie2', domain: 'domain1' },
+                    { name: 'domain2cookie1', domain: 'domain2' },
+                    { name: 'domain2cookie2', domain: 'domain2' },
+                    { name: 'domain3cookie1', domain: 'domain3' },
                 ],
-                CookieCollectionUrlResults: [partialScanResult.results],
-                StartDateTime: startDate,
-                FinishDateTime: currentDate,
+                cookieCollectionUrlResults: [partialScanResult.results],
+                startDateTime: startDate,
+                finishDateTime: currentDate,
             };
 
             const actualReport = testSubject.reduceResults(partialScanResult, undefined, metadata);
@@ -169,23 +169,23 @@ describe(PrivacyReportReducer, () => {
                 pageResponseCode: 404,
             };
             const failedUrl: FailedUrl = {
-                Url: metadata.url,
-                SeedUri: metadata.url,
-                HttpStatusCode: 404,
-                Reason: 'error="Browser error"',
-                BannerDetected: undefined,
-                BannerDetectionXpathExpression: undefined,
+                url: metadata.url,
+                seedUri: metadata.url,
+                httpStatusCode: 404,
+                reason: 'error="Browser error"',
+                bannerDetected: undefined,
+                bannerDetectionXpathExpression: undefined,
             };
 
             const expectedReport: PrivacyScanCombinedReport = {
-                ScanId: metadata.websiteScanId,
-                Status: 'Failed',
-                Urls: [metadata.url],
-                FailedUrls: [failedUrl],
-                ScanCookies: [],
-                CookieCollectionUrlResults: [],
-                StartDateTime: startDate,
-                FinishDateTime: currentDate,
+                scanId: metadata.websiteScanId,
+                status: 'Failed',
+                urls: [metadata.url],
+                failedUrls: [failedUrl],
+                scanCookies: [],
+                cookieCollectionUrlResults: [],
+                startDateTime: startDate,
+                finishDateTime: currentDate,
             };
 
             const actualReport = testSubject.reduceResults(failedScanResult, undefined, metadata);
@@ -199,39 +199,39 @@ describe(PrivacyReportReducer, () => {
 
         beforeEach(() => {
             existingReport = {
-                ScanId: 'report scan id',
-                Status: 'Completed',
-                Urls: ['url1', 'url2'],
-                FailedUrls: [],
-                ScanCookies: [
-                    { Name: 'domain1cookie1', Domain: 'domain1' },
-                    { Name: 'domain2cookie1', Domain: 'domain2' },
-                    { Name: 'domain4cookie1', Domain: 'domain4' },
+                scanId: 'report scan id',
+                status: 'Completed',
+                urls: ['url1', 'url2'],
+                failedUrls: [],
+                scanCookies: [
+                    { name: 'domain1cookie1', domain: 'domain1' },
+                    { name: 'domain2cookie1', domain: 'domain2' },
+                    { name: 'domain4cookie1', domain: 'domain4' },
                 ],
-                CookieCollectionUrlResults: [
+                cookieCollectionUrlResults: [
                     {
-                        HttpStatusCode: 200,
+                        httpStatusCode: 200,
                     } as PrivacyPageScanReport,
                 ],
-                StartDateTime: new Date(0, 0, 0, 0),
-                FinishDateTime: new Date(1, 1, 1, 1),
+                startDateTime: new Date(0, 0, 0, 0),
+                finishDateTime: new Date(1, 1, 1, 1),
             };
         });
 
         it.each(['Completed', 'Failed'] as PrivacyScanStatus[])('with successful scan result and existing report status=%s', (status) => {
-            existingReport.Status = status;
+            existingReport.status = status;
 
             const expectedReport: PrivacyScanCombinedReport = {
                 ..._.cloneDeep(existingReport),
-                Status: status,
-                Urls: [...existingReport.Urls, metadata.url],
-                ScanCookies: [
-                    ...existingReport.ScanCookies,
-                    { Name: 'domain1cookie2', Domain: 'domain1' },
-                    { Name: 'domain2cookie2', Domain: 'domain2' },
+                status: status,
+                urls: [...existingReport.urls, metadata.url],
+                scanCookies: [
+                    ...existingReport.scanCookies,
+                    { name: 'domain1cookie2', domain: 'domain1' },
+                    { name: 'domain2cookie2', domain: 'domain2' },
                 ],
-                CookieCollectionUrlResults: [...existingReport.CookieCollectionUrlResults, successfulScanResult.results],
-                FinishDateTime: currentDate,
+                cookieCollectionUrlResults: [...existingReport.cookieCollectionUrlResults, successfulScanResult.results],
+                finishDateTime: currentDate,
             };
 
             const actualReport = testSubject.reduceResults(successfulScanResult, existingReport, metadata);
@@ -242,29 +242,29 @@ describe(PrivacyReportReducer, () => {
         it.each(['Completed', 'Failed'] as PrivacyScanStatus[])(
             'with failed partial scan result and existing report status=%s',
             (status) => {
-                existingReport.Status = status;
+                existingReport.status = status;
 
                 const failedUrl: FailedUrl = {
-                    Url: partialScanResult.results.NavigationalUri,
-                    SeedUri: partialScanResult.results.SeedUri,
-                    HttpStatusCode: partialScanResult.pageResponseCode,
-                    Reason: 'error="Page reload error"',
-                    BannerDetected: partialScanResult.results.BannerDetected,
-                    BannerDetectionXpathExpression: partialScanResult.results.BannerDetectionXpathExpression,
+                    url: partialScanResult.results.navigationalUri,
+                    seedUri: partialScanResult.results.seedUri,
+                    httpStatusCode: partialScanResult.pageResponseCode,
+                    reason: 'error="Page reload error"',
+                    bannerDetected: partialScanResult.results.bannerDetected,
+                    bannerDetectionXpathExpression: partialScanResult.results.bannerDetectionXpathExpression,
                 };
                 const expectedReport: PrivacyScanCombinedReport = {
                     ..._.cloneDeep(existingReport),
-                    Status: 'Failed',
-                    Urls: [...existingReport.Urls, metadata.url],
-                    ScanCookies: [
-                        ...existingReport.ScanCookies,
-                        { Name: 'domain1cookie2', Domain: 'domain1' },
-                        { Name: 'domain2cookie2', Domain: 'domain2' },
-                        { Name: 'domain3cookie1', Domain: 'domain3' },
+                    status: 'Failed',
+                    urls: [...existingReport.urls, metadata.url],
+                    scanCookies: [
+                        ...existingReport.scanCookies,
+                        { name: 'domain1cookie2', domain: 'domain1' },
+                        { name: 'domain2cookie2', domain: 'domain2' },
+                        { name: 'domain3cookie1', domain: 'domain3' },
                     ],
-                    CookieCollectionUrlResults: [...existingReport.CookieCollectionUrlResults, partialScanResult.results],
-                    FailedUrls: [failedUrl],
-                    FinishDateTime: currentDate,
+                    cookieCollectionUrlResults: [...existingReport.cookieCollectionUrlResults, partialScanResult.results],
+                    failedUrls: [failedUrl],
+                    finishDateTime: currentDate,
                 };
 
                 const actualReport = testSubject.reduceResults(partialScanResult, existingReport, metadata);
@@ -276,25 +276,25 @@ describe(PrivacyReportReducer, () => {
         it.each(['Completed', 'Failed'] as PrivacyScanStatus[])(
             'with failed scan, no scan results, and existing report status=%s',
             (status) => {
-                existingReport.Status = status;
+                existingReport.status = status;
 
                 const failedScanResult: PrivacyScanResult = {
                     error: 'Browser error',
                     pageResponseCode: 404,
                 };
                 const failedUrl: FailedUrl = {
-                    Url: metadata.url,
-                    SeedUri: metadata.url,
-                    HttpStatusCode: 404,
-                    Reason: 'error="Browser error"',
+                    url: metadata.url,
+                    seedUri: metadata.url,
+                    httpStatusCode: 404,
+                    reason: 'error="Browser error"',
                 };
 
                 const expectedReport: PrivacyScanCombinedReport = {
                     ..._.cloneDeep(existingReport),
-                    Status: 'Failed',
-                    Urls: [...existingReport.Urls, metadata.url],
-                    FailedUrls: [failedUrl],
-                    FinishDateTime: currentDate,
+                    status: 'Failed',
+                    urls: [...existingReport.urls, metadata.url],
+                    failedUrls: [failedUrl],
+                    finishDateTime: currentDate,
                 };
 
                 const actualReport = testSubject.reduceResults(failedScanResult, existingReport, metadata);
@@ -303,32 +303,32 @@ describe(PrivacyReportReducer, () => {
             },
         );
 
-        it.each([metadata.url, successfulScanResult.results.NavigationalUri])(
+        it.each([metadata.url, successfulScanResult.results.navigationalUri])(
             'Replace existing failed results for failed url="%s" if retried scan succeeded',
             (url) => {
                 const expectedReport: PrivacyScanCombinedReport = {
                     ..._.cloneDeep(existingReport),
-                    Urls: [...existingReport.Urls, metadata.url],
-                    Status: 'Completed',
-                    ScanCookies: [
-                        ...existingReport.ScanCookies,
-                        { Name: 'domain1cookie2', Domain: 'domain1' },
-                        { Name: 'domain2cookie2', Domain: 'domain2' },
+                    urls: [...existingReport.urls, metadata.url],
+                    status: 'Completed',
+                    scanCookies: [
+                        ...existingReport.scanCookies,
+                        { name: 'domain1cookie2', domain: 'domain1' },
+                        { name: 'domain2cookie2', domain: 'domain2' },
                     ],
-                    CookieCollectionUrlResults: [...existingReport.CookieCollectionUrlResults, successfulScanResult.results],
-                    FailedUrls: [],
-                    FinishDateTime: currentDate,
+                    cookieCollectionUrlResults: [...existingReport.cookieCollectionUrlResults, successfulScanResult.results],
+                    failedUrls: [],
+                    finishDateTime: currentDate,
                 };
 
-                existingReport.Urls.push(metadata.url);
-                existingReport.FailedUrls.push({
-                    Url: url,
+                existingReport.urls.push(metadata.url);
+                existingReport.failedUrls.push({
+                    url: url,
                 } as FailedUrl);
-                existingReport.CookieCollectionUrlResults.push({
-                    NavigationalUri: successfulScanResult.results.NavigationalUri,
-                    CookieCollectionConsentResults: [{ Error: 'browser error' }],
+                existingReport.cookieCollectionUrlResults.push({
+                    navigationalUri: successfulScanResult.results.navigationalUri,
+                    cookieCollectionConsentResults: [{ error: 'browser error' }],
                 } as PrivacyPageScanReport);
-                existingReport.Status = 'Failed';
+                existingReport.status = 'Failed';
 
                 const actualReport = testSubject.reduceResults(successfulScanResult, existingReport, metadata);
 
@@ -337,9 +337,9 @@ describe(PrivacyReportReducer, () => {
         );
 
         it('Replace existing failed results if retried scan also failed', () => {
-            existingReport.Urls.push(metadata.url);
-            existingReport.FailedUrls.push({
-                Url: metadata.url,
+            existingReport.urls.push(metadata.url);
+            existingReport.failedUrls.push({
+                url: metadata.url,
             } as FailedUrl);
 
             const failedScanResult: PrivacyScanResult = {
@@ -347,17 +347,17 @@ describe(PrivacyReportReducer, () => {
                 pageResponseCode: 404,
             };
             const failedUrl: FailedUrl = {
-                Url: metadata.url,
-                SeedUri: metadata.url,
-                HttpStatusCode: 404,
-                Reason: 'error="Browser error"',
+                url: metadata.url,
+                seedUri: metadata.url,
+                httpStatusCode: 404,
+                reason: 'error="Browser error"',
             };
 
             const expectedReport: PrivacyScanCombinedReport = {
                 ..._.cloneDeep(existingReport),
-                Status: 'Failed',
-                FailedUrls: [failedUrl],
-                FinishDateTime: currentDate,
+                status: 'Failed',
+                failedUrls: [failedUrl],
+                finishDateTime: currentDate,
             };
 
             const actualReport = testSubject.reduceResults(failedScanResult, existingReport, metadata);
@@ -366,29 +366,29 @@ describe(PrivacyReportReducer, () => {
         });
 
         it('Replace existing failed results if retried scan succeeded but other scans have failed', () => {
-            const existingFailedUrl = { Url: 'some other url' } as FailedUrl;
+            const existingFailedUrl = { url: 'some other url' } as FailedUrl;
 
             const expectedReport: PrivacyScanCombinedReport = {
                 ..._.cloneDeep(existingReport),
-                Urls: [...existingReport.Urls, metadata.url],
-                Status: 'Failed',
-                ScanCookies: [
-                    ...existingReport.ScanCookies,
-                    { Name: 'domain1cookie2', Domain: 'domain1' },
-                    { Name: 'domain2cookie2', Domain: 'domain2' },
+                urls: [...existingReport.urls, metadata.url],
+                status: 'Failed',
+                scanCookies: [
+                    ...existingReport.scanCookies,
+                    { name: 'domain1cookie2', domain: 'domain1' },
+                    { name: 'domain2cookie2', domain: 'domain2' },
                 ],
-                CookieCollectionUrlResults: [...existingReport.CookieCollectionUrlResults, successfulScanResult.results],
-                FailedUrls: [existingFailedUrl],
-                FinishDateTime: currentDate,
+                cookieCollectionUrlResults: [...existingReport.cookieCollectionUrlResults, successfulScanResult.results],
+                failedUrls: [existingFailedUrl],
+                finishDateTime: currentDate,
             };
 
-            existingReport.Urls.push(metadata.url);
-            existingReport.FailedUrls = [{ Url: metadata.url }, existingFailedUrl] as FailedUrl[];
-            existingReport.CookieCollectionUrlResults.push({
-                NavigationalUri: successfulScanResult.results.NavigationalUri,
-                CookieCollectionConsentResults: [{ Error: 'browser error' }],
+            existingReport.urls.push(metadata.url);
+            existingReport.failedUrls = [{ url: metadata.url }, existingFailedUrl] as FailedUrl[];
+            existingReport.cookieCollectionUrlResults.push({
+                navigationalUri: successfulScanResult.results.navigationalUri,
+                cookieCollectionConsentResults: [{ error: 'browser error' }],
             } as PrivacyPageScanReport);
-            existingReport.Status = 'Failed';
+            existingReport.status = 'Failed';
 
             const actualReport = testSubject.reduceResults(successfulScanResult, existingReport, metadata);
 

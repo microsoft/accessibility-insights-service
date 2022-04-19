@@ -1,11 +1,13 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
+
 node_modules/
 dist/
 drop/
 test-results/
 out/
 crawler_storage/
+data/
 ai_scan_cli_output*
 
 **/.secrets

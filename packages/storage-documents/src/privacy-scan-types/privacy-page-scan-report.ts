@@ -2,43 +2,30 @@
 // Licensed under the MIT License.
 
 export interface PrivacyPageScanReport {
-    FinishDateTime: Date;
-    NavigationalUri: string;
-    SeedUri: string;
-    HttpStatusCode: number;
-    CookieCollectionConsentResults: ConsentResult[];
-    BannerDetected: boolean;
-    BannerDetectionXpathExpression: string;
-    ConsentModalValidationResult?: ConsentModalValidationResult;
+    finishDateTime: Date;
+    navigationalUri: string;
+    seedUri: string;
+    httpStatusCode: number;
+    cookieCollectionConsentResults: ConsentResult[];
+    bannerDetected: boolean;
+    bannerDetectionXpathExpression: string;
 }
 
 export interface Cookie {
-    Name: string;
-    Domain: string;
-    TimeStamp?: Date;
-    Expires?: Date;
+    name: string;
+    domain: string;
+    timeStamp?: Date;
+    expires?: Date;
 }
 
 export interface CookieByDomain {
-    Domain: string;
-    Cookies: Cookie[];
+    domain: string;
+    cookies: Cookie[];
 }
 
 export interface ConsentResult {
-    CookiesUsedForConsent?: string;
-    CookiesBeforeConsent?: CookieByDomain[];
-    CookiesAfterConsent?: CookieByDomain[];
-    Error?: unknown;
-}
-
-export interface MultiLoadResult {
-    BaseCookie: string;
-    TestedCookie: string;
-    CookiesBeforeUpdate: CookieByDomain[];
-    CookiesAfterUpdate: CookieByDomain[];
-}
-
-export interface ConsentModalValidationResult {
-    ConsentManagementElementXPath: string;
-    ConsentManagementElementExists: boolean;
+    cookiesUsedForConsent?: string;
+    cookiesBeforeConsent?: CookieByDomain[];
+    cookiesAfterConsent?: CookieByDomain[];
+    error?: unknown;
 }

@@ -27,8 +27,8 @@ import { PrivacyReportReducer } from './privacy-report-reducer';
 
 describe(CombinedPrivacyScanResultProcessor, () => {
     const reportId = 'report id';
-    const pageScanReport = { HttpStatusCode: 200 } as PrivacyPageScanReport;
-    const combinedReport = { Status: 'Completed' } as PrivacyScanCombinedReport;
+    const pageScanReport = { httpStatusCode: 200 } as PrivacyPageScanReport;
+    const combinedReport = { status: 'Completed' } as PrivacyScanCombinedReport;
     const privacyResults: PrivacyScanResult = {
         results: pageScanReport,
     };

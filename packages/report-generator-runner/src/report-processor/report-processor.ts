@@ -66,7 +66,7 @@ export class ReportProcessor {
 
             this.setRunResult(pageScanResult, 'completed');
             queuedRequest.condition = 'completed';
-            this.logger.logError(`The accessibility consolidated report generated successfully.`, {
+            this.logger.logInfo(`The accessibility consolidated report generated successfully.`, {
                 scanId: queuedRequest.request.scanId,
                 scanGroupId: queuedRequest.request.scanGroupId,
             });

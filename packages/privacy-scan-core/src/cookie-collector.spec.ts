@@ -51,15 +51,15 @@ describe(CookieCollector, () => {
         ] as Puppeteer.Protocol.Network.Cookie[];
         pageCookiesByDomain = [
             {
-                Domain: 'domain1',
-                Cookies: [
-                    { Name: 'domain1cookie1', Domain: 'domain1', Expires: expiryDate },
-                    { Name: 'domain1cookie2', Domain: 'domain1', Expires: expiryDate },
+                domain: 'domain1',
+                cookies: [
+                    { name: 'domain1cookie1', domain: 'domain1', expires: expiryDate },
+                    { name: 'domain1cookie2', domain: 'domain1', expires: expiryDate },
                 ],
             },
             {
-                Domain: 'domain2',
-                Cookies: [{ Name: 'domain2cookie', Domain: 'domain2', Expires: expiryDate }],
+                domain: 'domain2',
+                cookies: [{ name: 'domain2cookie', domain: 'domain2', expires: expiryDate }],
             },
         ];
         setupGetCookies(pageCookies);
@@ -80,7 +80,7 @@ describe(CookieCollector, () => {
             error: { message: 'test error' },
         };
         const expectedResult: ConsentResult = {
-            Error: failedReloadResponse.error,
+            error: failedReloadResponse.error,
         };
         setupClearCookies(failedReloadResponse);
 
@@ -95,7 +95,7 @@ describe(CookieCollector, () => {
             error: { message: 'test error' },
         };
         const expectedResult: ConsentResult = {
-            Error: failedReloadResponse.error,
+            error: failedReloadResponse.error,
         };
         setupClearCookies({ success: true });
         setupLoadPageWithCookie([], failedReloadResponse);
@@ -112,17 +112,17 @@ describe(CookieCollector, () => {
             expires: expiryDate.getTime(),
         } as Puppeteer.Protocol.Network.Cookie;
         const expectedResult: ConsentResult = {
-            CookiesUsedForConsent: `${cookieScenario.name}=${cookieScenario.value}`,
-            CookiesBeforeConsent: pageCookiesByDomain,
-            CookiesAfterConsent: [
+            cookiesUsedForConsent: `${cookieScenario.name}=${cookieScenario.value}`,
+            cookiesBeforeConsent: pageCookiesByDomain,
+            cookiesAfterConsent: [
                 ...pageCookiesByDomain,
                 {
-                    Domain: 'new domain',
-                    Cookies: [
+                    domain: 'new domain',
+                    cookies: [
                         {
-                            Domain: 'new domain',
-                            Name: 'new cookie',
-                            Expires: expiryDate,
+                            domain: 'new domain',
+                            name: 'new cookie',
+                            expires: expiryDate,
                         },
                     ],
                 },
