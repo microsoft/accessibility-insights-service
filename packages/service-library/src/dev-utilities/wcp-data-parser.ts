@@ -8,7 +8,8 @@ import yargs from 'yargs';
 import { System, HashGenerator } from 'common';
 import * as dotenv from 'dotenv';
 import pLimit from 'p-limit';
-import { PrivacyMetadata, UrlValidation } from './wcp-types';
+import { PrivacyPageScanReport, ConsentResult, CookieByDomain } from 'storage-documents';
+import { PrivacyMetadata, UrlValidation, ViolationTypeEnum } from './wcp-types';
 import { downloadBlob, writeToFile } from './common-lib';
 
 /* eslint-disable @typescript-eslint/no-explicit-any, security/detect-non-literal-fs-filename */
@@ -23,7 +24,7 @@ interface ClientArgs {
     azureBlobContainerName: string;
 }
 
-const maxConcurrencyLimit = 1;
+const maxConcurrencyLimit = 1; // TODO
 
 let clientArgs: ClientArgs;
 const hashGenerator = new HashGenerator();
@@ -91,7 +92,51 @@ function writeUrlValidation(urlValidation: UrlValidation[]): void {
     urlValidation.map((validation) => {
         const urlHash = hashGenerator.generateBase64Hash(validation.Url);
         writeToFile(validation, getDataFolderName(), `${urlHash}.validation`);
+
+        const privacyPageScanReport = convertToPrivacyPageScanReport(validation);
+        writeToFile(privacyPageScanReport, getDataFolderName(), `${urlHash}.report`);
     });
+}
+
+function convertToPrivacyPageScanReport(urlValidation: UrlValidation): PrivacyPageScanReport {
+    interface ConsentResultByKey {
+        key: string;
+        consentResult: ConsentResult;
+    }
+    const consentResult: ConsentResultByKey[] = [];
+
+    urlValidation.CookieValidations.map((cookieValidation) => {
+        const cookie: CookieByDomain = {
+            domain: cookieValidation.ScanCookie.Domain,
+            cookies: [
+                {
+                    name: cookieValidation.ScanCookie.Name,
+                    domain: cookieValidation.ScanCookie.Domain,
+                },
+            ],
+        };
+
+        const key = `${cookieValidation.ScanCookie.Domain}:${cookieValidation.ScanCookie.Name}:${cookieValidation.ViolationType}`;
+        if (!consentResult.some((r) => r.key === key)) {
+            consentResult.push({
+                key,
+                consentResult: {
+                    violation: ViolationTypeEnum[cookieValidation.ViolationType as number] as string,
+                    cookiesAfterConsent: [cookie],
+                } as ConsentResult,
+            });
+        }
+    });
+
+    return {
+        navigationalUri: urlValidation.Url,
+        seedUri: urlValidation.Url,
+        finishDateTime: new Date(),
+        bannerDetectionXpathExpression: urlValidation.BannerXPath,
+        bannerDetected: urlValidation.BannerStatus === 1,
+        httpStatusCode: urlValidation.HttpStatusCode,
+        cookieCollectionConsentResults: consentResult.map((r) => r.consentResult),
+    };
 }
 
 function cleanup(): void {

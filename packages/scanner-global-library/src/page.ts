@@ -157,7 +157,7 @@ export class Page {
         const scanResult: PrivacyScanResult = {
             results: {
                 ...privacyResult,
-                HttpStatusCode: navigationStatusCode,
+                httpStatusCode: navigationStatusCode,
             },
             pageResponseCode: navigationStatusCode,
         };
@@ -172,8 +172,8 @@ export class Page {
         }
 
         const failedConsentResults = _.filter(
-            privacyResult.CookieCollectionConsentResults,
-            (consentResult) => consentResult.Error !== undefined,
+            privacyResult.cookieCollectionConsentResults,
+            (consentResult) => consentResult.error !== undefined,
         );
         if (!_.isEmpty(failedConsentResults)) {
             const errorMessage = `Failed to collect cookies for ${failedConsentResults.length} test cases`;

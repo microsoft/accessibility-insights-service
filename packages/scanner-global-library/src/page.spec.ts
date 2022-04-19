@@ -230,12 +230,12 @@ describe(Page, () => {
 
         beforeEach(() => {
             privacyResults = {
-                BannerDetected: true,
-                CookieCollectionConsentResults: [
+                bannerDetected: true,
+                cookieCollectionConsentResults: [
                     {
-                        CookiesUsedForConsent: 'cookie=value',
-                        CookiesAfterConsent: [],
-                        CookiesBeforeConsent: [],
+                        cookiesUsedForConsent: 'cookie=value',
+                        cookiesAfterConsent: [],
+                        cookiesBeforeConsent: [],
                     },
                 ],
             } as PrivacyResults;
@@ -249,7 +249,7 @@ describe(Page, () => {
             const expectedPrivacyScanResults = {
                 results: {
                     ...privacyResults,
-                    HttpStatusCode: 200,
+                    httpStatusCode: 200,
                 },
                 pageResponseCode: 200,
             } as PrivacyScanResult;
@@ -298,7 +298,7 @@ describe(Page, () => {
             const expectedPrivacyScanResults = {
                 results: {
                     ...privacyResults,
-                    HttpStatusCode: 200,
+                    httpStatusCode: 200,
                 },
                 pageResponseCode: 200,
                 scannedUrl: redirectUrl,
@@ -321,7 +321,7 @@ describe(Page, () => {
             const expectedPrivacyScanResults = {
                 results: {
                     ...privacyResults,
-                    HttpStatusCode: 200,
+                    httpStatusCode: 200,
                 },
                 pageResponseCode: 200,
                 scannedUrl: redirectUrl,
@@ -341,15 +341,15 @@ describe(Page, () => {
         });
 
         it('Returns result with error if results contain an error in ConsentCollectionResults', async () => {
-            privacyResults.CookieCollectionConsentResults.push({
-                Error: 'Error reloading page',
+            privacyResults.cookieCollectionConsentResults.push({
+                error: 'Error reloading page',
             });
             puppeteerPageMock.setup((p) => p.url()).returns(() => url);
             simulatePageNavigation(puppeteerResponseMock.object);
             const expectedPrivacyScanResults = {
                 results: {
                     ...privacyResults,
-                    HttpStatusCode: 200,
+                    httpStatusCode: 200,
                 },
                 pageResponseCode: 200,
                 error: 'Failed to collect cookies for 1 test cases',

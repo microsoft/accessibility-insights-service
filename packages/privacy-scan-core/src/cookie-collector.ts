@@ -19,22 +19,22 @@ export class CookieCollector {
     ): Promise<ConsentResult> {
         let reloadResponse = await this.clearCookies(page, reloadPageFunc);
         if (!reloadResponse.success) {
-            return { Error: reloadResponse.error };
+            return { error: reloadResponse.error };
         }
 
         const cookiesBeforeConsent = await this.getCurrentCookies(page);
 
         reloadResponse = await this.reloadWithCookie(page, cookieScenario, reloadPageFunc);
         if (!reloadResponse.success) {
-            return { Error: reloadResponse.error };
+            return { error: reloadResponse.error };
         }
 
         const cookiesAfterConsent = await this.getCurrentCookies(page);
 
         return {
-            CookiesUsedForConsent: `${cookieScenario.name}=${cookieScenario.value}`,
-            CookiesBeforeConsent: cookiesBeforeConsent,
-            CookiesAfterConsent: cookiesAfterConsent,
+            cookiesUsedForConsent: `${cookieScenario.name}=${cookieScenario.value}`,
+            cookiesBeforeConsent: cookiesBeforeConsent,
+            cookiesAfterConsent: cookiesAfterConsent,
         };
     }
 
@@ -44,12 +44,12 @@ export class CookieCollector {
         const groupedCookies = _.groupBy(cookies, (cookie) => cookie.domain);
         Object.keys(groupedCookies).forEach((domain) => {
             results.push({
-                Domain: domain,
-                Cookies: groupedCookies[domain].map((c) => {
+                domain: domain,
+                cookies: groupedCookies[domain].map((c) => {
                     return {
-                        Name: c.name,
-                        Domain: c.domain,
-                        Expires: new Date(c.expires),
+                        name: c.name,
+                        domain: c.domain,
+                        expires: new Date(c.expires),
                     };
                 }),
             });
