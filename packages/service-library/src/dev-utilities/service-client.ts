@@ -6,7 +6,7 @@ import 'reflect-metadata';
 import fs from 'fs';
 import * as readline from 'readline';
 import yargs from 'yargs';
-import { GuidGenerator, System } from 'common';
+import { GuidGenerator, System, HashGenerator } from 'common';
 import * as nodeFetch from 'node-fetch';
 import * as dotenv from 'dotenv';
 import pLimit from 'p-limit';
@@ -29,6 +29,7 @@ interface ClientArgs {
     oauthClientSecret: string;
     serviceBaseUrl: string;
     dataFolder: string;
+    hashByUrl: boolean;
 }
 
 interface FileData {
@@ -47,6 +48,7 @@ const maxConcurrencyLimit = 10;
 let clientArgs: ClientArgs;
 let token: string;
 const guidGenerator = new GuidGenerator();
+const hashGenerator = new HashGenerator();
 const getDataFolderName = () => `${__dirname}/${clientArgs.dataFolder}`;
 const getScanFileName = () => `${getDataFolderName()}/${clientArgs.scanFile}`;
 const getPostScanUrl = () => {
@@ -158,10 +160,15 @@ async function sendRequestOperation(requests: ScanUrlData[]): Promise<void> {
 }
 
 async function getReportOperation(scanResult: ScanRunResultResponse): Promise<void> {
-    const privacyReport = scanResult.reports.find((r) => r.format === 'consolidated.json');
+    const privacyReport = scanResult.reports.find((r) => r.format === 'json');
     if (privacyReport) {
         const report = await sendGetReportRequest(scanResult.scanId, privacyReport.reportId);
         writeToFile(report, getDataFolderName(), `${scanResult.scanId}.privacy`);
+
+        if (clientArgs.hashByUrl === true) {
+            const urlHash = hashGenerator.generateBase64Hash(scanResult.url);
+            writeToFile(report, getDataFolderName(), `${urlHash}.ai.report`);
+        }
         console.log(`Privacy scan report for scan ${scanResult.scanId} downloaded.`);
     }
 }
@@ -226,7 +233,7 @@ function getClientArguments(): ClientArgs {
         .options({
             operation: {
                 type: 'string',
-                describe: 'The client operation: sendRequest | getScanResult.',
+                describe: 'The client operation.',
             },
             scanUrl: {
                 type: 'string',
@@ -265,6 +272,12 @@ function getClientArguments(): ClientArgs {
                 describe: 'The data folder relative location.',
                 default: './data',
                 alias: ['datafolder', 'data-folder'],
+            },
+            hashByUrl: {
+                type: 'boolean',
+                describe: 'When this option is enabled the report saved into file with URL`s hash name.',
+                default: false,
+                alias: ['hashbyurl'],
             },
         })
         .describe('help', 'Show help').argv as unknown as ClientArgs;

@@ -8,13 +8,17 @@ import yargs from 'yargs';
 import { System, HashGenerator } from 'common';
 import * as dotenv from 'dotenv';
 import pLimit from 'p-limit';
-import { PrivacyPageScanReport, ConsentResult, CookieByDomain } from 'storage-documents';
+import { PrivacyPageScanReport, ConsentResult, CookieByDomain, Cookie } from 'storage-documents';
 import { PrivacyMetadata, UrlValidation, ViolationTypeEnum } from './wcp-types';
 import { downloadBlob, writeToFile } from './common-lib';
 
 /* eslint-disable @typescript-eslint/no-explicit-any, security/detect-non-literal-fs-filename */
 
+type ClientOperation = 'compare-validation' | 'get-validation';
+type MissingFromReport = 'accessibility' | 'privacy';
+
 interface ClientArgs {
+    operation: ClientOperation;
     azureTenantId: string;
     azureClientId: string;
     azureClientSecret: string;
@@ -24,20 +28,122 @@ interface ClientArgs {
     azureBlobContainerName: string;
 }
 
+interface CookieMismatch {
+    missingFrom: MissingFromReport;
+    name: string;
+    domain: string;
+}
+
+interface ValidationDiff {
+    url: string;
+    fileHash: string;
+    bannerDetectionMismatch: boolean;
+    cookieMismatch: CookieMismatch[];
+}
+
 const maxConcurrencyLimit = 1; // TODO
 
 let clientArgs: ClientArgs;
 const hashGenerator = new HashGenerator();
 const getDataFolderName = () => `${__dirname}/${clientArgs.dataFolder}`;
 const getMetadataFileName = () => `${getDataFolderName()}/${clientArgs.metadataFile}`;
+const getFilePath = (fileName: string) => `${getDataFolderName()}/${fileName}`;
 
 async function main(): Promise<void> {
     clientArgs = getClientArguments();
     cleanup();
-    await exportScanResult();
+    await dispatchOperation();
 }
 
-async function exportScanResult(): Promise<void> {
+async function dispatchOperation(): Promise<void> {
+    switch (clientArgs.operation) {
+        case 'get-validation':
+            await exportPrivacyValidation();
+            break;
+        case 'compare-validation':
+            comparePrivacyValidation();
+            break;
+        default:
+            throw new Error(`Operation ${clientArgs.operation} is not supported.`);
+    }
+}
+
+function comparePrivacyValidation(): void {
+    const wcpValidationList = getPrivacyValidationList();
+    wcpValidationList.map((wcpValidationFileName) => {
+        const wcpValidation = readValidationReportFile(wcpValidationFileName);
+        const urlHash = hashGenerator.generateBase64Hash(wcpValidation.seedUri);
+        const aiValidationFileName = `${urlHash}.ai.report.json`;
+        const aiValidation = readValidationReportFile(aiValidationFileName);
+        if (aiValidation === undefined) {
+            console.log(`The AI validation report file not found. File: ${aiValidationFileName} URL: ${wcpValidation.seedUri}`);
+        } else {
+            const cookieMismatch = getMissingCookie(aiValidation, wcpValidation);
+            if (cookieMismatch.length > 0 || aiValidation.bannerDetected !== wcpValidation.bannerDetected) {
+                const validationDiff = {
+                    url: wcpValidation.seedUri,
+                    fileHash: urlHash,
+                    bannerDetectionMismatch: aiValidation.bannerDetected !== wcpValidation.bannerDetected,
+                    cookieMismatch,
+                } as ValidationDiff;
+
+                writeToFile(validationDiff, getDataFolderName(), `${urlHash}.diff`);
+            }
+            console.log(`Compared website validation for ${wcpValidation.seedUri}`);
+        }
+    });
+}
+
+function getMissingCookie(aiReport: PrivacyPageScanReport, wcpReport: PrivacyPageScanReport): CookieMismatch[] {
+    const getAllCookie = (source: PrivacyPageScanReport): Cookie[] => {
+        const allCookie: Cookie[] = [];
+        if (source.cookieCollectionConsentResults) {
+            source.cookieCollectionConsentResults.map((cookie) => {
+                if (cookie.cookiesBeforeConsent) {
+                    cookie.cookiesBeforeConsent.map((d) => {
+                        if (d.cookies) {
+                            allCookie.push(...d.cookies);
+                        }
+                    });
+                }
+                if (cookie.cookiesAfterConsent) {
+                    cookie.cookiesAfterConsent.map((d) => {
+                        if (d.cookies) {
+                            allCookie.push(...d.cookies);
+                        }
+                    });
+                }
+            });
+        }
+
+        return allCookie;
+    };
+
+    const aiReportCookie = getAllCookie(aiReport);
+    const wcpReportCookie = getAllCookie(wcpReport);
+    const missingCookieFromAi = wcpReportCookie
+        .filter((w) => !aiReportCookie.some((a) => a.domain === w.domain && a.name === w.name))
+        .map((r) => {
+            return {
+                missingFrom: 'accessibility',
+                domain: r.domain,
+                name: r.name,
+            } as CookieMismatch;
+        });
+    const missingCookieFromWcp = aiReportCookie
+        .filter((w) => !wcpReportCookie.some((a) => a.domain === w.domain && a.name === w.name))
+        .map((r) => {
+            return {
+                missingFrom: 'privacy',
+                domain: r.domain,
+                name: r.name,
+            } as CookieMismatch;
+        });
+
+    return [...missingCookieFromAi, ...missingCookieFromWcp];
+}
+
+async function exportPrivacyValidation(): Promise<void> {
     const privacyMetadata = readMetadataFile();
     await parsePrivacyMetadata(privacyMetadata);
 }
@@ -91,10 +197,10 @@ function readMetadataFile(): PrivacyMetadata[] {
 function writeUrlValidation(urlValidation: UrlValidation[]): void {
     urlValidation.map((validation) => {
         const urlHash = hashGenerator.generateBase64Hash(validation.Url);
-        writeToFile(validation, getDataFolderName(), `${urlHash}.validation`);
+        writeToFile(validation, getDataFolderName(), `${urlHash}.wcp.validation`);
 
         const privacyPageScanReport = convertToPrivacyPageScanReport(validation);
-        writeToFile(privacyPageScanReport, getDataFolderName(), `${urlHash}.report`);
+        writeToFile(privacyPageScanReport, getDataFolderName(), `${urlHash}.wcp.report`);
     });
 }
 
@@ -139,6 +245,29 @@ function convertToPrivacyPageScanReport(urlValidation: UrlValidation): PrivacyPa
     };
 }
 
+function readValidationReportFile(fileName: string): PrivacyPageScanReport {
+    const filePath = getFilePath(fileName);
+    if (!fs.existsSync(filePath)) {
+        console.log(`The validation report file not found: ${filePath}`);
+
+        return undefined;
+    }
+
+    return JSON.parse(fs.readFileSync(filePath, { encoding: 'utf-8' })) as PrivacyPageScanReport;
+}
+
+function getPrivacyValidationList(): string[] {
+    if (!fs.existsSync(getDataFolderName())) {
+        console.log(`Folder not found ${getDataFolderName()}`);
+
+        return [];
+    }
+
+    const dataFiles = fs.readdirSync(getDataFolderName());
+
+    return dataFiles.filter((f) => f.endsWith('.wcp.report.json'));
+}
+
 function cleanup(): void {
     const filePath = `${getDataFolderName()}/urls.txt`;
     if (fs.existsSync(filePath)) {
@@ -151,6 +280,10 @@ function getClientArguments(): ClientArgs {
         .env()
         .wrap(yargs.terminalWidth())
         .options({
+            operation: {
+                type: 'string',
+                describe: 'The parser operation.',
+            },
             azureTenantId: {
                 type: 'string',
                 describe: 'The Azure tenant id.',
