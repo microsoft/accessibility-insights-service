@@ -24,10 +24,10 @@ export class PrivacyReportReducer {
     ): PrivacyScanCombinedReport {
         let combinedReport = existingCombinedReport ?? this.createNewCombinedReport(metadata);
 
-        if (combinedReport.Urls.includes(metadata.url)) {
-            combinedReport = this.removeUrlResultsFromReport(combinedReport, metadata.url, scanResults.results?.NavigationalUri);
+        if (combinedReport.urls.includes(metadata.url)) {
+            combinedReport = this.removeUrlResultsFromReport(combinedReport, metadata.url, scanResults.results?.navigationalUri);
         } else {
-            combinedReport.Urls.push(metadata.url);
+            combinedReport.urls.push(metadata.url);
         }
 
         if (scanResults.error) {
@@ -37,7 +37,7 @@ export class PrivacyReportReducer {
             combinedReport = this.addCookieCollectionResults(scanResults, combinedReport);
         }
 
-        combinedReport.FinishDateTime = scanResults.results?.FinishDateTime ?? new Date();
+        combinedReport.finishDateTime = scanResults.results?.finishDateTime ?? new Date();
 
         return combinedReport;
     }
@@ -47,15 +47,15 @@ export class PrivacyReportReducer {
         combinedReport: PrivacyScanCombinedReport,
         url: string,
     ): PrivacyScanCombinedReport {
-        combinedReport.FailedUrls.push({
-            Url: scanResults.results?.NavigationalUri ?? url,
-            SeedUri: scanResults.results?.SeedUri ?? url,
-            HttpStatusCode: scanResults.pageResponseCode,
-            Reason: `error=${JSON.stringify(scanResults.error)}`,
-            BannerDetected: scanResults.results?.BannerDetected,
-            BannerDetectionXpathExpression: scanResults.results?.BannerDetectionXpathExpression,
+        combinedReport.failedUrls.push({
+            url: scanResults.results?.navigationalUri ?? url,
+            seedUri: scanResults.results?.seedUri ?? url,
+            httpStatusCode: scanResults.pageResponseCode,
+            reason: `error=${JSON.stringify(scanResults.error)}`,
+            bannerDetected: scanResults.results?.bannerDetected,
+            bannerDetectionXpathExpression: scanResults.results?.bannerDetectionXpathExpression,
         });
-        combinedReport.Status = 'Failed';
+        combinedReport.status = 'Failed';
 
         return combinedReport;
     }
@@ -64,10 +64,10 @@ export class PrivacyReportReducer {
         scanResults: PrivacyScanResult,
         combinedReport: PrivacyScanCombinedReport,
     ): PrivacyScanCombinedReport {
-        combinedReport.CookieCollectionUrlResults.push(scanResults.results);
-        scanResults.results.CookieCollectionConsentResults.forEach((consentResult) => {
-            combinedReport.ScanCookies = _.unionBy(
-                combinedReport.ScanCookies,
+        combinedReport.cookieCollectionUrlResults.push(scanResults.results);
+        scanResults.results.cookieCollectionConsentResults.forEach((consentResult) => {
+            combinedReport.scanCookies = _.unionBy(
+                combinedReport.scanCookies,
                 this.getCookiesFromConsentResult(consentResult),
                 JSON.stringify,
             );
@@ -77,22 +77,22 @@ export class PrivacyReportReducer {
     }
 
     private getCookiesFromConsentResult(consentResult: ConsentResult): Cookie[] {
-        const cookiesBeforeConsent = _.flatMap(consentResult.CookiesBeforeConsent ?? [], (cookieByDomain) => cookieByDomain.Cookies);
-        const cookiesAfterConsent = _.flatMap(consentResult.CookiesAfterConsent ?? [], (cookieByDomain) => cookieByDomain.Cookies);
+        const cookiesBeforeConsent = _.flatMap(consentResult.cookiesBeforeConsent ?? [], (cookieByDomain) => cookieByDomain.cookies);
+        const cookiesAfterConsent = _.flatMap(consentResult.cookiesAfterConsent ?? [], (cookieByDomain) => cookieByDomain.cookies);
 
         return _.unionBy(cookiesBeforeConsent, cookiesAfterConsent, JSON.stringify);
     }
 
     private createNewCombinedReport(metadata: PrivacyReportMetadata): PrivacyScanCombinedReport {
         return {
-            ScanId: metadata.websiteScanId,
-            Status: 'Completed',
-            Urls: [],
-            FailedUrls: [],
-            ScanCookies: [],
-            CookieCollectionUrlResults: [],
-            StartDateTime: this.guidGenerator.getGuidTimestamp(metadata.scanId),
-            FinishDateTime: new Date(),
+            scanId: metadata.websiteScanId,
+            status: 'Completed',
+            urls: [],
+            failedUrls: [],
+            scanCookies: [],
+            cookieCollectionUrlResults: [],
+            startDateTime: this.guidGenerator.getGuidTimestamp(metadata.scanId),
+            finishDateTime: new Date(),
         };
     }
 
@@ -102,16 +102,16 @@ export class PrivacyReportReducer {
         navigationalUrl?: string,
     ): PrivacyScanCombinedReport {
         _.remove(
-            report.FailedUrls,
-            (failedUrl) => failedUrl.Url === url || (navigationalUrl !== undefined && failedUrl.Url === navigationalUrl),
+            report.failedUrls,
+            (failedUrl) => failedUrl.url === url || (navigationalUrl !== undefined && failedUrl.url === navigationalUrl),
         );
         _.remove(
-            report.CookieCollectionUrlResults,
+            report.cookieCollectionUrlResults,
             (cookieCollectionResult) =>
-                cookieCollectionResult.NavigationalUri === url ||
-                (navigationalUrl !== undefined && cookieCollectionResult.NavigationalUri === navigationalUrl),
+                cookieCollectionResult.navigationalUri === url ||
+                (navigationalUrl !== undefined && cookieCollectionResult.navigationalUri === navigationalUrl),
         );
-        report.Status = _.isEmpty(report.FailedUrls) ? 'Completed' : 'Failed';
+        report.status = _.isEmpty(report.failedUrls) ? 'Completed' : 'Failed';
 
         return report;
     }

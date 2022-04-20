@@ -23,9 +23,9 @@ describe(PrivacyPageScanner, () => {
     const url = 'test url';
     const currentDate = new Date(1, 2, 3, 4);
     const consentResult: ConsentResult = {
-        CookiesUsedForConsent: 'cookie',
-        CookiesAfterConsent: [],
-        CookiesBeforeConsent: [],
+        cookiesUsedForConsent: 'cookie',
+        cookiesAfterConsent: [],
+        cookiesBeforeConsent: [],
     };
     const expectedCookieCollectionResults = [_.clone(consentResult), _.clone(consentResult)];
     const cookieScenarios: CookieScenario[] = [
@@ -89,12 +89,12 @@ describe(PrivacyPageScanner, () => {
 
     function createPageScanReport(hasBanner: boolean): PrivacyResults {
         return {
-            FinishDateTime: currentDate,
-            NavigationalUri: url,
-            SeedUri: url,
-            BannerDetectionXpathExpression: privacyConfig.bannerXPath,
-            BannerDetected: hasBanner,
-            CookieCollectionConsentResults: expectedCookieCollectionResults,
+            finishDateTime: currentDate,
+            navigationalUri: url,
+            seedUri: url,
+            bannerDetectionXpathExpression: privacyConfig.bannerXPath,
+            bannerDetected: hasBanner,
+            cookieCollectionConsentResults: expectedCookieCollectionResults,
         };
     }
 

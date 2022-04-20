@@ -42,6 +42,8 @@
     "dependencies": {
         "@azure/cosmos": "^3.15.1",
         "@azure/functions": "^3.0.0",
+        "@azure/identity": "^2.0.4",
+        "@azure/storage-blob": "^12.9.0",
         "accessibility-insights-report": "4.3.0",
         "axe-core": "4.4.1",
         "axe-result-converter": "^1.0.0",

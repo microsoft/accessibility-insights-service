@@ -117,7 +117,7 @@ async function scanAllUrls(urls: string[]): Promise<BannerDetectionResults> {
                 error: privacyScanResult.error,
                 pageResponseCode: privacyScanResult.pageResponseCode,
             });
-        } else if (privacyScanResult.results.BannerDetected) {
+        } else if (privacyScanResult.results.bannerDetected) {
             results.urlsWithBanner.push(url);
         } else {
             results.urlsWithoutBanner.push(url);

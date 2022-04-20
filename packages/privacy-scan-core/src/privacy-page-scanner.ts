@@ -29,12 +29,12 @@ export class PrivacyPageScanner {
         const cookieCollectionResults = await this.getAllConsentResults(page, reloadPageFunc);
 
         return {
-            FinishDateTime: new Date(),
-            NavigationalUri: page.url(),
-            SeedUri: page.url(),
-            BannerDetectionXpathExpression: privacyScanConfig.bannerXPath,
-            BannerDetected: hasBanner,
-            CookieCollectionConsentResults: cookieCollectionResults,
+            finishDateTime: new Date(),
+            navigationalUri: page.url(),
+            seedUri: page.url(),
+            bannerDetectionXpathExpression: privacyScanConfig.bannerXPath,
+            bannerDetected: hasBanner,
+            cookieCollectionConsentResults: cookieCollectionResults,
         };
     }
 

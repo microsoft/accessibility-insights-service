@@ -75,7 +75,7 @@ describe(Runner, () => {
             scannedUrl: 'scannedUrl',
             pageResponseCode: 200,
             results: {
-                HttpStatusCode: 200,
+                httpStatusCode: 200,
             } as PrivacyPageScanReport,
         } as PrivacyScanResult;
         reports = [{}] as OnDemandPageScanReport[];
@@ -128,7 +128,7 @@ describe(Runner, () => {
         await runner.run();
     });
 
-    it.each([undefined, { HttpStatusCode: 200 }] as PrivacyPageScanReport[])(
+    it.each([undefined, { httpStatusCode: 200 }] as PrivacyPageScanReport[])(
         'execute runner with page scanner exception and scan results = %s',
         async (scanResults) => {
             const error = new Error('page scan processor error');

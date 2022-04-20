@@ -16,7 +16,7 @@ describe(PrivacyScanCombinedReportProvider, () => {
     const fileId = 'file id';
     const filePath = 'file path';
     const combinedReport = {
-        Status: 'Completed',
+        status: 'Completed',
     } as PrivacyScanCombinedReport;
     const resultsString = JSON.stringify(combinedReport);
     const generatedReport: GeneratedReport = {
