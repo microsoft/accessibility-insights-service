@@ -58,7 +58,7 @@ This project can be run in an Azure environment and can be set up easily using t
     ```
 -   If the above command failed for formatting issues, run the below command to format all files
     ```bash
-    yarn format
+    yarn format:fix
     ```
 
 ## Testing
