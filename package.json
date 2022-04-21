@@ -80,7 +80,7 @@
         "adal-node": ">=0.2.3",
         "ansi-regex": "^5.0.1",
         "async": ">=3.2.2",
-        "axe-core": "4.3.2",
+        "axe-core": "4.4.1",
         "glob-parent": ">=5.1.2",
         "json-schema": ">=0.4.0",
         "minimist": ">=1.2.6",
@@ -91,6 +91,6 @@
         "tar": ">=6.1.9"
     },
     "dependencies": {
-        "accessibility-insights-report": "4.2.2"
+        "accessibility-insights-report": "4.3.0"
     }
 }
