@@ -7,7 +7,7 @@ import fs from 'fs';
 import readline from 'readline';
 import {
     BrowserError,
-    NavigationHooks,
+    PageNavigationHooks,
     Page,
     PageConfigurator,
     PageHandler,
@@ -44,7 +44,7 @@ const webDriver = new WebDriver(new PromiseUtils(), logger);
 const pageResponseProcessor = new PageResponseProcessor();
 const pageNavigator = new PageNavigator(
     pageResponseProcessor,
-    new NavigationHooks(new PageConfigurator(), pageResponseProcessor, new PageHandler(logger)),
+    new PageNavigationHooks(new PageConfigurator(), pageResponseProcessor, new PageHandler(logger)),
 );
 const privacyPageScanner = new PrivacyPageScanner(serviceConfig, new CookieCollector());
 const page = new Page(webDriver, undefined, pageNavigator, privacyPageScanner, logger);

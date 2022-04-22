@@ -11,7 +11,7 @@ import { PageResponseProcessor } from './page-response-processor';
 import { puppeteerTimeoutConfig } from './page-timeout-config';
 
 @injectable()
-export class NavigationHooks {
+export class PageNavigationHooks {
     constructor(
         @inject(PageConfigurator) public readonly pageConfigurator: PageConfigurator,
         @inject(PageResponseProcessor) protected readonly pageResponseProcessor: PageResponseProcessor,

@@ -9,7 +9,7 @@ import { PageResponseProcessor } from './page-response-processor';
 import { PageConfigurator } from './page-configurator';
 import { PageHandler } from './page-handler';
 import { BrowserError } from './browser-error';
-import { NavigationHooks } from './navigation-hooks';
+import { PageNavigationHooks } from './page-navigation-hooks';
 
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/consistent-type-assertions */
 const scrollTimeoutMsecs = 15000;
@@ -20,16 +20,16 @@ let pageHandlerMock: IMock<PageHandler>;
 let pageResponseProcessorMock: IMock<PageResponseProcessor>;
 let pageMock: IMock<Page>;
 
-let navigationHooks: NavigationHooks;
+let navigationHooks: PageNavigationHooks;
 
-describe(NavigationHooks, () => {
+describe(PageNavigationHooks, () => {
     beforeEach(() => {
         pageConfiguratorMock = Mock.ofType<PageConfigurator>();
         pageHandlerMock = Mock.ofType<PageHandler>();
         pageResponseProcessorMock = Mock.ofType<PageResponseProcessor>();
         pageMock = Mock.ofType<Page>();
 
-        navigationHooks = new NavigationHooks(
+        navigationHooks = new PageNavigationHooks(
             pageConfiguratorMock.object,
             pageResponseProcessorMock.object,
             pageHandlerMock.object,

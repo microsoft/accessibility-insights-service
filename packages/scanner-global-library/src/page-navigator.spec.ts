@@ -8,7 +8,7 @@ import { Page, HTTPResponse } from 'puppeteer';
 import { PageResponseProcessor } from './page-response-processor';
 import { PageNavigator } from './page-navigator';
 import { BrowserError } from './browser-error';
-import { NavigationHooks } from './navigation-hooks';
+import { PageNavigationHooks } from './page-navigation-hooks';
 import { PageConfigurator } from './page-configurator';
 import { puppeteerTimeoutConfig } from './page-timeout-config';
 
@@ -18,13 +18,13 @@ const url = 'url';
 
 let pageNavigator: PageNavigator;
 let pageResponseProcessorMock: IMock<PageResponseProcessor>;
-let navigationHooksMock: IMock<NavigationHooks>;
+let navigationHooksMock: IMock<PageNavigationHooks>;
 let pageMock: IMock<Page>;
 
 describe(PageNavigator, () => {
     beforeEach(() => {
         pageResponseProcessorMock = Mock.ofType<PageResponseProcessor>();
-        navigationHooksMock = Mock.ofType<NavigationHooks>();
+        navigationHooksMock = Mock.ofType<PageNavigationHooks>();
         pageMock = Mock.ofType<Page>();
 
         pageNavigator = new PageNavigator(pageResponseProcessorMock.object, navigationHooksMock.object);

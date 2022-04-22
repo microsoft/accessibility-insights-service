@@ -33,6 +33,7 @@ export class WebDriver {
         this.browser = await this.puppeteer.launch({
             executablePath: browserExecutablePath,
             ...defaultLaunchOptions,
+            headless: false,
         });
         this.logger?.logInfo('Chromium browser instance started.');
 

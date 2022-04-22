@@ -4,11 +4,11 @@
 import { injectable } from 'inversify';
 import * as Puppeteer from 'puppeteer';
 import { BrowserError, BrowserErrorTypes } from './browser-error';
-import { navigationErrorPatterns as errorPatterns } from './navigation-error-patterns';
+import { pageNavigationErrorPatterns } from './page-navigation-error-patterns';
 
 @injectable()
 export class PageResponseProcessor {
-    constructor(private readonly navigationErrorPatterns: Partial<Record<BrowserErrorTypes, string[]>> = errorPatterns) {}
+    constructor(private readonly navigationErrorPatterns: Partial<Record<BrowserErrorTypes, string[]>> = pageNavigationErrorPatterns) {}
 
     public getResponseError(response: Puppeteer.HTTPResponse, error: Error = new Error()): BrowserError {
         if (!response.ok()) {

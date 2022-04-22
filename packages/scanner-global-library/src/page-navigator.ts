@@ -6,7 +6,7 @@ import { injectable, inject } from 'inversify';
 import { isNil } from 'lodash';
 import { PageResponseProcessor } from './page-response-processor';
 import { BrowserError } from './browser-error';
-import { NavigationHooks } from './navigation-hooks';
+import { PageNavigationHooks } from './page-navigation-hooks';
 import { PageConfigurator } from './page-configurator';
 import { puppeteerTimeoutConfig } from './page-timeout-config';
 
@@ -16,11 +16,11 @@ export type OnNavigationError = (browserError: BrowserError, error?: unknown) =>
 export class PageNavigator {
     constructor(
         @inject(PageResponseProcessor) public readonly pageResponseProcessor: PageResponseProcessor,
-        @inject(NavigationHooks) public readonly navigationHooks: NavigationHooks,
+        @inject(PageNavigationHooks) public readonly pageNavigationHooks: PageNavigationHooks,
     ) {}
 
     public get pageConfigurator(): PageConfigurator {
-        return this.navigationHooks.pageConfigurator;
+        return this.pageNavigationHooks.pageConfigurator;
     }
 
     public async navigate(
@@ -28,7 +28,7 @@ export class PageNavigator {
         page: Puppeteer.Page,
         onNavigationError: (browserError: BrowserError, error?: unknown) => Promise<void> = () => Promise.resolve(),
     ): Promise<Puppeteer.HTTPResponse> {
-        await this.navigationHooks.preNavigation(page);
+        await this.pageNavigationHooks.preNavigation(page);
 
         let navigationResult = await this.navigateToUrl(url, page, 'networkidle2');
         if (navigationResult.browserError?.errorType === 'UrlNavigationTimeout') {
@@ -48,7 +48,7 @@ export class PageNavigator {
             return undefined;
         }
 
-        await this.navigationHooks.postNavigation(page, navigationResult.response, onNavigationError);
+        await this.pageNavigationHooks.postNavigation(page, navigationResult.response, onNavigationError);
 
         return navigationResult.response;
     }

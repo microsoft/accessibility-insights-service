@@ -10,6 +10,6 @@ export { AxePuppeteerFactory } from './factories/axe-puppeteer-factory';
 export { Page } from './page';
 export { AxeScanResults } from './axe-scan-results';
 export { WebDriver } from './web-driver';
-export { NavigationHooks } from './navigation-hooks';
+export { PageNavigationHooks } from './page-navigation-hooks';
 export { PageNavigator, OnNavigationError } from './page-navigator';
 export { PrivacyScanResult } from './privacy-scan-result';

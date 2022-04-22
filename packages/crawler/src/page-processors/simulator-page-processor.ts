@@ -3,7 +3,7 @@
 
 import Apify from 'apify';
 import { inject, injectable } from 'inversify';
-import { NavigationHooks } from 'scanner-global-library';
+import { PageNavigationHooks } from 'scanner-global-library';
 import { ActiveElement } from '../browser-components/active-elements-finder';
 import { CrawlerConfiguration } from '../crawler/crawler-configuration';
 import { DataBase } from '../level-storage/data-base';
@@ -72,7 +72,7 @@ export class SimulatorPageProcessor extends PageProcessorBase {
         @inject(DataBase) protected readonly dataBase: DataBase,
         @inject(EnqueueActiveElementsOperation) protected readonly enqueueActiveElementsOp: EnqueueActiveElementsOperation,
         @inject(ClickElementOperation) protected readonly clickElementOp: ClickElementOperation,
-        @inject(NavigationHooks) protected readonly navigationHooks: NavigationHooks,
+        @inject(PageNavigationHooks) protected readonly pageNavigationHooks: PageNavigationHooks,
         @inject(crawlerIocTypes.ApifyRequestQueueProvider) protected readonly requestQueueProvider: ApifyRequestQueueProvider,
         @inject(CrawlerConfiguration) protected readonly crawlerConfiguration: CrawlerConfiguration,
         protected readonly enqueueLinksExt: typeof Apify.utils.enqueueLinks = Apify.utils.enqueueLinks,
@@ -83,7 +83,7 @@ export class SimulatorPageProcessor extends PageProcessorBase {
             dataStore,
             blobStore,
             dataBase,
-            navigationHooks,
+            pageNavigationHooks,
             requestQueueProvider,
             crawlerConfiguration,
             enqueueLinksExt,
