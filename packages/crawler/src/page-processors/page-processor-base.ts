@@ -4,7 +4,7 @@
 import Apify from 'apify';
 import { inject, injectable } from 'inversify';
 import * as Puppeteer from 'puppeteer';
-import { BrowserError, NavigationHooks } from 'scanner-global-library';
+import { BrowserError, PageNavigationHooks } from 'scanner-global-library';
 import { System } from 'common';
 import _ from 'lodash';
 import { CrawlerConfiguration } from '../crawler/crawler-configuration';
@@ -78,14 +78,14 @@ export abstract class PageProcessorBase implements PageProcessor {
         if (!_.isArray(crawlingContext.session.userData)) {
             crawlingContext.session.userData = [];
         }
-        await this.navigationHooks.preNavigation(crawlingContext.page);
+        await this.pageNavigationHooks.preNavigation(crawlingContext.page);
     };
 
     public postNavigation = async (crawlingContext: PuppeteerCrawlingContext): Promise<void> => {
         let navigationError: BrowserError;
         let runError: unknown;
         try {
-            await this.navigationHooks.postNavigation(
+            await this.pageNavigationHooks.postNavigation(
                 crawlingContext.page,
                 crawlingContext.response,
                 async (browserError: BrowserError, error?: unknown) => {
@@ -139,7 +139,7 @@ export abstract class PageProcessorBase implements PageProcessor {
         @inject(LocalDataStore) protected readonly dataStore: DataStore,
         @inject(LocalBlobStore) protected readonly blobStore: BlobStore,
         @inject(DataBase) protected readonly dataBase: DataBase,
-        @inject(NavigationHooks) protected readonly navigationHooks: NavigationHooks,
+        @inject(PageNavigationHooks) protected readonly pageNavigationHooks: PageNavigationHooks,
         @inject(crawlerIocTypes.ApifyRequestQueueProvider) protected readonly requestQueueProvider: ApifyRequestQueueProvider,
         @inject(CrawlerConfiguration) protected readonly crawlerConfiguration: CrawlerConfiguration,
         protected readonly enqueueLinksExt: typeof Apify.utils.enqueueLinks = Apify.utils.enqueueLinks,
@@ -224,7 +224,7 @@ export abstract class PageProcessorBase implements PageProcessor {
     protected async saveScanMetadata(url: string, pageTitle: string): Promise<void> {
         // save metadata for any url first to support the case when base url is not processed
         if ((this.baseUrl && this.baseUrl === url) || !this.scanMetadataSaved) {
-            const pageConfigurator = this.navigationHooks.pageConfigurator;
+            const pageConfigurator = this.pageNavigationHooks.pageConfigurator;
             await this.dataBase.addScanMetadata({
                 baseUrl: this.baseUrl,
                 basePageTitle: this.baseUrl === url ? pageTitle : '',

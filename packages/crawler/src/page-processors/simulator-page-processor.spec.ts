@@ -5,7 +5,7 @@ import 'reflect-metadata';
 
 import Apify from 'apify';
 import { Page } from 'puppeteer';
-import { NavigationHooks } from 'scanner-global-library';
+import { PageNavigationHooks } from 'scanner-global-library';
 import { IMock, It, Mock } from 'typemoq';
 import { AxeResults } from 'axe-core';
 import { CrawlerConfiguration } from '../crawler/crawler-configuration';
@@ -34,7 +34,7 @@ describe(SimulatorPageProcessor, () => {
     let enqueueLinksExtMock: IMock<typeof Apify.utils.enqueueLinks>;
     let clickElementOpMock: IMock<ClickElementOperation>;
     let enqueueActiveElementsOpExtMock: IMock<EnqueueActiveElementsOperation>;
-    let navigationHooks: IMock<NavigationHooks>;
+    let pageNavigationHooks: IMock<PageNavigationHooks>;
     let crawlerConfigurationMock: IMock<CrawlerConfiguration>;
     let requestQueueProvider: ApifyRequestQueueProvider;
     let requestStub: Apify.Request;
@@ -51,7 +51,7 @@ describe(SimulatorPageProcessor, () => {
         enqueueLinksExtMock = Mock.ofType<typeof Apify.utils.enqueueLinks>();
         clickElementOpMock = Mock.ofType<ClickElementOperation>();
         enqueueActiveElementsOpExtMock = Mock.ofType<EnqueueActiveElementsOperation>();
-        navigationHooks = Mock.ofType<NavigationHooks>();
+        pageNavigationHooks = Mock.ofType<PageNavigationHooks>();
         crawlerConfigurationMock = Mock.ofType(CrawlerConfiguration);
 
         crawlerConfigurationMock
@@ -95,7 +95,7 @@ describe(SimulatorPageProcessor, () => {
             dataBaseMock.object,
             enqueueActiveElementsOpExtMock.object,
             clickElementOpMock.object,
-            navigationHooks.object,
+            pageNavigationHooks.object,
             requestQueueProvider,
             crawlerConfigurationMock.object,
             enqueueLinksExtMock.object,

@@ -4,7 +4,7 @@
 import 'reflect-metadata';
 
 import { Page } from 'puppeteer';
-import { BrowserError, NavigationHooks, PageConfigurator } from 'scanner-global-library';
+import { BrowserError, PageNavigationHooks, PageConfigurator } from 'scanner-global-library';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { System } from 'common';
 import Apify from 'apify';
@@ -51,7 +51,7 @@ describe(PageProcessorBase, () => {
     let enqueueLinksExtMock: IMock<typeof Apify.utils.enqueueLinks>;
     let saveSnapshotMock: IMock<typeof Apify.utils.puppeteer.saveSnapshot>;
     let processPageMock: IMock<Apify.PuppeteerHandlePage>;
-    let navigationHooksMock: IMock<NavigationHooks>;
+    let pageNavigationHooksMock: IMock<PageNavigationHooks>;
     let pageConfiguratorMock: IMock<PageConfigurator>;
     let crawlerConfigurationMock: IMock<CrawlerConfiguration>;
     let requestQueueProvider: ApifyRequestQueueProvider;
@@ -68,7 +68,7 @@ describe(PageProcessorBase, () => {
         enqueueLinksExtMock = Mock.ofType<typeof Apify.utils.enqueueLinks>();
         saveSnapshotMock = Mock.ofType<typeof Apify.utils.puppeteer.saveSnapshot>();
         processPageMock = Mock.ofType<Apify.PuppeteerHandlePage>();
-        navigationHooksMock = Mock.ofType<NavigationHooks>();
+        pageNavigationHooksMock = Mock.ofType<PageNavigationHooks>();
         pageConfiguratorMock = Mock.ofType<PageConfigurator>();
         crawlerConfigurationMock = Mock.ofType(CrawlerConfiguration);
         crawlerConfigurationMock
@@ -101,7 +101,7 @@ describe(PageProcessorBase, () => {
             dataStoreMock.object,
             blobStoreMock.object,
             dataBaseMock.object,
-            navigationHooksMock.object,
+            pageNavigationHooksMock.object,
             requestQueueProvider,
             crawlerConfigurationMock.object,
             enqueueLinksExtMock.object,
@@ -115,7 +115,7 @@ describe(PageProcessorBase, () => {
         dataStoreMock.verifyAll();
         processPageMock.verifyAll();
         saveSnapshotMock.verifyAll();
-        navigationHooksMock.verifyAll();
+        pageNavigationHooksMock.verifyAll();
         dataBaseMock.verifyAll();
         crawlerConfigurationMock.verifyAll();
     });
@@ -131,7 +131,7 @@ describe(PageProcessorBase, () => {
         } as any;
         const gotoOptions = {};
 
-        navigationHooksMock.setup((o) => o.preNavigation(crawlingContext.page)).verifiable();
+        pageNavigationHooksMock.setup((o) => o.preNavigation(crawlingContext.page)).verifiable();
 
         await pageProcessorBase.preNavigation(crawlingContext, gotoOptions);
     });
@@ -153,11 +153,11 @@ describe(PageProcessorBase, () => {
             .setup((o) => o.getBrowserResolution())
             .returns(() => browserResolution)
             .verifiable();
-        navigationHooksMock
+        pageNavigationHooksMock
             .setup((o) => o.pageConfigurator)
             .returns(() => pageConfiguratorMock.object)
             .verifiable(Times.atLeastOnce());
-        navigationHooksMock.setup(async (o) => o.postNavigation(crawlingContext.page, It.isAny(), It.isAny())).verifiable();
+        pageNavigationHooksMock.setup(async (o) => o.postNavigation(crawlingContext.page, It.isAny(), It.isAny())).verifiable();
         dataBaseMock
             .setup((o) => o.addScanMetadata({ baseUrl: testUrl, basePageTitle: 'title', userAgent, browserResolution }))
             .verifiable();
@@ -180,7 +180,7 @@ describe(PageProcessorBase, () => {
             },
             response: {},
         } as any;
-        navigationHooksMock
+        pageNavigationHooksMock
             .setup(async (nh) => nh.postNavigation(crawlingContext.page, crawlingContext.response, It.isAny()))
             .returns((page, response, errorCallback) => errorCallback(browserError, undefined))
             .verifiable();
@@ -214,7 +214,7 @@ describe(PageProcessorBase, () => {
             message: error.message,
             stack: 'stack',
         } as BrowserError;
-        navigationHooksMock
+        pageNavigationHooksMock
             .setup(async (o) => o.postNavigation(crawlingContext.page, It.isAny(), It.isAny()))
             .returns((url, page, errorCallback) => errorCallback(browserError, error))
             .verifiable();

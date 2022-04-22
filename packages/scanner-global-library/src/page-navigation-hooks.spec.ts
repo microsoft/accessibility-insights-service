@@ -9,36 +9,32 @@ import { PageResponseProcessor } from './page-response-processor';
 import { PageConfigurator } from './page-configurator';
 import { PageHandler } from './page-handler';
 import { BrowserError } from './browser-error';
-import { NavigationHooks } from './navigation-hooks';
+import { PageNavigationHooks } from './page-navigation-hooks';
 
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/consistent-type-assertions */
 const scrollTimeoutMsecs = 15000;
 const pageRenderingTimeoutMsecs = 1000;
-const networkIdleTimeMsecs = 500;
-const networkWaitTimeout = 60000;
 
 let pageConfiguratorMock: IMock<PageConfigurator>;
 let pageHandlerMock: IMock<PageHandler>;
 let pageResponseProcessorMock: IMock<PageResponseProcessor>;
 let pageMock: IMock<Page>;
 
-let navigationHooks: NavigationHooks;
+let navigationHooks: PageNavigationHooks;
 
-describe(NavigationHooks, () => {
+describe(PageNavigationHooks, () => {
     beforeEach(() => {
         pageConfiguratorMock = Mock.ofType<PageConfigurator>();
         pageHandlerMock = Mock.ofType<PageHandler>();
         pageResponseProcessorMock = Mock.ofType<PageResponseProcessor>();
         pageMock = Mock.ofType<Page>();
 
-        navigationHooks = new NavigationHooks(
+        navigationHooks = new PageNavigationHooks(
             pageConfiguratorMock.object,
             pageResponseProcessorMock.object,
             pageHandlerMock.object,
             scrollTimeoutMsecs,
             pageRenderingTimeoutMsecs,
-            networkWaitTimeout,
-            networkIdleTimeMsecs,
         );
     });
 
@@ -57,10 +53,6 @@ describe(NavigationHooks, () => {
 
     it('postNavigation with successful response', async () => {
         const response = {} as HTTPResponse;
-        pageMock
-            .setup((p) => p.waitForNetworkIdle({ idleTime: networkIdleTimeMsecs, timeout: networkWaitTimeout }))
-            .returns(async () => null)
-            .verifiable();
         pageResponseProcessorMock
             .setup((o) => o.getResponseError(response))
             .returns(() => undefined)
@@ -83,10 +75,6 @@ describe(NavigationHooks, () => {
         const onNavigationErrorStub = async (browserError: BrowserError, error?: any) => {
             navigationError = browserError;
         };
-        pageMock
-            .setup((p) => p.waitForNetworkIdle({ idleTime: networkIdleTimeMsecs, timeout: networkWaitTimeout }))
-            .returns(async () => null)
-            .verifiable();
 
         await navigationHooks.postNavigation(pageMock.object, undefined, onNavigationErrorStub);
         expect(navigationError).toMatchObject(expectedError);
@@ -99,10 +87,6 @@ describe(NavigationHooks, () => {
             message: 'message',
             stack: 'stack',
         } as BrowserError;
-        pageMock
-            .setup((p) => p.waitForNetworkIdle({ idleTime: networkIdleTimeMsecs, timeout: networkWaitTimeout }))
-            .returns(async () => null)
-            .verifiable();
         pageResponseProcessorMock
             .setup((o) => o.getResponseError(response))
             .returns(() => browserError)
@@ -112,50 +96,5 @@ describe(NavigationHooks, () => {
 
         await navigationHooks.postNavigation(pageMock.object, response, onNavigationErrorMock);
         expect(onNavigationErrorMock).toHaveBeenCalledWith(browserError);
-    });
-
-    it('postNavigation with network wait error', async () => {
-        const error = new Error('Test error');
-        const browserError = {
-            errorType: 'NavigationError',
-            message: 'Unable to get a page response from the browser.',
-        } as BrowserError;
-        pageMock.setup((p) => p.waitForNetworkIdle({ idleTime: networkIdleTimeMsecs, timeout: networkWaitTimeout })).throws(error);
-        pageResponseProcessorMock
-            .setup((o) => o.getNavigationError(error))
-            .returns(() => browserError)
-            .verifiable();
-        const onNavigationErrorMock = jest.fn();
-        onNavigationErrorMock.mockImplementation((browserErr) => Promise.resolve());
-
-        await navigationHooks.postNavigation(pageMock.object, undefined, onNavigationErrorMock);
-        expect(onNavigationErrorMock).toHaveBeenCalledWith(browserError, error);
-    });
-
-    it('postNavigation with urlNavigationTimeout error', async () => {
-        const response = {} as HTTPResponse;
-        const error = new Error('Test error');
-        const browserError = {
-            errorType: 'UrlNavigationTimeout',
-            message: 'Unable to get a page response from the browser.',
-        } as BrowserError;
-        pageMock.setup((p) => p.waitForNetworkIdle({ idleTime: networkIdleTimeMsecs, timeout: networkWaitTimeout })).throws(error);
-        pageResponseProcessorMock
-            .setup((o) => o.getNavigationError(error))
-            .returns(() => browserError)
-            .verifiable();
-        const onNavigationErrorMock = jest.fn();
-        onNavigationErrorMock.mockImplementation((browserErr) => Promise.resolve());
-        pageResponseProcessorMock
-            .setup((o) => o.getResponseError(response))
-            .returns(() => undefined)
-            .verifiable();
-        pageHandlerMock
-            .setup(async (o) => o.waitForPageToCompleteRendering(pageMock.object, scrollTimeoutMsecs, pageRenderingTimeoutMsecs))
-            .returns(() => Promise.resolve())
-            .verifiable();
-
-        await navigationHooks.postNavigation(pageMock.object, response, onNavigationErrorMock);
-        expect(onNavigationErrorMock).toHaveBeenCalledTimes(0);
     });
 });

@@ -3,7 +3,7 @@
 
 import 'reflect-metadata';
 
-import { Browser, Page } from 'puppeteer';
+import { Browser, Page, ConnectionTransport } from 'puppeteer';
 import { IMock, Mock } from 'typemoq';
 import { PageConfigurator } from './page-configurator';
 
@@ -11,6 +11,7 @@ describe(PageConfigurator, () => {
     let pageConfigurator: PageConfigurator;
     let pageMock: IMock<Page>;
     let browserMock: IMock<Browser>;
+    let connectionTransportMock: IMock<ConnectionTransport>;
 
     const viewport = {
         width: 1920,
@@ -23,6 +24,12 @@ describe(PageConfigurator, () => {
     beforeEach(() => {
         pageMock = Mock.ofType<Page>();
         browserMock = Mock.ofType<Browser>();
+        connectionTransportMock = Mock.ofType<ConnectionTransport>();
+
+        connectionTransportMock
+            .setup((o) => o.send('Emulation.clearDeviceMetricsOverride'))
+            .returns(() => Promise.resolve())
+            .verifiable();
         browserMock
             .setup(async (o) => o.userAgent())
             .returns(() => Promise.resolve(headlessChromeUserAgent))
@@ -47,6 +54,11 @@ describe(PageConfigurator, () => {
             .setup(async (o) => o.setCacheEnabled(false))
             .returns(() => Promise.resolve())
             .verifiable();
+        pageMock
+            //@ts-expect-error
+            .setup((o) => o._client)
+            .returns(() => connectionTransportMock.object)
+            .verifiable();
 
         pageConfigurator = new PageConfigurator();
     });
@@ -54,6 +66,7 @@ describe(PageConfigurator, () => {
     afterEach(() => {
         pageMock.verifyAll();
         browserMock.verifyAll();
+        connectionTransportMock.verifyAll();
     });
 
     it('configurePage()', async () => {

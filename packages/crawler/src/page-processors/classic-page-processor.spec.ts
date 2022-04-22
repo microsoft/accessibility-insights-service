@@ -5,7 +5,7 @@ import 'reflect-metadata';
 
 import Apify from 'apify';
 import { Page } from 'puppeteer';
-import { NavigationHooks } from 'scanner-global-library';
+import { PageNavigationHooks } from 'scanner-global-library';
 import { IMock, It, Mock } from 'typemoq';
 import { AxeResults } from 'axe-core';
 import { CrawlerConfiguration } from '../crawler/crawler-configuration';
@@ -29,7 +29,7 @@ describe(ClassicPageProcessor, () => {
     let blobStoreMock: IMock<BlobStore>;
     let dataBaseMock: IMock<DataBase>;
     let enqueueLinksExtMock: IMock<typeof Apify.utils.enqueueLinks>;
-    let navigationHooks: IMock<NavigationHooks>;
+    let pageNavigationHooks: IMock<PageNavigationHooks>;
     let crawlerConfigurationMock: IMock<CrawlerConfiguration>;
     let requestStub: Apify.Request;
     let pageStub: Page;
@@ -44,7 +44,7 @@ describe(ClassicPageProcessor, () => {
         blobStoreMock = Mock.ofType<BlobStore>();
         dataBaseMock = Mock.ofType<DataBase>();
         enqueueLinksExtMock = Mock.ofType<typeof Apify.utils.enqueueLinks>();
-        navigationHooks = Mock.ofType<NavigationHooks>();
+        pageNavigationHooks = Mock.ofType<PageNavigationHooks>();
         crawlerConfigurationMock = Mock.ofType(CrawlerConfiguration);
         crawlerConfigurationMock
             .setup((o) => o.discoveryPatterns())
@@ -83,7 +83,7 @@ describe(ClassicPageProcessor, () => {
             dataStoreMock.object,
             blobStoreMock.object,
             dataBaseMock.object,
-            navigationHooks.object,
+            pageNavigationHooks.object,
             requestQueueProvider,
             crawlerConfigurationMock.object,
             enqueueLinksExtMock.object,

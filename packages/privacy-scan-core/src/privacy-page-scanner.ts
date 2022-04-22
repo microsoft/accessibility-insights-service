@@ -1,18 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License.
-
 import { PrivacyScanConfig, ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
-import _ from 'lodash';
 import { ConsentResult } from 'storage-documents';
 import * as Puppeteer from 'puppeteer';
 import { CookieScenario, getAllCookieScenarios } from './cookie-scenarios';
 import { CookieCollector } from './cookie-collector';
-import { PrivacyResults } from './types';
-import { ReloadPageFunc } from '.';
+import { PrivacyResults, ReloadPageFunc } from './types';
 
 @injectable()
 export class PrivacyPageScanner {
@@ -45,7 +40,7 @@ export class PrivacyPageScanner {
             });
 
             return true;
-        } catch (e) {
+        } catch {
             return false;
         }
     }

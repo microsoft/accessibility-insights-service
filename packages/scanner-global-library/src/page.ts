@@ -6,8 +6,8 @@ import { inject, injectable, optional } from 'inversify';
 import { GlobalLogger } from 'logger';
 import * as Puppeteer from 'puppeteer';
 import axe from 'axe-core';
-import _, { isNil } from 'lodash';
-import { PrivacyPageScanner, PrivacyResults } from 'privacy-scan-core';
+import { isNil, isEmpty, filter } from 'lodash';
+import { PrivacyPageScanner, PrivacyResults, ReloadPageResponse } from 'privacy-scan-core';
 import { AxeScanResults } from './axe-scan-results';
 import { AxePuppeteerFactory } from './factories/axe-puppeteer-factory';
 import { WebDriver } from './web-driver';
@@ -28,7 +28,7 @@ export class Page {
 
     public browser: Puppeteer.Browser;
 
-    public navigationResponse: Puppeteer.HTTPResponse;
+    public lastNavigationResponse: Puppeteer.HTTPResponse;
 
     public lastBrowserError: BrowserError;
 
@@ -65,12 +65,10 @@ export class Page {
     public async navigateToUrl(url: string): Promise<void> {
         this.requestUrl = url;
         this.lastBrowserError = undefined;
-        const response = await this.pageNavigator.navigate(url, this.page, async (browserError) => {
+        this.lastNavigationResponse = await this.pageNavigator.navigate(url, this.page, async (browserError) => {
             this.logger?.logError('Page navigation error', { browserError: System.serializeError(browserError) });
             this.lastBrowserError = browserError;
         });
-
-        this.navigationResponse = response;
     }
 
     public async scanForA11yIssues(contentSourcePath?: string): Promise<AxeScanResults> {
@@ -88,7 +86,7 @@ export class Page {
     }
 
     public isOpen(): boolean {
-        return !isNil(this.page) && !this.page.isClosed() && isNil(this.lastBrowserError) && !isNil(this.navigationResponse);
+        return !isNil(this.page) && !this.page.isClosed() && isNil(this.lastBrowserError) && !isNil(this.lastNavigationResponse);
     }
 
     private async runIfNavigationSucceeded<T>(
@@ -120,13 +118,13 @@ export class Page {
             results: axeResults,
             pageTitle: await this.page.title(),
             browserSpec: await this.browser.version(),
-            pageResponseCode: this.navigationResponse.status(),
+            pageResponseCode: this.lastNavigationResponse.status(),
             userAgent: this.userAgent,
             browserResolution: this.browserResolution,
         };
 
         if (
-            this.navigationResponse.request().redirectChain().length > 0 ||
+            this.lastNavigationResponse.request().redirectChain().length > 0 ||
             // comparison of encode normalized Urls is preferable
             (this.requestUrl !== undefined && encodeURI(this.requestUrl) !== axeResults.url)
         ) {
@@ -138,11 +136,11 @@ export class Page {
     }
 
     private async scanPageForCookies(): Promise<PrivacyScanResult> {
-        const navigationStatusCode = this.navigationResponse.status();
-        const reloadPageFunc = async (page: Puppeteer.Page) => {
+        const navigationStatusCode = this.lastNavigationResponse.status();
+        const reloadPageFunc = async (page: Puppeteer.Page): Promise<ReloadPageResponse> => {
             await this.navigateToUrl(page.url());
 
-            return { success: this.navigationResponse?.ok() === true, error: this.lastBrowserError };
+            return { success: this.lastNavigationResponse?.ok() === true, error: this.lastBrowserError };
         };
 
         let privacyResult: PrivacyResults;
@@ -163,7 +161,7 @@ export class Page {
         };
 
         if (
-            this.navigationResponse.request().redirectChain().length > 0 ||
+            this.lastNavigationResponse.request().redirectChain().length > 0 ||
             // comparison of encode normalized Urls is preferable
             (this.requestUrl !== undefined && encodeURI(this.requestUrl) !== this.page.url())
         ) {
@@ -171,11 +169,11 @@ export class Page {
             scanResult.scannedUrl = this.page.url();
         }
 
-        const failedConsentResults = _.filter(
+        const failedConsentResults = filter(
             privacyResult.cookieCollectionConsentResults,
             (consentResult) => consentResult.error !== undefined,
         );
-        if (!_.isEmpty(failedConsentResults)) {
+        if (!isEmpty(failedConsentResults)) {
             const errorMessage = `Failed to collect cookies for ${failedConsentResults.length} test cases`;
             this.logger.logError(errorMessage, {
                 url: this.requestUrl,

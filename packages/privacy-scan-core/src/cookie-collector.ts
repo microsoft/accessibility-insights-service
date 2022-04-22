@@ -2,11 +2,11 @@
 // Licensed under the MIT License.
 
 import { injectable } from 'inversify';
-import _ from 'lodash';
+import { groupBy } from 'lodash';
 import { ConsentResult, CookieByDomain } from 'storage-documents';
 import * as Puppeteer from 'puppeteer';
 import { CookieScenario } from './cookie-scenarios';
-import { ReloadPageFunc, ReloadPageResponse } from '.';
+import { ReloadPageFunc, ReloadPageResponse } from './types';
 
 type GetAllCookiesResponse = { cookies: Puppeteer.Protocol.Network.Cookie[] };
 
@@ -41,7 +41,7 @@ export class CookieCollector {
     private async getCurrentCookies(page: Puppeteer.Page): Promise<CookieByDomain[]> {
         const results: CookieByDomain[] = [];
         const cookies = await this.getAllCookies(page);
-        const groupedCookies = _.groupBy(cookies, (cookie) => cookie.domain);
+        const groupedCookies = groupBy(cookies, (cookie) => cookie.domain);
         Object.keys(groupedCookies).forEach((domain) => {
             results.push({
                 domain: domain,
