@@ -11,7 +11,7 @@ import { defaultBrowserOptions, defaultLaunchOptions } from './puppeteer-options
 export class WebDriver {
     public browser: Puppeteer.Browser;
 
-    private readonly browserCloseTimeout = 60000;
+    private readonly browserCloseTimeoutMsecs = 60000;
 
     constructor(
         @inject(PromiseUtils) private readonly promiseUtils: PromiseUtils,
@@ -41,8 +41,8 @@ export class WebDriver {
 
     public async close(): Promise<void> {
         if (this.browser !== undefined) {
-            await this.promiseUtils.waitFor(this.closeBrowser(), this.browserCloseTimeout, async () => {
-                this.logger?.logError(`Browser failed to close with timeout of ${this.browserCloseTimeout} ms.`);
+            await this.promiseUtils.waitFor(this.closeBrowser(), this.browserCloseTimeoutMsecs, async () => {
+                this.logger?.logError(`Browser failed to close with timeout of ${this.browserCloseTimeoutMsecs} ms.`);
                 if (this.browser.process()) {
                     this.logger?.logInfo('Sending kill signal to browser process');
                     this.browser.process().kill('SIGINT');

@@ -27,9 +27,6 @@ describe(PageHandler, () => {
         loggerMock = Mock.ofType<MockableLogger>();
         pageMock = Mock.ofType<Page>();
         scrollByMock = Mock.ofType<typeof window.scrollBy>();
-
-        pageMock.setup((p) => p.evaluate(It.isAny())).returns(async (action) => action());
-
         windowStub = {
             innerHeight: windowHeight,
             document: {
@@ -39,12 +36,15 @@ describe(PageHandler, () => {
                 scrollingElement: {
                     scrollTop: 0,
                     scrollHeight: windowHeight,
+                    clientHeight: windowHeight,
                 },
             } as Writeable<Document>,
             scrollBy: scrollByMock.object,
         };
         originalWindow = global.window;
         global.window = windowStub as unknown as Window & typeof globalThis;
+
+        pageMock.setup((p) => p.evaluate(It.isAny())).returns(async (action) => action());
 
         pageHandler = new PageHandler(loggerMock.object, checkIntervalMsecs);
     });
@@ -82,7 +82,6 @@ describe(PageHandler, () => {
     it('terminate wait and warn if page is not fully rendered', async () => {
         const timeoutMsecs = 200;
         const validationCallCount = timeoutMsecs / checkIntervalMsecs;
-
         const scrollCount = 1;
         setupScrollToBottom(scrollCount);
 

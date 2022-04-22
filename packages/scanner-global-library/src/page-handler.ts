@@ -35,10 +35,15 @@ export class PageHandler {
                 scrollingComplete = await page.evaluate(async () => {
                     window.scrollBy(0, window.innerHeight);
 
-                    return window.document.scrollingElement.scrollTop + window.innerHeight >= window.document.scrollingElement.scrollHeight;
+                    return (
+                        window.document.scrollingElement.scrollHeight -
+                            Math.round(window.document.scrollingElement.scrollTop) -
+                            window.document.scrollingElement.clientHeight <
+                        window.innerHeight / 10 // the scroll completion threshold
+                    );
                 });
             } catch (error) {
-                this.logger?.logError(`Page evaluation failed.`, { error: System.serializeError(error) });
+                this.logger?.logError(`The page scrolling failed.`, { error: System.serializeError(error) });
             }
 
             await page.waitForTimeout(this.checkIntervalMsecs);
@@ -46,7 +51,7 @@ export class PageHandler {
         }
 
         if (!scrollingComplete) {
-            this.logger?.logWarn(`Did not scroll to bottom of page after ${timeoutMsecs / 1000} seconds.`);
+            this.logger?.logWarn(`Did not scroll to the bottom of the page after ${timeoutMsecs / 1000} seconds.`);
         }
     }
 
@@ -66,7 +71,7 @@ export class PageHandler {
                 pageHtmlContentSize = await page.evaluate(() => window.document.body.innerHTML.length);
             } catch (error) {
                 pageHtmlContentSize = 0;
-                this.logger?.logError(`Page evaluation failed.`, { error: System.serializeError(error) });
+                this.logger?.logError(`The evaluation in page's context failed.`, { error: System.serializeError(error) });
             }
 
             if (lastCheckPageHtmlContentSize !== 0 && pageHtmlContentSize === lastCheckPageHtmlContentSize) {

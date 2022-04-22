@@ -374,7 +374,7 @@ describe(Page, () => {
 
             await page.navigateToUrl(url);
 
-            expect(page.navigationResponse).toEqual(puppeteerResponseMock.object);
+            expect(page.lastNavigationResponse).toEqual(puppeteerResponseMock.object);
         });
 
         it('handles browser error', async () => {
@@ -509,7 +509,7 @@ describe(Page, () => {
     }
 
     function simulatePageNavigation(response: Puppeteer.HTTPResponse, browserError?: BrowserError): void {
-        page.navigationResponse = response;
+        page.lastNavigationResponse = response;
         page.lastBrowserError = browserError;
     }
 
