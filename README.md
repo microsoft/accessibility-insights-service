@@ -7,7 +7,6 @@ Licensed under the MIT License.
 
 [![Build Status](https://dev.azure.com/accessibility-insights/Accessibility%20Insights%20Service/_apis/build/status/Accessibility-Insights-Service%20CI?branchName=main)](https://dev.azure.com/accessibility-insights/Accessibility%20Insights%20Service/_build/latest?definitionId=28&branchName=main)
 [![codecov](https://codecov.io/gh/microsoft/accessibility-insights-service/branch/main/graph/badge.svg)](https://codecov.io/gh/microsoft/accessibility-insights-service)
-[![Dependabot Status](https://api.dependabot.com/badges/status?host=github&repo=microsoft/accessibility-insights-service)](https://dependabot.com)
 
 Accessibility Insights Service is a service that can be used to scan websites for accessibility issues on a periodic basis. It is Typescript project with shell scripts for install and update scenarios.
 
