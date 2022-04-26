@@ -25,6 +25,7 @@ interface ClientArgs {
     dataFolder: string;
     metadataFile: string;
     azureStorageName: string;
+    azureStorageKey: string;
     azureBlobContainerName: string;
 }
 
@@ -41,7 +42,7 @@ interface ValidationDiff {
     cookieMismatch: CookieMismatch[];
 }
 
-const maxConcurrencyLimit = 1; // TODO
+const maxConcurrencyLimit = 10;
 
 let clientArgs: ClientArgs;
 const hashGenerator = new HashGenerator();
@@ -153,17 +154,26 @@ async function parsePrivacyMetadata(privacyMetadata: PrivacyMetadata[]): Promise
     await Promise.all(
         await asyncLimit(async () => {
             return privacyMetadata.map(async (metadata) => {
-                const urlValidation = await downloadPrivacyBlob(metadata.ValidationResultBlobName);
-                appendUrlToList(urlValidation);
-                writeUrlValidation(urlValidation);
-                console.log(`Parsed website validation for ${metadata.Name}`);
+                try {
+                    const urlValidation = await downloadPrivacyBlob(metadata.ValidationResultBlobName);
+                    appendUrlToList(urlValidation);
+                    writeUrlValidation(urlValidation);
+                    console.log(`Parsed website validation for '${metadata.Name}'`);
+                } catch (error) {
+                    console.log('Error while parsing privacy metadata: ', System.serializeError(error));
+                }
             });
         }),
     );
 }
 
 async function downloadPrivacyBlob(blobName: string): Promise<UrlValidation[]> {
-    const blob = await downloadBlob<UrlValidation[]>(clientArgs.azureStorageName, clientArgs.azureBlobContainerName, blobName);
+    const blob = await downloadBlob<UrlValidation[]>(
+        clientArgs.azureStorageName,
+        clientArgs.azureBlobContainerName,
+        blobName,
+        clientArgs.azureStorageKey,
+    );
     if (blob === undefined) {
         console.log(`The blob '${blobName}' not found.`);
 
@@ -329,6 +339,11 @@ function getClientArguments(): ClientArgs {
                 type: 'string',
                 describe: 'The privacy storage name.',
                 alias: ['azurestoragename', 'wcp-azure-storage-name'],
+            },
+            azureStorageKey: {
+                type: 'string',
+                describe: 'The Azure storage access key.',
+                alias: ['azurestoragekey', 'azure-storage-key', 'wcp-azure-storage-key'],
             },
             azureBlobContainerName: {
                 type: 'string',

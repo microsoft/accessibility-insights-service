@@ -43,7 +43,7 @@ interface ScanUrlData {
     knownPages?: string[];
 }
 
-const maxConcurrencyLimit = 10;
+const maxConcurrencyLimit = 2;
 
 let clientArgs: ClientArgs;
 let token: string;
@@ -72,7 +72,7 @@ const getReportUrl = (scanId: string, reportId: string) => {
 
 async function main(): Promise<void> {
     clientArgs = getClientArguments();
-    token = await getOAuthToken(clientArgs);
+    token = await getOAuthToken(clientArgs.oauthResourceId, clientArgs.oauthClientId, clientArgs.oauthClientSecret);
     await dispatchOperation();
 }
 
@@ -104,29 +104,33 @@ async function getScanResultOperation(): Promise<void> {
     await Promise.all(
         await asyncLimit(async () => {
             return pendingScanIds.map(async (scanId) => {
-                let fileData: FileData;
-                let dataFileName: string;
-                const scanResult = await sendGetScanStatusRequest(scanId);
-                if (scanResult.run?.state === 'completed') {
-                    console.log(`Scan ${scanId} has completed`);
-                    dataFileName = `${scanId}.completed`;
-                    fileData = {
-                        scanUrl: scanResult.url,
-                        data: scanResult,
-                    };
-                    await getReportOperation(scanResult);
-                } else if (scanResult.run?.state === 'failed') {
-                    console.log(`Scan ${scanId} has failed`);
-                    dataFileName = `${scanId}.failed`;
-                    fileData = {
-                        scanUrl: scanResult.url,
-                        error: scanResult.run?.error,
-                        data: scanResult,
-                    };
-                } else {
-                    console.log(`Scan ${scanId} is pending`);
+                try {
+                    let fileData: FileData;
+                    let dataFileName: string;
+                    const scanResult = await sendGetScanStatusRequest(scanId);
+                    if (scanResult.run?.state === 'completed') {
+                        console.log(`Scan ${scanId} has completed`);
+                        dataFileName = `${scanId}.completed`;
+                        fileData = {
+                            scanUrl: scanResult.url,
+                            data: scanResult,
+                        };
+                        await getReportOperation(scanResult);
+                    } else if (scanResult.run?.state === 'failed') {
+                        console.log(`Scan ${scanId} has failed`);
+                        dataFileName = `${scanId}.failed`;
+                        fileData = {
+                            scanUrl: scanResult.url,
+                            error: scanResult.run?.error,
+                            data: scanResult,
+                        };
+                    } else {
+                        console.log(`Scan ${scanId} is pending`);
+                    }
+                    writeToFile(fileData, getDataFolderName(), dataFileName);
+                } catch (error) {
+                    console.log('Error while processing scan response: ', System.serializeError(error));
                 }
-                writeToFile(fileData, getDataFolderName(), dataFileName);
             });
         }),
     );
@@ -137,24 +141,26 @@ async function sendRequestOperation(requests: ScanUrlData[]): Promise<void> {
     requestsChunks.map(async (requestsChunk) => {
         const scanResponses = await sendPrivacyScanRequest(requestsChunk);
         scanResponses.map((scanResponse) => {
-            let fileData: FileData;
-            let dataFileName: string;
-            if (scanResponse.error) {
-                console.log(`Sending scan request ${scanResponse.scanId} for URL ${scanResponse.url} has failed.`);
-                dataFileName = `${guidGenerator.createGuid()}.error`;
-                fileData = {
-                    scanUrl: scanResponse.url,
-                    error: scanResponse,
-                };
-            } else {
-                console.log(`Scan request ${scanResponse.scanId} for URL ${scanResponse.url} sent successfully.`);
-                dataFileName = `${scanResponse.scanId}.request`;
-                fileData = {
-                    scanUrl: scanResponse.url,
-                    data: scanResponse,
-                };
+            if (scanResponse !== undefined) {
+                let fileData: FileData;
+                let dataFileName: string;
+                if (scanResponse.error) {
+                    console.log(`Sending scan request ${scanResponse.scanId} for URL ${scanResponse.url} has failed.`);
+                    dataFileName = `${guidGenerator.createGuid()}.error`;
+                    fileData = {
+                        scanUrl: scanResponse.url,
+                        error: scanResponse,
+                    };
+                } else {
+                    console.log(`Scan request ${scanResponse.scanId} for URL ${scanResponse.url} sent successfully.`);
+                    dataFileName = `${scanResponse.scanId}.request`;
+                    fileData = {
+                        scanUrl: scanResponse.url,
+                        data: scanResponse,
+                    };
+                }
+                writeToFile(fileData, getDataFolderName(), dataFileName);
             }
-            writeToFile(fileData, getDataFolderName(), dataFileName);
         });
     });
 }
@@ -196,13 +202,19 @@ async function sendPrivacyScanRequest(requests: ScanUrlData[]): Promise<ScanRunR
 
     return Promise.all(
         await asyncLimit(async () => {
-            const scanRequests = requests.map((request) => createPrivacyScanRequest(request.scanUrl, request.knownPages));
-            const httpRequest = createPostHttpRequest(scanRequests, token);
-            const httpResponse = await nodeFetch.default(getPostScanUrl(), httpRequest);
-            await ensureHttpResponse(httpResponse);
-            const body = await httpResponse.json();
+            try {
+                const scanRequests = requests.map((request) => createPrivacyScanRequest(request.scanUrl, request.knownPages));
+                const httpRequest = createPostHttpRequest(scanRequests, token);
+                const httpResponse = await nodeFetch.default(getPostScanUrl(), httpRequest);
+                await ensureHttpResponse(httpResponse);
+                const body = await httpResponse.json();
 
-            return body;
+                return body;
+            } catch (error) {
+                console.log('Error while send scan request: ', System.serializeError(error));
+
+                return undefined;
+            }
         }),
     );
 }
@@ -255,7 +267,7 @@ function getClientArguments(): ClientArgs {
             oauthResourceId: {
                 type: 'string',
                 describe: 'The OAuth2 resource id.',
-                alias: ['oauthresourceid, ai-oauth-resource-id'],
+                alias: ['oauthresourceid', 'ai-oauth-resource-id'],
             },
             oauthClientSecret: {
                 type: 'string',
