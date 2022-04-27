@@ -9,6 +9,7 @@ import { System, HashGenerator } from 'common';
 import * as dotenv from 'dotenv';
 import pLimit from 'p-limit';
 import { PrivacyPageScanReport, ConsentResult, CookieByDomain, Cookie } from 'storage-documents';
+import { isEmpty } from 'lodash';
 import { PrivacyMetadata, UrlValidation, ViolationTypeEnum } from './wcp-types';
 import { downloadBlob, writeToFile, executeBatchInChunkExclusive } from './common-lib';
 
@@ -86,13 +87,13 @@ function comparePrivacyValidationImpl(wcpValidationFileName: string): void {
     if (aiValidation === undefined) {
         console.log(`The AI validation report file not found. File: ${aiValidationFileName} URL: ${wcpValidation.seedUri}`);
     } else {
-        const cookieMismatch = getMissingCookie(aiValidation, wcpValidation);
-        if (cookieMismatch.length > 0 || aiValidation.bannerDetected !== wcpValidation.bannerDetected) {
+        const cookieDiff = getCookieDiff(aiValidation, wcpValidation);
+        if (cookieDiff.length > 0 || aiValidation.bannerDetected !== wcpValidation.bannerDetected) {
             const validationDiff = {
                 url: wcpValidation.seedUri,
                 fileHash: urlHash,
                 bannerDetectionMismatch: aiValidation.bannerDetected !== wcpValidation.bannerDetected,
-                cookieMismatch,
+                cookieMismatch: cookieDiff,
             } as ValidationDiff;
 
             writeToFile(validationDiff, getDataFolderName(), `${urlHash}.diff`);
@@ -101,7 +102,7 @@ function comparePrivacyValidationImpl(wcpValidationFileName: string): void {
     }
 }
 
-function getMissingCookie(aiReport: PrivacyPageScanReport, wcpReport: PrivacyPageScanReport): CookieMismatch[] {
+function getCookieDiff(aiReport: PrivacyPageScanReport, wcpReport: PrivacyPageScanReport): CookieMismatch[] {
     const getAllCookie = (source: PrivacyPageScanReport): Cookie[] => {
         const allCookie: Cookie[] = [];
         if (source.cookieCollectionConsentResults) {
@@ -129,7 +130,7 @@ function getMissingCookie(aiReport: PrivacyPageScanReport, wcpReport: PrivacyPag
     const aiReportCookie = getAllCookie(aiReport);
     const wcpReportCookie = getAllCookie(wcpReport);
     const missingCookieFromAi = wcpReportCookie
-        .filter((w) => !aiReportCookie.some((a) => a.domain === w.domain && a.name === w.name))
+        .filter((w) => !aiReportCookie.some((a) => normalizeDomain(a.domain) === normalizeDomain(w.domain) && a.name === w.name))
         .map((r) => {
             return {
                 missingFrom: 'accessibility',
@@ -138,7 +139,7 @@ function getMissingCookie(aiReport: PrivacyPageScanReport, wcpReport: PrivacyPag
             } as CookieMismatch;
         });
     const missingCookieFromWcp = aiReportCookie
-        .filter((w) => !wcpReportCookie.some((a) => a.domain === w.domain && a.name === w.name))
+        .filter((w) => !wcpReportCookie.some((a) => normalizeDomain(a.domain) === normalizeDomain(w.domain) && a.name === w.name))
         .map((r) => {
             return {
                 missingFrom: 'privacy',
@@ -148,6 +149,21 @@ function getMissingCookie(aiReport: PrivacyPageScanReport, wcpReport: PrivacyPag
         });
 
     return [...missingCookieFromAi, ...missingCookieFromWcp];
+}
+
+function normalizeDomain(domain: string): string {
+    if (isEmpty(domain)) {
+        return domain;
+    }
+
+    let domainFixed = domain;
+    if (domain.startsWith('www')) {
+        domainFixed = domain.slice(domain.indexOf('.') + 1);
+    } else {
+        domainFixed = domain.startsWith('.') ? domain.slice(1) : domain;
+    }
+
+    return domainFixed;
 }
 
 async function exportPrivacyValidation(): Promise<void> {
