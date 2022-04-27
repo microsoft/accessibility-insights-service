@@ -9,8 +9,9 @@ import { System, HashGenerator } from 'common';
 import * as dotenv from 'dotenv';
 import pLimit from 'p-limit';
 import { PrivacyPageScanReport, ConsentResult, CookieByDomain, Cookie } from 'storage-documents';
+import { isEmpty } from 'lodash';
 import { PrivacyMetadata, UrlValidation, ViolationTypeEnum } from './wcp-types';
-import { downloadBlob, writeToFile } from './common-lib';
+import { downloadBlob, writeToFile, executeBatchInChunkExclusive } from './common-lib';
 
 /* eslint-disable @typescript-eslint/no-explicit-any, security/detect-non-literal-fs-filename */
 
@@ -25,6 +26,7 @@ interface ClientArgs {
     dataFolder: string;
     metadataFile: string;
     azureStorageName: string;
+    azureStorageKey: string;
     azureBlobContainerName: string;
 }
 
@@ -41,7 +43,7 @@ interface ValidationDiff {
     cookieMismatch: CookieMismatch[];
 }
 
-const maxConcurrencyLimit = 1; // TODO
+const maxConcurrencyLimit = 10;
 
 let clientArgs: ClientArgs;
 const hashGenerator = new HashGenerator();
@@ -61,40 +63,46 @@ async function dispatchOperation(): Promise<void> {
             await exportPrivacyValidation();
             break;
         case 'compare-validation':
-            comparePrivacyValidation();
+            await comparePrivacyValidation();
             break;
         default:
             throw new Error(`Operation ${clientArgs.operation} is not supported.`);
     }
 }
 
-function comparePrivacyValidation(): void {
-    const wcpValidationList = getPrivacyValidationList();
-    wcpValidationList.map((wcpValidationFileName) => {
-        const wcpValidation = readValidationReportFile(wcpValidationFileName);
-        const urlHash = hashGenerator.generateBase64Hash(wcpValidation.seedUri);
-        const aiValidationFileName = `${urlHash}.ai.report.json`;
-        const aiValidation = readValidationReportFile(aiValidationFileName);
-        if (aiValidation === undefined) {
-            console.log(`The AI validation report file not found. File: ${aiValidationFileName} URL: ${wcpValidation.seedUri}`);
-        } else {
-            const cookieMismatch = getMissingCookie(aiValidation, wcpValidation);
-            if (cookieMismatch.length > 0 || aiValidation.bannerDetected !== wcpValidation.bannerDetected) {
-                const validationDiff = {
-                    url: wcpValidation.seedUri,
-                    fileHash: urlHash,
-                    bannerDetectionMismatch: aiValidation.bannerDetected !== wcpValidation.bannerDetected,
-                    cookieMismatch,
-                } as ValidationDiff;
+async function comparePrivacyValidation(): Promise<void> {
+    const fn = (validations: string[]) => {
+        return Promise.resolve(validations.map(comparePrivacyValidationImpl));
+    };
 
-                writeToFile(validationDiff, getDataFolderName(), `${urlHash}.diff`);
-            }
-            console.log(`Compared website validation for ${wcpValidation.seedUri}`);
-        }
-    });
+    const wcpValidationList = getPrivacyValidationList();
+    await executeBatchInChunkExclusive(fn, wcpValidationList);
 }
 
-function getMissingCookie(aiReport: PrivacyPageScanReport, wcpReport: PrivacyPageScanReport): CookieMismatch[] {
+function comparePrivacyValidationImpl(wcpValidationFileName: string): void {
+    const wcpValidation = readValidationReportFile(wcpValidationFileName);
+    const urlHash = hashGenerator.generateBase64Hash(wcpValidation.seedUri);
+    const aiValidationFileName = `${urlHash}.ai.report.json`;
+    const aiValidation = readValidationReportFile(aiValidationFileName);
+    if (aiValidation === undefined) {
+        console.log(`The AI validation report file not found. File: ${aiValidationFileName} URL: ${wcpValidation.seedUri}`);
+    } else {
+        const cookieDiff = getCookieDiff(aiValidation, wcpValidation);
+        if (cookieDiff.length > 0 || aiValidation.bannerDetected !== wcpValidation.bannerDetected) {
+            const validationDiff = {
+                url: wcpValidation.seedUri,
+                fileHash: urlHash,
+                bannerDetectionMismatch: aiValidation.bannerDetected !== wcpValidation.bannerDetected,
+                cookieMismatch: cookieDiff,
+            } as ValidationDiff;
+
+            writeToFile(validationDiff, getDataFolderName(), `${urlHash}.diff`);
+        }
+        console.log(`Compared website validation for ${wcpValidation.seedUri}`);
+    }
+}
+
+function getCookieDiff(aiReport: PrivacyPageScanReport, wcpReport: PrivacyPageScanReport): CookieMismatch[] {
     const getAllCookie = (source: PrivacyPageScanReport): Cookie[] => {
         const allCookie: Cookie[] = [];
         if (source.cookieCollectionConsentResults) {
@@ -122,7 +130,7 @@ function getMissingCookie(aiReport: PrivacyPageScanReport, wcpReport: PrivacyPag
     const aiReportCookie = getAllCookie(aiReport);
     const wcpReportCookie = getAllCookie(wcpReport);
     const missingCookieFromAi = wcpReportCookie
-        .filter((w) => !aiReportCookie.some((a) => a.domain === w.domain && a.name === w.name))
+        .filter((w) => !aiReportCookie.some((a) => normalizeDomain(a.domain) === normalizeDomain(w.domain) && a.name === w.name))
         .map((r) => {
             return {
                 missingFrom: 'accessibility',
@@ -131,7 +139,7 @@ function getMissingCookie(aiReport: PrivacyPageScanReport, wcpReport: PrivacyPag
             } as CookieMismatch;
         });
     const missingCookieFromWcp = aiReportCookie
-        .filter((w) => !wcpReportCookie.some((a) => a.domain === w.domain && a.name === w.name))
+        .filter((w) => !wcpReportCookie.some((a) => normalizeDomain(a.domain) === normalizeDomain(w.domain) && a.name === w.name))
         .map((r) => {
             return {
                 missingFrom: 'privacy',
@@ -141,6 +149,21 @@ function getMissingCookie(aiReport: PrivacyPageScanReport, wcpReport: PrivacyPag
         });
 
     return [...missingCookieFromAi, ...missingCookieFromWcp];
+}
+
+function normalizeDomain(domain: string): string {
+    if (isEmpty(domain)) {
+        return domain;
+    }
+
+    let domainFixed = domain;
+    if (domain.startsWith('www')) {
+        domainFixed = domain.slice(domain.indexOf('.') + 1);
+    } else {
+        domainFixed = domain.startsWith('.') ? domain.slice(1) : domain;
+    }
+
+    return domainFixed;
 }
 
 async function exportPrivacyValidation(): Promise<void> {
@@ -153,17 +176,26 @@ async function parsePrivacyMetadata(privacyMetadata: PrivacyMetadata[]): Promise
     await Promise.all(
         await asyncLimit(async () => {
             return privacyMetadata.map(async (metadata) => {
-                const urlValidation = await downloadPrivacyBlob(metadata.ValidationResultBlobName);
-                appendUrlToList(urlValidation);
-                writeUrlValidation(urlValidation);
-                console.log(`Parsed website validation for ${metadata.Name}`);
+                try {
+                    const urlValidation = await downloadPrivacyBlob(metadata.ValidationResultBlobName);
+                    appendUrlToList(urlValidation);
+                    writeUrlValidation(urlValidation);
+                    console.log(`Parsed website validation for '${metadata.Name}'`);
+                } catch (error) {
+                    console.log('Error while parsing privacy metadata: ', System.serializeError(error));
+                }
             });
         }),
     );
 }
 
 async function downloadPrivacyBlob(blobName: string): Promise<UrlValidation[]> {
-    const blob = await downloadBlob<UrlValidation[]>(clientArgs.azureStorageName, clientArgs.azureBlobContainerName, blobName);
+    const blob = await downloadBlob<UrlValidation[]>(
+        clientArgs.azureStorageName,
+        clientArgs.azureBlobContainerName,
+        blobName,
+        clientArgs.azureStorageKey,
+    );
     if (blob === undefined) {
         console.log(`The blob '${blobName}' not found.`);
 
@@ -329,6 +361,11 @@ function getClientArguments(): ClientArgs {
                 type: 'string',
                 describe: 'The privacy storage name.',
                 alias: ['azurestoragename', 'wcp-azure-storage-name'],
+            },
+            azureStorageKey: {
+                type: 'string',
+                describe: 'The Azure storage access key.',
+                alias: ['azurestoragekey', 'azure-storage-key', 'wcp-azure-storage-key'],
             },
             azureBlobContainerName: {
                 type: 'string',

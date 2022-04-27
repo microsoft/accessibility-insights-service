@@ -7,7 +7,7 @@ drop/
 test-results/
 out/
 crawler_storage/
-data/
+data*
 ai_scan_cli_output*
 
 **/.secrets
