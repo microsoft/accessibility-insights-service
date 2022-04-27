@@ -10,7 +10,7 @@ import * as dotenv from 'dotenv';
 import pLimit from 'p-limit';
 import { PrivacyPageScanReport, ConsentResult, CookieByDomain, Cookie } from 'storage-documents';
 import { PrivacyMetadata, UrlValidation, ViolationTypeEnum } from './wcp-types';
-import { downloadBlob, writeToFile } from './common-lib';
+import { downloadBlob, writeToFile, executeBatchInChunkExclusive } from './common-lib';
 
 /* eslint-disable @typescript-eslint/no-explicit-any, security/detect-non-literal-fs-filename */
 
@@ -62,37 +62,43 @@ async function dispatchOperation(): Promise<void> {
             await exportPrivacyValidation();
             break;
         case 'compare-validation':
-            comparePrivacyValidation();
+            await comparePrivacyValidation();
             break;
         default:
             throw new Error(`Operation ${clientArgs.operation} is not supported.`);
     }
 }
 
-function comparePrivacyValidation(): void {
-    const wcpValidationList = getPrivacyValidationList();
-    wcpValidationList.map((wcpValidationFileName) => {
-        const wcpValidation = readValidationReportFile(wcpValidationFileName);
-        const urlHash = hashGenerator.generateBase64Hash(wcpValidation.seedUri);
-        const aiValidationFileName = `${urlHash}.ai.report.json`;
-        const aiValidation = readValidationReportFile(aiValidationFileName);
-        if (aiValidation === undefined) {
-            console.log(`The AI validation report file not found. File: ${aiValidationFileName} URL: ${wcpValidation.seedUri}`);
-        } else {
-            const cookieMismatch = getMissingCookie(aiValidation, wcpValidation);
-            if (cookieMismatch.length > 0 || aiValidation.bannerDetected !== wcpValidation.bannerDetected) {
-                const validationDiff = {
-                    url: wcpValidation.seedUri,
-                    fileHash: urlHash,
-                    bannerDetectionMismatch: aiValidation.bannerDetected !== wcpValidation.bannerDetected,
-                    cookieMismatch,
-                } as ValidationDiff;
+async function comparePrivacyValidation(): Promise<void> {
+    const fn = (validations: string[]) => {
+        return Promise.resolve(validations.map(comparePrivacyValidationImpl));
+    };
 
-                writeToFile(validationDiff, getDataFolderName(), `${urlHash}.diff`);
-            }
-            console.log(`Compared website validation for ${wcpValidation.seedUri}`);
+    const wcpValidationList = getPrivacyValidationList();
+    await executeBatchInChunkExclusive(fn, wcpValidationList);
+}
+
+function comparePrivacyValidationImpl(wcpValidationFileName: string): void {
+    const wcpValidation = readValidationReportFile(wcpValidationFileName);
+    const urlHash = hashGenerator.generateBase64Hash(wcpValidation.seedUri);
+    const aiValidationFileName = `${urlHash}.ai.report.json`;
+    const aiValidation = readValidationReportFile(aiValidationFileName);
+    if (aiValidation === undefined) {
+        console.log(`The AI validation report file not found. File: ${aiValidationFileName} URL: ${wcpValidation.seedUri}`);
+    } else {
+        const cookieMismatch = getMissingCookie(aiValidation, wcpValidation);
+        if (cookieMismatch.length > 0 || aiValidation.bannerDetected !== wcpValidation.bannerDetected) {
+            const validationDiff = {
+                url: wcpValidation.seedUri,
+                fileHash: urlHash,
+                bannerDetectionMismatch: aiValidation.bannerDetected !== wcpValidation.bannerDetected,
+                cookieMismatch,
+            } as ValidationDiff;
+
+            writeToFile(validationDiff, getDataFolderName(), `${urlHash}.diff`);
         }
-    });
+        console.log(`Compared website validation for ${wcpValidation.seedUri}`);
+    }
 }
 
 function getMissingCookie(aiReport: PrivacyPageScanReport, wcpReport: PrivacyPageScanReport): CookieMismatch[] {

@@ -14,7 +14,15 @@ import { isEmpty } from 'lodash';
 import { ScanRunRequest } from '../web-api/api-contracts/scan-run-request';
 import { ScanRunResponse } from '../web-api/api-contracts/scan-run-response';
 import { ScanRunResultResponse } from '../web-api/api-contracts/scan-result-response';
-import { getOAuthToken, ensureHttpResponse, createGetHttpRequest, createPostHttpRequest, writeToFile } from './common-lib';
+import {
+    getOAuthToken,
+    ensureHttpResponse,
+    createGetHttpRequest,
+    createPostHttpRequest,
+    writeToFile,
+    executeWithExpRetry,
+    executeBatchInChunkExclusive,
+} from './common-lib';
 
 /* eslint-disable @typescript-eslint/no-explicit-any, security/detect-non-literal-fs-filename */
 
@@ -43,7 +51,7 @@ interface ScanUrlData {
     knownPages?: string[];
 }
 
-const maxConcurrencyLimit = 2;
+const maxConcurrencyLimit = 10;
 
 let clientArgs: ClientArgs;
 let token: string;
@@ -97,9 +105,14 @@ async function dispatchOperation(): Promise<void> {
 }
 
 async function getScanResultOperation(): Promise<void> {
-    const asyncLimit = pLimit(maxConcurrencyLimit);
     const pendingScanIds = readPendingResultsScanIds();
     console.log(`Found ${pendingScanIds.length} pending scans.`);
+
+    await executeBatchInChunkExclusive(getScanResultOperationBatch, pendingScanIds);
+}
+
+async function getScanResultOperationBatch(pendingScanIds: string[]): Promise<void> {
+    const asyncLimit = pLimit(maxConcurrencyLimit);
 
     await Promise.all(
         await asyncLimit(async () => {
@@ -127,7 +140,9 @@ async function getScanResultOperation(): Promise<void> {
                     } else {
                         console.log(`Scan ${scanId} is pending`);
                     }
-                    writeToFile(fileData, getDataFolderName(), dataFileName);
+                    if (fileData) {
+                        writeToFile(fileData, getDataFolderName(), dataFileName);
+                    }
                 } catch (error) {
                     console.log('Error while processing scan response: ', System.serializeError(error));
                 }
@@ -181,7 +196,9 @@ async function getReportOperation(scanResult: ScanRunResultResponse): Promise<vo
 
 async function sendGetReportRequest(scanId: string, reportId: string): Promise<any> {
     const httpRequest = createGetHttpRequest(token);
-    const httpResponse = await nodeFetch.default(getReportUrl(scanId, reportId), httpRequest);
+    const httpResponse = await executeWithExpRetry<nodeFetch.Response>(async () =>
+        nodeFetch.default(getReportUrl(scanId, reportId), httpRequest),
+    );
     await ensureHttpResponse(httpResponse);
     const body = await httpResponse.json();
 
@@ -190,7 +207,9 @@ async function sendGetReportRequest(scanId: string, reportId: string): Promise<a
 
 async function sendGetScanStatusRequest(scanId: string): Promise<ScanRunResultResponse> {
     const httpRequest = createGetHttpRequest(token);
-    const httpResponse = await nodeFetch.default(getScanStatusUrl(scanId), httpRequest);
+    const httpResponse = await executeWithExpRetry<nodeFetch.Response>(async () =>
+        nodeFetch.default(getScanStatusUrl(scanId), httpRequest),
+    );
     await ensureHttpResponse(httpResponse);
     const body = await httpResponse.json();
 
@@ -205,7 +224,9 @@ async function sendPrivacyScanRequest(requests: ScanUrlData[]): Promise<ScanRunR
             try {
                 const scanRequests = requests.map((request) => createPrivacyScanRequest(request.scanUrl, request.knownPages));
                 const httpRequest = createPostHttpRequest(scanRequests, token);
-                const httpResponse = await nodeFetch.default(getPostScanUrl(), httpRequest);
+                const httpResponse = await executeWithExpRetry<nodeFetch.Response>(async () =>
+                    nodeFetch.default(getPostScanUrl(), httpRequest),
+                );
                 await ensureHttpResponse(httpResponse);
                 const body = await httpResponse.json();
 

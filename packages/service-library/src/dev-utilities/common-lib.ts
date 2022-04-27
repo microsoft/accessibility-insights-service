@@ -3,18 +3,66 @@
 
 import { Readable } from 'stream';
 import fs from 'fs';
+import https from 'https';
 import * as nodeFetch from 'node-fetch';
 import { BlobServiceClient, StorageSharedKeyCredential } from '@azure/storage-blob';
 import { EnvironmentCredential } from '@azure/identity';
-import { BlobStorageClient } from 'azure-services';
-import { BodyParser } from 'common';
+import { BlobStorageClient, BlobContentDownloadResponse } from 'azure-services';
+import { BodyParser, System } from 'common';
 import { isEmpty } from 'lodash';
+import { backOff, IBackOffOptions } from 'exponential-backoff';
+import { Mutex } from 'async-mutex';
 
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types */
 /* eslint-disable security/detect-non-literal-fs-filename */
 
+const backOffOptions: Partial<IBackOffOptions> = {
+    delayFirstAttempt: false,
+    numOfAttempts: 5,
+    maxDelay: 6000,
+    startingDelay: 0,
+    retry: (error, retry) => {
+        console.log(`Retrying error ${retry} time: `, System.serializeError(error));
+
+        return true;
+    },
+};
+
+const httpsAgent = new https.Agent({ keepAlive: true });
+
 export interface OAuthToken {
     access_token: string;
+}
+
+export async function executeExclusive<T>(fn: () => Promise<T>): Promise<T> {
+    const mutex = new Mutex();
+
+    return mutex.runExclusive(async () => fn());
+}
+
+export async function executeBatchInChunkExclusive<T>(
+    fn: (batch: any[]) => Promise<void | T[]>,
+    items: any[],
+    batchSize: number = 20,
+): Promise<(void | T)[]> {
+    let batchCount = 1;
+    const itemsChunks = System.chunkArray(items, batchSize);
+    const result = await Promise.all(
+        itemsChunks.map(async (batch) => {
+            return executeExclusive(async () => {
+                console.log(`Processing batch ${batchCount} of ${itemsChunks.length}`);
+                batchCount += 1;
+
+                return fn(batch);
+            });
+        }),
+    );
+
+    return result.flat();
+}
+
+export async function executeWithExpRetry<T>(fn: () => Promise<T>): Promise<T> {
+    return backOff(async () => fn(), backOffOptions);
 }
 
 export async function getOAuthToken(oauthResourceId: string, oauthClientId: string, oauthClientSecret: string): Promise<string> {
@@ -44,6 +92,7 @@ export function createGetHttpRequest(token: string): nodeFetch.RequestInit {
     return {
         method: 'GET',
         headers,
+        agent: httpsAgent,
     };
 }
 
@@ -58,6 +107,7 @@ export function createPostHttpRequest(bodyObj: any, token: string): nodeFetch.Re
         method: 'POST',
         headers,
         body,
+        agent: httpsAgent,
     };
 }
 
@@ -72,7 +122,9 @@ export async function downloadBlob<T>(accountName: string, blobContainerName: st
     }
 
     const blobStorageClient = new BlobStorageClient(() => Promise.resolve(blobServiceClient));
-    const blobContentStream = await blobStorageClient.getBlobContent(blobContainerName, blobName);
+    const blobContentStream = await executeWithExpRetry<BlobContentDownloadResponse>(async () =>
+        blobStorageClient.getBlobContent(blobContainerName, blobName),
+    );
 
     if (blobContentStream.notFound) {
         return undefined;
@@ -107,5 +159,6 @@ function createGetTokenHttpRequest(oauthResourceId: string, oauthClientId: strin
         method: 'POST',
         headers,
         body,
+        agent: httpsAgent,
     };
 }
