@@ -10,10 +10,15 @@ import { PageConfigurator } from './page-configurator';
 import { PageHandler } from './page-handler';
 import { BrowserError } from './browser-error';
 import { PageNavigationHooks } from './page-navigation-hooks';
+import { PageNavigationTiming } from './page-timeout-config';
 
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/consistent-type-assertions */
 const scrollTimeoutMsecs = 15000;
 const pageRenderingTimeoutMsecs = 1000;
+const pageNavigationTiming: Partial<PageNavigationTiming> = {
+    scroll: 1,
+    render: 2,
+};
 
 let pageConfiguratorMock: IMock<PageConfigurator>;
 let pageHandlerMock: IMock<PageHandler>;
@@ -59,10 +64,11 @@ describe(PageNavigationHooks, () => {
             .verifiable();
         pageHandlerMock
             .setup(async (o) => o.waitForPageToCompleteRendering(pageMock.object, scrollTimeoutMsecs, pageRenderingTimeoutMsecs))
-            .returns(() => Promise.resolve())
+            .returns(() => Promise.resolve(pageNavigationTiming))
             .verifiable();
 
-        await navigationHooks.postNavigation(pageMock.object, {} as HTTPResponse);
+        const timing = await navigationHooks.postNavigation(pageMock.object, {} as HTTPResponse);
+        expect(pageNavigationTiming).toEqual(timing);
     });
 
     it('postNavigation with undefined response', async () => {

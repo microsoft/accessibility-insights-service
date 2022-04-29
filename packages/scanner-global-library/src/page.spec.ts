@@ -17,17 +17,25 @@ import { PageConfigurator } from './page-configurator';
 import { MockableLogger } from './test-utilities/mockable-logger';
 import { getPromisableDynamicMock } from './test-utilities/promisable-mock';
 import { WebDriver } from './web-driver';
-import { PageNavigator } from './page-navigator';
+import { PageNavigator, NavigationResponse } from './page-navigator';
 import { PrivacyScanResult } from './privacy-scan-result';
+import { PageNavigationTiming } from './page-timeout-config';
 
 const url = 'url';
 const redirectUrl = 'redirect url';
 const userAgent = 'user agent';
 const browserResolution = '1920x1080';
+const pageNavigationTiming: PageNavigationTiming = {
+    goto1: 1,
+    goto2: 2,
+    scroll: 3,
+    render: 4,
+};
 
 let axeResults: AxeResults;
 let scanResults: AxeScanResults;
 let page: Page;
+let navigationResponse: NavigationResponse;
 let webDriverMock: IMock<WebDriver>;
 let axePuppeteerFactoryMock: IMock<AxePuppeteerFactory>;
 let pageConfiguratorMock: IMock<PageConfigurator>;
@@ -61,6 +69,10 @@ describe(Page, () => {
         puppeteerRequestMock = getPromisableDynamicMock(Mock.ofType<Puppeteer.HTTPRequest>());
         axePuppeteerMock = getPromisableDynamicMock(Mock.ofType<AxePuppeteer>());
         privacyScannerMock = Mock.ofType<PrivacyPageScanner>();
+        navigationResponse = {
+            httpResponse: puppeteerResponseMock.object,
+            pageNavigationTiming: pageNavigationTiming,
+        };
 
         browserMock
             .setup(async (o) => o.version())
@@ -369,7 +381,13 @@ describe(Page, () => {
         it('navigates to page and saves response', async () => {
             pageNavigatorMock
                 .setup(async (o) => o.navigate(url, puppeteerPageMock.object, It.isAny()))
-                .returns(() => Promise.resolve(puppeteerResponseMock.object))
+                .returns(() => Promise.resolve(navigationResponse))
+                .verifiable();
+
+            loggerMock
+                .setup((o) =>
+                    o.logInfo('Total page rendering time 10 msec', { total: '10', goto1: '1', goto2: '2', scroll: '3', render: '4' }),
+                )
                 .verifiable();
 
             await page.navigateToUrl(url);

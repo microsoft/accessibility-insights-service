@@ -1,6 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+export interface PageNavigationTiming {
+    goto1: number;
+    goto2: number;
+    scroll: number;
+    render: number;
+}
+
 export const puppeteerTimeoutConfig = {
     /**
      * Maximum wait time, in milliseconds, to scroll to the bottom of the page.
@@ -18,4 +25,9 @@ export const puppeteerTimeoutConfig = {
      * Refer to service configuration TaskRuntimeConfig.taskTimeoutInMinutes property
      */
     navigationTimeoutMsecs: 60000,
+
+    /**
+     * The minimum time the HTML DOM should be stable to accept page rendering.
+     */
+    pageDomStableTimeMsecs: 3000,
 };

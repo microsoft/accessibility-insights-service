@@ -18,6 +18,7 @@ describe(PageHandler, () => {
     let pageMock: IMock<Page>;
     let scrollByMock: IMock<typeof window.scrollBy>;
     let originalWindow: Window & typeof globalThis;
+    let timingCount: number;
 
     const windowHeight = 100;
     const checkIntervalMsecs = 10;
@@ -44,9 +45,18 @@ describe(PageHandler, () => {
         originalWindow = global.window;
         global.window = windowStub as unknown as Window & typeof globalThis;
 
+        timingCount = 0;
+        process.hrtime = {
+            bigint: () => {
+                timingCount += 1;
+
+                return BigInt(timingCount * 10000000000);
+            },
+        } as NodeJS.HRTime;
+
         pageMock.setup((p) => p.evaluate(It.isAny())).returns(async (action) => action());
 
-        pageHandler = new PageHandler(loggerMock.object, checkIntervalMsecs);
+        pageHandler = new PageHandler(loggerMock.object, checkIntervalMsecs, checkIntervalMsecs * minCheckBreakCount);
     });
 
     afterEach(() => {
@@ -63,7 +73,8 @@ describe(PageHandler, () => {
             .returns(() => Promise.resolve())
             .verifiable(Times.exactly(minCheckBreakCount + _.max([1, scrollCount])));
 
-        await pageHandler.waitForPageToCompleteRendering(pageMock.object, 1000, 2000);
+        const pageTiming = await pageHandler.waitForPageToCompleteRendering(pageMock.object, 1000, 2000);
+        expect(pageTiming).toEqual({ render: 9970, scroll: 10000 });
     });
 
     it('terminate wait and warn if scrolling exceeds timeout', async () => {
@@ -76,7 +87,8 @@ describe(PageHandler, () => {
             .verifiable(Times.exactly(minCheckBreakCount + scrollCount));
         loggerMock.setup((l) => l.logWarn(It.isAny())).verifiable();
 
-        await pageHandler.waitForPageToCompleteRendering(pageMock.object, scrollTimeout, 2000);
+        const pageTiming = await pageHandler.waitForPageToCompleteRendering(pageMock.object, scrollTimeout, 2000);
+        expect(pageTiming).toEqual({ render: 9970, scroll: 10000 });
     });
 
     it('terminate wait and warn if page is not fully rendered', async () => {
@@ -99,7 +111,8 @@ describe(PageHandler, () => {
             .verifiable(Times.exactly(validationCallCount + scrollCount));
         loggerMock.setup((l) => l.logWarn(It.isAny())).verifiable();
 
-        await pageHandler.waitForPageToCompleteRendering(pageMock.object, 1000, timeoutMsecs);
+        const pageTiming = await pageHandler.waitForPageToCompleteRendering(pageMock.object, 1000, timeoutMsecs);
+        expect(pageTiming).toEqual({ render: 10000, scroll: 10000 });
     });
 
     function setupScrollToBottom(scrollCount: number): void {

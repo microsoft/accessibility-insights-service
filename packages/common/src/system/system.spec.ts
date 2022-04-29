@@ -135,3 +135,14 @@ describe('normalizeHttpResponse()', () => {
         expect(actualResponse).toEqual(expectedResponse);
     });
 });
+
+describe('getElapsedTime()', () => {
+    it('get elapsed time', () => {
+        process.hrtime = { bigint: () => 10000000000n } as NodeJS.HRTime;
+        console.log(process.hrtime.bigint());
+
+        const timestamp = 3000000000n;
+        const elapsed = System.getElapsedTime(timestamp);
+        expect(elapsed).toEqual(7000);
+    });
+});
