@@ -6662,10 +6662,10 @@ forever-agent@^0.6.1, forever-agent@~0.6.1:
   resolved "https://registry.npmjs.org/forever-agent/-/forever-agent-0.6.1.tgz"
   integrity sha1-+8cfDEGt6zf5bFd60e1C2P2sypE=
 
-fork-ts-checker-webpack-plugin@^7.2.3:
-  version "7.2.3"
-  resolved "https://registry.yarnpkg.com/fork-ts-checker-webpack-plugin/-/fork-ts-checker-webpack-plugin-7.2.3.tgz#978dbc0b601556552a5a274a8984ec5dd8de56a3"
-  integrity sha512-9v308zIFTIFkWJBN/4N1A5oqm/ed9hWG6GH+KYTCBjYCEJOmHoVtDIWpfrJ0eD6cPB7V53HEVoJ6bL2In8QRaw==
+fork-ts-checker-webpack-plugin@^7.2.9:
+  version "7.2.9"
+  resolved "https://registry.yarnpkg.com/fork-ts-checker-webpack-plugin/-/fork-ts-checker-webpack-plugin-7.2.9.tgz#4677c1bde10b492df6dc56ebaa538c14f0370782"
+  integrity sha512-tiK7gAyND3pK7CFXgKXjzBQ4w2SuxPCHDsIUSN7qJD6vUNKt2LHAb+4nxm5GhxI5ADK8aFYIWQv3knC24k4sRg==
   dependencies:
     "@babel/code-frame" "^7.16.7"
     chalk "^4.1.2"
@@ -9253,9 +9253,9 @@ lru-cache@^7.4.0:
   integrity sha512-AmXqneQZL3KZMIgBpaPTeI6pfwh+xQ2vutMsyqOu1TBdEXFZgpG/80wuJ531w2ZN7TI0/oc8CPxzh/DKQudZqg==
 
 lru-cache@^7.4.4, lru-cache@^7.5.1:
-  version "7.8.1"
-  resolved "https://registry.yarnpkg.com/lru-cache/-/lru-cache-7.8.1.tgz#68ee3f4807a57d2ba185b7fd90827d5c21ce82bb"
-  integrity sha512-E1v547OCgJvbvevfjgK9sNKIVXO96NnsTsFPBlg4ZxjhsJSODoH9lk8Bm0OxvHNm6Vm5Yqkl/1fErDxhYL8Skg==
+  version "7.9.0"
+  resolved "https://registry.yarnpkg.com/lru-cache/-/lru-cache-7.9.0.tgz#29c2a989b6c10f32ceccc66ff44059e1490af3e1"
+  integrity sha512-lkcNMUKqdJk96TuIXUidxaPuEg5sJo/+ZyVE2BDFnuZGzwXem7d8582eG8vbu4todLfT14snP6iHriCHXXi5Rw==
 
 luxon@^2.3.2:
   version "2.3.2"
