@@ -29,7 +29,7 @@
   resolved "https://registry.npmjs.org/@actions/io/-/io-1.1.1.tgz"
   integrity sha512-Qi4JoKXjmE0O67wAOH6y0n26QXhMKMFo7GD/4IXNVcrtLjUlGjGuVys6pQgwF3ArfGTQu0XpqaNr0YhED2RaRA==
 
-"@apify/consts@^1.0.0", "@apify/consts@^1.5.0":
+"@apify/consts@^1.0.0":
   version "1.5.0"
   resolved "https://registry.npmjs.org/@apify/consts/-/consts-1.5.0.tgz"
   integrity sha512-3bqpRGzVy+p2Zx6PaijH4Z1IADfXyZGmXHjkB3qezUXxNNnWgqh5l76ouqdl6wYNCHRmgVpUxExIOHQzS6U2cg==
@@ -44,15 +44,7 @@
   resolved "https://registry.npmjs.org/@apify/datastructures/-/datastructures-1.0.1.tgz"
   integrity sha512-AgnrfMjzDph+Te5WGNnIsz3+dJM7v/Sqo82nWwSqca292paRotUhORXr9Ik+d0yurC5LutDAhcvu8VZ8SfANGg==
 
-"@apify/log@^1.0.0":
-  version "1.1.7"
-  resolved "https://registry.npmjs.org/@apify/log/-/log-1.1.7.tgz"
-  integrity sha512-tkfA+cSJ/MynnsEyf25OdbjCXP7t9QRFl9lfb/1dO3YpP2Dpq9g445ByL166hAr3fHbxqPZcl17Fw72R0/IsOw==
-  dependencies:
-    "@apify/consts" "^1.5.0"
-    ansi-colors "^4.1.1"
-
-"@apify/log@^1.0.5", "@apify/log@^1.1.1", "@apify/log@^1.1.10":
+"@apify/log@^1.0.0", "@apify/log@^1.0.5", "@apify/log@^1.1.1", "@apify/log@^1.1.10":
   version "1.1.10"
   resolved "https://registry.npmjs.org/@apify/log/-/log-1.1.10.tgz"
   integrity sha512-NJw2bqJWyd8JGGdUmnudHKm4sbZfcRYHUeeXiN8YZWOVcoEIhIDhAH9P8YT2iN1celnuXlzq0w9JnIuQdrOFYA==
@@ -4422,10 +4414,10 @@ braces@^3.0.1, braces@~3.0.2:
   dependencies:
     fill-range "^7.0.1"
 
-browser-pool@^3.1.0:
-  version "3.1.0"
-  resolved "https://registry.npmjs.org/browser-pool/-/browser-pool-3.1.0.tgz"
-  integrity sha512-kC7ZXHxSdY5+vxWj3MGBUSwN1lTrEnBpn+E325EONUmN++cLrkSGUL0bFVWnpw9DWqyMGy+xHvDv8xSufNoH3A==
+browser-pool@^3.1.0, browser-pool@^3.1.1:
+  version "3.1.1"
+  resolved "https://registry.yarnpkg.com/browser-pool/-/browser-pool-3.1.1.tgz#fdf8c54f21cdc260d7ba6ca1c1405c9b0ffb69fc"
+  integrity sha512-l+fD5/jp9LNESlLvZM9ceRK80rgJvrlVixH+3miC4iJktlwgsHGAeTXWqKv1ZcSWTyW39cpljd0ofH+MRGCIcw==
   dependencies:
     "@apify/log" "^1.1.1"
     "@apify/timeout" "^0.2.1"
@@ -9253,9 +9245,9 @@ lru-cache@^7.4.0:
   integrity sha512-AmXqneQZL3KZMIgBpaPTeI6pfwh+xQ2vutMsyqOu1TBdEXFZgpG/80wuJ531w2ZN7TI0/oc8CPxzh/DKQudZqg==
 
 lru-cache@^7.4.4, lru-cache@^7.5.1:
-  version "7.8.1"
-  resolved "https://registry.yarnpkg.com/lru-cache/-/lru-cache-7.8.1.tgz#68ee3f4807a57d2ba185b7fd90827d5c21ce82bb"
-  integrity sha512-E1v547OCgJvbvevfjgK9sNKIVXO96NnsTsFPBlg4ZxjhsJSODoH9lk8Bm0OxvHNm6Vm5Yqkl/1fErDxhYL8Skg==
+  version "7.9.0"
+  resolved "https://registry.yarnpkg.com/lru-cache/-/lru-cache-7.9.0.tgz#29c2a989b6c10f32ceccc66ff44059e1490af3e1"
+  integrity sha512-lkcNMUKqdJk96TuIXUidxaPuEg5sJo/+ZyVE2BDFnuZGzwXem7d8582eG8vbu4todLfT14snP6iHriCHXXi5Rw==
 
 luxon@^2.3.2:
   version "2.3.2"
