@@ -25,7 +25,7 @@
         "@types/jest": "^27.4.1",
         "@types/lodash": "^4.14.181",
         "@types/node": "^16.11.7",
-        "@types/puppeteer": "^5.4.0",
+        "@types/puppeteer": "^5.4.6",
         "jest": "^27.5.1",
         "jest-junit": "^12.3.0",
         "mockdate": "^3.0.5",

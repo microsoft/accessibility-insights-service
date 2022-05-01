@@ -30,7 +30,7 @@
         "@types/leveldown": "^4.0.2",
         "@types/levelup": "^5.1.1",
         "@types/node": "^16.11.7",
-        "@types/puppeteer": "^5.4.0",
+        "@types/puppeteer": "^5.4.6",
         "jest": "^27.5.1",
         "jest-junit": "^12.3.0",
         "npm-run-all": "^4.1.5",
