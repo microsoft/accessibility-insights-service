@@ -6,7 +6,7 @@ Licensed under the MIT License.
 ## Submit privacy scan to AI Service
 
 -   Open terminal window
--   Login to Azure account:
+-   Login in to Azure with Azure CLI:
 
 ```bash
 az login
