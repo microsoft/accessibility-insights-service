@@ -18,7 +18,7 @@ az login
 az account set --subscription <subscription id>
 ```
 
--   Run [create-env-file-for-debug.sh](https://github.com/microsoft/accessibility-insights-service/blob/main/packages/resource-deployment/scripts/create-env-file-for-debug.sh) script to create SP account. Provide resource group name where AI Service is deployed. Use script out to fulfill `AI_OAUTH_*` script parameters below.
+-   Run [create-env-file-for-debug.sh](https://github.com/microsoft/accessibility-insights-service/blob/main/packages/resource-deployment/scripts/create-env-file-for-debug.sh) script to create SP account. Provide resource group name where AI Service is deployed. Use script output to fulfill `AI_OAUTH_*` script parameters below.
 
 ```bash
 ./create-env-file-for-debug.sh -r <resource group name>
@@ -96,7 +96,7 @@ WCP_AZURE_BLOB_CONTAINER_NAME=
 -   Run the [wcp-data-parser.ts](https://github.com/microsoft/accessibility-insights-service/blob/main/packages/service-library/src/dev-utilities/wcp-data-parser.ts) script:
 
 ```bash
-node ./dist/wcp-data-parser.ts
+node ./dist/wcp-data-parser.js
 ```
 
 > Note: The script will download privacy scan result to `DATA_FOLDER` location.
@@ -112,5 +112,5 @@ OPERATION=compare-validation
 -   Run the [wcp-data-parser.ts](https://github.com/microsoft/accessibility-insights-service/blob/main/packages/service-library/src/dev-utilities/wcp-data-parser.ts) script:
 
 ```bash
-node ./dist/wcp-data-parser.ts
+node ./dist/wcp-data-parser.js
 ```
