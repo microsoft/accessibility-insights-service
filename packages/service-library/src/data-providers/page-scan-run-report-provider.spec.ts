@@ -9,7 +9,6 @@ import { IMock, Mock } from 'typemoq';
 import { BodyParser, System } from 'common';
 import { AxeScanResults } from 'scanner-global-library';
 import { AxeResults } from 'axe-core';
-import { AxeResultsList, AxeResult } from 'axe-result-converter';
 import { DataProvidersCommon } from './data-providers-common';
 import { PageScanRunReportProvider } from './page-scan-run-report-provider';
 
@@ -27,22 +26,16 @@ const blobFilePath = `${time.getUTCFullYear()}/${time.getUTCMonth() + 1}/${time.
 const readableStream = {
     readable: true,
 } as NodeJS.ReadableStream;
-const createAxeResult = (key: string, value: string) => {
-    const list = new AxeResultsList();
-    list.add(key, { description: value } as unknown as AxeResult);
-
-    return list;
-};
 const axeScanResults = {
     scannedUrl: 'scannedUrl',
     pageTitle: 'pageTitle',
     results: {
         url: 'url',
-        passes: createAxeResult('1', 'a'),
-        violations: createAxeResult('2', 'b'),
-        incomplete: createAxeResult('3', 'c'),
-        inapplicable: createAxeResult('4', 'd'),
-    } as unknown as AxeResults,
+        passes: [{ id: 'aria-allowed-attr', impact: null }],
+        violations: [{ id: 'frame-title', impact: 'serious' }],
+        incomplete: [{ id: 'color-contrast', impact: 'serious' }],
+        inapplicable: [{ id: 'area-alt', impact: null }],
+    } as AxeResults,
 } as AxeScanResults;
 const resultsString = JSON.stringify(axeScanResults);
 

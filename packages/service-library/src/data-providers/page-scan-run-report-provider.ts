@@ -5,7 +5,6 @@ import { Readable } from 'stream';
 import { BlobContentDownloadResponse, BlobStorageClient } from 'azure-services';
 import { inject, injectable } from 'inversify';
 import { BodyParser, System } from 'common';
-import { AxeResultsList } from 'axe-result-converter';
 import { AxeScanResults } from 'scanner-global-library';
 import { DataProvidersCommon } from './data-providers-common';
 import { ReadErrorCode } from './combined-scan-results-provider';
@@ -58,13 +57,7 @@ export class PageScanRunReportProvider {
         }
 
         try {
-            const content = JSON.parse(contentString, (key, value) => {
-                if (key === 'violations' || key === 'passes' || key === 'incomplete' || key === 'inapplicable') {
-                    return new AxeResultsList(value);
-                }
-
-                return value;
-            });
+            const content = JSON.parse(contentString);
 
             return {
                 content,
