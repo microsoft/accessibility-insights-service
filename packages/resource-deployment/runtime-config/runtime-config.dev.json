@@ -9,7 +9,7 @@
         "messageVisibilityTimeoutInSeconds": 300
     },
     "scanConfig": {
-        "failedScanRetryIntervalInMinutes": 6,
+        "failedScanRetryIntervalInMinutes": 15,
         "maxFailedScanRetryCount": 1
     }
 }

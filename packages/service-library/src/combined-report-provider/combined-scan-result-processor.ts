@@ -43,7 +43,7 @@ export class CombinedScanResultProcessor {
 
     private async generateCombinedScanResultsImpl(axeScanResults: AxeScanResults, pageScanResult: OnDemandPageScanResult): Promise<void> {
         const websiteScanRef = this.getWebsiteScanRefs(pageScanResult);
-        const websiteScanResult = await this.websiteScanResultProvider.read(websiteScanRef.id);
+        const websiteScanResult = await this.websiteScanResultProvider.read(websiteScanRef.id, true);
         const combinedResultsBlob = await this.combinedResultsBlobProvider.getBlob(websiteScanResult.combinedResultsBlobId);
         const combinedResultsBlobId = combinedResultsBlob.blobId;
 
@@ -52,7 +52,11 @@ export class CombinedScanResultProcessor {
             websiteScanId: websiteScanRef.id,
         });
 
-        const combinedAxeResults = await this.combinedAxeResultBuilder.mergeAxeResults(axeScanResults.results, combinedResultsBlob);
+        const combinedAxeResults = await this.combinedAxeResultBuilder.mergeAxeResults(
+            axeScanResults.results,
+            combinedResultsBlob,
+            websiteScanResult.pageScans,
+        );
         const generatedReport = this.combinedReportGenerator.generate(
             combinedAxeResults,
             websiteScanResult,
