@@ -7,7 +7,7 @@ import { IMock, Mock, It, Times } from 'typemoq';
 import { RetryHelper } from 'common';
 import { AxeScanResults } from 'scanner-global-library';
 import { AxeResults } from 'axe-core';
-import { OnDemandPageScanResult, WebsiteScanResult, CombinedScanResults, OnDemandPageScanReport } from 'storage-documents';
+import { OnDemandPageScanResult, WebsiteScanResult, CombinedScanResults, OnDemandPageScanReport, PageScan } from 'storage-documents';
 import { MockableLogger } from '../test-utilities/mockable-logger';
 import { WebsiteScanResultProvider } from '../data-providers/website-scan-result-provider';
 import { GeneratedReport, ReportWriter } from '../data-providers/report-writer';
@@ -32,6 +32,7 @@ let combinedResultsBlob: CombinedResultsBlob;
 let combinedAxeResults: CombinedScanResults;
 let generatedReport: GeneratedReport;
 let pageScanReport: OnDemandPageScanReport;
+let pageScans: PageScan[];
 
 const websiteScanId = 'websiteScanId';
 
@@ -56,9 +57,22 @@ describe(CombinedScanResultProcessor, () => {
         combinedResultsBlob = {
             blobId: 'blobId',
         } as CombinedResultsBlob;
+        pageScans = [
+            {
+                scanState: 'pass',
+            },
+            {
+                scanState: 'pass',
+            },
+            {
+                scanState: 'fail',
+            },
+        ] as PageScan[];
         combinedAxeResults = {
             urlCount: {
-                total: 12,
+                total: 3,
+                passed: 2,
+                failed: 1,
             },
         } as CombinedScanResults;
         generatedReport = {
@@ -154,9 +168,11 @@ function setupFullPass(): void {
     websiteScanResult = {
         id: 'websiteScanResultId',
         combinedResultsBlobId: combinedResultsBlob.blobId,
+        pageScans,
     } as WebsiteScanResult;
     updatedWebsiteScanResults = {
-        ...websiteScanResult,
+        id: websiteScanResult.id,
+        combinedResultsBlobId: combinedResultsBlob.blobId,
         reports: [pageScanReport],
     };
 
@@ -165,7 +181,7 @@ function setupFullPass(): void {
         .returns(() => Promise.resolve(combinedResultsBlob))
         .verifiable();
     combinedAxeResultBuilderMock
-        .setup((o) => o.mergeAxeResults(axeScanResults.results, combinedResultsBlob))
+        .setup((o) => o.mergeAxeResults(axeScanResults.results, combinedResultsBlob, websiteScanResult.pageScans))
         .returns(() => Promise.resolve(combinedAxeResults))
         .verifiable();
     combinedReportGeneratorMock
@@ -181,7 +197,7 @@ function setupFullPass(): void {
 
 function setupWebsiteScanResultProviderMock(): void {
     websiteScanResultProviderMock
-        .setup((o) => o.read(websiteScanId))
+        .setup((o) => o.read(websiteScanId, true))
         .returns(() => Promise.resolve(websiteScanResult))
         .verifiable();
     websiteScanResultProviderMock.setup((o) => o.mergeOrCreate(pageScanResult.id, It.isValue(updatedWebsiteScanResults))).verifiable();
