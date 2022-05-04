@@ -10,8 +10,16 @@ import * as dotenv from 'dotenv';
 import pLimit from 'p-limit';
 import { PrivacyPageScanReport, ConsentResult, CookieByDomain, Cookie } from 'storage-documents';
 import { isEmpty } from 'lodash';
+import * as nodeFetch from 'node-fetch';
 import { PrivacyMetadata, UrlValidation, ViolationTypeEnum } from './wcp-types';
-import { downloadBlob, writeToFile, executeBatchInChunkExclusive } from './common-lib';
+import {
+    downloadBlob,
+    writeToFile,
+    executeBatchInChunkExclusive,
+    createGetHttpRequestForWebsec,
+    executeWithExpRetry,
+    ensureHttpResponse,
+} from './common-lib';
 
 /* eslint-disable @typescript-eslint/no-explicit-any, security/detect-non-literal-fs-filename */
 
@@ -20,14 +28,13 @@ type MissingFromReport = 'accessibility' | 'privacy';
 
 interface ClientArgs {
     operation: ClientOperation;
-    azureTenantId: string;
-    azureClientId: string;
-    azureClientSecret: string;
     dataFolder: string;
     metadataFile: string;
     azureStorageName: string;
     azureStorageKey: string;
     azureBlobContainerName: string;
+    websecAppKey: string;
+    privacyServiceBaseUrl: string;
 }
 
 interface CookieMismatch {
@@ -50,6 +57,7 @@ const hashGenerator = new HashGenerator();
 const getDataFolderName = () => `${__dirname}/${clientArgs.dataFolder}`;
 const getMetadataFileName = () => `${getDataFolderName()}/${clientArgs.metadataFile}`;
 const getFilePath = (fileName: string) => `${getDataFolderName()}/${fileName}`;
+const getPrivacyValidationUrl = (validationId: string) => new URL(`${clientArgs.privacyServiceBaseUrl}/${validationId}`);
 
 async function main(): Promise<void> {
     clientArgs = getClientArguments();
@@ -167,19 +175,19 @@ function normalizeDomain(domain: string): string {
 }
 
 async function exportPrivacyValidation(): Promise<void> {
-    const privacyMetadata = readMetadataFile();
-    await parsePrivacyMetadata(privacyMetadata);
+    const privacyMetadata = readPrivacyMetadataFile();
+    await downloadPrivacyValidationResult(privacyMetadata);
 }
 
-async function parsePrivacyMetadata(privacyMetadata: PrivacyMetadata[]): Promise<void> {
+async function downloadPrivacyValidationResult(privacyMetadata: PrivacyMetadata[]): Promise<void> {
     const asyncLimit = pLimit(maxConcurrencyLimit);
     await Promise.all(
         await asyncLimit(async () => {
             return privacyMetadata.map(async (metadata) => {
                 try {
-                    const urlValidation = await downloadPrivacyBlob(metadata.ValidationResultBlobName);
-                    appendUrlToList(urlValidation);
-                    writeUrlValidation(urlValidation);
+                    const validationResult = await sendGetPrivacyValidationResult(metadata.ValidationResultID, clientArgs.websecAppKey);
+                    appendUrlToList(validationResult);
+                    writeUrlValidation(validationResult);
                     console.log(`Parsed website validation for '${metadata.Name}'`);
                 } catch (error) {
                     console.log('Error while parsing privacy metadata: ', System.serializeError(error));
@@ -189,6 +197,18 @@ async function parsePrivacyMetadata(privacyMetadata: PrivacyMetadata[]): Promise
     );
 }
 
+async function sendGetPrivacyValidationResult(validationId: string, appKey: string): Promise<any> {
+    const httpRequest = createGetHttpRequestForWebsec(appKey);
+    const httpResponse = await executeWithExpRetry<nodeFetch.Response>(async () =>
+        nodeFetch.default(getPrivacyValidationUrl(validationId), httpRequest),
+    );
+    await ensureHttpResponse(httpResponse);
+    const body = await httpResponse.json();
+
+    return body;
+}
+
+// @ts-expect-error
 async function downloadPrivacyBlob(blobName: string): Promise<UrlValidation[]> {
     const blob = await downloadBlob<UrlValidation[]>(
         clientArgs.azureStorageName,
@@ -216,7 +236,7 @@ function appendUrlToList(urlValidation: UrlValidation[]): void {
     });
 }
 
-function readMetadataFile(): PrivacyMetadata[] {
+function readPrivacyMetadataFile(): PrivacyMetadata[] {
     if (!fs.existsSync(getMetadataFileName())) {
         console.log(`File not found ${getMetadataFileName()}`);
 
@@ -316,36 +336,6 @@ function getClientArguments(): ClientArgs {
                 type: 'string',
                 describe: 'The parser operation.',
             },
-            azureTenantId: {
-                type: 'string',
-                describe: 'The Azure tenant id.',
-                alias: ['azuretenantid', 'azure-tenant-id', 'wcp-azure-tenant-id'],
-                coerce: (arg) => {
-                    process.env.AZURE_TENANT_ID = arg;
-
-                    return arg;
-                },
-            },
-            azureClientId: {
-                type: 'string',
-                describe: 'The Azure client id.',
-                alias: ['azureclientid', 'azure-client-id', 'wcp-azure-client-id'],
-                coerce: (arg) => {
-                    process.env.AZURE_CLIENT_ID = arg;
-
-                    return arg;
-                },
-            },
-            azureClientSecret: {
-                type: 'string',
-                describe: 'The Azure client secret.',
-                alias: ['azureclientsecret', 'azure-client-secret', 'wcp-azure-client-secret'],
-                coerce: (arg) => {
-                    process.env.AZURE_CLIENT_SECRET = arg;
-
-                    return arg;
-                },
-            },
             dataFolder: {
                 type: 'string',
                 describe: 'The data folder relative location.',
@@ -371,6 +361,16 @@ function getClientArguments(): ClientArgs {
                 type: 'string',
                 describe: 'The privacy blob container name.',
                 alias: ['azureblobcontainername', 'wcp-azure-blob-container-name'],
+            },
+            websecAppKey: {
+                type: 'string',
+                describe: 'The websec app key.',
+                alias: ['websecappkey', 'websec-app-key'],
+            },
+            privacyServiceBaseUrl: {
+                type: 'string',
+                describe: 'The privacy service base URL.',
+                alias: ['privacyservicebaseurl', 'privacy-service-base-url'],
             },
         })
         .describe('help', 'Show help').argv as unknown as ClientArgs;

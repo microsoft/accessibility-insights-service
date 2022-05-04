@@ -72,7 +72,7 @@ node ./dist/service-client.js
 -   Run the below SQL query against WCP SQL database and export query result as `.json`. Save exported result in `privacy-data.json` file.
 
 ```SQL
-SELECT Site.ID, Site.Name, R.StartedDate, R.ValidationResultBlobName FROM [dbo].[Site]
+SELECT Site.ID, Site.Name, R.StartedDate, R.ID AS ValidationResultID, R.ValidationResultBlobName FROM [dbo].[Site]
 INNER JOIN
 (
 	SELECT WebSecValidationResult.* FROM

@@ -62,7 +62,14 @@ export async function executeBatchInChunkExclusive<T>(
 }
 
 export async function executeWithExpRetry<T>(fn: () => Promise<T>): Promise<T> {
-    return backOff(async () => fn(), backOffOptions);
+    return backOff(async () => {
+        try {
+            return fn();
+        } catch (error) {
+            console.log('Error: ', System.serializeError(error));
+            throw error;
+        }
+    }, backOffOptions);
 }
 
 export async function getOAuthToken(oauthResourceId: string, oauthClientId: string, oauthClientSecret: string): Promise<string> {
@@ -79,7 +86,7 @@ export async function ensureHttpResponse(response: nodeFetch.Response): Promise<
     if (response.status < 200 || response.status > 299) {
         const body = await response.text();
 
-        throw new Error(body);
+        throw new Error(`HTTP request has failed. Status code: ${response.status} Response: ${body}`);
     }
 }
 
@@ -87,6 +94,19 @@ export function createGetHttpRequest(token: string): nodeFetch.RequestInit {
     const headers: nodeFetch.HeadersInit = {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
+    };
+
+    return {
+        method: 'GET',
+        headers,
+        agent: httpsAgent,
+    };
+}
+
+export function createGetHttpRequestForWebsec(appKey: string): nodeFetch.RequestInit {
+    const headers: nodeFetch.HeadersInit = {
+        'Content-Type': 'application/json',
+        'Ocp-Apim-Subscription-Key': appKey,
     };
 
     return {

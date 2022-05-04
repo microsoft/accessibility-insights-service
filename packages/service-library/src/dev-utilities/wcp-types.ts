@@ -52,5 +52,6 @@ export interface PrivacyMetadata {
     ID: string;
     Name: string;
     StartedDate: string;
+    ValidationResultID: string;
     ValidationResultBlobName: string;
 }
