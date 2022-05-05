@@ -8,17 +8,10 @@ import yargs from 'yargs';
 import { System, HashGenerator } from 'common';
 import * as dotenv from 'dotenv';
 import pLimit from 'p-limit';
-import { PrivacyPageScanReport, ConsentResult, CookieByDomain, Cookie } from 'storage-documents';
+import { PrivacyPageScanReport, CookieByDomain, Cookie } from 'storage-documents';
 import { isEmpty, clone } from 'lodash';
 import * as nodeFetch from 'node-fetch';
-import {
-    PrivacyMetadata,
-    UrlValidation,
-    ViolationTypeEnum,
-    PrivacyValidationResult,
-    CookieCollectionUrlResult,
-    CookiesSession,
-} from './wcp-types';
+import { PrivacyMetadata, PrivacyValidationResult, CookieCollectionUrlResult, CookiesSession } from './wcp-types';
 import {
     writeToFile,
     executeBatchInChunkExclusive,
@@ -288,48 +281,6 @@ function convertToPrivacyPageScanReport(
         bannerDetected: cookieCollectionUrlResult.BannerDetected,
         httpStatusCode: cookieCollectionUrlResult.HttpStatusCode,
         cookieCollectionConsentResults,
-    };
-}
-
-// @ts-expect-error
-function convertToPrivacyPageScanReport2(urlValidation: UrlValidation): PrivacyPageScanReport {
-    interface ConsentResultByKey {
-        key: string;
-        consentResult: ConsentResult;
-    }
-    const consentResult: ConsentResultByKey[] = [];
-
-    urlValidation.CookieValidations.map((cookieValidation) => {
-        const cookie: CookieByDomain = {
-            domain: cookieValidation.ScanCookie.Domain,
-            cookies: [
-                {
-                    name: cookieValidation.ScanCookie.Name,
-                    domain: cookieValidation.ScanCookie.Domain,
-                },
-            ],
-        };
-
-        const key = `${cookieValidation.ScanCookie.Domain}:${cookieValidation.ScanCookie.Name}:${cookieValidation.ViolationType}`;
-        if (!consentResult.some((r) => r.key === key)) {
-            consentResult.push({
-                key,
-                consentResult: {
-                    violation: ViolationTypeEnum[cookieValidation.ViolationType as number] as string,
-                    cookiesAfterConsent: [cookie],
-                } as ConsentResult,
-            });
-        }
-    });
-
-    return {
-        navigationalUri: urlValidation.Url,
-        seedUri: urlValidation.Url,
-        finishDateTime: new Date(),
-        bannerDetectionXpathExpression: urlValidation.BannerXPath,
-        bannerDetected: urlValidation.BannerStatus === 1,
-        httpStatusCode: urlValidation.HttpStatusCode,
-        cookieCollectionConsentResults: consentResult.map((r) => r.consentResult),
     };
 }
 
