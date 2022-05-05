@@ -72,15 +72,15 @@ node ./dist/service-client.js
 -   Run the below SQL query against WCP SQL database and export query result as `.json`. Save exported result in `privacy-data.json` file.
 
 ```SQL
-SELECT Site.ID, Site.Name, R.StartedDate, R.ID AS ValidationResultID, R.ValidationResultBlobName FROM [dbo].[Site]
+SELECT Site.ID, Site.Name, R.ValidatedDate AS ScanDate, R.ScanResultLinks AS ScanResultLink FROM [dbo].[Site]
 INNER JOIN
 (
-	SELECT WebSecValidationResult.* FROM
-	(SELECT SiteId, MAX(StartedDate) AS StartedDate FROM [dbo].[WebSecValidationResult] GROUP BY SiteId) AS G
-	INNER JOIN [dbo].[WebSecValidationResult] ON G.StartedDate = WebSecValidationResult.StartedDate
+	SELECT WebSecSiteValidationResultSummary.* FROM
+	(SELECT SiteId, MAX(ValidatedDate) AS ValidatedDate FROM WebSecSiteValidationResultSummary GROUP BY SiteId) AS G
+	INNER JOIN WebSecSiteValidationResultSummary ON G.ValidatedDate = WebSecSiteValidationResultSummary.ValidatedDate
 ) AS R
 ON Site.ID = R.SiteId
-WHERE R.StartedDate > '2022-03-01'
+WHERE R.ValidatedDate > '2022-04-01'
 ```
 
 -   Update `.env` file by adding the following keys:

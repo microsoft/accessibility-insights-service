@@ -9,11 +9,17 @@ import { System, HashGenerator } from 'common';
 import * as dotenv from 'dotenv';
 import pLimit from 'p-limit';
 import { PrivacyPageScanReport, ConsentResult, CookieByDomain, Cookie } from 'storage-documents';
-import { isEmpty } from 'lodash';
+import { isEmpty, clone } from 'lodash';
 import * as nodeFetch from 'node-fetch';
-import { PrivacyMetadata, UrlValidation, ViolationTypeEnum } from './wcp-types';
 import {
-    downloadBlob,
+    PrivacyMetadata,
+    UrlValidation,
+    ViolationTypeEnum,
+    PrivacyValidationResult,
+    CookieCollectionUrlResult,
+    CookiesSession,
+} from './wcp-types';
+import {
     writeToFile,
     executeBatchInChunkExclusive,
     createGetHttpRequestForWebsec,
@@ -57,7 +63,12 @@ const hashGenerator = new HashGenerator();
 const getDataFolderName = () => `${__dirname}/${clientArgs.dataFolder}`;
 const getMetadataFileName = () => `${getDataFolderName()}/${clientArgs.metadataFile}`;
 const getFilePath = (fileName: string) => `${getDataFolderName()}/${fileName}`;
-const getPrivacyValidationUrl = (validationId: string) => new URL(`${clientArgs.privacyServiceBaseUrl}/${validationId}`);
+const getPrivacyValidationUrl = (link: string) => {
+    const segments = link.split('/');
+    const id = segments[segments.length - 1];
+
+    return new URL(`${clientArgs.privacyServiceBaseUrl}/${id}`);
+};
 
 async function main(): Promise<void> {
     clientArgs = getClientArguments();
@@ -185,8 +196,8 @@ async function downloadPrivacyValidationResult(privacyMetadata: PrivacyMetadata[
         await asyncLimit(async () => {
             return privacyMetadata.map(async (metadata) => {
                 try {
-                    const validationResult = await sendGetPrivacyValidationResult(metadata.ValidationResultID, clientArgs.websecAppKey);
-                    appendUrlToList(validationResult);
+                    const validationResult = await sendGetPrivacyValidationResult(metadata.ScanResultLink, clientArgs.websecAppKey);
+                    appendUrlToList(validationResult.CookieCollectionUrlResults);
                     writeUrlValidation(validationResult);
                     console.log(`Parsed website validation for '${metadata.Name}'`);
                 } catch (error) {
@@ -197,10 +208,10 @@ async function downloadPrivacyValidationResult(privacyMetadata: PrivacyMetadata[
     );
 }
 
-async function sendGetPrivacyValidationResult(validationId: string, appKey: string): Promise<any> {
+async function sendGetPrivacyValidationResult(link: string, appKey: string): Promise<PrivacyValidationResult> {
     const httpRequest = createGetHttpRequestForWebsec(appKey);
     const httpResponse = await executeWithExpRetry<nodeFetch.Response>(async () =>
-        nodeFetch.default(getPrivacyValidationUrl(validationId), httpRequest),
+        nodeFetch.default(getPrivacyValidationUrl(link), httpRequest),
     );
     await ensureHttpResponse(httpResponse);
     const body = await httpResponse.json();
@@ -208,31 +219,14 @@ async function sendGetPrivacyValidationResult(validationId: string, appKey: stri
     return body;
 }
 
-// @ts-expect-error
-async function downloadPrivacyBlob(blobName: string): Promise<UrlValidation[]> {
-    const blob = await downloadBlob<UrlValidation[]>(
-        clientArgs.azureStorageName,
-        clientArgs.azureBlobContainerName,
-        blobName,
-        clientArgs.azureStorageKey,
-    );
-    if (blob === undefined) {
-        console.log(`The blob '${blobName}' not found.`);
-
-        return undefined;
-    }
-
-    return blob;
-}
-
-function appendUrlToList(urlValidation: UrlValidation[]): void {
+function appendUrlToList(cookieCollectionUrlResults: CookieCollectionUrlResult[]): void {
     if (!fs.existsSync(getDataFolderName())) {
         fs.mkdirSync(getDataFolderName());
     }
 
     const filePath = `${getDataFolderName()}/urls.txt`;
-    urlValidation.map((validation) => {
-        fs.appendFileSync(filePath, `${validation.Url}\n`);
+    cookieCollectionUrlResults.map((validation) => {
+        fs.appendFileSync(filePath, `${validation.SeedUri}\n`);
     });
 }
 
@@ -246,17 +240,59 @@ function readPrivacyMetadataFile(): PrivacyMetadata[] {
     return JSON.parse(fs.readFileSync(getMetadataFileName(), { encoding: 'utf-8' })) as PrivacyMetadata[];
 }
 
-function writeUrlValidation(urlValidation: UrlValidation[]): void {
-    urlValidation.map((validation) => {
-        const urlHash = hashGenerator.generateBase64Hash(validation.Url);
-        writeToFile(validation, getDataFolderName(), `${urlHash}.wcp.validation`);
+function writeUrlValidation(privacyValidationResult: PrivacyValidationResult): void {
+    const privacyValidationResultClone = clone(privacyValidationResult);
 
-        const privacyPageScanReport = convertToPrivacyPageScanReport(validation);
+    privacyValidationResult.CookieCollectionUrlResults.map((validation) => {
+        privacyValidationResultClone.CookieCollectionUrlResults = [validation];
+        const urlHash = hashGenerator.generateBase64Hash(validation.SeedUri);
+        writeToFile(privacyValidationResultClone, getDataFolderName(), `${urlHash}.wcp.validation`);
+
+        const privacyPageScanReport = convertToPrivacyPageScanReport(validation, privacyValidationResultClone);
         writeToFile(privacyPageScanReport, getDataFolderName(), `${urlHash}.wcp.report`);
     });
 }
 
-function convertToPrivacyPageScanReport(urlValidation: UrlValidation): PrivacyPageScanReport {
+function convertToPrivacyPageScanReport(
+    cookieCollectionUrlResult: CookieCollectionUrlResult,
+    privacyValidationResult: PrivacyValidationResult,
+): PrivacyPageScanReport {
+    const getCookieByDomain = (cookiesSessions: CookiesSession[]): CookieByDomain[] => {
+        return cookiesSessions.map((cookie) => {
+            return {
+                domain: cookie.Domain,
+                cookies: cookie.Cookies.map((c) => {
+                    return {
+                        name: c.Name,
+                        domain: c.Domain,
+                        expires: c.Expires,
+                    };
+                }),
+            };
+        });
+    };
+
+    const cookieCollectionConsentResults = cookieCollectionUrlResult.CookieCollectionConsentResults.map((scenario) => {
+        return {
+            cookiesUsedForConsent: scenario.CookiesUsedForConsent,
+            cookiesBeforeConsent: getCookieByDomain(scenario.CookiesBeforeConsent),
+            cookiesAfterConsent: getCookieByDomain(scenario.CookiesAfterConsent),
+        };
+    });
+
+    return {
+        navigationalUri: cookieCollectionUrlResult.NavigationalUri,
+        seedUri: cookieCollectionUrlResult.SeedUri,
+        finishDateTime: privacyValidationResult.FinishDateTime,
+        bannerDetectionXpathExpression: cookieCollectionUrlResult.BannerDetectionXpathExpression,
+        bannerDetected: cookieCollectionUrlResult.BannerDetected,
+        httpStatusCode: cookieCollectionUrlResult.HttpStatusCode,
+        cookieCollectionConsentResults,
+    };
+}
+
+// @ts-expect-error
+function convertToPrivacyPageScanReport2(urlValidation: UrlValidation): PrivacyPageScanReport {
     interface ConsentResultByKey {
         key: string;
         consentResult: ConsentResult;
