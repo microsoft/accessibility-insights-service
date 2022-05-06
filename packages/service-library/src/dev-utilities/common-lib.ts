@@ -16,6 +16,8 @@ import { Mutex } from 'async-mutex';
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types */
 /* eslint-disable security/detect-non-literal-fs-filename */
 
+const mutex = new Mutex();
+
 const backOffOptions: Partial<IBackOffOptions> = {
     delayFirstAttempt: false,
     numOfAttempts: 5,
@@ -35,8 +37,6 @@ export interface OAuthToken {
 }
 
 export async function executeExclusive<T>(fn: () => Promise<T>): Promise<T> {
-    const mutex = new Mutex();
-
     return mutex.runExclusive(async () => fn());
 }
 

@@ -8,7 +8,7 @@ import yargs from 'yargs';
 import { System, HashGenerator } from 'common';
 import * as dotenv from 'dotenv';
 import pLimit from 'p-limit';
-import { PrivacyPageScanReport, CookieByDomain, Cookie } from 'storage-documents';
+import { PrivacyPageScanReport, CookieByDomain, Cookie, ConsentResult } from 'storage-documents';
 import { isEmpty, clone } from 'lodash';
 import * as nodeFetch from 'node-fetch';
 import { PrivacyMetadata, PrivacyValidationResult, CookieCollectionUrlResult, CookiesSession } from './wcp-types';
@@ -23,7 +23,8 @@ import {
 /* eslint-disable @typescript-eslint/no-explicit-any, security/detect-non-literal-fs-filename */
 
 type ClientOperation = 'compare-validation' | 'get-validation';
-type MissingFromReport = 'accessibility' | 'privacy';
+type MissingFromReport = 'accessibility' | 'websec';
+type ScenarioStep = 'beforeConsent' | 'afterConsent';
 
 interface ClientArgs {
     operation: ClientOperation;
@@ -36,17 +37,24 @@ interface ClientArgs {
     privacyServiceBaseUrl: string;
 }
 
-interface CookieMismatch {
-    missingFrom: MissingFromReport;
-    name: string;
-    domain: string;
-}
-
-interface ValidationDiff {
+interface ReportMismatch {
     url: string;
     fileHash: string;
     bannerDetectionMismatch: boolean;
-    cookieMismatch: CookieMismatch[];
+    scenariosMismatch: ScenarioMismatch[];
+}
+
+interface ScenarioMismatch {
+    scenario: string;
+    isMissing?: boolean;
+    cookiesMismatch?: CookieMismatch[];
+}
+
+interface CookieMismatch {
+    missingFrom: MissingFromReport;
+    step: ScenarioStep;
+    name: string;
+    domain: string;
 }
 
 const maxConcurrencyLimit = 10;
@@ -82,6 +90,8 @@ async function dispatchOperation(): Promise<void> {
     }
 }
 
+let totalReports = 0;
+let mismatchReports = 0;
 async function comparePrivacyValidation(): Promise<void> {
     const fn = (validations: string[]) => {
         return Promise.resolve(validations.map(comparePrivacyValidationImpl));
@@ -89,78 +99,143 @@ async function comparePrivacyValidation(): Promise<void> {
 
     const wcpValidationList = getPrivacyValidationList();
     await executeBatchInChunkExclusive(fn, wcpValidationList);
+    console.log(`Total Reports: ${totalReports}, Mismatch Reports: ${mismatchReports}`);
 }
 
 function comparePrivacyValidationImpl(wcpValidationFileName: string): void {
-    const wcpValidation = readValidationReportFile(wcpValidationFileName);
-    const urlHash = hashGenerator.generateBase64Hash(wcpValidation.seedUri);
-    const aiValidationFileName = `${urlHash}.ai.report.json`;
-    const aiValidation = readValidationReportFile(aiValidationFileName);
-    if (aiValidation === undefined) {
-        console.log(`The AI validation report file not found. File: ${aiValidationFileName} URL: ${wcpValidation.seedUri}`);
+    const websecReport = readValidationReportFile(wcpValidationFileName);
+    const urlHash = hashGenerator.generateBase64Hash(websecReport.seedUri);
+    const aiReportFileName = `${urlHash}.ai.report.json`;
+    const aiReport = readValidationReportFile(aiReportFileName);
+    if (aiReport === undefined) {
+        console.log(`The AI validation report file not found. File: ${aiReportFileName} URL: ${websecReport.seedUri}`);
     } else {
-        const cookieDiff = getCookieDiff(aiValidation, wcpValidation);
-        if (cookieDiff.length > 0 || aiValidation.bannerDetected !== wcpValidation.bannerDetected) {
-            const validationDiff = {
-                url: wcpValidation.seedUri,
-                fileHash: urlHash,
-                bannerDetectionMismatch: aiValidation.bannerDetected !== wcpValidation.bannerDetected,
-                cookieMismatch: cookieDiff,
-            } as ValidationDiff;
-
-            writeToFile(validationDiff, getDataFolderName(), `${urlHash}.diff`);
+        totalReports++;
+        const reportMismatch = comparePrivacyReport(websecReport, aiReport);
+        if (
+            reportMismatch.scenariosMismatch.map((s) => s.cookiesMismatch).flat().length > 0 ||
+            reportMismatch.bannerDetectionMismatch === true
+        ) {
+            mismatchReports++;
+            reportMismatch.fileHash = aiReportFileName;
+            writeToFile(reportMismatch, getDataFolderName(), `${urlHash}.diff`);
+            writeStatFile(reportMismatch);
         }
-        console.log(`Compared website validation for ${wcpValidation.seedUri}`);
+        console.log(`Compared website validation for ${websecReport.seedUri}`);
     }
 }
 
-function getCookieDiff(aiReport: PrivacyPageScanReport, wcpReport: PrivacyPageScanReport): CookieMismatch[] {
-    const getAllCookie = (source: PrivacyPageScanReport): Cookie[] => {
-        const allCookie: Cookie[] = [];
-        if (source.cookieCollectionConsentResults) {
-            source.cookieCollectionConsentResults.map((cookie) => {
-                if (cookie.cookiesBeforeConsent) {
-                    cookie.cookiesBeforeConsent.map((d) => {
-                        if (d.cookies) {
-                            allCookie.push(...d.cookies);
-                        }
-                    });
-                }
-                if (cookie.cookiesAfterConsent) {
-                    cookie.cookiesAfterConsent.map((d) => {
-                        if (d.cookies) {
-                            allCookie.push(...d.cookies);
-                        }
-                    });
-                }
-            });
-        }
+function writeStatFile(reportMismatch: ReportMismatch): void {
+    const uniqueCookies = flatCookieMismatch(reportMismatch);
+    const missingCookies = uniqueCookies.filter((c) => c.missingFrom === 'accessibility');
+    const newCookies = uniqueCookies.filter((c) => c.missingFrom === 'websec');
 
-        return allCookie;
+    // URL BannerDetectionMismatch NewCookies MissingCookies FileName
+    const headerLine = `URL\tBannerDetectionMismatch\tNewCookies\tMissingCookies\tFileName`;
+    const fileLine = `${reportMismatch.url}\t${reportMismatch.bannerDetectionMismatch}\t${newCookies.length}\t${missingCookies.length}\t${reportMismatch.fileHash}`;
+
+    const filePath = `${getDataFolderName()}/!reportComparison.txt`;
+    if (!fs.existsSync(getDataFolderName())) {
+        fs.mkdirSync(getDataFolderName());
+    }
+    if (!fs.existsSync(filePath)) {
+        fs.writeFileSync(filePath, `${headerLine}\n`);
+    }
+    fs.appendFileSync(filePath, `${fileLine}\n`);
+}
+
+function flatCookieMismatch(reportMismatch: ReportMismatch): CookieMismatch[] {
+    const allCookies = reportMismatch.scenariosMismatch
+        .map((scenario) =>
+            scenario.cookiesMismatch.map((c) => {
+                return { ...c, key: `${c.domain}:${c.name}:${c.missingFrom}` };
+            }),
+        )
+        .flat();
+
+    const key = 'key';
+    const uniqueCookies = [...new Map(allCookies.map((item) => [item[key], item])).values()];
+
+    return uniqueCookies;
+}
+
+function comparePrivacyReport(websecReport: PrivacyPageScanReport, aiReport: PrivacyPageScanReport): ReportMismatch {
+    const scenariosMismatch = websecReport.cookieCollectionConsentResults.map((websecScenario) => {
+        return compareScenario(websecScenario, aiReport.cookieCollectionConsentResults);
+    });
+
+    return {
+        url: websecReport.seedUri,
+        fileHash: '',
+        bannerDetectionMismatch: websecReport.bannerDetected !== aiReport.bannerDetected,
+        scenariosMismatch,
     };
+}
 
-    const aiReportCookie = getAllCookie(aiReport);
-    const wcpReportCookie = getAllCookie(wcpReport);
-    const missingCookieFromAi = wcpReportCookie
-        .filter((w) => !aiReportCookie.some((a) => normalizeDomain(a.domain) === normalizeDomain(w.domain) && a.name === w.name))
+function compareScenario(websecConsentResult: ConsentResult, aiConsentResults: ConsentResult[]): ScenarioMismatch {
+    const aiConsentResult = aiConsentResults.find((r) => r.cookiesUsedForConsent === websecConsentResult.cookiesUsedForConsent);
+    if (aiConsentResult === undefined) {
+        return {
+            scenario: websecConsentResult.cookiesUsedForConsent,
+            isMissing: true,
+        };
+    }
+
+    const cookieMismatchBeforeConsent = compareCookies(
+        'beforeConsent',
+        websecConsentResult.cookiesBeforeConsent,
+        aiConsentResult.cookiesBeforeConsent,
+    );
+    const cookieMismatchAfterConsent = compareCookies(
+        'afterConsent',
+        websecConsentResult.cookiesAfterConsent,
+        aiConsentResult.cookiesAfterConsent,
+    );
+
+    return {
+        scenario: websecConsentResult.cookiesUsedForConsent,
+        cookiesMismatch: [...cookieMismatchBeforeConsent, ...cookieMismatchAfterConsent],
+    };
+}
+
+function compareCookies(
+    scenarioStep: ScenarioStep,
+    websecReportCookie: CookieByDomain[],
+    aiReportCookie: CookieByDomain[],
+): CookieMismatch[] {
+    const websecReportCookieFlat = flatCookieByDomain(websecReportCookie);
+    const aiReportCookieFlat = flatCookieByDomain(aiReportCookie);
+
+    const missingCookieFromAi = websecReportCookieFlat
+        .filter((w) => !aiReportCookieFlat.some((a) => normalizeDomain(a.domain) === normalizeDomain(w.domain) && a.name === w.name))
         .map((r) => {
             return {
                 missingFrom: 'accessibility',
+                step: scenarioStep,
                 domain: r.domain,
                 name: r.name,
             } as CookieMismatch;
         });
-    const missingCookieFromWcp = aiReportCookie
-        .filter((w) => !wcpReportCookie.some((a) => normalizeDomain(a.domain) === normalizeDomain(w.domain) && a.name === w.name))
+    const missingCookieFromWebsec = aiReportCookieFlat
+        .filter((w) => !websecReportCookieFlat.some((a) => normalizeDomain(a.domain) === normalizeDomain(w.domain) && a.name === w.name))
         .map((r) => {
             return {
-                missingFrom: 'privacy',
+                missingFrom: 'websec',
+                step: scenarioStep,
                 domain: r.domain,
                 name: r.name,
             } as CookieMismatch;
         });
 
-    return [...missingCookieFromAi, ...missingCookieFromWcp];
+    return [...missingCookieFromAi, ...missingCookieFromWebsec];
+}
+
+function flatCookieByDomain(cookieByDomain: CookieByDomain[]): Cookie[] {
+    return cookieByDomain
+        .map((d) => {
+            return d.cookies;
+        })
+        .flat();
 }
 
 function normalizeDomain(domain: string): string {
@@ -179,8 +254,12 @@ function normalizeDomain(domain: string): string {
 }
 
 async function exportPrivacyValidation(): Promise<void> {
+    const fn = (metadata: PrivacyMetadata[]) => {
+        return downloadPrivacyValidationResult(metadata);
+    };
+
     const privacyMetadata = readPrivacyMetadataFile();
-    await downloadPrivacyValidationResult(privacyMetadata);
+    await executeBatchInChunkExclusive(fn, privacyMetadata);
 }
 
 async function downloadPrivacyValidationResult(privacyMetadata: PrivacyMetadata[]): Promise<void> {
