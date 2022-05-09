@@ -67,7 +67,6 @@ export interface PrivacyValidationResult {
     Status: string;
     Urls: string[];
     Vulnerablilities: string[];
-    Whitelist: string[];
 }
 export interface CookieCollectionUrlResult {
     ConsentModalValidationResult: ConsentModalValidationResult;
