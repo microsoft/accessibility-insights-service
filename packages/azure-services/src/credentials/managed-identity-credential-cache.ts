@@ -4,10 +4,11 @@
 import * as nodeUrl from 'url';
 import { injectable } from 'inversify';
 import { AccessToken } from '@azure/core-auth';
-import { ManagedIdentityCredential, TokenCredential, GetTokenOptions } from '@azure/identity';
+import { ManagedIdentityCredential, TokenCredential, GetTokenOptions, EnvironmentCredential } from '@azure/identity';
 import NodeCache from 'node-cache';
 import { Mutex } from 'async-mutex';
 import { backOff, IBackOffOptions } from 'exponential-backoff';
+import moment from 'moment';
 
 // Get a token using HTTP
 // https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/how-to-use-vm-token#get-a-token-using-http
@@ -25,6 +26,7 @@ export class ManagedIdentityCredentialCache implements TokenCredential {
     };
 
     constructor(
+        // @ts-expect-error
         private readonly managedIdentityCredential: ManagedIdentityCredential = new ManagedIdentityCredential(),
         private readonly tokenCache: NodeCache = new NodeCache({ checkperiod: ManagedIdentityCredentialCache.cacheCheckPeriodInSeconds }),
         private readonly mutex: Mutex = new Mutex(),
@@ -39,9 +41,22 @@ export class ManagedIdentityCredentialCache implements TokenCredential {
     private async getMsiToken(scopes: string | string[], options?: GetTokenOptions): Promise<AccessToken> {
         const resourceUrl = this.getResourceUrl(scopes);
 
+        const token = JSON.parse(`{"token":"token-string","expiresOnTimestamp":1652311396000}`) as AccessToken;
+        const nowUtc = moment.utc().milliseconds();
+        token.expiresOnTimestamp = nowUtc - 1000;
+        this.tokenCache.set<AccessToken>(
+            resourceUrl,
+            token,
+            // cache item TTL in seconds
+            token.expiresOnTimestamp / 1000 - ManagedIdentityCredentialCache.cacheCheckPeriodInSeconds * 3,
+        );
+
         // Try get token from the cache
         const cachedAccessToken = this.tokenCache.get<AccessToken>(resourceUrl);
-        if (cachedAccessToken !== undefined) {
+        if (
+            cachedAccessToken !== undefined &&
+            cachedAccessToken.expiresOnTimestamp - moment.utc().milliseconds() - 3600000 /* one hour */ > 0
+        ) {
             return cachedAccessToken;
         }
 
@@ -61,7 +76,9 @@ export class ManagedIdentityCredentialCache implements TokenCredential {
         return backOff(async () => {
             let token;
             try {
-                token = await this.managedIdentityCredential.getToken(scopes, options);
+                const envpr = new EnvironmentCredential();
+                token = await envpr.getToken(scopes, options);
+                // token = await this.managedIdentityCredential.getToken(scopes, options);
             } catch (error) {
                 throw new Error(`MSI credential provider has failed. ${JSON.stringify(error)}`);
             }
