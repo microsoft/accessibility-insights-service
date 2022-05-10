@@ -11,5 +11,9 @@
     "scanConfig": {
         "failedScanRetryIntervalInMinutes": 15,
         "maxFailedScanRetryCount": 1
+    },
+    "crawlConfig": {
+        "deepScanDiscoveryLimit": 10,
+        "deepScanUpperLimit": 5000
     }
 }
