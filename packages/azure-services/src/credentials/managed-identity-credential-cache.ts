@@ -17,7 +17,7 @@ import moment from 'moment';
 export class ManagedIdentityCredentialCache implements TokenCredential {
     private static readonly cacheCheckPeriodInSeconds = 60;
 
-    private static readonly tokenExpirationReductionMsec = 3600000; // one hour
+    private static readonly tokenExpirationReductionMsec = 7200000; // two hours
 
     public backOffOptions: Partial<IBackOffOptions> = {
         delayFirstAttempt: false,
