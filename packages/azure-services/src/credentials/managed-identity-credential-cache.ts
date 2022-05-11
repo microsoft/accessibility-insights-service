@@ -8,6 +8,7 @@ import { ManagedIdentityCredential, TokenCredential, GetTokenOptions } from '@az
 import NodeCache from 'node-cache';
 import { Mutex } from 'async-mutex';
 import { backOff, IBackOffOptions } from 'exponential-backoff';
+import moment from 'moment';
 
 // Get a token using HTTP
 // https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/how-to-use-vm-token#get-a-token-using-http
@@ -15,6 +16,8 @@ import { backOff, IBackOffOptions } from 'exponential-backoff';
 @injectable()
 export class ManagedIdentityCredentialCache implements TokenCredential {
     private static readonly cacheCheckPeriodInSeconds = 60;
+
+    private static readonly tokenExpirationReductionMsec = 7200000; // two hours
 
     public backOffOptions: Partial<IBackOffOptions> = {
         delayFirstAttempt: false,
@@ -41,7 +44,10 @@ export class ManagedIdentityCredentialCache implements TokenCredential {
 
         // Try get token from the cache
         const cachedAccessToken = this.tokenCache.get<AccessToken>(resourceUrl);
-        if (cachedAccessToken !== undefined) {
+        if (
+            cachedAccessToken !== undefined &&
+            cachedAccessToken.expiresOnTimestamp - moment.utc().valueOf() - ManagedIdentityCredentialCache.tokenExpirationReductionMsec > 0
+        ) {
             return cachedAccessToken;
         }
 
@@ -51,7 +57,7 @@ export class ManagedIdentityCredentialCache implements TokenCredential {
             resourceUrl,
             accessToken,
             // cache item TTL in seconds
-            accessToken.expiresOnTimestamp / 1000 - ManagedIdentityCredentialCache.cacheCheckPeriodInSeconds * 3,
+            (accessToken.expiresOnTimestamp - ManagedIdentityCredentialCache.tokenExpirationReductionMsec) / 1000,
         );
 
         return accessToken;
