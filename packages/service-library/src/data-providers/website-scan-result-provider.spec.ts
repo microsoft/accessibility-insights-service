@@ -240,11 +240,7 @@ describe(WebsiteScanResultProvider, () => {
             .verifiable();
 
         websiteScanResultAggregatorMock
-            .setup((o) => o.mergePartDocuments(It.isValue([partDocuments[0]]), {}))
-            .returns(() => Promise.resolve(partMergedDocuments[0]))
-            .verifiable();
-        websiteScanResultAggregatorMock
-            .setup((o) => o.mergePartDocuments(It.isValue([partDocuments[1]]), partMergedDocuments[0]))
+            .setup((o) => o.mergePartDocuments(It.isValue([partDocuments[0], partDocuments[1]]), {}))
             .returns(() => Promise.resolve(partMergedDocuments[1]))
             .verifiable();
 

@@ -46,6 +46,13 @@ export class WebsiteScanResultAggregator {
         return this.mergePartDocuments([sourceDocument], targetDocument);
     }
 
+    /**
+     * Merge DB documents. The merge runs in a separate node process. Creating a separate process is a time consuming operation.
+     * Passing a high number of documents to merge at once will reduce process creation operations when processing in batches.
+     *
+     * @param documents DB documents to merge.
+     * @param baseDocument The base DB document to merge with DB documents.
+     */
     public async mergePartDocuments(
         documents: Partial<WebsiteScanResultPart>[],
         baseDocument?: Partial<WebsiteScanResultPart>,
