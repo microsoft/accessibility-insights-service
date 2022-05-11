@@ -22,7 +22,7 @@ export class CredentialsProvider {
     }
 
     public getAzureCredential(): TokenCredential {
-        if (this.authenticationMethod === AuthenticationMethod.managedIdentity) {
+        if (this.authenticationMethod === AuthenticationMethod.servicePrincipal) {
             return new EnvironmentCredential();
         } else {
             // must be object instance to reuse an internal cache
