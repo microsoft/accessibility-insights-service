@@ -2,10 +2,10 @@
 // Licensed under the MIT License.
 
 import axe from 'axe-core';
-import { AxeResultsReducer, UrlCount } from 'axe-result-converter';
+import { AxeResultsReducer } from 'axe-result-converter';
 import { inject, injectable } from 'inversify';
 import { GlobalLogger } from 'logger';
-import { CombinedScanResults, PageScan } from 'storage-documents';
+import { CombinedScanResults } from 'storage-documents';
 import { CombinedScanResultsProvider } from '../data-providers/combined-scan-results-provider';
 import { CombinedResultsBlob } from './combined-results-blob-provider';
 
@@ -20,13 +20,12 @@ export class CombinedAxeResultBuilder {
     public async mergeAxeResults(
         axeScanResults: axe.AxeResults,
         combinedResultsBlobInfo: CombinedResultsBlob,
-        pageScans: PageScan[],
     ): Promise<CombinedScanResults> {
         const combinedResultsBlobId = combinedResultsBlobInfo.blobId;
         const blobReadResponse = combinedResultsBlobInfo.response;
         const combinedScanResults = blobReadResponse.results;
 
-        combinedScanResults.urlCount = this.getScannedUrlCount(pageScans);
+        this.setScannedUrlCount(axeScanResults, combinedScanResults);
 
         this.axeResultsReducer.reduce(combinedScanResults.axeResults, axeScanResults);
         const blobWriteResponse = await this.combinedScanResultsProvider.writeCombinedResults(
@@ -50,22 +49,13 @@ export class CombinedAxeResultBuilder {
         return combinedScanResults;
     }
 
-    private getScannedUrlCount(pageScans: PageScan[]): UrlCount {
-        if (pageScans === undefined) {
-            return {
-                total: 0,
-                failed: 0,
-                passed: 0,
-            };
+    private setScannedUrlCount(axeScanResults: axe.AxeResults, combinedScanResults: CombinedScanResults): void {
+        if (axeScanResults.violations?.length > 0) {
+            combinedScanResults.urlCount.failed++;
+        } else {
+            combinedScanResults.urlCount.passed++;
         }
 
-        const passed = pageScans.filter((s) => s?.scanState === 'pass').length;
-        const failed = pageScans.filter((s) => s?.scanState === 'fail').length;
-
-        return {
-            total: passed + failed,
-            failed,
-            passed,
-        };
+        combinedScanResults.urlCount.total++;
     }
 }
