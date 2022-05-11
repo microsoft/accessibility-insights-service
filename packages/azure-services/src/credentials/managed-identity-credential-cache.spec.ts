@@ -13,8 +13,8 @@ import { ManagedIdentityCredentialCache } from './managed-identity-credential-ca
 const scopes = 'https://vault.azure.net/default';
 const resourceUrl = 'vault.azure.net';
 const accessTokenOptions = {};
-const cacheCheckPeriodInSeconds = 60;
-const tokenExpirationReductionMsec = 3600000;
+const tokenExpirationReductionMsec = 7200000;
+const getCacheTtl = (token: AccessToken): number => (token.expiresOnTimestamp - tokenExpirationReductionMsec) / 1000;
 
 let tokenCacheMock: IMock<NodeCache>;
 let managedIdentityCredentialMock: IMock<ManagedIdentityCredential>;
@@ -56,7 +56,7 @@ describe(ManagedIdentityCredentialCache, () => {
             .returns(() => undefined)
             .verifiable();
         tokenCacheMock
-            .setup((o) => o.set(resourceUrl, accessToken, accessToken.expiresOnTimestamp / 1000 - cacheCheckPeriodInSeconds * 3))
+            .setup((o) => o.set(resourceUrl, accessToken, getCacheTtl(accessToken)))
             .returns(() => true)
             .verifiable();
         managedIdentityCredentialMock
@@ -76,7 +76,7 @@ describe(ManagedIdentityCredentialCache, () => {
             .returns(() => accessToken)
             .verifiable();
         tokenCacheMock
-            .setup((o) => o.set(resourceUrl, accessToken, accessToken.expiresOnTimestamp / 1000 - cacheCheckPeriodInSeconds * 3))
+            .setup((o) => o.set(resourceUrl, accessToken, getCacheTtl(accessToken)))
             .returns(() => true)
             .verifiable();
         managedIdentityCredentialMock
@@ -95,7 +95,7 @@ describe(ManagedIdentityCredentialCache, () => {
             .returns(() => accessToken)
             .verifiable();
         tokenCacheMock
-            .setup((o) => o.set(resourceUrl, accessToken, accessToken.expiresOnTimestamp - cacheCheckPeriodInSeconds * 1000 * 3))
+            .setup((o) => o.set(resourceUrl, accessToken, getCacheTtl(accessToken)))
             .returns(() => true)
             .verifiable(Times.never());
 
@@ -110,7 +110,7 @@ describe(ManagedIdentityCredentialCache, () => {
             .returns(() => undefined)
             .verifiable();
         tokenCacheMock
-            .setup((o) => o.set(resourceUrl, accessToken, accessToken.expiresOnTimestamp - cacheCheckPeriodInSeconds * 1000 * 3))
+            .setup((o) => o.set(resourceUrl, accessToken, getCacheTtl(accessToken)))
             .returns(() => true)
             .verifiable(Times.never());
         managedIdentityCredentialMock

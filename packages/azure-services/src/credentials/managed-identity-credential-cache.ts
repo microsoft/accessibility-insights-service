@@ -57,7 +57,7 @@ export class ManagedIdentityCredentialCache implements TokenCredential {
             resourceUrl,
             accessToken,
             // cache item TTL in seconds
-            accessToken.expiresOnTimestamp / 1000 - ManagedIdentityCredentialCache.cacheCheckPeriodInSeconds * 3,
+            (accessToken.expiresOnTimestamp - ManagedIdentityCredentialCache.tokenExpirationReductionMsec) / 1000,
         );
 
         return accessToken;
