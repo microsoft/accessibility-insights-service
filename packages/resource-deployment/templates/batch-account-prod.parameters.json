@@ -3,7 +3,7 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "onDemandScanRequestPoolNodes": {
-            "value": "8"
+            "value": "5"
         },
         "onDemandScanRequestPoolVmSize": {
             "value": "standard_f8s_v2"
@@ -12,7 +12,7 @@
             "value": "8"
         },
         "onDemandUrlScanPoolNodes": {
-            "value": "8"
+            "value": "5"
         },
         "onDemandUrlScanPoolVmSize": {
             "value": "standard_f8s_v2"
