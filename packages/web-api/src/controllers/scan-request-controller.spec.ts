@@ -4,7 +4,7 @@
 import 'reflect-metadata';
 
 import { Context } from '@azure/functions';
-import { GuidGenerator, RestApiConfig, ServiceConfiguration } from 'common';
+import { GuidGenerator, RestApiConfig, ServiceConfiguration, CrawlConfig } from 'common';
 import { ScanRequestReceivedMeasurements } from 'logger';
 import { HttpResponse, ScanDataProvider, ScanRunResponse, WebApiErrorCodes } from 'service-library';
 import { ScanRunBatchRequest, PrivacyScan } from 'storage-documents';
@@ -54,6 +54,13 @@ describe(ScanRequestController, () => {
                     maxScanPriorityValue: 10,
                 } as RestApiConfig;
             });
+        serviceConfigurationMock
+            .setup(async (s) => s.getConfigValue('crawlConfig'))
+            .returns(async () => {
+                return {
+                    deepScanUpperLimit: 2,
+                } as CrawlConfig;
+            });
 
         loggerMock = Mock.ofType<MockableLogger>();
     });
@@ -84,13 +91,30 @@ describe(ScanRequestController, () => {
             expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.requestBodyTooLarge));
         });
 
-        it('rejects request invalid scan notify url', async () => {
-            context.req.rawBody = JSON.stringify([{ url: 'https://abs/path/', scanNotifyUrl: 'invalid-url' }]);
+        it('rejects request with invalid scan notify url', async () => {
+            context.req.rawBody = JSON.stringify([{ url: 'https://abc/path/', scanNotifyUrl: 'invalid-url' }]);
             scanRequestController = createScanRequestController(context);
+            const expectedResponse = [{ url: 'https://abc/path/', error: WebApiErrorCodes.invalidScanNotifyUrl.error }];
 
             await scanRequestController.handleRequest();
 
-            expect(context.res.body[0].error).toEqual(WebApiErrorCodes.invalidScanNotifyUrl.error);
+            expect(context.res.body).toEqual(expectedResponse);
+        });
+
+        it('rejects request with invalid base url', async () => {
+            context.req.rawBody = JSON.stringify([
+                {
+                    url: 'https://abc/path/',
+                    site: { baseUrl: 'invalid-url' },
+                    reportGroups: [{ consolidatedId: 'reportGroupId' }],
+                },
+            ]);
+            scanRequestController = createScanRequestController(context);
+            const expectedResponse = [{ url: 'https://abc/path/', error: WebApiErrorCodes.invalidURL.error }];
+
+            await scanRequestController.handleRequest();
+
+            expect(context.res.body).toEqual(expectedResponse);
         });
 
         it("rejects request with incomplete 'site' or 'reportGroups' property", async () => {
@@ -171,6 +195,50 @@ describe(ScanRequestController, () => {
             const responseSorted = sortData(<ScanRunResponse[]>(<unknown>context.res.body));
 
             expect(responseSorted).toEqual(expectedResponseSorted);
+        });
+
+        it('rejects deepScan requests if they are too many known pages', async () => {
+            context.req.rawBody = JSON.stringify([
+                {
+                    // too many known pages
+                    deepScan: true,
+                    url: 'https://base/path/',
+                    reportGroups: [{ consolidatedId: 'reportGroupId' }],
+                    site: {
+                        baseUrl: 'https://base/path',
+                        knownPages: ['https://base/path/p1', 'https://base/path/p2', 'https://base/path/p3'],
+                    },
+                },
+            ]);
+            const expectedResponse = [{ url: 'https://base/path/', error: WebApiErrorCodes.tooManyKnownPages.error }];
+
+            scanRequestController = createScanRequestController(context);
+
+            await scanRequestController.handleRequest();
+
+            expect(context.res.body).toEqual(expectedResponse);
+        });
+
+        it('rejects deepScan requests if there is invalid known page URL', async () => {
+            context.req.rawBody = JSON.stringify([
+                {
+                    // invalid known page URL
+                    deepScan: true,
+                    url: 'https://base/path/',
+                    reportGroups: [{ consolidatedId: 'reportGroupId' }],
+                    site: {
+                        baseUrl: 'https://base/path',
+                        knownPages: ['https://base/path/p1', 'invalid " url'],
+                    },
+                },
+            ]);
+            const expectedResponse = [{ url: 'https://base/path/', error: WebApiErrorCodes.invalidKnownPageURL.error }];
+
+            scanRequestController = createScanRequestController(context);
+
+            await scanRequestController.handleRequest();
+
+            expect(context.res.body).toEqual(expectedResponse);
         });
 
         it('accepts valid request only', async () => {

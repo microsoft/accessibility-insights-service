@@ -12,7 +12,6 @@ import {
 } from 'service-library';
 import { ServiceConfiguration, System } from 'common';
 import { isString } from 'lodash';
-import pLimit from 'p-limit';
 import { QueuedRequest } from '../runner/request-selector';
 import { AccessibilityReportProcessor } from './accessibility-report-processor';
 
@@ -22,8 +21,6 @@ export interface TargetReportProcessor {
 
 @injectable()
 export class ReportProcessor {
-    public maxConcurrencyLimit = 5;
-
     constructor(
         @inject(OnDemandPageScanRunResultProvider) private readonly onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider,
         @inject(WebsiteScanResultProvider) protected readonly websiteScanResultProvider: WebsiteScanResultProvider,
@@ -34,23 +31,24 @@ export class ReportProcessor {
     ) {}
 
     public async generate(targetReport: TargetReport, queuedRequests: QueuedRequest[]): Promise<QueuedRequest[]> {
-        const limit = pLimit(this.maxConcurrencyLimit);
+        const processedRequests = [];
+        // processing in sequence to avoid collision
+        for (const queuedRequest of queuedRequests) {
+            let processedRequest: QueuedRequest;
+            if (targetReport === 'accessibility') {
+                processedRequest = await this.generateReport(this.accessibilityReportProcessor, queuedRequest);
+            } else {
+                processedRequest = {
+                    ...queuedRequest,
+                    condition: 'failed',
+                    error: `The '${targetReport}' report is not supported. Report group id: ${queuedRequest.request.scanGroupId}`,
+                } as QueuedRequest;
+            }
 
-        return Promise.all(
-            queuedRequests.map(async (queuedRequest) => {
-                return limit(async () => {
-                    if (targetReport === 'accessibility') {
-                        return this.generateReport(this.accessibilityReportProcessor, queuedRequest);
-                    } else {
-                        return {
-                            ...queuedRequest,
-                            condition: 'failed',
-                            error: `The '${targetReport}' report is not supported. Report group id: ${queuedRequest.request.scanGroupId}`,
-                        } as QueuedRequest;
-                    }
-                });
-            }),
-        );
+            processedRequests.push(processedRequest);
+        }
+
+        return processedRequests;
     }
 
     private async generateReport(targetReportProcessor: TargetReportProcessor, queuedRequest: QueuedRequest): Promise<QueuedRequest> {

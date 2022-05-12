@@ -32,6 +32,9 @@ export class WebsiteScanResultProvider {
 
     private readonly msecBetweenRetries: number = 1000;
 
+    // Passing a high number of documents to merge at once will reduce process creation operations when processing in batches.
+    public maxBatchItems = 5000;
+
     public maxConcurrencyLimit = 5;
 
     constructor(
@@ -180,22 +183,31 @@ export class WebsiteScanResultProvider {
             ],
         };
 
+        const getDbItems = async (token: string) => {
+            const response = (await this.cosmosContainerClient.queryDocuments<WebsiteScanResultPart>(
+                query,
+                token,
+            )) as CosmosOperationResponse<WebsiteScanResultPart[]>;
+            client.ensureSuccessStatusCode(response);
+
+            return response;
+        };
+
         let documentCount = 0;
         let elapsedToAggregate = 0;
         let partDocument: Partial<WebsiteScanResultPart> = {};
-        let continuationToken;
+        let continuationToken: string;
         do {
-            const response = (await this.cosmosContainerClient.queryDocuments<WebsiteScanResultPart>(
-                query,
-                continuationToken,
-            )) as CosmosOperationResponse<WebsiteScanResultPart[]>;
+            const items = [];
+            do {
+                const response = await getDbItems(continuationToken);
+                continuationToken = response.continuationToken;
+                items.push(...response.item);
+            } while (continuationToken !== undefined || items.length >= this.maxBatchItems);
 
-            client.ensureSuccessStatusCode(response);
-            continuationToken = response.continuationToken;
-
-            documentCount = documentCount + response.item.length;
+            documentCount = documentCount + items.length;
             const start = process.hrtime();
-            partDocument = await this.websiteScanResultAggregator.mergePartDocuments(response.item, partDocument);
+            partDocument = await this.websiteScanResultAggregator.mergePartDocuments(items, partDocument);
             const elapsed = process.hrtime(start);
             elapsedToAggregate = elapsedToAggregate + elapsed[0] * 1000 + elapsed[1] / 1000000;
         } while (continuationToken !== undefined);

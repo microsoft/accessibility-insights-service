@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { GuidGenerator, RestApiConfig, ServiceConfiguration, Url } from 'common';
+import { GuidGenerator, RestApiConfig, ServiceConfiguration, Url, CrawlConfig } from 'common';
 import { inject, injectable } from 'inversify';
 import { isEmpty, isNil } from 'lodash';
 import { ContextAwareLogger, ScanRequestReceivedMeasurements } from 'logger';
@@ -32,7 +32,9 @@ export class ScanRequestController extends ApiController {
 
     public readonly apiName = 'web-api-post-scans';
 
-    private config: RestApiConfig;
+    private restApiConfig: RestApiConfig;
+
+    private crawlConfig: CrawlConfig;
 
     public constructor(
         @inject(ScanDataProvider) private readonly scanDataProvider: ScanDataProvider,
@@ -54,7 +56,7 @@ export class ScanRequestController extends ApiController {
             return;
         }
 
-        if (payload.length > this.config.maxScanRequestBatchCount) {
+        if (payload.length > this.restApiConfig.maxScanRequestBatchCount) {
             this.context.res = HttpResponse.getErrorResponse(WebApiErrorCodes.requestBodyTooLarge);
             this.logger.logError(`The HTTP request body is too large. The requests count: ${payload.length}.`);
 
@@ -176,7 +178,10 @@ export class ScanRequestController extends ApiController {
             return { valid: false, error: WebApiErrorCodes.invalidScanNotifyUrl.error };
         }
 
-        if (scanRunRequest.priority < this.config.minScanPriorityValue || scanRunRequest.priority > this.config.maxScanPriorityValue) {
+        if (
+            scanRunRequest.priority < this.restApiConfig.minScanPriorityValue ||
+            scanRunRequest.priority > this.restApiConfig.maxScanPriorityValue
+        ) {
             return { valid: false, error: WebApiErrorCodes.outOfRangePriority.error };
         }
 
@@ -192,11 +197,26 @@ export class ScanRequestController extends ApiController {
             return { valid: false, error: WebApiErrorCodes.missingSiteOrReportGroups.error };
         }
 
+        if (scanRunRequest.site?.baseUrl && Url.tryParseUrlString(scanRunRequest.site.baseUrl) === undefined) {
+            return { valid: false, error: WebApiErrorCodes.invalidURL.error };
+        }
+
+        if (scanRunRequest.site?.knownPages?.length > this.crawlConfig.deepScanUpperLimit) {
+            return { valid: false, error: WebApiErrorCodes.tooManyKnownPages.error };
+        }
+
+        if (scanRunRequest.site?.knownPages?.length > 0) {
+            if (scanRunRequest.site.knownPages.some((url) => Url.tryParseUrlString(url) === undefined)) {
+                return { valid: false, error: WebApiErrorCodes.invalidKnownPageURL.error };
+            }
+        }
+
         return { valid: true };
     }
 
     private async init(): Promise<void> {
-        this.config = await this.getRestApiConfig();
+        this.restApiConfig = await this.getRestApiConfig();
+        this.crawlConfig = await this.serviceConfig.getConfigValue('crawlConfig');
         this.logger.setCommonProperties({ source: 'postScanRequestRESTApi' });
     }
 }

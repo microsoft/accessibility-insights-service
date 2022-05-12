@@ -3,10 +3,10 @@
 
 import 'reflect-metadata';
 
-import { AxeResults } from 'axe-core';
+import axe, { AxeResults } from 'axe-core';
 import { AxeResultsReducer } from 'axe-result-converter';
 import { cloneDeep } from 'lodash';
-import { CombinedScanResults, PageScan } from 'storage-documents';
+import { CombinedScanResults } from 'storage-documents';
 import { IMock, It, Mock } from 'typemoq';
 import { MockableLogger } from '../test-utilities/mockable-logger';
 import {
@@ -31,27 +31,12 @@ describe(CombinedAxeResultBuilder, () => {
     let combinedResultsBlobId: string;
     let blobReadETagStub: string;
     let combinedResultsBlobInfoStub: CombinedResultsBlob;
-    let pageScans: PageScan[];
 
     beforeEach(() => {
         loggerMock = Mock.ofType(MockableLogger);
         combinedScanResultsProviderMock = Mock.ofType<CombinedScanResultsProvider>();
         axeResultsReducerMock = Mock.ofType<AxeResultsReducer>();
 
-        pageScans = [
-            {
-                scanState: 'pass',
-            },
-            {
-                scanState: 'pass',
-            },
-            {
-                scanState: 'fail',
-            },
-            {
-                scanState: 'pending',
-            },
-        ] as PageScan[];
         axeResults = {
             url: 'url',
             timestamp: 'timestamp',
@@ -85,16 +70,24 @@ describe(CombinedAxeResultBuilder, () => {
     describe('Success', () => {
         test('generate combined scan results with no new violations', async () => {
             const expectedCombinedScanResults = cloneDeep(combinedScanResults);
-            const failed = pageScans.filter((s) => s?.scanState === 'fail').length;
-            const passed = pageScans.filter((s) => s?.scanState === 'pass').length;
-            expectedCombinedScanResults.urlCount = {
-                total: passed + failed,
-                failed,
-                passed,
-            };
+            expectedCombinedScanResults.urlCount.passed++;
+            expectedCombinedScanResults.urlCount.total++;
 
             setupBlobWrite(expectedCombinedScanResults, blobReadETagStub, combinedResultsBlobId, {});
-            const combinedResults = await testSubject.mergeAxeResults(axeResults, combinedResultsBlobInfoStub, pageScans);
+            const combinedResults = await testSubject.mergeAxeResults(axeResults, combinedResultsBlobInfoStub);
+            expect(combinedResults).toEqual(expectedCombinedScanResults);
+        });
+
+        test('generate combined scan results with new violations', async () => {
+            axeResults.violations = [{} as axe.Result];
+
+            const expectedCombinedScanResults = cloneDeep(combinedScanResults);
+            expectedCombinedScanResults.urlCount.failed++;
+            expectedCombinedScanResults.urlCount.total++;
+
+            setupBlobWrite(expectedCombinedScanResults, blobReadETagStub, combinedResultsBlobId, {});
+
+            const combinedResults = await testSubject.mergeAxeResults(axeResults, combinedResultsBlobInfoStub);
             expect(combinedResults).toEqual(expectedCombinedScanResults);
         });
     });
@@ -102,18 +95,15 @@ describe(CombinedAxeResultBuilder, () => {
     describe('Error', () => {
         test('throw for when writing blob fails', async () => {
             const expectedCombinedScanResults = cloneDeep(combinedScanResultsBlobRead.results);
-            expectedCombinedScanResults.urlCount = {
-                total: 3,
-                failed: 1,
-                passed: 2,
-            };
+            expectedCombinedScanResults.urlCount.passed++;
+            expectedCombinedScanResults.urlCount.total++;
 
             combinedScanResultsProviderMock.setup((m) => m.getEmptyResponse()).returns(() => combinedScanResultsBlobRead);
             setupBlobWrite(expectedCombinedScanResults, blobReadETagStub, combinedResultsBlobId, {
                 error: {} as any,
             });
 
-            await expect(testSubject.mergeAxeResults(axeResults, combinedResultsBlobInfoStub, pageScans)).rejects.toThrowError(
+            await expect(testSubject.mergeAxeResults(axeResults, combinedResultsBlobInfoStub)).rejects.toThrowError(
                 'Failed to write new combined axe scan results blob.',
             );
         });
