@@ -6,7 +6,8 @@
         "environmentDefinition": "canary"
     },
     "queueConfig": {
-        "messageVisibilityTimeoutInSeconds": 300
+        "messageVisibilityTimeoutInSeconds": 300,
+        "maxQueueSize": 50
     },
     "scanConfig": {
         "failedScanRetryIntervalInMinutes": 15,

@@ -3,7 +3,7 @@
         "sendNotification": true
     },
     "queueConfig": {
-        "maxQueueSize": 40
+        "maxQueueSize": 100
     },
     "restApiConfig": {
         "scanRequestProcessingDelayInSeconds": 300
