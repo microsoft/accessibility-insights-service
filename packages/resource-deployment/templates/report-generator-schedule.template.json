@@ -1,7 +1,7 @@
 {
     "id": "report-generator-schedule",
     "schedule": {
-        "recurrenceInterval": "PT5M"
+        "recurrenceInterval": "PT1M"
     },
     "jobSpecification": {
         "priority": 0,
