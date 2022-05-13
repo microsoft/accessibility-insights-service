@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 import { DiscoveryPatternFactory, getDiscoveryPatternForUrl } from 'accessibility-insights-crawler';
-import { ServiceConfiguration } from 'common';
+import { ServiceConfiguration, CrawlConfig } from 'common';
 import { inject, injectable } from 'inversify';
 import { isNil } from 'lodash';
 import { GlobalLogger } from 'logger';
@@ -26,17 +26,28 @@ export class DeepScanner {
     ) {}
 
     public async runDeepScan(runnerScanMetadata: RunnerScanMetadata, pageScanResult: OnDemandPageScanResult, page: Page): Promise<void> {
-        const websiteScanResult = await this.readWebsiteScanResult(pageScanResult);
+        let websiteScanResult = await this.readWebsiteScanResult(pageScanResult, false);
         this.logger.setCommonProperties({
             websiteScanId: websiteScanResult.id,
             deepScanId: websiteScanResult.deepScanId,
         });
 
         const deepScanDiscoveryLimit = await this.getDeepScanLimit(websiteScanResult);
-        if (websiteScanResult.knownPages !== undefined && websiteScanResult.knownPages.length >= deepScanDiscoveryLimit) {
+        if (deepScanDiscoveryLimit.canDiscover === false) {
+            this.logger.logInfo(`The website deep scan is skipped since there are known pages over discovery limit.`, {
+                knownPages: `${websiteScanResult.deepScanLimit}`,
+                discoveryLimit: `${(await this.getConfig()).deepScanDiscoveryLimit}`,
+            });
+
+            return;
+        }
+
+        // read websiteScanResult.knownPages from a storage
+        websiteScanResult = await this.readWebsiteScanResult(pageScanResult, true);
+        if (websiteScanResult.knownPages !== undefined && websiteScanResult.knownPages.length >= deepScanDiscoveryLimit.limit) {
             this.logger.logInfo(`The website deep scan completed since maximum discovered pages limit was reached.`, {
-                discoveredUrlsTotal: websiteScanResult.knownPages.length.toString(),
-                discoveredUrlsLimit: deepScanDiscoveryLimit.toString(),
+                discoveredUrls: `${websiteScanResult.knownPages.length}`,
+                discoveryLimit: `${deepScanDiscoveryLimit.limit}`,
             });
 
             return;
@@ -44,7 +55,7 @@ export class DeepScanner {
 
         const discoveryPatterns = websiteScanResult.discoveryPatterns ?? [this.discoveryPatternGenerator(websiteScanResult.baseUrl)];
         const discoveredUrls = await this.crawlRunner.run(runnerScanMetadata.url, discoveryPatterns, page.currentPage);
-        const processedUrls = this.processUrls(discoveredUrls, deepScanDiscoveryLimit, websiteScanResult.knownPages);
+        const processedUrls = this.processUrls(discoveredUrls, deepScanDiscoveryLimit.limit, websiteScanResult.knownPages);
         const websiteScanResultUpdated = await this.updateWebsiteScanResult(
             runnerScanMetadata.id,
             websiteScanResult,
@@ -69,7 +80,7 @@ export class DeepScanner {
         return this.websiteScanResultProvider.mergeOrCreate(scanId, websiteScanResultUpdate, true);
     }
 
-    private async readWebsiteScanResult(pageScanResult: OnDemandPageScanResult): Promise<WebsiteScanResult> {
+    private async readWebsiteScanResult(pageScanResult: OnDemandPageScanResult, readCompleteDocument: boolean): Promise<WebsiteScanResult> {
         const scanGroupType = 'deep-scan';
         const websiteScanRef = pageScanResult.websiteScanRefs?.find((ref) => ref.scanGroupType === scanGroupType);
         if (isNil(websiteScanRef)) {
@@ -78,12 +89,22 @@ export class DeepScanner {
             throw new Error(`No websiteScanRef exists with scanGroupType ${scanGroupType}`);
         }
 
-        return this.websiteScanResultProvider.read(websiteScanRef.id, true);
+        return this.websiteScanResultProvider.read(websiteScanRef.id, readCompleteDocument);
     }
 
-    private async getDeepScanLimit(websiteScanResult: WebsiteScanResult): Promise<number> {
-        const defaultLimit = (await this.serviceConfig.getConfigValue('crawlConfig')).deepScanDiscoveryLimit;
+    private async getDeepScanLimit(websiteScanResult: WebsiteScanResult): Promise<{ limit: number; canDiscover: boolean }> {
+        const config = await this.getConfig();
+        const limit = websiteScanResult.deepScanLimit ?? config.deepScanDiscoveryLimit;
+        // discovery is not possible if deepScanLimit is already higher than deepScanDiscoveryLimit
+        const canDiscover = limit <= config.deepScanDiscoveryLimit;
 
-        return websiteScanResult.deepScanLimit ?? defaultLimit;
+        return {
+            limit,
+            canDiscover,
+        };
+    }
+
+    private async getConfig(): Promise<CrawlConfig> {
+        return this.serviceConfig.getConfigValue('crawlConfig');
     }
 }

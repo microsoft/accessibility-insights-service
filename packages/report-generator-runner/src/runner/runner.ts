@@ -122,6 +122,10 @@ export class Runner {
             this.logger.logInfo(`Updating report request run state to ${queuedRequest.condition}.`, {
                 id: queuedRequest.request.id,
                 scanId: queuedRequest.request.scanId,
+                condition: queuedRequest.condition,
+                runState: queuedRequest.request.run?.state,
+                retryCount: `${queuedRequest.request.run?.retryCount}`,
+                runTimestamp: queuedRequest.request.run?.timestamp,
             });
 
             return {
@@ -145,6 +149,10 @@ export class Runner {
                 this.logger.logInfo(`Deleting report request from a report queue.`, {
                     id: queuedRequest.request.id,
                     scanId: queuedRequest.request.scanId,
+                    condition: queuedRequest.condition,
+                    runState: queuedRequest.request.run?.state,
+                    retryCount: `${queuedRequest.request.run?.retryCount}`,
+                    runTimestamp: queuedRequest.request.run?.timestamp,
                 });
 
                 return queuedRequest.request.id;
@@ -158,11 +166,18 @@ export class Runner {
                 this.logger.logInfo(`Updated report request run state to ${state}.`, {
                     id: response.result.id,
                     scanId: response.result.scanId,
+                    runState: response.result.run?.state,
+                    retryCount: `${response.result.run?.retryCount}`,
+                    runTimestamp: response.result.run?.timestamp,
                 });
             } else {
                 this.logger.logError(`Failed to update report request run state to ${state}.`, {
                     id: response.result.id,
                     scanId: response.result.scanId,
+                    runState: response.result.run?.state,
+                    retryCount: `${response.result.run?.retryCount}`,
+                    runTimestamp: response.result.run?.timestamp,
+                    error: `${response.result.run?.error}`.substring(0, 2048),
                 });
             }
         });
