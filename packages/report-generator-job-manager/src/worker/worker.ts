@@ -145,24 +145,26 @@ export class Worker extends BatchTaskCreator {
     }
 
     private convertToScanMessages(reportRequests: ScanReportGroup[]): ScanMessage[] {
-        return reportRequests.map((reportRequest) => {
-            const id = this.guidGenerator.createGuid();
-            const batchTaskArguments: BatchTaskArguments = {
-                id,
-                scanGroupId: reportRequest.scanGroupId,
-                targetReport: reportRequest.targetReport,
-            };
-            const batchTaskScanData = {
-                messageId: id,
-                // batch task parameters passed to container
-                messageText: JSON.stringify(batchTaskArguments),
-            };
+        return reportRequests
+            .filter((reportRequest) => !isEmpty(reportRequest?.scanGroupId) && !isEmpty(reportRequest?.targetReport))
+            .map((reportRequest) => {
+                const id = this.guidGenerator.createGuid();
+                const batchTaskArguments: BatchTaskArguments = {
+                    id,
+                    scanGroupId: reportRequest.scanGroupId,
+                    targetReport: reportRequest.targetReport,
+                };
+                const batchTaskScanData = {
+                    messageId: id,
+                    // batch task parameters passed to container
+                    messageText: JSON.stringify(batchTaskArguments),
+                };
 
-            return {
-                scanId: reportRequest.scanGroupId,
-                messageId: id,
-                message: batchTaskScanData,
-            };
-        });
+                return {
+                    scanId: reportRequest.scanGroupId,
+                    messageId: id,
+                    message: batchTaskScanData,
+                };
+            });
     }
 }
