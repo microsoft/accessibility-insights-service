@@ -129,6 +129,14 @@ function getScanArguments(): ScanArguments {
                 default: false,
                 alias: 'singleworker',
             },
+            serviceAccountName: {
+                type: 'string',
+                describe: 'Use with --serviceAccountPass to crawl pages requiring authentication.',
+            },
+            serviceAccountPass: {
+                type: 'string',
+                describe: 'Use with --serviceAccountName to crawl pages requiring authentication.',
+            },
         })
         .check((args) => {
             validateScanArguments(args as ScanArguments);

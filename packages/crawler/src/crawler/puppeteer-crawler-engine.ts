@@ -90,49 +90,48 @@ export class PuppeteerCrawlerEngine {
             } as BrowserPoolOptions;
         }
 
+        if (crawlerRunOptions.serviceAccountName) {
+            browserPoolOptions = {
+                ...browserPoolOptions,
+                postLaunchHooks: [
+                    async (pageId: string, browserController: any) => {
+                        const browser = browserController.browser as Puppeteer.Browser;
+                        await run(browser, crawlerRunOptions.serviceAccountName, crawlerRunOptions.serviceAccountPass);
+                    },
+                ],
+            } as BrowserPoolOptions;
+        }
+
         this.crawlerConfiguration.setSilentMode(false);
         puppeteerCrawlerOptions.browserPoolOptions = {
             ...browserPoolOptions,
             browserPlugins: [new PuppeteerPlugin(Puppeteer)],
-            postLaunchHooks: [
-                async (pageId: string, browserController: any) => {
-                    const browser = browserController.browser as Puppeteer.Browser;
-                    console.log('about to run');
-                    await run(browser);
-                },
-            ],
-        } as BrowserPoolOptions;
-
+        };
         const crawler = this.crawlerFactory.createPuppeteerCrawler(puppeteerCrawlerOptions);
         await crawler.run();
     }
 }
 
-async function run(browser: Puppeteer.Browser) {
+async function run(browser: Puppeteer.Browser, username: string, password: string) {
     const page = await browser.newPage();
-
-    await attemptAuthentication(page);
-
-    console.log('Navigating to office.com to demo Single Sign-on...');
-    await page.goto('https://office.com', { waitUntil: 'networkidle0' });
-    console.log('success!');
+    await attemptAuthentication(page, username, password);
 }
 
-async function attemptAuthentication(page: Puppeteer.Page, attemptNumber: number = 1) {
+async function attemptAuthentication(page: Puppeteer.Page, username: string, password: string, attemptNumber: number = 1) {
     if (attemptNumber == 1) {
         console.log('Attempting Authentication...');
     } else {
         console.log(`Authentication Attempt #${attemptNumber}...`);
     }
 
-    await page.goto('https://portal.azure.com', { waitUntil: 'networkidle0' });
-
-    await page.type('input[name="loginfmt"]', process.env.SERVICE_ACCT_USER!);
+    await page.goto('https://portal.azure.com');
+    await page.waitForSelector('input[name="loginfmt"]');
+    await page.type('input[name="loginfmt"]', username);
     await page.click('input[type="submit"]');
     await page.waitForNavigation({ waitUntil: 'networkidle0' });
     await page.waitForSelector('#FormsAuthentication');
     await page.click('#FormsAuthentication');
-    await page.type('#passwordInput', process.env.SERVICE_ACCT_PASS!);
+    await page.type('#passwordInput', password);
     await page.click('#submitButton');
     await page.waitForNavigation({ waitUntil: 'networkidle0' });
 
@@ -141,7 +140,7 @@ async function attemptAuthentication(page: Puppeteer.Page, attemptNumber: number
             console.log('Authentication Failed!');
             return;
         }
-        await attemptAuthentication(page, ++attemptNumber);
+        await attemptAuthentication(page, username, password, ++attemptNumber);
         return;
     }
     console.log('Authentication Successful');

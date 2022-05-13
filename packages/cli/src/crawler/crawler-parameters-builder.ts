@@ -43,6 +43,8 @@ export class CrawlerParametersBuilder {
             axeSourcePath: scanArguments.axeSourcePath,
             debug: scanArguments.debug,
             singleWorker: scanArguments.singleWorker,
+            serviceAccountName: scanArguments.serviceAccountName,
+            serviceAccountPass: scanArguments.serviceAccountPass,
         };
     }
 
