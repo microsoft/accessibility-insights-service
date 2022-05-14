@@ -235,7 +235,7 @@ function setupProcessUrls(deepScanLimit: number = deepScanDiscoveryLimit): void 
 function setupUpdateWebsiteScanResult(crawlDiscoveryPatterns: string[]): void {
     updatedWebsiteScanResult.discoveryPatterns = crawlDiscoveryPatterns;
     websiteScanResultProviderMock
-        .setup((o) => o.mergeOrCreate(runnerScanMetadata.id, It.isValue(updatedWebsiteScanResult), true))
+        .setup((o) => o.mergeOrCreate(runnerScanMetadata.id, It.isValue(updatedWebsiteScanResult), undefined, true))
         .returns(() => Promise.resolve(websiteScanResultDbDocument))
         .verifiable();
 }

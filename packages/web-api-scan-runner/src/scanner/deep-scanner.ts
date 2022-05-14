@@ -77,7 +77,7 @@ export class DeepScanner {
             discoveryPatterns: discoveryPatterns,
         };
 
-        return this.websiteScanResultProvider.mergeOrCreate(scanId, websiteScanResultUpdate, true);
+        return this.websiteScanResultProvider.mergeOrCreate(scanId, websiteScanResultUpdate, undefined, true);
     }
 
     private async readWebsiteScanResult(pageScanResult: OnDemandPageScanResult, readCompleteDocument: boolean): Promise<WebsiteScanResult> {

@@ -3,7 +3,7 @@
 
 import { injectable, inject } from 'inversify';
 import { GlobalLogger } from 'logger';
-import { ScanDataProvider, WebsiteScanResultProvider } from 'service-library';
+import { ScanDataProvider, WebsiteScanResultProvider, OnMergeCallbackFn } from 'service-library';
 import { OnDemandPageScanResult, WebsiteScanResult, ScanRunBatchRequest } from 'storage-documents';
 import _ from 'lodash';
 import { GuidGenerator, RetryHelper, System } from 'common';
@@ -132,7 +132,12 @@ export class ScanFeedGenerator {
             id: websiteScanResult.id,
             pageScans,
         };
-        await this.websiteScanResultProvider.mergeOrCreate(pageScanResult.id, updatedWebsiteScanResult);
+        const onMergeCallbackFn: OnMergeCallbackFn = (dbDocument) => {
+            dbDocument.pageCount = dbDocument.pageCount ? dbDocument.pageCount + scanRequests.length : scanRequests.length;
+
+            return dbDocument;
+        };
+        await this.websiteScanResultProvider.mergeOrCreate(pageScanResult.id, updatedWebsiteScanResult, onMergeCallbackFn);
     }
 
     private getUrlsToScan(websiteScanResult: WebsiteScanResult): string[] {

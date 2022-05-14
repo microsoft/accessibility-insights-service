@@ -93,13 +93,18 @@ describe(ScanFeedGenerator, () => {
             pageScans,
         };
         websiteScanResult.knownPages.push(...newPages);
+        websiteScanResult.pageCount = 1;
         setupGuidGeneratorMock(newPages);
 
-        websiteScanResultProviderMock.setup((o) => o.mergeOrCreate(pageScanResult.id, updatedWebsiteScanResult)).verifiable();
+        websiteScanResultProviderMock
+            .setup((o) => o.mergeOrCreate(pageScanResult.id, updatedWebsiteScanResult, It.isAny()))
+            .callback((id, result, callback) => callback(websiteScanResult))
+            .verifiable();
         setupScanDataProviderMock(scanRequests);
         loggerMock.setup((o) => o.logInfo(`Discovered pages has been queued for scanning.`)).verifiable();
 
         await scanFeedGenerator.queueDiscoveredPages(websiteScanResult, pageScanResult);
+        expect(websiteScanResult.pageCount).toEqual(newPages.length + 1);
     });
 
     it('queue scan requests in batches', async () => {
@@ -115,11 +120,15 @@ describe(ScanFeedGenerator, () => {
         websiteScanResult.knownPages.push(...newPages);
         setupGuidGeneratorMock(newPages);
 
-        websiteScanResultProviderMock.setup((o) => o.mergeOrCreate(pageScanResult.id, updatedWebsiteScanResult)).verifiable();
+        websiteScanResultProviderMock
+            .setup((o) => o.mergeOrCreate(pageScanResult.id, updatedWebsiteScanResult, It.isAny()))
+            .callback((id, result, callback) => callback(websiteScanResult))
+            .verifiable();
         setupScanDataProviderMock(scanRequests);
         loggerMock.setup((o) => o.logInfo(`Discovered pages has been queued for scanning.`)).verifiable();
 
         await scanFeedGenerator.queueDiscoveredPages(websiteScanResult, pageScanResult);
+        expect(websiteScanResult.pageCount).toEqual(newPages.length);
     });
 });
 

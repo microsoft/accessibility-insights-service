@@ -141,7 +141,7 @@ describe(ScanBatchRequestFeedController, () => {
                         scanNotifyUrl: 'reply-url-4',
                         site: {
                             baseUrl: 'base-url-4',
-                            knownPages: ['page1'],
+                            knownPages: ['page1', 'page2'],
                             discoveryPatterns: ['pattern1'],
                         },
                         reportGroups: [{ consolidatedId: 'consolidated-id-2' }],
@@ -216,6 +216,7 @@ function setupWebsiteScanResultProviderMock(documents: OnDemandPageScanBatchRequ
                             },
                         ],
                         knownPages: request.site.knownPages,
+                        pageCount: isEmpty(request.site?.knownPages) ? 1 : request.site.knownPages.length + 1,
                         discoveryPatterns: request.site.discoveryPatterns,
                         created: dateNow.toJSON(),
                     } as WebsiteScanResult;

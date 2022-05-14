@@ -156,6 +156,7 @@ export class ScanBatchRequestFeedController extends WebController {
                         },
                     ],
                     knownPages: request.site?.knownPages,
+                    pageCount: isEmpty(request.site?.knownPages) ? 1 : request.site.knownPages.length + 1,
                     discoveryPatterns: request.site?.discoveryPatterns?.length > 0 ? request.site.discoveryPatterns : undefined,
                     created: new Date().toJSON(),
                 };

@@ -190,7 +190,7 @@ function setupUpdateScanResult(): void {
             id: 'websiteScanResultId',
         } as WebsiteScanResult;
         websiteScanResultProviderMock
-            .setup((o) => o.mergeOrCreate(scanMetadata.id, It.isValue(updatedWebsiteScanResult), true))
+            .setup((o) => o.mergeOrCreate(scanMetadata.id, It.isValue(updatedWebsiteScanResult)))
             .returns(() => Promise.resolve(websiteScanResult))
             .verifiable();
     }

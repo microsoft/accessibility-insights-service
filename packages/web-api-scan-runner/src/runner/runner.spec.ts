@@ -26,6 +26,7 @@ import {
 import { AxeScanResults } from 'scanner-global-library';
 import { System, ServiceConfiguration, ScanRunTimeConfig, GuidGenerator } from 'common';
 import { AxeResults } from 'axe-core';
+import { cloneDeep } from 'lodash';
 import { RunnerScanMetadataConfig } from '../runner-scan-metadata-config';
 import { PageScanProcessor } from '../scanner/page-scan-processor';
 import { ReportGenerator, GeneratedReport } from '../report-generator/report-generator';
@@ -266,7 +267,11 @@ describe(Runner, () => {
 
         pageScanResult.run.retryCount = maxFailedScanRetryCount;
         setupUpdateScanResult();
-        setupScanNotificationProcessor();
+
+        const websiteScanResultUpdated = cloneDeep(websiteScanResult);
+        websiteScanResultUpdated.runResult = { completedScans: 0, failedScans: 1 };
+        setupScanNotificationProcessor(websiteScanResultUpdated);
+
         await runner.run();
     });
 });
@@ -296,10 +301,14 @@ function setupPageScanResultDbDocumentForDeepScan(): void {
     ] as WebsiteScanRef[];
 }
 
-function setupScanNotificationProcessor(): void {
+function setupScanNotificationProcessor(websiteScanResultUpdated: WebsiteScanResult = undefined): void {
     scanNotificationProcessorMock
         .setup((o) =>
-            o.sendScanCompletionNotification(It.isValue(runnerScanMetadata), It.isValue(pageScanResult), It.isValue(websiteScanResult)),
+            o.sendScanCompletionNotification(
+                It.isValue(runnerScanMetadata),
+                It.isValue(pageScanResult),
+                It.isValue(websiteScanResultUpdated ?? websiteScanResult),
+            ),
         )
         .verifiable();
 }
@@ -330,7 +339,12 @@ function setupUpdateScanResult(): void {
             id: 'websiteScanResultId',
         } as WebsiteScanResult;
         websiteScanResultProviderMock
-            .setup((o) => o.mergeOrCreate(runnerScanMetadata.id, It.isValue(updatedWebsiteScanResult), true))
+            .setup((o) => o.mergeOrCreate(runnerScanMetadata.id, It.isValue(updatedWebsiteScanResult), It.isAny()))
+            .callback((id, result, callback) => {
+                if (callback) {
+                    callback(websiteScanResult);
+                }
+            })
             .returns(() => Promise.resolve(websiteScanResult))
             .verifiable();
     }

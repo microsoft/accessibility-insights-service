@@ -73,14 +73,15 @@ export class ScanNotificationProcessor {
         }
 
         const deepScanCompleted =
-            websiteScanResult.pageScans &&
-            websiteScanResult.pageScans.length > 0 &&
-            websiteScanResult.pageScans.every((pageScan) => pageScan.runState === 'completed' || pageScan.runState === 'failed');
+            websiteScanResult.runResult &&
+            websiteScanResult.runResult.completedScans + websiteScanResult.runResult.failedScans >= websiteScanResult.pageCount;
 
         if (deepScanCompleted === true) {
             this.logger.logInfo('Sending scan result notification message for a deep scan.', {
                 deepScanId: websiteScanResult?.deepScanId,
-                scannedPages: websiteScanResult.pageScans.length.toString(),
+                completedScans: `${websiteScanResult.runResult.completedScans}`,
+                failedScans: `${websiteScanResult.runResult.failedScans}`,
+                pageCount: `${websiteScanResult.pageCount}`,
                 scanNotifyUrl: pageScanResult.notification.scanNotifyUrl,
             });
         }
