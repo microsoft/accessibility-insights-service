@@ -169,17 +169,18 @@ export class WebsiteScanResultProvider {
     }
 
     private async mergeAndWriteBaseDocument(dbDocument: DbDocument, onMergeCallbackFn: OnMergeCallbackFn): Promise<WebsiteScanResultBase> {
-        const operationResult = await this.createBaseDocumentIfNotExists(dbDocument);
+        const operationResult = await this.createOrReadBaseDocument(dbDocument, onMergeCallbackFn);
         if (operationResult.created) {
             return operationResult.scanResult;
         }
 
         let storageDocument = operationResult.scanResult;
+        const originalDocument = cloneDeep(storageDocument);
+        // update after storage document has been cloned
         if (onMergeCallbackFn !== undefined) {
             storageDocument = onMergeCallbackFn(storageDocument);
         }
 
-        const originalDocument = cloneDeep(storageDocument);
         const mergedDocument = this.websiteScanResultAggregator.mergeBaseDocument(dbDocument.baseDocument, storageDocument);
         if (!this.same(originalDocument, mergedDocument)) {
             return (await this.cosmosContainerClient.writeDocument(mergedDocument as WebsiteScanResultBase)).item;
@@ -258,7 +259,10 @@ export class WebsiteScanResultProvider {
         return partDocument;
     }
 
-    private async createBaseDocumentIfNotExists(dbDocument: DbDocument): Promise<{ created: boolean; scanResult: WebsiteScanResultBase }> {
+    private async createOrReadBaseDocument(
+        dbDocument: DbDocument,
+        onMergeCallbackFn: OnMergeCallbackFn,
+    ): Promise<{ created: boolean; scanResult: WebsiteScanResultBase }> {
         const operationResponse = await this.cosmosContainerClient.readDocument<WebsiteScanResultBase>(
             dbDocument.baseDocument.id,
             dbDocument.baseDocument.partitionKey,
@@ -270,6 +274,10 @@ export class WebsiteScanResultProvider {
         }
 
         await this.setDeepScanLimit(dbDocument);
+        if (onMergeCallbackFn !== undefined) {
+            dbDocument.baseDocument = onMergeCallbackFn(dbDocument.baseDocument as WebsiteScanResultBase);
+        }
+
         // compact document before writing to database
         const websiteScanResultDocument = this.websiteScanResultAggregator.mergeBaseDocument(dbDocument.baseDocument, {});
         const scanResult = (await this.cosmosContainerClient.writeDocument(websiteScanResultDocument as WebsiteScanResultBase)).item;

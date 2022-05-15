@@ -17,7 +17,7 @@ import {
 import { HashGenerator, RetryHelper, ServiceConfiguration, CrawlConfig } from 'common';
 import { GlobalLogger } from 'logger';
 import * as MockDate from 'mockdate';
-import _ from 'lodash';
+import _, { cloneDeep } from 'lodash';
 import * as cosmos from '@azure/cosmos';
 import { PartitionKeyFactory } from '../factories/partition-key-factory';
 import { WebsiteScanResultProvider, getOnMergeCallbackFnToUpdateRunResult } from './website-scan-result-provider';
@@ -176,10 +176,18 @@ describe(WebsiteScanResultProvider, () => {
             .setup((o) => o.getConfigValue('crawlConfig'))
             .returns(() => Promise.resolve({ deepScanDiscoveryLimit: deepScanDiscoveryLimit } as CrawlConfig))
             .verifiable();
+        const onMergeCallbackFn = jest.fn().mockImplementation((dbDoc: WebsiteScanResultBase) => {
+            const dbDocUpdated = cloneDeep(websiteScanResultBaseDbDocumentCreated);
+            delete dbDocUpdated._etag;
+            expect(dbDoc).toEqual(dbDocUpdated);
 
-        const actualWebsiteScanResult = await websiteScanResultProvider.mergeOrCreate(scanId, websiteScanResult);
+            return dbDoc;
+        });
+
+        const actualWebsiteScanResult = await websiteScanResultProvider.mergeOrCreate(scanId, websiteScanResult, onMergeCallbackFn);
 
         expect(actualWebsiteScanResult).toEqual(websiteScanResultBaseDbDocumentCreated);
+        expect(onMergeCallbackFn).toBeCalledTimes(1);
     });
 
     it('create new website scan result db document with discovery deep scan limit', async () => {
