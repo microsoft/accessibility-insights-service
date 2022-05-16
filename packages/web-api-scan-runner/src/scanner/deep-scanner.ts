@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 import { DiscoveryPatternFactory, getDiscoveryPatternForUrl } from 'accessibility-insights-crawler';
-import { ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
 import { isNil } from 'lodash';
 import { GlobalLogger } from 'logger';
@@ -19,29 +18,30 @@ export class DeepScanner {
         @inject(CrawlRunner) private readonly crawlRunner: CrawlRunner,
         @inject(ScanFeedGenerator) private readonly scanFeedGenerator: ScanFeedGenerator,
         @inject(WebsiteScanResultProvider) private readonly websiteScanResultProvider: WebsiteScanResultProvider,
-        @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
         @inject(GlobalLogger) private readonly logger: GlobalLogger,
         private readonly processUrls: DiscoveredUrlProcessor = discoveredUrlProcessor,
         private readonly discoveryPatternGenerator: DiscoveryPatternFactory = getDiscoveryPatternForUrl,
     ) {}
 
     public async runDeepScan(runnerScanMetadata: RunnerScanMetadata, pageScanResult: OnDemandPageScanResult, page: Page): Promise<void> {
-        const websiteScanResult = await this.readWebsiteScanResult(pageScanResult);
+        let websiteScanResult = await this.readWebsiteScanResult(pageScanResult, false);
         this.logger.setCommonProperties({
             websiteScanId: websiteScanResult.id,
             deepScanId: websiteScanResult.deepScanId,
         });
 
-        const deepScanDiscoveryLimit = await this.getDeepScanLimit(websiteScanResult);
-        if (websiteScanResult.knownPages !== undefined && websiteScanResult.knownPages.length >= deepScanDiscoveryLimit) {
+        const deepScanDiscoveryLimit = websiteScanResult.deepScanLimit;
+        if (websiteScanResult.pageCount >= deepScanDiscoveryLimit) {
             this.logger.logInfo(`The website deep scan completed since maximum discovered pages limit was reached.`, {
-                discoveredUrlsTotal: websiteScanResult.knownPages.length.toString(),
-                discoveredUrlsLimit: deepScanDiscoveryLimit.toString(),
+                discoveredUrls: `${websiteScanResult.pageCount}`,
+                discoveryLimit: `${deepScanDiscoveryLimit}`,
             });
 
             return;
         }
 
+        // fetch websiteScanResult.knownPages from a storage
+        websiteScanResult = await this.readWebsiteScanResult(pageScanResult, true);
         const discoveryPatterns = websiteScanResult.discoveryPatterns ?? [this.discoveryPatternGenerator(websiteScanResult.baseUrl)];
         const discoveredUrls = await this.crawlRunner.run(runnerScanMetadata.url, discoveryPatterns, page.currentPage);
         const processedUrls = this.processUrls(discoveredUrls, deepScanDiscoveryLimit, websiteScanResult.knownPages);
@@ -66,10 +66,10 @@ export class DeepScanner {
             discoveryPatterns: discoveryPatterns,
         };
 
-        return this.websiteScanResultProvider.mergeOrCreate(scanId, websiteScanResultUpdate, true);
+        return this.websiteScanResultProvider.mergeOrCreate(scanId, websiteScanResultUpdate, undefined, true);
     }
 
-    private async readWebsiteScanResult(pageScanResult: OnDemandPageScanResult): Promise<WebsiteScanResult> {
+    private async readWebsiteScanResult(pageScanResult: OnDemandPageScanResult, readCompleteDocument: boolean): Promise<WebsiteScanResult> {
         const scanGroupType = 'deep-scan';
         const websiteScanRef = pageScanResult.websiteScanRefs?.find((ref) => ref.scanGroupType === scanGroupType);
         if (isNil(websiteScanRef)) {
@@ -78,12 +78,6 @@ export class DeepScanner {
             throw new Error(`No websiteScanRef exists with scanGroupType ${scanGroupType}`);
         }
 
-        return this.websiteScanResultProvider.read(websiteScanRef.id, true);
-    }
-
-    private async getDeepScanLimit(websiteScanResult: WebsiteScanResult): Promise<number> {
-        const defaultLimit = (await this.serviceConfig.getConfigValue('crawlConfig')).deepScanDiscoveryLimit;
-
-        return websiteScanResult.deepScanLimit ?? defaultLimit;
+        return this.websiteScanResultProvider.read(websiteScanRef.id, readCompleteDocument);
     }
 }

@@ -14,6 +14,7 @@ import { ServiceConfiguration, ScanRunTimeConfig, System } from 'common';
 import * as MockDate from 'mockdate';
 import { GlobalLogger } from 'logger';
 import { TargetReport, OnDemandPageScanResult, WebsiteScanResult } from 'storage-documents';
+import { cloneDeep } from 'lodash';
 import { QueuedRequest } from '../runner/request-selector';
 import { ReportProcessor } from './report-processor';
 import { AccessibilityReportProcessor } from './accessibility-report-processor';
@@ -177,7 +178,12 @@ describe(ReportProcessor, () => {
             const websiteScanResult = websiteScanResults.find((w) => r.id === w.pageScans[0].scanId);
             const websiteScanResultUpdated = websiteScanResultsUpdated.find((w) => w.id === websiteScanResult.id);
             websiteScanResultProviderMock
-                .setup((o) => o.mergeOrCreate(r.id, websiteScanResult, true))
+                .setup((o) => o.mergeOrCreate(r.id, websiteScanResult, It.isAny()))
+                .callback((id, result, callback) => {
+                    if (callback) {
+                        callback(websiteScanResultUpdated);
+                    }
+                })
                 .returns(() => Promise.resolve(websiteScanResultUpdated))
                 .verifiable();
         });
@@ -191,12 +197,18 @@ describe(ReportProcessor, () => {
                 url: pageScanResultUpdated.url,
                 deepScan: websiteScanResultUpdated.deepScanId !== undefined ? true : false,
             } as RunnerScanMetadata;
+            const websiteScanResultUpdatedClone = cloneDeep(websiteScanResultUpdated);
+            if (pageScanResultUpdated.run.state === 'completed') {
+                websiteScanResultUpdatedClone.runResult = { completedScans: 1, failedScans: 0 };
+            } else if (pageScanResultUpdated.run.state === 'failed') {
+                websiteScanResultUpdatedClone.runResult = { completedScans: 0, failedScans: 1 };
+            }
             scanNotificationProcessorMock
                 .setup((o) =>
                     o.sendScanCompletionNotification(
                         It.isValue(runnerScanMetadata),
                         It.isValue(pageScanResultUpdated),
-                        It.isValue(websiteScanResultUpdated),
+                        It.isValue(websiteScanResultUpdatedClone),
                     ),
                 )
                 .returns(() => Promise.resolve())

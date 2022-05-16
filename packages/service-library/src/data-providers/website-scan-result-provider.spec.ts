@@ -17,10 +17,10 @@ import {
 import { HashGenerator, RetryHelper, ServiceConfiguration, CrawlConfig } from 'common';
 import { GlobalLogger } from 'logger';
 import * as MockDate from 'mockdate';
-import _ from 'lodash';
+import { cloneDeep, pick } from 'lodash';
 import * as cosmos from '@azure/cosmos';
 import { PartitionKeyFactory } from '../factories/partition-key-factory';
-import { WebsiteScanResultProvider } from './website-scan-result-provider';
+import { WebsiteScanResultProvider, getOnMergeCallbackToUpdateRunResult } from './website-scan-result-provider';
 import { WebsiteScanResultAggregator } from './website-scan-result-aggregator';
 
 type TestWorkflow = 'merge' | 'create' | 'skip-merge';
@@ -101,6 +101,25 @@ describe(WebsiteScanResultProvider, () => {
         expect(actualWebsiteScanResult).toEqual(websiteScanResultBaseDbDocumentMerged);
     });
 
+    it('merge website scan result document with db base document with on merge callback invocation', async () => {
+        setupDocumentEntities();
+        setupHashGeneratorMock();
+        setupWebsiteScanResultAggregatorMock('merge');
+        setupPartitionKeyFactoryMock();
+        setupCosmosContainerClientMock('merge');
+        setupRetryHelperMock();
+        const onMergeCallbackFn = jest.fn().mockImplementation((dbDoc: WebsiteScanResultBase) => {
+            expect(dbDoc).toEqual(websiteScanResultBaseDbDocumentExisting);
+
+            return dbDoc;
+        });
+
+        const actualWebsiteScanResult = await websiteScanResultProvider.mergeOrCreate(scanId, websiteScanResult, onMergeCallbackFn);
+
+        expect(actualWebsiteScanResult).toEqual(websiteScanResultBaseDbDocumentMerged);
+        expect(onMergeCallbackFn).toBeCalledTimes(1);
+    });
+
     it('merge website scan result document with db base document and reload', async () => {
         setupDocumentEntities();
         setupHashGeneratorMock();
@@ -115,7 +134,7 @@ describe(WebsiteScanResultProvider, () => {
                 : Promise.reject('Unexpected read() method invocation');
         });
 
-        const actualWebsiteScanResult = await websiteScanResultProvider.mergeOrCreate(scanId, websiteScanResult, true);
+        const actualWebsiteScanResult = await websiteScanResultProvider.mergeOrCreate(scanId, websiteScanResult, undefined, true);
         expect(actualWebsiteScanResult).toEqual(websiteScanResult);
     });
 
@@ -157,10 +176,18 @@ describe(WebsiteScanResultProvider, () => {
             .setup((o) => o.getConfigValue('crawlConfig'))
             .returns(() => Promise.resolve({ deepScanDiscoveryLimit: deepScanDiscoveryLimit } as CrawlConfig))
             .verifiable();
+        const onMergeCallbackFn = jest.fn().mockImplementation((dbDoc: WebsiteScanResultBase) => {
+            const dbDocUpdated = cloneDeep(websiteScanResultBaseDbDocumentCreated);
+            delete dbDocUpdated._etag;
+            expect(dbDoc).toEqual(dbDocUpdated);
 
-        const actualWebsiteScanResult = await websiteScanResultProvider.mergeOrCreate(scanId, websiteScanResult);
+            return dbDoc;
+        });
+
+        const actualWebsiteScanResult = await websiteScanResultProvider.mergeOrCreate(scanId, websiteScanResult, onMergeCallbackFn);
 
         expect(actualWebsiteScanResult).toEqual(websiteScanResultBaseDbDocumentCreated);
+        expect(onMergeCallbackFn).toBeCalledTimes(1);
     });
 
     it('create new website scan result db document with discovery deep scan limit', async () => {
@@ -246,8 +273,38 @@ describe(WebsiteScanResultProvider, () => {
 
         const actualWebsiteScanResult = await websiteScanResultProvider.read(websiteScanResultBaseId, true);
 
-        const partDocumentModel = _.pick(partMergedDocuments[1], websiteScanResultPartModelKeys) as Partial<WebsiteScanResultPartModel>;
+        const partDocumentModel = pick(partMergedDocuments[1], websiteScanResultPartModelKeys) as Partial<WebsiteScanResultPartModel>;
         expect(actualWebsiteScanResult).toEqual({ ...websiteScanResultBaseDbDocumentExisting, ...partDocumentModel });
+    });
+});
+
+describe(getOnMergeCallbackToUpdateRunResult, () => {
+    let websiteScanResultBaseDbDocument: WebsiteScanResultBase;
+
+    beforeEach(() => {
+        websiteScanResultBaseDbDocument = {} as WebsiteScanResultBase;
+    });
+
+    it('create function for `completed` run state', () => {
+        const fn = getOnMergeCallbackToUpdateRunResult('completed');
+        let websiteScanResultBaseDbDocumentUpdated = fn(websiteScanResultBaseDbDocument);
+        const expectedDocument = { runResult: { completedScans: 1, failedScans: 0 } };
+        expect(websiteScanResultBaseDbDocumentUpdated).toEqual(expectedDocument);
+
+        websiteScanResultBaseDbDocumentUpdated = fn(websiteScanResultBaseDbDocument);
+        expectedDocument.runResult.completedScans++;
+        expect(websiteScanResultBaseDbDocumentUpdated).toEqual(expectedDocument);
+    });
+
+    it('create function for `failed` run state', () => {
+        const fn = getOnMergeCallbackToUpdateRunResult('failed');
+        let websiteScanResultBaseDbDocumentUpdated = fn(websiteScanResultBaseDbDocument);
+        const expectedDocument = { runResult: { completedScans: 0, failedScans: 1 } };
+        expect(websiteScanResultBaseDbDocumentUpdated).toEqual(expectedDocument);
+
+        websiteScanResultBaseDbDocumentUpdated = fn(websiteScanResultBaseDbDocument);
+        expectedDocument.runResult.failedScans++;
+        expect(websiteScanResultBaseDbDocumentUpdated).toEqual(expectedDocument);
     });
 });
 

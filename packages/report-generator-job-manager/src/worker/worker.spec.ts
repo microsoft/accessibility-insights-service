@@ -272,6 +272,7 @@ describe(Worker, () => {
                 targetReport: 'accessibility',
             } as ScanReportGroup;
         });
+        scanReportGroups.push({} as ScanReportGroup); // empty report to be removed
         const cosmosOperationResponse = {
             item: scanReportGroups,
             statusCode: 200,

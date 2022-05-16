@@ -34,6 +34,8 @@ export interface WebsiteScanResultBase extends StorageDocument {
     discoveryPatterns?: string[];
     combinedResultsBlobId?: string;
     reports?: WebsiteScanReport[];
+    runResult?: WebsiteScanRunResult;
+    pageCount?: number;
     deepScanLimit?: number;
     created: string;
 }
@@ -52,6 +54,11 @@ export interface WebsiteScanReport {
     reportId: string;
     format: ReportFormat;
     href: string;
+}
+
+export interface WebsiteScanRunResult {
+    completedScans: number;
+    failedScans: number;
 }
 
 export interface PageScan {

@@ -145,7 +145,7 @@ export class ScanBatchRequestFeedController extends WebController {
                 const websiteScanRequest: Partial<WebsiteScanResult> = {
                     baseUrl: request.site?.baseUrl,
                     scanGroupId: consolidatedGroup.consolidatedId,
-                    // the deep scan id will be saved only when new db document is created
+                    // `deepScanId` value is set only when db document is created
                     deepScanId: request.deepScan ? request.scanId : undefined,
                     scanGroupType: request.deepScan ? 'deep-scan' : 'consolidated-scan-report',
                     pageScans: [
@@ -157,6 +157,7 @@ export class ScanBatchRequestFeedController extends WebController {
                     ],
                     knownPages: request.site?.knownPages,
                     discoveryPatterns: request.site?.discoveryPatterns?.length > 0 ? request.site.discoveryPatterns : undefined,
+                    // `created` value is set only when db document is created
                     created: new Date().toJSON(),
                 };
 

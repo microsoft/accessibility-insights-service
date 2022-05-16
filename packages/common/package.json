@@ -22,7 +22,7 @@
     },
     "homepage": "https://github.com/Microsoft/accessibility-insights-service#readme",
     "devDependencies": {
-        "@types/convict": "^6.0.2",
+        "@types/convict": "^6.1.1",
         "@types/jest": "^27.4.1",
         "@types/node": "^16.11.7",
         "@types/normalize-path": "^3.0.0",
@@ -37,7 +37,7 @@
     },
     "dependencies": {
         "@sindresorhus/fnv1a": "^2.0.1",
-        "convict": "^6.2.2",
+        "convict": "^6.2.3",
         "got": "^11.8.3",
         "inversify": "^6.0.1",
         "lodash": "^4.17.21",

@@ -6,7 +6,7 @@ import 'reflect-metadata';
 import { IMock, Mock } from 'typemoq';
 import { ServiceConfiguration, FeatureFlags, ScanRunTimeConfig } from 'common';
 import { GlobalLogger } from 'logger';
-import { OnDemandPageScanResult, WebsiteScanResult, PageScan, OnDemandNotificationRequestMessage } from 'storage-documents';
+import { OnDemandPageScanResult, WebsiteScanResult, OnDemandNotificationRequestMessage } from 'storage-documents';
 import { RunnerScanMetadata } from '../types/runner-scan-metadata';
 import { ScanNotificationProcessor } from './scan-notification-processor';
 import { ScanNotificationDispatcher } from './scan-notification-dispatcher';
@@ -48,12 +48,6 @@ describe(ScanNotificationProcessor, () => {
         websiteScanResult = {
             id: 'websiteScanResultId',
             deepScanId: 'deepScanId',
-            pageScans: [
-                {
-                    scanId: 'scanId',
-                    runState: 'completed',
-                },
-            ],
         } as WebsiteScanResult;
         pageScanResult = {
             id: 'pageScanResultId',
@@ -143,16 +137,15 @@ describe(ScanNotificationProcessor, () => {
             .setup((o) => o.logInfo('The scan result notification feature flag is enabled.', { sendNotificationFlag: 'true' }))
             .verifiable();
         runnerScanMetadata.deepScan = true;
-        websiteScanResult.pageScans = [
-            {
-                scanId: 'scanId',
-            } as PageScan,
-        ];
+        websiteScanResult.pageCount = 3;
+        websiteScanResult.runResult = { completedScans: 1, failedScans: undefined };
         await scanNotificationProcessor.sendScanCompletionNotification(runnerScanMetadata, pageScanResult, websiteScanResult);
     });
 
     it('send scan notification for a deep scan', async () => {
         runnerScanMetadata.deepScan = true;
+        websiteScanResult.pageCount = 3;
+        websiteScanResult.runResult = { completedScans: 2, failedScans: 1 };
         setupLoggerForDeepScan();
         setupNotificationQueueMessageSender();
         await scanNotificationProcessor.sendScanCompletionNotification(runnerScanMetadata, pageScanResult, websiteScanResult);
@@ -164,7 +157,9 @@ function setupLoggerForDeepScan(): void {
         .setup((o) =>
             o.logInfo('Sending scan result notification message for a deep scan.', {
                 deepScanId: websiteScanResult?.deepScanId,
-                scannedPages: websiteScanResult.pageScans.length.toString(),
+                completedScans: `${websiteScanResult.runResult?.completedScans}`,
+                failedScans: `${websiteScanResult.runResult?.failedScans}`,
+                pageCount: `${websiteScanResult.pageCount}`,
                 scanNotifyUrl: pageScanResult.notification.scanNotifyUrl,
             }),
         )

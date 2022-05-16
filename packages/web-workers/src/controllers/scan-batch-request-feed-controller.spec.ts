@@ -141,7 +141,7 @@ describe(ScanBatchRequestFeedController, () => {
                         scanNotifyUrl: 'reply-url-4',
                         site: {
                             baseUrl: 'base-url-4',
-                            knownPages: ['page1'],
+                            knownPages: ['page1', 'page2'],
                             discoveryPatterns: ['pattern1'],
                         },
                         reportGroups: [{ consolidatedId: 'consolidated-id-2' }],
