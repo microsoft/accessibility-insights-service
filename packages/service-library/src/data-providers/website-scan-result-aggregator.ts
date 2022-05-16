@@ -18,7 +18,7 @@ export class WebsiteScanResultAggregator {
         sourceDocument: Partial<WebsiteScanResultBase>,
         targetDocument: Partial<WebsiteScanResultBase>,
     ): Partial<WebsiteScanResultBase> {
-        const propertiesToKeep = ['_etag', 'deepScanId', 'deepScanLimit'];
+        const propertiesToKeep = ['_etag', 'deepScanId', 'deepScanLimit', 'created'];
         const mergedDocument = _.mergeWith(targetDocument, sourceDocument, (target, source, key) => {
             // preserve the targe value if defined
             if (propertiesToKeep.includes(key)) {
