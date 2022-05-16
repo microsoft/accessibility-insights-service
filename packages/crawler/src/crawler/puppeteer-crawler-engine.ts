@@ -106,6 +106,7 @@ export class PuppeteerCrawlerEngine {
                             browser,
                             crawlerRunOptions.serviceAccountName,
                             crawlerRunOptions.serviceAccountPass,
+                            Apify.utils.log,
                         );
                     },
                 ],

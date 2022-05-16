@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+import Apify from 'apify';
+const { log: apifyLog } = Apify.utils
 import Puppeteer from 'puppeteer';
 
 import { IMock, It, Mock, Times } from 'typemoq';
@@ -12,7 +14,9 @@ describe(authenticateBrowser, () => {
     let pageMock: IMock<Puppeteer.Page>;
     let browserMock: IMock<Puppeteer.Browser>;
     let keyboardMock: IMock<Puppeteer.Keyboard>;
+    let loggerMock: IMock<typeof apifyLog>;
     beforeEach(() => {
+        loggerMock = Mock.ofType<typeof apifyLog>();
         keyboardMock = getPromisableDynamicMock(Mock.ofType<Puppeteer.Keyboard>());
         pageMock = getPromisableDynamicMock(Mock.ofType<Puppeteer.Page>());
         pageMock.setup((p) => p.keyboard).returns(() => keyboardMock.object);
@@ -24,17 +28,21 @@ describe(authenticateBrowser, () => {
     });
 
     it('follows portal.azure.com authentication flow', async () => {
-        setupPortalAuthenticationFlow(pageMock, keyboardMock, accountName, accountPass);
-        await authenticateBrowser(browserMock.object, accountName, accountPass);
+        setupPortalAuthenticationFlow(pageMock, keyboardMock, accountName, accountPass, loggerMock);
+        await authenticateBrowser(browserMock.object, accountName, accountPass, loggerMock.object);
         browserMock.verifyAll();
         pageMock.verifyAll();
+        keyboardMock.verifyAll();
+        loggerMock.verifyAll();
     });
 
     it('retries four times if it detects authentication failed', async () => {
-        setupPortalAuthenticationFlow(pageMock, keyboardMock, accountName, accountPass, false, 5);
-        await authenticateBrowser(browserMock.object, accountName, accountPass);
+        setupPortalAuthenticationFlow(pageMock, keyboardMock, accountName, accountPass, loggerMock, false, 5);
+        await authenticateBrowser(browserMock.object, accountName, accountPass, loggerMock.object);
         browserMock.verifyAll();
         pageMock.verifyAll();
+        keyboardMock.verifyAll();
+        loggerMock.verifyAll();
     });
 });
 
@@ -43,6 +51,7 @@ const setupPortalAuthenticationFlow = (
     keyboardMock: IMock<Puppeteer.Keyboard>,
     accountName: string,
     accountPass: string,
+    loggerMock: IMock<typeof apifyLog>,
     success: boolean = true,
     times: number = 1,
 ) => {
@@ -59,4 +68,10 @@ const setupPortalAuthenticationFlow = (
         .returns(() => (success ? 'https://ms.portal.azure.com' : 'https://login.microsoftonline.com'))
         .verifiable(Times.exactly(times));
     pageMock.setup((p) => p.close()).verifiable(Times.once());
+    if (success) {
+        loggerMock.setup((l) => l.info(It.isAnyString())).verifiable(Times.once());
+    } else {
+        loggerMock.setup((l) => l.warning(It.isAnyString())).verifiable(Times.exactly(times - 1));
+        loggerMock.setup((l) => l.error(It.isAnyString())).verifiable(Times.once());
+    }
 };
