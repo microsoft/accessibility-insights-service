@@ -65,6 +65,6 @@
         "sha.js": "^2.4.11",
         "scanner-global-library": "1.0.0",
         "storage-documents": "1.0.0",
-        "yargs": "^17.4.0"
+        "yargs": "^17.5.1"
     }
 }
