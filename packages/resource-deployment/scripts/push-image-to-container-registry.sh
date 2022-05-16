@@ -91,14 +91,14 @@ pushImagesToRegistry() (
     # shellcheck disable=SC2034
     local imageBuildProcesses=(
         "pushImageToRegistry \"batch-scan-runner\" $batchScanRunnerDist windows"
-        # "pushImageToRegistry \"batch-scan-manager\" $batchScanManagerDist windows"
-        # "pushImageToRegistry \"batch-scan-request-sender\" $batchScanRequestSenderDist linux"
-        # "pushImageToRegistry \"batch-scan-notification-manager\" $batchScanNotificationManagerDist linux"
-        # "pushImageToRegistry \"batch-scan-notification-runner\" $batchScanNotificationRunnerDist linux"
-        # "pushImageToRegistry \"batch-privacy-scan-runner\" $batchPrivacyScanRunnerDist windows"
-        # "pushImageToRegistry \"batch-privacy-scan-manager\" $batchPrivacyScanJobManagerDist windows"
-        # "pushImageToRegistry \"batch-report-generator-runner\" $batchReportGeneratorRunnerDist linux"
-        # "pushImageToRegistry \"batch-report-generator-manager\" $batchReportGeneratorJobManagerDist linux"
+        "pushImageToRegistry \"batch-scan-manager\" $batchScanManagerDist windows"
+        "pushImageToRegistry \"batch-scan-request-sender\" $batchScanRequestSenderDist linux"
+        "pushImageToRegistry \"batch-scan-notification-manager\" $batchScanNotificationManagerDist linux"
+        "pushImageToRegistry \"batch-scan-notification-runner\" $batchScanNotificationRunnerDist linux"
+        "pushImageToRegistry \"batch-privacy-scan-runner\" $batchPrivacyScanRunnerDist windows"
+        "pushImageToRegistry \"batch-privacy-scan-manager\" $batchPrivacyScanJobManagerDist windows"
+        "pushImageToRegistry \"batch-report-generator-runner\" $batchReportGeneratorRunnerDist linux"
+        "pushImageToRegistry \"batch-report-generator-manager\" $batchReportGeneratorJobManagerDist linux"
     )
 
     echo "Pushing images to Azure Container Registry."
