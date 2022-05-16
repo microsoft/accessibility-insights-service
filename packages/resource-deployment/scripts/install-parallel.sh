@@ -128,39 +128,39 @@ function install() {
 
     echo "Starting parallel processes..."
 
-    . "${0%/*}/create-api-management.sh" &
-    apiManagmentProcessId="$!"
+    # . "${0%/*}/create-api-management.sh" &
+    # apiManagmentProcessId="$!"
 
-    parallelProcesses=(
-        # "${0%/*}/create-datalake-storage-account.sh"
-        "${0%/*}/upload-files.sh"
-        "${0%/*}/create-queues.sh"
-        "${0%/*}/setup-cosmos-db.sh"
-        "${0%/*}/create-vnet.sh"
-        "${0%/*}/app-insights-create.sh"
-        "${0%/*}/create-container-registry.sh"
-    )
-    runCommandsWithoutSecretsInParallel parallelProcesses
+    # parallelProcesses=(
+    # "${0%/*}/create-datalake-storage-account.sh"
+    # "${0%/*}/upload-files.sh"
+    # "${0%/*}/create-queues.sh"
+    # "${0%/*}/setup-cosmos-db.sh"
+    # "${0%/*}/create-vnet.sh"
+    # "${0%/*}/app-insights-create.sh"
+    # "${0%/*}/create-container-registry.sh"
+    # )
+    # runCommandsWithoutSecretsInParallel parallelProcesses
 
     # The following scripts all depend on the result from the above scripts.
     # Additionally, these should run sequentially because of interdependence.
 
-    . "${0%/*}/setup-key-vault.sh"
+    # . "${0%/*}/setup-key-vault.sh"
     . "${0%/*}/push-image-to-container-registry.sh"
-    . "${0%/*}/batch-account-create.sh"
-    . "${0%/*}/job-schedule-create.sh"
-    . "${0%/*}/function-app-create.sh"
+    # . "${0%/*}/batch-account-create.sh"
+    # . "${0%/*}/job-schedule-create.sh"
+    # . "${0%/*}/function-app-create.sh"
 
-    . "${0%/*}/create-dashboard.sh" &
-    dashboardProcessId="$!"
+    # . "${0%/*}/create-dashboard.sh" &
+    # dashboardProcessId="$!"
 
     echo "Waiting for API Management service deployment completion"
-    waitForProcesses apiManagmentProcessId
+    # waitForProcesses apiManagmentProcessId
     echo "Deploying REST API configuration to API Management service"
-    . "${0%/*}/deploy-rest-api.sh"
+    # . "${0%/*}/deploy-rest-api.sh"
 
     echo "Waiting for dashboard deployment completion"
-    waitForProcesses dashboardProcessId
+    # waitForProcesses dashboardProcessId
 }
 
 install
