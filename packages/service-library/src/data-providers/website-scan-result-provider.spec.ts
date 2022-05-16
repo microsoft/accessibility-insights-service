@@ -17,7 +17,7 @@ import {
 import { HashGenerator, RetryHelper, ServiceConfiguration, CrawlConfig } from 'common';
 import { GlobalLogger } from 'logger';
 import * as MockDate from 'mockdate';
-import _, { cloneDeep } from 'lodash';
+import { cloneDeep, pick } from 'lodash';
 import * as cosmos from '@azure/cosmos';
 import { PartitionKeyFactory } from '../factories/partition-key-factory';
 import { WebsiteScanResultProvider, getOnMergeCallbackToUpdateRunResult } from './website-scan-result-provider';
@@ -273,7 +273,7 @@ describe(WebsiteScanResultProvider, () => {
 
         const actualWebsiteScanResult = await websiteScanResultProvider.read(websiteScanResultBaseId, true);
 
-        const partDocumentModel = _.pick(partMergedDocuments[1], websiteScanResultPartModelKeys) as Partial<WebsiteScanResultPartModel>;
+        const partDocumentModel = pick(partMergedDocuments[1], websiteScanResultPartModelKeys) as Partial<WebsiteScanResultPartModel>;
         expect(actualWebsiteScanResult).toEqual({ ...websiteScanResultBaseDbDocumentExisting, ...partDocumentModel });
     });
 });
