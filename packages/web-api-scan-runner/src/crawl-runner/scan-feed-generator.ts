@@ -133,11 +133,13 @@ export class ScanFeedGenerator {
             pageScans,
         };
         const onMergeCallbackFn: OnMergeCallbackFn = (dbDocument) => {
-            this.logger.logInfo(
-                `Update WebsiteScanResult on merge. dbDocument.pageCount: ${dbDocument.pageCount},  scanRequests.length: ${scanRequests.length}`,
-                { document: JSON.stringify(websiteScanResult) },
-            );
+            this.logger.logInfo(`Updating websiteScanResult on merge. scanRequests.length: ${scanRequests.length}`, {
+                document: JSON.stringify(dbDocument),
+            });
             dbDocument.pageCount = dbDocument.pageCount ? dbDocument.pageCount + scanRequests.length : scanRequests.length;
+            this.logger.logInfo(`Updated websiteScanResult on merge.`, {
+                document: JSON.stringify(dbDocument),
+            });
 
             return dbDocument;
         };
