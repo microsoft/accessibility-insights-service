@@ -6,6 +6,7 @@ import { BrowserPoolOptions, PuppeteerPlugin } from 'browser-pool';
 import { inject, injectable } from 'inversify';
 import { isEmpty } from 'lodash';
 import Puppeteer from 'puppeteer';
+import { authenticateBrowser } from '../authenticator/browser-authenticator';
 import { CrawlerRunOptions } from '../types/crawler-run-options';
 import { ApifyRequestQueueProvider, crawlerIocTypes, PageProcessorFactory } from '../types/ioc-types';
 import { CrawlerConfiguration } from './crawler-configuration';
@@ -83,65 +84,34 @@ export class PuppeteerCrawlerEngine {
                 '--auto-open-devtools-for-tabs',
                 ...puppeteerDefaultOptions,
             ];
-            browserPoolOptions = {
+            puppeteerCrawlerOptions.browserPoolOptions = {
+                browserPlugins: [new PuppeteerPlugin(Puppeteer)],
                 operationTimeoutSecs: 3600,
                 closeInactiveBrowserAfterSecs: 3600,
                 maxOpenPagesPerBrowser: 1,
             } as BrowserPoolOptions;
+            this.crawlerConfiguration.setSilentMode(false);
         }
 
-        if (crawlerRunOptions.serviceAccountName) {
-            browserPoolOptions = {
+        if (!isEmpty(crawlerRunOptions.serviceAccountName)) {
+            this.crawlerConfiguration.setSilentMode(false);
+
+            puppeteerCrawlerOptions.browserPoolOptions = {
                 ...browserPoolOptions,
+                browserPlugins: [new PuppeteerPlugin(Puppeteer)],
                 postLaunchHooks: [
                     async (pageId: string, browserController: any) => {
                         const browser = browserController.browser as Puppeteer.Browser;
-                        await run(browser, crawlerRunOptions.serviceAccountName, crawlerRunOptions.serviceAccountPass);
+                        await authenticateBrowser(
+                            browser,
+                            crawlerRunOptions.serviceAccountName,
+                            crawlerRunOptions.serviceAccountPass,
+                        );
                     },
                 ],
             } as BrowserPoolOptions;
         }
-
-        this.crawlerConfiguration.setSilentMode(false);
-        puppeteerCrawlerOptions.browserPoolOptions = {
-            ...browserPoolOptions,
-            browserPlugins: [new PuppeteerPlugin(Puppeteer)],
-        };
         const crawler = this.crawlerFactory.createPuppeteerCrawler(puppeteerCrawlerOptions);
         await crawler.run();
     }
-}
-
-async function run(browser: Puppeteer.Browser, username: string, password: string) {
-    const page = await browser.newPage();
-    await attemptAuthentication(page, username, password);
-}
-
-async function attemptAuthentication(page: Puppeteer.Page, username: string, password: string, attemptNumber: number = 1) {
-    if (attemptNumber == 1) {
-        console.log('Attempting Authentication...');
-    } else {
-        console.log(`Authentication Attempt #${attemptNumber}...`);
-    }
-
-    await page.goto('https://portal.azure.com');
-    await page.waitForSelector('input[name="loginfmt"]');
-    await page.type('input[name="loginfmt"]', username);
-    await page.click('input[type="submit"]');
-    await page.waitForNavigation({ waitUntil: 'networkidle0' });
-    await page.waitForSelector('#FormsAuthentication');
-    await page.click('#FormsAuthentication');
-    await page.type('#passwordInput', password);
-    await page.click('#submitButton');
-    await page.waitForNavigation({ waitUntil: 'networkidle0' });
-
-    if (page.url().match('^https://(msft.sts.microsoft.com|login.microsoftonline.com)')) {
-        if (attemptNumber > 4) {
-            console.log('Authentication Failed!');
-            return;
-        }
-        await attemptAuthentication(page, username, password, ++attemptNumber);
-        return;
-    }
-    console.log('Authentication Successful');
 }
