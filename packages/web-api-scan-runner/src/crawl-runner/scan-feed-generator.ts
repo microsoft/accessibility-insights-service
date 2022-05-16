@@ -5,7 +5,7 @@ import { injectable, inject } from 'inversify';
 import { GlobalLogger } from 'logger';
 import { ScanDataProvider, WebsiteScanResultProvider, OnMergeCallbackFn } from 'service-library';
 import { OnDemandPageScanResult, WebsiteScanResult, ScanRunBatchRequest } from 'storage-documents';
-import _ from 'lodash';
+import { isNil, pullAll } from 'lodash';
 import { GuidGenerator, RetryHelper, System } from 'common';
 import pLimit from 'p-limit';
 
@@ -105,7 +105,7 @@ export class ScanFeedGenerator {
             return {
                 scanId,
                 url,
-                priority: _.isNil(pageScanResult.priority) ? 0 : pageScanResult.priority,
+                priority: isNil(pageScanResult.priority) ? 0 : pageScanResult.priority,
                 deepScan: true,
                 scanNotifyUrl: pageScanResult.notification?.scanNotifyUrl ?? undefined,
                 site: {
@@ -133,22 +133,19 @@ export class ScanFeedGenerator {
             pageScans,
         };
         const onMergeCallbackFn: OnMergeCallbackFn = (dbDocument) => {
-            this.logger.logInfo(`Updating websiteScanResult on merge. scanRequests.length: ${scanRequests.length}`, {
-                document: JSON.stringify(dbDocument),
-            });
-            dbDocument.pageCount = dbDocument.pageCount ? dbDocument.pageCount + scanRequests.length : scanRequests.length;
-            this.logger.logInfo(`Updated websiteScanResult on merge.`, {
-                document: JSON.stringify(dbDocument),
-            });
+            dbDocument.pageCount = dbDocument.pageCount
+                ? dbDocument.pageCount + scanRequests.length
+                : scanRequests.length + 1; /** count base page */
 
             return dbDocument;
         };
+
         await this.websiteScanResultProvider.mergeOrCreate(pageScanResult.id, updatedWebsiteScanResult, onMergeCallbackFn);
     }
 
     private getUrlsToScan(websiteScanResult: WebsiteScanResult): string[] {
         const queuedUrls = websiteScanResult.pageScans.map((pageScan) => pageScan.url);
 
-        return _.pullAll([...websiteScanResult.knownPages], queuedUrls);
+        return pullAll([...websiteScanResult.knownPages], queuedUrls);
     }
 }

@@ -11,7 +11,7 @@ import {
     ReportGeneratorRequestProvider,
     ScanNotificationProcessor,
     RunnerScanMetadata,
-    getOnMergeCallbackFnToUpdateRunResult,
+    getOnMergeCallbackToUpdateRunResult,
 } from 'service-library';
 import {
     OnDemandPageScanReport,
@@ -140,7 +140,7 @@ export class Runner {
                     },
                 ],
             };
-            const onMergeCallbackFn = getOnMergeCallbackFnToUpdateRunResult(runState);
+            const onMergeCallbackFn = getOnMergeCallbackToUpdateRunResult(runState);
 
             return this.websiteScanResultProvider.mergeOrCreate(runnerScanMetadata.id, updatedWebsiteScanResult, onMergeCallbackFn);
         }

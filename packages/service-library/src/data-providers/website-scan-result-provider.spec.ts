@@ -20,7 +20,7 @@ import * as MockDate from 'mockdate';
 import _, { cloneDeep } from 'lodash';
 import * as cosmos from '@azure/cosmos';
 import { PartitionKeyFactory } from '../factories/partition-key-factory';
-import { WebsiteScanResultProvider, getOnMergeCallbackFnToUpdateRunResult } from './website-scan-result-provider';
+import { WebsiteScanResultProvider, getOnMergeCallbackToUpdateRunResult } from './website-scan-result-provider';
 import { WebsiteScanResultAggregator } from './website-scan-result-aggregator';
 
 type TestWorkflow = 'merge' | 'create' | 'skip-merge';
@@ -278,7 +278,7 @@ describe(WebsiteScanResultProvider, () => {
     });
 });
 
-describe(getOnMergeCallbackFnToUpdateRunResult, () => {
+describe(getOnMergeCallbackToUpdateRunResult, () => {
     let websiteScanResultBaseDbDocument: WebsiteScanResultBase;
 
     beforeEach(() => {
@@ -286,7 +286,7 @@ describe(getOnMergeCallbackFnToUpdateRunResult, () => {
     });
 
     it('create function for `completed` run state', () => {
-        const fn = getOnMergeCallbackFnToUpdateRunResult('completed');
+        const fn = getOnMergeCallbackToUpdateRunResult('completed');
         let websiteScanResultBaseDbDocumentUpdated = fn(websiteScanResultBaseDbDocument);
         const expectedDocument = { runResult: { completedScans: 1, failedScans: 0 } };
         expect(websiteScanResultBaseDbDocumentUpdated).toEqual(expectedDocument);
@@ -297,7 +297,7 @@ describe(getOnMergeCallbackFnToUpdateRunResult, () => {
     });
 
     it('create function for `failed` run state', () => {
-        const fn = getOnMergeCallbackFnToUpdateRunResult('failed');
+        const fn = getOnMergeCallbackToUpdateRunResult('failed');
         let websiteScanResultBaseDbDocumentUpdated = fn(websiteScanResultBaseDbDocument);
         const expectedDocument = { runResult: { completedScans: 0, failedScans: 1 } };
         expect(websiteScanResultBaseDbDocumentUpdated).toEqual(expectedDocument);

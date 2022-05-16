@@ -9,7 +9,7 @@ import {
     WebsiteScanResultProvider,
     ScanNotificationProcessor,
     RunnerScanMetadata,
-    getOnMergeCallbackFnToUpdateRunResult,
+    getOnMergeCallbackToUpdateRunResult,
 } from 'service-library';
 import { ServiceConfiguration, System } from 'common';
 import { isString } from 'lodash';
@@ -121,7 +121,7 @@ export class ReportProcessor {
                     },
                 ],
             };
-            const onMergeCallbackFn = getOnMergeCallbackFnToUpdateRunResult(runState);
+            const onMergeCallbackFn = getOnMergeCallbackToUpdateRunResult(runState);
 
             return this.websiteScanResultProvider.mergeOrCreate(pageScanResult.id, updatedWebsiteScanResult, onMergeCallbackFn);
         }

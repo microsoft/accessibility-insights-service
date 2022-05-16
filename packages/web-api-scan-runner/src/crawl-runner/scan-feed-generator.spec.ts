@@ -128,7 +128,7 @@ describe(ScanFeedGenerator, () => {
         loggerMock.setup((o) => o.logInfo(`Discovered pages has been queued for scanning.`)).verifiable();
 
         await scanFeedGenerator.queueDiscoveredPages(websiteScanResult, pageScanResult);
-        expect(websiteScanResult.pageCount).toEqual(newPages.length);
+        expect(websiteScanResult.pageCount).toEqual(newPages.length + 1);
     });
 });
 

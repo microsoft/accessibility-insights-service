@@ -216,7 +216,6 @@ function setupWebsiteScanResultProviderMock(documents: OnDemandPageScanBatchRequ
                             },
                         ],
                         knownPages: request.site.knownPages,
-                        pageCount: isEmpty(request.site?.knownPages) ? 1 : request.site.knownPages.length + 1,
                         discoveryPatterns: request.site.discoveryPatterns,
                         created: dateNow.toJSON(),
                     } as WebsiteScanResult;

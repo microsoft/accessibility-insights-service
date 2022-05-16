@@ -29,7 +29,7 @@ interface DbDocument {
 
 export type OnMergeCallbackFn = (storageDocument: WebsiteScanResultBase) => WebsiteScanResultBase;
 
-export const getOnMergeCallbackFnToUpdateRunResult = (runState: OnDemandPageScanRunState): OnMergeCallbackFn => {
+export const getOnMergeCallbackToUpdateRunResult = (runState: OnDemandPageScanRunState): OnMergeCallbackFn => {
     let onMergeCallbackFn: OnMergeCallbackFn;
     if (runState === 'completed') {
         onMergeCallbackFn = (dbDocument) => {
