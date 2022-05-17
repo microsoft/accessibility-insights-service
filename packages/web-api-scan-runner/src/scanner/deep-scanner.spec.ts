@@ -11,6 +11,7 @@ import { OnDemandPageScanResult, WebsiteScanResult } from 'storage-documents';
 import { IMock, It, Mock, Times } from 'typemoq';
 import * as Puppeteer from 'puppeteer';
 import { cloneDeep } from 'lodash';
+import { ServiceConfiguration, CrawlConfig } from 'common';
 import { DiscoveredUrlProcessor } from '../crawl-runner/discovered-url-processor';
 import { CrawlRunner } from '../crawl-runner/crawl-runner';
 import { ScanFeedGenerator } from '../crawl-runner/scan-feed-generator';
@@ -29,6 +30,7 @@ let deepScanDiscoveryLimit: number;
 let loggerMock: IMock<GlobalLogger>;
 let crawlRunnerMock: IMock<CrawlRunner>;
 let websiteScanResultProviderMock: IMock<WebsiteScanResultProvider>;
+let serviceConfigMock: IMock<ServiceConfiguration>;
 let urlProcessorMock: IMock<DiscoveredUrlProcessor>;
 let discoveryPatternGeneratorMock: IMock<DiscoveryPatternFactory>;
 let pageMock: IMock<Page>;
@@ -45,12 +47,16 @@ describe(DeepScanner, () => {
         loggerMock = Mock.ofType<GlobalLogger>();
         crawlRunnerMock = Mock.ofType<CrawlRunner>();
         websiteScanResultProviderMock = Mock.ofType<WebsiteScanResultProvider>();
+        serviceConfigMock = Mock.ofType<ServiceConfiguration>();
         urlProcessorMock = Mock.ofType<DiscoveredUrlProcessor>();
         discoveryPatternGeneratorMock = Mock.ofType<DiscoveryPatternFactory>();
         pageMock = Mock.ofType<Page>();
         scanFeedGeneratorMock = Mock.ofType<ScanFeedGenerator>();
 
         deepScanDiscoveryLimit = 5;
+        serviceConfigMock
+            .setup((sc) => sc.getConfigValue('crawlConfig'))
+            .returns(() => Promise.resolve({ deepScanDiscoveryLimit } as CrawlConfig));
         pageMock.setup((p) => p.currentPage).returns(() => puppeteerPageStub);
         runnerScanMetadata = {
             url,
@@ -86,6 +92,7 @@ describe(DeepScanner, () => {
             crawlRunnerMock.object,
             scanFeedGeneratorMock.object,
             websiteScanResultProviderMock.object,
+            serviceConfigMock.object,
             loggerMock.object,
             urlProcessorMock.object,
             discoveryPatternGeneratorMock.object,
@@ -101,13 +108,20 @@ describe(DeepScanner, () => {
         scanFeedGeneratorMock.verifyAll();
     });
 
-    it('continue deep scan for all given known pages when below deepScanDiscoveryLimit', async () => {
-        websiteScanResult.knownPages = [];
-        for (let i = 0; i < deepScanDiscoveryLimit - 2; i++) {
-            websiteScanResult.knownPages.push(`page${i}`);
-        }
-        websiteScanResult.deepScanLimit = websiteScanResult.knownPages.length + 1;
+    it('start deep scan when known pages below deepScanDiscoveryLimit', async () => {
+        websiteScanResult.deepScanLimit = deepScanDiscoveryLimit;
+        setupReadWebsiteScanResult();
+        setupLoggerProperties();
+        setupCrawl(discoveryPatterns);
+        setupProcessUrls(websiteScanResult.deepScanLimit);
+        setupUpdateWebsiteScanResult(discoveryPatterns);
+        setupScanFeedGeneratorMock();
 
+        await testSubject.runDeepScan(runnerScanMetadata, pageScanResult, pageMock.object);
+    });
+
+    it('start deep scan when known pages above deepScanDiscoveryLimit', async () => {
+        websiteScanResult.deepScanLimit = deepScanDiscoveryLimit + 4;
         setupReadWebsiteScanResult();
         setupLoggerProperties();
         setupCrawl(discoveryPatterns);
@@ -119,6 +133,7 @@ describe(DeepScanner, () => {
     });
 
     it('skip deep scan if maximum discovered pages limit was reached', async () => {
+        websiteScanResult.deepScanLimit = deepScanDiscoveryLimit;
         websiteScanResult.pageCount = deepScanDiscoveryLimit + 2;
         setupReadWebsiteScanResult(1);
         setupLoggerProperties();
@@ -126,7 +141,24 @@ describe(DeepScanner, () => {
             .setup((o) =>
                 o.logInfo('The website deep scan completed since maximum discovered pages limit was reached.', {
                     discoveredUrls: `${websiteScanResult.pageCount}`,
-                    discoveryLimit: `${deepScanDiscoveryLimit}`,
+                    discoveryLimit: `${websiteScanResult.deepScanLimit}`,
+                }),
+            )
+            .verifiable();
+
+        await testSubject.runDeepScan(runnerScanMetadata, pageScanResult, pageMock.object);
+    });
+
+    it('skip deep scan when know pages over limit and base page was scanned', async () => {
+        websiteScanResult.deepScanLimit = deepScanDiscoveryLimit + 4;
+        websiteScanResult.pageCount = deepScanDiscoveryLimit + 2;
+        setupReadWebsiteScanResult(1);
+        setupLoggerProperties();
+        loggerMock
+            .setup((o) =>
+                o.logInfo('The website deep scan completed since maximum discovered pages limit was reached.', {
+                    discoveredUrls: `${websiteScanResult.pageCount}`,
+                    discoveryLimit: `${websiteScanResult.deepScanLimit}`,
                 }),
             )
             .verifiable();

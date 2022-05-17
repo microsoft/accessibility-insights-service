@@ -8,6 +8,7 @@ import { GlobalLogger } from 'logger';
 import { Page } from 'scanner-global-library';
 import { WebsiteScanResultProvider, RunnerScanMetadata } from 'service-library';
 import { OnDemandPageScanResult, WebsiteScanResult } from 'storage-documents';
+import { ServiceConfiguration } from 'common';
 import { DiscoveredUrlProcessor, discoveredUrlProcessor } from '../crawl-runner/discovered-url-processor';
 import { CrawlRunner } from '../crawl-runner/crawl-runner';
 import { ScanFeedGenerator } from '../crawl-runner/scan-feed-generator';
@@ -18,6 +19,7 @@ export class DeepScanner {
         @inject(CrawlRunner) private readonly crawlRunner: CrawlRunner,
         @inject(ScanFeedGenerator) private readonly scanFeedGenerator: ScanFeedGenerator,
         @inject(WebsiteScanResultProvider) private readonly websiteScanResultProvider: WebsiteScanResultProvider,
+        @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
         @inject(GlobalLogger) private readonly logger: GlobalLogger,
         private readonly processUrls: DiscoveredUrlProcessor = discoveredUrlProcessor,
         private readonly discoveryPatternGenerator: DiscoveryPatternFactory = getDiscoveryPatternForUrl,
@@ -31,7 +33,8 @@ export class DeepScanner {
         });
 
         const deepScanDiscoveryLimit = websiteScanResult.deepScanLimit;
-        if (websiteScanResult.pageCount >= deepScanDiscoveryLimit) {
+        const canDeepScan = await this.canDeepScan(websiteScanResult);
+        if (canDeepScan === false) {
             this.logger.logInfo(`The website deep scan completed since maximum discovered pages limit was reached.`, {
                 discoveredUrls: `${websiteScanResult.pageCount}`,
                 discoveryLimit: `${deepScanDiscoveryLimit}`,
@@ -79,5 +82,24 @@ export class DeepScanner {
         }
 
         return this.websiteScanResultProvider.read(websiteScanRef.id, readCompleteDocument);
+    }
+
+    private async canDeepScan(websiteScanResult: WebsiteScanResult): Promise<boolean> {
+        const discoveryLimit = (await this.serviceConfig.getConfigValue('crawlConfig')).deepScanDiscoveryLimit;
+
+        // allow initial deep scan only when known pages over discover limit
+        if (
+            websiteScanResult.deepScanLimit > discoveryLimit &&
+            (websiteScanResult.pageCount === undefined || websiteScanResult.pageCount === 0)
+        ) {
+            return true;
+        }
+
+        // allow deep scan if below discover limit
+        if (websiteScanResult.pageCount === undefined || websiteScanResult.pageCount < discoveryLimit) {
+            return true;
+        }
+
+        return false;
     }
 }
