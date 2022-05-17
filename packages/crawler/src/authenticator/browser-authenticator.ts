@@ -5,17 +5,6 @@ import Apify from 'apify';
 const { log: apifyLog } = Apify.utils;
 import * as Puppeteer from 'puppeteer';
 
-export const authenticateBrowser = async (
-    browser: Puppeteer.Browser,
-    accountName: string,
-    accountPass: string,
-    logger: typeof apifyLog,
-): Promise<void> => {
-    const page = await browser.newPage();
-    await attemptAuthentication(page, accountName, accountPass, logger);
-    await page.close();
-};
-
 const attemptAuthentication = async (
     page: Puppeteer.Page,
     accountName: string,
@@ -37,13 +26,26 @@ const attemptAuthentication = async (
         const errorText: string = await page.$eval('#errorText', (el) => el.textContent);
         if (attemptNumber > 4) {
             logger.error('Attempted authentication 5 times and ultimately failed.');
+
             return;
         }
         if (errorText !== '') {
             logger.warning(`Authentication failed with error: ${errorText}`);
         }
-        await attemptAuthentication(page, accountName, accountPass, logger, ++attemptNumber);
+        await attemptAuthentication(page, accountName, accountPass, logger, attemptNumber + 1);
+
         return;
     }
     logger.info('Authentication succeeded');
+};
+
+export const authenticateBrowser = async (
+    browser: Puppeteer.Browser,
+    accountName: string,
+    accountPass: string,
+    logger: typeof apifyLog,
+): Promise<void> => {
+    const page = await browser.newPage();
+    await attemptAuthentication(page, accountName, accountPass, logger);
+    await page.close();
 };

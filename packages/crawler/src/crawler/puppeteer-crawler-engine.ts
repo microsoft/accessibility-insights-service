@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 import Apify from 'apify';
-import { BrowserPoolOptions, PuppeteerPlugin } from 'browser-pool';
+import { BrowserPoolOptions, PuppeteerPlugin, BrowserController } from 'browser-pool';
 import { inject, injectable } from 'inversify';
 import { isEmpty } from 'lodash';
 import Puppeteer from 'puppeteer';
@@ -100,7 +100,7 @@ export class PuppeteerCrawlerEngine {
                 ...browserPoolOptions,
                 browserPlugins: [new PuppeteerPlugin(Puppeteer)],
                 postLaunchHooks: [
-                    async (pageId: string, browserController: any) => {
+                    async (pageId: string, browserController: BrowserController) => {
                         const browser = browserController.browser as Puppeteer.Browser;
                         await authenticateBrowser(
                             browser,
