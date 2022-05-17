@@ -90,7 +90,6 @@ export class PuppeteerCrawlerEngine {
                 closeInactiveBrowserAfterSecs: 3600,
                 maxOpenPagesPerBrowser: 1,
             } as BrowserPoolOptions;
-            this.crawlerConfiguration.setSilentMode(false);
         }
 
         if (!isEmpty(crawlerRunOptions.serviceAccountName)) {
