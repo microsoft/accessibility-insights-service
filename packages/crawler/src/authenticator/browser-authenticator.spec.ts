@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 import Apify from 'apify';
-const { log: apifyLog } = Apify.utils
+const { log: apifyLog } = Apify.utils;
 import Puppeteer from 'puppeteer';
 
 import { IMock, It, Mock, Times } from 'typemoq';
