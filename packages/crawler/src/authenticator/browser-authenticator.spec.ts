@@ -2,27 +2,27 @@
 // Licensed under the MIT License.
 
 import Apify from 'apify';
-const { log: apifyLog } = Apify.utils;
 import Puppeteer from 'puppeteer';
-
 import { IMock, It, Mock, Times } from 'typemoq';
 import { getPromisableDynamicMock } from '../test-utilities/promisable-mock';
 import { authenticateBrowser } from './browser-authenticator';
 
-const setupPortalAuthenticationFlow = (
+const { log: apifyLog } = Apify.utils;
+
+function setupPortalAuthenticationFlow(
     pageMock: IMock<Puppeteer.Page>,
     keyboardMock: IMock<Puppeteer.Keyboard>,
     accountName: string,
-    accountPass: string,
+    accountPassword: string,
     loggerMock: IMock<typeof apifyLog>,
     success: boolean = true,
     times: number = 1,
-) => {
+): void {
     keyboardMock.setup((k) => k.press('Enter')).verifiable(Times.exactly(2 * times));
     pageMock.setup((p) => p.goto('https://portal.azure.com')).verifiable(Times.exactly(times));
     pageMock.setup((p) => p.waitForSelector(It.isAnyString())).verifiable(Times.exactly(2 * times));
     pageMock.setup((p) => p.type(It.isAnyString(), accountName)).verifiable(Times.exactly(times));
-    pageMock.setup((p) => p.type(It.isAnyString(), accountPass)).verifiable(Times.exactly(times));
+    pageMock.setup((p) => p.type(It.isAnyString(), accountPassword)).verifiable(Times.exactly(times));
     pageMock.setup((p) => p.click('#FormsAuthentication')).verifiable(Times.exactly(times));
     pageMock.setup((p) => p.waitForNavigation({ waitUntil: 'networkidle0' })).verifiable(Times.exactly(times));
     pageMock.setup((p) => p.$eval('#errorText', It.isAny())).returns(() => Promise.resolve(success ? '' : 'this is an error'));
@@ -37,7 +37,7 @@ const setupPortalAuthenticationFlow = (
         loggerMock.setup((l) => l.warning(It.isAnyString())).verifiable(Times.exactly(times - 1));
         loggerMock.setup((l) => l.error(It.isAnyString())).verifiable(Times.once());
     }
-};
+}
 
 describe(authenticateBrowser, () => {
     const accountName = 'testServiceAccount';
@@ -58,21 +58,20 @@ describe(authenticateBrowser, () => {
             .verifiable(Times.exactly(1));
     });
 
-    it('follows portal.azure.com authentication flow', async () => {
-        setupPortalAuthenticationFlow(pageMock, keyboardMock, accountName, accountPass, loggerMock);
-        await authenticateBrowser(browserMock.object, accountName, accountPass, loggerMock.object);
+    afterEach(() => {
         browserMock.verifyAll();
         pageMock.verifyAll();
         keyboardMock.verifyAll();
         loggerMock.verifyAll();
     });
 
+    it('follows portal.azure.com authentication flow', async () => {
+        setupPortalAuthenticationFlow(pageMock, keyboardMock, accountName, accountPass, loggerMock);
+        await authenticateBrowser(browserMock.object, accountName, accountPass, loggerMock.object);
+    });
+
     it('retries four times if it detects authentication failed', async () => {
         setupPortalAuthenticationFlow(pageMock, keyboardMock, accountName, accountPass, loggerMock, false, 5);
         await authenticateBrowser(browserMock.object, accountName, accountPass, loggerMock.object);
-        browserMock.verifyAll();
-        pageMock.verifyAll();
-        keyboardMock.verifyAll();
-        loggerMock.verifyAll();
     });
 });

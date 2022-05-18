@@ -2,42 +2,43 @@
 // Licensed under the MIT License.
 
 import Apify from 'apify';
-const { log: apifyLog } = Apify.utils;
 import * as Puppeteer from 'puppeteer';
 
-const attemptAuthentication = async (
+const { log: apifyLog } = Apify.utils;
+
+async function attemptAuthentication(
     page: Puppeteer.Page,
     accountName: string,
-    accountPass: string,
+    accountPassword: string,
     logger: typeof apifyLog,
     attemptNumber: number = 1,
-): Promise<void> => {
-    await page.goto('https://portal.azure.com');
+): Promise<void> {
+    const startingUrl = 'portal.azure.com';
+    await page.goto(`https://${startingUrl}`);
     await page.waitForSelector('input[name="loginfmt"]');
     await page.type('input[name="loginfmt"]', accountName);
     await page.keyboard.press('Enter');
     await page.waitForSelector('#FormsAuthentication');
     await page.click('#FormsAuthentication');
-    await page.type('input[type="password"]', accountPass);
-
+    await page.type('input[type="password"]', accountPassword);
     await page.keyboard.press('Enter');
     await page.waitForNavigation({ waitUntil: 'networkidle0' });
-    if (!page.url().match('^https://ms.portal.azure.com')) {
+    if (!page.url().match(`^https://ms.${startingUrl}`)) {
         const errorText: string = await page.$eval('#errorText', (el) => el.textContent);
         if (attemptNumber > 4) {
-            logger.error('Attempted authentication 5 times and ultimately failed.');
+            logger.error(`Attempted authentication ${attemptNumber} times and ultimately failed.`);
 
             return;
         }
         if (errorText !== '') {
             logger.warning(`Authentication failed with error: ${errorText}`);
         }
-        await attemptAuthentication(page, accountName, accountPass, logger, attemptNumber + 1);
+        await attemptAuthentication(page, accountName, accountPassword, logger, attemptNumber + 1);
 
         return;
     }
     logger.info('Authentication succeeded');
-};
+}
 
 export const authenticateBrowser = async (
     browser: Puppeteer.Browser,

@@ -24,5 +24,5 @@ export interface ScanArguments {
     debug?: boolean;
     singleWorker?: boolean;
     serviceAccountName?: string;
-    serviceAccountPass?: string;
+    serviceAccountPassword?: string;
 }

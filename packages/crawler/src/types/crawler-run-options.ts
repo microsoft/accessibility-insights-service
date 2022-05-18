@@ -22,5 +22,5 @@ export interface CrawlerRunOptions {
     axeSourcePath?: string;
     singleWorker?: boolean;
     serviceAccountName?: string;
-    serviceAccountPass?: string;
+    serviceAccountPassword?: string;
 }

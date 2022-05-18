@@ -104,7 +104,7 @@ export class PuppeteerCrawlerEngine {
                         await authenticateBrowser(
                             browser,
                             crawlerRunOptions.serviceAccountName,
-                            crawlerRunOptions.serviceAccountPass,
+                            crawlerRunOptions.serviceAccountPassword,
                             Apify.utils.log,
                         );
                     },
