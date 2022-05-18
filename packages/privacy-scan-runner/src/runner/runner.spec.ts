@@ -246,7 +246,7 @@ function setupPageScanProcessor(succeeded: boolean = true, error: Error = undefi
     }
 
     pageScanProcessorMock
-        .setup((o) => o.scan(scanMetadata))
+        .setup((o) => o.scan(scanMetadata, pageScanResultDbDocument))
         .returns(() => {
             if (error) {
                 return Promise.reject(error);

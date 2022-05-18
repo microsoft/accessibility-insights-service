@@ -5,23 +5,29 @@ import { System } from 'common';
 import { inject, injectable } from 'inversify';
 import { GlobalLogger } from 'logger';
 import { Page, PrivacyScanResult } from 'scanner-global-library';
+import { OnDemandPageScanResult } from 'storage-documents';
 import { PrivacyScanMetadata } from '../types/privacy-scan-metadata';
 import { PrivacyScanner } from './privacy-scanner';
+import { PageScanScheduler } from './page-scan-scheduler';
 
 @injectable()
 export class PageScanProcessor {
     public constructor(
         @inject(Page) private readonly page: Page,
         @inject(PrivacyScanner) private readonly privacyScanner: PrivacyScanner,
+        @inject(PageScanScheduler) private readonly pageScanScheduler: PageScanScheduler,
         @inject(GlobalLogger) private readonly logger: GlobalLogger,
     ) {}
 
-    public async scan(scanMetadata: PrivacyScanMetadata): Promise<PrivacyScanResult> {
+    public async scan(scanMetadata: PrivacyScanMetadata, pageScanResult: OnDemandPageScanResult): Promise<PrivacyScanResult> {
         let privacyScanResults: PrivacyScanResult;
         try {
             await this.openPage(scanMetadata.url);
 
             privacyScanResults = await this.runPrivacyScan();
+            if (scanMetadata.deepScan) {
+                await this.pageScanScheduler.schedulePageScan(pageScanResult);
+            }
         } finally {
             await this.closePage();
         }

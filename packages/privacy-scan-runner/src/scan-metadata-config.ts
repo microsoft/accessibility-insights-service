@@ -7,7 +7,14 @@ import { PrivacyScanMetadata } from './types/privacy-scan-metadata';
 
 @injectable()
 export class ScanMetadataConfig {
-    constructor(private readonly argvObj: Argv = yargs) {}
+    constructor(private readonly argvObj: Argv = yargs) {
+        argvObj.options({
+            deepScan: {
+                type: 'boolean',
+                alias: 'deepscan',
+            },
+        });
+    }
 
     public getConfig(): PrivacyScanMetadata {
         this.argvObj.env().demandOption(['id', 'url']);
