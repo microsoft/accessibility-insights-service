@@ -4,4 +4,5 @@
 export interface PrivacyScanMetadata {
     id: string;
     url: string;
+    deepScan: boolean;
 }

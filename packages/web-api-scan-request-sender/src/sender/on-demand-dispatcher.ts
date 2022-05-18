@@ -59,6 +59,7 @@ export class OnDemandDispatcher {
         let count = 0;
         await Promise.all(
             scanRequests.map(async (scanRequest) => {
+                // the message to be read by job manager and pass to task runner
                 const message = {
                     id: scanRequest.request.id,
                     url: scanRequest.request.url,

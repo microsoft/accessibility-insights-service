@@ -7,7 +7,7 @@ import { PrivacyScanResult } from 'scanner-global-library';
 import { OnDemandPageScanRunResultProvider, WebsiteScanResultProvider, ReportWriter, GeneratedReport } from 'service-library';
 import { OnDemandPageScanReport, OnDemandPageScanResult, OnDemandPageScanRunState, ScanError, WebsiteScanResult } from 'storage-documents';
 import { System, ServiceConfiguration, GuidGenerator } from 'common';
-import _ from 'lodash';
+import { isString, isEmpty } from 'lodash';
 import { ScanMetadataConfig } from '../scan-metadata-config';
 import { ScanRunnerTelemetryManager } from '../scan-runner-telemetry-manager';
 import { PageScanProcessor } from '../scanner/page-scan-processor';
@@ -44,7 +44,7 @@ export class Runner {
 
         this.telemetryManager.trackScanStarted(scanMetadata.id);
         try {
-            const privacyScanResults = await this.pageScanProcessor.scan(scanMetadata);
+            const privacyScanResults = await this.pageScanProcessor.scan(scanMetadata, pageScanResult);
             await this.processScanResult(privacyScanResults, pageScanResult);
         } catch (error) {
             const errorMessage = System.serializeError(error);
@@ -89,7 +89,7 @@ export class Runner {
         privacyScanResult: PrivacyScanResult,
         pageScanResult: OnDemandPageScanResult,
     ): Promise<PrivacyScanResult> {
-        if (_.isEmpty(privacyScanResult.error)) {
+        if (isEmpty(privacyScanResult.error)) {
             this.setRunResult(pageScanResult, 'completed');
             pageScanResult.scanResult = {
                 state: 'pass', // TBD
@@ -101,7 +101,7 @@ export class Runner {
             this.telemetryManager.trackBrowserScanFailed();
         }
 
-        if (!_.isEmpty(privacyScanResult.results)) {
+        if (!isEmpty(privacyScanResult.results)) {
             pageScanResult.reports = await this.generateScanReports(privacyScanResult);
             if (privacyScanResult.scannedUrl !== undefined) {
                 pageScanResult.scannedUrl = privacyScanResult.scannedUrl;
@@ -166,7 +166,7 @@ export class Runner {
             ...pageScanResult.run,
             state,
             timestamp: new Date().toJSON(),
-            error: _.isString(error) ? error.substring(0, 2048) : error,
+            error: isString(error) ? error.substring(0, 2048) : error,
         };
     }
 }
