@@ -131,9 +131,9 @@ function getScanArguments(): ScanArguments {
             },
             serviceAccountName: {
                 type: 'string',
-                describe: 'Use with --serviceAccountPass to crawl pages requiring authentication.',
+                describe: 'Use with --serviceAccountPassword to crawl pages requiring authentication.',
             },
-            serviceAccountPass: {
+            serviceAccountPassword: {
                 type: 'string',
                 describe: 'Use with --serviceAccountName to crawl pages requiring authentication.',
             },
