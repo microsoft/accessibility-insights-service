@@ -69,7 +69,7 @@ describe(AuthenticatorFactory, () => {
     };
 
     class TestableAuthenticatorFactory extends AuthenticatorFactory {
-        public injectCredentials(authenticationFlow: AuthenticationFlow, accountName: string, accountPassword: string ) {
+        public injectCredentials(authenticationFlow: AuthenticationFlow, accountName: string, accountPassword: string): AuthenticationFlow {
             return this.injectCredentialsIntoAuthFlow(authenticationFlow, accountName, accountPassword);
         }
     }

@@ -53,22 +53,23 @@ describe(Authenticator, () => {
         keyboardMock: IMock<Puppeteer.Keyboard>,
         success: boolean = true,
         times: number = 1,
-    ) {
+    ): void {
         pageMock.setup((o) => o.goto(flow.startingUrl)).verifiable(Times.exactly(times));
         const operationCounts = flow.steps.reduce((counts: { [operation: string]: number }, currentStep: AuthenticationStep) => {
             counts[currentStep.operation] = (counts[currentStep.operation] || 0) + 1;
+
             return counts;
         }, {});
-        keyboardMock.setup((o) => o.press('Enter')).verifiable(Times.exactly(operationCounts['enter'] * times));
+        keyboardMock.setup((o) => o.press('Enter')).verifiable(Times.exactly(operationCounts.enter * times));
         pageMock
             .setup((o) => o.waitForSelector(It.isAnyString()))
-            .verifiable(Times.exactly((operationCounts['type'] + operationCounts['click']) * times));
+            .verifiable(Times.exactly((operationCounts.type + operationCounts.click) * times));
         pageMock.setup((o) => o.type(It.isAnyString(), testAccountName)).verifiable(Times.exactly(times));
         pageMock.setup((o) => o.type(It.isAnyString(), testAccountPassword)).verifiable(Times.exactly(times));
-        pageMock.setup((o) => o.click(It.isAnyString())).verifiable(Times.exactly(operationCounts['click'] * times));
+        pageMock.setup((o) => o.click(It.isAnyString())).verifiable(Times.exactly(operationCounts.click * times));
         pageMock
             .setup((o) => o.waitForNavigation({ waitUntil: 'networkidle0' }))
-            .verifiable(Times.exactly(operationCounts['waitForNavigation'] * times));
+            .verifiable(Times.exactly(operationCounts.waitForNavigation * times));
         pageMock.setup((o) => o.$eval('#errorText', It.isAny())).returns(() => Promise.resolve(success ? '' : 'this is an error'));
         pageMock
             .setup((o) => o.url())
@@ -77,7 +78,7 @@ describe(Authenticator, () => {
         pageMock.setup((o) => o.close()).verifiable(Times.once());
     }
 
-    function setupLogger(loggerMock: IMock<typeof Apify.utils.log>, success: boolean = true, times: number = 1) {
+    function setupLogger(loggerMock: IMock<typeof Apify.utils.log>, success: boolean = true, times: number = 1): void {
         if (success) {
             loggerMock.setup((o) => o.info(It.isAnyString())).verifiable(Times.once());
         } else {

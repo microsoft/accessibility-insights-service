@@ -6,7 +6,10 @@ import * as Puppeteer from 'puppeteer';
 import { AuthenticationStep, AuthenticationFlow } from './authentication-flow';
 
 export class Authenticator {
-    public constructor(protected authenticationFlow: AuthenticationFlow, private logger: typeof Apify.utils.log = Apify.utils.log) {}
+    public constructor(
+        protected authenticationFlow: AuthenticationFlow,
+        private readonly logger: typeof Apify.utils.log = Apify.utils.log,
+    ) {}
 
     public async run(browser: Puppeteer.Browser): Promise<void> {
         const page = await browser.newPage();
@@ -37,7 +40,7 @@ export class Authenticator {
 
     private async attemptAuthentication(page: Puppeteer.Page, attemptNumber: number = 1): Promise<void> {
         await page.goto(this.authenticationFlow.startingUrl);
-        for (let step of this.authenticationFlow.steps) {
+        for (const step of this.authenticationFlow.steps) {
             await this.executeAuthenticationStep(page, step);
         }
 
