@@ -3,8 +3,8 @@
 
 import 'reflect-metadata';
 
-import Apify from 'apify';
-import { IMock, Mock } from 'typemoq';
+import Apify, { PuppeteerCrawlerOptions } from 'apify';
+import { IMock, It, Mock } from 'typemoq';
 import Puppeteer from 'puppeteer';
 import { PageProcessor, PageProcessorBase } from '../page-processors/page-processor-base';
 import { CrawlerRunOptions } from '../types/crawler-run-options';
@@ -12,6 +12,8 @@ import { ApifyRequestQueueProvider } from '../types/ioc-types';
 import { CrawlerConfiguration } from './crawler-configuration';
 import { PuppeteerCrawlerEngine } from './puppeteer-crawler-engine';
 import { CrawlerFactory } from './crawler-factory';
+import { AuthenticatorFactory } from '../authenticator/authenticator-factory';
+import { Authenticator } from '../authenticator/authenticator';
 
 /* eslint-disable
    @typescript-eslint/no-explicit-any,
@@ -34,6 +36,7 @@ describe(PuppeteerCrawlerEngine, () => {
     };
 
     let pageProcessorFactoryStub: () => PageProcessorBase;
+    let authenticatorFactoryMock: IMock<AuthenticatorFactory>;
     let crawlerRunOptions: CrawlerRunOptions;
     let crawlerFactoryMock: IMock<CrawlerFactory>;
     let requestQueueStub: Apify.RequestQueue;
@@ -42,12 +45,15 @@ describe(PuppeteerCrawlerEngine, () => {
     let baseCrawlerOptions: Apify.PuppeteerCrawlerOptions;
     let crawlerEngine: PuppeteerCrawlerEngine;
     let requestQueueProvider: ApifyRequestQueueProvider;
+    let authenticatorMock: IMock<Authenticator>;
 
     beforeEach(() => {
+        authenticatorFactoryMock = Mock.ofType<AuthenticatorFactory>();
         crawlerFactoryMock = Mock.ofType<CrawlerFactory>();
         requestQueueStub = {} as Apify.RequestQueue;
         puppeteerCrawlerMock = Mock.ofType<Apify.PuppeteerCrawler>();
         crawlerConfigurationMock = Mock.ofType(CrawlerConfiguration);
+        authenticatorMock = Mock.ofType<Authenticator>();
 
         crawlerRunOptions = {
             localOutputDir: 'localOutputDir',
@@ -94,6 +100,7 @@ describe(PuppeteerCrawlerEngine, () => {
             pageProcessorFactoryStub,
             requestQueueProvider,
             crawlerFactoryMock.object,
+            authenticatorFactoryMock.object,
             crawlerConfigurationMock.object,
         );
     });
@@ -136,10 +143,37 @@ describe(PuppeteerCrawlerEngine, () => {
         await crawlerEngine.start(crawlerRunOptions);
     });
 
+    it('Run crawler while serviceAccountName and serviceAccountPassword are set', async () => {
+        const testAccountName = 'testAccount@microsoft.com';
+        const testAccountPassword = 'testpassword';
+        crawlerRunOptions.serviceAccountName = testAccountName;
+        crawlerRunOptions.serviceAccountPassword = testAccountPassword;
+
+        authenticatorFactoryMock
+            .setup((o) => o.createAADAuthenticator(testAccountName, testAccountPassword))
+            .returns(() => authenticatorMock.object)
+            .verifiable();
+
+        crawlerFactoryMock
+            .setup((o) =>
+                o.createPuppeteerCrawler(
+                    It.is<PuppeteerCrawlerOptions>((options) => {
+                        return options.browserPoolOptions.browserPlugins[0].name === 'PuppeteerPlugin';
+                    }),
+                ),
+            )
+            .returns(() => puppeteerCrawlerMock.object)
+            .verifiable();
+
+        await crawlerEngine.start(crawlerRunOptions);
+    });
+
     afterEach(() => {
         crawlerFactoryMock.verifyAll();
         puppeteerCrawlerMock.verifyAll();
         crawlerConfigurationMock.verifyAll();
+        authenticatorFactoryMock.verifyAll();
+        authenticatorMock.verifyAll();
         expect(pageProcessorFactoryStub).toHaveBeenCalledTimes(1);
     });
 });

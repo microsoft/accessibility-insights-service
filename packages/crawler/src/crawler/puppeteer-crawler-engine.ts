@@ -2,11 +2,11 @@
 // Licensed under the MIT License.
 
 import Apify from 'apify';
-import { BrowserPoolOptions, PuppeteerPlugin, BrowserController } from 'browser-pool';
+import { BrowserController, BrowserPoolOptions, PuppeteerPlugin } from 'browser-pool';
 import { inject, injectable } from 'inversify';
 import { isEmpty } from 'lodash';
 import Puppeteer from 'puppeteer';
-import { authenticateBrowser } from '../authenticator/browser-authenticator';
+import { AuthenticatorFactory } from '../authenticator/authenticator-factory';
 import { CrawlerRunOptions } from '../types/crawler-run-options';
 import { ApifyRequestQueueProvider, crawlerIocTypes, PageProcessorFactory } from '../types/ioc-types';
 import { CrawlerConfiguration } from './crawler-configuration';
@@ -20,6 +20,7 @@ export class PuppeteerCrawlerEngine {
         @inject(crawlerIocTypes.PageProcessorFactory) private readonly pageProcessorFactory: PageProcessorFactory,
         @inject(crawlerIocTypes.ApifyRequestQueueProvider) protected readonly requestQueueProvider: ApifyRequestQueueProvider,
         @inject(CrawlerFactory) private readonly crawlerFactory: CrawlerFactory,
+        @inject(AuthenticatorFactory) private readonly authenticatorFactory: AuthenticatorFactory,
         @inject(CrawlerConfiguration) private readonly crawlerConfiguration: CrawlerConfiguration,
     ) {}
 
@@ -93,21 +94,17 @@ export class PuppeteerCrawlerEngine {
         }
 
         if (!isEmpty(crawlerRunOptions.serviceAccountName)) {
-            this.crawlerConfiguration.setSilentMode(false);
+            const authenticator = this.authenticatorFactory.createAADAuthenticator(
+                crawlerRunOptions.serviceAccountName,
+                crawlerRunOptions.serviceAccountPassword,
+            );
 
             puppeteerCrawlerOptions.browserPoolOptions = {
                 ...browserPoolOptions,
                 browserPlugins: [new PuppeteerPlugin(Puppeteer)],
                 postLaunchHooks: [
-                    async (pageId: string, browserController: BrowserController) => {
-                        const browser = browserController.browser as Puppeteer.Browser;
-                        await authenticateBrowser(
-                            browser,
-                            crawlerRunOptions.serviceAccountName,
-                            crawlerRunOptions.serviceAccountPassword,
-                            Apify.utils.log,
-                        );
-                    },
+                    (pageId: string, browserController: BrowserController) =>
+                        authenticator.run(browserController.browser as Puppeteer.Browser),
                 ],
             } as BrowserPoolOptions;
         }
