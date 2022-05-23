@@ -3,84 +3,22 @@
 
 import 'reflect-metadata';
 
-import { AuthenticationFlow, AuthenticationStep } from './authentication-flow';
+import { Authenticator } from './authenticator';
 import { AuthenticatorFactory } from './authenticator-factory';
+import { AzurePortalAuthentication } from './azure-portal-authenticator';
 
 describe(AuthenticatorFactory, () => {
     const testAccountName = 'testServiceAccount';
     const testAccountPassword = 'test123';
-    const baseAuthenticationSteps: AuthenticationStep[] = [
-        {
-            operation: 'type',
-            selector: '#username',
-            credential: 'name',
-        },
-        {
-            operation: 'click',
-            selector: '#1',
-        },
-        {
-            operation: 'waitForNavigation',
-        },
-        {
-            operation: 'type',
-            selector: '#password',
-            credential: 'password',
-        },
-        {
-            operation: 'enter',
-        },
-        {
-            operation: 'waitForNavigation',
-        },
-    ];
-    const credentialedAuthenticationSteps: AuthenticationStep[] = [
-        {
-            operation: 'type',
-            selector: '#username',
-            credential: 'name',
-            value: testAccountName,
-        },
-        {
-            operation: 'click',
-            selector: '#1',
-        },
-        {
-            operation: 'waitForNavigation',
-        },
-        {
-            operation: 'type',
-            selector: '#password',
-            credential: 'password',
-            value: testAccountPassword,
-        },
-        {
-            operation: 'enter',
-        },
-        {
-            operation: 'waitForNavigation',
-        },
-    ];
+    let authenticatorFactory: AuthenticatorFactory;
 
-    const baseAuthenticationFlow: AuthenticationFlow = {
-        startingUrl: 'https://example.com',
-        authenticatedUrl: 'https://example.com/en',
-        steps: baseAuthenticationSteps,
-    };
-
-    class TestableAuthenticatorFactory extends AuthenticatorFactory {
-        public injectCredentials(authenticationFlow: AuthenticationFlow, accountName: string, accountPassword: string): AuthenticationFlow {
-            return this.injectCredentialsIntoAuthFlow(authenticationFlow, accountName, accountPassword);
-        }
-    }
-
-    let authenticatorFactory: TestableAuthenticatorFactory;
     beforeEach(() => {
-        authenticatorFactory = new TestableAuthenticatorFactory();
+        authenticatorFactory = new AuthenticatorFactory();
     });
 
-    it('injectCredentialsIntoAuthFlow', async () => {
-        const authenticationFlow = authenticatorFactory.injectCredentials(baseAuthenticationFlow, testAccountName, testAccountPassword);
-        expect(authenticationFlow.steps).toEqual(credentialedAuthenticationSteps);
+    it('createAADAuthenticator uses azure portal authentication with supplied credentials', async () => {
+        const testAuthenticationMethod = new AzurePortalAuthentication(testAccountName, testAccountPassword);
+        const authenticator = authenticatorFactory.createAADAuthenticator(testAccountName, testAccountPassword);
+        expect(authenticator).toEqual(new Authenticator(testAuthenticationMethod));
     });
 });
