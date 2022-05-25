@@ -23,4 +23,6 @@ export interface ScanArguments {
     axeSourcePath?: string;
     debug?: boolean;
     singleWorker?: boolean;
+    serviceAccountName?: string;
+    serviceAccountPassword?: string;
 }
