@@ -30,7 +30,7 @@ function setupPortalAuthenticationFlow(
 
 describe(AzurePortalAuthentication, () => {
     const accountName = 'testServiceAccount';
-    const accountPassword = 'placeholder';
+    const accountPassword = 'Placeholder_test123';
     let pageMock: IMock<Puppeteer.Page>;
     let keyboardMock: IMock<Puppeteer.Keyboard>;
     let testSubject: AzurePortalAuthentication;
