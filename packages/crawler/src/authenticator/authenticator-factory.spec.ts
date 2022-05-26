@@ -9,7 +9,7 @@ import { AzurePortalAuthentication } from './azure-portal-authenticator';
 
 describe(AuthenticatorFactory, () => {
     const testAccountName = 'testServiceAccount';
-    const testAccountPassword = 'test123';
+    const testAccountPassword = 'placeholder';
     let authenticatorFactory: AuthenticatorFactory;
 
     beforeEach(() => {
