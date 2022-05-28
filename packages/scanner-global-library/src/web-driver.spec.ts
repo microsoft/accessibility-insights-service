@@ -9,6 +9,7 @@ import { IMock, It, Mock, Times, MockBehavior } from 'typemoq';
 import { PromiseUtils } from 'common';
 import { MockableLogger } from './test-utilities/mockable-logger';
 import { WebDriver } from './web-driver';
+import { ModHttpHeader } from './browser-extensions/mod-http-header';
 
 /* eslint-disable @typescript-eslint/consistent-type-assertions */
 
@@ -47,19 +48,21 @@ let puppeteerBrowserMock: PuppeteerBrowserMock;
 let puppeteerLaunchMock: IMock<puppeteerLaunch>;
 let puppeteerConnectMock: IMock<puppeteerConnect>;
 let promiseUtilsMock: IMock<PromiseUtils>;
+let modHttpHeaderMock: IMock<ModHttpHeader>;
 
 beforeEach(() => {
     puppeteerBrowserMock = new PuppeteerBrowserMock();
     puppeteerLaunchMock = Mock.ofType<puppeteerLaunch>();
     puppeteerConnectMock = Mock.ofType<puppeteerConnect>();
     promiseUtilsMock = Mock.ofType<PromiseUtils>();
+    modHttpHeaderMock = Mock.ofType<ModHttpHeader>();
 
     const puppeteer = Puppeteer;
     puppeteer.launch = puppeteerLaunchMock.object;
     puppeteer.connect = puppeteerConnectMock.object;
 
     loggerMock = Mock.ofType(MockableLogger);
-    testSubject = new WebDriver(promiseUtilsMock.object, loggerMock.object, puppeteer);
+    testSubject = new WebDriver(modHttpHeaderMock.object, promiseUtilsMock.object, loggerMock.object, puppeteer);
 });
 
 describe('WebDriver', () => {
