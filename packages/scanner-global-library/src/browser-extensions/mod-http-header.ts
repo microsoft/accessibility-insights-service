@@ -1,12 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import os from 'os';
-import fs from 'fs';
+import * as nodeOs from 'os';
+import * as nodeFs from 'fs';
 import { System } from 'common';
 import { injectable, inject, optional } from 'inversify';
 import { GlobalLogger, Logger } from 'logger';
 import Puppeteer from 'puppeteer';
+import { isEmpty } from 'lodash';
 import { defaultLaunchOptions } from '../puppeteer-options';
 
 /* eslint-disable security/detect-non-literal-fs-filename */
@@ -29,6 +30,8 @@ export class ModHttpHeader {
     constructor(
         @inject(GlobalLogger) @optional() private readonly logger: Logger,
         private readonly puppeteer: typeof Puppeteer = Puppeteer,
+        private readonly os: typeof nodeOs = nodeOs,
+        private readonly fs: typeof nodeFs = nodeFs,
     ) {}
 
     public async launchWithExtension(browserExecutablePath?: string): Promise<Puppeteer.Browser> {
@@ -65,14 +68,14 @@ export class ModHttpHeader {
     }
 
     private getManifest(path: string): Manifest {
-        const content = fs.readFileSync(path, { encoding: 'utf8' });
+        const content = this.fs.readFileSync(path, { encoding: 'utf8' });
 
-        return JSON.parse(content) as Manifest;
+        return (isEmpty(content) ? {} : JSON.parse(content)) as Manifest;
     }
 
     private getManifestFile(path: string, validator: (manifest: Manifest) => boolean): { manifest: Manifest; path: string } {
         const separator = process.platform === 'win32' ? '\\' : '/';
-        const entries = fs.readdirSync(path, { withFileTypes: true });
+        const entries = this.fs.readdirSync(path, { withFileTypes: true });
         const files = entries.filter((file) => !file.isDirectory() && file.name === 'manifest.json');
         const folders = entries.filter((folder) => folder.isDirectory());
         for (const file of files) {
@@ -97,7 +100,7 @@ export class ModHttpHeader {
             throw new Error(`Unsupported operating system platform: ${process.platform}`);
         }
 
-        const userId = os.userInfo().username;
+        const userId = this.os.userInfo().username;
         const extensionFolderMac = `/Users/${userId}/Library/Application Support/Google/Chrome/Default/Extensions`;
         const extensionFolderWin = `C:\\Users\\${userId}\\AppData\\Local\\Google\\Chrome\\User Data\\Default\\Extensions`;
         const extensionFolder = process.platform === 'win32' ? extensionFolderWin : extensionFolderMac;

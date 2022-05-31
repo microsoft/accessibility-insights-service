@@ -71,11 +71,19 @@ describe('WebDriver', () => {
         let browserProcessMock: IMock<ChildProcess>;
 
         beforeEach(() => {
+            process.env.MOD_HTTP_HEADER = undefined;
             pageMock = Mock.ofType<Puppeteer.Page>();
             puppeteerBrowserMock.browserPages = [pageMock.object];
 
             browserProcessMock = Mock.ofInstance({ kill: () => null } as ChildProcess, MockBehavior.Strict);
             puppeteerBrowserMock.childProcess = browserProcessMock.object;
+        });
+
+        afterEach(() => {
+            puppeteerLaunchMock.verifyAll();
+            puppeteerConnectMock.verifyAll();
+            promiseUtilsMock.verifyAll();
+            modHttpHeaderMock.verifyAll();
         });
 
         it('should close puppeteer browser', async () => {
@@ -93,7 +101,6 @@ describe('WebDriver', () => {
             await testSubject.close();
 
             expect(puppeteerBrowserMock.isClosed).toEqual(true);
-            pageMock.verifyAll();
         });
 
         it('should kill browser process if close times out', async () => {
@@ -106,8 +113,6 @@ describe('WebDriver', () => {
 
             await testSubject.launch();
             await testSubject.close();
-
-            browserProcessMock.verifyAll();
         });
 
         it('should do nothing if close times out and browser process is not found', async () => {
@@ -120,8 +125,6 @@ describe('WebDriver', () => {
 
             await testSubject.launch();
             await testSubject.close();
-
-            browserProcessMock.verifyAll();
         });
     });
 
@@ -134,7 +137,22 @@ describe('WebDriver', () => {
         const browser = await testSubject.launch();
 
         expect(browser).toEqual(puppeteerBrowserMock);
-        puppeteerLaunchMock.verifyAll();
+    });
+
+    it('should launch puppeteer browser with extension', async () => {
+        process.env.MOD_HTTP_HEADER = 'true';
+        puppeteerLaunchMock
+            .setup(async (o) => o(It.isAny()))
+            .returns(async () => Promise.resolve(<Puppeteer.Browser>(<unknown>puppeteerBrowserMock)))
+            .verifiable(Times.once());
+        modHttpHeaderMock
+            .setup((o) => o.launchWithExtension(It.isAny()))
+            .returns(() => Promise.resolve(<Puppeteer.Browser>(<unknown>puppeteerBrowserMock)))
+            .verifiable();
+
+        const browser = await testSubject.launch();
+
+        expect(browser).toEqual(puppeteerBrowserMock);
     });
 
     it('should connect to existing puppeteer browser', async () => {
@@ -146,7 +164,6 @@ describe('WebDriver', () => {
         const browser = await testSubject.connect('ws');
 
         expect(browser).toEqual(puppeteerBrowserMock);
-        puppeteerLaunchMock.verifyAll();
     });
 
     function setupPromiseUtils(simulateTimeout: boolean): void {

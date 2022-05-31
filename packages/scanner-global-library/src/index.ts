@@ -13,3 +13,4 @@ export { WebDriver } from './web-driver';
 export { PageNavigationHooks } from './page-navigation-hooks';
 export { PageNavigator, OnNavigationError } from './page-navigator';
 export { PrivacyScanResult } from './privacy-scan-result';
+export { ModHttpHeader } from './browser-extensions/mod-http-header';
