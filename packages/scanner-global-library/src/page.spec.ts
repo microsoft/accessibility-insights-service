@@ -311,6 +311,7 @@ describe(Page, () => {
         });
 
         it('scan page with redirect but no response chain', async () => {
+            page.requestUrl = 'request page';
             puppeteerRequestMock.reset();
             puppeteerRequestMock
                 .setup((o) => o.redirectChain())
@@ -322,12 +323,12 @@ describe(Page, () => {
                 results: {
                     ...privacyResults,
                     httpStatusCode: 200,
+                    seedUri: page.requestUrl,
                 },
                 pageResponseCode: 200,
                 scannedUrl: redirectUrl,
             } as PrivacyScanResult;
             loggerMock.setup((o) => o.logWarn(`Scanning performed on redirected page`, { redirectedUrl: redirectUrl })).verifiable();
-            page.requestUrl = 'request page';
 
             const privacyScanResults = await page.scanForPrivacy();
 

@@ -156,6 +156,7 @@ export class Page {
             results: {
                 ...privacyResult,
                 httpStatusCode: navigationStatusCode,
+                seedUri: this.requestUrl,
             },
             pageResponseCode: navigationStatusCode,
         };
@@ -176,7 +177,7 @@ export class Page {
         if (!isEmpty(failedConsentResults)) {
             const errorMessage = `Failed to collect cookies for ${failedConsentResults.length} test cases`;
             this.logger.logError(errorMessage, {
-                url: this.requestUrl,
+                url: this.page.url(),
                 failures: JSON.stringify(failedConsentResults),
             });
             scanResult.error = errorMessage;

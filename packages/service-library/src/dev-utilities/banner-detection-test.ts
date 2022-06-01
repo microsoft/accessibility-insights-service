@@ -48,7 +48,7 @@ const pageNavigator = new PageNavigator(
     pageResponseProcessor,
     new PageNavigationHooks(new PageConfigurator(), pageResponseProcessor, new PageHandler(logger)),
 );
-const privacyPageScanner = new PrivacyPageScanner(serviceConfig, new CookieCollector());
+const privacyPageScanner = new PrivacyPageScanner(serviceConfig, new CookieCollector(), logger);
 const page = new Page(webDriver, undefined, pageNavigator, privacyPageScanner, logger);
 
 function getArguments(): BannerDetectionTestArgs {
