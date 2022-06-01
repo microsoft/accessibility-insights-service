@@ -3960,10 +3960,10 @@ apify@^2.2.2:
     underscore "^1.13.0"
     ws "^7.5.3"
 
-applicationinsights@^2.3.1:
-  version "2.3.1"
-  resolved "https://registry.yarnpkg.com/applicationinsights/-/applicationinsights-2.3.1.tgz#b6908ea2da67bf3dc781da9b0994e1e042ca8b91"
-  integrity sha512-lhKd8EgmLKdDDhzB0jx8lcnbTAzedT63AH5DosnK4GQO3HgjRCC7AlUr86+aEwJEWfmfg0CxEdXDb9Rug/5XpQ==
+applicationinsights@^2.3.3:
+  version "2.3.3"
+  resolved "https://registry.yarnpkg.com/applicationinsights/-/applicationinsights-2.3.3.tgz#2c92aaccf85cc75c7212be1764cc51c55f10501c"
+  integrity sha512-Q4o6gexNhzukgmzzWYzXLa2gdJ6DhM+c35tw0lRNNjc/qldWxGHVxV65DMRYrQIp4vetLdCK7Pyd/dmEsGO4qA==
   dependencies:
     "@azure/core-http" "^2.2.3"
     "@opentelemetry/api" "^1.0.4"
@@ -9253,9 +9253,9 @@ lru-cache@^7.4.0:
   integrity sha512-AmXqneQZL3KZMIgBpaPTeI6pfwh+xQ2vutMsyqOu1TBdEXFZgpG/80wuJ531w2ZN7TI0/oc8CPxzh/DKQudZqg==
 
 lru-cache@^7.4.4, lru-cache@^7.5.1:
-  version "7.8.1"
-  resolved "https://registry.yarnpkg.com/lru-cache/-/lru-cache-7.8.1.tgz#68ee3f4807a57d2ba185b7fd90827d5c21ce82bb"
-  integrity sha512-E1v547OCgJvbvevfjgK9sNKIVXO96NnsTsFPBlg4ZxjhsJSODoH9lk8Bm0OxvHNm6Vm5Yqkl/1fErDxhYL8Skg==
+  version "7.10.1"
+  resolved "https://registry.yarnpkg.com/lru-cache/-/lru-cache-7.10.1.tgz#db577f42a94c168f676b638d15da8fb073448cab"
+  integrity sha512-BQuhQxPuRl79J5zSXRP+uNzPOyZw2oFI9JLRQ80XswSvg21KMKNtQza9eF42rfI/3Z40RvzBdXgziEkudzjo8A==
 
 luxon@^2.3.2:
   version "2.3.2"
