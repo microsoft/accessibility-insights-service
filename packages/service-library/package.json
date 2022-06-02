@@ -60,7 +60,7 @@
         "paralleljs": "^1.1.0",
         "p-limit": "^3.1.0",
         "privacy-scan-core": "1.0.0",
-        "puppeteer": "^10.0.0",
+        "puppeteer": "^14.2.1",
         "reflect-metadata": "^0.1.13",
         "sha.js": "^2.4.11",
         "scanner-global-library": "1.0.0",
