@@ -8,7 +8,8 @@ import { IMock, Mock } from 'typemoq';
 import * as Puppeteer from 'puppeteer';
 import { ConsentResult } from 'storage-documents';
 import * as MockDate from 'mockdate';
-import _ from 'lodash';
+import { clone } from 'lodash';
+import { GlobalLogger } from 'logger';
 import { PrivacyPageScanner } from './privacy-page-scanner';
 import { CookieCollector } from './cookie-collector';
 import { CookieScenario } from './cookie-scenarios';
@@ -27,7 +28,7 @@ describe(PrivacyPageScanner, () => {
         cookiesAfterConsent: [],
         cookiesBeforeConsent: [],
     };
-    const expectedCookieCollectionResults = [_.clone(consentResult), _.clone(consentResult)];
+    const expectedCookieCollectionResults = [clone(consentResult), clone(consentResult)];
     const cookieScenarios: CookieScenario[] = [
         {
             name: 'MSCC',
@@ -43,7 +44,7 @@ describe(PrivacyPageScanner, () => {
     let serviceConfigMock: IMock<ServiceConfiguration>;
     let puppeteerPageMock: IMock<Puppeteer.Page>;
     let cookieCollectorMock: IMock<CookieCollector>;
-
+    let loggerMock: IMock<GlobalLogger>;
     let testSubject: PrivacyPageScanner;
 
     beforeEach(() => {
@@ -52,9 +53,15 @@ describe(PrivacyPageScanner, () => {
         serviceConfigMock.setup((c) => c.getConfigValue('privacyScanConfig')).returns(async () => privacyConfig);
         puppeteerPageMock.setup((p) => p.url()).returns(() => url);
         cookieCollectorMock = Mock.ofType<CookieCollector>();
+        loggerMock = Mock.ofType<GlobalLogger>();
         MockDate.set(currentDate);
 
-        testSubject = new PrivacyPageScanner(serviceConfigMock.object, cookieCollectorMock.object, () => cookieScenarios);
+        testSubject = new PrivacyPageScanner(
+            serviceConfigMock.object,
+            cookieCollectorMock.object,
+            loggerMock.object,
+            () => cookieScenarios,
+        );
     });
 
     afterEach(() => {
@@ -78,7 +85,7 @@ describe(PrivacyPageScanner, () => {
         const expectedResult = createPageScanReport(false);
         puppeteerPageMock
             .setup((p) => p.waitForXPath(privacyConfig.bannerXPath, { timeout: privacyConfig.bannerDetectionTimeout }))
-            .throws(new Error())
+            .returns(() => Promise.reject({ name: 'TimeoutError' }))
             .verifiable();
         setupCollectCookies();
 
@@ -91,7 +98,6 @@ describe(PrivacyPageScanner, () => {
         return {
             finishDateTime: currentDate,
             navigationalUri: url,
-            seedUri: url,
             bannerDetectionXpathExpression: privacyConfig.bannerXPath,
             bannerDetected: hasBanner,
             cookieCollectionConsentResults: expectedCookieCollectionResults,

@@ -4,7 +4,7 @@
 import { PrivacyPageScanReport } from 'storage-documents';
 import * as Puppeteer from 'puppeteer';
 
-export type PrivacyResults = Omit<PrivacyPageScanReport, 'httpStatusCode'>;
+export type PrivacyResults = Omit<PrivacyPageScanReport, 'httpStatusCode' | 'seedUri'>;
 
 export type ReloadPageResponse = {
     success: boolean;
