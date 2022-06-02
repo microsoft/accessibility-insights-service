@@ -23,7 +23,7 @@ export class PrivacyPageScanner {
         const privacyScanConfig = await this.serviceConfig.getConfigValue('privacyScanConfig');
 
         const hasBanner = await this.hasBanner(page, privacyScanConfig);
-        this.logger?.logInfo(`Banner ${hasBanner ? ' was detected.' : ' was not detected.'}`, {
+        this.logger?.logInfo(`Privacy banner ${hasBanner ? ' was detected.' : ' was not detected.'}`, {
             bannerDetected: `${hasBanner}`,
             url: page.url(),
             bannerXPath: privacyScanConfig.bannerXPath,
