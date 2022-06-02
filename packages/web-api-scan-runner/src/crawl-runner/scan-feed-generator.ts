@@ -146,6 +146,6 @@ export class ScanFeedGenerator {
     private getUrlsToScan(websiteScanResult: WebsiteScanResult): string[] {
         const queuedUrls = websiteScanResult.pageScans.map((pageScan) => pageScan.url);
 
-        return pullAll([...websiteScanResult.knownPages], queuedUrls);
+        return pullAll([...(websiteScanResult?.knownPages ?? [])], queuedUrls);
     }
 }
