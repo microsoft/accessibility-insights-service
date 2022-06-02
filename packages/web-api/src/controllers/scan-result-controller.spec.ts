@@ -230,7 +230,7 @@ describe(ScanResultController, () => {
 
             scanResponseConverterMock
                 .setup((o) => o.getScanResultResponse(baseUrl, apiVersion, dbResponse, websiteScanResult))
-                .returns(() => scanClientResponseForDbResponse);
+                .returns(() => Promise.resolve(scanClientResponseForDbResponse));
 
             await scanResultController.handleRequest();
 

@@ -86,7 +86,8 @@ export class BatchScanResultController extends BaseScanResultController {
                     });
                 } else {
                     const websiteScanResult = await this.getWebsiteScanResult(pageScanResult);
-                    responses.push(this.getScanResultResponse(pageScanResult, websiteScanResult));
+                    const response = await this.getScanResultResponse(pageScanResult, websiteScanResult);
+                    responses.push(response);
                 }
             }),
         );
