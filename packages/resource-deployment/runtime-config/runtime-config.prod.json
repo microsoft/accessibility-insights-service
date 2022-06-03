@@ -3,7 +3,7 @@
         "sendNotification": true
     },
     "queueConfig": {
-        "maxQueueSize": 40
+        "maxQueueSize": 100
     },
     "restApiConfig": {
         "scanRequestProcessingDelayInSeconds": 300
@@ -13,6 +13,6 @@
     },
     "crawlConfig": {
         "deepScanDiscoveryLimit": 100,
-        "deepScanUpperLimit": 3000
+        "deepScanUpperLimit": 5000
     }
 }

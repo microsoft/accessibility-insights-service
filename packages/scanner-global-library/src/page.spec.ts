@@ -323,6 +323,7 @@ describe(Page, () => {
         });
 
         it('scan page with redirect but no response chain', async () => {
+            page.requestUrl = 'request page';
             puppeteerRequestMock.reset();
             puppeteerRequestMock
                 .setup((o) => o.redirectChain())
@@ -334,12 +335,12 @@ describe(Page, () => {
                 results: {
                     ...privacyResults,
                     httpStatusCode: 200,
+                    seedUri: page.requestUrl,
                 },
                 pageResponseCode: 200,
                 scannedUrl: redirectUrl,
             } as PrivacyScanResult;
             loggerMock.setup((o) => o.logWarn(`Scanning performed on redirected page`, { redirectedUrl: redirectUrl })).verifiable();
-            page.requestUrl = 'request page';
 
             const privacyScanResults = await page.scanForPrivacy();
 
@@ -352,19 +353,33 @@ describe(Page, () => {
             await expect(page.scanForPrivacy()).rejects.toThrow();
         });
 
-        it('Returns result with error if results contain an error in ConsentCollectionResults', async () => {
-            privacyResults.cookieCollectionConsentResults.push({
-                error: 'Error reloading page',
-            });
+        it('Returns result with error if privacy results contain an error', async () => {
+            privacyResults.cookieCollectionConsentResults.push(
+                ...[
+                    {
+                        error: {
+                            message: 'Error reloading page, run 1',
+                            statusCode: 404,
+                        },
+                    },
+                    {
+                        error: {
+                            message: 'Error reloading page, run 2',
+                            statusCode: 404,
+                        },
+                    },
+                ],
+            );
             puppeteerPageMock.setup((p) => p.url()).returns(() => url);
             simulatePageNavigation(puppeteerResponseMock.object);
+            const expectedError = privacyResults.cookieCollectionConsentResults.find((r) => r.error !== undefined).error as BrowserError;
             const expectedPrivacyScanResults = {
                 results: {
                     ...privacyResults,
-                    httpStatusCode: 200,
+                    httpStatusCode: expectedError.statusCode,
                 },
-                pageResponseCode: 200,
-                error: 'Failed to collect cookies for 1 test cases',
+                pageResponseCode: expectedError.statusCode,
+                error: expectedError,
             } as PrivacyScanResult;
 
             const privacyScanResults = await page.scanForPrivacy();

@@ -56,9 +56,10 @@ export class ScanResultController extends BaseScanResultController {
             }
         } else {
             const websiteScanResult = await this.getWebsiteScanResult(pageScanResult);
+            const body = await this.getScanResultResponse(pageScanResult, websiteScanResult);
             this.context.res = {
                 status: 200,
-                body: this.getScanResultResponse(pageScanResult, websiteScanResult),
+                body,
             };
             this.logger.logInfo('Scan result successfully fetched from a storage.');
         }

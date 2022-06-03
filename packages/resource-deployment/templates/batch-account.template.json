@@ -6,7 +6,7 @@
             "type": "string",
             "defaultValue": "[concat('allybatch',toLower(uniqueString(resourceGroup().id)))]",
             "metadata": {
-                "description": "Batch Account Name"
+                "description": "Batch account name"
             }
         },
         "keyVault": {
@@ -66,14 +66,14 @@
             }
         },
         "onDemandScanRequestPoolVmSize": {
-            "defaultValue": "standard_d1_v2",
+            "defaultValue": "standard_f8s_v2",
             "type": "string",
             "metadata": {
                 "description": "VM size for on-demand-scan-request-pool pool"
             }
         },
         "onDemandScanRequestPoolTaskSlotsPerNode": {
-            "defaultValue": "2",
+            "defaultValue": "8",
             "type": "string",
             "metadata": {
                 "description": "Task slots per node for on-demand-scan-request-pool pool"
@@ -87,14 +87,14 @@
             }
         },
         "onDemandUrlScanPoolVmSize": {
-            "defaultValue": "standard_d11_v2",
+            "defaultValue": "standard_f8s_v2",
             "type": "string",
             "metadata": {
                 "description": "VM size for on-demand-url-scan-pool pool"
             }
         },
         "onDemandUrlScanPoolTaskSlotsPerNode": {
-            "defaultValue": "4",
+            "defaultValue": "8",
             "type": "string",
             "metadata": {
                 "description": "Task slots per node for on-demand-url-scan-pool pool"
@@ -108,14 +108,14 @@
             }
         },
         "privacyScanPoolVmSize": {
-            "defaultValue": "standard_d11_v2",
+            "defaultValue": "standard_f8s_v2",
             "type": "string",
             "metadata": {
                 "description": "VM size for privacy-scan-pool pool"
             }
         },
         "privacyScanPoolTaskSlotsPerNode": {
-            "defaultValue": "4",
+            "defaultValue": "8",
             "type": "string",
             "metadata": {
                 "description": "Task slots per node for privacy-scan-pool pool"

@@ -18,7 +18,7 @@ export class WebsiteScanResultAggregator {
         sourceDocument: Partial<WebsiteScanResultBase>,
         targetDocument: Partial<WebsiteScanResultBase>,
     ): Partial<WebsiteScanResultBase> {
-        const propertiesToKeep = ['_etag', 'deepScanId', 'deepScanLimit'];
+        const propertiesToKeep = ['_etag', 'deepScanId', 'deepScanLimit', 'created'];
         const mergedDocument = _.mergeWith(targetDocument, sourceDocument, (target, source, key) => {
             // preserve the targe value if defined
             if (propertiesToKeep.includes(key)) {
@@ -46,6 +46,13 @@ export class WebsiteScanResultAggregator {
         return this.mergePartDocuments([sourceDocument], targetDocument);
     }
 
+    /**
+     * Merge DB documents. The merge runs in a separate node process. Creating a separate process is a time consuming operation.
+     * Passing a high number of documents to merge at once will reduce process creation operations when processing in batches.
+     *
+     * @param documents DB documents to merge.
+     * @param baseDocument The base DB document to merge with DB documents.
+     */
     public async mergePartDocuments(
         documents: Partial<WebsiteScanResultPart>[],
         baseDocument?: Partial<WebsiteScanResultPart>,
@@ -73,7 +80,7 @@ export class WebsiteScanResultAggregator {
     private async mergePartDocumentsParallel(documents: Partial<WebsiteScanResultPart>[]): Promise<Partial<WebsiteScanResultPart>[]> {
         const partResults = await new Promise<Partial<WebsiteScanResultPart>[][]>((resolve, reject) => {
             const parts = System.chunkArray(documents, WebsiteScanResultAggregator.parallelBlockSize);
-            const parallel = new Parallel(parts, { evalPath: `${__dirname}/eval.js` });
+            const parallel = new Parallel(parts, { evalPath: `${this.getDirName()}/eval.js` });
 
             parallel
                 .map((part: Partial<WebsiteScanResultPart>[]) => {
@@ -96,6 +103,19 @@ export class WebsiteScanResultAggregator {
         });
 
         return partResults.map((p) => p[0]);
+    }
+
+    private getDirName(): string {
+        const isDebugEnabled = /--debug|--inspect/i.test(process.execArgv.join(' '));
+        if (isDebugEnabled === true) {
+            const buildDir = '/dist/';
+            if (__dirname.lastIndexOf(buildDir) > -1) {
+                // return build directory
+                return __dirname.substring(0, __dirname.lastIndexOf(buildDir) + buildDir.length - 1);
+            }
+        }
+
+        return __dirname;
     }
 
     private mergeArray(target: any, source: any, key: string, supportedKeys: string[]): any {

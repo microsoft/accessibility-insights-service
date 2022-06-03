@@ -8,39 +8,53 @@ import yargs from 'yargs';
 import { System, HashGenerator } from 'common';
 import * as dotenv from 'dotenv';
 import pLimit from 'p-limit';
-import { PrivacyPageScanReport, ConsentResult, CookieByDomain, Cookie } from 'storage-documents';
-import { isEmpty } from 'lodash';
-import { PrivacyMetadata, UrlValidation, ViolationTypeEnum } from './wcp-types';
-import { downloadBlob, writeToFile, executeBatchInChunkExclusive } from './common-lib';
+import { PrivacyPageScanReport, CookieByDomain, Cookie, ConsentResult } from 'storage-documents';
+import { isEmpty, clone } from 'lodash';
+import * as nodeFetch from 'node-fetch';
+import { PrivacyMetadata, PrivacyValidationResult, CookieCollectionUrlResult, CookiesSession } from './wcp-types';
+import {
+    writeToFile,
+    executeBatchInChunkExclusive,
+    createGetHttpRequestForWebsec,
+    executeWithExpRetry,
+    ensureHttpResponse,
+} from './common-lib';
 
 /* eslint-disable @typescript-eslint/no-explicit-any, security/detect-non-literal-fs-filename */
 
 type ClientOperation = 'compare-validation' | 'get-validation';
-type MissingFromReport = 'accessibility' | 'privacy';
+type MissingFromReport = 'accessibility' | 'websec';
+type ScenarioStep = 'beforeConsent' | 'afterConsent';
 
 interface ClientArgs {
     operation: ClientOperation;
-    azureTenantId: string;
-    azureClientId: string;
-    azureClientSecret: string;
     dataFolder: string;
     metadataFile: string;
     azureStorageName: string;
     azureStorageKey: string;
     azureBlobContainerName: string;
+    websecAppKey: string;
+    privacyServiceBaseUrl: string;
+}
+
+interface ReportMismatch {
+    url: string;
+    fileHash: string;
+    bannerDetectionMismatch: boolean;
+    scenariosMismatch: ScenarioMismatch[];
+}
+
+interface ScenarioMismatch {
+    scenario: string;
+    isMissing?: boolean;
+    cookiesMismatch?: CookieMismatch[];
 }
 
 interface CookieMismatch {
     missingFrom: MissingFromReport;
+    step: ScenarioStep;
     name: string;
     domain: string;
-}
-
-interface ValidationDiff {
-    url: string;
-    fileHash: string;
-    bannerDetectionMismatch: boolean;
-    cookieMismatch: CookieMismatch[];
 }
 
 const maxConcurrencyLimit = 10;
@@ -50,6 +64,12 @@ const hashGenerator = new HashGenerator();
 const getDataFolderName = () => `${__dirname}/${clientArgs.dataFolder}`;
 const getMetadataFileName = () => `${getDataFolderName()}/${clientArgs.metadataFile}`;
 const getFilePath = (fileName: string) => `${getDataFolderName()}/${fileName}`;
+const getPrivacyValidationUrl = (link: string) => {
+    const segments = link.split('/');
+    const id = segments[segments.length - 1];
+
+    return new URL(`${clientArgs.privacyServiceBaseUrl}/${id}`);
+};
 
 async function main(): Promise<void> {
     clientArgs = getClientArguments();
@@ -70,6 +90,8 @@ async function dispatchOperation(): Promise<void> {
     }
 }
 
+let totalReports = 0;
+let mismatchReports = 0;
 async function comparePrivacyValidation(): Promise<void> {
     const fn = (validations: string[]) => {
         return Promise.resolve(validations.map(comparePrivacyValidationImpl));
@@ -77,78 +99,143 @@ async function comparePrivacyValidation(): Promise<void> {
 
     const wcpValidationList = getPrivacyValidationList();
     await executeBatchInChunkExclusive(fn, wcpValidationList);
+    console.log(`Total Reports: ${totalReports}, Mismatch Reports: ${mismatchReports}`);
 }
 
 function comparePrivacyValidationImpl(wcpValidationFileName: string): void {
-    const wcpValidation = readValidationReportFile(wcpValidationFileName);
-    const urlHash = hashGenerator.generateBase64Hash(wcpValidation.seedUri);
-    const aiValidationFileName = `${urlHash}.ai.report.json`;
-    const aiValidation = readValidationReportFile(aiValidationFileName);
-    if (aiValidation === undefined) {
-        console.log(`The AI validation report file not found. File: ${aiValidationFileName} URL: ${wcpValidation.seedUri}`);
+    const websecReport = readValidationReportFile(wcpValidationFileName);
+    const urlHash = hashGenerator.generateBase64Hash(websecReport.seedUri);
+    const aiReportFileName = `${urlHash}.ai.report.json`;
+    const aiReport = readValidationReportFile(aiReportFileName);
+    if (aiReport === undefined) {
+        console.log(`The AI validation report file not found. File: ${aiReportFileName} URL: ${websecReport.seedUri}`);
     } else {
-        const cookieDiff = getCookieDiff(aiValidation, wcpValidation);
-        if (cookieDiff.length > 0 || aiValidation.bannerDetected !== wcpValidation.bannerDetected) {
-            const validationDiff = {
-                url: wcpValidation.seedUri,
-                fileHash: urlHash,
-                bannerDetectionMismatch: aiValidation.bannerDetected !== wcpValidation.bannerDetected,
-                cookieMismatch: cookieDiff,
-            } as ValidationDiff;
-
-            writeToFile(validationDiff, getDataFolderName(), `${urlHash}.diff`);
+        totalReports++;
+        const reportMismatch = comparePrivacyReport(websecReport, aiReport);
+        if (
+            reportMismatch.scenariosMismatch.map((s) => s.cookiesMismatch).flat().length > 0 ||
+            reportMismatch.bannerDetectionMismatch === true
+        ) {
+            mismatchReports++;
+            reportMismatch.fileHash = aiReportFileName;
+            writeToFile(reportMismatch, getDataFolderName(), `${urlHash}.diff`);
+            writeStatFile(reportMismatch);
         }
-        console.log(`Compared website validation for ${wcpValidation.seedUri}`);
+        console.log(`Compared website validation for ${websecReport.seedUri}`);
     }
 }
 
-function getCookieDiff(aiReport: PrivacyPageScanReport, wcpReport: PrivacyPageScanReport): CookieMismatch[] {
-    const getAllCookie = (source: PrivacyPageScanReport): Cookie[] => {
-        const allCookie: Cookie[] = [];
-        if (source.cookieCollectionConsentResults) {
-            source.cookieCollectionConsentResults.map((cookie) => {
-                if (cookie.cookiesBeforeConsent) {
-                    cookie.cookiesBeforeConsent.map((d) => {
-                        if (d.cookies) {
-                            allCookie.push(...d.cookies);
-                        }
-                    });
-                }
-                if (cookie.cookiesAfterConsent) {
-                    cookie.cookiesAfterConsent.map((d) => {
-                        if (d.cookies) {
-                            allCookie.push(...d.cookies);
-                        }
-                    });
-                }
-            });
-        }
+function writeStatFile(reportMismatch: ReportMismatch): void {
+    const uniqueCookies = flatCookieMismatch(reportMismatch);
+    const missingCookies = uniqueCookies.filter((c) => c.missingFrom === 'accessibility');
+    const newCookies = uniqueCookies.filter((c) => c.missingFrom === 'websec');
 
-        return allCookie;
+    // URL BannerDetectionMismatch NewCookies MissingCookies FileName
+    const headerLine = `URL\tBannerDetectionMismatch\tNewCookies\tMissingCookies\tFileName`;
+    const fileLine = `${reportMismatch.url}\t${reportMismatch.bannerDetectionMismatch}\t${newCookies.length}\t${missingCookies.length}\t${reportMismatch.fileHash}`;
+
+    const filePath = `${getDataFolderName()}/!reportComparison.txt`;
+    if (!fs.existsSync(getDataFolderName())) {
+        fs.mkdirSync(getDataFolderName());
+    }
+    if (!fs.existsSync(filePath)) {
+        fs.writeFileSync(filePath, `${headerLine}\n`);
+    }
+    fs.appendFileSync(filePath, `${fileLine}\n`);
+}
+
+function flatCookieMismatch(reportMismatch: ReportMismatch): CookieMismatch[] {
+    const allCookies = reportMismatch.scenariosMismatch
+        .map((scenario) =>
+            scenario.cookiesMismatch.map((c) => {
+                return { ...c, key: `${c.domain}:${c.name}:${c.missingFrom}` };
+            }),
+        )
+        .flat();
+
+    const key = 'key';
+    const uniqueCookies = [...new Map(allCookies.map((item) => [item[key], item])).values()];
+
+    return uniqueCookies;
+}
+
+function comparePrivacyReport(websecReport: PrivacyPageScanReport, aiReport: PrivacyPageScanReport): ReportMismatch {
+    const scenariosMismatch = websecReport.cookieCollectionConsentResults.map((websecScenario) => {
+        return compareScenario(websecScenario, aiReport.cookieCollectionConsentResults);
+    });
+
+    return {
+        url: websecReport.seedUri,
+        fileHash: '',
+        bannerDetectionMismatch: websecReport.bannerDetected !== aiReport.bannerDetected,
+        scenariosMismatch,
     };
+}
 
-    const aiReportCookie = getAllCookie(aiReport);
-    const wcpReportCookie = getAllCookie(wcpReport);
-    const missingCookieFromAi = wcpReportCookie
-        .filter((w) => !aiReportCookie.some((a) => normalizeDomain(a.domain) === normalizeDomain(w.domain) && a.name === w.name))
+function compareScenario(websecConsentResult: ConsentResult, aiConsentResults: ConsentResult[]): ScenarioMismatch {
+    const aiConsentResult = aiConsentResults.find((r) => r.cookiesUsedForConsent === websecConsentResult.cookiesUsedForConsent);
+    if (aiConsentResult === undefined) {
+        return {
+            scenario: websecConsentResult.cookiesUsedForConsent,
+            isMissing: true,
+        };
+    }
+
+    const cookieMismatchBeforeConsent = compareCookies(
+        'beforeConsent',
+        websecConsentResult.cookiesBeforeConsent,
+        aiConsentResult.cookiesBeforeConsent,
+    );
+    const cookieMismatchAfterConsent = compareCookies(
+        'afterConsent',
+        websecConsentResult.cookiesAfterConsent,
+        aiConsentResult.cookiesAfterConsent,
+    );
+
+    return {
+        scenario: websecConsentResult.cookiesUsedForConsent,
+        cookiesMismatch: [...cookieMismatchBeforeConsent, ...cookieMismatchAfterConsent],
+    };
+}
+
+function compareCookies(
+    scenarioStep: ScenarioStep,
+    websecReportCookie: CookieByDomain[],
+    aiReportCookie: CookieByDomain[],
+): CookieMismatch[] {
+    const websecReportCookieFlat = flatCookieByDomain(websecReportCookie);
+    const aiReportCookieFlat = flatCookieByDomain(aiReportCookie);
+
+    const missingCookieFromAi = websecReportCookieFlat
+        .filter((w) => !aiReportCookieFlat.some((a) => normalizeDomain(a.domain) === normalizeDomain(w.domain) && a.name === w.name))
         .map((r) => {
             return {
                 missingFrom: 'accessibility',
+                step: scenarioStep,
                 domain: r.domain,
                 name: r.name,
             } as CookieMismatch;
         });
-    const missingCookieFromWcp = aiReportCookie
-        .filter((w) => !wcpReportCookie.some((a) => normalizeDomain(a.domain) === normalizeDomain(w.domain) && a.name === w.name))
+    const missingCookieFromWebsec = aiReportCookieFlat
+        .filter((w) => !websecReportCookieFlat.some((a) => normalizeDomain(a.domain) === normalizeDomain(w.domain) && a.name === w.name))
         .map((r) => {
             return {
-                missingFrom: 'privacy',
+                missingFrom: 'websec',
+                step: scenarioStep,
                 domain: r.domain,
                 name: r.name,
             } as CookieMismatch;
         });
 
-    return [...missingCookieFromAi, ...missingCookieFromWcp];
+    return [...missingCookieFromAi, ...missingCookieFromWebsec];
+}
+
+function flatCookieByDomain(cookieByDomain: CookieByDomain[]): Cookie[] {
+    return cookieByDomain
+        .map((d) => {
+            return d.cookies;
+        })
+        .flat();
 }
 
 function normalizeDomain(domain: string): string {
@@ -167,19 +254,23 @@ function normalizeDomain(domain: string): string {
 }
 
 async function exportPrivacyValidation(): Promise<void> {
-    const privacyMetadata = readMetadataFile();
-    await parsePrivacyMetadata(privacyMetadata);
+    const fn = (metadata: PrivacyMetadata[]) => {
+        return downloadPrivacyValidationResult(metadata);
+    };
+
+    const privacyMetadata = readPrivacyMetadataFile();
+    await executeBatchInChunkExclusive(fn, privacyMetadata);
 }
 
-async function parsePrivacyMetadata(privacyMetadata: PrivacyMetadata[]): Promise<void> {
+async function downloadPrivacyValidationResult(privacyMetadata: PrivacyMetadata[]): Promise<void> {
     const asyncLimit = pLimit(maxConcurrencyLimit);
     await Promise.all(
         await asyncLimit(async () => {
             return privacyMetadata.map(async (metadata) => {
                 try {
-                    const urlValidation = await downloadPrivacyBlob(metadata.ValidationResultBlobName);
-                    appendUrlToList(urlValidation);
-                    writeUrlValidation(urlValidation);
+                    const validationResult = await sendGetPrivacyValidationResult(metadata.ScanResultLink, clientArgs.websecAppKey);
+                    appendUrlToList(validationResult.CookieCollectionUrlResults);
+                    writeUrlValidation(validationResult);
                     console.log(`Parsed website validation for '${metadata.Name}'`);
                 } catch (error) {
                     console.log('Error while parsing privacy metadata: ', System.serializeError(error));
@@ -189,34 +280,29 @@ async function parsePrivacyMetadata(privacyMetadata: PrivacyMetadata[]): Promise
     );
 }
 
-async function downloadPrivacyBlob(blobName: string): Promise<UrlValidation[]> {
-    const blob = await downloadBlob<UrlValidation[]>(
-        clientArgs.azureStorageName,
-        clientArgs.azureBlobContainerName,
-        blobName,
-        clientArgs.azureStorageKey,
+async function sendGetPrivacyValidationResult(link: string, appKey: string): Promise<PrivacyValidationResult> {
+    const httpRequest = createGetHttpRequestForWebsec(appKey);
+    const httpResponse = await executeWithExpRetry<nodeFetch.Response>(async () =>
+        nodeFetch.default(getPrivacyValidationUrl(link), httpRequest),
     );
-    if (blob === undefined) {
-        console.log(`The blob '${blobName}' not found.`);
+    await ensureHttpResponse(httpResponse);
+    const body = await httpResponse.json();
 
-        return undefined;
-    }
-
-    return blob;
+    return body;
 }
 
-function appendUrlToList(urlValidation: UrlValidation[]): void {
+function appendUrlToList(cookieCollectionUrlResults: CookieCollectionUrlResult[]): void {
     if (!fs.existsSync(getDataFolderName())) {
         fs.mkdirSync(getDataFolderName());
     }
 
     const filePath = `${getDataFolderName()}/urls.txt`;
-    urlValidation.map((validation) => {
-        fs.appendFileSync(filePath, `${validation.Url}\n`);
+    cookieCollectionUrlResults.map((validation) => {
+        fs.appendFileSync(filePath, `${validation.SeedUri}\n`);
     });
 }
 
-function readMetadataFile(): PrivacyMetadata[] {
+function readPrivacyMetadataFile(): PrivacyMetadata[] {
     if (!fs.existsSync(getMetadataFileName())) {
         console.log(`File not found ${getMetadataFileName()}`);
 
@@ -226,54 +312,54 @@ function readMetadataFile(): PrivacyMetadata[] {
     return JSON.parse(fs.readFileSync(getMetadataFileName(), { encoding: 'utf-8' })) as PrivacyMetadata[];
 }
 
-function writeUrlValidation(urlValidation: UrlValidation[]): void {
-    urlValidation.map((validation) => {
-        const urlHash = hashGenerator.generateBase64Hash(validation.Url);
-        writeToFile(validation, getDataFolderName(), `${urlHash}.wcp.validation`);
+function writeUrlValidation(privacyValidationResult: PrivacyValidationResult): void {
+    const privacyValidationResultClone = clone(privacyValidationResult);
 
-        const privacyPageScanReport = convertToPrivacyPageScanReport(validation);
+    privacyValidationResult.CookieCollectionUrlResults.map((validation) => {
+        privacyValidationResultClone.CookieCollectionUrlResults = [validation];
+        const urlHash = hashGenerator.generateBase64Hash(validation.SeedUri);
+        writeToFile(privacyValidationResultClone, getDataFolderName(), `${urlHash}.wcp.validation`);
+
+        const privacyPageScanReport = convertToPrivacyPageScanReport(validation, privacyValidationResultClone);
         writeToFile(privacyPageScanReport, getDataFolderName(), `${urlHash}.wcp.report`);
     });
 }
 
-function convertToPrivacyPageScanReport(urlValidation: UrlValidation): PrivacyPageScanReport {
-    interface ConsentResultByKey {
-        key: string;
-        consentResult: ConsentResult;
-    }
-    const consentResult: ConsentResultByKey[] = [];
+function convertToPrivacyPageScanReport(
+    cookieCollectionUrlResult: CookieCollectionUrlResult,
+    privacyValidationResult: PrivacyValidationResult,
+): PrivacyPageScanReport {
+    const getCookieByDomain = (cookiesSessions: CookiesSession[]): CookieByDomain[] => {
+        return cookiesSessions.map((cookie) => {
+            return {
+                domain: cookie.Domain,
+                cookies: cookie.Cookies.map((c) => {
+                    return {
+                        name: c.Name,
+                        domain: c.Domain,
+                        expires: c.Expires,
+                    };
+                }),
+            };
+        });
+    };
 
-    urlValidation.CookieValidations.map((cookieValidation) => {
-        const cookie: CookieByDomain = {
-            domain: cookieValidation.ScanCookie.Domain,
-            cookies: [
-                {
-                    name: cookieValidation.ScanCookie.Name,
-                    domain: cookieValidation.ScanCookie.Domain,
-                },
-            ],
+    const cookieCollectionConsentResults = cookieCollectionUrlResult.CookieCollectionConsentResults.map((scenario) => {
+        return {
+            cookiesUsedForConsent: scenario.CookiesUsedForConsent,
+            cookiesBeforeConsent: getCookieByDomain(scenario.CookiesBeforeConsent),
+            cookiesAfterConsent: getCookieByDomain(scenario.CookiesAfterConsent),
         };
-
-        const key = `${cookieValidation.ScanCookie.Domain}:${cookieValidation.ScanCookie.Name}:${cookieValidation.ViolationType}`;
-        if (!consentResult.some((r) => r.key === key)) {
-            consentResult.push({
-                key,
-                consentResult: {
-                    violation: ViolationTypeEnum[cookieValidation.ViolationType as number] as string,
-                    cookiesAfterConsent: [cookie],
-                } as ConsentResult,
-            });
-        }
     });
 
     return {
-        navigationalUri: urlValidation.Url,
-        seedUri: urlValidation.Url,
-        finishDateTime: new Date(),
-        bannerDetectionXpathExpression: urlValidation.BannerXPath,
-        bannerDetected: urlValidation.BannerStatus === 1,
-        httpStatusCode: urlValidation.HttpStatusCode,
-        cookieCollectionConsentResults: consentResult.map((r) => r.consentResult),
+        navigationalUri: cookieCollectionUrlResult.NavigationalUri,
+        seedUri: cookieCollectionUrlResult.SeedUri,
+        finishDateTime: privacyValidationResult.FinishDateTime,
+        bannerDetectionXpathExpression: cookieCollectionUrlResult.BannerDetectionXpathExpression,
+        bannerDetected: cookieCollectionUrlResult.BannerDetected,
+        httpStatusCode: cookieCollectionUrlResult.HttpStatusCode,
+        cookieCollectionConsentResults,
     };
 }
 
@@ -316,36 +402,6 @@ function getClientArguments(): ClientArgs {
                 type: 'string',
                 describe: 'The parser operation.',
             },
-            azureTenantId: {
-                type: 'string',
-                describe: 'The Azure tenant id.',
-                alias: ['azuretenantid', 'azure-tenant-id', 'wcp-azure-tenant-id'],
-                coerce: (arg) => {
-                    process.env.AZURE_TENANT_ID = arg;
-
-                    return arg;
-                },
-            },
-            azureClientId: {
-                type: 'string',
-                describe: 'The Azure client id.',
-                alias: ['azureclientid', 'azure-client-id', 'wcp-azure-client-id'],
-                coerce: (arg) => {
-                    process.env.AZURE_CLIENT_ID = arg;
-
-                    return arg;
-                },
-            },
-            azureClientSecret: {
-                type: 'string',
-                describe: 'The Azure client secret.',
-                alias: ['azureclientsecret', 'azure-client-secret', 'wcp-azure-client-secret'],
-                coerce: (arg) => {
-                    process.env.AZURE_CLIENT_SECRET = arg;
-
-                    return arg;
-                },
-            },
             dataFolder: {
                 type: 'string',
                 describe: 'The data folder relative location.',
@@ -371,6 +427,16 @@ function getClientArguments(): ClientArgs {
                 type: 'string',
                 describe: 'The privacy blob container name.',
                 alias: ['azureblobcontainername', 'wcp-azure-blob-container-name'],
+            },
+            websecAppKey: {
+                type: 'string',
+                describe: 'The websec app key.',
+                alias: ['websecappkey', 'websec-app-key'],
+            },
+            privacyServiceBaseUrl: {
+                type: 'string',
+                describe: 'The privacy service base URL.',
+                alias: ['privacyservicebaseurl', 'privacy-service-base-url'],
             },
         })
         .describe('help', 'Show help').argv as unknown as ClientArgs;

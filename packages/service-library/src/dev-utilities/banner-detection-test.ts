@@ -14,6 +14,7 @@ import {
     PageNavigator,
     PageResponseProcessor,
     WebDriver,
+    ModHttpHeader,
 } from 'scanner-global-library';
 import { ConsoleLoggerClient, GlobalLogger } from 'logger';
 import { PromiseUtils, ServiceConfiguration } from 'common';
@@ -40,13 +41,14 @@ type BannerDetectionResults = {
 
 const serviceConfig = new ServiceConfiguration();
 const logger = new GlobalLogger([new ConsoleLoggerClient(serviceConfig, console)], process);
-const webDriver = new WebDriver(new PromiseUtils(), logger);
+const modHttpHeader = new ModHttpHeader(logger);
+const webDriver = new WebDriver(modHttpHeader, new PromiseUtils(), logger);
 const pageResponseProcessor = new PageResponseProcessor();
 const pageNavigator = new PageNavigator(
     pageResponseProcessor,
     new PageNavigationHooks(new PageConfigurator(), pageResponseProcessor, new PageHandler(logger)),
 );
-const privacyPageScanner = new PrivacyPageScanner(serviceConfig, new CookieCollector());
+const privacyPageScanner = new PrivacyPageScanner(serviceConfig, new CookieCollector(), logger);
 const page = new Page(webDriver, undefined, pageNavigator, privacyPageScanner, logger);
 
 function getArguments(): BannerDetectionTestArgs {

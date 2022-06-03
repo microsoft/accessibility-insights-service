@@ -2,10 +2,11 @@
 // Licensed under the MIT License.
 
 import Apify from 'apify';
-import { PuppeteerPlugin } from 'browser-pool';
+import { BrowserController, BrowserPoolOptions, PuppeteerPlugin } from 'browser-pool';
 import { inject, injectable } from 'inversify';
 import { isEmpty } from 'lodash';
 import Puppeteer from 'puppeteer';
+import { AuthenticatorFactory } from '../authenticator/authenticator-factory';
 import { CrawlerRunOptions } from '../types/crawler-run-options';
 import { ApifyRequestQueueProvider, crawlerIocTypes, PageProcessorFactory } from '../types/ioc-types';
 import { CrawlerConfiguration } from './crawler-configuration';
@@ -19,6 +20,7 @@ export class PuppeteerCrawlerEngine {
         @inject(crawlerIocTypes.PageProcessorFactory) private readonly pageProcessorFactory: PageProcessorFactory,
         @inject(crawlerIocTypes.ApifyRequestQueueProvider) protected readonly requestQueueProvider: ApifyRequestQueueProvider,
         @inject(CrawlerFactory) private readonly crawlerFactory: CrawlerFactory,
+        @inject(AuthenticatorFactory) private readonly authenticatorFactory: AuthenticatorFactory,
         @inject(CrawlerConfiguration) private readonly crawlerConfiguration: CrawlerConfiguration,
     ) {}
 
@@ -66,6 +68,7 @@ export class PuppeteerCrawlerEngine {
             puppeteerCrawlerOptions.maxConcurrency = 1;
         }
 
+        let browserPoolOptions: BrowserPoolOptions;
         if (crawlerRunOptions.debug === true) {
             this.crawlerConfiguration.setSilentMode(false);
 
@@ -87,9 +90,24 @@ export class PuppeteerCrawlerEngine {
                 operationTimeoutSecs: 3600,
                 closeInactiveBrowserAfterSecs: 3600,
                 maxOpenPagesPerBrowser: 1,
-            };
+            } as BrowserPoolOptions;
         }
 
+        if (!isEmpty(crawlerRunOptions.serviceAccountName)) {
+            const authenticator = this.authenticatorFactory.createAADAuthenticator(
+                crawlerRunOptions.serviceAccountName,
+                crawlerRunOptions.serviceAccountPassword,
+            );
+
+            puppeteerCrawlerOptions.browserPoolOptions = {
+                ...browserPoolOptions,
+                browserPlugins: [new PuppeteerPlugin(Puppeteer)],
+                postLaunchHooks: [
+                    (pageId: string, browserController: BrowserController) =>
+                        authenticator.run(browserController.browser as Puppeteer.Browser),
+                ],
+            } as BrowserPoolOptions;
+        }
         const crawler = this.crawlerFactory.createPuppeteerCrawler(puppeteerCrawlerOptions);
         await crawler.run();
     }

@@ -6,10 +6,15 @@
         "environmentDefinition": "canary"
     },
     "queueConfig": {
-        "messageVisibilityTimeoutInSeconds": 300
+        "messageVisibilityTimeoutInSeconds": 300,
+        "maxQueueSize": 50
     },
     "scanConfig": {
         "failedScanRetryIntervalInMinutes": 15,
         "maxFailedScanRetryCount": 1
+    },
+    "crawlConfig": {
+        "deepScanDiscoveryLimit": 10,
+        "deepScanUpperLimit": 5000
     }
 }

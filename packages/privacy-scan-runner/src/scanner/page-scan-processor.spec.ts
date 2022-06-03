@@ -8,27 +8,39 @@ import { GlobalLogger } from 'logger';
 import { PrivacyScanResult, Page } from 'scanner-global-library';
 import { System } from 'common';
 import * as Puppeteer from 'puppeteer';
+import { OnDemandPageScanResult } from 'storage-documents';
+import { PrivacyScanMetadata } from '../types/privacy-scan-metadata';
 import { PrivacyScanner } from './privacy-scanner';
 import { PageScanProcessor } from './page-scan-processor';
+import { PageScanScheduler } from './page-scan-scheduler';
 
 describe(PageScanProcessor, () => {
     let loggerMock: IMock<GlobalLogger>;
     let pageMock: IMock<Page>;
     let privacyScannerMock: IMock<PrivacyScanner>;
     let browserPageMock: IMock<Puppeteer.Page>;
+    let pageScanSchedulerMock: IMock<PageScanScheduler>;
+    let testSubject: PageScanProcessor;
+    let pageScanResult: OnDemandPageScanResult;
+    let scanMetadata: PrivacyScanMetadata;
 
     const url = 'url';
     const privacyScanResult = { scannedUrl: url } as PrivacyScanResult;
-
-    let testSubject: PageScanProcessor;
 
     beforeEach(() => {
         loggerMock = Mock.ofType<GlobalLogger>();
         pageMock = Mock.ofType<Page>();
         privacyScannerMock = Mock.ofType<PrivacyScanner>();
         browserPageMock = Mock.ofType<Puppeteer.Page>();
+        pageScanSchedulerMock = Mock.ofType<PageScanScheduler>();
+        pageScanResult = {} as OnDemandPageScanResult;
+        scanMetadata = {
+            url: url,
+            id: 'id',
+            deepScan: false,
+        };
 
-        testSubject = new PageScanProcessor(pageMock.object, privacyScannerMock.object, loggerMock.object);
+        testSubject = new PageScanProcessor(pageMock.object, privacyScannerMock.object, pageScanSchedulerMock.object, loggerMock.object);
     });
 
     afterEach(() => {
@@ -36,14 +48,10 @@ describe(PageScanProcessor, () => {
         pageMock.verifyAll();
         privacyScannerMock.verifyAll();
         browserPageMock.verifyAll();
+        pageScanSchedulerMock.verifyAll();
     });
 
     it('run successful scan', async () => {
-        const scanMetadata = {
-            url: url,
-            id: 'id',
-        };
-
         setupOpenPage();
         setupClosePage();
         privacyScannerMock
@@ -51,31 +59,40 @@ describe(PageScanProcessor, () => {
             .returns(() => Promise.resolve(privacyScanResult))
             .verifiable();
 
-        const results = await testSubject.scan(scanMetadata);
+        const results = await testSubject.scan(scanMetadata, pageScanResult);
+
+        expect(results).toEqual(privacyScanResult);
+    });
+
+    it('run successful scan with known pages list', async () => {
+        scanMetadata.deepScan = true;
+        setupOpenPage();
+        setupClosePage();
+        privacyScannerMock
+            .setup((s) => s.scan(pageMock.object))
+            .returns(() => Promise.resolve(privacyScanResult))
+            .verifiable();
+        pageScanSchedulerMock
+            .setup((o) => o.schedulePageScan(pageScanResult))
+            .returns(() => Promise.resolve())
+            .verifiable();
+
+        const results = await testSubject.scan(scanMetadata, pageScanResult);
 
         expect(results).toEqual(privacyScanResult);
     });
 
     it('returns error thrown by a scanner', async () => {
-        const scanMetadata = {
-            url: url,
-            id: 'id',
-        };
         const error = new Error('test error');
-
         setupOpenPage();
         setupClosePage();
         privacyScannerMock.setup((s) => s.scan(pageMock.object)).throws(error);
 
-        await expect(testSubject.scan(scanMetadata)).rejects.toThrowError('test error');
+        await expect(testSubject.scan(scanMetadata, pageScanResult)).rejects.toThrowError('test error');
     });
 
     it('handles browser close failure', async () => {
         const error = new Error('browser close error');
-        const scanMetadata = {
-            url: url,
-            id: 'id',
-        };
         setupOpenPage();
         pageMock
             .setup((p) => p.close())
@@ -83,7 +100,7 @@ describe(PageScanProcessor, () => {
             .verifiable();
         loggerMock.setup((l) => l.logError(It.isAny(), { error: System.serializeError(error) })).verifiable();
 
-        await testSubject.scan(scanMetadata);
+        await testSubject.scan(scanMetadata, pageScanResult);
     });
 
     function setupOpenPage(): void {

@@ -37,6 +37,7 @@ describe(ScanMetadataConfig, () => {
         const args: PrivacyScanMetadata = {
             id: 'scan id',
             url: 'url',
+            deepScan: true,
         };
 
         beforeEach(() => {

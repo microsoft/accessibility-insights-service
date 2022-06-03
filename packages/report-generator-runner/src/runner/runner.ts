@@ -3,8 +3,8 @@
 
 import { inject, injectable } from 'inversify';
 import { GlobalLogger } from 'logger';
-import { OnDemandPageScanRunResultProvider, ReportGeneratorRequestProvider } from 'service-library';
-import { OnDemandPageScanResult, ReportGeneratorRequest } from 'storage-documents';
+import { OnDemandPageScanRunResultProvider, ReportGeneratorRequestProvider, OperationResult } from 'service-library';
+import { OnDemandPageScanResult, ReportGeneratorRequest, OnDemandPageScanRunState } from 'storage-documents';
 import { System } from 'common';
 import { isEmpty } from 'lodash';
 import { RunMetadataConfig } from '../run-metadata-config';
@@ -80,11 +80,6 @@ export class Runner {
 
     private async updateRequestStateToRunning(queuedRequests: QueuedRequests): Promise<void> {
         const requestsToUpdate = queuedRequests.requestsToProcess.map((queuedRequest) => {
-            this.logger.logInfo(`Updating report request run state to running.`, {
-                id: queuedRequest.request.id,
-                scanId: queuedRequest.request.scanId,
-            });
-
             return {
                 id: queuedRequest.request.id,
                 run: {
@@ -97,6 +92,7 @@ export class Runner {
         });
 
         const updatedRequestsResponse = await this.reportGeneratorRequestProvider.tryUpdateRequests(requestsToUpdate);
+        this.logOperationResult('running', updatedRequestsResponse);
 
         // remove failed update requests
         const updatedRequests = queuedRequests.requestsToProcess.filter((queuedRequest) =>
@@ -107,11 +103,6 @@ export class Runner {
 
     private async updateRequestStateToFailed(queuedRequests: QueuedRequest[]): Promise<void> {
         const requestsToUpdate = queuedRequests.map((queuedRequest) => {
-            this.logger.logInfo(`Updating report request run state to failed.`, {
-                id: queuedRequest.request.id,
-                scanId: queuedRequest.request.scanId,
-            });
-
             return {
                 id: queuedRequest.request.id,
                 run: {
@@ -122,7 +113,8 @@ export class Runner {
             } as Partial<ReportGeneratorRequest>;
         });
 
-        await this.reportGeneratorRequestProvider.tryUpdateRequests(requestsToUpdate);
+        const updatedRequestsResponse = await this.reportGeneratorRequestProvider.tryUpdateRequests(requestsToUpdate);
+        this.logOperationResult('failed', updatedRequestsResponse);
     }
 
     private async updateScanRunStatesToCompleted(queuedRequests: QueuedRequest[]): Promise<void> {
@@ -130,6 +122,10 @@ export class Runner {
             this.logger.logInfo(`Updating report request run state to ${queuedRequest.condition}.`, {
                 id: queuedRequest.request.id,
                 scanId: queuedRequest.request.scanId,
+                condition: queuedRequest.condition,
+                runState: queuedRequest.request.run?.state,
+                retryCount: `${queuedRequest.request.run?.retryCount}`,
+                runTimestamp: queuedRequest.request.run?.timestamp,
             });
 
             return {
@@ -150,13 +146,40 @@ export class Runner {
     private async deleteRequests(queuedRequests: QueuedRequest[]): Promise<void> {
         await this.reportGeneratorRequestProvider.deleteRequests(
             queuedRequests.map((queuedRequest) => {
-                this.logger.logInfo(`Deleting report request from a queue.`, {
+                this.logger.logInfo(`Deleting report request from a report queue.`, {
                     id: queuedRequest.request.id,
                     scanId: queuedRequest.request.scanId,
+                    condition: queuedRequest.condition,
+                    runState: queuedRequest.request.run?.state,
+                    retryCount: `${queuedRequest.request.run?.retryCount}`,
+                    runTimestamp: queuedRequest.request.run?.timestamp,
                 });
 
                 return queuedRequest.request.id;
             }),
         );
+    }
+
+    private logOperationResult(state: OnDemandPageScanRunState, operationResult: OperationResult<ReportGeneratorRequest>[]): void {
+        operationResult.map((response) => {
+            if (response.succeeded) {
+                this.logger.logInfo(`Updated report request run state to ${state}.`, {
+                    id: response.result.id,
+                    scanId: response.result.scanId,
+                    runState: response.result.run?.state,
+                    retryCount: `${response.result.run?.retryCount}`,
+                    runTimestamp: response.result.run?.timestamp,
+                });
+            } else {
+                this.logger.logError(`Failed to update report request run state to ${state}.`, {
+                    id: response.result.id,
+                    scanId: response.result.scanId,
+                    runState: response.result.run?.state,
+                    retryCount: `${response.result.run?.retryCount}`,
+                    runTimestamp: response.result.run?.timestamp,
+                    error: `${response.result.run?.error}`.substring(0, 2048),
+                });
+            }
+        });
     }
 }

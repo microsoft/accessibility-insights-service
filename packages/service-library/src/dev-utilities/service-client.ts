@@ -153,31 +153,33 @@ async function getScanResultOperationBatch(pendingScanIds: string[]): Promise<vo
 
 async function sendRequestOperation(requests: ScanUrlData[]): Promise<void> {
     const requestsChunks = System.chunkArray(requests, 20);
-    requestsChunks.map(async (requestsChunk) => {
-        const scanResponses = await sendPrivacyScanRequest(requestsChunk);
-        scanResponses.map((scanResponse) => {
-            if (scanResponse !== undefined) {
-                let fileData: FileData;
-                let dataFileName: string;
-                if (scanResponse.error) {
-                    console.log(`Sending scan request ${scanResponse.scanId} for URL ${scanResponse.url} has failed.`);
-                    dataFileName = `${guidGenerator.createGuid()}.error`;
-                    fileData = {
-                        scanUrl: scanResponse.url,
-                        error: scanResponse,
-                    };
-                } else {
-                    console.log(`Scan request ${scanResponse.scanId} for URL ${scanResponse.url} sent successfully.`);
-                    dataFileName = `${scanResponse.scanId}.request`;
-                    fileData = {
-                        scanUrl: scanResponse.url,
-                        data: scanResponse,
-                    };
+    await Promise.all(
+        requestsChunks.map(async (requestsChunk) => {
+            const scanResponses = await sendPrivacyScanRequest(requestsChunk);
+            scanResponses.map((scanResponse) => {
+                if (scanResponse !== undefined) {
+                    let fileData: FileData;
+                    let dataFileName: string;
+                    if (scanResponse.error) {
+                        console.log(`Sending scan request ${scanResponse.scanId} for URL ${scanResponse.url} has failed.`);
+                        dataFileName = `${guidGenerator.createGuid()}.error`;
+                        fileData = {
+                            scanUrl: scanResponse.url,
+                            error: scanResponse,
+                        };
+                    } else {
+                        console.log(`Scan request ${scanResponse.scanId} for URL ${scanResponse.url} sent successfully.`);
+                        dataFileName = `${scanResponse.scanId}.request`;
+                        fileData = {
+                            scanUrl: scanResponse.url,
+                            data: scanResponse,
+                        };
+                    }
+                    writeToFile(fileData, getDataFolderName(), dataFileName);
                 }
-                writeToFile(fileData, getDataFolderName(), dataFileName);
-            }
-        });
-    });
+            });
+        }),
+    );
 }
 
 async function getReportOperation(scanResult: ScanRunResultResponse): Promise<void> {

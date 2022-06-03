@@ -1,10 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { PrivacyScanConfig, ServiceConfiguration } from 'common';
-import { inject, injectable } from 'inversify';
+import { PrivacyScanConfig, ServiceConfiguration, System } from 'common';
+import { inject, injectable, optional } from 'inversify';
 import { ConsentResult } from 'storage-documents';
 import * as Puppeteer from 'puppeteer';
+import { GlobalLogger } from 'logger';
 import { CookieScenario, getAllCookieScenarios } from './cookie-scenarios';
 import { CookieCollector } from './cookie-collector';
 import { PrivacyResults, ReloadPageFunc } from './types';
@@ -14,6 +15,7 @@ export class PrivacyPageScanner {
     constructor(
         @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
         @inject(CookieCollector) private readonly cookieCollector: CookieCollector,
+        @inject(GlobalLogger) @optional() private readonly logger: GlobalLogger,
         private readonly getCookieScenarios: () => CookieScenario[] = getAllCookieScenarios,
     ) {}
 
@@ -21,12 +23,17 @@ export class PrivacyPageScanner {
         const privacyScanConfig = await this.serviceConfig.getConfigValue('privacyScanConfig');
 
         const hasBanner = await this.hasBanner(page, privacyScanConfig);
+        this.logger?.logInfo(`Privacy banner ${hasBanner ? ' was detected.' : ' was not detected.'}`, {
+            bannerDetected: `${hasBanner}`,
+            url: page.url(),
+            bannerXPath: privacyScanConfig.bannerXPath,
+        });
+
         const cookieCollectionResults = await this.getAllConsentResults(page, reloadPageFunc);
 
         return {
             finishDateTime: new Date(),
             navigationalUri: page.url(),
-            seedUri: page.url(),
             bannerDetectionXpathExpression: privacyScanConfig.bannerXPath,
             bannerDetected: hasBanner,
             cookieCollectionConsentResults: cookieCollectionResults,
@@ -40,7 +47,12 @@ export class PrivacyPageScanner {
             });
 
             return true;
-        } catch {
+        } catch (error) {
+            if (error.name !== 'TimeoutError') {
+                this.logger?.logError('Banner detection error.', { url: page.url(), browserError: System.serializeError(error) });
+                throw error;
+            }
+
             return false;
         }
     }
@@ -51,7 +63,8 @@ export class PrivacyPageScanner {
 
         // Test sequentially so that cookie values don't interfere with each other
         for (const scenario of scenarios) {
-            results.push(await this.cookieCollector.getCookiesForScenario(page, scenario, reloadPageFunc));
+            const result = await this.cookieCollector.getCookiesForScenario(page, scenario, reloadPageFunc);
+            results.push(result);
         }
 
         return results;

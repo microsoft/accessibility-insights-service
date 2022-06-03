@@ -19,7 +19,9 @@ export declare type WebApiErrorCodeName =
     | 'MissingReleaseVersion'
     | 'InvalidScanNotifyUrl'
     | 'MissingSiteOrReportGroups'
-    | 'MissingRequiredDeepScanProperties';
+    | 'MissingRequiredDeepScanProperties'
+    | 'TooManyKnownPages'
+    | 'InvalidKnownPageURL';
 
 export interface WebApiErrorCode {
     statusCode: number;
@@ -159,6 +161,24 @@ export class WebApiErrorCodes {
             code: 'MissingRequiredDeepScanProperties',
             codeId: 4014,
             message: 'The request is missing either the site or report groups property, which are required when deepScan is true.',
+        },
+    };
+
+    public static tooManyKnownPages: WebApiErrorCode = {
+        statusCode: 400,
+        error: {
+            code: 'TooManyKnownPages',
+            codeId: 4015,
+            message: 'The request contains too many known pages.',
+        },
+    };
+
+    public static invalidKnownPageURL: WebApiErrorCode = {
+        statusCode: 400,
+        error: {
+            code: 'InvalidKnownPageURL',
+            codeId: 4016,
+            message: 'The know page URL is not valid.',
         },
     };
 

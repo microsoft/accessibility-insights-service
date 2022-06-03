@@ -190,7 +190,7 @@ function setupUpdateScanResult(): void {
             id: 'websiteScanResultId',
         } as WebsiteScanResult;
         websiteScanResultProviderMock
-            .setup((o) => o.mergeOrCreate(scanMetadata.id, It.isValue(updatedWebsiteScanResult), true))
+            .setup((o) => o.mergeOrCreate(scanMetadata.id, It.isValue(updatedWebsiteScanResult)))
             .returns(() => Promise.resolve(websiteScanResult))
             .verifiable();
     }
@@ -246,7 +246,7 @@ function setupPageScanProcessor(succeeded: boolean = true, error: Error = undefi
     }
 
     pageScanProcessorMock
-        .setup((o) => o.scan(scanMetadata))
+        .setup((o) => o.scan(scanMetadata, pageScanResultDbDocument))
         .returns(() => {
             if (error) {
                 return Promise.reject(error);

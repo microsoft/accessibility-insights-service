@@ -6,7 +6,7 @@ import { inject, injectable, optional } from 'inversify';
 import { GlobalLogger } from 'logger';
 import * as Puppeteer from 'puppeteer';
 import axe from 'axe-core';
-import { isNil, isEmpty, filter } from 'lodash';
+import { isNil, isEmpty } from 'lodash';
 import { PrivacyPageScanner, PrivacyResults, ReloadPageResponse } from 'privacy-scan-core';
 import { AxeScanResults } from './axe-scan-results';
 import { AxePuppeteerFactory } from './factories/axe-puppeteer-factory';
@@ -173,6 +173,7 @@ export class Page {
             results: {
                 ...privacyResult,
                 httpStatusCode: navigationStatusCode,
+                seedUri: this.requestUrl,
             },
             pageResponseCode: navigationStatusCode,
         };
@@ -186,17 +187,20 @@ export class Page {
             scanResult.scannedUrl = this.page.url();
         }
 
-        const failedConsentResults = filter(
-            privacyResult.cookieCollectionConsentResults,
-            (consentResult) => consentResult.error !== undefined,
-        );
-        if (!isEmpty(failedConsentResults)) {
-            const errorMessage = `Failed to collect cookies for ${failedConsentResults.length} test cases`;
-            this.logger.logError(errorMessage, {
-                url: this.requestUrl,
-                failures: JSON.stringify(failedConsentResults),
+        const errors = privacyResult.cookieCollectionConsentResults
+            .filter((result) => result.error !== undefined)
+            .map((result) => result.error);
+        if (!isEmpty(errors)) {
+            // use first error only to parse/return to the client
+            const error = errors[0] as BrowserError;
+            scanResult.error = error;
+            scanResult.pageResponseCode = error.statusCode;
+            scanResult.results.httpStatusCode = error.statusCode;
+
+            this.logger.logError('Failed to collect cookies for test scenario.', {
+                url: this.page.url(),
+                errors: JSON.stringify(errors),
             });
-            scanResult.error = errorMessage;
         }
 
         return scanResult;

@@ -21,4 +21,6 @@ export interface CrawlerRunOptions {
     chromePath?: string;
     axeSourcePath?: string;
     singleWorker?: boolean;
+    serviceAccountName?: string;
+    serviceAccountPassword?: string;
 }

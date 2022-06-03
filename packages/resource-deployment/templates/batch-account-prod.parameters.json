@@ -3,31 +3,31 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "onDemandScanRequestPoolNodes": {
-            "value": "8"
+            "value": "5"
         },
         "onDemandScanRequestPoolVmSize": {
-            "value": "standard_d11_v2"
+            "value": "standard_f8s_v2"
         },
         "onDemandScanRequestPoolTaskSlotsPerNode": {
-            "value": "4"
-        },
-        "onDemandUrlScanPoolNodes": {
             "value": "8"
         },
+        "onDemandUrlScanPoolNodes": {
+            "value": "5"
+        },
         "onDemandUrlScanPoolVmSize": {
-            "value": "standard_d11_v2"
+            "value": "standard_f8s_v2"
         },
         "onDemandUrlScanPoolTaskSlotsPerNode": {
-            "value": "2"
+            "value": "8"
         },
         "privacyScanPoolNodes": {
             "value": "1"
         },
         "privacyScanPoolVmSize": {
-            "value": "standard_d11_v2"
+            "value": "standard_f8s_v2"
         },
         "privacyScanPoolTaskSlotsPerNode": {
-            "value": "2"
+            "value": "8"
         }
     }
 }

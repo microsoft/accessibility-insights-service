@@ -4,13 +4,14 @@
 import 'reflect-metadata';
 
 import { DiscoveryPatternFactory } from 'accessibility-insights-crawler';
-import { CrawlConfig, ServiceConfiguration } from 'common';
 import { GlobalLogger } from 'logger';
 import { Page } from 'scanner-global-library';
 import { WebsiteScanResultProvider, RunnerScanMetadata } from 'service-library';
 import { OnDemandPageScanResult, WebsiteScanResult } from 'storage-documents';
-import { IMock, It, Mock } from 'typemoq';
+import { IMock, It, Mock, Times } from 'typemoq';
 import * as Puppeteer from 'puppeteer';
+import { cloneDeep } from 'lodash';
+import { ServiceConfiguration, CrawlConfig } from 'common';
 import { DiscoveredUrlProcessor } from '../crawl-runner/discovered-url-processor';
 import { CrawlRunner } from '../crawl-runner/crawl-runner';
 import { ScanFeedGenerator } from '../crawl-runner/scan-feed-generator';
@@ -52,7 +53,7 @@ describe(DeepScanner, () => {
         pageMock = Mock.ofType<Page>();
         scanFeedGeneratorMock = Mock.ofType<ScanFeedGenerator>();
 
-        deepScanDiscoveryLimit = 3;
+        deepScanDiscoveryLimit = 5;
         serviceConfigMock
             .setup((sc) => sc.getConfigValue('crawlConfig'))
             .returns(() => Promise.resolve({ deepScanDiscoveryLimit } as CrawlConfig));
@@ -80,6 +81,7 @@ describe(DeepScanner, () => {
             discoveryPatterns,
             baseUrl: crawlBaseUrl,
             deepScanId,
+            deepScanLimit: deepScanDiscoveryLimit,
         } as WebsiteScanResult;
         websiteScanResultDbDocument = {
             ...websiteScanResult,
@@ -106,13 +108,20 @@ describe(DeepScanner, () => {
         scanFeedGeneratorMock.verifyAll();
     });
 
-    it('continue deep scan for all given known pages', async () => {
-        websiteScanResult.knownPages = [];
-        for (let i = 0; i < deepScanDiscoveryLimit + 2; i++) {
-            websiteScanResult.knownPages.push(`page${i}`);
-        }
-        websiteScanResult.deepScanLimit = websiteScanResult.knownPages.length + 1;
+    it('start deep scan when known pages below deepScanDiscoveryLimit', async () => {
+        websiteScanResult.deepScanLimit = deepScanDiscoveryLimit;
+        setupReadWebsiteScanResult();
+        setupLoggerProperties();
+        setupCrawl(discoveryPatterns);
+        setupProcessUrls(websiteScanResult.deepScanLimit);
+        setupUpdateWebsiteScanResult(discoveryPatterns);
+        setupScanFeedGeneratorMock();
 
+        await testSubject.runDeepScan(runnerScanMetadata, pageScanResult, pageMock.object);
+    });
+
+    it('start deep scan when known pages above deepScanDiscoveryLimit', async () => {
+        websiteScanResult.deepScanLimit = deepScanDiscoveryLimit + 4;
         setupReadWebsiteScanResult();
         setupLoggerProperties();
         setupCrawl(discoveryPatterns);
@@ -124,17 +133,32 @@ describe(DeepScanner, () => {
     });
 
     it('skip deep scan if maximum discovered pages limit was reached', async () => {
-        websiteScanResult.knownPages = [];
-        for (let i = 0; i < deepScanDiscoveryLimit + 1; i++) {
-            websiteScanResult.knownPages.push(`i`);
-        }
-        setupReadWebsiteScanResult();
+        websiteScanResult.deepScanLimit = deepScanDiscoveryLimit;
+        websiteScanResult.pageCount = deepScanDiscoveryLimit + 2;
+        setupReadWebsiteScanResult(1);
         setupLoggerProperties();
         loggerMock
             .setup((o) =>
                 o.logInfo('The website deep scan completed since maximum discovered pages limit was reached.', {
-                    discoveredUrlsTotal: (deepScanDiscoveryLimit + 1).toString(),
-                    discoveredUrlsLimit: deepScanDiscoveryLimit.toString(),
+                    discoveredUrls: `${websiteScanResult.pageCount}`,
+                    discoveryLimit: `${websiteScanResult.deepScanLimit}`,
+                }),
+            )
+            .verifiable();
+
+        await testSubject.runDeepScan(runnerScanMetadata, pageScanResult, pageMock.object);
+    });
+
+    it('skip deep scan when know pages over limit and base page was scanned', async () => {
+        websiteScanResult.deepScanLimit = deepScanDiscoveryLimit + 4;
+        websiteScanResult.pageCount = deepScanDiscoveryLimit + 2;
+        setupReadWebsiteScanResult(1);
+        setupLoggerProperties();
+        loggerMock
+            .setup((o) =>
+                o.logInfo('The website deep scan completed since maximum discovered pages limit was reached.', {
+                    discoveredUrls: `${websiteScanResult.pageCount}`,
+                    discoveryLimit: `${websiteScanResult.deepScanLimit}`,
                 }),
             )
             .verifiable();
@@ -185,8 +209,20 @@ function setupScanFeedGeneratorMock(): void {
         .verifiable();
 }
 
-function setupReadWebsiteScanResult(): void {
-    websiteScanResultProviderMock.setup((w) => w.read(websiteScanResultId, true)).returns(() => Promise.resolve(websiteScanResult));
+function setupReadWebsiteScanResult(times: number = 2): void {
+    websiteScanResultProviderMock
+        .setup((w) => w.read(websiteScanResultId, It.isAny()))
+        .returns((id, read) => {
+            if (read === false) {
+                const temp = cloneDeep(websiteScanResult);
+                delete temp.knownPages;
+
+                return Promise.resolve(websiteScanResult);
+            } else {
+                return Promise.resolve(websiteScanResult);
+            }
+        })
+        .verifiable(Times.exactly(times));
 }
 
 function setupCrawl(crawlDiscoveryPatterns: string[]): void {
@@ -206,7 +242,7 @@ function setupProcessUrls(deepScanLimit: number = deepScanDiscoveryLimit): void 
 function setupUpdateWebsiteScanResult(crawlDiscoveryPatterns: string[]): void {
     updatedWebsiteScanResult.discoveryPatterns = crawlDiscoveryPatterns;
     websiteScanResultProviderMock
-        .setup((o) => o.mergeOrCreate(runnerScanMetadata.id, It.isValue(updatedWebsiteScanResult), true))
+        .setup((o) => o.mergeOrCreate(runnerScanMetadata.id, It.isValue(updatedWebsiteScanResult), undefined, true))
         .returns(() => Promise.resolve(websiteScanResultDbDocument))
         .verifiable();
 }
