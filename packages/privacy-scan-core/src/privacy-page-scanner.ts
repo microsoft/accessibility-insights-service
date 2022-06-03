@@ -63,8 +63,7 @@ export class PrivacyPageScanner {
 
         // Test sequentially so that cookie values don't interfere with each other
         for (const scenario of scenarios) {
-            const result = await this.cookieCollector.getCookiesForScenario(page, scenario, reloadPageFunc);
-            results.push(result);
+            results.push(await this.cookieCollector.getCookiesForScenario(page, scenario, reloadPageFunc));
         }
 
         return results;
