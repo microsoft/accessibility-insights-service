@@ -345,22 +345,29 @@ describe(Page, () => {
             privacyResults.cookieCollectionConsentResults.push(
                 ...[
                     {
-                        error: 'Error reloading page 1',
+                        error: {
+                            message: 'Error reloading page, run 1',
+                            statusCode: 404,
+                        },
                     },
                     {
-                        error: 'Error reloading page 2',
+                        error: {
+                            message: 'Error reloading page, run 2',
+                            statusCode: 404,
+                        },
                     },
                 ],
             );
             puppeteerPageMock.setup((p) => p.url()).returns(() => url);
             simulatePageNavigation(puppeteerResponseMock.object);
+            const expectedError = privacyResults.cookieCollectionConsentResults.find((r) => r.error !== undefined).error as BrowserError;
             const expectedPrivacyScanResults = {
                 results: {
                     ...privacyResults,
-                    httpStatusCode: 200,
+                    httpStatusCode: expectedError.statusCode,
                 },
-                pageResponseCode: 200,
-                error: privacyResults.cookieCollectionConsentResults.find((r) => r.error !== undefined).error,
+                pageResponseCode: expectedError.statusCode,
+                error: expectedError,
             } as PrivacyScanResult;
 
             const privacyScanResults = await page.scanForPrivacy();
