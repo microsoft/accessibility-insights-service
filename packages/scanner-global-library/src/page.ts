@@ -174,11 +174,16 @@ export class Page {
             .filter((result) => result.error !== undefined)
             .map((result) => result.error);
         if (!isEmpty(errors)) {
+            // use first error only to parse/return to the client
+            const error = errors[0] as BrowserError;
+            scanResult.error = error;
+            scanResult.pageResponseCode = error.statusCode;
+            scanResult.results.httpStatusCode = error.statusCode;
+
             this.logger.logError('Failed to collect cookies for test scenario.', {
                 url: this.page.url(),
                 errors: JSON.stringify(errors),
             });
-            scanResult.error = errors[0] as string; // set first error only to parse/return to client
         }
 
         return scanResult;
