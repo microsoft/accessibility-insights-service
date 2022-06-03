@@ -62,7 +62,10 @@ export abstract class BaseScanResultController extends ApiController {
         );
     }
 
-    protected getScanResultResponse(pageScanResult: OnDemandPageScanResult, websiteScanResult: WebsiteScanResult): ScanResultResponse {
+    protected async getScanResultResponse(
+        pageScanResult: OnDemandPageScanResult,
+        websiteScanResult: WebsiteScanResult,
+    ): Promise<ScanResultResponse> {
         const segment = '/api/';
         const baseUrl = this.context.req.url.substring(0, this.context.req.url.indexOf(segment) + segment.length);
 

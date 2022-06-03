@@ -10,53 +10,63 @@ import {
     ScanCompletedNotification as NotificationDb,
     WebsiteScanResult,
 } from 'storage-documents';
+import { ServiceConfiguration } from 'common';
 import { ScanErrorConverter } from './scan-error-converter';
 
 @injectable()
 export class ScanResponseConverter {
-    constructor(@inject(ScanErrorConverter) private readonly scanErrorConverter: ScanErrorConverter) {}
+    constructor(
+        @inject(ScanErrorConverter) private readonly scanErrorConverter: ScanErrorConverter,
+        @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
+    ) {}
 
-    public getScanResultResponse(
+    public async getScanResultResponse(
         baseUrl: string,
         apiVersion: string,
         pageScanResult: OnDemandPageScanResult,
         websiteScanResult: WebsiteScanResult,
-    ): ScanResultResponse {
-        const runState: OnDemandPageScanRunState = pageScanResult.run.state;
-        switch (runState) {
+    ): Promise<ScanResultResponse> {
+        const effectiveRunState = await this.getEffectiveRunState(pageScanResult);
+        switch (effectiveRunState) {
             case 'pending':
             case 'accepted':
             case 'queued':
             case 'running':
             case 'report':
             default:
-                return this.createIncompleteScanResponse(pageScanResult);
+                return this.createIncompleteScanResponse(pageScanResult, effectiveRunState);
             case 'failed':
-                return this.createFailedScanResponse(pageScanResult);
+                return this.createFailedScanResponse(pageScanResult, effectiveRunState);
             case 'completed':
-                return this.createCompletedScanResponse(baseUrl, apiVersion, pageScanResult, websiteScanResult);
+                return this.createCompletedScanResponse(baseUrl, apiVersion, pageScanResult, websiteScanResult, effectiveRunState);
         }
     }
 
-    private createIncompleteScanResponse(pageScanResult: OnDemandPageScanResult): ScanResultResponse {
+    private createIncompleteScanResponse(
+        pageScanResult: OnDemandPageScanResult,
+        effectiveRunState: OnDemandPageScanRunState,
+    ): ScanResultResponse {
         return {
             scanId: pageScanResult.id,
             url: pageScanResult.url,
             scanType: pageScanResult.privacyScan ? 'privacy' : 'accessibility',
             run: {
-                state: pageScanResult.run.state,
+                state: effectiveRunState,
             },
             ...this.getRunCompleteNotificationResponse(pageScanResult.notification),
         };
     }
 
-    private createFailedScanResponse(pageScanResult: OnDemandPageScanResult): ScanResultResponse {
+    private createFailedScanResponse(
+        pageScanResult: OnDemandPageScanResult,
+        effectiveRunState: OnDemandPageScanRunState,
+    ): ScanResultResponse {
         return {
             scanId: pageScanResult.id,
             url: pageScanResult.url,
             scanType: pageScanResult.privacyScan ? 'privacy' : 'accessibility',
             run: {
-                state: pageScanResult.run.state,
+                state: effectiveRunState,
                 timestamp: pageScanResult.run.timestamp,
                 error: this.scanErrorConverter.getScanRunErrorCode(pageScanResult.run.error),
                 pageResponseCode: pageScanResult.run.pageResponseCode,
@@ -71,6 +81,7 @@ export class ScanResponseConverter {
         apiVersion: string,
         pageScanResult: OnDemandPageScanResult,
         websiteScanResult: WebsiteScanResult,
+        effectiveRunState: OnDemandPageScanRunState,
     ): ScanResultResponse {
         const scanResultResponse: ScanResultResponse = {
             scanId: pageScanResult.id,
@@ -82,7 +93,7 @@ export class ScanResponseConverter {
             },
             reports: this.getScanReports(baseUrl, apiVersion, pageScanResult),
             run: {
-                state: pageScanResult.run.state,
+                state: effectiveRunState,
                 timestamp: pageScanResult.run.timestamp,
                 pageResponseCode: pageScanResult.run.pageResponseCode,
                 pageTitle: pageScanResult.run.pageTitle,
@@ -165,5 +176,22 @@ export class ScanResponseConverter {
         });
 
         return { deepScanResult };
+    }
+
+    private async getEffectiveRunState(pageScanResult: OnDemandPageScanResult): Promise<OnDemandPageScanRunState> {
+        if (pageScanResult.run.state !== 'failed') {
+            return pageScanResult.run.state;
+        }
+
+        const maxRetryCount = await this.getMaxRetryCount();
+
+        // indicate to the client that scan is still pending when there are retries attempts left
+        return pageScanResult.run?.retryCount >= maxRetryCount ? pageScanResult.run.state : 'pending';
+    }
+
+    private async getMaxRetryCount(): Promise<number> {
+        const scanConfig = await this.serviceConfig.getConfigValue('scanConfig');
+
+        return scanConfig.maxFailedScanRetryCount;
     }
 }
