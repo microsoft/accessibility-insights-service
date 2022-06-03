@@ -103,7 +103,7 @@ describe(BatchScanResultController, () => {
         scanResponseConverterMock = Mock.ofType<ScanResponseConverter>();
         scanResponseConverterMock
             .setup((o) => o.getScanResultResponse(baseUrl, apiVersion, scanFetchedResponse, websiteScanResult))
-            .returns(() => scanClientResponseForFetchedResponse);
+            .returns(() => Promise.resolve(scanClientResponseForFetchedResponse));
 
         websiteScanResultProviderMock = Mock.ofType<WebsiteScanResultProvider>();
         websiteScanResultProviderMock

@@ -6,7 +6,7 @@ import { inject, injectable, optional } from 'inversify';
 import { GlobalLogger } from 'logger';
 import * as Puppeteer from 'puppeteer';
 import axe from 'axe-core';
-import { isNil, isEmpty, filter } from 'lodash';
+import { isNil, isEmpty } from 'lodash';
 import { PrivacyPageScanner, PrivacyResults, ReloadPageResponse } from 'privacy-scan-core';
 import { AxeScanResults } from './axe-scan-results';
 import { AxePuppeteerFactory } from './factories/axe-puppeteer-factory';
@@ -170,17 +170,15 @@ export class Page {
             scanResult.scannedUrl = this.page.url();
         }
 
-        const failedConsentResults = filter(
-            privacyResult.cookieCollectionConsentResults,
-            (consentResult) => consentResult.error !== undefined,
-        );
-        if (!isEmpty(failedConsentResults)) {
-            const errorMessage = `Failed to collect cookies for ${failedConsentResults.length} test cases`;
-            this.logger.logError(errorMessage, {
+        const errors = privacyResult.cookieCollectionConsentResults
+            .filter((result) => result.error !== undefined)
+            .map((result) => result.error);
+        if (!isEmpty(errors)) {
+            this.logger.logError('Failed to collect cookies for test scenario.', {
                 url: this.page.url(),
-                failures: JSON.stringify(failedConsentResults),
+                errors: JSON.stringify(errors),
             });
-            scanResult.error = errorMessage;
+            scanResult.error = errors[0] as string; // set first error only to parse/return to client
         }
 
         return scanResult;
