@@ -36,7 +36,7 @@ export class PageNavigator {
     ): Promise<NavigationResponse> {
         await this.pageNavigationHooks.preNavigation(page);
 
-        let timestamp = process.hrtime.bigint();
+        let timestamp = System.getTimestamp();
         let navigationResult = await this.navigateToUrl(url, page, 'networkidle2');
         const goto1Elapsed = System.getElapsedTime(timestamp);
 
@@ -49,7 +49,7 @@ export class PageNavigator {
             // However any dynamic contents may not be available if it is loaded after window.onload() event.
             // Since we reuse page instance from the first navigation attempt some contents could be already loaded and available which
             // mitigates dynamic content rendering issue above.
-            timestamp = process.hrtime.bigint();
+            timestamp = System.getTimestamp();
             navigationResult = await this.navigateToUrl(url, page, 'load');
             goto2Elapsed = System.getElapsedTime(timestamp);
         }

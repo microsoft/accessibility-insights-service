@@ -79,10 +79,14 @@ export namespace System {
 
     /**
      * Returns elapsed time since the given timestamp, in msec
-     * @param timestamp The timestamp to use as start timestamp to calculate elapsed time, in nsec.
-     * Use ```process.hrtime.bigint()``` to get timestamp value
+     * @param timestamp The timestamp to use as start timestamp to calculate elapsed time, in msec.
+     * Use ```System.getTimestamp()``` to get timestamp value
      */
-    export function getElapsedTime(timestamp: bigint): number {
-        return Number((process.hrtime.bigint() - timestamp) / 1000000n);
+    export function getElapsedTime(timestamp: number): number {
+        return getTimestamp() - timestamp;
+    }
+
+    export function getTimestamp(): number {
+        return Number(process.hrtime.bigint() / 1000000n);
     }
 }

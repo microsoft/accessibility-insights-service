@@ -33,7 +33,7 @@ export class PageHandler {
         let scrollingComplete = false;
 
         // Scroll incrementally so everything is inside the window at some point
-        const timestamp = process.hrtime.bigint();
+        const timestamp = System.getTimestamp();
         while (!scrollingComplete && checkCount < maxCheckCount) {
             // Use try/catch because navigation issues may cause page.evaluate to throw
             try {
@@ -74,7 +74,7 @@ export class PageHandler {
         let pageHasStableContent = false;
         let pageHtmlContentSize = 0;
 
-        const timestamp = process.hrtime.bigint();
+        const timestamp = System.getTimestamp();
         while (checkCount < maxCheckCount) {
             try {
                 // Use try/catch because navigation issues may cause page.evaluate to throw

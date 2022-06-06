@@ -137,12 +137,26 @@ describe('normalizeHttpResponse()', () => {
 });
 
 describe('getElapsedTime()', () => {
+    let processHrtimeOriginal: NodeJS.HRTime;
+
+    beforeEach(() => {
+        processHrtimeOriginal = process.hrtime;
+    });
+
+    afterEach(() => {
+        process.hrtime = processHrtimeOriginal;
+    });
+
     it('get elapsed time', () => {
         process.hrtime = { bigint: () => 10000000000n } as NodeJS.HRTime;
-        console.log(process.hrtime.bigint());
-
-        const timestamp = 3000000000n;
+        const timestamp = 3000;
         const elapsed = System.getElapsedTime(timestamp);
         expect(elapsed).toEqual(7000);
+    });
+
+    it('get timestamp', () => {
+        process.hrtime = { bigint: () => 10000000000n } as NodeJS.HRTime;
+        const elapsed = System.getTimestamp();
+        expect(elapsed).toEqual(10000);
     });
 });
