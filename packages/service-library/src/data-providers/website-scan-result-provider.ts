@@ -243,10 +243,9 @@ export class WebsiteScanResultProvider {
             } while (continuationToken !== undefined || items.length >= this.maxBatchItems);
 
             documentCount = documentCount + items.length;
-            const start = process.hrtime();
+            const timestamp = System.getTimestamp();
             partDocument = await this.websiteScanResultAggregator.mergePartDocuments(items, partDocument);
-            const elapsed = process.hrtime(start);
-            elapsedToAggregate = elapsedToAggregate + elapsed[0] * 1000 + elapsed[1] / 1000000;
+            elapsedToAggregate = elapsedToAggregate + System.getElapsedTime(timestamp);
         } while (continuationToken !== undefined);
 
         this.logger.logInfo(

@@ -20,12 +20,22 @@ let pageNavigator: PageNavigator;
 let pageResponseProcessorMock: IMock<PageResponseProcessor>;
 let navigationHooksMock: IMock<PageNavigationHooks>;
 let pageMock: IMock<Page>;
+let timingCount: number;
 
 describe(PageNavigator, () => {
     beforeEach(() => {
         pageResponseProcessorMock = Mock.ofType<PageResponseProcessor>();
         navigationHooksMock = Mock.ofType<PageNavigationHooks>();
         pageMock = Mock.ofType<Page>();
+
+        timingCount = 0;
+        process.hrtime = {
+            bigint: () => {
+                timingCount += 1;
+
+                return BigInt(timingCount * 10000000000);
+            },
+        } as NodeJS.HRTime;
 
         pageNavigator = new PageNavigator(pageResponseProcessorMock.object, navigationHooksMock.object);
     });
@@ -58,9 +68,15 @@ describe(PageNavigator, () => {
         navigationHooksMock.setup((o) => o.preNavigation(pageMock.object)).verifiable();
         navigationHooksMock.setup((o) => o.postNavigation(pageMock.object, response, onNavigationErrorMock)).verifiable();
 
-        await pageNavigator.navigate(url, pageMock.object, onNavigationErrorMock);
-
+        const pageTiming = await pageNavigator.navigate(url, pageMock.object, onNavigationErrorMock);
         expect(onNavigationErrorMock).toBeCalledTimes(0);
+        expect(pageTiming).toEqual({
+            httpResponse: response,
+            pageNavigationTiming: {
+                goto1: 10000,
+                goto2: 0,
+            },
+        });
     });
 
     it('navigate with browser error', async () => {
@@ -124,8 +140,14 @@ describe(PageNavigator, () => {
         navigationHooksMock.setup((o) => o.preNavigation(pageMock.object)).verifiable();
         navigationHooksMock.setup((o) => o.postNavigation(pageMock.object, response, onNavigationErrorMock)).verifiable();
 
-        await pageNavigator.navigate(url, pageMock.object, onNavigationErrorMock);
-
+        const pageTiming = await pageNavigator.navigate(url, pageMock.object, onNavigationErrorMock);
         expect(onNavigationErrorMock).toBeCalledTimes(0);
+        expect(pageTiming).toEqual({
+            httpResponse: {},
+            pageNavigationTiming: {
+                goto1: 10000,
+                goto2: 10000,
+            },
+        });
     });
 });

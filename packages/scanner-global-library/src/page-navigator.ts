@@ -4,13 +4,19 @@
 import * as Puppeteer from 'puppeteer';
 import { injectable, inject } from 'inversify';
 import { isNil } from 'lodash';
+import { System } from 'common';
 import { PageResponseProcessor } from './page-response-processor';
 import { BrowserError } from './browser-error';
 import { PageNavigationHooks } from './page-navigation-hooks';
 import { PageConfigurator } from './page-configurator';
-import { puppeteerTimeoutConfig } from './page-timeout-config';
+import { puppeteerTimeoutConfig, PageNavigationTiming } from './page-timeout-config';
 
 export type OnNavigationError = (browserError: BrowserError, error?: unknown) => Promise<void>;
+
+export interface NavigationResponse {
+    httpResponse: Puppeteer.HTTPResponse;
+    pageNavigationTiming: PageNavigationTiming;
+}
 
 @injectable()
 export class PageNavigator {
@@ -27,10 +33,14 @@ export class PageNavigator {
         url: string,
         page: Puppeteer.Page,
         onNavigationError: (browserError: BrowserError, error?: unknown) => Promise<void> = () => Promise.resolve(),
-    ): Promise<Puppeteer.HTTPResponse> {
+    ): Promise<NavigationResponse> {
         await this.pageNavigationHooks.preNavigation(page);
 
+        let timestamp = System.getTimestamp();
         let navigationResult = await this.navigateToUrl(url, page, 'networkidle2');
+        const goto1Elapsed = System.getElapsedTime(timestamp);
+
+        let goto2Elapsed = 0;
         if (navigationResult.browserError?.errorType === 'UrlNavigationTimeout') {
             // Fallback to load partial page resources on navigation timeout.
             // This will help in cases when page has a streaming video controls.
@@ -39,7 +49,9 @@ export class PageNavigator {
             // However any dynamic contents may not be available if it is loaded after window.onload() event.
             // Since we reuse page instance from the first navigation attempt some contents could be already loaded and available which
             // mitigates dynamic content rendering issue above.
+            timestamp = System.getTimestamp();
             navigationResult = await this.navigateToUrl(url, page, 'load');
+            goto2Elapsed = System.getElapsedTime(timestamp);
         }
 
         if (!isNil(navigationResult.browserError)) {
@@ -48,9 +60,16 @@ export class PageNavigator {
             return undefined;
         }
 
-        await this.pageNavigationHooks.postNavigation(page, navigationResult.response, onNavigationError);
+        const pageTiming = (await this.pageNavigationHooks.postNavigation(
+            page,
+            navigationResult.response,
+            onNavigationError,
+        )) as PageNavigationTiming;
 
-        return navigationResult.response;
+        return {
+            httpResponse: navigationResult.response,
+            pageNavigationTiming: { ...pageTiming, goto1: goto1Elapsed, goto2: goto2Elapsed },
+        };
     }
 
     private async navigateToUrl(

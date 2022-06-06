@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { JobManagerConfig, ServiceConfiguration } from 'common';
+import { JobManagerConfig, ServiceConfiguration, System } from 'common';
 import { inject, injectable } from 'inversify';
 import moment from 'moment';
 
@@ -83,8 +83,8 @@ export class PoolLoadGenerator {
             Math.ceil(this.processingSpeed / 2);
         this.lastTasksIncrementCount = tasksIncrementCount > 0 ? tasksIncrementCount : 0;
 
-        this.samplingIntervalInSeconds = process.hrtime()[0] - this.timestamp;
-        this.timestamp = process.hrtime()[0];
+        this.samplingIntervalInSeconds = System.getElapsedTime(this.timestamp) / 1000;
+        this.timestamp = System.getTimestamp();
     }
 
     private setActiveToRunningTasksRatio(activeTasks: number, maxTasksPerPool: number): void {
@@ -102,7 +102,7 @@ export class PoolLoadGenerator {
 
         this.defaultActiveToRunningTasksRatio = configActiveToRunningTasksRatio;
         this.activeToRunningTasksRatio = configActiveToRunningTasksRatio;
-        this.timestamp = process.hrtime()[0];
+        this.timestamp = System.getTimestamp();
     }
 
     private async getJobManagerConfig(): Promise<JobManagerConfig> {
