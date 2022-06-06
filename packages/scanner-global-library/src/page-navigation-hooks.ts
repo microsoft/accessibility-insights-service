@@ -8,7 +8,7 @@ import { BrowserError } from './browser-error';
 import { PageConfigurator } from './page-configurator';
 import { PageHandler } from './page-handler';
 import { PageResponseProcessor } from './page-response-processor';
-import { puppeteerTimeoutConfig } from './page-timeout-config';
+import { puppeteerTimeoutConfig, PageNavigationTiming } from './page-timeout-config';
 
 @injectable()
 export class PageNavigationHooks {
@@ -29,7 +29,7 @@ export class PageNavigationHooks {
         page: Puppeteer.Page,
         response: Puppeteer.HTTPResponse,
         onNavigationError: (browserError: BrowserError, error?: unknown) => Promise<void> = () => Promise.resolve(),
-    ): Promise<void> {
+    ): Promise<Partial<PageNavigationTiming>> {
         if (isNil(response)) {
             await onNavigationError({
                 errorType: 'NavigationError',
@@ -37,7 +37,7 @@ export class PageNavigationHooks {
                 stack: new Error().stack,
             });
 
-            return;
+            return {};
         }
 
         // Validate HTTP response
@@ -45,9 +45,9 @@ export class PageNavigationHooks {
         if (responseError !== undefined) {
             await onNavigationError(responseError);
 
-            return;
+            return {};
         }
 
-        await this.pageRenderingHandler.waitForPageToCompleteRendering(page, this.scrollTimeoutMsecs, this.pageRenderingTimeoutMsecs);
+        return this.pageRenderingHandler.waitForPageToCompleteRendering(page, this.scrollTimeoutMsecs, this.pageRenderingTimeoutMsecs);
     }
 }

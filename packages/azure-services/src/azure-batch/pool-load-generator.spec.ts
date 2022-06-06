@@ -3,7 +3,7 @@
 
 import 'reflect-metadata';
 
-import { JobManagerConfig, ServiceConfiguration } from 'common';
+import { JobManagerConfig, ServiceConfiguration, System } from 'common';
 import moment from 'moment';
 import { IMock, Mock } from 'typemoq';
 import { PoolLoadGenerator, PoolMetricsInfo } from './pool-load-generator';
@@ -14,6 +14,7 @@ let poolMetricsInfo: PoolMetricsInfo;
 let poolLoadGenerator: PoolLoadGenerator;
 let serviceConfigMock: IMock<ServiceConfiguration>;
 let activeToRunningTasksRatio: number;
+
 const dateNow = new Date('2019-12-12T12:00:00.000Z');
 
 describe(PoolLoadGenerator, () => {
@@ -30,7 +31,7 @@ describe(PoolLoadGenerator, () => {
                 } as JobManagerConfig;
             });
 
-        jest.spyOn(process, 'hrtime').mockImplementation((time?: [number, number]) => [5, 0]);
+        System.getTimestamp = () => 5000;
         moment.prototype.toDate = () => dateNow;
 
         poolLoadGenerator = new PoolLoadGenerator(serviceConfigMock.object);
@@ -83,7 +84,7 @@ describe(PoolLoadGenerator, () => {
         let poolLoadSnapshot = await poolLoadGenerator.getPoolLoadSnapshot(poolMetricsInfo);
         expect(poolLoadSnapshot).toEqual(expectedPoolLoadSnapshot);
 
-        jest.spyOn(process, 'hrtime').mockImplementation((time?: [number, number]) => [7, 0]);
+        System.getElapsedTime = () => 2000;
         poolMetricsInfo = {
             id: 'pool-id',
             maxTasksPerPool: 32,
@@ -130,7 +131,7 @@ describe(PoolLoadGenerator, () => {
         let poolLoadSnapshot = await poolLoadGenerator.getPoolLoadSnapshot(poolMetricsInfo);
         expect(poolLoadSnapshot).toEqual(expectedPoolLoadSnapshot);
 
-        jest.spyOn(process, 'hrtime').mockImplementation((time?: [number, number]) => [7, 0]);
+        System.getElapsedTime = () => 2000;
         poolMetricsInfo = {
             id: 'pool-id',
             maxTasksPerPool: 32,
@@ -177,7 +178,7 @@ describe(PoolLoadGenerator, () => {
         let poolLoadSnapshot = await poolLoadGenerator.getPoolLoadSnapshot(poolMetricsInfo);
         expect(poolLoadSnapshot).toEqual(expectedPoolLoadSnapshot);
 
-        jest.spyOn(process, 'hrtime').mockImplementation((time?: [number, number]) => [7, 0]);
+        System.getElapsedTime = () => 2000;
         poolMetricsInfo = {
             id: 'pool-id',
             maxTasksPerPool: 32,
@@ -225,7 +226,7 @@ describe(PoolLoadGenerator, () => {
         let poolLoadSnapshot = await poolLoadGenerator.getPoolLoadSnapshot(poolMetricsInfo);
         expect(poolLoadSnapshot).toEqual(expectedPoolLoadSnapshot);
 
-        jest.spyOn(process, 'hrtime').mockImplementation((time?: [number, number]) => [7, 0]);
+        System.getElapsedTime = () => 2000;
         poolMetricsInfo = {
             id: 'pool-id',
             maxTasksPerPool: 32,
@@ -248,7 +249,7 @@ describe(PoolLoadGenerator, () => {
         poolLoadSnapshot = await poolLoadGenerator.getPoolLoadSnapshot(poolMetricsInfo);
         expect(poolLoadSnapshot).toEqual(expectedPoolLoadSnapshot);
 
-        jest.spyOn(process, 'hrtime').mockImplementation((time?: [number, number]) => [10, 0]);
+        System.getElapsedTime = () => 3000;
         poolMetricsInfo = {
             id: 'pool-id',
             maxTasksPerPool: 32,
@@ -296,7 +297,7 @@ describe(PoolLoadGenerator, () => {
         poolLoadGenerator.setLastTasksIncrementCount(26);
         expect(poolLoadSnapshot).toEqual(expectedPoolLoadSnapshot);
 
-        jest.spyOn(process, 'hrtime').mockImplementation((time?: [number, number]) => [7, 0]);
+        System.getElapsedTime = () => 2000;
         poolMetricsInfo = {
             id: 'pool-id',
             maxTasksPerPool: 32,

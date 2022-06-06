@@ -76,4 +76,17 @@ export namespace System {
 
         return httpResponseCopy;
     }
+
+    /**
+     * Returns elapsed time since the given timestamp, in msec
+     * @param timestamp The timestamp to use as start timestamp to calculate elapsed time, in msec.
+     * Use ```System.getTimestamp()``` to get timestamp value
+     */
+    export function getElapsedTime(timestamp: number): number {
+        return getTimestamp() - timestamp;
+    }
+
+    export function getTimestamp(): number {
+        return Number(process.hrtime.bigint() / 1000000n);
+    }
 }

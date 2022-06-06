@@ -14,6 +14,7 @@ import { WebDriver } from './web-driver';
 import { PageNavigator } from './page-navigator';
 import { BrowserError } from './browser-error';
 import { PrivacyScanResult } from './privacy-scan-result';
+import { PageNavigationTiming } from './page-timeout-config';
 
 export interface BrowserStartOptions {
     browserExecutablePath?: string;
@@ -65,10 +66,26 @@ export class Page {
     public async navigateToUrl(url: string): Promise<void> {
         this.requestUrl = url;
         this.lastBrowserError = undefined;
-        this.lastNavigationResponse = await this.pageNavigator.navigate(url, this.page, async (browserError) => {
+        const navigationResponse = await this.pageNavigator.navigate(url, this.page, async (browserError) => {
             this.logger?.logError('Page navigation error', { browserError: System.serializeError(browserError) });
             this.lastBrowserError = browserError;
         });
+
+        this.lastNavigationResponse = navigationResponse?.httpResponse;
+        if (navigationResponse?.pageNavigationTiming) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const timing = {} as any;
+            let totalNavigationElapsed = 0;
+            Object.keys(navigationResponse.pageNavigationTiming).forEach((key: keyof PageNavigationTiming) => {
+                totalNavigationElapsed += navigationResponse.pageNavigationTiming[key];
+                timing[key] = `${navigationResponse.pageNavigationTiming[key]}`;
+            });
+
+            this.logger.logInfo(`Total page rendering time ${totalNavigationElapsed} msec`, {
+                total: totalNavigationElapsed.toString(),
+                ...timing,
+            });
+        }
     }
 
     public async scanForA11yIssues(contentSourcePath?: string): Promise<AxeScanResults> {
