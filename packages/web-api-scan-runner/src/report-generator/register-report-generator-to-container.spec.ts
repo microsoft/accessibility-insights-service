@@ -22,7 +22,7 @@ describe('registerReportGeneratorToContainer', () => {
         expect(axeResultConverterTypes).toContain('html');
         expect(axeResultConverterTypes).toContain('sarif');
         expect(axeResultConverterTypes).toContain('axe');
-        expect(axeResultConverterTypes).toContain('png');
-        expect(axeResultConverterTypes).toContain('mhtml');
+        expect(axeResultConverterTypes).toContain('page.png');
+        expect(axeResultConverterTypes).toContain('page.mhtml');
     });
 });

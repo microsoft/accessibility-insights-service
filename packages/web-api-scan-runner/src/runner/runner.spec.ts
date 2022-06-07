@@ -380,7 +380,7 @@ function setupProcessScanResult(): void {
             };
         }
 
-        const generatedReports = [{}] as GeneratedReport[];
+        const generatedReports = [{ id: 'id', format: 'html', content: 'content' }] as GeneratedReport[];
         reportGeneratorMock
             .setup((o) => o.generateReports(axeScanResults))
             .returns(() => generatedReports)
