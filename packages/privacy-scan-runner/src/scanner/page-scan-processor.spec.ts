@@ -23,9 +23,11 @@ describe(PageScanProcessor, () => {
     let testSubject: PageScanProcessor;
     let pageScanResult: OnDemandPageScanResult;
     let scanMetadata: PrivacyScanMetadata;
+    let privacyScanResult: PrivacyScanResult;
 
     const url = 'url';
-    const privacyScanResult = { scannedUrl: url } as PrivacyScanResult;
+    const pageScreenshot = 'page screenshot';
+    const pageSnapshot = 'page snapshot';
 
     beforeEach(() => {
         loggerMock = Mock.ofType<GlobalLogger>();
@@ -39,6 +41,15 @@ describe(PageScanProcessor, () => {
             id: 'id',
             deepScan: false,
         };
+        pageMock
+            .setup((o) => o.getPageScreenshot())
+            .returns(() => Promise.resolve(pageScreenshot))
+            .verifiable();
+        pageMock
+            .setup((o) => o.getPageSnapshot())
+            .returns(() => Promise.resolve(pageSnapshot))
+            .verifiable();
+        privacyScanResult = { scannedUrl: url } as PrivacyScanResult;
 
         testSubject = new PageScanProcessor(pageMock.object, privacyScannerMock.object, pageScanSchedulerMock.object, loggerMock.object);
     });
@@ -58,6 +69,7 @@ describe(PageScanProcessor, () => {
             .setup((s) => s.scan(pageMock.object))
             .returns(() => Promise.resolve(privacyScanResult))
             .verifiable();
+        privacyScanResult = { ...privacyScanResult, pageScreenshot, pageSnapshot };
 
         const results = await testSubject.scan(scanMetadata, pageScanResult);
 
@@ -76,6 +88,7 @@ describe(PageScanProcessor, () => {
             .setup((o) => o.schedulePageScan(pageScanResult))
             .returns(() => Promise.resolve())
             .verifiable();
+        privacyScanResult = { ...privacyScanResult, pageScreenshot, pageSnapshot };
 
         const results = await testSubject.scan(scanMetadata, pageScanResult);
 

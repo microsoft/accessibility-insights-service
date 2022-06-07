@@ -23,8 +23,9 @@ export class PageScanProcessor {
         let axeScanResults: AxeScanResults;
         try {
             await this.openPage(runnerScanMetadata.url);
-
+            const pageState = await this.capturePageState();
             axeScanResults = await this.axeScanner.scan(this.page);
+            axeScanResults = { ...axeScanResults, ...pageState };
 
             if (runnerScanMetadata.deepScan) {
                 if (this.page.isOpen()) {
@@ -39,6 +40,16 @@ export class PageScanProcessor {
         }
 
         return axeScanResults;
+    }
+
+    private async capturePageState(): Promise<AxeScanResults> {
+        const pageSnapshot = await this.page.getPageSnapshot();
+        const pageScreenshot = await this.page.getPageScreenshot();
+
+        return {
+            pageSnapshot,
+            pageScreenshot,
+        };
     }
 
     private async openPage(url: string): Promise<void> {

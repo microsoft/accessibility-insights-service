@@ -106,6 +106,25 @@ export class Page {
         return !isNil(this.page) && !this.page.isClosed() && isNil(this.lastBrowserError) && !isNil(this.lastNavigationResponse);
     }
 
+    public async getPageScreenshot(): Promise<string> {
+        const data = (await this.page.screenshot({
+            type: 'png',
+            fullPage: true,
+            encoding: 'base64',
+            captureBeyondViewport: true,
+        })) as string;
+
+        return data;
+    }
+
+    public async getPageSnapshot(): Promise<string> {
+        const client = await this.page.target().createCDPSession();
+        const { data } = await client.send('Page.captureSnapshot', { format: 'mhtml' });
+        await client.detach();
+
+        return data;
+    }
+
     private async runIfNavigationSucceeded<T>(
         action: () => Promise<T>,
     ): Promise<T | { error?: BrowserError | string; pageResponseCode?: number }> {

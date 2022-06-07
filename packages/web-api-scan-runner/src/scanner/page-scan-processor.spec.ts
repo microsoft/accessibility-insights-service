@@ -18,20 +18,30 @@ describe(PageScanProcessor, () => {
     let pageMock: IMock<Page>;
     let axeScannerMock: IMock<AxeScanner>;
     let deepScannerMock: IMock<DeepScanner>;
-    let browserPageMock: IMock<Puppeteer.Page>;
+    let puppeteerPageMock: IMock<Puppeteer.Page>;
+    let testSubject: PageScanProcessor;
+    let axeScanResults: AxeScanResults;
 
     const url = 'url';
-    const axeScanResults = { scannedUrl: url } as AxeScanResults;
     const pageScanResult = { id: 'id' } as OnDemandPageScanResult;
-
-    let testSubject: PageScanProcessor;
+    const pageScreenshot = 'page screenshot';
+    const pageSnapshot = 'page snapshot';
 
     beforeEach(() => {
         loggerMock = Mock.ofType<GlobalLogger>();
         pageMock = Mock.ofType<Page>();
         axeScannerMock = Mock.ofType<AxeScanner>();
         deepScannerMock = Mock.ofType<DeepScanner>();
-        browserPageMock = Mock.ofType<Puppeteer.Page>();
+        puppeteerPageMock = Mock.ofType<Puppeteer.Page>();
+        axeScanResults = { scannedUrl: url } as AxeScanResults;
+        pageMock
+            .setup((o) => o.getPageScreenshot())
+            .returns(() => Promise.resolve(pageScreenshot))
+            .verifiable();
+        pageMock
+            .setup((o) => o.getPageSnapshot())
+            .returns(() => Promise.resolve(pageSnapshot))
+            .verifiable();
 
         testSubject = new PageScanProcessor(pageMock.object, axeScannerMock.object, deepScannerMock.object, loggerMock.object);
     });
@@ -41,7 +51,7 @@ describe(PageScanProcessor, () => {
         pageMock.verifyAll();
         axeScannerMock.verifyAll();
         deepScannerMock.verifyAll();
-        browserPageMock.verifyAll();
+        puppeteerPageMock.verifyAll();
     });
 
     it.each([false, undefined])('scans successfully with deepScan=%s', async (deepScan: boolean) => {
@@ -50,6 +60,7 @@ describe(PageScanProcessor, () => {
             id: 'id',
             deepScan: deepScan,
         };
+        axeScanResults = { ...axeScanResults, pageScreenshot, pageSnapshot };
 
         setupOpenPage();
         setupClosePage();
@@ -70,6 +81,7 @@ describe(PageScanProcessor, () => {
             id: 'id',
             deepScan: true,
         };
+        axeScanResults = { ...axeScanResults, pageScreenshot, pageSnapshot };
 
         setupOpenPage();
         setupClosePage();

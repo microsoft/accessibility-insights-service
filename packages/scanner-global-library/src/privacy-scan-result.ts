@@ -9,4 +9,6 @@ export interface PrivacyScanResult {
     error?: string | BrowserError;
     pageResponseCode?: number;
     scannedUrl?: string;
+    pageSnapshot?: string;
+    pageScreenshot?: string;
 }

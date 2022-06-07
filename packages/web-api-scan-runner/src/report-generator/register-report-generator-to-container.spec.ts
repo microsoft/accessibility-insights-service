@@ -3,8 +3,6 @@
 
 import 'reflect-metadata';
 
-import { reporterFactory } from 'accessibility-insights-report';
-import { convertAxeToSarif } from 'axe-sarif-converter';
 import { Container } from 'inversify';
 import { iocTypeNames } from '../ioc-types';
 import { AxeResultConverter } from './axe-result-converter';
@@ -18,21 +16,13 @@ describe('registerReportGeneratorToContainer', () => {
         registerReportGeneratorToContainer(container);
     });
 
-    it('container has convertAxeToSarif function', () => {
-        expect(container.get(iocTypeNames.ConvertAxeToSarifFunc)).toBe(convertAxeToSarif);
-    });
-
-    it('container has html reporterFactory', () => {
-        expect(container.get(iocTypeNames.ReporterFactory)).toBe(reporterFactory);
-    });
-
-    it('container has both sarif and html report generators', () => {
+    it('container has all required report generators', () => {
         const axeResultConverters: AxeResultConverter[] = container.get(iocTypeNames.AxeResultConverters);
-        expect(axeResultConverters.length).toBe(3);
-
         const axeResultConverterTypes = axeResultConverters.map((converter) => converter.targetReportFormat);
         expect(axeResultConverterTypes).toContain('html');
         expect(axeResultConverterTypes).toContain('sarif');
         expect(axeResultConverterTypes).toContain('axe');
+        expect(axeResultConverterTypes).toContain('png');
+        expect(axeResultConverterTypes).toContain('mhtml');
     });
 });

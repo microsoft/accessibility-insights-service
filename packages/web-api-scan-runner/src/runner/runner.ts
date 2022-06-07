@@ -175,8 +175,9 @@ export class Runner {
     private async generateScanReports(axeResults: AxeScanResults): Promise<OnDemandPageScanReport[]> {
         this.logger.logInfo(`Generating reports from scan results.`);
         const reports = this.reportGenerator.generateReports(axeResults);
+        const availableReports = reports.filter((r) => !isEmpty(r.content));
 
-        return this.reportWriter.writeBatch(reports);
+        return this.reportWriter.writeBatch(availableReports);
     }
 
     private setRunResult(pageScanResult: OnDemandPageScanResult, state: OnDemandPageScanRunState, error?: string | ScanError): void {
