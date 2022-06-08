@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 import { expect } from 'chai';
-import _ from 'lodash';
+import { some } from 'lodash';
 import { ScanReport, ScanRunResultResponse } from 'service-library';
 import { TestEnvironment } from '../common-types';
 import { test } from '../test-decorator';
@@ -16,14 +16,21 @@ export class PrivacyScanReportsTestGroup extends FunctionalTestGroup {
         const response = await this.a11yServiceClient.getScanStatus(this.testContextData.scanId);
         const reports = (<ScanRunResultResponse>response.body).reports;
 
-        expect(reports, 'Expected three reports to be returned').to.have.lengthOf(2);
         expect(
-            _.some(reports, (report) => report.format === 'json'),
-            'Expected at least one json report',
+            some(reports, (report) => report.format === 'json'),
+            'Expected privacy scan json report',
         ).to.be.true;
         expect(
-            _.some(reports, (report) => report.format === 'consolidated.json'),
-            'Expected at least one consolidated report',
+            some(reports, (report) => report.format === 'consolidated.json'),
+            'Expected privacy scan consolidated report',
+        ).to.be.true;
+        expect(
+            some(reports, (report) => report.format === 'page.mhtml'),
+            'Expected page snapshot report',
+        ).to.be.true;
+        expect(
+            some(reports, (report) => report.format === 'page.png'),
+            'Expected page screenshot report',
         ).to.be.true;
     }
 
@@ -37,7 +44,7 @@ export class PrivacyScanReportsTestGroup extends FunctionalTestGroup {
                 const reportResponse = await this.a11yServiceClient.getScanReport(this.testContextData.scanId, reportData.reportId);
 
                 this.ensureResponseSuccessStatusCode(response);
-                expect(reportResponse.body, 'Get Scan Report API should return response with defined body').to.not.be.undefined;
+                expect(reportResponse.body, 'Get scan report API should return response with defined body').to.not.be.undefined;
             }),
         );
     }
