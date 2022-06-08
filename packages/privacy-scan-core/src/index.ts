@@ -4,4 +4,3 @@
 export { PrivacyPageScanner } from './privacy-page-scanner';
 export { CookieCollector } from './cookie-collector';
 export * from './types';
-export * from './cookie-scenarios';

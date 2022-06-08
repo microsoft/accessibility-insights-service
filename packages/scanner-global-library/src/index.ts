@@ -14,4 +14,3 @@ export { PageNavigationHooks } from './page-navigation-hooks';
 export * from './page-navigator';
 export { PrivacyScanResult } from './privacy-scan-result';
 export { ModHttpHeader } from './browser-extensions/mod-http-header';
-export * from './page-timeout-config';

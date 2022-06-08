@@ -31,13 +31,3 @@ export const puppeteerTimeoutConfig = {
      */
     pageDomStableTimeMsecs: 3000,
 };
-
-export const pageTimeoutConfig = {
-    /**
-     * Maximum wait time, in milliseconds, to complete page rendering.
-     */
-    maxPageNavigationTimeMsec:
-        puppeteerTimeoutConfig.navigationTimeoutMsecs +
-        puppeteerTimeoutConfig.scrollTimeoutMsecs +
-        puppeteerTimeoutConfig.pageRenderingTimeoutMsecs,
-};

@@ -1,33 +1,29 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { PromiseUtils, System } from 'common';
+import { PromiseUtils, ServiceConfiguration, System } from 'common';
 import { inject, injectable } from 'inversify';
 import { GlobalLogger } from 'logger';
-import { Page, PrivacyScanResult, pageTimeoutConfig } from 'scanner-global-library';
-import { CookieScenario, getAllCookieScenarios } from 'privacy-scan-core';
+import { Page, PrivacyScanResult } from 'scanner-global-library';
 
 @injectable()
 export class PrivacyScanner {
     constructor(
         @inject(PromiseUtils) private readonly promiseUtils: PromiseUtils,
+        @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
         @inject(GlobalLogger) private readonly logger: GlobalLogger,
-        private readonly getCookieScenarios: () => CookieScenario[] = getAllCookieScenarios,
-        private readonly maxPageNavigationTimeMsec: number = pageTimeoutConfig.maxPageNavigationTimeMsec,
     ) {}
 
     public async scan(page: Page): Promise<PrivacyScanResult> {
-        // privacy scan consists of several page reloads corresponding to cookie collection scenarios
-        // hence calculation total privacy scan time
-        const scanTimeoutMsec = this.maxPageNavigationTimeMsec * this.getCookieScenarios().length;
+        const scanConfig = await this.serviceConfig.getConfigValue('scanConfig');
 
-        return this.promiseUtils.waitFor(this.scanImpl(page), scanTimeoutMsec, () => {
-            this.logger.logError(`Privacy scan timed out after ${scanTimeoutMsec / 60000} minutes`);
+        return this.promiseUtils.waitFor(this.scanImpl(page), scanConfig.scanTimeoutInMin * 60000, () => {
+            this.logger.logError(`Privacy scan timed out after ${scanConfig.scanTimeoutInMin} minutes`);
 
             return Promise.resolve({
                 error: {
                     errorType: 'ScanTimeout',
-                    message: `Privacy scan timed out after ${scanTimeoutMsec / 60000} minutes`,
+                    message: `Privacy scan timed out after ${scanConfig.scanTimeoutInMin} minutes`,
                     stack: new Error().stack,
                 },
             } as PrivacyScanResult);

@@ -4,33 +4,34 @@
 import 'reflect-metadata';
 
 import { fail } from 'assert';
-import { PromiseUtils, System } from 'common';
+import { PromiseUtils, ScanRunTimeConfig, ServiceConfiguration, System } from 'common';
 import { BrowserError, Page, PrivacyScanResult } from 'scanner-global-library';
 import { IMock, It, Mock } from 'typemoq';
-import { CookieScenario } from 'privacy-scan-core';
 import { MockableLogger } from '../test-utilities/mockable-logger';
 import { PrivacyScanner } from './privacy-scanner';
 
 /* eslint-disable @typescript-eslint/consistent-type-assertions, @typescript-eslint/no-explicit-any */
 
 describe(PrivacyScanner, () => {
-    const maxPageNavigationTimeMsec = 5;
-
     let privacyScanner: PrivacyScanner;
     let pageMock: IMock<Page>;
     let loggerMock: IMock<MockableLogger>;
+    let serviceConfigMock: IMock<ServiceConfiguration>;
     let promiseUtilsMock: IMock<PromiseUtils>;
-    let getCookieScenarios: () => CookieScenario[];
-    let scanTimeoutMsec: number;
+    let scanConfig: ScanRunTimeConfig;
 
     beforeEach(() => {
         pageMock = Mock.ofType(Page);
         loggerMock = Mock.ofType(MockableLogger);
+        serviceConfigMock = Mock.ofType(ServiceConfiguration);
         promiseUtilsMock = Mock.ofType(PromiseUtils);
-        getCookieScenarios = () => [{}, {}, {}] as CookieScenario[];
-        scanTimeoutMsec = maxPageNavigationTimeMsec * getCookieScenarios().length;
 
-        privacyScanner = new PrivacyScanner(promiseUtilsMock.object, loggerMock.object, getCookieScenarios, maxPageNavigationTimeMsec);
+        scanConfig = {
+            scanTimeoutInMin: 5,
+        } as ScanRunTimeConfig;
+        serviceConfigMock.setup((s) => s.getConfigValue('scanConfig')).returns(() => Promise.resolve(scanConfig));
+
+        privacyScanner = new PrivacyScanner(promiseUtilsMock.object, serviceConfigMock.object, loggerMock.object);
     });
 
     afterEach(() => {
@@ -51,7 +52,7 @@ describe(PrivacyScanner, () => {
     it('should throw errors', async () => {
         const scanError = { error: 'scan error', pageResponseCode: 101 };
         pageMock.setup((p) => p.scanForPrivacy()).throws(scanError as unknown as Error);
-        privacyScanner = new PrivacyScanner(promiseUtilsMock.object, loggerMock.object, getCookieScenarios, maxPageNavigationTimeMsec);
+        privacyScanner = new PrivacyScanner(promiseUtilsMock.object, serviceConfigMock.object, loggerMock.object);
 
         setupWaitForPromisetoReturnOriginalPromise();
         loggerMock
@@ -77,7 +78,7 @@ describe(PrivacyScanner, () => {
         expect(scanResult).toEqual({
             error: {
                 errorType: 'ScanTimeout',
-                message: `Privacy scan timed out after ${scanTimeoutMsec / 60000} minutes`,
+                message: `Privacy scan timed out after ${scanConfig.scanTimeoutInMin} minutes`,
                 stack: 'stack',
             },
         } as PrivacyScanResult);
@@ -85,7 +86,7 @@ describe(PrivacyScanner, () => {
 
     function setupWaitForPromisetoReturnOriginalPromise(): void {
         promiseUtilsMock
-            .setup((s) => s.waitFor(It.isAny(), scanTimeoutMsec, It.isAny()))
+            .setup((s) => s.waitFor(It.isAny(), scanConfig.scanTimeoutInMin * 60000, It.isAny()))
             .returns(async (scanPromiseObj, timeout, timeoutCb) => {
                 return scanPromiseObj;
             })
@@ -94,7 +95,7 @@ describe(PrivacyScanner, () => {
 
     function setupWaitForPromiseToReturnTimeoutPromise(): void {
         promiseUtilsMock
-            .setup((s) => s.waitFor(It.isAny(), scanTimeoutMsec, It.isAny()))
+            .setup((s) => s.waitFor(It.isAny(), scanConfig.scanTimeoutInMin * 60000, It.isAny()))
             .returns(async (scanPromiseObj, timeout, timeoutCb) => {
                 return timeoutCb();
             })
