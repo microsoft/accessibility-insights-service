@@ -8,6 +8,11 @@ import { Page, PrivacyScanResult } from 'scanner-global-library';
 
 @injectable()
 export class PrivacyScanner {
+    /**
+     * The buffer time for starting and stopping task.
+     */
+    private readonly taskRunBufferTimeMinute = 4;
+
     constructor(
         @inject(PromiseUtils) private readonly promiseUtils: PromiseUtils,
         @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
@@ -15,15 +20,16 @@ export class PrivacyScanner {
     ) {}
 
     public async scan(page: Page): Promise<PrivacyScanResult> {
-        const scanConfig = await this.serviceConfig.getConfigValue('scanConfig');
+        const taskConfig = await this.serviceConfig.getConfigValue('taskConfig');
+        const scanTimeoutMinute = taskConfig.taskTimeoutInMinutes - this.taskRunBufferTimeMinute;
 
-        return this.promiseUtils.waitFor(this.scanImpl(page), scanConfig.scanTimeoutInMin * 60000, () => {
-            this.logger.logError(`Privacy scan timed out after ${scanConfig.scanTimeoutInMin} minutes`);
+        return this.promiseUtils.waitFor(this.scanImpl(page), scanTimeoutMinute * 60000, () => {
+            this.logger.logError(`Privacy scan timed out after ${scanTimeoutMinute} minutes`);
 
             return Promise.resolve({
                 error: {
                     errorType: 'ScanTimeout',
-                    message: `Privacy scan timed out after ${scanConfig.scanTimeoutInMin} minutes`,
+                    message: `Privacy scan timed out after ${scanTimeoutMinute} minutes`,
                     stack: new Error().stack,
                 },
             } as PrivacyScanResult);
