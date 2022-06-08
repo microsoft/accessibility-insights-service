@@ -24,6 +24,8 @@ import { CombinedPrivacyScanResultProcessor } from '../combined-report/combined-
 import { Runner } from './runner';
 
 const maxFailedScanRetryCount = 1;
+const pageScreenshot = 'page screenshot';
+const pageSnapshot = 'page snapshot';
 
 let scanMetadataConfigMock: IMock<ScanMetadataConfig>;
 let onDemandPageScanRunResultProviderMock: IMock<OnDemandPageScanRunResultProvider>;
@@ -77,6 +79,8 @@ describe(Runner, () => {
             results: {
                 httpStatusCode: 200,
             } as PrivacyPageScanReport,
+            pageScreenshot,
+            pageSnapshot,
         } as PrivacyScanResult;
         reports = [{}] as OnDemandPageScanReport[];
         serviceConfigMock
@@ -218,16 +222,28 @@ function setupProcessScanResult(): void {
     }
 
     if (privacyScanResults.results) {
-        pageScanResult.scannedUrl = privacyScanResults.scannedUrl;
-        const reportId = 'page report id';
-        const generatedReports: GeneratedReport[] = [
-            {
-                content: JSON.stringify(privacyScanResults.results),
-                id: reportId,
-                format: 'json',
-            },
-        ];
-        guidGeneratorMock.setup((gg) => gg.createGuid()).returns(() => reportId);
+        let reportId = 0;
+        guidGeneratorMock
+            .setup((o) => o.createGuid())
+            .returns(() => `${reportId++}`)
+            .verifiable();
+
+        const generatedReports: GeneratedReport[] = [];
+        generatedReports.push({
+            content: JSON.stringify(privacyScanResults.results),
+            id: '0',
+            format: 'json',
+        });
+        generatedReports.push({
+            content: pageScreenshot,
+            id: '1',
+            format: 'page.png',
+        });
+        generatedReports.push({
+            content: pageSnapshot,
+            id: '2',
+            format: 'page.mhtml',
+        });
         reportWriterMock
             .setup((o) => o.writeBatch(generatedReports))
             .returns(() => Promise.resolve(reports))
@@ -235,9 +251,10 @@ function setupProcessScanResult(): void {
         pageScanResult.reports = reports;
     }
 
-    combinedResultsProcessorMock.setup((c) => c.generateCombinedScanResults(privacyScanResults, pageScanResult)).verifiable();
-
+    pageScanResult.scannedUrl = privacyScanResults.scannedUrl;
     pageScanResult.run.pageResponseCode = privacyScanResults.pageResponseCode;
+
+    combinedResultsProcessorMock.setup((c) => c.generateCombinedScanResults(privacyScanResults, pageScanResult)).verifiable();
 }
 
 function setupPageScanProcessor(succeeded: boolean = true, error: Error = undefined): void {

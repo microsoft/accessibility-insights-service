@@ -101,16 +101,11 @@ export class Runner {
             this.telemetryManager.trackBrowserScanFailed();
         }
 
-        if (!isEmpty(privacyScanResult.results)) {
-            pageScanResult.reports = await this.generateScanReports(privacyScanResult);
-            if (privacyScanResult.scannedUrl !== undefined) {
-                pageScanResult.scannedUrl = privacyScanResult.scannedUrl;
-            }
-        }
+        pageScanResult.scannedUrl = privacyScanResult.scannedUrl;
+        pageScanResult.run.pageResponseCode = privacyScanResult.pageResponseCode;
+        pageScanResult.reports = await this.generateScanReports(privacyScanResult);
 
         await this.combinedResultProcessor.generateCombinedScanResults(privacyScanResult, pageScanResult);
-
-        pageScanResult.run.pageResponseCode = privacyScanResult.pageResponseCode;
 
         return privacyScanResult.error ? undefined : privacyScanResult;
     }
@@ -150,15 +145,32 @@ export class Runner {
 
     private async generateScanReports(privacyScanResult: PrivacyScanResult): Promise<OnDemandPageScanReport[]> {
         this.logger.logInfo(`Generating privacy scan report for a webpage scan.`);
-        const reports: GeneratedReport[] = [
-            {
+        const reports: GeneratedReport[] = [];
+        if (!isEmpty(privacyScanResult.results)) {
+            reports.push({
                 content: JSON.stringify(privacyScanResult.results),
                 format: 'json',
                 id: this.guidGenerator.createGuid(),
-            },
-        ];
+            });
+        }
 
-        return this.reportWriter.writeBatch(reports);
+        if (!isEmpty(privacyScanResult.pageScreenshot)) {
+            reports.push({
+                content: privacyScanResult.pageScreenshot,
+                format: 'page.png',
+                id: this.guidGenerator.createGuid(),
+            });
+        }
+
+        if (!isEmpty(privacyScanResult.pageSnapshot)) {
+            reports.push({
+                content: privacyScanResult.pageSnapshot,
+                format: 'page.mhtml',
+                id: this.guidGenerator.createGuid(),
+            });
+        }
+
+        return !isEmpty(reports) ? this.reportWriter.writeBatch(reports) : undefined;
     }
 
     private setRunResult(pageScanResult: OnDemandPageScanResult, state: OnDemandPageScanRunState, error?: string | ScanError): void {

@@ -23,8 +23,10 @@ export class PageScanProcessor {
         let privacyScanResults: PrivacyScanResult;
         try {
             await this.openPage(scanMetadata.url);
-
+            const pageState = await this.capturePageState();
             privacyScanResults = await this.runPrivacyScan();
+            privacyScanResults = { ...privacyScanResults, ...pageState };
+
             if (scanMetadata.deepScan) {
                 await this.pageScanScheduler.schedulePageScan(pageScanResult);
             }
@@ -33,6 +35,16 @@ export class PageScanProcessor {
         }
 
         return privacyScanResults;
+    }
+
+    private async capturePageState(): Promise<PrivacyScanResult> {
+        const pageSnapshot = await this.page.getPageSnapshot();
+        const pageScreenshot = await this.page.getPageScreenshot();
+
+        return {
+            pageSnapshot,
+            pageScreenshot,
+        };
     }
 
     private async runPrivacyScan(): Promise<PrivacyScanResult> {

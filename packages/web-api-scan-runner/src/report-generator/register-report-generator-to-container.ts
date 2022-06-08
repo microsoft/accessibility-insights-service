@@ -8,6 +8,8 @@ import { iocTypeNames } from '../ioc-types';
 import { AxeResultToHtmlConverter } from './axe-result-to-html-converter';
 import { AxeResultToSarifConverter } from './axe-result-to-sarif-converter';
 import { AxeResultEchoConverter } from './axe-result-echo-converter';
+import { AxeResultScreenshotConverter } from './axe-result-screenshot-converter';
+import { AxeResultSnapshotConverter } from './axe-result-snapshot-converter';
 
 export function registerReportGeneratorToContainer(container: Container): void {
     container.bind(iocTypeNames.ConvertAxeToSarifFunc).toConstantValue(convertAxeToSarif);
@@ -18,5 +20,7 @@ export function registerReportGeneratorToContainer(container: Container): void {
             container.get<AxeResultToSarifConverter>(AxeResultToSarifConverter),
             container.get<AxeResultToHtmlConverter>(AxeResultToHtmlConverter),
             container.get<AxeResultEchoConverter>(AxeResultEchoConverter),
+            container.get<AxeResultScreenshotConverter>(AxeResultScreenshotConverter),
+            container.get<AxeResultSnapshotConverter>(AxeResultSnapshotConverter),
         ]);
 }
