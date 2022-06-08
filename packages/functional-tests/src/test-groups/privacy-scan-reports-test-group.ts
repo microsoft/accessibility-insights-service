@@ -44,7 +44,7 @@ export class PrivacyScanReportsTestGroup extends FunctionalTestGroup {
                 const reportResponse = await this.a11yServiceClient.getScanReport(this.testContextData.scanId, reportData.reportId);
 
                 this.ensureResponseSuccessStatusCode(response);
-                expect(reportResponse.body, 'Get Scan Report API should return response with defined body').to.not.be.undefined;
+                expect(reportResponse.body, 'Get scan report API should return response with defined body').to.not.be.undefined;
             }),
         );
     }
