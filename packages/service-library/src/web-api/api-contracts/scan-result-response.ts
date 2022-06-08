@@ -6,7 +6,15 @@ import { ScanRunErrorCodeName } from '../scan-run-error-codes';
 import { WebApiError } from '../web-api-error-codes';
 
 export declare type LinkType = 'self';
-export declare type ReportFormat = 'axe' | 'sarif' | 'html' | 'consolidated.html' | 'json' | 'consolidated.json';
+export declare type ReportFormat =
+    | 'axe'
+    | 'sarif'
+    | 'html'
+    | 'consolidated.html'
+    | 'json'
+    | 'consolidated.json'
+    | 'page.mhtml'
+    | 'page.png';
 export declare type ScanState = 'pending' | 'pass' | 'fail';
 export declare type RunState = 'pending' | 'accepted' | 'queued' | 'running' | 'report' | 'completed' | 'failed';
 export declare type NotificationState = 'pending' | 'queued' | 'queueFailed' | 'sending' | 'sent' | 'sendFailed';

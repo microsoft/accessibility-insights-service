@@ -1,0 +1,55 @@
+<!--
+Copyright (c) Microsoft Corporation. All rights reserved.
+Licensed under the MIT License.
+-->
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>Base64 Image Viewer</title>
+    </head>
+    <style>
+        * {
+            margin: 5px;
+            padding: 0;
+        }
+        .text-area {
+            width: 50%;
+        }
+        .image-box {
+            display: grid;
+            height: 100%;
+        }
+        .center-fit {
+            max-width: 100%;
+            max-height: 100vh;
+            margin: auto;
+            cursor: zoom-in;
+        }
+        input[type='checkbox'] {
+            display: none;
+        }
+        input[type='checkbox']:checked ~ label > img {
+            max-height: none;
+            cursor: zoom-out;
+        }
+    </style>
+    <body>
+        <h1>Base64 Image Viewer</h1>
+        <label for="base64Input">To view the image paste the base64 image string into the text area below.</label>
+        <br /><br />
+        <textarea id="base64Input" class="text-area" rows="5"></textarea>
+        <br /><br />
+        <div class="image-box">
+            <input type="checkbox" id="zoom" />
+            <label for="zoom" class="center-fit">
+                <img id="base64Image" class="center-fit" />
+            </label>
+        </div>
+        <script>
+            document.getElementById('base64Input').onkeyup = function () {
+                document.getElementById('base64Image').src = 'data:image/png;base64, ' + this.value;
+            };
+        </script>
+    </body>
+</html>

@@ -30,7 +30,7 @@ export class AxePuppeteerFactory {
         if (isEmpty(contentSourcePath)) {
             // It's important that we default to this rather than allowing axe-puppeteer to use its
             // own default because axe-puppeteer uses a transitive dependency like "axe-core": "^1.2.3",
-            // and we want to to instead force the use of the specific axe-core version we and the report
+            // and we want to to instead force the use of the specific axe-core version and the report
             // package are pinned to.
             //
             // We can't rely on a resolution/lockfile for this because it's still true from the context

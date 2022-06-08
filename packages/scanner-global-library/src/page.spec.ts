@@ -5,7 +5,7 @@ import 'reflect-metadata';
 
 import { AxePuppeteer } from '@axe-core/puppeteer';
 import { AxeResults } from 'axe-core';
-import Puppeteer from 'puppeteer';
+import Puppeteer, { ScreenshotOptions } from 'puppeteer';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { System } from 'common';
 import { PrivacyPageScanner, PrivacyResults } from 'privacy-scan-core';
@@ -47,6 +47,7 @@ let puppeteerResponseMock: IMock<Puppeteer.HTTPResponse>;
 let puppeteerRequestMock: IMock<Puppeteer.HTTPRequest>;
 let axePuppeteerMock: IMock<AxePuppeteer>;
 let privacyScannerMock: IMock<PrivacyPageScanner>;
+let cdpSessionMock: IMock<Puppeteer.CDPSession>;
 
 describe(Page, () => {
     beforeEach(() => {
@@ -68,6 +69,7 @@ describe(Page, () => {
         puppeteerResponseMock = getPromisableDynamicMock(Mock.ofType<Puppeteer.HTTPResponse>());
         puppeteerRequestMock = getPromisableDynamicMock(Mock.ofType<Puppeteer.HTTPRequest>());
         axePuppeteerMock = getPromisableDynamicMock(Mock.ofType<AxePuppeteer>());
+        cdpSessionMock = getPromisableDynamicMock(Mock.ofType<Puppeteer.CDPSession>());
         privacyScannerMock = Mock.ofType<PrivacyPageScanner>();
         navigationResponse = {
             httpResponse: puppeteerResponseMock.object,
@@ -99,26 +101,10 @@ describe(Page, () => {
         axePuppeteerMock.verifyAll();
         loggerMock.verifyAll();
         puppeteerRequestMock.verifyAll();
+        cdpSessionMock.verifyAll();
     });
 
-    function setupAxePuppeteerFactoryMock(axeResultUrl: string = redirectUrl): void {
-        puppeteerPageMock
-            .setup(async (o) => o.title())
-            .returns(() => Promise.resolve(scanResults.pageTitle))
-            .verifiable();
-
-        axeResults = { url: axeResultUrl } as AxeResults;
-        axePuppeteerMock
-            .setup((o) => o.analyze())
-            .returns(() => Promise.resolve(axeResults))
-            .verifiable();
-        axePuppeteerFactoryMock
-            .setup((o) => o.createAxePuppeteer(puppeteerPageMock.object, It.isAny()))
-            .returns(() => Promise.resolve(axePuppeteerMock.object))
-            .verifiable();
-    }
-
-    describe('scanForA11yIssues', () => {
+    describe('scanForA11yIssues()', () => {
         beforeEach(() => {
             simulatePageLaunch();
         });
@@ -237,7 +223,7 @@ describe(Page, () => {
         });
     });
 
-    describe('scanForPrivacy', () => {
+    describe('scanForPrivacy()', () => {
         let privacyResults: PrivacyResults;
 
         beforeEach(() => {
@@ -353,7 +339,7 @@ describe(Page, () => {
             await expect(page.scanForPrivacy()).rejects.toThrow();
         });
 
-        it('Returns result with error if privacy results contain an error', async () => {
+        it('returns result with error if privacy results contain an error', async () => {
             privacyResults.cookieCollectionConsentResults.push(
                 ...[
                     {
@@ -388,7 +374,7 @@ describe(Page, () => {
         });
     });
 
-    describe('navigateToUrl', () => {
+    describe('navigateToUrl()', () => {
         beforeEach(() => {
             simulatePageLaunch();
         });
@@ -430,74 +416,6 @@ describe(Page, () => {
         });
     });
 
-    it('create()', async () => {
-        browserMock
-            .setup(async (o) => o.newPage())
-            .returns(() => Promise.resolve(puppeteerPageMock.object))
-            .verifiable();
-        webDriverMock
-            .setup(async (o) => o.launch(It.isAny()))
-            .returns(() => Promise.resolve(browserMock.object))
-            .verifiable();
-        setupPageConfigurator();
-        page.browser = undefined;
-        page.page = undefined;
-
-        await page.create();
-
-        expect(page.userAgent).toEqual(userAgent);
-        expect(page.browserResolution).toEqual(browserResolution);
-        browserMock.verify(async (o) => o.newPage(), Times.once());
-    });
-
-    it('create() with browser url', async () => {
-        browserMock
-            .setup(async (o) => o.newPage())
-            .returns(() => Promise.resolve(puppeteerPageMock.object))
-            .verifiable();
-        webDriverMock
-            .setup(async (m) => m.launch(It.isValue('path')))
-            .returns(() => Promise.resolve(browserMock.object))
-            .verifiable();
-        page.browser = undefined;
-        page.page = undefined;
-
-        await page.create({
-            browserExecutablePath: 'path',
-        });
-
-        browserMock.verify(async (o) => o.newPage(), Times.once());
-    });
-
-    it('create() prioritizes ws endpoint option if provided', async () => {
-        browserMock
-            .setup(async (o) => o.newPage())
-            .returns(() => Promise.resolve(puppeteerPageMock.object))
-            .verifiable();
-        webDriverMock
-            .setup(async (m) => m.connect(It.isValue('ws')))
-            .returns(() => Promise.resolve(browserMock.object))
-            .verifiable();
-        page.browser = undefined;
-        page.page = undefined;
-
-        await page.create({
-            browserExecutablePath: 'path',
-            browserWSEndpoint: 'ws',
-        });
-
-        browserMock.verify(async (o) => o.newPage(), Times.once());
-    });
-
-    it('close()', async () => {
-        webDriverMock
-            .setup(async (o) => o.close())
-            .returns(() => Promise.resolve())
-            .verifiable();
-
-        await page.close();
-    });
-
     describe('isOpen()', () => {
         it('returns false if page not launched', () => {
             expect(page.isOpen()).toEqual(false);
@@ -525,29 +443,152 @@ describe(Page, () => {
         });
     });
 
-    function setupPageConfigurator(): void {
-        pageConfiguratorMock
-            .setup((o) => o.getBrowserResolution())
-            .returns(() => browserResolution)
-            .verifiable();
-        pageConfiguratorMock
-            .setup((o) => o.getUserAgent())
-            .returns(() => userAgent)
-            .verifiable();
+    describe('Miscellaneous', () => {
+        it('create()', async () => {
+            browserMock
+                .setup(async (o) => o.newPage())
+                .returns(() => Promise.resolve(puppeteerPageMock.object))
+                .verifiable();
+            webDriverMock
+                .setup(async (o) => o.launch(It.isAny()))
+                .returns(() => Promise.resolve(browserMock.object))
+                .verifiable();
+            setupPageConfigurator();
+            page.browser = undefined;
+            page.page = undefined;
 
-        pageNavigatorMock
-            .setup((o) => o.pageConfigurator)
-            .returns(() => pageConfiguratorMock.object)
-            .verifiable(Times.atLeastOnce());
-    }
+            await page.create();
 
-    function simulatePageNavigation(response: Puppeteer.HTTPResponse, browserError?: BrowserError): void {
-        page.lastNavigationResponse = response;
-        page.lastBrowserError = browserError;
-    }
+            expect(page.userAgent).toEqual(userAgent);
+            expect(page.browserResolution).toEqual(browserResolution);
+            browserMock.verify(async (o) => o.newPage(), Times.once());
+        });
 
-    function simulatePageLaunch(): void {
-        page.browser = browserMock.object;
-        page.page = puppeteerPageMock.object;
-    }
+        it('create() with browser url', async () => {
+            browserMock
+                .setup(async (o) => o.newPage())
+                .returns(() => Promise.resolve(puppeteerPageMock.object))
+                .verifiable();
+            webDriverMock
+                .setup(async (m) => m.launch(It.isValue('path')))
+                .returns(() => Promise.resolve(browserMock.object))
+                .verifiable();
+            page.browser = undefined;
+            page.page = undefined;
+
+            await page.create({
+                browserExecutablePath: 'path',
+            });
+
+            browserMock.verify(async (o) => o.newPage(), Times.once());
+        });
+
+        it('create() prioritizes ws endpoint option if provided', async () => {
+            browserMock
+                .setup(async (o) => o.newPage())
+                .returns(() => Promise.resolve(puppeteerPageMock.object))
+                .verifiable();
+            webDriverMock
+                .setup(async (m) => m.connect(It.isValue('ws')))
+                .returns(() => Promise.resolve(browserMock.object))
+                .verifiable();
+            page.browser = undefined;
+            page.page = undefined;
+
+            await page.create({
+                browserExecutablePath: 'path',
+                browserWSEndpoint: 'ws',
+            });
+
+            browserMock.verify(async (o) => o.newPage(), Times.once());
+        });
+
+        it('close()', async () => {
+            webDriverMock
+                .setup(async (o) => o.close())
+                .returns(() => Promise.resolve())
+                .verifiable();
+
+            await page.close();
+        });
+
+        it('getPageScreenshot()', async () => {
+            simulatePageLaunch();
+            const options = {
+                type: 'png',
+                fullPage: true,
+                encoding: 'base64',
+                captureBeyondViewport: true,
+            } as ScreenshotOptions;
+            puppeteerPageMock
+                .setup((o) => o.screenshot(options))
+                .returns(() => Promise.resolve('data'))
+                .verifiable();
+            const data = await page.getPageScreenshot();
+            expect(data).toEqual('data');
+        });
+
+        it('getPageSnapshot()', async () => {
+            simulatePageLaunch();
+            setupCDPSession('data');
+            const data = await page.getPageSnapshot();
+            expect(data).toEqual('data');
+        });
+    });
 });
+
+function setupAxePuppeteerFactoryMock(axeResultUrl: string = redirectUrl): void {
+    puppeteerPageMock
+        .setup(async (o) => o.title())
+        .returns(() => Promise.resolve(scanResults.pageTitle))
+        .verifiable();
+    axeResults = { url: axeResultUrl } as AxeResults;
+    axePuppeteerMock
+        .setup((o) => o.analyze())
+        .returns(() => Promise.resolve(axeResults))
+        .verifiable();
+    axePuppeteerFactoryMock
+        .setup((o) => o.createAxePuppeteer(puppeteerPageMock.object, It.isAny()))
+        .returns(() => Promise.resolve(axePuppeteerMock.object))
+        .verifiable();
+}
+
+function setupPageConfigurator(): void {
+    pageConfiguratorMock
+        .setup((o) => o.getBrowserResolution())
+        .returns(() => browserResolution)
+        .verifiable();
+    pageConfiguratorMock
+        .setup((o) => o.getUserAgent())
+        .returns(() => userAgent)
+        .verifiable();
+    pageNavigatorMock
+        .setup((o) => o.pageConfigurator)
+        .returns(() => pageConfiguratorMock.object)
+        .verifiable(Times.atLeastOnce());
+}
+
+function simulatePageNavigation(response: Puppeteer.HTTPResponse, browserError?: BrowserError): void {
+    page.lastNavigationResponse = response;
+    page.lastBrowserError = browserError;
+}
+
+function simulatePageLaunch(): void {
+    page.browser = browserMock.object;
+    page.page = puppeteerPageMock.object;
+}
+
+function setupCDPSession(data: string): void {
+    cdpSessionMock = getPromisableDynamicMock(Mock.ofType<Puppeteer.CDPSession>());
+    const targetStub = {
+        createCDPSession: async () => cdpSessionMock.object,
+    } as Puppeteer.Target;
+    puppeteerPageMock.setup((o) => o.target()).returns(() => targetStub);
+
+    const snapshot = { data };
+    cdpSessionMock.setup((o) => o.send('Page.captureSnapshot', { format: 'mhtml' })).returns(async () => snapshot);
+    cdpSessionMock
+        .setup((o) => o.detach())
+        .returns(() => Promise.resolve())
+        .verifiable();
+}

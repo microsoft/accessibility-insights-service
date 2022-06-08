@@ -14,7 +14,6 @@ export class ScanReportTestGroup extends FunctionalTestGroup {
     public async testReportGenerated(): Promise<void> {
         const response = await this.a11yServiceClient.getScanStatus(this.testContextData.scanId);
 
-        //response.body.reports[0].format
         this.ensureResponseSuccessStatusCode(response);
         const reports = (<ScanRunResultResponse>response.body).reports;
 
@@ -30,6 +29,14 @@ export class ScanReportTestGroup extends FunctionalTestGroup {
         expect(
             reports.find((r) => r.format === 'axe'),
             `Expected 'axe' report to be returned`,
+        ).to.not.be.undefined;
+        expect(
+            reports.find((r) => r.format === 'page.mhtml'),
+            `Expected page snapshot 'page.mhtml' report to be returned`,
+        ).to.not.be.undefined;
+        expect(
+            reports.find((r) => r.format === 'page.png'),
+            `Expected page screenshot 'page.png' report to be returned`,
         ).to.not.be.undefined;
     }
 
