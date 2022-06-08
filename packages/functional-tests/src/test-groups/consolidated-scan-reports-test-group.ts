@@ -32,6 +32,14 @@ export class ConsolidatedScanReportsTestGroup extends FunctionalTestGroup {
             reports.find((r) => r.format === 'consolidated.html'),
             `Expected 'consolidated.html' report to be returned`,
         ).to.not.be.undefined;
+        expect(
+            reports.find((r) => r.format === 'page.mhtml'),
+            `Expected page snapshot 'page.mhtml' report to be returned`,
+        ).to.not.be.undefined;
+        expect(
+            reports.find((r) => r.format === 'page.png'),
+            `Expected page screenshot 'page.png' report to be returned`,
+        ).to.not.be.undefined;
     }
 
     @test(TestEnvironment.all)

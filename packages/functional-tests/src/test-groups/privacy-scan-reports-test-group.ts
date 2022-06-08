@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 import { expect } from 'chai';
-import { some } from 'lodash';
 import { ScanReport, ScanRunResultResponse } from 'service-library';
 import { TestEnvironment } from '../common-types';
 import { test } from '../test-decorator';
@@ -16,22 +15,23 @@ export class PrivacyScanReportsTestGroup extends FunctionalTestGroup {
         const response = await this.a11yServiceClient.getScanStatus(this.testContextData.scanId);
         const reports = (<ScanRunResultResponse>response.body).reports;
 
+        expect(reports, 'Expected a valid reports response result').to.not.be.undefined;
         expect(
-            some(reports, (report) => report.format === 'json'),
-            'Expected privacy scan json report',
-        ).to.be.true;
+            reports.find((r) => r.format === 'json'),
+            `Expected privacy scan 'json' report to be returned`,
+        ).to.not.be.undefined;
         expect(
-            some(reports, (report) => report.format === 'consolidated.json'),
-            'Expected privacy scan consolidated report',
-        ).to.be.true;
+            reports.find((r) => r.format === 'consolidated.json'),
+            `Expected privacy scan 'consolidated.json' report to be returned`,
+        ).to.not.be.undefined;
         expect(
-            some(reports, (report) => report.format === 'page.mhtml'),
-            'Expected page snapshot report',
-        ).to.be.true;
+            reports.find((r) => r.format === 'page.mhtml'),
+            `Expected page snapshot 'page.mhtml' report to be returned`,
+        ).to.not.be.undefined;
         expect(
-            some(reports, (report) => report.format === 'page.png'),
-            'Expected page screenshot report',
-        ).to.be.true;
+            reports.find((r) => r.format === 'page.png'),
+            `Expected page screenshot 'page.png' report to be returned`,
+        ).to.not.be.undefined;
     }
 
     @test(TestEnvironment.all)
