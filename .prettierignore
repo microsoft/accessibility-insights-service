@@ -31,3 +31,4 @@ copyright-header.txt
 **/crawler_storage/
 **/ai_scan_cli_output/
 **/*.ps1
+**/*.cmd
