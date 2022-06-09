@@ -4,7 +4,7 @@
 import 'reflect-metadata';
 
 import { fail } from 'assert';
-import { PromiseUtils, ScanRunTimeConfig, ServiceConfiguration, System } from 'common';
+import { PromiseUtils, ServiceConfiguration, System, TaskRuntimeConfig } from 'common';
 import { BrowserError, Page, PrivacyScanResult } from 'scanner-global-library';
 import { IMock, It, Mock } from 'typemoq';
 import { MockableLogger } from '../test-utilities/mockable-logger';
@@ -13,12 +13,14 @@ import { PrivacyScanner } from './privacy-scanner';
 /* eslint-disable @typescript-eslint/consistent-type-assertions, @typescript-eslint/no-explicit-any */
 
 describe(PrivacyScanner, () => {
+    const taskRunBufferTimeMinute = 5;
+
     let privacyScanner: PrivacyScanner;
     let pageMock: IMock<Page>;
     let loggerMock: IMock<MockableLogger>;
     let serviceConfigMock: IMock<ServiceConfiguration>;
     let promiseUtilsMock: IMock<PromiseUtils>;
-    let scanConfig: ScanRunTimeConfig;
+    let taskConfig: TaskRuntimeConfig;
 
     beforeEach(() => {
         pageMock = Mock.ofType(Page);
@@ -26,10 +28,10 @@ describe(PrivacyScanner, () => {
         serviceConfigMock = Mock.ofType(ServiceConfiguration);
         promiseUtilsMock = Mock.ofType(PromiseUtils);
 
-        scanConfig = {
-            scanTimeoutInMin: 5,
-        } as ScanRunTimeConfig;
-        serviceConfigMock.setup((s) => s.getConfigValue('scanConfig')).returns(() => Promise.resolve(scanConfig));
+        taskConfig = {
+            taskTimeoutInMinutes: 7,
+        } as TaskRuntimeConfig;
+        serviceConfigMock.setup((s) => s.getConfigValue('taskConfig')).returns(() => Promise.resolve(taskConfig));
 
         privacyScanner = new PrivacyScanner(promiseUtilsMock.object, serviceConfigMock.object, loggerMock.object);
     });
@@ -78,7 +80,7 @@ describe(PrivacyScanner, () => {
         expect(scanResult).toEqual({
             error: {
                 errorType: 'ScanTimeout',
-                message: `Privacy scan timed out after ${scanConfig.scanTimeoutInMin} minutes`,
+                message: `Privacy scan timed out after ${taskConfig.taskTimeoutInMinutes - taskRunBufferTimeMinute} minutes`,
                 stack: 'stack',
             },
         } as PrivacyScanResult);
@@ -86,7 +88,7 @@ describe(PrivacyScanner, () => {
 
     function setupWaitForPromisetoReturnOriginalPromise(): void {
         promiseUtilsMock
-            .setup((s) => s.waitFor(It.isAny(), scanConfig.scanTimeoutInMin * 60000, It.isAny()))
+            .setup((s) => s.waitFor(It.isAny(), (taskConfig.taskTimeoutInMinutes - taskRunBufferTimeMinute) * 60000, It.isAny()))
             .returns(async (scanPromiseObj, timeout, timeoutCb) => {
                 return scanPromiseObj;
             })
@@ -95,7 +97,7 @@ describe(PrivacyScanner, () => {
 
     function setupWaitForPromiseToReturnTimeoutPromise(): void {
         promiseUtilsMock
-            .setup((s) => s.waitFor(It.isAny(), scanConfig.scanTimeoutInMin * 60000, It.isAny()))
+            .setup((s) => s.waitFor(It.isAny(), (taskConfig.taskTimeoutInMinutes - taskRunBufferTimeMinute) * 60000, It.isAny()))
             .returns(async (scanPromiseObj, timeout, timeoutCb) => {
                 return timeoutCb();
             })

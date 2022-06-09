@@ -11,6 +11,7 @@ import { BrowserError } from './browser-error';
 import { PageNavigationHooks } from './page-navigation-hooks';
 import { PageConfigurator } from './page-configurator';
 import { puppeteerTimeoutConfig } from './page-timeout-config';
+import { MockableLogger } from './test-utilities/mockable-logger';
 
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/consistent-type-assertions */
 
@@ -20,6 +21,7 @@ let pageNavigator: PageNavigator;
 let pageResponseProcessorMock: IMock<PageResponseProcessor>;
 let navigationHooksMock: IMock<PageNavigationHooks>;
 let pageMock: IMock<Page>;
+let loggerMock: IMock<MockableLogger>;
 let timingCount: number;
 
 describe(PageNavigator, () => {
@@ -27,6 +29,7 @@ describe(PageNavigator, () => {
         pageResponseProcessorMock = Mock.ofType<PageResponseProcessor>();
         navigationHooksMock = Mock.ofType<PageNavigationHooks>();
         pageMock = Mock.ofType<Page>();
+        loggerMock = Mock.ofType(MockableLogger);
 
         timingCount = 0;
         process.hrtime = {
@@ -37,12 +40,13 @@ describe(PageNavigator, () => {
             },
         } as NodeJS.HRTime;
 
-        pageNavigator = new PageNavigator(pageResponseProcessorMock.object, navigationHooksMock.object);
+        pageNavigator = new PageNavigator(pageResponseProcessorMock.object, navigationHooksMock.object, loggerMock.object);
     });
 
     afterEach(() => {
         pageResponseProcessorMock.verifyAll();
         navigationHooksMock.verifyAll();
+        loggerMock.verifyAll();
     });
 
     it('get pageConfigurator', () => {
@@ -74,6 +78,7 @@ describe(PageNavigator, () => {
             httpResponse: response,
             pageNavigationTiming: {
                 goto1: 10000,
+                goto1Timeout: false,
                 goto2: 0,
             },
         });
@@ -146,6 +151,7 @@ describe(PageNavigator, () => {
             httpResponse: {},
             pageNavigationTiming: {
                 goto1: 10000,
+                goto1Timeout: true,
                 goto2: 10000,
             },
         });

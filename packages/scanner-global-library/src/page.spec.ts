@@ -21,16 +21,21 @@ import { PageNavigator, NavigationResponse } from './page-navigator';
 import { PrivacyScanResult } from './privacy-scan-result';
 import { PageNavigationTiming } from './page-timeout-config';
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 const url = 'url';
 const redirectUrl = 'redirect url';
 const userAgent = 'user agent';
 const browserResolution = '1920x1080';
-const pageNavigationTiming: PageNavigationTiming = {
+const pageNavigationTiming = {
     goto1: 1,
+    goto1Timeout: false,
     goto2: 2,
     scroll: 3,
+    scrollTimeout: true,
     render: 4,
-};
+    renderTimeout: false,
+} as PageNavigationTiming;
 
 let axeResults: AxeResults;
 let scanResults: AxeScanResults;
@@ -385,11 +390,11 @@ describe(Page, () => {
                 .returns(() => Promise.resolve(navigationResponse))
                 .verifiable();
 
-            loggerMock
-                .setup((o) =>
-                    o.logInfo('Total page rendering time 10 msec', { total: '10', goto1: '1', goto2: '2', scroll: '3', render: '4' }),
-                )
-                .verifiable();
+            const timing = { total: '10' } as any;
+            Object.keys(navigationResponse.pageNavigationTiming).forEach((key: keyof PageNavigationTiming) => {
+                timing[key] = `${navigationResponse.pageNavigationTiming[key]}`;
+            });
+            loggerMock.setup((o) => o.logInfo('Total page rendering time 10 msec', { ...timing })).verifiable();
 
             await page.navigateToUrl(url);
 
