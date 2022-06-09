@@ -6,7 +6,7 @@ import { inject, injectable, optional } from 'inversify';
 import { GlobalLogger } from 'logger';
 import * as Puppeteer from 'puppeteer';
 import axe from 'axe-core';
-import { isNil, isEmpty } from 'lodash';
+import { isNil, isEmpty, isNumber } from 'lodash';
 import { PrivacyPageScanner, PrivacyResults, ReloadPageResponse } from 'privacy-scan-core';
 import { AxeScanResults } from './axe-scan-results';
 import { AxePuppeteerFactory } from './factories/axe-puppeteer-factory';
@@ -77,7 +77,9 @@ export class Page {
             const timing = {} as any;
             let totalNavigationElapsed = 0;
             Object.keys(navigationResponse.pageNavigationTiming).forEach((key: keyof PageNavigationTiming) => {
-                totalNavigationElapsed += navigationResponse.pageNavigationTiming[key];
+                if (isNumber(navigationResponse.pageNavigationTiming[key])) {
+                    totalNavigationElapsed += navigationResponse.pageNavigationTiming[key] as number;
+                }
                 timing[key] = `${navigationResponse.pageNavigationTiming[key]}`;
             });
 

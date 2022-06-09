@@ -3,9 +3,12 @@
 
 export interface PageNavigationTiming {
     goto1: number;
+    goto1Timeout: boolean;
     goto2: number;
     scroll: number;
+    scrollTimeout: boolean;
     render: number;
+    renderTimeout: boolean;
 }
 
 /**

@@ -2,9 +2,10 @@
 // Licensed under the MIT License.
 
 import * as Puppeteer from 'puppeteer';
-import { injectable, inject } from 'inversify';
+import { injectable, inject, optional } from 'inversify';
 import { isNil } from 'lodash';
 import { System } from 'common';
+import { GlobalLogger } from 'logger';
 import { PageResponseProcessor } from './page-response-processor';
 import { BrowserError } from './browser-error';
 import { PageNavigationHooks } from './page-navigation-hooks';
@@ -23,6 +24,7 @@ export class PageNavigator {
     constructor(
         @inject(PageResponseProcessor) public readonly pageResponseProcessor: PageResponseProcessor,
         @inject(PageNavigationHooks) public readonly pageNavigationHooks: PageNavigationHooks,
+        @inject(GlobalLogger) @optional() private readonly logger: GlobalLogger,
     ) {}
 
     public get pageConfigurator(): PageConfigurator {
@@ -34,10 +36,14 @@ export class PageNavigator {
         page: Puppeteer.Page,
         onNavigationError: (browserError: BrowserError, error?: unknown) => Promise<void> = () => Promise.resolve(),
     ): Promise<NavigationResponse> {
+        const goto1NavigationCondition = 'networkidle2';
+        const goto2NavigationCondition = 'load';
+
         await this.pageNavigationHooks.preNavigation(page);
 
+        let goto1Timeout = false;
         let timestamp = System.getTimestamp();
-        let navigationResult = await this.navigateToUrl(url, page, 'networkidle2');
+        let navigationResult = await this.navigateToUrl(url, page, goto1NavigationCondition);
         const goto1Elapsed = System.getElapsedTime(timestamp);
 
         let goto2Elapsed = 0;
@@ -49,9 +55,21 @@ export class PageNavigator {
             // However any dynamic contents may not be available if it is loaded after window.onload() event.
             // Since we reuse page instance from the first navigation attempt some contents could be already loaded and available which
             // mitigates dynamic content rendering issue above.
+            goto1Timeout = true;
+            this.logger?.logWarn('Page navigation error on a first attempt', {
+                navigationCondition: goto1NavigationCondition,
+                browserError: System.serializeError(navigationResult.browserError),
+            });
+
             timestamp = System.getTimestamp();
-            navigationResult = await this.navigateToUrl(url, page, 'load');
+            navigationResult = await this.navigateToUrl(url, page, goto2NavigationCondition);
             goto2Elapsed = System.getElapsedTime(timestamp);
+            if (navigationResult.browserError) {
+                this.logger?.logError('Page navigation error on a second attempt', {
+                    navigationCondition: goto2NavigationCondition,
+                    browserError: System.serializeError(navigationResult.browserError),
+                });
+            }
         }
 
         if (!isNil(navigationResult.browserError)) {
@@ -68,7 +86,7 @@ export class PageNavigator {
 
         return {
             httpResponse: navigationResult.response,
-            pageNavigationTiming: { ...pageTiming, goto1: goto1Elapsed, goto2: goto2Elapsed },
+            pageNavigationTiming: { ...pageTiming, goto1: goto1Elapsed, goto1Timeout, goto2: goto2Elapsed },
         };
     }
 

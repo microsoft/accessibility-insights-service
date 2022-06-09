@@ -24,10 +24,10 @@ export class PageHandler {
         const scroll = await this.scrollToBottom(page, scrollTimeoutMsecs);
         const render = await this.waitForStableContent(page, renderTimeoutMsecs);
 
-        return { scroll, render };
+        return { ...scroll, ...render };
     }
 
-    private async scrollToBottom(page: Puppeteer.Page, timeoutMsecs: number): Promise<number> {
+    private async scrollToBottom(page: Puppeteer.Page, timeoutMsecs: number): Promise<Partial<PageNavigationTiming>> {
         const maxCheckCount = timeoutMsecs / this.checkIntervalMsecs;
         let checkCount = 0;
         let scrollingComplete = false;
@@ -61,10 +61,10 @@ export class PageHandler {
             this.logger?.logWarn(`Did not scroll to the bottom of the page after ${timeoutMsecs / 1000} seconds.`);
         }
 
-        return elapsed;
+        return { scroll: elapsed, scrollTimeout: !scrollingComplete };
     }
 
-    private async waitForStableContent(page: Puppeteer.Page, timeoutMsecs: number): Promise<number> {
+    private async waitForStableContent(page: Puppeteer.Page, timeoutMsecs: number): Promise<Partial<PageNavigationTiming>> {
         const maxCheckCount = timeoutMsecs / this.checkIntervalMsecs;
         const minCheckBreakCount = this.pageDomStableTimeMsecs / this.checkIntervalMsecs;
 
@@ -100,12 +100,13 @@ export class PageHandler {
             checkCount += 1;
         }
 
-        const elapsed = System.getElapsedTime(timestamp);
+        let elapsed = System.getElapsedTime(timestamp);
+        elapsed = pageHasStableContent ? elapsed - minCheckBreakCount * this.checkIntervalMsecs : elapsed;
 
         if (pageHasStableContent !== true) {
             this.logger?.logWarn(`Page did not complete full rendering after ${timeoutMsecs / 1000} seconds.`);
         }
 
-        return pageHasStableContent ? elapsed - minCheckBreakCount * this.checkIntervalMsecs : elapsed;
+        return { render: elapsed, renderTimeout: !pageHasStableContent };
     }
 }
