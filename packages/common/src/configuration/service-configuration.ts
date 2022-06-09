@@ -172,7 +172,7 @@ export class ServiceConfiguration {
             taskConfig: {
                 taskTimeoutInMinutes: {
                     format: 'int',
-                    default: 15,
+                    default: 20,
                     doc: 'Timeout value after which the task has to be terminated. Must correlate with queueConfig.messageVisibilityTimeoutInSeconds config value.',
                 },
                 retentionTimeInDays: {

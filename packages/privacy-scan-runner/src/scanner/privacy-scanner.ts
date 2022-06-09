@@ -11,7 +11,7 @@ export class PrivacyScanner {
     /**
      * The buffer time for starting and stopping task.
      */
-    private readonly taskRunBufferTimeMinute = 4;
+    private readonly taskRunBufferTimeMinute = 5;
 
     constructor(
         @inject(PromiseUtils) private readonly promiseUtils: PromiseUtils,

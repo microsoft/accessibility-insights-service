@@ -13,7 +13,7 @@ import { PrivacyScanner } from './privacy-scanner';
 /* eslint-disable @typescript-eslint/consistent-type-assertions, @typescript-eslint/no-explicit-any */
 
 describe(PrivacyScanner, () => {
-    const taskRunBufferTimeMinute = 4;
+    const taskRunBufferTimeMinute = 5;
 
     let privacyScanner: PrivacyScanner;
     let pageMock: IMock<Page>;

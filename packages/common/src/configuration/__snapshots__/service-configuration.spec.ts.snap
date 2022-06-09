@@ -222,7 +222,7 @@ Object {
       "format": "int",
     },
     "taskTimeoutInMinutes": Object {
-      "default": 15,
+      "default": 20,
       "doc": "Timeout value after which the task has to be terminated. Must correlate with queueConfig.messageVisibilityTimeoutInSeconds config value.",
       "format": "int",
     },
@@ -452,7 +452,7 @@ Object {
       "format": "int",
     },
     "taskTimeoutInMinutes": Object {
-      "default": 15,
+      "default": 20,
       "doc": "Timeout value after which the task has to be terminated. Must correlate with queueConfig.messageVisibilityTimeoutInSeconds config value.",
       "format": "int",
     },
