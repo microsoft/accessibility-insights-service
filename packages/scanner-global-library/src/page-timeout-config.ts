@@ -19,12 +19,12 @@ export const puppeteerTimeoutConfig = {
     navigationTimeoutMsecs: 20000,
 
     /**
-     * Maximum wait time, in milliseconds, to complete async rendering operations of the page.
+     * Maximum wait time, in milliseconds, to complete async page rendering.
      */
     pageRenderingTimeoutMsecs: 20000,
 
     /**
-     * The minimum time the HTML DOM should be stable to accept page rendered.
+     * The minimum time the HTML DOM should be stable to accept page rendering.
      */
     pageDomStableTimeMsecs: 3000,
 
