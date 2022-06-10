@@ -34,7 +34,7 @@
         "@types/lodash": "^4.14.181",
         "@types/node": "^16.11.7",
         "@types/normalize-path": "^3.0.0",
-        "@types/puppeteer": "^5.4.0",
+        "@types/puppeteer": "^5.4.6",
         "@types/table": "^6.3.2",
         "accessibility-insights-crawler": "^1.0.0",
         "axe-result-converter": "^1.0.0",
