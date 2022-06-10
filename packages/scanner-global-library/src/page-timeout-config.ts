@@ -20,7 +20,8 @@ export interface PageNavigationTiming {
 export const puppeteerTimeoutConfig = {
     /**
      * Maximum wait time, in milliseconds, to complete page navigation.
-     * Puppeteer will not render page properly and timeout on page.goto() when running headless
+     *
+     * Puppeteer will not render page properly for some webpages and timeout on page.goto() when running
      * in docker. Hence do not increase this value as it will not mitigate navigation timeout error.
      */
     navigationTimeoutMsecs: 20000,
