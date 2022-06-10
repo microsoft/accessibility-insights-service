@@ -58,6 +58,7 @@ export class PageNavigator {
             goto1Timeout = true;
             this.logger?.logWarn('Page navigation error on a first attempt.', {
                 navigationCondition: goto1NavigationCondition,
+                timeout: `${puppeteerTimeoutConfig.navigationTimeoutMsecs}`,
                 browserError: System.serializeError(navigationResult.browserError),
             });
 
@@ -67,6 +68,7 @@ export class PageNavigator {
             if (navigationResult.browserError) {
                 this.logger?.logError('Page navigation error on a second attempt.', {
                     navigationCondition: goto2NavigationCondition,
+                    timeout: `${puppeteerTimeoutConfig.navigationTimeoutMsecs}`,
                     browserError: System.serializeError(navigationResult.browserError),
                 });
             }
@@ -105,6 +107,7 @@ export class PageNavigator {
         } catch (error) {
             networkIdleTimeout = true;
             this.logger.logWarn('Error while waiting for page network idle state.', {
+                timeout: `${puppeteerTimeoutConfig.networkIdleTimeoutMsec}`,
                 error: System.serializeError(error),
             });
         }
