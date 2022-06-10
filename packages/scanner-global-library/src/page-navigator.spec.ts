@@ -71,7 +71,7 @@ describe(PageNavigator, () => {
             .returns(() => Promise.resolve(response))
             .verifiable();
         puppeteerPageMock
-            .setup((o) => o.waitForNetworkIdle({ timeout: puppeteerTimeoutConfig.navigationTimeoutMsecs }))
+            .setup((o) => o.waitForNetworkIdle({ timeout: puppeteerTimeoutConfig.networkIdleTimeoutMsec }))
             .returns(() => Promise.resolve())
             .verifiable();
         navigationHooksMock.setup((o) => o.preNavigation(puppeteerPageMock.object)).verifiable();
@@ -105,7 +105,7 @@ describe(PageNavigator, () => {
             .returns(() => Promise.resolve(response))
             .verifiable();
         puppeteerPageMock
-            .setup((o) => o.waitForNetworkIdle({ timeout: puppeteerTimeoutConfig.navigationTimeoutMsecs }))
+            .setup((o) => o.waitForNetworkIdle({ timeout: puppeteerTimeoutConfig.networkIdleTimeoutMsec }))
             .returns(() => Promise.reject('waitForNetworkIdle() error'))
             .verifiable();
         navigationHooksMock.setup((o) => o.preNavigation(puppeteerPageMock.object)).verifiable();
@@ -178,7 +178,7 @@ describe(PageNavigator, () => {
             .returns(() => Promise.resolve(response))
             .verifiable();
         puppeteerPageMock
-            .setup((o) => o.waitForNetworkIdle({ timeout: puppeteerTimeoutConfig.navigationTimeoutMsecs }))
+            .setup((o) => o.waitForNetworkIdle({ timeout: puppeteerTimeoutConfig.networkIdleTimeoutMsec }))
             .returns(() => Promise.resolve())
             .verifiable();
         pageResponseProcessorMock
