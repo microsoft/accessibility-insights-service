@@ -5,6 +5,8 @@ export interface PageNavigationTiming {
     goto1: number;
     goto1Timeout: boolean;
     goto2: number;
+    networkIdle: number;
+    networkIdleTimeout: boolean;
     scroll: number;
     scrollTimeout: boolean;
     render: number;
@@ -19,7 +21,7 @@ export const puppeteerTimeoutConfig = {
     /**
      * Maximum wait time, in milliseconds, to complete page navigation.
      */
-    navigationTimeoutMsecs: 20000,
+    navigationTimeoutMsecs: 30000,
 
     /**
      * Maximum wait time, in milliseconds, to complete async page rendering.

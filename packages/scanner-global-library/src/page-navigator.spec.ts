@@ -20,7 +20,7 @@ const url = 'url';
 let pageNavigator: PageNavigator;
 let pageResponseProcessorMock: IMock<PageResponseProcessor>;
 let navigationHooksMock: IMock<PageNavigationHooks>;
-let pageMock: IMock<Page>;
+let puppeteerPageMock: IMock<Page>;
 let loggerMock: IMock<MockableLogger>;
 let timingCount: number;
 
@@ -28,7 +28,7 @@ describe(PageNavigator, () => {
     beforeEach(() => {
         pageResponseProcessorMock = Mock.ofType<PageResponseProcessor>();
         navigationHooksMock = Mock.ofType<PageNavigationHooks>();
-        pageMock = Mock.ofType<Page>();
+        puppeteerPageMock = Mock.ofType<Page>();
         loggerMock = Mock.ofType(MockableLogger);
 
         timingCount = 0;
@@ -46,6 +46,7 @@ describe(PageNavigator, () => {
     afterEach(() => {
         pageResponseProcessorMock.verifyAll();
         navigationHooksMock.verifyAll();
+        puppeteerPageMock.verifyAll();
         loggerMock.verifyAll();
     });
 
@@ -56,11 +57,11 @@ describe(PageNavigator, () => {
         expect(pageNavigator.pageConfigurator).toBe(pageConfiguratorMock.object);
     });
 
-    it('navigate', async () => {
+    it('navigate with success', async () => {
         const response = {} as HTTPResponse;
         const onNavigationErrorMock = jest.fn();
 
-        pageMock
+        puppeteerPageMock
             .setup(async (o) =>
                 o.goto(url, {
                     waitUntil: 'networkidle2',
@@ -69,10 +70,14 @@ describe(PageNavigator, () => {
             )
             .returns(() => Promise.resolve(response))
             .verifiable();
-        navigationHooksMock.setup((o) => o.preNavigation(pageMock.object)).verifiable();
-        navigationHooksMock.setup((o) => o.postNavigation(pageMock.object, response, onNavigationErrorMock)).verifiable();
+        puppeteerPageMock
+            .setup((o) => o.waitForNetworkIdle({ timeout: puppeteerTimeoutConfig.navigationTimeoutMsecs }))
+            .returns(() => Promise.resolve())
+            .verifiable();
+        navigationHooksMock.setup((o) => o.preNavigation(puppeteerPageMock.object)).verifiable();
+        navigationHooksMock.setup((o) => o.postNavigation(puppeteerPageMock.object, response, onNavigationErrorMock)).verifiable();
 
-        const pageTiming = await pageNavigator.navigate(url, pageMock.object, onNavigationErrorMock);
+        const pageTiming = await pageNavigator.navigate(url, puppeteerPageMock.object, onNavigationErrorMock);
         expect(onNavigationErrorMock).toBeCalledTimes(0);
         expect(pageTiming).toEqual({
             httpResponse: response,
@@ -80,6 +85,42 @@ describe(PageNavigator, () => {
                 goto1: 10000,
                 goto1Timeout: false,
                 goto2: 0,
+                networkIdle: 10000,
+                networkIdleTimeout: false,
+            },
+        });
+    });
+
+    it('navigate with network idle wait error', async () => {
+        const response = {} as HTTPResponse;
+        const onNavigationErrorMock = jest.fn();
+
+        puppeteerPageMock
+            .setup(async (o) =>
+                o.goto(url, {
+                    waitUntil: 'networkidle2',
+                    timeout: puppeteerTimeoutConfig.navigationTimeoutMsecs,
+                }),
+            )
+            .returns(() => Promise.resolve(response))
+            .verifiable();
+        puppeteerPageMock
+            .setup((o) => o.waitForNetworkIdle({ timeout: puppeteerTimeoutConfig.navigationTimeoutMsecs }))
+            .returns(() => Promise.reject('waitForNetworkIdle() error'))
+            .verifiable();
+        navigationHooksMock.setup((o) => o.preNavigation(puppeteerPageMock.object)).verifiable();
+        navigationHooksMock.setup((o) => o.postNavigation(puppeteerPageMock.object, response, onNavigationErrorMock)).verifiable();
+
+        const pageTiming = await pageNavigator.navigate(url, puppeteerPageMock.object, onNavigationErrorMock);
+        expect(onNavigationErrorMock).toBeCalledTimes(0);
+        expect(pageTiming).toEqual({
+            httpResponse: response,
+            pageNavigationTiming: {
+                goto1: 10000,
+                goto1Timeout: false,
+                goto2: 0,
+                networkIdle: 10000,
+                networkIdleTimeout: true,
             },
         });
     });
@@ -90,7 +131,7 @@ describe(PageNavigator, () => {
             errorType: 'NavigationError',
             message: 'navigation error',
         } as BrowserError;
-        pageMock
+        puppeteerPageMock
             .setup(async (o) =>
                 o.goto(url, {
                     waitUntil: 'networkidle2',
@@ -99,7 +140,7 @@ describe(PageNavigator, () => {
             )
             .returns(() => Promise.reject(error))
             .verifiable();
-        navigationHooksMock.setup((o) => o.preNavigation(pageMock.object)).verifiable();
+        navigationHooksMock.setup((o) => o.preNavigation(puppeteerPageMock.object)).verifiable();
         pageResponseProcessorMock
             .setup((o) => o.getNavigationError(error))
             .returns(() => browserError)
@@ -107,7 +148,7 @@ describe(PageNavigator, () => {
         const onNavigationErrorMock = jest.fn();
         onNavigationErrorMock.mockImplementation((browserErr, err) => Promise.resolve());
 
-        await pageNavigator.navigate(url, pageMock.object, onNavigationErrorMock);
+        await pageNavigator.navigate(url, puppeteerPageMock.object, onNavigationErrorMock);
         expect(onNavigationErrorMock).toHaveBeenCalledWith(browserError, error);
     });
 
@@ -118,7 +159,7 @@ describe(PageNavigator, () => {
             errorType: 'UrlNavigationTimeout',
             message: 'navigation timeout',
         } as BrowserError;
-        pageMock
+        puppeteerPageMock
             .setup(async (o) =>
                 o.goto(url, {
                     waitUntil: 'networkidle2',
@@ -127,7 +168,7 @@ describe(PageNavigator, () => {
             )
             .returns(() => Promise.reject(error))
             .verifiable();
-        pageMock
+        puppeteerPageMock
             .setup(async (o) =>
                 o.goto(url, {
                     waitUntil: 'load',
@@ -136,16 +177,20 @@ describe(PageNavigator, () => {
             )
             .returns(() => Promise.resolve(response))
             .verifiable();
+        puppeteerPageMock
+            .setup((o) => o.waitForNetworkIdle({ timeout: puppeteerTimeoutConfig.navigationTimeoutMsecs }))
+            .returns(() => Promise.resolve())
+            .verifiable();
         pageResponseProcessorMock
             .setup((o) => o.getNavigationError(error))
             .returns(() => browserError)
             .verifiable();
 
         const onNavigationErrorMock = jest.fn();
-        navigationHooksMock.setup((o) => o.preNavigation(pageMock.object)).verifiable();
-        navigationHooksMock.setup((o) => o.postNavigation(pageMock.object, response, onNavigationErrorMock)).verifiable();
+        navigationHooksMock.setup((o) => o.preNavigation(puppeteerPageMock.object)).verifiable();
+        navigationHooksMock.setup((o) => o.postNavigation(puppeteerPageMock.object, response, onNavigationErrorMock)).verifiable();
 
-        const pageTiming = await pageNavigator.navigate(url, pageMock.object, onNavigationErrorMock);
+        const pageTiming = await pageNavigator.navigate(url, puppeteerPageMock.object, onNavigationErrorMock);
         expect(onNavigationErrorMock).toBeCalledTimes(0);
         expect(pageTiming).toEqual({
             httpResponse: {},
@@ -153,6 +198,8 @@ describe(PageNavigator, () => {
                 goto1: 10000,
                 goto1Timeout: true,
                 goto2: 10000,
+                networkIdle: 10000,
+                networkIdleTimeout: false,
             },
         });
     });

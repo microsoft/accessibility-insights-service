@@ -36,7 +36,7 @@ export class PageNavigator {
         page: Puppeteer.Page,
         onNavigationError: (browserError: BrowserError, error?: unknown) => Promise<void> = () => Promise.resolve(),
     ): Promise<NavigationResponse> {
-        const goto1NavigationCondition = 'networkidle2';
+        const goto1NavigationCondition = 'networkidle2'; // switching to networkidle0 will break some websites scanning
         const goto2NavigationCondition = 'load';
 
         await this.pageNavigationHooks.preNavigation(page);
@@ -56,7 +56,7 @@ export class PageNavigator {
             // Since we reuse page instance from the first navigation attempt some contents could be already loaded and available which
             // mitigates dynamic content rendering issue above.
             goto1Timeout = true;
-            this.logger?.logWarn('Page navigation error on a first attempt', {
+            this.logger?.logWarn('Page navigation error on a first attempt.', {
                 navigationCondition: goto1NavigationCondition,
                 browserError: System.serializeError(navigationResult.browserError),
             });
@@ -65,7 +65,7 @@ export class PageNavigator {
             navigationResult = await this.navigateToUrl(url, page, goto2NavigationCondition);
             goto2Elapsed = System.getElapsedTime(timestamp);
             if (navigationResult.browserError) {
-                this.logger?.logError('Page navigation error on a second attempt', {
+                this.logger?.logError('Page navigation error on a second attempt.', {
                     navigationCondition: goto2NavigationCondition,
                     browserError: System.serializeError(navigationResult.browserError),
                 });
@@ -78,16 +78,39 @@ export class PageNavigator {
             return undefined;
         }
 
-        const pageTiming = (await this.pageNavigationHooks.postNavigation(
-            page,
-            navigationResult.response,
-            onNavigationError,
-        )) as PageNavigationTiming;
+        // Try to wait for the page network idle state to support pages that have network activity
+        // past networkidle2 wait condition. This will let page load pending frame/content.
+        // Pages with constant network activity will succeed this the page navigation.
+        const networkIdlePageTiming = await this.tryWaitForNetworkIdle(page);
+
+        const postNavigationPageTiming = await this.pageNavigationHooks.postNavigation(page, navigationResult.response, onNavigationError);
 
         return {
             httpResponse: navigationResult.response,
-            pageNavigationTiming: { ...pageTiming, goto1: goto1Elapsed, goto1Timeout, goto2: goto2Elapsed },
+            pageNavigationTiming: {
+                goto1: goto1Elapsed,
+                goto1Timeout,
+                goto2: goto2Elapsed,
+                ...networkIdlePageTiming,
+                ...postNavigationPageTiming,
+            } as PageNavigationTiming,
         };
+    }
+
+    private async tryWaitForNetworkIdle(page: Puppeteer.Page): Promise<Partial<PageNavigationTiming>> {
+        let networkIdleTimeout = false;
+        const timestamp = System.getTimestamp();
+        try {
+            await page.waitForNetworkIdle({ timeout: puppeteerTimeoutConfig.navigationTimeoutMsecs });
+        } catch (error) {
+            networkIdleTimeout = true;
+            this.logger.logWarn('Error while waiting for page network idle state.', {
+                error: System.serializeError(error),
+            });
+        }
+        const networkIdleElapsed = System.getElapsedTime(timestamp);
+
+        return { networkIdle: networkIdleElapsed, networkIdleTimeout };
     }
 
     private async navigateToUrl(
