@@ -91,7 +91,7 @@ describe(PageHandler, () => {
             .setup(async (o) => o.waitForTimeout(checkIntervalMsecs))
             .returns(() => Promise.resolve())
             .verifiable(Times.exactly(minCheckBreakCount + scrollCount));
-        loggerMock.setup((l) => l.logWarn(It.isAny())).verifiable();
+        loggerMock.setup((l) => l.logWarn(It.isAny(), { timeout: `${scrollTimeout}` })).verifiable();
         const expectedResult = {
             render: 9970,
             renderTimeout: false,
@@ -121,7 +121,7 @@ describe(PageHandler, () => {
             .setup(async (o) => o.waitForTimeout(checkIntervalMsecs))
             .returns(() => Promise.resolve())
             .verifiable(Times.exactly(validationCallCount + scrollCount));
-        loggerMock.setup((l) => l.logWarn(It.isAny())).verifiable();
+        loggerMock.setup((l) => l.logWarn(It.isAny(), { timeout: `${timeoutMsecs}` })).verifiable();
         const expectedResult = {
             render: 10000,
             renderTimeout: true,

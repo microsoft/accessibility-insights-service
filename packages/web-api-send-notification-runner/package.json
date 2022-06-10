@@ -26,7 +26,7 @@
         "@types/jest": "^27.4.1",
         "@types/lodash": "^4.14.181",
         "@types/node": "^16.11.7",
-        "@types/puppeteer": "^5.4.0",
+        "@types/puppeteer": "^5.4.6",
         "@types/sha.js": "^2.4.0",
         "@types/verror": "^1.10.4",
         "@types/yargs": "^17.0.10",
@@ -41,17 +41,17 @@
         "ts-jest": "^27.1.4",
         "ts-loader": "^9.2.8",
         "typemoq": "^2.1.0",
-        "typescript": "^4.6.3",
-        "webpack": "^5.72.0",
+        "typescript": "^4.7.2",
+        "webpack": "^5.73.0",
         "webpack-cli": "^4.9.2",
         "webpack-ignore-dynamic-require": "^1.0.0"
     },
     "dependencies": {
-        "@azure/cosmos": "^3.15.1",
+        "@azure/cosmos": "^3.16.1",
         "applicationinsights": "^2.3.1",
         "azure-services": "^1.0.0",
         "common": "^1.0.0",
-        "dotenv": "^16.0.0",
+        "dotenv": "^16.0.1",
         "got": "^11.8.3",
         "inversify": "^6.0.1",
         "lodash": "^4.17.21",
@@ -61,6 +61,6 @@
         "sha.js": "^2.4.11",
         "storage-documents": "1.0.0",
         "verror": "^1.10.1",
-        "yargs": "^17.4.0"
+        "yargs": "^17.5.1"
     }
 }

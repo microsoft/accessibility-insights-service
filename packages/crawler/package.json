@@ -30,7 +30,7 @@
         "@types/leveldown": "^4.0.2",
         "@types/levelup": "^5.1.1",
         "@types/node": "^16.11.7",
-        "@types/puppeteer": "^5.4.0",
+        "@types/puppeteer": "^5.4.6",
         "jest": "^27.5.1",
         "jest-junit": "^12.3.0",
         "npm-run-all": "^4.1.5",
@@ -38,7 +38,7 @@
         "rollup": "^2.70.1",
         "ts-jest": "^27.1.4",
         "typemoq": "^2.1.0",
-        "typescript": "^4.6.3"
+        "typescript": "^4.7.2"
     },
     "dependencies": {
         "@axe-core/puppeteer": "4.4.2",
@@ -48,17 +48,17 @@
         "axe-core": "4.4.1",
         "browser-pool": "^3.1.0",
         "common": "^1.0.0",
-        "dotenv": "^16.0.0",
+        "dotenv": "^16.0.1",
         "encoding-down": "^7.1.0",
         "inversify": "^6.0.1",
         "leveldown": "^6.1.1",
         "levelup": "^5.1.1",
         "lodash": "^4.17.21",
         "logger": "1.0.0",
-        "puppeteer": "^10.0.0",
+        "puppeteer": "^14.2.1",
         "reflect-metadata": "^0.1.13",
         "scanner-global-library": "1.0.0",
         "sha.js": "^2.4.11",
-        "yargs": "^17.4.0"
+        "yargs": "^17.5.1"
     }
 }

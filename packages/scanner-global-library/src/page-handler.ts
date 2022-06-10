@@ -58,7 +58,9 @@ export class PageHandler {
         const elapsed = System.getElapsedTime(timestamp);
 
         if (!scrollingComplete) {
-            this.logger?.logWarn(`Did not scroll to the bottom of the page after ${timeoutMsecs / 1000} seconds.`);
+            this.logger?.logWarn(`Did not scroll to the bottom of the page after ${timeoutMsecs / 1000} seconds.`, {
+                timeout: `${timeoutMsecs}`,
+            });
         }
 
         return { scroll: elapsed, scrollTimeout: !scrollingComplete };
@@ -104,7 +106,9 @@ export class PageHandler {
         elapsed = pageHasStableContent ? elapsed - minCheckBreakCount * this.checkIntervalMsecs : elapsed;
 
         if (pageHasStableContent !== true) {
-            this.logger?.logWarn(`Page did not complete full rendering after ${timeoutMsecs / 1000} seconds.`);
+            this.logger?.logWarn(`Page did not complete full rendering after ${timeoutMsecs / 1000} seconds.`, {
+                timeout: `${timeoutMsecs}`,
+            });
         }
 
         return { render: elapsed, renderTimeout: !pageHasStableContent };
