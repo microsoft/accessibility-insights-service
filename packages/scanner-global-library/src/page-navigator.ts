@@ -82,7 +82,7 @@ export class PageNavigator {
 
         // Try to wait for the page network idle state to support pages that have network activity
         // past networkidle2 wait condition. This will let page load pending frame/content.
-        // Pages with constant network activity will succeed the page navigation.
+        // Pages with constant network activity still succeed the page navigation.
         const networkIdlePageTiming = await this.tryWaitForNetworkIdle(page);
 
         const postNavigationPageTiming = await this.pageNavigationHooks.postNavigation(page, navigationResult.response, onNavigationError);
