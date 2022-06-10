@@ -27,15 +27,17 @@ const url = 'url';
 const redirectUrl = 'redirect url';
 const userAgent = 'user agent';
 const browserResolution = '1920x1080';
-const pageNavigationTiming = {
+const pageNavigationTiming: PageNavigationTiming = {
     goto1: 1,
     goto1Timeout: false,
     goto2: 2,
+    networkIdle: 0,
+    networkIdleTimeout: false,
     scroll: 3,
     scrollTimeout: true,
     render: 4,
     renderTimeout: false,
-} as PageNavigationTiming;
+};
 
 let axeResults: AxeResults;
 let scanResults: AxeScanResults;
