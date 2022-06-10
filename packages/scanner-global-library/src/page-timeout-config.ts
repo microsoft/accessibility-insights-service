@@ -33,7 +33,7 @@ export const puppeteerTimeoutConfig = {
     /**
      * Maximum wait time, in milliseconds, to complete async page rendering.
      */
-    pageRenderingTimeoutMsecs: 10000,
+    pageRenderingTimeoutMsecs: 15000,
 
     /**
      * The minimum time the HTML DOM should be stable to accept page rendering.
@@ -43,5 +43,5 @@ export const puppeteerTimeoutConfig = {
     /**
      * Maximum wait time, in milliseconds, to scroll to the bottom of the page.
      */
-    scrollTimeoutMsecs: 10000,
+    scrollTimeoutMsecs: 15000,
 };
