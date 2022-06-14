@@ -279,6 +279,20 @@ describe(Page, () => {
 
             expect(page.lastBrowserError).toEqual(browserError);
         });
+
+        it('set extra HTTP headers to the navigation requests', async () => {
+            process.env.X_FORWARDED_FOR_HTTP_HEADER = '1.1.1.1';
+            pageNavigatorMock
+                .setup(async (o) => o.navigate(url, puppeteerPageMock.object, It.isAny()))
+                .returns(() => Promise.resolve(navigationResponse))
+                .verifiable();
+            puppeteerPageMock
+                .setup((o) => o.setExtraHTTPHeaders({ X_FORWARDED_FOR: '1.1.1.1' }))
+                .returns(() => Promise.resolve())
+                .verifiable();
+
+            await page.navigateToUrl(url);
+        });
     });
 
     describe('isOpen()', () => {

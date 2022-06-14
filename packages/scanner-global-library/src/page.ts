@@ -6,13 +6,15 @@ import { inject, injectable, optional } from 'inversify';
 import { GlobalLogger } from 'logger';
 import * as Puppeteer from 'puppeteer';
 import axe from 'axe-core';
-import { isNil, isNumber } from 'lodash';
+import { isNil, isNumber, isEmpty } from 'lodash';
 import { AxeScanResults } from './axe-scan-results';
 import { AxePuppeteerFactory } from './factories/axe-puppeteer-factory';
 import { WebDriver } from './web-driver';
 import { PageNavigator } from './page-navigator';
 import { BrowserError } from './browser-error';
 import { PageNavigationTiming } from './page-timeout-config';
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 export interface BrowserStartOptions {
     browserExecutablePath?: string;
@@ -76,6 +78,8 @@ export class Page {
             await this.recreate();
         }
 
+        await this.setExtraHTTPHeaders();
+
         const navigationResponse = await this.pageNavigator.navigate(url, this.page, async (browserError) => {
             this.logger?.logError('Page navigation error', { browserError: System.serializeError(browserError) });
             this.lastBrowserError = browserError;
@@ -83,7 +87,6 @@ export class Page {
 
         this.lastNavigationResponse = navigationResponse?.httpResponse;
         if (navigationResponse?.pageNavigationTiming) {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const timing = {} as any;
             let totalNavigationElapsed = 0;
             Object.keys(navigationResponse.pageNavigationTiming).forEach((key: keyof PageNavigationTiming) => {
@@ -167,6 +170,29 @@ export class Page {
         }
 
         return action();
+    }
+
+    private async setExtraHTTPHeaders(): Promise<void> {
+        const nameSuffix = '_HTTP_HEADER';
+        const headers = [];
+        const headersObj = {} as any;
+        const environmentVariables = Object.entries(process.env).map(([key, value]) => ({ name: key, value }));
+        for (const variable of environmentVariables) {
+            if (!variable.name.endsWith(nameSuffix)) {
+                continue;
+            }
+
+            // eslint-disable-next-line security/detect-non-literal-regexp
+            const name = variable.name.replace(new RegExp(nameSuffix, 'gi'), '').replace(/_/g, '-');
+            headers.push({ name, value: variable.value });
+            headersObj[name] = variable.value;
+
+            await this.page.setExtraHTTPHeaders({ [name]: `${variable.value}` });
+        }
+
+        if (!isEmpty(headers)) {
+            this.logger?.logWarn('Added extra HTTP headers to the navigation requests.', { headers: headersObj });
+        }
     }
 
     private async scanPageForIssues(contentSourcePath?: string): Promise<AxeScanResults> {
