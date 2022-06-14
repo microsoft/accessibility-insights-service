@@ -19,8 +19,8 @@ import {
 import { ConsoleLoggerClient, GlobalLogger } from 'logger';
 import { PromiseUtils, ServiceConfiguration } from 'common';
 import yargs from 'yargs';
-import _ from 'lodash';
-import { PrivacyPageScanner, CookieCollector } from 'privacy-scan-core';
+import { isEmpty } from 'lodash';
+import { PrivacyScannerCore, PrivacyScenarioRunner, CookieCollector } from 'privacy-scan-core';
 
 type BannerDetectionTestArgs = {
     urlsListPath: string;
@@ -49,8 +49,9 @@ const pageNavigator = new PageNavigator(
     new PageNavigationHooks(new PageConfigurator(), pageResponseProcessor, new PageHandler(logger)),
     logger,
 );
-const privacyPageScanner = new PrivacyPageScanner(serviceConfig, new CookieCollector(), logger);
-const page = new Page(webDriver, undefined, pageNavigator, privacyPageScanner, logger);
+const privacyScenarioRunner = new PrivacyScenarioRunner(serviceConfig, new CookieCollector(), logger);
+const privacyScannerCore = new PrivacyScannerCore(privacyScenarioRunner, logger);
+const page = new Page(webDriver, undefined, pageNavigator, logger);
 
 function getArguments(): BannerDetectionTestArgs {
     yargs.option<keyof BannerDetectionTestArgs, yargs.Options>('urlsListPath', {
@@ -97,7 +98,7 @@ function readUrlsList(filename: string): string[] {
     // eslint-disable-next-line security/detect-non-literal-fs-filename
     const lines = fs.readFileSync(filename).toString().split('\n');
 
-    return lines.map((line) => line.trim()).filter((str) => !_.isEmpty(str));
+    return lines.map((line) => line.trim()).filter((str) => !isEmpty(str));
 }
 
 async function scanAllUrls(urls: string[]): Promise<BannerDetectionResults> {
@@ -112,7 +113,7 @@ async function scanAllUrls(urls: string[]): Promise<BannerDetectionResults> {
     // and prevent the banner from being detected
     for (const url of urls) {
         await page.navigateToUrl(url);
-        const privacyScanResult = await page.scanForPrivacy();
+        const privacyScanResult = await privacyScannerCore.scan(page);
 
         if (privacyScanResult.error !== undefined || privacyScanResult.results === undefined) {
             results.errors.push({
