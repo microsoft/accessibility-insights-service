@@ -56,7 +56,8 @@ export class ModHttpHeader {
 
     private async configureExtension(browser: Puppeteer.Browser, extensionUrl: string): Promise<void> {
         const extensionPage = await browser.newPage();
-        await extensionPage.goto(`chrome://version/`); // open any webpage first to force extension page rendering on subsequent navigation
+        // await extensionPage.goto(`chrome://version/`);
+        // open any webpage first to force extension page rendering on subsequent navigation
         await extensionPage.goto(extensionUrl, { waitUntil: 'load' });
 
         await extensionPage.waitForSelector(this.nameInputSelector);
