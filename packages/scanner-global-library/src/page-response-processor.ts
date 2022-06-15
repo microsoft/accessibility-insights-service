@@ -11,7 +11,7 @@ export class PageResponseProcessor {
     constructor(private readonly navigationErrorPatterns: Partial<Record<BrowserErrorTypes, string[]>> = pageNavigationErrorPatterns) {}
 
     public getResponseError(response: Puppeteer.HTTPResponse, error: Error = new Error()): BrowserError {
-        if (!response.ok()) {
+        if (response.status() > 399) {
             return {
                 errorType: 'HttpErrorCode',
                 statusCode: response.status(),

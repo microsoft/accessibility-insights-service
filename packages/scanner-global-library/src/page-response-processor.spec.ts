@@ -27,14 +27,10 @@ describe(PageResponseProcessor, () => {
         responseMock
             .setup((o) => o.status())
             .returns(() => 404)
-            .verifiable();
+            .verifiable(Times.exactly(2));
         responseMock
             .setup((o) => o.statusText())
             .returns(() => 'Not Found')
-            .verifiable();
-        responseMock
-            .setup((o) => o.ok())
-            .returns(() => false)
             .verifiable();
 
         const expectedError = {
@@ -58,8 +54,8 @@ describe(PageResponseProcessor, () => {
             })
             .verifiable(Times.exactly(2));
         responseMock
-            .setup((o) => o.ok())
-            .returns(() => true)
+            .setup((o) => o.status())
+            .returns(() => 200)
             .verifiable();
 
         const expectedError = {
@@ -81,8 +77,8 @@ describe(PageResponseProcessor, () => {
             })
             .verifiable();
         responseMock
-            .setup((o) => o.ok())
-            .returns(() => true)
+            .setup((o) => o.status())
+            .returns(() => 200)
             .verifiable();
 
         const actualError = pageResponseProcessor.getResponseError(responseMock.object);

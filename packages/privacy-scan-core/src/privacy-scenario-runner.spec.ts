@@ -50,22 +50,6 @@ describe(PrivacyScenarioRunner, () => {
             .setup((o) => o.getConfigValue('privacyScanConfig'))
             .returns(() => Promise.resolve(privacyScanConfig))
             .verifiable();
-        puppeteerPageMock
-            .setup((o) =>
-                o.waitForXPath(privacyScanConfig.bannerXPath, {
-                    timeout: privacyScanConfig.bannerDetectionTimeout,
-                }),
-            )
-            .returns(() => Promise.resolve(undefined))
-            .verifiable();
-        pageMock
-            .setup((o) => o.url)
-            .returns(() => url)
-            .verifiable(Times.atLeastOnce());
-        pageMock
-            .setup((o) => o.page)
-            .returns(() => puppeteerPageMock.object)
-            .verifiable();
 
         for (const scenario of cookieScenario) {
             const result = { cookiesUsedForConsent: scenario.name } as ConsentResult;
@@ -94,6 +78,23 @@ describe(PrivacyScenarioRunner, () => {
     });
 
     it('run scenarios with banner detected', async () => {
+        puppeteerPageMock
+            .setup((o) =>
+                o.waitForXPath(privacyScanConfig.bannerXPath, {
+                    timeout: privacyScanConfig.bannerDetectionTimeout,
+                }),
+            )
+            .returns(() => Promise.resolve(undefined))
+            .verifiable();
+        pageMock
+            .setup((o) => o.url)
+            .returns(() => url)
+            .verifiable(Times.atLeastOnce());
+        pageMock
+            .setup((o) => o.page)
+            .returns(() => puppeteerPageMock.object)
+            .verifiable();
+
         const expectedResult = {
             finishDateTime: dateNow,
             navigationalUri: url,
@@ -108,7 +109,8 @@ describe(PrivacyScenarioRunner, () => {
     });
 
     it('run scenarios with banner not detected', async () => {
-        puppeteerPageMock.reset();
+        const times = 5;
+
         puppeteerPageMock
             .setup((o) =>
                 o.waitForXPath(privacyScanConfig.bannerXPath, {
@@ -116,7 +118,19 @@ describe(PrivacyScenarioRunner, () => {
                 }),
             )
             .returns(() => Promise.reject({ name: 'TimeoutError' }))
-            .verifiable();
+            .verifiable(Times.exactly(times));
+        pageMock
+            .setup((o) => o.page)
+            .returns(() => puppeteerPageMock.object)
+            .verifiable(Times.exactly(times));
+        pageMock
+            .setup((o) => o.url)
+            .returns(() => url)
+            .verifiable(Times.atLeast(times));
+        pageMock
+            .setup((o) => o.navigateToUrl(url))
+            .returns(() => Promise.resolve())
+            .verifiable(Times.exactly(times));
 
         const expectedResult = {
             finishDateTime: dateNow,

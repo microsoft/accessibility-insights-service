@@ -12,6 +12,8 @@ import { PrivacyResults } from './types';
 
 @injectable()
 export class PrivacyScenarioRunner {
+    private readonly maxBannerDetectionAttemptCount = 5;
+
     constructor(
         @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
         @inject(CookieCollector) private readonly cookieCollector: CookieCollector,
@@ -22,9 +24,10 @@ export class PrivacyScenarioRunner {
     public async run(page: Page): Promise<PrivacyResults> {
         const privacyScanConfig = await this.serviceConfig.getConfigValue('privacyScanConfig');
 
-        const hasBanner = await this.hasBanner(page, privacyScanConfig);
-        this.logger?.logInfo(`Privacy banner ${hasBanner ? 'was detected.' : 'was not detected.'}`, {
-            bannerDetected: `${hasBanner}`,
+        const bannerState = await this.tryDetectBanner(page, privacyScanConfig);
+        this.logger?.logInfo(`Privacy banner ${bannerState.found ? 'was detected.' : 'was not detected.'}`, {
+            bannerDetected: `${bannerState.found}`,
+            attemptCount: `${bannerState.attemptCount}`,
             url: page.url,
             bannerXPath: privacyScanConfig.bannerXPath,
         });
@@ -35,9 +38,23 @@ export class PrivacyScenarioRunner {
             finishDateTime: new Date(),
             navigationalUri: page.url,
             bannerDetectionXpathExpression: privacyScanConfig.bannerXPath,
-            bannerDetected: hasBanner,
+            bannerDetected: bannerState.found,
             cookieCollectionConsentResults: cookieCollectionResults,
         };
+    }
+
+    private async tryDetectBanner(page: Page, privacyScanConfig: PrivacyScanConfig): Promise<{ found: boolean; attemptCount: number }> {
+        let attemptCount = 0;
+        let found = false;
+        do {
+            found = await this.hasBanner(page, privacyScanConfig);
+            attemptCount++;
+            if (!found) {
+                await page.navigateToUrl(page.url);
+            }
+        } while (attemptCount < this.maxBannerDetectionAttemptCount && found === false);
+
+        return { found, attemptCount };
     }
 
     private async hasBanner(page: Page, privacyScanConfig: PrivacyScanConfig): Promise<boolean> {
