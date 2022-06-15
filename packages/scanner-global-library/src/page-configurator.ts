@@ -17,9 +17,9 @@ export class PageConfigurator {
         await page.setViewport(defaultBrowserOptions.defaultViewport);
         //@ts-expect-error
         await page._client.send('Emulation.clearDeviceMetricsOverride'); // enable page resizing to match to browser viewport
-
         await page.setBypassCSP(true);
         await this.setUserAgent(page);
+        await page.setCacheEnabled(false);
     }
 
     public getBrowserResolution(): string {
