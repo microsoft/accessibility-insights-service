@@ -7,6 +7,7 @@ import { fail } from 'assert';
 import { PromiseUtils, ServiceConfiguration, System, TaskRuntimeConfig } from 'common';
 import { BrowserError, Page, PrivacyScanResult } from 'scanner-global-library';
 import { IMock, It, Mock } from 'typemoq';
+import { PrivacyScannerCore } from 'privacy-scan-core';
 import { MockableLogger } from '../test-utilities/mockable-logger';
 import { PrivacyScanner } from './privacy-scanner';
 
@@ -20,6 +21,7 @@ describe(PrivacyScanner, () => {
     let loggerMock: IMock<MockableLogger>;
     let serviceConfigMock: IMock<ServiceConfiguration>;
     let promiseUtilsMock: IMock<PromiseUtils>;
+    let privacyScannerCoreMock: IMock<PrivacyScannerCore>;
     let taskConfig: TaskRuntimeConfig;
 
     beforeEach(() => {
@@ -27,25 +29,38 @@ describe(PrivacyScanner, () => {
         loggerMock = Mock.ofType(MockableLogger);
         serviceConfigMock = Mock.ofType(ServiceConfiguration);
         promiseUtilsMock = Mock.ofType(PromiseUtils);
+        privacyScannerCoreMock = Mock.ofType(PrivacyScannerCore);
 
         taskConfig = {
             taskTimeoutInMinutes: 7,
         } as TaskRuntimeConfig;
-        serviceConfigMock.setup((s) => s.getConfigValue('taskConfig')).returns(() => Promise.resolve(taskConfig));
+        serviceConfigMock
+            .setup((s) => s.getConfigValue('taskConfig'))
+            .returns(() => Promise.resolve(taskConfig))
+            .verifiable();
 
-        privacyScanner = new PrivacyScanner(promiseUtilsMock.object, serviceConfigMock.object, loggerMock.object);
+        privacyScanner = new PrivacyScanner(
+            privacyScannerCoreMock.object,
+            promiseUtilsMock.object,
+            serviceConfigMock.object,
+            loggerMock.object,
+        );
     });
 
     afterEach(() => {
         pageMock.verifyAll();
         promiseUtilsMock.verifyAll();
         loggerMock.verifyAll();
+        privacyScannerCoreMock.verifyAll();
     });
 
     it('should launch browser page with given url and scan the page', async () => {
         const expectedResult = { state: 'pass' } as PrivacyScanResult;
         setupWaitForPromisetoReturnOriginalPromise();
-        pageMock.setup((p) => p.scanForPrivacy()).returns(async () => expectedResult);
+        privacyScannerCoreMock
+            .setup((o) => o.scan(pageMock.object))
+            .returns(async () => expectedResult)
+            .verifiable();
 
         const actualResult = await privacyScanner.scan(pageMock.object);
         expect(actualResult).toEqual(expectedResult);
@@ -53,8 +68,16 @@ describe(PrivacyScanner, () => {
 
     it('should throw errors', async () => {
         const scanError = { error: 'scan error', pageResponseCode: 101 };
-        pageMock.setup((p) => p.scanForPrivacy()).throws(scanError as unknown as Error);
-        privacyScanner = new PrivacyScanner(promiseUtilsMock.object, serviceConfigMock.object, loggerMock.object);
+        privacyScannerCoreMock
+            .setup((o) => o.scan(pageMock.object))
+            .throws(scanError as unknown as Error)
+            .verifiable();
+        privacyScanner = new PrivacyScanner(
+            privacyScannerCoreMock.object,
+            promiseUtilsMock.object,
+            serviceConfigMock.object,
+            loggerMock.object,
+        );
 
         setupWaitForPromisetoReturnOriginalPromise();
         loggerMock

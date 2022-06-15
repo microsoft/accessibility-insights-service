@@ -9,7 +9,6 @@ import { IMock, It, Mock, Times, MockBehavior } from 'typemoq';
 import { PromiseUtils } from 'common';
 import { MockableLogger } from './test-utilities/mockable-logger';
 import { WebDriver } from './web-driver';
-import { ModHttpHeader } from './browser-extensions/mod-http-header';
 
 /* eslint-disable @typescript-eslint/consistent-type-assertions */
 
@@ -48,21 +47,19 @@ let puppeteerBrowserMock: PuppeteerBrowserMock;
 let puppeteerLaunchMock: IMock<puppeteerLaunch>;
 let puppeteerConnectMock: IMock<puppeteerConnect>;
 let promiseUtilsMock: IMock<PromiseUtils>;
-let modHttpHeaderMock: IMock<ModHttpHeader>;
 
 beforeEach(() => {
     puppeteerBrowserMock = new PuppeteerBrowserMock();
     puppeteerLaunchMock = Mock.ofType<puppeteerLaunch>();
     puppeteerConnectMock = Mock.ofType<puppeteerConnect>();
     promiseUtilsMock = Mock.ofType<PromiseUtils>();
-    modHttpHeaderMock = Mock.ofType<ModHttpHeader>();
 
     const puppeteer = Puppeteer;
     puppeteer.launch = puppeteerLaunchMock.object;
     puppeteer.connect = puppeteerConnectMock.object;
 
     loggerMock = Mock.ofType(MockableLogger);
-    testSubject = new WebDriver(modHttpHeaderMock.object, promiseUtilsMock.object, loggerMock.object, puppeteer);
+    testSubject = new WebDriver(promiseUtilsMock.object, loggerMock.object, puppeteer);
 });
 
 describe('WebDriver', () => {
@@ -83,7 +80,6 @@ describe('WebDriver', () => {
             puppeteerLaunchMock.verifyAll();
             puppeteerConnectMock.verifyAll();
             promiseUtilsMock.verifyAll();
-            modHttpHeaderMock.verifyAll();
         });
 
         it('should close puppeteer browser', async () => {
@@ -133,22 +129,6 @@ describe('WebDriver', () => {
             .setup(async (o) => o(It.isAny()))
             .returns(async () => Promise.resolve(<Puppeteer.Browser>(<unknown>puppeteerBrowserMock)))
             .verifiable(Times.once());
-
-        const browser = await testSubject.launch();
-
-        expect(browser).toEqual(puppeteerBrowserMock);
-    });
-
-    it('should launch puppeteer browser with extension', async () => {
-        process.env.MOD_HTTP_HEADER = 'true';
-        puppeteerLaunchMock
-            .setup(async (o) => o(It.isAny()))
-            .returns(async () => Promise.resolve(<Puppeteer.Browser>(<unknown>puppeteerBrowserMock)))
-            .verifiable(Times.once());
-        modHttpHeaderMock
-            .setup((o) => o.launchWithExtension(It.isAny()))
-            .returns(() => Promise.resolve(<Puppeteer.Browser>(<unknown>puppeteerBrowserMock)))
-            .verifiable();
 
         const browser = await testSubject.launch();
 
