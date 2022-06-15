@@ -6,19 +6,23 @@ import { inject, injectable, optional } from 'inversify';
 import { GlobalLogger } from 'logger';
 import * as Puppeteer from 'puppeteer';
 import axe from 'axe-core';
-import { isNil, isEmpty, isNumber } from 'lodash';
-import { PrivacyPageScanner, PrivacyResults, ReloadPageResponse } from 'privacy-scan-core';
+import { isNil, isNumber, isEmpty } from 'lodash';
 import { AxeScanResults } from './axe-scan-results';
 import { AxePuppeteerFactory } from './factories/axe-puppeteer-factory';
 import { WebDriver } from './web-driver';
 import { PageNavigator } from './page-navigator';
 import { BrowserError } from './browser-error';
-import { PrivacyScanResult } from './privacy-scan-result';
 import { PageNavigationTiming } from './page-timeout-config';
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 export interface BrowserStartOptions {
     browserExecutablePath?: string;
     browserWSEndpoint?: string;
+}
+
+export interface PageConfigurationOptions {
+    reopenPage?: boolean;
 }
 
 @injectable()
@@ -37,7 +41,6 @@ export class Page {
         @inject(WebDriver) private readonly webDriver: WebDriver,
         @inject(AxePuppeteerFactory) private readonly axePuppeteerFactory: AxePuppeteerFactory,
         @inject(PageNavigator) private readonly pageNavigator: PageNavigator,
-        @inject(PrivacyPageScanner) private readonly privacyPageScanner: PrivacyPageScanner,
         @inject(GlobalLogger) @optional() private readonly logger: GlobalLogger,
     ) {}
 
@@ -53,6 +56,10 @@ export class Page {
         return this.page;
     }
 
+    public get url(): string {
+        return this.page.url();
+    }
+
     public async create(options?: BrowserStartOptions): Promise<void> {
         if (options?.browserWSEndpoint !== undefined) {
             this.browser = await this.webDriver.connect(options.browserWSEndpoint);
@@ -63,9 +70,16 @@ export class Page {
         this.page = await this.browser.newPage();
     }
 
-    public async navigateToUrl(url: string): Promise<void> {
+    public async navigateToUrl(url: string, options?: PageConfigurationOptions): Promise<void> {
         this.requestUrl = url;
         this.lastBrowserError = undefined;
+
+        if (options?.reopenPage === true) {
+            await this.reopen();
+        }
+
+        await this.setExtraHTTPHeaders();
+
         const navigationResponse = await this.pageNavigator.navigate(url, this.page, async (browserError) => {
             this.logger?.logError('Page navigation error', { browserError: System.serializeError(browserError) });
             this.lastBrowserError = browserError;
@@ -73,7 +87,6 @@ export class Page {
 
         this.lastNavigationResponse = navigationResponse?.httpResponse;
         if (navigationResponse?.pageNavigationTiming) {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const timing = {} as any;
             let totalNavigationElapsed = 0;
             Object.keys(navigationResponse.pageNavigationTiming).forEach((key: keyof PageNavigationTiming) => {
@@ -90,12 +103,9 @@ export class Page {
         }
     }
 
-    public async scanForA11yIssues(contentSourcePath?: string): Promise<AxeScanResults> {
-        return this.runIfNavigationSucceeded(async () => this.scanPageForIssues(contentSourcePath));
-    }
-
-    public async scanForPrivacy(): Promise<PrivacyScanResult> {
-        return this.runIfNavigationSucceeded(async () => this.scanPageForCookies());
+    public async reopen(): Promise<void> {
+        await this.page.close();
+        this.page = await this.browser.newPage();
     }
 
     public async close(): Promise<void> {
@@ -127,6 +137,27 @@ export class Page {
         return data;
     }
 
+    public async getAllCookies(): Promise<Puppeteer.Protocol.Network.Cookie[]> {
+        const client = await this.page.target().createCDPSession();
+        const { cookies } = await client.send('Network.getAllCookies');
+        await client.detach();
+
+        return cookies;
+    }
+
+    public async clearCookies(): Promise<void> {
+        const currentPageCookies = await this.getAllCookies();
+        await this.page.deleteCookie(...currentPageCookies);
+    }
+
+    public async setCookies(cookies: Puppeteer.Protocol.Network.CookieParam[]): Promise<void> {
+        await this.page.setCookie(...cookies);
+    }
+
+    public async scanForA11yIssues(contentSourcePath?: string): Promise<AxeScanResults> {
+        return this.runIfNavigationSucceeded(async () => this.scanPageForIssues(contentSourcePath));
+    }
+
     private async runIfNavigationSucceeded<T>(
         action: () => Promise<T>,
     ): Promise<T | { error?: BrowserError | string; pageResponseCode?: number }> {
@@ -135,10 +166,33 @@ export class Page {
         }
 
         if (!this.isOpen()) {
-            throw new Error(`Page is not ready. Call create() and navigateToUrl() before scan.`);
+            throw new Error('Page is not ready. Call create() and navigateToUrl() before scan.');
         }
 
         return action();
+    }
+
+    private async setExtraHTTPHeaders(): Promise<void> {
+        const nameSuffix = '_HTTP_HEADER';
+        const headers = [];
+        const headersObj = {} as any;
+        const environmentVariables = Object.entries(process.env).map(([key, value]) => ({ name: key, value }));
+        for (const variable of environmentVariables) {
+            if (!variable.name.endsWith(nameSuffix)) {
+                continue;
+            }
+
+            // eslint-disable-next-line security/detect-non-literal-regexp
+            const name = variable.name.replace(new RegExp(nameSuffix, 'gi'), '').replace(/_/g, '-');
+            headers.push({ name, value: variable.value });
+            headersObj[name] = variable.value;
+
+            await this.page.setExtraHTTPHeaders({ [name]: `${variable.value}` });
+        }
+
+        if (!isEmpty(headers)) {
+            this.logger?.logWarn('Added extra HTTP headers to the navigation requests.', { headers: headersObj });
+        }
     }
 
     private async scanPageForIssues(contentSourcePath?: string): Promise<AxeScanResults> {
@@ -171,59 +225,5 @@ export class Page {
         }
 
         return scanResults;
-    }
-
-    private async scanPageForCookies(): Promise<PrivacyScanResult> {
-        const navigationStatusCode = this.lastNavigationResponse.status();
-        const reloadPageFunc = async (page: Puppeteer.Page): Promise<ReloadPageResponse> => {
-            await this.navigateToUrl(page.url());
-
-            return { success: this.lastNavigationResponse?.ok() === true, error: this.lastBrowserError };
-        };
-
-        let privacyResult: PrivacyResults;
-        try {
-            privacyResult = await this.privacyPageScanner.scanPageForPrivacy(this.page, reloadPageFunc);
-        } catch (error) {
-            this.logger?.logError('Privacy scan engine error', { browserError: System.serializeError(error), url: this.page.url() });
-
-            return { error: `Privacy scan engine error. ${System.serializeError(error)}`, scannedUrl: this.page.url() };
-        }
-
-        const scanResult: PrivacyScanResult = {
-            results: {
-                ...privacyResult,
-                httpStatusCode: navigationStatusCode,
-                seedUri: this.requestUrl,
-            },
-            pageResponseCode: navigationStatusCode,
-        };
-
-        if (
-            this.lastNavigationResponse.request().redirectChain().length > 0 ||
-            // comparison of encode normalized Urls is preferable
-            (this.requestUrl !== undefined && encodeURI(this.requestUrl) !== this.page.url())
-        ) {
-            this.logger?.logWarn(`Scanning performed on redirected page`, { redirectedUrl: this.page.url() });
-            scanResult.scannedUrl = this.page.url();
-        }
-
-        const errors = privacyResult.cookieCollectionConsentResults
-            .filter((result) => result.error !== undefined)
-            .map((result) => result.error);
-        if (!isEmpty(errors)) {
-            // use first error only to parse/return to the client
-            const error = errors[0] as BrowserError;
-            scanResult.error = error;
-            scanResult.pageResponseCode = error.statusCode;
-            scanResult.results.httpStatusCode = error.statusCode;
-
-            this.logger.logError('Failed to collect cookies for test scenario.', {
-                url: this.page.url(),
-                errors: JSON.stringify(errors),
-            });
-        }
-
-        return scanResult;
     }
 }

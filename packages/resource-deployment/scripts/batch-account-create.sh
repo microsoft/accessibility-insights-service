@@ -37,8 +37,14 @@ getContainerRegistryLoginCredentials() {
 }
 
 function setParameterFilePath() {
-    if [ $environment = "prod" ] || [ $environment = "ppe" ]; then
+    if [ $environment = "prod" ]; then
         parameterFilePath="${0%/*}/../templates/batch-account-prod.parameters.json"
+    elif [ $environment = "prod-pr" ]; then
+        parameterFilePath="${0%/*}/../templates/batch-account-prod-pr.parameters.json"
+    elif [ $environment = "ppe" ]; then
+        parameterFilePath="${0%/*}/../templates/batch-account-ppe.parameters.json"
+    elif [ $environment = "ppe-pr" ]; then
+        parameterFilePath="${0%/*}/../templates/batch-account-ppe-pr.parameters.json"
     else
         parameterFilePath="${0%/*}/../templates/batch-account-dev.parameters.json"
     fi

@@ -103,7 +103,10 @@ export class PageNavigator {
         let networkIdleTimeout = false;
         const timestamp = System.getTimestamp();
         try {
-            await page.waitForNetworkIdle({ timeout: puppeteerTimeoutConfig.networkIdleTimeoutMsec });
+            await Promise.all([
+                page.waitForNavigation({ waitUntil: 'networkidle0', timeout: puppeteerTimeoutConfig.networkIdleTimeoutMsec }),
+                page.evaluate(() => history.pushState(null, null, null)),
+            ]);
         } catch (error) {
             networkIdleTimeout = true;
             this.logger.logWarn('Error while waiting for page network idle state.', {
