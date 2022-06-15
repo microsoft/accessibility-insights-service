@@ -164,7 +164,7 @@ describe(CookieCollector, () => {
                 navigationResultCallCount++;
 
                 return {
-                    ok: () => !result,
+                    status: () => (result ? 404 : 200),
                 } as Puppeteer.HTTPResponse;
             })
             .verifiable(Times.exactly(times));

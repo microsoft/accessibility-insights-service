@@ -13,7 +13,7 @@ export class CookieCollector {
         await page.clearCookies();
         // recreate puppeteer page to mitigate case when page became not responsive after several navigation
         await page.navigateToUrl(page.url, { recreatePage: true });
-        if (page.lastNavigationResponse?.ok() !== true) {
+        if (page.lastNavigationResponse?.status() > 399) {
             return { error: page.lastBrowserError };
         }
 
@@ -21,7 +21,7 @@ export class CookieCollector {
 
         await page.setCookies([cookieScenario]);
         await page.navigateToUrl(page.url);
-        if (page.lastNavigationResponse?.ok() !== true) {
+        if (page.lastNavigationResponse?.status() > 399) {
             return { error: page.lastBrowserError };
         }
 
