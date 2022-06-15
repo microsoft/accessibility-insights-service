@@ -19,7 +19,6 @@ export class PageConfigurator {
         await page._client.send('Emulation.clearDeviceMetricsOverride'); // enable page resizing to match to browser viewport
 
         await page.setBypassCSP(true);
-        await page.setCacheEnabled(false); // disable cache to allow page reload
         await this.setUserAgent(page);
     }
 

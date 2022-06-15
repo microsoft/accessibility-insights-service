@@ -6,7 +6,6 @@ import { inject, injectable, optional } from 'inversify';
 import { GlobalLogger, Logger } from 'logger';
 import Puppeteer from 'puppeteer';
 import { defaultBrowserOptions, defaultLaunchOptions } from './puppeteer-options';
-import { ModHttpHeader } from './browser-extensions/mod-http-header';
 
 @injectable()
 export class WebDriver {
@@ -15,7 +14,6 @@ export class WebDriver {
     private readonly browserCloseTimeoutMsecs = 60000;
 
     constructor(
-        @inject(ModHttpHeader) private readonly modHttpHeader: ModHttpHeader,
         @inject(PromiseUtils) private readonly promiseUtils: PromiseUtils,
         @inject(GlobalLogger) @optional() private readonly logger: Logger,
         private readonly puppeteer: typeof Puppeteer = Puppeteer,
@@ -32,18 +30,14 @@ export class WebDriver {
     }
 
     public async launch(browserExecutablePath?: string): Promise<Puppeteer.Browser> {
-        if (process.env.MOD_HTTP_HEADER === 'true') {
-            this.browser = await this.modHttpHeader.launchWithExtension(browserExecutablePath);
-        } else {
-            const options = {
-                ...defaultLaunchOptions,
-                headless: process.env.HEADLESS === 'false' ? false : true,
-            };
-            this.browser = await this.puppeteer.launch({
-                executablePath: browserExecutablePath,
-                ...options,
-            });
-        }
+        const options = {
+            ...defaultLaunchOptions,
+            headless: process.env.HEADLESS === 'false' ? false : true,
+        };
+        this.browser = await this.puppeteer.launch({
+            executablePath: browserExecutablePath,
+            ...options,
+        });
 
         this.logger?.logInfo('Chromium browser instance started.');
 

@@ -51,10 +51,6 @@ describe(PageConfigurator, () => {
             .returns(() => Promise.resolve())
             .verifiable();
         pageMock
-            .setup(async (o) => o.setCacheEnabled(false))
-            .returns(() => Promise.resolve())
-            .verifiable();
-        pageMock
             //@ts-expect-error
             .setup((o) => o._client)
             .returns(() => connectionTransportMock.object)
