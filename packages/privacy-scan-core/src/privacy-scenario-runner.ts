@@ -12,7 +12,7 @@ import { PrivacyResults } from './types';
 
 @injectable()
 export class PrivacyScenarioRunner {
-    private readonly maxBannerDetectionAttemptCount = 5;
+    private readonly maxBannerDetectionAttemptCount = 3;
 
     constructor(
         @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
@@ -50,7 +50,7 @@ export class PrivacyScenarioRunner {
             found = await this.hasBanner(page, privacyScanConfig);
             attemptCount++;
             if (!found) {
-                await page.navigateToUrl(page.url);
+                await page.navigateToUrl(page.url, { reopenPage: true });
             }
         } while (attemptCount < this.maxBannerDetectionAttemptCount && found === false);
 

@@ -22,7 +22,7 @@ export interface BrowserStartOptions {
 }
 
 export interface PageConfigurationOptions {
-    recreatePage?: boolean;
+    reopenPage?: boolean;
 }
 
 @injectable()
@@ -74,8 +74,8 @@ export class Page {
         this.requestUrl = url;
         this.lastBrowserError = undefined;
 
-        if (options?.recreatePage === true) {
-            await this.recreate();
+        if (options?.reopenPage === true) {
+            await this.reopen();
         }
 
         await this.setExtraHTTPHeaders();
@@ -103,7 +103,7 @@ export class Page {
         }
     }
 
-    public async recreate(): Promise<void> {
+    public async reopen(): Promise<void> {
         await this.page.close();
         this.page = await this.browser.newPage();
     }

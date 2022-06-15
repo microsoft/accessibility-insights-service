@@ -109,7 +109,7 @@ describe(PrivacyScenarioRunner, () => {
     });
 
     it('run scenarios with banner not detected', async () => {
-        const times = 5;
+        const times = 3;
 
         puppeteerPageMock
             .setup((o) =>
@@ -128,7 +128,7 @@ describe(PrivacyScenarioRunner, () => {
             .returns(() => url)
             .verifiable(Times.atLeast(times));
         pageMock
-            .setup((o) => o.navigateToUrl(url))
+            .setup((o) => o.navigateToUrl(url, { reopenPage: true }))
             .returns(() => Promise.resolve())
             .verifiable(Times.exactly(times));
 

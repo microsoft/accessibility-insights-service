@@ -25,12 +25,16 @@ describe(PageResponseProcessor, () => {
 
     it('get response error for failed response code', () => {
         responseMock
-            .setup((o) => o.status())
-            .returns(() => 404)
-            .verifiable(Times.exactly(2));
+            .setup((o) => o.ok())
+            .returns(() => false)
+            .verifiable();
         responseMock
             .setup((o) => o.statusText())
             .returns(() => 'Not Found')
+            .verifiable();
+        responseMock
+            .setup((o) => o.status())
+            .returns(() => 404)
             .verifiable();
 
         const expectedError = {
@@ -54,8 +58,8 @@ describe(PageResponseProcessor, () => {
             })
             .verifiable(Times.exactly(2));
         responseMock
-            .setup((o) => o.status())
-            .returns(() => 200)
+            .setup((o) => o.ok())
+            .returns(() => true)
             .verifiable();
 
         const expectedError = {
@@ -77,8 +81,8 @@ describe(PageResponseProcessor, () => {
             })
             .verifiable();
         responseMock
-            .setup((o) => o.status())
-            .returns(() => 200)
+            .setup((o) => o.ok())
+            .returns(() => true)
             .verifiable();
 
         const actualError = pageResponseProcessor.getResponseError(responseMock.object);

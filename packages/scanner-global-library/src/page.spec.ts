@@ -239,7 +239,7 @@ describe(Page, () => {
                 .returns(() => Promise.resolve(puppeteerPageMock.object))
                 .verifiable();
 
-            await page.navigateToUrl(url, { recreatePage: true });
+            await page.navigateToUrl(url, { reopenPage: true });
 
             expect(page.lastNavigationResponse).toEqual(puppeteerResponseMock.object);
         });

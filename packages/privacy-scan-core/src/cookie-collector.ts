@@ -11,17 +11,16 @@ import { CookieScenario } from './cookie-scenarios';
 export class CookieCollector {
     public async getCookiesForScenario(page: Page, cookieScenario: CookieScenario): Promise<ConsentResult> {
         await page.clearCookies();
-        // recreate puppeteer page to mitigate case when page became not responsive after several navigation
-        await page.navigateToUrl(page.url, { recreatePage: true });
-        if (page.lastNavigationResponse?.status() > 399) {
+        await page.navigateToUrl(page.url, { reopenPage: true });
+        if (!page.lastNavigationResponse?.ok()) {
             return { error: page.lastBrowserError };
         }
 
         const cookiesBeforeConsent = await this.getCurrentCookies(page);
 
         await page.setCookies([cookieScenario]);
-        await page.navigateToUrl(page.url);
-        if (page.lastNavigationResponse?.status() > 399) {
+        await page.navigateToUrl(page.url, { reopenPage: true });
+        if (!page.lastNavigationResponse?.ok()) {
             return { error: page.lastBrowserError };
         }
 

@@ -71,7 +71,7 @@ describe(CookieCollector, () => {
 
     it('Returns error if first reload fails', async () => {
         setupClearCookies();
-        setupNavigateToUrl(true);
+        setupNavigateToUrl(1);
         setupNavigationResult(1);
 
         const expectedResult: ConsentResult = {
@@ -85,11 +85,10 @@ describe(CookieCollector, () => {
 
     it('Returns error if second reload fails', async () => {
         setupClearCookies();
-        setupNavigateToUrl(true);
+        setupNavigateToUrl(2);
         setupNavigationResult(2);
         setupGetCookies([]);
         setupSetCookie([cookieScenario]);
-        setupNavigateToUrl();
 
         const expectedResult: ConsentResult = {
             error: browserError,
@@ -125,11 +124,10 @@ describe(CookieCollector, () => {
         };
 
         setupClearCookies();
-        setupNavigateToUrl(true);
+        setupNavigateToUrl(2);
         setupNavigationResult();
         setupGetCookies(pageCookies, 2);
         setupSetCookie([cookieScenario]);
-        setupNavigateToUrl();
         setupGetCookies([...pageCookies, newCookie], 2);
 
         const actualResults = await testSubject.getCookiesForScenario(pageMock.object, cookieScenario);
@@ -137,21 +135,21 @@ describe(CookieCollector, () => {
         expect(actualResults).toEqual(expectedResult);
     });
 
-    function setupNavigateToUrl(recreatePage: boolean = false): void {
+    function setupNavigateToUrl(times: number, reopenPage: boolean = true): void {
         pageMock
             .setup((o) => o.url)
             .returns(() => url)
             .verifiable(Times.atLeastOnce());
-        if (recreatePage) {
+        if (reopenPage) {
             pageMock
-                .setup((o) => o.navigateToUrl(It.isValue(url), It.isValue({ recreatePage: true })))
+                .setup((o) => o.navigateToUrl(It.isValue(url), It.isValue({ reopenPage: true })))
                 .returns(() => Promise.resolve())
-                .verifiable();
+                .verifiable(Times.exactly(times));
         } else {
             pageMock
                 .setup((o) => o.navigateToUrl(It.isValue(url)))
                 .returns(() => Promise.resolve())
-                .verifiable();
+                .verifiable(Times.exactly(times));
         }
     }
 
@@ -164,7 +162,7 @@ describe(CookieCollector, () => {
                 navigationResultCallCount++;
 
                 return {
-                    status: () => (result ? 404 : 200),
+                    ok: () => !result,
                 } as Puppeteer.HTTPResponse;
             })
             .verifiable(Times.exactly(times));
