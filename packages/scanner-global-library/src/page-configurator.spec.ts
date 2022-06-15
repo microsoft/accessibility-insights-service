@@ -43,6 +43,10 @@ describe(PageConfigurator, () => {
             .returns(() => Promise.resolve())
             .verifiable();
         pageMock
+            .setup(async (o) => o.setCacheEnabled(false))
+            .returns(() => Promise.resolve())
+            .verifiable();
+        pageMock
             .setup(async (o) => o.setViewport(viewport))
             .returns(() => Promise.resolve())
             .verifiable();
