@@ -334,7 +334,7 @@ describe(Page, () => {
                 .verifiable();
             setupPageConfigurator();
             page.browser = undefined;
-            page.page = undefined;
+            (page as any).page = undefined;
 
             await page.create();
 
@@ -353,7 +353,7 @@ describe(Page, () => {
                 .returns(() => Promise.resolve(browserMock.object))
                 .verifiable();
             page.browser = undefined;
-            page.page = undefined;
+            (page as any).page = undefined;
 
             await page.create({
                 browserExecutablePath: 'path',
@@ -372,7 +372,7 @@ describe(Page, () => {
                 .returns(() => Promise.resolve(browserMock.object))
                 .verifiable();
             page.browser = undefined;
-            page.page = undefined;
+            (page as any).page = undefined;
 
             await page.create({
                 browserExecutablePath: 'path',
@@ -483,7 +483,7 @@ function simulatePageNavigation(response: Puppeteer.HTTPResponse, browserError?:
 
 function simulatePageLaunch(): void {
     page.browser = browserMock.object;
-    page.page = puppeteerPageMock.object;
+    (page as any).page = puppeteerPageMock.object;
 }
 
 function setupCDPSessionForCaptureSnapshot(data: string): void {

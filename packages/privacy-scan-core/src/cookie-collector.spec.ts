@@ -7,6 +7,7 @@ import * as Puppeteer from 'puppeteer';
 import { IMock, Mock, Times, It } from 'typemoq';
 import { ConsentResult, CookieByDomain } from 'storage-documents';
 import { Page, BrowserError } from 'scanner-global-library';
+import { Logger } from 'logger';
 import { CookieCollector } from './cookie-collector';
 import { CookieScenario } from './cookie-scenarios';
 
@@ -21,16 +22,24 @@ describe(CookieCollector, () => {
     };
     const url = 'test url';
     const expiryDate = new Date(0, 1, 2, 3);
+    const retryOptions = {
+        delayFirstAttempt: true,
+        numOfAttempts: 2,
+        maxDelay: 10,
+        startingDelay: 0,
+    };
 
     let navigationResultCallCount: number;
     let pageCookies: Puppeteer.Protocol.Network.Cookie[];
     let pageCookiesByDomain: CookieByDomain[];
     let pageMock: IMock<Page>;
     let testSubject: CookieCollector;
+    let loggerMock: IMock<Logger>;
 
     beforeEach(() => {
         navigationResultCallCount = 1;
         pageMock = Mock.ofType<Page>();
+        loggerMock = Mock.ofType<Logger>();
         pageCookies = [
             {
                 name: 'domain1cookie1',
@@ -62,7 +71,7 @@ describe(CookieCollector, () => {
             },
         ];
 
-        testSubject = new CookieCollector();
+        testSubject = new CookieCollector(loggerMock.object, retryOptions);
     });
 
     afterEach(() => {

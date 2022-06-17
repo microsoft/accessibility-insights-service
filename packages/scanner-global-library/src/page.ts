@@ -29,13 +29,15 @@ export interface PageConfigurationOptions {
 export class Page {
     public requestUrl: string;
 
-    public page: Puppeteer.Page;
-
     public browser: Puppeteer.Browser;
 
     public lastNavigationResponse: Puppeteer.HTTPResponse;
 
     public lastBrowserError: BrowserError;
+
+    public pageNavigationTiming: PageNavigationTiming;
+
+    private page: Puppeteer.Page;
 
     constructor(
         @inject(WebDriver) private readonly webDriver: WebDriver,
@@ -52,7 +54,7 @@ export class Page {
         return this.pageNavigator.pageConfigurator.getBrowserResolution();
     }
 
-    public get currentPage(): Puppeteer.Page {
+    public get puppeteerPage(): Puppeteer.Page {
         return this.page;
     }
 
@@ -86,6 +88,7 @@ export class Page {
         });
 
         this.lastNavigationResponse = navigationResponse?.httpResponse;
+        this.pageNavigationTiming = navigationResponse?.pageNavigationTiming;
         if (navigationResponse?.pageNavigationTiming) {
             const timing = {} as any;
             let totalNavigationElapsed = 0;
