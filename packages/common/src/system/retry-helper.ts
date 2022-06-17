@@ -5,19 +5,19 @@ import { injectable } from 'inversify';
 
 export type ErrorHandler = (error: Error) => Promise<void>;
 
-async function defaultWaitFn(timeoutMsec: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, timeoutMsec));
+async function defaultSleepFunction(milliseconds: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, milliseconds));
 }
 
 @injectable()
 export class RetryHelper<T> {
-    public constructor(private readonly sleepFunction: (timeoutMsec: number) => Promise<void> = defaultWaitFn) {}
+    public constructor(private readonly sleepFunction: (msecs: number) => Promise<void> = defaultSleepFunction) {}
 
     public async executeWithRetries(
         action: () => Promise<T>,
         onRetry: ErrorHandler,
         maxRetryCount: number,
-        retryIntervalMsec: number = 0,
+        retryIntervalMilliseconds: number = 0,
     ): Promise<T> {
         let lastError: Error;
         for (let i = 0; i < maxRetryCount; i += 1) {
@@ -29,8 +29,8 @@ export class RetryHelper<T> {
 
                 if (i < maxRetryCount - 1) {
                     await onRetry(lastError);
-                    if (retryIntervalMsec > 0) {
-                        await this.sleepFunction(retryIntervalMsec * (i + 1));
+                    if (retryIntervalMilliseconds > 0) {
+                        await this.sleepFunction(retryIntervalMilliseconds * (i + 1));
                     }
                 }
             }

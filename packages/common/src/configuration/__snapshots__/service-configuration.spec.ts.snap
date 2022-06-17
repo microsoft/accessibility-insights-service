@@ -144,7 +144,7 @@ Object {
   },
   "privacyScanConfig": Object {
     "bannerDetectionTimeout": Object {
-      "default": 10000,
+      "default": 5000,
       "doc": "The maximum time in milliseconds to wait for the banner XPath after the initial page load has completed",
       "format": "int",
     },
@@ -374,7 +374,7 @@ Object {
   },
   "privacyScanConfig": Object {
     "bannerDetectionTimeout": Object {
-      "default": 10000,
+      "default": 5000,
       "doc": "The maximum time in milliseconds to wait for the banner XPath after the initial page load has completed",
       "format": "int",
     },

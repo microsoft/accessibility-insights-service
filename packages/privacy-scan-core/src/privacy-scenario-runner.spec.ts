@@ -91,7 +91,7 @@ describe(PrivacyScenarioRunner, () => {
             .returns(() => url)
             .verifiable(Times.atLeastOnce());
         pageMock
-            .setup((o) => o.puppeteerPage)
+            .setup((o) => o.page)
             .returns(() => puppeteerPageMock.object)
             .verifiable();
 
@@ -120,7 +120,7 @@ describe(PrivacyScenarioRunner, () => {
             .returns(() => Promise.reject({ name: 'TimeoutError' }))
             .verifiable(Times.exactly(times));
         pageMock
-            .setup((o) => o.puppeteerPage)
+            .setup((o) => o.page)
             .returns(() => puppeteerPageMock.object)
             .verifiable(Times.exactly(times));
         pageMock

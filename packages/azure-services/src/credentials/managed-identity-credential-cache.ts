@@ -7,8 +7,8 @@ import { AccessToken } from '@azure/core-auth';
 import { ManagedIdentityCredential, TokenCredential, GetTokenOptions } from '@azure/identity';
 import NodeCache from 'node-cache';
 import { Mutex } from 'async-mutex';
+import { backOff, IBackOffOptions } from 'exponential-backoff';
 import moment from 'moment';
-import { executeWithExponentialRetry, ExponentialRetryOptions } from 'common';
 
 // Get a token using HTTP
 // https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/how-to-use-vm-token#get-a-token-using-http
@@ -19,7 +19,7 @@ export class ManagedIdentityCredentialCache implements TokenCredential {
 
     private static readonly tokenExpirationReductionMsec = 7200000; // two hours
 
-    private static readonly msiRetryOptions: ExponentialRetryOptions = {
+    public backOffOptions: Partial<IBackOffOptions> = {
         delayFirstAttempt: false,
         numOfAttempts: 5,
         maxDelay: 6000,
@@ -31,7 +31,6 @@ export class ManagedIdentityCredentialCache implements TokenCredential {
         private readonly managedIdentityCredential: ManagedIdentityCredential = new ManagedIdentityCredential(),
         private readonly tokenCache: NodeCache = new NodeCache({ checkperiod: ManagedIdentityCredentialCache.cacheCheckPeriodInSeconds }),
         private readonly mutex: Mutex = new Mutex(),
-        private readonly retryOptions: ExponentialRetryOptions = ManagedIdentityCredentialCache.msiRetryOptions,
     ) {}
 
     public async getToken(scopes: string | string[], options?: GetTokenOptions): Promise<AccessToken> {
@@ -65,7 +64,7 @@ export class ManagedIdentityCredentialCache implements TokenCredential {
     }
 
     private async getAccessToken(scopes: string | string[], options?: GetTokenOptions): Promise<AccessToken> {
-        return executeWithExponentialRetry(async () => {
+        return backOff(async () => {
             let token;
             try {
                 token = await this.managedIdentityCredential.getToken(scopes, options);
@@ -74,7 +73,7 @@ export class ManagedIdentityCredentialCache implements TokenCredential {
             }
 
             return token;
-        }, this.retryOptions);
+        }, this.backOffOptions);
     }
 
     private getResourceUrl(scopes: string | string[]): string {

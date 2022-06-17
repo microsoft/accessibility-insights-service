@@ -46,7 +46,7 @@ export class DeepScanner {
         // fetch websiteScanResult.knownPages from a storage
         websiteScanResult = await this.readWebsiteScanResult(pageScanResult, true);
         const discoveryPatterns = websiteScanResult.discoveryPatterns ?? [this.discoveryPatternGenerator(websiteScanResult.baseUrl)];
-        const discoveredUrls = await this.crawlRunner.run(runnerScanMetadata.url, discoveryPatterns, page.puppeteerPage);
+        const discoveredUrls = await this.crawlRunner.run(runnerScanMetadata.url, discoveryPatterns, page.currentPage);
         const processedUrls = this.processUrls(discoveredUrls, deepScanDiscoveryLimit, websiteScanResult.knownPages);
         const websiteScanResultUpdated = await this.updateWebsiteScanResult(
             runnerScanMetadata.id,

@@ -54,8 +54,7 @@ describe(PageHandler, () => {
             },
         } as NodeJS.HRTime;
 
-        pageMock.setup((o) => o.evaluate(It.isAny())).returns(async (action) => action());
-        pageMock.setup((o) => o.isClosed()).returns(() => false);
+        pageMock.setup((p) => p.evaluate(It.isAny())).returns(async (action) => action());
 
         pageHandler = new PageHandler(loggerMock.object, checkIntervalMsecs, checkIntervalMsecs * minCheckBreakCount);
     });
