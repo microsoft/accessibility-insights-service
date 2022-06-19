@@ -254,7 +254,7 @@ describe(Page, () => {
             Object.keys(navigationResponse.pageNavigationTiming).forEach((key: keyof PageNavigationTiming) => {
                 timing[key] = `${navigationResponse.pageNavigationTiming[key]}`;
             });
-            loggerMock.setup((o) => o.logInfo('Total page rendering time 10, msec', { ...timing })).verifiable();
+            loggerMock.setup((o) => o.logInfo('Total page load time 10, msec', { ...timing })).verifiable();
 
             await page.navigateToUrl(url);
 
@@ -310,7 +310,7 @@ describe(Page, () => {
             Object.keys(navigationResponse.pageNavigationTiming).forEach((key: keyof PageNavigationTiming) => {
                 timing[key] = `${navigationResponse.pageNavigationTiming[key]}`;
             });
-            loggerMock.setup((o) => o.logInfo('Total page rendering time 10, msec', { ...timing })).verifiable();
+            loggerMock.setup((o) => o.logInfo('Total page reload time 10, msec', { ...timing })).verifiable();
 
             await page.reload();
 
