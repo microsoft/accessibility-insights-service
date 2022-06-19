@@ -99,6 +99,54 @@ export class PageNavigator {
         };
     }
 
+    public async reload(
+        page: Puppeteer.Page,
+        onNavigationError: (browserError: BrowserError, error?: unknown) => Promise<void> = () => Promise.resolve(),
+    ): Promise<NavigationResponse> {
+        // navigate away from the original url
+        await page.goto('chrome://version/');
+
+        let response: Puppeteer.HTTPResponse;
+        let browserError: BrowserError;
+        let reloadTimeout = false;
+        const timestamp = System.getTimestamp();
+        try {
+            response = await page.goBack({ waitUntil: 'networkidle2', timeout: puppeteerTimeoutConfig.navigationTimeoutMsecs });
+        } catch (error) {
+            browserError = this.pageResponseProcessor.getNavigationError(error as Error);
+            if (browserError) {
+                await onNavigationError(browserError, error);
+
+                return undefined;
+            }
+        }
+        const reloadElapsed = System.getElapsedTime(timestamp);
+
+        if (browserError?.errorType === 'UrlNavigationTimeout') {
+            reloadTimeout = true;
+            this.logger?.logWarn('Page navigation error on reload.', {
+                navigationCondition: 'networkidle2',
+                timeout: `${puppeteerTimeoutConfig.navigationTimeoutMsecs}`,
+                browserError: System.serializeError(browserError),
+            });
+        }
+
+        const networkIdlePageTiming = await this.tryWaitForNetworkIdle(page);
+
+        const postNavigationPageTiming = await this.pageNavigationHooks.postNavigation(page, response, onNavigationError);
+
+        return {
+            httpResponse: response,
+            pageNavigationTiming: {
+                goto1: reloadElapsed,
+                goto1Timeout: reloadTimeout,
+                goto2: 0,
+                ...networkIdlePageTiming,
+                ...postNavigationPageTiming,
+            } as PageNavigationTiming,
+        };
+    }
+
     private async tryWaitForNetworkIdle(page: Puppeteer.Page): Promise<Partial<PageNavigationTiming>> {
         let networkIdleTimeout = false;
         const timestamp = System.getTimestamp();

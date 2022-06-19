@@ -7,12 +7,13 @@ import { ChildProcess } from 'child_process';
 import * as Puppeteer from 'puppeteer';
 import { IMock, It, Mock, Times, MockBehavior } from 'typemoq';
 import { PromiseUtils } from 'common';
+// eslint-disable-next-line @typescript-eslint/tslint/config
+import PuppeteerExtra from 'puppeteer-extra';
 import { MockableLogger } from './test-utilities/mockable-logger';
 import { WebDriver } from './web-driver';
 
 /* eslint-disable @typescript-eslint/consistent-type-assertions */
 
-type puppeteerLaunch = (options?: Puppeteer.LaunchOptions) => Promise<Puppeteer.Browser>;
 type puppeteerConnect = (options?: Puppeteer.ConnectOptions) => Promise<Puppeteer.Browser>;
 
 class PuppeteerBrowserMock {
@@ -44,22 +45,21 @@ class PuppeteerBrowserMock {
 let testSubject: WebDriver;
 let loggerMock: IMock<MockableLogger>;
 let puppeteerBrowserMock: PuppeteerBrowserMock;
-let puppeteerLaunchMock: IMock<puppeteerLaunch>;
 let puppeteerConnectMock: IMock<puppeteerConnect>;
 let promiseUtilsMock: IMock<PromiseUtils>;
+let puppeteerExtraMock: IMock<typeof PuppeteerExtra>;
 
 beforeEach(() => {
     puppeteerBrowserMock = new PuppeteerBrowserMock();
-    puppeteerLaunchMock = Mock.ofType<puppeteerLaunch>();
     puppeteerConnectMock = Mock.ofType<puppeteerConnect>();
     promiseUtilsMock = Mock.ofType<PromiseUtils>();
+    puppeteerExtraMock = Mock.ofType<typeof PuppeteerExtra>();
 
     const puppeteer = Puppeteer;
-    puppeteer.launch = puppeteerLaunchMock.object;
     puppeteer.connect = puppeteerConnectMock.object;
 
     loggerMock = Mock.ofType(MockableLogger);
-    testSubject = new WebDriver(promiseUtilsMock.object, loggerMock.object, puppeteer);
+    testSubject = new WebDriver(promiseUtilsMock.object, loggerMock.object, puppeteer, puppeteerExtraMock.object);
 });
 
 describe('WebDriver', () => {
@@ -77,16 +77,16 @@ describe('WebDriver', () => {
         });
 
         afterEach(() => {
-            puppeteerLaunchMock.verifyAll();
             puppeteerConnectMock.verifyAll();
             promiseUtilsMock.verifyAll();
+            puppeteerExtraMock.verifyAll();
         });
 
         it('should close puppeteer browser', async () => {
             setupPromiseUtils(false);
-            puppeteerLaunchMock
-                .setup(async (o) => o(It.isAny()))
-                .returns(async () => Promise.resolve(<Puppeteer.Browser>(<unknown>puppeteerBrowserMock)))
+            puppeteerExtraMock
+                .setup((o) => o.launch(It.isAny()))
+                .returns(() => Promise.resolve(<Puppeteer.Browser>(<unknown>puppeteerBrowserMock)))
                 .verifiable(Times.once());
             pageMock
                 .setup((p) => p.close())
@@ -101,9 +101,9 @@ describe('WebDriver', () => {
 
         it('should kill browser process if close times out', async () => {
             setupPromiseUtils(true);
-            puppeteerLaunchMock
-                .setup(async (o) => o(It.isAny()))
-                .returns(async () => Promise.resolve(<Puppeteer.Browser>(<unknown>puppeteerBrowserMock)))
+            puppeteerExtraMock
+                .setup((o) => o.launch(It.isAny()))
+                .returns(() => Promise.resolve(<Puppeteer.Browser>(<unknown>puppeteerBrowserMock)))
                 .verifiable(Times.once());
             browserProcessMock.setup((bp) => bp.kill('SIGINT')).verifiable();
 
@@ -114,9 +114,9 @@ describe('WebDriver', () => {
         it('should do nothing if close times out and browser process is not found', async () => {
             setupPromiseUtils(true);
             puppeteerBrowserMock.childProcess = undefined;
-            puppeteerLaunchMock
-                .setup(async (o) => o(It.isAny()))
-                .returns(async () => Promise.resolve(<Puppeteer.Browser>(<unknown>puppeteerBrowserMock)))
+            puppeteerExtraMock
+                .setup((o) => o.launch(It.isAny()))
+                .returns(() => Promise.resolve(<Puppeteer.Browser>(<unknown>puppeteerBrowserMock)))
                 .verifiable(Times.once());
 
             await testSubject.launch();
@@ -125,9 +125,13 @@ describe('WebDriver', () => {
     });
 
     it('should launch puppeteer browser', async () => {
-        puppeteerLaunchMock
-            .setup(async (o) => o(It.isAny()))
-            .returns(async () => Promise.resolve(<Puppeteer.Browser>(<unknown>puppeteerBrowserMock)))
+        puppeteerExtraMock
+            .setup((o) => o.use(It.isAny()))
+            .returns(() => puppeteerExtraMock.object)
+            .verifiable();
+        puppeteerExtraMock
+            .setup((o) => o.launch(It.isAny()))
+            .returns(() => Promise.resolve(<Puppeteer.Browser>(<unknown>puppeteerBrowserMock)))
             .verifiable(Times.once());
 
         const browser = await testSubject.launch();

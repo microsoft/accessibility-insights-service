@@ -59,6 +59,8 @@
         "moment": "^2.29.2",
         "p-limit": "^3.1.0",
         "puppeteer": "^13.7.0",
+        "puppeteer-extra": "^3.2.3",
+        "puppeteer-extra-plugin": "^3.2.0",
         "reflect-metadata": "^0.1.13",
         "scanner-global-library": "1.0.0",
         "service-library": "1.0.0",

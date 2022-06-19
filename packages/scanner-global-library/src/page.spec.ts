@@ -5,7 +5,7 @@ import 'reflect-metadata';
 
 import { AxePuppeteer } from '@axe-core/puppeteer';
 import { AxeResults } from 'axe-core';
-import Puppeteer, { ScreenshotOptions } from 'puppeteer';
+import Puppeteer from 'puppeteer';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { System } from 'common';
 import { AxeScanResults } from './axe-scan-results';
@@ -225,7 +225,7 @@ describe(Page, () => {
             simulatePageLaunch();
         });
 
-        it('navigates with options', async () => {
+        it('navigates to page with options', async () => {
             pageNavigatorMock
                 .setup(async (o) => o.navigate(url, puppeteerPageMock.object, It.isAny()))
                 .returns(() => Promise.resolve(navigationResponse))
@@ -254,14 +254,14 @@ describe(Page, () => {
             Object.keys(navigationResponse.pageNavigationTiming).forEach((key: keyof PageNavigationTiming) => {
                 timing[key] = `${navigationResponse.pageNavigationTiming[key]}`;
             });
-            loggerMock.setup((o) => o.logInfo('Total page rendering time 10 msec', { ...timing })).verifiable();
+            loggerMock.setup((o) => o.logInfo('Total page rendering time 10, msec', { ...timing })).verifiable();
 
             await page.navigateToUrl(url);
 
             expect(page.lastNavigationResponse).toEqual(puppeteerResponseMock.object);
         });
 
-        it('handles browser error', async () => {
+        it('handles browser error on navigate', async () => {
             const error = new Error('navigation error');
             const browserError = { errorType: 'SslError', statusCode: 500 } as BrowserError;
             loggerMock
@@ -280,7 +280,7 @@ describe(Page, () => {
             expect(page.lastBrowserError).toEqual(browserError);
         });
 
-        it('set extra HTTP headers to the navigation requests', async () => {
+        it('set extra HTTP headers on navigate', async () => {
             process.env.X_FORWARDED_FOR_HTTP_HEADER = '1.1.1.1';
             pageNavigatorMock
                 .setup(async (o) => o.navigate(url, puppeteerPageMock.object, It.isAny()))
@@ -292,6 +292,46 @@ describe(Page, () => {
                 .verifiable();
 
             await page.navigateToUrl(url);
+        });
+    });
+
+    describe('reload()', () => {
+        beforeEach(() => {
+            simulatePageLaunch();
+        });
+
+        it('reload page and saves response', async () => {
+            pageNavigatorMock
+                .setup(async (o) => o.reload(puppeteerPageMock.object, It.isAny()))
+                .returns(() => Promise.resolve(navigationResponse))
+                .verifiable();
+
+            const timing = { total: '10' } as any;
+            Object.keys(navigationResponse.pageNavigationTiming).forEach((key: keyof PageNavigationTiming) => {
+                timing[key] = `${navigationResponse.pageNavigationTiming[key]}`;
+            });
+            loggerMock.setup((o) => o.logInfo('Total page rendering time 10, msec', { ...timing })).verifiable();
+
+            await page.reload();
+
+            expect(page.lastNavigationResponse).toEqual(puppeteerResponseMock.object);
+        });
+
+        it('handles browser error on reload', async () => {
+            const error = new Error('navigation error');
+            const browserError = { errorType: 'SslError', statusCode: 500 } as BrowserError;
+            loggerMock.setup((o) => o.logError('Page reload error', { browserError: System.serializeError(browserError) })).verifiable();
+            pageNavigatorMock
+                .setup(async (o) => o.reload(puppeteerPageMock.object, It.isAny()))
+                .callback(async (p, fn) => {
+                    await fn(browserError, error);
+                })
+                .returns(() => Promise.resolve(undefined))
+                .verifiable();
+
+            await page.reload();
+
+            expect(page.lastBrowserError).toEqual(browserError);
         });
     });
 
@@ -391,21 +431,21 @@ describe(Page, () => {
             await page.close();
         });
 
-        it('getPageScreenshot()', async () => {
-            simulatePageLaunch();
-            const options = {
-                type: 'png',
-                fullPage: true,
-                encoding: 'base64',
-                captureBeyondViewport: true,
-            } as ScreenshotOptions;
-            puppeteerPageMock
-                .setup((o) => o.screenshot(options))
-                .returns(() => Promise.resolve('data'))
-                .verifiable();
-            const data = await page.getPageScreenshot();
-            expect(data).toEqual('data');
-        });
+        // it('getPageScreenshot()', async () => {
+        //     simulatePageLaunch();
+        //     const options = {
+        //         type: 'png',
+        //         fullPage: true,
+        //         encoding: 'base64',
+        //         captureBeyondViewport: true,
+        //     } as ScreenshotOptions;
+        //     puppeteerPageMock
+        //         .setup((o) => o.screenshot(options))
+        //         .returns(() => Promise.resolve('data'))
+        //         .verifiable();
+        //     const data = await page.getPageScreenshot();
+        //     expect(data).toEqual('data');
+        // });
 
         it('getPageSnapshot()', async () => {
             simulatePageLaunch();

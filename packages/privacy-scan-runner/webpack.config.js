@@ -13,7 +13,7 @@ module.exports = (env) => {
 
     return {
         devtool: 'cheap-source-map',
-        externals: ['puppeteer', 'yargs', 'applicationinsights'],
+        externals: ['puppeteer', 'yargs', 'applicationinsights', 'puppeteer-extra', 'puppeteer-extra-plugin'],
         entry: {
             ['privacy-scan-runner']: path.resolve('./src/index.ts'),
         },

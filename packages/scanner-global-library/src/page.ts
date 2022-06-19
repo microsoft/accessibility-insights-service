@@ -89,26 +89,26 @@ export class Page {
 
         this.lastNavigationResponse = navigationResponse?.httpResponse;
         this.pageNavigationTiming = navigationResponse?.pageNavigationTiming;
-        if (navigationResponse?.pageNavigationTiming) {
-            const timing = {} as any;
-            let totalNavigationElapsed = 0;
-            Object.keys(navigationResponse.pageNavigationTiming).forEach((key: keyof PageNavigationTiming) => {
-                if (isNumber(navigationResponse.pageNavigationTiming[key])) {
-                    totalNavigationElapsed += navigationResponse.pageNavigationTiming[key] as number;
-                }
-                timing[key] = `${navigationResponse.pageNavigationTiming[key]}`;
-            });
-
-            this.logger.logInfo(`Total page rendering time ${totalNavigationElapsed} msec`, {
-                total: totalNavigationElapsed.toString(),
-                ...timing,
-            });
-        }
+        this.logPageNavigationTiming('load');
     }
 
     public async reopen(): Promise<void> {
         await this.page.close();
         this.page = await this.browser.newPage();
+    }
+
+    public async reload(): Promise<void> {
+        this.requestUrl = this.url;
+        this.lastBrowserError = undefined;
+
+        const navigationResponse = await this.pageNavigator.reload(this.page, async (browserError) => {
+            this.logger?.logError('Page reload error', { browserError: System.serializeError(browserError) });
+            this.lastBrowserError = browserError;
+        });
+
+        this.lastNavigationResponse = navigationResponse?.httpResponse;
+        this.pageNavigationTiming = navigationResponse?.pageNavigationTiming;
+        this.logPageNavigationTiming('reload');
     }
 
     public async close(): Promise<void> {
@@ -121,15 +121,20 @@ export class Page {
         return !isNil(this.page) && !this.page.isClosed() && isNil(this.lastBrowserError) && !isNil(this.lastNavigationResponse);
     }
 
+    /**
+     * Disabled. The puppeteer may break page layout when taking screenshot. Use it after page validation.
+     */
     public async getPageScreenshot(): Promise<string> {
-        const data = (await this.page.screenshot({
-            type: 'png',
-            fullPage: true,
-            encoding: 'base64',
-            captureBeyondViewport: true,
-        })) as string;
+        // TODO enable safe screenshot processing
 
-        return data;
+        // const data = (await this.page.screenshot({
+        //     type: 'png',
+        //     fullPage: true,
+        //     encoding: 'base64',
+        //     captureBeyondViewport: true,
+        // })) as string;
+
+        return 'png-empty-screenshot-base64-string==';
     }
 
     public async getPageSnapshot(): Promise<string> {
@@ -157,24 +162,6 @@ export class Page {
         await this.page.setCookie(...cookies);
     }
 
-    public async scanForA11yIssues(contentSourcePath?: string): Promise<AxeScanResults> {
-        return this.runIfNavigationSucceeded(async () => this.scanPageForIssues(contentSourcePath));
-    }
-
-    private async runIfNavigationSucceeded<T>(
-        action: () => Promise<T>,
-    ): Promise<T | { error?: BrowserError | string; pageResponseCode?: number }> {
-        if (!isNil(this.lastBrowserError)) {
-            return { error: this.lastBrowserError, pageResponseCode: this.lastBrowserError.statusCode };
-        }
-
-        if (!this.isOpen()) {
-            throw new Error('Page is not ready. Call create() and navigateToUrl() before scan.');
-        }
-
-        return action();
-    }
-
     private async setExtraHTTPHeaders(): Promise<void> {
         const nameSuffix = '_HTTP_HEADER';
         const headers = [];
@@ -198,6 +185,42 @@ export class Page {
         }
     }
 
+    private logPageNavigationTiming(operation: string): void {
+        if (!isEmpty(this.pageNavigationTiming)) {
+            const timing = {} as any;
+            let totalNavigationElapsed = 0;
+            Object.keys(this.pageNavigationTiming).forEach((key: keyof PageNavigationTiming) => {
+                if (isNumber(this.pageNavigationTiming[key])) {
+                    totalNavigationElapsed += this.pageNavigationTiming[key] as number;
+                }
+                timing[key] = `${this.pageNavigationTiming[key]}`;
+            });
+
+            this.logger.logInfo(`Total page ${operation} time ${totalNavigationElapsed}, msec`, {
+                total: totalNavigationElapsed.toString(),
+                ...timing,
+            });
+        }
+    }
+
+    public async scanForA11yIssues(contentSourcePath?: string): Promise<AxeScanResults> {
+        return this.runIfNavigationSucceeded(async () => this.scanPageForIssues(contentSourcePath));
+    }
+
+    private async runIfNavigationSucceeded<T>(
+        action: () => Promise<T>,
+    ): Promise<T | { error?: BrowserError | string; pageResponseCode?: number }> {
+        if (!isNil(this.lastBrowserError)) {
+            return { error: this.lastBrowserError, pageResponseCode: this.lastBrowserError.statusCode };
+        }
+
+        if (!this.isOpen()) {
+            throw new Error('Page is not ready. Call create() and navigateToUrl() before scan.');
+        }
+
+        return action();
+    }
+
     private async scanPageForIssues(contentSourcePath?: string): Promise<AxeScanResults> {
         const axePuppeteer = await this.axePuppeteerFactory.createAxePuppeteer(this.page, contentSourcePath);
         let axeResults: axe.AxeResults;
@@ -219,8 +242,8 @@ export class Page {
         };
 
         if (
-            this.lastNavigationResponse.request().redirectChain().length > 0 ||
-            // comparison of encode normalized Urls is preferable
+            this.lastNavigationResponse.request()?.redirectChain()?.length > 0 ||
+            // should compare encoded Urls
             (this.requestUrl !== undefined && encodeURI(this.requestUrl) !== axeResults.url)
         ) {
             this.logger?.logWarn(`Scanning performed on redirected page`, { redirectedUrl: axeResults.url });

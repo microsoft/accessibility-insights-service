@@ -22,6 +22,8 @@ module.exports = (env) => {
             'accessibility-insights-report',
             'apify',
             'leveldown',
+            'puppeteer-extra',
+            'puppeteer-extra-plugin',
         ],
         entry: {
             ['web-api-scan-runner']: path.resolve('./src/index.ts'),
