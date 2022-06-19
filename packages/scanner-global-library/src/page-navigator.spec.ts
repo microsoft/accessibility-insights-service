@@ -62,7 +62,7 @@ describe(PageNavigator, () => {
         const onNavigationErrorMock = jest.fn();
 
         puppeteerPageMock
-            .setup(async (o) => o.goto('chrome://version/'))
+            .setup(async (o) => o.goto(`file:///${__dirname}/blank-page.html`))
             .returns(() => Promise.resolve(response))
             .verifiable();
         puppeteerPageMock
