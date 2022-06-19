@@ -24,6 +24,7 @@ module.exports = (env) => {
             'leveldown',
             'puppeteer-extra',
             'puppeteer-extra-plugin',
+            'puppeteer-extra-plugin-stealth',
         ],
         entry: {
             ['web-api-scan-runner']: path.resolve('./src/index.ts'),
