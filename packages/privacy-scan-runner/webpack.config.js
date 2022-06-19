@@ -13,7 +13,14 @@ module.exports = (env) => {
 
     return {
         devtool: 'cheap-source-map',
-        externals: ['puppeteer', 'yargs', 'applicationinsights', 'puppeteer-extra', 'puppeteer-extra-plugin'],
+        externals: [
+            'puppeteer',
+            'yargs',
+            'applicationinsights',
+            'puppeteer-extra',
+            'puppeteer-extra-plugin',
+            'puppeteer-extra-plugin-stealth',
+        ],
         entry: {
             ['privacy-scan-runner']: path.resolve('./src/index.ts'),
         },
@@ -78,6 +85,11 @@ module.exports = (env) => {
                     {
                         context: '../../packages/parallel-workers/dist',
                         from: '**/*.js',
+                        to: '',
+                    },
+                    {
+                        context: '.',
+                        from: './blank-page.html',
                         to: '',
                     },
                 ],

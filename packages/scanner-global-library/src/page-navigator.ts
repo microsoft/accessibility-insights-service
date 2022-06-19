@@ -103,8 +103,8 @@ export class PageNavigator {
         page: Puppeteer.Page,
         onNavigationError: (browserError: BrowserError, error?: unknown) => Promise<void> = () => Promise.resolve(),
     ): Promise<NavigationResponse> {
-        // navigate away from the original url
-        await page.goto('chrome://version/');
+        // navigate away from the page to reload
+        await page.goto(`file:///${__dirname}/blank-page.html`);
 
         let response: Puppeteer.HTTPResponse;
         let browserError: BrowserError;
