@@ -23,7 +23,7 @@
     "homepage": "https://github.com/Microsoft/accessibility-insights-service#readme",
     "devDependencies": {
         "@types/jest": "^27.4.1",
-        "@types/lodash": "^4.14.181",
+        "@types/lodash": "^4.14.182",
         "@types/node": "^16.11.7",
         "filemanager-webpack-plugin": "^7.0.0",
         "fork-ts-checker-webpack-plugin": "^7.2.3",
