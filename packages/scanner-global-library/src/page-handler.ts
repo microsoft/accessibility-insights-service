@@ -34,7 +34,7 @@ export class PageHandler {
 
         // Scroll incrementally so everything is inside the window at some point
         const timestamp = System.getTimestamp();
-        while (!scrollingComplete && checkCount < maxCheckCount) {
+        while (!scrollingComplete && checkCount < maxCheckCount && !page.isClosed()) {
             // Use try/catch because navigation issues may cause page.evaluate to throw
             try {
                 scrollingComplete = await page.evaluate(async () => {
@@ -77,7 +77,7 @@ export class PageHandler {
         let pageHtmlContentSize = 0;
 
         const timestamp = System.getTimestamp();
-        while (checkCount < maxCheckCount) {
+        while (checkCount < maxCheckCount && !page.isClosed()) {
             try {
                 // Use try/catch because navigation issues may cause page.evaluate to throw
                 pageHtmlContentSize = await page.evaluate(() => window.document.body.innerHTML.length);

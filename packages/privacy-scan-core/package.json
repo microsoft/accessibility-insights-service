@@ -42,6 +42,7 @@
         "logger": "1.0.0",
         "puppeteer": "^13.7.0",
         "reflect-metadata": "^0.1.13",
+        "scanner-global-library": "1.0.0",
         "storage-documents": "1.0.0"
     }
 }

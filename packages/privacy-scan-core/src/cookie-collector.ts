@@ -2,45 +2,42 @@
 // Licensed under the MIT License.
 
 import { injectable } from 'inversify';
-import { groupBy } from 'lodash';
+import { groupBy, isEmpty } from 'lodash';
 import { ConsentResult, CookieByDomain } from 'storage-documents';
-import * as Puppeteer from 'puppeteer';
+import { Page } from 'scanner-global-library';
 import { CookieScenario } from './cookie-scenarios';
-import { ReloadPageFunc, ReloadPageResponse } from './types';
-
-type GetAllCookiesResponse = { cookies: Puppeteer.Protocol.Network.Cookie[] };
 
 @injectable()
 export class CookieCollector {
-    public async getCookiesForScenario(
-        page: Puppeteer.Page,
-        cookieScenario: CookieScenario,
-        reloadPageFunc: ReloadPageFunc,
-    ): Promise<ConsentResult> {
-        let reloadResponse = await this.clearCookies(page, reloadPageFunc);
-        if (!reloadResponse.success) {
-            return { error: reloadResponse.error };
-        }
+    private cookiesBeforeConsent: CookieByDomain[];
 
-        const cookiesBeforeConsent = await this.getCurrentCookies(page);
-
-        reloadResponse = await this.reloadWithCookie(page, cookieScenario, reloadPageFunc);
-        if (!reloadResponse.success) {
-            return { error: reloadResponse.error };
+    public async getCookiesForScenario(page: Page, cookieScenario: CookieScenario): Promise<ConsentResult> {
+        await this.getCookiesBeforeConsent(page);
+        await page.clearCookies();
+        await page.setCookies([cookieScenario]);
+        await page.reload();
+        if (!page.lastNavigationResponse?.ok()) {
+            return { error: page.lastBrowserError };
         }
 
         const cookiesAfterConsent = await this.getCurrentCookies(page);
 
         return {
             cookiesUsedForConsent: `${cookieScenario.name}=${cookieScenario.value}`,
-            cookiesBeforeConsent: cookiesBeforeConsent,
+            cookiesBeforeConsent: this.cookiesBeforeConsent,
             cookiesAfterConsent: cookiesAfterConsent,
         };
     }
 
-    private async getCurrentCookies(page: Puppeteer.Page): Promise<CookieByDomain[]> {
+    private async getCookiesBeforeConsent(page: Page): Promise<void> {
+        if (isEmpty(this.cookiesBeforeConsent)) {
+            this.cookiesBeforeConsent = await this.getCurrentCookies(page);
+        }
+    }
+
+    private async getCurrentCookies(page: Page): Promise<CookieByDomain[]> {
         const results: CookieByDomain[] = [];
-        const cookies = await this.getAllCookies(page);
+        const cookies = await page.getAllCookies();
         const groupedCookies = groupBy(cookies, (cookie) => cookie.domain);
         Object.keys(groupedCookies).forEach((domain) => {
             results.push({
@@ -56,29 +53,5 @@ export class CookieCollector {
         });
 
         return results;
-    }
-
-    private async getAllCookies(page: Puppeteer.Page): Promise<Puppeteer.Protocol.Network.Cookie[]> {
-        const client = await page.target().createCDPSession();
-        const response = (await client.send('Network.getAllCookies')) as GetAllCookiesResponse;
-        await client.detach();
-
-        return response.cookies;
-    }
-
-    private async clearCookies(page: Puppeteer.Page, reloadPageFunc: ReloadPageFunc): Promise<ReloadPageResponse> {
-        await page.deleteCookie(...(await this.getAllCookies(page)));
-
-        return reloadPageFunc(page);
-    }
-
-    private async reloadWithCookie(
-        page: Puppeteer.Page,
-        cookieScenario: CookieScenario,
-        reloadPageFunc: ReloadPageFunc,
-    ): Promise<ReloadPageResponse> {
-        await page.setCookie(cookieScenario);
-
-        return reloadPageFunc(page);
     }
 }
