@@ -15,6 +15,6 @@
     },
     "crawlConfig": {
         "deepScanDiscoveryLimit": 10,
-        "deepScanUpperLimit": 5000
+        "deepScanUpperLimit": 3000
     }
 }
