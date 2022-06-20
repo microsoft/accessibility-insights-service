@@ -57,7 +57,7 @@ describe(DeepScanner, () => {
         serviceConfigMock
             .setup((sc) => sc.getConfigValue('crawlConfig'))
             .returns(() => Promise.resolve({ deepScanDiscoveryLimit } as CrawlConfig));
-        pageMock.setup((p) => p.currentPage).returns(() => puppeteerPageStub);
+        pageMock.setup((p) => p.puppeteerPage).returns(() => puppeteerPageStub);
         runnerScanMetadata = {
             url,
             deepScan: true,

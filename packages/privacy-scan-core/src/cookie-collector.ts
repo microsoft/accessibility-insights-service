@@ -2,24 +2,20 @@
 // Licensed under the MIT License.
 
 import { injectable } from 'inversify';
-import { groupBy } from 'lodash';
+import { groupBy, isEmpty } from 'lodash';
 import { ConsentResult, CookieByDomain } from 'storage-documents';
 import { Page } from 'scanner-global-library';
 import { CookieScenario } from './cookie-scenarios';
 
 @injectable()
 export class CookieCollector {
+    private cookiesBeforeConsent: CookieByDomain[];
+
     public async getCookiesForScenario(page: Page, cookieScenario: CookieScenario): Promise<ConsentResult> {
+        await this.getCookiesBeforeConsent(page);
         await page.clearCookies();
-        await page.navigateToUrl(page.url, { reopenPage: true });
-        if (!page.lastNavigationResponse?.ok()) {
-            return { error: page.lastBrowserError };
-        }
-
-        const cookiesBeforeConsent = await this.getCurrentCookies(page);
-
         await page.setCookies([cookieScenario]);
-        await page.navigateToUrl(page.url, { reopenPage: true });
+        await page.reload();
         if (!page.lastNavigationResponse?.ok()) {
             return { error: page.lastBrowserError };
         }
@@ -28,9 +24,15 @@ export class CookieCollector {
 
         return {
             cookiesUsedForConsent: `${cookieScenario.name}=${cookieScenario.value}`,
-            cookiesBeforeConsent: cookiesBeforeConsent,
+            cookiesBeforeConsent: this.cookiesBeforeConsent,
             cookiesAfterConsent: cookiesAfterConsent,
         };
+    }
+
+    private async getCookiesBeforeConsent(page: Page): Promise<void> {
+        if (isEmpty(this.cookiesBeforeConsent)) {
+            this.cookiesBeforeConsent = await this.getCurrentCookies(page);
+        }
     }
 
     private async getCurrentCookies(page: Page): Promise<CookieByDomain[]> {

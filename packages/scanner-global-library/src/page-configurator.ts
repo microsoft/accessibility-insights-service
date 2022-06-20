@@ -7,7 +7,7 @@ import { defaultBrowserOptions } from './puppeteer-options';
 
 @injectable()
 export class PageConfigurator {
-    private userAgent: string;
+    private readonly userAgent: string;
 
     public getUserAgent(): string {
         return this.userAgent;
@@ -15,20 +15,17 @@ export class PageConfigurator {
 
     public async configurePage(page: Puppeteer.Page): Promise<void> {
         await page.setViewport(defaultBrowserOptions.defaultViewport);
-        //@ts-expect-error
-        await page._client.send('Emulation.clearDeviceMetricsOverride'); // enable page resizing to match to browser viewport
         await page.setBypassCSP(true);
-        await this.setUserAgent(page);
-        await page.setCacheEnabled(false);
+        await this.enablePageResizing(page);
     }
 
     public getBrowserResolution(): string {
         return `${defaultBrowserOptions.defaultViewport.width}x${defaultBrowserOptions.defaultViewport.height}`;
     }
 
-    private async setUserAgent(page: Puppeteer.Page): Promise<void> {
-        const browser = page.browser();
-        this.userAgent = (await browser.userAgent()).replace('HeadlessChrome', 'Chrome');
-        await page.setUserAgent(this.userAgent);
+    private async enablePageResizing(page: Puppeteer.Page): Promise<void> {
+        // enable page resizing to match to browser viewport
+        //@ts-expect-error
+        await page._client.send('Emulation.clearDeviceMetricsOverride');
     }
 }

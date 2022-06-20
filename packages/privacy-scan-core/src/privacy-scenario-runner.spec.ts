@@ -91,7 +91,7 @@ describe(PrivacyScenarioRunner, () => {
             .returns(() => url)
             .verifiable(Times.atLeastOnce());
         pageMock
-            .setup((o) => o.page)
+            .setup((o) => o.puppeteerPage)
             .returns(() => puppeteerPageMock.object)
             .verifiable();
 
@@ -109,8 +109,6 @@ describe(PrivacyScenarioRunner, () => {
     });
 
     it('run scenarios with banner not detected', async () => {
-        const times = 3;
-
         puppeteerPageMock
             .setup((o) =>
                 o.waitForXPath(privacyScanConfig.bannerXPath, {
@@ -118,19 +116,15 @@ describe(PrivacyScenarioRunner, () => {
                 }),
             )
             .returns(() => Promise.reject({ name: 'TimeoutError' }))
-            .verifiable(Times.exactly(times));
+            .verifiable();
         pageMock
-            .setup((o) => o.page)
+            .setup((o) => o.puppeteerPage)
             .returns(() => puppeteerPageMock.object)
-            .verifiable(Times.exactly(times));
+            .verifiable();
         pageMock
             .setup((o) => o.url)
             .returns(() => url)
-            .verifiable(Times.atLeast(times));
-        pageMock
-            .setup((o) => o.navigateToUrl(url, { reopenPage: true }))
-            .returns(() => Promise.resolve())
-            .verifiable(Times.exactly(times));
+            .verifiable(Times.atLeastOnce());
 
         const expectedResult = {
             finishDateTime: dateNow,
