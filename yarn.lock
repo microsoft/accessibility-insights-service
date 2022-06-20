@@ -5526,10 +5526,10 @@ deep-eql@^3.0.1:
   dependencies:
     type-detect "^4.0.0"
 
-deep-equal-in-any-order@^1.1.15:
-  version "1.1.15"
-  resolved "https://registry.npmjs.org/deep-equal-in-any-order/-/deep-equal-in-any-order-1.1.15.tgz"
-  integrity sha512-/W36YW15Z+AymTkswOoCOX++gWLd0XBy1lFlxmML/m/PW0/0GuNkE65UTA2qiuPrKJTxXssKKrvtIZkOh+yEHA==
+deep-equal-in-any-order@^1.1.19:
+  version "1.1.19"
+  resolved "https://registry.yarnpkg.com/deep-equal-in-any-order/-/deep-equal-in-any-order-1.1.19.tgz#54aa9e97eae87345f2086b81773051cb11579d4d"
+  integrity sha512-7R7lJt8PwUtDp+qOx/9fXjvkitEPLoogMb1B2G2Ibcfq3EHZdWZGZzgbwznN/LimgfFbyekupMPItTCsQ1k9nQ==
   dependencies:
     lodash.mapvalues "^4.6.0"
     sort-any "^2.0.0"
