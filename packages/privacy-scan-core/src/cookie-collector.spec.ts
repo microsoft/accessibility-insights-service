@@ -19,17 +19,14 @@ describe(CookieCollector, () => {
         name: 'cookieName',
         value: 'test cookie value',
     };
-    const url = 'test url';
     const expiryDate = new Date(0, 1, 2, 3);
 
-    let navigationResultCallCount: number;
     let pageCookies: Puppeteer.Protocol.Network.Cookie[];
     let pageCookiesByDomain: CookieByDomain[];
     let pageMock: IMock<Page>;
     let testSubject: CookieCollector;
 
     beforeEach(() => {
-        navigationResultCallCount = 1;
         pageMock = Mock.ofType<Page>();
         pageCookies = [
             {
@@ -69,26 +66,10 @@ describe(CookieCollector, () => {
         pageMock.verifyAll();
     });
 
-    it('Returns error if first reload fails', async () => {
+    it('Returns error if reload fails', async () => {
         setupClearCookies();
-        setupNavigateToUrl(1);
-        setupNavigationResult(1);
-
-        const expectedResult: ConsentResult = {
-            error: browserError,
-        };
-
-        const actualResults = await testSubject.getCookiesForScenario(pageMock.object, cookieScenario);
-
-        expect(actualResults).toEqual(expectedResult);
-    });
-
-    it('Returns error if second reload fails', async () => {
-        setupClearCookies();
-        setupNavigateToUrl(2);
-        setupNavigationResult(2);
-        setupGetCookies([]);
-        setupSetCookie([cookieScenario]);
+        setupNavigateToUrl();
+        setupNavigationResult(true);
 
         const expectedResult: ConsentResult = {
             error: browserError,
@@ -124,50 +105,35 @@ describe(CookieCollector, () => {
         };
 
         setupClearCookies();
-        setupNavigateToUrl(2);
-        setupNavigationResult();
-        setupGetCookies(pageCookies, 2);
+        setupNavigateToUrl();
+        setupNavigationResult(false);
+        setupGetCookies(pageCookies);
         setupSetCookie([cookieScenario]);
-        setupGetCookies([...pageCookies, newCookie], 2);
+        setupGetCookies([...pageCookies, newCookie]);
 
         const actualResults = await testSubject.getCookiesForScenario(pageMock.object, cookieScenario);
 
         expect(actualResults).toEqual(expectedResult);
     });
 
-    function setupNavigateToUrl(times: number, reopenPage: boolean = true): void {
+    function setupNavigateToUrl(): void {
         pageMock
-            .setup((o) => o.url)
-            .returns(() => url)
-            .verifiable(Times.atLeastOnce());
-        if (reopenPage) {
-            pageMock
-                .setup((o) => o.navigateToUrl(It.isValue(url), It.isValue({ reopenPage: true })))
-                .returns(() => Promise.resolve())
-                .verifiable(Times.exactly(times));
-        } else {
-            pageMock
-                .setup((o) => o.navigateToUrl(It.isValue(url)))
-                .returns(() => Promise.resolve())
-                .verifiable(Times.exactly(times));
-        }
+            .setup((o) => o.reload())
+            .returns(() => Promise.resolve())
+            .verifiable();
     }
 
-    function setupNavigationResult(failOnCount: number = 0): void {
-        const times = failOnCount === 1 ? 1 : 2;
+    function setupNavigationResult(fail: boolean): void {
         pageMock
             .setup((o) => o.lastNavigationResponse)
             .returns(() => {
-                const result = navigationResultCallCount / 2 === failOnCount;
-                navigationResultCallCount++;
-
                 return {
-                    ok: () => !result,
+                    ok: () => !fail,
                 } as Puppeteer.HTTPResponse;
             })
-            .verifiable(Times.exactly(times));
+            .verifiable();
 
-        if (failOnCount > 0) {
+        if (fail) {
             pageMock
                 .setup((o) => o.lastBrowserError)
                 .returns(() => browserError)
@@ -189,10 +155,10 @@ describe(CookieCollector, () => {
             .verifiable();
     }
 
-    function setupGetCookies(cookies: Puppeteer.Protocol.Network.Cookie[], times: number = 1): void {
+    function setupGetCookies(cookies: Puppeteer.Protocol.Network.Cookie[]): void {
         pageMock
             .setup((o) => o.getAllCookies())
             .returns(() => Promise.resolve(cookies))
-            .verifiable(Times.exactly(times));
+            .verifiable(Times.exactly(2));
     }
 });

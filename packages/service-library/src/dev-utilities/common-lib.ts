@@ -8,9 +8,8 @@ import * as nodeFetch from 'node-fetch';
 import { BlobServiceClient, StorageSharedKeyCredential } from '@azure/storage-blob';
 import { EnvironmentCredential } from '@azure/identity';
 import { BlobStorageClient, BlobContentDownloadResponse } from 'azure-services';
-import { BodyParser, System } from 'common';
+import { BodyParser, System, ExponentialRetryOptions, executeWithExponentialRetry } from 'common';
 import { isEmpty } from 'lodash';
-import { backOff, IBackOffOptions } from 'exponential-backoff';
 import { Mutex } from 'async-mutex';
 
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types */
@@ -18,7 +17,7 @@ import { Mutex } from 'async-mutex';
 
 const mutex = new Mutex();
 
-const backOffOptions: Partial<IBackOffOptions> = {
+const retryOptions: ExponentialRetryOptions = {
     delayFirstAttempt: false,
     numOfAttempts: 5,
     maxDelay: 6000,
@@ -62,14 +61,14 @@ export async function executeBatchInChunkExclusive<T>(
 }
 
 export async function executeWithExpRetry<T>(fn: () => Promise<T>): Promise<T> {
-    return backOff(async () => {
+    return executeWithExponentialRetry(async () => {
         try {
             return fn();
         } catch (error) {
             console.log('Error: ', System.serializeError(error));
             throw error;
         }
-    }, backOffOptions);
+    }, retryOptions);
 }
 
 export async function getOAuthToken(oauthResourceId: string, oauthClientId: string, oauthClientSecret: string): Promise<string> {

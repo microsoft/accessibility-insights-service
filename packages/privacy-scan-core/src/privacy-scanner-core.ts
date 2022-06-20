@@ -42,7 +42,7 @@ export class PrivacyScannerCore {
         };
 
         if (
-            page.lastNavigationResponse.request().redirectChain().length > 0 ||
+            page.lastNavigationResponse?.request()?.redirectChain()?.length > 0 ||
             // should compare encoded Urls
             (page.requestUrl !== undefined && encodeURI(page.requestUrl) !== page.url)
         ) {

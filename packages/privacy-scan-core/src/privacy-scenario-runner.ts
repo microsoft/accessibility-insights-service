@@ -12,8 +12,6 @@ import { PrivacyResults } from './types';
 
 @injectable()
 export class PrivacyScenarioRunner {
-    private readonly maxBannerDetectionAttemptCount = 3;
-
     constructor(
         @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
         @inject(CookieCollector) private readonly cookieCollector: CookieCollector,
@@ -24,10 +22,9 @@ export class PrivacyScenarioRunner {
     public async run(page: Page): Promise<PrivacyResults> {
         const privacyScanConfig = await this.serviceConfig.getConfigValue('privacyScanConfig');
 
-        const bannerState = await this.tryDetectBanner(page, privacyScanConfig);
-        this.logger?.logInfo(`Privacy banner ${bannerState.found ? 'was detected.' : 'was not detected.'}`, {
-            bannerDetected: `${bannerState.found}`,
-            attemptCount: `${bannerState.attemptCount}`,
+        const bannerDetected = await this.detectBanner(page, privacyScanConfig);
+        this.logger?.logInfo(`Privacy banner ${bannerDetected ? 'was detected.' : 'was not detected.'}`, {
+            bannerDetected: `${bannerDetected}`,
             url: page.url,
             bannerXPath: privacyScanConfig.bannerXPath,
         });
@@ -38,28 +35,14 @@ export class PrivacyScenarioRunner {
             finishDateTime: new Date(),
             navigationalUri: page.url,
             bannerDetectionXpathExpression: privacyScanConfig.bannerXPath,
-            bannerDetected: bannerState.found,
+            bannerDetected,
             cookieCollectionConsentResults: cookieCollectionResults,
         };
     }
 
-    private async tryDetectBanner(page: Page, privacyScanConfig: PrivacyScanConfig): Promise<{ found: boolean; attemptCount: number }> {
-        let attemptCount = 0;
-        let found = false;
-        do {
-            found = await this.hasBanner(page, privacyScanConfig);
-            attemptCount++;
-            if (!found) {
-                await page.navigateToUrl(page.url, { reopenPage: true });
-            }
-        } while (attemptCount < this.maxBannerDetectionAttemptCount && found === false);
-
-        return { found, attemptCount };
-    }
-
-    private async hasBanner(page: Page, privacyScanConfig: PrivacyScanConfig): Promise<boolean> {
+    private async detectBanner(page: Page, privacyScanConfig: PrivacyScanConfig): Promise<boolean> {
         try {
-            await page.page.waitForXPath(privacyScanConfig.bannerXPath, {
+            await page.puppeteerPage.waitForXPath(privacyScanConfig.bannerXPath, {
                 timeout: privacyScanConfig.bannerDetectionTimeout,
             });
 
