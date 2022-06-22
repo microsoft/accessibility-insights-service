@@ -20,6 +20,7 @@ describe(CookieCollector, () => {
         value: 'test cookie value',
     };
     const expiryDate = new Date(0, 1, 2, 3);
+    const expiryDateSec = expiryDate.getTime() / 1000;
 
     let pageCookies: Puppeteer.Protocol.Network.Cookie[];
     let pageCookiesByDomain: CookieByDomain[];
@@ -32,17 +33,17 @@ describe(CookieCollector, () => {
             {
                 name: 'domain1cookie1',
                 domain: 'domain1',
-                expires: expiryDate.getTime(),
+                expires: expiryDateSec,
             },
             {
                 name: 'domain1cookie2',
                 domain: 'domain1',
-                expires: expiryDate.getTime(),
+                expires: expiryDateSec,
             },
             {
                 name: 'domain2cookie',
                 domain: 'domain2',
-                expires: expiryDate.getTime(),
+                expires: expiryDateSec,
             },
         ] as Puppeteer.Protocol.Network.Cookie[];
         pageCookiesByDomain = [
@@ -84,7 +85,7 @@ describe(CookieCollector, () => {
         const newCookie = {
             name: 'new cookie',
             domain: 'new domain',
-            expires: expiryDate.getTime(),
+            expires: expiryDateSec,
         } as Puppeteer.Protocol.Network.Cookie;
         const expectedResult: ConsentResult = {
             cookiesUsedForConsent: `${cookieScenario.name}=${cookieScenario.value}`,

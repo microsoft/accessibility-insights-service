@@ -46,7 +46,7 @@ export class CookieCollector {
                     return {
                         name: c.name,
                         domain: c.domain,
-                        expires: new Date(c.expires),
+                        expires: new Date(c.expires * 1000),
                     };
                 }),
             });
