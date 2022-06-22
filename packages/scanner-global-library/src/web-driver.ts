@@ -42,9 +42,15 @@ export class WebDriver {
             ...defaultLaunchOptions,
             headless: process.env.HEADLESS === 'false' ? false : true,
         };
+
+        const isDebugEnabled = /--debug|--inspect/i.test(process.execArgv.join(' '));
+        if (isDebugEnabled === true) {
+            options.args.push('--disable-web-security');
+        }
+
         this.browser = await this.puppeteerExtra.launch({
-            executablePath: browserExecutablePath,
             ...options,
+            executablePath: browserExecutablePath,
             devtools: process.env.DEVTOOLS === 'true' ? true : false,
         });
 
