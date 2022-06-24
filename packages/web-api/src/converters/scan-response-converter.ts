@@ -35,6 +35,7 @@ export class ScanResponseConverter {
             case 'report':
             default:
                 return this.createIncompleteScanResponse(pageScanResult, effectiveRunState);
+            case 'retrying':
             case 'failed':
                 return this.createFailedScanResponse(pageScanResult, effectiveRunState);
             case 'completed':
@@ -67,10 +68,10 @@ export class ScanResponseConverter {
             scanType: pageScanResult.privacyScan ? 'privacy' : 'accessibility',
             run: {
                 state: effectiveRunState,
-                timestamp: pageScanResult.run.timestamp,
-                error: this.scanErrorConverter.getScanRunErrorCode(pageScanResult.run.error),
-                pageResponseCode: pageScanResult.run.pageResponseCode,
-                pageTitle: pageScanResult.run.pageTitle,
+                timestamp: pageScanResult.run?.timestamp,
+                error: this.scanErrorConverter.getScanRunErrorCode(pageScanResult.run?.error),
+                pageResponseCode: pageScanResult.run?.pageResponseCode,
+                pageTitle: pageScanResult.run?.pageTitle,
             },
             ...this.getRunCompleteNotificationResponse(pageScanResult.notification),
         };
@@ -185,8 +186,8 @@ export class ScanResponseConverter {
 
         const maxRetryCount = await this.getMaxRetryCount();
 
-        // indicate to the client that scan is still pending when there are retries attempts left
-        return pageScanResult.run?.retryCount >= maxRetryCount ? pageScanResult.run.state : 'pending';
+        // indicate to the client that scan is retrying if there are retries attempts left
+        return pageScanResult.run?.retryCount >= maxRetryCount ? pageScanResult.run.state : 'retrying';
     }
 
     private async getMaxRetryCount(): Promise<number> {

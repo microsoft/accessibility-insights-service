@@ -13,8 +13,15 @@ import {
 } from 'service-library';
 import { GlobalLogger } from 'logger';
 import * as MockDate from 'mockdate';
-import { OnDemandPageScanResult, OnDemandPageScanReport, WebsiteScanResult, PrivacyPageScanReport } from 'storage-documents';
-import { PrivacyScanResult } from 'scanner-global-library';
+import {
+    OnDemandPageScanResult,
+    OnDemandPageScanReport,
+    WebsiteScanResult,
+    PrivacyPageScanReport,
+    OnDemandPageScanRunState,
+    OnDemandPageScanRunResult,
+} from 'storage-documents';
+import { PrivacyScanResult, BrowserError } from 'scanner-global-library';
 import { System, ServiceConfiguration, ScanRunTimeConfig, GuidGenerator } from 'common';
 import { ScanMetadataConfig } from '../scan-metadata-config';
 import { PageScanProcessor } from '../scanner/page-scan-processor';
@@ -167,6 +174,37 @@ describe(Runner, () => {
         setupUpdateScanResult();
         await runner.run();
     });
+
+    it('retry on missing privacy banner', async () => {
+        privacyScanResults.error = {
+            errorType: 'ResourceLoadFailure',
+        } as BrowserError;
+
+        setupScanMetadataConfig();
+        setupUpdateScanRunStateToRunning();
+        setupScanRunnerTelemetryManager(true, false);
+        setupPageScanProcessor();
+        setupProcessScanResult();
+        setupUpdateScanResult();
+        await runner.run();
+    });
+
+    it('complete on missing privacy banner when no retries', async () => {
+        privacyScanResults.error = {
+            errorType: 'ResourceLoadFailure',
+        } as BrowserError;
+        pageScanResultDbDocument.run = { retryCount: maxFailedScanRetryCount } as OnDemandPageScanRunResult;
+
+        setupScanMetadataConfig();
+        setupUpdateScanRunStateToRunning();
+        setupScanRunnerTelemetryManager(true, false);
+        setupPageScanProcessor();
+        setupProcessScanResult();
+
+        pageScanResult.run = { ...pageScanResult.run, retryCount: maxFailedScanRetryCount } as OnDemandPageScanRunResult;
+        setupUpdateScanResult();
+        await runner.run();
+    });
 });
 
 function setupUpdateScanResult(): void {
@@ -202,10 +240,17 @@ function setupUpdateScanResult(): void {
 
 function setupProcessScanResult(): void {
     if (privacyScanResults.error) {
+        let runState: OnDemandPageScanRunState = 'failed';
+        if ((privacyScanResults.error as BrowserError)?.errorType === 'ResourceLoadFailure') {
+            runState = pageScanResult.run?.retryCount >= maxFailedScanRetryCount ? 'completed' : 'retrying';
+        }
         pageScanResult.run = {
-            state: 'failed',
+            state: runState,
             timestamp: dateNow.toJSON(),
             error: privacyScanResults.error,
+        };
+        pageScanResult.scanResult = {
+            state: 'fail',
         };
         loggerMock
             .setup((o) => o.logError(`Browser has failed to scan a webpage.`, { error: JSON.stringify(privacyScanResults.error) }))
@@ -253,8 +298,13 @@ function setupProcessScanResult(): void {
 
     pageScanResult.scannedUrl = privacyScanResults.scannedUrl;
     pageScanResult.run.pageResponseCode = privacyScanResults.pageResponseCode;
+    if (pageScanResultDbDocument.run) {
+        pageScanResult.run = { ...pageScanResult.run, ...pageScanResultDbDocument.run };
+    }
 
-    combinedResultsProcessorMock.setup((c) => c.generateCombinedScanResults(privacyScanResults, pageScanResult)).verifiable();
+    combinedResultsProcessorMock
+        .setup((c) => c.generateCombinedScanResults(It.isValue(privacyScanResults), It.isValue(pageScanResult)))
+        .verifiable();
 }
 
 function setupPageScanProcessor(succeeded: boolean = true, error: Error = undefined): void {

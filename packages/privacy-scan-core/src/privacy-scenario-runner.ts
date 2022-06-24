@@ -49,7 +49,7 @@ export class PrivacyScenarioRunner {
             return true;
         } catch (error) {
             if (error.name !== 'TimeoutError') {
-                this.logger?.logError('Banner detection error.', { url: page.url, browserError: System.serializeError(error) });
+                this.logger?.logError('Privacy banner detection error.', { url: page.url, browserError: System.serializeError(error) });
                 throw error;
             }
 

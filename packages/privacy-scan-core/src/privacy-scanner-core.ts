@@ -64,6 +64,12 @@ export class PrivacyScannerCore {
                 url: page.url,
                 errors: JSON.stringify(errors),
             });
+        } else if (privacyResult.bannerDetected === false) {
+            scanResult.error = {
+                errorType: 'ResourceLoadFailure',
+                message: 'Privacy banner was not detected.',
+                stack: new Error().stack,
+            };
         }
 
         return scanResult;

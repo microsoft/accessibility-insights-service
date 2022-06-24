@@ -6,6 +6,10 @@ import { StorageDocument } from './storage-document';
 import { ScanGroupType } from './website-scan-result';
 import { PrivacyScan } from './on-demand-page-scan-batch-request';
 
+export declare type ScanState = 'pending' | 'pass' | 'fail';
+export declare type NotificationState = 'pending' | 'queued' | 'queueFailed' | 'sending' | 'sent' | 'sendFailed';
+export declare type NotificationErrorTypes = 'InternalError' | 'HttpErrorCode';
+
 export declare type ReportFormat =
     | 'axe'
     | 'sarif'
@@ -15,10 +19,16 @@ export declare type ReportFormat =
     | 'consolidated.json'
     | 'page.mhtml'
     | 'page.png';
-export declare type ScanState = 'pending' | 'pass' | 'fail';
-export declare type OnDemandPageScanRunState = 'pending' | 'accepted' | 'queued' | 'running' | 'report' | 'completed' | 'failed';
-export declare type NotificationState = 'pending' | 'queued' | 'queueFailed' | 'sending' | 'sent' | 'sendFailed';
-export declare type NotificationErrorTypes = 'InternalError' | 'HttpErrorCode';
+
+export declare type OnDemandPageScanRunState =
+    | 'pending'
+    | 'accepted'
+    | 'queued'
+    | 'running'
+    | 'retrying'
+    | 'report'
+    | 'completed'
+    | 'failed';
 
 export declare type ScanErrorTypes =
     | 'UrlNavigationTimeout'

@@ -7,11 +7,9 @@ export type CookieScenario = {
 };
 
 export const getAllCookieScenarios = (): CookieScenario[] => {
-    const timestamp = Date.now();
-
     /**
      * Cookies:
-     * - name:
+     * - property:
      * c1 - Analytics
      * c2 - Social Media
      * c3 - Advertising
@@ -21,10 +19,6 @@ export const getAllCookieScenarios = (): CookieScenario[] => {
      * Rejected = 1
      */
     return [
-        {
-            name: 'MSCC',
-            value: `${timestamp}`,
-        },
         {
             // Analytics - accepted
             name: 'MSCC',
