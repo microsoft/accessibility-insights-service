@@ -75,7 +75,7 @@
         "exponential-backoff": "^3.1.0",
         "filenamify": "^4.3.0",
         "filenamify-url": "^2.1.2",
-        "got": "^11.8.3",
+        "got": "^11.8.5",
         "inversify": "^6.0.1",
         "json5": "^2.2.1",
         "leveldown": "^6.1.1",
