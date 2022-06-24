@@ -3,10 +3,10 @@
 
 import { inject, injectable } from 'inversify';
 import { GlobalLogger } from 'logger';
-import { PrivacyScanResult } from 'scanner-global-library';
+import { PrivacyScanResult, BrowserError } from 'scanner-global-library';
 import { OnDemandPageScanRunResultProvider, WebsiteScanResultProvider, ReportWriter, GeneratedReport } from 'service-library';
 import { OnDemandPageScanReport, OnDemandPageScanResult, OnDemandPageScanRunState, ScanError, WebsiteScanResult } from 'storage-documents';
-import { System, ServiceConfiguration, GuidGenerator } from 'common';
+import { System, ServiceConfiguration, GuidGenerator, ScanRunTimeConfig } from 'common';
 import { isString, isEmpty } from 'lodash';
 import { ScanMetadataConfig } from '../scan-metadata-config';
 import { ScanRunnerTelemetryManager } from '../scan-runner-telemetry-manager';
@@ -37,7 +37,7 @@ export class Runner {
         this.logger.setCommonProperties({ scanId: scanMetadata.id, url: scanMetadata.url });
         this.logger.logInfo('Start privacy scan runner.');
 
-        const pageScanResult = await this.updateScanRunState(scanMetadata.id);
+        const pageScanResult = await this.updateScanRunStateToRunning(scanMetadata.id);
         if (pageScanResult === undefined) {
             return;
         }
@@ -61,7 +61,7 @@ export class Runner {
         this.logger.logInfo('Stop privacy scan runner.');
     }
 
-    private async updateScanRunState(scanId: string): Promise<OnDemandPageScanResult> {
+    private async updateScanRunStateToRunning(scanId: string): Promise<OnDemandPageScanResult> {
         this.logger.logInfo(`Updating webpage scan run state to 'running'.`);
         const partialPageScanResult: Partial<OnDemandPageScanResult> = {
             id: scanId,
@@ -85,20 +85,11 @@ export class Runner {
         return response.result;
     }
 
-    private async processScanResult(
-        privacyScanResult: PrivacyScanResult,
-        pageScanResult: OnDemandPageScanResult,
-    ): Promise<PrivacyScanResult> {
+    private async processScanResult(privacyScanResult: PrivacyScanResult, pageScanResult: OnDemandPageScanResult): Promise<void> {
         if (isEmpty(privacyScanResult.error)) {
-            this.setRunResult(pageScanResult, 'completed');
-            pageScanResult.scanResult = {
-                state: 'pass', // TBD
-            };
+            this.onCompletedScan(pageScanResult);
         } else {
-            this.setRunResult(pageScanResult, 'failed', privacyScanResult.error);
-
-            this.logger.logError('Browser has failed to scan a webpage.', { error: JSON.stringify(privacyScanResult.error) });
-            this.telemetryManager.trackBrowserScanFailed();
+            await this.onFailedScan(privacyScanResult, pageScanResult);
         }
 
         pageScanResult.scannedUrl = privacyScanResult.scannedUrl;
@@ -106,8 +97,30 @@ export class Runner {
         pageScanResult.reports = await this.generateScanReports(privacyScanResult);
 
         await this.combinedResultProcessor.generateCombinedScanResults(privacyScanResult, pageScanResult);
+    }
 
-        return privacyScanResult.error ? undefined : privacyScanResult;
+    private onCompletedScan(pageScanResult: OnDemandPageScanResult): void {
+        this.setRunResult(pageScanResult, 'completed');
+        pageScanResult.scanResult = {
+            state: 'pass',
+        };
+    }
+
+    private async onFailedScan(privacyScanResult: PrivacyScanResult, pageScanResult: OnDemandPageScanResult): Promise<void> {
+        let runState: OnDemandPageScanRunState = 'failed';
+        // Retrying privacy banner detection
+        if ((privacyScanResult.error as BrowserError)?.errorType === 'ResourceLoadFailure') {
+            const scanConfig = await this.getScanConfig();
+            runState = pageScanResult.run?.retryCount >= scanConfig.maxFailedScanRetryCount ? 'completed' : 'retrying';
+        }
+
+        pageScanResult.scanResult = {
+            state: 'fail',
+        };
+
+        this.setRunResult(pageScanResult, runState, privacyScanResult.error);
+        this.logger.logError('Browser has failed to scan a webpage.', { error: JSON.stringify(privacyScanResult.error) });
+        this.telemetryManager.trackBrowserScanFailed();
     }
 
     private async updateScanResult(
@@ -118,7 +131,7 @@ export class Runner {
 
         const websiteScanRef = pageScanResult.websiteScanRefs?.find((ref) => ref.scanGroupType === 'deep-scan');
         if (websiteScanRef) {
-            const scanConfig = await this.serviceConfig.getConfigValue('scanConfig');
+            const scanConfig = await this.getScanConfig();
             const runState =
                 pageScanResult.run.state === 'completed' || pageScanResult.run.retryCount >= scanConfig.maxFailedScanRetryCount
                     ? pageScanResult.run.state
@@ -180,5 +193,9 @@ export class Runner {
             timestamp: new Date().toJSON(),
             error: isString(error) ? error.substring(0, 2048) : error,
         };
+    }
+
+    private async getScanConfig(): Promise<ScanRunTimeConfig> {
+        return this.serviceConfig.getConfigValue('scanConfig');
     }
 }

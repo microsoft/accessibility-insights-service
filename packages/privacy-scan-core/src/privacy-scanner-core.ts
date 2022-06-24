@@ -60,10 +60,16 @@ export class PrivacyScannerCore {
             scanResult.pageResponseCode = error.statusCode;
             scanResult.results.httpStatusCode = error.statusCode;
 
-            this.logger.logError('Failed to collect cookies for test scenario.', {
+            this.logger.logError('Failed to collect cookies for test scenario(s).', {
                 url: page.url,
                 errors: JSON.stringify(errors),
             });
+        } else if (privacyResult.bannerDetected === false) {
+            scanResult.error = {
+                errorType: 'ResourceLoadFailure',
+                message: 'Privacy banner was not detected.',
+                stack: new Error().stack,
+            };
         }
 
         return scanResult;

@@ -44,6 +44,38 @@ describe(PrivacyScannerCore, () => {
         pageMock.verifyAll();
     });
 
+    it('return error if banner not found', async () => {
+        setupPageUrl();
+        setupRequestUrl();
+        setupLastNavigationResponse();
+
+        privacyResult.bannerDetected = false;
+        privacyScenarioRunnerMock
+            .setup((o) => o.run(pageMock.object))
+            .returns(() => Promise.resolve(privacyResult))
+            .verifiable();
+        const expectedResult = {
+            pageResponseCode: 200,
+            scannedUrl: url,
+            error: {
+                errorType: 'ResourceLoadFailure',
+                message: 'Privacy banner was not detected.',
+            },
+            results: {
+                bannerDetected: false,
+                cookieCollectionConsentResults: [] as ConsentResult[],
+                httpStatusCode: 200,
+                navigationalUri,
+                seedUri: requestUrl,
+            },
+        };
+
+        const actualResult = await privacyScannerCore.scan(pageMock.object);
+        delete (actualResult.error as BrowserError).stack; // remove stack trace
+
+        expect(actualResult).toEqual(expectedResult);
+    });
+
     it('scan with runner errors', async () => {
         setupPageUrl();
         setupRequestUrl();
@@ -126,7 +158,7 @@ describe(PrivacyScannerCore, () => {
         expect(actualResult).toEqual(expectedResult);
     });
 
-    it('return error result if first navigation was unsuccessfully', async () => {
+    it('return error result if navigation was unsuccessfully', async () => {
         pageMock
             .setup((o) => o.lastBrowserError)
             .returns(() => browserError)
