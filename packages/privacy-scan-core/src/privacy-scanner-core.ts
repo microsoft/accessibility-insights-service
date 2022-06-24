@@ -60,7 +60,7 @@ export class PrivacyScannerCore {
             scanResult.pageResponseCode = error.statusCode;
             scanResult.results.httpStatusCode = error.statusCode;
 
-            this.logger.logError('Failed to collect cookies for test scenario(s).', {
+            this.logger.logError('Failed to collect cookies for test scenario.', {
                 url: page.url,
                 errors: JSON.stringify(errors),
             });
