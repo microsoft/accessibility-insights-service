@@ -15,7 +15,7 @@
         "pack": "npx lerna run pack --stream",
         "test": "npx jest --maxConcurrency=1 --maxWorkers=4",
         "test:nc": "npx jest --maxConcurrency=1 --maxWorkers=4 --collectCoverage=false",
-        "test:ci": "npx jest --config jest.ci.js --totalTestSlices=4 --testSlicesToRun=[1,2,3]",
+        "test:ci": "npx jest --maxConcurrency=1 --maxWorkers=4",
         "publish-code-coverage": "./upload-to-codecov.sh",
         "test:e2e": "npx jest functional-tests.local.spec.ts",
         "lint:check": "npx lerna run lint --stream",
