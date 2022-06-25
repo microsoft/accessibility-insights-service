@@ -50,8 +50,8 @@ export class TestOnDemandController extends WebController {
                 scanId: '', // set scanId
             },
             test: {
-                // set functionalTestGroupTypes value that match to test group class (under functional-tests package)
-                // corresponds to e2e testContainerName i.e. ScanReportTestGroup -> ScanReports
+                // set testGroupName vale to a key from functionalTestGroupTypes const (functional-tests package)
+                // i.e. ScanReportTestGroup -> ScanReports
                 testGroupName: 'ScanReports',
                 scenarioName: '',
             },
