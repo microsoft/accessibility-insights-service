@@ -83,6 +83,7 @@ describe(ScanResponseConverter, () => {
         await validateConverterShortResult('accepted', 'accepted', notificationEnabled);
         await validateConverterShortResult('queued', 'queued', notificationEnabled);
         await validateConverterShortResult('running', 'running', notificationEnabled);
+        await validateConverterShortResult('report', 'report', notificationEnabled);
         await validateConverterShortResult('failed', 'failed', notificationEnabled);
     });
 
@@ -96,7 +97,7 @@ describe(ScanResponseConverter, () => {
     it('return not completed result, when scan has failed and there is retry option', async () => {
         const pageScanDbResult = getPageScanResult('failed');
         pageScanDbResult.run.retryCount = 0;
-        const responseExpected = getScanResultClientResponseShort('pending');
+        const responseExpected = getScanResultClientResponseShort('retrying');
         const response = await scanResponseConverter.getScanResultResponse(baseUrl, apiVersion, pageScanDbResult, websiteScanResult);
         expect(response).toEqual(responseExpected);
     });
@@ -308,12 +309,12 @@ function getScanResultClientResponseShort(state: RunStateRestApi, isNotification
         scanType: 'accessibility',
         run: {
             state: state,
-            error: state === 'failed' ? ScanRunErrorCodes.internalError : undefined,
+            error: state === 'failed' || state === 'retrying' ? ScanRunErrorCodes.internalError : undefined,
         },
         ...(isNotificationEnabled ? { notification: notificationResponse } : {}),
     };
 
-    if (state === 'completed' || state === 'failed') {
+    if (state === 'completed' || state === 'failed' || state === 'retrying') {
         response.run.pageResponseCode = pageResponseCode;
         response.run.pageTitle = pageTitle;
     }

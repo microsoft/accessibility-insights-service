@@ -102,9 +102,15 @@ export class ScanRequestSelector {
                 }
 
                 if (
-                    (scanResult.run.state === 'queued' || scanResult.run.state === 'running' || scanResult.run.state === 'failed') && // terminated or failed
-                    (scanResult.run.retryCount === undefined || scanResult.run.retryCount < this.maxFailedScanRetryCount) && // retry threshold
-                    moment.utc(scanResult.run.timestamp).add(this.failedScanRetryIntervalInMinutes, 'minutes') <= moment.utc() // retry delay
+                    // scan was terminated, failed, or retry was requested
+                    (scanResult.run.state === 'queued' ||
+                        scanResult.run.state === 'running' ||
+                        scanResult.run.state === 'retrying' ||
+                        scanResult.run.state === 'failed') &&
+                    // still below maximum retry threshold
+                    (scanResult.run.retryCount === undefined || scanResult.run.retryCount < this.maxFailedScanRetryCount) &&
+                    // retry delay has passed
+                    moment.utc(scanResult.run.timestamp).add(this.failedScanRetryIntervalInMinutes, 'minutes') <= moment.utc()
                 ) {
                     this.addRequestToScanQueue(filteredScanRequests, { request: scanRequest, result: scanResult, condition: 'retry' });
 

@@ -5,10 +5,9 @@ import 'reflect-metadata';
 
 import { AxePuppeteer } from '@axe-core/puppeteer';
 import { AxeResults } from 'axe-core';
-import Puppeteer, { ScreenshotOptions } from 'puppeteer';
+import Puppeteer from 'puppeteer';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { System } from 'common';
-import { PrivacyPageScanner, PrivacyResults } from 'privacy-scan-core';
 import { AxeScanResults } from './axe-scan-results';
 import { BrowserError } from './browser-error';
 import { AxePuppeteerFactory } from './factories/axe-puppeteer-factory';
@@ -18,7 +17,6 @@ import { MockableLogger } from './test-utilities/mockable-logger';
 import { getPromisableDynamicMock } from './test-utilities/promisable-mock';
 import { WebDriver } from './web-driver';
 import { PageNavigator, NavigationResponse } from './page-navigator';
-import { PrivacyScanResult } from './privacy-scan-result';
 import { PageNavigationTiming } from './page-timeout-config';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -53,7 +51,6 @@ let puppeteerPageMock: IMock<Puppeteer.Page>;
 let puppeteerResponseMock: IMock<Puppeteer.HTTPResponse>;
 let puppeteerRequestMock: IMock<Puppeteer.HTTPRequest>;
 let axePuppeteerMock: IMock<AxePuppeteer>;
-let privacyScannerMock: IMock<PrivacyPageScanner>;
 let cdpSessionMock: IMock<Puppeteer.CDPSession>;
 
 describe(Page, () => {
@@ -77,7 +74,6 @@ describe(Page, () => {
         puppeteerRequestMock = getPromisableDynamicMock(Mock.ofType<Puppeteer.HTTPRequest>());
         axePuppeteerMock = getPromisableDynamicMock(Mock.ofType<AxePuppeteer>());
         cdpSessionMock = getPromisableDynamicMock(Mock.ofType<Puppeteer.CDPSession>());
-        privacyScannerMock = Mock.ofType<PrivacyPageScanner>();
         navigationResponse = {
             httpResponse: puppeteerResponseMock.object,
             pageNavigationTiming: pageNavigationTiming,
@@ -91,13 +87,7 @@ describe(Page, () => {
         puppeteerResponseMock.setup((o) => o.request()).returns(() => puppeteerRequestMock.object);
         puppeteerResponseMock.setup((o) => o.status()).returns(() => scanResults.pageResponseCode);
 
-        page = new Page(
-            webDriverMock.object,
-            axePuppeteerFactoryMock.object,
-            pageNavigatorMock.object,
-            privacyScannerMock.object,
-            loggerMock.object,
-        );
+        page = new Page(webDriverMock.object, axePuppeteerFactoryMock.object, pageNavigatorMock.object, loggerMock.object);
     });
 
     afterEach(() => {
@@ -230,160 +220,28 @@ describe(Page, () => {
         });
     });
 
-    describe('scanForPrivacy()', () => {
-        let privacyResults: PrivacyResults;
-
-        beforeEach(() => {
-            privacyResults = {
-                bannerDetected: true,
-                cookieCollectionConsentResults: [
-                    {
-                        cookiesUsedForConsent: 'cookie=value',
-                        cookiesAfterConsent: [],
-                        cookiesBeforeConsent: [],
-                    },
-                ],
-            } as PrivacyResults;
-            simulatePageLaunch();
-            privacyScannerMock.setup((s) => s.scanPageForPrivacy(puppeteerPageMock.object, It.isAny())).returns(async () => privacyResults);
-        });
-
-        it('scan page', async () => {
-            puppeteerPageMock.setup((p) => p.url()).returns(() => url);
-            simulatePageNavigation(puppeteerResponseMock.object);
-            const expectedPrivacyScanResults = {
-                results: {
-                    ...privacyResults,
-                    httpStatusCode: 200,
-                },
-                pageResponseCode: 200,
-            } as PrivacyScanResult;
-
-            const privacyScanResults = await page.scanForPrivacy();
-
-            expect(privacyScanResults).toEqual(expectedPrivacyScanResults);
-        });
-
-        it('handles error thrown by scan engine', async () => {
-            const scanError = new Error('Test error');
-            const expectedResult = { error: `Privacy scan engine error. ${System.serializeError(scanError)}`, scannedUrl: url };
-
-            puppeteerPageMock.setup((p) => p.url()).returns(() => url);
-            simulatePageNavigation(puppeteerResponseMock.object);
-            privacyScannerMock.reset();
-            privacyScannerMock.setup((p) => p.scanPageForPrivacy(It.isAny(), It.isAny())).throws(scanError);
-
-            const privacyScanResults = await page.scanForPrivacy();
-
-            expect(privacyScanResults).toEqual(expectedResult);
-        });
-
-        it('scan page with navigation error', async () => {
-            const browserError = { errorType: 'SslError', statusCode: 500 } as BrowserError;
-            puppeteerPageMock.setup((p) => p.url()).returns(() => url);
-            simulatePageNavigation(undefined, browserError);
-            const expectedPrivacyScanResults = {
-                error: browserError,
-                pageResponseCode: browserError.statusCode,
-            } as PrivacyScanResult;
-
-            const privacyScanResults = await page.scanForPrivacy();
-
-            expect(privacyScanResults).toEqual(expectedPrivacyScanResults);
-        });
-
-        it('scan page with redirect', async () => {
-            puppeteerRequestMock.reset();
-            puppeteerRequestMock
-                .setup((o) => o.redirectChain())
-                .returns(() => [{}] as Puppeteer.HTTPRequest[])
-                .verifiable();
-            puppeteerPageMock.setup((p) => p.url()).returns(() => redirectUrl);
-            simulatePageNavigation(puppeteerResponseMock.object);
-            const expectedPrivacyScanResults = {
-                results: {
-                    ...privacyResults,
-                    httpStatusCode: 200,
-                },
-                pageResponseCode: 200,
-                scannedUrl: redirectUrl,
-            } as PrivacyScanResult;
-            loggerMock.setup((o) => o.logWarn(`Scanning performed on redirected page`, { redirectedUrl: redirectUrl })).verifiable();
-
-            const privacyScanResults = await page.scanForPrivacy();
-
-            expect(privacyScanResults).toEqual(expectedPrivacyScanResults);
-        });
-
-        it('scan page with redirect but no response chain', async () => {
-            page.requestUrl = 'request page';
-            puppeteerRequestMock.reset();
-            puppeteerRequestMock
-                .setup((o) => o.redirectChain())
-                .returns(() => [] as Puppeteer.HTTPRequest[])
-                .verifiable();
-            puppeteerPageMock.setup((p) => p.url()).returns(() => redirectUrl);
-            simulatePageNavigation(puppeteerResponseMock.object);
-            const expectedPrivacyScanResults = {
-                results: {
-                    ...privacyResults,
-                    httpStatusCode: 200,
-                    seedUri: page.requestUrl,
-                },
-                pageResponseCode: 200,
-                scannedUrl: redirectUrl,
-            } as PrivacyScanResult;
-            loggerMock.setup((o) => o.logWarn(`Scanning performed on redirected page`, { redirectedUrl: redirectUrl })).verifiable();
-
-            const privacyScanResults = await page.scanForPrivacy();
-
-            expect(privacyScanResults).toEqual(expectedPrivacyScanResults);
-        });
-
-        it('scan throws error if navigateToUrl was not called first', async () => {
-            pageNavigatorMock.setup(async (o) => o.navigate(It.isAny(), It.isAny(), It.isAny())).verifiable(Times.never());
-
-            await expect(page.scanForPrivacy()).rejects.toThrow();
-        });
-
-        it('returns result with error if privacy results contain an error', async () => {
-            privacyResults.cookieCollectionConsentResults.push(
-                ...[
-                    {
-                        error: {
-                            message: 'Error reloading page, run 1',
-                            statusCode: 404,
-                        },
-                    },
-                    {
-                        error: {
-                            message: 'Error reloading page, run 2',
-                            statusCode: 404,
-                        },
-                    },
-                ],
-            );
-            puppeteerPageMock.setup((p) => p.url()).returns(() => url);
-            simulatePageNavigation(puppeteerResponseMock.object);
-            const expectedError = privacyResults.cookieCollectionConsentResults.find((r) => r.error !== undefined).error as BrowserError;
-            const expectedPrivacyScanResults = {
-                results: {
-                    ...privacyResults,
-                    httpStatusCode: expectedError.statusCode,
-                },
-                pageResponseCode: expectedError.statusCode,
-                error: expectedError,
-            } as PrivacyScanResult;
-
-            const privacyScanResults = await page.scanForPrivacy();
-
-            expect(privacyScanResults).toEqual(expectedPrivacyScanResults);
-        });
-    });
-
     describe('navigateToUrl()', () => {
         beforeEach(() => {
             simulatePageLaunch();
+        });
+
+        it('navigates to page with options', async () => {
+            pageNavigatorMock
+                .setup(async (o) => o.navigate(url, puppeteerPageMock.object, It.isAny()))
+                .returns(() => Promise.resolve(navigationResponse))
+                .verifiable();
+            puppeteerPageMock
+                .setup((o) => o.close())
+                .returns(() => Promise.resolve())
+                .verifiable();
+            browserMock
+                .setup(async (o) => o.newPage())
+                .returns(() => Promise.resolve(puppeteerPageMock.object))
+                .verifiable();
+
+            await page.navigateToUrl(url, { reopenPage: true });
+
+            expect(page.lastNavigationResponse).toEqual(puppeteerResponseMock.object);
         });
 
         it('navigates to page and saves response', async () => {
@@ -396,14 +254,14 @@ describe(Page, () => {
             Object.keys(navigationResponse.pageNavigationTiming).forEach((key: keyof PageNavigationTiming) => {
                 timing[key] = `${navigationResponse.pageNavigationTiming[key]}`;
             });
-            loggerMock.setup((o) => o.logInfo('Total page rendering time 10 msec', { ...timing })).verifiable();
+            loggerMock.setup((o) => o.logInfo('Total page load time 10, msec', { ...timing })).verifiable();
 
             await page.navigateToUrl(url);
 
             expect(page.lastNavigationResponse).toEqual(puppeteerResponseMock.object);
         });
 
-        it('handles browser error', async () => {
+        it('handles browser error on navigate', async () => {
             const error = new Error('navigation error');
             const browserError = { errorType: 'SslError', statusCode: 500 } as BrowserError;
             loggerMock
@@ -418,6 +276,60 @@ describe(Page, () => {
                 .verifiable();
 
             await page.navigateToUrl(url);
+
+            expect(page.lastBrowserError).toEqual(browserError);
+        });
+
+        it('set extra HTTP headers on navigate', async () => {
+            process.env.X_FORWARDED_FOR_HTTP_HEADER = '1.1.1.1';
+            pageNavigatorMock
+                .setup(async (o) => o.navigate(url, puppeteerPageMock.object, It.isAny()))
+                .returns(() => Promise.resolve(navigationResponse))
+                .verifiable();
+            puppeteerPageMock
+                .setup((o) => o.setExtraHTTPHeaders({ X_FORWARDED_FOR: '1.1.1.1' }))
+                .returns(() => Promise.resolve())
+                .verifiable();
+
+            await page.navigateToUrl(url);
+        });
+    });
+
+    describe('reload()', () => {
+        beforeEach(() => {
+            simulatePageLaunch();
+        });
+
+        it('reload page and saves response', async () => {
+            pageNavigatorMock
+                .setup(async (o) => o.reload(puppeteerPageMock.object, It.isAny()))
+                .returns(() => Promise.resolve(navigationResponse))
+                .verifiable();
+
+            const timing = { total: '10' } as any;
+            Object.keys(navigationResponse.pageNavigationTiming).forEach((key: keyof PageNavigationTiming) => {
+                timing[key] = `${navigationResponse.pageNavigationTiming[key]}`;
+            });
+            loggerMock.setup((o) => o.logInfo('Total page reload time 10, msec', { ...timing })).verifiable();
+
+            await page.reload();
+
+            expect(page.lastNavigationResponse).toEqual(puppeteerResponseMock.object);
+        });
+
+        it('handles browser error on reload', async () => {
+            const error = new Error('navigation error');
+            const browserError = { errorType: 'SslError', statusCode: 500 } as BrowserError;
+            loggerMock.setup((o) => o.logError('Page reload error', { browserError: System.serializeError(browserError) })).verifiable();
+            pageNavigatorMock
+                .setup(async (o) => o.reload(puppeteerPageMock.object, It.isAny()))
+                .callback(async (p, fn) => {
+                    await fn(browserError, error);
+                })
+                .returns(() => Promise.resolve(undefined))
+                .verifiable();
+
+            await page.reload();
 
             expect(page.lastBrowserError).toEqual(browserError);
         });
@@ -462,7 +374,7 @@ describe(Page, () => {
                 .verifiable();
             setupPageConfigurator();
             page.browser = undefined;
-            page.page = undefined;
+            (page as any).page = undefined;
 
             await page.create();
 
@@ -481,7 +393,7 @@ describe(Page, () => {
                 .returns(() => Promise.resolve(browserMock.object))
                 .verifiable();
             page.browser = undefined;
-            page.page = undefined;
+            (page as any).page = undefined;
 
             await page.create({
                 browserExecutablePath: 'path',
@@ -500,7 +412,7 @@ describe(Page, () => {
                 .returns(() => Promise.resolve(browserMock.object))
                 .verifiable();
             page.browser = undefined;
-            page.page = undefined;
+            (page as any).page = undefined;
 
             await page.create({
                 browserExecutablePath: 'path',
@@ -519,27 +431,56 @@ describe(Page, () => {
             await page.close();
         });
 
-        it('getPageScreenshot()', async () => {
-            simulatePageLaunch();
-            const options = {
-                type: 'png',
-                fullPage: true,
-                encoding: 'base64',
-                captureBeyondViewport: true,
-            } as ScreenshotOptions;
-            puppeteerPageMock
-                .setup((o) => o.screenshot(options))
-                .returns(() => Promise.resolve('data'))
-                .verifiable();
-            const data = await page.getPageScreenshot();
-            expect(data).toEqual('data');
-        });
+        // it('getPageScreenshot()', async () => {
+        //     simulatePageLaunch();
+        //     const options = {
+        //         type: 'png',
+        //         fullPage: true,
+        //         encoding: 'base64',
+        //         captureBeyondViewport: true,
+        //     } as ScreenshotOptions;
+        //     puppeteerPageMock
+        //         .setup((o) => o.screenshot(options))
+        //         .returns(() => Promise.resolve('data'))
+        //         .verifiable();
+        //     const data = await page.getPageScreenshot();
+        //     expect(data).toEqual('data');
+        // });
 
         it('getPageSnapshot()', async () => {
             simulatePageLaunch();
-            setupCDPSession('data');
+            setupCDPSessionForCaptureSnapshot('data');
             const data = await page.getPageSnapshot();
             expect(data).toEqual('data');
+        });
+
+        it('getAllCookies()', async () => {
+            const cookies = [{ name: 'c1' }, { name: 'c2' }] as Puppeteer.Protocol.Network.Cookie[];
+            simulatePageLaunch();
+            setupCDPSessionForGetAllCookies(cookies);
+            const data = await page.getAllCookies();
+            expect(data).toEqual(cookies);
+        });
+
+        it('clearCookies()', async () => {
+            const cookies = [{ name: 'c1' }, { name: 'c2' }] as Puppeteer.Protocol.Network.Cookie[];
+            simulatePageLaunch();
+            setupCDPSessionForGetAllCookies(cookies);
+            puppeteerPageMock
+                .setup((o) => o.deleteCookie(...cookies))
+                .returns(() => Promise.resolve())
+                .verifiable();
+            await page.clearCookies();
+        });
+
+        it('setCookies()', async () => {
+            const cookies = [{ name: 'c1' }, { name: 'c2' }] as Puppeteer.Protocol.Network.CookieParam[];
+            simulatePageLaunch();
+            puppeteerPageMock
+                .setup((o) => o.setCookie(...cookies))
+                .returns(() => Promise.resolve())
+                .verifiable();
+            await page.setCookies(cookies);
         });
     });
 });
@@ -582,10 +523,10 @@ function simulatePageNavigation(response: Puppeteer.HTTPResponse, browserError?:
 
 function simulatePageLaunch(): void {
     page.browser = browserMock.object;
-    page.page = puppeteerPageMock.object;
+    (page as any).page = puppeteerPageMock.object;
 }
 
-function setupCDPSession(data: string): void {
+function setupCDPSessionForCaptureSnapshot(data: string): void {
     cdpSessionMock = getPromisableDynamicMock(Mock.ofType<Puppeteer.CDPSession>());
     const targetStub = {
         createCDPSession: async () => cdpSessionMock.object,
@@ -594,6 +535,21 @@ function setupCDPSession(data: string): void {
 
     const snapshot = { data };
     cdpSessionMock.setup((o) => o.send('Page.captureSnapshot', { format: 'mhtml' })).returns(async () => snapshot);
+    cdpSessionMock
+        .setup((o) => o.detach())
+        .returns(() => Promise.resolve())
+        .verifiable();
+}
+
+function setupCDPSessionForGetAllCookies(cookies: Puppeteer.Protocol.Network.Cookie[]): void {
+    cdpSessionMock = getPromisableDynamicMock(Mock.ofType<Puppeteer.CDPSession>());
+    const targetStub = {
+        createCDPSession: async () => cdpSessionMock.object,
+    } as Puppeteer.Target;
+    puppeteerPageMock.setup((o) => o.target()).returns(() => targetStub);
+
+    const data = { cookies };
+    cdpSessionMock.setup((o) => o.send('Network.getAllCookies')).returns(async () => data);
     cdpSessionMock
         .setup((o) => o.detach())
         .returns(() => Promise.resolve())

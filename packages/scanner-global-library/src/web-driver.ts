@@ -5,8 +5,11 @@ import { PromiseUtils } from 'common';
 import { inject, injectable, optional } from 'inversify';
 import { GlobalLogger, Logger } from 'logger';
 import Puppeteer from 'puppeteer';
+// eslint-disable-next-line @typescript-eslint/tslint/config
+import PuppeteerExtra from 'puppeteer-extra';
+// eslint-disable-next-line @typescript-eslint/tslint/config
+import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 import { defaultBrowserOptions, defaultLaunchOptions } from './puppeteer-options';
-import { ModHttpHeader } from './browser-extensions/mod-http-header';
 
 @injectable()
 export class WebDriver {
@@ -15,10 +18,10 @@ export class WebDriver {
     private readonly browserCloseTimeoutMsecs = 60000;
 
     constructor(
-        @inject(ModHttpHeader) private readonly modHttpHeader: ModHttpHeader,
         @inject(PromiseUtils) private readonly promiseUtils: PromiseUtils,
         @inject(GlobalLogger) @optional() private readonly logger: Logger,
         private readonly puppeteer: typeof Puppeteer = Puppeteer,
+        private readonly puppeteerExtra: typeof PuppeteerExtra = PuppeteerExtra,
     ) {}
 
     public async connect(wsEndpoint: string): Promise<Puppeteer.Browser> {
@@ -32,18 +35,24 @@ export class WebDriver {
     }
 
     public async launch(browserExecutablePath?: string): Promise<Puppeteer.Browser> {
-        if (process.env.MOD_HTTP_HEADER === 'true') {
-            this.browser = await this.modHttpHeader.launchWithExtension(browserExecutablePath);
-        } else {
-            const options = {
-                ...defaultLaunchOptions,
-                headless: process.env.HEADLESS === 'false' ? false : true,
-            };
-            this.browser = await this.puppeteer.launch({
-                executablePath: browserExecutablePath,
-                ...options,
-            });
+        // Chromium browser extension to hide puppeteer automation from a webserver
+        this.puppeteerExtra.use(StealthPlugin());
+
+        const options = {
+            ...defaultLaunchOptions,
+            headless: process.env.HEADLESS === 'false' ? false : true,
+        };
+
+        const isDebugEnabled = /--debug|--inspect/i.test(process.execArgv.join(' '));
+        if (isDebugEnabled === true) {
+            options.args.push('--disable-web-security');
         }
+
+        this.browser = await this.puppeteerExtra.launch({
+            ...options,
+            executablePath: browserExecutablePath,
+            devtools: process.env.DEVTOOLS === 'true' ? true : false,
+        });
 
         this.logger?.logInfo('Chromium browser instance started.');
 

@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 export interface PrivacyPageScanReport {
     finishDateTime: Date;
     navigationalUri: string;
@@ -27,5 +29,5 @@ export interface ConsentResult {
     cookiesUsedForConsent?: string;
     cookiesBeforeConsent?: CookieByDomain[];
     cookiesAfterConsent?: CookieByDomain[];
-    error?: unknown;
+    error?: any;
 }

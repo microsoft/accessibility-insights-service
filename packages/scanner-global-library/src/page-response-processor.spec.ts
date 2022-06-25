@@ -25,16 +25,16 @@ describe(PageResponseProcessor, () => {
 
     it('get response error for failed response code', () => {
         responseMock
-            .setup((o) => o.status())
-            .returns(() => 404)
+            .setup((o) => o.ok())
+            .returns(() => false)
             .verifiable();
         responseMock
             .setup((o) => o.statusText())
             .returns(() => 'Not Found')
             .verifiable();
         responseMock
-            .setup((o) => o.ok())
-            .returns(() => false)
+            .setup((o) => o.status())
+            .returns(() => 404)
             .verifiable();
 
         const expectedError = {

@@ -16,7 +16,7 @@ export declare type ReportFormat =
     | 'page.mhtml'
     | 'page.png';
 export declare type ScanState = 'pending' | 'pass' | 'fail';
-export declare type RunState = 'pending' | 'accepted' | 'queued' | 'running' | 'report' | 'completed' | 'failed';
+export declare type RunState = 'pending' | 'accepted' | 'queued' | 'running' | 'retrying' | 'report' | 'completed' | 'failed';
 export declare type NotificationState = 'pending' | 'queued' | 'queueFailed' | 'sending' | 'sent' | 'sendFailed';
 export declare type NotificationErrorTypes = 'InternalError' | 'HttpErrorCode';
 export declare type ScanType = 'accessibility' | 'privacy';

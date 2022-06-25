@@ -8,6 +8,7 @@ import { IMock, Mock, Times } from 'typemoq';
 import { Mutex } from 'async-mutex';
 import { ManagedIdentityCredential, AccessToken } from '@azure/identity';
 import * as MockDate from 'mockdate';
+import { ExponentialRetryOptions } from 'common';
 import { ManagedIdentityCredentialCache } from './managed-identity-credential-cache';
 
 const scopes = 'https://vault.azure.net/default';
@@ -21,6 +22,7 @@ let managedIdentityCredentialMock: IMock<ManagedIdentityCredential>;
 let azureManagedCredential: ManagedIdentityCredentialCache;
 let accessToken: AccessToken;
 let dateNow: Date;
+let retryOptions: ExponentialRetryOptions;
 
 describe(ManagedIdentityCredentialCache, () => {
     beforeEach(() => {
@@ -28,20 +30,20 @@ describe(ManagedIdentityCredentialCache, () => {
         MockDate.set(dateNow);
 
         accessToken = { token: 'eyJ0e_3g', expiresOnTimestamp: dateNow.valueOf() + tokenExpirationReductionMsec + 60000 };
-
+        retryOptions = {
+            delayFirstAttempt: false,
+            numOfAttempts: 2,
+            maxDelay: 10,
+            startingDelay: 0,
+        };
         tokenCacheMock = Mock.ofType<NodeCache>();
         managedIdentityCredentialMock = Mock.ofType<ManagedIdentityCredential>();
         azureManagedCredential = new ManagedIdentityCredentialCache(
             managedIdentityCredentialMock.object,
             tokenCacheMock.object,
             new Mutex(),
+            retryOptions,
         );
-        azureManagedCredential.backOffOptions = {
-            delayFirstAttempt: false,
-            numOfAttempts: 2,
-            maxDelay: 10,
-            startingDelay: 0,
-        };
     });
 
     afterEach(() => {

@@ -5,6 +5,7 @@ import { PromiseUtils, ServiceConfiguration, System } from 'common';
 import { inject, injectable } from 'inversify';
 import { GlobalLogger } from 'logger';
 import { Page, PrivacyScanResult } from 'scanner-global-library';
+import { PrivacyScannerCore } from 'privacy-scan-core';
 
 @injectable()
 export class PrivacyScanner {
@@ -14,6 +15,7 @@ export class PrivacyScanner {
     private readonly taskRunBufferTimeMinute = 5;
 
     constructor(
+        @inject(PrivacyScannerCore) private readonly privacyScannerCore: PrivacyScannerCore,
         @inject(PromiseUtils) private readonly promiseUtils: PromiseUtils,
         @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
         @inject(GlobalLogger) private readonly logger: GlobalLogger,
@@ -39,7 +41,7 @@ export class PrivacyScanner {
     private async scanImpl(page: Page): Promise<PrivacyScanResult> {
         try {
             this.logger.logInfo(`Starting privacy scan of a webpage.`);
-            const scanResult = await page.scanForPrivacy();
+            const scanResult = await this.privacyScannerCore.scan(page);
             this.logger.logInfo(`Privacy scanning of a webpage successfully completed.`);
 
             return scanResult;

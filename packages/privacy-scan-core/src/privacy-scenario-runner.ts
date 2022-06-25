@@ -4,52 +4,52 @@
 import { PrivacyScanConfig, ServiceConfiguration, System } from 'common';
 import { inject, injectable, optional } from 'inversify';
 import { ConsentResult } from 'storage-documents';
-import * as Puppeteer from 'puppeteer';
 import { GlobalLogger } from 'logger';
+import { Page } from 'scanner-global-library';
 import { CookieScenario, getAllCookieScenarios } from './cookie-scenarios';
 import { CookieCollector } from './cookie-collector';
-import { PrivacyResults, ReloadPageFunc } from './types';
+import { PrivacyResults } from './types';
 
 @injectable()
-export class PrivacyPageScanner {
+export class PrivacyScenarioRunner {
     constructor(
         @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
         @inject(CookieCollector) private readonly cookieCollector: CookieCollector,
         @inject(GlobalLogger) @optional() private readonly logger: GlobalLogger,
-        private readonly getCookieScenarios: () => CookieScenario[] = getAllCookieScenarios,
+        private readonly cookieScenariosProvider: () => CookieScenario[] = getAllCookieScenarios,
     ) {}
 
-    public async scanPageForPrivacy(page: Puppeteer.Page, reloadPageFunc: ReloadPageFunc): Promise<PrivacyResults> {
+    public async run(page: Page): Promise<PrivacyResults> {
         const privacyScanConfig = await this.serviceConfig.getConfigValue('privacyScanConfig');
 
-        const hasBanner = await this.hasBanner(page, privacyScanConfig);
-        this.logger?.logInfo(`Privacy banner ${hasBanner ? 'was detected.' : 'was not detected.'}`, {
-            bannerDetected: `${hasBanner}`,
-            url: page.url(),
+        const bannerDetected = await this.detectBanner(page, privacyScanConfig);
+        this.logger?.logInfo(`Privacy banner ${bannerDetected ? 'was detected.' : 'was not detected.'}`, {
+            bannerDetected: `${bannerDetected}`,
+            url: page.url,
             bannerXPath: privacyScanConfig.bannerXPath,
         });
 
-        const cookieCollectionResults = await this.getAllConsentResults(page, reloadPageFunc);
+        const cookieCollectionResults = await this.getAllConsentResults(page);
 
         return {
             finishDateTime: new Date(),
-            navigationalUri: page.url(),
+            navigationalUri: page.url,
             bannerDetectionXpathExpression: privacyScanConfig.bannerXPath,
-            bannerDetected: hasBanner,
+            bannerDetected,
             cookieCollectionConsentResults: cookieCollectionResults,
         };
     }
 
-    private async hasBanner(page: Puppeteer.Page, privacyScanConfig: PrivacyScanConfig): Promise<boolean> {
+    private async detectBanner(page: Page, privacyScanConfig: PrivacyScanConfig): Promise<boolean> {
         try {
-            await page.waitForXPath(privacyScanConfig.bannerXPath, {
+            await page.puppeteerPage.waitForXPath(privacyScanConfig.bannerXPath, {
                 timeout: privacyScanConfig.bannerDetectionTimeout,
             });
 
             return true;
         } catch (error) {
             if (error.name !== 'TimeoutError') {
-                this.logger?.logError('Banner detection error.', { url: page.url(), browserError: System.serializeError(error) });
+                this.logger?.logError('Privacy banner detection error.', { url: page.url, browserError: System.serializeError(error) });
                 throw error;
             }
 
@@ -57,13 +57,13 @@ export class PrivacyPageScanner {
         }
     }
 
-    private async getAllConsentResults(page: Puppeteer.Page, reloadPageFunc: ReloadPageFunc): Promise<ConsentResult[]> {
+    private async getAllConsentResults(page: Page): Promise<ConsentResult[]> {
         const results: ConsentResult[] = [];
-        const scenarios = this.getCookieScenarios();
+        const scenarios = this.cookieScenariosProvider();
 
-        // Test sequentially so that cookie values don't interfere with each other
+        // Run scenarios sequentially so that cookie values don't interfere with each other
         for (const scenario of scenarios) {
-            const result = await this.cookieCollector.getCookiesForScenario(page, scenario, reloadPageFunc);
+            const result = await this.cookieCollector.getCookiesForScenario(page, scenario);
             results.push(result);
         }
 

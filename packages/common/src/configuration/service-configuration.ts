@@ -366,7 +366,7 @@ export class ServiceConfiguration {
                 },
                 bannerDetectionTimeout: {
                     format: 'int',
-                    default: 5000,
+                    default: 10000,
                     doc: 'The maximum time in milliseconds to wait for the banner XPath after the initial page load has completed',
                 },
             },

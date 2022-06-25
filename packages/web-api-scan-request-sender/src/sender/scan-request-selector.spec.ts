@@ -9,7 +9,7 @@ import { ServiceConfiguration, ScanRunTimeConfig } from 'common';
 import { CosmosOperationResponse } from 'azure-services';
 import { OnDemandPageScanRequest, OnDemandPageScanResult, PrivacyScan } from 'storage-documents';
 import * as MockDate from 'mockdate';
-import _ from 'lodash';
+import { cloneDeep, merge } from 'lodash';
 import moment from 'moment';
 import { ScanRequestSelector, ScanRequests, DispatchCondition } from './scan-request-selector';
 
@@ -80,7 +80,7 @@ describe(ScanRequestSelector, () => {
             'accepted',
             scanRequests.map((scanRequest) => scanRequest.id),
         );
-        const expectedResult = _.cloneDeep(filteredScanRequests);
+        const expectedResult = cloneDeep(filteredScanRequests);
         expectedResult.accessibilityRequestsToQueue = expectedResult.accessibilityRequestsToQueue.slice(0, 3);
 
         const result = await scanRequestSelector.getRequests(accessibilityMessageCount, privacyMessageCount);
@@ -120,6 +120,9 @@ describe(ScanRequestSelector, () => {
             },
             {
                 run: { state: 'running' },
+            },
+            {
+                run: { state: 'retrying' },
             },
             {
                 run: { state: 'failed' },
@@ -225,7 +228,7 @@ function createScanRequests(requests: OnDemandPageScanRequest[] = []): void {
 function createScanResults(scans: Partial<OnDemandPageScanResult>[]): void {
     let id = 0;
     scanResults = scans.map((scanResult) => {
-        return _.merge(
+        return merge(
             {
                 id: ++id,
                 run: {
