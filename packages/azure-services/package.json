@@ -59,7 +59,7 @@
         "moment": "^2.29.2",
         "node-cache": "^5.1.2",
         "p-limit": "^3.1.0",
-        "pretty-format": "^27.5.1",
+        "pretty-format": "^28.1.1",
         "reflect-metadata": "^0.1.13",
         "storage-documents": "1.0.0",
         "verror": "^1.10.1"

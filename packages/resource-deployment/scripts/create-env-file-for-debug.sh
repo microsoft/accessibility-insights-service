@@ -102,9 +102,6 @@ AZURE_TENANT_ID=$tenant
 AZURE_CLIENT_ID=$clientId
 AZURE_CLIENT_SECRET=$password
 
-!!! Update variables below if required !!!
-
-Available pools: on-demand-scan-request-pool, on-demand-url-scan-pool, privacy-scan-pool
 AZ_BATCH_POOL_ID=
 AZ_BATCH_JOB_ID=1-dev-test-job
 AZ_BATCH_TASK_ID=dev-test-task
@@ -114,6 +111,12 @@ ID=
 DEEPSCAN=
 SCANGROUPID=
 TARGETREPORT=
+
+WEB_API_BASE_URL=
+
+HEADLESS=false
+DEVTOOLS=true
+X_FORWARDED_FOR_HTTP_HEADER=
 
 \033[0m <<< END of .env file
 
