@@ -3,21 +3,26 @@
 
 import { inject, injectable } from 'inversify';
 import { isEmpty, isNil } from 'lodash';
-import { DeepScanResultItem, ScanCompletedNotification as NotificationResponse, ScanReport, ScanResultResponse } from 'service-library';
+import {
+    DeepScanResultItem,
+    ScanCompletedNotification as NotificationResponse,
+    ScanReport,
+    ScanResultResponse,
+    RunStateProvider,
+} from 'service-library';
 import {
     OnDemandPageScanResult,
     OnDemandPageScanRunState,
     ScanCompletedNotification as NotificationDb,
     WebsiteScanResult,
 } from 'storage-documents';
-import { ServiceConfiguration } from 'common';
 import { ScanErrorConverter } from './scan-error-converter';
 
 @injectable()
 export class ScanResponseConverter {
     constructor(
         @inject(ScanErrorConverter) private readonly scanErrorConverter: ScanErrorConverter,
-        @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
+        @inject(RunStateProvider) private readonly runStateProvider: RunStateProvider,
     ) {}
 
     public async getScanResultResponse(
@@ -26,7 +31,7 @@ export class ScanResponseConverter {
         pageScanResult: OnDemandPageScanResult,
         websiteScanResult: WebsiteScanResult,
     ): Promise<ScanResultResponse> {
-        const effectiveRunState = await this.getEffectiveRunState(pageScanResult);
+        const effectiveRunState = await this.runStateProvider.getEffectiveRunState(pageScanResult);
         switch (effectiveRunState) {
             case 'pending':
             case 'accepted':
@@ -177,22 +182,5 @@ export class ScanResponseConverter {
         });
 
         return { deepScanResult };
-    }
-
-    private async getEffectiveRunState(pageScanResult: OnDemandPageScanResult): Promise<OnDemandPageScanRunState> {
-        if (pageScanResult.run.state !== 'failed') {
-            return pageScanResult.run.state;
-        }
-
-        const maxRetryCount = await this.getMaxRetryCount();
-
-        // indicate to the client that scan is retrying if there are retries attempts left
-        return pageScanResult.run?.retryCount >= maxRetryCount ? pageScanResult.run.state : 'retrying';
-    }
-
-    private async getMaxRetryCount(): Promise<number> {
-        const scanConfig = await this.serviceConfig.getConfigValue('scanConfig');
-
-        return scanConfig.maxFailedScanRetryCount;
     }
 }

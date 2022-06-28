@@ -2,6 +2,7 @@
     "IsEncrypted": false,
     "Values": {
         "FUNCTIONS_WORKER_RUNTIME": "node",
-        "AzureWebJobsStorage": "{AzureWebJobsStorage}"
+        "AzureWebJobsStorage": "DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=allystorageafht2l63h4dle;AccountKey=U8/GUsmKhSc/puSUJeOWPg/YYO9/9Uo/a/H1Dc13HGD9xX3uwom/5mc9uLPGpcATVbxqfvcsbYqC+AStGUsR0A==",
+        "COSMOS_CONNECTION_STRING": "AccountEndpoint=https://allycosmosafht2l63h4dle.documents.azure.com:443/;AccountKey=0r4tWY8NnO7D2GvYKuVzo6iKvdKrtiF0wR9b5Dj8oSRoJcHpg8B4vIh5Cso00xgeirPODvh9FqUWB5yLuk7k8w==;"
     }
 }

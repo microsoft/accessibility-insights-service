@@ -8,7 +8,6 @@ import { ServiceConfiguration } from 'common';
 import { client, CosmosOperationResponse } from 'azure-services';
 import moment from 'moment';
 
-/* eslint-disable max-len */
 export declare type DispatchCondition = 'notFound' | 'completed' | 'noRetry' | 'accepted' | 'retry';
 
 export interface ScanRequest {
@@ -103,10 +102,7 @@ export class ScanRequestSelector {
 
                 if (
                     // scan was terminated, failed, or retry was requested
-                    (scanResult.run.state === 'queued' ||
-                        scanResult.run.state === 'running' ||
-                        scanResult.run.state === 'retrying' ||
-                        scanResult.run.state === 'failed') &&
+                    ['queued', 'running', 'retrying', 'failed'].includes(scanResult.run.state) &&
                     // still below maximum retry threshold
                     (scanResult.run.retryCount === undefined || scanResult.run.retryCount < this.maxFailedScanRetryCount) &&
                     // retry delay has passed

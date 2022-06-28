@@ -302,7 +302,7 @@
             "dependsOn": ["[resourceId('Microsoft.Batch/batchAccounts', parameters('batchAccount'))]"],
             "properties": {
                 "vmSize": "[parameters('privacyScanPoolVmSize')]",
-                "interNodeCommunication": "Enabled",
+                "interNodeCommunication": "Disabled",
                 "taskSlotsPerNode": "[parameters('privacyScanPoolTaskSlotsPerNode')]",
                 "taskSchedulingPolicy": {
                     "nodeFillType": "Spread"

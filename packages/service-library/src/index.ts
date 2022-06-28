@@ -34,3 +34,4 @@ export { ScanNotificationDispatcher } from './processors/scan-notification-dispa
 export { ScanNotificationProcessor } from './processors/scan-notification-processor';
 export { RunnerScanMetadata } from './types/runner-scan-metadata';
 export { CombinedScanResultProcessor } from './combined-report-provider/combined-scan-result-processor';
+export { RunStateProvider } from './data-providers/run-state-provider';
