@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 import { inject, injectable } from 'inversify';
-import { OnDemandPageScanRequest, OnDemandPageScanResult } from 'storage-documents';
+import { OnDemandPageScanRequest, OnDemandPageScanResult, OnDemandPageScanRunState } from 'storage-documents';
 import { PageScanRequestProvider, OnDemandPageScanRunResultProvider } from 'service-library';
 import { ServiceConfiguration } from 'common';
 import { client, CosmosOperationResponse } from 'azure-services';
@@ -80,31 +80,28 @@ export class ScanRequestSelector {
                 }
 
                 if (scanResult.run.state === 'completed') {
-                    filteredScanRequests.requestsToDelete.push({ request: scanRequest, condition: 'completed' });
+                    filteredScanRequests.requestsToDelete.push({ request: scanRequest, result: scanResult, condition: 'completed' });
 
                     return;
                 }
 
                 if (scanResult.run.retryCount >= this.maxFailedScanRetryCount) {
-                    filteredScanRequests.requestsToDelete.push({ request: scanRequest, condition: 'noRetry' });
+                    filteredScanRequests.requestsToDelete.push({ request: scanRequest, result: scanResult, condition: 'noRetry' });
 
                     return;
                 }
 
-                if (
-                    scanResult.run.state === 'accepted' &&
-                    (scanResult.run.retryCount === undefined || scanResult.run.retryCount < this.maxFailedScanRetryCount)
-                ) {
+                if (scanResult.run.state === 'accepted') {
                     this.addRequestToScanQueue(filteredScanRequests, { request: scanRequest, result: scanResult, condition: 'accepted' });
 
                     return;
                 }
 
                 if (
-                    // scan was terminated, failed, or retry was requested
-                    ['queued', 'running', 'retrying', 'failed'].includes(scanResult.run.state) &&
+                    // scan was terminated or failed
+                    (['queued', 'running', 'failed'] as OnDemandPageScanRunState[]).includes(scanResult.run.state) &&
                     // still below maximum retry threshold
-                    (scanResult.run.retryCount === undefined || scanResult.run.retryCount < this.maxFailedScanRetryCount) &&
+                    scanResult.run.retryCount < this.maxFailedScanRetryCount &&
                     // retry delay has passed
                     moment.utc(scanResult.run.timestamp).add(this.failedScanRetryIntervalInMinutes, 'minutes') <= moment.utc()
                 ) {

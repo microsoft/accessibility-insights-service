@@ -5,8 +5,14 @@ import { Queue, StorageConfig } from 'azure-services';
 import { ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
 import { ContextAwareLogger } from 'logger';
-import { PageScanRequestProvider, OnDemandPageScanRunResultProvider } from 'service-library';
-import { OnDemandPageScanRunState, ScanError, OnDemandPageScanResult } from 'storage-documents';
+import {
+    PageScanRequestProvider,
+    OnDemandPageScanRunResultProvider,
+    WebsiteScanResultProvider,
+    getOnMergeCallbackToUpdateRunResult,
+} from 'service-library';
+import { OnDemandPageScanRunState, ScanError, OnDemandPageScanResult, WebsiteScanResult } from 'storage-documents';
+import { isEmpty } from 'lodash';
 import { ScanRequestSelector, ScanRequest } from './scan-request-selector';
 
 /* eslint-disable max-len */
@@ -17,6 +23,7 @@ export class OnDemandDispatcher {
         @inject(PageScanRequestProvider) private readonly pageScanRequestProvider: PageScanRequestProvider,
         @inject(ScanRequestSelector) private readonly scanRequestSelector: ScanRequestSelector,
         @inject(OnDemandPageScanRunResultProvider) private readonly onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider,
+        @inject(WebsiteScanResultProvider) protected readonly websiteScanResultProvider: WebsiteScanResultProvider,
         @inject(StorageConfig) private readonly storageConfig: StorageConfig,
         @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
         @inject(ContextAwareLogger) private readonly logger: ContextAwareLogger,
@@ -96,10 +103,62 @@ export class OnDemandDispatcher {
 
         await Promise.all(
             scanRequests.map(async (scanRequest) => {
+                await this.updateScanResultStateOnDelete(scanRequest);
                 await this.pageScanRequestProvider.deleteRequests([scanRequest.request.id]);
                 await this.trace(scanRequest);
             }),
         );
+    }
+
+    private async updateScanResultStateOnDelete(scanRequest: ScanRequest): Promise<void> {
+        const pageScanResult = scanRequest.result;
+        if (isEmpty(pageScanResult)) {
+            return;
+        }
+
+        // set scan run state to failed when scan was abandon or terminated
+        if ((['queued', 'running'] as OnDemandPageScanRunState[]).includes(pageScanResult.run.state)) {
+            pageScanResult.run = {
+                ...pageScanResult.run,
+                state: 'failed',
+                error: `Service pipeline failure. Failed run state: ${JSON.stringify(pageScanResult.run.state)}`,
+                timestamp: new Date().toJSON(),
+            };
+
+            await this.onDemandPageScanRunResultProvider.updateScanRun(pageScanResult);
+
+            this.logger.logError('The scan request was abandon or terminated in a service pipeline. Set run state to failed', {
+                scanId: pageScanResult.id,
+                runState: JSON.stringify(pageScanResult.run.state),
+            });
+        }
+
+        // update website's page scan metadata if missing
+        const websiteScanRef = pageScanResult.websiteScanRefs?.find((ref) => ref.scanGroupType === 'deep-scan');
+        if (websiteScanRef) {
+            const websiteScanResult = await this.websiteScanResultProvider.read(websiteScanRef.id, false, pageScanResult.id);
+            if (isEmpty(websiteScanResult.pageScans)) {
+                const updatedWebsiteScanResult: Partial<WebsiteScanResult> = {
+                    id: websiteScanRef.id,
+                    pageScans: [
+                        {
+                            scanId: pageScanResult.id,
+                            url: pageScanResult.url,
+                            scanState: pageScanResult.scanResult?.state,
+                            runState: pageScanResult.run.state,
+                            timestamp: new Date().toJSON(),
+                        },
+                    ],
+                };
+
+                const onMergeCallbackFn = getOnMergeCallbackToUpdateRunResult(pageScanResult.run.state);
+                await this.websiteScanResultProvider.mergeOrCreate(pageScanResult.id, updatedWebsiteScanResult, onMergeCallbackFn);
+
+                this.logger.logError('The website scan result has missing page scan metadata. Update page scan metadata.', {
+                    scanId: pageScanResult.id,
+                });
+            }
+        }
     }
 
     private async updateScanResultState(
@@ -110,13 +169,15 @@ export class OnDemandDispatcher {
         scanResult.run = {
             state,
             timestamp: new Date().toJSON(),
-            error: error ?? null, // reset error document property if no any error
-            retryCount: scanResult.run?.retryCount !== undefined ? scanResult.run.retryCount + 1 : 0, // undefined value indicates first scan request processing (not retry attempt)
+            // reset error document property if no error
+            error: error ?? null,
+            // undefined value indicates first scan request processing (not a retry attempt)
+            retryCount: scanResult.run?.retryCount !== undefined ? scanResult.run.retryCount + 1 : 0,
         };
 
         const response = await this.onDemandPageScanRunResultProvider.tryUpdateScanRun(scanResult);
         if (response.succeeded === false) {
-            this.logger.logError('Failed to update scan result state as it was modified by external process.', {
+            this.logger.logError('Failed to update scan result state as it was modified by other process.', {
                 scanId: scanResult.id,
             });
         }

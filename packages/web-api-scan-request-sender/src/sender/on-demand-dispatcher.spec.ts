@@ -5,12 +5,12 @@ import 'reflect-metadata';
 
 import { IMock, Mock, It, Times } from 'typemoq';
 import { Logger } from 'logger';
-import { PageScanRequestProvider, OnDemandPageScanRunResultProvider, OperationResult } from 'service-library';
+import { PageScanRequestProvider, OnDemandPageScanRunResultProvider, OperationResult, WebsiteScanResultProvider } from 'service-library';
 import { ServiceConfiguration, QueueRuntimeConfig } from 'common';
 import { Queue, StorageConfig } from 'azure-services';
-import { OnDemandPageScanResult, ScanError } from 'storage-documents';
+import { OnDemandPageScanResult, ScanError, WebsiteScanResult } from 'storage-documents';
 import * as MockDate from 'mockdate';
-import _ from 'lodash';
+import { cloneDeep } from 'lodash';
 import { OnDemandDispatcher } from './on-demand-dispatcher';
 import { ScanRequestSelector, ScanRequests } from './scan-request-selector';
 
@@ -25,6 +25,7 @@ let onDemandPageScanRunResultProviderMock: IMock<OnDemandPageScanRunResultProvid
 let storageConfigMock: IMock<StorageConfig>;
 let serviceConfigurationMock: IMock<ServiceConfiguration>;
 let loggerMock: IMock<Logger>;
+let websiteScanResultProviderMock: IMock<WebsiteScanResultProvider>;
 let onDemandDispatcher: OnDemandDispatcher;
 let maxQueueSize: number;
 let accessibilityMessageCount: number;
@@ -43,6 +44,7 @@ describe(OnDemandDispatcher, () => {
         storageConfigMock = Mock.ofType<StorageConfig>();
         serviceConfigurationMock = Mock.ofType<ServiceConfiguration>();
         loggerMock = Mock.ofType<Logger>();
+        websiteScanResultProviderMock = Mock.ofType<WebsiteScanResultProvider>();
 
         maxQueueSize = 10;
         accessibilityMessageCount = 0;
@@ -61,6 +63,7 @@ describe(OnDemandDispatcher, () => {
             pageScanRequestProviderMock.object,
             scanRequestSelectorMock.object,
             onDemandPageScanRunResultProviderMock.object,
+            websiteScanResultProviderMock.object,
             storageConfigMock.object,
             serviceConfigurationMock.object,
             loggerMock.object,
@@ -75,6 +78,7 @@ describe(OnDemandDispatcher, () => {
         storageConfigMock.verifyAll();
         serviceConfigurationMock.verifyAll();
         loggerMock.verifyAll();
+        websiteScanResultProviderMock.verifyAll();
     });
 
     it('skip dispatcher run when all queues are full', async () => {
@@ -120,6 +124,104 @@ describe(OnDemandDispatcher, () => {
         setupQueue();
         setupScanRequestSelector(scanRequests);
         setupPageScanRequestProvider(scanRequests);
+
+        await onDemandDispatcher.dispatchScanRequests();
+    });
+
+    it('update scan run state on delete', async () => {
+        const scanRequests = {
+            accessibilityRequestsToQueue: [],
+            privacyRequestsToQueue: [],
+            requestsToDelete: [
+                {
+                    request: { id: 'id2' },
+                    result: {
+                        run: {
+                            state: 'running',
+                            timestamp: new Date().toJSON(),
+                            retryCount: 2,
+                        },
+                    },
+                    condition: 'noRetry',
+                },
+            ],
+        } as ScanRequests;
+
+        setupServiceConfiguration();
+        setupQueue();
+        setupScanRequestSelector(scanRequests);
+        setupPageScanRequestProvider(scanRequests);
+
+        const pageScanResult = cloneDeep(scanRequests.requestsToDelete[0].result);
+        pageScanResult.run.state = 'failed';
+        pageScanResult.run.error = `Service pipeline failure. Failed run state: ${JSON.stringify(
+            scanRequests.requestsToDelete[0].result.run.state,
+        )}`;
+
+        onDemandPageScanRunResultProviderMock
+            .setup((o) => o.updateScanRun(It.isValue(pageScanResult)))
+            .returns(() => Promise.resolve(undefined))
+            .verifiable();
+
+        await onDemandDispatcher.dispatchScanRequests();
+    });
+
+    it('update website`s page scan metadata on delete', async () => {
+        const scanRequests = {
+            accessibilityRequestsToQueue: [],
+            privacyRequestsToQueue: [],
+            requestsToDelete: [
+                {
+                    request: { id: 'id2' },
+                    result: {
+                        id: 'scanId',
+                        url: 'url',
+                        scanResult: {
+                            state: 'fail',
+                        },
+                        run: {
+                            state: 'completed',
+                            timestamp: new Date().toJSON(),
+                            retryCount: 2,
+                        },
+                        websiteScanRefs: [
+                            {
+                                id: 'websiteScanRefId',
+                                scanGroupType: 'deep-scan',
+                            },
+                        ],
+                    },
+                    condition: 'noRetry',
+                },
+            ],
+        } as ScanRequests;
+
+        setupServiceConfiguration();
+        setupQueue();
+        setupScanRequestSelector(scanRequests);
+        setupPageScanRequestProvider(scanRequests);
+
+        const pageScanResult = scanRequests.requestsToDelete[0].result;
+        websiteScanResultProviderMock
+            .setup((o) => o.read(pageScanResult.websiteScanRefs[0].id, false, pageScanResult.id))
+            .returns(() => Promise.resolve({ pageScans: [] } as WebsiteScanResult))
+            .verifiable();
+        const updatedWebsiteScanResult: Partial<WebsiteScanResult> = {
+            id: pageScanResult.websiteScanRefs[0].id,
+            pageScans: [
+                {
+                    scanId: pageScanResult.id,
+                    url: pageScanResult.url,
+                    scanState: pageScanResult.scanResult?.state,
+                    runState: pageScanResult.run.state,
+                    timestamp: new Date().toJSON(),
+                },
+            ],
+        };
+        websiteScanResultProviderMock
+            .setup((o) => o.mergeOrCreate(pageScanResult.id, updatedWebsiteScanResult, It.isAny()))
+            .returns(() => Promise.resolve(undefined))
+            .verifiable();
 
         await onDemandDispatcher.dispatchScanRequests();
     });
@@ -200,7 +302,7 @@ describe(OnDemandDispatcher, () => {
 
 function setupOnDemandPageScanRunResultProvider(scanRequests: ScanRequests): void {
     const setupFunc = (scanRequest: any) => {
-        const scanRequestClone = _.cloneDeep(scanRequest);
+        const scanRequestClone = cloneDeep(scanRequest);
         scanRequestClone.result.run = {
             state: scanRequest.request.created ? 'queued' : 'failed',
             timestamp: new Date().toJSON(),

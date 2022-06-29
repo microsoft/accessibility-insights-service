@@ -68,32 +68,44 @@ export class RequestSelector {
                 return;
             }
 
+            // completed scan
             if (queuedRequest.run.state === 'completed') {
                 filteredRequests.requestsToDelete.push({ request: queuedRequest, condition: 'completed' });
 
                 return;
             }
 
+            // failed scan with no retry attempt left
+            if (queuedRequest.run.state === 'failed' && queuedRequest.run.retryCount >= this.maxFailedScanRetryCount) {
+                filteredRequests.requestsToDelete.push({ request: queuedRequest, condition: 'failed' });
+
+                return;
+            }
+
+            // abandon scan with no retry attempt left
             if (
-                (queuedRequest.run.state === 'failed' || queuedRequest.run.state === 'running') &&
-                queuedRequest.run.retryCount >= this.maxFailedScanRetryCount
+                queuedRequest.run.state === 'running' &&
+                queuedRequest.run.retryCount >= this.maxFailedScanRetryCount &&
+                moment.utc(queuedRequest.run.timestamp).add(this.failedScanRetryIntervalInMinutes, 'minutes') <= moment.utc()
             ) {
                 filteredRequests.requestsToDelete.push({ request: queuedRequest, condition: 'failed' });
 
                 return;
             }
 
+            // pending scan request
             if (queuedRequest.run.state === 'pending') {
                 filteredRequests.requestsToProcess.push({ request: queuedRequest, condition: 'pending' });
 
                 return;
             }
 
+            // abandon or failed scan with available retry attempt
             if (
                 // task was terminated or failed
                 (queuedRequest.run.state === 'running' || queuedRequest.run.state === 'failed') &&
                 // check retry threshold
-                (queuedRequest.run.retryCount === undefined || queuedRequest.run.retryCount < this.maxFailedScanRetryCount) &&
+                queuedRequest.run.retryCount < this.maxFailedScanRetryCount &&
                 // check retry delay
                 moment.utc(queuedRequest.run.timestamp).add(this.failedScanRetryIntervalInMinutes, 'minutes') <= moment.utc()
             ) {

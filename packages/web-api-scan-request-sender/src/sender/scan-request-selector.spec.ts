@@ -122,9 +122,6 @@ describe(ScanRequestSelector, () => {
                 run: { state: 'running' },
             },
             {
-                run: { state: 'retrying' },
-            },
-            {
                 run: { state: 'failed' },
             },
         ]);
@@ -207,6 +204,7 @@ function createFilteredScanRequests(condition: DispatchCondition, toQueueIds: st
         } else if (toDeleteIds.includes(scanRequest.id)) {
             filteredScanRequests.requestsToDelete.push({
                 request: scanRequest,
+                result: scanResults.find((scanResult) => scanResult.id === scanRequest.id),
                 condition,
             });
         }

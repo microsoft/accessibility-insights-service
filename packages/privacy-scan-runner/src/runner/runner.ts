@@ -108,10 +108,10 @@ export class Runner {
 
     private async onFailedScan(privacyScanResult: PrivacyScanResult, pageScanResult: OnDemandPageScanResult): Promise<void> {
         let runState: OnDemandPageScanRunState = 'failed';
-        // Retrying privacy banner detection
+        // Retry privacy banner detection error or mark scan as completed since banner detection error considered as non failure
         if ((privacyScanResult.error as BrowserError)?.errorType === 'ResourceLoadFailure') {
             const scanConfig = await this.getScanConfig();
-            runState = pageScanResult.run?.retryCount >= scanConfig.maxFailedScanRetryCount ? 'completed' : 'retrying';
+            runState = pageScanResult.run?.retryCount >= scanConfig.maxFailedScanRetryCount ? 'completed' : 'failed';
         }
 
         pageScanResult.scanResult = {

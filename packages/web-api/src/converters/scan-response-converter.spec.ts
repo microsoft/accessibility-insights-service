@@ -12,7 +12,7 @@ import {
     ScanRunErrorCodes,
     ScanRunResultResponse,
     RunState,
-    RunStateProvider,
+    RunStateClientProvider,
 } from 'service-library';
 import {
     ItemType,
@@ -36,7 +36,7 @@ const pageResponseCode = 101;
 
 let scanResponseConverter: ScanResponseConverter;
 let scanErrorConverterMock: IMock<ScanErrorConverter>;
-let runStateProviderMock: IMock<RunStateProvider>;
+let runStateClientProviderMock: IMock<RunStateClientProvider>;
 let notificationDb: Notification;
 let notificationResponse: ScanCompletedNotification;
 let deepScanResult: DeepScanResultItem[];
@@ -44,7 +44,7 @@ let websiteScanResult: WebsiteScanResult;
 
 beforeEach(() => {
     scanErrorConverterMock = Mock.ofType(ScanErrorConverter);
-    runStateProviderMock = Mock.ofType<RunStateProvider>();
+    runStateClientProviderMock = Mock.ofType<RunStateClientProvider>();
     scanErrorConverterMock
         .setup((o) => o.getScanRunErrorCode(scanRunError))
         .returns(() => ScanRunErrorCodes.internalError)
@@ -55,13 +55,13 @@ beforeEach(() => {
         .verifiable();
 
     let state: OnDemandPageScanRunState;
-    runStateProviderMock
+    runStateClientProviderMock
         .setup((o) => o.getEffectiveRunState(It.isAny()))
         .callback((r) => (state = r.run.state))
         .returns(() => Promise.resolve(state))
         .verifiable();
 
-    scanResponseConverter = new ScanResponseConverter(scanErrorConverterMock.object, runStateProviderMock.object);
+    scanResponseConverter = new ScanResponseConverter(scanErrorConverterMock.object, runStateClientProviderMock.object);
     notificationResponse = {
         scanNotifyUrl: 'reply-url',
         state: 'queued',

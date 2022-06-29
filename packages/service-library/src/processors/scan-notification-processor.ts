@@ -43,13 +43,11 @@ export class ScanNotificationProcessor {
         websiteScanResult: WebsiteScanResult,
     ): Promise<boolean> {
         const featureFlags = await this.serviceConfig.getConfigValue('featureFlags');
-        const scanConfig = await this.serviceConfig.getConfigValue('scanConfig');
-
-        this.logger.logInfo(`The scan result notification feature flag is ${featureFlags.sendNotification ? 'enabled' : 'disabled'}.`, {
-            sendNotificationFlag: featureFlags.sendNotification.toString(),
-        });
-
         if (featureFlags.sendNotification !== true) {
+            this.logger.logInfo(`The scan result notification is disabled.`, {
+                sendNotificationFlag: featureFlags.sendNotification.toString(),
+            });
+
             return false;
         }
 
@@ -59,9 +57,12 @@ export class ScanNotificationProcessor {
             return false;
         }
 
+        const scanConfig = await this.serviceConfig.getConfigValue('scanConfig');
         if (runnerScanMetadata.deepScan !== true) {
             if (
+                // completed scan
                 pageScanResult.run.state === 'completed' ||
+                // failed scan with no retry attempt
                 (pageScanResult.run.state === 'failed' && pageScanResult.run.retryCount >= scanConfig.maxFailedScanRetryCount)
             ) {
                 this.logger.logInfo(`Sending scan result notification message for a single scan.`, {

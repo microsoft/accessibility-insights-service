@@ -78,12 +78,21 @@ export class WebsiteScanResultProvider {
         @inject(RetryHelper) private readonly retryHelper: RetryHelper<WebsiteScanResult> = new RetryHelper<WebsiteScanResult>(),
     ) {}
 
-    public async read(websiteScanId: string, readCompleteDocument: boolean = false): Promise<WebsiteScanResult> {
+    public async read(
+        websiteScanId: string,
+        readCompleteDocument: boolean = false,
+        scanId: string = undefined,
+    ): Promise<WebsiteScanResult> {
         const baseDocument = (
             await this.cosmosContainerClient.readDocument<WebsiteScanResultBase>(websiteScanId, this.getPartitionKey(websiteScanId))
         ).item;
 
-        const partDocument = readCompleteDocument ? await this.readPartDocument(baseDocument) : {};
+        let partDocument: WebsiteScanResultPartModel;
+        if (scanId) {
+            partDocument = await this.readPartDocumentForScanId(baseDocument, scanId);
+        } else {
+            partDocument = readCompleteDocument ? await this.readPartDocument(baseDocument) : {};
+        }
         // ensure that there are no storage properties to overlap
         const partDocumentModel = pick(partDocument, websiteScanResultPartModelKeys) as Partial<WebsiteScanResultPartModel>;
 
@@ -199,6 +208,37 @@ export class WebsiteScanResultProvider {
         // compact new document before writing to database
         const mergedDocument = await this.websiteScanResultAggregator.mergePartDocument(partDocument, operationResponse.item ?? {});
         await this.cosmosContainerClient.writeDocument(mergedDocument);
+    }
+
+    private async readPartDocumentForScanId(websiteScanResult: WebsiteScanResultBase, scanId: string): Promise<WebsiteScanResultPartModel> {
+        const query = {
+            query: 'SELECT * FROM c WHERE c.partitionKey = @partitionKey and c.baseId = @baseId and c.itemType = @itemType and c.scanId = @scanId',
+            parameters: [
+                {
+                    name: '@baseId',
+                    value: websiteScanResult.id,
+                },
+                {
+                    name: '@scanId',
+                    value: scanId,
+                },
+                {
+                    name: '@partitionKey',
+                    value: websiteScanResult.partitionKey,
+                },
+                {
+                    name: '@itemType',
+                    value: ItemType.websiteScanResultPart,
+                },
+            ],
+        };
+
+        const response = (await this.cosmosContainerClient.queryDocuments<WebsiteScanResultPart>(query)) as CosmosOperationResponse<
+            WebsiteScanResultPart[]
+        >;
+        client.ensureSuccessStatusCode(response);
+
+        return response.item?.length > 0 ? response.item[0] : {};
     }
 
     private async readPartDocument(websiteScanResult: WebsiteScanResultBase): Promise<WebsiteScanResultPartModel> {

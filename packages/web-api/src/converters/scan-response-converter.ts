@@ -8,21 +8,17 @@ import {
     ScanCompletedNotification as NotificationResponse,
     ScanReport,
     ScanResultResponse,
-    RunStateProvider,
+    RunStateClientProvider,
+    RunState,
 } from 'service-library';
-import {
-    OnDemandPageScanResult,
-    OnDemandPageScanRunState,
-    ScanCompletedNotification as NotificationDb,
-    WebsiteScanResult,
-} from 'storage-documents';
+import { OnDemandPageScanResult, ScanCompletedNotification as NotificationDb, WebsiteScanResult } from 'storage-documents';
 import { ScanErrorConverter } from './scan-error-converter';
 
 @injectable()
 export class ScanResponseConverter {
     constructor(
         @inject(ScanErrorConverter) private readonly scanErrorConverter: ScanErrorConverter,
-        @inject(RunStateProvider) private readonly runStateProvider: RunStateProvider,
+        @inject(RunStateClientProvider) private readonly runStateClientProvider: RunStateClientProvider,
     ) {}
 
     public async getScanResultResponse(
@@ -31,7 +27,7 @@ export class ScanResponseConverter {
         pageScanResult: OnDemandPageScanResult,
         websiteScanResult: WebsiteScanResult,
     ): Promise<ScanResultResponse> {
-        const effectiveRunState = await this.runStateProvider.getEffectiveRunState(pageScanResult);
+        const effectiveRunState = await this.runStateClientProvider.getEffectiveRunState(pageScanResult);
         switch (effectiveRunState) {
             case 'pending':
             case 'accepted':
@@ -48,10 +44,7 @@ export class ScanResponseConverter {
         }
     }
 
-    private createIncompleteScanResponse(
-        pageScanResult: OnDemandPageScanResult,
-        effectiveRunState: OnDemandPageScanRunState,
-    ): ScanResultResponse {
+    private createIncompleteScanResponse(pageScanResult: OnDemandPageScanResult, effectiveRunState: RunState): ScanResultResponse {
         return {
             scanId: pageScanResult.id,
             url: pageScanResult.url,
@@ -63,10 +56,7 @@ export class ScanResponseConverter {
         };
     }
 
-    private createFailedScanResponse(
-        pageScanResult: OnDemandPageScanResult,
-        effectiveRunState: OnDemandPageScanRunState,
-    ): ScanResultResponse {
+    private createFailedScanResponse(pageScanResult: OnDemandPageScanResult, effectiveRunState: RunState): ScanResultResponse {
         return {
             scanId: pageScanResult.id,
             url: pageScanResult.url,
@@ -87,7 +77,7 @@ export class ScanResponseConverter {
         apiVersion: string,
         pageScanResult: OnDemandPageScanResult,
         websiteScanResult: WebsiteScanResult,
-        effectiveRunState: OnDemandPageScanRunState,
+        effectiveRunState: RunState,
     ): ScanResultResponse {
         const scanResultResponse: ScanResultResponse = {
             scanId: pageScanResult.id,
