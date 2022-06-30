@@ -133,7 +133,7 @@ export class Runner {
             return {
                 id: queuedRequest.request.id,
                 run: {
-                    state: queuedRequest.condition,
+                    state: queuedRequest.condition === 'completed' ? 'completed' : 'failed',
                     timestamp: new Date().toJSON(),
                     error: isEmpty(queuedRequest.error) ? null : queuedRequest.error.toString().substring(0, 2048),
                 },
