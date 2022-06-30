@@ -154,7 +154,7 @@ describe(OnDemandDispatcher, () => {
 
         const pageScanResult = cloneDeep(scanRequests.requestsToDelete[0].result);
         pageScanResult.run.state = 'failed';
-        pageScanResult.run.error = `Service pipeline failure. Failed run state: ${JSON.stringify(
+        pageScanResult.run.error = `The scan request was abandon or terminated in a service pipeline. State: ${JSON.stringify(
             scanRequests.requestsToDelete[0].result.run,
         )}`;
 

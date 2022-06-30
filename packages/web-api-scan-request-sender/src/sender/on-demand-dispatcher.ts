@@ -121,13 +121,13 @@ export class OnDemandDispatcher {
             pageScanResult.run = {
                 ...pageScanResult.run,
                 state: 'failed',
-                error: `Service pipeline failure. Failed run state: ${JSON.stringify(pageScanResult.run)}`,
+                error: `The scan request was abandon or terminated in a service pipeline. State: ${JSON.stringify(pageScanResult.run)}`,
                 timestamp: new Date().toJSON(),
             };
 
             await this.onDemandPageScanRunResultProvider.updateScanRun(pageScanResult);
 
-            this.logger.logError('The scan request was abandon or terminated in a service pipeline. Set run state to failed', {
+            this.logger.logError('The scan request was abandon or terminated in a service pipeline.', {
                 scanId: pageScanResult.id,
                 runState: JSON.stringify(pageScanResult.run.state),
             });
@@ -154,7 +154,7 @@ export class OnDemandDispatcher {
                 const onMergeCallbackFn = getOnMergeCallbackToUpdateRunResult(pageScanResult.run.state);
                 await this.websiteScanResultProvider.mergeOrCreate(pageScanResult.id, updatedWebsiteScanResult, onMergeCallbackFn);
 
-                this.logger.logError('The website scan result has missing page scan metadata. Update page scan metadata.', {
+                this.logger.logError('The page scan metadata was missing in website scan result.', {
                     scanId: pageScanResult.id,
                 });
             }
