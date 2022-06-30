@@ -53,11 +53,13 @@ export class Runner {
             });
 
             await this.updateRequestStateToRunning(queuedRequests);
+            // report processor will return either failed or completed request state
             queuedRequests.requestsToProcess = await this.reportProcessor.generate(
                 runMetadata.targetReport,
                 queuedRequests.requestsToProcess,
             );
             this.moveCompletedRequestsForDeletion(queuedRequests);
+            // at this stage the list contains failed request only
             await this.updateRequestStateToFailed(queuedRequests.requestsToProcess);
             await this.deleteRequests(queuedRequests.requestsToDelete);
             await this.updateScanRunStatesToCompleted(queuedRequests.requestsToDelete);

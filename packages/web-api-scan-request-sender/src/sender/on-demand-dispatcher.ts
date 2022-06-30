@@ -121,7 +121,7 @@ export class OnDemandDispatcher {
             pageScanResult.run = {
                 ...pageScanResult.run,
                 state: 'failed',
-                error: `Service pipeline failure. Failed run state: ${JSON.stringify(pageScanResult.run.state)}`,
+                error: `Service pipeline failure. Failed run state: ${JSON.stringify(pageScanResult.run)}`,
                 timestamp: new Date().toJSON(),
             };
 

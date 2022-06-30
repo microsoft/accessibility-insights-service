@@ -104,9 +104,9 @@ export class RequestSelector {
             if (
                 // task was terminated or failed
                 (queuedRequest.run.state === 'running' || queuedRequest.run.state === 'failed') &&
-                // check retry threshold
+                // retry attempt available
                 queuedRequest.run.retryCount < this.maxFailedScanRetryCount &&
-                // check retry delay
+                // retry delay passed
                 moment.utc(queuedRequest.run.timestamp).add(this.failedScanRetryIntervalInMinutes, 'minutes') <= moment.utc()
             ) {
                 filteredRequests.requestsToProcess.push({ request: queuedRequest, condition: 'retry' });

@@ -155,7 +155,7 @@ describe(OnDemandDispatcher, () => {
         const pageScanResult = cloneDeep(scanRequests.requestsToDelete[0].result);
         pageScanResult.run.state = 'failed';
         pageScanResult.run.error = `Service pipeline failure. Failed run state: ${JSON.stringify(
-            scanRequests.requestsToDelete[0].result.run.state,
+            scanRequests.requestsToDelete[0].result.run,
         )}`;
 
         onDemandPageScanRunResultProviderMock
