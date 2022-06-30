@@ -28,6 +28,8 @@ export class ScanRequestSelector {
 
     private maxFailedScanRetryCount: number;
 
+    private maxReportProcessingIntervalInMinutes: number;
+
     constructor(
         @inject(PageScanRequestProvider) private readonly pageScanRequestProvider: PageScanRequestProvider,
         @inject(OnDemandPageScanRunResultProvider) private readonly onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider,
@@ -91,6 +93,15 @@ export class ScanRequestSelector {
                     return;
                 }
 
+                if (
+                    scanResult.run.state === 'report' &&
+                    moment.utc(scanResult.run.timestamp).add(this.maxReportProcessingIntervalInMinutes, 'minutes') <= moment.utc()
+                ) {
+                    filteredScanRequests.requestsToDelete.push({ request: scanRequest, result: scanResult, condition: 'noRetry' });
+
+                    return;
+                }
+
                 if (scanResult.run.state === 'accepted') {
                     this.addRequestToScanQueue(filteredScanRequests, { request: scanRequest, result: scanResult, condition: 'accepted' });
 
@@ -125,5 +136,6 @@ export class ScanRequestSelector {
         const scanConfig = await this.serviceConfig.getConfigValue('scanConfig');
         this.failedScanRetryIntervalInMinutes = scanConfig.failedScanRetryIntervalInMinutes;
         this.maxFailedScanRetryCount = scanConfig.maxFailedScanRetryCount;
+        this.maxReportProcessingIntervalInMinutes = scanConfig.maxReportProcessingIntervalInMinutes;
     }
 }

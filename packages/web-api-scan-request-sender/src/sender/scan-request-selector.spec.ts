@@ -183,6 +183,30 @@ describe(ScanRequestSelector, () => {
 
         expect(result).toEqual(filteredScanRequests);
     });
+
+    it('delete abandon report scan', async () => {
+        createScanResults([
+            {
+                run: {
+                    state: 'report',
+                    timestamp: moment(dateNow).add(-12, 'minutes').toJSON(),
+                },
+            },
+        ]);
+        accessibilityMessageCount = scanResults.length;
+        createScanRequests();
+        setupPageScanRequestProvider();
+        setupOnDemandPageScanRunResultProvider();
+        createFilteredScanRequests(
+            'noRetry',
+            [],
+            scanRequests.map((scanRequest) => scanRequest.id),
+        );
+
+        const result = await scanRequestSelector.getRequests(accessibilityMessageCount, privacyMessageCount);
+
+        expect(result).toEqual(filteredScanRequests);
+    });
 });
 
 function createFilteredScanRequests(condition: DispatchCondition, toQueueIds: string[], toDeleteIds: string[] = []): void {
@@ -275,6 +299,7 @@ function setupServiceConfiguration(): void {
             Promise.resolve({
                 failedScanRetryIntervalInMinutes: 1,
                 maxFailedScanRetryCount: 1,
+                maxReportProcessingIntervalInMinutes: 10,
             } as ScanRunTimeConfig),
         )
         .verifiable(Times.atLeastOnce());
