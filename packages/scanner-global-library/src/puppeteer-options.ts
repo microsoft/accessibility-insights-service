@@ -13,6 +13,12 @@ export const defaultBrowserOptions: Puppeteer.BrowserConnectOptions = {
 
 export const defaultLaunchOptions: Puppeteer.PuppeteerNodeLaunchOptions = {
     headless: true,
-    args: ['--disable-dev-shm-usage', '--no-sandbox', '--disable-setuid-sandbox', '--js-flags=--max-old-space-size=8192'],
+    args: [
+        '--disable-dev-shm-usage',
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--js-flags=--max-old-space-size=8192',
+        '--window-size=1920,1080',
+    ],
     ...defaultBrowserOptions,
 };

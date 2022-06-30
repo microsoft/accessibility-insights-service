@@ -20,15 +20,7 @@ export declare type ReportFormat =
     | 'page.mhtml'
     | 'page.png';
 
-export declare type OnDemandPageScanRunState =
-    | 'pending'
-    | 'accepted'
-    | 'queued'
-    | 'running'
-    | 'retrying'
-    | 'report'
-    | 'completed'
-    | 'failed';
+export declare type OnDemandPageScanRunState = 'pending' | 'accepted' | 'queued' | 'running' | 'report' | 'completed' | 'failed';
 
 export declare type ScanErrorTypes =
     | 'UrlNavigationTimeout'

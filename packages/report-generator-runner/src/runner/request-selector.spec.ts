@@ -8,7 +8,6 @@ import { ReportGeneratorRequestProvider } from 'service-library';
 import { ServiceConfiguration, ScanRunTimeConfig } from 'common';
 import { CosmosOperationResponse } from 'azure-services';
 import * as MockDate from 'mockdate';
-import _ from 'lodash';
 import moment from 'moment';
 import { ReportGeneratorRequest } from 'storage-documents';
 import { RequestSelector } from './request-selector';
@@ -35,7 +34,7 @@ describe(RequestSelector, () => {
             .setup((o) => o.getConfigValue('scanConfig'))
             .returns(() =>
                 Promise.resolve({
-                    failedScanRetryIntervalInMinutes: 1,
+                    failedScanRetryIntervalInMinutes: 10,
                     maxFailedScanRetryCount: 2,
                 } as ScanRunTimeConfig),
             )
@@ -53,26 +52,37 @@ describe(RequestSelector, () => {
     it('filter queued requests', async () => {
         const queuedRequests = [
             {
-                id: 'id1',
+                id: 'id0', // pending - process:pending
+            },
+            {
+                id: 'id1', // completed - delete:completed
                 run: {
                     state: 'completed',
                 },
             },
             {
-                id: 'id2',
+                id: 'id2', // failed no retry - delete:failed
                 run: {
                     state: 'failed',
                     retryCount: 10,
                 },
             },
             {
-                id: 'id3',
+                id: 'id3', // abandon scan with no retry - delete:failed
+                run: {
+                    state: 'running',
+                    retryCount: 10,
+                    timestamp: moment(dateNow).add(-10, 'minutes').toJSON(),
+                },
+            },
+            {
+                id: 'id4', // pending - process:pending
                 run: {
                     state: 'pending',
                 },
             },
             {
-                id: 'id4',
+                id: 'id5', // abandon scan with retry - process:retry
                 run: {
                     state: 'running',
                     retryCount: 1,
@@ -80,13 +90,18 @@ describe(RequestSelector, () => {
                 },
             },
             {
-                id: 'id5',
+                id: 'id6', // failed with retry - process:retry
+                run: {
+                    state: 'failed',
+                    retryCount: 1,
+                    timestamp: moment(dateNow).add(-10, 'minutes').toJSON(),
+                },
             },
             {
-                id: 'id6',
+                id: 'id7', // scan is running within run window threshold - skip
                 run: {
                     state: 'running',
-                    retryCount: 10,
+                    timestamp: moment(dateNow).toJSON(),
                 },
             },
         ] as ReportGeneratorRequest[];
@@ -112,19 +127,21 @@ describe(RequestSelector, () => {
 
         const filteredRequests = {
             requestsToProcess: [
-                { request: queuedRequests[2], condition: 'pending' },
-                { request: queuedRequests[3], condition: 'retry' },
+                { request: queuedRequests[0], condition: 'pending' },
                 { request: queuedRequests[4], condition: 'pending' },
+                { request: queuedRequests[5], condition: 'retry' },
+                { request: queuedRequests[6], condition: 'retry' },
             ],
             requestsToDelete: [
-                { request: queuedRequests[0], condition: 'completed' },
-                { request: queuedRequests[1], condition: 'failed' },
-                { request: queuedRequests[5], condition: 'failed' },
+                { request: queuedRequests[1], condition: 'completed' },
+                { request: queuedRequests[2], condition: 'failed' },
+                { request: queuedRequests[3], condition: 'failed' },
             ],
         };
 
         const result = await requestSelector.getQueuedRequests(scanGroupId, queryCount);
 
-        expect(result).toEqual(filteredRequests);
+        expect(result.requestsToDelete).toEqual(filteredRequests.requestsToDelete);
+        expect(result.requestsToProcess).toEqual(filteredRequests.requestsToProcess);
     });
 });

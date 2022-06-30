@@ -122,9 +122,6 @@ describe(ScanRequestSelector, () => {
                 run: { state: 'running' },
             },
             {
-                run: { state: 'retrying' },
-            },
-            {
                 run: { state: 'failed' },
             },
         ]);
@@ -186,6 +183,30 @@ describe(ScanRequestSelector, () => {
 
         expect(result).toEqual(filteredScanRequests);
     });
+
+    it('delete abandon report scan', async () => {
+        createScanResults([
+            {
+                run: {
+                    state: 'report',
+                    timestamp: moment(dateNow).add(-12, 'minutes').toJSON(),
+                },
+            },
+        ]);
+        accessibilityMessageCount = scanResults.length;
+        createScanRequests();
+        setupPageScanRequestProvider();
+        setupOnDemandPageScanRunResultProvider();
+        createFilteredScanRequests(
+            'noRetry',
+            [],
+            scanRequests.map((scanRequest) => scanRequest.id),
+        );
+
+        const result = await scanRequestSelector.getRequests(accessibilityMessageCount, privacyMessageCount);
+
+        expect(result).toEqual(filteredScanRequests);
+    });
 });
 
 function createFilteredScanRequests(condition: DispatchCondition, toQueueIds: string[], toDeleteIds: string[] = []): void {
@@ -207,6 +228,7 @@ function createFilteredScanRequests(condition: DispatchCondition, toQueueIds: st
         } else if (toDeleteIds.includes(scanRequest.id)) {
             filteredScanRequests.requestsToDelete.push({
                 request: scanRequest,
+                result: scanResults.find((scanResult) => scanResult.id === scanRequest.id),
                 condition,
             });
         }
@@ -277,6 +299,7 @@ function setupServiceConfiguration(): void {
             Promise.resolve({
                 failedScanRetryIntervalInMinutes: 1,
                 maxFailedScanRetryCount: 1,
+                maxReportProcessingIntervalInMinutes: 10,
             } as ScanRunTimeConfig),
         )
         .verifiable(Times.atLeastOnce());

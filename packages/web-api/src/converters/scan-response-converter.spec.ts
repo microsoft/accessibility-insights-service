@@ -12,6 +12,7 @@ import {
     ScanRunErrorCodes,
     ScanRunResultResponse,
     RunState,
+    RunStateClientProvider,
 } from 'service-library';
 import {
     ItemType,
@@ -19,9 +20,9 @@ import {
     OnDemandPageScanRunState as RunStateDb,
     ScanCompletedNotification as Notification,
     WebsiteScanResult,
+    OnDemandPageScanRunState,
 } from 'storage-documents';
 import { IMock, It, Mock, Times } from 'typemoq';
-import { ServiceConfiguration, ScanRunTimeConfig } from 'common';
 import { ScanErrorConverter } from './scan-error-converter';
 import { ScanResponseConverter } from './scan-response-converter';
 
@@ -32,11 +33,10 @@ const baseUrl = 'https://localhost/api/';
 const scanRunError = 'internal-error';
 const pageTitle = 'sample page title';
 const pageResponseCode = 101;
-const maxFailedScanRetryCount = 3;
 
 let scanResponseConverter: ScanResponseConverter;
 let scanErrorConverterMock: IMock<ScanErrorConverter>;
-let serviceConfigurationMock: IMock<ServiceConfiguration>;
+let runStateClientProviderMock: IMock<RunStateClientProvider>;
 let notificationDb: Notification;
 let notificationResponse: ScanCompletedNotification;
 let deepScanResult: DeepScanResultItem[];
@@ -44,7 +44,7 @@ let websiteScanResult: WebsiteScanResult;
 
 beforeEach(() => {
     scanErrorConverterMock = Mock.ofType(ScanErrorConverter);
-    serviceConfigurationMock = Mock.ofType<ServiceConfiguration>();
+    runStateClientProviderMock = Mock.ofType<RunStateClientProvider>();
     scanErrorConverterMock
         .setup((o) => o.getScanRunErrorCode(scanRunError))
         .returns(() => ScanRunErrorCodes.internalError)
@@ -53,11 +53,15 @@ beforeEach(() => {
         .setup((o) => o.getScanNotificationErrorCode(It.isAny()))
         .returns(() => ScanNotificationErrorCodes.InternalError)
         .verifiable();
-    scanResponseConverter = new ScanResponseConverter(scanErrorConverterMock.object, serviceConfigurationMock.object);
-    serviceConfigurationMock
-        .setup((o) => o.getConfigValue('scanConfig'))
-        .returns(() => Promise.resolve({ maxFailedScanRetryCount } as ScanRunTimeConfig))
+
+    let state: OnDemandPageScanRunState;
+    runStateClientProviderMock
+        .setup((o) => o.getEffectiveRunState(It.isAny()))
+        .callback((r) => (state = r.run.state))
+        .returns(() => Promise.resolve(state))
         .verifiable();
+
+    scanResponseConverter = new ScanResponseConverter(scanErrorConverterMock.object, runStateClientProviderMock.object);
     notificationResponse = {
         scanNotifyUrl: 'reply-url',
         state: 'queued',
@@ -90,14 +94,6 @@ describe(ScanResponseConverter, () => {
     test.each([true, false])('return completed scan run result, when notification enabled = %s', async (notificationEnabled) => {
         const pageScanDbResult = getPageScanResult('completed', notificationEnabled);
         const responseExpected = getScanResultClientResponseFull('completed', notificationEnabled);
-        const response = await scanResponseConverter.getScanResultResponse(baseUrl, apiVersion, pageScanDbResult, websiteScanResult);
-        expect(response).toEqual(responseExpected);
-    });
-
-    it('return not completed result, when scan has failed and there is retry option', async () => {
-        const pageScanDbResult = getPageScanResult('failed');
-        pageScanDbResult.run.retryCount = 0;
-        const responseExpected = getScanResultClientResponseShort('retrying');
         const response = await scanResponseConverter.getScanResultResponse(baseUrl, apiVersion, pageScanDbResult, websiteScanResult);
         expect(response).toEqual(responseExpected);
     });
@@ -249,7 +245,6 @@ function getPageScanResult(state: RunStateDb, isNotificationEnabled = false, isD
             error: 'internal-error',
             pageTitle: pageTitle,
             pageResponseCode: pageResponseCode,
-            retryCount: maxFailedScanRetryCount,
         },
         batchRequestId: 'batch-id',
         ...(isNotificationEnabled ? { notification: notificationDb } : {}),
