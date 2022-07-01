@@ -276,6 +276,67 @@ describe(WebsiteScanResultProvider, () => {
         const partDocumentModel = pick(partMergedDocuments[1], websiteScanResultPartModelKeys) as Partial<WebsiteScanResultPartModel>;
         expect(actualWebsiteScanResult).toEqual({ ...websiteScanResultBaseDbDocumentExisting, ...partDocumentModel });
     });
+
+    it('read website scan result for the scan id', async () => {
+        const pageScanId = 'id1';
+        const partDocuments = [
+            {
+                id: pageScanId,
+                pageScans: [
+                    {
+                        scanId: '1',
+                    },
+                ],
+            },
+            {
+                id: 'id2',
+                pageScans: [
+                    {
+                        scanId: '2',
+                    },
+                ],
+            },
+        ] as WebsiteScanResultPart[];
+        const partMergedDocuments = [
+            {
+                id: 'id1-merged',
+                pageScans: [
+                    {
+                        scanId: '1',
+                    },
+                ],
+            },
+            {
+                id: 'id2-merged',
+                pageScans: [
+                    {
+                        scanId: '2',
+                    },
+                ],
+            },
+        ] as WebsiteScanResultPart[];
+
+        setupDocumentEntities();
+        setupPartitionKeyFactoryMock();
+        cosmosContainerClientMock
+            .setup(async (o) => o.readDocument(websiteScanResultBaseId, websiteScanResultBasePartitionKey))
+            .returns(() => Promise.resolve({ item: websiteScanResultBaseDbDocumentExisting } as CosmosOperationResponse<WebsiteScanResult>))
+            .verifiable();
+        cosmosContainerClientMock
+            .setup(async (o) => o.queryDocuments(getQueryForScanId(pageScanId), undefined))
+            .returns(() =>
+                Promise.resolve({
+                    item: [partDocuments[0]],
+                    statusCode: 200,
+                } as CosmosOperationResponse<WebsiteScanResultPart[]>),
+            )
+            .verifiable();
+
+        const actualWebsiteScanResult = await websiteScanResultProvider.read(websiteScanResultBaseId, false, pageScanId);
+
+        const partDocumentModel = pick(partMergedDocuments[0], websiteScanResultPartModelKeys) as Partial<WebsiteScanResultPartModel>;
+        expect(actualWebsiteScanResult).toEqual({ ...websiteScanResultBaseDbDocumentExisting, ...partDocumentModel });
+    });
 });
 
 describe(getOnMergeCallbackToUpdateRunResult, () => {
@@ -497,6 +558,30 @@ function getQuery(): cosmos.SqlQuerySpec {
             {
                 name: '@baseId',
                 value: websiteScanResultBaseId,
+            },
+            {
+                name: '@partitionKey',
+                value: websiteScanResultBasePartitionKey,
+            },
+            {
+                name: '@itemType',
+                value: ItemType.websiteScanResultPart,
+            },
+        ],
+    };
+}
+
+function getQueryForScanId(pageScanId: string): cosmos.SqlQuerySpec {
+    return {
+        query: 'SELECT * FROM c WHERE c.partitionKey = @partitionKey and c.baseId = @baseId and c.itemType = @itemType and c.scanId = @scanId',
+        parameters: [
+            {
+                name: '@baseId',
+                value: websiteScanResultBaseId,
+            },
+            {
+                name: '@scanId',
+                value: pageScanId,
             },
             {
                 name: '@partitionKey',

@@ -40,6 +40,7 @@ export interface ScanRunTimeConfig {
     failedScanRetryIntervalInMinutes: number;
     maxFailedScanRetryCount: number;
     maxSendNotificationRetryCount: number;
+    maxReportProcessingIntervalInMinutes: number;
     scanTimeoutInMin: number;
 }
 
@@ -263,6 +264,11 @@ export class ServiceConfiguration {
                     format: 'int',
                     default: 5,
                     doc: 'Maximum number of retries allowed for a scan notification sending',
+                },
+                maxReportProcessingIntervalInMinutes: {
+                    format: 'int',
+                    default: 1440,
+                    doc: 'Maximum allowed time for generating scan report in a dedicated report pipeline.',
                 },
                 scanTimeoutInMin: {
                     default: 3,

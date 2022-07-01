@@ -242,7 +242,7 @@ function setupProcessScanResult(): void {
     if (privacyScanResults.error) {
         let runState: OnDemandPageScanRunState = 'failed';
         if ((privacyScanResults.error as BrowserError)?.errorType === 'ResourceLoadFailure') {
-            runState = pageScanResult.run?.retryCount >= maxFailedScanRetryCount ? 'completed' : 'retrying';
+            runState = pageScanResult.run?.retryCount >= maxFailedScanRetryCount ? 'completed' : 'failed';
         }
         pageScanResult.run = {
             state: runState,

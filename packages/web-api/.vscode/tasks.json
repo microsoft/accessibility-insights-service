@@ -25,7 +25,7 @@
         {
             "type": "shell",
             "label": "copy-local-settings",
-            "dependsOn": "tsc",
+            "dependsOn": "copy-runtime-config",
             "windows": {
                 "command": "xcopy /Y local.settings.json .\\dist\\"
             },
@@ -33,7 +33,17 @@
                 "command": "cp local.settings.json ./dist"
             }
         },
-
+        {
+            "type": "shell",
+            "label": "copy-runtime-config",
+            "dependsOn": "tsc",
+            "windows": {
+                "command": "xcopy /Y local.settings.json .\\dist\\"
+            },
+            "osx": {
+                "command": "cp ../resource-deployment/runtime-config/runtime-config.dev.json ../common/dist/configuration/runtime-config.json"
+            }
+        },
         {
             "type": "shell",
             "label": "tsc",

@@ -103,8 +103,8 @@ export class Runner {
         if (this.isPageScanCompleted(pageScanResult)) {
             this.setRunResult(pageScanResult, 'completed');
         } else {
-            this.setRunResult(pageScanResult, 'report');
             await this.sendGenerateConsolidatedReportRequest(pageScanResult, websiteScanRef);
+            this.setRunResult(pageScanResult, 'report');
         }
     }
 
@@ -216,7 +216,7 @@ export class Runner {
         };
         await this.reportGeneratorRequestProvider.writeRequest(reportGeneratorRequest);
 
-        this.logger.logInfo('Sending request to generate consolidated report.', {
+        this.logger.logInfo('Send request to generate consolidated report.', {
             id: reportGeneratorRequest.id,
             scanGroupId: websiteScanRef.scanGroupId,
         });

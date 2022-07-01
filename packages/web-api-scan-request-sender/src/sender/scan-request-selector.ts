@@ -2,13 +2,12 @@
 // Licensed under the MIT License.
 
 import { inject, injectable } from 'inversify';
-import { OnDemandPageScanRequest, OnDemandPageScanResult } from 'storage-documents';
+import { OnDemandPageScanRequest, OnDemandPageScanResult, OnDemandPageScanRunState } from 'storage-documents';
 import { PageScanRequestProvider, OnDemandPageScanRunResultProvider } from 'service-library';
 import { ServiceConfiguration } from 'common';
 import { client, CosmosOperationResponse } from 'azure-services';
 import moment from 'moment';
 
-/* eslint-disable max-len */
 export declare type DispatchCondition = 'notFound' | 'completed' | 'noRetry' | 'accepted' | 'retry';
 
 export interface ScanRequest {
@@ -28,6 +27,8 @@ export class ScanRequestSelector {
     private failedScanRetryIntervalInMinutes: number;
 
     private maxFailedScanRetryCount: number;
+
+    private maxReportProcessingIntervalInMinutes: number;
 
     constructor(
         @inject(PageScanRequestProvider) private readonly pageScanRequestProvider: PageScanRequestProvider,
@@ -81,34 +82,37 @@ export class ScanRequestSelector {
                 }
 
                 if (scanResult.run.state === 'completed') {
-                    filteredScanRequests.requestsToDelete.push({ request: scanRequest, condition: 'completed' });
+                    filteredScanRequests.requestsToDelete.push({ request: scanRequest, result: scanResult, condition: 'completed' });
 
                     return;
                 }
 
                 if (scanResult.run.retryCount >= this.maxFailedScanRetryCount) {
-                    filteredScanRequests.requestsToDelete.push({ request: scanRequest, condition: 'noRetry' });
+                    filteredScanRequests.requestsToDelete.push({ request: scanRequest, result: scanResult, condition: 'noRetry' });
 
                     return;
                 }
 
                 if (
-                    scanResult.run.state === 'accepted' &&
-                    (scanResult.run.retryCount === undefined || scanResult.run.retryCount < this.maxFailedScanRetryCount)
+                    scanResult.run.state === 'report' &&
+                    moment.utc(scanResult.run.timestamp).add(this.maxReportProcessingIntervalInMinutes, 'minutes') <= moment.utc()
                 ) {
+                    filteredScanRequests.requestsToDelete.push({ request: scanRequest, result: scanResult, condition: 'noRetry' });
+
+                    return;
+                }
+
+                if (scanResult.run.state === 'accepted') {
                     this.addRequestToScanQueue(filteredScanRequests, { request: scanRequest, result: scanResult, condition: 'accepted' });
 
                     return;
                 }
 
                 if (
-                    // scan was terminated, failed, or retry was requested
-                    (scanResult.run.state === 'queued' ||
-                        scanResult.run.state === 'running' ||
-                        scanResult.run.state === 'retrying' ||
-                        scanResult.run.state === 'failed') &&
+                    // scan was terminated or failed
+                    (['queued', 'running', 'failed'] as OnDemandPageScanRunState[]).includes(scanResult.run.state) &&
                     // still below maximum retry threshold
-                    (scanResult.run.retryCount === undefined || scanResult.run.retryCount < this.maxFailedScanRetryCount) &&
+                    scanResult.run.retryCount < this.maxFailedScanRetryCount &&
                     // retry delay has passed
                     moment.utc(scanResult.run.timestamp).add(this.failedScanRetryIntervalInMinutes, 'minutes') <= moment.utc()
                 ) {
@@ -132,5 +136,6 @@ export class ScanRequestSelector {
         const scanConfig = await this.serviceConfig.getConfigValue('scanConfig');
         this.failedScanRetryIntervalInMinutes = scanConfig.failedScanRetryIntervalInMinutes;
         this.maxFailedScanRetryCount = scanConfig.maxFailedScanRetryCount;
+        this.maxReportProcessingIntervalInMinutes = scanConfig.maxReportProcessingIntervalInMinutes;
     }
 }
