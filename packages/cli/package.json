@@ -83,7 +83,7 @@
         "lodash": "^4.17.21",
         "moment": "^2.29.3",
         "normalize-path": "^3.0.0",
-        "puppeteer": "^13.7.0",
+        "puppeteer": "^15.3.0",
         "puppeteer-extra": "^3.2.3",
         "puppeteer-extra-plugin": "^3.2.0",
         "puppeteer-extra-plugin-stealth": "^2.9.0",
