@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 import { injectable } from 'inversify';
-import { groupBy, isEmpty } from 'lodash';
+import { groupBy } from 'lodash';
 import { ConsentResult, CookieByDomain } from 'storage-documents';
 import { Page } from 'scanner-global-library';
 import { CookieScenario } from './cookie-scenarios';
@@ -10,6 +10,8 @@ import { CookieScenario } from './cookie-scenarios';
 @injectable()
 export class CookieCollector {
     private cookiesBeforeConsent: CookieByDomain[];
+
+    private isCookiesBeforeConsentCollected: boolean;
 
     public async getCookiesForScenario(page: Page, cookieScenario: CookieScenario): Promise<ConsentResult> {
         await this.getCookiesBeforeConsent(page);
@@ -30,8 +32,9 @@ export class CookieCollector {
     }
 
     private async getCookiesBeforeConsent(page: Page): Promise<void> {
-        if (isEmpty(this.cookiesBeforeConsent)) {
+        if (this.isCookiesBeforeConsentCollected !== true) {
             this.cookiesBeforeConsent = await this.getCurrentCookies(page);
+            this.isCookiesBeforeConsentCollected = true;
         }
     }
 

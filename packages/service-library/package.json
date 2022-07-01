@@ -54,7 +54,7 @@
         "inversify": "^6.0.1",
         "lodash": "^4.17.21",
         "logger": "1.0.0",
-        "moment": "^2.29.2",
+        "moment": "^2.29.3",
         "node-fetch": "^2.6.7",
         "paralleljs": "^1.1.0",
         "p-limit": "^3.1.0",

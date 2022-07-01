@@ -11,8 +11,9 @@ import { PromiseUtils } from 'common';
 import PuppeteerExtra from 'puppeteer-extra';
 import { MockableLogger } from './test-utilities/mockable-logger';
 import { WebDriver } from './web-driver';
+import { StealthPluginType } from './stealth-plugin-type';
 
-/* eslint-disable @typescript-eslint/consistent-type-assertions */
+/* eslint-disable @typescript-eslint/consistent-type-assertions, @typescript-eslint/no-explicit-any*/
 
 type puppeteerConnect = (options?: Puppeteer.ConnectOptions) => Promise<Puppeteer.Browser>;
 
@@ -137,6 +138,22 @@ describe('WebDriver', () => {
         const browser = await testSubject.launch();
 
         expect(browser).toEqual(puppeteerBrowserMock);
+    });
+
+    it('should disable stealth plugin evasions', async () => {
+        puppeteerExtraMock
+            .setup((o) => o.use(It.isAny()))
+            .returns(() => puppeteerExtraMock.object)
+            .verifiable();
+        puppeteerExtraMock
+            .setup((o) => o.launch(It.isAny()))
+            .returns(() => Promise.resolve(<Puppeteer.Browser>(<unknown>puppeteerBrowserMock)))
+            .verifiable(Times.once());
+
+        await testSubject.launch();
+        const stealthPlugin = (testSubject as any).stealthPlugin as StealthPluginType;
+
+        expect(stealthPlugin.enabledEvasions.has('iframe.contentWindow')).toEqual(false);
     });
 
     it('should connect to existing puppeteer browser', async () => {
