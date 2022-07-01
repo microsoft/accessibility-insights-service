@@ -9,6 +9,7 @@ import Puppeteer from 'puppeteer';
 import PuppeteerExtra from 'puppeteer-extra';
 // eslint-disable-next-line @typescript-eslint/tslint/config
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
+import { StealthPluginType } from './stealth-plugin-type';
 import { defaultBrowserOptions, defaultLaunchOptions } from './puppeteer-options';
 
 @injectable()
@@ -22,6 +23,7 @@ export class WebDriver {
         @inject(GlobalLogger) @optional() private readonly logger: Logger,
         private readonly puppeteer: typeof Puppeteer = Puppeteer,
         private readonly puppeteerExtra: typeof PuppeteerExtra = PuppeteerExtra,
+        private readonly stealthPlugin: StealthPluginType = StealthPlugin(),
     ) {}
 
     public async connect(wsEndpoint: string): Promise<Puppeteer.Browser> {
@@ -35,23 +37,12 @@ export class WebDriver {
     }
 
     public async launch(browserExecutablePath?: string): Promise<Puppeteer.Browser> {
-        // Chromium browser extension to hide puppeteer automation from a webserver
-        this.puppeteerExtra.use(StealthPlugin());
+        this.addStealthPlugin();
 
-        const options = {
-            ...defaultLaunchOptions,
-            headless: process.env.HEADLESS === 'false' ? false : true,
-        };
-
-        const isDebugEnabled = /--debug|--inspect/i.test(process.execArgv.join(' '));
-        if (isDebugEnabled === true) {
-            options.args.push('--disable-web-security');
-        }
-
+        const options = this.createLaunchOptions();
         this.browser = await this.puppeteerExtra.launch({
             ...options,
             executablePath: browserExecutablePath,
-            devtools: process.env.DEVTOOLS === 'true' ? true : false,
         });
 
         this.logger?.logInfo('Chromium browser instance started.');
@@ -77,5 +68,27 @@ export class WebDriver {
         const browserPages = await this.browser.pages();
         await Promise.all(browserPages.map((p) => p.close()));
         await this.browser.close();
+    }
+
+    private createLaunchOptions(): Puppeteer.LaunchOptions & Puppeteer.BrowserLaunchArgumentOptions {
+        const options = {
+            ...defaultLaunchOptions,
+            headless: process.env.HEADLESS === 'false' ? false : true,
+            devtools: process.env.DEVTOOLS === 'true' ? true : false,
+        };
+
+        const isDebugEnabled = /--debug|--inspect/i.test(process.execArgv.join(' '));
+        if (isDebugEnabled === true) {
+            options.args.push('--disable-web-security');
+        }
+
+        return options;
+    }
+
+    private addStealthPlugin(): void {
+        // Disable iframe.contentWindow evasion to avoid interference with privacy banner
+        this.stealthPlugin.enabledEvasions.delete('iframe.contentWindow');
+        // Chromium browser extension to hide puppeteer automation from a webserver
+        this.puppeteerExtra.use(this.stealthPlugin);
     }
 }
