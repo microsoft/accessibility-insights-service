@@ -4,11 +4,14 @@
 import 'reflect-metadata';
 
 import { ChildProcess } from 'child_process';
+import fs from 'fs';
 import * as Puppeteer from 'puppeteer';
 import { IMock, It, Mock, Times, MockBehavior } from 'typemoq';
 import { PromiseUtils } from 'common';
 // eslint-disable-next-line @typescript-eslint/tslint/config
 import PuppeteerExtra from 'puppeteer-extra';
+// eslint-disable-next-line @typescript-eslint/tslint/config
+import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 import { MockableLogger } from './test-utilities/mockable-logger';
 import { WebDriver } from './web-driver';
 import { StealthPluginType } from './stealth-plugin-type';
@@ -49,18 +52,31 @@ let puppeteerBrowserMock: PuppeteerBrowserMock;
 let puppeteerConnectMock: IMock<puppeteerConnect>;
 let promiseUtilsMock: IMock<PromiseUtils>;
 let puppeteerExtraMock: IMock<typeof PuppeteerExtra>;
+let fsMock: IMock<typeof fs>;
 
 beforeEach(() => {
     puppeteerBrowserMock = new PuppeteerBrowserMock();
     puppeteerConnectMock = Mock.ofType<puppeteerConnect>();
     promiseUtilsMock = Mock.ofType<PromiseUtils>();
     puppeteerExtraMock = Mock.ofType<typeof PuppeteerExtra>();
+    fsMock = Mock.ofType<typeof fs>();
 
     const puppeteer = Puppeteer;
     puppeteer.connect = puppeteerConnectMock.object;
 
     loggerMock = Mock.ofType(MockableLogger);
-    testSubject = new WebDriver(promiseUtilsMock.object, loggerMock.object, puppeteer, puppeteerExtraMock.object);
+    testSubject = new WebDriver(
+        promiseUtilsMock.object,
+        loggerMock.object,
+        puppeteer,
+        puppeteerExtraMock.object,
+        StealthPlugin(),
+        fsMock.object,
+    );
+});
+
+afterEach(() => {
+    fsMock.verifyAll();
 });
 
 describe('WebDriver', () => {
@@ -136,6 +152,22 @@ describe('WebDriver', () => {
             .verifiable(Times.once());
 
         const browser = await testSubject.launch();
+
+        expect(browser).toEqual(puppeteerBrowserMock);
+    });
+
+    it('should clean browser cache', async () => {
+        puppeteerExtraMock
+            .setup((o) => o.use(It.isAny()))
+            .returns(() => puppeteerExtraMock.object)
+            .verifiable();
+        puppeteerExtraMock
+            .setup((o) => o.launch(It.isAny()))
+            .returns(() => Promise.resolve(<Puppeteer.Browser>(<unknown>puppeteerBrowserMock)))
+            .verifiable(Times.once());
+        fsMock.setup((o) => o.rmSync(`${__dirname}/browser-cache`, { recursive: true, force: true })).verifiable();
+
+        const browser = await testSubject.launch({ clearDiskCache: true });
 
         expect(browser).toEqual(puppeteerBrowserMock);
     });

@@ -20,6 +20,11 @@ export const getAllCookieScenarios = (): CookieScenario[] => {
      */
     return [
         {
+            // All - accepted
+            name: 'MSCC',
+            value: 'cid=3nqibqsmahlqkom8tlvlek2q-c1=2-c2=2-c3=2',
+        },
+        {
             // Analytics - accepted
             name: 'MSCC',
             value: 'cid=3nqibqsmahlqkom8tlvlek2q-c1=2-c2=0-c3=0',
@@ -33,11 +38,6 @@ export const getAllCookieScenarios = (): CookieScenario[] => {
             // Advertising - accepted
             name: 'MSCC',
             value: 'cid=3nqibqsmahlqkom8tlvlek2q-c1=0-c2=0-c3=2',
-        },
-        {
-            // All - accepted
-            name: 'MSCC',
-            value: 'cid=3nqibqsmahlqkom8tlvlek2q-c1=2-c2=2-c3=2',
         },
     ];
 };

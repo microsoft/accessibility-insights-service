@@ -9,7 +9,7 @@ export { PageResponseProcessor } from './page-response-processor';
 export { AxePuppeteerFactory } from './factories/axe-puppeteer-factory';
 export * from './page';
 export { AxeScanResults } from './axe-scan-results';
-export { WebDriver } from './web-driver';
+export { WebDriver, WebDriverConfigurationOptions } from './web-driver';
 export { PageNavigationHooks } from './page-navigation-hooks';
 export * from './page-navigator';
 export { PrivacyScanResult } from './privacy-scan-result';

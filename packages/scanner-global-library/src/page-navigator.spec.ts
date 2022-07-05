@@ -58,16 +58,16 @@ describe(PageNavigator, () => {
     });
 
     it('reload with success', async () => {
-        const response = {} as HTTPResponse;
+        const response = {
+            status: () => 304,
+            _status: 234,
+            _statusText: 'HTTP 304 Not Modified',
+        } as unknown as HTTPResponse;
         const onNavigationErrorMock = jest.fn();
 
         puppeteerPageMock
-            .setup(async (o) => o.goto(`file:///${__dirname}/blank-page.html`))
-            .returns(() => Promise.resolve(response))
-            .verifiable();
-        puppeteerPageMock
             .setup(async (o) =>
-                o.goBack({
+                o.reload({
                     waitUntil: 'networkidle2',
                     timeout: puppeteerTimeoutConfig.navigationTimeoutMsecs,
                 }),
@@ -106,7 +106,7 @@ describe(PageNavigator, () => {
         } as BrowserError;
         puppeteerPageMock
             .setup(async (o) =>
-                o.goBack({
+                o.reload({
                     waitUntil: 'networkidle2',
                     timeout: puppeteerTimeoutConfig.navigationTimeoutMsecs,
                 }),
@@ -125,12 +125,14 @@ describe(PageNavigator, () => {
     });
 
     it('reload with network idle wait error', async () => {
-        const response = {} as HTTPResponse;
+        const response = {
+            status: () => 200,
+        } as HTTPResponse;
         const onNavigationErrorMock = jest.fn();
 
         puppeteerPageMock
             .setup(async (o) =>
-                o.goBack({
+                o.reload({
                     waitUntil: 'networkidle2',
                     timeout: puppeteerTimeoutConfig.navigationTimeoutMsecs,
                 }),

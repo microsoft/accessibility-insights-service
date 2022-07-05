@@ -9,13 +9,14 @@ import { CookieScenario } from './cookie-scenarios';
 
 @injectable()
 export class CookieCollector {
-    private cookiesBeforeConsent: CookieByDomain[];
-
-    private isCookiesBeforeConsentCollected: boolean;
-
     public async getCookiesForScenario(page: Page, cookieScenario: CookieScenario): Promise<ConsentResult> {
-        await this.getCookiesBeforeConsent(page);
-        await page.clearCookies();
+        await page.reload({ hardReload: true });
+        if (!page.lastNavigationResponse?.ok()) {
+            return { error: page.lastBrowserError };
+        }
+
+        const cookiesBeforeConsent = await this.getCurrentCookies(page);
+
         await page.setCookies([cookieScenario]);
         await page.reload();
         if (!page.lastNavigationResponse?.ok()) {
@@ -26,16 +27,9 @@ export class CookieCollector {
 
         return {
             cookiesUsedForConsent: `${cookieScenario.name}=${cookieScenario.value}`,
-            cookiesBeforeConsent: this.cookiesBeforeConsent,
+            cookiesBeforeConsent: cookiesBeforeConsent,
             cookiesAfterConsent: cookiesAfterConsent,
         };
-    }
-
-    private async getCookiesBeforeConsent(page: Page): Promise<void> {
-        if (this.isCookiesBeforeConsentCollected !== true) {
-            this.cookiesBeforeConsent = await this.getCurrentCookies(page);
-            this.isCookiesBeforeConsentCollected = true;
-        }
     }
 
     private async getCurrentCookies(page: Page): Promise<CookieByDomain[]> {

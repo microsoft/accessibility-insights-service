@@ -225,25 +225,6 @@ describe(Page, () => {
             simulatePageLaunch();
         });
 
-        it('navigates to page with options', async () => {
-            pageNavigatorMock
-                .setup(async (o) => o.navigate(url, puppeteerPageMock.object, It.isAny()))
-                .returns(() => Promise.resolve(navigationResponse))
-                .verifiable();
-            puppeteerPageMock
-                .setup((o) => o.close())
-                .returns(() => Promise.resolve())
-                .verifiable();
-            browserMock
-                .setup(async (o) => o.newPage())
-                .returns(() => Promise.resolve(puppeteerPageMock.object))
-                .verifiable();
-
-            await page.navigateToUrl(url, { reopenPage: true });
-
-            expect(page.lastNavigationResponse).toEqual(puppeteerResponseMock.object);
-        });
-
         it('navigates to page and saves response', async () => {
             pageNavigatorMock
                 .setup(async (o) => o.navigate(url, puppeteerPageMock.object, It.isAny()))
@@ -259,6 +240,22 @@ describe(Page, () => {
             await page.navigateToUrl(url);
 
             expect(page.lastNavigationResponse).toEqual(puppeteerResponseMock.object);
+        });
+
+        it('navigates to page with allowCachedVersion option', async () => {
+            const error = new Error('navigation error');
+            const browserError = { errorType: 'NavigationError', statusCode: 304 } as BrowserError;
+            pageNavigatorMock
+                .setup(async (o) => o.navigate(url, puppeteerPageMock.object, It.isAny()))
+                .callback(async (u, p, fn) => {
+                    await fn(browserError, error);
+                })
+                .returns(() => Promise.resolve(undefined))
+                .verifiable();
+
+            await page.navigateToUrl(url, { allowCachedVersion: true });
+
+            expect(page.lastBrowserError).toEqual(undefined);
         });
 
         it('handles browser error on navigate', async () => {
@@ -313,6 +310,42 @@ describe(Page, () => {
             loggerMock.setup((o) => o.logInfo('Total page reload time 10, msec', { ...timing })).verifiable();
 
             await page.reload();
+
+            expect(page.lastNavigationResponse).toEqual(puppeteerResponseMock.object);
+        });
+
+        it('hard page reload', async () => {
+            (page as any).lastBrowserStartOptions = {
+                browserExecutablePath: 'path',
+                clearBrowserCache: true,
+            };
+            puppeteerPageMock.setup((p) => p.url()).returns(() => url);
+            // close browser
+            webDriverMock
+                .setup(async (o) => o.close())
+                .returns(() => Promise.resolve())
+                .verifiable();
+            // create browser
+            browserMock
+                .setup(async (o) => o.newPage())
+                .returns(() => Promise.resolve(puppeteerPageMock.object))
+                .verifiable();
+            webDriverMock
+                .setup(async (m) => m.launch({ browserExecutablePath: 'path', clearDiskCache: false }))
+                .returns(() => Promise.resolve(browserMock.object))
+                .verifiable();
+            // navigate url
+            pageNavigatorMock
+                .setup(async (o) => o.navigate(url, puppeteerPageMock.object, It.isAny()))
+                .returns(() => Promise.resolve(navigationResponse))
+                .verifiable();
+            // reload page
+            pageNavigatorMock
+                .setup(async (o) => o.reload(puppeteerPageMock.object, It.isAny()))
+                .returns(() => Promise.resolve(navigationResponse))
+                .verifiable(Times.never());
+
+            await page.reload({ hardReload: true });
 
             expect(page.lastNavigationResponse).toEqual(puppeteerResponseMock.object);
         });
@@ -389,7 +422,7 @@ describe(Page, () => {
                 .returns(() => Promise.resolve(puppeteerPageMock.object))
                 .verifiable();
             webDriverMock
-                .setup(async (m) => m.launch(It.isValue('path')))
+                .setup(async (m) => m.launch(It.isValue({ browserExecutablePath: 'path', clearDiskCache: undefined })))
                 .returns(() => Promise.resolve(browserMock.object))
                 .verifiable();
             page.browser = undefined;
@@ -460,17 +493,6 @@ describe(Page, () => {
             setupCDPSessionForGetAllCookies(cookies);
             const data = await page.getAllCookies();
             expect(data).toEqual(cookies);
-        });
-
-        it('clearCookies()', async () => {
-            const cookies = [{ name: 'c1' }, { name: 'c2' }] as Puppeteer.Protocol.Network.Cookie[];
-            simulatePageLaunch();
-            setupCDPSessionForGetAllCookies(cookies);
-            puppeteerPageMock
-                .setup((o) => o.deleteCookie(...cookies))
-                .returns(() => Promise.resolve())
-                .verifiable();
-            await page.clearCookies();
         });
 
         it('setCookies()', async () => {
