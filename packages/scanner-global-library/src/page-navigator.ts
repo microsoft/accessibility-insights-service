@@ -11,6 +11,7 @@ import { BrowserError } from './browser-error';
 import { PageNavigationHooks } from './page-navigation-hooks';
 import { PageConfigurator } from './page-configurator';
 import { puppeteerTimeoutConfig, PageNavigationTiming } from './page-timeout-config';
+import { PageConfigurationOptions } from './page';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -36,6 +37,7 @@ export class PageNavigator {
     public async navigate(
         url: string,
         page: Puppeteer.Page,
+        options?: PageConfigurationOptions,
         onNavigationError: (browserError: BrowserError, error?: unknown) => Promise<void> = () => Promise.resolve(),
     ): Promise<NavigationResponse> {
         const goto1NavigationCondition = 'networkidle2'; // switching to networkidle0 will break some websites scanning
@@ -45,7 +47,7 @@ export class PageNavigator {
 
         let goto1Timeout = false;
         let timestamp = System.getTimestamp();
-        let navigationResult = await this.navigateToUrl(url, page, goto1NavigationCondition);
+        let navigationResult = await this.navigateToUrl(url, page, goto1NavigationCondition, options);
         const goto1Elapsed = System.getElapsedTime(timestamp);
 
         let goto2Elapsed = 0;
@@ -65,7 +67,7 @@ export class PageNavigator {
             });
 
             timestamp = System.getTimestamp();
-            navigationResult = await this.navigateToUrl(url, page, goto2NavigationCondition);
+            navigationResult = await this.navigateToUrl(url, page, goto2NavigationCondition, options);
             goto2Elapsed = System.getElapsedTime(timestamp);
             if (navigationResult.browserError) {
                 this.logger?.logError('Page navigation error on a second attempt.', {
@@ -154,12 +156,11 @@ export class PageNavigator {
         page: Puppeteer.Page,
     ): Promise<{ response: Puppeteer.HTTPResponse; browserError?: BrowserError; error?: unknown }> {
         const navigationCondition = 'networkidle2';
+        let response: Puppeteer.HTTPResponse;
         try {
-            const response = await page.reload({ waitUntil: navigationCondition, timeout: puppeteerTimeoutConfig.navigationTimeoutMsecs });
-            // Prevent validation error if website returns HTTP 304 when browser use page cached version
+            response = await page.reload({ waitUntil: navigationCondition, timeout: puppeteerTimeoutConfig.navigationTimeoutMsecs });
             if (response.status() === 304) {
-                (response as any)._status = 234;
-                (response as any)._statusText = 'HTTP 304 Not Modified';
+                response = await this.reloadCachedVersion(page, navigationCondition);
             }
 
             return { response };
@@ -178,16 +179,21 @@ export class PageNavigator {
     private async navigateToUrl(
         url: string,
         page: Puppeteer.Page,
-        condition: Puppeteer.PuppeteerLifeCycleEvent,
+        navigationCondition: Puppeteer.PuppeteerLifeCycleEvent,
+        options?: PageConfigurationOptions,
     ): Promise<{ response: Puppeteer.HTTPResponse; browserError?: BrowserError; error?: unknown }> {
         let response: Puppeteer.HTTPResponse;
         let browserError: BrowserError;
         try {
-            const options = {
-                waitUntil: condition,
+            const waitForOptions = {
+                waitUntil: navigationCondition,
                 timeout: puppeteerTimeoutConfig.navigationTimeoutMsecs,
             };
-            response = await page.goto(url, options);
+
+            response = await page.goto(url, waitForOptions);
+            if (response.status() === 304 && options?.allowCachedVersion) {
+                response = await this.reloadCachedVersion(page, navigationCondition);
+            }
 
             return { response };
         } catch (error) {
@@ -195,5 +201,15 @@ export class PageNavigator {
 
             return { response, browserError, error };
         }
+    }
+
+    private async reloadCachedVersion(
+        page: Puppeteer.Page,
+        navigationCondition: Puppeteer.PuppeteerLifeCycleEvent,
+    ): Promise<Puppeteer.HTTPResponse> {
+        // Reload page if website returns HTTP 304 (Not Modified) when browser use disk cached.
+        await page.goto(`file:///${__dirname}/blank-page.html`);
+
+        return page.goBack({ waitUntil: navigationCondition, timeout: puppeteerTimeoutConfig.navigationTimeoutMsecs });
     }
 }

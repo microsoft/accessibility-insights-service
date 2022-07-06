@@ -65,7 +65,7 @@ export class Page {
         return this.page.url();
     }
 
-    public async create(options?: BrowserStartOptions): Promise<void> {
+    public async create(options: BrowserStartOptions = { clearBrowserCache: true }): Promise<void> {
         this.lastBrowserStartOptions = options;
         if (options?.browserWSEndpoint !== undefined) {
             this.browser = await this.webDriver.connect(options?.browserWSEndpoint);
@@ -85,10 +85,7 @@ export class Page {
 
         await this.setExtraHTTPHeaders();
 
-        const navigationResponse = await this.pageNavigator.navigate(url, this.page, async (browserError) => {
-            if (browserError.statusCode === 304 && options?.allowCachedVersion === true) {
-                return;
-            }
+        const navigationResponse = await this.pageNavigator.navigate(url, this.page, options, async (browserError) => {
             this.logger?.logError('Page navigation error', { browserError: System.serializeError(browserError) });
             this.lastBrowserError = browserError;
         });
@@ -105,6 +102,10 @@ export class Page {
      * parameter `hardReload === true` will restart browser instance and delete browser storage, settings, etc. but use browser disk cache
      */
     public async reload(options?: { hardReload: boolean }): Promise<void> {
+        if (isEmpty(this.lastNavigationResponse)) {
+            throw new Error('Page should be loaded first before reload.');
+        }
+
         this.requestUrl = this.url;
 
         if (options?.hardReload === true) {

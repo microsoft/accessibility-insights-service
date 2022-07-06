@@ -12,6 +12,7 @@ import PuppeteerExtra from 'puppeteer-extra';
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 import { StealthPluginType } from './stealth-plugin-type';
 import { defaultBrowserOptions, defaultLaunchOptions } from './puppeteer-options';
+import { ExtensionLoader } from './browser-extensions/extension-loader';
 
 export interface WebDriverConfigurationOptions {
     browserExecutablePath?: string;
@@ -27,6 +28,7 @@ export class WebDriver {
     private readonly browserCloseTimeoutMsecs = 60000;
 
     constructor(
+        @inject(ExtensionLoader) private readonly extensionLoader: ExtensionLoader,
         @inject(PromiseUtils) private readonly promiseUtils: PromiseUtils,
         @inject(GlobalLogger) @optional() private readonly logger: Logger,
         private readonly puppeteer: typeof Puppeteer = Puppeteer,
@@ -97,6 +99,11 @@ export class WebDriver {
         const isDebugEnabled = /--debug|--inspect/i.test(process.execArgv.join(' '));
         if (isDebugEnabled === true) {
             options.args.push('--disable-web-security');
+        }
+
+        if (process.env.EXTENSION_NAME || process.env.EXTENSION_ID) {
+            const extension = this.extensionLoader.getExtension(process.env.EXTENSION_NAME, process.env.EXTENSION_ID);
+            options.args.push(...[`--disable-extensions-except=${extension.path}`, `--load-extension=${extension.path}`]);
         }
 
         return options;
