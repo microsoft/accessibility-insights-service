@@ -87,6 +87,11 @@ module.exports = (env) => {
                         from: '**/*.js',
                         to: '',
                     },
+                    {
+                        context: '.',
+                        from: './blank-page.html',
+                        to: '',
+                    },
                 ],
             }),
         ],
