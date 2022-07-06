@@ -15,7 +15,6 @@ import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 import { MockableLogger } from './test-utilities/mockable-logger';
 import { WebDriver } from './web-driver';
 import { StealthPluginType } from './stealth-plugin-type';
-import { ExtensionLoader } from './browser-extensions/extension-loader';
 
 /* eslint-disable @typescript-eslint/consistent-type-assertions, @typescript-eslint/no-explicit-any*/
 
@@ -54,7 +53,6 @@ let puppeteerConnectMock: IMock<puppeteerConnect>;
 let promiseUtilsMock: IMock<PromiseUtils>;
 let puppeteerExtraMock: IMock<typeof PuppeteerExtra>;
 let fsMock: IMock<typeof fs>;
-let extensionLoaderMock: IMock<ExtensionLoader>;
 
 beforeEach(() => {
     puppeteerBrowserMock = new PuppeteerBrowserMock();
@@ -62,14 +60,12 @@ beforeEach(() => {
     promiseUtilsMock = Mock.ofType<PromiseUtils>();
     puppeteerExtraMock = Mock.ofType<typeof PuppeteerExtra>();
     fsMock = Mock.ofType<typeof fs>();
-    extensionLoaderMock = Mock.ofType<ExtensionLoader>();
 
     const puppeteer = Puppeteer;
     puppeteer.connect = puppeteerConnectMock.object;
 
     loggerMock = Mock.ofType(MockableLogger);
     testSubject = new WebDriver(
-        extensionLoaderMock.object,
         promiseUtilsMock.object,
         loggerMock.object,
         puppeteer,

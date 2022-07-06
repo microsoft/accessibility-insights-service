@@ -28,7 +28,6 @@ export class WebDriver {
     private readonly browserCloseTimeoutMsecs = 60000;
 
     constructor(
-        @inject(ExtensionLoader) private readonly extensionLoader: ExtensionLoader,
         @inject(PromiseUtils) private readonly promiseUtils: PromiseUtils,
         @inject(GlobalLogger) @optional() private readonly logger: Logger,
         private readonly puppeteer: typeof Puppeteer = Puppeteer,
@@ -102,7 +101,8 @@ export class WebDriver {
         }
 
         if (process.env.EXTENSION_NAME || process.env.EXTENSION_ID) {
-            const extension = this.extensionLoader.getExtension(process.env.EXTENSION_NAME, process.env.EXTENSION_ID);
+            const extensionLoader = new ExtensionLoader();
+            const extension = extensionLoader.getExtension(process.env.EXTENSION_NAME, process.env.EXTENSION_ID);
             options.args.push(...[`--disable-extensions-except=${extension.path}`, `--load-extension=${extension.path}`]);
         }
 
