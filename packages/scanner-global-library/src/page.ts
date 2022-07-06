@@ -19,10 +19,11 @@ import { PageNavigationTiming } from './page-timeout-config';
 export interface BrowserStartOptions {
     browserExecutablePath?: string;
     browserWSEndpoint?: string;
+    clearBrowserCache?: boolean;
 }
 
 export interface PageConfigurationOptions {
-    reopenPage?: boolean;
+    allowCachedVersion?: boolean;
 }
 
 @injectable()
@@ -36,6 +37,8 @@ export class Page {
     public lastBrowserError: BrowserError;
 
     public pageNavigationTiming: PageNavigationTiming;
+
+    private lastBrowserStartOptions: BrowserStartOptions;
 
     private page: Puppeteer.Page;
 
@@ -62,11 +65,15 @@ export class Page {
         return this.page.url();
     }
 
-    public async create(options?: BrowserStartOptions): Promise<void> {
+    public async create(options: BrowserStartOptions = { clearBrowserCache: true }): Promise<void> {
+        this.lastBrowserStartOptions = options;
         if (options?.browserWSEndpoint !== undefined) {
-            this.browser = await this.webDriver.connect(options.browserWSEndpoint);
+            this.browser = await this.webDriver.connect(options?.browserWSEndpoint);
         } else {
-            this.browser = await this.webDriver.launch(options?.browserExecutablePath);
+            this.browser = await this.webDriver.launch({
+                browserExecutablePath: options?.browserExecutablePath,
+                clearDiskCache: options?.clearBrowserCache,
+            });
         }
 
         this.page = await this.browser.newPage();
@@ -76,13 +83,9 @@ export class Page {
         this.requestUrl = url;
         this.lastBrowserError = undefined;
 
-        if (options?.reopenPage === true) {
-            await this.reopen();
-        }
-
         await this.setExtraHTTPHeaders();
 
-        const navigationResponse = await this.pageNavigator.navigate(url, this.page, async (browserError) => {
+        const navigationResponse = await this.pageNavigator.navigate(url, this.page, options, async (browserError) => {
             this.logger?.logError('Page navigation error', { browserError: System.serializeError(browserError) });
             this.lastBrowserError = browserError;
         });
@@ -92,23 +95,34 @@ export class Page {
         this.logPageNavigationTiming('load');
     }
 
-    public async reopen(): Promise<void> {
-        await this.page.close();
-        this.page = await this.browser.newPage();
-    }
+    /**
+     * Reload browser page
+     * @param options - Optional reload parameters
+     *
+     * parameter `hardReload === true` will restart browser instance and delete browser storage, settings, etc. but use browser disk cache
+     */
+    public async reload(options?: { hardReload: boolean }): Promise<void> {
+        if (isEmpty(this.lastNavigationResponse)) {
+            throw new Error('Page should be loaded first before reload.');
+        }
 
-    public async reload(): Promise<void> {
         this.requestUrl = this.url;
-        this.lastBrowserError = undefined;
 
-        const navigationResponse = await this.pageNavigator.reload(this.page, async (browserError) => {
-            this.logger?.logError('Page reload error', { browserError: System.serializeError(browserError) });
-            this.lastBrowserError = browserError;
-        });
+        if (options?.hardReload === true) {
+            await this.close();
+            await this.create({ ...this.lastBrowserStartOptions, clearBrowserCache: false });
+            await this.navigateToUrl(this.requestUrl, { allowCachedVersion: true });
+        } else {
+            this.lastBrowserError = undefined;
+            const navigationResponse = await this.pageNavigator.reload(this.page, async (browserError) => {
+                this.logger?.logError('Page reload error', { browserError: System.serializeError(browserError) });
+                this.lastBrowserError = browserError;
+            });
 
-        this.lastNavigationResponse = navigationResponse?.httpResponse;
-        this.pageNavigationTiming = navigationResponse?.pageNavigationTiming;
-        this.logPageNavigationTiming('reload');
+            this.lastNavigationResponse = navigationResponse?.httpResponse;
+            this.pageNavigationTiming = navigationResponse?.pageNavigationTiming;
+            this.logPageNavigationTiming('reload');
+        }
     }
 
     public async close(): Promise<void> {
@@ -151,11 +165,6 @@ export class Page {
         await client.detach();
 
         return cookies;
-    }
-
-    public async clearCookies(): Promise<void> {
-        const currentPageCookies = await this.getAllCookies();
-        await this.page.deleteCookie(...currentPageCookies);
     }
 
     public async setCookies(cookies: Puppeteer.Protocol.Network.CookieParam[]): Promise<void> {
@@ -243,7 +252,7 @@ export class Page {
 
         if (
             this.lastNavigationResponse.request()?.redirectChain()?.length > 0 ||
-            // should compare encoded Urls
+            // Should compare encoded Urls
             (this.requestUrl !== undefined && encodeURI(this.requestUrl) !== axeResults.url)
         ) {
             this.logger?.logWarn(`Scanning performed on redirected page`, { redirectedUrl: axeResults.url });

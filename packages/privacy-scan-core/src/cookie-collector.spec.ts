@@ -16,8 +16,8 @@ describe(CookieCollector, () => {
         message: 'page not found',
     } as BrowserError;
     const cookieScenario: CookieScenario = {
-        name: 'cookieName',
-        value: 'test cookie value',
+        name: 'cookie name',
+        value: 'cookie value',
     };
     const expiryDate = new Date(0, 1, 2, 3);
     const expiryDateSec = expiryDate.getTime() / 1000;
@@ -31,17 +31,17 @@ describe(CookieCollector, () => {
         pageMock = Mock.ofType<Page>();
         pageCookies = [
             {
-                name: 'domain1cookie1',
+                name: 'domain1-cookie1',
                 domain: 'domain1',
                 expires: expiryDateSec,
             },
             {
-                name: 'domain1cookie2',
+                name: 'domain1-cookie2',
                 domain: 'domain1',
                 expires: expiryDateSec,
             },
             {
-                name: 'domain2cookie',
+                name: 'domain2-cookie1',
                 domain: 'domain2',
                 expires: expiryDateSec,
             },
@@ -50,13 +50,13 @@ describe(CookieCollector, () => {
             {
                 domain: 'domain1',
                 cookies: [
-                    { name: 'domain1cookie1', domain: 'domain1', expires: expiryDate },
-                    { name: 'domain1cookie2', domain: 'domain1', expires: expiryDate },
+                    { name: 'domain1-cookie1', domain: 'domain1', expires: expiryDate },
+                    { name: 'domain1-cookie2', domain: 'domain1', expires: expiryDate },
                 ],
             },
             {
                 domain: 'domain2',
-                cookies: [{ name: 'domain2cookie', domain: 'domain2', expires: expiryDate }],
+                cookies: [{ name: 'domain2-cookie1', domain: 'domain2', expires: expiryDate }],
             },
         ];
 
@@ -67,9 +67,23 @@ describe(CookieCollector, () => {
         pageMock.verifyAll();
     });
 
+    it('Returns error if hard reload fails', async () => {
+        setupPageReload(true);
+        setupNavigationResult(true);
+
+        const expectedResult: ConsentResult = {
+            error: browserError,
+        };
+
+        const actualResults = await testSubject.getCookiesForScenario(pageMock.object, cookieScenario);
+
+        expect(actualResults).toEqual(expectedResult);
+    });
+
     it('Returns error if reload fails', async () => {
-        setupClearCookies();
-        setupNavigateToUrl();
+        setupPageReload(true);
+        setupNavigationResult();
+        setupPageReload();
         setupNavigationResult(true);
 
         const expectedResult: ConsentResult = {
@@ -105,9 +119,7 @@ describe(CookieCollector, () => {
             ],
         };
 
-        setupClearCookies();
-        setupNavigateToUrl();
-        setupNavigationResult(false);
+        setupNavigationResult();
         setupGetCookies(pageCookies);
         setupSetCookie([cookieScenario]);
         setupGetCookies([...pageCookies, newCookie]);
@@ -117,14 +129,21 @@ describe(CookieCollector, () => {
         expect(actualResults).toEqual(expectedResult);
     });
 
-    function setupNavigateToUrl(): void {
-        pageMock
-            .setup((o) => o.reload())
-            .returns(() => Promise.resolve())
-            .verifiable();
+    function setupPageReload(hardReload: boolean = undefined): void {
+        if (hardReload) {
+            pageMock
+                .setup((o) => o.reload({ hardReload }))
+                .returns(() => Promise.resolve())
+                .verifiable();
+        } else {
+            pageMock
+                .setup((o) => o.reload())
+                .returns(() => Promise.resolve())
+                .verifiable();
+        }
     }
 
-    function setupNavigationResult(fail: boolean): void {
+    function setupNavigationResult(fail: boolean = false): void {
         pageMock
             .setup((o) => o.lastNavigationResponse)
             .returns(() => {
@@ -132,7 +151,7 @@ describe(CookieCollector, () => {
                     ok: () => !fail,
                 } as Puppeteer.HTTPResponse;
             })
-            .verifiable();
+            .verifiable(Times.atLeastOnce());
 
         if (fail) {
             pageMock
@@ -140,13 +159,6 @@ describe(CookieCollector, () => {
                 .returns(() => browserError)
                 .verifiable();
         }
-    }
-
-    function setupClearCookies(): void {
-        pageMock
-            .setup((o) => o.clearCookies())
-            .returns(() => Promise.resolve())
-            .verifiable();
     }
 
     function setupSetCookie(newCookiesAfterLoad: CookieScenario[]): void {
