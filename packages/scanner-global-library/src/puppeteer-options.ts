@@ -3,12 +3,13 @@
 
 import Puppeteer from 'puppeteer';
 
+export const windowSize = {
+    width: 1920,
+    height: 1080,
+};
+
 export const defaultBrowserOptions: Puppeteer.BrowserConnectOptions = {
-    defaultViewport: {
-        width: 1920,
-        height: 1080,
-        deviceScaleFactor: 1,
-    },
+    defaultViewport: null,
 };
 
 export const defaultLaunchOptions: Puppeteer.PuppeteerNodeLaunchOptions = {
@@ -18,7 +19,7 @@ export const defaultLaunchOptions: Puppeteer.PuppeteerNodeLaunchOptions = {
         '--no-sandbox',
         '--disable-setuid-sandbox',
         '--js-flags=--max-old-space-size=8192',
-        '--window-size=1920,1080',
+        `--window-size=${windowSize.width},${windowSize.width}`,
     ],
     ...defaultBrowserOptions,
 };

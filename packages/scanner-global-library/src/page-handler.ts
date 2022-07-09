@@ -6,6 +6,7 @@ import { GlobalLogger } from 'logger';
 import * as Puppeteer from 'puppeteer';
 import { System } from 'common';
 import { puppeteerTimeoutConfig, PageNavigationTiming } from './page-timeout-config';
+import { scrollToBottom } from './page-client-lib';
 
 @injectable()
 export class PageHandler {
@@ -13,6 +14,7 @@ export class PageHandler {
         @inject(GlobalLogger) @optional() private readonly logger: GlobalLogger,
         private readonly checkIntervalMsecs: number = 200,
         private readonly pageDomStableTimeMsecs: number = puppeteerTimeoutConfig.pageDomStableTimeMsecs,
+        private readonly scrollToPageBottom: typeof scrollToBottom = scrollToBottom,
     ) {}
 
     public async waitForPageToCompleteRendering(
@@ -35,18 +37,9 @@ export class PageHandler {
         // Scroll incrementally so everything is inside the window at some point
         const timestamp = System.getTimestamp();
         while (!scrollingComplete && checkCount < maxCheckCount && !page.isClosed()) {
-            // Use try/catch because navigation issues may cause page.evaluate to throw
+            // Use try/catch because navigation issues may cause page.evaluate() to throw
             try {
-                scrollingComplete = await page.evaluate(async () => {
-                    window.scrollBy(0, window.innerHeight);
-
-                    return (
-                        window.document.scrollingElement.scrollHeight -
-                            Math.round(window.document.scrollingElement.scrollTop) -
-                            window.document.scrollingElement.clientHeight <
-                        window.innerHeight / 10 // the scroll completion threshold
-                    );
-                });
+                scrollingComplete = await this.scrollToPageBottom(page);
             } catch (error) {
                 this.logger?.logError(`The page scrolling failed.`, { error: System.serializeError(error) });
             }

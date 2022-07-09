@@ -43,8 +43,8 @@ export class PageScanProcessor {
     }
 
     private async capturePageState(): Promise<AxeScanResults> {
-        const pageSnapshot = await this.page.getPageSnapshot();
         const pageScreenshot = await this.page.getPageScreenshot();
+        const pageSnapshot = await this.page.getPageSnapshot();
 
         return {
             pageSnapshot,

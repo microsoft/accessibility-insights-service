@@ -5,19 +5,19 @@ import 'reflect-metadata';
 
 import { AxePuppeteer } from '@axe-core/puppeteer';
 import { AxeResults } from 'axe-core';
-import Puppeteer, { HTTPResponse } from 'puppeteer';
+import Puppeteer, { HTTPResponse, ScreenshotOptions } from 'puppeteer';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { System } from 'common';
 import { AxeScanResults } from './axe-scan-results';
 import { BrowserError } from './browser-error';
 import { AxePuppeteerFactory } from './factories/axe-puppeteer-factory';
 import { Page } from './page';
-import { PageConfigurator } from './page-configurator';
 import { MockableLogger } from './test-utilities/mockable-logger';
 import { getPromisableDynamicMock } from './test-utilities/promisable-mock';
 import { WebDriver } from './web-driver';
 import { PageNavigator, NavigationResponse } from './page-navigator';
 import { PageNavigationTiming } from './page-timeout-config';
+import { scrollToTop } from './page-client-lib';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -37,13 +37,13 @@ const pageNavigationTiming: PageNavigationTiming = {
     renderTimeout: false,
 };
 
+let scrollToTopMock: typeof scrollToTop;
 let axeResults: AxeResults;
 let scanResults: AxeScanResults;
 let page: Page;
 let navigationResponse: NavigationResponse;
 let webDriverMock: IMock<WebDriver>;
 let axePuppeteerFactoryMock: IMock<AxePuppeteerFactory>;
-let pageConfiguratorMock: IMock<PageConfigurator>;
 let pageNavigatorMock: IMock<PageNavigator>;
 let loggerMock: IMock<MockableLogger>;
 let browserMock: IMock<Puppeteer.Browser>;
@@ -65,7 +65,6 @@ describe(Page, () => {
 
         webDriverMock = Mock.ofType(WebDriver);
         axePuppeteerFactoryMock = Mock.ofType(AxePuppeteerFactory);
-        pageConfiguratorMock = Mock.ofType(PageConfigurator);
         pageNavigatorMock = Mock.ofType(PageNavigator);
         loggerMock = Mock.ofType(MockableLogger);
         browserMock = getPromisableDynamicMock(Mock.ofType<Puppeteer.Browser>());
@@ -74,6 +73,7 @@ describe(Page, () => {
         puppeteerRequestMock = getPromisableDynamicMock(Mock.ofType<Puppeteer.HTTPRequest>());
         axePuppeteerMock = getPromisableDynamicMock(Mock.ofType<AxePuppeteer>());
         cdpSessionMock = getPromisableDynamicMock(Mock.ofType<Puppeteer.CDPSession>());
+        scrollToTopMock = jest.fn().mockImplementation(() => Promise.resolve());
         navigationResponse = {
             httpResponse: puppeteerResponseMock.object,
             pageNavigationTiming: pageNavigationTiming,
@@ -83,18 +83,18 @@ describe(Page, () => {
             .setup(async (o) => o.version())
             .returns(() => Promise.resolve(scanResults.browserSpec))
             .verifiable();
+
         puppeteerRequestMock.setup((o) => o.redirectChain()).returns(() => [] as Puppeteer.HTTPRequest[]);
         puppeteerResponseMock.setup((o) => o.request()).returns(() => puppeteerRequestMock.object);
         puppeteerResponseMock.setup((o) => o.status()).returns(() => scanResults.pageResponseCode);
 
-        page = new Page(webDriverMock.object, axePuppeteerFactoryMock.object, pageNavigatorMock.object, loggerMock.object);
+        page = new Page(webDriverMock.object, axePuppeteerFactoryMock.object, pageNavigatorMock.object, loggerMock.object, scrollToTopMock);
     });
 
     afterEach(() => {
         webDriverMock.verifyAll();
         axePuppeteerFactoryMock.verifyAll();
         pageNavigatorMock.verifyAll();
-        pageConfiguratorMock.verifyAll();
         axePuppeteerMock.verifyAll();
         loggerMock.verifyAll();
         puppeteerRequestMock.verifyAll();
@@ -113,7 +113,6 @@ describe(Page, () => {
                 results: axeResults,
                 ...scanResults,
             } as AxeScanResults;
-            setupPageConfigurator();
 
             const axeScanResults = await page.scanForA11yIssues();
 
@@ -147,7 +146,6 @@ describe(Page, () => {
                 ...scanResults,
                 scannedUrl: undefined, // redirected flag
             } as AxeScanResults;
-            setupPageConfigurator();
             page.requestUrl = requestUrl;
 
             const axeScanResults = await page.scanForA11yIssues();
@@ -176,7 +174,6 @@ describe(Page, () => {
                 .setup((o) => o.redirectChain())
                 .returns(() => [{}] as Puppeteer.HTTPRequest[])
                 .verifiable();
-            setupPageConfigurator();
             simulatePageNavigation(puppeteerResponseMock.object);
             const expectedAxeScanResults = {
                 results: axeResults,
@@ -198,7 +195,6 @@ describe(Page, () => {
                 .setup((o) => o.redirectChain())
                 .returns(() => [] as Puppeteer.HTTPRequest[])
                 .verifiable();
-            setupPageConfigurator();
             simulatePageNavigation(puppeteerResponseMock.object);
             const expectedAxeScanResults = {
                 results: axeResults,
@@ -394,6 +390,10 @@ describe(Page, () => {
     describe('Miscellaneous', () => {
         it('create()', async () => {
             browserMock
+                .setup((o) => o.userAgent())
+                .returns(() => Promise.resolve(userAgent))
+                .verifiable();
+            browserMock
                 .setup(async (o) => o.newPage())
                 .returns(() => Promise.resolve(puppeteerPageMock.object))
                 .verifiable();
@@ -401,14 +401,12 @@ describe(Page, () => {
                 .setup(async (o) => o.launch(It.isAny()))
                 .returns(() => Promise.resolve(browserMock.object))
                 .verifiable();
-            setupPageConfigurator();
             page.browser = undefined;
             (page as any).page = undefined;
 
             await page.create();
 
             expect(page.userAgent).toEqual(userAgent);
-            expect(page.browserResolution).toEqual(browserResolution);
             browserMock.verify(async (o) => o.newPage(), Times.once());
         });
 
@@ -460,21 +458,20 @@ describe(Page, () => {
             await page.close();
         });
 
-        // it('getPageScreenshot()', async () => {
-        //     simulatePageLaunch();
-        //     const options = {
-        //         type: 'png',
-        //         fullPage: true,
-        //         encoding: 'base64',
-        //         captureBeyondViewport: true,
-        //     } as ScreenshotOptions;
-        //     puppeteerPageMock
-        //         .setup((o) => o.screenshot(options))
-        //         .returns(() => Promise.resolve('data'))
-        //         .verifiable();
-        //     const data = await page.getPageScreenshot();
-        //     expect(data).toEqual('data');
-        // });
+        it('getPageScreenshot()', async () => {
+            simulatePageLaunch();
+            const options = {
+                fullPage: true,
+                encoding: 'base64',
+            } as ScreenshotOptions;
+            puppeteerPageMock
+                .setup((o) => o.screenshot(options))
+                .returns(() => Promise.resolve('data'))
+                .verifiable();
+            const data = await page.getPageScreenshot();
+            expect(data).toEqual('data');
+            expect(scrollToTopMock).toBeCalled();
+        });
 
         it('getPageSnapshot()', async () => {
             simulatePageLaunch();
@@ -519,21 +516,6 @@ function setupAxePuppeteerFactoryMock(axeResultUrl: string = redirectUrl): void 
         .verifiable();
 }
 
-function setupPageConfigurator(): void {
-    pageConfiguratorMock
-        .setup((o) => o.getBrowserResolution())
-        .returns(() => browserResolution)
-        .verifiable();
-    pageConfiguratorMock
-        .setup((o) => o.getUserAgent())
-        .returns(() => userAgent)
-        .verifiable();
-    pageNavigatorMock
-        .setup((o) => o.pageConfigurator)
-        .returns(() => pageConfiguratorMock.object)
-        .verifiable(Times.atLeastOnce());
-}
-
 function simulatePageNavigation(response: Puppeteer.HTTPResponse, browserError?: BrowserError): void {
     page.lastNavigationResponse = response;
     page.lastBrowserError = browserError;
@@ -542,6 +524,17 @@ function simulatePageNavigation(response: Puppeteer.HTTPResponse, browserError?:
 function simulatePageLaunch(): void {
     page.browser = browserMock.object;
     (page as any).page = puppeteerPageMock.object;
+    puppeteerPageMock
+        .setup((o) => o.evaluate(It.isAny()))
+        .returns(() =>
+            Promise.resolve({
+                width: 1920,
+                height: 1080,
+                deviceScaleFactor: 1,
+            }),
+        )
+        .verifiable();
+    page.userAgent = userAgent;
 }
 
 function setupCDPSessionForCaptureSnapshot(data: string): void {
