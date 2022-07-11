@@ -30,7 +30,7 @@
         "@types/lodash": "^4.14.181",
         "@types/node": "^16.11.7",
         "@types/yargs": "^17.0.10",
-        "copy-webpack-plugin": "^10.2.4",
+        "copy-webpack-plugin": "^11.0.0",
         "fork-ts-checker-webpack-plugin": "^7.2.12",
         "jest": "^27.5.1",
         "jest-junit": "^14.0.0",
