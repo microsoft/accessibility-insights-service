@@ -29,10 +29,15 @@
   resolved "https://registry.npmjs.org/@actions/io/-/io-1.1.1.tgz"
   integrity sha512-Qi4JoKXjmE0O67wAOH6y0n26QXhMKMFo7GD/4IXNVcrtLjUlGjGuVys6pQgwF3ArfGTQu0XpqaNr0YhED2RaRA==
 
-"@apify/consts@^1.0.0", "@apify/consts@^1.5.0":
+"@apify/consts@^1.0.0":
   version "1.5.0"
   resolved "https://registry.npmjs.org/@apify/consts/-/consts-1.5.0.tgz"
   integrity sha512-3bqpRGzVy+p2Zx6PaijH4Z1IADfXyZGmXHjkB3qezUXxNNnWgqh5l76ouqdl6wYNCHRmgVpUxExIOHQzS6U2cg==
+
+"@apify/consts@^1.11.0":
+  version "1.11.0"
+  resolved "https://registry.yarnpkg.com/@apify/consts/-/consts-1.11.0.tgz#37ce30de7207118896911a1367a414eac18d5292"
+  integrity sha512-5tFbj/t+zqQDxMYKKUbAvgdkalZPNWWJjcL7AlyslwdZXkNaxUWD3CCXLz/hHvQ5otLuxGa7GuRQEcrkL6+jYw==
 
 "@apify/consts@^1.3.0", "@apify/consts@^1.4.0", "@apify/consts@^1.7.0":
   version "1.7.0"
@@ -44,20 +49,12 @@
   resolved "https://registry.npmjs.org/@apify/datastructures/-/datastructures-1.0.1.tgz"
   integrity sha512-AgnrfMjzDph+Te5WGNnIsz3+dJM7v/Sqo82nWwSqca292paRotUhORXr9Ik+d0yurC5LutDAhcvu8VZ8SfANGg==
 
-"@apify/log@^1.0.0":
-  version "1.1.7"
-  resolved "https://registry.npmjs.org/@apify/log/-/log-1.1.7.tgz"
-  integrity sha512-tkfA+cSJ/MynnsEyf25OdbjCXP7t9QRFl9lfb/1dO3YpP2Dpq9g445ByL166hAr3fHbxqPZcl17Fw72R0/IsOw==
+"@apify/log@^1.0.0", "@apify/log@^1.0.5", "@apify/log@^1.1.1", "@apify/log@^1.1.10", "@apify/log@^1.2.0":
+  version "1.2.5"
+  resolved "https://registry.yarnpkg.com/@apify/log/-/log-1.2.5.tgz#17d9e4956180a33915538493bad480ba9822f0db"
+  integrity sha512-gTaRzdhJ0qmcBLsFULlLz/jUUCw+0whC6G6TFt+VYHwWwWsIAwo5aSvww7nTq6xBNoKLXgZY/fEyUIDAQ7ekXA==
   dependencies:
-    "@apify/consts" "^1.5.0"
-    ansi-colors "^4.1.1"
-
-"@apify/log@^1.0.5", "@apify/log@^1.1.1", "@apify/log@^1.1.10":
-  version "1.1.10"
-  resolved "https://registry.npmjs.org/@apify/log/-/log-1.1.10.tgz"
-  integrity sha512-NJw2bqJWyd8JGGdUmnudHKm4sbZfcRYHUeeXiN8YZWOVcoEIhIDhAH9P8YT2iN1celnuXlzq0w9JnIuQdrOFYA==
-  dependencies:
-    "@apify/consts" "^1.7.0"
+    "@apify/consts" "^1.11.0"
     ansi-colors "^4.1.1"
 
 "@apify/ps-tree@^1.1.4":
@@ -4541,23 +4538,23 @@ braces@^3.0.1, braces@~3.0.2:
   dependencies:
     fill-range "^7.0.1"
 
-browser-pool@^3.1.0:
-  version "3.1.0"
-  resolved "https://registry.npmjs.org/browser-pool/-/browser-pool-3.1.0.tgz"
-  integrity sha512-kC7ZXHxSdY5+vxWj3MGBUSwN1lTrEnBpn+E325EONUmN++cLrkSGUL0bFVWnpw9DWqyMGy+xHvDv8xSufNoH3A==
+browser-pool@^3.1.0, browser-pool@^3.1.4:
+  version "3.1.4"
+  resolved "https://registry.yarnpkg.com/browser-pool/-/browser-pool-3.1.4.tgz#72c2d7b098d0a37dcefbba4875f5b882783f0c55"
+  integrity sha512-vd++Ta4CQiyncPR/+RUjLM/BcervZ+bx9UvIRclQlLPq+KK7cPDhbj6T2u0q5iZMBMfRXVb1pMNsyD2MZRPCOA==
   dependencies:
-    "@apify/log" "^1.1.1"
+    "@apify/log" "^1.2.0"
     "@apify/timeout" "^0.2.1"
     fingerprint-generator "^1.0.0"
     fingerprint-injector "^1.0.0"
     lodash.merge "^4.6.2"
-    nanoid "^3.1.25"
+    nanoid "^3.3.3"
     ow "^0.27.0"
     p-limit "^3.1.0"
-    proxy-chain "^2.0.1-beta.0"
+    proxy-chain "^2.0.1"
     quick-lru "^5.1.1"
     tiny-typed-emitter "^2.1.0"
-    tslib "^2.3.1"
+    tslib "^2.4.0"
 
 browser-process-hrtime@^1.0.0:
   version "1.0.0"
@@ -9646,10 +9643,10 @@ mute-stream@0.0.8, mute-stream@~0.0.4:
   resolved "https://registry.npmjs.org/mute-stream/-/mute-stream-0.0.8.tgz"
   integrity sha512-nnbWWOkoWyUsTjKrhgD0dcz22mdkSnpYqbEjIm2nhwhuxlSkpywJmBo8h0ZqJdkp73mb90SssHkN4rsRaBAfAA==
 
-nanoid@^3.1.25:
-  version "3.3.1"
-  resolved "https://registry.npmjs.org/nanoid/-/nanoid-3.3.1.tgz"
-  integrity sha512-n6Vs/3KGyxPQd6uO0eH4Bv0ojGSUvuLlIHtC3Y0kEO23YRge8H9x1GCzLn28YX0H66pMkxuaeESFq4tKISKwdw==
+nanoid@^3.3.3:
+  version "3.3.4"
+  resolved "https://registry.yarnpkg.com/nanoid/-/nanoid-3.3.4.tgz#730b67e3cd09e2deacf03c027c81c9d9dbc5e8ab"
+  integrity sha512-MqBkQh/OHTS2egovRtLk45wEyNXwF+cokD+1YPf9u5VfJiRdAiRwB2froX5Co9Rh20xs4siNPm8naNotSD6RBw==
 
 napi-build-utils@^1.0.1:
   version "1.0.2"
@@ -10747,10 +10744,10 @@ protocols@^2.0.0, protocols@^2.0.1:
   resolved "https://registry.yarnpkg.com/protocols/-/protocols-2.0.1.tgz#8f155da3fc0f32644e83c5782c8e8212ccf70a86"
   integrity sha512-/XJ368cyBJ7fzLMwLKv1e4vLxOju2MNAIokcr7meSaNcVbWz/CPcW22cP04mwxOErdA5mwjA8Q6w/cdAQxVn7Q==
 
-proxy-chain@^2.0.1-beta.0:
-  version "2.0.1-beta.2"
-  resolved "https://registry.npmjs.org/proxy-chain/-/proxy-chain-2.0.1-beta.2.tgz"
-  integrity sha512-nMxqLLdW4cIOhGiwFhH6JiNL/g9rYiJOjTGv+9CjP3h3y+r/jtEs5p+a8FTD9eKn9asDTrjjlge3R9OcwypSQw==
+proxy-chain@^2.0.1:
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/proxy-chain/-/proxy-chain-2.0.2.tgz#bf40febc801865922c69b616be4c3baef5e5c6ed"
+  integrity sha512-f+Ifc3IyrxT3nt1uYH4rEpPv4aTLg+4oy9UzwkW6CiEWGIjK58SItW0ktNWSwPZQnQ1mt9X9i2M2YFCryaBEjA==
   dependencies:
     tslib "^2.3.1"
 
@@ -12474,10 +12471,10 @@ tslib@^1.10.0, tslib@^1.13.0, tslib@^1.8.1, tslib@^1.9.0, tslib@^1.9.3:
   resolved "https://registry.npmjs.org/tslib/-/tslib-1.14.1.tgz"
   integrity sha512-Xni35NKzjgMrwevysHTCArtLDpPvye8zV/0E4EyYn43P7/7qvQwPh9BGkHewbMulVntbigmcT7rdX3BNo9wRJg==
 
-tslib@^2.1.0, tslib@^2.2.0, tslib@^2.3.1:
-  version "2.3.1"
-  resolved "https://registry.yarnpkg.com/tslib/-/tslib-2.3.1.tgz#e8a335add5ceae51aa261d32a490158ef042ef01"
-  integrity sha512-77EbyPPpMz+FRFRuAFlWMtmgUWGe9UOG2Z25NqCwiIjRhOf5iKGuzSe5P2w1laq+FkRy4p+PCuVkJSGkzTEKVw==
+tslib@^2.1.0, tslib@^2.2.0, tslib@^2.3.1, tslib@^2.4.0:
+  version "2.4.0"
+  resolved "https://registry.yarnpkg.com/tslib/-/tslib-2.4.0.tgz#7cecaa7f073ce680a05847aa77be941098f36dc3"
+  integrity sha512-d6xOpEDfsi2CZVlPQzGeux8XMwLT9hssAsaPYExaQMuYskwb+x1x7J371tWlbBdWHroy99KnVB6qIkUbs5X3UQ==
 
 tslib@~2.1.0:
   version "2.1.0"
