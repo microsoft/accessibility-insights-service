@@ -6,7 +6,7 @@ import { inject, injectable } from 'inversify';
 import * as Puppeteer from 'puppeteer';
 import { BrowserError, PageNavigationHooks } from 'scanner-global-library';
 import { System } from 'common';
-import _ from 'lodash';
+import { isArray } from 'lodash';
 import { CrawlerConfiguration } from '../crawler/crawler-configuration';
 import { DataBase } from '../level-storage/data-base';
 import { AccessibilityScanOperation } from '../page-operations/accessibility-scan-operation';
@@ -56,7 +56,7 @@ export abstract class PageProcessorBase implements PageProcessor {
     public pageHandler: Apify.PuppeteerHandlePage = async (inputs: PuppeteerHandlePageInputs) => {
         try {
             if (
-                _.isArray(inputs.session?.userData) &&
+                isArray(inputs.session?.userData) &&
                 (inputs.session.userData as SessionData[]).find((s) => s.requestId === inputs.request.id)
             ) {
                 return;
@@ -75,7 +75,7 @@ export abstract class PageProcessorBase implements PageProcessor {
 
     // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
     public preNavigation = async (crawlingContext: PuppeteerCrawlingContext, gotoOptions: any): Promise<void> => {
-        if (!_.isArray(crawlingContext.session.userData)) {
+        if (!isArray(crawlingContext.session.userData)) {
             crawlingContext.session.userData = [];
         }
         await this.pageNavigationHooks.preNavigation(crawlingContext.page);
@@ -109,8 +109,7 @@ export abstract class PageProcessorBase implements PageProcessor {
             } else if (navigationError !== undefined) {
                 await this.saveBrowserError(crawlingContext.request, navigationError, crawlingContext.session);
             } else {
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                await this.saveScanMetadata(crawlingContext.request.url, await (crawlingContext as any).page.title());
+                await this.saveScanMetadata(crawlingContext.request.url, crawlingContext.page);
             }
         }
     };
@@ -221,15 +220,22 @@ export abstract class PageProcessorBase implements PageProcessor {
         });
     }
 
-    protected async saveScanMetadata(url: string, pageTitle: string): Promise<void> {
+    protected async saveScanMetadata(url: string, page: Puppeteer.Page): Promise<void> {
         // save metadata for any url first to support the case when base url is not processed
         if ((this.baseUrl && this.baseUrl === url) || !this.scanMetadataSaved) {
-            const pageConfigurator = this.pageNavigationHooks.pageConfigurator;
+            const pageTitle = await page.title();
+            const browserResolution = await page.evaluate(() => {
+                return {
+                    width: window.innerWidth,
+                    height: window.innerHeight,
+                };
+            });
+            const userAgent = await page.browser().userAgent();
             await this.dataBase.addScanMetadata({
                 baseUrl: this.baseUrl,
                 basePageTitle: this.baseUrl === url ? pageTitle : '',
-                userAgent: pageConfigurator.getUserAgent(),
-                browserResolution: pageConfigurator.getBrowserResolution(),
+                userAgent,
+                browserResolution: `${browserResolution.width}x${browserResolution.height}`,
             });
             this.scanMetadataSaved = true;
         }

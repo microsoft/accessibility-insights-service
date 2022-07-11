@@ -207,7 +207,7 @@ export class PageNavigator {
         page: Puppeteer.Page,
         navigationCondition: Puppeteer.PuppeteerLifeCycleEvent,
     ): Promise<Puppeteer.HTTPResponse> {
-        // Reload page if website returns HTTP 304 (Not Modified) when browser use disk cached.
+        // Reload page if website returns HTTP 304 (Not Modified) when browser use disk cache
         await page.goto(`file:///${__dirname}/blank-page.html`);
 
         return page.goBack({ waitUntil: navigationCondition, timeout: puppeteerTimeoutConfig.navigationTimeoutMsecs });

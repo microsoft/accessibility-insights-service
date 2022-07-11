@@ -13,6 +13,7 @@ import { WebDriver } from './web-driver';
 import { PageNavigator } from './page-navigator';
 import { BrowserError } from './browser-error';
 import { PageNavigationTiming } from './page-timeout-config';
+import { scrollToTop } from './page-client-lib';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -26,19 +27,27 @@ export interface PageConfigurationOptions {
     allowCachedVersion?: boolean;
 }
 
+export interface Viewport {
+    width: number;
+    height: number;
+    deviceScaleFactor: number;
+}
+
 @injectable()
 export class Page {
-    public requestUrl: string;
-
     public browser: Puppeteer.Browser;
 
     public lastNavigationResponse: Puppeteer.HTTPResponse;
 
     public lastBrowserError: BrowserError;
 
+    public lastBrowserStartOptions: BrowserStartOptions;
+
     public pageNavigationTiming: PageNavigationTiming;
 
-    private lastBrowserStartOptions: BrowserStartOptions;
+    public requestUrl: string;
+
+    public userAgent: string;
 
     private page: Puppeteer.Page;
 
@@ -47,15 +56,8 @@ export class Page {
         @inject(AxePuppeteerFactory) private readonly axePuppeteerFactory: AxePuppeteerFactory,
         @inject(PageNavigator) private readonly pageNavigator: PageNavigator,
         @inject(GlobalLogger) @optional() private readonly logger: GlobalLogger,
+        private readonly scrollToPageTop: typeof scrollToTop = scrollToTop,
     ) {}
-
-    public get userAgent(): string {
-        return this.pageNavigator.pageConfigurator.getUserAgent();
-    }
-
-    public get browserResolution(): string {
-        return this.pageNavigator.pageConfigurator.getBrowserResolution();
-    }
 
     public get puppeteerPage(): Puppeteer.Page {
         return this.page;
@@ -76,6 +78,7 @@ export class Page {
             });
         }
 
+        this.userAgent = await this.browser.userAgent();
         this.page = await this.browser.newPage();
     }
 
@@ -135,20 +138,18 @@ export class Page {
         return !isNil(this.page) && !this.page.isClosed() && isNil(this.lastBrowserError) && !isNil(this.lastNavigationResponse);
     }
 
-    /**
-     * Disabled. The puppeteer may break page layout when taking screenshot. Use it after page validation.
-     */
     public async getPageScreenshot(): Promise<string> {
-        // TODO enable safe screenshot processing
+        // Scrolling to the top of the page to capture full page rendering as page might be scrolled down after initial load
+        await this.scrollToPageTop(this.page);
 
-        // const data = (await this.page.screenshot({
-        //     type: 'png',
-        //     fullPage: true,
-        //     encoding: 'base64',
-        //     captureBeyondViewport: true,
-        // })) as string;
+        // Note: changing page.screenshot() options may break page layout
+        // Setting BrowserConnectOptions.defaultViewport == null is required for not breaking page layout
+        const data = await this.page.screenshot({
+            fullPage: true,
+            encoding: 'base64',
+        });
 
-        return 'png-empty-screenshot-base64-string==';
+        return data as string;
     }
 
     public async getPageSnapshot(): Promise<string> {
@@ -169,6 +170,18 @@ export class Page {
 
     public async setCookies(cookies: Puppeteer.Protocol.Network.CookieParam[]): Promise<void> {
         await this.page.setCookie(...cookies);
+    }
+
+    public async getBrowserResolution(): Promise<Viewport> {
+        const windowSize = await this.page.evaluate(() => {
+            return {
+                width: window.innerWidth,
+                height: window.innerHeight,
+                deviceScaleFactor: window.devicePixelRatio,
+            };
+        });
+
+        return { width: windowSize.width, height: windowSize.height, deviceScaleFactor: windowSize.deviceScaleFactor };
     }
 
     private async setExtraHTTPHeaders(): Promise<void> {
@@ -241,13 +254,14 @@ export class Page {
             return { error: `Axe core engine error. ${System.serializeError(error)}`, scannedUrl: this.page.url() };
         }
 
+        const browserResolution = await this.getBrowserResolution();
         const scanResults: AxeScanResults = {
             results: axeResults,
             pageTitle: await this.page.title(),
             browserSpec: await this.browser.version(),
             pageResponseCode: this.lastNavigationResponse.status(),
             userAgent: this.userAgent,
-            browserResolution: this.browserResolution,
+            browserResolution: `${browserResolution.width}x${browserResolution.height}`,
         };
 
         if (

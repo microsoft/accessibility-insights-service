@@ -3,8 +3,8 @@
 
 import 'reflect-metadata';
 
-import { Page } from 'puppeteer';
-import { BrowserError, PageNavigationHooks, PageConfigurator } from 'scanner-global-library';
+import { Page, Browser } from 'puppeteer';
+import { BrowserError, PageNavigationHooks } from 'scanner-global-library';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { System } from 'common';
 import Apify from 'apify';
@@ -52,12 +52,12 @@ describe(PageProcessorBase, () => {
     let saveSnapshotMock: IMock<typeof Apify.utils.puppeteer.saveSnapshot>;
     let processPageMock: IMock<Apify.PuppeteerHandlePage>;
     let pageNavigationHooksMock: IMock<PageNavigationHooks>;
-    let pageConfiguratorMock: IMock<PageConfigurator>;
     let crawlerConfigurationMock: IMock<CrawlerConfiguration>;
     let requestQueueProvider: ApifyRequestQueueProvider;
     let requestStub: Apify.Request;
     let pageStub: Page;
     let pageProcessorBase: TestablePageProcessor;
+    let browserMock: IMock<Browser>;
 
     beforeEach(() => {
         requestQueueStub = {} as Apify.RequestQueue;
@@ -69,8 +69,8 @@ describe(PageProcessorBase, () => {
         saveSnapshotMock = Mock.ofType<typeof Apify.utils.puppeteer.saveSnapshot>();
         processPageMock = Mock.ofType<Apify.PuppeteerHandlePage>();
         pageNavigationHooksMock = Mock.ofType<PageNavigationHooks>();
-        pageConfiguratorMock = Mock.ofType<PageConfigurator>();
         crawlerConfigurationMock = Mock.ofType(CrawlerConfiguration);
+        browserMock = Mock.ofType<Browser>();
         crawlerConfigurationMock
             .setup((o) => o.discoveryPatterns())
             .returns(() => discoveryPatterns)
@@ -88,11 +88,17 @@ describe(PageProcessorBase, () => {
         } as any;
 
         pageStub = {
+            browser: () => browserMock.object,
             url: () => testUrl,
             setBypassCSP: (op: boolean) => {
                 return;
             },
             title: () => 'title',
+            evaluate: async () =>
+                Promise.resolve({
+                    width: 1920,
+                    height: 1080,
+                }),
         } as any;
 
         requestQueueProvider = () => Promise.resolve(requestQueueStub);
@@ -140,23 +146,16 @@ describe(PageProcessorBase, () => {
         pageProcessorBase.baseUrl = testUrl;
         const userAgent = 'userAgent';
         const browserResolution = '1920x1080';
+        browserMock
+            .setup((o) => o.userAgent())
+            .returns(() => Promise.resolve(userAgent))
+            .verifiable();
         const crawlingContext: PuppeteerCrawlingContext = {
             page: pageStub,
             request: requestStub,
             response: {} as Response,
         } as any;
-        pageConfiguratorMock
-            .setup((o) => o.getUserAgent())
-            .returns(() => userAgent)
-            .verifiable();
-        pageConfiguratorMock
-            .setup((o) => o.getBrowserResolution())
-            .returns(() => browserResolution)
-            .verifiable();
-        pageNavigationHooksMock
-            .setup((o) => o.pageConfigurator)
-            .returns(() => pageConfiguratorMock.object)
-            .verifiable(Times.atLeastOnce());
+
         pageNavigationHooksMock.setup(async (o) => o.postNavigation(crawlingContext.page, It.isAny(), It.isAny())).verifiable();
         dataBaseMock
             .setup((o) => o.addScanMetadata({ baseUrl: testUrl, basePageTitle: 'title', userAgent, browserResolution }))

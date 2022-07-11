@@ -111,7 +111,11 @@ function setupAuthenticationMethod(container: interfaces.Container): void {
     const isDebugEnabled = /--debug|--inspect/i.test(process.execArgv.join(' '));
     container
         .bind(iocTypeNames.AuthenticationMethod)
-        .toConstantValue(isDebugEnabled ? AuthenticationMethod.servicePrincipal : AuthenticationMethod.managedIdentity);
+        .toConstantValue(
+            isDebugEnabled || process.env.LOCAL_AUTH === 'true'
+                ? AuthenticationMethod.servicePrincipal
+                : AuthenticationMethod.managedIdentity,
+        );
 }
 
 function setupSingletonAzureKeyVaultClientProvider(container: interfaces.Container): void {
