@@ -19,7 +19,7 @@ export const defaultLaunchOptions: Puppeteer.PuppeteerNodeLaunchOptions = {
         '--no-sandbox',
         '--disable-setuid-sandbox',
         '--js-flags=--max-old-space-size=8192',
-        `--window-size=${windowSize.width},${windowSize.width}`,
+        `--window-size=${windowSize.width},${windowSize.height}`,
     ],
     ...defaultBrowserOptions,
 };
