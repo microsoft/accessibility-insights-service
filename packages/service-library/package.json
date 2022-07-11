@@ -43,7 +43,7 @@
         "@azure/cosmos": "^3.16.2",
         "@azure/functions": "^3.0.0",
         "@azure/identity": "^2.0.5",
-        "@azure/storage-blob": "^12.9.0",
+        "@azure/storage-blob": "^12.11.0",
         "accessibility-insights-report": "4.3.0",
         "async-mutex": "^0.3.2",
         "axe-core": "4.4.1",
