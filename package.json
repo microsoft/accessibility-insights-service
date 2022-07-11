@@ -54,7 +54,7 @@
         "jest": "^27.5.1",
         "jest-extended": "^2.0.0",
         "jest-html-reporter": "^3.4.2",
-        "jest-junit": "^13.2.0",
+        "jest-junit": "^14.0.0",
         "lerna": "^5.1.8",
         "lerna-audit": "^1.3.3",
         "license-check-and-add": "^4.0.3",
