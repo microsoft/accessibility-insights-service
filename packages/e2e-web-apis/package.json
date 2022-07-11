@@ -27,7 +27,7 @@
         "@azure/functions": "^3.0.0",
         "@types/dotenv": "^8.2.0",
         "@types/jest": "^27.4.1",
-        "@types/lodash": "^4.14.181",
+        "@types/lodash": "^4.14.182",
         "@types/node": "^16.11.7",
         "@types/yargs": "^17.0.10",
         "copy-webpack-plugin": "^10.2.4",
