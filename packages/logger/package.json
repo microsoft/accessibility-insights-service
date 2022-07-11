@@ -42,6 +42,6 @@
         "lodash": "^4.17.21",
         "reflect-metadata": "^0.1.13",
         "verror": "^1.10.1",
-        "moment": "^2.29.3"
+        "moment": "^2.29.4"
     }
 }
