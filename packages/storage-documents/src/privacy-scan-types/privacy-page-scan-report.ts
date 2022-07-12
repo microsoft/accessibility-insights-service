@@ -11,6 +11,7 @@ export interface PrivacyPageScanReport {
     cookieCollectionConsentResults: ConsentResult[];
     bannerDetected: boolean;
     bannerDetectionXpathExpression: string;
+    geolocation: IpGeolocation;
 }
 
 export interface Cookie {
@@ -30,4 +31,12 @@ export interface ConsentResult {
     cookiesBeforeConsent?: CookieByDomain[];
     cookiesAfterConsent?: CookieByDomain[];
     error?: any;
+}
+
+export interface IpGeolocation {
+    ip: string;
+    countryName: string;
+    regionName: string;
+    city: string;
+    isInEuropeanUnion: boolean;
 }

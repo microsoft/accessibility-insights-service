@@ -8,7 +8,8 @@ import { IMock, Mock } from 'typemoq';
 import * as mockDate from 'mockdate';
 import { PrivacyScanResult } from 'scanner-global-library';
 import { FailedUrl, PrivacyPageScanReport, PrivacyScanCombinedReport, PrivacyScanStatus } from 'storage-documents';
-import _ from 'lodash';
+import { cloneDeep } from 'lodash';
+import { IpGeolocation } from 'privacy-scan-core';
 import { PrivacyReportMetadata, PrivacyReportReducer } from './privacy-report-reducer';
 
 describe(PrivacyReportReducer, () => {
@@ -66,15 +67,18 @@ describe(PrivacyReportReducer, () => {
             ],
             bannerDetected: true,
             bannerDetectionXpathExpression: 'banner xpath',
+            geolocation: {
+                ip: '1.1.1.1',
+            } as IpGeolocation,
         },
     };
     const partialScanResult: PrivacyScanResult = {
         pageResponseCode: 200,
         error: 'Page reload error',
         results: {
-            ..._.cloneDeep(successfulScanResult.results),
+            ...cloneDeep(successfulScanResult.results),
             cookieCollectionConsentResults: [
-                ..._.cloneDeep(successfulScanResult.results.cookieCollectionConsentResults),
+                ...cloneDeep(successfulScanResult.results.cookieCollectionConsentResults),
                 {
                     cookiesUsedForConsent: 'cookie3=value',
                     error: 'First page reload failed',
@@ -222,7 +226,7 @@ describe(PrivacyReportReducer, () => {
             existingReport.status = status;
 
             const expectedReport: PrivacyScanCombinedReport = {
-                ..._.cloneDeep(existingReport),
+                ...cloneDeep(existingReport),
                 status: status,
                 urls: [...existingReport.urls, metadata.url],
                 scanCookies: [
@@ -253,7 +257,7 @@ describe(PrivacyReportReducer, () => {
                     bannerDetectionXpathExpression: partialScanResult.results.bannerDetectionXpathExpression,
                 };
                 const expectedReport: PrivacyScanCombinedReport = {
-                    ..._.cloneDeep(existingReport),
+                    ...cloneDeep(existingReport),
                     status: 'Failed',
                     urls: [...existingReport.urls, metadata.url],
                     scanCookies: [
@@ -290,7 +294,7 @@ describe(PrivacyReportReducer, () => {
                 };
 
                 const expectedReport: PrivacyScanCombinedReport = {
-                    ..._.cloneDeep(existingReport),
+                    ...cloneDeep(existingReport),
                     status: 'Failed',
                     urls: [...existingReport.urls, metadata.url],
                     failedUrls: [failedUrl],
@@ -307,7 +311,7 @@ describe(PrivacyReportReducer, () => {
             'Replace existing failed results for failed url="%s" if retried scan succeeded',
             (url) => {
                 const expectedReport: PrivacyScanCombinedReport = {
-                    ..._.cloneDeep(existingReport),
+                    ...cloneDeep(existingReport),
                     urls: [...existingReport.urls, metadata.url],
                     status: 'Completed',
                     scanCookies: [
@@ -354,7 +358,7 @@ describe(PrivacyReportReducer, () => {
             };
 
             const expectedReport: PrivacyScanCombinedReport = {
-                ..._.cloneDeep(existingReport),
+                ...cloneDeep(existingReport),
                 status: 'Failed',
                 failedUrls: [failedUrl],
                 finishDateTime: currentDate,
@@ -369,7 +373,7 @@ describe(PrivacyReportReducer, () => {
             const existingFailedUrl = { url: 'some other url' } as FailedUrl;
 
             const expectedReport: PrivacyScanCombinedReport = {
-                ..._.cloneDeep(existingReport),
+                ...cloneDeep(existingReport),
                 urls: [...existingReport.urls, metadata.url],
                 status: 'Failed',
                 scanCookies: [

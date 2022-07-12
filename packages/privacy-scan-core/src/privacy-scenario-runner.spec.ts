@@ -13,15 +13,18 @@ import * as MockDate from 'mockdate';
 import { PrivacyScenarioRunner } from './privacy-scenario-runner';
 import { CookieCollector } from './cookie-collector';
 import { CookieScenario } from './cookie-scenarios';
+import { IpGeolocationProvider, IpGeolocation } from './ip-geolocation-provider';
 
 const privacyScanConfig = {
     bannerXPath: 'bannerXPath',
     bannerDetectionTimeout: 10,
 } as PrivacyScanConfig;
 const url = 'url';
+const ipGeolocation = { ip: '1.1.1.1' } as IpGeolocation;
 
 let serviceConfigurationMock: IMock<ServiceConfiguration>;
 let cookieCollectorMock: IMock<CookieCollector>;
+let ipGeolocationProviderMock: IMock<IpGeolocationProvider>;
 let loggerMock: IMock<GlobalLogger>;
 let pageMock: IMock<Page>;
 let puppeteerPageMock: IMock<Puppeteer.Page>;
@@ -38,6 +41,7 @@ describe(PrivacyScenarioRunner, () => {
 
         serviceConfigurationMock = Mock.ofType<ServiceConfiguration>();
         cookieCollectorMock = Mock.ofType<CookieCollector>();
+        ipGeolocationProviderMock = Mock.ofType<IpGeolocationProvider>();
         loggerMock = Mock.ofType<GlobalLogger>();
         pageMock = Mock.ofType<Page>();
         puppeteerPageMock = Mock.ofType<Puppeteer.Page>();
@@ -49,6 +53,11 @@ describe(PrivacyScenarioRunner, () => {
         serviceConfigurationMock
             .setup((o) => o.getConfigValue('privacyScanConfig'))
             .returns(() => Promise.resolve(privacyScanConfig))
+            .verifiable();
+
+        ipGeolocationProviderMock
+            .setup((o) => o.getIpGeolocation())
+            .returns(() => ipGeolocation)
             .verifiable();
 
         for (const scenario of cookieScenario) {
@@ -63,6 +72,7 @@ describe(PrivacyScenarioRunner, () => {
         privacyScenarioRunner = new PrivacyScenarioRunner(
             serviceConfigurationMock.object,
             cookieCollectorMock.object,
+            ipGeolocationProviderMock.object,
             loggerMock.object,
             cookieScenariosProvider,
         );
@@ -72,6 +82,7 @@ describe(PrivacyScenarioRunner, () => {
         MockDate.reset();
         serviceConfigurationMock.verifyAll();
         cookieCollectorMock.verifyAll();
+        ipGeolocationProviderMock.verifyAll();
         loggerMock.verifyAll();
         pageMock.verifyAll();
         puppeteerPageMock.verifyAll();
@@ -101,6 +112,7 @@ describe(PrivacyScenarioRunner, () => {
             bannerDetectionXpathExpression: privacyScanConfig.bannerXPath,
             bannerDetected: true,
             cookieCollectionConsentResults: cookieCollectionResults,
+            geolocation: ipGeolocation,
         };
 
         const actualResult = await privacyScenarioRunner.run(pageMock.object);
@@ -132,6 +144,7 @@ describe(PrivacyScenarioRunner, () => {
             bannerDetectionXpathExpression: privacyScanConfig.bannerXPath,
             bannerDetected: false,
             cookieCollectionConsentResults: cookieCollectionResults,
+            geolocation: ipGeolocation,
         };
 
         const actualResult = await privacyScenarioRunner.run(pageMock.object);

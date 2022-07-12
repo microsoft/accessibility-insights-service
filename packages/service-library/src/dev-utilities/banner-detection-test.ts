@@ -19,7 +19,7 @@ import { ConsoleLoggerClient, GlobalLogger } from 'logger';
 import { PromiseUtils, ServiceConfiguration } from 'common';
 import yargs from 'yargs';
 import { isEmpty } from 'lodash';
-import { PrivacyScannerCore, PrivacyScenarioRunner, CookieCollector } from 'privacy-scan-core';
+import { PrivacyScannerCore, PrivacyScenarioRunner, CookieCollector, IpGeolocationProvider } from 'privacy-scan-core';
 
 type BannerDetectionTestArgs = {
     urlsListPath: string;
@@ -47,7 +47,7 @@ const pageNavigator = new PageNavigator(
     new PageNavigationHooks(new PageConfigurator(), pageResponseProcessor, new PageHandler(logger)),
     logger,
 );
-const privacyScenarioRunner = new PrivacyScenarioRunner(serviceConfig, new CookieCollector(), logger);
+const privacyScenarioRunner = new PrivacyScenarioRunner(serviceConfig, new CookieCollector(), new IpGeolocationProvider(), logger);
 const privacyScannerCore = new PrivacyScannerCore(privacyScenarioRunner, logger);
 const page = new Page(webDriver, undefined, pageNavigator, logger);
 
