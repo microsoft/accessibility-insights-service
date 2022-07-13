@@ -17,7 +17,7 @@ import { executeWithExponentialRetry, ExponentialRetryOptions } from 'common';
 export class ManagedIdentityCredentialCache implements TokenCredential {
     private static readonly cacheCheckPeriodInSeconds = 60;
 
-    private static readonly tokenExpirationReductionMsec = 7200000; // two hours
+    private static readonly tokenExpirationReductionMsec = 11100000;
 
     private static readonly msiRetryOptions: ExponentialRetryOptions = {
         delayFirstAttempt: false,

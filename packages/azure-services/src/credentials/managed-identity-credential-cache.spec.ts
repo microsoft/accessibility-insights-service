@@ -14,7 +14,7 @@ import { ManagedIdentityCredentialCache } from './managed-identity-credential-ca
 const scopes = 'https://vault.azure.net/default';
 const resourceUrl = 'vault.azure.net';
 const accessTokenOptions = {};
-const tokenExpirationReductionMsec = 7200000;
+const tokenExpirationReductionMsec = 11100000;
 const getCacheTtl = (token: AccessToken): number => (token.expiresOnTimestamp - tokenExpirationReductionMsec) / 1000;
 
 let tokenCacheMock: IMock<NodeCache>;
