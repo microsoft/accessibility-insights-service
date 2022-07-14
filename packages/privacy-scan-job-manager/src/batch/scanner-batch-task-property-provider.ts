@@ -16,7 +16,12 @@ export class ScannerBatchTaskPropertyProvider extends BatchTaskPropertyProvider 
     }
 
     public getAdditionalContainerRunOptions?(): string {
-        return '';
+        // IP Geolocation data file
+        const geolocationFile = process.env.AZ_BATCH_NODE_SHARED_DIR.endsWith('\\')
+            ? `${process.env.AZ_BATCH_NODE_SHARED_DIR}.env`
+            : `${process.env.AZ_BATCH_NODE_SHARED_DIR}\\.env`;
+
+        return `--env-file ${geolocationFile}`;
     }
 
     public getUserElevationLevel(): UserAccessLevels {
