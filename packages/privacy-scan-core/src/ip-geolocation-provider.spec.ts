@@ -10,16 +10,13 @@ let ipGeolocationProvider: IpGeolocationProvider;
 describe(IpGeolocationProvider, () => {
     beforeEach(() => {
         ipGeolocationProvider = new IpGeolocationProvider();
-        process.env.IP_GEOLOCATION = `{"ip":"1.1.1.1","country_name":"United States","region_name":"Washington","city":"Redmond","is_in_european_union":true}`;
+        process.env.IP_GEOLOCATION = `{"ip": "1.1.1.1", "region": "westeurope"}`;
     });
 
     it('should return ip geolocation', () => {
         const expectedIpGeolocation = {
-            city: 'Redmond',
-            countryName: 'United States',
             ip: '1.1.1.0',
-            isInEuropeanUnion: true,
-            regionName: 'Washington',
+            region: 'westeurope',
         };
         const ipGeolocation = ipGeolocationProvider.getIpGeolocation();
 
@@ -30,6 +27,6 @@ describe(IpGeolocationProvider, () => {
         process.env.IP_GEOLOCATION = '';
         const ipGeolocation = ipGeolocationProvider.getIpGeolocation();
 
-        expect(ipGeolocation).toEqual({});
+        expect(ipGeolocation).toEqual(undefined);
     });
 });

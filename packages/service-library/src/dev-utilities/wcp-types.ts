@@ -57,10 +57,7 @@ export interface PrivacyMetadata {
 
 export interface IpGeolocation {
     IP: string;
-    CountryName: string;
-    RegionName: string;
-    City: string;
-    IsInEuropeanUnion: boolean;
+    Region: string;
 }
 
 export interface PrivacyValidationResult {

@@ -35,8 +35,5 @@ export interface ConsentResult {
 
 export interface IpGeolocation {
     ip: string;
-    countryName: string;
-    regionName: string;
-    city: string;
-    isInEuropeanUnion: boolean;
+    region: string;
 }

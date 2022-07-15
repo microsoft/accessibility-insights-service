@@ -4,37 +4,23 @@
 import { isEmpty } from 'lodash';
 import { injectable } from 'inversify';
 
-interface IpGeolocationXml {
-    ip: string;
-    country_name: string;
-    region_name: string;
-    city: string;
-    is_in_european_union: boolean;
-}
-
 export interface IpGeolocation {
     ip: string;
-    countryName: string;
-    regionName: string;
-    city: string;
-    isInEuropeanUnion: boolean;
+    region: string;
 }
 
 @injectable()
 export class IpGeolocationProvider {
     public getIpGeolocation(): IpGeolocation {
         if (isEmpty(process.env.IP_GEOLOCATION)) {
-            return {} as IpGeolocation;
+            return undefined;
         }
 
-        const ipGeolocation = JSON.parse(process.env.IP_GEOLOCATION) as IpGeolocationXml;
+        const ipGeolocation = JSON.parse(process.env.IP_GEOLOCATION) as IpGeolocation;
 
         return {
             ip: this.fixIpAddress(ipGeolocation.ip),
-            countryName: ipGeolocation.country_name,
-            regionName: ipGeolocation.region_name,
-            city: ipGeolocation.city,
-            isInEuropeanUnion: ipGeolocation.is_in_european_union,
+            region: ipGeolocation.region,
         };
     }
 
