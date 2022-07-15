@@ -29,6 +29,11 @@ if [[ -z $resourceGroupName ]]; then
     exitWithUsageInfo
 fi
 
+bastionId=$(az resource list --resource-group "$resourceGroupName" --query "[?type=='Microsoft.Network/bastionHosts'][].id" -o tsv)
+if [[ -n $bastionId ]]; then
+    az resource delete --ids "$bastionId"
+fi
+
 addressPrefix=${addressPrefix:-"10.2.0.0/16"}
 subnetAddressPrefix=${subnetAddressPrefix:-"10.2.0.0/24"}
 
