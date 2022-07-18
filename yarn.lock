@@ -349,10 +349,10 @@
     events "^3.0.0"
     tslib "^2.2.0"
 
-"@azure/storage-queue@^12.8.0":
-  version "12.8.0"
-  resolved "https://registry.yarnpkg.com/@azure/storage-queue/-/storage-queue-12.8.0.tgz#1242787d2d7a42035bf291e16cf9d2ade0c82e55"
-  integrity sha512-ob06EwNkWYUEXcvu6063+w3UnTCn78qB6NUY00FuHjYnsNuZaCZXQKYGVHx14ItLjnHTMdWVHlxK4fikxqg8Uw==
+"@azure/storage-queue@^12.10.0":
+  version "12.10.0"
+  resolved "https://registry.yarnpkg.com/@azure/storage-queue/-/storage-queue-12.10.0.tgz#b2b1f42c7a0f02b2d6104ca4076b9b5588d7bdcb"
+  integrity sha512-N0x0fZLwFmn+nNLxLvYhZIfUfg7XXdzutCwoealT4Bm1Hxjeosoqx66UZDYxIcRT57+ESFYenbpzCtcZY8JCIA==
   dependencies:
     "@azure/abort-controller" "^1.0.0"
     "@azure/core-http" "^2.0.0"
@@ -2941,15 +2941,15 @@
     magic-string "^0.25.7"
     resolve "^1.17.0"
 
-"@rollup/plugin-node-resolve@^13.1.3":
-  version "13.1.3"
-  resolved "https://registry.npmjs.org/@rollup/plugin-node-resolve/-/plugin-node-resolve-13.1.3.tgz"
-  integrity sha512-BdxNk+LtmElRo5d06MGY4zoepyrXX1tkzX2hrnPEZ53k78GuOMWLqmJDGIIOPwVRIFZrLQOo+Yr6KtCuLIA0AQ==
+"@rollup/plugin-node-resolve@^13.3.0":
+  version "13.3.0"
+  resolved "https://registry.yarnpkg.com/@rollup/plugin-node-resolve/-/plugin-node-resolve-13.3.0.tgz#da1c5c5ce8316cef96a2f823d111c1e4e498801c"
+  integrity sha512-Lus8rbUo1eEcnS4yTFKLZrVumLPY+YayBdWXgFSHYhTT2iJbMhoaaBL3xl5NCdeRytErGr8tZ0L71BMRmnlwSw==
   dependencies:
     "@rollup/pluginutils" "^3.1.0"
     "@types/resolve" "1.17.1"
-    builtin-modules "^3.1.0"
     deepmerge "^4.2.2"
+    is-builtin-module "^3.1.0"
     is-module "^1.0.0"
     resolve "^1.19.0"
 
@@ -3160,10 +3160,10 @@
     "@types/abstract-leveldown" "*"
     "@types/level-codec" "*"
 
-"@types/escape-html@^1.0.1":
-  version "1.0.1"
-  resolved "https://registry.npmjs.org/@types/escape-html/-/escape-html-1.0.1.tgz"
-  integrity sha512-4mI1FuUUZiuT95fSVqvZxp/ssQK9zsa86S43h9x3zPOSU9BBJ+BfDkXwuaU7BfsD+e7U0/cUUfJFk3iW2M4okA==
+"@types/escape-html@^1.0.2":
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/@types/escape-html/-/escape-html-1.0.2.tgz#072b7b13784fb3cee9c2450c22f36405983f5e3c"
+  integrity sha512-gaBLT8pdcexFztLSPRtriHeXY/Kn4907uOCZ4Q3lncFBkheAWOuNt53ypsF8szgxbEJ513UeBzcf4utN0EzEwA==
 
 "@types/eslint-scope@^3.7.3":
   version "3.7.3"
@@ -4617,7 +4617,7 @@ builtin-modules@^1.1.1:
   resolved "https://registry.npmjs.org/builtin-modules/-/builtin-modules-1.1.1.tgz"
   integrity sha1-Jw8HbFpywC9bZaR9+Uxf46J4iS8=
 
-builtin-modules@^3.0.0, builtin-modules@^3.1.0:
+builtin-modules@^3.0.0:
   version "3.2.0"
   resolved "https://registry.npmjs.org/builtin-modules/-/builtin-modules-3.2.0.tgz"
   integrity sha512-lGzLKcioL90C7wMczpkY0n/oART3MbBa8R9OFGE1rJxoVI86u4WAGfEk8Wjv10eKSyTHVGkSo3bvBylCEtk7LA==
@@ -8901,10 +8901,10 @@ libnpmpublish@^4.0.0:
     semver "^7.1.3"
     ssri "^8.0.0"
 
-license-check-and-add@^4.0.3:
-  version "4.0.3"
-  resolved "https://registry.npmjs.org/license-check-and-add/-/license-check-and-add-4.0.3.tgz"
-  integrity sha512-2dFjAOviPmukS35Udy+D1fNnWeGbJaIfOM/fstsYlofnviyDJDSx1w++nStyxFffa2R9RIB0myH3Pvxv0q7jWA==
+license-check-and-add@^4.0.5:
+  version "4.0.5"
+  resolved "https://registry.yarnpkg.com/license-check-and-add/-/license-check-and-add-4.0.5.tgz#ef820a78d59248327565ab5b7dec16776ac1ea4b"
+  integrity sha512-FySnMi3Kf/vO5jka8tcbVF1FhDFb8PWsQ8pg5Y7U/zkQgta+fIrJGcGHO58WFjfKlgvhneG1uQ00Fpxzhau3QA==
   dependencies:
     fs-extra "^8.1.0"
     gitignore-to-glob "^0.3.0"
@@ -9142,12 +9142,7 @@ lru-cache@^6.0.0:
   dependencies:
     yallist "^4.0.0"
 
-lru-cache@^7.4.4, lru-cache@^7.5.1:
-  version "7.12.0"
-  resolved "https://registry.yarnpkg.com/lru-cache/-/lru-cache-7.12.0.tgz#be2649a992c8a9116efda5c487538dcf715f3476"
-  integrity sha512-OIP3DwzRZDfLg9B9VP/huWBlpvbkmbfiBy8xmsXp4RPmE4A3MhwNozc5ZJ3fWnSg8fDcdlE/neRTPG2ycEKliw==
-
-lru-cache@^7.7.1:
+lru-cache@^7.4.4, lru-cache@^7.5.1, lru-cache@^7.7.1:
   version "7.12.0"
   resolved "https://registry.yarnpkg.com/lru-cache/-/lru-cache-7.12.0.tgz#be2649a992c8a9116efda5c487538dcf715f3476"
   integrity sha512-OIP3DwzRZDfLg9B9VP/huWBlpvbkmbfiBy8xmsXp4RPmE4A3MhwNozc5ZJ3fWnSg8fDcdlE/neRTPG2ycEKliw==
