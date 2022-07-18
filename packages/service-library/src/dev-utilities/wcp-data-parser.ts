@@ -360,6 +360,10 @@ function convertToPrivacyPageScanReport(
         bannerDetected: cookieCollectionUrlResult.BannerDetected,
         httpStatusCode: cookieCollectionUrlResult.HttpStatusCode,
         cookieCollectionConsentResults,
+        geolocation: {
+            ip: privacyValidationResult.Geolocation.IP,
+            region: privacyValidationResult.Geolocation.Region,
+        },
     };
 }
 

@@ -10,7 +10,7 @@ import { HTTPResponse, HTTPRequest } from 'puppeteer';
 import { ConsentResult } from 'storage-documents';
 import { PrivacyScannerCore } from './privacy-scanner-core';
 import { PrivacyScenarioRunner } from './privacy-scenario-runner';
-import { PrivacyResults } from './types';
+import { PrivacyResults } from './privacy-results';
 
 const url = 'url';
 const requestUrl = 'request url';

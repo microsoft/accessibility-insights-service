@@ -55,6 +55,11 @@ export interface PrivacyMetadata {
     ScanResultLink: string;
 }
 
+export interface IpGeolocation {
+    IP: string;
+    Region: string;
+}
+
 export interface PrivacyValidationResult {
     CookieCollectionUrlResults: CookieCollectionUrlResult[];
     FailedUrls: string[];
@@ -67,6 +72,7 @@ export interface PrivacyValidationResult {
     Status: string;
     Urls: string[];
     Vulnerablilities: string[];
+    Geolocation: IpGeolocation;
 }
 export interface CookieCollectionUrlResult {
     ConsentModalValidationResult: ConsentModalValidationResult;

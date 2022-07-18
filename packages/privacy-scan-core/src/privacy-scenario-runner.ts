@@ -8,13 +8,15 @@ import { GlobalLogger } from 'logger';
 import { Page } from 'scanner-global-library';
 import { CookieScenario, getAllCookieScenarios } from './cookie-scenarios';
 import { CookieCollector } from './cookie-collector';
-import { PrivacyResults } from './types';
+import { PrivacyResults } from './privacy-results';
+import { IpGeolocationProvider } from './ip-geolocation-provider';
 
 @injectable()
 export class PrivacyScenarioRunner {
     constructor(
         @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
         @inject(CookieCollector) private readonly cookieCollector: CookieCollector,
+        @inject(IpGeolocationProvider) private readonly ipGeolocationProvider: IpGeolocationProvider,
         @inject(GlobalLogger) @optional() private readonly logger: GlobalLogger,
         private readonly cookieScenariosProvider: () => CookieScenario[] = getAllCookieScenarios,
     ) {}
@@ -37,6 +39,7 @@ export class PrivacyScenarioRunner {
             bannerDetectionXpathExpression: privacyScanConfig.bannerXPath,
             bannerDetected,
             cookieCollectionConsentResults: cookieCollectionResults,
+            geolocation: this.ipGeolocationProvider.getIpGeolocation(),
         };
     }
 

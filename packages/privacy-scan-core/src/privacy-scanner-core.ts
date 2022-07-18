@@ -6,7 +6,7 @@ import { inject, injectable } from 'inversify';
 import { GlobalLogger } from 'logger';
 import { Page, PrivacyScanResult, BrowserError } from 'scanner-global-library';
 import { isEmpty } from 'lodash';
-import { PrivacyResults } from './types';
+import { PrivacyResults } from './privacy-results';
 import { PrivacyScenarioRunner } from './privacy-scenario-runner';
 
 @injectable()
