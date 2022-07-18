@@ -13,11 +13,16 @@ import { executeWithExponentialRetry, ExponentialRetryOptions } from 'common';
 // Get a token using HTTP
 // https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/how-to-use-vm-token#get-a-token-using-http
 
+export interface TokenCacheItem {
+    accessToken: AccessToken;
+    expiresOn: number;
+}
+
 @injectable()
 export class ManagedIdentityCredentialCache implements TokenCredential {
     private static readonly cacheCheckPeriodInSeconds = 60;
 
-    private static readonly tokenExpirationReductionMsec = 11100000;
+    private static readonly tokenValidForSec = 55 * 60;
 
     private static readonly msiRetryOptions: ExponentialRetryOptions = {
         delayFirstAttempt: false,
@@ -44,21 +49,21 @@ export class ManagedIdentityCredentialCache implements TokenCredential {
         const resourceUrl = this.getResourceUrl(scopes);
 
         // Try get token from the cache
-        const cachedAccessToken = this.tokenCache.get<AccessToken>(resourceUrl);
-        if (
-            cachedAccessToken !== undefined &&
-            cachedAccessToken.expiresOnTimestamp - moment.utc().valueOf() - ManagedIdentityCredentialCache.tokenExpirationReductionMsec > 0
-        ) {
-            return cachedAccessToken;
+        let tokenCacheItem = this.tokenCache.get<TokenCacheItem>(resourceUrl);
+        if (tokenCacheItem !== undefined && tokenCacheItem.expiresOn > moment.utc().valueOf()) {
+            return tokenCacheItem.accessToken;
         }
 
         const accessToken = await this.getAccessToken(scopes, options);
-        // Add token to the cache with reduced TTL to ensure that a cache item is deleted before token expiration time
-        this.tokenCache.set<AccessToken>(
-            resourceUrl,
+        tokenCacheItem = {
             accessToken,
+            expiresOn: moment.utc().valueOf() + ManagedIdentityCredentialCache.tokenValidForSec * 1000,
+        };
+        this.tokenCache.set<TokenCacheItem>(
+            resourceUrl,
+            tokenCacheItem,
             // cache item TTL in seconds
-            (accessToken.expiresOnTimestamp - ManagedIdentityCredentialCache.tokenExpirationReductionMsec) / 1000,
+            ManagedIdentityCredentialCache.tokenValidForSec,
         );
 
         return accessToken;
