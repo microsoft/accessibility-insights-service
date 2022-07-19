@@ -317,6 +317,9 @@ export class WebsiteScanResultProvider {
             dbDocument.baseDocument = onMergeCallbackFn(dbDocument.baseDocument as WebsiteScanResultBase);
         }
 
+        // set defaults
+        dbDocument.baseDocument.pageCount = dbDocument.baseDocument.pageCount ?? 1;
+
         // compact document before writing to database
         const websiteScanResultDocument = this.websiteScanResultAggregator.mergeBaseDocument(dbDocument.baseDocument, {});
         const scanResult = (await this.cosmosContainerClient.writeDocument(websiteScanResultDocument as WebsiteScanResultBase)).item;
