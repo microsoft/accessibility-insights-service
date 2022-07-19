@@ -506,6 +506,7 @@ function setupDocumentEntities(knownPages: string[] = ['new page']): void {
     websiteScanResultBase = {
         baseUrl: 'baseUrl',
         scanGroupId: 'scanGroupId',
+        pageCount: 1,
     } as WebsiteScanResultBase;
     websiteScanResultBaseNormalized = {
         ...websiteScanResultBase,
