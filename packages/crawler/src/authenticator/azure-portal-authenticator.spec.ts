@@ -51,8 +51,12 @@ describe(AzurePortalAuthentication, () => {
     const accountPassword = 'Placeholder_test123';
     let pageMock: IMock<Puppeteer.Page>;
     let keyboardMock: IMock<Puppeteer.Keyboard>;
+    let consoleErrorMock: jest.SpyInstance;
+    let consoleInfoMock: jest.SpyInstance;
     let testSubject: AzurePortalAuthentication;
     beforeEach(() => {
+        consoleErrorMock = jest.spyOn(global.console, 'error').mockImplementation(() => {});
+        consoleInfoMock = jest.spyOn(global.console, 'info').mockImplementation(() => {});
         keyboardMock = getPromisableDynamicMock(Mock.ofType<Puppeteer.Keyboard>());
         pageMock = getPromisableDynamicMock(Mock.ofType<Puppeteer.Page>());
         pageMock.setup((p) => p.keyboard).returns(() => keyboardMock.object);
@@ -62,15 +66,19 @@ describe(AzurePortalAuthentication, () => {
     afterEach(() => {
         pageMock.verifyAll();
         keyboardMock.verifyAll();
+        consoleErrorMock.mockRestore();
+        consoleInfoMock.mockRestore();
     });
 
     it('follows portal.azure.com authentication flow', async () => {
         setupPortalAuthenticationFlow(pageMock, keyboardMock, accountName, accountPassword);
         await testSubject.authenticate(pageMock.object);
+        expect(consoleInfoMock).toHaveBeenCalledWith('Authentication succeeded.');
     });
 
     it('retries four times if it detects authentication failed', async () => {
         setupPortalAuthenticationFlow(pageMock, keyboardMock, accountName, accountPassword, false, 5);
         await testSubject.authenticate(pageMock.object);
+        expect(consoleErrorMock).toHaveBeenCalledWith('Attempted authentication 5 times and ultimately failed.');
     });
 });
