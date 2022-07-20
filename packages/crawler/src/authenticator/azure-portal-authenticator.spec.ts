@@ -55,8 +55,8 @@ describe(AzurePortalAuthentication, () => {
     let consoleInfoMock: jest.SpyInstance;
     let testSubject: AzurePortalAuthentication;
     beforeEach(() => {
-        consoleErrorMock = jest.spyOn(global.console, 'error').mockImplementation(() => {});
-        consoleInfoMock = jest.spyOn(global.console, 'info').mockImplementation(() => {});
+        consoleErrorMock = jest.spyOn(global.console, 'error').mockImplementation();
+        consoleInfoMock = jest.spyOn(global.console, 'info').mockImplementation();
         keyboardMock = getPromisableDynamicMock(Mock.ofType<Puppeteer.Keyboard>());
         pageMock = getPromisableDynamicMock(Mock.ofType<Puppeteer.Page>());
         pageMock.setup((p) => p.keyboard).returns(() => keyboardMock.object);

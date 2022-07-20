@@ -45,6 +45,7 @@ export class AzurePortalAuthentication implements AuthenticationMethod {
             return false;
         }
         console.info('Authentication succeeded.');
+
         return true;
     }
 }
