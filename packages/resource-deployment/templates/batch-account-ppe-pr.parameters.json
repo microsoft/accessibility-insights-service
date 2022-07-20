@@ -21,7 +21,7 @@
             "value": "4"
         },
         "privacyScanPoolNodes": {
-            "value": "2"
+            "value": "12"
         },
         "privacyScanPoolVmSize": {
             "value": "standard_f4s_v2"
