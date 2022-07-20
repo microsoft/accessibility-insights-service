@@ -23,7 +23,7 @@ export class PageScanScheduler {
             deepScanId: websiteScanResult.deepScanId,
         });
 
-        if (websiteScanResult.pageCount > 0) {
+        if (websiteScanResult.pageCount > 1) {
             this.logger.logInfo(`Skip known privacy pages scan scheduling since scan was already scheduled.`, {
                 privacyUrls: `${websiteScanResult.pageCount}`,
             });
