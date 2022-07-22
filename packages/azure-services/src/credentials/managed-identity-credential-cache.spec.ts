@@ -11,7 +11,6 @@ import * as MockDate from 'mockdate';
 import { ExponentialRetryOptions } from 'common';
 import moment from 'moment';
 import { cloneDeep } from 'lodash';
-import { Logger } from 'logger';
 import { ManagedIdentityCredentialCache, TokenCacheItem } from './managed-identity-credential-cache';
 
 const scopes = 'https://vault.azure.net/default';
@@ -21,7 +20,6 @@ const tokenValidForSec = 55 * 60;
 
 let tokenCacheMock: IMock<NodeCache>;
 let managedIdentityCredentialMock: IMock<ManagedIdentityCredential>;
-let loggerMock: IMock<Logger>;
 let azureManagedCredential: ManagedIdentityCredentialCache;
 let tokenCacheItem: TokenCacheItem;
 let dateNow: Date;
@@ -44,9 +42,7 @@ describe(ManagedIdentityCredentialCache, () => {
         };
         tokenCacheMock = Mock.ofType<NodeCache>();
         managedIdentityCredentialMock = Mock.ofType<ManagedIdentityCredential>();
-        loggerMock = Mock.ofType<Logger>();
         azureManagedCredential = new ManagedIdentityCredentialCache(
-            loggerMock.object,
             managedIdentityCredentialMock.object,
             tokenCacheMock.object,
             new Mutex(),

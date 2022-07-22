@@ -2,14 +2,13 @@
 // Licensed under the MIT License.
 
 import * as nodeUrl from 'url';
-import { injectable, inject } from 'inversify';
+import { injectable } from 'inversify';
 import { AccessToken } from '@azure/core-auth';
 import { ManagedIdentityCredential, TokenCredential, GetTokenOptions } from '@azure/identity';
 import NodeCache from 'node-cache';
 import { Mutex } from 'async-mutex';
 import moment from 'moment';
 import { executeWithExponentialRetry, ExponentialRetryOptions } from 'common';
-import { GlobalLogger } from 'logger';
 
 // Get a token using HTTP
 // https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/how-to-use-vm-token#get-a-token-using-http
@@ -34,7 +33,6 @@ export class ManagedIdentityCredentialCache implements TokenCredential {
     };
 
     constructor(
-        @inject(GlobalLogger) private readonly logger: GlobalLogger,
         private readonly managedIdentityCredential: ManagedIdentityCredential = new ManagedIdentityCredential(),
         private readonly tokenCache: NodeCache = new NodeCache({ checkperiod: ManagedIdentityCredentialCache.cacheCheckPeriodInSeconds }),
         private readonly mutex: Mutex = new Mutex(),
@@ -53,8 +51,6 @@ export class ManagedIdentityCredentialCache implements TokenCredential {
         // Try get token from the cache
         let tokenCacheItem = this.tokenCache.get<TokenCacheItem>(resourceUrl);
         if (tokenCacheItem !== undefined && tokenCacheItem.expiresOn > moment.utc().valueOf()) {
-            this.logger.logInfo('Token fetched from a cache.', { resourceUrl: resourceUrl });
-
             return tokenCacheItem.accessToken;
         }
 
@@ -69,7 +65,6 @@ export class ManagedIdentityCredentialCache implements TokenCredential {
             // cache item TTL in seconds
             ManagedIdentityCredentialCache.tokenValidForSec,
         );
-        this.logger.logInfo('Token fetched from a service.', { resourceUrl: resourceUrl });
 
         return accessToken;
     }
