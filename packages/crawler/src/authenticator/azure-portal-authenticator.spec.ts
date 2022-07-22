@@ -24,8 +24,26 @@ function setupPortalAuthenticationFlow(
     pageMock.setup((p) => p.$eval('#errorText', It.isAny())).returns(() => Promise.resolve(success ? '' : 'this is an error'));
     pageMock
         .setup((p) => p.url())
-        .returns(() => (success ? 'https://ms.portal.azure.com' : 'https://login.microsoftonline.com'))
-        .verifiable(Times.exactly(times));
+        .returns(() => 'https://login.microsoftonline.com')
+        .verifiable(Times.exactly(2 * times));
+
+    if (success) {
+        pageMock
+            .setup((p) => p.url())
+            .returns(() => 'https://ms.portal.azure.com')
+            .verifiable(Times.exactly(2 * times));
+    } else {
+        // If authentication fails we must setup a sequence of calls to the page.url() method
+        // equaling the number of times it will be called. This is because in a successful scenario
+        // the page.url() method will be called twice with different values each time. With multiple
+        // setups you must have a setup for each time it is called, as detailed here: https://github.com/florinn/typemoq#record-and-replay
+        for (let i = 0; i < times * 2; i++) {
+            pageMock
+                .setup((p) => p.url())
+                .returns(() => 'https://login.microsoftonline.com')
+                .verifiable(Times.exactly(2 * times));
+        }
+    }
 }
 
 describe(AzurePortalAuthentication, () => {
@@ -33,8 +51,12 @@ describe(AzurePortalAuthentication, () => {
     const accountPassword = 'Placeholder_test123';
     let pageMock: IMock<Puppeteer.Page>;
     let keyboardMock: IMock<Puppeteer.Keyboard>;
+    let consoleErrorMock: jest.SpyInstance;
+    let consoleInfoMock: jest.SpyInstance;
     let testSubject: AzurePortalAuthentication;
     beforeEach(() => {
+        consoleErrorMock = jest.spyOn(global.console, 'error').mockImplementation();
+        consoleInfoMock = jest.spyOn(global.console, 'info').mockImplementation();
         keyboardMock = getPromisableDynamicMock(Mock.ofType<Puppeteer.Keyboard>());
         pageMock = getPromisableDynamicMock(Mock.ofType<Puppeteer.Page>());
         pageMock.setup((p) => p.keyboard).returns(() => keyboardMock.object);
@@ -44,15 +66,19 @@ describe(AzurePortalAuthentication, () => {
     afterEach(() => {
         pageMock.verifyAll();
         keyboardMock.verifyAll();
+        consoleErrorMock.mockRestore();
+        consoleInfoMock.mockRestore();
     });
 
     it('follows portal.azure.com authentication flow', async () => {
         setupPortalAuthenticationFlow(pageMock, keyboardMock, accountName, accountPassword);
         await testSubject.authenticate(pageMock.object);
+        expect(consoleInfoMock).toHaveBeenCalledWith('Authentication succeeded.');
     });
 
     it('retries four times if it detects authentication failed', async () => {
         setupPortalAuthenticationFlow(pageMock, keyboardMock, accountName, accountPassword, false, 5);
         await testSubject.authenticate(pageMock.object);
+        expect(consoleErrorMock).toHaveBeenCalledWith('Attempted authentication 5 times and ultimately failed.');
     });
 });
