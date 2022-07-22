@@ -9,7 +9,7 @@ import NodeCache from 'node-cache';
 import { Mutex } from 'async-mutex';
 import moment from 'moment';
 import { executeWithExponentialRetry, ExponentialRetryOptions } from 'common';
-import { ContextAwareLogger } from 'logger';
+import { Logger } from 'logger';
 
 // Get a token using HTTP
 // https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/how-to-use-vm-token#get-a-token-using-http
@@ -34,7 +34,7 @@ export class ManagedIdentityCredentialCache implements TokenCredential {
     };
 
     constructor(
-        @inject(ContextAwareLogger) private readonly logger: ContextAwareLogger,
+        @inject(Logger) private readonly logger: Logger,
         private readonly managedIdentityCredential: ManagedIdentityCredential = new ManagedIdentityCredential(),
         private readonly tokenCache: NodeCache = new NodeCache({ checkperiod: ManagedIdentityCredentialCache.cacheCheckPeriodInSeconds }),
         private readonly mutex: Mutex = new Mutex(),
