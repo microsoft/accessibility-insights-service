@@ -11,11 +11,13 @@ export const iocTypeNames = {
     AzureKeyVaultClientProvider: 'AzureKeyVaultClientProvider',
     BlobServiceClientProvider: 'BlobServiceClientProvider',
     CosmosClientProvider: 'CosmosClientProvider',
-    msRestAzure: 'msRestAzure',
     QueueServiceClientProvider: 'QueueServiceClientProvider',
+    BatchServiceClientProvider: 'BatchServiceClientProvider',
+    msRestAzure: 'msRestAzure',
     AuthenticationMethod: 'AuthenticationMethod',
     CredentialType: 'CredentialType',
-    BatchServiceClientProvider: 'BatchServiceClientProvider',
+    StorageCredential: 'StorageCredential',
+    CosmosCredential: 'CosmosCredential',
 };
 
 export type AzureKeyVaultClientProvider = () => Promise<SecretClient>;

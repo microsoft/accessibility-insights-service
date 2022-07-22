@@ -7,7 +7,6 @@ import { CosmosClient, CosmosClientOptions } from '@azure/cosmos';
 import * as msRestNodeAuth from '@azure/ms-rest-nodeauth';
 import { BlobServiceClient } from '@azure/storage-blob';
 import { Container, interfaces } from 'inversify';
-import * as _ from 'lodash';
 import { ContextAwareLogger, registerLoggerToContainer } from 'logger';
 import { IMock, Mock, Times } from 'typemoq';
 import { SecretClient } from '@azure/keyvault-secrets';
@@ -29,7 +28,7 @@ import {
 } from './ioc-types';
 import { secretNames } from './key-vault/secret-names';
 import { SecretProvider } from './key-vault/secret-provider';
-import { registerAzureServicesToContainer } from './register-azure-services-to-container';
+import { registerAzureServicesToContainer, CosmosCredential, StorageCredential } from './register-azure-services-to-container';
 import { CosmosContainerClient } from './storage/cosmos-container-client';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -59,7 +58,7 @@ describe('BatchServiceClient', () => {
         registerAzureServicesToContainer(container, CredentialType.AppService);
         credentialsProviderMock = Mock.ofType(CredentialsProvider);
         credentialsStub = new msRestNodeAuth.ApplicationTokenCredentials('clientId', 'domain', 'secret');
-        credentialsProviderMock.setup(async (c) => c.getCredentialsForBatch()).returns(async () => Promise.resolve(credentialsStub));
+        credentialsProviderMock.setup(async (o) => o.getCredentialsForBatch()).returns(async () => Promise.resolve(credentialsStub));
 
         stubBinding(container, SecretProvider, secretProviderMock.object);
         stubBinding(container, CredentialsProvider, credentialsProviderMock.object);
@@ -73,7 +72,7 @@ describe('BatchServiceClient', () => {
         expect(batchServiceClient.batchUrl).toBe(batchAccountUrl);
     });
 
-    it('resolves BatchServiceClient top singleton value', async () => {
+    it('resolves BatchServiceClient to singleton value', async () => {
         const batchServiceClientProvider1: BatchServiceClientProvider = container.get(iocTypeNames.BatchServiceClientProvider);
         const batchServiceClientProvider2: BatchServiceClientProvider = container.get(iocTypeNames.BatchServiceClientProvider);
 
@@ -127,7 +126,6 @@ describe(registerAzureServicesToContainer, () => {
             'onDemandScanner',
             'scanRequests',
         );
-
         verifyCosmosContainerClient(
             container,
             cosmosContainerClientTypes.OnDemandScanRunsCosmosContainerClient,
@@ -139,25 +137,53 @@ describe(registerAzureServicesToContainer, () => {
     describe('BlobServiceClientProvider', () => {
         const storageAccountName = 'test-storage-account-name';
 
-        it('creates singleton blob service client', async () => {
-            const secretProviderMock: IMock<SecretProvider> = Mock.ofType(SecretProvider);
+        let secretProviderMock: IMock<SecretProvider>;
+        let credentialsProviderMock: IMock<CredentialsProvider>;
+
+        beforeEach(() => {
+            secretProviderMock = Mock.ofType(SecretProvider);
+            credentialsProviderMock = Mock.ofType(CredentialsProvider);
 
             secretProviderMock
-                .setup(async (s) => s.getSecret(secretNames.storageAccountName))
+                .setup(async (o) => o.getSecret(secretNames.storageAccountName))
                 .returns(async () => storageAccountName)
-                .verifiable(Times.once());
+                .verifiable();
+        });
+
+        afterEach(() => {
+            secretProviderMock.verifyAll();
+        });
+
+        it('creates blob service client', async () => {
             registerAzureServicesToContainer(container);
             stubBinding(container, SecretProvider, secretProviderMock.object);
 
-            const blobServiceClientProvider = container.get<BlobServiceClientProvider>(iocTypeNames.BlobServiceClientProvider);
+            const blobServiceClientProvider1 = container.get<BlobServiceClientProvider>(iocTypeNames.BlobServiceClientProvider);
+            const blobServiceClientProvider2 = container.get<BlobServiceClientProvider>(iocTypeNames.BlobServiceClientProvider);
 
-            const blobServiceClient1 = await blobServiceClientProvider();
-            const blobServiceClient2 = await blobServiceClientProvider();
-            const blobServiceClient3 = await container.get<BlobServiceClientProvider>(iocTypeNames.BlobServiceClientProvider)();
+            const blobServiceClient1 = await blobServiceClientProvider1();
+            const blobServiceClient2 = await blobServiceClientProvider2();
 
             expect(blobServiceClient1).toBeInstanceOf(BlobServiceClient);
-            expect(blobServiceClient2).toBe(blobServiceClient1);
-            expect(blobServiceClient3).toBe(blobServiceClient1);
+            expect(blobServiceClient2).toBeInstanceOf(BlobServiceClient);
+            expect(blobServiceClient2).not.toBe(blobServiceClient1);
+        });
+
+        it('creates storage credential singleton instance', async () => {
+            registerAzureServicesToContainer(container);
+            stubBinding(container, SecretProvider, secretProviderMock.object);
+
+            const testCredential = {} as TokenCredential;
+            const expectedStorageCredential = { accountName: storageAccountName, tokenCredential: testCredential };
+            credentialsProviderMock.setup((o) => o.getAzureCredential()).returns(() => testCredential);
+            stubBinding(container, CredentialsProvider, credentialsProviderMock.object);
+
+            const storageCredential1 = await container.get<() => Promise<StorageCredential>>(iocTypeNames.StorageCredential)();
+            const storageCredential2 = await container.get<() => Promise<StorageCredential>>(iocTypeNames.StorageCredential)();
+
+            expect(storageCredential1).toEqual(expectedStorageCredential);
+            expect(storageCredential2).toEqual(expectedStorageCredential);
+            expect(storageCredential1).toBe(storageCredential2);
         });
     });
 
@@ -179,20 +205,22 @@ describe(registerAzureServicesToContainer, () => {
             secretProviderMock.verifyAll();
         });
 
-        it('verify Azure QueueService resolution', async () => {
+        it('verify queue service resolution', async () => {
             const queueServiceClientProvider = container.get<QueueServiceClientProvider>(iocTypeNames.QueueServiceClientProvider);
             const queueServiceClient = await queueServiceClientProvider();
 
             expect(queueServiceClient).toBeInstanceOf(QueueServiceClient);
         });
 
-        it('creates singleton queueService instance', async () => {
+        it('creates queue service instance', async () => {
             const queueServiceClientProvider1 = container.get<QueueServiceClientProvider>(iocTypeNames.QueueServiceClientProvider);
             const queueServiceClientProvider2 = container.get<QueueServiceClientProvider>(iocTypeNames.QueueServiceClientProvider);
-            const queueServiceClient1Promise = queueServiceClientProvider1();
-            const queueServiceClient2Promise = queueServiceClientProvider2();
+            const queueServiceClient1 = await queueServiceClientProvider1();
+            const queueServiceClient2 = await queueServiceClientProvider2();
 
-            expect(await queueServiceClient1Promise).toBe(await queueServiceClient2Promise);
+            expect(queueServiceClient1).toBeInstanceOf(QueueServiceClient);
+            expect(queueServiceClient2).toBeInstanceOf(QueueServiceClient);
+            expect(queueServiceClient1).not.toBe(queueServiceClient2);
         });
     });
 
@@ -220,17 +248,18 @@ describe(registerAzureServicesToContainer, () => {
     });
 
     describe('CosmosClientProvider', () => {
-        let secretProviderMock: IMock<SecretProvider>;
-        let credentialsProviderMock: IMock<CredentialsProvider>;
         const cosmosDbUrl = 'db url';
         const cosmosDbKey = 'db key';
+
+        let secretProviderMock: IMock<SecretProvider>;
+        let credentialsProviderMock: IMock<CredentialsProvider>;
 
         beforeEach(() => {
             secretProviderMock = Mock.ofType(SecretProvider);
             credentialsProviderMock = Mock.ofType(CredentialsProvider);
 
             secretProviderMock
-                .setup(async (s) => s.getSecret(secretNames.cosmosDbUrl))
+                .setup(async (o) => o.getSecret(secretNames.cosmosDbUrl))
                 .returns(async () => Promise.resolve(cosmosDbUrl))
                 .verifiable();
         });
@@ -243,7 +272,7 @@ describe(registerAzureServicesToContainer, () => {
             const testCredential = {} as TokenCredential;
             const expectedOptions = { endpoint: cosmosDbUrl, aadCredentials: testCredential };
 
-            credentialsProviderMock.setup((cp) => cp.getAzureCredential()).returns(() => testCredential);
+            credentialsProviderMock.setup((o) => o.getAzureCredential()).returns(() => testCredential);
 
             runCosmosClientTest(container, secretProviderMock);
             stubBinding(container, CredentialsProvider, credentialsProviderMock.object);
@@ -255,19 +284,41 @@ describe(registerAzureServicesToContainer, () => {
             expect(cosmosClient).toMatchObject(expectedCosmosClient);
         });
 
-        it('creates singleton queueService instance', async () => {
+        it('creates cosmos service instance', async () => {
             runCosmosClientTest(container, secretProviderMock);
+
+            const testCredential = {} as TokenCredential;
+            const expectedOptions = { endpoint: cosmosDbUrl, aadCredentials: testCredential };
+            const expectedCosmosClient = cosmosClientFactoryStub(expectedOptions);
 
             const cosmosClientProvider1 = container.get<CosmosClientProvider>(iocTypeNames.CosmosClientProvider);
             const cosmosClientProvider2 = container.get<CosmosClientProvider>(iocTypeNames.CosmosClientProvider);
 
-            const cosmosClient1Promise = cosmosClientProvider1();
-            const cosmosClient2Promise = cosmosClientProvider2();
+            const cosmosClient1 = await cosmosClientProvider1();
+            const cosmosClient2 = await cosmosClientProvider2();
 
-            expect(await cosmosClient1Promise).toBe(await cosmosClient2Promise);
+            expect(cosmosClient1).toMatchObject(expectedCosmosClient);
+            expect(cosmosClient2).toMatchObject(expectedCosmosClient);
+            expect(cosmosClient1).not.toBe(cosmosClient2);
         });
 
-        it('use env variables if available', async () => {
+        it('creates cosmos credential singleton instance', async () => {
+            runCosmosClientTest(container, secretProviderMock);
+
+            const testCredential = {} as TokenCredential;
+            const expectedOptions = { endpoint: cosmosDbUrl, tokenCredential: testCredential };
+            credentialsProviderMock.setup((o) => o.getAzureCredential()).returns(() => testCredential);
+            stubBinding(container, CredentialsProvider, credentialsProviderMock.object);
+
+            const cosmosCredential1 = await container.get<() => Promise<CosmosCredential>>(iocTypeNames.CosmosCredential)();
+            const cosmosCredential2 = await container.get<() => Promise<CosmosCredential>>(iocTypeNames.CosmosCredential)();
+
+            expect(cosmosCredential1).toEqual(expectedOptions);
+            expect(cosmosCredential2).toEqual(expectedOptions);
+            expect(cosmosCredential1).toBe(cosmosCredential2);
+        });
+
+        it('use environment variables if available', async () => {
             const expectedOptions = { endpoint: cosmosDbUrl, key: cosmosDbKey };
             secretProviderMock.reset();
             secretProviderMock.setup(async (s) => s.getSecret(secretNames.cosmosDbUrl)).verifiable(Times.never());
