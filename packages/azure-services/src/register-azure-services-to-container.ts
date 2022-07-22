@@ -10,6 +10,8 @@ import { IoC } from 'common';
 import { Container, interfaces } from 'inversify';
 import { ContextAwareLogger } from 'logger';
 import { SecretClient } from '@azure/keyvault-secrets';
+import { isEmpty } from 'lodash';
+import { TokenCredential } from '@azure/identity';
 import { Batch } from './azure-batch/batch';
 import { BatchConfig } from './azure-batch/batch-config';
 import { StorageContainerSASUrlProvider } from './azure-blob/storage-container-sas-url-provider';
@@ -23,6 +25,16 @@ import { secretNames } from './key-vault/secret-names';
 import { SecretProvider } from './key-vault/secret-provider';
 import { CosmosContainerClient } from './storage/cosmos-container-client';
 
+export interface CosmosCredential {
+    endpoint: string;
+    tokenCredential: TokenCredential;
+}
+
+export interface StorageCredential {
+    accountName: string;
+    tokenCredential: TokenCredential;
+}
+
 export function registerAzureServicesToContainer(
     container: Container,
     credentialType: CredentialType = CredentialType.VM,
@@ -33,18 +45,21 @@ export function registerAzureServicesToContainer(
     container.bind(iocTypeNames.msRestAzure).toConstantValue(msRestNodeAuth);
     container.bind(CredentialsProvider).toSelf().inSingletonScope();
 
-    setupSingletonAzureKeyVaultClientProvider(container);
+    setupAzureKeyVaultClientProvider(container);
 
     container.bind(SecretProvider).toSelf().inSingletonScope();
 
     container.bind(StorageConfig).toSelf().inSingletonScope();
 
-    setupSingletonCosmosClientProvider(container, cosmosClientFactory);
+    setupSingletonCosmosCredential(container);
+    setupSingletonStorageCredential(container);
+
+    setupCosmosClientProvider(container, cosmosClientFactory);
 
     container.bind(CosmosClientWrapper).toSelf();
     container.bind(MSICredentialsProvider).toSelf().inSingletonScope();
 
-    setupSingletonQueueServiceClientProvider(container);
+    setupQueueServiceClientProvider(container);
 
     container.bind(cosmosContainerClientTypes.OnDemandScanBatchRequestsCosmosContainerClient).toDynamicValue((context) => {
         return createCosmosContainerClient(context.container, 'onDemandScanner', 'scanBatchRequests');
@@ -73,33 +88,12 @@ export function registerAzureServicesToContainer(
     container.bind(Batch).toSelf().inSingletonScope();
 }
 
-async function getStorageAccountName(context: interfaces.Context): Promise<string> {
-    if (process.env.AZURE_STORAGE_NAME !== undefined) {
-        return process.env.AZURE_STORAGE_NAME;
-    } else {
-        const secretProvider = context.container.get(SecretProvider);
+function setupSingletonAzureBatchServiceClientProvider(container: Container): void {
+    IoC.setupSingletonProvider(iocTypeNames.BatchServiceClientProvider, container, async (context) => {
+        const batchConfig = context.container.get(BatchConfig);
+        const credentialProvider = context.container.get(CredentialsProvider);
 
-        return secretProvider.getSecret(secretNames.storageAccountName);
-    }
-}
-
-// CredentialsProvider will first look for Azure Active Directory (AAD)
-// client secret credentials in the following environment variables:
-//
-// - AZURE_TENANT_ID: The ID of your AAD tenant
-// - AZURE_CLIENT_ID: The ID of your AAD app registration (client)
-// - AZURE_CLIENT_SECRET: The client secret for your AAD app registration
-//
-// If those environment variables aren't found and your application is deployed
-// to an Azure VM or App Service instance, the managed service identity endpoint
-// will be used as a fallback authentication source.
-function setupBlobServiceClientProvider(container: interfaces.Container): void {
-    IoC.setupSingletonProvider<BlobServiceClient>(iocTypeNames.BlobServiceClientProvider, container, async (context) => {
-        const accountName = await getStorageAccountName(context);
-        const credentialProvider = container.get(CredentialsProvider);
-        const credential = credentialProvider.getAzureCredential();
-
-        return new BlobServiceClient(`https://${accountName}.blob.core.windows.net`, credential);
+        return new BatchServiceClient(await credentialProvider.getCredentialsForBatch(), batchConfig.accountUrl);
     });
 }
 
@@ -107,18 +101,7 @@ function createCosmosContainerClient(container: interfaces.Container, dbName: st
     return new CosmosContainerClient(container.get(CosmosClientWrapper), dbName, collectionName, container.get(ContextAwareLogger));
 }
 
-function setupAuthenticationMethod(container: interfaces.Container): void {
-    const isDebugEnabled = /--debug|--inspect/i.test(process.execArgv.join(' '));
-    container
-        .bind(iocTypeNames.AuthenticationMethod)
-        .toConstantValue(
-            isDebugEnabled || process.env.LOCAL_AUTH === 'true'
-                ? AuthenticationMethod.servicePrincipal
-                : AuthenticationMethod.managedIdentity,
-        );
-}
-
-function setupSingletonAzureKeyVaultClientProvider(container: interfaces.Container): void {
+function setupAzureKeyVaultClientProvider(container: Container): void {
     IoC.setupSingletonProvider<SecretClient>(iocTypeNames.AzureKeyVaultClientProvider, container, async (context) => {
         const credentialProvider = container.get(CredentialsProvider);
         const credentials = credentialProvider.getAzureCredential();
@@ -127,41 +110,68 @@ function setupSingletonAzureKeyVaultClientProvider(container: interfaces.Contain
     });
 }
 
-function setupSingletonQueueServiceClientProvider(container: interfaces.Container): void {
-    IoC.setupSingletonProvider<QueueServiceClient>(iocTypeNames.QueueServiceClientProvider, container, async (context) => {
+function setupBlobServiceClientProvider(container: Container): void {
+    container
+        .bind<interfaces.Factory<BlobServiceClient>>(iocTypeNames.BlobServiceClientProvider)
+        .toFactory<Promise<BlobServiceClient>>((context) => {
+            return async () => {
+                const storageCredential = await context.container.get<() => Promise<StorageCredential>>(iocTypeNames.StorageCredential)();
+
+                return new BlobServiceClient(
+                    `https://${storageCredential.accountName}.blob.core.windows.net`,
+                    storageCredential.tokenCredential,
+                );
+            };
+        });
+}
+
+function setupQueueServiceClientProvider(container: Container): void {
+    container
+        .bind<interfaces.Factory<QueueServiceClient>>(iocTypeNames.QueueServiceClientProvider)
+        .toFactory<Promise<QueueServiceClient>>((context) => {
+            return async () => {
+                const storageCredential = await context.container.get<() => Promise<StorageCredential>>(iocTypeNames.StorageCredential)();
+
+                return new QueueServiceClient(
+                    `https://${storageCredential.accountName}.queue.core.windows.net`,
+                    storageCredential.tokenCredential,
+                );
+            };
+        });
+}
+
+function setupCosmosClientProvider(container: Container, cosmosClientFactory: (options: CosmosClientOptions) => CosmosClient): void {
+    container.bind<interfaces.Factory<CosmosClient>>(iocTypeNames.CosmosClientProvider).toFactory<Promise<CosmosClient>>((context) => {
+        return async () => {
+            if (!isEmpty(process.env.COSMOS_DB_URL) && !isEmpty(process.env.COSMOS_DB_KEY)) {
+                return cosmosClientFactory({ endpoint: process.env.COSMOS_DB_URL, key: process.env.COSMOS_DB_KEY });
+            } else {
+                const cosmosCredential = await context.container.get<() => Promise<CosmosCredential>>(iocTypeNames.CosmosCredential)();
+
+                return cosmosClientFactory({ endpoint: cosmosCredential.endpoint, aadCredentials: cosmosCredential.tokenCredential });
+            }
+        };
+    });
+}
+
+function setupSingletonCosmosCredential(container: Container): void {
+    IoC.setupSingletonProvider(iocTypeNames.CosmosCredential, container, async (context) => {
+        const secretProvider = context.container.get(SecretProvider);
+        const endpoint = await secretProvider.getSecret(secretNames.cosmosDbUrl);
+        const credentialProvider = container.get(CredentialsProvider);
+        const tokenCredential = credentialProvider.getAzureCredential();
+
+        return { endpoint, tokenCredential };
+    });
+}
+
+function setupSingletonStorageCredential(container: Container): void {
+    IoC.setupSingletonProvider(iocTypeNames.StorageCredential, container, async (context) => {
         const accountName = await getStorageAccountName(context);
         const credentialProvider = container.get(CredentialsProvider);
-        const credentials = credentialProvider.getAzureCredential();
+        const tokenCredential = credentialProvider.getAzureCredential();
 
-        return new QueueServiceClient(`https://${accountName}.queue.core.windows.net`, credentials);
-    });
-}
-
-function setupSingletonCosmosClientProvider(
-    container: interfaces.Container,
-    cosmosClientFactory: (options: CosmosClientOptions) => CosmosClient,
-): void {
-    IoC.setupSingletonProvider<CosmosClient>(iocTypeNames.CosmosClientProvider, container, async (context) => {
-        let cosmosDbUrl: string;
-        if (process.env.COSMOS_DB_URL !== undefined && process.env.COSMOS_DB_KEY !== undefined) {
-            return cosmosClientFactory({ endpoint: process.env.COSMOS_DB_URL, key: process.env.COSMOS_DB_KEY });
-        } else {
-            const secretProvider = context.container.get(SecretProvider);
-            cosmosDbUrl = await secretProvider.getSecret(secretNames.cosmosDbUrl);
-            const credentialProvider = container.get(CredentialsProvider);
-            const credentials = credentialProvider.getAzureCredential();
-
-            return cosmosClientFactory({ endpoint: cosmosDbUrl, aadCredentials: credentials });
-        }
-    });
-}
-
-function setupSingletonAzureBatchServiceClientProvider(container: Container): void {
-    IoC.setupSingletonProvider(iocTypeNames.BatchServiceClientProvider, container, async (context: interfaces.Context) => {
-        const batchConfig = context.container.get(BatchConfig);
-        const credentialProvider = context.container.get(CredentialsProvider);
-
-        return new BatchServiceClient(await credentialProvider.getCredentialsForBatch(), batchConfig.accountUrl);
+        return { accountName, tokenCredential };
     });
 }
 
@@ -174,4 +184,25 @@ function defaultCosmosClientFactory(cosmosClientOptions: CosmosClientOptions): C
     };
 
     return new CosmosClient(options);
+}
+
+function setupAuthenticationMethod(container: Container): void {
+    const isDebugEnabled = /--debug|--inspect/i.test(process.execArgv.join(' '));
+    container
+        .bind(iocTypeNames.AuthenticationMethod)
+        .toConstantValue(
+            isDebugEnabled || process.env.LOCAL_AUTH === 'true'
+                ? AuthenticationMethod.servicePrincipal
+                : AuthenticationMethod.managedIdentity,
+        );
+}
+
+async function getStorageAccountName(context: interfaces.Context): Promise<string> {
+    if (!isEmpty(process.env.AZURE_STORAGE_NAME)) {
+        return process.env.AZURE_STORAGE_NAME;
+    } else {
+        const secretProvider = context.container.get(SecretProvider);
+
+        return secretProvider.getSecret(secretNames.storageAccountName);
+    }
 }
