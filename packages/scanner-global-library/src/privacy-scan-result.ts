@@ -8,6 +8,9 @@ export interface PrivacyScanResult {
     results?: PrivacyPageScanReport;
     error?: string | BrowserError;
     pageResponseCode?: number;
+    /**
+     * Redirected URL if a page was redirected.
+     */
     scannedUrl?: string;
     pageSnapshot?: string;
     pageScreenshot?: string;

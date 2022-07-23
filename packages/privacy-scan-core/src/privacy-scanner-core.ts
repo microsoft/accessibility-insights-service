@@ -16,7 +16,7 @@ export class PrivacyScannerCore {
         @inject(GlobalLogger) private readonly logger: GlobalLogger,
     ) {}
 
-    public async scan(page: Page): Promise<PrivacyScanResult> {
+    public async scan(url: string, page: Page): Promise<PrivacyScanResult> {
         if (!isEmpty(page.lastBrowserError)) {
             return { error: page.lastBrowserError, pageResponseCode: page.lastBrowserError.statusCode };
         }
@@ -25,7 +25,7 @@ export class PrivacyScannerCore {
 
         let privacyResult: PrivacyResults;
         try {
-            privacyResult = await this.privacyScenarioRunner.run(page);
+            privacyResult = await this.privacyScenarioRunner.run(url, page);
         } catch (error) {
             this.logger?.logError('Privacy scan engine error', { browserError: System.serializeError(error), url: page.url });
 
@@ -36,7 +36,7 @@ export class PrivacyScannerCore {
             results: {
                 ...privacyResult,
                 httpStatusCode: navigationStatusCode,
-                seedUri: page.requestUrl,
+                seedUri: url,
             },
             pageResponseCode: navigationStatusCode,
         };
@@ -44,7 +44,7 @@ export class PrivacyScannerCore {
         if (
             page.lastNavigationResponse?.request()?.redirectChain()?.length > 0 ||
             // should compare encoded Urls
-            (page.requestUrl !== undefined && encodeURI(page.requestUrl) !== page.url)
+            encodeURI(url) !== page.url
         ) {
             this.logger?.logWarn(`Scanning performed on redirected page`, { redirectedUrl: page.url });
             scanResult.scannedUrl = page.url;
@@ -61,7 +61,7 @@ export class PrivacyScannerCore {
             scanResult.results.httpStatusCode = error.statusCode;
 
             this.logger.logError('Failed to collect cookies for test scenario.', {
-                url: page.url,
+                url,
                 errors: JSON.stringify(errors),
             });
         } else if (privacyResult.bannerDetected === false) {

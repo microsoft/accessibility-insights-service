@@ -111,7 +111,7 @@ async function scanAllUrls(urls: string[]): Promise<BannerDetectionResults> {
     // and prevent the banner from being detected
     for (const url of urls) {
         await page.navigateToUrl(url);
-        const privacyScanResult = await privacyScannerCore.scan(page);
+        const privacyScanResult = await privacyScannerCore.scan(url, page);
 
         if (privacyScanResult.error !== undefined || privacyScanResult.results === undefined) {
             results.errors.push({

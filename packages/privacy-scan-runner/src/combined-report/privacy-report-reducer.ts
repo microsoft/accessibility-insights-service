@@ -25,7 +25,7 @@ export class PrivacyReportReducer {
         let combinedReport = existingCombinedReport ?? this.createNewCombinedReport(metadata);
 
         if (combinedReport.urls.includes(metadata.url)) {
-            combinedReport = this.removeUrlResultsFromReport(combinedReport, metadata.url, privacyScanResult.results?.navigationalUri);
+            combinedReport = this.removeUrlResultsFromReport(combinedReport, metadata.url);
         } else {
             combinedReport.urls.push(metadata.url);
         }
@@ -49,8 +49,9 @@ export class PrivacyReportReducer {
         url: string,
     ): PrivacyScanCombinedReport {
         combinedReport.failedUrls.push({
-            url: privacyScanResult.results?.navigationalUri ?? url,
-            seedUri: privacyScanResult.results?.seedUri ?? url,
+            url,
+            seedUri: url,
+            navigationalUri: privacyScanResult.results?.navigationalUri,
             httpStatusCode: privacyScanResult.pageResponseCode,
             reason: `error=${JSON.stringify(privacyScanResult.error)}`,
             bannerDetected: privacyScanResult.results?.bannerDetected,
@@ -97,21 +98,9 @@ export class PrivacyReportReducer {
         };
     }
 
-    private removeUrlResultsFromReport(
-        report: PrivacyScanCombinedReport,
-        url: string,
-        navigationalUrl?: string,
-    ): PrivacyScanCombinedReport {
-        remove(
-            report.failedUrls,
-            (failedUrl) => failedUrl.url === url || (navigationalUrl !== undefined && failedUrl.url === navigationalUrl),
-        );
-        remove(
-            report.cookieCollectionUrlResults,
-            (cookieCollectionResult) =>
-                cookieCollectionResult.navigationalUri === url ||
-                (navigationalUrl !== undefined && cookieCollectionResult.navigationalUri === navigationalUrl),
-        );
+    private removeUrlResultsFromReport(report: PrivacyScanCombinedReport, url: string): PrivacyScanCombinedReport {
+        remove(report.failedUrls, (failedUrl) => failedUrl.seedUri === url);
+        remove(report.cookieCollectionUrlResults, (cookieCollectionResult) => cookieCollectionResult.seedUri === url);
         report.status = isEmpty(report.failedUrls) ? 'Completed' : 'Failed';
 
         return report;

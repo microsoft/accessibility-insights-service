@@ -115,7 +115,7 @@ describe(PrivacyScenarioRunner, () => {
             geolocation: ipGeolocation,
         };
 
-        const actualResult = await privacyScenarioRunner.run(pageMock.object);
+        const actualResult = await privacyScenarioRunner.run(url, pageMock.object);
 
         expect(actualResult).toEqual(expectedResult);
     });
@@ -147,7 +147,7 @@ describe(PrivacyScenarioRunner, () => {
             geolocation: ipGeolocation,
         };
 
-        const actualResult = await privacyScenarioRunner.run(pageMock.object);
+        const actualResult = await privacyScenarioRunner.run(url, pageMock.object);
 
         expect(actualResult).toEqual(expectedResult);
     });
