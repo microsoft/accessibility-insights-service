@@ -66,7 +66,7 @@ describe(PageScanProcessor, () => {
         setupOpenPage();
         setupClosePage();
         privacyScannerMock
-            .setup((s) => s.scan(pageMock.object))
+            .setup((s) => s.scan(url, pageMock.object))
             .returns(() => Promise.resolve(privacyScanResult))
             .verifiable();
         privacyScanResult = { ...privacyScanResult, pageScreenshot, pageSnapshot };
@@ -81,7 +81,7 @@ describe(PageScanProcessor, () => {
         setupOpenPage();
         setupClosePage();
         privacyScannerMock
-            .setup((s) => s.scan(pageMock.object))
+            .setup((s) => s.scan(url, pageMock.object))
             .returns(() => Promise.resolve(privacyScanResult))
             .verifiable();
         pageScanSchedulerMock
@@ -99,7 +99,7 @@ describe(PageScanProcessor, () => {
         const error = new Error('test error');
         setupOpenPage();
         setupClosePage();
-        privacyScannerMock.setup((s) => s.scan(pageMock.object)).throws(error);
+        privacyScannerMock.setup((s) => s.scan(url, pageMock.object)).throws(error);
 
         await expect(testSubject.scan(scanMetadata, pageScanResult)).rejects.toThrowError('test error');
     });

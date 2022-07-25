@@ -18,9 +18,16 @@ export interface PrivacyScanCombinedReport {
 }
 
 export interface FailedUrl {
+    /**
+     * Same as `seedUri` property
+     */
     url: string;
     seedUri: string;
-    reason: string; // "error=Error message"
+    navigationalUri: string;
+    /**
+     * Format: "error=message"
+     */
+    reason: string;
     httpStatusCode: number;
     bannerDetected?: boolean;
     bannerDetectionXpathExpression?: string;

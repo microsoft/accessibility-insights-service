@@ -15,6 +15,7 @@ import { PrivacyScanner } from './privacy-scanner';
 
 describe(PrivacyScanner, () => {
     const taskRunBufferTimeMinute = 5;
+    const url = 'url';
 
     let privacyScanner: PrivacyScanner;
     let pageMock: IMock<Page>;
@@ -58,18 +59,18 @@ describe(PrivacyScanner, () => {
         const expectedResult = { state: 'pass' } as PrivacyScanResult;
         setupWaitForPromisetoReturnOriginalPromise();
         privacyScannerCoreMock
-            .setup((o) => o.scan(pageMock.object))
+            .setup((o) => o.scan(url, pageMock.object))
             .returns(async () => expectedResult)
             .verifiable();
 
-        const actualResult = await privacyScanner.scan(pageMock.object);
+        const actualResult = await privacyScanner.scan(url, pageMock.object);
         expect(actualResult).toEqual(expectedResult);
     });
 
     it('should throw errors', async () => {
         const scanError = { error: 'scan error', pageResponseCode: 101 };
         privacyScannerCoreMock
-            .setup((o) => o.scan(pageMock.object))
+            .setup((o) => o.scan(url, pageMock.object))
             .throws(scanError as unknown as Error)
             .verifiable();
         privacyScanner = new PrivacyScanner(
@@ -86,7 +87,7 @@ describe(PrivacyScanner, () => {
             })
             .verifiable();
         try {
-            await privacyScanner.scan(pageMock.object);
+            await privacyScanner.scan(url, pageMock.object);
             fail('should throw');
         } catch (err) {
             expect(err).toEqual(scanError);
@@ -96,7 +97,7 @@ describe(PrivacyScanner, () => {
     it('should return timeout promise', async () => {
         setupWaitForPromiseToReturnTimeoutPromise();
 
-        const scanResult = await privacyScanner.scan(pageMock.object);
+        const scanResult = await privacyScanner.scan(url, pageMock.object);
 
         expect((scanResult.error as BrowserError).stack).toBeTruthy();
         (scanResult.error as BrowserError).stack = 'stack';
@@ -111,7 +112,7 @@ describe(PrivacyScanner, () => {
 
     function setupWaitForPromisetoReturnOriginalPromise(): void {
         promiseUtilsMock
-            .setup((s) => s.waitFor(It.isAny(), (taskConfig.taskTimeoutInMinutes - taskRunBufferTimeMinute) * 60000, It.isAny()))
+            .setup((o) => o.waitFor(It.isAny(), (taskConfig.taskTimeoutInMinutes - taskRunBufferTimeMinute) * 60000, It.isAny()))
             .returns(async (scanPromiseObj, timeout, timeoutCb) => {
                 return scanPromiseObj;
             })
@@ -120,7 +121,7 @@ describe(PrivacyScanner, () => {
 
     function setupWaitForPromiseToReturnTimeoutPromise(): void {
         promiseUtilsMock
-            .setup((s) => s.waitFor(It.isAny(), (taskConfig.taskTimeoutInMinutes - taskRunBufferTimeMinute) * 60000, It.isAny()))
+            .setup((o) => o.waitFor(It.isAny(), (taskConfig.taskTimeoutInMinutes - taskRunBufferTimeMinute) * 60000, It.isAny()))
             .returns(async (scanPromiseObj, timeout, timeoutCb) => {
                 return timeoutCb();
             })

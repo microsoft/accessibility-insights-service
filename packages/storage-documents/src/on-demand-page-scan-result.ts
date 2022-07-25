@@ -33,7 +33,8 @@ export declare type ScanErrorTypes =
     | 'InvalidContentType'
     | 'UrlNotResolved'
     | 'ScanTimeout'
-    | 'InternalError';
+    | 'InternalError'
+    | 'BannerXPathNotDetected';
 
 export interface ScanError {
     errorType: ScanErrorTypes;

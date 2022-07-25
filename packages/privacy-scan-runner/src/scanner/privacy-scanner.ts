@@ -21,11 +21,11 @@ export class PrivacyScanner {
         @inject(GlobalLogger) private readonly logger: GlobalLogger,
     ) {}
 
-    public async scan(page: Page): Promise<PrivacyScanResult> {
+    public async scan(url: string, page: Page): Promise<PrivacyScanResult> {
         const taskConfig = await this.serviceConfig.getConfigValue('taskConfig');
         const scanTimeoutMinute = taskConfig.taskTimeoutInMinutes - this.taskRunBufferTimeMinute;
 
-        return this.promiseUtils.waitFor(this.scanImpl(page), scanTimeoutMinute * 60000, () => {
+        return this.promiseUtils.waitFor(this.scanImpl(url, page), scanTimeoutMinute * 60000, () => {
             this.logger.logError(`Privacy scan timed out after ${scanTimeoutMinute} minutes`);
 
             return Promise.resolve({
@@ -38,10 +38,10 @@ export class PrivacyScanner {
         });
     }
 
-    private async scanImpl(page: Page): Promise<PrivacyScanResult> {
+    private async scanImpl(url: string, page: Page): Promise<PrivacyScanResult> {
         try {
             this.logger.logInfo(`Starting privacy scan of a webpage.`);
-            const scanResult = await this.privacyScannerCore.scan(page);
+            const scanResult = await this.privacyScannerCore.scan(url, page);
             this.logger.logInfo(`Privacy scanning of a webpage successfully completed.`);
 
             return scanResult;

@@ -21,13 +21,13 @@ export class PrivacyScenarioRunner {
         private readonly cookieScenariosProvider: () => CookieScenario[] = getAllCookieScenarios,
     ) {}
 
-    public async run(page: Page): Promise<PrivacyResults> {
+    public async run(url: string, page: Page): Promise<PrivacyResults> {
         const privacyScanConfig = await this.serviceConfig.getConfigValue('privacyScanConfig');
 
-        const bannerDetected = await this.detectBanner(page, privacyScanConfig);
+        const bannerDetected = await this.detectBanner(url, page, privacyScanConfig);
         this.logger?.logInfo(`Privacy banner ${bannerDetected ? 'was detected.' : 'was not detected.'}`, {
             bannerDetected: `${bannerDetected}`,
-            url: page.url,
+            url,
             bannerXPath: privacyScanConfig.bannerXPath,
         });
 
@@ -43,7 +43,7 @@ export class PrivacyScenarioRunner {
         };
     }
 
-    private async detectBanner(page: Page, privacyScanConfig: PrivacyScanConfig): Promise<boolean> {
+    private async detectBanner(url: string, page: Page, privacyScanConfig: PrivacyScanConfig): Promise<boolean> {
         try {
             await page.puppeteerPage.waitForXPath(privacyScanConfig.bannerXPath, {
                 timeout: privacyScanConfig.bannerDetectionTimeout,
@@ -52,7 +52,7 @@ export class PrivacyScenarioRunner {
             return true;
         } catch (error) {
             if (error.name !== 'TimeoutError') {
-                this.logger?.logError('Privacy banner detection error.', { url: page.url, browserError: System.serializeError(error) });
+                this.logger?.logError('Privacy banner detection error.', { url, browserError: System.serializeError(error) });
                 throw error;
             }
 

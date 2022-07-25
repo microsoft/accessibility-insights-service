@@ -24,7 +24,7 @@ export class PageScanProcessor {
         try {
             await this.openPage(scanMetadata.url);
             const pageState = await this.capturePageState();
-            privacyScanResults = await this.runPrivacyScan();
+            privacyScanResults = await this.runPrivacyScan(scanMetadata.url);
             privacyScanResults = { ...privacyScanResults, ...pageState };
 
             if (scanMetadata.deepScan) {
@@ -47,8 +47,8 @@ export class PageScanProcessor {
         };
     }
 
-    private async runPrivacyScan(): Promise<PrivacyScanResult> {
-        const privacyScanResult = await this.privacyScanner.scan(this.page);
+    private async runPrivacyScan(url: string): Promise<PrivacyScanResult> {
+        const privacyScanResult = await this.privacyScanner.scan(url, this.page);
         this.logger.logInfo('The privacy scan of a webpage is completed.');
 
         return privacyScanResult;

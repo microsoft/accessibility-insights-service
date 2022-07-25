@@ -13,7 +13,6 @@ import { PrivacyScenarioRunner } from './privacy-scenario-runner';
 import { PrivacyResults } from './privacy-results';
 
 const url = 'url';
-const requestUrl = 'request url';
 const navigationalUri = 'navigational url';
 const browserError = {
     statusCode: 404,
@@ -46,19 +45,18 @@ describe(PrivacyScannerCore, () => {
 
     it('return error if banner not found', async () => {
         setupPageUrl();
-        setupRequestUrl();
         setupLastNavigationResponse();
 
         privacyResult.bannerDetected = false;
         privacyScenarioRunnerMock
-            .setup((o) => o.run(pageMock.object))
+            .setup((o) => o.run(url, pageMock.object))
             .returns(() => Promise.resolve(privacyResult))
             .verifiable();
         const expectedResult = {
             pageResponseCode: 200,
             scannedUrl: url,
             error: {
-                errorType: 'ResourceLoadFailure',
+                errorType: 'BannerXPathNotDetected',
                 message: 'Privacy banner was not detected.',
             },
             results: {
@@ -66,11 +64,11 @@ describe(PrivacyScannerCore, () => {
                 cookieCollectionConsentResults: [] as ConsentResult[],
                 httpStatusCode: 200,
                 navigationalUri,
-                seedUri: requestUrl,
+                seedUri: url,
             },
         };
 
-        const actualResult = await privacyScannerCore.scan(pageMock.object);
+        const actualResult = await privacyScannerCore.scan(url, pageMock.object);
         delete (actualResult.error as BrowserError).stack; // remove stack trace
 
         expect(actualResult).toEqual(expectedResult);
@@ -78,7 +76,6 @@ describe(PrivacyScannerCore, () => {
 
     it('scan with runner errors', async () => {
         setupPageUrl();
-        setupRequestUrl();
         setupLastNavigationResponse();
 
         privacyResult = {
@@ -97,7 +94,7 @@ describe(PrivacyScannerCore, () => {
             ],
         } as PrivacyResults;
         privacyScenarioRunnerMock
-            .setup((o) => o.run(pageMock.object))
+            .setup((o) => o.run(url, pageMock.object))
             .returns(() => Promise.resolve(privacyResult))
             .verifiable();
         const expectedResult = {
@@ -107,22 +104,21 @@ describe(PrivacyScannerCore, () => {
                 cookieCollectionConsentResults: privacyResult.cookieCollectionConsentResults,
                 httpStatusCode: privacyResult.cookieCollectionConsentResults[0].error.statusCode,
                 navigationalUri,
-                seedUri: requestUrl,
+                seedUri: url,
             },
             scannedUrl: url,
         };
 
-        const actualResult = await privacyScannerCore.scan(pageMock.object);
+        const actualResult = await privacyScannerCore.scan(url, pageMock.object);
 
         expect(actualResult).toEqual(expectedResult);
     });
 
     it('scan with success', async () => {
         setupPageUrl();
-        setupRequestUrl();
         setupLastNavigationResponse();
         privacyScenarioRunnerMock
-            .setup((o) => o.run(pageMock.object))
+            .setup((o) => o.run(url, pageMock.object))
             .returns(() => Promise.resolve(privacyResult))
             .verifiable();
         const expectedResult = {
@@ -132,11 +128,11 @@ describe(PrivacyScannerCore, () => {
                 cookieCollectionConsentResults: [] as ConsentResult[],
                 httpStatusCode: 200,
                 navigationalUri,
-                seedUri: requestUrl,
+                seedUri: url,
             },
         };
 
-        const actualResult = await privacyScannerCore.scan(pageMock.object);
+        const actualResult = await privacyScannerCore.scan(url, pageMock.object);
 
         expect(actualResult).toEqual(expectedResult);
     });
@@ -145,7 +141,7 @@ describe(PrivacyScannerCore, () => {
         setupPageUrl();
         setupLastNavigationResponse();
         privacyScenarioRunnerMock
-            .setup((o) => o.run(pageMock.object))
+            .setup((o) => o.run(url, pageMock.object))
             .returns(() => Promise.reject('runner error'))
             .verifiable();
         const expectedResult = {
@@ -153,7 +149,7 @@ describe(PrivacyScannerCore, () => {
             scannedUrl: url,
         };
 
-        const actualResult = await privacyScannerCore.scan(pageMock.object);
+        const actualResult = await privacyScannerCore.scan(url, pageMock.object);
 
         expect(actualResult).toEqual(expectedResult);
     });
@@ -171,7 +167,7 @@ describe(PrivacyScannerCore, () => {
             pageResponseCode: 404,
         };
 
-        const actualResult = await privacyScannerCore.scan(pageMock.object);
+        const actualResult = await privacyScannerCore.scan(url, pageMock.object);
 
         expect(actualResult).toEqual(expectedResult);
     });
@@ -181,13 +177,6 @@ function setupPageUrl(): void {
     pageMock
         .setup((o) => o.url)
         .returns(() => url)
-        .verifiable(Times.atLeastOnce());
-}
-
-function setupRequestUrl(): void {
-    pageMock
-        .setup((o) => o.requestUrl)
-        .returns(() => requestUrl)
         .verifiable(Times.atLeastOnce());
 }
 
