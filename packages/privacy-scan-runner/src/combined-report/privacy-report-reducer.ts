@@ -3,7 +3,7 @@
 
 import { GuidGenerator } from 'common';
 import { inject, injectable } from 'inversify';
-import { PrivacyScanResult } from 'scanner-global-library';
+import { PrivacyScanResult, BrowserError } from 'scanner-global-library';
 import { ConsentResult, Cookie, PrivacyScanCombinedReport } from 'storage-documents';
 import { unionBy, flatMap, remove, isEmpty } from 'lodash';
 
@@ -39,6 +39,7 @@ export class PrivacyReportReducer {
         }
 
         combinedReport.finishDateTime = privacyScanResult.results?.finishDateTime ?? new Date();
+        combinedReport.status = isEmpty(combinedReport.failedUrls) ? 'Completed' : 'Failed';
 
         return combinedReport;
     }
@@ -48,6 +49,11 @@ export class PrivacyReportReducer {
         combinedReport: PrivacyScanCombinedReport,
         url: string,
     ): PrivacyScanCombinedReport {
+        // banner detection error considered as non-fatal
+        if ((privacyScanResult.error as BrowserError)?.errorType === 'BannerXPathNotDetected') {
+            return combinedReport;
+        }
+
         combinedReport.failedUrls.push({
             url,
             seedUri: url,
@@ -57,7 +63,6 @@ export class PrivacyReportReducer {
             bannerDetected: privacyScanResult.results?.bannerDetected,
             bannerDetectionXpathExpression: privacyScanResult.results?.bannerDetectionXpathExpression,
         });
-        combinedReport.status = 'Failed';
 
         return combinedReport;
     }
@@ -98,11 +103,10 @@ export class PrivacyReportReducer {
         };
     }
 
-    private removeUrlResultsFromReport(report: PrivacyScanCombinedReport, url: string): PrivacyScanCombinedReport {
-        remove(report.failedUrls, (failedUrl) => failedUrl.seedUri === url);
-        remove(report.cookieCollectionUrlResults, (cookieCollectionResult) => cookieCollectionResult.seedUri === url);
-        report.status = isEmpty(report.failedUrls) ? 'Completed' : 'Failed';
+    private removeUrlResultsFromReport(combinedReport: PrivacyScanCombinedReport, url: string): PrivacyScanCombinedReport {
+        remove(combinedReport.failedUrls, (failedUrl) => failedUrl.seedUri === url);
+        remove(combinedReport.cookieCollectionUrlResults, (cookieCollectionResult) => cookieCollectionResult.seedUri === url);
 
-        return report;
+        return combinedReport;
     }
 }

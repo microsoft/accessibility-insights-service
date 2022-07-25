@@ -6,7 +6,7 @@ import 'reflect-metadata';
 import { GuidGenerator } from 'common';
 import { IMock, Mock } from 'typemoq';
 import * as mockDate from 'mockdate';
-import { PrivacyScanResult } from 'scanner-global-library';
+import { PrivacyScanResult, BrowserError } from 'scanner-global-library';
 import { FailedUrl, PrivacyPageScanReport, PrivacyScanCombinedReport, PrivacyScanStatus } from 'storage-documents';
 import { cloneDeep } from 'lodash';
 import { IpGeolocation } from 'privacy-scan-core';
@@ -226,12 +226,14 @@ describe(PrivacyReportReducer, () => {
             };
         });
 
-        it.each(['Completed', 'Failed'] as PrivacyScanStatus[])('with successful scan result and existing report status=%s', (status) => {
-            existingReport.status = status;
-
+        it('should ignore banner detection failure', () => {
+            successfulScanResult.error = {
+                errorType: 'BannerXPathNotDetected',
+                message: 'Privacy banner was not detected.',
+            } as BrowserError;
             const expectedReport: PrivacyScanCombinedReport = {
                 ...cloneDeep(existingReport),
-                status: status,
+                status: 'Completed',
                 urls: [...existingReport.urls, metadata.url],
                 scanCookies: [
                     ...existingReport.scanCookies,

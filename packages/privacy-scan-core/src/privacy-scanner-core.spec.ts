@@ -56,7 +56,7 @@ describe(PrivacyScannerCore, () => {
             pageResponseCode: 200,
             scannedUrl: url,
             error: {
-                errorType: 'ResourceLoadFailure',
+                errorType: 'BannerXPathNotDetected',
                 message: 'Privacy banner was not detected.',
             },
             results: {

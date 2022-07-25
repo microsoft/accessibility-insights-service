@@ -14,7 +14,8 @@ export declare type ScanRunErrorCodeName =
     | 'NavigationError'
     | 'InvalidContentType'
     | 'UrlNotResolved'
-    | 'ScanTimeout';
+    | 'ScanTimeout'
+    | 'BannerXPathNotDetected';
 
 export interface ScanRunErrorCode {
     // This type is part of the REST API client response.
@@ -91,6 +92,12 @@ export class ScanRunErrorCodes {
         codeId: 9011,
         message: 'Unable to complete scan before maximum timeout value',
     };
+
+    public static bannerXPathNotDetected: ScanRunErrorCode = {
+        code: 'BannerXPathNotDetected',
+        codeId: 9012,
+        message: 'Privacy banner was not detected',
+    };
 }
 
 export const scanErrorNameToErrorMap: { [key in ScanRunErrorCodeName]: ScanRunErrorCode } = {
@@ -105,4 +112,5 @@ export const scanErrorNameToErrorMap: { [key in ScanRunErrorCodeName]: ScanRunEr
     InvalidContentType: ScanRunErrorCodes.invalidContentType,
     UrlNotResolved: ScanRunErrorCodes.urlNotResolved,
     ScanTimeout: ScanRunErrorCodes.scanTimedOut,
+    BannerXPathNotDetected: ScanRunErrorCodes.bannerXPathNotDetected,
 };

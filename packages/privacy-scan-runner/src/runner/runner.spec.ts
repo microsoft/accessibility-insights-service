@@ -177,7 +177,7 @@ describe(Runner, () => {
 
     it('retry on missing privacy banner', async () => {
         privacyScanResults.error = {
-            errorType: 'ResourceLoadFailure',
+            errorType: 'BannerXPathNotDetected',
         } as BrowserError;
 
         setupScanMetadataConfig();
@@ -191,7 +191,7 @@ describe(Runner, () => {
 
     it('complete on missing privacy banner when no retries', async () => {
         privacyScanResults.error = {
-            errorType: 'ResourceLoadFailure',
+            errorType: 'BannerXPathNotDetected',
         } as BrowserError;
         pageScanResultDbDocument.run = { retryCount: maxFailedScanRetryCount } as OnDemandPageScanRunResult;
 
@@ -241,7 +241,7 @@ function setupUpdateScanResult(): void {
 function setupProcessScanResult(): void {
     if (privacyScanResults.error) {
         let runState: OnDemandPageScanRunState = 'failed';
-        if ((privacyScanResults.error as BrowserError)?.errorType === 'ResourceLoadFailure') {
+        if ((privacyScanResults.error as BrowserError)?.errorType === 'BannerXPathNotDetected') {
             runState = pageScanResult.run?.retryCount >= maxFailedScanRetryCount ? 'completed' : 'failed';
         }
         pageScanResult.run = {

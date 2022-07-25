@@ -66,7 +66,7 @@ export class PrivacyScannerCore {
             });
         } else if (privacyResult.bannerDetected === false) {
             scanResult.error = {
-                errorType: 'ResourceLoadFailure',
+                errorType: 'BannerXPathNotDetected',
                 message: 'Privacy banner was not detected.',
                 stack: new Error().stack,
             };
