@@ -30,8 +30,9 @@ export function validateScanArguments(args: ScanArguments): void {
     }
 
     if (
-        (isEmpty(args.serviceAccountName) && !isEmpty(args.serviceAccountPassword)) ||
-        (!isEmpty(args.serviceAccountName) && isEmpty(args.serviceAccountPassword))
+        (!isEmpty(args.serviceAccountPassword) && (isEmpty(args.serviceAccountName) || isEmpty(args.authType))) ||
+        (!isEmpty(args.serviceAccountName) && (isEmpty(args.serviceAccountPassword) || isEmpty(args.authType))) ||
+        (!isEmpty(args.authType) && (isEmpty(args.serviceAccountPassword) || isEmpty(args.serviceAccountName)))
     ) {
         throw new Error('--serviceAccountName, --serviceAccountPassword, and --authType all must be provided to scan authenticated pages.');
     }
