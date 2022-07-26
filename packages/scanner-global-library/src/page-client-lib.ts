@@ -11,11 +11,12 @@ export async function scrollToBottom(page: Puppeteer.Page): Promise<boolean> {
     const scrollingComplete = await page.evaluate(async () => {
         // @ts-ignore
         const scrollElement = getScrollElement();
-        scrollElement.element.scrollBy(0, window.innerHeight);
+        scrollElement.element.scrollBy(0, document.documentElement.clientHeight);
         const scrollingElement = scrollElement.type === 'window' ? scrollElement.element.document.scrollingElement : scrollElement.element;
 
         return (
-            scrollingElement.scrollHeight - Math.round(scrollingElement.scrollTop) - scrollingElement.clientHeight < window.innerHeight / 10
+            scrollingElement.scrollHeight - Math.round(scrollingElement.scrollTop) - scrollingElement.clientHeight <
+            document.documentElement.clientHeight / 10
         );
     });
 
@@ -35,21 +36,40 @@ export async function scrollToTop(page: Puppeteer.Page): Promise<void> {
 
 async function importGetScrollElementFunc(page: Puppeteer.Page): Promise<void> {
     function getScrollElement(): any {
-        function getActualCss(e: any, style: any): any {
-            return document.defaultView.getComputedStyle(e, null)[style];
-        }
-
-        function autoOrScroll(text: any): any {
-            return text === 'scroll' || text === 'auto';
+        function getDocumentScrollHeight(): any {
+            return Math.max(
+                document.body.scrollHeight,
+                document.body.clientHeight,
+                document.body.offsetHeight,
+                document.documentElement.scrollHeight,
+                document.documentElement.clientHeight,
+                document.documentElement.offsetHeight,
+            );
         }
 
         function hasVerticalScroll(e: any): any {
-            return e.offsetHeight < e.scrollHeight && autoOrScroll(getActualCss(e, 'overflow-y'));
+            return e.offsetHeight < e.scrollHeight;
         }
 
-        const scrollElement = [].filter.call(document.querySelectorAll('*'), hasVerticalScroll);
+        function getMaxScrollElement(elements: any): any {
+            let maxScrollHeight = 0;
+            let scrollElement;
+            elements.forEach((element: any) => {
+                if (element.scrollHeight > maxScrollHeight) {
+                    maxScrollHeight = element.scrollHeight;
+                    scrollElement = element;
+                }
+            });
 
-        return scrollElement && scrollElement[0] ? { element: scrollElement[0], type: 'element' } : { element: window, type: 'window' };
+            return scrollElement;
+        }
+
+        const scrollElements = [].filter.call(document.querySelectorAll('*'), hasVerticalScroll);
+        const scrollElement = getMaxScrollElement(scrollElements);
+
+        return scrollElement?.scrollHeight > getDocumentScrollHeight()
+            ? { element: scrollElement, type: 'element' }
+            : { element: window, type: 'window' };
     }
 
     const content = await page.content();
