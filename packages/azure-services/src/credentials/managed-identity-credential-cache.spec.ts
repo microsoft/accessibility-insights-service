@@ -16,7 +16,7 @@ import { ManagedIdentityCredentialCache, TokenCacheItem } from './managed-identi
 const scopes = 'https://vault.azure.net/default';
 const resourceUrl = 'vault.azure.net';
 const accessTokenOptions = {};
-const tokenValidForSec = 55 * 60;
+const tokenValidForSec = 10 * 60;
 
 let tokenCacheMock: IMock<NodeCache>;
 let managedIdentityCredentialMock: IMock<ManagedIdentityCredential>;

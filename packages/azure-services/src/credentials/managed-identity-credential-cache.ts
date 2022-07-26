@@ -22,7 +22,7 @@ export interface TokenCacheItem {
 export class ManagedIdentityCredentialCache implements TokenCredential {
     private static readonly cacheCheckPeriodInSeconds = 60;
 
-    private static readonly tokenValidForSec = 55 * 60;
+    private static readonly tokenValidForSec = 10 * 60;
 
     private static readonly msiRetryOptions: ExponentialRetryOptions = {
         delayFirstAttempt: false,
