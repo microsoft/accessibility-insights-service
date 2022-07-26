@@ -10,10 +10,10 @@ import { PageProcessor, PageProcessorBase } from '../page-processors/page-proces
 import { CrawlerRunOptions } from '../types/crawler-run-options';
 import { ApifyRequestQueueProvider } from '../types/ioc-types';
 import { AuthenticatorFactory } from '../authenticator/authenticator-factory';
+import { Authenticator } from '../authenticator/authenticator';
 import { CrawlerConfiguration } from './crawler-configuration';
 import { PuppeteerCrawlerEngine } from './puppeteer-crawler-engine';
 import { CrawlerFactory } from './crawler-factory';
-import { Authenticator } from '../authenticator/authenticator';
 
 /* eslint-disable
    @typescript-eslint/no-explicit-any,
