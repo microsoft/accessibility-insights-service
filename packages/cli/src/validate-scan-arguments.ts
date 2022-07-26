@@ -29,6 +29,10 @@ export function validateScanArguments(args: ScanArguments): void {
         throw new Error('Options --serviceAccountName, --serviceAccountPassword, and --authType are only supported with --crawl option.');
     }
 
+    validateAuthInputs(args);
+}
+
+function validateAuthInputs(args: ScanArguments): void {
     if (
         (!isEmpty(args.serviceAccountPassword) && (isEmpty(args.serviceAccountName) || isEmpty(args.authType))) ||
         (!isEmpty(args.serviceAccountName) && (isEmpty(args.serviceAccountPassword) || isEmpty(args.authType))) ||
