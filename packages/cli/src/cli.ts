@@ -137,6 +137,10 @@ function getScanArguments(): ScanArguments {
                 type: 'string',
                 describe: 'Use with --serviceAccountName to crawl pages requiring authentication.',
             },
+            authType: {
+                type: 'string',
+                describe: 'Use with --serviceAccountName and --serviceAccountPassword to specify the authentication type.',
+            },
         })
         .check((args) => {
             validateScanArguments(args as ScanArguments);

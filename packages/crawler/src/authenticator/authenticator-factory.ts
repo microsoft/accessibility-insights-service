@@ -3,11 +3,16 @@
 
 import { injectable } from 'inversify';
 import { Authenticator } from './authenticator';
-import { AzurePortalAuthentication } from './azure-portal-authenticator';
+import { AzureActiveDirectoryAuthentication } from './azure-active-directory-authenticator';
 
 @injectable()
 export class AuthenticatorFactory {
-    public createAADAuthenticator(accountName: string, accountPassword: string): Authenticator {
-        return new Authenticator(new AzurePortalAuthentication(accountName, accountPassword));
+    public createAuthenticator(accountName: string, accountPassword: string, authType: string): Authenticator {
+        switch (authType) {
+            case 'AAD':
+                return new Authenticator(new AzureActiveDirectoryAuthentication(accountName, accountPassword));
+            default:
+                throw new Error(`Unknown auth type: ${authType}`);
+        }
     }
 }

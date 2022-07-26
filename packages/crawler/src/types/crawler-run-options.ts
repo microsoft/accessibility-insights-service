@@ -23,4 +23,5 @@ export interface CrawlerRunOptions {
     singleWorker?: boolean;
     serviceAccountName?: string;
     serviceAccountPassword?: string;
+    authType?: string;
 }

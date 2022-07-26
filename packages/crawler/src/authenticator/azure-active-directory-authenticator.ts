@@ -5,7 +5,7 @@ import { isEmpty } from 'lodash';
 import * as Puppeteer from 'puppeteer';
 import { AuthenticationMethod } from './authentication-method';
 
-export class AzurePortalAuthentication implements AuthenticationMethod {
+export class AzureActiveDirectoryAuthentication implements AuthenticationMethod {
     constructor(private readonly accountName: string, private readonly accountPassword: string) {}
 
     public async authenticate(page: Puppeteer.Page, attemptNumber: number = 1): Promise<void> {

@@ -25,4 +25,5 @@ export interface ScanArguments {
     singleWorker?: boolean;
     serviceAccountName?: string;
     serviceAccountPassword?: string;
+    authType?: string;
 }

@@ -45,6 +45,7 @@ export class CrawlerParametersBuilder {
             singleWorker: scanArguments.singleWorker,
             serviceAccountName: scanArguments.serviceAccountName,
             serviceAccountPassword: scanArguments.serviceAccountPassword,
+            authType: scanArguments.authType,
         };
     }
 

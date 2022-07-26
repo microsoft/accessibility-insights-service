@@ -25,14 +25,14 @@ export function validateScanArguments(args: ScanArguments): void {
         throw new Error('Option --updateBaseline requires option --baselineFile.');
     }
 
-    if (!args.crawl && (!isEmpty(args.serviceAccountName) || !isEmpty(args.serviceAccountPassword))) {
-        throw new Error('Options --serviceAccountName and --serviceAccountPassword are only supported with --crawl option.');
+    if (!args.crawl && (!isEmpty(args.serviceAccountName) || !isEmpty(args.serviceAccountPassword) || !isEmpty(args.authType))) {
+        throw new Error('Options --serviceAccountName, --serviceAccountPassword, and --authType are only supported with --crawl option.');
     }
 
     if (
         (isEmpty(args.serviceAccountName) && !isEmpty(args.serviceAccountPassword)) ||
         (!isEmpty(args.serviceAccountName) && isEmpty(args.serviceAccountPassword))
     ) {
-        throw new Error('Both --serviceAccountName and --serviceAccountPassword must be provided to scan authenticated pages.');
+        throw new Error('--serviceAccountName, --serviceAccountPassword, and --authType all must be provided to scan authenticated pages.');
     }
 }

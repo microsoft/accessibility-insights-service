@@ -4,9 +4,9 @@
 import { IMock, It, Mock, Times } from 'typemoq';
 import * as Puppeteer from 'puppeteer';
 import { getPromisableDynamicMock } from '../test-utilities/promisable-mock';
-import { AzurePortalAuthentication } from './azure-portal-authenticator';
+import { AzureActiveDirectoryAuthentication } from './azure-active-directory-authenticator';
 
-function setupPortalAuthenticationFlow(
+function setupAADAuthenticationFlow(
     pageMock: IMock<Puppeteer.Page>,
     keyboardMock: IMock<Puppeteer.Keyboard>,
     accountName: string,
@@ -46,21 +46,21 @@ function setupPortalAuthenticationFlow(
     }
 }
 
-describe(AzurePortalAuthentication, () => {
+describe(AzureActiveDirectoryAuthentication, () => {
     const accountName = 'testServiceAccount';
     const accountPassword = 'Placeholder_test123';
     let pageMock: IMock<Puppeteer.Page>;
     let keyboardMock: IMock<Puppeteer.Keyboard>;
     let consoleErrorMock: jest.SpyInstance;
     let consoleInfoMock: jest.SpyInstance;
-    let testSubject: AzurePortalAuthentication;
+    let testSubject: AzureActiveDirectoryAuthentication;
     beforeEach(() => {
         consoleErrorMock = jest.spyOn(global.console, 'error').mockImplementation();
         consoleInfoMock = jest.spyOn(global.console, 'info').mockImplementation();
         keyboardMock = getPromisableDynamicMock(Mock.ofType<Puppeteer.Keyboard>());
         pageMock = getPromisableDynamicMock(Mock.ofType<Puppeteer.Page>());
         pageMock.setup((p) => p.keyboard).returns(() => keyboardMock.object);
-        testSubject = new AzurePortalAuthentication(accountName, accountPassword);
+        testSubject = new AzureActiveDirectoryAuthentication(accountName, accountPassword);
     });
 
     afterEach(() => {
@@ -71,13 +71,13 @@ describe(AzurePortalAuthentication, () => {
     });
 
     it('follows portal.azure.com authentication flow', async () => {
-        setupPortalAuthenticationFlow(pageMock, keyboardMock, accountName, accountPassword);
+        setupAADAuthenticationFlow(pageMock, keyboardMock, accountName, accountPassword);
         await testSubject.authenticate(pageMock.object);
         expect(consoleInfoMock).toHaveBeenCalledWith('Authentication succeeded.');
     });
 
     it('retries four times if it detects authentication failed', async () => {
-        setupPortalAuthenticationFlow(pageMock, keyboardMock, accountName, accountPassword, false, 5);
+        setupAADAuthenticationFlow(pageMock, keyboardMock, accountName, accountPassword, false, 5);
         await testSubject.authenticate(pageMock.object);
         expect(consoleErrorMock).toHaveBeenCalledWith('Attempted authentication 5 times and ultimately failed.');
     });

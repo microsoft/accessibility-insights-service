@@ -10,10 +10,10 @@ import { PageProcessor, PageProcessorBase } from '../page-processors/page-proces
 import { CrawlerRunOptions } from '../types/crawler-run-options';
 import { ApifyRequestQueueProvider } from '../types/ioc-types';
 import { AuthenticatorFactory } from '../authenticator/authenticator-factory';
-import { Authenticator } from '../authenticator/authenticator';
 import { CrawlerConfiguration } from './crawler-configuration';
 import { PuppeteerCrawlerEngine } from './puppeteer-crawler-engine';
 import { CrawlerFactory } from './crawler-factory';
+import { Authenticator } from '../authenticator/authenticator';
 
 /* eslint-disable
    @typescript-eslint/no-explicit-any,
@@ -143,14 +143,16 @@ describe(PuppeteerCrawlerEngine, () => {
         await crawlerEngine.start(crawlerRunOptions);
     });
 
-    it('Run crawler while serviceAccountName and serviceAccountPassword are set', async () => {
+    it('Run crawler while serviceAccountName, serviceAccountPassword, and authType are set', async () => {
         const testAccountName = 'testAccount@microsoft.com';
         const testAccountPassword = 'testpassword';
+        const testAuthType = 'AAD';
         crawlerRunOptions.serviceAccountName = testAccountName;
         crawlerRunOptions.serviceAccountPassword = testAccountPassword;
+        crawlerRunOptions.authType = testAuthType;
 
         authenticatorFactoryMock
-            .setup((o) => o.createAADAuthenticator(testAccountName, testAccountPassword))
+            .setup((o) => o.createAuthenticator(testAccountName, testAccountPassword, testAuthType))
             .returns(() => authenticatorMock.object)
             .verifiable();
 
