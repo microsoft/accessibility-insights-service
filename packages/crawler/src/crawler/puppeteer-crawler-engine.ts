@@ -94,9 +94,10 @@ export class PuppeteerCrawlerEngine {
         }
 
         if (!isEmpty(crawlerRunOptions.serviceAccountName)) {
-            const authenticator = this.authenticatorFactory.createAADAuthenticator(
+            const authenticator = this.authenticatorFactory.createAuthenticator(
                 crawlerRunOptions.serviceAccountName,
                 crawlerRunOptions.serviceAccountPassword,
+                crawlerRunOptions.authType,
             );
 
             puppeteerCrawlerOptions.browserPoolOptions = {

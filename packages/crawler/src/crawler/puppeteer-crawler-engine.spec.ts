@@ -143,14 +143,16 @@ describe(PuppeteerCrawlerEngine, () => {
         await crawlerEngine.start(crawlerRunOptions);
     });
 
-    it('Run crawler while serviceAccountName and serviceAccountPassword are set', async () => {
+    it('Run crawler while serviceAccountName, serviceAccountPassword, and authType are set', async () => {
         const testAccountName = 'testAccount@microsoft.com';
         const testAccountPassword = 'testpassword';
+        const testAuthType = 'AAD';
         crawlerRunOptions.serviceAccountName = testAccountName;
         crawlerRunOptions.serviceAccountPassword = testAccountPassword;
+        crawlerRunOptions.authType = testAuthType;
 
         authenticatorFactoryMock
-            .setup((o) => o.createAADAuthenticator(testAccountName, testAccountPassword))
+            .setup((o) => o.createAuthenticator(testAccountName, testAccountPassword, testAuthType))
             .returns(() => authenticatorMock.object)
             .verifiable();
 

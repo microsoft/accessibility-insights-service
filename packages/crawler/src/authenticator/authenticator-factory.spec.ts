@@ -5,7 +5,7 @@ import 'reflect-metadata';
 
 import { Authenticator } from './authenticator';
 import { AuthenticatorFactory } from './authenticator-factory';
-import { AzurePortalAuthentication } from './azure-portal-authenticator';
+import { AzureActiveDirectoryAuthentication } from './azure-active-directory-authenticator';
 
 describe(AuthenticatorFactory, () => {
     const testAccountName = 'testServiceAccount';
@@ -16,9 +16,10 @@ describe(AuthenticatorFactory, () => {
         authenticatorFactory = new AuthenticatorFactory();
     });
 
-    it('createAADAuthenticator uses azure portal authentication with supplied credentials', async () => {
-        const testAuthenticationMethod = new AzurePortalAuthentication(testAccountName, testAccountPassword);
-        const authenticator = authenticatorFactory.createAADAuthenticator(testAccountName, testAccountPassword);
+    it('createAuthenticator uses AAD authentication with supplied credentials when authType is set to AAD', async () => {
+        const authType = 'AAD';
+        const testAuthenticationMethod = new AzureActiveDirectoryAuthentication(testAccountName, testAccountPassword);
+        const authenticator = authenticatorFactory.createAuthenticator(testAccountName, testAccountPassword, authType);
         expect(authenticator).toEqual(new Authenticator(testAuthenticationMethod));
     });
 });
