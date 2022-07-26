@@ -12,7 +12,7 @@ export class AuthenticatorFactory {
             case 'AAD':
                 return new Authenticator(new AzureActiveDirectoryAuthentication(accountName, accountPassword));
             default:
-                throw new Error(`Unknown auth type: ${authType}`);
+                throw new Error(`Unknown auth type: ${authType}, please provide a valid authType input.`);
         }
     }
 }
