@@ -6,6 +6,7 @@ import { inject, injectable } from 'inversify';
 import { GlobalLogger } from 'logger';
 import { Page, PrivacyScanResult } from 'scanner-global-library';
 import { OnDemandPageScanResult } from 'storage-documents';
+import { isEmpty } from 'lodash';
 import { PrivacyScanMetadata } from '../types/privacy-scan-metadata';
 import { PrivacyScanner } from './privacy-scanner';
 import { PageScanScheduler } from './page-scan-scheduler';
@@ -23,6 +24,10 @@ export class PageScanProcessor {
         let privacyScanResults: PrivacyScanResult;
         try {
             await this.openPage(scanMetadata.url);
+            if (!isEmpty(this.page.lastBrowserError)) {
+                return { error: this.page.lastBrowserError, pageResponseCode: this.page.lastBrowserError.statusCode };
+            }
+
             const pageState = await this.capturePageState();
             privacyScanResults = await this.runPrivacyScan(scanMetadata.url);
             privacyScanResults = { ...privacyScanResults, ...pageState };
