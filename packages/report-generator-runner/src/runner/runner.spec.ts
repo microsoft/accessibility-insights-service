@@ -6,7 +6,7 @@ import 'reflect-metadata';
 import { IMock, Mock, It } from 'typemoq';
 import { ReportGeneratorRequestProvider, OnDemandPageScanRunResultProvider, OperationResult } from 'service-library';
 import { GlobalLogger } from 'logger';
-import { ReportGeneratorRequest, OnDemandPageScanResult, OnDemandPageScanRunState } from 'storage-documents';
+import { ReportGeneratorRequest, OnDemandPageScanResult, ReportScanRunState } from 'storage-documents';
 import * as MockDate from 'mockdate';
 import { isEmpty, cloneDeep } from 'lodash';
 import { RunMetadataConfig } from '../run-metadata-config';
@@ -40,27 +40,21 @@ describe(Runner, () => {
                 id: 'id-1',
                 scanGroupId: 'scanGroupId-1',
                 reports: [{}],
-                run: {
-                    state: 'pending',
-                },
+                condition: 'pending',
             },
             {
                 id: 'id-2',
                 scanGroupId: 'scanGroupId-1',
                 reports: [{}],
-                run: {
-                    state: 'pending',
-                },
+                condition: 'pending',
             },
             {
                 id: 'id-3',
                 scanGroupId: 'scanGroupId-1',
                 reports: [{}],
-                run: {
-                    state: 'completed',
-                },
+                condition: 'completed',
             },
-        ] as ReportGeneratorRequest[];
+        ] as unknown as ReportGeneratorRequest[];
 
         runMetadataConfigMock = Mock.ofType<RunMetadataConfig>();
         reportGeneratorRequestProviderMock = Mock.ofType<ReportGeneratorRequestProvider>();
@@ -125,9 +119,7 @@ describe(Runner, () => {
                 id: 'id-1',
                 scanGroupId: 'scanGroupId-1',
                 reports: [{}],
-                run: {
-                    state: 'pending',
-                },
+                condition: 'pending',
             },
             {
                 id: 'id-3',
@@ -155,17 +147,13 @@ describe(Runner, () => {
                 id: 'id-1',
                 scanGroupId: 'scanGroupId-1',
                 reports: [{}],
-                run: {
-                    state: 'pending',
-                },
+                run: {},
             },
             {
                 id: 'id-3',
                 scanGroupId: 'scanGroupId-1',
                 reports: [{}],
-                run: {
-                    state: 'pending',
-                },
+                run: {},
             },
         ] as ReportGeneratorRequest[];
         const resultRequestsUpdateByReportProcessor = [
@@ -355,7 +343,7 @@ function setupReportProcessorMock(
         const projectedRequest = cloneDeep(request);
         const updatedRequest = updatedRequests.find((r) => r.request.id === projectedRequest.id);
         if (updatedRequest) {
-            projectedRequest.run.state = updatedRequest.condition as OnDemandPageScanRunState;
+            projectedRequest.run.state = updatedRequest.condition as ReportScanRunState;
         }
 
         return projectedRequest;

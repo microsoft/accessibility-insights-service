@@ -76,12 +76,6 @@ describe(RequestSelector, () => {
                 },
             },
             {
-                id: 'id4', // pending - process:pending
-                run: {
-                    state: 'pending',
-                },
-            },
-            {
                 id: 'id5', // abandon scan with retry - process:retry
                 run: {
                     state: 'running',
@@ -128,9 +122,8 @@ describe(RequestSelector, () => {
         const filteredRequests = {
             requestsToProcess: [
                 { request: queuedRequests[0], condition: 'pending' },
-                { request: queuedRequests[4], condition: 'pending' },
+                { request: queuedRequests[4], condition: 'retry' },
                 { request: queuedRequests[5], condition: 'retry' },
-                { request: queuedRequests[6], condition: 'retry' },
             ],
             requestsToDelete: [
                 { request: queuedRequests[1], condition: 'completed' },
