@@ -241,6 +241,50 @@ describe(ScanRequestController, () => {
             expect(context.res.body).toEqual(expectedResponse);
         });
 
+        it('rejects deepScan requests if there is duplicate known page URL', async () => {
+            context.req.rawBody = JSON.stringify([
+                {
+                    // duplicate known page URL
+                    deepScan: true,
+                    url: 'https://base/path/',
+                    reportGroups: [{ consolidatedId: 'reportGroupId' }],
+                    site: {
+                        baseUrl: 'https://base/path',
+                        knownPages: ['https://base/path/p1', 'https://base/path/p1/#top'],
+                    },
+                },
+            ]);
+            const expectedResponse = [{ url: 'https://base/path/', error: WebApiErrorCodes.duplicateKnownPage.error }];
+
+            scanRequestController = createScanRequestController(context);
+
+            await scanRequestController.handleRequest();
+
+            expect(context.res.body).toEqual(expectedResponse);
+        });
+
+        it('rejects deepScan requests if there is duplicate base URL in known pages list', async () => {
+            context.req.rawBody = JSON.stringify([
+                {
+                    // duplicate known page URL
+                    deepScan: true,
+                    url: 'https://base/path/',
+                    reportGroups: [{ consolidatedId: 'reportGroupId' }],
+                    site: {
+                        baseUrl: 'https://base/path',
+                        knownPages: ['https://base/path/p1', 'https://base/path/'],
+                    },
+                },
+            ]);
+            const expectedResponse = [{ url: 'https://base/path/', error: WebApiErrorCodes.duplicateKnownPage.error }];
+
+            scanRequestController = createScanRequestController(context);
+
+            await scanRequestController.handleRequest();
+
+            expect(context.res.body).toEqual(expectedResponse);
+        });
+
         it('accepts valid request only', async () => {
             const guid1 = '1e9cefa6-538a-6df0-aaaa-ffffffffffff';
             const guid2 = '1e9cefa6-538a-6df0-bbbb-ffffffffffff';

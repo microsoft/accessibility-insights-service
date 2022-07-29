@@ -3,7 +3,7 @@
 
 import { GuidGenerator, RestApiConfig, ServiceConfiguration, Url, CrawlConfig } from 'common';
 import { inject, injectable } from 'inversify';
-import { isEmpty, isNil } from 'lodash';
+import { isEmpty, isNil, groupBy, filter } from 'lodash';
 import { ContextAwareLogger, ScanRequestReceivedMeasurements } from 'logger';
 import {
     ApiController,
@@ -208,6 +208,17 @@ export class ScanRequestController extends ApiController {
         if (scanRunRequest.site?.knownPages?.length > 0) {
             if (scanRunRequest.site.knownPages.some((url) => Url.tryParseUrlString(url) === undefined)) {
                 return { valid: false, error: WebApiErrorCodes.invalidKnownPageURL.error };
+            }
+        }
+
+        if (scanRunRequest.site?.knownPages?.length > 0) {
+            const pages = [...scanRunRequest.site.knownPages, scanRunRequest.url];
+            const duplicates = filter(
+                groupBy(pages, (url) => Url.normalizeUrl(url)),
+                (g) => g.length > 1,
+            );
+            if (duplicates.length > 0) {
+                return { valid: false, error: WebApiErrorCodes.duplicateKnownPage.error };
             }
         }
 
