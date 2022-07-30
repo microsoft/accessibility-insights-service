@@ -3,6 +3,7 @@
 
 import * as nodeUrl from 'url';
 import { isNil } from 'lodash';
+import * as normalizeUrlExt from 'normalize-url';
 
 export namespace Url {
     export function tryParseUrlString(url: string, absoluteUrlOnly: boolean = true): nodeUrl.Url {
@@ -28,5 +29,9 @@ export namespace Url {
 
     export function hasQueryParameters(url: string): boolean {
         return url.indexOf('?') !== -1;
+    }
+
+    export function normalizeUrl(url: string): string {
+        return normalizeUrlExt.default(url, { stripHash: true, removeQueryParameters: false });
     }
 }

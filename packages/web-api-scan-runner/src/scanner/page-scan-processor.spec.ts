@@ -5,7 +5,7 @@ import 'reflect-metadata';
 
 import { IMock, It, Mock, Times } from 'typemoq';
 import { GlobalLogger } from 'logger';
-import { AxeScanResults, Page } from 'scanner-global-library';
+import { AxeScanResults, Page, BrowserError } from 'scanner-global-library';
 import { OnDemandPageScanResult } from 'storage-documents';
 import { System } from 'common';
 import * as Puppeteer from 'puppeteer';
@@ -113,6 +113,33 @@ describe(PageScanProcessor, () => {
         deepScannerMock.setup((d) => d.runDeepScan(It.isAny(), It.isAny(), It.isAny())).verifiable(Times.never());
 
         await expect(testSubject.scan(scanMetadata, pageScanResult)).rejects.toThrowError('test error');
+    });
+
+    it('returns error if page failed to load.', async () => {
+        const scanMetadata = {
+            url: url,
+            id: 'id',
+        };
+        const browserError = {
+            errorType: 'HttpErrorCode',
+            statusCode: 404,
+        } as BrowserError;
+
+        pageMock.reset();
+        setupOpenPage();
+        setupClosePage();
+        pageMock
+            .setup((o) => o.lastBrowserError)
+            .returns(() => browserError)
+            .verifiable(Times.atLeastOnce());
+
+        const expectedResult = {
+            error: browserError,
+            pageResponseCode: browserError.statusCode,
+        };
+        const results = await testSubject.scan(scanMetadata, pageScanResult);
+
+        expect(results).toEqual(expectedResult);
     });
 
     it('returns error thrown by deep scanner', async () => {
