@@ -218,7 +218,9 @@ export class ScanRequestController extends ApiController {
                 (g) => g.length > 1,
             );
             if (duplicates.length > 0) {
-                return { valid: false, error: WebApiErrorCodes.duplicateKnownPage.error };
+                this.logger.logWarn('Found duplicated URL(s) in a client request.', { duplicatedUrls: JSON.stringify(duplicates.flat()) });
+
+                // return { valid: false, error: WebApiErrorCodes.duplicateKnownPage.error };
             }
         }
 
