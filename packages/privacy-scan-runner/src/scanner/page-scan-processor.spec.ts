@@ -3,9 +3,9 @@
 
 import 'reflect-metadata';
 
-import { IMock, It, Mock } from 'typemoq';
+import { IMock, It, Mock, Times } from 'typemoq';
 import { GlobalLogger } from 'logger';
-import { PrivacyScanResult, Page } from 'scanner-global-library';
+import { PrivacyScanResult, Page, BrowserError } from 'scanner-global-library';
 import { System } from 'common';
 import * as Puppeteer from 'puppeteer';
 import { OnDemandPageScanResult } from 'storage-documents';
@@ -89,6 +89,29 @@ describe(PageScanProcessor, () => {
             .returns(() => Promise.resolve())
             .verifiable();
         privacyScanResult = { ...privacyScanResult, pageScreenshot, pageSnapshot };
+
+        const results = await testSubject.scan(scanMetadata, pageScanResult);
+
+        expect(results).toEqual(privacyScanResult);
+    });
+
+    it('return error if page load failed', async () => {
+        const browserError = {
+            errorType: 'HttpErrorCode',
+            statusCode: 404,
+        } as BrowserError;
+
+        pageMock.reset();
+        setupOpenPage();
+        setupClosePage();
+        pageMock
+            .setup((o) => o.lastBrowserError)
+            .returns(() => browserError)
+            .verifiable(Times.atLeastOnce());
+        privacyScanResult = {
+            error: browserError,
+            pageResponseCode: browserError.statusCode,
+        };
 
         const results = await testSubject.scan(scanMetadata, pageScanResult);
 

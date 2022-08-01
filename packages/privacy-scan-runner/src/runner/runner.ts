@@ -157,9 +157,9 @@ export class Runner {
     }
 
     private async generateScanReports(privacyScanResult: PrivacyScanResult): Promise<OnDemandPageScanReport[]> {
-        this.logger.logInfo(`Generating privacy scan report for a webpage scan.`);
         const reports: GeneratedReport[] = [];
         if (!isEmpty(privacyScanResult.results)) {
+            this.logger.logInfo(`Generating privacy scan report for a webpage scan.`);
             reports.push({
                 content: JSON.stringify(privacyScanResult.results),
                 format: 'json',

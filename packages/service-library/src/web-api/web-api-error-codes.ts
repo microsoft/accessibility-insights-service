@@ -21,7 +21,8 @@ export declare type WebApiErrorCodeName =
     | 'MissingSiteOrReportGroups'
     | 'MissingRequiredDeepScanProperties'
     | 'TooManyKnownPages'
-    | 'InvalidKnownPageURL';
+    | 'InvalidKnownPageURL'
+    | 'DuplicateKnownPage';
 
 export interface WebApiErrorCode {
     statusCode: number;
@@ -179,6 +180,15 @@ export class WebApiErrorCodes {
             code: 'InvalidKnownPageURL',
             codeId: 4016,
             message: 'The know page URL is not valid.',
+        },
+    };
+
+    public static duplicateKnownPage: WebApiErrorCode = {
+        statusCode: 400,
+        error: {
+            code: 'DuplicateKnownPage',
+            codeId: 4017,
+            message: 'The request contains duplicate know page URL.',
         },
     };
 
