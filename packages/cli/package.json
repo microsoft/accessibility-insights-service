@@ -41,7 +41,7 @@
         "common": "1.0.0",
         "copy-webpack-plugin": "^11.0.0",
         "dts-bundle-generator": "^6.12.0",
-        "fork-ts-checker-webpack-plugin": "^7.2.12",
+        "fork-ts-checker-webpack-plugin": "^7.2.13",
         "jest": "^27.5.1",
         "jest-junit": "^14.0.0",
         "mkdirp": "^1.0.4",

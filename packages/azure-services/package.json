@@ -27,7 +27,7 @@
         "@types/lodash": "^4.14.182",
         "@types/verror": "^1.10.4",
         "@types/yargs": "^17.0.10",
-        "fork-ts-checker-webpack-plugin": "^7.2.12",
+        "fork-ts-checker-webpack-plugin": "^7.2.13",
         "jest": "^27.5.1",
         "jest-junit": "^14.0.0",
         "mockdate": "^3.0.5",
