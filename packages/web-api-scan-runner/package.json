@@ -52,7 +52,7 @@
         "@axe-core/puppeteer": "4.4.2",
         "@azure/cosmos": "^3.16.2",
         "accessibility-insights-crawler": "1.0.0",
-        "accessibility-insights-report": "4.3.0",
+        "accessibility-insights-report": "4.3.1",
         "apify": "^2.3.2",
         "applicationinsights": "^2.3.1",
         "axe-core": "4.4.1",

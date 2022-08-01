@@ -91,6 +91,6 @@
         "tar": ">=6.1.9"
     },
     "dependencies": {
-        "accessibility-insights-report": "4.3.0"
+        "accessibility-insights-report": "4.3.1"
     }
 }
