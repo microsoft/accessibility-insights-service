@@ -52,7 +52,7 @@
         "eslint-plugin-sort-class-members": "^1.14.0",
         "eslint-plugin-unicorn": "^40.1.0",
         "jest": "^27.5.1",
-        "jest-extended": "^2.0.0",
+        "jest-extended": "^3.0.1",
         "jest-html-reporter": "^3.6.0",
         "jest-junit": "^14.0.0",
         "lerna": "^5.2.0",
