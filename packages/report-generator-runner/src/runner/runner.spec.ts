@@ -13,10 +13,14 @@ import { RunMetadataConfig } from '../run-metadata-config';
 import { ReportGeneratorRunnerTelemetryManager } from '../report-generator-runner-telemetry-manager';
 import { ReportGeneratorMetadata } from '../types/report-generator-metadata';
 import { ReportProcessor } from '../report-processor/report-processor';
-import { RequestSelector, QueuedRequests, QueuedRequest } from './request-selector';
+import { RequestSelector, QueuedRequests, QueuedRequest, DispatchCondition } from './request-selector';
 import { Runner } from './runner';
 
 const maxQueuedRequests = 10;
+
+interface ReportGeneratorRequestMockType extends ReportGeneratorRequest {
+    condition?: DispatchCondition;
+}
 
 let runMetadataConfigMock: IMock<RunMetadataConfig>;
 let reportGeneratorRequestProviderMock: IMock<ReportGeneratorRequestProvider>;
@@ -52,9 +56,12 @@ describe(Runner, () => {
                 id: 'id-3',
                 scanGroupId: 'scanGroupId-1',
                 reports: [{}],
+                run: {
+                    state: 'completed',
+                },
                 condition: 'completed',
             },
-        ] as unknown as ReportGeneratorRequest[];
+        ] as ReportGeneratorRequestMockType[];
 
         runMetadataConfigMock = Mock.ofType<RunMetadataConfig>();
         reportGeneratorRequestProviderMock = Mock.ofType<ReportGeneratorRequestProvider>();
@@ -128,8 +135,9 @@ describe(Runner, () => {
                 run: {
                     state: 'completed',
                 },
+                condition: 'completed',
             },
-        ] as ReportGeneratorRequest[];
+        ] as ReportGeneratorRequestMockType[];
         const queuedRequests = createQueuedRequests(reportGeneratorRequests);
         setupGetQueuedRequests(queuedRequests);
         setupTryUpdateRequestsWithRunningState(reportGeneratorRequests, resultRequestsUpdateWithRunningState);
@@ -147,15 +155,15 @@ describe(Runner, () => {
                 id: 'id-1',
                 scanGroupId: 'scanGroupId-1',
                 reports: [{}],
-                run: {},
+                condition: 'pending',
             },
             {
                 id: 'id-3',
                 scanGroupId: 'scanGroupId-1',
                 reports: [{}],
-                run: {},
+                condition: 'pending',
             },
-        ] as ReportGeneratorRequest[];
+        ] as ReportGeneratorRequestMockType[];
         const resultRequestsUpdateByReportProcessor = [
             {
                 id: 'id-1',
@@ -173,7 +181,7 @@ describe(Runner, () => {
                     state: 'completed',
                 },
             },
-        ] as ReportGeneratorRequest[];
+        ] as ReportGeneratorRequestMockType[];
         const queuedRequests = createQueuedRequests(reportGeneratorRequests);
         setupGetQueuedRequests(queuedRequests);
         setupTryUpdateRequestsWithRunningState(reportGeneratorRequests);
@@ -189,21 +197,21 @@ describe(Runner, () => {
     });
 });
 
-function createQueuedRequests(requests: ReportGeneratorRequest[]): QueuedRequests {
+function createQueuedRequests(requests: ReportGeneratorRequestMockType[]): QueuedRequests {
     const queuedRequests: QueuedRequests = {
         requestsToProcess: [],
         requestsToDelete: [],
     };
     requests.map((request) => {
-        if (request.run?.state === 'completed') {
+        if (request.condition === 'completed') {
             queuedRequests.requestsToDelete.push({
-                request,
+                request: getCloneRequest(request),
                 condition: 'completed',
                 error: request.run?.error as string,
             } as QueuedRequest);
         } else {
             queuedRequests.requestsToProcess.push({
-                request,
+                request: getCloneRequest(request),
                 condition: 'pending',
                 error: request.run?.error as string,
             } as QueuedRequest);
@@ -214,10 +222,10 @@ function createQueuedRequests(requests: ReportGeneratorRequest[]): QueuedRequest
 }
 
 function setupTryUpdateRequestsWithRunningState(
-    requests: ReportGeneratorRequest[],
-    resultRequests: ReportGeneratorRequest[] = undefined,
+    requests: ReportGeneratorRequestMockType[],
+    resultRequests: ReportGeneratorRequestMockType[] = undefined,
 ): void {
-    const requestsToProcess = requests.filter((r) => r.run.state !== 'completed');
+    const requestsToProcess = requests.filter((r) => r.run?.state !== 'completed');
     const requestsToUpdate = requestsToProcess.map((request) => {
         return {
             id: request.id,
@@ -232,7 +240,7 @@ function setupTryUpdateRequestsWithRunningState(
     const updatedRequests = (resultRequests ?? requests).map((request) => {
         return {
             succeeded: true,
-            result: request,
+            result: getCloneRequest(request),
         } as OperationResult<ReportGeneratorRequest>;
     });
 
@@ -243,24 +251,24 @@ function setupTryUpdateRequestsWithRunningState(
 }
 
 function setupTryUpdateRequestsWithFailedState(
-    requests: ReportGeneratorRequest[],
-    resultRequests: ReportGeneratorRequest[] = undefined,
+    requests: ReportGeneratorRequestMockType[],
+    resultRequests: ReportGeneratorRequestMockType[] = undefined,
 ): void {
-    const requestsToProcess = requests.filter((r) => r.run.state !== 'completed');
+    const requestsToProcess = requests.filter((r) => r.run?.state !== 'completed');
     const requestsToUpdate = requestsToProcess.map((request) => {
         return {
             id: request.id,
             run: {
                 state: 'failed',
                 timestamp: dateNow.toJSON(),
-                error: isEmpty(request.run.error) ? null : request.run.error.toString().substring(0, 2048),
+                error: isEmpty(request.run?.error) ? null : request.run.error.toString().substring(0, 2048),
             },
         } as Partial<ReportGeneratorRequest>;
     });
     const updatedRequests = (resultRequests ?? requests).map((request) => {
         return {
             succeeded: true,
-            result: request,
+            result: getCloneRequest(request),
         } as OperationResult<ReportGeneratorRequest>;
     });
     reportGeneratorRequestProviderMock
@@ -270,14 +278,14 @@ function setupTryUpdateRequestsWithFailedState(
 }
 
 function setupSetScanRunStatesToCompleted(queuedRequests: ReportGeneratorRequest[]): void {
-    const requestsToProcess = queuedRequests.filter((r) => r.run.state === 'completed');
+    const requestsToProcess = queuedRequests.filter((r) => r.run?.state === 'completed');
     const requestsToUpdate = requestsToProcess.map((request) => {
         return {
             id: request.id,
             run: {
-                state: request.run.state,
+                state: request.run?.state,
                 timestamp: dateNow.toJSON(),
-                error: isEmpty(request.run.error) ? null : request.run.error.toString().substring(0, 2048),
+                error: isEmpty(request.run?.error) ? null : request.run.error.toString().substring(0, 2048),
             },
             reports: request.reports,
         } as Partial<OnDemandPageScanResult>;
@@ -289,7 +297,7 @@ function setupSetScanRunStatesToCompleted(queuedRequests: ReportGeneratorRequest
 }
 
 function setupDeleteRequests(queuedRequests: ReportGeneratorRequest[]): void {
-    const requestsToProcess = queuedRequests.filter((r) => r.run.state === 'completed');
+    const requestsToProcess = queuedRequests.filter((r) => r.run?.state === 'completed');
     reportGeneratorRequestProviderMock
         .setup((o) => o.deleteRequests(It.isValue(requestsToProcess.map((r) => r.id))))
         .returns(() => Promise.resolve(undefined))
@@ -304,32 +312,33 @@ function setupGetQueuedRequests(queuedRequests: QueuedRequests): void {
 }
 
 function setupReportProcessorMock(
-    requests: ReportGeneratorRequest[],
-    resultRequests: ReportGeneratorRequest[] = undefined,
+    requests: ReportGeneratorRequestMockType[],
+    resultRequests: ReportGeneratorRequestMockType[] = undefined,
 ): ReportGeneratorRequest[] {
-    const requestsToProcess = requests.filter((r) => r.run.state !== 'completed');
+    const requestsToProcess = requests.filter((r) => r.run?.state !== 'completed');
     const requestsToUpdate = requestsToProcess.map((request) => {
         return {
-            request,
-            condition: request.run.state,
-            error: request.run.error,
+            request: getCloneRequest(request),
+            condition: request.condition,
+            error: request.run?.error,
         } as QueuedRequest;
     });
+
     let updatedRequests: QueuedRequest[];
     if (resultRequests) {
         updatedRequests = resultRequests.map((request) => {
             return {
-                request,
-                condition: request.run.state,
-                error: request.run.error,
+                request: getCloneRequest(request),
+                condition: request.condition,
+                error: request.run?.error,
             } as QueuedRequest;
         });
     } else {
         updatedRequests = requestsToProcess.map((request) => {
             return {
-                request,
+                request: getCloneRequest(request),
                 condition: 'completed',
-                error: request.run.error,
+                error: request.run?.error,
             } as QueuedRequest;
         });
     }
@@ -343,11 +352,21 @@ function setupReportProcessorMock(
         const projectedRequest = cloneDeep(request);
         const updatedRequest = updatedRequests.find((r) => r.request.id === projectedRequest.id);
         if (updatedRequest) {
-            projectedRequest.run.state = updatedRequest.condition as ReportScanRunState;
+            projectedRequest.run = {
+                ...projectedRequest.run,
+                state: updatedRequest.condition as ReportScanRunState,
+            };
         }
 
         return projectedRequest;
     });
 
     return projectedReportGeneratorRequests;
+}
+
+function getCloneRequest(request: ReportGeneratorRequestMockType): ReportGeneratorRequest {
+    const requestClone = cloneDeep(request);
+    delete requestClone.condition;
+
+    return requestClone;
 }
