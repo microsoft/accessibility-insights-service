@@ -115,13 +115,13 @@ if ([string]::IsNullOrEmpty($global:keyvault)) {
     exitWithUsageInfo
 }
 
-try {
-    getCurrentUserDetails
-    loginToAzure
-    grantUserAccessToKeyVault
-    loginToContainerRegistry
-    pullDockerImages
-}
-catch {
+trap {
     revokeUserAccessToKeyVault
+    break
 }
+
+getCurrentUserDetails
+loginToAzure
+grantUserAccessToKeyVault
+loginToContainerRegistry
+pullDockerImages
