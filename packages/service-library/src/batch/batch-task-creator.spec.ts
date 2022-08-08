@@ -84,13 +84,13 @@ class TestableBatchTaskCreator extends BatchTaskCreator {
         );
     }
 
-    public async deleteScanQueueMessagesForSucceededTasks(scanMessages: ScanMessage[]): Promise<void> {
+    public async deleteScanQueueMessagesForSucceededTasks(): Promise<void> {
         return this.invokeOverrides(
             EnableBaseWorkflow.deleteScanQueueMessagesForSucceededTasks,
             this.deleteScanQueueMessagesForSucceededTasksCallback,
-            async () => super.deleteScanQueueMessagesForSucceededTasks(scanMessages),
+            async () => super.deleteScanQueueMessagesForSucceededTasks(),
             undefined,
-            scanMessages,
+            this.activeScanMessages,
         );
     }
 
@@ -555,12 +555,12 @@ describe(BatchTaskCreator, () => {
             EnableBaseWorkflow.deleteScanQueueMessagesForSucceededTasks | EnableBaseWorkflow.deleteSucceededRequest;
         testSubject.activeScanMessages = queueMessagesGenerator.scanMessages;
 
-        await testSubject.deleteScanQueueMessagesForSucceededTasks(queueMessagesGenerator.scanMessages);
+        await testSubject.deleteScanQueueMessagesForSucceededTasks();
 
         expect(testSubject.activeScanMessages).toEqual(expectScanMessages);
 
         // the subsequent run should be no-op since active messages cache was cleaned up
-        await testSubject.deleteScanQueueMessagesForSucceededTasks(queueMessagesGenerator.scanMessages);
+        await testSubject.deleteScanQueueMessagesForSucceededTasks();
     });
 });
 
