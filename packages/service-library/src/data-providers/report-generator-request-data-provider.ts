@@ -61,8 +61,7 @@ export class ReportGeneratorRequestProvider {
     ): Promise<CosmosOperationResponse<ScanReportGroup[]>> {
         const query = {
             query: `SELECT TOP @itemCount COUNT(1) as scanCount, t.scanGroupId, t.targetReport FROM (
-                SELECT * FROM c WHERE c.itemType = @itemType AND
-                (NOT IS_DEFINED(c.run.state) OR c.run.state != "running" OR (c.run.state = "running" AND DateTimeToTimestamp(c.run.timestamp) < @availabilityTimestamp))
+                SELECT * FROM c WHERE c.itemType = @itemType AND (NOT IS_DEFINED(c.run.state) OR c.run.state != "running" OR (c.run.state = "running" AND DateTimeToTimestamp(c.run.timestamp) < @availabilityTimestamp))
                 ) t GROUP BY t.scanGroupId, t.targetReport`,
             parameters: [
                 {
