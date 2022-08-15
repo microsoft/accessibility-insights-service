@@ -68,7 +68,8 @@ export class Worker extends BatchTaskCreator {
         if (poolLoadSnapshot.tasksIncrementCountPerInterval > 0) {
             const reportMessages = await this.readReportMessages(poolLoadSnapshot.tasksIncrementCountPerInterval);
             if (reportMessages?.length > 0) {
-                messages = this.convertToScanMessages(reportMessages);
+                const newReportMessages = this.reduceReportMessages(reportMessages);
+                messages = this.convertToScanMessages(newReportMessages);
             }
         }
 
@@ -133,6 +134,14 @@ export class Worker extends BatchTaskCreator {
         } while (reportMessages.length < requestCount && continuationToken !== undefined);
 
         return reportMessages;
+    }
+
+    private reduceReportMessages(reportRequests: ScanReportGroup[]): ScanReportGroup[] {
+        if (this.activeScanMessages.length === 0 || reportRequests.length === 0) {
+            return reportRequests;
+        }
+
+        return reportRequests.filter((r) => !this.activeScanMessages.some((a) => a.scanId === r.scanGroupId));
     }
 
     private async writePoolLoadSnapshot(poolLoadSnapshot: PoolLoadSnapshot): Promise<void> {

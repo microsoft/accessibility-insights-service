@@ -30,7 +30,7 @@ class TestableWorker extends Worker {
 
     public handleFailedTasksCallback: (failedTasks: BatchTask[]) => Promise<void>;
 
-    public activeScanMessages: ScanMessage[];
+    public activeScanMessages: ScanMessage[] = [];
 
     public async getMessagesForTaskCreation(): Promise<ScanMessage[]> {
         return super.getMessagesForTaskCreation();
@@ -244,26 +244,7 @@ describe(Worker, () => {
     });
 
     it('get report requests', async () => {
-        const poolLoadSnapshot = {
-            tasksIncrementCountPerInterval: 10,
-            samplingIntervalInSeconds: 15,
-        } as PoolLoadSnapshot;
-        poolLoadGeneratorMock
-            .setup((o) => o.getPoolLoadSnapshot(poolMetricsInfo))
-            .returns(async () => Promise.resolve(poolLoadSnapshot))
-            .verifiable();
-        batchPoolLoadSnapshotProviderMock
-            .setup((o) =>
-                o.writeBatchPoolLoadSnapshot(
-                    It.isValue({
-                        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-                        ...({} as StorageDocument),
-                        batchAccountName: batchConfig.accountName,
-                        ...poolLoadSnapshot,
-                    }),
-                ),
-            )
-            .verifiable();
+        const poolLoadSnapshot = setupPoolLoadSnapshot();
 
         reportRequestGenerator.queueMessagesGeneratorFn()();
         const scanReportGroups = reportRequestGenerator.scanMessages.map((m) => {
@@ -299,6 +280,36 @@ describe(Worker, () => {
         const actualMessages = await testSubject.getMessagesForTaskCreation();
 
         expect(actualMessages).toEqual(reportRequestGenerator.scanMessages);
+    });
+
+    it('get report requests for new scan report groups only', async () => {
+        const poolLoadSnapshot = setupPoolLoadSnapshot();
+
+        reportRequestGenerator.queueMessagesGeneratorFn()();
+        const scanReportGroups = reportRequestGenerator.scanMessages.map((m) => {
+            return {
+                scanGroupId: m.scanId,
+                targetReport: 'accessibility',
+            } as ScanReportGroup;
+        });
+        testSubject.activeScanMessages = [
+            {
+                scanId: scanReportGroups[0].scanGroupId,
+            },
+        ] as ScanMessage[];
+
+        const cosmosOperationResponse = {
+            item: scanReportGroups,
+            statusCode: 200,
+        };
+        reportGeneratorRequestProviderMock
+            .setup((o) => o.readScanGroupIds(failedScanRetryIntervalInMinutes, poolLoadSnapshot.tasksIncrementCountPerInterval, undefined))
+            .returns(() => Promise.resolve(cosmosOperationResponse))
+            .verifiable();
+
+        const actualMessages = await testSubject.getMessagesForTaskCreation();
+
+        expect(actualMessages).toEqual(reportRequestGenerator.scanMessages.slice(1));
     });
 
     it('update pool stats when tasks added', async () => {
@@ -368,6 +379,31 @@ describe(Worker, () => {
         await testSubject.handleFailedTasks(failedTasks);
     });
 });
+
+function setupPoolLoadSnapshot(): PoolLoadSnapshot {
+    const poolLoadSnapshot = {
+        tasksIncrementCountPerInterval: 10,
+        samplingIntervalInSeconds: 15,
+    } as PoolLoadSnapshot;
+    poolLoadGeneratorMock
+        .setup((o) => o.getPoolLoadSnapshot(poolMetricsInfo))
+        .returns(async () => Promise.resolve(poolLoadSnapshot))
+        .verifiable();
+    batchPoolLoadSnapshotProviderMock
+        .setup((o) =>
+            o.writeBatchPoolLoadSnapshot(
+                It.isValue({
+                    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+                    ...({} as StorageDocument),
+                    batchAccountName: batchConfig.accountName,
+                    ...poolLoadSnapshot,
+                }),
+            ),
+        )
+        .verifiable();
+
+    return poolLoadSnapshot;
+}
 
 function createJobTasks(messages: ScanMessage[]): JobTask[] {
     let count = 0;
