@@ -6,6 +6,7 @@ import { StorageDocument } from './storage-document';
 import { ItemType } from './item-type';
 
 export declare type TargetReport = 'accessibility' | 'privacy';
+export declare type ReportScanRunState = 'running' | 'completed' | 'failed';
 
 export interface ReportGeneratorRequest extends StorageDocument {
     itemType: ItemType.reportGeneratorRequest;
@@ -17,5 +18,9 @@ export interface ReportGeneratorRequest extends StorageDocument {
     /**
      * Supported run states: pending, running, completed, failed
      */
-    run: OnDemandPageScanRunResult;
+    run: ReportScanRunResult;
+}
+
+export interface ReportScanRunResult extends Omit<OnDemandPageScanRunResult, 'state'> {
+    state: ReportScanRunState;
 }

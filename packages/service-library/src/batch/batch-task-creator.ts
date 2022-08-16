@@ -189,12 +189,12 @@ export abstract class BatchTaskCreator {
     }
 
     protected async validateTasks(): Promise<void> {
-        await this.deleteScanQueueMessagesForSucceededTasks(this.activeScanMessages);
+        await this.deleteScanQueueMessagesForSucceededTasks();
         await this.handleFailedTasksImpl();
     }
 
-    protected async deleteScanQueueMessagesForSucceededTasks(scanMessages: ScanMessage[]): Promise<void> {
-        if (scanMessages.length === 0) {
+    protected async deleteScanQueueMessagesForSucceededTasks(): Promise<void> {
+        if (this.activeScanMessages.length === 0) {
             return;
         }
 

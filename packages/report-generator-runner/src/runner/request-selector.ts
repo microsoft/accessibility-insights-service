@@ -60,8 +60,6 @@ export class RequestSelector {
 
     private filterRequests(filteredRequests: QueuedRequests, queuedRequests: ReportGeneratorRequest[]): void {
         queuedRequests.map((queuedRequest) => {
-            // Supported run states: pending, running, completed, failed
-
             if (queuedRequest.run === undefined) {
                 filteredRequests.requestsToProcess.push({ request: queuedRequest, condition: 'pending' });
 
@@ -89,13 +87,6 @@ export class RequestSelector {
                 moment.utc(queuedRequest.run.timestamp).add(this.failedScanRetryIntervalInMinutes, 'minutes') <= moment.utc()
             ) {
                 filteredRequests.requestsToDelete.push({ request: queuedRequest, condition: 'failed' });
-
-                return;
-            }
-
-            // pending scan request
-            if (queuedRequest.run.state === 'pending') {
-                filteredRequests.requestsToProcess.push({ request: queuedRequest, condition: 'pending' });
 
                 return;
             }
