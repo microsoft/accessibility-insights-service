@@ -7,7 +7,7 @@ const forkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 const fileManagerPlugin = require('filemanager-webpack-plugin');
 
 module.exports = (env) => {
-    const version = env ? env.version : 'dev';
+    const version = env?.version ?? 'dev';
     console.log(`Building for version : ${version}`);
 
     return {

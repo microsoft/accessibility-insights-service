@@ -111,7 +111,7 @@ function getCommonConfig(version, generateTypings) {
 }
 
 module.exports = (env) => {
-    const version = env ? env.version : 'dev';
+    const version = env?.version ?? 'dev';
     console.log(`Building for version : ${version}`);
 
     return [
