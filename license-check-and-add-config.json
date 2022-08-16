@@ -21,11 +21,13 @@
         "**/Dockerfile",
         "**/package.json",
         "**/packages",
-        "**/.DS_Store"
+        "**/.DS_Store",
+        ".yarn/",
+        ".yarnrc.yml"
     ],
     "license": "./copyright-header.txt",
     "licenseFormats": {
-        "yaml|npmrc|yml|ps1|gitignore|dockerignore|prettierignore|yarnrc|nsh|sh": {
+        "yaml|npmrc|yml|ps1|gitignore|dockerignore|prettierignore|yarnrc|nsh|sh|shellcheckrc": {
             "eachLine": {
                 "prepend": "# "
             }

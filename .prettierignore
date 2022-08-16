@@ -32,3 +32,4 @@ copyright-header.txt
 **/ai_scan_cli_output/
 **/*.ps1
 **/*.cmd
+.yarn/

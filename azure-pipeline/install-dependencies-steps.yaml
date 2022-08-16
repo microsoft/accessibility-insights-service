@@ -7,5 +7,5 @@ steps:
       displayName: Use node 16.x
 
     - script: |
-          yarn install --frozen-lockfile
-      displayName: 'install dependencies'
+          yarn install --immutable
+      displayName: Install dependencies

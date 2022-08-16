@@ -5,28 +5,28 @@ steps:
 
     - script: |
           yarn format:check
-      displayName: check code formatting
+      displayName: Check code formatting
 
     - script: |
           yarn copyright:check
-      displayName: check for copyright headers
+      displayName: Check for copyright headers
 
     - script: |
           yarn syncpack:check
-      displayName: check for package version inconsistencies
-
-    - template: ./build-steps.yaml
+      displayName: Check for package version
 
     - script: |
           yarn lint:check
-      displayName: run linter
+      displayName: Run linter
+
+    - template: ./build-steps.yaml
 
     - template: ./test-steps.yaml
       parameters: { totalTestSlices: '${{ parameters.totalTestSlices }}', testSlicesToRun: '${{ parameters.testSlicesToRun }}' }
 
     - script: |
           yarn run pack
-      displayName: create npm package zips
+      displayName: Create npm package zips
 
     - task: CopyFiles@2
       inputs:

@@ -45,10 +45,10 @@
         "webpack-ignore-dynamic-require": "^1.0.0"
     },
     "dependencies": {
-        "azure-services": "1.0.0",
+        "azure-services": "workspace:*",
         "inversify": "^6.0.1",
         "lodash": "^4.17.21",
-        "logger": "1.0.0",
+        "logger": "workspace:*",
         "reflect-metadata": "^0.1.13"
     }
 }

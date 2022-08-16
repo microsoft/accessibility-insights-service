@@ -36,13 +36,13 @@
         "typescript": "^4.7.4"
     },
     "dependencies": {
-        "common": "1.0.0",
+        "common": "workspace:*",
         "inversify": "^6.0.1",
         "lodash": "^4.17.21",
-        "logger": "1.0.0",
+        "logger": "workspace:*",
         "puppeteer": "^13.7.0",
         "reflect-metadata": "^0.1.13",
-        "scanner-global-library": "1.0.0",
-        "storage-documents": "1.0.0"
+        "scanner-global-library": "workspace:*",
+        "storage-documents": "workspace:*"
     }
 }
