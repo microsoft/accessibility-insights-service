@@ -3074,6 +3074,12 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/fingerprint-generator@1.0.0, @types/fingerprint-generator@workspace:packages/typings":
+  version: 0.0.0-use.local
+  resolution: "@types/fingerprint-generator@workspace:packages/typings"
+  languageName: unknown
+  linkType: soft
+
 "@types/glob@npm:*":
   version: 7.2.0
   resolution: "@types/glob@npm:7.2.0"
@@ -3916,6 +3922,48 @@ __metadata:
   languageName: node
   linkType: hard
 
+"accessibility-insights-crawler@workspace:*, accessibility-insights-crawler@workspace:packages/crawler":
+  version: 0.0.0-use.local
+  resolution: "accessibility-insights-crawler@workspace:packages/crawler"
+  dependencies:
+    "@axe-core/puppeteer": 4.4.2
+    "@medv/finder": ^2.1.0
+    "@rollup/plugin-commonjs": ^22.0.1
+    "@rollup/plugin-node-resolve": ^13.3.0
+    "@types/encoding-down": ^5.0.0
+    "@types/jest": ^27.4.1
+    "@types/leveldown": ^4.0.2
+    "@types/levelup": ^5.1.1
+    "@types/node": ^16.11.7
+    "@types/puppeteer": ^5.4.6
+    accessibility-insights-report: 4.3.0
+    apify: ^2.3.2
+    axe-core: 4.4.1
+    browser-pool: ^3.1.4
+    common: "workspace:*"
+    dotenv: ^16.0.1
+    encoding-down: ^7.1.0
+    inversify: ^6.0.1
+    jest: ^27.5.1
+    jest-junit: ^14.0.0
+    leveldown: ^6.1.1
+    levelup: ^5.1.1
+    lodash: ^4.17.21
+    logger: "workspace:*"
+    npm-run-all: ^4.1.5
+    puppeteer: ^13.7.0
+    reflect-metadata: ^0.1.13
+    rimraf: ^3.0.2
+    rollup: ^2.75.6
+    scanner-global-library: "workspace:*"
+    sha.js: ^2.4.11
+    ts-jest: ^27.1.4
+    typemoq: ^2.1.0
+    typescript: ^4.7.4
+    yargs: ^17.5.1
+  languageName: unknown
+  linkType: soft
+
 "accessibility-insights-report@npm:4.3.0":
   version: 4.3.0
   resolution: "accessibility-insights-report@npm:4.3.0"
@@ -3932,6 +3980,118 @@ __metadata:
   checksum: e4ca853394ba77a6fbb6bcb64d913c68e2e8b732a62f2412f71cc81719ad4c2297f3c4b4c7517edb0001c2ed04d56c6644c14d74fadb48ea1f878f3420ce167a
   languageName: node
   linkType: hard
+
+"accessibility-insights-scan@workspace:packages/cli":
+  version: 0.0.0-use.local
+  resolution: "accessibility-insights-scan@workspace:packages/cli"
+  dependencies:
+    "@axe-core/puppeteer": 4.4.2
+    "@medv/finder": ^2.1.0
+    "@sindresorhus/fnv1a": ^2.0.1
+    "@types/cli-spinner": ^0.2.0
+    "@types/escape-html": ^1.0.2
+    "@types/fingerprint-generator": 1.0.0
+    "@types/jest": ^27.4.1
+    "@types/lodash": ^4.14.182
+    "@types/node": ^16.11.7
+    "@types/normalize-path": ^3.0.0
+    "@types/puppeteer": ^5.4.6
+    "@types/table": ^6.3.2
+    accessibility-insights-crawler: "workspace:*"
+    accessibility-insights-report: 4.3.0
+    ajv: ^8.10.0
+    apify: ^2.3.2
+    applicationinsights: ^2.3.1
+    axe-core: 4.4.1
+    axe-result-converter: "workspace:*"
+    browser-pool: ^3.1.4
+    cli-spinner: ^0.2.10
+    common: "workspace:*"
+    convict: ^6.2.3
+    copy-webpack-plugin: ^11.0.0
+    dotenv: ^16.0.1
+    dts-bundle-generator: ^6.12.0
+    encoding-down: ^7.1.0
+    exponential-backoff: ^3.1.0
+    filenamify: ^4.3.0
+    filenamify-url: ^2.1.2
+    fork-ts-checker-webpack-plugin: ^7.2.12
+    got: ^11.8.5
+    inversify: ^6.0.1
+    jest: ^27.5.1
+    jest-junit: ^14.0.0
+    json5: ^2.2.1
+    leveldown: ^6.1.1
+    levelup: ^5.1.1
+    lodash: ^4.17.21
+    mkdirp: ^1.0.4
+    mockdate: ^3.0.5
+    moment: ^2.29.4
+    normalize-path: ^3.0.0
+    normalize-url: 6.1.0
+    npm-run-all: ^4.1.5
+    playwright: ^1.22.2
+    puppeteer: ^13.7.0
+    puppeteer-extra: ^3.2.3
+    puppeteer-extra-plugin: ^3.2.0
+    puppeteer-extra-plugin-stealth: ^2.9.0
+    raw-body: ^2.5.1
+    reflect-metadata: ^0.1.13
+    rimraf: ^3.0.2
+    scanner-global-library: "workspace:*"
+    serialize-error: ^8.1.0
+    sha.js: ^2.4.11
+    shebang-loader: ^0.0.1
+    ts-jest: ^27.1.4
+    typemoq: ^2.1.0
+    typescript: ^4.7.4
+    uuid-with-v6: ^2.0.0
+    verror: ^1.10.1
+    webpack: ^5.73.0
+    webpack-cli: ^4.9.2
+    webpack-node-externals: ^3.0.0
+    wtfnode: ^0.9.0
+    yargs: ^17.5.1
+  bin:
+    ai-scan: dist/ai-scan-cli.js
+  languageName: unknown
+  linkType: soft
+
+"accessibility-insights-service@workspace:.":
+  version: 0.0.0-use.local
+  resolution: "accessibility-insights-service@workspace:."
+  dependencies:
+    "@types/node": ^16.11.7
+    "@typescript-eslint/eslint-plugin": ^4.33.0
+    "@typescript-eslint/eslint-plugin-tslint": ^5.30.6
+    "@typescript-eslint/parser": ^4.33.0
+    accessibility-insights-report: 4.3.0
+    combine-dependabot-prs: ^1.0.5
+    commander: ^9.3.0
+    eslint: ^7.32.0
+    eslint-plugin-header: ^3.0.1
+    eslint-plugin-import: ^2.26.0
+    eslint-plugin-jest: ^26.5.3
+    eslint-plugin-jsdoc: ^39.0.1
+    eslint-plugin-prefer-arrow: ^1.2.3
+    eslint-plugin-security: ^1.5.0
+    eslint-plugin-sort-class-members: ^1.14.0
+    eslint-plugin-unicorn: ^40.1.0
+    jest: ^27.5.1
+    jest-extended: ^2.0.0
+    jest-html-reporter: ^3.6.0
+    jest-junit: ^14.0.0
+    license-check-and-add: ^4.0.5
+    npm-run-all: ^4.1.5
+    prettier: 2.6.2
+    rimraf: ^3.0.2
+    simple-git: ^3.10.0
+    syncpack: ^8.2.4
+    ts-jest: ^27.1.4
+    tslint: ^6.1.3
+    typescript: ^4.7.4
+  languageName: unknown
+  linkType: soft
 
 "acorn-globals@npm:^6.0.0":
   version: 6.0.0
@@ -4498,6 +4658,29 @@ __metadata:
   languageName: node
   linkType: hard
 
+"axe-result-converter@workspace:*, axe-result-converter@workspace:packages/axe-result-converter":
+  version: 0.0.0-use.local
+  resolution: "axe-result-converter@workspace:packages/axe-result-converter"
+  dependencies:
+    "@types/jest": ^27.4.1
+    "@types/lodash": ^4.14.182
+    "@types/node": ^16.11.7
+    accessibility-insights-report: 4.3.0
+    axe-core: 4.4.1
+    common: "workspace:*"
+    inversify: ^6.0.1
+    jest: ^27.5.1
+    jest-junit: ^14.0.0
+    lodash: ^4.17.21
+    npm-run-all: ^4.1.5
+    reflect-metadata: ^0.1.13
+    rimraf: ^3.0.2
+    ts-jest: ^27.1.4
+    typemoq: ^2.1.0
+    typescript: ^4.7.4
+  languageName: unknown
+  linkType: soft
+
 "axe-sarif-converter@npm:^2.9.0":
   version: 2.9.0
   resolution: "axe-sarif-converter@npm:2.9.0"
@@ -4519,6 +4702,52 @@ __metadata:
   checksum: 44245f24ac971e7458f3120c92f9d66d1fc695e8b97019139de5b0cc65d9b8104647db01e5f46917728edfc0cfd88eb30fc4c55e6053eef4ace76768ce95ff3c
   languageName: node
   linkType: hard
+
+"azure-services@workspace:*, azure-services@workspace:packages/azure-services":
+  version: 0.0.0-use.local
+  resolution: "azure-services@workspace:packages/azure-services"
+  dependencies:
+    "@azure/batch": ^10.1.0
+    "@azure/core-auth": ^1.3.2
+    "@azure/cosmos": ^3.16.2
+    "@azure/identity": ^2.1.0
+    "@azure/keyvault-secrets": ^4.4.0
+    "@azure/ms-rest-nodeauth": ^3.1.1
+    "@azure/storage-blob": ^12.11.0
+    "@azure/storage-queue": ^12.10.0
+    "@types/got": ^9.6.11
+    "@types/jest": ^27.4.1
+    "@types/lodash": ^4.14.182
+    "@types/verror": ^1.10.4
+    "@types/yargs": ^17.0.10
+    async-mutex: ^0.3.2
+    common: "workspace:*"
+    dotenv: ^16.0.1
+    fork-ts-checker-webpack-plugin: ^7.2.12
+    got: ^11.8.5
+    inversify: ^6.0.1
+    jest: ^27.5.1
+    jest-junit: ^14.0.0
+    lodash: ^4.17.21
+    logger: "workspace:*"
+    mockdate: ^3.0.5
+    moment: ^2.29.4
+    node-cache: ^5.1.2
+    npm-run-all: ^4.1.5
+    p-limit: ^3.1.0
+    pretty-format: ^28.1.1
+    reflect-metadata: ^0.1.13
+    rimraf: ^3.0.2
+    storage-documents: "workspace:*"
+    ts-jest: ^27.1.4
+    ts-loader: ^9.3.1
+    typemoq: ^2.1.0
+    typescript: ^4.7.4
+    verror: ^1.10.1
+    webpack: ^5.73.0
+    webpack-cli: ^4.9.2
+  languageName: unknown
+  linkType: soft
 
 "babel-jest@npm:^27.5.1":
   version: 27.5.1
@@ -5423,6 +5652,38 @@ __metadata:
   languageName: node
   linkType: hard
 
+"common@workspace:*, common@workspace:packages/common":
+  version: 0.0.0-use.local
+  resolution: "common@workspace:packages/common"
+  dependencies:
+    "@sindresorhus/fnv1a": ^2.0.1
+    "@types/convict": ^6.1.1
+    "@types/jest": ^27.4.1
+    "@types/node": ^16.11.7
+    "@types/normalize-path": ^3.0.0
+    "@types/sha.js": ^2.4.0
+    convict: ^6.2.3
+    exponential-backoff: ^3.1.0
+    got: ^11.8.5
+    inversify: ^6.0.1
+    jest: ^27.5.1
+    jest-junit: ^14.0.0
+    lodash: ^4.17.21
+    normalize-path: ^3.0.0
+    normalize-url: 6.1.0
+    npm-run-all: ^4.1.5
+    raw-body: ^2.5.1
+    reflect-metadata: ^0.1.13
+    rimraf: ^3.0.2
+    serialize-error: ^8.1.0
+    sha.js: ^2.4.11
+    ts-jest: ^27.1.4
+    typemoq: ^2.1.0
+    typescript: ^4.7.4
+    uuid-with-v6: ^2.0.0
+  languageName: unknown
+  linkType: soft
+
 "commondir@npm:^1.0.1":
   version: 1.0.1
   resolution: "commondir@npm:1.0.1"
@@ -6137,6 +6398,47 @@ __metadata:
   checksum: e4d7108dfdb9a230981c780bd1045f3c8d8222555fae59c427138d56e6428f3cba9857b2d530920fd6f4ce148227eb9f6854a083473f06232c926f13e9a14673
   languageName: node
   linkType: hard
+
+"e2e-test-site@workspace:packages/e2e-test-site":
+  version: 0.0.0-use.local
+  resolution: "e2e-test-site@workspace:packages/e2e-test-site"
+  dependencies:
+    cpy-cli: ^4.1.0
+    npm-run-all: ^4.1.5
+    rimraf: ^3.0.2
+  languageName: unknown
+  linkType: soft
+
+"e2e-web-apis@workspace:packages/e2e-web-apis":
+  version: 0.0.0-use.local
+  resolution: "e2e-web-apis@workspace:packages/e2e-web-apis"
+  dependencies:
+    "@azure/functions": ^3.2.0
+    "@types/dotenv": ^8.2.0
+    "@types/jest": ^27.4.1
+    "@types/lodash": ^4.14.182
+    "@types/node": ^16.11.7
+    "@types/yargs": ^17.0.10
+    azure-services: "workspace:*"
+    copy-webpack-plugin: ^11.0.0
+    fork-ts-checker-webpack-plugin: ^7.2.12
+    inversify: ^6.0.1
+    jest: ^27.5.1
+    jest-junit: ^14.0.0
+    lodash: ^4.17.21
+    logger: "workspace:*"
+    node-loader: ^2.0.0
+    npm-run-all: ^4.1.5
+    reflect-metadata: ^0.1.13
+    rimraf: ^3.0.2
+    ts-jest: ^27.1.4
+    ts-loader: ^9.3.1
+    typescript: ^4.7.4
+    webpack: ^5.73.0
+    webpack-cli: ^4.9.2
+    webpack-ignore-dynamic-require: ^1.0.0
+  languageName: unknown
+  linkType: soft
 
 "ecc-jsbn@npm:~0.1.1":
   version: 0.1.2
@@ -7337,6 +7639,41 @@ __metadata:
   languageName: node
   linkType: hard
 
+"functional-tests@workspace:*, functional-tests@workspace:packages/functional-tests":
+  version: 0.0.0-use.local
+  resolution: "functional-tests@workspace:packages/functional-tests"
+  dependencies:
+    "@azure/cosmos": ^3.16.2
+    "@types/chai": ^4.3.1
+    "@types/deep-equal-in-any-order": ^1.0.1
+    "@types/dotenv": ^8.2.0
+    "@types/jest": ^27.4.1
+    "@types/lodash": ^4.14.182
+    "@types/node": ^16.11.7
+    azure-services: "workspace:*"
+    chai: ^4.3.6
+    common: "workspace:*"
+    deep-equal-in-any-order: ^2.0.0
+    dotenv: ^16.0.1
+    inversify: ^6.0.1
+    jest: ^27.5.1
+    jest-junit: ^14.0.0
+    lodash: ^4.17.21
+    logger: "workspace:*"
+    mockdate: ^3.0.5
+    npm-run-all: ^4.1.5
+    reflect-metadata: ^0.1.13
+    rimraf: ^3.0.2
+    service-library: "workspace:*"
+    storage-documents: "workspace:*"
+    ts-jest: ^27.1.4
+    typemoq: ^2.1.0
+    typescript: ^4.7.4
+    web-api-client: "workspace:*"
+    yargs: ^17.5.1
+  languageName: unknown
+  linkType: soft
+
 "gauge@npm:^4.0.3":
   version: 4.0.4
   resolution: "gauge@npm:4.0.4"
@@ -7749,6 +8086,39 @@ __metadata:
   checksum: 36ea1781a38b822ce019f8483ff82b348f06d9f04aa99030543cfd45b95f161bcaafa1e03ec8997dff407f99c2171aeb7e15196e735c664dfee78bc540763673
   languageName: node
   linkType: hard
+
+"health-client@workspace:packages/health-client":
+  version: 0.0.0-use.local
+  resolution: "health-client@workspace:packages/health-client"
+  dependencies:
+    "@types/chai": ^4.3.1
+    "@types/jest": ^27.4.1
+    "@types/lodash": ^4.14.182
+    "@types/node": ^16.11.7
+    chai: ^4.3.6
+    common: "workspace:*"
+    copy-webpack-plugin: ^11.0.0
+    functional-tests: "workspace:*"
+    inversify: ^6.0.1
+    jest: ^27.5.1
+    jest-junit: ^14.0.0
+    lodash: ^4.17.21
+    logger: "workspace:*"
+    npm-run-all: ^4.1.5
+    reflect-metadata: ^0.1.13
+    rimraf: ^3.0.2
+    service-library: "workspace:*"
+    shebang-loader: ^0.0.1
+    ts-jest: ^27.1.4
+    typemoq: ^2.1.0
+    typescript: ^4.7.4
+    web-api-client: "workspace:*"
+    webpack: ^5.73.0
+    webpack-cli: ^4.9.2
+    webpack-ignore-dynamic-require: ^1.0.0
+    yargs: ^17.5.1
+  languageName: unknown
+  linkType: soft
 
 "hosted-git-info@npm:^2.1.4":
   version: 2.8.9
@@ -9898,6 +10268,32 @@ __metadata:
   languageName: node
   linkType: hard
 
+"logger@workspace:*, logger@workspace:packages/logger":
+  version: 0.0.0-use.local
+  resolution: "logger@workspace:packages/logger"
+  dependencies:
+    "@types/dotenv": ^8.2.0
+    "@types/jest": ^27.4.1
+    "@types/lodash": ^4.14.182
+    "@types/node": ^16.11.7
+    applicationinsights: ^2.3.1
+    common: "workspace:*"
+    dotenv: ^16.0.1
+    inversify: ^6.0.1
+    jest: ^27.5.1
+    jest-junit: ^14.0.0
+    lodash: ^4.17.21
+    moment: ^2.29.4
+    npm-run-all: ^4.1.5
+    reflect-metadata: ^0.1.13
+    rimraf: ^3.0.2
+    ts-jest: ^27.1.4
+    typemoq: ^2.1.0
+    typescript: ^4.7.4
+    verror: ^1.10.1
+  languageName: unknown
+  linkType: soft
+
 "loose-envify@npm:^1.0.0, loose-envify@npm:^1.1.0, loose-envify@npm:^1.4.0":
   version: 1.4.0
   resolution: "loose-envify@npm:1.4.0"
@@ -11047,6 +11443,31 @@ __metadata:
   languageName: node
   linkType: hard
 
+"parallel-workers@workspace:packages/parallel-workers":
+  version: 0.0.0-use.local
+  resolution: "parallel-workers@workspace:packages/parallel-workers"
+  dependencies:
+    "@types/jest": ^27.4.1
+    "@types/lodash": ^4.14.182
+    "@types/node": ^16.11.7
+    filemanager-webpack-plugin: ^7.0.0
+    fork-ts-checker-webpack-plugin: ^7.2.12
+    jest: ^27.5.1
+    jest-junit: ^14.0.0
+    lodash: ^4.17.21
+    moment: ^2.29.4
+    npm-run-all: ^4.1.5
+    rimraf: ^3.0.2
+    storage-documents: "workspace:*"
+    ts-jest: ^27.1.4
+    ts-loader: ^9.3.1
+    typemoq: ^2.1.0
+    typescript: ^4.7.4
+    webpack: ^5.73.0
+    webpack-cli: ^4.9.2
+  languageName: unknown
+  linkType: soft
+
 "paralleljs@npm:^1.1.0":
   version: 1.1.0
   resolution: "paralleljs@npm:1.1.0"
@@ -11388,6 +11809,126 @@ __metadata:
   checksum: 9400c3fdebca6ceedce7f42343611aca1860de4fd15e40d1ef71436aab0f29cff779dcbfef535901b424d01232090f2b2d442be6958d3e67262495a5197c4528
   languageName: node
   linkType: hard
+
+"privacy-scan-core@workspace:*, privacy-scan-core@workspace:packages/privacy-scan-core":
+  version: 0.0.0-use.local
+  resolution: "privacy-scan-core@workspace:packages/privacy-scan-core"
+  dependencies:
+    "@types/jest": ^27.4.1
+    "@types/lodash": ^4.14.182
+    "@types/node": ^16.11.7
+    "@types/puppeteer": ^5.4.6
+    common: "workspace:*"
+    inversify: ^6.0.1
+    jest: ^27.5.1
+    jest-junit: ^14.0.0
+    lodash: ^4.17.21
+    logger: "workspace:*"
+    mockdate: ^3.0.5
+    npm-run-all: ^4.1.5
+    puppeteer: ^13.7.0
+    reflect-metadata: ^0.1.13
+    rimraf: ^3.0.2
+    scanner-global-library: "workspace:*"
+    storage-documents: "workspace:*"
+    ts-jest: ^27.1.4
+    typemoq: ^2.1.0
+    typescript: ^4.7.4
+  languageName: unknown
+  linkType: soft
+
+"privacy-scan-job-manager@workspace:packages/privacy-scan-job-manager":
+  version: 0.0.0-use.local
+  resolution: "privacy-scan-job-manager@workspace:packages/privacy-scan-job-manager"
+  dependencies:
+    "@azure/batch": ^10.1.0
+    "@azure/ms-rest-nodeauth": ^3.1.1
+    "@types/dotenv": ^8.2.0
+    "@types/jest": ^27.4.1
+    "@types/lodash": ^4.14.182
+    "@types/node": ^16.11.7
+    "@types/verror": ^1.10.4
+    applicationinsights: ^2.3.1
+    azure-services: "workspace:*"
+    common: "workspace:*"
+    copy-webpack-plugin: ^11.0.0
+    dotenv: ^16.0.1
+    fork-ts-checker-webpack-plugin: ^7.2.12
+    inversify: ^6.0.1
+    jest: ^27.5.1
+    jest-junit: ^14.0.0
+    lodash: ^4.17.21
+    logger: "workspace:*"
+    mockdate: ^3.0.5
+    moment: ^2.29.4
+    node-loader: ^2.0.0
+    npm-run-all: ^4.1.5
+    reflect-metadata: ^0.1.13
+    rimraf: ^3.0.2
+    service-library: "workspace:*"
+    storage-documents: "workspace:*"
+    ts-jest: ^27.1.4
+    ts-loader: ^9.3.1
+    typemoq: ^2.1.0
+    typescript: ^4.7.4
+    verror: ^1.10.1
+    webpack: ^5.73.0
+    webpack-cli: ^4.9.2
+    webpack-ignore-dynamic-require: ^1.0.0
+    yargs: ^17.5.1
+  languageName: unknown
+  linkType: soft
+
+"privacy-scan-runner@workspace:packages/privacy-scan-runner":
+  version: 0.0.0-use.local
+  resolution: "privacy-scan-runner@workspace:packages/privacy-scan-runner"
+  dependencies:
+    "@azure/cosmos": ^3.16.2
+    "@types/dotenv": ^8.2.0
+    "@types/jest": ^27.4.1
+    "@types/lodash": ^4.14.182
+    "@types/node": ^16.11.7
+    "@types/puppeteer": ^5.4.6
+    "@types/verror": ^1.10.4
+    "@types/yargs": ^17.0.10
+    applicationinsights: ^2.3.1
+    azure-services: "workspace:*"
+    common: "workspace:*"
+    copy-webpack-plugin: ^11.0.0
+    dotenv: ^16.0.1
+    fork-ts-checker-webpack-plugin: ^7.2.12
+    inversify: ^6.0.1
+    jest: ^27.5.1
+    jest-junit: ^14.0.0
+    lodash: ^4.17.21
+    logger: "workspace:*"
+    mockdate: ^3.0.5
+    moment: ^2.29.4
+    node-loader: ^2.0.0
+    npm-force-resolutions: ^0.0.10
+    npm-run-all: ^4.1.5
+    p-limit: ^3.1.0
+    privacy-scan-core: "workspace:*"
+    puppeteer: ^13.7.0
+    puppeteer-extra: ^3.2.3
+    puppeteer-extra-plugin: ^3.2.0
+    puppeteer-extra-plugin-stealth: ^2.9.0
+    reflect-metadata: ^0.1.13
+    rimraf: ^3.0.2
+    scanner-global-library: "workspace:*"
+    service-library: "workspace:*"
+    storage-documents: "workspace:*"
+    ts-jest: ^27.1.4
+    ts-loader: ^9.3.1
+    typemoq: ^2.1.0
+    typescript: ^4.7.4
+    verror: ^1.10.1
+    webpack: ^5.73.0
+    webpack-cli: ^4.9.2
+    webpack-ignore-dynamic-require: ^1.0.0
+    yargs: ^17.5.1
+  languageName: unknown
+  linkType: soft
 
 "process-nextick-args@npm:~2.0.0":
   version: 2.0.1
@@ -11962,6 +12503,98 @@ __metadata:
   languageName: node
   linkType: hard
 
+"report-generator-job-manager@workspace:packages/report-generator-job-manager":
+  version: 0.0.0-use.local
+  resolution: "report-generator-job-manager@workspace:packages/report-generator-job-manager"
+  dependencies:
+    "@azure/batch": ^10.1.0
+    "@azure/ms-rest-nodeauth": ^3.1.1
+    "@types/dotenv": ^8.2.0
+    "@types/jest": ^27.4.1
+    "@types/lodash": ^4.14.182
+    "@types/node": ^16.11.7
+    "@types/verror": ^1.10.4
+    applicationinsights: ^2.3.1
+    azure-services: "workspace:*"
+    common: "workspace:*"
+    copy-webpack-plugin: ^11.0.0
+    dotenv: ^16.0.1
+    fork-ts-checker-webpack-plugin: ^7.2.12
+    inversify: ^6.0.1
+    jest: ^27.5.1
+    jest-junit: ^14.0.0
+    lodash: ^4.17.21
+    logger: "workspace:*"
+    mockdate: ^3.0.5
+    moment: ^2.29.4
+    node-loader: ^2.0.0
+    npm-run-all: ^4.1.5
+    reflect-metadata: ^0.1.13
+    rimraf: ^3.0.2
+    service-library: "workspace:*"
+    storage-documents: "workspace:*"
+    ts-jest: ^27.1.4
+    ts-loader: ^9.3.1
+    typemoq: ^2.1.0
+    typescript: ^4.7.4
+    verror: ^1.10.1
+    webpack: ^5.73.0
+    webpack-cli: ^4.9.2
+    webpack-ignore-dynamic-require: ^1.0.0
+    yargs: ^17.5.1
+  languageName: unknown
+  linkType: soft
+
+"report-generator-runner@workspace:packages/report-generator-runner":
+  version: 0.0.0-use.local
+  resolution: "report-generator-runner@workspace:packages/report-generator-runner"
+  dependencies:
+    "@azure/cosmos": ^3.16.2
+    "@types/dotenv": ^8.2.0
+    "@types/jest": ^27.4.1
+    "@types/lodash": ^4.14.182
+    "@types/node": ^16.11.7
+    "@types/puppeteer": ^5.4.6
+    "@types/verror": ^1.10.4
+    "@types/yargs": ^17.0.10
+    applicationinsights: ^2.3.1
+    azure-services: "workspace:*"
+    common: "workspace:*"
+    copy-webpack-plugin: ^11.0.0
+    dotenv: ^16.0.1
+    fork-ts-checker-webpack-plugin: ^7.2.12
+    inversify: ^6.0.1
+    jest: ^27.5.1
+    jest-junit: ^14.0.0
+    lodash: ^4.17.21
+    logger: "workspace:*"
+    mockdate: ^3.0.5
+    moment: ^2.29.4
+    node-loader: ^2.0.0
+    npm-force-resolutions: ^0.0.10
+    npm-run-all: ^4.1.5
+    p-limit: ^3.1.0
+    puppeteer: ^13.7.0
+    puppeteer-extra: ^3.2.3
+    puppeteer-extra-plugin: ^3.2.0
+    puppeteer-extra-plugin-stealth: ^2.9.0
+    reflect-metadata: ^0.1.13
+    rimraf: ^3.0.2
+    scanner-global-library: "workspace:*"
+    service-library: "workspace:*"
+    storage-documents: "workspace:*"
+    ts-jest: ^27.1.4
+    ts-loader: ^9.3.1
+    typemoq: ^2.1.0
+    typescript: ^4.7.4
+    verror: ^1.10.1
+    webpack: ^5.73.0
+    webpack-cli: ^4.9.2
+    webpack-ignore-dynamic-require: ^1.0.0
+    yargs: ^17.5.1
+  languageName: unknown
+  linkType: soft
+
 "request@npm:^2.88.0, request@npm:^2.88.2":
   version: 2.88.2
   resolution: "request@npm:2.88.2"
@@ -12087,6 +12720,16 @@ __metadata:
   checksum: c79ecaea36c872ee4a79e3db0d3d4160b593f2ca16e031d8283735acd01715a203607e9ded3f91f68899c2937fa0d49390cddbe0fb2852629212f3cda283f4a7
   languageName: node
   linkType: hard
+
+"resource-deployment@workspace:packages/resource-deployment":
+  version: 0.0.0-use.local
+  resolution: "resource-deployment@workspace:packages/resource-deployment"
+  dependencies:
+    cpy-cli: ^4.1.0
+    npm-run-all: ^4.1.5
+    rimraf: ^3.0.2
+  languageName: unknown
+  linkType: soft
 
 "responselike@npm:^2.0.0":
   version: 2.0.0
@@ -12233,6 +12876,37 @@ __metadata:
   languageName: node
   linkType: hard
 
+"scanner-global-library@workspace:*, scanner-global-library@workspace:packages/scanner-global-library":
+  version: 0.0.0-use.local
+  resolution: "scanner-global-library@workspace:packages/scanner-global-library"
+  dependencies:
+    "@axe-core/puppeteer": 4.4.2
+    "@types/jest": ^27.4.1
+    "@types/lodash": ^4.14.182
+    "@types/node": ^16.11.7
+    "@types/puppeteer": ^5.4.6
+    axe-core: 4.4.1
+    common: "workspace:*"
+    cpy-cli: ^4.1.0
+    inversify: ^6.0.1
+    jest: ^27.5.1
+    jest-junit: ^14.0.0
+    lodash: ^4.17.21
+    logger: "workspace:*"
+    npm-run-all: ^4.1.5
+    puppeteer: ^13.7.0
+    puppeteer-extra: ^3.2.3
+    puppeteer-extra-plugin: ^3.2.0
+    puppeteer-extra-plugin-stealth: ^2.9.0
+    reflect-metadata: ^0.1.13
+    rimraf: ^3.0.2
+    storage-documents: "workspace:*"
+    ts-jest: ^27.1.4
+    typemoq: ^2.1.0
+    typescript: ^4.7.4
+  languageName: unknown
+  linkType: soft
+
 "scheduler@npm:^0.19.1":
   version: 0.19.1
   resolution: "scheduler@npm:0.19.1"
@@ -12346,6 +13020,54 @@ __metadata:
   checksum: 56f90b562a1bdc92e55afb3e657c6397c01a902c588c0fe3d4c490efdcc97dcd2a3074ba12df9e94630f33a5ce5b76a74784a7041294628a6f4306e0ec84bf93
   languageName: node
   linkType: hard
+
+"service-library@workspace:*, service-library@workspace:packages/service-library":
+  version: 0.0.0-use.local
+  resolution: "service-library@workspace:packages/service-library"
+  dependencies:
+    "@azure/cosmos": ^3.16.2
+    "@azure/functions": ^3.2.0
+    "@azure/identity": ^2.1.0
+    "@azure/storage-blob": ^12.11.0
+    "@types/jest": ^27.4.1
+    "@types/node": ^16.11.7
+    "@types/paralleljs": ^0.0.21
+    "@types/puppeteer": ^5.4.6
+    "@types/sha.js": ^2.4.0
+    "@types/yargs": ^17.0.10
+    accessibility-insights-report: 4.3.0
+    async-mutex: ^0.3.2
+    axe-core: 4.4.1
+    axe-result-converter: "workspace:*"
+    azure-services: "workspace:*"
+    common: "workspace:*"
+    cpy-cli: ^4.1.0
+    dotenv: ^16.0.1
+    inversify: ^6.0.1
+    jest: ^27.5.1
+    jest-extended: ^2.0.0
+    jest-junit: ^14.0.0
+    lodash: ^4.17.21
+    logger: "workspace:*"
+    mockdate: ^3.0.5
+    moment: ^2.29.4
+    node-fetch: ^2.6.7
+    npm-run-all: ^4.1.5
+    p-limit: ^3.1.0
+    paralleljs: ^1.1.0
+    privacy-scan-core: "workspace:*"
+    puppeteer: ^13.7.0
+    reflect-metadata: ^0.1.13
+    rimraf: ^3.0.2
+    scanner-global-library: "workspace:*"
+    sha.js: ^2.4.11
+    storage-documents: "workspace:*"
+    ts-jest: ^27.1.4
+    typemoq: ^2.1.0
+    typescript: ^4.7.4
+    yargs: ^17.5.1
+  languageName: unknown
+  linkType: soft
 
 "set-blocking@npm:^2.0.0, set-blocking@npm:~2.0.0":
   version: 2.0.0
@@ -12746,6 +13468,28 @@ __metadata:
   checksum: 63104fcbdece130bc4906fd982061e763d2ef48065ed1ab29895e5ad00552c625f8a4c50c9cd2e3bfa805c8a2c3bfdda0f07c5ae39694bd2d5cb0bee1618d1e9
   languageName: node
   linkType: hard
+
+"storage-documents@workspace:*, storage-documents@workspace:packages/storage-documents":
+  version: 0.0.0-use.local
+  resolution: "storage-documents@workspace:packages/storage-documents"
+  dependencies:
+    "@types/jest": ^27.4.1
+    "@types/node": ^16.11.7
+    axe-result-converter: "workspace:*"
+    common: "workspace:*"
+    inversify: ^6.0.1
+    jest: ^27.5.1
+    jest-junit: ^14.0.0
+    npm-run-all: ^4.1.5
+    reflect-metadata: ^0.1.13
+    rimraf: ^3.0.2
+    ts-jest: ^27.1.4
+    ts-transformer-keys: ^0.4.3
+    ttypescript: ^1.5.13
+    typemoq: ^2.1.0
+    typescript: ^4.7.4
+  languageName: unknown
+  linkType: soft
 
 "stream-chain@npm:^2.2.5":
   version: 2.2.5
@@ -13934,6 +14678,341 @@ __metadata:
   checksum: 814e9d1ddcc9798f7377ffa448a5a3892232b9275ebb30a41b529607691c0491de47cba426e917a4d08ded3ee7e9ba2f3fe32e62ee3cd9c7d3bafb7754bd553c
   languageName: node
   linkType: hard
+
+"web-api-client@workspace:*, web-api-client@workspace:packages/web-api-client":
+  version: 0.0.0-use.local
+  resolution: "web-api-client@workspace:packages/web-api-client"
+  dependencies:
+    "@types/got": ^9.6.11
+    "@types/jest": ^27.4.1
+    "@types/lodash": ^4.14.182
+    "@types/node": ^16.11.7
+    adal-node: ">=0.2.3"
+    common: "workspace:*"
+    forever-agent: ^0.6.1
+    got: ^11.8.5
+    inversify: ^6.0.1
+    jest: ^27.5.1
+    jest-junit: ^14.0.0
+    lodash: ^4.17.21
+    logger: "workspace:*"
+    npm-run-all: ^4.1.5
+    reflect-metadata: ^0.1.13
+    rimraf: ^3.0.2
+    service-library: "workspace:*"
+    ts-jest: ^27.1.4
+    typemoq: ^2.1.0
+    typescript: ^4.7.4
+  languageName: unknown
+  linkType: soft
+
+"web-api-scan-job-manager@workspace:packages/web-api-scan-job-manager":
+  version: 0.0.0-use.local
+  resolution: "web-api-scan-job-manager@workspace:packages/web-api-scan-job-manager"
+  dependencies:
+    "@azure/batch": ^10.1.0
+    "@azure/ms-rest-nodeauth": ^3.1.1
+    "@types/dotenv": ^8.2.0
+    "@types/jest": ^27.4.1
+    "@types/lodash": ^4.14.182
+    "@types/node": ^16.11.7
+    "@types/verror": ^1.10.4
+    applicationinsights: ^2.3.1
+    azure-services: "workspace:*"
+    common: "workspace:*"
+    copy-webpack-plugin: ^11.0.0
+    dotenv: ^16.0.1
+    fork-ts-checker-webpack-plugin: ^7.2.12
+    inversify: ^6.0.1
+    jest: ^27.5.1
+    jest-junit: ^14.0.0
+    lodash: ^4.17.21
+    logger: "workspace:*"
+    mockdate: ^3.0.5
+    moment: ^2.29.4
+    node-loader: ^2.0.0
+    npm-run-all: ^4.1.5
+    reflect-metadata: ^0.1.13
+    rimraf: ^3.0.2
+    service-library: "workspace:*"
+    storage-documents: "workspace:*"
+    ts-jest: ^27.1.4
+    ts-loader: ^9.3.1
+    typemoq: ^2.1.0
+    typescript: ^4.7.4
+    verror: ^1.10.1
+    webpack: ^5.73.0
+    webpack-cli: ^4.9.2
+    webpack-ignore-dynamic-require: ^1.0.0
+    yargs: ^17.5.1
+  languageName: unknown
+  linkType: soft
+
+"web-api-scan-request-sender@workspace:packages/web-api-scan-request-sender":
+  version: 0.0.0-use.local
+  resolution: "web-api-scan-request-sender@workspace:packages/web-api-scan-request-sender"
+  dependencies:
+    "@types/jest": ^27.4.1
+    applicationinsights: ^2.3.1
+    azure-services: "workspace:*"
+    common: "workspace:*"
+    copy-webpack-plugin: ^11.0.0
+    fork-ts-checker-webpack-plugin: ^7.2.12
+    inversify: ^6.0.1
+    jest: ^27.5.1
+    jest-junit: ^14.0.0
+    lodash: ^4.17.21
+    logger: "workspace:*"
+    mockdate: ^3.0.5
+    moment: ^2.29.4
+    node-loader: ^2.0.0
+    npm-run-all: ^4.1.5
+    reflect-metadata: ^0.1.13
+    rimraf: ^3.0.2
+    service-library: "workspace:*"
+    storage-documents: "workspace:*"
+    ts-jest: ^27.1.4
+    ts-loader: ^9.3.1
+    typemoq: ^2.1.0
+    typescript: ^4.7.4
+    webpack: ^5.73.0
+    webpack-cli: ^4.9.2
+    webpack-ignore-dynamic-require: ^1.0.0
+    why-is-node-running: ^2.2.2
+    yargs: ^17.5.1
+  languageName: unknown
+  linkType: soft
+
+"web-api-scan-runner@workspace:packages/web-api-scan-runner":
+  version: 0.0.0-use.local
+  resolution: "web-api-scan-runner@workspace:packages/web-api-scan-runner"
+  dependencies:
+    "@axe-core/puppeteer": 4.4.2
+    "@azure/cosmos": ^3.16.2
+    "@types/dotenv": ^8.2.0
+    "@types/jest": ^27.4.1
+    "@types/lodash": ^4.14.182
+    "@types/node": ^16.11.7
+    "@types/puppeteer": ^5.4.6
+    "@types/sha.js": ^2.4.0
+    "@types/verror": ^1.10.4
+    "@types/yargs": ^17.0.10
+    accessibility-insights-crawler: "workspace:*"
+    accessibility-insights-report: 4.3.0
+    apify: ^2.3.2
+    applicationinsights: ^2.3.1
+    axe-core: 4.4.1
+    axe-result-converter: "workspace:*"
+    axe-sarif-converter: ^2.9.0
+    azure-services: "workspace:*"
+    common: "workspace:*"
+    copy-webpack-plugin: ^11.0.0
+    dotenv: ^16.0.1
+    fork-ts-checker-webpack-plugin: ^7.2.12
+    inversify: ^6.0.1
+    jest: ^27.5.1
+    jest-junit: ^14.0.0
+    leveldown: ^6.1.1
+    lodash: ^4.17.21
+    logger: "workspace:*"
+    mockdate: ^3.0.5
+    moment: ^2.29.4
+    node-loader: ^2.0.0
+    npm-force-resolutions: ^0.0.10
+    npm-run-all: ^4.1.5
+    p-limit: ^3.1.0
+    puppeteer: ^13.7.0
+    puppeteer-extra: ^3.2.3
+    puppeteer-extra-plugin: ^3.2.0
+    puppeteer-extra-plugin-stealth: ^2.9.0
+    reflect-metadata: ^0.1.13
+    request: ^2.88.2
+    rimraf: ^3.0.2
+    scanner-global-library: "workspace:*"
+    service-library: "workspace:*"
+    sha.js: ^2.4.11
+    storage-documents: "workspace:*"
+    ts-jest: ^27.1.4
+    ts-loader: ^9.3.1
+    typemoq: ^2.1.0
+    typescript: ^4.7.4
+    verror: ^1.10.1
+    webpack: ^5.73.0
+    webpack-cli: ^4.9.2
+    webpack-ignore-dynamic-require: ^1.0.0
+    yamlparser: ^0.0.2
+    yargs: ^17.5.1
+  languageName: unknown
+  linkType: soft
+
+"web-api-send-notification-job-manager@workspace:packages/web-api-send-notification-job-manager":
+  version: 0.0.0-use.local
+  resolution: "web-api-send-notification-job-manager@workspace:packages/web-api-send-notification-job-manager"
+  dependencies:
+    "@azure/batch": ^10.1.0
+    "@azure/ms-rest-nodeauth": ^3.1.1
+    "@types/dotenv": ^8.2.0
+    "@types/jest": ^27.4.1
+    "@types/lodash": ^4.14.182
+    "@types/node": ^16.11.7
+    "@types/verror": ^1.10.4
+    applicationinsights: ^2.3.1
+    azure-services: "workspace:*"
+    common: "workspace:*"
+    copy-webpack-plugin: ^11.0.0
+    dotenv: ^16.0.1
+    fork-ts-checker-webpack-plugin: ^7.2.12
+    inversify: ^6.0.1
+    jest: ^27.5.1
+    jest-junit: ^14.0.0
+    lodash: ^4.17.21
+    logger: "workspace:*"
+    moment: ^2.29.4
+    node-loader: ^2.0.0
+    npm-run-all: ^4.1.5
+    reflect-metadata: ^0.1.13
+    rimraf: ^3.0.2
+    service-library: "workspace:*"
+    storage-documents: "workspace:*"
+    ts-jest: ^27.1.4
+    ts-loader: ^9.3.1
+    typemoq: ^2.1.0
+    typescript: ^4.7.4
+    verror: ^1.10.1
+    webpack: ^5.73.0
+    webpack-cli: ^4.9.2
+    webpack-ignore-dynamic-require: ^1.0.0
+    yargs: ^17.5.1
+  languageName: unknown
+  linkType: soft
+
+"web-api-send-notification-runner@workspace:packages/web-api-send-notification-runner":
+  version: 0.0.0-use.local
+  resolution: "web-api-send-notification-runner@workspace:packages/web-api-send-notification-runner"
+  dependencies:
+    "@azure/cosmos": ^3.16.2
+    "@types/dotenv": ^8.2.0
+    "@types/got": ^9.6.11
+    "@types/jest": ^27.4.1
+    "@types/lodash": ^4.14.182
+    "@types/node": ^16.11.7
+    "@types/puppeteer": ^5.4.6
+    "@types/sha.js": ^2.4.0
+    "@types/verror": ^1.10.4
+    "@types/yargs": ^17.0.10
+    applicationinsights: ^2.3.1
+    azure-services: "workspace:*"
+    common: "workspace:*"
+    copy-webpack-plugin: ^11.0.0
+    dotenv: ^16.0.1
+    fork-ts-checker-webpack-plugin: ^7.2.12
+    got: ^11.8.5
+    inversify: ^6.0.1
+    jest: ^27.5.1
+    jest-junit: ^14.0.0
+    lodash: ^4.17.21
+    logger: "workspace:*"
+    mockdate: ^3.0.5
+    node-loader: ^2.0.0
+    npm-run-all: ^4.1.5
+    reflect-metadata: ^0.1.13
+    rimraf: ^3.0.2
+    service-library: "workspace:*"
+    sha.js: ^2.4.11
+    storage-documents: "workspace:*"
+    ts-jest: ^27.1.4
+    ts-loader: ^9.3.1
+    typemoq: ^2.1.0
+    typescript: ^4.7.4
+    verror: ^1.10.1
+    webpack: ^5.73.0
+    webpack-cli: ^4.9.2
+    webpack-ignore-dynamic-require: ^1.0.0
+    yargs: ^17.5.1
+  languageName: unknown
+  linkType: soft
+
+"web-api@workspace:packages/web-api":
+  version: 0.0.0-use.local
+  resolution: "web-api@workspace:packages/web-api"
+  dependencies:
+    "@azure/functions": ^3.2.0
+    "@types/dotenv": ^8.2.0
+    "@types/jest": ^27.4.1
+    "@types/lodash": ^4.14.182
+    "@types/node": ^16.11.7
+    "@types/sha.js": ^2.4.0
+    "@types/verror": ^1.10.4
+    "@types/yargs": ^17.0.10
+    azure-services: "workspace:*"
+    common: "workspace:*"
+    copy-webpack-plugin: ^11.0.0
+    fork-ts-checker-webpack-plugin: ^7.2.12
+    functional-tests: "workspace:*"
+    inversify: ^6.0.1
+    jest: ^27.5.1
+    jest-junit: ^14.0.0
+    lodash: ^4.17.21
+    logger: "workspace:*"
+    moment: ^2.29.4
+    node-loader: ^2.0.0
+    npm-run-all: ^4.1.5
+    reflect-metadata: ^0.1.13
+    rimraf: ^3.0.2
+    service-library: "workspace:*"
+    storage-documents: "workspace:*"
+    ts-jest: ^27.1.4
+    ts-loader: ^9.3.1
+    typemoq: ^2.1.0
+    typescript: ^4.7.4
+    webpack: ^5.73.0
+    webpack-cli: ^4.9.2
+    webpack-ignore-dynamic-require: ^1.0.0
+  languageName: unknown
+  linkType: soft
+
+"web-workers@workspace:packages/web-workers":
+  version: 0.0.0-use.local
+  resolution: "web-workers@workspace:packages/web-workers"
+  dependencies:
+    "@azure/functions": ^3.2.0
+    "@types/dotenv": ^8.2.0
+    "@types/jest": ^27.4.1
+    "@types/lodash": ^4.14.182
+    "@types/node": ^16.11.7
+    "@types/sha.js": ^2.4.0
+    "@types/verror": ^1.10.4
+    "@types/yargs": ^17.0.10
+    azure-services: "workspace:*"
+    common: "workspace:*"
+    copy-webpack-plugin: ^11.0.0
+    durable-functions: ^1.5.4
+    fork-ts-checker-webpack-plugin: ^7.2.12
+    functional-tests: "workspace:*"
+    inversify: ^6.0.1
+    jest: ^27.5.1
+    jest-junit: ^14.0.0
+    lodash: ^4.17.21
+    logger: "workspace:*"
+    mockdate: ^3.0.5
+    moment: ^2.29.4
+    node-loader: ^2.0.0
+    npm-run-all: ^4.1.5
+    p-limit: ^3.1.0
+    reflect-metadata: ^0.1.13
+    rimraf: ^3.0.2
+    service-library: "workspace:*"
+    storage-documents: "workspace:*"
+    ts-jest: ^27.1.4
+    ts-loader: ^9.3.1
+    typemoq: ^2.1.0
+    typescript: ^4.7.4
+    web-api-client: "workspace:*"
+    webpack: ^5.73.0
+    webpack-cli: ^4.9.2
+    webpack-ignore-dynamic-require: ^1.0.0
+  languageName: unknown
+  linkType: soft
 
 "webidl-conversions@npm:^3.0.0":
   version: 3.0.1
