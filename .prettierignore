@@ -1,11 +1,13 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
+
 .gitattributes
 .github
 .prettierignore
 LICENSE
 yarn.lock
 .dockerignore
+.shellcheckrc
 
 **/*.code-workspace
 **/Dockerfile

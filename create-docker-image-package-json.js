@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 const fs = require('fs');
 const packageJson = require(process.cwd() + '/package.json');
 const getWebpackConfig = require(process.cwd() + '/webpack.config');

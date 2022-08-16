@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 const glob = require('glob');
 const config = require('./jest.config');
 const yargs = require('yargs');
