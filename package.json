@@ -11,7 +11,7 @@
         "clean": "yarn packages run clean && rimraf dist test-results",
         "build": "yarn packages --topological-dev run build",
         "cbuild": "yarn packages --topological-dev run cbuild",
-        "dbuild": "yarn install && npm-run-all --serial --npm-path npm 'syncpack:fix build' 'build -- --concurrency 1'",
+        "dbuild": "yarn install && npm-run-all --serial --npm-path npm syncpack:fix build",
         "test": "npx jest",
         "test:nc": "npx jest --collectCoverage=false --maxWorkers=4",
         "test:ci": "npx jest --config jest.ci.js --totalTestSlices=4 --testSlicesToRun=[1,2,3]",
