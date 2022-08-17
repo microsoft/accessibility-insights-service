@@ -1,20 +1,12 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
+
 name: $(Build.SourceBranchName)_$(Date:yyyyMMdd)$(Rev:.r)
 
 jobs:
-    - job: 'BuildArtifactsAndRunSomeTests'
+    - job: 'BuildArtifactsAndRunUnitTests'
       pool:
           vmImage: 'ubuntu-20.04'
           demands: npm
       steps:
           - template: ./azure-pipeline/build-artifacts-and-run-tests-job.yaml
-            parameters: { totalTestSlices: 4, testSlicesToRun: '[0]' }
-
-    - job: 'RunRemainingTests'
-      pool:
-          vmImage: 'ubuntu-20.04'
-          demands: npm
-      steps:
-          - template: ./azure-pipeline/run-tests-job.yaml
-            parameters: { totalTestSlices: 4, testSlicesToRun: '[1,2,3]' }

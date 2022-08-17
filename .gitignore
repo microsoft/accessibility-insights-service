@@ -3,6 +3,13 @@
 
 node_modules/
 node_modules*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+
 dist/
 drop/
 test-results/
@@ -10,19 +17,16 @@ out/
 crawler_storage/
 /data*
 ai_scan_cli_output*
+codecov
+codecov.*
 
 **/.secrets
 **/dev.DockerFile
 **/.env
 **/.prod
-
 **/*.generated.template.json
-
-yarn-error.log
 **/*.DS_Store
-
 **/bin
 **/obj
 
-codecov
-codecov.*
+yarn-error.log

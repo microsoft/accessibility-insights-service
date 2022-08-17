@@ -33,13 +33,13 @@
     },
     "dependencies": {
         "adal-node": ">=0.2.3",
-        "common": "1.0.0",
+        "common": "workspace:*",
         "forever-agent": "^0.6.1",
         "got": "^11.8.5",
         "inversify": "^6.0.1",
         "lodash": "^4.17.21",
-        "logger": "1.0.0",
+        "logger": "workspace:*",
         "reflect-metadata": "^0.1.13",
-        "service-library": "1.0.0"
+        "service-library": "workspace:*"
     }
 }

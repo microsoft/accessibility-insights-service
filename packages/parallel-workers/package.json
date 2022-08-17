@@ -4,7 +4,7 @@
     "description": "This project welcomes contributions and suggestions.  Most contributions require you to agree to a Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us the rights to use your contribution. For details, visit https://cla.microsoft.com.",
     "main": "dist/index.js",
     "scripts": {
-        "build": "webpack --config ./webpack.config.js",
+        "build": "webpack --config ./webpack.config.js \"$@\"",
         "cbuild": "npm-run-all --serial --npm-path npm 'clean' 'build'",
         "clean": "rimraf dist test-results",
         "lint": "eslint -c ../../.eslintrc.js --ext .ts ./",
@@ -41,6 +41,6 @@
     "dependencies": {
         "lodash": "^4.17.21",
         "moment": "^2.29.4",
-        "storage-documents": "1.0.0"
+        "storage-documents": "workspace:*"
     }
 }

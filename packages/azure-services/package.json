@@ -50,18 +50,18 @@
         "@azure/storage-blob": "^12.11.0",
         "@azure/storage-queue": "^12.10.0",
         "async-mutex": "^0.3.2",
-        "common": "1.0.0",
+        "common": "workspace:*",
         "dotenv": "^16.0.1",
         "got": "^11.8.5",
         "inversify": "^6.0.1",
         "lodash": "^4.17.21",
-        "logger": "1.0.0",
+        "logger": "workspace:*",
         "moment": "^2.29.4",
         "node-cache": "^5.1.2",
         "p-limit": "^3.1.0",
         "pretty-format": "^28.1.1",
         "reflect-metadata": "^0.1.13",
-        "storage-documents": "1.0.0",
+        "storage-documents": "workspace:*",
         "verror": "^1.10.1"
     }
 }

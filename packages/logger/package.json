@@ -36,12 +36,12 @@
     },
     "dependencies": {
         "applicationinsights": "^2.3.1",
-        "common": "1.0.0",
+        "common": "workspace:*",
         "dotenv": "^16.0.1",
         "inversify": "^6.0.1",
         "lodash": "^4.17.21",
+        "moment": "^2.29.4",
         "reflect-metadata": "^0.1.13",
-        "verror": "^1.10.1",
-        "moment": "^2.29.4"
+        "verror": "^1.10.1"
     }
 }

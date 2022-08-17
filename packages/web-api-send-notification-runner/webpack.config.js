@@ -8,7 +8,7 @@ const copyWebpackPlugin = require('copy-webpack-plugin');
 const ignoreDynamicRequire = require('webpack-ignore-dynamic-require');
 
 module.exports = (env) => {
-    const version = env ? env.version : 'dev';
+    const version = env?.version ?? 'dev';
     console.log(`Building for version : ${version}`);
 
     return {

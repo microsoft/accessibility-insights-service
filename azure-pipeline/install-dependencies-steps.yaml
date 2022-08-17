@@ -1,5 +1,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
+
 steps:
     - task: NodeTool@0
       inputs:
@@ -7,5 +8,5 @@ steps:
       displayName: Use node 16.x
 
     - script: |
-          yarn install --frozen-lockfile
-      displayName: 'install dependencies'
+          yarn install --immutable
+      displayName: Install dependencies

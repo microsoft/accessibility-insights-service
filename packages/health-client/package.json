@@ -3,7 +3,7 @@
     "version": "1.0.0",
     "description": "This project welcomes contributions and suggestions.  Most contributions require you to agree to a Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us the rights to use your contribution. For details, visit https://cla.microsoft.com.",
     "scripts": {
-        "build": "webpack --config ./webpack.config.js",
+        "build": "webpack --config ./webpack.config.js \"$@\"",
         "cbuild": "npm-run-all --serial --npm-path npm 'clean' 'build'",
         "clean": "rimraf dist test-results",
         "lint": "eslint -c ../../.eslintrc.js --ext .ts ./",
@@ -37,15 +37,15 @@
         "webpack-ignore-dynamic-require": "^1.0.0"
     },
     "dependencies": {
+        "chai": "^4.3.6",
+        "common": "workspace:*",
+        "functional-tests": "workspace:*",
         "inversify": "^6.0.1",
         "lodash": "^4.17.21",
+        "logger": "workspace:*",
         "reflect-metadata": "^0.1.13",
-        "common": "1.0.0",
-        "service-library": "1.0.0",
-        "web-api-client": "1.0.0",
-        "functional-tests": "1.0.0",
-        "logger": "1.0.0",
-        "chai": "^4.3.6",
+        "service-library": "workspace:*",
+        "web-api-client": "workspace:*",
         "yargs": "^17.5.1"
     }
 }
