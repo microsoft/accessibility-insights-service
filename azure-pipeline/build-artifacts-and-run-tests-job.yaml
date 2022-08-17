@@ -4,21 +4,21 @@
 steps:
     - template: ./install-dependencies-steps.yaml
 
-    # - script: |
-    #       yarn format:check
-    #   displayName: Check code formatting
+    - script: |
+          yarn format:check
+      displayName: Check code formatting
 
-    # - script: |
-    #       yarn copyright:check
-    #   displayName: Check for copyright headers
+    - script: |
+          yarn copyright:check
+      displayName: Check for copyright headers
 
-    # - script: |
-    #       yarn syncpack:check
-    #   displayName: Check for package version
+    - script: |
+          yarn syncpack:check
+      displayName: Check for package version
 
-    # - script: |
-    #       yarn lint:check
-    #   displayName: Run linter
+    - script: |
+          yarn lint:check
+      displayName: Run linter
 
     - template: ./build-steps.yaml
 
