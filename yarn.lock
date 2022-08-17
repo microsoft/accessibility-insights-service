@@ -6429,7 +6429,7 @@ __metadata:
     logger: "workspace:*"
     node-loader: ^2.0.0
     npm-run-all: ^4.1.5
-    parallel-workers: ":"
+    parallel-workers: "workspace:*"
     reflect-metadata: ^0.1.13
     rimraf: ^3.0.2
     ts-jest: ^27.1.4
@@ -11444,7 +11444,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"parallel-workers@:, parallel-workers@workspace:packages/parallel-workers":
+"parallel-workers@workspace:*, parallel-workers@workspace:packages/parallel-workers":
   version: 0.0.0-use.local
   resolution: "parallel-workers@workspace:packages/parallel-workers"
   dependencies:
