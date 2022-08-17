@@ -6,5 +6,5 @@ steps:
       displayName: Clean
 
     - script: |
-          yarn run build --env version=$(Build.BuildId)
+          yarn packages --topological-dev run build --env version=$(Build.BuildId)
       displayName: Build
