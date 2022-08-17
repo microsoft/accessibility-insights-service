@@ -10,4 +10,4 @@ jobs:
           demands: npm
       steps:
           - template: ./azure-pipeline/build-artifacts-and-run-tests-job.yaml
-            parameters: { totalTestSlices: 1, testSlicesToRun: '[0]' }
+            parameters: { totalTestSlices: 4, testSlicesToRun: '[1,2,3]' }
