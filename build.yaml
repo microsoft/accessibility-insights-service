@@ -4,7 +4,7 @@
 name: $(Build.SourceBranchName)_$(Date:yyyyMMdd)$(Rev:.r)
 
 jobs:
-    - job: 'Build artifacts and run unit tests'
+    - job: 'BuildArtifactsAndRunUnitTests'
       pool:
           vmImage: 'ubuntu-20.04'
           demands: npm
