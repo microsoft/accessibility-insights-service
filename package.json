@@ -15,7 +15,6 @@
         "pack": "yarn packages --topological-dev run pack",
         "test": "npx jest",
         "test:nc": "npx jest --collectCoverage=false --maxWorkers=4",
-        "test:ci": "npx jest --config jest.ci.js --totalTestSlices=4 --testSlicesToRun=\"[1,2,3]\"",
         "test:e2e": "npx jest functional-tests.local.spec.ts",
         "publish-code-coverage": "./upload-to-codecov.sh",
         "lint:check": "yarn packages run lint",

@@ -4,7 +4,7 @@
 steps:
     - script: |
           export NODE_OPTIONS=--max_old_space_size=8192
-          yarn test --ci --coverage --config jest.ci.js --totalTestSlices=${{ parameters.totalTestSlices }} --testSlicesToRun=${{ parameters.testSlicesToRun }}
+          yarn test --coverage
       displayName: Run unit tests
 
     - task: PublishTestResults@2
