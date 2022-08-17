@@ -10,12 +10,4 @@ jobs:
           demands: npm
       steps:
           - template: ./azure-pipeline/build-artifacts-and-run-tests-job.yaml
-            parameters: { totalTestSlices: 4, testSlicesToRun: '[0]' }
-
-    - job: 'RunRemainingTests'
-      pool:
-          vmImage: 'ubuntu-20.04'
-          demands: npm
-      steps:
-          - template: ./azure-pipeline/run-tests-job.yaml
-            parameters: { totalTestSlices: 4, testSlicesToRun: '[1,2,3]' }
+            parameters: { totalTestSlices: 1, testSlicesToRun: '[0]' }

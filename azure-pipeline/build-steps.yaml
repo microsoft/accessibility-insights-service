@@ -6,5 +6,5 @@ steps:
       displayName: Clean
 
     - script: |
-          yarn workspaces foreach --no-private --parallel --verbose --topological-dev run build --env version=$(Build.BuildId)
+          yarn build --env version=$(Build.BuildId)
       displayName: Build
