@@ -49,6 +49,7 @@
         "inversify": "^6.0.1",
         "lodash": "^4.17.21",
         "logger": "workspace:*",
+        "parallel-workers": ":",
         "reflect-metadata": "^0.1.13"
     }
 }
