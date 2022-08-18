@@ -203,13 +203,20 @@ export class PageNavigator {
         }
     }
 
+    // Reload page if website returns HTTP 304 (Not Modified) when browser use disk cache
     private async reloadCachedVersion(
         page: Puppeteer.Page,
         navigationCondition: Puppeteer.PuppeteerLifeCycleEvent,
     ): Promise<Puppeteer.HTTPResponse> {
-        // Reload page if website returns HTTP 304 (Not Modified) when browser use disk cache
-        await page.goto(`file:///${__dirname}/blank-page.html`);
+        let count = 3;
+        let response;
+        do {
+            count--;
+            await page.goto(`file:///${__dirname}/blank-page.html`);
 
-        return page.goBack({ waitUntil: navigationCondition, timeout: puppeteerTimeoutConfig.navigationTimeoutMsecs });
+            response = await page.goBack({ waitUntil: navigationCondition, timeout: puppeteerTimeoutConfig.navigationTimeoutMsecs });
+        } while (count > 0 && response.status() === 304);
+
+        return response;
     }
 }
