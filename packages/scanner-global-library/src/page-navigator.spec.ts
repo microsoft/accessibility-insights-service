@@ -3,7 +3,7 @@
 
 import 'reflect-metadata';
 
-import { IMock, Mock, It } from 'typemoq';
+import { IMock, Mock, It, Times } from 'typemoq';
 import { Page, HTTPResponse } from 'puppeteer';
 import { PageResponseProcessor } from './page-response-processor';
 import { PageNavigator } from './page-navigator';
@@ -101,7 +101,8 @@ describe(PageNavigator, () => {
         });
     });
 
-    it('reload with success if receive HTTP 304', async () => {
+    it('reload with success if received HTTP 304', async () => {
+        const maxRetryCount = 4;
         const response = {
             status: () => 304,
         } as unknown as HTTPResponse;
@@ -119,7 +120,7 @@ describe(PageNavigator, () => {
         puppeteerPageMock
             .setup(async (o) => o.goto(`file:///${__dirname}/blank-page.html`))
             .returns(() => Promise.resolve(response))
-            .verifiable();
+            .verifiable(Times.exactly(maxRetryCount));
         puppeteerPageMock
             .setup(async (o) =>
                 o.goBack({
@@ -128,7 +129,7 @@ describe(PageNavigator, () => {
                 }),
             )
             .returns(() => Promise.resolve(response))
-            .verifiable();
+            .verifiable(Times.exactly(maxRetryCount));
         puppeteerPageMock
             .setup((o) => o.evaluate(It.isAny()))
             .returns(() => Promise.resolve())
