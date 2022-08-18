@@ -102,6 +102,7 @@ describe(PageNavigator, () => {
     });
 
     it('reload with success if received HTTP 304', async () => {
+        const maxRetryCount = 4;
         const response = {
             status: () => 304,
         } as unknown as HTTPResponse;
@@ -119,7 +120,7 @@ describe(PageNavigator, () => {
         puppeteerPageMock
             .setup(async (o) => o.goto(`file:///${__dirname}/blank-page.html`))
             .returns(() => Promise.resolve(response))
-            .verifiable(Times.exactly(3));
+            .verifiable(Times.exactly(maxRetryCount));
         puppeteerPageMock
             .setup(async (o) =>
                 o.goBack({
@@ -128,7 +129,7 @@ describe(PageNavigator, () => {
                 }),
             )
             .returns(() => Promise.resolve(response))
-            .verifiable(Times.exactly(3));
+            .verifiable(Times.exactly(maxRetryCount));
         puppeteerPageMock
             .setup((o) => o.evaluate(It.isAny()))
             .returns(() => Promise.resolve())
