@@ -183,7 +183,7 @@ Object {
       "format": "int",
     },
     "scanRequestProcessingDelayInSeconds": Object {
-      "default": 15,
+      "default": 600,
       "doc": "The scan request processing delay interval in seconds for a new submitted request.",
       "format": "int",
     },
@@ -418,7 +418,7 @@ Object {
       "format": "int",
     },
     "scanRequestProcessingDelayInSeconds": Object {
-      "default": 15,
+      "default": 600,
       "doc": "The scan request processing delay interval in seconds for a new submitted request.",
       "format": "int",
     },
