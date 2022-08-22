@@ -284,7 +284,7 @@ export class ServiceConfiguration {
                 },
                 scanRequestProcessingDelayInSeconds: {
                     format: 'int',
-                    default: 15,
+                    default: 600,
                     doc: 'The scan request processing delay interval in seconds for a new submitted request.',
                 },
                 minScanPriorityValue: {
