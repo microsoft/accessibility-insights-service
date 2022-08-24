@@ -88,7 +88,7 @@ export class WebDriver {
         const options = {
             ...defaultLaunchOptions,
             headless: process.env.HEADLESS === 'false' ? false : true,
-            devtools: process.env.DEVTOOLS === 'true' ? true : false,
+            devtools: process.env.DEV_TOOLS === 'true' ? true : false,
         };
 
         // Define browser cache location to allow reuse it after browser relaunch.
