@@ -57,12 +57,12 @@ enableCosmosAccess() {
     fi
 
     local end=$((SECONDS + 300))
-    local status="ok"
     echo "Creating a custom role assignment $customRoleName under $cosmosAccountName Cosmos DB account"
     printf " - Running .."
     while [ $SECONDS -le $end ]; do
+        local status="ok"
         az cosmosdb sql role assignment create --account-name "$cosmosAccountName" --resource-group "$resourceGroupName" --scope "/" --principal-id "$principalId" --role-definition-id "$RBACRoleId" 1>/dev/null || status="failed"
-        if [[ $status != "failed" ]]; then
+        if [[ $status == "ok" ]]; then
             break
         else
             printf "."
