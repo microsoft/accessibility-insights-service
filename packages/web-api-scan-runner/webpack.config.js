@@ -25,7 +25,6 @@ module.exports = (env) => {
             'puppeteer-extra',
             'puppeteer-extra-plugin',
             'puppeteer-extra-plugin-stealth',
-            '@fluentui/react',
         ],
         entry: {
             ['web-api-scan-runner']: path.resolve('./src/index.ts'),
