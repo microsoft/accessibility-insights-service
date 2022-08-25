@@ -7,6 +7,8 @@ import { inject, injectable } from 'inversify';
 import { cloneDeep } from 'lodash';
 import moment from 'moment';
 
+export declare type UserAccessLevels = 'admin' | 'nonadmin';
+
 export interface BatchTaskPropertyProvider {
     getResourceFiles?(): BatchServiceModels.ResourceFile[];
     getAdditionalContainerRunOptions?(): string;
@@ -25,11 +27,9 @@ export abstract class BatchTaskPropertyProvider {
     }
 
     public getUserElevationLevel(): UserAccessLevels {
-        return 'nonadmin';
+        return 'admin';
     }
 }
-
-export declare type UserAccessLevels = 'admin' | 'nonadmin';
 
 @injectable()
 export class BatchTaskConfigGenerator {
