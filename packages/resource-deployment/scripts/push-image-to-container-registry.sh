@@ -108,16 +108,14 @@ pushImagesToRegistry() (
 
 if [[ $keepImages == true ]]; then
     echo "Skip pushing images to Azure Container Registry."
+else
+    . "${0%/*}/get-resource-names.sh"
+    . "${0%/*}/process-utilities.sh"
 
-    exit 0
+    # Login to container registry
+    az acr login --name "$containerRegistryName"
+
+    setImageBuildSource
+    prepareImageBuildSource
+    pushImagesToRegistry
 fi
-
-. "${0%/*}/get-resource-names.sh"
-. "${0%/*}/process-utilities.sh"
-
-# Login to container registry
-az acr login --name "$containerRegistryName"
-
-setImageBuildSource
-prepareImageBuildSource
-pushImagesToRegistry
