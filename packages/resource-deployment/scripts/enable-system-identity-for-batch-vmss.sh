@@ -79,8 +79,31 @@ enableCosmosAccess() {
     echo "Successfully created a custom role assignment $customRoleName under $cosmosAccountName Cosmos DB account"
 }
 
+ensurePrincipalId() {
+    local end=$((SECONDS + 300))
+    echo "Wait for system-assigned identity propagation"
+    printf " - Running .."
+    while [ $SECONDS -le $end ]; do
+        enabled=$(az ad sp show --id "$principalId" --query "accountEnabled" -o tsv)
+        if [[ $enabled == "True" ]]; then
+            break
+        else
+            printf "."
+        fi
+
+        sleep 5
+    done
+    echo "  ended"
+
+    if [[ $enabled != "True" ]]; then
+        echo "System-assigned identity $principalId is not enabled."
+        exit 1
+    fi
+}
+
 assignSystemIdentity() {
     principalId=$(az vmss identity assign --name "$vmssName" --resource-group "$vmssResourceGroup" --query systemAssignedIdentity -o tsv)
+    ensurePrincipalId
 
     echo \
         "VMSS Resource configuration:

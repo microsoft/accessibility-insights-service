@@ -20,6 +20,6 @@ export class ScannerBatchTaskPropertyProvider extends BatchTaskPropertyProvider 
     }
 
     public getUserElevationLevel(): UserAccessLevels {
-        return 'nonadmin';
+        return 'admin';
     }
 }

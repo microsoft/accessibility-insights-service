@@ -13,10 +13,11 @@ Usage: $0 -r <resource group> [-e <runtime environment>]
 }
 
 # Read script arguments
-while getopts ":r:e:" option; do
+while getopts ":r:e:w:" option; do
     case $option in
     r) resourceGroupName=${OPTARG} ;;
     e) environment=${OPTARG} ;;
+    w) keepImages=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
@@ -104,6 +105,12 @@ pushImagesToRegistry() (
     echo "Pushing images to Azure Container Registry."
     runCommandsWithoutSecretsInParallel imageBuildProcesses
 )
+
+if [[ $keepImages == true ]]; then
+    echo "Skip pushing images to Azure Container Registry."
+
+    exit 0
+fi
 
 . "${0%/*}/get-resource-names.sh"
 . "${0%/*}/process-utilities.sh"

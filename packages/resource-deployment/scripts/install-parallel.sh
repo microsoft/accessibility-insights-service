@@ -24,6 +24,7 @@ export webApiAdClientSecret
 export releaseVersion
 export templatesFolder="${0%/*}/../templates/"
 export dropPools=false
+export keepImages=false
 
 exitWithUsageInfo() {
     echo "
@@ -93,7 +94,7 @@ function onExit() {
 trap "onExit" EXIT
 
 # Read script arguments
-while getopts ":r:s:l:e:o:p:c:t:v:d:" option; do
+while getopts ":r:s:l:e:o:p:c:t:v:d:w:" option; do
     case $option in
     r) resourceGroupName=${OPTARG} ;;
     s) subscription=${OPTARG} ;;
@@ -105,6 +106,7 @@ while getopts ":r:s:l:e:o:p:c:t:v:d:" option; do
     t) webApiAdClientSecret=${OPTARG} ;;
     v) releaseVersion=${OPTARG} ;;
     d) dropPools=${OPTARG} ;;
+    w) keepImages=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done

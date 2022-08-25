@@ -41,6 +41,6 @@ describe(ScannerBatchTaskPropertyProvider, () => {
 
     it('get get user elevation level', () => {
         const actualElevationLevel = testSubject.getUserElevationLevel();
-        expect(actualElevationLevel).toEqual('nonadmin');
+        expect(actualElevationLevel).toEqual('admin');
     });
 });
