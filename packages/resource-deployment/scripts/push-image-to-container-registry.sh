@@ -106,9 +106,7 @@ pushImagesToRegistry() (
     runCommandsWithoutSecretsInParallel imageBuildProcesses
 )
 
-if [[ $keepImages == true ]]; then
-    echo "Skip pushing images to Azure Container Registry."
-else
+if [[ $keepImages != true ]]; then
     . "${0%/*}/get-resource-names.sh"
     . "${0%/*}/process-utilities.sh"
 
@@ -118,4 +116,6 @@ else
     setImageBuildSource
     prepareImageBuildSource
     pushImagesToRegistry
+else
+    echo "Skip pushing images to Azure Container Registry."
 fi
