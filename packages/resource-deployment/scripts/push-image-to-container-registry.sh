@@ -92,13 +92,13 @@ pushImagesToRegistry() (
     local imageBuildProcesses=(
         "pushImageToRegistry \"batch-scan-runner\" $batchScanRunnerDist windows"
         "pushImageToRegistry \"batch-scan-manager\" $batchScanManagerDist windows"
-        "pushImageToRegistry \"batch-scan-request-sender\" $batchScanRequestSenderDist linux"
-        "pushImageToRegistry \"batch-scan-notification-manager\" $batchScanNotificationManagerDist linux"
-        "pushImageToRegistry \"batch-scan-notification-runner\" $batchScanNotificationRunnerDist linux"
+        "pushImageToRegistry \"batch-scan-request-sender\" $batchScanRequestSenderDist windows"
+        "pushImageToRegistry \"batch-scan-notification-manager\" $batchScanNotificationManagerDist windows"
+        "pushImageToRegistry \"batch-scan-notification-runner\" $batchScanNotificationRunnerDist windows"
         "pushImageToRegistry \"batch-privacy-scan-runner\" $batchPrivacyScanRunnerDist windows"
         "pushImageToRegistry \"batch-privacy-scan-manager\" $batchPrivacyScanJobManagerDist windows"
-        "pushImageToRegistry \"batch-report-generator-runner\" $batchReportGeneratorRunnerDist linux"
-        "pushImageToRegistry \"batch-report-generator-manager\" $batchReportGeneratorJobManagerDist linux"
+        "pushImageToRegistry \"batch-report-generator-runner\" $batchReportGeneratorRunnerDist windows"
+        "pushImageToRegistry \"batch-report-generator-manager\" $batchReportGeneratorJobManagerDist windows"
     )
 
     echo "Pushing images to Azure Container Registry."
