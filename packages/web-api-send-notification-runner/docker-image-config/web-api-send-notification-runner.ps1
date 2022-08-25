@@ -10,4 +10,4 @@ $response = Invoke-RestMethod -Headers @{"Metadata"="true"} -Method GET -Uri "ht
 if ($response) { $healthCheck = 'OK' } else { $healthCheck = 'FAILED' }
 Write-Host "IMDS health status: " $healthCheck
 
-node ./web-api-scan-job-manager.js
+node ./web-api-send-notification-runner.js

@@ -71,6 +71,11 @@ module.exports = (env) => {
                         to: '',
                     },
                     {
+                        context: './docker-image-config',
+                        from: 'report-generator-job-manager.ps1',
+                        to: '',
+                    },
+                    {
                         context: '../../packages/parallel-workers/dist',
                         from: '**/*.js',
                         to: '',

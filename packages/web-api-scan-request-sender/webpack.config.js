@@ -15,7 +15,7 @@ module.exports = (env) => {
         devtool: 'cheap-source-map',
         externals: ['yargs', 'applicationinsights'],
         entry: {
-            ['sender']: path.resolve('./src/index.ts'),
+            ['web-api-scan-request-sender']: path.resolve('./src/index.ts'),
         },
         mode: 'development',
         module: {
@@ -68,6 +68,11 @@ module.exports = (env) => {
                     {
                         context: './docker-image-config',
                         from: 'Dockerfile',
+                        to: '',
+                    },
+                    {
+                        context: './docker-image-config',
+                        from: 'web-api-scan-request-sender.ps1',
                         to: '',
                     },
                     {

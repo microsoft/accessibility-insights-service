@@ -71,6 +71,11 @@ module.exports = (env) => {
                         to: '',
                     },
                     {
+                        context: './docker-image-config',
+                        from: 'web-api-send-notification-runner.ps1',
+                        to: '',
+                    },
+                    {
                         context: '../../packages/parallel-workers/dist',
                         from: '**/*.js',
                         to: '',

@@ -1,25 +1,26 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
 
-FROM sbidprod.azurecr.io/quinault
+FROM mcr.microsoft.com/windows/servercore:1809-amd64
+
+ENV NODE_VERSION 16.14.0
+
+USER ContainerAdministrator
 
 WORKDIR /app
 
 # Install Node.js
-ARG NODE_VERSION=16.14.0
-ARG NODE_PACKAGE=node-v$NODE_VERSION-linux-x64
-ARG NODE_HOME=/opt/$NODE_PACKAGE
+RUN powershell Set-ExecutionPolicy RemoteSigned
+RUN powershell -Command \
+    Invoke-WebRequest $('https://nodejs.org/dist/v{0}/node-v{0}-win-x64.zip' -f $env:NODE_VERSION) -OutFile 'node.zip' -UseBasicParsing ; \
+    Expand-Archive node.zip -DestinationPath / ; \
+    Rename-Item -Path $('C:\node-v{0}-win-x64' -f $env:NODE_VERSION) -NewName 'C:\nodejs'
+RUN setx /m PATH "%PATH%;C:\nodejs"
 
-ENV NODE_PATH $NODE_HOME/lib/node_modules
-ENV PATH $NODE_HOME/bin:$PATH
-
-RUN apt-get update && apt-get install -y ca-certificates curl
-RUN curl https://nodejs.org/dist/v$NODE_VERSION/$NODE_PACKAGE.tar.gz | tar -xzC /opt/
-
-# Bundle app source
+# Bundle app package
 COPY . .
 
 # Install app dependencies
 RUN npm install
 
-ENTRYPOINT [ "node", "./report-generator-runner.js" ]
+ENTRYPOINT ["powershell.exe", "./report-generator-runner.ps1"]
