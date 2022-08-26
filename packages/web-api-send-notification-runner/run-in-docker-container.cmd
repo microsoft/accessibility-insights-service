@@ -11,5 +11,5 @@ copy .\.env .\dist\
 
 wsl yarn build &&^
 cd .\dist &&^
-docker build --tag web-api-scan-runner . &&^
-docker run --init --cap-add=SYS_ADMIN --ipc=host --env-file .env web-api-scan-runner
+docker build --tag web-api-send-notification-runner . &&^
+docker run --init --cap-add=SYS_ADMIN --ipc=host --env-file .env web-api-send-notification-runner
