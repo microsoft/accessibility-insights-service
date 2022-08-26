@@ -17,6 +17,12 @@ RUN powershell -Command \
     Rename-Item -Path $('C:\node-v{0}-win-x64' -f $env:NODE_VERSION) -NewName 'C:\nodejs'
 RUN setx /m PATH "%PATH%;C:\nodejs"
 
+# Install fonts to enable browser rendering
+ADD Fonts.tar /Fonts/
+COPY Add-Font.ps1 .
+RUN powershell -Command \
+    .\Add-Font.ps1 /Fonts/ > nul
+
 # Bundle app package
 COPY . .
 
