@@ -6,8 +6,4 @@ $gateway = (route print | ?{$_ -like "*0.0.0.0*0.0.0.0*"} | %{$_ -split " "} | ?
 $arguments = 'add','169.254.169.0','mask','255.255.255.0',$gateway
 &'route' $arguments
 
-$response = Invoke-RestMethod -Headers @{"Metadata"="true"} -Method GET -Uri "http://169.254.169.254/metadata/instance/compute/vmId?api-version=2017-08-01&format=text"
-if ($response) { $healthCheck = 'OK' } else { $healthCheck = 'FAILED' }
-Write-Host "IMDS health status:" $healthCheck
-
 node ./web-api-send-notification-job-manager.js
