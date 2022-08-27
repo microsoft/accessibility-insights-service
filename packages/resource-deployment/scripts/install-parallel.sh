@@ -28,7 +28,9 @@ export keepImages=false
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -e <environment> -l <Azure region> -o <organisation name> -p <publisher email> -r <resource group> -s <subscription name or id> -c <client id> -t <client secret> -v <release version> [-d <pass \"true\" to force pools to drop>]
+Usage: $0 -e <environment> -l <Azure region> -o <organisation name> -p <publisher email> -r <resource group> -s <subscription name or id>  -c <client id>
+-t <client secret> -v <release version> [-d <pass \"true\" to force pools to drop>] [-w <pass \"true\" to preserve docker images in Azure Container Registry>]
+
 where:
 
 Resource group - The name of the resource group that everything will be deployed in.
