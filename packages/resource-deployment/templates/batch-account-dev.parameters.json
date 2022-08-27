@@ -6,7 +6,7 @@
             "value": "1"
         },
         "onDemandScanRequestPoolVmSize": {
-            "value": "standard_f4s_v2"
+            "value": "standard_f8s_v2"
         },
         "onDemandScanRequestPoolTaskSlotsPerNode": {
             "value": "4"
