@@ -13,10 +13,11 @@ Usage: $0 -r <resource group> [-e <runtime environment>]
 }
 
 # Read script arguments
-while getopts ":r:e:" option; do
+while getopts ":r:e:w:" option; do
     case $option in
     r) resourceGroupName=${OPTARG} ;;
     e) environment=${OPTARG} ;;
+    w) keepImages=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
@@ -92,25 +93,29 @@ pushImagesToRegistry() (
     local imageBuildProcesses=(
         "pushImageToRegistry \"batch-scan-runner\" $batchScanRunnerDist windows"
         "pushImageToRegistry \"batch-scan-manager\" $batchScanManagerDist windows"
-        "pushImageToRegistry \"batch-scan-request-sender\" $batchScanRequestSenderDist linux"
-        "pushImageToRegistry \"batch-scan-notification-manager\" $batchScanNotificationManagerDist linux"
-        "pushImageToRegistry \"batch-scan-notification-runner\" $batchScanNotificationRunnerDist linux"
+        "pushImageToRegistry \"batch-scan-request-sender\" $batchScanRequestSenderDist windows"
+        "pushImageToRegistry \"batch-scan-notification-manager\" $batchScanNotificationManagerDist windows"
+        "pushImageToRegistry \"batch-scan-notification-runner\" $batchScanNotificationRunnerDist windows"
         "pushImageToRegistry \"batch-privacy-scan-runner\" $batchPrivacyScanRunnerDist windows"
         "pushImageToRegistry \"batch-privacy-scan-manager\" $batchPrivacyScanJobManagerDist windows"
-        "pushImageToRegistry \"batch-report-generator-runner\" $batchReportGeneratorRunnerDist linux"
-        "pushImageToRegistry \"batch-report-generator-manager\" $batchReportGeneratorJobManagerDist linux"
+        "pushImageToRegistry \"batch-report-generator-runner\" $batchReportGeneratorRunnerDist windows"
+        "pushImageToRegistry \"batch-report-generator-manager\" $batchReportGeneratorJobManagerDist windows"
     )
 
     echo "Pushing images to Azure Container Registry."
     runCommandsWithoutSecretsInParallel imageBuildProcesses
 )
 
-. "${0%/*}/get-resource-names.sh"
-. "${0%/*}/process-utilities.sh"
+if [[ $keepImages != true ]]; then
+    . "${0%/*}/get-resource-names.sh"
+    . "${0%/*}/process-utilities.sh"
 
-# Login to container registry
-az acr login --name "$containerRegistryName"
+    # Login to container registry
+    az acr login --name "$containerRegistryName"
 
-setImageBuildSource
-prepareImageBuildSource
-pushImagesToRegistry
+    setImageBuildSource
+    prepareImageBuildSource
+    pushImagesToRegistry
+else
+    echo "Skip pushing images to Azure Container Registry."
+fi

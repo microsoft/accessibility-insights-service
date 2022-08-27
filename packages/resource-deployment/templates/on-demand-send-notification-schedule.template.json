@@ -25,7 +25,7 @@
             "userIdentity": {
                 "autoUser": {
                     "scope": "task",
-                    "elevationLevel": "nonadmin"
+                    "elevationLevel": "admin"
                 }
             },
             "runExclusive": false

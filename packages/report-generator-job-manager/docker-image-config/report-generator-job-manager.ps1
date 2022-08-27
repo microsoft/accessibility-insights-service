@@ -6,4 +6,4 @@ $gateway = (route print | ?{$_ -like "*0.0.0.0*0.0.0.0*"} | %{$_ -split " "} | ?
 $arguments = 'add','169.254.169.0','mask','255.255.255.0',$gateway
 &'route' $arguments
 
-node ./privacy-scan-job-manager.js
+node ./report-generator-job-manager.js

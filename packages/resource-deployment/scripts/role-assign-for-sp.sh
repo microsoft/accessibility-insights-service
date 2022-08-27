@@ -31,12 +31,12 @@ fi
 
 grantRoleToResource() {
     local end=$((SECONDS + 300))
-
     echo "Create '$role' role assignment for service principal $principalId in $scope"
     printf " - Running .."
     while [ $SECONDS -le $end ]; do
-        response=$(az role assignment create --role "$role" --assignee-object-id "$principalId" --assignee-principal-type ServicePrincipal $scope --query "roleDefinitionId") || true
-        if [[ -n $response ]]; then
+        local status="ok"
+        az role assignment create --role "$role" --assignee-object-id "$principalId" --assignee-principal-type ServicePrincipal $scope --query "roleDefinitionId" 1>/dev/null || status="failed"
+        if [[ $status == "ok" ]]; then
             break
         else
             printf "."
@@ -46,7 +46,7 @@ grantRoleToResource() {
     done
     echo "  ended"
 
-    if [[ -z $response ]]; then
+    if [[ $status == "failed" ]]; then
         echo "Unable to create '$role' role assignment for service principal $principalId in $scope"
         exit 1
     fi

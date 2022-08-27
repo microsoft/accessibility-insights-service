@@ -120,7 +120,7 @@ describe(BatchTaskConfigGenerator, () => {
             },
             userIdentity: {
                 autoUser: {
-                    elevationLevel: 'nonadmin',
+                    elevationLevel: 'admin',
                     scope: 'task',
                 },
             },

@@ -16,6 +16,6 @@ export class SendNotificationTaskPropertyProvider extends BatchTaskPropertyProvi
     }
 
     public getUserElevationLevel(): UserAccessLevels {
-        return 'nonadmin';
+        return 'admin';
     }
 }
