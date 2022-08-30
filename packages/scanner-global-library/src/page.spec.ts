@@ -312,6 +312,13 @@ describe(Page, () => {
                 clearBrowserCache: true,
             };
             puppeteerPageMock.setup((p) => p.url()).returns(() => url);
+            // clear browser cookies
+            setupCDPSessionForClearBrowserCookies();
+            // refresh page
+            pageNavigatorMock
+                .setup((o) => o.refresh(puppeteerPageMock.object))
+                .returns(() => Promise.resolve())
+                .verifiable();
             // close browser
             webDriverMock
                 .setup(async (o) => o.close())
@@ -497,6 +504,12 @@ describe(Page, () => {
                 .verifiable();
             await page.setCookies(cookies);
         });
+
+        it('clearBrowserCookies()', async () => {
+            simulatePageLaunch();
+            setupCDPSessionForClearBrowserCookies();
+            await page.clearBrowserCookies();
+        });
     });
 });
 
@@ -537,15 +550,41 @@ function simulatePageLaunch(): void {
     page.userAgent = userAgent;
 }
 
+function setupCDPSessionForClearBrowserCookies(): void {
+    cdpSessionMock = getPromisableDynamicMock(Mock.ofType<Puppeteer.CDPSession>());
+    const targetStub = {
+        createCDPSession: async () => cdpSessionMock.object,
+    } as Puppeteer.Target;
+    puppeteerPageMock
+        .setup((o) => o.target())
+        .returns(() => targetStub)
+        .verifiable();
+
+    cdpSessionMock
+        .setup((o) => o.send('Network.clearBrowserCookies'))
+        .returns(async () => Promise.resolve())
+        .verifiable();
+    cdpSessionMock
+        .setup((o) => o.detach())
+        .returns(() => Promise.resolve())
+        .verifiable();
+}
+
 function setupCDPSessionForCaptureSnapshot(data: string): void {
     cdpSessionMock = getPromisableDynamicMock(Mock.ofType<Puppeteer.CDPSession>());
     const targetStub = {
         createCDPSession: async () => cdpSessionMock.object,
     } as Puppeteer.Target;
-    puppeteerPageMock.setup((o) => o.target()).returns(() => targetStub);
+    puppeteerPageMock
+        .setup((o) => o.target())
+        .returns(() => targetStub)
+        .verifiable();
 
     const snapshot = { data };
-    cdpSessionMock.setup((o) => o.send('Page.captureSnapshot', { format: 'mhtml' })).returns(async () => snapshot);
+    cdpSessionMock
+        .setup((o) => o.send('Page.captureSnapshot', { format: 'mhtml' }))
+        .returns(async () => snapshot)
+        .verifiable();
     cdpSessionMock
         .setup((o) => o.detach())
         .returns(() => Promise.resolve())
@@ -557,10 +596,16 @@ function setupCDPSessionForGetAllCookies(cookies: Puppeteer.Protocol.Network.Coo
     const targetStub = {
         createCDPSession: async () => cdpSessionMock.object,
     } as Puppeteer.Target;
-    puppeteerPageMock.setup((o) => o.target()).returns(() => targetStub);
+    puppeteerPageMock
+        .setup((o) => o.target())
+        .returns(() => targetStub)
+        .verifiable();
 
     const data = { cookies };
-    cdpSessionMock.setup((o) => o.send('Network.getAllCookies')).returns(async () => data);
+    cdpSessionMock
+        .setup((o) => o.send('Network.getAllCookies'))
+        .returns(async () => data)
+        .verifiable();
     cdpSessionMock
         .setup((o) => o.detach())
         .returns(() => Promise.resolve())

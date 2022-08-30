@@ -112,19 +112,9 @@ export class Page {
         this.requestUrl = this.url;
 
         if (options?.hardReload === true) {
-            await this.close();
-            await this.create({ ...this.lastBrowserStartOptions, clearBrowserCache: false });
-            await this.navigateToUrl(this.requestUrl, { allowCachedVersion: true });
+            await this.hardReload();
         } else {
-            this.lastBrowserError = undefined;
-            const navigationResponse = await this.pageNavigator.reload(this.page, async (browserError) => {
-                this.logger?.logError('Page reload error', { browserError: System.serializeError(browserError) });
-                this.lastBrowserError = browserError;
-            });
-
-            this.lastNavigationResponse = navigationResponse?.httpResponse;
-            this.pageNavigationTiming = navigationResponse?.pageNavigationTiming;
-            this.logPageNavigationTiming('reload');
+            await this.softReload();
         }
     }
 
@@ -182,6 +172,39 @@ export class Page {
         });
 
         return { width: windowSize.width, height: windowSize.height, deviceScaleFactor: windowSize.deviceScaleFactor };
+    }
+
+    public async clearBrowserCookies(): Promise<void> {
+        const client = await this.page.target().createCDPSession();
+        await client.send('Network.clearBrowserCookies');
+        await client.detach();
+    }
+
+    private async hardReload(): Promise<void> {
+        /**
+         * Hard reload (close and reopen browser) will delete all browser's data but preserve html/image/script/css/etc. cached files.
+         *
+         * Some websites implement persistence of cookie consent state within html page content.
+         * To reset this state we clear browser cookies and resubmit page to the webserver without any cookies.
+         * The webserver will return page with reset cookie consent state that can be used in browser cache.
+         */
+        await this.clearBrowserCookies();
+        await this.pageNavigator.refresh(this.page);
+        await this.close();
+        await this.create({ ...this.lastBrowserStartOptions, clearBrowserCache: false });
+        await this.navigateToUrl(this.requestUrl, { allowCachedVersion: true });
+    }
+
+    private async softReload(): Promise<void> {
+        this.lastBrowserError = undefined;
+        const navigationResponse = await this.pageNavigator.reload(this.page, async (browserError) => {
+            this.logger?.logError('Page reload error', { browserError: System.serializeError(browserError) });
+            this.lastBrowserError = browserError;
+        });
+
+        this.lastNavigationResponse = navigationResponse?.httpResponse;
+        this.pageNavigationTiming = navigationResponse?.pageNavigationTiming;
+        this.logPageNavigationTiming('reload');
     }
 
     private async setExtraHTTPHeaders(): Promise<void> {

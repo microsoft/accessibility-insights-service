@@ -132,6 +132,20 @@ export class PageNavigator {
         };
     }
 
+    public async refresh(page: Puppeteer.Page): Promise<void> {
+        const navigationCondition = 'networkidle2';
+        try {
+            await page.reload({ waitUntil: navigationCondition, timeout: puppeteerTimeoutConfig.navigationTimeoutMsecs });
+        } catch (error) {
+            const browserError = this.pageResponseProcessor.getNavigationError(error as Error);
+            this.logger?.logError(`Page navigation error while refresh page.`, {
+                navigationCondition,
+                timeout: `${puppeteerTimeoutConfig.navigationTimeoutMsecs}`,
+                browserError: System.serializeError(browserError),
+            });
+        }
+    }
+
     private async tryWaitForNetworkIdle(page: Puppeteer.Page): Promise<Partial<PageNavigationTiming>> {
         let networkIdleTimeout = false;
         const timestamp = System.getTimestamp();

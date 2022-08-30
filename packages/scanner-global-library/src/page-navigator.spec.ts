@@ -62,6 +62,48 @@ describe(PageNavigator, () => {
         expect(pageNavigator.pageConfigurator).toBe(pageConfiguratorMock.object);
     });
 
+    it('refresh page', async () => {
+        const response = {
+            status: () => 200,
+        } as unknown as HTTPResponse;
+
+        puppeteerPageMock
+            .setup(async (o) =>
+                o.reload({
+                    waitUntil: 'networkidle2',
+                    timeout: puppeteerTimeoutConfig.navigationTimeoutMsecs,
+                }),
+            )
+            .returns(() => Promise.resolve(response))
+            .verifiable();
+
+        await pageNavigator.reload(puppeteerPageMock.object);
+    });
+
+    it('refresh page with error', async () => {
+        const error = new Error('navigation error');
+        const browserError = {
+            errorType: 'NavigationError',
+            message: 'navigation error',
+        } as BrowserError;
+
+        puppeteerPageMock
+            .setup(async (o) =>
+                o.reload({
+                    waitUntil: 'networkidle2',
+                    timeout: puppeteerTimeoutConfig.navigationTimeoutMsecs,
+                }),
+            )
+            .returns(() => Promise.reject(error))
+            .verifiable();
+        pageResponseProcessorMock
+            .setup((o) => o.getNavigationError(error))
+            .returns(() => browserError)
+            .verifiable();
+
+        await pageNavigator.reload(puppeteerPageMock.object);
+    });
+
     it('reload with success', async () => {
         const response = {
             status: () => 200,
