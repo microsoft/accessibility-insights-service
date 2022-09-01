@@ -29,7 +29,6 @@ class BatchTaskPropertyProviderStub extends BatchTaskPropertyProvider {
 const appInsightsKey = 'appInsightsKeyEnvValue';
 const keyVaultUrl = 'keyVaultUrlEnvValue';
 const taskRuntimeConfig: TaskRuntimeConfig = {
-    maxTaskRetryCount: 3,
     retentionTimeInDays: 1,
     taskTimeoutInMinutes: 5,
 };
@@ -116,7 +115,7 @@ describe(BatchTaskConfigGenerator, () => {
             constraints: {
                 maxWallClockTime: `PT${taskRuntimeConfig.taskTimeoutInMinutes}M`,
                 retentionTime: `P${taskRuntimeConfig.retentionTimeInDays}D`,
-                maxTaskRetryCount: taskRuntimeConfig.maxTaskRetryCount,
+                maxTaskRetryCount: 0,
             },
             userIdentity: {
                 autoUser: {

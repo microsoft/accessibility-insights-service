@@ -81,18 +81,25 @@ export class ScanRequestSelector {
                     return;
                 }
 
+                // completed scan
                 if (scanResult.run.state === 'completed') {
                     filteredScanRequests.requestsToDelete.push({ request: scanRequest, result: scanResult, condition: 'completed' });
 
                     return;
                 }
 
-                if (scanResult.run.retryCount >= this.maxFailedScanRetryCount) {
+                // abandon scan with no retry attempt left
+                if (
+                    scanResult.run.state === 'running' &&
+                    scanResult.run.retryCount >= this.maxFailedScanRetryCount &&
+                    moment.utc(scanResult.run.timestamp).add(this.failedScanRetryIntervalInMinutes, 'minutes') <= moment.utc()
+                ) {
                     filteredScanRequests.requestsToDelete.push({ request: scanRequest, result: scanResult, condition: 'noRetry' });
 
                     return;
                 }
 
+                // abandon report
                 if (
                     scanResult.run.state === 'report' &&
                     moment.utc(scanResult.run.timestamp).add(this.maxReportProcessingIntervalInMinutes, 'minutes') <= moment.utc()
@@ -102,12 +109,14 @@ export class ScanRequestSelector {
                     return;
                 }
 
+                // accepted scan
                 if (scanResult.run.state === 'accepted') {
                     this.addRequestToScanQueue(filteredScanRequests, { request: scanRequest, result: scanResult, condition: 'accepted' });
 
                     return;
                 }
 
+                // abandon or failed scan with available retry attempt
                 if (
                     // scan was terminated or failed
                     (['queued', 'running', 'failed'] as OnDemandPageScanRunState[]).includes(scanResult.run.state) &&

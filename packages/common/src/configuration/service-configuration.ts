@@ -9,7 +9,6 @@ import { isNil } from 'lodash';
 export interface TaskRuntimeConfig {
     taskTimeoutInMinutes: number;
     retentionTimeInDays: number;
-    maxTaskRetryCount: number;
 }
 
 export interface QueueRuntimeConfig {
@@ -180,11 +179,6 @@ export class ServiceConfiguration {
                     format: 'int',
                     default: 3,
                     doc: 'The minimum time to retain the working directory for the task on the compute node where it ran, from the time it completes execution. After this time, the Batch service may delete the working directory and all its contents.',
-                },
-                maxTaskRetryCount: {
-                    format: 'int',
-                    default: 2,
-                    doc: 'The maximum number of times the task may be retried.',
                 },
             },
             jobManagerConfig: {

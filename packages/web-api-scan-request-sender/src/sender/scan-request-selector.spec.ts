@@ -164,13 +164,25 @@ describe(ScanRequestSelector, () => {
         createScanResults([
             {
                 run: {
-                    state: 'queued',
+                    state: 'running',
                     retryCount: 10,
+                    pageResponseCode: 500,
+                },
+            },
+            {
+                // ignore due to failedScanRetryIntervalInMinutes delay
+                run: {
+                    state: 'running',
+                    retryCount: 10,
+                    timestamp: moment(dateNow).toJSON(),
+                    pageResponseCode: 501,
                 },
             },
         ]);
         accessibilityMessageCount = scanResults.length;
         createScanRequests();
+        scanRequests = [scanRequests[0]];
+
         setupPageScanRequestProvider();
         setupOnDemandPageScanRunResultProvider();
         createFilteredScanRequests(

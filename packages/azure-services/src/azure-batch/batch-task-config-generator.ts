@@ -74,7 +74,7 @@ export class BatchTaskConfigGenerator {
             constraints: {
                 maxWallClockTime: moment.duration({ minute: batchTaskConfig.taskTimeoutInMinutes }).toISOString(),
                 retentionTime: moment.duration({ day: batchTaskConfig.retentionTimeInDays }).toISOString(),
-                maxTaskRetryCount: batchTaskConfig.maxTaskRetryCount,
+                maxTaskRetryCount: 0,
             },
             userIdentity: {
                 autoUser: {
