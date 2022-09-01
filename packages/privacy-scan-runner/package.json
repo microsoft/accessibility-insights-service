@@ -29,7 +29,7 @@
         "@types/node": "^16.11.7",
         "@types/puppeteer": "^5.4.6",
         "@types/verror": "^1.10.4",
-        "@types/yargs": "^17.0.10",
+        "@types/yargs": "^17.0.12",
         "copy-webpack-plugin": "^11.0.0",
         "fork-ts-checker-webpack-plugin": "^7.2.12",
         "jest": "^27.5.1",

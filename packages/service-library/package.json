@@ -27,7 +27,7 @@
         "@types/paralleljs": "^0.0.21",
         "@types/puppeteer": "^5.4.6",
         "@types/sha.js": "^2.4.0",
-        "@types/yargs": "^17.0.10",
+        "@types/yargs": "^17.0.12",
         "cpy-cli": "^4.1.0",
         "jest": "^27.5.1",
         "jest-extended": "^2.0.0",
