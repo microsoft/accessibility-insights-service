@@ -216,11 +216,6 @@ Object {
     },
   },
   "taskConfig": Object {
-    "maxTaskRetryCount": Object {
-      "default": 2,
-      "doc": "The maximum number of times the task may be retried.",
-      "format": "int",
-    },
     "retentionTimeInDays": Object {
       "default": 3,
       "doc": "The minimum time to retain the working directory for the task on the compute node where it ran, from the time it completes execution. After this time, the Batch service may delete the working directory and all its contents.",
@@ -451,11 +446,6 @@ Object {
     },
   },
   "taskConfig": Object {
-    "maxTaskRetryCount": Object {
-      "default": 2,
-      "doc": "The maximum number of times the task may be retried.",
-      "format": "int",
-    },
     "retentionTimeInDays": Object {
       "default": 3,
       "doc": "The minimum time to retain the working directory for the task on the compute node where it ran, from the time it completes execution. After this time, the Batch service may delete the working directory and all its contents.",

@@ -29,7 +29,7 @@ class BatchTaskPropertyProviderStub extends BatchTaskPropertyProvider {
 const appInsightsKey = 'appInsightsKeyEnvValue';
 const keyVaultUrl = 'keyVaultUrlEnvValue';
 const taskRuntimeConfig: TaskRuntimeConfig = {
-    maxTaskRetryCount: 3,
+    maxTaskRetryCount: 0,
     retentionTimeInDays: 1,
     taskTimeoutInMinutes: 5,
 };
