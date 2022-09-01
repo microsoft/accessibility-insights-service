@@ -48,7 +48,7 @@
         "axe-core": "4.4.1",
         "browser-pool": "^3.1.4",
         "common": "workspace:*",
-        "dotenv": "^16.0.1",
+        "dotenv": "^16.0.2",
         "encoding-down": "^7.1.0",
         "inversify": "^6.0.1",
         "leveldown": "^6.1.1",
