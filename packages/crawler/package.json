@@ -28,7 +28,7 @@
         "@types/encoding-down": "^5.0.0",
         "@types/jest": "^27.4.1",
         "@types/leveldown": "^4.0.2",
-        "@types/levelup": "^5.1.1",
+        "@types/levelup": "^5.1.2",
         "@types/node": "^16.11.7",
         "@types/puppeteer": "^5.4.6",
         "jest": "^27.5.1",
