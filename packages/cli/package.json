@@ -86,7 +86,7 @@
         "normalize-url": "6.1.0",
         "puppeteer": "^13.7.0",
         "puppeteer-extra": "^3.2.3",
-        "puppeteer-extra-plugin": "^3.2.0",
+        "puppeteer-extra-plugin": "^3.2.2",
         "puppeteer-extra-plugin-stealth": "^2.9.0",
         "raw-body": "^2.5.1",
         "reflect-metadata": "^0.1.13",
