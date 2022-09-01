@@ -64,7 +64,7 @@
         "@sindresorhus/fnv1a": "^2.0.1",
         "accessibility-insights-report": "4.3.0",
         "ajv": "^8.10.0",
-        "apify": "^2.3.2",
+        "apify": "^3.0.2",
         "applicationinsights": "^2.3.1",
         "axe-core": "4.4.1",
         "browser-pool": "^3.1.4",
