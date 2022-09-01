@@ -25,7 +25,7 @@
         "@types/got": "^9.6.11",
         "@types/jest": "^27.4.1",
         "@types/lodash": "^4.14.182",
-        "@types/verror": "^1.10.4",
+        "@types/verror": "^1.10.6",
         "@types/yargs": "^17.0.10",
         "fork-ts-checker-webpack-plugin": "^7.2.12",
         "jest": "^27.5.1",
