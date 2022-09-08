@@ -44,7 +44,7 @@ async function invokeWithTimeout(op: any): Promise<any> {
     }, 0);
 
     let totalDelay = 0;
-    const iterationDelay = 100;
+    const iterationDelay = 200;
     while (!completed && totalDelay <= 1000) {
         await delay(iterationDelay);
         totalDelay = totalDelay + iterationDelay;
