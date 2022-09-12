@@ -25,7 +25,7 @@ enableResourceGroupAccess() {
 }
 
 enableStorageAccess() {
-    scope="--scope /subscriptions/$subscription/resourceGroups/$resourceGroupName/providers/Microsoft.Storage/storageAccounts/$storageAccountName"
+    scope="--scope /subscriptions/${subscription}/resourceGroups/${resourceGroupName}/providers/Microsoft.Storage/storageAccounts/${storageAccountName}"
 
     role="Storage Blob Data Contributor"
     . "${0%/*}/role-assign-for-sp.sh"
@@ -35,16 +35,16 @@ enableStorageAccess() {
 }
 
 enableCosmosAccess() {
-    cosmosAccountId=$(az cosmosdb show --name "$cosmosAccountName" --resource-group "$resourceGroupName" --query id -o tsv)
-    scope="--scope $cosmosAccountId"
+    cosmosAccountId=$(az cosmosdb show --name "${cosmosAccountName}" --resource-group "${resourceGroupName}" --query id -o tsv)
+    scope="--scope ${cosmosAccountId}"
 
     role="DocumentDB Account Contributor"
     . "${0%/*}/role-assign-for-sp.sh"
 
     # Create and assign custom RBAC role
     customRoleName="CosmosDocumentRW"
-    RBACRoleId=$(az cosmosdb sql role definition list --account-name "$cosmosAccountName" --resource-group "$resourceGroupName" --query "[?roleName=='$customRoleName'].id" -o tsv)
-    if [[ -z "$RBACRoleId" ]]; then
+    RBACRoleId=$(az cosmosdb sql role definition list --account-name "${cosmosAccountName}" --resource-group "${resourceGroupName}" --query "[?roleName=='${customRoleName}'].id" -o tsv)
+    if [[ -z "${RBACRoleId}" ]]; then
         echo "Creating a custom RBAC role with read-write permissions"
         RBACRoleId=$(az cosmosdb sql role definition create --account-name "${cosmosAccountName}" \
             --resource-group "${resourceGroupName}" \
@@ -57,12 +57,12 @@ enableCosmosAccess() {
     fi
 
     local end=$((SECONDS + 300))
-    echo "Creating a custom role assignment $customRoleName under $cosmosAccountName Cosmos DB account"
+    echo "Creating a custom role assignment ${customRoleName} under ${cosmosAccountName} Cosmos DB account"
     printf " - Running .."
     while [ $SECONDS -le $end ]; do
         local status="ok"
-        az cosmosdb sql role assignment create --account-name "$cosmosAccountName" --resource-group "$resourceGroupName" --scope "/" --principal-id "$principalId" --role-definition-id "$RBACRoleId" 1>/dev/null || status="failed"
-        if [[ $status == "ok" ]]; then
+        az cosmosdb sql role assignment create --account-name "${cosmosAccountName}" --resource-group "${resourceGroupName}" --scope "/" --principal-id "${principalId}" --role-definition-id "${RBACRoleId}" 1>/dev/null || status="failed"
+        if [[ ${status} == "ok" ]]; then
             break
         else
             printf "."
@@ -72,34 +72,51 @@ enableCosmosAccess() {
     done
     echo "  ended"
 
-    if [[ $status == "failed" ]]; then
-        echo "Unable to create a custom role assignment $customRoleName under $cosmosAccountName Cosmos DB account"
+    if [[ ${status} == "failed" ]]; then
+        echo "Unable to create a custom role assignment ${customRoleName} under ${cosmosAccountName} Cosmos DB account"
         exit 1
     fi
 
-    echo "Successfully created a custom role assignment $customRoleName under $cosmosAccountName Cosmos DB account"
+    echo "Successfully created a custom role assignment ${customRoleName} under ${cosmosAccountName} Cosmos DB account"
 }
 
 assignSystemIdentity() {
-    principalId=$(az vmss identity assign --name "$vmssName" --resource-group "$vmssResourceGroup" --query systemAssignedIdentity -o tsv)
+    local end=$((SECONDS + 9))
+    echo "Assigning system managed identity to Batch pool VMSS ${vmssName}"
+    printf " - Running .."
+    while [ $SECONDS -le $end ]; do
+        local status="ok"
+        az vmss identity assign --name "${vmssName}" --resource-group "${vmssResourceGroup}" 1>/dev/null || status="failed"
+        principalId=$(az vmss identity show --name "${vmssName}" --resource-group "${vmssResourceGroup}" --query principalId -o tsv) || status="failed"
+        accountEnabled=$(az ad sp show --id "${principalId}" --query accountEnabled -o tsv) || status="failed"
+
+        if [[ ${status} == "ok" ]] && [[ ${accountEnabled} == "True" ]] && [[ -n ${principalId} ]]; then
+            break
+        else
+            printf "."
+        fi
+
+        sleep 5
+    done
+    echo "  ended"
+
+    if [[ ${status} == "failed" ]]; then
+        echo "Failed to assign system managed identity to Batch pool VMSS ${vmssName}"
+        exit 1
+    fi
 
     echo \
         "VMSS Resource configuration:
-  Batch Pool: $pool
-  VMSS resource group: $vmssResourceGroup
-  VMSS name: $vmssName
-  System-assigned identity: $principalId
-  "
-    . "${0%/*}/key-vault-enable-msi.sh"
-
-    enableResourceGroupAccess
-    enableStorageAccess
-    enableCosmosAccess
+  Batch Pool: ${pool}
+  VMSS resource group: ${vmssResourceGroup}
+  VMSS name: ${vmssName}
+  System-assigned identity: ${principalId}"
+    echo "Successfully assigned system managed identity to Batch pool VMSS ${vmssName}"
 }
 
 # Read script arguments
 while getopts ":v:r:p:" option; do
-    case $option in
+    case ${option} in
     v) vmssName=${OPTARG} ;;
     r) vmssResourceGroup=${OPTARG} ;;
     p) pool=${OPTARG} ;;
@@ -107,7 +124,7 @@ while getopts ":v:r:p:" option; do
     esac
 done
 
-if [[ -z $vmssName ]] || [[ -z $vmssResourceGroup ]] || [[ -z $pool ]]; then
+if [[ -z ${vmssName} ]] || [[ -z ${vmssResourceGroup} ]] || [[ -z ${pool} ]]; then
     exitWithUsageInfo
 fi
 
@@ -117,3 +134,7 @@ fi
 subscription=$(az account show --query "id" -o tsv)
 
 assignSystemIdentity
+. "${0%/*}/key-vault-enable-msi.sh"
+enableResourceGroupAccess
+enableStorageAccess
+enableCosmosAccess

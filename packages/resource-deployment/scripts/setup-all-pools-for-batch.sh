@@ -22,33 +22,35 @@ function setupPools() {
 
     echo "Setup tags for Batch VMSS"
     parallelProcesses=()
-    for pool in $pools; do
+    for pool in ${pools}; do
         command=". \"${0%/*}/add-tags-for-batch-vmss.sh\""
-        commandName="Setup tags for pool $pool"
+        commandName="Setup tags for pool ${pool}"
         . "${0%/*}/run-command-on-all-vmss-for-pool.sh" &
         parallelProcesses+=("$!")
     done
     waitForProcesses parallelProcesses
 
     echo "Setup system identity for created pools"
-    for pool in $pools; do
+    parallelProcesses=()
+    for pool in ${pools}; do
         command=". ${0%/*}/enable-system-identity-for-batch-vmss.sh"
-        commandName="Enable system identity for pool $pool"
-        . "${0%/*}/run-command-on-all-vmss-for-pool.sh"
+        commandName="Enable system identity for pool ${pool}"
+        . "${0%/*}/run-command-on-all-vmss-for-pool.sh" &
+        parallelProcesses+=("$!")
     done
-
+    waitForProcesses parallelProcesses
 }
 
 # Read script arguments
 while getopts ":r:" option; do
-    case $option in
+    case ${option} in
     r) resourceGroupName=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
 
 # Print script usage help
-if [[ -z $resourceGroupName ]]; then
+if [[ -z ${resourceGroupName} ]]; then
     exitWithUsageInfo
 fi
 
@@ -60,9 +62,9 @@ fi
 . "${0%/*}/get-resource-names.sh"
 
 # Login into Azure Batch account
-echo "Logging into '$batchAccountName' Azure Batch account"
-az batch account login --name "$batchAccountName" --resource-group "$resourceGroupName"
+echo "Logging into '${batchAccountName}' Azure Batch account"
+az batch account login --name "${batchAccountName}" --resource-group "${resourceGroupName}"
 
 setupPools
 
-echo "Successfully setup all pools for batch account $batchAccountName"
+echo "Successfully setup all pools for batch account ${batchAccountName}"
