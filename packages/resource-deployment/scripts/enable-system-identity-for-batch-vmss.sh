@@ -81,7 +81,7 @@ enableCosmosAccess() {
 }
 
 assignSystemIdentity() {
-    local end=$((SECONDS + 9))
+    local end=$((SECONDS + 300))
     echo "Assigning system managed identity to Batch pool VMSS ${vmssName}"
     printf " - Running .."
     while [ $SECONDS -le $end ]; do
@@ -96,7 +96,7 @@ assignSystemIdentity() {
             printf "."
         fi
 
-        sleep 5
+        sleep 15
     done
     echo "  ended"
 
