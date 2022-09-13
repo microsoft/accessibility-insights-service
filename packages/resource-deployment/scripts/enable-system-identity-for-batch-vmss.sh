@@ -88,9 +88,8 @@ assignSystemIdentity() {
         local status="ok"
         az vmss identity assign --name "${vmssName}" --resource-group "${vmssResourceGroup}" 1>/dev/null || status="failed"
         principalId=$(az vmss identity show --name "${vmssName}" --resource-group "${vmssResourceGroup}" --query principalId -o tsv) || status="failed"
-        accountEnabled=$(az ad sp show --id "${principalId}" --query accountEnabled -o tsv) || status="failed"
 
-        if [[ ${status} == "ok" ]] && [[ ${accountEnabled} == "True" ]] && [[ -n ${principalId} ]]; then
+        if [[ ${status} == "ok" ]] && [[ -n ${principalId} ]]; then
             break
         else
             printf "."
