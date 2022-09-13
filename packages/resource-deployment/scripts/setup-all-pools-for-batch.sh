@@ -35,10 +35,8 @@ function setupPools() {
     for pool in ${pools}; do
         command=". ${0%/*}/enable-system-identity-for-batch-vmss.sh"
         commandName="Enable system identity for pool ${pool}"
-        . "${0%/*}/run-command-on-all-vmss-for-pool.sh" &
-        parallelProcesses+=("$!")
+        . "${0%/*}/run-command-on-all-vmss-for-pool.sh"
     done
-    waitForProcesses parallelProcesses
 }
 
 # Read script arguments
