@@ -13,7 +13,7 @@ import {
 } from 'service-library';
 import { OnDemandPageScanRunState, ScanError, OnDemandPageScanResult, WebsiteScanResult } from 'storage-documents';
 import { isEmpty } from 'lodash';
-import { ScanRequestSelector, ScanRequest } from './scan-request-selector';
+import { ScanRequestSelector, ScanRequest, DispatchCondition } from './scan-request-selector';
 
 /* eslint-disable max-len */
 @injectable()
@@ -66,7 +66,7 @@ export class OnDemandDispatcher {
         let count = 0;
         await Promise.all(
             scanRequests.map(async (scanRequest) => {
-                // the message to be read by job manager and pass to task runner
+                // the message to be read by job manager and pass through to task runner
                 const message = {
                     id: scanRequest.request.id,
                     url: scanRequest.request.url,
@@ -116,18 +116,18 @@ export class OnDemandDispatcher {
             return;
         }
 
-        // set scan run state to failed when scan was abandon or terminated
-        if ((['queued', 'running'] as OnDemandPageScanRunState[]).includes(pageScanResult.run.state)) {
+        // set scan run state to failed when scan is stale
+        if ((['noRetry', 'abandoned'] as DispatchCondition[]).includes(scanRequest.condition) && pageScanResult.run.state !== 'failed') {
             pageScanResult.run = {
                 ...pageScanResult.run,
                 state: 'failed',
-                error: `The scan request was abandon or terminated in a service pipeline. State: ${JSON.stringify(pageScanResult.run)}`,
+                error: `The scan request was abandon in a service pipeline. State: ${JSON.stringify(pageScanResult.run)}`,
                 timestamp: new Date().toJSON(),
             };
 
             await this.onDemandPageScanRunResultProvider.updateScanRun(pageScanResult);
 
-            this.logger.logError('The scan request was abandon or terminated in a service pipeline.', {
+            this.logger.logError('The scan request was abandon in a service pipeline.', {
                 scanId: pageScanResult.id,
                 runState: JSON.stringify(pageScanResult.run.state),
             });
