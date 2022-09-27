@@ -5,6 +5,7 @@ import { ItemType } from './item-type';
 import { StorageDocument } from './storage-document';
 import { ScanGroupType } from './website-scan-result';
 import { PrivacyScan } from './on-demand-page-scan-batch-request';
+import { ReportScanRunResult } from './report-generator-request';
 
 export declare type ScanState = 'pending' | 'pass' | 'fail';
 export declare type NotificationState = 'pending' | 'queued' | 'queueFailed' | 'sending' | 'sent' | 'sendFailed';
@@ -54,6 +55,7 @@ export interface OnDemandPageScanResult extends StorageDocument {
     scanResult?: OnDemandScanResult;
     reports?: OnDemandPageScanReport[];
     run: OnDemandPageScanRunResult;
+    subRuns?: WorkflowRunResults;
     notification?: ScanCompletedNotification;
     privacyScan?: PrivacyScan;
 }
@@ -94,4 +96,8 @@ export interface WebsiteScanRef {
     id: string;
     scanGroupId: string;
     scanGroupType: ScanGroupType;
+}
+
+export interface WorkflowRunResults {
+    report: ReportScanRunResult;
 }

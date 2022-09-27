@@ -8,7 +8,7 @@ import { ServiceConfiguration } from 'common';
 import { client, CosmosOperationResponse } from 'azure-services';
 import moment from 'moment';
 
-export declare type DispatchCondition = 'notFound' | 'completed' | 'noRetry' | 'accepted' | 'retry';
+export declare type DispatchCondition = 'notFound' | 'completed' | 'noRetry' | 'accepted' | 'retry' | 'abandoned';
 
 export interface ScanRequest {
     request: OnDemandPageScanRequest;
@@ -28,7 +28,7 @@ export class ScanRequestSelector {
 
     private maxFailedScanRetryCount: number;
 
-    private maxReportProcessingIntervalInMinutes: number;
+    private maxScanStaleTimeoutInMinutes: number;
 
     constructor(
         @inject(PageScanRequestProvider) private readonly pageScanRequestProvider: PageScanRequestProvider,
@@ -88,9 +88,10 @@ export class ScanRequestSelector {
                     return;
                 }
 
-                // abandon scan with no retry attempt left
+                // stale or failed scan with no retry attempt left
                 if (
-                    scanResult.run.state === 'running' &&
+                    // 'report' state is excluded here as report scan runs in standalone workflow
+                    (['queued', 'running', 'failed'] as OnDemandPageScanRunState[]).includes(scanResult.run.state) &&
                     scanResult.run.retryCount >= this.maxFailedScanRetryCount &&
                     moment.utc(scanResult.run.timestamp).add(this.failedScanRetryIntervalInMinutes, 'minutes') <= moment.utc()
                 ) {
@@ -99,12 +100,12 @@ export class ScanRequestSelector {
                     return;
                 }
 
-                // abandon report
+                // abandon scan
                 if (
-                    scanResult.run.state === 'report' &&
-                    moment.utc(scanResult.run.timestamp).add(this.maxReportProcessingIntervalInMinutes, 'minutes') <= moment.utc()
+                    (['accepted', 'queued', 'running', 'report'] as OnDemandPageScanRunState[]).includes(scanResult.run.state) &&
+                    moment.utc(scanResult._ts).add(this.maxScanStaleTimeoutInMinutes, 'minutes') <= moment.utc()
                 ) {
-                    filteredScanRequests.requestsToDelete.push({ request: scanRequest, result: scanResult, condition: 'noRetry' });
+                    filteredScanRequests.requestsToDelete.push({ request: scanRequest, result: scanResult, condition: 'abandoned' });
 
                     return;
                 }
@@ -116,7 +117,7 @@ export class ScanRequestSelector {
                     return;
                 }
 
-                // abandon or failed scan with available retry attempt
+                // stale scan with available retry attempt
                 if (
                     // scan was terminated or failed
                     (['queued', 'running', 'failed'] as OnDemandPageScanRunState[]).includes(scanResult.run.state) &&
@@ -145,6 +146,6 @@ export class ScanRequestSelector {
         const scanConfig = await this.serviceConfig.getConfigValue('scanConfig');
         this.failedScanRetryIntervalInMinutes = scanConfig.failedScanRetryIntervalInMinutes;
         this.maxFailedScanRetryCount = scanConfig.maxFailedScanRetryCount;
-        this.maxReportProcessingIntervalInMinutes = scanConfig.maxReportProcessingIntervalInMinutes;
+        this.maxScanStaleTimeoutInMinutes = scanConfig.maxScanStaleTimeoutInMinutes;
     }
 }

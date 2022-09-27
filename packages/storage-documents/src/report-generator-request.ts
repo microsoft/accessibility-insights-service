@@ -6,7 +6,7 @@ import { StorageDocument } from './storage-document';
 import { ItemType } from './item-type';
 
 export declare type TargetReport = 'accessibility' | 'privacy';
-export declare type ReportScanRunState = 'running' | 'completed' | 'failed';
+export declare type ReportScanRunState = 'pending' | 'running' | 'completed' | 'failed';
 
 export interface ReportGeneratorRequest extends StorageDocument {
     itemType: ItemType.reportGeneratorRequest;

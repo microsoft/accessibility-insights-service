@@ -185,7 +185,6 @@ describe(Runner, () => {
             setupScanRunnerTelemetryManager(false);
             setupPageScanProcessor(true, error);
             setupUpdateScanResult();
-            setupScanNotificationProcessor();
             await runner.run();
         },
     );
@@ -202,7 +201,6 @@ describe(Runner, () => {
             setupPageScanProcessor();
             setupProcessScanResult();
             setupUpdateScanResult();
-            setupScanNotificationProcessor();
             await runner.run();
         },
     );
@@ -248,7 +246,6 @@ describe(Runner, () => {
         setupPageScanProcessor();
         setupProcessScanResult();
         setupUpdateScanResult();
-        setupScanNotificationProcessor();
         await runner.run();
     });
 
@@ -365,6 +362,13 @@ function setupProcessScanResult(): void {
             state: 'report',
             timestamp: dateNow.toJSON(),
             error: undefined,
+        };
+        pageScanResult.subRuns = {
+            report: {
+                state: 'pending',
+                timestamp: new Date().toJSON(),
+                error: null,
+            },
         };
         pageScanResult.reports = reports;
         pageScanResult.scannedUrl = axeScanResults.scannedUrl;

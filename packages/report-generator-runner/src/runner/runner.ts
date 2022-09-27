@@ -59,10 +59,10 @@ export class Runner {
                 queuedRequests.requestsToProcess,
             );
             this.moveCompletedRequestsForDeletion(queuedRequests);
-            // at this stage the list contains failed request only
+            // at this stage the requestsToProcess[] list contains failed request only
             await this.updateRequestStateToFailed(queuedRequests.requestsToProcess);
             await this.deleteRequests(queuedRequests.requestsToDelete);
-            await this.updateScanRunStatesToCompleted(queuedRequests.requestsToDelete);
+            await this.updateScanRunStatesOnCompletion(queuedRequests.requestsToDelete);
         } catch (error) {
             this.logger.logError(`The report generator processor failed.`, { error: System.serializeError(error) });
             this.telemetryManager.trackRequestFailed();
@@ -81,45 +81,83 @@ export class Runner {
     }
 
     private async updateRequestStateToRunning(queuedRequests: QueuedRequests): Promise<void> {
-        const requestsToUpdate = queuedRequests.requestsToProcess.map((queuedRequest) => {
-            return {
+        const dbDocuments = queuedRequests.requestsToProcess.map((queuedRequest) => {
+            const run = {
+                state: 'running',
+                timestamp: new Date().toJSON(),
+                error: <string>null,
+            };
+
+            const reportRequest = {
                 id: queuedRequest.request.id,
                 run: {
-                    state: 'running',
-                    timestamp: new Date().toJSON(),
-                    error: null,
+                    ...run,
                     retryCount: queuedRequest.request.run?.retryCount !== undefined ? queuedRequest.request.run.retryCount + 1 : 0,
                 },
             } as Partial<ReportGeneratorRequest>;
+
+            const scanResult = {
+                id: queuedRequest.request.id,
+                subRuns: {
+                    report: {
+                        ...run,
+                    },
+                },
+                // write entire reports[] array when merge with existing DB document due to internal merge logic
+                reports: queuedRequest.request.reports,
+            } as Partial<OnDemandPageScanResult>;
+
+            return {
+                reportRequest,
+                scanResult,
+            };
         });
 
-        const updatedRequestsResponse = await this.reportGeneratorRequestProvider.tryUpdateRequests(requestsToUpdate);
-        this.logOperationResult('running', updatedRequestsResponse);
-
-        // remove failed update requests
-        const updatedRequests = queuedRequests.requestsToProcess.filter((queuedRequest) =>
-            updatedRequestsResponse.some((response) => response.succeeded === true && response.result.id === queuedRequest.request.id),
+        const updatedRequestsResponse = await this.reportGeneratorRequestProvider.tryUpdateRequests(
+            dbDocuments.map((d) => d.reportRequest),
         );
-        queuedRequests.requestsToProcess = updatedRequests;
+        await this.onDemandPageScanRunResultProvider.tryUpdateScanRuns(dbDocuments.map((d) => d.scanResult));
+
+        this.logOperationResult('running', updatedRequestsResponse);
     }
 
     private async updateRequestStateToFailed(queuedRequests: QueuedRequest[]): Promise<void> {
-        const requestsToUpdate = queuedRequests.map((queuedRequest) => {
-            return {
+        const dbDocuments = queuedRequests.map((queuedRequest) => {
+            const run = {
+                state: 'failed',
+                timestamp: new Date().toJSON(),
+                error: isEmpty(queuedRequest.error) ? null : queuedRequest.error.substring(0, 2048),
+            };
+
+            const reportRequest = {
                 id: queuedRequest.request.id,
-                run: {
-                    state: 'failed',
-                    timestamp: new Date().toJSON(),
-                    error: isEmpty(queuedRequest.error) ? null : queuedRequest.error.substring(0, 2048),
-                },
+                run,
             } as Partial<ReportGeneratorRequest>;
+
+            const scanResult = {
+                id: queuedRequest.request.id,
+                subRuns: {
+                    report: run,
+                },
+                // write entire reports[] array when merge with existing DB document due to internal merge logic
+                reports: queuedRequest.request.reports,
+            } as Partial<OnDemandPageScanResult>;
+
+            return {
+                reportRequest,
+                scanResult,
+            };
         });
 
-        const updatedRequestsResponse = await this.reportGeneratorRequestProvider.tryUpdateRequests(requestsToUpdate);
+        const updatedRequestsResponse = await this.reportGeneratorRequestProvider.tryUpdateRequests(
+            dbDocuments.map((d) => d.reportRequest),
+        );
+        await this.onDemandPageScanRunResultProvider.tryUpdateScanRuns(dbDocuments.map((d) => d.scanResult));
+
         this.logOperationResult('failed', updatedRequestsResponse);
     }
 
-    private async updateScanRunStatesToCompleted(queuedRequests: QueuedRequest[]): Promise<void> {
+    private async updateScanRunStatesOnCompletion(queuedRequests: QueuedRequest[]): Promise<void> {
         const scansToUpdate = queuedRequests.map((queuedRequest) => {
             this.logger.logInfo(`Updating report request run state to ${queuedRequest.condition}.`, {
                 id: queuedRequest.request.id,
@@ -130,14 +168,19 @@ export class Runner {
                 runTimestamp: queuedRequest.request.run?.timestamp,
             });
 
+            const run = {
+                state: queuedRequest.condition === 'completed' ? 'completed' : 'failed',
+                timestamp: new Date().toJSON(),
+                error: isEmpty(queuedRequest.error) ? null : queuedRequest.error.toString().substring(0, 2048),
+            };
+
             return {
                 id: queuedRequest.request.id,
-                run: {
-                    state: queuedRequest.condition === 'completed' ? 'completed' : 'failed',
-                    timestamp: new Date().toJSON(),
-                    error: isEmpty(queuedRequest.error) ? null : queuedRequest.error.toString().substring(0, 2048),
+                run,
+                subRuns: {
+                    report: run,
                 },
-                // we need to write entire reports[] array when merge with existing DB document due to internal merge logic
+                // write entire reports[] array when merge with existing DB document due to internal merge logic
                 reports: queuedRequest.request.reports,
             } as Partial<OnDemandPageScanResult>;
         });
