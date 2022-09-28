@@ -195,13 +195,13 @@ Object {
       "format": "int",
     },
     "maxFailedScanRetryCount": Object {
-      "default": 7,
+      "default": 2,
       "doc": "Maximum number of retries (additional times to re-run a scan) allowed for a failed scan request.",
       "format": "int",
     },
-    "maxReportProcessingIntervalInMinutes": Object {
-      "default": 1440,
-      "doc": "Maximum allowed time for generating scan report in a dedicated report pipeline.",
+    "maxScanStaleTimeoutInMinutes": Object {
+      "default": 4320,
+      "doc": "Maximum sliding window for a scan to complete.",
       "format": "int",
     },
     "maxSendNotificationRetryCount": Object {
@@ -425,13 +425,13 @@ Object {
       "format": "int",
     },
     "maxFailedScanRetryCount": Object {
-      "default": 7,
+      "default": 2,
       "doc": "Maximum number of retries (additional times to re-run a scan) allowed for a failed scan request.",
       "format": "int",
     },
-    "maxReportProcessingIntervalInMinutes": Object {
-      "default": 1440,
-      "doc": "Maximum allowed time for generating scan report in a dedicated report pipeline.",
+    "maxScanStaleTimeoutInMinutes": Object {
+      "default": 4320,
+      "doc": "Maximum sliding window for a scan to complete.",
       "format": "int",
     },
     "maxSendNotificationRetryCount": Object {

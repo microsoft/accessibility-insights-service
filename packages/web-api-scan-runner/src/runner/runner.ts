@@ -23,7 +23,7 @@ import {
     WebsiteScanRef,
     ReportGeneratorRequest,
 } from 'storage-documents';
-import { System, ServiceConfiguration, GuidGenerator } from 'common';
+import { System, ServiceConfiguration, GuidGenerator, ScanRunTimeConfig } from 'common';
 import { isEmpty, isString } from 'lodash';
 import { ReportGenerator } from '../report-generator/report-generator';
 import { RunnerScanMetadataConfig } from '../runner-scan-metadata-config';
@@ -85,7 +85,7 @@ export class Runner {
 
         const websiteScanResult = await this.updateScanResult(runnerScanMetadata, pageScanResult);
 
-        if (this.isPageScanCompleted(pageScanResult) || pageScanResult.run.state === 'failed') {
+        if (this.isPageScanCompleted(pageScanResult) || (await this.isPageScanFailed(pageScanResult))) {
             await this.scanNotificationProcessor.sendScanCompletionNotification(runnerScanMetadata, pageScanResult, websiteScanResult);
         }
 
@@ -122,7 +122,7 @@ export class Runner {
 
         const websiteScanRef = pageScanResult.websiteScanRefs?.find((ref) => ref.scanGroupType === 'deep-scan');
         if (websiteScanRef) {
-            const scanConfig = await this.serviceConfig.getConfigValue('scanConfig');
+            const scanConfig = await this.getScanConfig();
             const runState =
                 pageScanResult.run.state === 'completed' || pageScanResult.run.retryCount >= scanConfig.maxFailedScanRetryCount
                     ? pageScanResult.run.state
@@ -187,6 +187,16 @@ export class Runner {
             timestamp: new Date().toJSON(),
             error: isString(error) ? error.substring(0, 2048) : error,
         };
+
+        if (state === 'report') {
+            pageScanResult.subRuns = {
+                report: {
+                    state: 'pending',
+                    timestamp: new Date().toJSON(),
+                    error: null,
+                },
+            };
+        }
     }
 
     private getScanStatus(axeResults: AxeScanResults): OnDemandScanResult {
@@ -237,5 +247,16 @@ export class Runner {
      */
     private isPageScanCompleted(pageScanResult: OnDemandPageScanResult): boolean {
         return this.getWebsiteScanRefs(pageScanResult) === undefined;
+    }
+
+    private async isPageScanFailed(pageScanResult: OnDemandPageScanResult): Promise<boolean> {
+        const scanConfig = await this.getScanConfig();
+
+        // retry count is set by request sender
+        return pageScanResult.run.state === 'failed' && pageScanResult.run.retryCount >= scanConfig.maxFailedScanRetryCount;
+    }
+
+    private async getScanConfig(): Promise<ScanRunTimeConfig> {
+        return this.serviceConfig.getConfigValue('scanConfig');
     }
 }

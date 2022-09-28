@@ -115,36 +115,7 @@ describe(Runner, () => {
         const reportRequestsWithReportProcessorResult = setupReportProcessorMock(reportGeneratorRequests);
         setupTryUpdateRequestsWithFailedState(reportRequestsWithReportProcessorResult);
         setupDeleteRequests(reportRequestsWithReportProcessorResult);
-        setupSetScanRunStatesToCompleted(reportRequestsWithReportProcessorResult);
-
-        await runner.run();
-    });
-
-    it('should skip queued requests failed `running` state update', async () => {
-        const resultRequestsUpdateWithRunningState = [
-            {
-                id: 'id-1',
-                scanGroupId: 'scanGroupId-1',
-                reports: [{}],
-                condition: 'pending',
-            },
-            {
-                id: 'id-3',
-                scanGroupId: 'scanGroupId-1',
-                reports: [{}],
-                run: {
-                    state: 'completed',
-                },
-                condition: 'completed',
-            },
-        ] as ReportGeneratorRequestMockType[];
-        const queuedRequests = createQueuedRequests(reportGeneratorRequests);
-        setupGetQueuedRequests(queuedRequests);
-        setupTryUpdateRequestsWithRunningState(reportGeneratorRequests, resultRequestsUpdateWithRunningState);
-        const reportRequestsWithReportProcessorResult = setupReportProcessorMock(resultRequestsUpdateWithRunningState);
-        setupTryUpdateRequestsWithFailedState(reportRequestsWithReportProcessorResult);
-        setupDeleteRequests(reportRequestsWithReportProcessorResult);
-        setupSetScanRunStatesToCompleted(reportRequestsWithReportProcessorResult);
+        setupSetScanRunStatesOnCompletion(reportRequestsWithReportProcessorResult);
 
         await runner.run();
     });
@@ -191,7 +162,7 @@ describe(Runner, () => {
         );
         setupTryUpdateRequestsWithFailedState(reportRequestsWithReportProcessorResult);
         setupDeleteRequests(reportRequestsWithReportProcessorResult);
-        setupSetScanRunStatesToCompleted(reportRequestsWithReportProcessorResult);
+        setupSetScanRunStatesOnCompletion(reportRequestsWithReportProcessorResult);
 
         await runner.run();
     });
@@ -226,8 +197,8 @@ function setupTryUpdateRequestsWithRunningState(
     resultRequests: ReportGeneratorRequestMockType[] = undefined,
 ): void {
     const requestsToProcess = requests.filter((r) => r.run?.state !== 'completed');
-    const requestsToUpdate = requestsToProcess.map((request) => {
-        return {
+    const dbDocuments = requestsToProcess.map((request) => {
+        const reportRequest = {
             id: request.id,
             run: {
                 state: 'running',
@@ -236,6 +207,23 @@ function setupTryUpdateRequestsWithRunningState(
                 retryCount: request.run?.retryCount !== undefined ? request.run.retryCount + 1 : 0,
             },
         } as Partial<ReportGeneratorRequest>;
+
+        const scanResult = {
+            id: request.id,
+            subRuns: {
+                report: {
+                    state: 'running',
+                    timestamp: dateNow.toJSON(),
+                    error: null,
+                },
+            },
+            reports: request.reports,
+        } as Partial<OnDemandPageScanResult>;
+
+        return {
+            reportRequest,
+            scanResult,
+        };
     });
     const updatedRequests = (resultRequests ?? requests).map((request) => {
         return {
@@ -243,10 +231,13 @@ function setupTryUpdateRequestsWithRunningState(
             result: getCloneRequest(request),
         } as OperationResult<ReportGeneratorRequest>;
     });
-
     reportGeneratorRequestProviderMock
-        .setup((o) => o.tryUpdateRequests(It.isValue(requestsToUpdate)))
+        .setup((o) => o.tryUpdateRequests(It.isValue(dbDocuments.map((d) => d.reportRequest))))
         .returns(() => Promise.resolve(updatedRequests))
+        .verifiable();
+    onDemandPageScanRunResultProviderMock
+        .setup((o) => o.tryUpdateScanRuns(It.isValue(dbDocuments.map((d) => d.scanResult))))
+        .returns(() => Promise.resolve([]))
         .verifiable();
 }
 
@@ -255,8 +246,8 @@ function setupTryUpdateRequestsWithFailedState(
     resultRequests: ReportGeneratorRequestMockType[] = undefined,
 ): void {
     const requestsToProcess = requests.filter((r) => r.run?.state !== 'completed');
-    const requestsToUpdate = requestsToProcess.map((request) => {
-        return {
+    const dbDocuments = requestsToProcess.map((request) => {
+        const reportRequest = {
             id: request.id,
             run: {
                 state: 'failed',
@@ -264,6 +255,24 @@ function setupTryUpdateRequestsWithFailedState(
                 error: isEmpty(request.run?.error) ? null : request.run.error.toString().substring(0, 2048),
             },
         } as Partial<ReportGeneratorRequest>;
+
+        const scanResult = {
+            id: request.id,
+            subRuns: {
+                report: {
+                    state: 'failed',
+                    timestamp: dateNow.toJSON(),
+                    error: isEmpty(request.run?.error) ? null : request.run.error.toString().substring(0, 2048),
+                },
+            },
+            // write entire reports[] array when merge with existing DB document due to internal merge logic
+            reports: request.reports,
+        } as Partial<OnDemandPageScanResult>;
+
+        return {
+            reportRequest,
+            scanResult,
+        };
     });
     const updatedRequests = (resultRequests ?? requests).map((request) => {
         return {
@@ -272,12 +281,16 @@ function setupTryUpdateRequestsWithFailedState(
         } as OperationResult<ReportGeneratorRequest>;
     });
     reportGeneratorRequestProviderMock
-        .setup((o) => o.tryUpdateRequests(It.isValue(requestsToUpdate)))
+        .setup((o) => o.tryUpdateRequests(It.isValue(dbDocuments.map((d) => d.reportRequest))))
         .returns(() => Promise.resolve(updatedRequests))
+        .verifiable();
+    onDemandPageScanRunResultProviderMock
+        .setup((o) => o.tryUpdateScanRuns(It.isValue(dbDocuments.map((d) => d.scanResult))))
+        .returns(() => Promise.resolve([]))
         .verifiable();
 }
 
-function setupSetScanRunStatesToCompleted(queuedRequests: ReportGeneratorRequest[]): void {
+function setupSetScanRunStatesOnCompletion(queuedRequests: ReportGeneratorRequest[]): void {
     const requestsToProcess = queuedRequests.filter((r) => r.run?.state === 'completed');
     const requestsToUpdate = requestsToProcess.map((request) => {
         return {
@@ -286,6 +299,13 @@ function setupSetScanRunStatesToCompleted(queuedRequests: ReportGeneratorRequest
                 state: request.run?.state,
                 timestamp: dateNow.toJSON(),
                 error: isEmpty(request.run?.error) ? null : request.run.error.toString().substring(0, 2048),
+            },
+            subRuns: {
+                report: {
+                    state: request.run?.state,
+                    timestamp: dateNow.toJSON(),
+                    error: isEmpty(request.run?.error) ? null : request.run.error.toString().substring(0, 2048),
+                },
             },
             reports: request.reports,
         } as Partial<OnDemandPageScanResult>;

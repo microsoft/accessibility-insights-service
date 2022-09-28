@@ -144,6 +144,17 @@ describe(OnDemandDispatcher, () => {
                     },
                     condition: 'noRetry',
                 },
+                {
+                    request: { id: 'id3' },
+                    result: {
+                        run: {
+                            state: 'failed',
+                            timestamp: new Date().toJSON(),
+                            retryCount: 2,
+                        },
+                    },
+                    condition: 'noRetry',
+                },
             ],
         } as ScanRequests;
 
@@ -154,7 +165,7 @@ describe(OnDemandDispatcher, () => {
 
         const pageScanResult = cloneDeep(scanRequests.requestsToDelete[0].result);
         pageScanResult.run.state = 'failed';
-        pageScanResult.run.error = `The scan request was abandon or terminated in a service pipeline. State: ${JSON.stringify(
+        pageScanResult.run.error = `The scan request was abandon in a service pipeline. State: ${JSON.stringify(
             scanRequests.requestsToDelete[0].result.run,
         )}`;
 
@@ -180,7 +191,7 @@ describe(OnDemandDispatcher, () => {
                             state: 'fail',
                         },
                         run: {
-                            state: 'completed',
+                            state: 'running',
                             timestamp: new Date().toJSON(),
                             retryCount: 2,
                         },
@@ -213,13 +224,13 @@ describe(OnDemandDispatcher, () => {
                     scanId: pageScanResult.id,
                     url: pageScanResult.url,
                     scanState: pageScanResult.scanResult?.state,
-                    runState: pageScanResult.run.state,
+                    runState: 'failed',
                     timestamp: new Date().toJSON(),
                 },
             ],
         };
         websiteScanResultProviderMock
-            .setup((o) => o.mergeOrCreate(pageScanResult.id, updatedWebsiteScanResult, It.isAny()))
+            .setup((o) => o.mergeOrCreate(pageScanResult.id, It.isValue(updatedWebsiteScanResult), It.isAny()))
             .returns(() => Promise.resolve(undefined))
             .verifiable();
 

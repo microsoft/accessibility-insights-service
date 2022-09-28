@@ -160,7 +160,7 @@ describe(ScanRequestSelector, () => {
         expect(result).toEqual(filteredScanRequests);
     });
 
-    it('delete completed and no-retry scan requests', async () => {
+    it('adhere retry delay interval', async () => {
         createScanResults([
             {
                 run: {
@@ -196,11 +196,26 @@ describe(ScanRequestSelector, () => {
         expect(result).toEqual(filteredScanRequests);
     });
 
-    it('delete abandon report scan', async () => {
+    it('delete scan with no retry', async () => {
         createScanResults([
             {
                 run: {
-                    state: 'report',
+                    state: 'queued',
+                    retryCount: 10,
+                    timestamp: moment(dateNow).add(-12, 'minutes').toJSON(),
+                },
+            },
+            {
+                run: {
+                    state: 'running',
+                    retryCount: 10,
+                    timestamp: moment(dateNow).add(-12, 'minutes').toJSON(),
+                },
+            },
+            {
+                run: {
+                    state: 'failed',
+                    retryCount: 10,
                     timestamp: moment(dateNow).add(-12, 'minutes').toJSON(),
                 },
             },
@@ -211,6 +226,49 @@ describe(ScanRequestSelector, () => {
         setupOnDemandPageScanRunResultProvider();
         createFilteredScanRequests(
             'noRetry',
+            [],
+            scanRequests.map((scanRequest) => scanRequest.id),
+        );
+
+        const result = await scanRequestSelector.getRequests(accessibilityMessageCount, privacyMessageCount);
+
+        expect(result).toEqual(filteredScanRequests);
+    });
+
+    it('delete abandon scan', async () => {
+        const _ts = moment(dateNow).add(-12, 'minutes').valueOf() / 1000;
+        createScanResults([
+            {
+                run: {
+                    state: 'accepted',
+                },
+                _ts,
+            },
+            {
+                run: {
+                    state: 'queued',
+                },
+                _ts,
+            },
+            {
+                run: {
+                    state: 'running',
+                },
+                _ts,
+            },
+            {
+                run: {
+                    state: 'report',
+                },
+                _ts,
+            },
+        ]);
+        accessibilityMessageCount = scanResults.length;
+        createScanRequests();
+        setupPageScanRequestProvider();
+        setupOnDemandPageScanRunResultProvider();
+        createFilteredScanRequests(
+            'abandoned',
             [],
             scanRequests.map((scanRequest) => scanRequest.id),
         );
@@ -311,7 +369,7 @@ function setupServiceConfiguration(): void {
             Promise.resolve({
                 failedScanRetryIntervalInMinutes: 1,
                 maxFailedScanRetryCount: 1,
-                maxReportProcessingIntervalInMinutes: 10,
+                maxScanStaleTimeoutInMinutes: 10,
             } as ScanRunTimeConfig),
         )
         .verifiable(Times.atLeastOnce());
