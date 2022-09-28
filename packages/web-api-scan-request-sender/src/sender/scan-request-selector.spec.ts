@@ -25,12 +25,10 @@ let accessibilityMessageCount: number;
 let privacyMessageCount: number;
 let filteredScanRequests: ScanRequests;
 let dateNow: Date;
-let dateNowEpochTimestamp: number;
 
 describe(ScanRequestSelector, () => {
     beforeEach(() => {
         dateNow = new Date();
-        dateNowEpochTimestamp = Math.floor(dateNow.getTime() / 1000);
         MockDate.set(dateNow);
 
         pageScanRequestProviderMock = Mock.ofType<PageScanRequestProvider>();
@@ -238,7 +236,7 @@ describe(ScanRequestSelector, () => {
     });
 
     it('delete abandon scan', async () => {
-        const _ts = moment.unix(dateNowEpochTimestamp).add(-12, 'minutes').valueOf() / 1000;
+        const _ts = moment(dateNow).add(-12, 'minutes').valueOf() / 1000;
         createScanResults([
             {
                 run: {
