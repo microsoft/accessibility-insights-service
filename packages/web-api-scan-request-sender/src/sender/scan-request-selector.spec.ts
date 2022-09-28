@@ -25,12 +25,12 @@ let accessibilityMessageCount: number;
 let privacyMessageCount: number;
 let filteredScanRequests: ScanRequests;
 let dateNow: Date;
-let dateNowUnixTimestamp: number;
+let dateNowEpochTimestamp: number;
 
 describe(ScanRequestSelector, () => {
     beforeEach(() => {
         dateNow = new Date();
-        dateNowUnixTimestamp = dateNow.valueOf();
+        dateNowEpochTimestamp = Math.floor(dateNow.getTime() / 1000);
         MockDate.set(dateNow);
 
         pageScanRequestProviderMock = Mock.ofType<PageScanRequestProvider>();
@@ -238,30 +238,31 @@ describe(ScanRequestSelector, () => {
     });
 
     it('delete abandon scan', async () => {
+        const _ts = moment.unix(dateNowEpochTimestamp).add(-12, 'minutes').valueOf() / 1000;
         createScanResults([
             {
                 run: {
                     state: 'accepted',
                 },
-                _ts: moment(dateNowUnixTimestamp).add(-12, 'minutes').valueOf(),
+                _ts,
             },
             {
                 run: {
                     state: 'queued',
                 },
-                _ts: moment(dateNowUnixTimestamp).add(-12, 'minutes').valueOf(),
+                _ts,
             },
             {
                 run: {
                     state: 'running',
                 },
-                _ts: moment(dateNowUnixTimestamp).add(-12, 'minutes').valueOf(),
+                _ts,
             },
             {
                 run: {
                     state: 'report',
                 },
-                _ts: moment(dateNowUnixTimestamp).add(-12, 'minutes').valueOf(),
+                _ts,
             },
         ]);
         accessibilityMessageCount = scanResults.length;
