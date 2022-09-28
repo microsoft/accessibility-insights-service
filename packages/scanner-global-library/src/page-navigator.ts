@@ -156,24 +156,23 @@ export class PageNavigator {
         page: Puppeteer.Page,
     ): Promise<{ response: Puppeteer.HTTPResponse; browserError?: BrowserError; error?: unknown }> {
         const navigationCondition = 'networkidle2';
-        let response: Puppeteer.HTTPResponse;
-        try {
-            response = await page.reload({ waitUntil: navigationCondition, timeout: puppeteerTimeoutConfig.navigationTimeoutMsecs });
-            if (response.status() === 304) {
-                response = await this.reloadCachedVersion(page, navigationCondition);
-            }
+        const opResult = await this.invokePageNavigationOperation((waitUntil = navigationCondition) =>
+            page.reload({ waitUntil, timeout: puppeteerTimeoutConfig.navigationTimeoutMsecs }),
+        );
 
-            return { response };
-        } catch (error) {
-            const browserError = this.pageResponseProcessor.getNavigationError(error as Error);
+        if (!isNil(opResult.error)) {
             this.logger?.logError(`Page navigation error while reload page.`, {
-                navigationCondition,
-                timeout: `${puppeteerTimeoutConfig.navigationTimeoutMsecs}`,
-                browserError: System.serializeError(browserError),
+                browserError: System.serializeError(opResult.browserError),
             });
 
-            return { response: undefined, browserError, error };
+            return { response: undefined, browserError: opResult.browserError, error: opResult.error };
         }
+
+        if (opResult.response.status() === 304) {
+            opResult.response = await this.reloadCachedVersion(page, navigationCondition);
+        }
+
+        return { response: opResult.response };
     }
 
     private async navigateToUrl(
@@ -208,7 +207,7 @@ export class PageNavigator {
         page: Puppeteer.Page,
         navigationCondition: Puppeteer.PuppeteerLifeCycleEvent,
     ): Promise<Puppeteer.HTTPResponse> {
-        const maxRetryCount = 4;
+        const maxRetryCount = 2;
 
         let count = 0;
         let response;
@@ -220,8 +219,33 @@ export class PageNavigator {
             response = await page.goBack({ waitUntil: navigationCondition, timeout: puppeteerTimeoutConfig.navigationTimeoutMsecs });
         } while (count < maxRetryCount && response.status() === 304);
 
-        this.logger.logWarn('Reload page on HTTP 304 (Not Modified) website response.', { retryCount: `${count}` });
+        this.logger.logWarn('Reloaded page on HTTP 304 (Not Modified) website response.', { retryCount: `${count}` });
 
         return response;
+    }
+
+    private async invokePageNavigationOperation(
+        navigationOperation: (navigationCondition?: Puppeteer.PuppeteerLifeCycleEvent) => Promise<Puppeteer.HTTPResponse>,
+    ): Promise<{ response: Puppeteer.HTTPResponse; browserError?: BrowserError; error?: unknown }> {
+        let opResult = await this.invokePageOperation(navigationOperation);
+        if (opResult?.browserError?.errorType === 'UrlNavigationTimeout') {
+            opResult = await this.invokePageOperation(() => navigationOperation('load'));
+        }
+
+        return opResult;
+    }
+
+    private async invokePageOperation(
+        navigationOperation: () => Promise<Puppeteer.HTTPResponse>,
+    ): Promise<{ response: Puppeteer.HTTPResponse; browserError?: BrowserError; error?: unknown }> {
+        try {
+            const response = await navigationOperation();
+
+            return { response };
+        } catch (error) {
+            const browserError = this.pageResponseProcessor.getNavigationError(error as Error);
+
+            return { response: undefined, browserError, error };
+        }
     }
 }

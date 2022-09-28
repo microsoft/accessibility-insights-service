@@ -105,10 +105,6 @@ export class Page {
      * parameter `hardReload === true` will restart browser instance and delete browser storage, settings, etc. but use browser disk cache
      */
     public async reload(options?: { hardReload: boolean }): Promise<void> {
-        if (isEmpty(this.lastNavigationResponse)) {
-            throw new Error('Page should be loaded first before reload.');
-        }
-
         this.requestUrl = this.url;
 
         if (options?.hardReload === true) {
