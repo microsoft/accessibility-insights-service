@@ -102,7 +102,7 @@ describe(PageNavigator, () => {
     });
 
     it('reload with success if received HTTP 304', async () => {
-        const maxRetryCount = 4;
+        const maxRetryCount = 3;
         const response = {
             status: () => 304,
         } as unknown as HTTPResponse;
