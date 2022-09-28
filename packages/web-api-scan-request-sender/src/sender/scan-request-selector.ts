@@ -103,7 +103,7 @@ export class ScanRequestSelector {
                 // abandon scan
                 if (
                     (['accepted', 'queued', 'running', 'report'] as OnDemandPageScanRunState[]).includes(scanResult.run.state) &&
-                    moment.utc(scanResult._ts).add(this.maxScanStaleTimeoutInMinutes, 'minutes') <= moment.utc()
+                    moment.unix(scanResult._ts).add(this.maxScanStaleTimeoutInMinutes, 'minutes') <= moment.utc()
                 ) {
                     filteredScanRequests.requestsToDelete.push({ request: scanRequest, result: scanResult, condition: 'abandoned' });
 
