@@ -50,7 +50,7 @@ export class WebDriver {
         this.addStealthPlugin();
 
         if (options.clearDiskCache === true) {
-            this.fs.rmSync(this.diskCacheDir, { recursive: true, force: true });
+            this.clearDiskCache();
         }
 
         const launchOptions = this.createLaunchOptions();
@@ -76,6 +76,10 @@ export class WebDriver {
 
             this.logger?.logInfo('Chromium browser instance stopped.');
         }
+    }
+
+    public clearDiskCache(): void {
+        this.fs.rmSync(this.diskCacheDir, { recursive: true, force: true });
     }
 
     private async closeBrowser(): Promise<void> {

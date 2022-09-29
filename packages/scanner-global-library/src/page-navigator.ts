@@ -206,7 +206,7 @@ export class PageNavigator {
         page: Puppeteer.Page,
         navigationCondition: Puppeteer.PuppeteerLifeCycleEvent,
     ): Promise<Puppeteer.HTTPResponse> {
-        const maxRetryCount = 3;
+        const maxRetryCount = 2;
 
         let count = 0;
         let opResult;

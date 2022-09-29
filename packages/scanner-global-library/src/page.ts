@@ -102,25 +102,16 @@ export class Page {
      * Reload browser page
      * @param options - Optional reload parameters
      *
-     * parameter `hardReload === true` will restart browser instance and delete browser storage, settings, etc. but use browser disk cache
+     * parameter `hardReload === true` will restart browser instance and delete browser storage, settings, etc. but use browser disk cache.
      */
     public async reload(options?: { hardReload: boolean }): Promise<void> {
-        this.requestUrl = this.url;
+        await this.reloadImpl(options);
+        if (this.lastNavigationResponse?.status() === 304) {
+            this.logger?.logWarn('Page reload has failed. Reload page without browser cache.');
 
-        if (options?.hardReload === true) {
-            await this.close();
-            await this.create({ ...this.lastBrowserStartOptions, clearBrowserCache: false });
-            await this.navigateToUrl(this.requestUrl, { allowCachedVersion: true });
-        } else {
-            this.lastBrowserError = undefined;
-            const navigationResponse = await this.pageNavigator.reload(this.page, async (browserError) => {
-                this.logger?.logError('Page reload error', { browserError: System.serializeError(browserError) });
-                this.lastBrowserError = browserError;
-            });
-
-            this.lastNavigationResponse = navigationResponse?.httpResponse;
-            this.pageNavigationTiming = navigationResponse?.pageNavigationTiming;
-            this.logPageNavigationTiming('reload');
+            // Reload has failed due to browser cache presence. Reload without browser cache.
+            this.webDriver.clearDiskCache();
+            await this.reloadImpl({ ...options, hardReload: false });
         }
     }
 
@@ -178,6 +169,36 @@ export class Page {
         });
 
         return { width: windowSize.width, height: windowSize.height, deviceScaleFactor: windowSize.deviceScaleFactor };
+    }
+
+    private async reloadImpl(options?: { hardReload: boolean }): Promise<void> {
+        this.requestUrl = this.url;
+        if (options?.hardReload === true) {
+            await this.hardReload();
+        } else {
+            await this.softReload();
+        }
+    }
+
+    /**
+     * Hard reload (close and reopen browser) will delete all browser's data but preserve html/image/script/css/etc. cached files.
+     */
+    private async hardReload(): Promise<void> {
+        await this.close();
+        await this.create({ ...this.lastBrowserStartOptions, clearBrowserCache: false });
+        await this.navigateToUrl(this.requestUrl, { allowCachedVersion: true });
+    }
+
+    private async softReload(): Promise<void> {
+        this.lastBrowserError = undefined;
+        const navigationResponse = await this.pageNavigator.reload(this.page, async (browserError) => {
+            this.logger?.logError('Page reload error', { browserError: System.serializeError(browserError) });
+            this.lastBrowserError = browserError;
+        });
+
+        this.lastNavigationResponse = navigationResponse?.httpResponse;
+        this.pageNavigationTiming = navigationResponse?.pageNavigationTiming;
+        this.logPageNavigationTiming('reload');
     }
 
     private async setExtraHTTPHeaders(): Promise<void> {
