@@ -102,7 +102,7 @@ describe(PageNavigator, () => {
     });
 
     it('reload with success if received HTTP 304', async () => {
-        const maxRetryCount = 4;
+        const maxRetryCount = 2;
         const response = {
             status: () => 304,
         } as unknown as HTTPResponse;
@@ -178,6 +178,44 @@ describe(PageNavigator, () => {
 
         await pageNavigator.reload(puppeteerPageMock.object, onNavigationErrorMock);
         expect(onNavigationErrorMock).toHaveBeenCalledWith(browserError, error);
+    });
+
+    it('reload with navigation timeout', async () => {
+        const response = {
+            status: () => 200,
+        } as unknown as HTTPResponse;
+        const error = new Error('navigation timeout');
+        const browserError = {
+            errorType: 'UrlNavigationTimeout',
+            message: 'navigation timeout',
+        } as BrowserError;
+        puppeteerPageMock
+            .setup(async (o) =>
+                o.reload({
+                    waitUntil: 'networkidle2',
+                    timeout: puppeteerTimeoutConfig.navigationTimeoutMsecs,
+                }),
+            )
+            .returns(() => Promise.reject(error))
+            .verifiable();
+        puppeteerPageMock
+            .setup(async (o) =>
+                o.reload({
+                    waitUntil: 'load',
+                    timeout: puppeteerTimeoutConfig.navigationTimeoutMsecs,
+                }),
+            )
+            .returns(() => Promise.resolve(response))
+            .verifiable();
+        pageResponseProcessorMock
+            .setup((o) => o.getNavigationError(error))
+            .returns(() => browserError)
+            .verifiable();
+        const onNavigationErrorMock = jest.fn();
+        onNavigationErrorMock.mockImplementation((browserErr, err) => Promise.resolve());
+
+        await pageNavigator.reload(puppeteerPageMock.object, onNavigationErrorMock);
+        expect(onNavigationErrorMock).not.toHaveBeenCalledWith(browserError, error);
     });
 
     it('reload with network idle wait error', async () => {

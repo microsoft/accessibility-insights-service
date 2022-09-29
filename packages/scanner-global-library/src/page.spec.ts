@@ -85,8 +85,7 @@ describe(Page, () => {
             .verifiable();
 
         puppeteerRequestMock.setup((o) => o.redirectChain()).returns(() => [] as Puppeteer.HTTPRequest[]);
-        puppeteerResponseMock.setup((o) => o.request()).returns(() => puppeteerRequestMock.object);
-        puppeteerResponseMock.setup((o) => o.status()).returns(() => scanResults.pageResponseCode);
+        setupPuppeteerResponseMock();
 
         page = new Page(webDriverMock.object, axePuppeteerFactoryMock.object, pageNavigatorMock.object, loggerMock.object, scrollToTopMock);
     });
@@ -300,6 +299,25 @@ describe(Page, () => {
                 timing[key] = `${navigationResponse.pageNavigationTiming[key]}`;
             });
             loggerMock.setup((o) => o.logInfo('Total page reload time 10, msec', { ...timing })).verifiable();
+
+            await page.reload();
+
+            expect(page.lastNavigationResponse).toEqual(puppeteerResponseMock.object);
+        });
+
+        it('reload page with browser cache deleted', async () => {
+            setupPuppeteerResponseMock(304);
+            pageNavigatorMock
+                .setup(async (o) => o.reload(puppeteerPageMock.object, It.isAny()))
+                .returns(() => Promise.resolve(navigationResponse))
+                .verifiable(Times.exactly(2));
+
+            const timing = { total: '10' } as any;
+            Object.keys(navigationResponse.pageNavigationTiming).forEach((key: keyof PageNavigationTiming) => {
+                timing[key] = `${navigationResponse.pageNavigationTiming[key]}`;
+            });
+            loggerMock.setup((o) => o.logInfo('Total page reload time 10, msec', { ...timing })).verifiable(Times.exactly(2));
+            loggerMock.setup((o) => o.logWarn('Page reload has failed. Reload page without browser cache.')).verifiable();
 
             await page.reload();
 
@@ -565,4 +583,10 @@ function setupCDPSessionForGetAllCookies(cookies: Puppeteer.Protocol.Network.Coo
         .setup((o) => o.detach())
         .returns(() => Promise.resolve())
         .verifiable();
+}
+
+function setupPuppeteerResponseMock(pageResponseCode?: number): void {
+    puppeteerResponseMock.reset();
+    puppeteerResponseMock.setup((o) => o.request()).returns(() => puppeteerRequestMock.object);
+    puppeteerResponseMock.setup((o) => o.status()).returns(() => pageResponseCode ?? scanResults.pageResponseCode);
 }
