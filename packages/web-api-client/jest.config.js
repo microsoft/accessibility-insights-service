@@ -8,7 +8,6 @@ module.exports = {
     ...baseConfig,
     displayName: package.name,
     moduleNameMapper: {
-        'office-ui-fabric-react/lib/(.*)$': 'office-ui-fabric-react/lib-commonjs/$1',
-        '@uifabric/styling': '@uifabric/styling/lib-commonjs',
+        '@fluentui/react': '@fluentui/react/lib-commonjs',
     },
 };

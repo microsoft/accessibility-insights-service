@@ -7,7 +7,6 @@ import { injectable } from 'inversify';
 export class RuleExclusion {
     public accessibilityRuleExclusionList = [
         'accesskeys',
-        'aria-allowed-role',
         'aria-dialog-name',
         'aria-text',
         'aria-treeitem-name',
@@ -40,7 +39,6 @@ export class RuleExclusion {
         'no-autoplay-audio',
         'p-as-heading',
         'page-has-heading-one',
-        'presentation-role-conflict',
         'region',
         'scope-attr-valid',
         'scrollable-region-focusable',
