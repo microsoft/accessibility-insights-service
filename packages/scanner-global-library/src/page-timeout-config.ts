@@ -24,7 +24,7 @@ export const puppeteerTimeoutConfig = {
      * Puppeteer will not render page properly for some webpages and timeout on page.goto() when running
      * in docker. Hence do not increase this value as it will not mitigate navigation timeout error.
      */
-    navigationTimeoutMsecs: 20000,
+    navigationTimeoutMsecs: 60000,
 
     /**
      * Maximum wait time, in milliseconds, to wait when network is idle.
