@@ -73,14 +73,14 @@
             }
         },
         "onDemandScanRequestPoolVmSize": {
-            "defaultValue": "standard_f8s_v2",
+            "defaultValue": "standard_e2d_v5",
             "type": "string",
             "metadata": {
                 "description": "VM size for on-demand-scan-request-pool pool"
             }
         },
         "onDemandScanRequestPoolTaskSlotsPerNode": {
-            "defaultValue": "8",
+            "defaultValue": "2",
             "type": "string",
             "metadata": {
                 "description": "Task slots per node for on-demand-scan-request-pool pool"
@@ -94,14 +94,14 @@
             }
         },
         "onDemandUrlScanPoolVmSize": {
-            "defaultValue": "standard_f4s_v2",
+            "defaultValue": "standard_e2d_v5",
             "type": "string",
             "metadata": {
                 "description": "VM size for on-demand-url-scan-pool pool"
             }
         },
         "onDemandUrlScanPoolTaskSlotsPerNode": {
-            "defaultValue": "8",
+            "defaultValue": "2",
             "type": "string",
             "metadata": {
                 "description": "Task slots per node for on-demand-url-scan-pool pool"
@@ -115,14 +115,14 @@
             }
         },
         "privacyScanPoolVmSize": {
-            "defaultValue": "standard_f4s_v2",
+            "defaultValue": "standard_e2d_v5",
             "type": "string",
             "metadata": {
                 "description": "VM size for privacy-scan-pool pool"
             }
         },
         "privacyScanPoolTaskSlotsPerNode": {
-            "defaultValue": "8",
+            "defaultValue": "2",
             "type": "string",
             "metadata": {
                 "description": "Task slots per node for privacy-scan-pool pool"
