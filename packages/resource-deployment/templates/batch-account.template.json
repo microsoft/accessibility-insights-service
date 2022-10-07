@@ -37,6 +37,13 @@
                 "description": "Name of the virtual network to be used for the batch pool nodes"
             }
         },
+        "publicIpName": {
+            "defaultValue": "[concat('allybatch-public-ip-',toLower(uniqueString(resourceGroup().id)))]",
+            "type": "string",
+            "metadata": {
+                "description": "Name of the public IP address to be used for the batch pool nodes"
+            }
+        },
         "containerRegistryName": {
             "defaultValue": "[concat('allyregistry',toLower(uniqueString(resourceGroup().id)))]",
             "type": "string",
@@ -125,7 +132,8 @@
     "variables": {
         "keyVaultUrl": "[concat('https://', parameters('keyVault'), '.vault.azure.net/')]",
         "vnetResource": "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnetName'))]",
-        "containerRegistryServerName": "[concat(parameters('containerRegistryName'), '.azurecr.io')]"
+        "containerRegistryServerName": "[concat(parameters('containerRegistryName'), '.azurecr.io')]",
+        "publicIpNameResource": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIpName'))]"
     },
     "resources": [
         {
@@ -185,7 +193,11 @@
                     }
                 },
                 "networkConfiguration": {
-                    "subnetId": "[concat(variables('vnetResource'), '/subnets/default')]"
+                    "subnetId": "[concat(variables('vnetResource'), '/subnets/default')]",
+                    "publicIPAddressConfiguration": {
+                        "provision": "userManaged",
+                        "ipAddressIds": ["[variables('publicIpNameResource')]"]
+                    }
                 },
                 "scaleSettings": {
                     "fixedScale": {
@@ -262,7 +274,11 @@
                     }
                 },
                 "networkConfiguration": {
-                    "subnetId": "[concat(variables('vnetResource'), '/subnets/default')]"
+                    "subnetId": "[concat(variables('vnetResource'), '/subnets/default')]",
+                    "publicIPAddressConfiguration": {
+                        "provision": "userManaged",
+                        "ipAddressIds": ["[variables('publicIpNameResource')]"]
+                    }
                 },
                 "scaleSettings": {
                     "fixedScale": {
@@ -336,7 +352,11 @@
                     }
                 },
                 "networkConfiguration": {
-                    "subnetId": "[concat(variables('vnetResource'), '/subnets/default')]"
+                    "subnetId": "[concat(variables('vnetResource'), '/subnets/default')]",
+                    "publicIPAddressConfiguration": {
+                        "provision": "userManaged",
+                        "ipAddressIds": ["[variables('publicIpNameResource')]"]
+                    }
                 },
                 "scaleSettings": {
                     "fixedScale": {
