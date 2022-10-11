@@ -14,5 +14,5 @@ steps:
       condition: always()
       displayName: Publish test results
 
-    - script: yarn publish-code-coverage -t $(CODECOV_TOKEN)
-      displayName: Publish code coverage to codecov
+    # - script: yarn publish-code-coverage -t $(CODECOV_TOKEN)
+    #   displayName: Publish code coverage to codecov
