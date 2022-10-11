@@ -13,6 +13,8 @@ export resourceGroupName
 export batchAccountName
 export parameterFilePath
 export dropPools
+export publicIpAddressName
+export dnsName
 
 # Set default ARM template file
 batchTemplateFile="${0%/*}/../templates/batch-account.template.json"
@@ -27,11 +29,11 @@ Usage: $0 -r <resource group> -e <environment> [-t <batch template file (optiona
 . "${0%/*}/process-utilities.sh"
 
 getContainerRegistryLoginCredentials() {
-    containerRegistryUsername=$(az acr credential show --name "$containerRegistryName" --query "username" -o tsv)
-    containerRegistryPassword=$(az acr credential show --name "$containerRegistryName" --query "passwords[0].value" -o tsv)
+    containerRegistryUsername=$(az acr credential show --name "${containerRegistryName}" --query "username" -o tsv)
+    containerRegistryPassword=$(az acr credential show --name "${containerRegistryName}" --query "passwords[0].value" -o tsv)
 
-    if [[ -z $containerRegistryUsername ]] || [[ -z $containerRegistryPassword ]]; then
-        echo "Unable to get login credentials for container registry $containerRegistryName"
+    if [[ -z ${containerRegistryUsername} ]] || [[ -z ${containerRegistryPassword} ]]; then
+        echo "Unable to get login credentials for container registry ${containerRegistryName}"
         exit 1
     fi
 }
@@ -50,22 +52,31 @@ function setParameterFilePath() {
     fi
 }
 
+function createPublicIp() {
+    local poolName=$1
+
+    publicIpAddressName="public-ip-${poolName}"
+    dnsName=${poolName}
+
+    . "${0%/*}/create-public-ip.sh"
+}
+
 function deployBatch() {
     # Deploy Azure Batch account using resource manager template
-    echo "Deploying Azure Batch account in resource group $resourceGroupName with template $batchTemplateFile"
+    echo "Deploying Azure Batch account in resource group ${resourceGroupName} with template ${batchTemplateFile}"
     resources=$(
         az deployment group create \
-            --resource-group "$resourceGroupName" \
-            --template-file "$batchTemplateFile" \
-            --parameters "$parameterFilePath" \
-            --parameters containerRegistryServerUserName=$containerRegistryUsername \
-            --parameters containerRegistryServerPassword=$containerRegistryPassword \
+            --resource-group "${resourceGroupName}" \
+            --template-file "${batchTemplateFile}" \
+            --parameters "${parameterFilePath}" \
+            --parameters containerRegistryServerUserName="${containerRegistryUsername}" \
+            --parameters containerRegistryServerPassword="${containerRegistryPassword}" \
             --query "properties.outputResources[].id" \
             -o tsv
     )
 
-    echo "Deployed Batch account :
-        resources: $resources
+    echo "Deployed Batch account:
+        resources: ${resources}
     "
 }
 
@@ -92,7 +103,7 @@ fi
 
 . "${0%/*}/get-resource-names.sh"
 
-echo "Setting up batch account $batchAccountName"
+echo "Setting up batch account ${batchAccountName}"
 
 # Configure Azure subscription account to support Batch account in user subscription mode
 . "${0%/*}/enable-batch-provider.sh"
@@ -101,9 +112,14 @@ setParameterFilePath
 
 . "${0%/*}/delete-pools-if-needed.sh"
 
+# Create Batch pool static public IP
+createPublicIp "on-demand-scan-request-pool"
+createPublicIp "on-demand-url-scan-pool"
+createPublicIp "privacy-scan-pool"
+
 getContainerRegistryLoginCredentials
 deployBatch
 
 . "${0%/*}/setup-all-pools-for-batch.sh"
 
-echo "The '$batchAccountName' Azure Batch account successfully deployed"
+echo "The '${batchAccountName}' Azure Batch account successfully deployed"

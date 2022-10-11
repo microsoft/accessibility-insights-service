@@ -140,7 +140,6 @@ function install() {
         "${0%/*}/upload-files.sh"
         "${0%/*}/create-queues.sh"
         "${0%/*}/setup-cosmos-db.sh"
-        "${0%/*}/create-public-ip.sh"
         "${0%/*}/create-vnet.sh"
         "${0%/*}/app-insights-create.sh"
         "${0%/*}/create-container-registry.sh"
