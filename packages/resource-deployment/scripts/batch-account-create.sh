@@ -56,7 +56,7 @@ function createPublicIp() {
     local poolName=$1
 
     publicIpAddressName="public-ip-${poolName}"
-    dnsName=${poolName}
+    dnsName="${resourceGroupSuffix}-${poolName}"
 
     . "${0%/*}/create-public-ip.sh"
 }
