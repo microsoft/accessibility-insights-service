@@ -78,6 +78,8 @@ export abstract class PageProcessorBase implements PageProcessor {
         if (!isArray(crawlingContext.session.userData)) {
             crawlingContext.session.userData = [];
         }
+
+        gotoOptions.waitUntil = 'networkidle2';
         await this.pageNavigationHooks.preNavigation(crawlingContext.page);
     };
 
