@@ -192,7 +192,7 @@
                     "publicIPAddressConfiguration": {
                         "provision": "userManaged",
                         "ipAddressIds": [
-                            "[resourceId('Microsoft.Network/publicIPAddresses', concat(parameters('batchAccount'), '-', variables('onDemandUrlScanPoolName'), '-public-ip'))]"
+                            "[resourceId('Microsoft.Network/publicIPAddresses', concat('public-ip-', variables('onDemandUrlScanPoolName')))]"
                         ]
                     }
                 },
@@ -275,7 +275,7 @@
                     "publicIPAddressConfiguration": {
                         "provision": "userManaged",
                         "ipAddressIds": [
-                            "[resourceId('Microsoft.Network/publicIPAddresses', concat(parameters('batchAccount'), '-', variables('onDemandScanRequestPoolName'), '-public-ip'))]"
+                            "[resourceId('Microsoft.Network/publicIPAddresses', concat('public-ip-', variables('onDemandScanRequestPoolName')))]"
                         ]
                     }
                 },
@@ -355,7 +355,7 @@
                     "publicIPAddressConfiguration": {
                         "provision": "userManaged",
                         "ipAddressIds": [
-                            "[resourceId('Microsoft.Network/publicIPAddresses', concat(parameters('batchAccount'), '-', variables('privacyScanPoolName'), '-public-ip'))]"
+                            "[resourceId('Microsoft.Network/publicIPAddresses', concat('public-ip-', variables('privacyScanPoolName')))]"
                         ]
                     }
                 },

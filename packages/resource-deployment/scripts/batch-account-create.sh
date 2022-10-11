@@ -55,7 +55,7 @@ function setParameterFilePath() {
 function createPublicIp() {
     local poolName=$1
 
-    publicIpAddressName="${batchAccountName}-${poolName}-public-ip"
+    publicIpAddressName="public-ip-${poolName}"
     dnsName=${poolName}
 
     . "${0%/*}/create-public-ip.sh"
