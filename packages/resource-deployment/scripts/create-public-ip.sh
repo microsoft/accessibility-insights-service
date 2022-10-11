@@ -7,7 +7,7 @@ set -eo pipefail
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -r <resource group> [-n <name of the public IP address>] [-d <globally unique DNS entry>]
+Usage: $0 -r <resource group> -n <name of the public IP address> -d <globally unique DNS entry>
 "
     exit 1
 }
@@ -16,34 +16,30 @@ Usage: $0 -r <resource group> [-n <name of the public IP address>] [-d <globally
 while getopts ":r:n:d:" option; do
     case $option in
     r) resourceGroupName=${OPTARG} ;;
-    n) batchPublicIpAddressName=${OPTARG} ;;
+    n) publicIpAddressName=${OPTARG} ;;
     d) dnsName=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
 
 # Print script usage help
-if [[ -z ${resourceGroupName} ]]; then
+if [[ -z ${resourceGroupName} ]] || [[ -z ${publicIpAddressName} ]] || [[ -z ${dnsName} ]]; then
     exitWithUsageInfo
 fi
 
 . "${0%/*}/get-resource-names.sh"
 
-if [[ -z ${dnsName} ]]; then
-    dnsName=${batchAccountName}
-fi
-
-ipAddress=$(az network public-ip list --resource-group "${resourceGroupName}" --query "[?name=='${batchPublicIpAddressName}'].ipAddress" -o tsv)
+ipAddress=$(az network public-ip list --resource-group "${resourceGroupName}" --query "[?name=='${publicIpAddressName}'].ipAddress" -o tsv)
 if [[ -z ${ipAddress} ]]; then
-    echo "Deploying public IP address ${batchPublicIpAddressName}"
+    echo "Deploying public IP address ${publicIpAddressName}"
     ipAddress=$(az network public-ip create \
         --resource-group "${resourceGroupName}" \
-        --name "${batchPublicIpAddressName}" \
+        --name "${publicIpAddressName}" \
         --dns-name "${dnsName}" \
         --allocation-method Static --sku Standard --tier Regional --version IPv4 \
         --query "publicIp.ipAddress" -o tsv)
 
-    echo "Public IP address ${batchPublicIpAddressName} with IP ${ipAddress} successfully deployed"
+    echo "Public IP address ${publicIpAddressName} with IP ${ipAddress} successfully deployed"
 else
-    echo "Public IP address ${batchPublicIpAddressName} with IP ${ipAddress} already deployed"
+    echo "Public IP address ${publicIpAddressName} with IP ${ipAddress} already deployed"
 fi
