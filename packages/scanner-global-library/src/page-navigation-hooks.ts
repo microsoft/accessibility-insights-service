@@ -23,6 +23,7 @@ export class PageNavigationHooks {
     public async preNavigation(page: Puppeteer.Page): Promise<void> {
         // Configure page settings before navigating to URL
         await this.pageConfigurator.configurePage(page);
+        this.disableAnimation(page);
     }
 
     public async postNavigation(
@@ -49,5 +50,24 @@ export class PageNavigationHooks {
         }
 
         return this.pageRenderingHandler.waitForPageToCompleteRendering(page, this.scrollTimeoutMsecs, this.pageRenderingTimeoutMsecs);
+    }
+
+    private disableAnimation(page: Puppeteer.Page): void {
+        // disable page animation effects to prevent false positive color contrast accessibility issues
+        page.on('load', async () => {
+            const content = `
+            *,
+            *::after,
+            *::before {
+                transition-delay: 0s !important;
+                transition-duration: 0s !important;
+                animation-delay: -0.0001s !important;
+                animation-duration: 0s !important;
+                animation-play-state: paused !important;
+                caret-color: transparent !important;
+            }`;
+
+            await page.addStyleTag({ content });
+        });
     }
 }
