@@ -2289,21 +2289,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@jest/schemas@npm:^28.0.2":
-  version: 28.0.2
-  resolution: "@jest/schemas@npm:28.0.2"
-  dependencies:
-    "@sinclair/typebox": ^0.23.3
-  checksum: 6a177e97b112c99f377697fe803a34f4489b92cd07949876250c69edc9029c7cbda771fcbb03caebd20ffbcfa89b9c22b4dc9d1e9a7fbc9873185459b48ba780
-  languageName: node
-  linkType: hard
-
 "@jest/schemas@npm:^28.1.3":
   version: 28.1.3
   resolution: "@jest/schemas@npm:28.1.3"
   dependencies:
     "@sinclair/typebox": ^0.24.1
   checksum: 3cf1d4b66c9c4ffda58b246de1ddcba8e6ad085af63dccdf07922511f13b68c0cc480a7bc620cb4f3099a6f134801c747e1df7bfc7a4ef4dceefbdea3e31e1de
+  languageName: node
+  linkType: hard
+
+"@jest/schemas@npm:^29.0.0":
+  version: 29.0.0
+  resolution: "@jest/schemas@npm:29.0.0"
+  dependencies:
+    "@sinclair/typebox": ^0.24.1
+  checksum: 41355c78f09eb1097e57a3c5d0ca11c9099e235e01ea5fa4e3953562a79a6a9296c1d300f1ba50ca75236048829e056b00685cd2f1ff8285e56fd2ce01249acb
   languageName: node
   linkType: hard
 
@@ -2743,56 +2743,51 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@rollup/plugin-commonjs@npm:^22.0.1":
-  version: 22.0.1
-  resolution: "@rollup/plugin-commonjs@npm:22.0.1"
+"@rollup/plugin-commonjs@npm:^23.0.0":
+  version: 23.0.0
+  resolution: "@rollup/plugin-commonjs@npm:23.0.0"
   dependencies:
-    "@rollup/pluginutils": ^3.1.0
+    "@rollup/pluginutils": ^4.2.1
     commondir: ^1.0.1
-    estree-walker: ^2.0.1
-    glob: ^7.1.6
-    is-reference: ^1.2.1
-    magic-string: ^0.25.7
-    resolve: ^1.17.0
+    estree-walker: ^2.0.2
+    glob: ^8.0.3
+    is-reference: 1.2.1
+    magic-string: ^0.26.4
   peerDependencies:
-    rollup: ^2.68.0
-  checksum: 6326227b688d1069ab2146b6f08c3d189da94bb77388691d7496001148041388542ddcbc6ffa7e9e97419c67e9cf3256a2414d770b4539998b4bc5d807404198
+    rollup: ^2.68.0||^3.0.0
+  peerDependenciesMeta:
+    rollup:
+      optional: true
+  checksum: a8b23ae4c6dc67d13149908444a5eab1375d63b5e5a22f48acd024cd67568cf90524700df76f078e4238e9ffab27ccd29b620625e55cbc50b3780c8f7159b5eb
   languageName: node
   linkType: hard
 
-"@rollup/plugin-node-resolve@npm:^13.3.0":
-  version: 13.3.0
-  resolution: "@rollup/plugin-node-resolve@npm:13.3.0"
+"@rollup/plugin-node-resolve@npm:^15.0.0":
+  version: 15.0.0
+  resolution: "@rollup/plugin-node-resolve@npm:15.0.0"
   dependencies:
-    "@rollup/pluginutils": ^3.1.0
-    "@types/resolve": 1.17.1
+    "@rollup/pluginutils": ^4.2.1
+    "@types/resolve": 1.20.2
     deepmerge: ^4.2.2
-    is-builtin-module: ^3.1.0
+    is-builtin-module: ^3.2.0
     is-module: ^1.0.0
-    resolve: ^1.19.0
+    resolve: ^1.22.1
   peerDependencies:
-    rollup: ^2.42.0
-  checksum: ec5418e6b3c23a9e30683056b3010e9d325316dcfae93fbc673ae64dad8e56a2ce761c15c48f5e2dcfe0c822fdc4a4905ee6346e3dcf90603ba2260afef5a5e6
+    rollup: ^2.78.0||^3.0.0
+  peerDependenciesMeta:
+    rollup:
+      optional: true
+  checksum: 1be60a90cdb98ffd4cadb9005bc280a768c1eb608ea090e29710052be94118044e85ebccf73c615ef71f6d1201b1d3086f13e314406a3d2e741adf0c808fcaf8
   languageName: node
   linkType: hard
 
-"@rollup/pluginutils@npm:^3.1.0":
-  version: 3.1.0
-  resolution: "@rollup/pluginutils@npm:3.1.0"
+"@rollup/pluginutils@npm:^4.2.1":
+  version: 4.2.1
+  resolution: "@rollup/pluginutils@npm:4.2.1"
   dependencies:
-    "@types/estree": 0.0.39
-    estree-walker: ^1.0.1
+    estree-walker: ^2.0.1
     picomatch: ^2.2.2
-  peerDependencies:
-    rollup: ^1.20.0||^2.0.0
-  checksum: 8be16e27863c219edbb25a4e6ec2fe0e1e451d9e917b6a43cf2ae5bc025a6b8faaa40f82a6e53b66d0de37b58ff472c6c3d57a83037ae635041f8df959d6d9aa
-  languageName: node
-  linkType: hard
-
-"@sinclair/typebox@npm:^0.23.3":
-  version: 0.23.5
-  resolution: "@sinclair/typebox@npm:0.23.5"
-  checksum: c96056d35d9cb862aeb635ff8873e2e7633e668dd544e162aee2690a82c970d0b3f90aa2b3501fe374dfa8e792388559a3e3a86712b23ebaef10061add534f47
+  checksum: 6bc41f22b1a0f1efec3043899e4d3b6b1497b3dea4d94292d8f83b4cf07a1073ecbaedd562a22d11913ff7659f459677b01b09e9598a98936e746780ecc93a12
   languageName: node
   linkType: hard
 
@@ -3081,13 +3076,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/estree@npm:0.0.39":
-  version: 0.0.39
-  resolution: "@types/estree@npm:0.0.39"
-  checksum: 412fb5b9868f2c418126451821833414189b75cc6bf84361156feed733e3d92ec220b9d74a89e52722e03d5e241b2932732711b7497374a404fad49087adc248
-  languageName: node
-  linkType: hard
-
 "@types/fingerprint-generator@1.0.0, @types/fingerprint-generator@workspace:packages/typings":
   version: 0.0.0-use.local
   resolution: "@types/fingerprint-generator@workspace:packages/typings"
@@ -3337,12 +3325,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/resolve@npm:1.17.1":
-  version: 1.17.1
-  resolution: "@types/resolve@npm:1.17.1"
-  dependencies:
-    "@types/node": "*"
-  checksum: dc6a6df507656004e242dcb02c784479deca516d5f4b58a1707e708022b269ae147e1da0521f3e8ad0d63638869d87e0adc023f0bd5454aa6f72ac66c7525cf5
+"@types/resolve@npm:1.20.2":
+  version: 1.20.2
+  resolution: "@types/resolve@npm:1.20.2"
+  checksum: 61c2cad2499ffc8eab36e3b773945d337d848d3ac6b7b0a87c805ba814bc838ef2f262fc0f109bfd8d2e0898ff8bd80ad1025f9ff64f1f71d3d4294c9f14e5f6
   languageName: node
   linkType: hard
 
@@ -3440,7 +3426,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/yargs@npm:^17.0.10, @types/yargs@npm:^17.0.8":
+"@types/yargs@npm:^17.0.13":
+  version: 17.0.13
+  resolution: "@types/yargs@npm:17.0.13"
+  dependencies:
+    "@types/yargs-parser": "*"
+  checksum: 0ab269abc2da2223cf0a8c16d578850fbe327d40fb85724b5c3f9f6cf38d03656ef699518c05d4df3bc337339ec6d0aad7df01682a9dca4783ad1ccc7336cf12
+  languageName: node
+  linkType: hard
+
+"@types/yargs@npm:^17.0.8":
   version: 17.0.10
   resolution: "@types/yargs@npm:17.0.10"
   dependencies:
@@ -3942,8 +3937,8 @@ __metadata:
   dependencies:
     "@axe-core/puppeteer": 4.4.2
     "@medv/finder": ^2.1.0
-    "@rollup/plugin-commonjs": ^22.0.1
-    "@rollup/plugin-node-resolve": ^13.3.0
+    "@rollup/plugin-commonjs": ^23.0.0
+    "@rollup/plugin-node-resolve": ^15.0.0
     "@types/encoding-down": ^5.0.0
     "@types/jest": ^27.4.1
     "@types/leveldown": ^4.0.2
@@ -3968,13 +3963,13 @@ __metadata:
     puppeteer: ^13.7.0
     reflect-metadata: ^0.1.13
     rimraf: ^3.0.2
-    rollup: ^2.75.6
+    rollup: ^3.1.0
     scanner-global-library: "workspace:*"
     sha.js: ^2.4.11
     ts-jest: ^27.1.4
     typemoq: ^2.1.0
     typescript: ^4.7.4
-    yargs: ^17.5.1
+    yargs: ^17.6.0
   languageName: unknown
   linkType: soft
 
@@ -4065,7 +4060,7 @@ __metadata:
     webpack-cli: ^4.9.2
     webpack-node-externals: ^3.0.0
     wtfnode: ^0.9.0
-    yargs: ^17.5.1
+    yargs: ^17.6.0
   bin:
     ai-scan: dist/ai-scan-cli.js
   languageName: unknown
@@ -4733,7 +4728,6 @@ __metadata:
     "@types/jest": ^27.4.1
     "@types/lodash": ^4.14.182
     "@types/verror": ^1.10.4
-    "@types/yargs": ^17.0.10
     async-mutex: ^0.3.2
     common: "workspace:*"
     dotenv: ^16.0.1
@@ -4749,7 +4743,7 @@ __metadata:
     node-cache: ^5.1.2
     npm-run-all: ^4.1.5
     p-limit: ^3.1.0
-    pretty-format: ^28.1.1
+    pretty-format: ^29.1.2
     reflect-metadata: ^0.1.13
     rimraf: ^3.0.2
     storage-documents: "workspace:*"
@@ -5087,6 +5081,13 @@ __metadata:
   version: 3.2.0
   resolution: "builtin-modules@npm:3.2.0"
   checksum: 0265aa1ba78e1a16f4e18668d815cb43fb364e6a6b8aa9189c6f44c7b894a551a43b323c40206959d2d4b2568c1f2805607ad6c88adc306a776ce6904cca6715
+  languageName: node
+  linkType: hard
+
+"builtin-modules@npm:^3.3.0":
+  version: 3.3.0
+  resolution: "builtin-modules@npm:3.3.0"
+  checksum: db021755d7ed8be048f25668fe2117620861ef6703ea2c65ed2779c9e3636d5c3b82325bd912244293959ff3ae303afa3471f6a15bf5060c103e4cc3a839749d
   languageName: node
   linkType: hard
 
@@ -5470,6 +5471,17 @@ __metadata:
     strip-ansi: ^6.0.0
     wrap-ansi: ^7.0.0
   checksum: ce2e8f578a4813806788ac399b9e866297740eecd4ad1823c27fd344d78b22c5f8597d548adbcc46f0573e43e21e751f39446c5a5e804a12aace402b7a315d7f
+  languageName: node
+  linkType: hard
+
+"cliui@npm:^8.0.1":
+  version: 8.0.1
+  resolution: "cliui@npm:8.0.1"
+  dependencies:
+    string-width: ^4.2.0
+    strip-ansi: ^6.0.1
+    wrap-ansi: ^7.0.0
+  checksum: 79648b3b0045f2e285b76fb2e24e207c6db44323581e421c3acbd0e86454cba1b37aea976ab50195a49e7384b871e6dfb2247ad7dec53c02454ac6497394cb56
   languageName: node
   linkType: hard
 
@@ -6432,7 +6444,6 @@ __metadata:
     "@types/jest": ^27.4.1
     "@types/lodash": ^4.14.182
     "@types/node": ^16.11.7
-    "@types/yargs": ^17.0.10
     azure-services: "workspace:*"
     copy-webpack-plugin: ^11.0.0
     fork-ts-checker-webpack-plugin: ^7.2.12
@@ -7037,17 +7048,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"estree-walker@npm:^1.0.1":
-  version: 1.0.1
-  resolution: "estree-walker@npm:1.0.1"
-  checksum: 7e70da539691f6db03a08e7ce94f394ce2eef4180e136d251af299d41f92fb2d28ebcd9a6e393e3728d7970aeb5358705ddf7209d52fbcb2dd4693f95dcf925f
-  languageName: node
-  linkType: hard
-
 "estree-walker@npm:^2.0.1":
   version: 2.0.1
   resolution: "estree-walker@npm:2.0.1"
   checksum: c8e89c1e0dced789554c2c76152ef748ef226aa792eead6eee1777b6faa24e56a539639b8024f3952e80c451dd2c51f9ca8e7a360771dcaa794ad7b92243929c
+  languageName: node
+  linkType: hard
+
+"estree-walker@npm:^2.0.2":
+  version: 2.0.2
+  resolution: "estree-walker@npm:2.0.2"
+  checksum: 6151e6f9828abe2259e57f5fd3761335bb0d2ebd76dc1a01048ccee22fabcfef3c0859300f6d83ff0d1927849368775ec5a6d265dde2f6de5a1be1721cd94efc
   languageName: node
   linkType: hard
 
@@ -7685,7 +7696,7 @@ __metadata:
     typemoq: ^2.1.0
     typescript: ^4.7.4
     web-api-client: "workspace:*"
-    yargs: ^17.5.1
+    yargs: ^17.6.0
   languageName: unknown
   linkType: soft
 
@@ -7834,7 +7845,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"glob@npm:8.0.3, glob@npm:^8.0.1":
+"glob@npm:8.0.3, glob@npm:^8.0.1, glob@npm:^8.0.3":
   version: 8.0.3
   resolution: "glob@npm:8.0.3"
   dependencies:
@@ -8131,7 +8142,7 @@ __metadata:
     webpack: ^5.73.0
     webpack-cli: ^4.9.2
     webpack-ignore-dynamic-require: ^1.0.0
-    yargs: ^17.5.1
+    yargs: ^17.6.0
   languageName: unknown
   linkType: soft
 
@@ -8544,6 +8555,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"is-builtin-module@npm:^3.2.0":
+  version: 3.2.0
+  resolution: "is-builtin-module@npm:3.2.0"
+  dependencies:
+    builtin-modules: ^3.3.0
+  checksum: 0315751b898feff0646511c896e88b608a755c5025d0ce9a3ad25783de50be870e47dafb838cebbb06fbb2a948b209ea55348eee267836c9dd40d3a11ec717d3
+  languageName: node
+  linkType: hard
+
 "is-callable@npm:^1.1.4, is-callable@npm:^1.2.0":
   version: 1.2.0
   resolution: "is-callable@npm:1.2.0"
@@ -8575,6 +8595,15 @@ __metadata:
   dependencies:
     has: ^1.0.3
   checksum: 418b7bc10768a73c41c7ef497e293719604007f88934a6ffc5f7c78702791b8528102fb4c9e56d006d69361549b3d9519440214a74aefc7e0b79e5e4411d377f
+  languageName: node
+  linkType: hard
+
+"is-core-module@npm:^2.9.0":
+  version: 2.10.0
+  resolution: "is-core-module@npm:2.10.0"
+  dependencies:
+    has: ^1.0.3
+  checksum: 0f3f77811f430af3256fa7bbc806f9639534b140f8ee69476f632c3e1eb4e28a38be0b9d1b8ecf596179c841b53576129279df95e7051d694dac4ceb6f967593
   languageName: node
   linkType: hard
 
@@ -8756,7 +8785,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"is-reference@npm:^1.2.1":
+"is-reference@npm:1.2.1":
   version: 1.2.1
   resolution: "is-reference@npm:1.2.1"
   dependencies:
@@ -10369,12 +10398,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"magic-string@npm:^0.25.7":
-  version: 0.25.7
-  resolution: "magic-string@npm:0.25.7"
+"magic-string@npm:^0.26.4":
+  version: 0.26.7
+  resolution: "magic-string@npm:0.26.7"
   dependencies:
-    sourcemap-codec: ^1.4.4
-  checksum: 727a1fb70f9610304fe384f1df0251eb7d1d9dd779c07ef1225690361b71b216f26f5d934bfb11c919b5b0e7ba50f6240c823a6f2e44cfd33d4a07d7747ca829
+    sourcemap-codec: ^1.4.8
+  checksum: 89b0d60cbb32bbf3d1e23c46ea93db082d18a8230b972027aecb10a40bba51be519ecce0674f995571e3affe917b76b09f59d8dbc9a1b2c9c4102a2b6e8a2b01
   languageName: node
   linkType: hard
 
@@ -11785,18 +11814,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pretty-format@npm:^28.1.1":
-  version: 28.1.1
-  resolution: "pretty-format@npm:28.1.1"
-  dependencies:
-    "@jest/schemas": ^28.0.2
-    ansi-regex: ^5.0.1
-    ansi-styles: ^5.0.0
-    react-is: ^18.0.0
-  checksum: 7fde4e2d6fd57cef8cf2fa9d5560cc62126de481f09c65dccfe89a3e6158a04355cff278853ace07fdf7f2f48c3d77877c00c47d7d3c1c028dcff5c322300d79
-  languageName: node
-  linkType: hard
-
 "pretty-format@npm:^28.1.3":
   version: 28.1.3
   resolution: "pretty-format@npm:28.1.3"
@@ -11806,6 +11823,17 @@ __metadata:
     ansi-styles: ^5.0.0
     react-is: ^18.0.0
   checksum: e69f857358a3e03d271252d7524bec758c35e44680287f36c1cb905187fbc82da9981a6eb07edfd8a03bc3cbeebfa6f5234c13a3d5b59f2bbdf9b4c4053e0a7f
+  languageName: node
+  linkType: hard
+
+"pretty-format@npm:^29.1.2":
+  version: 29.1.2
+  resolution: "pretty-format@npm:29.1.2"
+  dependencies:
+    "@jest/schemas": ^29.0.0
+    ansi-styles: ^5.0.0
+    react-is: ^18.0.0
+  checksum: b2c6e77666716e55094f29dcbd92e431a1b8cc0a06cd41ec1a3c8a10e5e56bb1f2d7b5942f1d8f6a0f69912712f3edb4c41713926d60cbb89f2a41355d49e7a4
   languageName: node
   linkType: hard
 
@@ -11890,7 +11918,7 @@ __metadata:
     webpack: ^5.73.0
     webpack-cli: ^4.9.2
     webpack-ignore-dynamic-require: ^1.0.0
-    yargs: ^17.5.1
+    yargs: ^17.6.0
   languageName: unknown
   linkType: soft
 
@@ -11905,7 +11933,7 @@ __metadata:
     "@types/node": ^16.11.7
     "@types/puppeteer": ^5.4.6
     "@types/verror": ^1.10.4
-    "@types/yargs": ^17.0.10
+    "@types/yargs": ^17.0.13
     applicationinsights: ^2.3.1
     azure-services: "workspace:*"
     common: "workspace:*"
@@ -11941,7 +11969,7 @@ __metadata:
     webpack: ^5.73.0
     webpack-cli: ^4.9.2
     webpack-ignore-dynamic-require: ^1.0.0
-    yargs: ^17.5.1
+    yargs: ^17.6.0
   languageName: unknown
   linkType: soft
 
@@ -12556,7 +12584,7 @@ __metadata:
     webpack: ^5.73.0
     webpack-cli: ^4.9.2
     webpack-ignore-dynamic-require: ^1.0.0
-    yargs: ^17.5.1
+    yargs: ^17.6.0
   languageName: unknown
   linkType: soft
 
@@ -12571,7 +12599,7 @@ __metadata:
     "@types/node": ^16.11.7
     "@types/puppeteer": ^5.4.6
     "@types/verror": ^1.10.4
-    "@types/yargs": ^17.0.10
+    "@types/yargs": ^17.0.13
     applicationinsights: ^2.3.1
     azure-services: "workspace:*"
     common: "workspace:*"
@@ -12606,7 +12634,7 @@ __metadata:
     webpack: ^5.73.0
     webpack-cli: ^4.9.2
     webpack-ignore-dynamic-require: ^1.0.0
-    yargs: ^17.5.1
+    yargs: ^17.6.0
   languageName: unknown
   linkType: soft
 
@@ -12710,7 +12738,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"resolve@npm:>=1.9.0, resolve@npm:^1.10.0, resolve@npm:^1.17.0, resolve@npm:^1.19.0, resolve@npm:^1.20.0, resolve@npm:^1.22.0, resolve@npm:^1.3.2, resolve@npm:^1.9.0":
+"resolve@npm:>=1.9.0, resolve@npm:^1.10.0, resolve@npm:^1.20.0, resolve@npm:^1.22.0, resolve@npm:^1.3.2, resolve@npm:^1.9.0":
   version: 1.22.0
   resolution: "resolve@npm:1.22.0"
   dependencies:
@@ -12723,7 +12751,20 @@ __metadata:
   languageName: node
   linkType: hard
 
-"resolve@patch:resolve@>=1.9.0#~builtin<compat/resolve>, resolve@patch:resolve@^1.10.0#~builtin<compat/resolve>, resolve@patch:resolve@^1.17.0#~builtin<compat/resolve>, resolve@patch:resolve@^1.19.0#~builtin<compat/resolve>, resolve@patch:resolve@^1.20.0#~builtin<compat/resolve>, resolve@patch:resolve@^1.22.0#~builtin<compat/resolve>, resolve@patch:resolve@^1.3.2#~builtin<compat/resolve>, resolve@patch:resolve@^1.9.0#~builtin<compat/resolve>":
+"resolve@npm:^1.22.1":
+  version: 1.22.1
+  resolution: "resolve@npm:1.22.1"
+  dependencies:
+    is-core-module: ^2.9.0
+    path-parse: ^1.0.7
+    supports-preserve-symlinks-flag: ^1.0.0
+  bin:
+    resolve: bin/resolve
+  checksum: 07af5fc1e81aa1d866cbc9e9460fbb67318a10fa3c4deadc35c3ad8a898ee9a71a86a65e4755ac3195e0ea0cfbe201eb323ebe655ce90526fd61917313a34e4e
+  languageName: node
+  linkType: hard
+
+"resolve@patch:resolve@>=1.9.0#~builtin<compat/resolve>, resolve@patch:resolve@^1.10.0#~builtin<compat/resolve>, resolve@patch:resolve@^1.20.0#~builtin<compat/resolve>, resolve@patch:resolve@^1.22.0#~builtin<compat/resolve>, resolve@patch:resolve@^1.3.2#~builtin<compat/resolve>, resolve@patch:resolve@^1.9.0#~builtin<compat/resolve>":
   version: 1.22.0
   resolution: "resolve@patch:resolve@npm%3A1.22.0#~builtin<compat/resolve>::version=1.22.0&hash=07638b"
   dependencies:
@@ -12733,6 +12774,19 @@ __metadata:
   bin:
     resolve: bin/resolve
   checksum: c79ecaea36c872ee4a79e3db0d3d4160b593f2ca16e031d8283735acd01715a203607e9ded3f91f68899c2937fa0d49390cddbe0fb2852629212f3cda283f4a7
+  languageName: node
+  linkType: hard
+
+"resolve@patch:resolve@^1.22.1#~builtin<compat/resolve>":
+  version: 1.22.1
+  resolution: "resolve@patch:resolve@npm%3A1.22.1#~builtin<compat/resolve>::version=1.22.1&hash=07638b"
+  dependencies:
+    is-core-module: ^2.9.0
+    path-parse: ^1.0.7
+    supports-preserve-symlinks-flag: ^1.0.0
+  bin:
+    resolve: bin/resolve
+  checksum: 5656f4d0bedcf8eb52685c1abdf8fbe73a1603bb1160a24d716e27a57f6cecbe2432ff9c89c2bd57542c3a7b9d14b1882b73bfe2e9d7849c9a4c0b8b39f02b8b
   languageName: node
   linkType: hard
 
@@ -12808,9 +12862,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rollup@npm:^2.75.6":
-  version: 2.75.6
-  resolution: "rollup@npm:2.75.6"
+"rollup@npm:^3.1.0":
+  version: 3.1.0
+  resolution: "rollup@npm:3.1.0"
   dependencies:
     fsevents: ~2.3.2
   dependenciesMeta:
@@ -12818,7 +12872,7 @@ __metadata:
       optional: true
   bin:
     rollup: dist/bin/rollup
-  checksum: df83c6d43a144a296daf82bed7f12f2dfcc6c495a64245e840d15fd21f2ab8b66bb3423e61c974875b33ccf53fb659d2ed099f272937ecf23af48815277c6cd5
+  checksum: 5f0bad2b949225eaaeb40204311b1c9eb9e7f4ed6664334b289c1329bf86f87416716d806f4861f501de6cead6eef7b489a140fd5fa57719fc877c5f280dff1b
   languageName: node
   linkType: hard
 
@@ -13049,7 +13103,7 @@ __metadata:
     "@types/paralleljs": ^0.0.21
     "@types/puppeteer": ^5.4.6
     "@types/sha.js": ^2.4.0
-    "@types/yargs": ^17.0.10
+    "@types/yargs": ^17.0.13
     accessibility-insights-report: 4.4.0
     async-mutex: ^0.3.2
     axe-core: 4.4.1
@@ -13080,7 +13134,7 @@ __metadata:
     ts-jest: ^27.1.4
     typemoq: ^2.1.0
     typescript: ^4.7.4
-    yargs: ^17.5.1
+    yargs: ^17.6.0
   languageName: unknown
   linkType: soft
 
@@ -13360,7 +13414,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"sourcemap-codec@npm:^1.4.4":
+"sourcemap-codec@npm:^1.4.8":
   version: 1.4.8
   resolution: "sourcemap-codec@npm:1.4.8"
   checksum: b57981c05611afef31605732b598ccf65124a9fcb03b833532659ac4d29ac0f7bfacbc0d6c5a28a03e84c7510e7e556d758d0bb57786e214660016fb94279316
@@ -14768,7 +14822,7 @@ __metadata:
     webpack: ^5.73.0
     webpack-cli: ^4.9.2
     webpack-ignore-dynamic-require: ^1.0.0
-    yargs: ^17.5.1
+    yargs: ^17.6.0
   languageName: unknown
   linkType: soft
 
@@ -14803,7 +14857,7 @@ __metadata:
     webpack-cli: ^4.9.2
     webpack-ignore-dynamic-require: ^1.0.0
     why-is-node-running: ^2.2.2
-    yargs: ^17.5.1
+    yargs: ^17.6.0
   languageName: unknown
   linkType: soft
 
@@ -14820,7 +14874,7 @@ __metadata:
     "@types/puppeteer": ^5.4.6
     "@types/sha.js": ^2.4.0
     "@types/verror": ^1.10.4
-    "@types/yargs": ^17.0.10
+    "@types/yargs": ^17.0.13
     accessibility-insights-crawler: "workspace:*"
     accessibility-insights-report: 4.4.0
     apify: ^2.3.2
@@ -14865,7 +14919,7 @@ __metadata:
     webpack-cli: ^4.9.2
     webpack-ignore-dynamic-require: ^1.0.0
     yamlparser: ^0.0.2
-    yargs: ^17.5.1
+    yargs: ^17.6.0
   languageName: unknown
   linkType: soft
 
@@ -14906,7 +14960,7 @@ __metadata:
     webpack: ^5.73.0
     webpack-cli: ^4.9.2
     webpack-ignore-dynamic-require: ^1.0.0
-    yargs: ^17.5.1
+    yargs: ^17.6.0
   languageName: unknown
   linkType: soft
 
@@ -14923,7 +14977,7 @@ __metadata:
     "@types/puppeteer": ^5.4.6
     "@types/sha.js": ^2.4.0
     "@types/verror": ^1.10.4
-    "@types/yargs": ^17.0.10
+    "@types/yargs": ^17.0.13
     applicationinsights: ^2.3.1
     azure-services: "workspace:*"
     common: "workspace:*"
@@ -14952,7 +15006,7 @@ __metadata:
     webpack: ^5.73.0
     webpack-cli: ^4.9.2
     webpack-ignore-dynamic-require: ^1.0.0
-    yargs: ^17.5.1
+    yargs: ^17.6.0
   languageName: unknown
   linkType: soft
 
@@ -14967,7 +15021,6 @@ __metadata:
     "@types/node": ^16.11.7
     "@types/sha.js": ^2.4.0
     "@types/verror": ^1.10.4
-    "@types/yargs": ^17.0.10
     azure-services: "workspace:*"
     common: "workspace:*"
     copy-webpack-plugin: ^11.0.0
@@ -15006,7 +15059,6 @@ __metadata:
     "@types/node": ^16.11.7
     "@types/sha.js": ^2.4.0
     "@types/verror": ^1.10.4
-    "@types/yargs": ^17.0.10
     azure-services: "workspace:*"
     common: "workspace:*"
     copy-webpack-plugin: ^11.0.0
@@ -15521,7 +15573,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"yargs@npm:^17.0.0, yargs@npm:^17.2.1, yargs@npm:^17.5.1":
+"yargs@npm:^17.0.0, yargs@npm:^17.2.1":
   version: 17.5.1
   resolution: "yargs@npm:17.5.1"
   dependencies:
@@ -15533,6 +15585,21 @@ __metadata:
     y18n: ^5.0.5
     yargs-parser: ^21.0.0
   checksum: 00d58a2c052937fa044834313f07910fd0a115dec5ee35919e857eeee3736b21a4eafa8264535800ba8bac312991ce785ecb8a51f4d2cc8c4676d865af1cfbde
+  languageName: node
+  linkType: hard
+
+"yargs@npm:^17.6.0":
+  version: 17.6.0
+  resolution: "yargs@npm:17.6.0"
+  dependencies:
+    cliui: ^8.0.1
+    escalade: ^3.1.1
+    get-caller-file: ^2.0.5
+    require-directory: ^2.1.1
+    string-width: ^4.2.3
+    y18n: ^5.0.5
+    yargs-parser: ^21.0.0
+  checksum: 604bdb4a6395a870540d2f3fea083c8e28441f12da8fd05b172b1e68480f00ed73d76be4a05fac19de9bf55ec7729b41e81cf555cccaed700aa192e4fff64872
   languageName: node
   linkType: hard
 

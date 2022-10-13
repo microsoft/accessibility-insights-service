@@ -26,7 +26,6 @@
         "@types/jest": "^27.4.1",
         "@types/lodash": "^4.14.182",
         "@types/verror": "^1.10.4",
-        "@types/yargs": "^17.0.10",
         "fork-ts-checker-webpack-plugin": "^7.2.12",
         "jest": "^27.5.1",
         "jest-junit": "^14.0.0",
@@ -59,7 +58,7 @@
         "moment": "^2.29.4",
         "node-cache": "^5.1.2",
         "p-limit": "^3.1.0",
-        "pretty-format": "^28.1.1",
+        "pretty-format": "^29.1.2",
         "reflect-metadata": "^0.1.13",
         "storage-documents": "workspace:*",
         "verror": "^1.10.1"

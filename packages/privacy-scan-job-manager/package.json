@@ -57,6 +57,6 @@
         "service-library": "workspace:*",
         "storage-documents": "workspace:*",
         "verror": "^1.10.1",
-        "yargs": "^17.5.1"
+        "yargs": "^17.6.0"
     }
 }

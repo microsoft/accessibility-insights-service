@@ -16,6 +16,19 @@ Usage: $0 -r <resource group>
 
 . "${0%/*}/process-utilities.sh"
 
+function waitForVmssToCompleteSetup() {
+    # Allow VMSS to complete initial setup to mitigate system identity reset issue
+    # There is no reliable way to detect when VMSS has completed initial setup hence use fixed delay
+    local end=$((SECONDS + 300))
+    echo "Waiting for Batch pools VMSS to complete setup"
+    printf " - Running .."
+    while [ $SECONDS -le $end ]; do
+        sleep 15
+        printf "."
+    done
+    echo " ended"
+}
+
 function setupPools() {
     # Enable managed identity on Batch pools
     pools=$(az batch pool list --query "[].id" -o tsv)
@@ -63,6 +76,7 @@ fi
 echo "Logging into '${batchAccountName}' Azure Batch account"
 az batch account login --name "${batchAccountName}" --resource-group "${resourceGroupName}"
 
+waitForVmssToCompleteSetup
 setupPools
 
 echo "Successfully setup all pools for batch account ${batchAccountName}"

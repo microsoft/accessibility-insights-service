@@ -50,6 +50,6 @@
         "service-library": "workspace:*",
         "storage-documents": "workspace:*",
         "why-is-node-running": "^2.2.2",
-        "yargs": "^17.5.1"
+        "yargs": "^17.6.0"
     }
 }
