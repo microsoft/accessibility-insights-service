@@ -2479,6 +2479,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@microsoft/applicationinsights-web-snippet@npm:^1.0.1":
+  version: 1.0.1
+  resolution: "@microsoft/applicationinsights-web-snippet@npm:1.0.1"
+  checksum: e4e723031ce8fd9b21e0b52467ddc13f8f30e0ce3ec54b9f9f0946f9e2826050b97803f60322be3676218e77fff7234679cc488ee122e689f487bb2073cd95b4
+  languageName: node
+  linkType: hard
+
 "@microsoft/load-themed-styles@npm:^1.10.26":
   version: 1.10.224
   resolution: "@microsoft/load-themed-styles@npm:1.10.224"
@@ -4010,7 +4017,7 @@ __metadata:
     accessibility-insights-report: 4.4.0
     ajv: ^8.10.0
     apify: ^2.3.2
-    applicationinsights: ^2.3.1
+    applicationinsights: ^2.3.5
     axe-core: 4.4.1
     axe-result-converter: "workspace:*"
     browser-pool: ^3.1.4
@@ -4401,11 +4408,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"applicationinsights@npm:^2.3.1":
-  version: 2.3.1
-  resolution: "applicationinsights@npm:2.3.1"
+"applicationinsights@npm:^2.3.5":
+  version: 2.3.5
+  resolution: "applicationinsights@npm:2.3.5"
   dependencies:
     "@azure/core-http": ^2.2.3
+    "@microsoft/applicationinsights-web-snippet": ^1.0.1
     "@opentelemetry/api": ^1.0.4
     "@opentelemetry/core": ^1.0.1
     "@opentelemetry/sdk-trace-base": ^1.0.1
@@ -4419,7 +4427,7 @@ __metadata:
   peerDependenciesMeta:
     applicationinsights-native-metrics:
       optional: true
-  checksum: a8cc53e1a1942c4d06969befbaad69ced1d71e15f9c498a23e5ae84a93deb1110731abec0d25e6aa4bb101f846643466899911b54012839c7c2fca354d557ecf
+  checksum: 48ab24d11dca9122c5e1ecaf0ff3619aa0d2fed813bc7b7f49c7bdaa21e852c2e5e9fc7808901f7b044a623dd790e2c148d4ed9e66bf41ef9e37e6c5fff7237c
   languageName: node
   linkType: hard
 
@@ -10320,7 +10328,7 @@ __metadata:
     "@types/jest": ^27.4.1
     "@types/lodash": ^4.14.182
     "@types/node": ^16.11.7
-    applicationinsights: ^2.3.1
+    applicationinsights: ^2.3.5
     common: "workspace:*"
     dotenv: ^16.0.1
     inversify: ^6.0.1
@@ -11891,7 +11899,7 @@ __metadata:
     "@types/lodash": ^4.14.182
     "@types/node": ^16.11.7
     "@types/verror": ^1.10.4
-    applicationinsights: ^2.3.1
+    applicationinsights: ^2.3.5
     azure-services: "workspace:*"
     common: "workspace:*"
     copy-webpack-plugin: ^11.0.0
@@ -11934,7 +11942,7 @@ __metadata:
     "@types/puppeteer": ^5.4.6
     "@types/verror": ^1.10.4
     "@types/yargs": ^17.0.13
-    applicationinsights: ^2.3.1
+    applicationinsights: ^2.3.5
     azure-services: "workspace:*"
     common: "workspace:*"
     copy-webpack-plugin: ^11.0.0
@@ -12557,7 +12565,7 @@ __metadata:
     "@types/lodash": ^4.14.182
     "@types/node": ^16.11.7
     "@types/verror": ^1.10.4
-    applicationinsights: ^2.3.1
+    applicationinsights: ^2.3.5
     azure-services: "workspace:*"
     common: "workspace:*"
     copy-webpack-plugin: ^11.0.0
@@ -12600,7 +12608,7 @@ __metadata:
     "@types/puppeteer": ^5.4.6
     "@types/verror": ^1.10.4
     "@types/yargs": ^17.0.13
-    applicationinsights: ^2.3.1
+    applicationinsights: ^2.3.5
     azure-services: "workspace:*"
     common: "workspace:*"
     copy-webpack-plugin: ^11.0.0
@@ -14795,7 +14803,7 @@ __metadata:
     "@types/lodash": ^4.14.182
     "@types/node": ^16.11.7
     "@types/verror": ^1.10.4
-    applicationinsights: ^2.3.1
+    applicationinsights: ^2.3.5
     azure-services: "workspace:*"
     common: "workspace:*"
     copy-webpack-plugin: ^11.0.0
@@ -14831,7 +14839,7 @@ __metadata:
   resolution: "web-api-scan-request-sender@workspace:packages/web-api-scan-request-sender"
   dependencies:
     "@types/jest": ^27.4.1
-    applicationinsights: ^2.3.1
+    applicationinsights: ^2.3.5
     azure-services: "workspace:*"
     common: "workspace:*"
     copy-webpack-plugin: ^11.0.0
@@ -14878,7 +14886,7 @@ __metadata:
     accessibility-insights-crawler: "workspace:*"
     accessibility-insights-report: 4.4.0
     apify: ^2.3.2
-    applicationinsights: ^2.3.1
+    applicationinsights: ^2.3.5
     axe-core: 4.4.1
     axe-result-converter: "workspace:*"
     axe-sarif-converter: ^2.9.0
@@ -14934,7 +14942,7 @@ __metadata:
     "@types/lodash": ^4.14.182
     "@types/node": ^16.11.7
     "@types/verror": ^1.10.4
-    applicationinsights: ^2.3.1
+    applicationinsights: ^2.3.5
     azure-services: "workspace:*"
     common: "workspace:*"
     copy-webpack-plugin: ^11.0.0
@@ -14978,7 +14986,7 @@ __metadata:
     "@types/sha.js": ^2.4.0
     "@types/verror": ^1.10.4
     "@types/yargs": ^17.0.13
-    applicationinsights: ^2.3.1
+    applicationinsights: ^2.3.5
     azure-services: "workspace:*"
     common: "workspace:*"
     copy-webpack-plugin: ^11.0.0
