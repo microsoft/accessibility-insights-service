@@ -6,7 +6,7 @@
             "value": "1"
         },
         "onDemandScanRequestPoolVmSize": {
-            "value": "standard_f8s_v2"
+            "value": "standard_e8d_v5"
         },
         "onDemandScanRequestPoolTaskSlotsPerNode": {
             "value": "8"
@@ -15,7 +15,7 @@
             "value": "2"
         },
         "onDemandUrlScanPoolVmSize": {
-            "value": "standard_f4s_v2"
+            "value": "standard_e4d_v5"
         },
         "onDemandUrlScanPoolTaskSlotsPerNode": {
             "value": "4"
@@ -24,7 +24,7 @@
             "value": "1"
         },
         "privacyScanPoolVmSize": {
-            "value": "standard_f4s_v2"
+            "value": "standard_e4d_v5"
         },
         "privacyScanPoolTaskSlotsPerNode": {
             "value": "4"
