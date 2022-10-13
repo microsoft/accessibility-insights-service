@@ -66,7 +66,7 @@
             }
         },
         "onDemandScanRequestPoolVmSize": {
-            "defaultValue": "standard_f8s_v2",
+            "defaultValue": "standard_e8d_v5",
             "type": "string",
             "metadata": {
                 "description": "VM size for on-demand-scan-request-pool pool"
@@ -87,14 +87,14 @@
             }
         },
         "onDemandUrlScanPoolVmSize": {
-            "defaultValue": "standard_f4s_v2",
+            "defaultValue": "standard_e4d_v5",
             "type": "string",
             "metadata": {
                 "description": "VM size for on-demand-url-scan-pool pool"
             }
         },
         "onDemandUrlScanPoolTaskSlotsPerNode": {
-            "defaultValue": "8",
+            "defaultValue": "4",
             "type": "string",
             "metadata": {
                 "description": "Task slots per node for on-demand-url-scan-pool pool"
@@ -108,14 +108,14 @@
             }
         },
         "privacyScanPoolVmSize": {
-            "defaultValue": "standard_f4s_v2",
+            "defaultValue": "standard_e4d_v5",
             "type": "string",
             "metadata": {
                 "description": "VM size for privacy-scan-pool pool"
             }
         },
         "privacyScanPoolTaskSlotsPerNode": {
-            "defaultValue": "8",
+            "defaultValue": "4",
             "type": "string",
             "metadata": {
                 "description": "Task slots per node for privacy-scan-pool pool"
@@ -125,7 +125,10 @@
     "variables": {
         "keyVaultUrl": "[concat('https://', parameters('keyVault'), '.vault.azure.net/')]",
         "vnetResource": "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnetName'))]",
-        "containerRegistryServerName": "[concat(parameters('containerRegistryName'), '.azurecr.io')]"
+        "containerRegistryServerName": "[concat(parameters('containerRegistryName'), '.azurecr.io')]",
+        "onDemandUrlScanPoolName": "on-demand-url-scan-pool",
+        "onDemandScanRequestPoolName": "on-demand-scan-request-pool",
+        "privacyScanPoolName": "privacy-scan-pool"
     },
     "resources": [
         {
@@ -147,7 +150,7 @@
         {
             "type": "Microsoft.Batch/batchAccounts/pools",
             "apiVersion": "2021-01-01",
-            "name": "[concat(parameters('batchAccount'), '/on-demand-url-scan-pool')]",
+            "name": "[concat(parameters('batchAccount'), '/', variables('onDemandUrlScanPoolName'))]",
             "dependsOn": ["[resourceId('Microsoft.Batch/batchAccounts', parameters('batchAccount'))]"],
             "properties": {
                 "vmSize": "[parameters('onDemandUrlScanPoolVmSize')]",
@@ -185,7 +188,13 @@
                     }
                 },
                 "networkConfiguration": {
-                    "subnetId": "[concat(variables('vnetResource'), '/subnets/default')]"
+                    "subnetId": "[concat(variables('vnetResource'), '/subnets/default')]",
+                    "publicIPAddressConfiguration": {
+                        "provision": "userManaged",
+                        "ipAddressIds": [
+                            "[resourceId('Microsoft.Network/publicIPAddresses', concat('public-ip-', variables('onDemandUrlScanPoolName')))]"
+                        ]
+                    }
                 },
                 "scaleSettings": {
                     "fixedScale": {
@@ -221,7 +230,7 @@
         {
             "type": "Microsoft.Batch/batchAccounts/pools",
             "apiVersion": "2021-01-01",
-            "name": "[concat(parameters('batchAccount'), '/on-demand-scan-request-pool')]",
+            "name": "[concat(parameters('batchAccount'), '/', variables('onDemandScanRequestPoolName'))]",
             "dependsOn": ["[resourceId('Microsoft.Batch/batchAccounts', parameters('batchAccount'))]"],
             "properties": {
                 "vmSize": "[parameters('onDemandScanRequestPoolVmSize')]",
@@ -262,7 +271,13 @@
                     }
                 },
                 "networkConfiguration": {
-                    "subnetId": "[concat(variables('vnetResource'), '/subnets/default')]"
+                    "subnetId": "[concat(variables('vnetResource'), '/subnets/default')]",
+                    "publicIPAddressConfiguration": {
+                        "provision": "userManaged",
+                        "ipAddressIds": [
+                            "[resourceId('Microsoft.Network/publicIPAddresses', concat('public-ip-', variables('onDemandScanRequestPoolName')))]"
+                        ]
+                    }
                 },
                 "scaleSettings": {
                     "fixedScale": {
@@ -298,7 +313,7 @@
         {
             "type": "Microsoft.Batch/batchAccounts/pools",
             "apiVersion": "2021-01-01",
-            "name": "[concat(parameters('batchAccount'), '/privacy-scan-pool')]",
+            "name": "[concat(parameters('batchAccount'), '/', variables('privacyScanPoolName'))]",
             "dependsOn": ["[resourceId('Microsoft.Batch/batchAccounts', parameters('batchAccount'))]"],
             "properties": {
                 "vmSize": "[parameters('privacyScanPoolVmSize')]",
@@ -336,7 +351,13 @@
                     }
                 },
                 "networkConfiguration": {
-                    "subnetId": "[concat(variables('vnetResource'), '/subnets/default')]"
+                    "subnetId": "[concat(variables('vnetResource'), '/subnets/default')]",
+                    "publicIPAddressConfiguration": {
+                        "provision": "userManaged",
+                        "ipAddressIds": [
+                            "[resourceId('Microsoft.Network/publicIPAddresses', concat('public-ip-', variables('privacyScanPoolName')))]"
+                        ]
+                    }
                 },
                 "scaleSettings": {
                     "fixedScale": {

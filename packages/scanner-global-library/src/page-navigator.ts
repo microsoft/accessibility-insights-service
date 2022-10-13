@@ -57,8 +57,8 @@ export class PageNavigator {
             //
             // The 'load' event is fired when the whole page has loaded, including all dependent resources such as stylesheets and images.
             // However any dynamic contents may not be available if it is loaded after window.onload() event.
-            // Since we reuse page instance from the first navigation attempt some contents could be already loaded and available which
-            // mitigates dynamic content rendering issue above.
+            // Since we reuse page instance from the first navigation attempt some contents could be already loaded and available
+            // that will mitigate dynamic content rendering issue above.
             goto1Timeout = true;
             this.logger?.logWarn('Page navigation error on a first attempt.', {
                 navigationCondition: goto1NavigationCondition,
@@ -67,7 +67,8 @@ export class PageNavigator {
             });
 
             timestamp = System.getTimestamp();
-            navigationResult = await this.navigateToUrl(url, page, goto2NavigationCondition, options);
+            // allow page cached version on page reload to mitigate HTTP 304 response status code
+            navigationResult = await this.navigateToUrl(url, page, goto2NavigationCondition, { ...options, allowCachedVersion: true });
             goto2Elapsed = System.getElapsedTime(timestamp);
             if (navigationResult.browserError) {
                 this.logger?.logError('Page navigation error on a second attempt.', {

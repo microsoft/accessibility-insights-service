@@ -140,6 +140,7 @@ describe(PageProcessorBase, () => {
         pageNavigationHooksMock.setup((o) => o.preNavigation(crawlingContext.page)).verifiable();
 
         await pageProcessorBase.preNavigation(crawlingContext, gotoOptions);
+        expect(gotoOptions).toEqual({ waitUntil: 'networkidle2' });
     });
 
     it('postNavigation', async () => {
