@@ -67,7 +67,8 @@ export class PageNavigator {
             });
 
             timestamp = System.getTimestamp();
-            navigationResult = await this.navigateToUrl(url, page, goto2NavigationCondition, options);
+            // allow page cached version on page reload to mitigate HTTP 304 response status code
+            navigationResult = await this.navigateToUrl(url, page, goto2NavigationCondition, { ...options, allowCachedVersion: true });
             goto2Elapsed = System.getElapsedTime(timestamp);
             if (navigationResult.browserError) {
                 this.logger?.logError('Page navigation error on a second attempt.', {
