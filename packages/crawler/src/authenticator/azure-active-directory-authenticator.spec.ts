@@ -81,4 +81,34 @@ describe(AzureActiveDirectoryAuthentication, () => {
         await testSubject.authenticate(pageMock.object);
         expect(consoleErrorMock).toHaveBeenCalledWith('Attempted authentication 5 times and ultimately failed.');
     });
+
+    it('throws error if account name is invalid', async () => {
+        keyboardMock.setup((k) => k.press('Enter')).verifiable(Times.exactly(1));
+        pageMock.setup((p) => p.goto('https://portal.azure.com')).verifiable(Times.exactly(1));
+        pageMock.setup((p) => p.waitForSelector(It.isAnyString())).verifiable(Times.exactly(1));
+        pageMock.setup((p) => p.type(It.isAnyString(), accountName)).verifiable(Times.exactly(1));
+        pageMock
+            .setup((p) => p.$eval('#usernameError', It.isAny()))
+            .returns(() => Promise.resolve("We couldn't find an account with that username. Try another, or get a new Microsoft account."))
+            .verifiable(Times.exactly(1));
+        pageMock
+            .setup((o) => o.waitForNavigation())
+            .returns(() => Promise.reject())
+            .verifiable(Times.exactly(1));
+        pageMock
+            .setup((p) => p.url())
+            .returns(() => 'https://login.microsoftonline.com')
+            .verifiable(Times.exactly(1));
+
+        expect.assertions(1);
+        const expectedErrorMessage = new Error(
+            "Authentication failed with error: We couldn't find an account with that username. Try another, or get a new Microsoft account.",
+        );
+
+        try {
+            await testSubject.authenticate(pageMock.object);
+        } catch (error) {
+            expect(error).toEqual(expectedErrorMessage);
+        }
+    });
 });

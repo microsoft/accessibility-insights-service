@@ -17,7 +17,12 @@ export class AzureActiveDirectoryAuthentication implements AuthenticationMethod 
 
         await page.waitForSelector('input[name="loginfmt"]');
         await page.type('input[name="loginfmt"]', this.accountName);
-        await Promise.all([page.waitForNavigation(), page.keyboard.press('Enter')]);
+        try {
+            await Promise.all([page.waitForNavigation(), page.keyboard.press('Enter')]);
+        } catch (error) {
+            const errorText: string = await page.$eval('#usernameError', (el) => el.textContent).catch(() => '');
+            throw new Error(isEmpty(errorText) ? error : `Authentication failed with error: ${errorText}`);
+        }
         await page.waitForSelector('#FormsAuthentication');
         await page.click('#FormsAuthentication');
         await page.type('input[type="password"]', this.accountPassword);
