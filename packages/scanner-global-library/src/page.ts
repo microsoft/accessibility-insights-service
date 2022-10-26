@@ -88,7 +88,7 @@ export class Page {
 
         await this.setExtraHTTPHeaders();
 
-        const navigationResponse = await this.pageNavigator.navigate(url, this.page, options, async (browserError) => {
+        const navigationResponse = await this.pageNavigator.navigate(url, this.page, async (browserError) => {
             this.logger?.logError('Page navigation error', { browserError: System.serializeError(browserError) });
             this.lastBrowserError = browserError;
         });
