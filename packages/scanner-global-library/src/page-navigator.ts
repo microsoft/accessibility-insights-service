@@ -14,6 +14,7 @@ import { puppeteerTimeoutConfig, PageNavigationTiming } from './page-timeout-con
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 export type OnNavigationError = (browserError: BrowserError, error?: unknown) => Promise<void>;
+export type NavigationOperation = (navigationCondition?: Puppeteer.PuppeteerLifeCycleEvent) => Promise<Puppeteer.HTTPResponse>;
 
 export interface NavigationResponse {
     httpResponse: Puppeteer.HTTPResponse;
@@ -26,8 +27,6 @@ export interface PageOperationResult {
     error?: unknown;
     navigationTiming?: PageNavigationTiming;
 }
-
-export declare type NavigationOperation = (navigationCondition?: Puppeteer.PuppeteerLifeCycleEvent) => Promise<Puppeteer.HTTPResponse>;
 
 @injectable()
 export class PageNavigator {
@@ -223,55 +222,76 @@ export class PageNavigator {
     ): Promise<PageOperationResult> {
         const requests: { url: string; opResult?: PageOperationResult }[] = [];
 
-        if (pageOperationResult.response || pageOperationResult.error) {
+        if (pageOperationResult.response !== undefined || pageOperationResult.error !== undefined) {
             return pageOperationResult;
         }
 
         await page.setRequestInterception(true);
-        page.on('request', async (request) => {
-            // handle only main frame navigational requests
-            const isNavigationRequest = request.isNavigationRequest() && request.frame() === page.mainFrame();
-            if (isNavigationRequest) {
-                requests.push({
-                    url: request.url(),
-                });
+        const pageOnRequestEventHandler = async (request: Puppeteer.HTTPRequest) => {
+            try {
+                // handle only main frame navigational requests
+                const isNavigationRequest = request.isNavigationRequest() && request.frame() === page.mainFrame();
+                if (isNavigationRequest) {
+                    requests.push({
+                        url: request.url(),
+                    });
+                }
+            } catch (e) {
+                this.logger.logError(`Error handling 'request' page event`, { error: System.serializeError(e) });
             }
 
             await request.continue();
-        });
-        page.on('requestfinished', async (request) => {
-            const pendingRequest = requests.find((r) => r.url === request.url());
-            if (pendingRequest !== undefined) {
-                pendingRequest.opResult = { response: request.response() };
-            }
-        });
-        page.on('requestfailed', async (request) => {
-            const pendingRequest = requests.find((r) => r.url === request.url());
-            if (pendingRequest !== undefined) {
-                const error = new Error(request.failure()?.errorText);
-                pendingRequest.opResult = {
-                    response: undefined,
-                    error,
-                    browserError: this.pageResponseProcessor.getNavigationError(error),
-                };
-            }
-        });
+        };
+        page.on('request', pageOnRequestEventHandler);
 
-        await this.invokePageNavigationOperation(navigationOperation);
+        const pageOnResponseEventHandler = async (response: Puppeteer.HTTPResponse) => {
+            try {
+                const pendingRequest = requests.find((r) => r.url === response.url());
+                if (pendingRequest !== undefined) {
+                    pendingRequest.opResult = { response };
+                }
+            } catch (e) {
+                this.logger.logError(`Error handling 'requestFinished' page event`, { error: System.serializeError(e) });
+            }
+        };
+        page.on('response', pageOnResponseEventHandler);
+
+        const pageOnRequestFailedEventHandler = async (request: Puppeteer.HTTPRequest) => {
+            try {
+                const pendingRequest = requests.find((r) => r.url === request.url());
+                if (pendingRequest !== undefined) {
+                    const error = new Error(request.failure()?.errorText);
+                    pendingRequest.opResult = {
+                        response: undefined,
+                        error,
+                        browserError: this.pageResponseProcessor.getNavigationError(error),
+                    };
+                }
+            } catch (e) {
+                this.logger.logError(`Error handling 'requestFailed' page event`, { error: System.serializeError(e) });
+            }
+        };
+        page.on('requestfailed', pageOnRequestFailedEventHandler);
+
+        const opResult = await this.invokePageNavigationOperation(navigationOperation);
 
         const timestamp = System.getTimestamp();
         let noPendingRequests = false;
         do {
             await System.wait(3000);
-            noPendingRequests = requests.every((r) => r.opResult.response || r.opResult.error);
+            noPendingRequests = requests.every((r) => r.opResult?.response || r.opResult?.error);
         } while (!noPendingRequests && System.getElapsedTime(timestamp) < puppeteerTimeoutConfig.navigationTimeoutMsecs);
 
+        page.removeListener('request', pageOnRequestEventHandler);
+        page.removeListener('response', pageOnResponseEventHandler);
+        page.removeListener('requestfailed', pageOnRequestFailedEventHandler);
         await page.setRequestInterception(false);
+
         this.logger.logWarn(`Indirect page redirection handled.`, {
             redirectChain: JSON.stringify(requests.map((r) => r.url)),
         });
 
-        return requests.at(-1)?.opResult;
+        return requests.at(-1)?.opResult ?? opResult;
     }
 
     /**

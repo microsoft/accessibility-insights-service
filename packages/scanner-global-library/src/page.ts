@@ -23,10 +23,6 @@ export interface BrowserStartOptions {
     clearBrowserCache?: boolean;
 }
 
-export interface PageConfigurationOptions {
-    allowCachedVersion?: boolean;
-}
-
 export interface Viewport {
     width: number;
     height: number;
@@ -82,7 +78,7 @@ export class Page {
         this.page = await this.browser.newPage();
     }
 
-    public async navigateToUrl(url: string, options?: PageConfigurationOptions): Promise<void> {
+    public async navigateToUrl(url: string): Promise<void> {
         this.requestUrl = url;
         this.lastBrowserError = undefined;
 
@@ -186,7 +182,7 @@ export class Page {
     private async hardReload(): Promise<void> {
         await this.close();
         await this.create({ ...this.lastBrowserStartOptions, clearBrowserCache: false });
-        await this.navigateToUrl(this.requestUrl, { allowCachedVersion: true });
+        await this.navigateToUrl(this.requestUrl);
     }
 
     private async softReload(): Promise<void> {

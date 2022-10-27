@@ -505,13 +505,39 @@ describe(PageNavigator, () => {
             puppeteerPageMock
                 .setup((o) => o.on(It.isAny(), It.isAny()))
                 .callback(async (eventName, eventHandler) => {
-                    if (['request', 'requestfinished'].includes(eventName)) {
-                        await Promise.all(onEventRequests.map(async (request) => eventHandler(request)));
+                    if (['request', 'response'].includes(eventName)) {
+                        await Promise.all(
+                            onEventRequests.map(async (request) => {
+                                if (eventName === 'response') {
+                                    return eventHandler(request.response());
+                                } else {
+                                    return eventHandler(request);
+                                }
+                            }),
+                        );
                     }
                 })
                 .returns(() => {
                     return {} as Puppeteer.EventEmitter;
                 });
+            puppeteerPageMock
+                .setup((o) => o.removeListener('request', It.isAny()))
+                .returns(() => {
+                    return {} as Puppeteer.EventEmitter;
+                })
+                .verifiable();
+            puppeteerPageMock
+                .setup((o) => o.removeListener('response', It.isAny()))
+                .returns(() => {
+                    return {} as Puppeteer.EventEmitter;
+                })
+                .verifiable();
+            puppeteerPageMock
+                .setup((o) => o.removeListener('requestfailed', It.isAny()))
+                .returns(() => {
+                    return {} as Puppeteer.EventEmitter;
+                })
+                .verifiable();
 
             const opResponse = await pageNavigator.handleIndirectPageRedirection(
                 navigationOperation,

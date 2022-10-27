@@ -237,17 +237,6 @@ describe(Page, () => {
             expect(page.lastNavigationResponse).toEqual(puppeteerResponseMock.object);
         });
 
-        it('navigates to page with allowCachedVersion option', async () => {
-            pageNavigatorMock
-                .setup(async (o) => o.navigate(url, puppeteerPageMock.object, It.isAny()))
-                .returns(() => Promise.resolve(navigationResponse))
-                .verifiable();
-
-            await page.navigateToUrl(url, { allowCachedVersion: true });
-
-            expect(page.lastNavigationResponse).toEqual(puppeteerResponseMock.object);
-        });
-
         it('handles browser error on navigate', async () => {
             const error = new Error('navigation error');
             const browserError = { errorType: 'SslError', statusCode: 500 } as BrowserError;
@@ -256,7 +245,7 @@ describe(Page, () => {
                 .verifiable();
             pageNavigatorMock
                 .setup(async (o) => o.navigate(url, puppeteerPageMock.object, It.isAny()))
-                .callback(async (u, p, o, fn) => {
+                .callback(async (u, p, fn) => {
                     await fn(browserError, error);
                 })
                 .returns(() => Promise.resolve(undefined))
