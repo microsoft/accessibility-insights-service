@@ -114,7 +114,7 @@ export class PageNavigator {
         };
     }
 
-    private async navigatePage(navigationOperation: NavigationOperation, page: Puppeteer.Page): Promise<PageOperationResult> {
+    protected async navigatePage(navigationOperation: NavigationOperation, page: Puppeteer.Page): Promise<PageOperationResult> {
         const getErrorResult = (result: PageOperationResult): PageOperationResult => {
             this.logger?.logError(`Page navigation error.`, {
                 error: System.serializeError(result.error),
@@ -142,7 +142,7 @@ export class PageNavigator {
         return opResult;
     }
 
-    private async invokePageNavigationOperation(navigationOperation: NavigationOperation): Promise<PageOperationResult> {
+    protected async invokePageNavigationOperation(navigationOperation: NavigationOperation): Promise<PageOperationResult> {
         let opTimeout = false;
 
         let timestamp = System.getTimestamp();
@@ -279,7 +279,7 @@ export class PageNavigator {
      * This mitigates cases when page needs load pending frame/content.
      * Will not throw if page still has network activity.
      */
-    private async waitForNetworkIdle(page: Puppeteer.Page): Promise<Partial<PageNavigationTiming>> {
+    protected async waitForNetworkIdle(page: Puppeteer.Page): Promise<Partial<PageNavigationTiming>> {
         let networkIdleTimeout = false;
         const timestamp = System.getTimestamp();
         try {
