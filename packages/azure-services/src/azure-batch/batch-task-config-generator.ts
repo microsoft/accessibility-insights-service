@@ -43,7 +43,8 @@ export class BatchTaskConfigGenerator {
     // The --rm container option removes the container after the task finishes
     // The --workdir container option defines task working directory
     // The --init arg to reap zombie processes
-    private readonly containerRunOptions = '--init --rm --workdir /app';
+    // The --shm-size increases shared memory allocated to a container
+    private readonly containerRunOptions = '--init --rm --shm-size=2gb --workdir /app';
 
     public constructor(
         @inject(BatchTaskPropertyProvider) protected readonly batchTaskPropertyProvider: BatchTaskPropertyProvider,
