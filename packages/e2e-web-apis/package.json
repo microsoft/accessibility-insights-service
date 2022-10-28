@@ -4,14 +4,14 @@
     "description": "This project welcomes contributions and suggestions.  Most contributions require you to agree to a Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us the rights to use your contribution. For details, visit https://cla.microsoft.com.",
     "scripts": {
         "build": "webpack --config ./webpack.config.js --config-name e2e-web-apis \"$@\"",
-        "cbuild": "npm-run-all --serial --npm-path npm 'clean' 'build'",
+        "cbuild": "npm-run-all --serial 'clean' 'build'",
         "clean": "rimraf dist test-results",
         "lint": "eslint -c ../../.eslintrc.js --ext .ts ./",
         "lint:fix": "eslint --fix -c ../../.eslintrc.js --ext .ts ./",
         "test": "jest --coverage --colors",
         "watch": "tsc --w",
         "start:host": "func start",
-        "start": "npm-run-all --parallel --npm-path npm 'start:host' 'watch'"
+        "start": "npm-run-all --parallel 'start:host' 'watch'"
     },
     "repository": {
         "type": "git",

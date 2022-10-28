@@ -5,7 +5,7 @@
     "main": "dist/index.js",
     "scripts": {
         "build": "tsc && cpy \"./blank-page.html\" \"./dist\" && echo",
-        "cbuild": "npm-run-all --serial --npm-path npm 'clean' 'build'",
+        "cbuild": "npm-run-all --serial 'clean' 'build'",
         "clean": "rimraf dist test-results",
         "lint": "eslint -c ../../.eslintrc.js --ext .ts ./",
         "lint:fix": "eslint --fix -c ../../.eslintrc.js --ext .ts ./",
