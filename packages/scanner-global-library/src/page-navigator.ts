@@ -5,6 +5,7 @@ import * as Puppeteer from 'puppeteer';
 import { injectable, inject, optional } from 'inversify';
 import { System } from 'common';
 import { GlobalLogger } from 'logger';
+import { isNil } from 'lodash';
 import { PageResponseProcessor } from './page-response-processor';
 import { BrowserError } from './browser-error';
 import { PageNavigationHooks } from './page-navigation-hooks';
@@ -222,7 +223,7 @@ export class PageNavigator {
     ): Promise<PageOperationResult> {
         const requests: { url: string; opResult?: PageOperationResult }[] = [];
 
-        if (pageOperationResult.response !== undefined || pageOperationResult.error !== undefined) {
+        if (!isNil(pageOperationResult.response) || !isNil(pageOperationResult.error)) {
             return pageOperationResult;
         }
 
