@@ -209,7 +209,7 @@ describe(Page, () => {
         });
 
         it('scan throws error if navigateToUrl was not called first', async () => {
-            pageNavigatorMock.setup(async (o) => o.navigate(It.isAny(), It.isAny(), It.isAny(), It.isAny())).verifiable(Times.never());
+            pageNavigatorMock.setup(async (o) => o.navigate(It.isAny(), It.isAny(), It.isAny())).verifiable(Times.never());
 
             await expect(page.scanForA11yIssues(url)).rejects.toThrow();
         });
@@ -222,7 +222,7 @@ describe(Page, () => {
 
         it('navigates to page and saves response', async () => {
             pageNavigatorMock
-                .setup(async (o) => o.navigate(url, puppeteerPageMock.object, undefined, It.isAny()))
+                .setup(async (o) => o.navigate(url, puppeteerPageMock.object, It.isAny()))
                 .returns(() => Promise.resolve(navigationResponse))
                 .verifiable();
 
@@ -237,17 +237,6 @@ describe(Page, () => {
             expect(page.lastNavigationResponse).toEqual(puppeteerResponseMock.object);
         });
 
-        it('navigates to page with allowCachedVersion option', async () => {
-            pageNavigatorMock
-                .setup(async (o) => o.navigate(url, puppeteerPageMock.object, { allowCachedVersion: true }, It.isAny()))
-                .returns(() => Promise.resolve(navigationResponse))
-                .verifiable();
-
-            await page.navigateToUrl(url, { allowCachedVersion: true });
-
-            expect(page.lastNavigationResponse).toEqual(puppeteerResponseMock.object);
-        });
-
         it('handles browser error on navigate', async () => {
             const error = new Error('navigation error');
             const browserError = { errorType: 'SslError', statusCode: 500 } as BrowserError;
@@ -255,8 +244,8 @@ describe(Page, () => {
                 .setup((o) => o.logError('Page navigation error', { browserError: System.serializeError(browserError) }))
                 .verifiable();
             pageNavigatorMock
-                .setup(async (o) => o.navigate(url, puppeteerPageMock.object, undefined, It.isAny()))
-                .callback(async (u, p, o, fn) => {
+                .setup(async (o) => o.navigate(url, puppeteerPageMock.object, It.isAny()))
+                .callback(async (u, p, fn) => {
                     await fn(browserError, error);
                 })
                 .returns(() => Promise.resolve(undefined))
@@ -270,7 +259,7 @@ describe(Page, () => {
         it('set extra HTTP headers on navigate', async () => {
             process.env.X_FORWARDED_FOR_HTTP_HEADER = '1.1.1.1';
             pageNavigatorMock
-                .setup(async (o) => o.navigate(url, puppeteerPageMock.object, undefined, It.isAny()))
+                .setup(async (o) => o.navigate(url, puppeteerPageMock.object, It.isAny()))
                 .returns(() => Promise.resolve(navigationResponse))
                 .verifiable();
             puppeteerPageMock
@@ -346,7 +335,7 @@ describe(Page, () => {
                 .verifiable();
             // navigate url
             pageNavigatorMock
-                .setup(async (o) => o.navigate(url, puppeteerPageMock.object, { allowCachedVersion: true }, It.isAny()))
+                .setup(async (o) => o.navigate(url, puppeteerPageMock.object, It.isAny()))
                 .returns(() => Promise.resolve(navigationResponse))
                 .verifiable();
             // reload page
