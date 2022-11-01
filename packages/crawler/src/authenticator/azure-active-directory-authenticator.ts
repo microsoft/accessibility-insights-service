@@ -33,7 +33,6 @@ export class AzureActiveDirectoryAuthentication implements AuthenticationMethod 
         }
 
         await page.click('#FormsAuthentication');
-
         await page.type('input[type="password"]', this.accountPassword);
         await Promise.all([page.waitForNavigation({ waitUntil: 'networkidle0' }), await page.keyboard.press('Enter')]);
         if (!this.authenticationSucceeded(page)) {
