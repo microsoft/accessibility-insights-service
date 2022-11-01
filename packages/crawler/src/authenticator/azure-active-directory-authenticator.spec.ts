@@ -129,7 +129,7 @@ describe(AzureActiveDirectoryAuthentication, () => {
 
         expect.assertions(1);
         const expectedErrorMessage = new Error(
-            'Authentication failed. Authentication requires a non-people service account https://aka.ms/AI-action-auth. TimeoutError: waiting for selector `#FormsAuthentication` failed: timeout 30000ms exceeded',
+            'Authentication failed. Authentication requires a non-people service account. To learn how to set up a service account, visit: https://aka.ms/AI-action-auth. TimeoutError: waiting for selector `#FormsAuthentication` failed: timeout 30000ms exceeded',
         );
 
         try {
