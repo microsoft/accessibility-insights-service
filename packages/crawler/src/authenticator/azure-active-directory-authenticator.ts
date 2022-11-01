@@ -23,8 +23,17 @@ export class AzureActiveDirectoryAuthentication implements AuthenticationMethod 
             const errorText: string = await page.$eval('#usernameError', (el) => el.textContent).catch(() => '');
             throw new Error(isEmpty(errorText) ? error : `Authentication failed with error: ${errorText}`);
         }
-        await page.waitForSelector('#FormsAuthentication');
+
+        try {
+            await page.waitForSelector('#FormsAuthentication');
+        } catch (error) {
+            throw new Error(
+                `Authentication failed. Authentication requires a non-people service account https://aka.ms/AI-action-auth. ${error}`,
+            );
+        }
+
         await page.click('#FormsAuthentication');
+
         await page.type('input[type="password"]', this.accountPassword);
         await Promise.all([page.waitForNavigation({ waitUntil: 'networkidle0' }), await page.keyboard.press('Enter')]);
         if (!this.authenticationSucceeded(page)) {

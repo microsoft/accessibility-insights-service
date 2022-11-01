@@ -112,4 +112,30 @@ describe(AzureActiveDirectoryAuthentication, () => {
             expect(error).toEqual(expectedErrorMessage);
         }
     });
+
+    it('throws error if account name has TimeoutError', async () => {
+        keyboardMock.setup((k) => k.press('Enter')).verifiable(Times.exactly(1));
+        pageMock.setup((p) => p.goto('https://portal.azure.com')).verifiable(Times.exactly(1));
+        pageMock.setup((p) => p.waitForSelector('input[name="loginfmt"]')).verifiable(Times.exactly(1));
+        pageMock.setup((p) => p.type(It.isAnyString(), accountName)).verifiable(Times.exactly(1));
+        pageMock.setup((o) => o.waitForNavigation()).verifiable(Times.exactly(1));
+        pageMock
+            .setup((p) => p.waitForSelector('#FormsAuthentication'))
+            .returns(() => Promise.reject('TimeoutError: waiting for selector `#FormsAuthentication` failed: timeout 30000ms exceeded'));
+        pageMock
+            .setup((p) => p.url())
+            .returns(() => 'https://login.microsoftonline.com')
+            .verifiable(Times.exactly(1));
+
+        expect.assertions(1);
+        const expectedErrorMessage = new Error(
+            'Authentication failed. Authentication requires a non-people service account https://aka.ms/AI-action-auth. TimeoutError: waiting for selector `#FormsAuthentication` failed: timeout 30000ms exceeded',
+        );
+
+        try {
+            await testSubject.authenticate(pageMock.object);
+        } catch (error) {
+            expect(error).toEqual(expectedErrorMessage);
+        }
+    });
 });
