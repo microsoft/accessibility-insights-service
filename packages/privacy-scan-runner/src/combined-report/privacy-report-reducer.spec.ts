@@ -143,7 +143,7 @@ describe(PrivacyReportReducer, () => {
                 seedUri: url,
                 navigationalUri,
                 httpStatusCode: partialScanResult.pageResponseCode,
-                reason: 'error="Page reload error"',
+                reason: '"Page reload error"',
                 bannerDetected: partialScanResult.results.bannerDetected,
                 bannerDetectionXpathExpression: partialScanResult.results.bannerDetectionXpathExpression,
             };
@@ -180,7 +180,7 @@ describe(PrivacyReportReducer, () => {
                 seedUri: url,
                 navigationalUri: undefined,
                 httpStatusCode: 404,
-                reason: 'error="Browser error"',
+                reason: '"Browser error"',
                 bannerDetected: undefined,
                 bannerDetectionXpathExpression: undefined,
             };
@@ -259,7 +259,7 @@ describe(PrivacyReportReducer, () => {
                     seedUri: url,
                     navigationalUri,
                     httpStatusCode: partialScanResult.pageResponseCode,
-                    reason: 'error="Page reload error"',
+                    reason: '"Page reload error"',
                     bannerDetected: partialScanResult.results.bannerDetected,
                     bannerDetectionXpathExpression: partialScanResult.results.bannerDetectionXpathExpression,
                 };
@@ -298,7 +298,7 @@ describe(PrivacyReportReducer, () => {
                     seedUri: url,
                     navigationalUri: undefined,
                     httpStatusCode: 404,
-                    reason: 'error="Browser error"',
+                    reason: '"Browser error"',
                 };
 
                 const expectedReport: PrivacyScanCombinedReport = {
@@ -361,7 +361,7 @@ describe(PrivacyReportReducer, () => {
                 seedUri: url,
                 navigationalUri: undefined,
                 httpStatusCode: 404,
-                reason: 'error="Browser error"',
+                reason: '"Browser error"',
             };
 
             const expectedReport: PrivacyScanCombinedReport = {

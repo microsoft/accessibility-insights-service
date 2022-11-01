@@ -117,7 +117,9 @@ export class OnDemandDispatcher {
         }
 
         // set scan run state to failed when scan is stale
+        let abandonedScan = false;
         if ((['noRetry', 'abandoned'] as DispatchCondition[]).includes(scanRequest.condition) && pageScanResult.run.state !== 'failed') {
+            abandonedScan = true;
             pageScanResult.run = {
                 ...pageScanResult.run,
                 state: 'failed',
@@ -137,7 +139,7 @@ export class OnDemandDispatcher {
         const websiteScanRef = pageScanResult.websiteScanRefs?.find((ref) => ref.scanGroupType === 'deep-scan');
         if (websiteScanRef) {
             const websiteScanResult = await this.websiteScanResultProvider.read(websiteScanRef.id, false, pageScanResult.id);
-            if (isEmpty(websiteScanResult.pageScans)) {
+            if (isEmpty(websiteScanResult.pageScans) || abandonedScan) {
                 const updatedWebsiteScanResult: Partial<WebsiteScanResult> = {
                     id: websiteScanRef.id,
                     pageScans: [
@@ -153,10 +155,6 @@ export class OnDemandDispatcher {
 
                 const onMergeCallbackFn = getOnMergeCallbackToUpdateRunResult(pageScanResult.run.state);
                 await this.websiteScanResultProvider.mergeOrCreate(pageScanResult.id, updatedWebsiteScanResult, onMergeCallbackFn);
-
-                this.logger.logError('The page scan metadata was missing in website scan result.', {
-                    scanId: pageScanResult.id,
-                });
             }
         }
     }
