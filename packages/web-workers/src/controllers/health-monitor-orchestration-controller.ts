@@ -24,7 +24,7 @@ export class HealthMonitorOrchestrationController extends WebController {
 
     public constructor(
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
-        @inject(ContextAwareLogger) logger: ContextAwareLogger,
+        @inject(ContextAwareLogger) protected readonly logger: ContextAwareLogger,
         private readonly df = durableFunctions,
         private readonly e2eScenarioFactory: typeof createScenarioDrivers = createScenarioDrivers,
         private readonly orchestrationStepsProvider: OrchestrationStepsFactory = createOrchestrationSteps,

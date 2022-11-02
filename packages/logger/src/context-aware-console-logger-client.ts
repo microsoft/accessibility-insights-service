@@ -11,8 +11,8 @@ import { loggerTypes } from './logger-types';
 @injectable()
 export class ContextAwareConsoleLoggerClient extends BaseConsoleLoggerClient {
     constructor(
-        @inject(ServiceConfiguration) serviceConfig: ServiceConfiguration,
-        @inject(loggerTypes.Console) consoleObject: typeof console,
+        @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
+        @inject(loggerTypes.Console) protected readonly consoleObject: typeof console,
         @inject(ConsoleLoggerClient) private readonly rootLoggerClient: ConsoleLoggerClient,
     ) {
         super(serviceConfig, consoleObject);

@@ -6,7 +6,6 @@ import * as cosmos from '@azure/cosmos';
 import { System } from 'common';
 import _ from 'lodash';
 import { Logger } from 'logger';
-import { VError } from 'verror';
 import pLimit from 'p-limit';
 import { CosmosClientWrapper } from '../azure-cosmos/cosmos-client-wrapper';
 import { CosmosDocument } from '../azure-cosmos/cosmos-document';
@@ -210,7 +209,8 @@ export class CosmosContainerClient {
                 }
             } catch (error) {
                 const customErrorMessage = 'An error occurred while executing storage operation';
-                const customError = error instanceof Error ? new VError(error, customErrorMessage) : `${util.inspect(error)}`;
+                const customError =
+                    error instanceof Error ? new Error(`${customErrorMessage} ${System.serializeError(error)}`) : `${util.inspect(error)}`;
 
                 return Promise.reject(customError);
             }

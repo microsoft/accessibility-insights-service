@@ -19,7 +19,7 @@ export class HealthMonitorTimerController extends WebController {
 
     public constructor(
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
-        @inject(ContextAwareLogger) logger: ContextAwareLogger,
+        @inject(ContextAwareLogger) protected readonly logger: ContextAwareLogger,
         @inject(GuidGenerator) private readonly guidGenerator: GuidGenerator,
     ) {
         super(logger);

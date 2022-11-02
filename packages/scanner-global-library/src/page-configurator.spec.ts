@@ -3,27 +3,33 @@
 
 import 'reflect-metadata';
 
-import { Page, ConnectionTransport } from 'puppeteer';
+import { Page, CDPSession, Target } from 'puppeteer';
 import { IMock, Mock } from 'typemoq';
 import { PageConfigurator } from './page-configurator';
+import { getPromisableDynamicMock } from './test-utilities/promisable-mock';
 
 describe(PageConfigurator, () => {
     let pageConfigurator: PageConfigurator;
     let pageMock: IMock<Page>;
-    let connectionTransportMock: IMock<ConnectionTransport>;
+    let cdpSessionMock: IMock<CDPSession>;
+    let targetMock: IMock<Target>;
 
     beforeEach(() => {
         pageMock = Mock.ofType<Page>();
-        connectionTransportMock = Mock.ofType<ConnectionTransport>();
+        targetMock = Mock.ofType<Target>();
+        cdpSessionMock = getPromisableDynamicMock(Mock.ofType<CDPSession>());
 
-        connectionTransportMock
+        cdpSessionMock
             .setup((o) => o.send('Emulation.clearDeviceMetricsOverride'))
             .returns(() => Promise.resolve())
             .verifiable();
+        targetMock
+            .setup((o) => o.createCDPSession())
+            .returns(() => Promise.resolve(cdpSessionMock.object))
+            .verifiable();
         pageMock
-            //@ts-expect-error
-            .setup((o) => o._client)
-            .returns(() => connectionTransportMock.object)
+            .setup((o) => o.target())
+            .returns(() => targetMock.object)
             .verifiable();
         pageMock
             .setup(async (o) => o.setBypassCSP(true))
@@ -35,7 +41,8 @@ describe(PageConfigurator, () => {
 
     afterEach(() => {
         pageMock.verifyAll();
-        connectionTransportMock.verifyAll();
+        targetMock.verifyAll();
+        cdpSessionMock.verifyAll();
     });
 
     it('configurePage()', async () => {

@@ -40,7 +40,7 @@ export class ScanRequestController extends ApiController {
         @inject(ScanDataProvider) private readonly scanDataProvider: ScanDataProvider,
         @inject(GuidGenerator) private readonly guidGenerator: GuidGenerator,
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
-        @inject(ContextAwareLogger) logger: ContextAwareLogger,
+        @inject(ContextAwareLogger) protected readonly logger: ContextAwareLogger,
     ) {
         super(logger);
     }

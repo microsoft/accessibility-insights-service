@@ -13,7 +13,7 @@ export class PageConfigurator {
 
     private async enablePageResizing(page: Puppeteer.Page): Promise<void> {
         // enable page resizing to match to browser viewport
-        //@ts-expect-error
-        await page._client.send('Emulation.clearDeviceMetricsOverride');
+        const client = await page.target().createCDPSession();
+        await client.send('Emulation.clearDeviceMetricsOverride');
     }
 }

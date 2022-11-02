@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 import { System } from 'common';
-import { VError } from 'verror';
 import { AvailabilityTelemetry } from './availability-telemetry';
 import { LoggerClient } from './logger-client';
 import { LoggerEvent } from './logger-event';
@@ -87,9 +86,7 @@ export abstract class Logger {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     public trackExceptionAny(underlyingErrorData: any | Error, message: string): void {
-        const parsedErrorObject =
-            underlyingErrorData instanceof Error ? underlyingErrorData : new Error(System.serializeError(underlyingErrorData));
-        this.trackException(new VError(parsedErrorObject, message));
+        this.trackException(new Error(`${message} ${System.serializeError(underlyingErrorData)}`));
     }
 
     public async flush(): Promise<void> {

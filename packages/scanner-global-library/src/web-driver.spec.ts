@@ -18,8 +18,6 @@ import { StealthPluginType } from './stealth-plugin-type';
 
 /* eslint-disable @typescript-eslint/consistent-type-assertions, @typescript-eslint/no-explicit-any*/
 
-type puppeteerConnect = (options?: Puppeteer.ConnectOptions) => Promise<Puppeteer.Browser>;
-
 class PuppeteerBrowserMock {
     public isClosed: boolean;
 
@@ -49,26 +47,20 @@ class PuppeteerBrowserMock {
 let testSubject: WebDriver;
 let loggerMock: IMock<MockableLogger>;
 let puppeteerBrowserMock: PuppeteerBrowserMock;
-let puppeteerConnectMock: IMock<puppeteerConnect>;
 let promiseUtilsMock: IMock<PromiseUtils>;
 let puppeteerExtraMock: IMock<typeof PuppeteerExtra>;
 let fsMock: IMock<typeof fs>;
 
 beforeEach(() => {
     puppeteerBrowserMock = new PuppeteerBrowserMock();
-    puppeteerConnectMock = Mock.ofType<puppeteerConnect>();
     promiseUtilsMock = Mock.ofType<PromiseUtils>();
     puppeteerExtraMock = Mock.ofType<typeof PuppeteerExtra>();
     fsMock = Mock.ofType<typeof fs>();
-
-    const puppeteer = Puppeteer;
-    puppeteer.connect = puppeteerConnectMock.object;
-
     loggerMock = Mock.ofType(MockableLogger);
     testSubject = new WebDriver(
         promiseUtilsMock.object,
         loggerMock.object,
-        puppeteer,
+        Puppeteer,
         puppeteerExtraMock.object,
         StealthPlugin(),
         fsMock.object,
@@ -94,7 +86,6 @@ describe('WebDriver', () => {
         });
 
         afterEach(() => {
-            puppeteerConnectMock.verifyAll();
             promiseUtilsMock.verifyAll();
             puppeteerExtraMock.verifyAll();
         });
@@ -189,14 +180,13 @@ describe('WebDriver', () => {
     });
 
     it('should connect to existing puppeteer browser', async () => {
-        puppeteerConnectMock
-            .setup(async (c) => c(It.isObjectWith({ browserWSEndpoint: 'ws' })))
-            .returns(async () => Promise.resolve(<Puppeteer.Browser>(<unknown>puppeteerBrowserMock)))
-            .verifiable(Times.once());
-
+        const connectFn = jest.fn().mockImplementation(() => Promise.resolve(<Puppeteer.Browser>(<unknown>puppeteerBrowserMock)));
+        // @ts-expect-error
+        Puppeteer.connect = connectFn;
         const browser = await testSubject.connect('ws');
 
         expect(browser).toEqual(puppeteerBrowserMock);
+        expect(connectFn).toBeCalledWith({ browserWSEndpoint: 'ws', defaultViewport: null });
     });
 
     function setupPromiseUtils(simulateTimeout: boolean): void {
