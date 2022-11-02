@@ -8,7 +8,6 @@ import { System } from 'common';
 import { inject, injectable, optional } from 'inversify';
 import * as _ from 'lodash';
 import { GlobalLogger } from 'logger';
-import { VError } from 'verror';
 import { CloudTask, TaskListOptions, JobListOptions, CloudJob, OutputFile } from '@azure/batch/types/src/models';
 import { StorageContainerSASUrlProvider } from '../azure-blob/storage-container-sas-url-provider';
 import { Message } from '../azure-queue/message';
@@ -112,7 +111,7 @@ export class Batch {
         try {
             const cloudJob = await client.job.get(serviceJobId);
             if (cloudJob.state !== 'active') {
-                throw new VError(`The job ${serviceJobId} is not active and cannot be used to run new tasks.`);
+                throw new Error(`The job ${serviceJobId} is not active and cannot be used to run new tasks.`);
             }
         } catch (error) {
             if ((<BatchServiceModels.BatchError>(<unknown>error)).code === 'JobNotFound') {
@@ -132,7 +131,7 @@ export class Batch {
 
                 this.logger.logInfo(`New batch job created successfully.`, { batchJobId: serviceJobId });
             } else {
-                throw new VError(error as Error, `An error occurred while retrieving state of ${jobId} job.`);
+                throw new Error(`An error occurred while retrieving state of ${jobId} job. ${System.serializeError(error)}`);
             }
         }
 

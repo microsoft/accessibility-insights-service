@@ -6,7 +6,7 @@ import 'reflect-metadata';
 import { System } from 'common';
 import { DotenvConfigOutput } from 'dotenv';
 import { Container } from 'inversify';
-import * as _ from 'lodash';
+import _ from 'lodash';
 import { BaseTelemetryProperties, GlobalLogger, loggerTypes } from 'logger';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { ProcessEntryPointBase } from './process-entry-point-base';
@@ -60,7 +60,7 @@ describe(ProcessEntryPointBase, () => {
                     throw errorMsg;
                 });
             containerMock
-                .setup((c) => c.get(It.is((val) => val !== loggerTypes.DotEnvConfig && val !== loggerTypes.Process)))
+                .setup((c) => c.get(It.is((val) => val !== loggerTypes.DotEnvConfig && val !== loggerTypes.Process)) as boolean)
                 .verifiable(Times.never());
 
             await expect(testSubject.start()).rejects.toEqual(errorMsg);
