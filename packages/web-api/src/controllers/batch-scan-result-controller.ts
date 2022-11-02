@@ -28,7 +28,7 @@ export class BatchScanResultController extends BaseScanResultController {
         @inject(ScanResponseConverter) protected readonly scanResponseConverter: ScanResponseConverter,
         @inject(GuidGenerator) protected readonly guidGenerator: GuidGenerator,
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
-        @inject(ContextAwareLogger) logger: ContextAwareLogger,
+        @inject(ContextAwareLogger) protected readonly logger: ContextAwareLogger,
     ) {
         super(logger);
     }

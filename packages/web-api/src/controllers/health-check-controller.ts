@@ -21,7 +21,7 @@ export class HealthCheckController extends ApiController {
 
     public constructor(
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
-        @inject(ContextAwareLogger) logger: ContextAwareLogger,
+        @inject(ContextAwareLogger) protected readonly logger: ContextAwareLogger,
         @inject(webApiTypeNames.ApplicationInsightsClientProvider)
         protected readonly appInsightsClientProvider: ApplicationInsightsClientProvider,
         protected readonly createQueryForRelease: typeof createHealthCheckQueryForRelease = createHealthCheckQueryForRelease,

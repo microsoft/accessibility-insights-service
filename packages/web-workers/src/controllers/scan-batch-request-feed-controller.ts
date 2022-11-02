@@ -37,7 +37,7 @@ export class ScanBatchRequestFeedController extends WebController {
         @inject(WebsiteScanResultProvider) private readonly websiteScanResultProvider: WebsiteScanResultProvider,
         @inject(PartitionKeyFactory) private readonly partitionKeyFactory: PartitionKeyFactory,
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
-        @inject(ContextAwareLogger) logger: ContextAwareLogger,
+        @inject(ContextAwareLogger) protected readonly logger: ContextAwareLogger,
     ) {
         super(logger);
     }

@@ -13,12 +13,12 @@ export class SendNotificationTaskCreator extends BatchTaskCreator {
     protected jobGroup: string;
 
     public constructor(
-        @inject(Batch) batch: Batch,
+        @inject(Batch) public readonly batch: Batch,
         @inject(Queue) private readonly queue: Queue,
-        @inject(BatchConfig) batchConfig: BatchConfig,
-        @inject(ServiceConfiguration) serviceConfig: ServiceConfiguration,
+        @inject(BatchConfig) public readonly batchConfig: BatchConfig,
+        @inject(ServiceConfiguration) public readonly serviceConfig: ServiceConfiguration,
         @inject(StorageConfig) private readonly storageConfig: StorageConfig,
-        @inject(GlobalLogger) logger: GlobalLogger,
+        @inject(GlobalLogger) public readonly logger: GlobalLogger,
         system: typeof System = System,
     ) {
         super(batch, batchConfig, serviceConfig, logger, system);

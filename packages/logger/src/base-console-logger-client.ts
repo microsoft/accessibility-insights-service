@@ -24,8 +24,8 @@ export abstract class BaseConsoleLoggerClient implements LoggerClient {
     private baseProperties?: BaseTelemetryProperties;
 
     constructor(
-        @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
-        @inject(loggerTypes.Console) private readonly consoleObject: typeof console,
+        @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
+        @inject(loggerTypes.Console) protected readonly consoleObject: typeof console,
     ) {}
 
     public async setup(baseProperties?: BaseTelemetryProperties): Promise<void> {

@@ -24,7 +24,7 @@ export class TestOnDemandController extends WebController {
 
     public constructor(
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
-        @inject(ContextAwareLogger) logger: ContextAwareLogger,
+        @inject(ContextAwareLogger) protected readonly logger: ContextAwareLogger,
         @inject(GuidGenerator) private readonly guidGenerator: GuidGenerator,
         @inject(TestRunner) protected readonly testRunner: TestRunner,
         @inject(a11yServiceClientTypeNames.A11yServiceClientProvider) protected readonly webApiClientProvider: A11yServiceClientProvider,

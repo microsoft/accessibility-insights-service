@@ -39,13 +39,13 @@ export class Worker extends BatchTaskCreator {
     protected jobGroup: string;
 
     public constructor(
-        @inject(Batch) batch: Batch,
+        @inject(Batch) public readonly batch: Batch,
         @inject(PoolLoadGenerator) private readonly poolLoadGenerator: PoolLoadGenerator,
         @inject(BatchPoolLoadSnapshotProvider) private readonly batchPoolLoadSnapshotProvider: BatchPoolLoadSnapshotProvider,
         @inject(ReportGeneratorRequestProvider) private readonly reportGeneratorRequestProvider: ReportGeneratorRequestProvider,
-        @inject(BatchConfig) batchConfig: BatchConfig,
-        @inject(ServiceConfiguration) serviceConfig: ServiceConfiguration,
-        @inject(GlobalLogger) logger: GlobalLogger,
+        @inject(BatchConfig) public readonly batchConfig: BatchConfig,
+        @inject(ServiceConfiguration) public readonly serviceConfig: ServiceConfiguration,
+        @inject(GlobalLogger) public readonly logger: GlobalLogger,
         @inject(GuidGenerator) protected readonly guidGenerator: GuidGenerator,
         system: typeof System = System,
     ) {
