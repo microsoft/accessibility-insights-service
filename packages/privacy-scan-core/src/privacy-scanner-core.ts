@@ -27,9 +27,27 @@ export class PrivacyScannerCore {
         try {
             privacyResult = await this.privacyScenarioRunner.run(url, page);
         } catch (error) {
-            this.logger?.logError('Privacy scan engine error', { browserError: System.serializeError(error), url: page.url });
+            this.logger?.logError('Privacy scan engine error', { error: System.serializeError(error), url: page.url });
 
-            return { error: `Privacy scan engine error. ${System.serializeError(error)}`, scannedUrl: page.url };
+            if (error instanceof Error) {
+                return {
+                    scannedUrl: page.url,
+                    error: {
+                        errorType: 'Error',
+                        message: error.message,
+                        stack: error.stack,
+                    },
+                };
+            } else {
+                return {
+                    scannedUrl: page.url,
+                    error: {
+                        errorType: 'Error',
+                        message: 'Privacy scan engine error',
+                        stack: new Error().stack,
+                    },
+                };
+            }
         }
 
         const scanResult: PrivacyScanResult = {

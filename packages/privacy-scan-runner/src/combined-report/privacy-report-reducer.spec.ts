@@ -76,7 +76,11 @@ describe(PrivacyReportReducer, () => {
     };
     const partialScanResult: PrivacyScanResult = {
         pageResponseCode: 200,
-        error: 'Page reload error',
+        error: {
+            errorType: 'Error',
+            message: 'Page reload error',
+            stack: 'stack',
+        },
         results: {
             ...cloneDeep(successfulScanResult.results),
             cookieCollectionConsentResults: [
@@ -172,7 +176,11 @@ describe(PrivacyReportReducer, () => {
 
         it('with failed scan and no scan results', () => {
             const failedScanResult: PrivacyScanResult = {
-                error: 'Browser error',
+                error: {
+                    errorType: 'UrlNotResolved',
+                    message: 'Browser error',
+                    stack: 'stack',
+                },
                 pageResponseCode: 404,
             };
             const failedUrl: FailedUrl = {
@@ -290,7 +298,11 @@ describe(PrivacyReportReducer, () => {
                 existingReport.status = status;
 
                 const failedScanResult: PrivacyScanResult = {
-                    error: 'Browser error',
+                    error: {
+                        errorType: 'UrlNotResolved',
+                        message: 'Browser error',
+                        stack: 'stack',
+                    },
                     pageResponseCode: 404,
                 };
                 const failedUrl: FailedUrl = {
@@ -353,7 +365,11 @@ describe(PrivacyReportReducer, () => {
             } as FailedUrl);
 
             const failedScanResult: PrivacyScanResult = {
-                error: 'Browser error',
+                error: {
+                    errorType: 'UrlNotResolved',
+                    message: 'Browser error',
+                    stack: 'stack',
+                },
                 pageResponseCode: 404,
             };
             const failedUrl: FailedUrl = {
