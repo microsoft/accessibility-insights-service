@@ -247,13 +247,13 @@ function setupProcessScanResult(): void {
         pageScanResult.run = {
             state: runState,
             timestamp: dateNow.toJSON(),
-            error: JSON.stringify(privacyScanResults.error),
+            error: System.serializeError(privacyScanResults.error),
         };
         pageScanResult.scanResult = {
             state: 'fail',
         };
         loggerMock
-            .setup((o) => o.logError(`Browser has failed to scan a webpage.`, { error: JSON.stringify(privacyScanResults.error) }))
+            .setup((o) => o.logError(`Browser has failed to scan a webpage.`, { error: System.serializeError(privacyScanResults.error) }))
             .verifiable();
     } else {
         pageScanResult.scanResult = {

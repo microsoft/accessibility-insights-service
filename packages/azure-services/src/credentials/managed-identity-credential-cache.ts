@@ -8,7 +8,7 @@ import { ManagedIdentityCredential, TokenCredential, GetTokenOptions } from '@az
 import NodeCache from 'node-cache';
 import { Mutex } from 'async-mutex';
 import moment from 'moment';
-import { executeWithExponentialRetry, ExponentialRetryOptions } from 'common';
+import { executeWithExponentialRetry, ExponentialRetryOptions, System } from 'common';
 
 // Get a token using HTTP
 // https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/how-to-use-vm-token#get-a-token-using-http
@@ -75,7 +75,7 @@ export class ManagedIdentityCredentialCache implements TokenCredential {
             try {
                 token = await this.managedIdentityCredential.getToken(scopes, options);
             } catch (error) {
-                throw new Error(`MSI credential provider has failed. ${JSON.stringify(error)}`);
+                throw new Error(`MSI credential provider has failed. ${System.serializeError(error)}`);
             }
 
             return token;

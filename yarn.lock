@@ -108,14 +108,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@axe-core/puppeteer@npm:4.4.2":
-  version: 4.4.2
-  resolution: "@axe-core/puppeteer@npm:4.4.2"
+"@axe-core/puppeteer@npm:^4.5.0":
+  version: 4.5.0
+  resolution: "@axe-core/puppeteer@npm:4.5.0"
   dependencies:
-    axe-core: ^4.4.1
+    axe-core: ^4.5.0
   peerDependencies:
-    puppeteer: ">=1.10.0 <= 13"
-  checksum: a6c46867569cbafaa20bf9b2171474cdec592d03125f5d122cd986642773427d27ed1e1f7176cfa6e73d1851e8e92a28ea096f6223d2a9b08a33a42e1a71f8ce
+    puppeteer: ">=1.10.0 <= 18"
+  checksum: 21a5a2f068564907be029e5d47ccb6890362be3a2e3292d296a93ddbb678556e6b7d81c5ed7cba80256080b960a6a8e9406a76c4b860057dde7b72df6337cebf
   languageName: node
   linkType: hard
 
@@ -3867,9 +3867,9 @@ __metadata:
   linkType: hard
 
 "@xmldom/xmldom@npm:^0.7.0":
-  version: 0.8.3
-  resolution: "@xmldom/xmldom@npm:0.8.3"
-  checksum: 087303060fc794f0ec8c0e9031362c1ae56eb1cf06b291cc178602462c072fb9f84657a430ae9c8c1b4c0d33549259e89ed14ebc86ca1a696f253bdd7f0dffcf
+  version: 0.8.4
+  resolution: "@xmldom/xmldom@npm:0.8.4"
+  checksum: 9046735714c47e95732449481954653788df5f93fa968a186ae62e6c201c0f9f7bed03647bbdfe25f26532d07a99604a48fadeddecbe437bae0edcf207751e02
   languageName: node
   linkType: hard
 
@@ -3928,7 +3928,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "accessibility-insights-crawler@workspace:packages/crawler"
   dependencies:
-    "@axe-core/puppeteer": 4.4.2
+    "@axe-core/puppeteer": ^4.5.0
     "@medv/finder": ^2.1.0
     "@rollup/plugin-commonjs": ^23.0.0
     "@rollup/plugin-node-resolve": ^15.0.0
@@ -3987,7 +3987,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "accessibility-insights-scan@workspace:packages/cli"
   dependencies:
-    "@axe-core/puppeteer": 4.4.2
+    "@axe-core/puppeteer": ^4.5.0
     "@medv/finder": ^2.1.0
     "@sindresorhus/fnv1a": ^2.0.1
     "@types/cli-spinner": ^0.2.0
@@ -12968,7 +12968,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "scanner-global-library@workspace:packages/scanner-global-library"
   dependencies:
-    "@axe-core/puppeteer": 4.4.2
+    "@axe-core/puppeteer": ^4.5.0
     "@types/jest": ^27.4.1
     "@types/lodash": ^4.14.182
     "@types/node": ^16.11.7
@@ -14891,7 +14891,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "web-api-scan-runner@workspace:packages/web-api-scan-runner"
   dependencies:
-    "@axe-core/puppeteer": 4.4.2
+    "@axe-core/puppeteer": ^4.5.0
     "@azure/cosmos": ^3.16.2
     "@types/dotenv": ^8.2.0
     "@types/jest": ^27.4.1

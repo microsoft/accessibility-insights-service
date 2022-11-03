@@ -118,8 +118,8 @@ export class Runner {
             state: 'fail',
         };
 
-        this.setRunResult(pageScanResult, runState, JSON.stringify(privacyScanResult.error));
-        this.logger.logError('Browser has failed to scan a webpage.', { error: JSON.stringify(privacyScanResult.error) });
+        this.setRunResult(pageScanResult, runState, System.serializeError(privacyScanResult.error));
+        this.logger.logError('Browser has failed to scan a webpage.', { error: System.serializeError(privacyScanResult.error) });
         this.telemetryManager.trackBrowserScanFailed();
     }
 

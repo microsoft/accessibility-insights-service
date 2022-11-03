@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 import { injectable } from 'inversify';
+import { System } from './system';
 
 export type ErrorHandler = (error: Error) => Promise<void>;
 
@@ -25,7 +26,9 @@ export class RetryHelper<T> {
                 return await action();
             } catch (error) {
                 lastError =
-                    error instanceof Error ? error : { name: 'RetryError', message: JSON.stringify(error), stack: new Error().stack };
+                    error instanceof Error
+                        ? error
+                        : { name: 'RetryError', message: System.serializeError(error), stack: new Error().stack };
 
                 if (i < maxRetryCount - 1) {
                     await onRetry(lastError);

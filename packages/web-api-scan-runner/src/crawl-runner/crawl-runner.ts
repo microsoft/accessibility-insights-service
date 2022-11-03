@@ -6,6 +6,7 @@ import { inject, injectable } from 'inversify';
 import { Crawler, CrawlerRunOptions, crawlerIocTypes } from 'accessibility-insights-crawler';
 import * as Puppeteer from 'puppeteer';
 import { BatchConfig } from 'azure-services';
+import { System } from 'common';
 
 type CrawlerProvider = () => Promise<Crawler<string[]>>;
 
@@ -40,8 +41,8 @@ export class CrawlRunner {
             };
 
             result = await crawler.crawl(crawlerRunOptions);
-        } catch (ex) {
-            this.logger.logError('Failure while crawling web page.', { error: JSON.stringify(ex) });
+        } catch (error) {
+            this.logger.logError('Failure while crawling web page.', { error: System.serializeError(error) });
 
             return undefined;
         }

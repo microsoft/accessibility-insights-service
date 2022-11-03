@@ -5,6 +5,7 @@ import 'reflect-metadata';
 
 import { IMock, It, Mock, Times } from 'typemoq';
 import { ErrorHandler, RetryHelper } from './retry-helper';
+import { System } from './system';
 
 describe(RetryHelper, () => {
     let testSubject: RetryHelper<number>;
@@ -120,7 +121,7 @@ describe(RetryHelper, () => {
                 thrownError = error;
             });
 
-        const expectedError = { name: 'RetryError', message: JSON.stringify(testErrorObj), stack: '' };
+        const expectedError = { name: 'RetryError', message: System.serializeError(testErrorObj), stack: '' };
         expect(thrownError.stack).toBeDefined();
         thrownError.stack = '';
         expect(thrownError).toEqual(expectedError);

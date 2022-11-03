@@ -125,7 +125,7 @@ export abstract class PageProcessorBase implements PageProcessor {
             url: request.url,
             succeeded: false,
             context: request.userData,
-            error: JSON.stringify(error),
+            error: System.serializeError(error),
             requestErrors: request.errorMessages as string[],
             issueCount: 0,
         };
@@ -207,7 +207,7 @@ export abstract class PageProcessorBase implements PageProcessor {
             id: request.id,
             url: request.url,
             scanState: 'browserError',
-            error: error !== undefined ? JSON.stringify(error) : undefined,
+            error: error !== undefined ? System.serializeError(error) : undefined,
         });
     }
 

@@ -59,7 +59,7 @@
         "webpack-node-externals": "^3.0.0"
     },
     "dependencies": {
-        "@axe-core/puppeteer": "4.4.2",
+        "@axe-core/puppeteer": "^4.5.0",
         "@medv/finder": "^2.1.0",
         "@sindresorhus/fnv1a": "^2.0.1",
         "accessibility-insights-report": "4.4.0",
@@ -95,6 +95,11 @@
         "uuid-with-v6": "^2.0.0",
         "wtfnode": "^0.9.0",
         "yargs": "^17.6.0"
+    },
+    "overrides": {
+        "apify": {
+            "puppeteer": "$puppeteer"
+        }
     },
     "bin": {
         "ai-scan": "dist/ai-scan-cli.js"
