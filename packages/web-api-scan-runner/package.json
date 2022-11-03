@@ -48,7 +48,7 @@
         "webpack-ignore-dynamic-require": "^1.0.0"
     },
     "dependencies": {
-        "@axe-core/puppeteer": "4.4.2",
+        "@axe-core/puppeteer": "^4.5.0",
         "@azure/cosmos": "^3.16.2",
         "accessibility-insights-crawler": "workspace:*",
         "accessibility-insights-report": "4.4.0",
@@ -81,5 +81,10 @@
     },
     "resolutions": {
         "axe-core": "4.4.1"
+    },
+    "overrides": {
+        "apify": {
+            "puppeteer": "$puppeteer"
+        }
     }
 }

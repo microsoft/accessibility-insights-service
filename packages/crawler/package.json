@@ -41,7 +41,7 @@
         "typescript": "^4.8.4"
     },
     "dependencies": {
-        "@axe-core/puppeteer": "4.4.2",
+        "@axe-core/puppeteer": "^4.5.0",
         "@medv/finder": "^2.1.0",
         "accessibility-insights-report": "4.4.0",
         "apify": "^2.3.2",
@@ -60,5 +60,10 @@
         "scanner-global-library": "workspace:*",
         "sha.js": "^2.4.11",
         "yargs": "^17.6.0"
+    },
+    "overrides": {
+        "apify": {
+            "puppeteer": "$puppeteer"
+        }
     }
 }

@@ -67,5 +67,10 @@
         "service-library": "workspace:*",
         "storage-documents": "workspace:*",
         "yargs": "^17.6.0"
+    },
+    "overrides": {
+        "apify": {
+            "puppeteer": "$puppeteer"
+        }
     }
 }
