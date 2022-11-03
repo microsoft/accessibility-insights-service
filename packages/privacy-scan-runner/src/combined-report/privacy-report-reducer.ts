@@ -59,7 +59,7 @@ export class PrivacyReportReducer {
             seedUri: url,
             navigationalUri: privacyScanResult.results?.navigationalUri,
             httpStatusCode: privacyScanResult.pageResponseCode,
-            reason: JSON.stringify(privacyScanResult.error),
+            reason: privacyScanResult.error,
             bannerDetected: privacyScanResult.results?.bannerDetected,
             bannerDetectionXpathExpression: privacyScanResult.results?.bannerDetectionXpathExpression,
         });
