@@ -52,7 +52,7 @@
         "@azure/cosmos": "^3.16.2",
         "accessibility-insights-crawler": "workspace:*",
         "accessibility-insights-report": "4.4.0",
-        "apify": "^2.3.2",
+        "apify": "^3.1.0",
         "applicationinsights": "^2.3.1",
         "axe-core": "4.4.1",
         "axe-result-converter": "workspace:*",
