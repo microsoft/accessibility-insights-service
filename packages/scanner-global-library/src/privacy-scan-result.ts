@@ -6,7 +6,7 @@ import { BrowserError } from './browser-error';
 
 export interface PrivacyScanResult {
     results?: PrivacyPageScanReport;
-    error?: BrowserError;
+    error?: Error | BrowserError;
     pageResponseCode?: number;
     /**
      * Redirected URL if a page was redirected.

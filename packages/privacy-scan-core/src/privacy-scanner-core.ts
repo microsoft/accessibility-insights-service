@@ -29,25 +29,10 @@ export class PrivacyScannerCore {
         } catch (error) {
             this.logger?.logError('Privacy scan engine error', { error: System.serializeError(error), url: page.url });
 
-            if (error instanceof Error) {
-                return {
-                    scannedUrl: page.url,
-                    error: {
-                        errorType: 'Error',
-                        message: error.message,
-                        stack: error.stack,
-                    },
-                };
-            } else {
-                return {
-                    scannedUrl: page.url,
-                    error: {
-                        errorType: 'Error',
-                        message: 'Privacy scan engine error',
-                        stack: new Error().stack,
-                    },
-                };
-            }
+            return {
+                scannedUrl: page.url,
+                error: error instanceof Error ? error : new Error(System.serializeError(error)),
+            };
         }
 
         const scanResult: PrivacyScanResult = {
