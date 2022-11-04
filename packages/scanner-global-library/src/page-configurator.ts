@@ -21,7 +21,7 @@ export class PageConfigurator {
             await session.send('Browser.setWindowBounds', { windowId, bounds: { width: windowSize.width, height: windowSize.height } });
             await session.detach();
         } else {
-            await page.setViewport({ width: 1920, height: 1080 });
+            await page.setViewport({ width: windowSize.width, height: windowSize.height });
         }
     }
 }
