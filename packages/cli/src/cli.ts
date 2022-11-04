@@ -18,10 +18,14 @@ import { validateScanArguments } from './validate-scan-arguments';
     const scanArguments = getScanArguments();
     const cliEntryPoint = new CliEntryPoint(setupCliContainer());
     await cliEntryPoint.runScan(scanArguments);
-})().catch((error) => {
-    console.log('Exception occurred while running the tool: ', System.serializeError(error));
-    process.exitCode = 1;
-});
+})()
+    .catch((error) => {
+        console.log('Exception occurred while running the tool: ', System.serializeError(error));
+        process.exitCode = 1;
+    })
+    .finally(() => {
+        process.exit();
+    });
 
 function getScanArguments(): ScanArguments {
     const defaultOutputDir = 'ai_scan_cli_output';
