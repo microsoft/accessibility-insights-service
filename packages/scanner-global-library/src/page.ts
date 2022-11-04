@@ -259,20 +259,20 @@ export class Page {
 
     private async scanPageForIssues(contentSourcePath?: string): Promise<AxeScanResults> {
         let axePuppeteer = await this.axePuppeteerFactory.createAxePuppeteer(this.page, contentSourcePath);
-        let result = await this.runAxeAnalyze(axePuppeteer);
-        if (result.error) {
+        let axeRunResult = await this.runAxeAnalyze(axePuppeteer);
+        if (axeRunResult.error) {
             // Fallback to axe puppeteer legacy mode
             axePuppeteer = await this.axePuppeteerFactory.createAxePuppeteer(this.page, contentSourcePath, true);
-            result = await this.runAxeAnalyze(axePuppeteer);
+            axeRunResult = await this.runAxeAnalyze(axePuppeteer);
         }
 
-        if (result.error) {
-            return { error: `Axe core engine error. ${System.serializeError(result.error)}`, scannedUrl: this.page.url() };
+        if (axeRunResult.error) {
+            return { error: `Axe core engine error. ${System.serializeError(axeRunResult.error)}`, scannedUrl: this.page.url() };
         }
 
         const browserResolution = await this.getBrowserResolution();
         const scanResults: AxeScanResults = {
-            results: result.axeResult,
+            results: axeRunResult.axeResults,
             pageTitle: await this.page.title(),
             browserSpec: await this.browser.version(),
             pageResponseCode: this.lastNavigationResponse.status(),
@@ -283,16 +283,16 @@ export class Page {
         if (
             this.lastNavigationResponse.request()?.redirectChain()?.length > 0 ||
             // Should compare encoded Urls
-            (this.requestUrl !== undefined && encodeURI(this.requestUrl) !== result.axeResult.url)
+            (this.requestUrl !== undefined && encodeURI(this.requestUrl) !== axeRunResult.axeResults.url)
         ) {
-            this.logger?.logWarn(`Scanning performed on redirected page`, { redirectedUrl: result.axeResult.url });
-            scanResults.scannedUrl = result.axeResult.url;
+            this.logger?.logWarn(`Scanning performed on redirected page`, { redirectedUrl: axeRunResult.axeResults.url });
+            scanResults.scannedUrl = axeRunResult.axeResults.url;
         }
 
         return scanResults;
     }
 
-    private async runAxeAnalyze(axePuppeteer: AxePuppeteer): Promise<{ axeResult?: AxeResults; error?: Error }> {
+    private async runAxeAnalyze(axePuppeteer: AxePuppeteer): Promise<{ axeResults?: AxeResults; error?: Error }> {
         let result: axe.AxeResults;
         try {
             result = await axePuppeteer.analyze();
@@ -302,6 +302,6 @@ export class Page {
             return { error };
         }
 
-        return { axeResult: result };
+        return { axeResults: result };
     }
 }
