@@ -119,11 +119,15 @@ describe(Page, () => {
         });
 
         it('handles error thrown by scan engine', async () => {
-            const scanError = new Error('Test error');
+            const scanError = { name: 'Error', message: 'error message' } as Error;
             const expectedResult = { error: `Axe core engine error. ${System.serializeError(scanError)}`, scannedUrl: url };
 
             puppeteerPageMock.setup((p) => p.url()).returns(() => url);
             setupAxePuppeteerFactoryMock();
+            axePuppeteerFactoryMock
+                .setup((o) => o.createAxePuppeteer(puppeteerPageMock.object, It.isAny(), true))
+                .returns(() => Promise.resolve(axePuppeteerMock.object))
+                .verifiable();
             axePuppeteerMock.reset();
             axePuppeteerMock = getPromisableDynamicMock(axePuppeteerMock);
             axePuppeteerMock.setup((ap) => ap.analyze()).throws(scanError);

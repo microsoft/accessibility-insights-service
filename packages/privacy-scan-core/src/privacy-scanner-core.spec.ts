@@ -8,6 +8,7 @@ import { GlobalLogger } from 'logger';
 import { Page, BrowserError } from 'scanner-global-library';
 import { HTTPResponse, HTTPRequest } from 'puppeteer';
 import { ConsentResult } from 'storage-documents';
+import { System } from 'common';
 import { PrivacyScannerCore } from './privacy-scanner-core';
 import { PrivacyScenarioRunner } from './privacy-scenario-runner';
 import { PrivacyResults } from './privacy-results';
@@ -144,8 +145,9 @@ describe(PrivacyScannerCore, () => {
             .setup((o) => o.run(url, pageMock.object))
             .returns(() => Promise.reject('runner error'))
             .verifiable();
+        const error = new Error(System.serializeError('runner error'));
         const expectedResult = {
-            error: "Privacy scan engine error. 'runner error'",
+            error,
             scannedUrl: url,
         };
 

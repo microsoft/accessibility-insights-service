@@ -23,7 +23,6 @@ export class PageNavigationHooks {
     public async preNavigation(page: Puppeteer.Page): Promise<void> {
         // Configure page settings before navigating to URL
         await this.pageConfigurator.configurePage(page);
-        this.disableAnimation(page);
     }
 
     public async postNavigation(
@@ -49,13 +48,14 @@ export class PageNavigationHooks {
             return {};
         }
 
+        await this.disableAnimation(page);
+
         return this.pageRenderingHandler.waitForPageToCompleteRendering(page, this.scrollTimeoutMsecs, this.pageRenderingTimeoutMsecs);
     }
 
-    private disableAnimation(page: Puppeteer.Page): void {
+    private async disableAnimation(page: Puppeteer.Page): Promise<void> {
         // disable page animation effects to prevent false positive color contrast accessibility issues
-        page.on('load', async () => {
-            const content = `
+        const content = `
             *,
             *::after,
             *::before {
@@ -67,7 +67,6 @@ export class PageNavigationHooks {
                 caret-color: transparent !important;
             }`;
 
-            await page.addStyleTag({ content });
-        });
+        await page.addStyleTag({ content });
     }
 }

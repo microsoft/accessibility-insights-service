@@ -3,6 +3,7 @@
 
 import { injectable } from 'inversify';
 import * as Puppeteer from 'puppeteer';
+import { windowSize } from './puppeteer-options';
 
 @injectable()
 export class PageConfigurator {
@@ -13,7 +14,14 @@ export class PageConfigurator {
 
     private async enablePageResizing(page: Puppeteer.Page): Promise<void> {
         // enable page resizing to match to browser viewport
-        //@ts-expect-error
-        await page._client.send('Emulation.clearDeviceMetricsOverride');
+        const headless = process.env.HEADLESS === 'false' ? false : true;
+        if (headless) {
+            const session = await page.target().createCDPSession();
+            const { windowId } = await session.send('Browser.getWindowForTarget');
+            await session.send('Browser.setWindowBounds', { windowId, bounds: { width: windowSize.width, height: windowSize.height } });
+            await session.detach();
+        } else {
+            await page.setViewport({ width: 1920, height: 1080 });
+        }
     }
 }

@@ -22,6 +22,15 @@ describe(PrivacyReportReducer, () => {
     };
     const startDate = new Date(1, 2, 3, 4);
     const currentDate = new Date(5, 6, 7, 8);
+    const scanError = {
+        message: 'Page reload error',
+        stack: 'stack',
+    } as Error;
+    const scanBrowserError = {
+        errorType: 'UrlNotResolved',
+        message: 'Browser error',
+        stack: 'stack',
+    } as BrowserError;
     const successfulScanResult: PrivacyScanResult = {
         pageResponseCode: 200,
         results: {
@@ -76,7 +85,7 @@ describe(PrivacyReportReducer, () => {
     };
     const partialScanResult: PrivacyScanResult = {
         pageResponseCode: 200,
-        error: 'Page reload error',
+        error: scanError,
         results: {
             ...cloneDeep(successfulScanResult.results),
             cookieCollectionConsentResults: [
@@ -143,7 +152,7 @@ describe(PrivacyReportReducer, () => {
                 seedUri: url,
                 navigationalUri,
                 httpStatusCode: partialScanResult.pageResponseCode,
-                reason: 'error="Page reload error"',
+                reason: scanError,
                 bannerDetected: partialScanResult.results.bannerDetected,
                 bannerDetectionXpathExpression: partialScanResult.results.bannerDetectionXpathExpression,
             };
@@ -172,7 +181,7 @@ describe(PrivacyReportReducer, () => {
 
         it('with failed scan and no scan results', () => {
             const failedScanResult: PrivacyScanResult = {
-                error: 'Browser error',
+                error: scanBrowserError,
                 pageResponseCode: 404,
             };
             const failedUrl: FailedUrl = {
@@ -180,7 +189,7 @@ describe(PrivacyReportReducer, () => {
                 seedUri: url,
                 navigationalUri: undefined,
                 httpStatusCode: 404,
-                reason: 'error="Browser error"',
+                reason: scanBrowserError,
                 bannerDetected: undefined,
                 bannerDetectionXpathExpression: undefined,
             };
@@ -259,7 +268,7 @@ describe(PrivacyReportReducer, () => {
                     seedUri: url,
                     navigationalUri,
                     httpStatusCode: partialScanResult.pageResponseCode,
-                    reason: 'error="Page reload error"',
+                    reason: scanError,
                     bannerDetected: partialScanResult.results.bannerDetected,
                     bannerDetectionXpathExpression: partialScanResult.results.bannerDetectionXpathExpression,
                 };
@@ -290,7 +299,7 @@ describe(PrivacyReportReducer, () => {
                 existingReport.status = status;
 
                 const failedScanResult: PrivacyScanResult = {
-                    error: 'Browser error',
+                    error: scanBrowserError,
                     pageResponseCode: 404,
                 };
                 const failedUrl: FailedUrl = {
@@ -298,7 +307,7 @@ describe(PrivacyReportReducer, () => {
                     seedUri: url,
                     navigationalUri: undefined,
                     httpStatusCode: 404,
-                    reason: 'error="Browser error"',
+                    reason: scanBrowserError,
                 };
 
                 const expectedReport: PrivacyScanCombinedReport = {
@@ -353,7 +362,7 @@ describe(PrivacyReportReducer, () => {
             } as FailedUrl);
 
             const failedScanResult: PrivacyScanResult = {
-                error: 'Browser error',
+                error: scanBrowserError,
                 pageResponseCode: 404,
             };
             const failedUrl: FailedUrl = {
@@ -361,7 +370,7 @@ describe(PrivacyReportReducer, () => {
                 seedUri: url,
                 navigationalUri: undefined,
                 httpStatusCode: 404,
-                reason: 'error="Browser error"',
+                reason: scanBrowserError,
             };
 
             const expectedReport: PrivacyScanCombinedReport = {

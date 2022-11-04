@@ -190,7 +190,7 @@ describe(PageProcessorBase, () => {
                     id: requestStub.id,
                     url: requestStub.url,
                     scanState: 'browserError',
-                    error: JSON.stringify(browserError),
+                    error: System.serializeError(browserError),
                 }),
             )
             .verifiable();
@@ -240,7 +240,7 @@ describe(PageProcessorBase, () => {
             url: requestStub.url,
             succeeded: false,
             context: requestStub.userData,
-            error: JSON.stringify(error),
+            error: System.serializeError(error),
             requestErrors: requestStub.errorMessages as string[],
             issueCount: 0,
         };

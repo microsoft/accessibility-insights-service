@@ -164,7 +164,7 @@ describe(Runner, () => {
     );
 
     it('handle scanner browser navigation error', async () => {
-        privacyScanResults.error = 'browser navigation error';
+        privacyScanResults.error = { message: 'scan error' } as Error;
 
         setupScanMetadataConfig();
         setupUpdateScanRunStateToRunning();
@@ -247,13 +247,13 @@ function setupProcessScanResult(): void {
         pageScanResult.run = {
             state: runState,
             timestamp: dateNow.toJSON(),
-            error: privacyScanResults.error,
+            error: System.serializeError(privacyScanResults.error),
         };
         pageScanResult.scanResult = {
             state: 'fail',
         };
         loggerMock
-            .setup((o) => o.logError(`Browser has failed to scan a webpage.`, { error: JSON.stringify(privacyScanResults.error) }))
+            .setup((o) => o.logError(`Browser has failed to scan a webpage.`, { error: System.serializeError(privacyScanResults.error) }))
             .verifiable();
     } else {
         pageScanResult.scanResult = {
@@ -309,7 +309,7 @@ function setupProcessScanResult(): void {
 
 function setupPageScanProcessor(succeeded: boolean = true, error: Error = undefined): void {
     if (!succeeded) {
-        privacyScanResults.error = 'scan error';
+        privacyScanResults.error = { message: 'scan error' } as Error;
     }
 
     pageScanProcessorMock

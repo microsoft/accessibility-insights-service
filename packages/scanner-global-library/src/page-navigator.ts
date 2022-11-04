@@ -139,6 +139,8 @@ export class PageNavigator {
             return getErrorResult(opResult);
         }
 
+        await this.resetBrowserSessionHistory(page);
+
         return opResult;
     }
 
@@ -296,6 +298,19 @@ export class PageNavigator {
     }
 
     /**
+     * Resets browser session history to support page reload.
+     */
+    private async resetBrowserSessionHistory(page: Puppeteer.Page): Promise<void> {
+        try {
+            await page.evaluate(() => history.pushState(null, null, null));
+        } catch (error) {
+            this.logger.logWarn('Error while resetting browser session history.', {
+                error: System.serializeError(error),
+            });
+        }
+    }
+
+    /**
      * Waits for page network activity to reach idle state.
      * This mitigates cases when page needs load pending frame/content.
      * Will not throw if page still has network activity.
@@ -304,10 +319,7 @@ export class PageNavigator {
         let networkIdleTimeout = false;
         const timestamp = System.getTimestamp();
         try {
-            await Promise.all([
-                page.waitForNavigation({ waitUntil: 'networkidle0', timeout: puppeteerTimeoutConfig.networkIdleTimeoutMsec }),
-                page.evaluate(() => history.pushState(null, null, null)),
-            ]);
+            await page.waitForNavigation({ waitUntil: 'networkidle0', timeout: puppeteerTimeoutConfig.networkIdleTimeoutMsec });
         } catch (error) {
             networkIdleTimeout = true;
             this.logger.logWarn('Error while waiting for page network idle state.', {

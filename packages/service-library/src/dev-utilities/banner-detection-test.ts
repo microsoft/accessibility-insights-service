@@ -28,7 +28,7 @@ type BannerDetectionTestArgs = {
 
 type BannerDetectionError = {
     url: string;
-    error: string | BrowserError;
+    error: Error | BrowserError;
     pageResponseCode?: number;
 };
 

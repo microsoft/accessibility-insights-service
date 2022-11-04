@@ -38,10 +38,10 @@
         "rollup": "^3.1.0",
         "ts-jest": "^27.1.4",
         "typemoq": "^2.1.0",
-        "typescript": "^4.7.4"
+        "typescript": "^4.8.4"
     },
     "dependencies": {
-        "@axe-core/puppeteer": "4.4.2",
+        "@axe-core/puppeteer": "^4.5.0",
         "@medv/finder": "^2.1.0",
         "accessibility-insights-report": "4.4.0",
         "apify": "^2.3.2",
@@ -55,10 +55,15 @@
         "levelup": "^5.1.1",
         "lodash": "^4.17.21",
         "logger": "workspace:*",
-        "puppeteer": "^13.7.0",
+        "puppeteer": "18.1.0",
         "reflect-metadata": "^0.1.13",
         "scanner-global-library": "workspace:*",
         "sha.js": "^2.4.11",
         "yargs": "^17.6.0"
+    },
+    "overrides": {
+        "apify": {
+            "puppeteer": "$puppeteer"
+        }
     }
 }

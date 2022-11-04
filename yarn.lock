@@ -108,14 +108,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@axe-core/puppeteer@npm:4.4.2":
-  version: 4.4.2
-  resolution: "@axe-core/puppeteer@npm:4.4.2"
+"@axe-core/puppeteer@npm:^4.5.0":
+  version: 4.5.0
+  resolution: "@axe-core/puppeteer@npm:4.5.0"
   dependencies:
-    axe-core: ^4.4.1
+    axe-core: ^4.5.0
   peerDependencies:
-    puppeteer: ">=1.10.0 <= 13"
-  checksum: a6c46867569cbafaa20bf9b2171474cdec592d03125f5d122cd986642773427d27ed1e1f7176cfa6e73d1851e8e92a28ea096f6223d2a9b08a33a42e1a71f8ce
+    puppeteer: ">=1.10.0 <= 18"
+  checksum: 21a5a2f068564907be029e5d47ccb6890362be3a2e3292d296a93ddbb678556e6b7d81c5ed7cba80256080b960a6a8e9406a76c4b860057dde7b72df6337cebf
   languageName: node
   linkType: hard
 
@@ -3316,7 +3316,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/puppeteer@npm:*, @types/puppeteer@npm:^5.4.6":
+"@types/puppeteer@npm:^5.4.6":
   version: 5.4.6
   resolution: "@types/puppeteer@npm:5.4.6"
   dependencies:
@@ -3407,13 +3407,6 @@ __metadata:
   version: 9.4.4
   resolution: "@types/validator@npm:9.4.4"
   checksum: d639ffbdb8dcbba951780977376701b7d5ecc574129ffcd591479461bcd40439ae5bf9663d2bfa513ef3f4f58c2e8ac7edbce994b58dfd2f82205cc2e38cc804
-  languageName: node
-  linkType: hard
-
-"@types/verror@npm:^1.10.4":
-  version: 1.10.4
-  resolution: "@types/verror@npm:1.10.4"
-  checksum: aa4e3e0705781fdea3a22e9aa46687c7c2613089a1febf608bab1633446708c7e48013e2e7011c3c3d361add7f14917e8b2d7ff77caf96d68a59928229ea827b
   languageName: node
   linkType: hard
 
@@ -3883,9 +3876,9 @@ __metadata:
   linkType: hard
 
 "@xmldom/xmldom@npm:^0.7.0":
-  version: 0.8.3
-  resolution: "@xmldom/xmldom@npm:0.8.3"
-  checksum: 087303060fc794f0ec8c0e9031362c1ae56eb1cf06b291cc178602462c072fb9f84657a430ae9c8c1b4c0d33549259e89ed14ebc86ca1a696f253bdd7f0dffcf
+  version: 0.8.4
+  resolution: "@xmldom/xmldom@npm:0.8.4"
+  checksum: 9046735714c47e95732449481954653788df5f93fa968a186ae62e6c201c0f9f7bed03647bbdfe25f26532d07a99604a48fadeddecbe437bae0edcf207751e02
   languageName: node
   linkType: hard
 
@@ -3944,7 +3937,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "accessibility-insights-crawler@workspace:packages/crawler"
   dependencies:
-    "@axe-core/puppeteer": 4.4.2
+    "@axe-core/puppeteer": ^4.5.0
     "@medv/finder": ^2.1.0
     "@rollup/plugin-commonjs": ^23.0.0
     "@rollup/plugin-node-resolve": ^15.0.0
@@ -3969,7 +3962,7 @@ __metadata:
     lodash: ^4.17.21
     logger: "workspace:*"
     npm-run-all: ^4.1.5
-    puppeteer: ^13.7.0
+    puppeteer: 18.1.0
     reflect-metadata: ^0.1.13
     rimraf: ^3.0.2
     rollup: ^3.1.0
@@ -3977,7 +3970,7 @@ __metadata:
     sha.js: ^2.4.11
     ts-jest: ^27.1.4
     typemoq: ^2.1.0
-    typescript: ^4.7.4
+    typescript: ^4.8.4
     yargs: ^17.6.0
   languageName: unknown
   linkType: soft
@@ -4003,7 +3996,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "accessibility-insights-scan@workspace:packages/cli"
   dependencies:
-    "@axe-core/puppeteer": 4.4.2
+    "@axe-core/puppeteer": ^4.5.0
     "@medv/finder": ^2.1.0
     "@sindresorhus/fnv1a": ^2.0.1
     "@types/cli-spinner": ^0.2.0
@@ -4049,10 +4042,10 @@ __metadata:
     normalize-url: 6.1.0
     npm-run-all: ^4.1.5
     playwright: ^1.22.2
-    puppeteer: ^13.7.0
-    puppeteer-extra: ^3.2.3
-    puppeteer-extra-plugin: ^3.2.0
-    puppeteer-extra-plugin-stealth: ^2.9.0
+    puppeteer: 18.1.0
+    puppeteer-extra: ^3.3.4
+    puppeteer-extra-plugin: ^3.2.2
+    puppeteer-extra-plugin-stealth: ^2.11.1
     raw-body: ^2.5.1
     reflect-metadata: ^0.1.13
     rimraf: ^3.0.2
@@ -4062,9 +4055,8 @@ __metadata:
     shebang-loader: ^0.0.1
     ts-jest: ^27.1.4
     typemoq: ^2.1.0
-    typescript: ^4.7.4
+    typescript: ^4.8.4
     uuid-with-v6: ^2.0.0
-    verror: ^1.10.1
     webpack: ^5.73.0
     webpack-cli: ^4.9.2
     webpack-node-externals: ^3.0.0
@@ -4107,7 +4099,7 @@ __metadata:
     syncpack: ^8.2.4
     ts-jest: ^27.1.4
     tslint: ^6.1.3
-    typescript: ^4.7.4
+    typescript: ^4.8.4
   languageName: unknown
   linkType: soft
 
@@ -4695,7 +4687,7 @@ __metadata:
     rimraf: ^3.0.2
     ts-jest: ^27.1.4
     typemoq: ^2.1.0
-    typescript: ^4.7.4
+    typescript: ^4.8.4
   languageName: unknown
   linkType: soft
 
@@ -4736,7 +4728,6 @@ __metadata:
     "@types/got": ^9.6.11
     "@types/jest": ^27.4.1
     "@types/lodash": ^4.14.182
-    "@types/verror": ^1.10.4
     async-mutex: ^0.3.2
     common: "workspace:*"
     dotenv: ^16.0.1
@@ -4759,8 +4750,7 @@ __metadata:
     ts-jest: ^27.1.4
     ts-loader: ^9.3.1
     typemoq: ^2.1.0
-    typescript: ^4.7.4
-    verror: ^1.10.1
+    typescript: ^4.8.4
     webpack: ^5.73.0
     webpack-cli: ^4.9.2
   languageName: unknown
@@ -5714,7 +5704,7 @@ __metadata:
     sha.js: ^2.4.11
     ts-jest: ^27.1.4
     typemoq: ^2.1.0
-    typescript: ^4.7.4
+    typescript: ^4.8.4
     uuid-with-v6: ^2.0.0
   languageName: unknown
   linkType: soft
@@ -6239,10 +6229,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"devtools-protocol@npm:0.0.981744":
-  version: 0.0.981744
-  resolution: "devtools-protocol@npm:0.0.981744"
-  checksum: 609901bff551f5fbe98e272bdda7269de527e28fab138de371ffd7e9a06fa68ca2eec2e961bd1cd6fd98223ccee562c55b7ce3235d4e37cc8d85d6681bc45593
+"devtools-protocol@npm:0.0.1045489":
+  version: 0.0.1045489
+  resolution: "devtools-protocol@npm:0.0.1045489"
+  checksum: 670b2ecc8e890358b08da3095b4c927ffc5ef846a39e1526ff99aecaa623b339450dfe308e421e64bf94308441832b8e9497ebda97fb02266fef3f455286742f
   languageName: node
   linkType: hard
 
@@ -6468,7 +6458,7 @@ __metadata:
     rimraf: ^3.0.2
     ts-jest: ^27.1.4
     ts-loader: ^9.3.1
-    typescript: ^4.7.4
+    typescript: ^4.8.4
     webpack: ^5.73.0
     webpack-cli: ^4.9.2
     webpack-ignore-dynamic-require: ^1.0.0
@@ -7703,7 +7693,7 @@ __metadata:
     storage-documents: "workspace:*"
     ts-jest: ^27.1.4
     typemoq: ^2.1.0
-    typescript: ^4.7.4
+    typescript: ^4.8.4
     web-api-client: "workspace:*"
     yargs: ^17.6.0
   languageName: unknown
@@ -8146,7 +8136,7 @@ __metadata:
     shebang-loader: ^0.0.1
     ts-jest: ^27.1.4
     typemoq: ^2.1.0
-    typescript: ^4.7.4
+    typescript: ^4.8.4
     web-api-client: "workspace:*"
     webpack: ^5.73.0
     webpack-cli: ^4.9.2
@@ -10342,8 +10332,7 @@ __metadata:
     rimraf: ^3.0.2
     ts-jest: ^27.1.4
     typemoq: ^2.1.0
-    typescript: ^4.7.4
-    verror: ^1.10.1
+    typescript: ^4.8.4
   languageName: unknown
   linkType: soft
 
@@ -11515,7 +11504,7 @@ __metadata:
     ts-jest: ^27.1.4
     ts-loader: ^9.3.1
     typemoq: ^2.1.0
-    typescript: ^4.7.4
+    typescript: ^4.8.4
     webpack: ^5.73.0
     webpack-cli: ^4.9.2
   languageName: unknown
@@ -11721,7 +11710,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pkg-dir@npm:4.2.0, pkg-dir@npm:^4.2.0":
+"pkg-dir@npm:^4.2.0":
   version: 4.2.0
   resolution: "pkg-dir@npm:4.2.0"
   dependencies:
@@ -11878,14 +11867,14 @@ __metadata:
     logger: "workspace:*"
     mockdate: ^3.0.5
     npm-run-all: ^4.1.5
-    puppeteer: ^13.7.0
+    puppeteer: 18.1.0
     reflect-metadata: ^0.1.13
     rimraf: ^3.0.2
     scanner-global-library: "workspace:*"
     storage-documents: "workspace:*"
     ts-jest: ^27.1.4
     typemoq: ^2.1.0
-    typescript: ^4.7.4
+    typescript: ^4.8.4
   languageName: unknown
   linkType: soft
 
@@ -11899,7 +11888,6 @@ __metadata:
     "@types/jest": ^27.4.1
     "@types/lodash": ^4.14.182
     "@types/node": ^16.11.7
-    "@types/verror": ^1.10.4
     applicationinsights: ^2.3.1
     azure-services: "workspace:*"
     common: "workspace:*"
@@ -11922,8 +11910,7 @@ __metadata:
     ts-jest: ^27.1.4
     ts-loader: ^9.3.1
     typemoq: ^2.1.0
-    typescript: ^4.7.4
-    verror: ^1.10.1
+    typescript: ^4.8.4
     webpack: ^5.73.0
     webpack-cli: ^4.9.2
     webpack-ignore-dynamic-require: ^1.0.0
@@ -11941,7 +11928,6 @@ __metadata:
     "@types/lodash": ^4.14.182
     "@types/node": ^16.11.7
     "@types/puppeteer": ^5.4.6
-    "@types/verror": ^1.10.4
     "@types/yargs": ^17.0.13
     applicationinsights: ^2.3.1
     azure-services: "workspace:*"
@@ -11961,10 +11947,10 @@ __metadata:
     npm-run-all: ^4.1.5
     p-limit: ^3.1.0
     privacy-scan-core: "workspace:*"
-    puppeteer: ^13.7.0
-    puppeteer-extra: ^3.2.3
-    puppeteer-extra-plugin: ^3.2.0
-    puppeteer-extra-plugin-stealth: ^2.9.0
+    puppeteer: 18.1.0
+    puppeteer-extra: ^3.3.4
+    puppeteer-extra-plugin: ^3.2.2
+    puppeteer-extra-plugin-stealth: ^2.11.1
     reflect-metadata: ^0.1.13
     rimraf: ^3.0.2
     scanner-global-library: "workspace:*"
@@ -11973,8 +11959,7 @@ __metadata:
     ts-jest: ^27.1.4
     ts-loader: ^9.3.1
     typemoq: ^2.1.0
-    typescript: ^4.7.4
-    verror: ^1.10.1
+    typescript: ^4.8.4
     webpack: ^5.73.0
     webpack-cli: ^4.9.2
     webpack-ignore-dynamic-require: ^1.0.0
@@ -12088,84 +12073,122 @@ __metadata:
   languageName: node
   linkType: hard
 
-"puppeteer-extra-plugin-stealth@npm:^2.9.0":
-  version: 2.9.0
-  resolution: "puppeteer-extra-plugin-stealth@npm:2.9.0"
+"puppeteer-extra-plugin-stealth@npm:^2.11.1":
+  version: 2.11.1
+  resolution: "puppeteer-extra-plugin-stealth@npm:2.11.1"
   dependencies:
     debug: ^4.1.1
-    puppeteer-extra-plugin: ^3.2.0
-    puppeteer-extra-plugin-user-preferences: ^2.3.1
-  checksum: f8c447d3998a2cef09347b653bf6104aa8776452acd4bf8fe1ecd096940556f89b9e4118d54daa9f10d8fb259956c0c3bbff517208f5683dd6d5305d10614dce
+    puppeteer-extra-plugin: ^3.2.2
+    puppeteer-extra-plugin-user-preferences: ^2.4.0
+  peerDependencies:
+    playwright-extra: "*"
+    puppeteer-extra: "*"
+  peerDependenciesMeta:
+    playwright-extra:
+      optional: true
+    puppeteer-extra:
+      optional: true
+  checksum: 8d5c3c8f650113dd35e9dd8c93617528921b6d5b0331e60006324db4080c56268b0f1a3d7af036cf6741fbdd4587f5d4400545e7d225242a0cce698cd3e51295
   languageName: node
   linkType: hard
 
-"puppeteer-extra-plugin-user-data-dir@npm:^2.3.1":
-  version: 2.3.1
-  resolution: "puppeteer-extra-plugin-user-data-dir@npm:2.3.1"
+"puppeteer-extra-plugin-user-data-dir@npm:^2.4.0":
+  version: 2.4.0
+  resolution: "puppeteer-extra-plugin-user-data-dir@npm:2.4.0"
   dependencies:
     debug: ^4.1.1
     fs-extra: ^10.0.0
-    puppeteer-extra-plugin: ^3.2.0
-  checksum: 1da77d82c08e5d5e4c4fba3619bda25b93194e34d554741627a6dfdc629f09adbcaf62a9b593c3efe3d08fe2a8919403b45051a21c2449d982177894fe92316e
+    puppeteer-extra-plugin: ^3.2.2
+    rimraf: ^3.0.2
+  peerDependencies:
+    playwright-extra: "*"
+    puppeteer-extra: "*"
+  peerDependenciesMeta:
+    playwright-extra:
+      optional: true
+    puppeteer-extra:
+      optional: true
+  checksum: ba414fcf75768b85f8785815bb1bef948615225c3b663e01bf7b72dc7c425987e2db402f564c48dbae8af77a19179bcca9ada8e51f947b5850d2b4e9f52e5696
   languageName: node
   linkType: hard
 
-"puppeteer-extra-plugin-user-preferences@npm:^2.3.1":
-  version: 2.3.1
-  resolution: "puppeteer-extra-plugin-user-preferences@npm:2.3.1"
+"puppeteer-extra-plugin-user-preferences@npm:^2.4.0":
+  version: 2.4.0
+  resolution: "puppeteer-extra-plugin-user-preferences@npm:2.4.0"
   dependencies:
     debug: ^4.1.1
     deepmerge: ^4.2.2
-    puppeteer-extra-plugin: ^3.2.0
-    puppeteer-extra-plugin-user-data-dir: ^2.3.1
-  checksum: 4842a1dbccd9bde10a121ab7536a0bb9bae5427c3f92654da6412e6650f15d87ff89fbf16ea25273ad5affb8584d3c7e035187dcbff5fcfb4e0b0fd79d8547b5
+    puppeteer-extra-plugin: ^3.2.2
+    puppeteer-extra-plugin-user-data-dir: ^2.4.0
+  peerDependencies:
+    playwright-extra: "*"
+    puppeteer-extra: "*"
+  peerDependenciesMeta:
+    playwright-extra:
+      optional: true
+    puppeteer-extra:
+      optional: true
+  checksum: f8c2359b1ddce3d7b8f543b2a8708688e74da5b7d705f79d2599d485d0fc88b4465303348a7e6977bc1705817f4d40f2db3b1b532776cc602a700487f3d80ba3
   languageName: node
   linkType: hard
 
-"puppeteer-extra-plugin@npm:^3.2.0":
-  version: 3.2.0
-  resolution: "puppeteer-extra-plugin@npm:3.2.0"
+"puppeteer-extra-plugin@npm:^3.2.2":
+  version: 3.2.2
+  resolution: "puppeteer-extra-plugin@npm:3.2.2"
   dependencies:
     "@types/debug": ^4.1.0
     debug: ^4.1.1
     merge-deep: ^3.0.1
   peerDependencies:
+    playwright-extra: "*"
     puppeteer-extra: "*"
-  checksum: 4d94ff911a7256d92f2a2df33718d42ccbc00094265e2fcd03b4d8beba9021224ad48dd43034a63fba7b7a097a3dbfedd97f5474651c9b191e18ae10fa04d710
+  peerDependenciesMeta:
+    playwright-extra:
+      optional: true
+    puppeteer-extra:
+      optional: true
+  checksum: 9ace2300d9c0089e7dbef6ea46bca8e0cb3ea8dcaec621c093569fdad000da4947854970d5d22edd175b3631480fdd899e4de6f1b0e9050f7e6a07eebbe8d538
   languageName: node
   linkType: hard
 
-"puppeteer-extra@npm:^3.2.3":
-  version: 3.2.3
-  resolution: "puppeteer-extra@npm:3.2.3"
+"puppeteer-extra@npm:^3.3.4":
+  version: 3.3.4
+  resolution: "puppeteer-extra@npm:3.3.4"
   dependencies:
     "@types/debug": ^4.1.0
-    "@types/puppeteer": "*"
     debug: ^4.1.1
     deepmerge: ^4.2.2
   peerDependencies:
+    "@types/puppeteer": "*"
     puppeteer: "*"
-  checksum: a49f4b212fb041f6511fbae33be0e235700ee7029aa25c5cde3f37c07af84fd2a8db7a813b86dda29a8ec693d5c283bcc2b4191e21bd08f9c568c8be3b8b4309
+    puppeteer-core: "*"
+  peerDependenciesMeta:
+    "@types/puppeteer":
+      optional: true
+    puppeteer:
+      optional: true
+    puppeteer-core:
+      optional: true
+  checksum: dfbeceba086606c5f74305b207b78b0a7248b6667385210d6462af1fa01b6fe50c631449c3a343005ed712aa37e44f10539abc29429cac86baa76351d0c3d10b
   languageName: node
   linkType: hard
 
-"puppeteer@npm:^13.7.0":
-  version: 13.7.0
-  resolution: "puppeteer@npm:13.7.0"
+"puppeteer@npm:18.1.0":
+  version: 18.1.0
+  resolution: "puppeteer@npm:18.1.0"
   dependencies:
     cross-fetch: 3.1.5
     debug: 4.3.4
-    devtools-protocol: 0.0.981744
+    devtools-protocol: 0.0.1045489
     extract-zip: 2.0.1
     https-proxy-agent: 5.0.1
-    pkg-dir: 4.2.0
     progress: 2.0.3
     proxy-from-env: 1.1.0
     rimraf: 3.0.2
     tar-fs: 2.1.1
     unbzip2-stream: 1.4.3
-    ws: 8.5.0
-  checksum: 4062b3ac3330e70d58095c1e0c5a46cada39a3fc5608e0e0e204448a400aef4d785a3b21d9e7733b2b2dc8cf686a476abf016f05d2e9108b3753dd41d62b9d1c
+    ws: 8.9.0
+  checksum: b805067a1cb5d33afeb5359b268c2d2f8915ee066f653622a045b4fc9a14e5fbfb13894d67903183d023e87e2f8302d78d3fcc75d9ad2973fb8e49daf3261402
   languageName: node
   linkType: hard
 
@@ -12565,7 +12588,6 @@ __metadata:
     "@types/jest": ^27.4.1
     "@types/lodash": ^4.14.182
     "@types/node": ^16.11.7
-    "@types/verror": ^1.10.4
     applicationinsights: ^2.3.1
     azure-services: "workspace:*"
     common: "workspace:*"
@@ -12588,8 +12610,7 @@ __metadata:
     ts-jest: ^27.1.4
     ts-loader: ^9.3.1
     typemoq: ^2.1.0
-    typescript: ^4.7.4
-    verror: ^1.10.1
+    typescript: ^4.8.4
     webpack: ^5.73.0
     webpack-cli: ^4.9.2
     webpack-ignore-dynamic-require: ^1.0.0
@@ -12607,7 +12628,6 @@ __metadata:
     "@types/lodash": ^4.14.182
     "@types/node": ^16.11.7
     "@types/puppeteer": ^5.4.6
-    "@types/verror": ^1.10.4
     "@types/yargs": ^17.0.13
     applicationinsights: ^2.3.1
     azure-services: "workspace:*"
@@ -12626,10 +12646,10 @@ __metadata:
     npm-force-resolutions: ^0.0.10
     npm-run-all: ^4.1.5
     p-limit: ^3.1.0
-    puppeteer: ^13.7.0
-    puppeteer-extra: ^3.2.3
-    puppeteer-extra-plugin: ^3.2.0
-    puppeteer-extra-plugin-stealth: ^2.9.0
+    puppeteer: 18.1.0
+    puppeteer-extra: ^3.3.4
+    puppeteer-extra-plugin: ^3.2.2
+    puppeteer-extra-plugin-stealth: ^2.11.1
     reflect-metadata: ^0.1.13
     rimraf: ^3.0.2
     scanner-global-library: "workspace:*"
@@ -12638,8 +12658,7 @@ __metadata:
     ts-jest: ^27.1.4
     ts-loader: ^9.3.1
     typemoq: ^2.1.0
-    typescript: ^4.7.4
-    verror: ^1.10.1
+    typescript: ^4.8.4
     webpack: ^5.73.0
     webpack-cli: ^4.9.2
     webpack-ignore-dynamic-require: ^1.0.0
@@ -12958,7 +12977,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "scanner-global-library@workspace:packages/scanner-global-library"
   dependencies:
-    "@axe-core/puppeteer": 4.4.2
+    "@axe-core/puppeteer": ^4.5.0
     "@types/jest": ^27.4.1
     "@types/lodash": ^4.14.182
     "@types/node": ^16.11.7
@@ -12972,16 +12991,16 @@ __metadata:
     lodash: ^4.17.21
     logger: "workspace:*"
     npm-run-all: ^4.1.5
-    puppeteer: ^13.7.0
-    puppeteer-extra: ^3.2.3
-    puppeteer-extra-plugin: ^3.2.0
-    puppeteer-extra-plugin-stealth: ^2.9.0
+    puppeteer: 18.1.0
+    puppeteer-extra: ^3.3.4
+    puppeteer-extra-plugin: ^3.2.2
+    puppeteer-extra-plugin-stealth: ^2.11.1
     reflect-metadata: ^0.1.13
     rimraf: ^3.0.2
     storage-documents: "workspace:*"
     ts-jest: ^27.1.4
     typemoq: ^2.1.0
-    typescript: ^4.7.4
+    typescript: ^4.8.4
   languageName: unknown
   linkType: soft
 
@@ -13134,7 +13153,7 @@ __metadata:
     p-limit: ^3.1.0
     paralleljs: ^1.1.0
     privacy-scan-core: "workspace:*"
-    puppeteer: ^13.7.0
+    puppeteer: 18.1.0
     reflect-metadata: ^0.1.13
     rimraf: ^3.0.2
     scanner-global-library: "workspace:*"
@@ -13142,7 +13161,7 @@ __metadata:
     storage-documents: "workspace:*"
     ts-jest: ^27.1.4
     typemoq: ^2.1.0
-    typescript: ^4.7.4
+    typescript: ^4.8.4
     yargs: ^17.6.0
   languageName: unknown
   linkType: soft
@@ -13565,7 +13584,7 @@ __metadata:
     ts-transformer-keys: ^0.4.3
     ttypescript: ^1.5.13
     typemoq: ^2.1.0
-    typescript: ^4.7.4
+    typescript: ^4.8.4
   languageName: unknown
   linkType: soft
 
@@ -14428,7 +14447,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@npm:>=3.0.1, typescript@npm:^4.7.4":
+"typescript@npm:>=3.0.1":
   version: 4.7.4
   resolution: "typescript@npm:4.7.4"
   bin:
@@ -14438,13 +14457,33 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@>=3.0.1#~builtin<compat/typescript>, typescript@patch:typescript@^4.7.4#~builtin<compat/typescript>":
+"typescript@npm:^4.8.4":
+  version: 4.8.4
+  resolution: "typescript@npm:4.8.4"
+  bin:
+    tsc: bin/tsc
+    tsserver: bin/tsserver
+  checksum: 3e4f061658e0c8f36c820802fa809e0fd812b85687a9a2f5430bc3d0368e37d1c9605c3ce9b39df9a05af2ece67b1d844f9f6ea8ff42819f13bcb80f85629af0
+  languageName: node
+  linkType: hard
+
+"typescript@patch:typescript@>=3.0.1#~builtin<compat/typescript>":
   version: 4.7.4
   resolution: "typescript@patch:typescript@npm%3A4.7.4#~builtin<compat/typescript>::version=4.7.4&hash=f456af"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
   checksum: 9096d8f6c16cb80ef3bf96fcbbd055bf1c4a43bd14f3b7be45a9fbe7ada46ec977f604d5feed3263b4f2aa7d4c7477ce5f9cd87de0d6feedec69a983f3a4f93e
+  languageName: node
+  linkType: hard
+
+"typescript@patch:typescript@^4.8.4#~builtin<compat/typescript>":
+  version: 4.8.4
+  resolution: "typescript@patch:typescript@npm%3A4.8.4#~builtin<compat/typescript>::version=4.8.4&hash=f456af"
+  bin:
+    tsc: bin/tsc
+    tsserver: bin/tsserver
+  checksum: 563a0ef47abae6df27a9a3ab38f75fc681f633ccf1a3502b1108e252e187787893de689220f4544aaf95a371a4eb3141e4a337deb9895de5ac3c1ca76430e5f0
   languageName: node
   linkType: hard
 
@@ -14709,17 +14748,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"verror@npm:^1.10.1":
-  version: 1.10.1
-  resolution: "verror@npm:1.10.1"
-  dependencies:
-    assert-plus: ^1.0.0
-    core-util-is: 1.0.2
-    extsprintf: ^1.2.0
-  checksum: 690a8d6ad5a4001672290e9719e3107c86269bc45fe19f844758eecf502e59f8aa9631b19b839f6d3dea562334884d22d1eb95ae7c863032075a9212c889e116
-  languageName: node
-  linkType: hard
-
 "w3c-hr-time@npm:^1.0.2":
   version: 1.0.2
   resolution: "w3c-hr-time@npm:1.0.2"
@@ -14789,7 +14817,7 @@ __metadata:
     service-library: "workspace:*"
     ts-jest: ^27.1.4
     typemoq: ^2.1.0
-    typescript: ^4.7.4
+    typescript: ^4.8.4
   languageName: unknown
   linkType: soft
 
@@ -14803,7 +14831,6 @@ __metadata:
     "@types/jest": ^27.4.1
     "@types/lodash": ^4.14.182
     "@types/node": ^16.11.7
-    "@types/verror": ^1.10.4
     applicationinsights: ^2.3.1
     azure-services: "workspace:*"
     common: "workspace:*"
@@ -14826,8 +14853,7 @@ __metadata:
     ts-jest: ^27.1.4
     ts-loader: ^9.3.1
     typemoq: ^2.1.0
-    typescript: ^4.7.4
-    verror: ^1.10.1
+    typescript: ^4.8.4
     webpack: ^5.73.0
     webpack-cli: ^4.9.2
     webpack-ignore-dynamic-require: ^1.0.0
@@ -14861,7 +14887,7 @@ __metadata:
     ts-jest: ^27.1.4
     ts-loader: ^9.3.1
     typemoq: ^2.1.0
-    typescript: ^4.7.4
+    typescript: ^4.8.4
     webpack: ^5.73.0
     webpack-cli: ^4.9.2
     webpack-ignore-dynamic-require: ^1.0.0
@@ -14874,7 +14900,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "web-api-scan-runner@workspace:packages/web-api-scan-runner"
   dependencies:
-    "@axe-core/puppeteer": 4.4.2
+    "@axe-core/puppeteer": ^4.5.0
     "@azure/cosmos": ^3.16.2
     "@types/dotenv": ^8.2.0
     "@types/jest": ^27.4.1
@@ -14882,7 +14908,6 @@ __metadata:
     "@types/node": ^16.11.7
     "@types/puppeteer": ^5.4.6
     "@types/sha.js": ^2.4.0
-    "@types/verror": ^1.10.4
     "@types/yargs": ^17.0.13
     accessibility-insights-crawler: "workspace:*"
     accessibility-insights-report: 4.4.0
@@ -14908,10 +14933,10 @@ __metadata:
     npm-force-resolutions: ^0.0.10
     npm-run-all: ^4.1.5
     p-limit: ^3.1.0
-    puppeteer: ^13.7.0
-    puppeteer-extra: ^3.2.3
-    puppeteer-extra-plugin: ^3.2.0
-    puppeteer-extra-plugin-stealth: ^2.9.0
+    puppeteer: 18.1.0
+    puppeteer-extra: ^3.3.4
+    puppeteer-extra-plugin: ^3.2.2
+    puppeteer-extra-plugin-stealth: ^2.11.1
     reflect-metadata: ^0.1.13
     request: ^2.88.2
     rimraf: ^3.0.2
@@ -14922,8 +14947,7 @@ __metadata:
     ts-jest: ^27.1.4
     ts-loader: ^9.3.1
     typemoq: ^2.1.0
-    typescript: ^4.7.4
-    verror: ^1.10.1
+    typescript: ^4.8.4
     webpack: ^5.73.0
     webpack-cli: ^4.9.2
     webpack-ignore-dynamic-require: ^1.0.0
@@ -14942,7 +14966,6 @@ __metadata:
     "@types/jest": ^27.4.1
     "@types/lodash": ^4.14.182
     "@types/node": ^16.11.7
-    "@types/verror": ^1.10.4
     applicationinsights: ^2.3.1
     azure-services: "workspace:*"
     common: "workspace:*"
@@ -14964,8 +14987,7 @@ __metadata:
     ts-jest: ^27.1.4
     ts-loader: ^9.3.1
     typemoq: ^2.1.0
-    typescript: ^4.7.4
-    verror: ^1.10.1
+    typescript: ^4.8.4
     webpack: ^5.73.0
     webpack-cli: ^4.9.2
     webpack-ignore-dynamic-require: ^1.0.0
@@ -14985,7 +15007,6 @@ __metadata:
     "@types/node": ^16.11.7
     "@types/puppeteer": ^5.4.6
     "@types/sha.js": ^2.4.0
-    "@types/verror": ^1.10.4
     "@types/yargs": ^17.0.13
     applicationinsights: ^2.3.1
     azure-services: "workspace:*"
@@ -15010,8 +15031,7 @@ __metadata:
     ts-jest: ^27.1.4
     ts-loader: ^9.3.1
     typemoq: ^2.1.0
-    typescript: ^4.7.4
-    verror: ^1.10.1
+    typescript: ^4.8.4
     webpack: ^5.73.0
     webpack-cli: ^4.9.2
     webpack-ignore-dynamic-require: ^1.0.0
@@ -15029,7 +15049,6 @@ __metadata:
     "@types/lodash": ^4.14.182
     "@types/node": ^16.11.7
     "@types/sha.js": ^2.4.0
-    "@types/verror": ^1.10.4
     azure-services: "workspace:*"
     common: "workspace:*"
     copy-webpack-plugin: ^11.0.0
@@ -15050,7 +15069,7 @@ __metadata:
     ts-jest: ^27.1.4
     ts-loader: ^9.3.1
     typemoq: ^2.1.0
-    typescript: ^4.7.4
+    typescript: ^4.8.4
     webpack: ^5.73.0
     webpack-cli: ^4.9.2
     webpack-ignore-dynamic-require: ^1.0.0
@@ -15067,7 +15086,6 @@ __metadata:
     "@types/lodash": ^4.14.182
     "@types/node": ^16.11.7
     "@types/sha.js": ^2.4.0
-    "@types/verror": ^1.10.4
     azure-services: "workspace:*"
     common: "workspace:*"
     copy-webpack-plugin: ^11.0.0
@@ -15091,7 +15109,7 @@ __metadata:
     ts-jest: ^27.1.4
     ts-loader: ^9.3.1
     typemoq: ^2.1.0
-    typescript: ^4.7.4
+    typescript: ^4.8.4
     web-api-client: "workspace:*"
     webpack: ^5.73.0
     webpack-cli: ^4.9.2
@@ -15385,9 +15403,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ws@npm:8.5.0":
-  version: 8.5.0
-  resolution: "ws@npm:8.5.0"
+"ws@npm:8.9.0":
+  version: 8.9.0
+  resolution: "ws@npm:8.9.0"
   peerDependencies:
     bufferutil: ^4.0.1
     utf-8-validate: ^5.0.2
@@ -15396,7 +15414,7 @@ __metadata:
       optional: true
     utf-8-validate:
       optional: true
-  checksum: 76f2f90e40344bf18fd544194e7067812fb1372b2a37865678d8f12afe4b478ff2ebc0c7c0aff82cd5e6b66fc43d889eec0f1865c2365d8f7a66d92da7744a77
+  checksum: 23aa0f021b2eb65c108ec4c3e08c0d81ba01f82b500432dfe327fd6be36079c1d81fdb0eac6464d2a0eb49904d34a9ab8c59619d673fa07b8346f83aeb0cbf12
   languageName: node
   linkType: hard
 

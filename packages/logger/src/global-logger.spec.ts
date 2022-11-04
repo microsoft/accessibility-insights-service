@@ -6,7 +6,6 @@ import 'reflect-metadata';
 import { System } from 'common';
 import _ from 'lodash';
 import { IMock, Mock, Times, It, MockBehavior } from 'typemoq';
-import { VError } from 'verror';
 import { AvailabilityTelemetry } from './availability-telemetry';
 import { BaseTelemetryProperties } from './base-telemetry-properties';
 import { ConsoleLoggerClient } from './console-logger-client';
@@ -361,7 +360,9 @@ describe(GlobalLogger, () => {
             const errorMessage = 'error message';
             await testSubject.setup();
             invokeAllLoggerClientMocks((m) =>
-                m.setup((c) => c.trackException(new VError(underlyingError, errorMessage))).verifiable(Times.once()),
+                m
+                    .setup((c) => c.trackException(new Error(`${errorMessage} ${System.serializeError(underlyingError)}`)))
+                    .verifiable(Times.once()),
             );
 
             testSubject.trackExceptionAny(underlyingError, errorMessage);
@@ -375,7 +376,7 @@ describe(GlobalLogger, () => {
             await testSubject.setup();
             invokeAllLoggerClientMocks((m) =>
                 m
-                    .setup((c) => c.trackException(new VError(new Error(System.serializeError(underlyingError)), errorMessage)))
+                    .setup((c) => c.trackException(new Error(`${errorMessage} ${System.serializeError(underlyingError)}`)))
                     .verifiable(Times.once()),
             );
 

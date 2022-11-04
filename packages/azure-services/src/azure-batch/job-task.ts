@@ -3,7 +3,6 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as crypto from 'crypto';
-import { VError } from 'verror';
 
 export declare type BatchTaskExecutionResult = 'success' | 'failure';
 export declare type BatchTaskErrorCategory = 'userError' | 'serverError';
@@ -36,7 +35,7 @@ export class JobTask {
         const prefix = `task_${this.correlationId}_`;
         const size = Math.min(Math.floor((maxLength - prefix.length) / 2), 10);
         if (size < 0) {
-            throw new VError(
+            throw new Error(
                 `The correlationId string value is too long. Maximum length is ${maxLength - (prefix.length - this.correlationId.length)}`,
             );
         }

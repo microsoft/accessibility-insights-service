@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { Cookie, PrivacyPageScanReport } from './privacy-page-scan-report';
 
 export type PrivacyScanStatus = 'Completed' | 'Failed';
@@ -24,10 +26,7 @@ export interface FailedUrl {
     url: string;
     seedUri: string;
     navigationalUri: string;
-    /**
-     * Format: "error=message"
-     */
-    reason: string;
+    reason: any;
     httpStatusCode: number;
     bannerDetected?: boolean;
     bannerDetectionXpathExpression?: string;

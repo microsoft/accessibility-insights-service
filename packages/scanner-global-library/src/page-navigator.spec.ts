@@ -86,7 +86,7 @@ describe(PageNavigator, () => {
             status: () => 200,
         } as Puppeteer.HTTPResponse;
 
-        puppeteerFrame = { _id: 'mainFrame' } as Puppeteer.Frame;
+        puppeteerFrame = {} as Puppeteer.Frame;
         puppeteerPageMock
             .setup((o) => o.mainFrame())
             .returns(() => {
@@ -314,10 +314,6 @@ describe(PageNavigator, () => {
                 .setup((o) => o.waitForNavigation({ waitUntil: 'networkidle0', timeout: puppeteerTimeoutConfig.networkIdleTimeoutMsec }))
                 .returns(() => Promise.resolve(response))
                 .verifiable();
-            puppeteerPageMock
-                .setup((o) => o.evaluate(It.isAny()))
-                .returns(() => Promise.resolve())
-                .verifiable();
 
             const actualNavigationTiming = await pageNavigator.waitForNetworkIdle(puppeteerPageMock.object);
             const expectedNavigationTiming = {
@@ -332,10 +328,6 @@ describe(PageNavigator, () => {
             puppeteerPageMock
                 .setup((o) => o.waitForNavigation({ waitUntil: 'networkidle0', timeout: puppeteerTimeoutConfig.networkIdleTimeoutMsec }))
                 .returns(() => Promise.reject(timeoutError))
-                .verifiable();
-            puppeteerPageMock
-                .setup((o) => o.evaluate(It.isAny()))
-                .returns(() => Promise.resolve())
                 .verifiable();
 
             const actualNavigationTiming = await pageNavigator.waitForNetworkIdle(puppeteerPageMock.object);
@@ -475,7 +467,6 @@ describe(PageNavigator, () => {
                 } as Puppeteer.HTTPRequest,
                 {
                     ...cloneDeep(onEventRequest),
-                    _requestId: '2',
                     url: () => 'Url-2-OK',
                     response: () => {
                         return { url: () => 'Url-2-OK' } as Puppeteer.HTTPResponse;
