@@ -18,12 +18,13 @@ export class AxePuppeteerFactory {
         private readonly fileSystemObj: typeof fs = fs,
     ) {}
 
-    public async createAxePuppeteer(page: Puppeteer.Page, contentSourcePath?: string): Promise<AxePuppeteer> {
+    public async createAxePuppeteer(page: Puppeteer.Page, contentSourcePath?: string, legacyMode: boolean = false): Promise<AxePuppeteer> {
         const axeSource = await this.getAxeSource(contentSourcePath);
 
         return new AxePuppeteer(page, axeSource)
             .configure(this.axeConfiguration)
-            .disableRules(this.ruleExclusion.accessibilityRuleExclusionList);
+            .disableRules(this.ruleExclusion.accessibilityRuleExclusionList)
+            .setLegacyMode(legacyMode);
     }
 
     private async getAxeSource(contentSourcePath?: string): Promise<string> {

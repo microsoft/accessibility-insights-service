@@ -53,4 +53,11 @@ describe('AxePuppeteerFactory', () => {
         expect(axePuppeteer).toBeInstanceOf(AxePuppeteer);
         expect((axePuppeteer as any).config).toStrictEqual(axeConfiguration);
     });
+
+    it('create axe puppeteer instance, legacyMode is true', async () => {
+        const axePuppeteer = await testSubject.createAxePuppeteer(page.object, '', true);
+        expect(axePuppeteer).toBeDefined();
+        expect(axePuppeteer).toBeInstanceOf(AxePuppeteer);
+        expect((axePuppeteer as any).config).toStrictEqual(axeConfiguration);
+    });
 });

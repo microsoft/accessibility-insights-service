@@ -5,8 +5,9 @@ import { System } from 'common';
 import { inject, injectable, optional } from 'inversify';
 import { GlobalLogger } from 'logger';
 import * as Puppeteer from 'puppeteer';
-import axe from 'axe-core';
+import axe, { AxeResults } from 'axe-core';
 import { isNil, isNumber, isEmpty } from 'lodash';
+import { AxePuppeteer } from '@axe-core/puppeteer';
 import { AxeScanResults } from './axe-scan-results';
 import { AxePuppeteerFactory } from './factories/axe-puppeteer-factory';
 import { WebDriver } from './web-driver';
@@ -257,19 +258,21 @@ export class Page {
     }
 
     private async scanPageForIssues(contentSourcePath?: string): Promise<AxeScanResults> {
-        const axePuppeteer = await this.axePuppeteerFactory.createAxePuppeteer(this.page, contentSourcePath);
-        let axeResults: axe.AxeResults;
-        try {
-            axeResults = await axePuppeteer.analyze();
-        } catch (error) {
-            this.logger?.logError('Axe core engine error', { browserError: System.serializeError(error), url: this.page.url() });
+        let axePuppeteer = await this.axePuppeteerFactory.createAxePuppeteer(this.page, contentSourcePath);
+        let axeRunResult = await this.runAxeAnalyze(axePuppeteer);
+        if (axeRunResult.error) {
+            // Fallback to axe puppeteer legacy mode
+            axePuppeteer = await this.axePuppeteerFactory.createAxePuppeteer(this.page, contentSourcePath, true);
+            axeRunResult = await this.runAxeAnalyze(axePuppeteer);
+        }
 
-            return { error: `Axe core engine error. ${System.serializeError(error)}`, scannedUrl: this.page.url() };
+        if (axeRunResult.error) {
+            return { error: `Axe core engine error. ${System.serializeError(axeRunResult.error)}`, scannedUrl: this.page.url() };
         }
 
         const browserResolution = await this.getBrowserResolution();
         const scanResults: AxeScanResults = {
-            results: axeResults,
+            results: axeRunResult.axeResults,
             pageTitle: await this.page.title(),
             browserSpec: await this.browser.version(),
             pageResponseCode: this.lastNavigationResponse.status(),
@@ -280,12 +283,25 @@ export class Page {
         if (
             this.lastNavigationResponse.request()?.redirectChain()?.length > 0 ||
             // Should compare encoded Urls
-            (this.requestUrl !== undefined && encodeURI(this.requestUrl) !== axeResults.url)
+            (this.requestUrl !== undefined && encodeURI(this.requestUrl) !== axeRunResult.axeResults.url)
         ) {
-            this.logger?.logWarn(`Scanning performed on redirected page`, { redirectedUrl: axeResults.url });
-            scanResults.scannedUrl = axeResults.url;
+            this.logger?.logWarn(`Scanning performed on redirected page`, { redirectedUrl: axeRunResult.axeResults.url });
+            scanResults.scannedUrl = axeRunResult.axeResults.url;
         }
 
         return scanResults;
+    }
+
+    private async runAxeAnalyze(axePuppeteer: AxePuppeteer): Promise<{ axeResults?: AxeResults; error?: Error }> {
+        let result: axe.AxeResults;
+        try {
+            result = await axePuppeteer.analyze();
+        } catch (error) {
+            this.logger?.logError('Axe core engine error.', { error: System.serializeError(error), url: this.page.url() });
+
+            return { error };
+        }
+
+        return { axeResults: result };
     }
 }

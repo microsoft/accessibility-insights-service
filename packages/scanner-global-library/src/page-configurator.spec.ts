@@ -3,10 +3,11 @@
 
 import 'reflect-metadata';
 
-import { Page, CDPSession, Target } from 'puppeteer';
+import { Page, CDPSession, Target, Protocol } from 'puppeteer';
 import { IMock, Mock } from 'typemoq';
 import { PageConfigurator } from './page-configurator';
 import { getPromisableDynamicMock } from './test-utilities/promisable-mock';
+import { windowSize } from './puppeteer-options';
 
 describe(PageConfigurator, () => {
     let pageConfigurator: PageConfigurator;
@@ -20,9 +21,23 @@ describe(PageConfigurator, () => {
         cdpSessionMock = getPromisableDynamicMock(Mock.ofType<CDPSession>());
 
         cdpSessionMock
-            .setup((o) => o.send('Emulation.clearDeviceMetricsOverride'))
+            .setup((o) => o.send('Browser.getWindowForTarget'))
+            .returns(() => Promise.resolve({ windowId: 1 } as Protocol.Browser.GetWindowForTargetResponse))
+            .verifiable();
+        cdpSessionMock
+            .setup((o) =>
+                o.send('Browser.setWindowBounds', {
+                    windowId: 1,
+                    bounds: { width: windowSize.width, height: windowSize.height },
+                } as Protocol.Browser.GetWindowForTargetResponse),
+            )
             .returns(() => Promise.resolve())
             .verifiable();
+        cdpSessionMock
+            .setup((o) => o.detach())
+            .returns(() => Promise.resolve())
+            .verifiable();
+
         targetMock
             .setup((o) => o.createCDPSession())
             .returns(() => Promise.resolve(cdpSessionMock.object))
@@ -31,6 +46,7 @@ describe(PageConfigurator, () => {
             .setup((o) => o.target())
             .returns(() => targetMock.object)
             .verifiable();
+
         pageMock
             .setup(async (o) => o.setBypassCSP(true))
             .returns(() => Promise.resolve())
