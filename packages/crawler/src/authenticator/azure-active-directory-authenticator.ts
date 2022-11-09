@@ -56,7 +56,6 @@ export class AzureActiveDirectoryAuthentication implements AuthenticationMethod 
 
     private async handleKmsiPageIfShown(page: Puppeteer.Page): Promise<void> {
         try {
-            //check for KMSI page, handle if shown
             await page.waitForSelector('#idBtn_Back', { timeout: 5000 });
             await Promise.all([page.waitForNavigation({ waitUntil: 'networkidle0' }), page.click('#idBtn_Back')]);
             console.info('KMSI page handled.');
