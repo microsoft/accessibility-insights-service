@@ -19,8 +19,11 @@ function setupAADAuthenticationFlow(
     pageMock.setup((p) => p.type(It.isAnyString(), accountName)).verifiable(Times.exactly(1));
     pageMock.setup((p) => p.type(It.isAnyString(), accountPassword)).verifiable(Times.exactly(1));
     pageMock.setup((p) => p.click('#FormsAuthentication')).verifiable(Times.exactly(1));
-    pageMock.setup((p) => p.waitForNavigation({ waitUntil: 'networkidle0' })).verifiable(Times.exactly(1));
     pageMock.setup((p) => p.$eval('#errorText', It.isAny())).returns(() => Promise.resolve(success ? '' : 'this is an error'));
+    pageMock
+        .setup((p) => p.waitForSelector('#idBtn_Back', It.isAny()))
+        .throws({} as Error)
+        .verifiable();
     pageMock
         .setup((p) => p.url())
         .returns(() => 'https://login.microsoftonline.com')
@@ -67,12 +70,14 @@ describe(AzureActiveDirectoryAuthentication, () => {
     });
 
     it('follows portal.azure.com authentication flow', async () => {
+        pageMock.setup((p) => p.waitForNavigation({ waitUntil: 'networkidle0' })).verifiable(Times.exactly(1));
         setupAADAuthenticationFlow(pageMock, keyboardMock, accountName, accountPassword);
         await testSubject.authenticate(pageMock.object);
         expect(consoleInfoMock).toHaveBeenCalledWith('Authentication succeeded.');
     });
 
     it('throw error if authentication failed', async () => {
+        pageMock.setup((p) => p.waitForNavigation({ waitUntil: 'networkidle0' })).verifiable(Times.exactly(1));
         setupAADAuthenticationFlow(pageMock, keyboardMock, accountName, accountPassword, false);
         expect.assertions(1);
         const expectedErrorMessage = new Error('Authentication failed with error: this is an error');
@@ -137,5 +142,14 @@ describe(AzureActiveDirectoryAuthentication, () => {
         } catch (error) {
             expect(error).toEqual(expectedErrorMessage);
         }
+    });
+
+    it('handles kmsi dialog if it appears', async () => {
+        pageMock.setup((p) => p.waitForSelector('#idBtn_Back', It.isAny())).verifiable();
+        pageMock.setup((p) => p.waitForNavigation({ waitUntil: 'networkidle0' })).verifiable(Times.exactly(2));
+        pageMock.setup((p) => p.click('#idBtn_Back')).verifiable(Times.exactly(1));
+        setupAADAuthenticationFlow(pageMock, keyboardMock, accountName, accountPassword);
+        await testSubject.authenticate(pageMock.object);
+        expect(consoleInfoMock).toHaveBeenCalledWith('Authentication succeeded.');
     });
 });

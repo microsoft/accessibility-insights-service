@@ -34,7 +34,10 @@ export class AzureActiveDirectoryAuthentication implements AuthenticationMethod 
 
         await page.click('#FormsAuthentication');
         await page.type('input[type="password"]', this.accountPassword);
-        await Promise.all([page.waitForNavigation({ waitUntil: 'networkidle0' }), await page.keyboard.press('Enter')]);
+        await Promise.all([page.waitForNavigation({ waitUntil: 'networkidle0' }), page.keyboard.press('Enter')]);
+
+        await this.handleKmsiPageIfShown(page);
+
         if (!this.authenticationSucceeded(page)) {
             const errorText: string = await page.$eval('#errorText', (el) => el.textContent).catch(() => '');
             throw new Error(`Authentication failed${isEmpty(errorText) ? '' : ` with error: ${errorText}`}`);
@@ -49,5 +52,15 @@ export class AzureActiveDirectoryAuthentication implements AuthenticationMethod 
         console.info('Authentication succeeded.');
 
         return true;
+    }
+
+    private async handleKmsiPageIfShown(page: Puppeteer.Page): Promise<void> {
+        try {
+            await page.waitForSelector('#idBtn_Back', { timeout: 5000 });
+            await Promise.all([page.waitForNavigation({ waitUntil: 'networkidle0' }), page.click('#idBtn_Back')]);
+            console.info('KMSI page handled.');
+        } catch (error) {
+            console.info('KMSI page not shown.');
+        }
     }
 }
