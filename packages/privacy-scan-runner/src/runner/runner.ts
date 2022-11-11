@@ -118,7 +118,7 @@ export class Runner {
             state: 'fail',
         };
 
-        this.setRunResult(pageScanResult, runState, System.serializeError(privacyScanResult.error));
+        this.setRunResult(pageScanResult, runState, this.convertToScanError(privacyScanResult.error));
         this.logger.logError('Browser has failed to scan a webpage.', { error: System.serializeError(privacyScanResult.error) });
         this.telemetryManager.trackBrowserScanFailed();
     }
@@ -184,6 +184,17 @@ export class Runner {
         }
 
         return !isEmpty(reports) ? this.reportWriter.writeBatch(reports) : undefined;
+    }
+
+    private convertToScanError(error: Error | BrowserError): ScanError {
+        let scanError = null;
+        if (typeof error === typeof Error) {
+            scanError = { errorType: 'InternalError' } as ScanError;
+        } else {
+            scanError = error as ScanError;
+        }
+
+        return scanError;
     }
 
     private setRunResult(pageScanResult: OnDemandPageScanResult, state: OnDemandPageScanRunState, error?: string | ScanError): void {
