@@ -187,11 +187,9 @@ export class Runner {
     }
 
     private convertToScanError(error: Error | BrowserError): ScanError {
-        let scanError = null;
-        if (typeof error === typeof Error) {
-            scanError = { errorType: 'InternalError' } as ScanError;
-        } else {
-            scanError = error as ScanError;
+        const scanError = error as ScanError;
+        if (isEmpty(scanError.errorType)) {
+            scanError.errorType = 'InternalError';
         }
 
         return scanError;

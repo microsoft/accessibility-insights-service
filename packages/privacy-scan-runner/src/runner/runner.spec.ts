@@ -13,6 +13,7 @@ import {
 } from 'service-library';
 import { GlobalLogger } from 'logger';
 import * as MockDate from 'mockdate';
+import { isEmpty } from 'lodash';
 import {
     OnDemandPageScanResult,
     OnDemandPageScanReport,
@@ -20,6 +21,7 @@ import {
     PrivacyPageScanReport,
     OnDemandPageScanRunState,
     OnDemandPageScanRunResult,
+    ScanError,
 } from 'storage-documents';
 import { PrivacyScanResult, BrowserError } from 'scanner-global-library';
 import { System, ServiceConfiguration, ScanRunTimeConfig, GuidGenerator } from 'common';
@@ -244,10 +246,14 @@ function setupProcessScanResult(): void {
         if ((privacyScanResults.error as BrowserError)?.errorType === 'BannerXPathNotDetected') {
             runState = pageScanResult.run?.retryCount >= maxFailedScanRetryCount ? 'completed' : 'failed';
         }
+        const scanError = privacyScanResults.error as ScanError;
+        if (isEmpty(scanError.errorType)) {
+            scanError.errorType = 'InternalError';
+        }
         pageScanResult.run = {
             state: runState,
             timestamp: dateNow.toJSON(),
-            error: System.serializeError(privacyScanResults.error),
+            error: scanError,
         };
         pageScanResult.scanResult = {
             state: 'fail',
