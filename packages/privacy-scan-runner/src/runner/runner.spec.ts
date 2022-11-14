@@ -13,7 +13,6 @@ import {
 } from 'service-library';
 import { GlobalLogger } from 'logger';
 import * as MockDate from 'mockdate';
-import { isEmpty } from 'lodash';
 import {
     OnDemandPageScanResult,
     OnDemandPageScanReport,
@@ -247,7 +246,7 @@ function setupProcessScanResult(): void {
             runState = pageScanResult.run?.retryCount >= maxFailedScanRetryCount ? 'completed' : 'failed';
         }
         const scanError: ScanError = {
-            errorType: 'InternalError'
+            errorType: 'InternalError',
             ...privacyScanResults.error,
         };
         pageScanResult.run = {
