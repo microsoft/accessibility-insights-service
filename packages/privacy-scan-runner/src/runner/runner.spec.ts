@@ -246,10 +246,10 @@ function setupProcessScanResult(): void {
         if ((privacyScanResults.error as BrowserError)?.errorType === 'BannerXPathNotDetected') {
             runState = pageScanResult.run?.retryCount >= maxFailedScanRetryCount ? 'completed' : 'failed';
         }
-        const scanError = privacyScanResults.error as ScanError;
-        if (isEmpty(scanError.errorType)) {
-            scanError.errorType = 'InternalError';
-        }
+        const scanError: ScanError = {
+            errorType: 'InternalError'
+            ...privacyScanResults.error,
+        };
         pageScanResult.run = {
             state: runState,
             timestamp: dateNow.toJSON(),
