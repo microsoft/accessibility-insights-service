@@ -302,7 +302,7 @@ export class PageNavigator {
         /**
          * Waits for page network activity to reach idle state.
          * This mitigates cases when page needs load pending frame/content.
-         * Will not throw if page still has network activity.
+         * Will not throw on timeout if page still has network activity.
          */
         const waitForNavigationFn = async () => {
             try {
