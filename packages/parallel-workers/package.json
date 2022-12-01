@@ -25,7 +25,7 @@
         "@types/jest": "^27.4.1",
         "@types/lodash": "^4.14.182",
         "@types/node": "^16.11.7",
-        "filemanager-webpack-plugin": "^7.0.0",
+        "filemanager-webpack-plugin": "^8.0.0",
         "fork-ts-checker-webpack-plugin": "^7.2.12",
         "jest": "^27.5.1",
         "jest-junit": "^14.0.0",
