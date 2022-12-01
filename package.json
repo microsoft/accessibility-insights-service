@@ -49,7 +49,7 @@
         "eslint-plugin-jsdoc": "^39.0.1",
         "eslint-plugin-prefer-arrow": "^1.2.3",
         "eslint-plugin-security": "^1.5.0",
-        "eslint-plugin-sort-class-members": "^1.14.0",
+        "eslint-plugin-sort-class-members": "^1.15.2",
         "eslint-plugin-unicorn": "^40.1.0",
         "jest": "^27.5.1",
         "jest-extended": "^2.0.0",
