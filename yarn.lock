@@ -432,9 +432,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@azure/storage-queue@npm:^12.10.0":
-  version: 12.10.0
-  resolution: "@azure/storage-queue@npm:12.10.0"
+"@azure/storage-queue@npm:^12.11.0":
+  version: 12.11.0
+  resolution: "@azure/storage-queue@npm:12.11.0"
   dependencies:
     "@azure/abort-controller": ^1.0.0
     "@azure/core-http": ^2.0.0
@@ -442,7 +442,7 @@ __metadata:
     "@azure/core-tracing": 1.0.0-preview.13
     "@azure/logger": ^1.0.0
     tslib: ^2.2.0
-  checksum: 5a0974f74b18c6671e149139f09b6142bbea494d2156b4e0eb5d6e331db7152e4646b417ada83659246e1777d77a1f84751813c966307a226a272121f51d1f03
+  checksum: 774fa24fb5bd6fdcf8a1af4a8c01b82b5a3a7747d7043d57178147d46a2b98321c2f07e019d9cd421ab61cc121268a2b210deacefd661465f77ad41e20081c4d
   languageName: node
   linkType: hard
 
@@ -4724,7 +4724,7 @@ __metadata:
     "@azure/keyvault-secrets": ^4.4.0
     "@azure/ms-rest-nodeauth": ^3.1.1
     "@azure/storage-blob": ^12.11.0
-    "@azure/storage-queue": ^12.10.0
+    "@azure/storage-queue": ^12.11.0
     "@types/got": ^9.6.11
     "@types/jest": ^27.4.1
     "@types/lodash": ^4.14.182
