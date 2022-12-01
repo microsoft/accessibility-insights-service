@@ -4743,7 +4743,7 @@ __metadata:
     node-cache: ^5.1.2
     npm-run-all: ^4.1.5
     p-limit: ^3.1.0
-    pretty-format: ^29.1.2
+    pretty-format: ^29.3.1
     reflect-metadata: ^0.1.13
     rimraf: ^3.0.2
     storage-documents: "workspace:*"
@@ -11824,14 +11824,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pretty-format@npm:^29.1.2":
-  version: 29.1.2
-  resolution: "pretty-format@npm:29.1.2"
+"pretty-format@npm:^29.3.1":
+  version: 29.3.1
+  resolution: "pretty-format@npm:29.3.1"
   dependencies:
     "@jest/schemas": ^29.0.0
     ansi-styles: ^5.0.0
     react-is: ^18.0.0
-  checksum: b2c6e77666716e55094f29dcbd92e431a1b8cc0a06cd41ec1a3c8a10e5e56bb1f2d7b5942f1d8f6a0f69912712f3edb4c41713926d60cbb89f2a41355d49e7a4
+  checksum: 9917a0bb859cd7a24a343363f70d5222402c86d10eb45bcc2f77b23a4e67586257390e959061aec22762a782fe6bafb59bf34eb94527bc2e5d211afdb287eb4e
   languageName: node
   linkType: hard
 
