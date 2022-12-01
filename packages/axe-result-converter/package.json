@@ -31,7 +31,7 @@
         "rimraf": "^3.0.2",
         "ts-jest": "^27.1.4",
         "typemoq": "^2.1.0",
-        "typescript": "^4.8.4"
+        "typescript": "^4.9.3"
     },
     "dependencies": {
         "accessibility-insights-report": "4.4.0",
