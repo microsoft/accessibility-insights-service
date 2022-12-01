@@ -3956,7 +3956,7 @@ __metadata:
     encoding-down: ^7.1.0
     inversify: ^6.0.1
     jest: ^27.5.1
-    jest-junit: ^14.0.0
+    jest-junit: ^15.0.0
     leveldown: ^6.1.1
     levelup: ^5.1.1
     lodash: ^4.17.21
@@ -4030,7 +4030,7 @@ __metadata:
     got: ^11.8.5
     inversify: ^6.0.1
     jest: ^27.5.1
-    jest-junit: ^14.0.0
+    jest-junit: ^15.0.0
     json5: ^2.2.1
     leveldown: ^6.1.1
     levelup: ^5.1.1
@@ -4090,7 +4090,7 @@ __metadata:
     jest: ^27.5.1
     jest-extended: ^2.0.0
     jest-html-reporter: ^3.6.0
-    jest-junit: ^14.0.0
+    jest-junit: ^15.0.0
     license-check-and-add: ^4.0.5
     npm-run-all: ^4.1.5
     prettier: 2.6.2
@@ -4680,7 +4680,7 @@ __metadata:
     common: "workspace:*"
     inversify: ^6.0.1
     jest: ^27.5.1
-    jest-junit: ^14.0.0
+    jest-junit: ^15.0.0
     lodash: ^4.17.21
     npm-run-all: ^4.1.5
     reflect-metadata: ^0.1.13
@@ -4735,7 +4735,7 @@ __metadata:
     got: ^11.8.5
     inversify: ^6.0.1
     jest: ^27.5.1
-    jest-junit: ^14.0.0
+    jest-junit: ^15.0.0
     lodash: ^4.17.21
     logger: "workspace:*"
     mockdate: ^3.0.5
@@ -5692,7 +5692,7 @@ __metadata:
     got: ^11.8.5
     inversify: ^6.0.1
     jest: ^27.5.1
-    jest-junit: ^14.0.0
+    jest-junit: ^15.0.0
     lodash: ^4.17.21
     normalize-path: ^3.0.0
     normalize-url: 6.1.0
@@ -6448,7 +6448,7 @@ __metadata:
     fork-ts-checker-webpack-plugin: ^7.2.12
     inversify: ^6.0.1
     jest: ^27.5.1
-    jest-junit: ^14.0.0
+    jest-junit: ^15.0.0
     lodash: ^4.17.21
     logger: "workspace:*"
     node-loader: ^2.0.0
@@ -7682,7 +7682,7 @@ __metadata:
     dotenv: ^16.0.1
     inversify: ^6.0.1
     jest: ^27.5.1
-    jest-junit: ^14.0.0
+    jest-junit: ^15.0.0
     lodash: ^4.17.21
     logger: "workspace:*"
     mockdate: ^3.0.5
@@ -8126,7 +8126,7 @@ __metadata:
     functional-tests: "workspace:*"
     inversify: ^6.0.1
     jest: ^27.5.1
-    jest-junit: ^14.0.0
+    jest-junit: ^15.0.0
     lodash: ^4.17.21
     logger: "workspace:*"
     npm-run-all: ^4.1.5
@@ -9248,15 +9248,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jest-junit@npm:^14.0.0":
-  version: 14.0.0
-  resolution: "jest-junit@npm:14.0.0"
+"jest-junit@npm:^15.0.0":
+  version: 15.0.0
+  resolution: "jest-junit@npm:15.0.0"
   dependencies:
     mkdirp: ^1.0.4
     strip-ansi: ^6.0.1
     uuid: ^8.3.2
     xml: ^1.0.1
-  checksum: 89d6755f895360be9440d0feacc1a7da9adf23fa9a58746f6f80946cd55d91ba3d32314698615090682684d8315518a166fe46a60cdbd16b38e0c5c8d6418e55
+  checksum: e8fe4d2f2ab843383ac41820a6fe495739d154ec435cd44ba590b44ec7fd62095676f3eef13f98392f81d4a3727ea58b4f4fad231fe367ac31243952b9ad716f
   languageName: node
   linkType: hard
 
@@ -10324,7 +10324,7 @@ __metadata:
     dotenv: ^16.0.1
     inversify: ^6.0.1
     jest: ^27.5.1
-    jest-junit: ^14.0.0
+    jest-junit: ^15.0.0
     lodash: ^4.17.21
     moment: ^2.29.4
     npm-run-all: ^4.1.5
@@ -11495,7 +11495,7 @@ __metadata:
     filemanager-webpack-plugin: ^7.0.0
     fork-ts-checker-webpack-plugin: ^7.2.12
     jest: ^27.5.1
-    jest-junit: ^14.0.0
+    jest-junit: ^15.0.0
     lodash: ^4.17.21
     moment: ^2.29.4
     npm-run-all: ^4.1.5
@@ -11862,7 +11862,7 @@ __metadata:
     common: "workspace:*"
     inversify: ^6.0.1
     jest: ^27.5.1
-    jest-junit: ^14.0.0
+    jest-junit: ^15.0.0
     lodash: ^4.17.21
     logger: "workspace:*"
     mockdate: ^3.0.5
@@ -11896,7 +11896,7 @@ __metadata:
     fork-ts-checker-webpack-plugin: ^7.2.12
     inversify: ^6.0.1
     jest: ^27.5.1
-    jest-junit: ^14.0.0
+    jest-junit: ^15.0.0
     lodash: ^4.17.21
     logger: "workspace:*"
     mockdate: ^3.0.5
@@ -11937,7 +11937,7 @@ __metadata:
     fork-ts-checker-webpack-plugin: ^7.2.12
     inversify: ^6.0.1
     jest: ^27.5.1
-    jest-junit: ^14.0.0
+    jest-junit: ^15.0.0
     lodash: ^4.17.21
     logger: "workspace:*"
     mockdate: ^3.0.5
@@ -12596,7 +12596,7 @@ __metadata:
     fork-ts-checker-webpack-plugin: ^7.2.12
     inversify: ^6.0.1
     jest: ^27.5.1
-    jest-junit: ^14.0.0
+    jest-junit: ^15.0.0
     lodash: ^4.17.21
     logger: "workspace:*"
     mockdate: ^3.0.5
@@ -12637,7 +12637,7 @@ __metadata:
     fork-ts-checker-webpack-plugin: ^7.2.12
     inversify: ^6.0.1
     jest: ^27.5.1
-    jest-junit: ^14.0.0
+    jest-junit: ^15.0.0
     lodash: ^4.17.21
     logger: "workspace:*"
     mockdate: ^3.0.5
@@ -12987,7 +12987,7 @@ __metadata:
     cpy-cli: ^4.1.0
     inversify: ^6.0.1
     jest: ^27.5.1
-    jest-junit: ^14.0.0
+    jest-junit: ^15.0.0
     lodash: ^4.17.21
     logger: "workspace:*"
     npm-run-all: ^4.1.5
@@ -13143,7 +13143,7 @@ __metadata:
     inversify: ^6.0.1
     jest: ^27.5.1
     jest-extended: ^2.0.0
-    jest-junit: ^14.0.0
+    jest-junit: ^15.0.0
     lodash: ^4.17.21
     logger: "workspace:*"
     mockdate: ^3.0.5
@@ -13576,7 +13576,7 @@ __metadata:
     common: "workspace:*"
     inversify: ^6.0.1
     jest: ^27.5.1
-    jest-junit: ^14.0.0
+    jest-junit: ^15.0.0
     npm-run-all: ^4.1.5
     reflect-metadata: ^0.1.13
     rimraf: ^3.0.2
@@ -14808,7 +14808,7 @@ __metadata:
     got: ^11.8.5
     inversify: ^6.0.1
     jest: ^27.5.1
-    jest-junit: ^14.0.0
+    jest-junit: ^15.0.0
     lodash: ^4.17.21
     logger: "workspace:*"
     npm-run-all: ^4.1.5
@@ -14839,7 +14839,7 @@ __metadata:
     fork-ts-checker-webpack-plugin: ^7.2.12
     inversify: ^6.0.1
     jest: ^27.5.1
-    jest-junit: ^14.0.0
+    jest-junit: ^15.0.0
     lodash: ^4.17.21
     logger: "workspace:*"
     mockdate: ^3.0.5
@@ -14873,7 +14873,7 @@ __metadata:
     fork-ts-checker-webpack-plugin: ^7.2.12
     inversify: ^6.0.1
     jest: ^27.5.1
-    jest-junit: ^14.0.0
+    jest-junit: ^15.0.0
     lodash: ^4.17.21
     logger: "workspace:*"
     mockdate: ^3.0.5
@@ -14923,7 +14923,7 @@ __metadata:
     fork-ts-checker-webpack-plugin: ^7.2.12
     inversify: ^6.0.1
     jest: ^27.5.1
-    jest-junit: ^14.0.0
+    jest-junit: ^15.0.0
     leveldown: ^6.1.1
     lodash: ^4.17.21
     logger: "workspace:*"
@@ -14974,7 +14974,7 @@ __metadata:
     fork-ts-checker-webpack-plugin: ^7.2.12
     inversify: ^6.0.1
     jest: ^27.5.1
-    jest-junit: ^14.0.0
+    jest-junit: ^15.0.0
     lodash: ^4.17.21
     logger: "workspace:*"
     moment: ^2.29.4
@@ -15017,7 +15017,7 @@ __metadata:
     got: ^11.8.5
     inversify: ^6.0.1
     jest: ^27.5.1
-    jest-junit: ^14.0.0
+    jest-junit: ^15.0.0
     lodash: ^4.17.21
     logger: "workspace:*"
     mockdate: ^3.0.5
@@ -15056,7 +15056,7 @@ __metadata:
     functional-tests: "workspace:*"
     inversify: ^6.0.1
     jest: ^27.5.1
-    jest-junit: ^14.0.0
+    jest-junit: ^15.0.0
     lodash: ^4.17.21
     logger: "workspace:*"
     moment: ^2.29.4
@@ -15094,7 +15094,7 @@ __metadata:
     functional-tests: "workspace:*"
     inversify: ^6.0.1
     jest: ^27.5.1
-    jest-junit: ^14.0.0
+    jest-junit: ^15.0.0
     lodash: ^4.17.21
     logger: "workspace:*"
     mockdate: ^3.0.5
