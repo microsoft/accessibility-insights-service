@@ -31,7 +31,7 @@
         "@types/escape-html": "^1.0.2",
         "@types/fingerprint-generator": "1.0.0",
         "@types/jest": "^27.4.1",
-        "@types/lodash": "^4.14.182",
+        "@types/lodash": "^4.14.191",
         "@types/node": "^16.11.7",
         "@types/normalize-path": "^3.0.0",
         "@types/puppeteer": "^5.4.6",
