@@ -40,7 +40,7 @@
         "axe-result-converter": "workspace:*",
         "common": "workspace:*",
         "copy-webpack-plugin": "^11.0.0",
-        "dts-bundle-generator": "^6.12.0",
+        "dts-bundle-generator": "^7.1.0",
         "fork-ts-checker-webpack-plugin": "^7.2.12",
         "jest": "^27.5.1",
         "jest-junit": "^14.0.0",
