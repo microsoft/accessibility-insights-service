@@ -128,16 +128,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@azure/batch@npm:^10.1.0":
-  version: 10.1.0
-  resolution: "@azure/batch@npm:10.1.0"
+"@azure/batch@npm:^10.2.0":
+  version: 10.2.0
+  resolution: "@azure/batch@npm:10.2.0"
   dependencies:
     "@azure/ms-rest-azure-js": ^2.1.0
     "@azure/ms-rest-js": ^2.2.0
     jssha: ^3.2.0
     tslib: ^1.10.0
     url-parse: ^1.5.3
-  checksum: 133679a779431c3bb3d1316f1aa887eab229d4cd6f4eac8948aa355a6f27b0fc15e5bd1d24e686a45f0b42641169646081b6a28d36c5a10d84228fca57a335a5
+  checksum: ddc6977aa45b70b484af69bff4e6a177c3571b6e9a07cec4e162eb16b71f98fbe2c4c5ceac37abadd15b77420d4cb8ddfd0ebb2831d7dd9fb161b30a3abe9f11
   languageName: node
   linkType: hard
 
@@ -4717,7 +4717,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "azure-services@workspace:packages/azure-services"
   dependencies:
-    "@azure/batch": ^10.1.0
+    "@azure/batch": ^10.2.0
     "@azure/core-auth": ^1.3.2
     "@azure/cosmos": ^3.16.2
     "@azure/identity": ^2.1.0
@@ -11882,7 +11882,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "privacy-scan-job-manager@workspace:packages/privacy-scan-job-manager"
   dependencies:
-    "@azure/batch": ^10.1.0
+    "@azure/batch": ^10.2.0
     "@azure/ms-rest-nodeauth": ^3.1.1
     "@types/dotenv": ^8.2.0
     "@types/jest": ^27.4.1
@@ -12582,7 +12582,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "report-generator-job-manager@workspace:packages/report-generator-job-manager"
   dependencies:
-    "@azure/batch": ^10.1.0
+    "@azure/batch": ^10.2.0
     "@azure/ms-rest-nodeauth": ^3.1.1
     "@types/dotenv": ^8.2.0
     "@types/jest": ^27.4.1
@@ -14825,7 +14825,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "web-api-scan-job-manager@workspace:packages/web-api-scan-job-manager"
   dependencies:
-    "@azure/batch": ^10.1.0
+    "@azure/batch": ^10.2.0
     "@azure/ms-rest-nodeauth": ^3.1.1
     "@types/dotenv": ^8.2.0
     "@types/jest": ^27.4.1
@@ -14960,7 +14960,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "web-api-send-notification-job-manager@workspace:packages/web-api-send-notification-job-manager"
   dependencies:
-    "@azure/batch": ^10.1.0
+    "@azure/batch": ^10.2.0
     "@azure/ms-rest-nodeauth": ^3.1.1
     "@types/dotenv": ^8.2.0
     "@types/jest": ^27.4.1
