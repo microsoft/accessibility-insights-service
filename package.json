@@ -42,7 +42,7 @@
         "@typescript-eslint/parser": "^4.33.0",
         "combine-dependabot-prs": "^1.0.5",
         "commander": "^9.3.0",
-        "eslint": "^7.32.0",
+        "eslint": "^8.26.0",
         "eslint-plugin-header": "^3.0.1",
         "eslint-plugin-import": "^2.26.0",
         "eslint-plugin-jest": "^26.5.3",
