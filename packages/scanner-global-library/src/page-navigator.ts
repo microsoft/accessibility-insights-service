@@ -50,10 +50,7 @@ export class PageNavigator {
     ): Promise<NavigationResponse> {
         await this.pageNavigationHooks.preNavigation(page);
 
-        const opResult = await this.navigatePage(
-            (waitUntil = this.navigationCondition) => page.goto(url, { waitUntil, timeout: puppeteerTimeoutConfig.navigationTimeoutMsecs }),
-            page,
-        );
+        const opResult = await this.navigatePage(this.createPageNavigationOperation('goto', page, url), page);
 
         if (opResult.browserError) {
             this.logger?.logError('Page navigation error.', {
@@ -66,15 +63,12 @@ export class PageNavigator {
             return undefined;
         }
 
-        const networkIdlePageTiming = await this.waitForNetworkIdle(page);
-
         const postNavigationPageTiming = await this.pageNavigationHooks.postNavigation(page, opResult.response, onNavigationError);
 
         return {
             httpResponse: opResult.response,
             pageNavigationTiming: {
                 ...opResult.navigationTiming,
-                ...networkIdlePageTiming,
                 ...postNavigationPageTiming,
             } as PageNavigationTiming,
         };
@@ -84,10 +78,7 @@ export class PageNavigator {
         page: Puppeteer.Page,
         onNavigationError: (browserError: BrowserError, error?: unknown) => Promise<void> = () => Promise.resolve(),
     ): Promise<NavigationResponse> {
-        const opResult = await this.navigatePage(
-            (waitUntil = this.navigationCondition) => page.reload({ waitUntil, timeout: puppeteerTimeoutConfig.navigationTimeoutMsecs }),
-            page,
-        );
+        const opResult = await this.navigatePage(this.createPageNavigationOperation('reload', page), page);
 
         if (opResult.browserError) {
             this.logger?.logError('Page navigation error while reload page.', {
@@ -100,15 +91,12 @@ export class PageNavigator {
             return undefined;
         }
 
-        const networkIdlePageTiming = await this.waitForNetworkIdle(page);
-
         const postNavigationPageTiming = await this.pageNavigationHooks.postNavigation(page, opResult.response, onNavigationError);
 
         return {
             httpResponse: opResult.response,
             pageNavigationTiming: {
                 ...opResult.navigationTiming,
-                ...networkIdlePageTiming,
                 ...postNavigationPageTiming,
             } as PageNavigationTiming,
         };
@@ -310,25 +298,42 @@ export class PageNavigator {
         }
     }
 
-    /**
-     * Waits for page network activity to reach idle state.
-     * This mitigates cases when page needs load pending frame/content.
-     * Will not throw if page still has network activity.
-     */
-    protected async waitForNetworkIdle(page: Puppeteer.Page): Promise<Partial<PageNavigationTiming>> {
-        let networkIdleTimeout = false;
-        const timestamp = System.getTimestamp();
-        try {
-            await page.waitForNavigation({ waitUntil: 'networkidle0', timeout: puppeteerTimeoutConfig.networkIdleTimeoutMsec });
-        } catch (error) {
-            networkIdleTimeout = true;
-            this.logger.logWarn('Error while waiting for page network idle state.', {
-                timeout: `${puppeteerTimeoutConfig.networkIdleTimeoutMsec}`,
-                error: System.serializeError(error),
-            });
-        }
-        const networkIdleElapsed = System.getElapsedTime(timestamp);
+    private createPageNavigationOperation(operation: 'goto' | 'reload', page: Puppeteer.Page, url?: string): NavigationOperation {
+        /**
+         * Waits for page network activity to reach idle state.
+         * This mitigates cases when page needs load pending frame/content.
+         * Will not throw on timeout if page still has network activity.
+         */
+        const waitForNavigationFn = async () => {
+            try {
+                return await page.waitForNavigation({ waitUntil: 'networkidle0', timeout: puppeteerTimeoutConfig.networkIdleTimeoutMsec });
+            } catch (error) {
+                this.logger.logWarn('Error while waiting for page network idle state.', {
+                    timeout: `${puppeteerTimeoutConfig.networkIdleTimeoutMsec}`,
+                    error: System.serializeError(error),
+                });
 
-        return { networkIdle: networkIdleElapsed, networkIdleTimeout };
+                return undefined;
+            }
+        };
+
+        switch (operation) {
+            case 'goto':
+                return async (waitUntil = this.navigationCondition) => {
+                    const gotoPromise = page.goto(url, { waitUntil, timeout: puppeteerTimeoutConfig.navigationTimeoutMsecs });
+                    const responses = await Promise.all([gotoPromise, waitForNavigationFn()]);
+
+                    return responses[0];
+                };
+            case 'reload':
+                return async (waitUntil = this.navigationCondition) => {
+                    const reloadPromise = page.reload({ waitUntil, timeout: puppeteerTimeoutConfig.navigationTimeoutMsecs });
+                    const responses = await Promise.all([reloadPromise, waitForNavigationFn()]);
+
+                    return responses[0];
+                };
+            default:
+                return undefined;
+        }
     }
 }

@@ -42,10 +42,6 @@ class PageNavigatorStub extends PageNavigator {
         return super.invokePageNavigationOperation(navigationOperation);
     }
 
-    public async waitForNetworkIdle(page: Puppeteer.Page): Promise<Partial<PageNavigationTiming>> {
-        return super.waitForNetworkIdle(page);
-    }
-
     public async navigatePage(navigationOperation: NavigationOperation, page: Puppeteer.Page): Promise<PageOperationResult> {
         return super.navigatePage(navigationOperation, page);
     }
@@ -107,10 +103,6 @@ describe(PageNavigator, () => {
             pageOperationResult.response = {
                 status: () => 200,
             } as Puppeteer.HTTPResponse;
-            const waitForNetworkIdleTiming = {
-                networkIdle: 10000,
-                networkIdleTimeout: true,
-            } as PageNavigationTiming;
             const postNavigationTiming = {
                 render: 5000,
                 scroll: 2000,
@@ -123,28 +115,27 @@ describe(PageNavigator, () => {
                 .setup((o) => o.reload({ waitUntil: 'networkidle2', timeout: puppeteerTimeoutConfig.navigationTimeoutMsecs }))
                 .returns(() => Promise.resolve(response))
                 .verifiable();
+            puppeteerPageMock
+                .setup((o) => o.waitForNavigation({ waitUntil: 'networkidle0', timeout: puppeteerTimeoutConfig.networkIdleTimeoutMsec }))
+                .returns(() => Promise.resolve(response))
+                .verifiable();
             const navigatePageFn = jest.fn().mockImplementation(async (op) => {
                 await op();
 
                 return Promise.resolve(pageOperationResult);
             });
             pageNavigator.navigatePage = navigatePageFn;
-            const waitForNetworkIdleFn = jest.fn().mockImplementation(() => Promise.resolve(waitForNetworkIdleTiming));
-            pageNavigator.waitForNetworkIdle = waitForNetworkIdleFn;
 
             const actualNavigationResponse = await pageNavigator.reload(puppeteerPageMock.object, undefined);
 
             const expectedNavigationResponse = {
                 httpResponse: pageOperationResult.response,
                 pageNavigationTiming: {
-                    networkIdle: 10000,
-                    networkIdleTimeout: true,
                     render: 5000,
                     scroll: 2000,
                 },
             } as NavigationResponse;
             expect(navigatePageFn).toBeCalledWith(expect.any(Function), puppeteerPageMock.object);
-            expect(waitForNetworkIdleFn).toBeCalledWith(puppeteerPageMock.object);
             expect(actualNavigationResponse).toEqual(expectedNavigationResponse);
         });
 
@@ -171,10 +162,6 @@ describe(PageNavigator, () => {
             pageOperationResult.response = {
                 status: () => 200,
             } as Puppeteer.HTTPResponse;
-            const waitForNetworkIdleTiming = {
-                networkIdle: 10000,
-                networkIdleTimeout: true,
-            } as PageNavigationTiming;
             const postNavigationTiming = {
                 render: 5000,
                 scroll: 2000,
@@ -191,28 +178,27 @@ describe(PageNavigator, () => {
                 .setup((o) => o.goto(url, { waitUntil: 'networkidle2', timeout: puppeteerTimeoutConfig.navigationTimeoutMsecs }))
                 .returns(() => Promise.resolve(response))
                 .verifiable();
+            puppeteerPageMock
+                .setup((o) => o.waitForNavigation({ waitUntil: 'networkidle0', timeout: puppeteerTimeoutConfig.networkIdleTimeoutMsec }))
+                .returns(() => Promise.resolve(response))
+                .verifiable();
             const navigatePageFn = jest.fn().mockImplementation(async (op) => {
                 await op();
 
                 return Promise.resolve(pageOperationResult);
             });
             pageNavigator.navigatePage = navigatePageFn;
-            const waitForNetworkIdleFn = jest.fn().mockImplementation(() => Promise.resolve(waitForNetworkIdleTiming));
-            pageNavigator.waitForNetworkIdle = waitForNetworkIdleFn;
 
             const actualNavigationResponse = await pageNavigator.navigate(url, puppeteerPageMock.object, undefined);
 
             const expectedNavigationResponse = {
                 httpResponse: pageOperationResult.response,
                 pageNavigationTiming: {
-                    networkIdle: 10000,
-                    networkIdleTimeout: true,
                     render: 5000,
                     scroll: 2000,
                 },
             } as NavigationResponse;
             expect(navigatePageFn).toBeCalledWith(expect.any(Function), puppeteerPageMock.object);
-            expect(waitForNetworkIdleFn).toBeCalledWith(puppeteerPageMock.object);
             expect(actualNavigationResponse).toEqual(expectedNavigationResponse);
         });
 
@@ -309,33 +295,49 @@ describe(PageNavigator, () => {
     });
 
     describe('waitForNetworkIdle', () => {
-        it('wait without timeout', async () => {
-            puppeteerPageMock
-                .setup((o) => o.waitForNavigation({ waitUntil: 'networkidle0', timeout: puppeteerTimeoutConfig.networkIdleTimeoutMsec }))
-                .returns(() => Promise.resolve(response))
-                .verifiable();
-
-            const actualNavigationTiming = await pageNavigator.waitForNetworkIdle(puppeteerPageMock.object);
-            const expectedNavigationTiming = {
-                networkIdle: 10000,
-                networkIdleTimeout: false,
-            } as PageNavigationTiming;
-            expect(expectedNavigationTiming).toEqual(actualNavigationTiming);
-        });
-
         it('wait with timeout', async () => {
             const timeoutError = new Error('Navigation timeout');
+            pageOperationResult.response = {
+                status: () => 200,
+            } as Puppeteer.HTTPResponse;
+            const postNavigationTiming = {
+                render: 5000,
+                scroll: 2000,
+            } as PageNavigationTiming;
+            pageNavigationHooksMock
+                .setup((o) => o.preNavigation(puppeteerPageMock.object))
+                .returns(() => Promise.resolve())
+                .verifiable();
+            pageNavigationHooksMock
+                .setup((o) => o.postNavigation(puppeteerPageMock.object, pageOperationResult.response, It.isAny()))
+                .returns(() => Promise.resolve(postNavigationTiming))
+                .verifiable();
+            puppeteerPageMock
+                .setup((o) => o.goto(url, { waitUntil: 'networkidle2', timeout: puppeteerTimeoutConfig.navigationTimeoutMsecs }))
+                .returns(() => Promise.resolve(response))
+                .verifiable();
             puppeteerPageMock
                 .setup((o) => o.waitForNavigation({ waitUntil: 'networkidle0', timeout: puppeteerTimeoutConfig.networkIdleTimeoutMsec }))
                 .returns(() => Promise.reject(timeoutError))
                 .verifiable();
+            const navigatePageFn = jest.fn().mockImplementation(async (op) => {
+                await op();
 
-            const actualNavigationTiming = await pageNavigator.waitForNetworkIdle(puppeteerPageMock.object);
-            const expectedNavigationTiming = {
-                networkIdle: 10000,
-                networkIdleTimeout: true,
-            } as PageNavigationTiming;
-            expect(expectedNavigationTiming).toEqual(actualNavigationTiming);
+                return Promise.resolve(pageOperationResult);
+            });
+            pageNavigator.navigatePage = navigatePageFn;
+
+            const actualNavigationResponse = await pageNavigator.navigate(url, puppeteerPageMock.object, undefined);
+
+            const expectedNavigationResponse = {
+                httpResponse: pageOperationResult.response,
+                pageNavigationTiming: {
+                    render: 5000,
+                    scroll: 2000,
+                },
+            } as NavigationResponse;
+            expect(navigatePageFn).toBeCalledWith(expect.any(Function), puppeteerPageMock.object);
+            expect(actualNavigationResponse).toEqual(expectedNavigationResponse);
         });
     });
 
