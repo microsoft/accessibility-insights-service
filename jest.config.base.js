@@ -8,6 +8,7 @@ module.exports = {
     globals: {
         'ts-jest': {
             tsconfig: '<rootDir>/tsconfig.json',
+            astTransformers: { before: ['<rootDir>/../../ts-jest-keys-transformer.js'] },
         },
     },
     moduleDirectories: ['node_modules'],
