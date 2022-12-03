@@ -4628,12 +4628,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"async-mutex@npm:^0.3.2":
-  version: 0.3.2
-  resolution: "async-mutex@npm:0.3.2"
+"async-mutex@npm:^0.4.0":
+  version: 0.4.0
+  resolution: "async-mutex@npm:0.4.0"
   dependencies:
-    tslib: ^2.3.1
-  checksum: 620b771dfdea1cad0a6b712915c31a1e3ca880a8cf1eae92b4590f435995e0260929c6ebaae0b9126b1456790ea498064b5bb9a506948cda760f48d3d0dcc4c8
+    tslib: ^2.4.0
+  checksum: 813a71728b35a4fbfd64dba719f04726d9133c67b577fcd951b7028c4a675a13ee34e69beb82d621f87bf81f5d4f135c4c44be0448550c7db728547244ef71fc
   languageName: node
   linkType: hard
 
@@ -4748,7 +4748,7 @@ __metadata:
     "@types/got": ^9.6.11
     "@types/jest": ^27.4.1
     "@types/lodash": ^4.14.182
-    async-mutex: ^0.3.2
+    async-mutex: ^0.4.0
     common: "workspace:*"
     dotenv: ^16.0.1
     fork-ts-checker-webpack-plugin: ^7.2.12
@@ -13182,7 +13182,7 @@ __metadata:
     "@types/sha.js": ^2.4.0
     "@types/yargs": ^17.0.13
     accessibility-insights-report: 4.4.0
-    async-mutex: ^0.3.2
+    async-mutex: ^0.4.0
     axe-core: 4.4.1
     axe-result-converter: "workspace:*"
     azure-services: "workspace:*"
