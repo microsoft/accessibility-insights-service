@@ -29,7 +29,7 @@
         "@types/node": "^16.11.7",
         "@types/puppeteer": "^5.4.6",
         "@types/sha.js": "^2.4.0",
-        "@types/yargs": "^17.0.13",
+        "@types/yargs": "^17.0.18",
         "copy-webpack-plugin": "^11.0.0",
         "fork-ts-checker-webpack-plugin": "^7.2.12",
         "jest": "^27.5.1",
@@ -77,7 +77,7 @@
         "sha.js": "^2.4.11",
         "storage-documents": "workspace:*",
         "yamlparser": "^0.0.2",
-        "yargs": "^17.6.0"
+        "yargs": "^17.6.2"
     },
     "resolutions": {
         "axe-core": "4.4.1"

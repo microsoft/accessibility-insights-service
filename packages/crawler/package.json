@@ -59,7 +59,7 @@
         "reflect-metadata": "^0.1.13",
         "scanner-global-library": "workspace:*",
         "sha.js": "^2.4.11",
-        "yargs": "^17.6.0"
+        "yargs": "^17.6.2"
     },
     "overrides": {
         "apify": {
