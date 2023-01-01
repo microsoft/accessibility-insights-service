@@ -14851,7 +14851,7 @@ __metadata:
     "@types/jest": ^27.4.1
     "@types/lodash": ^4.14.182
     "@types/node": ^16.11.7
-    adal-node: ">=0.2.3"
+    adal-node: ">=0.2.4"
     common: "workspace:*"
     forever-agent: ^0.6.1
     got: ^11.8.5
