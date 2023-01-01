@@ -40,7 +40,7 @@
         "inversify": "^6.0.1",
         "lodash": "^4.17.21",
         "logger": "workspace:*",
-        "puppeteer": "18.1.0",
+        "puppeteer": "19.4.1",
         "reflect-metadata": "^0.1.13",
         "scanner-global-library": "workspace:*",
         "storage-documents": "workspace:*"
