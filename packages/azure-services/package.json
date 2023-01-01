@@ -25,7 +25,7 @@
         "@types/got": "^9.6.11",
         "@types/jest": "^27.4.1",
         "@types/lodash": "^4.14.182",
-        "fork-ts-checker-webpack-plugin": "^7.2.12",
+        "fork-ts-checker-webpack-plugin": "^7.2.14",
         "jest": "^27.5.1",
         "jest-junit": "^15.0.0",
         "mockdate": "^3.0.5",
