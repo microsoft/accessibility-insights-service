@@ -85,7 +85,7 @@
         "tar": ">=6.1.9"
     },
     "dependencies": {
-        "accessibility-insights-report": "4.4.0"
+        "accessibility-insights-report": "4.4.1"
     },
     "packageManager": "yarn@3.2.2"
 }

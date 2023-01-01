@@ -62,7 +62,7 @@
         "@axe-core/puppeteer": "^4.5.0",
         "@medv/finder": "^2.1.0",
         "@sindresorhus/fnv1a": "^2.0.1",
-        "accessibility-insights-report": "4.4.0",
+        "accessibility-insights-report": "4.4.1",
         "ajv": "^8.11.2",
         "apify": "^2.3.2",
         "applicationinsights": "^2.3.1",
