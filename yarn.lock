@@ -289,10 +289,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@azure/functions@npm:^3.2.0":
-  version: 3.2.0
-  resolution: "@azure/functions@npm:3.2.0"
-  checksum: 4e521ee450b4e47555b533e6e21d68141db62de7ba5a10327bdfaa93856f9d7f62197e1cc33359bba6007e3b79dd9d7214cbec23bb036875cbee9687593e8453
+"@azure/functions@npm:^3.5.0":
+  version: 3.5.0
+  resolution: "@azure/functions@npm:3.5.0"
+  dependencies:
+    iconv-lite: ^0.6.3
+    long: ^4.0.0
+    uuid: ^8.3.0
+  checksum: 105ddb7378d4b21e769de3d998b9e88913782356ac0edca20e1c0dbd1ac7fb15f6ca04f86121ce1ed5b2ec49564b64788d2046bf6e71f0199555e37c88cfaf8d
   languageName: node
   linkType: hard
 
@@ -6465,7 +6469,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "e2e-web-apis@workspace:packages/e2e-web-apis"
   dependencies:
-    "@azure/functions": ^3.2.0
+    "@azure/functions": ^3.5.0
     "@types/dotenv": ^8.2.0
     "@types/jest": ^27.4.1
     "@types/lodash": ^4.14.182
@@ -10386,6 +10390,13 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"long@npm:^4.0.0":
+  version: 4.0.0
+  resolution: "long@npm:4.0.0"
+  checksum: 16afbe8f749c7c849db1f4de4e2e6a31ac6e617cead3bdc4f9605cb703cd20e1e9fc1a7baba674ffcca57d660a6e5b53a9e236d7b25a295d3855cca79cc06744
+  languageName: node
+  linkType: hard
+
 "loose-envify@npm:^1.0.0, loose-envify@npm:^1.1.0, loose-envify@npm:^1.4.0":
   version: 1.4.0
   resolution: "loose-envify@npm:1.4.0"
@@ -13172,7 +13183,7 @@ __metadata:
   resolution: "service-library@workspace:packages/service-library"
   dependencies:
     "@azure/cosmos": ^3.17.2
-    "@azure/functions": ^3.2.0
+    "@azure/functions": ^3.5.0
     "@azure/identity": ^3.1.1
     "@azure/storage-blob": ^12.11.0
     "@types/jest": ^27.4.1
@@ -15092,7 +15103,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "web-api@workspace:packages/web-api"
   dependencies:
-    "@azure/functions": ^3.2.0
+    "@azure/functions": ^3.5.0
     "@types/dotenv": ^8.2.0
     "@types/jest": ^27.4.1
     "@types/lodash": ^4.14.182
@@ -15129,7 +15140,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "web-workers@workspace:packages/web-workers"
   dependencies:
-    "@azure/functions": ^3.2.0
+    "@azure/functions": ^3.5.0
     "@types/dotenv": ^8.2.0
     "@types/jest": ^27.4.1
     "@types/lodash": ^4.14.182
