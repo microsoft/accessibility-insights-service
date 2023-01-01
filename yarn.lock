@@ -3031,13 +3031,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/encoding-down@npm:^5.0.0":
-  version: 5.0.0
-  resolution: "@types/encoding-down@npm:5.0.0"
+"@types/encoding-down@npm:^5.0.1":
+  version: 5.0.1
+  resolution: "@types/encoding-down@npm:5.0.1"
   dependencies:
     "@types/abstract-leveldown": "*"
     "@types/level-codec": "*"
-  checksum: c71b9fb8a86de5484ac38baafb03603efcc6cff031e79b57d17e01b545fb0a1910012350d7819dd8670d98ee4f65f3b7af4522b59177760f984d3a2a99d28472
+  checksum: cc487817e5748735f3d13476fa742d15a8db5580e8cf08f837e87710ba651bf397311bce696f9730084e46df82bcf59d8418b7e143a211bd07db9c6bfc6887a4
   languageName: node
   linkType: hard
 
@@ -3940,7 +3940,7 @@ __metadata:
     "@medv/finder": ^2.1.0
     "@rollup/plugin-commonjs": ^23.0.0
     "@rollup/plugin-node-resolve": ^15.0.0
-    "@types/encoding-down": ^5.0.0
+    "@types/encoding-down": ^5.0.1
     "@types/jest": ^27.4.1
     "@types/leveldown": ^4.0.2
     "@types/levelup": ^5.1.1
