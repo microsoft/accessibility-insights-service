@@ -13630,7 +13630,7 @@ __metadata:
     reflect-metadata: ^0.1.13
     rimraf: ^3.0.2
     ts-jest: ^27.1.4
-    ts-transformer-keys: ^0.4.3
+    ts-transformer-keys: ^0.4.4
     ttypescript: ^1.5.13
     typemoq: ^2.1.0
     typescript: ^4.8.4
@@ -14268,12 +14268,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ts-transformer-keys@npm:^0.4.3":
-  version: 0.4.3
-  resolution: "ts-transformer-keys@npm:0.4.3"
+"ts-transformer-keys@npm:^0.4.4":
+  version: 0.4.4
+  resolution: "ts-transformer-keys@npm:0.4.4"
   peerDependencies:
     typescript: ">=2.4.1"
-  checksum: 915155202544d2975c858419924c1a56483222328cd2f51268605bf1508154021b2604f34de2de1c2b8627fb43e96dd92cea4142eadb9e20a3b21445dbae56ee
+  checksum: f63e9d658f992f8949ba09f7c6f3585342183efa657a16b82ca82915a9f5206bcff417437ee4ee87144ba79139373367e49b71feb19db51c61b5130c84fc6f88
   languageName: node
   linkType: hard
 
