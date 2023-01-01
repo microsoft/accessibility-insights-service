@@ -3228,7 +3228,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/lodash@npm:^4.14.119, @types/lodash@npm:^4.14.182":
+"@types/lodash@npm:^4.14.182":
   version: 4.14.182
   resolution: "@types/lodash@npm:4.14.182"
   checksum: 7dd137aa9dbabd632408bd37009d984655164fa1ecc3f2b6eb94afe35bf0a5852cbab6183148d883e9c73a958b7fec9a9bcf7c8e45d41195add6a18c34958209
@@ -3392,20 +3392,6 @@ __metadata:
   dependencies:
     "@types/node": "*"
   checksum: 53e23a1f9fb14a491c00425b2a4fc443817564d77be5e1b95fcbeb6d009551b62ea82ffc3e5ca0c6b9f6b186824ca6ec46e7450c1bcd6674a46d1325f0116e24
-  languageName: node
-  linkType: hard
-
-"@types/uuid@npm:~3.4.4":
-  version: 3.4.9
-  resolution: "@types/uuid@npm:3.4.9"
-  checksum: 64cbb7edc694a230f7093dacaa66db69f820b9c2c3491dcc29f3e5017a7ffae960567038a4f9b6520bfee591c2335b3258fd55705a18bf1b462948ed0aaf1381
-  languageName: node
-  linkType: hard
-
-"@types/validator@npm:^9.4.3":
-  version: 9.4.4
-  resolution: "@types/validator@npm:9.4.4"
-  checksum: d639ffbdb8dcbba951780977376701b7d5ecc574129ffcd591479461bcd40439ae5bf9663d2bfa513ef3f4f58c2e8ac7edbce994b58dfd2f82205cc2e38cc804
   languageName: node
   linkType: hard
 
@@ -5688,15 +5674,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"commander@npm:~2.9.0":
-  version: 2.9.0
-  resolution: "commander@npm:2.9.0"
-  dependencies:
-    graceful-readlink: ">= 1.0.0"
-  checksum: 37939b6866ae190784fa946ea5b926dfe713731064c746e818642ac59e28f513b54e88e35d8c34b4d24d063cb465977dca2efd2ec974f91e495c743fcb2ae7a2
-  languageName: node
-  linkType: hard
-
 "comment-parser@npm:1.3.1":
   version: 1.3.1
   resolution: "comment-parser@npm:1.3.1"
@@ -6431,23 +6408,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"durable-functions@npm:^1.5.4":
-  version: 1.5.4
-  resolution: "durable-functions@npm:1.5.4"
+"durable-functions@npm:^2.1.0":
+  version: 2.1.0
+  resolution: "durable-functions@npm:2.1.0"
   dependencies:
     "@azure/functions": ^1.2.3
-    "@types/lodash": ^4.14.119
-    "@types/node": 10.14.2
-    "@types/uuid": ~3.4.4
-    "@types/validator": ^9.4.3
     axios: ^0.21.1
-    commander: ~2.9.0
     debug: ~2.6.9
     lodash: ^4.17.15
-    rimraf: ~2.5.4
+    moment: ^2.29.2
     uuid: ~3.3.2
     validator: ~13.7.0
-  checksum: e4d7108dfdb9a230981c780bd1045f3c8d8222555fae59c427138d56e6428f3cba9857b2d530920fd6f4ce148227eb9f6854a083473f06232c926f13e9a14673
+  checksum: dae4605d5c11ed6a950c272eefaec33ec5cfc411f5e06e2d53d15a9418fb02cb040a440249ee699074eb46b55ec254de6a71c92dec4cf79b8846e12588b92943
   languageName: node
   linkType: hard
 
@@ -7907,7 +7879,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"glob@npm:^7.0.5, glob@npm:^7.1.1, glob@npm:^7.1.2, glob@npm:^7.1.3, glob@npm:^7.1.4, glob@npm:^7.1.6":
+"glob@npm:^7.1.1, glob@npm:^7.1.2, glob@npm:^7.1.3, glob@npm:^7.1.4, glob@npm:^7.1.6":
   version: 7.2.0
   resolution: "glob@npm:7.2.0"
   dependencies:
@@ -8046,13 +8018,6 @@ __metadata:
   version: 4.2.10
   resolution: "graceful-fs@npm:4.2.10"
   checksum: 3f109d70ae123951905d85032ebeae3c2a5a7a997430df00ea30df0e3a6c60cf6689b109654d6fdacd28810a053348c4d14642da1d075049e6be1ba5216218da
-  languageName: node
-  linkType: hard
-
-"graceful-readlink@npm:>= 1.0.0":
-  version: 1.0.1
-  resolution: "graceful-readlink@npm:1.0.1"
-  checksum: 4c1889ca0a6fc0bb9585b55c26a99719be132cbc4b7d84036193b70608059b9783e52e2a866d5a8e39821b16a69e899644ca75c6206563f1319b6720836b9ab2
   languageName: node
   linkType: hard
 
@@ -10826,7 +10791,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"moment@npm:^2.29.4":
+"moment@npm:^2.29.2, moment@npm:^2.29.4":
   version: 2.29.4
   resolution: "moment@npm:2.29.4"
   checksum: 0ec3f9c2bcba38dc2451b1daed5daded747f17610b92427bebe1d08d48d8b7bdd8d9197500b072d14e326dd0ccf3e326b9e3d07c5895d3d49e39b6803b76e80e
@@ -12914,17 +12879,6 @@ __metadata:
   bin:
     rimraf: bin.js
   checksum: 87f4164e396f0171b0a3386cc1877a817f572148ee13a7e113b238e48e8a9f2f31d009a92ec38a591ff1567d9662c6b67fd8818a2dbbaed74bc26a87a2a4a9a0
-  languageName: node
-  linkType: hard
-
-"rimraf@npm:~2.5.4":
-  version: 2.5.4
-  resolution: "rimraf@npm:2.5.4"
-  dependencies:
-    glob: ^7.0.5
-  bin:
-    rimraf: ./bin.js
-  checksum: 3d217997a312d520e0db3f89b148add6abfe1b03c3f82ab0fc6b0e1d43d0e9b63856bb0708dee18d4f397717af0d06cb52153c606ba145caa0dc567bc4f4ed4d
   languageName: node
   linkType: hard
 
@@ -15138,7 +15092,7 @@ __metadata:
     azure-services: "workspace:*"
     common: "workspace:*"
     copy-webpack-plugin: ^11.0.0
-    durable-functions: ^1.5.4
+    durable-functions: ^2.1.0
     fork-ts-checker-webpack-plugin: ^7.2.12
     functional-tests: "workspace:*"
     inversify: ^6.0.1
