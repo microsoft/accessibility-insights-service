@@ -53,7 +53,7 @@ export class HealthMonitorOrchestrationController extends WebController {
     private invokeOrchestration(): void {
         const orchestrationExecutor = this.getOrchestrationExecutor();
 
-        orchestrationExecutor(<IOrchestrationFunctionContext>this.context);
+        orchestrationExecutor(this.context as unknown as IOrchestrationFunctionContext);
     }
 
     private getOrchestrationExecutor(): (context: IOrchestrationFunctionContext) => void {

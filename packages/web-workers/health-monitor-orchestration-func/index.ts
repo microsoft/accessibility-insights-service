@@ -13,5 +13,5 @@ import { processWebRequest } from '../src/process-web-request';
  * The durable orchestration function to execute the health test workflow.
  */
 export async function run(context: Context): Promise<void> {
-    await processWebRequest(context, HealthMonitorOrchestrationController, (<IOrchestrationFunctionContext>context).df);
+    await processWebRequest(context, HealthMonitorOrchestrationController, (context as unknown as IOrchestrationFunctionContext).df);
 }

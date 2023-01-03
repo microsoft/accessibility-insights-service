@@ -9,7 +9,7 @@ import * as durableFunctions from 'durable-functions';
 import { IOrchestrationFunctionContext } from 'durable-functions/lib/src/classes';
 import { TestEnvironment } from 'functional-tests';
 import { It, Mock } from 'typemoq';
-import { ContextBindingData } from '@azure/functions';
+import { ContextBindingData, Context } from '@azure/functions';
 import { OrchestrationSteps } from '../orchestration/orchestration-steps';
 import { GeneratorExecutor } from '../test-utilities/generator-executor';
 import { MockableLogger } from '../test-utilities/mockable-logger';
@@ -46,7 +46,7 @@ describe('HealthMonitorOrchestrationController', () => {
             functionName: 'function-name',
             invocationId: 'id',
         },
-    } as unknown as IOrchestrationFunctionContext;
+    } as IOrchestrationFunctionContext;
 
     beforeEach(() => {
         contextStub.bindingData = {} as unknown as ContextBindingData;
@@ -81,13 +81,13 @@ describe('HealthMonitorOrchestrationController', () => {
 
     describe('invoke', () => {
         it('sets context required for orchestrator execution', async () => {
-            await testSubject.invoke(contextStub);
+            await testSubject.invoke(contextStub as unknown as Context);
             expect(contextStub.bindingData.controller).toBe(testSubject);
             expect(contextStub.bindingData.availabilityTestConfig).toEqual(availabilityTestConfig);
         });
 
         it('executes activities in sequence', async () => {
-            await testSubject.invoke(contextStub);
+            await testSubject.invoke(contextStub as unknown as Context);
 
             orchestrationStepsMock
                 .setup((m) => m.logTestRunStart(allTestIdentifiers))
