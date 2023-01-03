@@ -3363,10 +3363,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:^16.11.7":
-  version: 16.11.49
-  resolution: "@types/node@npm:16.11.49"
-  checksum: 05545ee49da3b783ab77cddca45db6f4d47861c2bb148a17b774688e1082f20f27177591d140923724bcd8643b32291203f6f1eadba397e394232d4a1e28e07a
+"@types/node@npm:^16.18.11":
+  version: 16.18.11
+  resolution: "@types/node@npm:16.18.11"
+  checksum: 2a3b1da13063debe6e26f732defb5f03ef4ef732c3e08daba838d8850433bd00e537ce1a97ce9bcfc4b15db5218d701d1265fae94e0d6926906bec157e6b46e0
   languageName: node
   linkType: hard
 
@@ -4034,7 +4034,7 @@ __metadata:
     "@types/jest": ^27.4.1
     "@types/leveldown": ^4.0.2
     "@types/levelup": ^5.1.1
-    "@types/node": ^16.11.7
+    "@types/node": ^16.18.11
     "@types/puppeteer": ^5.4.6
     accessibility-insights-report: 4.4.1
     apify: ^2.3.2
@@ -4059,7 +4059,7 @@ __metadata:
     sha.js: ^2.4.11
     ts-jest: ^27.1.4
     typemoq: ^2.1.0
-    typescript: ^4.8.4
+    typescript: ^4.9.4
     yargs: ^17.6.2
   languageName: unknown
   linkType: soft
@@ -4093,7 +4093,7 @@ __metadata:
     "@types/fingerprint-generator": 1.0.0
     "@types/jest": ^27.4.1
     "@types/lodash": ^4.14.182
-    "@types/node": ^16.11.7
+    "@types/node": ^16.18.11
     "@types/normalize-path": ^3.0.0
     "@types/puppeteer": ^5.4.6
     "@types/table": ^6.3.2
@@ -4144,7 +4144,7 @@ __metadata:
     shebang-loader: ^0.0.1
     ts-jest: ^27.1.4
     typemoq: ^2.1.0
-    typescript: ^4.8.4
+    typescript: ^4.9.4
     uuid-with-v6: ^2.0.0
     webpack: ^5.75.0
     webpack-cli: ^5.0.1
@@ -4160,7 +4160,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "accessibility-insights-service@workspace:."
   dependencies:
-    "@types/node": ^16.11.7
+    "@types/node": ^16.18.11
     "@typescript-eslint/eslint-plugin": ^4.33.0
     "@typescript-eslint/eslint-plugin-tslint": ^5.47.1
     "@typescript-eslint/parser": ^5.47.1
@@ -4188,7 +4188,7 @@ __metadata:
     syncpack: ^8.4.11
     ts-jest: ^27.1.4
     tslint: ^6.1.3
-    typescript: ^4.8.4
+    typescript: ^4.9.4
   languageName: unknown
   linkType: soft
 
@@ -4784,7 +4784,7 @@ __metadata:
   dependencies:
     "@types/jest": ^27.4.1
     "@types/lodash": ^4.14.182
-    "@types/node": ^16.11.7
+    "@types/node": ^16.18.11
     accessibility-insights-report: 4.4.1
     axe-core: 4.4.1
     common: "workspace:*"
@@ -4797,7 +4797,7 @@ __metadata:
     rimraf: ^3.0.2
     ts-jest: ^27.1.4
     typemoq: ^2.1.0
-    typescript: ^4.8.4
+    typescript: ^4.9.4
   languageName: unknown
   linkType: soft
 
@@ -4860,7 +4860,7 @@ __metadata:
     ts-jest: ^27.1.4
     ts-loader: ^9.4.2
     typemoq: ^2.1.0
-    typescript: ^4.8.4
+    typescript: ^4.9.4
     webpack: ^5.75.0
     webpack-cli: ^5.0.1
   languageName: unknown
@@ -5787,7 +5787,7 @@ __metadata:
     "@sindresorhus/fnv1a": ^2.0.1
     "@types/convict": ^6.1.1
     "@types/jest": ^27.4.1
-    "@types/node": ^16.11.7
+    "@types/node": ^16.18.11
     "@types/normalize-path": ^3.0.0
     "@types/sha.js": ^2.4.0
     convict: ^6.2.3
@@ -5807,7 +5807,7 @@ __metadata:
     sha.js: ^2.4.11
     ts-jest: ^27.1.4
     typemoq: ^2.1.0
-    typescript: ^4.8.4
+    typescript: ^4.9.4
     uuid-with-v6: ^2.0.0
   languageName: unknown
   linkType: soft
@@ -6552,7 +6552,7 @@ __metadata:
     "@types/dotenv": ^8.2.0
     "@types/jest": ^27.4.1
     "@types/lodash": ^4.14.182
-    "@types/node": ^16.11.7
+    "@types/node": ^16.18.11
     azure-services: "workspace:*"
     copy-webpack-plugin: ^11.0.0
     fork-ts-checker-webpack-plugin: ^7.2.14
@@ -6568,7 +6568,7 @@ __metadata:
     rimraf: ^3.0.2
     ts-jest: ^27.1.4
     ts-loader: ^9.4.2
-    typescript: ^4.8.4
+    typescript: ^4.9.4
     webpack: ^5.75.0
     webpack-cli: ^5.0.1
     webpack-ignore-dynamic-require: ^1.0.0
@@ -7808,7 +7808,7 @@ __metadata:
     "@types/dotenv": ^8.2.0
     "@types/jest": ^27.4.1
     "@types/lodash": ^4.14.182
-    "@types/node": ^16.11.7
+    "@types/node": ^16.18.11
     azure-services: "workspace:*"
     chai: ^4.3.7
     common: "workspace:*"
@@ -7827,7 +7827,7 @@ __metadata:
     storage-documents: "workspace:*"
     ts-jest: ^27.1.4
     typemoq: ^2.1.0
-    typescript: ^4.8.4
+    typescript: ^4.9.4
     web-api-client: "workspace:*"
     yargs: ^17.6.2
   languageName: unknown
@@ -8253,7 +8253,7 @@ __metadata:
     "@types/chai": ^4.3.4
     "@types/jest": ^27.4.1
     "@types/lodash": ^4.14.182
-    "@types/node": ^16.11.7
+    "@types/node": ^16.18.11
     chai: ^4.3.7
     common: "workspace:*"
     copy-webpack-plugin: ^11.0.0
@@ -8270,7 +8270,7 @@ __metadata:
     shebang-loader: ^0.0.1
     ts-jest: ^27.1.4
     typemoq: ^2.1.0
-    typescript: ^4.8.4
+    typescript: ^4.9.4
     web-api-client: "workspace:*"
     webpack: ^5.75.0
     webpack-cli: ^5.0.1
@@ -10414,7 +10414,7 @@ __metadata:
     "@types/dotenv": ^8.2.0
     "@types/jest": ^27.4.1
     "@types/lodash": ^4.14.182
-    "@types/node": ^16.11.7
+    "@types/node": ^16.18.11
     applicationinsights: ^2.3.1
     common: "workspace:*"
     dotenv: ^16.0.1
@@ -10428,7 +10428,7 @@ __metadata:
     rimraf: ^3.0.2
     ts-jest: ^27.1.4
     typemoq: ^2.1.0
-    typescript: ^4.8.4
+    typescript: ^4.9.4
   languageName: unknown
   linkType: soft
 
@@ -11587,7 +11587,7 @@ __metadata:
   dependencies:
     "@types/jest": ^27.4.1
     "@types/lodash": ^4.14.182
-    "@types/node": ^16.11.7
+    "@types/node": ^16.18.11
     filemanager-webpack-plugin: ^8.0.0
     fork-ts-checker-webpack-plugin: ^7.2.14
     jest: ^27.5.1
@@ -11600,7 +11600,7 @@ __metadata:
     ts-jest: ^27.1.4
     ts-loader: ^9.4.2
     typemoq: ^2.1.0
-    typescript: ^4.8.4
+    typescript: ^4.9.4
     webpack: ^5.75.0
     webpack-cli: ^5.0.1
   languageName: unknown
@@ -11948,7 +11948,7 @@ __metadata:
   dependencies:
     "@types/jest": ^27.4.1
     "@types/lodash": ^4.14.182
-    "@types/node": ^16.11.7
+    "@types/node": ^16.18.11
     "@types/puppeteer": ^5.4.6
     common: "workspace:*"
     inversify: ^6.0.1
@@ -11965,7 +11965,7 @@ __metadata:
     storage-documents: "workspace:*"
     ts-jest: ^27.1.4
     typemoq: ^2.1.0
-    typescript: ^4.8.4
+    typescript: ^4.9.4
   languageName: unknown
   linkType: soft
 
@@ -11978,7 +11978,7 @@ __metadata:
     "@types/dotenv": ^8.2.0
     "@types/jest": ^27.4.1
     "@types/lodash": ^4.14.182
-    "@types/node": ^16.11.7
+    "@types/node": ^16.18.11
     applicationinsights: ^2.3.1
     azure-services: "workspace:*"
     common: "workspace:*"
@@ -12001,7 +12001,7 @@ __metadata:
     ts-jest: ^27.1.4
     ts-loader: ^9.4.2
     typemoq: ^2.1.0
-    typescript: ^4.8.4
+    typescript: ^4.9.4
     webpack: ^5.75.0
     webpack-cli: ^5.0.1
     webpack-ignore-dynamic-require: ^1.0.0
@@ -12017,7 +12017,7 @@ __metadata:
     "@types/dotenv": ^8.2.0
     "@types/jest": ^27.4.1
     "@types/lodash": ^4.14.182
-    "@types/node": ^16.11.7
+    "@types/node": ^16.18.11
     "@types/puppeteer": ^5.4.6
     "@types/yargs": ^17.0.18
     applicationinsights: ^2.3.1
@@ -12050,7 +12050,7 @@ __metadata:
     ts-jest: ^27.1.4
     ts-loader: ^9.4.2
     typemoq: ^2.1.0
-    typescript: ^4.8.4
+    typescript: ^4.9.4
     webpack: ^5.75.0
     webpack-cli: ^5.0.1
     webpack-ignore-dynamic-require: ^1.0.0
@@ -12678,7 +12678,7 @@ __metadata:
     "@types/dotenv": ^8.2.0
     "@types/jest": ^27.4.1
     "@types/lodash": ^4.14.182
-    "@types/node": ^16.11.7
+    "@types/node": ^16.18.11
     applicationinsights: ^2.3.1
     azure-services: "workspace:*"
     common: "workspace:*"
@@ -12701,7 +12701,7 @@ __metadata:
     ts-jest: ^27.1.4
     ts-loader: ^9.4.2
     typemoq: ^2.1.0
-    typescript: ^4.8.4
+    typescript: ^4.9.4
     webpack: ^5.75.0
     webpack-cli: ^5.0.1
     webpack-ignore-dynamic-require: ^1.0.0
@@ -12717,7 +12717,7 @@ __metadata:
     "@types/dotenv": ^8.2.0
     "@types/jest": ^27.4.1
     "@types/lodash": ^4.14.182
-    "@types/node": ^16.11.7
+    "@types/node": ^16.18.11
     "@types/puppeteer": ^5.4.6
     "@types/yargs": ^17.0.18
     applicationinsights: ^2.3.1
@@ -12749,7 +12749,7 @@ __metadata:
     ts-jest: ^27.1.4
     ts-loader: ^9.4.2
     typemoq: ^2.1.0
-    typescript: ^4.8.4
+    typescript: ^4.9.4
     webpack: ^5.75.0
     webpack-cli: ^5.0.1
     webpack-ignore-dynamic-require: ^1.0.0
@@ -13071,7 +13071,7 @@ __metadata:
     "@axe-core/puppeteer": ^4.5.0
     "@types/jest": ^27.4.1
     "@types/lodash": ^4.14.182
-    "@types/node": ^16.11.7
+    "@types/node": ^16.18.11
     "@types/puppeteer": ^5.4.6
     axe-core: 4.4.1
     common: "workspace:*"
@@ -13091,7 +13091,7 @@ __metadata:
     storage-documents: "workspace:*"
     ts-jest: ^27.1.4
     typemoq: ^2.1.0
-    typescript: ^4.8.4
+    typescript: ^4.9.4
   languageName: unknown
   linkType: soft
 
@@ -13229,7 +13229,7 @@ __metadata:
     "@azure/identity": ^3.1.2
     "@azure/storage-blob": ^12.12.0
     "@types/jest": ^27.4.1
-    "@types/node": ^16.11.7
+    "@types/node": ^16.18.11
     "@types/paralleljs": ^0.0.21
     "@types/puppeteer": ^5.4.6
     "@types/sha.js": ^2.4.0
@@ -13263,7 +13263,7 @@ __metadata:
     storage-documents: "workspace:*"
     ts-jest: ^27.1.4
     typemoq: ^2.1.0
-    typescript: ^4.8.4
+    typescript: ^4.9.4
     yargs: ^17.6.2
   languageName: unknown
   linkType: soft
@@ -13666,7 +13666,7 @@ __metadata:
   resolution: "storage-documents@workspace:packages/storage-documents"
   dependencies:
     "@types/jest": ^27.4.1
-    "@types/node": ^16.11.7
+    "@types/node": ^16.18.11
     axe-result-converter: "workspace:*"
     common: "workspace:*"
     inversify: ^6.0.1
@@ -13677,9 +13677,9 @@ __metadata:
     rimraf: ^3.0.2
     ts-jest: ^27.1.4
     ts-transformer-keys: ^0.4.4
-    ttypescript: ^1.5.13
+    ttypescript: ^1.5.15
     typemoq: ^2.1.0
-    typescript: ^4.8.4
+    typescript: ^4.9.4
   languageName: unknown
   linkType: soft
 
@@ -14410,9 +14410,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ttypescript@npm:^1.5.13":
-  version: 1.5.13
-  resolution: "ttypescript@npm:1.5.13"
+"ttypescript@npm:^1.5.15":
+  version: 1.5.15
+  resolution: "ttypescript@npm:1.5.15"
   dependencies:
     resolve: ">=1.9.0"
   peerDependencies:
@@ -14421,7 +14421,7 @@ __metadata:
   bin:
     ttsc: bin/tsc
     ttsserver: bin/tsserver
-  checksum: bd97f058520ebd6183446b2100bfc714c400455e2195c3711d00c3407521d99098a4a204f16200c14a115cd78a5005d4a790bf7fb73a1b21a513573291a9c1d0
+  checksum: 0328578050f08f9d12e6732a9fe71e93cc693ed5e825aefb7f4ba142d4d3d6912caa59a723f775de89cd066c8e609665fd5a7ccfa3b69fb3456c7f24d695db90
   languageName: node
   linkType: hard
 
@@ -14552,13 +14552,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@npm:^4.8.4":
-  version: 4.8.4
-  resolution: "typescript@npm:4.8.4"
+"typescript@npm:^4.9.4":
+  version: 4.9.4
+  resolution: "typescript@npm:4.9.4"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: 3e4f061658e0c8f36c820802fa809e0fd812b85687a9a2f5430bc3d0368e37d1c9605c3ce9b39df9a05af2ece67b1d844f9f6ea8ff42819f13bcb80f85629af0
+  checksum: e782fb9e0031cb258a80000f6c13530288c6d63f1177ed43f770533fdc15740d271554cdae86701c1dd2c83b082cea808b07e97fd68b38a172a83dbf9e0d0ef9
   languageName: node
   linkType: hard
 
@@ -14572,13 +14572,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@^4.8.4#~builtin<compat/typescript>":
-  version: 4.8.4
-  resolution: "typescript@patch:typescript@npm%3A4.8.4#~builtin<compat/typescript>::version=4.8.4&hash=f456af"
+"typescript@patch:typescript@^4.9.4#~builtin<compat/typescript>":
+  version: 4.9.4
+  resolution: "typescript@patch:typescript@npm%3A4.9.4#~builtin<compat/typescript>::version=4.9.4&hash=f456af"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: 563a0ef47abae6df27a9a3ab38f75fc681f633ccf1a3502b1108e252e187787893de689220f4544aaf95a371a4eb3141e4a337deb9895de5ac3c1ca76430e5f0
+  checksum: 37f6e2c3c5e2aa5934b85b0fddbf32eeac8b1bacf3a5b51d01946936d03f5377fe86255d4e5a4ae628fd0cd553386355ad362c57f13b4635064400f3e8e05b9d
   languageName: node
   linkType: hard
 
@@ -14896,7 +14896,7 @@ __metadata:
     "@types/got": ^9.6.11
     "@types/jest": ^27.4.1
     "@types/lodash": ^4.14.182
-    "@types/node": ^16.11.7
+    "@types/node": ^16.18.11
     adal-node: ">=0.2.3"
     common: "workspace:*"
     forever-agent: ^0.6.1
@@ -14912,7 +14912,7 @@ __metadata:
     service-library: "workspace:*"
     ts-jest: ^27.1.4
     typemoq: ^2.1.0
-    typescript: ^4.8.4
+    typescript: ^4.9.4
   languageName: unknown
   linkType: soft
 
@@ -14925,7 +14925,7 @@ __metadata:
     "@types/dotenv": ^8.2.0
     "@types/jest": ^27.4.1
     "@types/lodash": ^4.14.182
-    "@types/node": ^16.11.7
+    "@types/node": ^16.18.11
     applicationinsights: ^2.3.1
     azure-services: "workspace:*"
     common: "workspace:*"
@@ -14948,7 +14948,7 @@ __metadata:
     ts-jest: ^27.1.4
     ts-loader: ^9.4.2
     typemoq: ^2.1.0
-    typescript: ^4.8.4
+    typescript: ^4.9.4
     webpack: ^5.75.0
     webpack-cli: ^5.0.1
     webpack-ignore-dynamic-require: ^1.0.0
@@ -14982,7 +14982,7 @@ __metadata:
     ts-jest: ^27.1.4
     ts-loader: ^9.4.2
     typemoq: ^2.1.0
-    typescript: ^4.8.4
+    typescript: ^4.9.4
     webpack: ^5.75.0
     webpack-cli: ^5.0.1
     webpack-ignore-dynamic-require: ^1.0.0
@@ -15000,7 +15000,7 @@ __metadata:
     "@types/dotenv": ^8.2.0
     "@types/jest": ^27.4.1
     "@types/lodash": ^4.14.182
-    "@types/node": ^16.11.7
+    "@types/node": ^16.18.11
     "@types/puppeteer": ^5.4.6
     "@types/sha.js": ^2.4.0
     "@types/yargs": ^17.0.18
@@ -15042,7 +15042,7 @@ __metadata:
     ts-jest: ^27.1.4
     ts-loader: ^9.4.2
     typemoq: ^2.1.0
-    typescript: ^4.8.4
+    typescript: ^4.9.4
     webpack: ^5.75.0
     webpack-cli: ^5.0.1
     webpack-ignore-dynamic-require: ^1.0.0
@@ -15060,7 +15060,7 @@ __metadata:
     "@types/dotenv": ^8.2.0
     "@types/jest": ^27.4.1
     "@types/lodash": ^4.14.182
-    "@types/node": ^16.11.7
+    "@types/node": ^16.18.11
     applicationinsights: ^2.3.1
     azure-services: "workspace:*"
     common: "workspace:*"
@@ -15082,7 +15082,7 @@ __metadata:
     ts-jest: ^27.1.4
     ts-loader: ^9.4.2
     typemoq: ^2.1.0
-    typescript: ^4.8.4
+    typescript: ^4.9.4
     webpack: ^5.75.0
     webpack-cli: ^5.0.1
     webpack-ignore-dynamic-require: ^1.0.0
@@ -15099,7 +15099,7 @@ __metadata:
     "@types/got": ^9.6.11
     "@types/jest": ^27.4.1
     "@types/lodash": ^4.14.182
-    "@types/node": ^16.11.7
+    "@types/node": ^16.18.11
     "@types/puppeteer": ^5.4.6
     "@types/sha.js": ^2.4.0
     "@types/yargs": ^17.0.18
@@ -15126,7 +15126,7 @@ __metadata:
     ts-jest: ^27.1.4
     ts-loader: ^9.4.2
     typemoq: ^2.1.0
-    typescript: ^4.8.4
+    typescript: ^4.9.4
     webpack: ^5.75.0
     webpack-cli: ^5.0.1
     webpack-ignore-dynamic-require: ^1.0.0
@@ -15142,7 +15142,7 @@ __metadata:
     "@types/dotenv": ^8.2.0
     "@types/jest": ^27.4.1
     "@types/lodash": ^4.14.182
-    "@types/node": ^16.11.7
+    "@types/node": ^16.18.11
     "@types/sha.js": ^2.4.0
     azure-services: "workspace:*"
     common: "workspace:*"
@@ -15164,7 +15164,7 @@ __metadata:
     ts-jest: ^27.1.4
     ts-loader: ^9.4.2
     typemoq: ^2.1.0
-    typescript: ^4.8.4
+    typescript: ^4.9.4
     webpack: ^5.75.0
     webpack-cli: ^5.0.1
     webpack-ignore-dynamic-require: ^1.0.0
@@ -15179,7 +15179,7 @@ __metadata:
     "@types/dotenv": ^8.2.0
     "@types/jest": ^27.4.1
     "@types/lodash": ^4.14.182
-    "@types/node": ^16.11.7
+    "@types/node": ^16.18.11
     "@types/sha.js": ^2.4.0
     azure-services: "workspace:*"
     common: "workspace:*"
@@ -15204,7 +15204,7 @@ __metadata:
     ts-jest: ^27.1.4
     ts-loader: ^9.4.2
     typemoq: ^2.1.0
-    typescript: ^4.8.4
+    typescript: ^4.9.4
     web-api-client: "workspace:*"
     webpack: ^5.75.0
     webpack-cli: ^5.0.1
