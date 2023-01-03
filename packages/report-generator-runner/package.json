@@ -28,7 +28,7 @@
         "@types/lodash": "^4.14.182",
         "@types/node": "^16.11.7",
         "@types/puppeteer": "^5.4.6",
-        "@types/yargs": "^17.0.13",
+        "@types/yargs": "^17.0.18",
         "copy-webpack-plugin": "^11.0.0",
         "fork-ts-checker-webpack-plugin": "^7.2.14",
         "jest": "^27.5.1",
@@ -65,6 +65,6 @@
         "scanner-global-library": "workspace:*",
         "service-library": "workspace:*",
         "storage-documents": "workspace:*",
-        "yargs": "^17.6.0"
+        "yargs": "^17.6.2"
     }
 }

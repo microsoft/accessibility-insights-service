@@ -47,7 +47,7 @@
         "mkdirp": "^1.0.4",
         "mockdate": "^3.0.5",
         "npm-run-all": "^4.1.5",
-        "playwright": "^1.28.1",
+        "playwright": "^1.29.1",
         "rimraf": "^3.0.2",
         "scanner-global-library": "workspace:*",
         "shebang-loader": "^0.0.1",
@@ -94,7 +94,7 @@
         "sha.js": "^2.4.11",
         "uuid-with-v6": "^2.0.0",
         "wtfnode": "^0.9.0",
-        "yargs": "^17.6.0"
+        "yargs": "^17.6.2"
     },
     "overrides": {
         "apify": {
