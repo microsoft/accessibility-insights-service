@@ -34,7 +34,7 @@
         "typescript": "^4.8.4"
     },
     "dependencies": {
-        "accessibility-insights-report": "4.4.0",
+        "accessibility-insights-report": "4.4.1",
         "axe-core": "4.4.1",
         "common": "workspace:*",
         "inversify": "^6.0.1",

@@ -23,9 +23,9 @@
     },
     "homepage": "https://github.com/Microsoft/accessibility-insights-service#readme",
     "devDependencies": {
-        "@rollup/plugin-commonjs": "^23.0.0",
+        "@rollup/plugin-commonjs": "^24.0.0",
         "@rollup/plugin-node-resolve": "^15.0.0",
-        "@types/encoding-down": "^5.0.0",
+        "@types/encoding-down": "^5.0.1",
         "@types/jest": "^27.4.1",
         "@types/leveldown": "^4.0.2",
         "@types/levelup": "^5.1.1",
@@ -43,7 +43,7 @@
     "dependencies": {
         "@axe-core/puppeteer": "^4.5.0",
         "@medv/finder": "^2.1.0",
-        "accessibility-insights-report": "4.4.0",
+        "accessibility-insights-report": "4.4.1",
         "apify": "^2.3.2",
         "axe-core": "4.4.1",
         "browser-pool": "^3.1.4",

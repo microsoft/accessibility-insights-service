@@ -46,7 +46,7 @@
         "eslint-plugin-header": "^3.0.1",
         "eslint-plugin-import": "^2.26.0",
         "eslint-plugin-jest": "^26.5.3",
-        "eslint-plugin-jsdoc": "^39.0.1",
+        "eslint-plugin-jsdoc": "^39.6.4",
         "eslint-plugin-prefer-arrow": "^1.2.3",
         "eslint-plugin-security": "^1.5.0",
         "eslint-plugin-sort-class-members": "^1.16.0",
@@ -57,7 +57,7 @@
         "jest-junit": "^15.0.0",
         "license-check-and-add": "^4.0.5",
         "npm-run-all": "^4.1.5",
-        "prettier": "2.6.2",
+        "prettier": "2.8.1",
         "rimraf": "^3.0.2",
         "simple-git": "^3.10.0",
         "syncpack": "^8.4.11",
@@ -85,7 +85,7 @@
         "tar": ">=6.1.9"
     },
     "dependencies": {
-        "accessibility-insights-report": "4.4.0"
+        "accessibility-insights-report": "4.4.1"
     },
     "packageManager": "yarn@3.2.2"
 }
