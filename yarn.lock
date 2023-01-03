@@ -3957,10 +3957,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@xmldom/xmldom@npm:^0.7.0":
-  version: 0.8.4
-  resolution: "@xmldom/xmldom@npm:0.8.4"
-  checksum: 9046735714c47e95732449481954653788df5f93fa968a186ae62e6c201c0f9f7bed03647bbdfe25f26532d07a99604a48fadeddecbe437bae0edcf207751e02
+"@xmldom/xmldom@npm:^0.8.3":
+  version: 0.8.6
+  resolution: "@xmldom/xmldom@npm:0.8.6"
+  checksum: f17ac6d99a971a6aeb831fcfc5cfa86f367664e45815046548814b2deb17ccc421fef4e0d5ba29e66179d112b552f6caa5680064f8e7bd8a389b788a60404c8e
   languageName: node
   linkType: hard
 
@@ -4247,11 +4247,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"adal-node@npm:>=0.2.3":
-  version: 0.2.3
-  resolution: "adal-node@npm:0.2.3"
+"adal-node@npm:>=0.2.4":
+  version: 0.2.4
+  resolution: "adal-node@npm:0.2.4"
   dependencies:
-    "@xmldom/xmldom": ^0.7.0
+    "@xmldom/xmldom": ^0.8.3
     async: ^2.6.3
     axios: ^0.21.1
     date-utils: "*"
@@ -4259,7 +4259,7 @@ __metadata:
     underscore: ">= 1.3.1"
     uuid: ^3.1.0
     xpath.js: ~1.1.0
-  checksum: ab00fcdc29da20b06280cf764fcf70dfec6a1885ebf4f2197c9d2ef660725b140d289f28afff161091868d896e32da6e5b2626e5c429c294bacf13f388e13fb0
+  checksum: 0517096fb5c249c0bf6f056ac2506d40a9ac8980f3cdf564a579a824cf3b0477d01739b107a49fdfc9319711c6cd36e8c935c0569d00b71b385a6b3e91ce5a66
   languageName: node
   linkType: hard
 
@@ -14880,7 +14880,7 @@ __metadata:
     "@types/jest": ^27.4.1
     "@types/lodash": ^4.14.182
     "@types/node": ^16.18.11
-    adal-node: ">=0.2.3"
+    adal-node: ^0.2.4
     common: "workspace:*"
     forever-agent: ^0.6.1
     got: ^11.8.5
