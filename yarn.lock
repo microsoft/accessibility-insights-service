@@ -4247,7 +4247,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"adal-node@npm:>=0.2.4":
+"adal-node@npm:^0.2.2, adal-node@npm:^0.2.4":
   version: 0.2.4
   resolution: "adal-node@npm:0.2.4"
   dependencies:
