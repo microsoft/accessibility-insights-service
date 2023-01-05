@@ -41,7 +41,10 @@
         {
             "type": "shell",
             "label": "restore-dotnet-packages",
-            "command": "dotnet restore"
+            "command": "dotnet restore",
+            "options": {
+                "cwd": "${workspaceRoot}/dist"
+            }
         }
     ]
 }
