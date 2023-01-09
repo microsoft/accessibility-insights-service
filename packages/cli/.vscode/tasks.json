@@ -8,7 +8,7 @@
             "label": "run",
             "dependsOn": "tsc",
             "windows": {
-                "command": "xcopy ./../crawler/dist/browser-imports.js ./dist /y"
+                "command": "xcopy .\\..\\crawler\\dist\\browser-imports.js .\\dist /y"
             },
             "osx": {
                 "command": "cp ./../crawler/dist/browser-imports.js ./dist"
