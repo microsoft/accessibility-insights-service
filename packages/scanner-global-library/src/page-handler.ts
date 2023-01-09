@@ -30,13 +30,11 @@ export class PageHandler {
     }
 
     private async scrollToBottom(page: Puppeteer.Page, timeoutMsecs: number): Promise<Partial<PageNavigationTiming>> {
-        const maxCheckCount = timeoutMsecs / this.checkIntervalMsecs;
-        let checkCount = 0;
         let scrollingComplete = false;
 
         // Scroll incrementally so everything is inside the window at some point
         const timestamp = System.getTimestamp();
-        while (!scrollingComplete && checkCount < maxCheckCount && !page.isClosed()) {
+        while (!scrollingComplete && System.getTimestamp() < timestamp + timeoutMsecs && !page.isClosed()) {
             // Use try/catch because navigation issues may cause page.evaluate() to throw
             try {
                 scrollingComplete = await this.scrollToPageBottom(page);
@@ -45,11 +43,9 @@ export class PageHandler {
             }
 
             await page.waitForTimeout(this.checkIntervalMsecs);
-            checkCount += 1;
         }
 
         const elapsed = System.getElapsedTime(timestamp);
-
         if (!scrollingComplete) {
             this.logger?.logWarn(`Did not scroll to the bottom of the page after ${timeoutMsecs / 1000} seconds.`, {
                 timeout: `${timeoutMsecs}`,
@@ -60,17 +56,15 @@ export class PageHandler {
     }
 
     private async waitForStableContent(page: Puppeteer.Page, timeoutMsecs: number): Promise<Partial<PageNavigationTiming>> {
-        const maxCheckCount = timeoutMsecs / this.checkIntervalMsecs;
         const minCheckBreakCount = this.pageDomStableTimeMsecs / this.checkIntervalMsecs;
 
-        let checkCount = 0;
         let continuousStableCheckCount = 0;
         let lastCheckPageHtmlContentSize = 0;
         let pageHasStableContent = false;
         let pageHtmlContentSize = 0;
 
         const timestamp = System.getTimestamp();
-        while (checkCount < maxCheckCount && !page.isClosed()) {
+        while (System.getTimestamp() < timestamp + timeoutMsecs && !page.isClosed()) {
             try {
                 // Use try/catch because navigation issues may cause page.evaluate to throw
                 pageHtmlContentSize = await page.evaluate(() => window.document.body.innerHTML.length);
@@ -92,12 +86,9 @@ export class PageHandler {
             }
 
             await page.waitForTimeout(this.checkIntervalMsecs);
-            checkCount += 1;
         }
 
-        let elapsed = System.getElapsedTime(timestamp);
-        elapsed = pageHasStableContent ? elapsed - minCheckBreakCount * this.checkIntervalMsecs : elapsed;
-
+        const elapsed = System.getElapsedTime(timestamp);
         if (pageHasStableContent !== true) {
             this.logger?.logWarn(`Page did not complete full rendering after ${timeoutMsecs / 1000} seconds.`, {
                 timeout: `${timeoutMsecs}`,

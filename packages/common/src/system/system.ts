@@ -86,6 +86,9 @@ export namespace System {
         return getTimestamp() - timestamp;
     }
 
+    /**
+     * Returns current time, in msec
+     */
     export function getTimestamp(): number {
         return Number(process.hrtime.bigint() / 1000000n);
     }
