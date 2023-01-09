@@ -88,7 +88,7 @@ export class PageHandler {
             await page.waitForTimeout(this.checkIntervalMsecs);
         }
 
-        let elapsed = System.getElapsedTime(timestamp);
+        const elapsed = System.getElapsedTime(timestamp);
         if (pageHasStableContent !== true) {
             this.logger?.logWarn(`Page did not complete full rendering after ${timeoutMsecs / 1000} seconds.`, {
                 timeout: `${timeoutMsecs}`,

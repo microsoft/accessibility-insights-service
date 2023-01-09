@@ -5,10 +5,10 @@ import 'reflect-metadata';
 
 import { Page } from 'puppeteer';
 import { IMock, It, Mock, Times } from 'typemoq';
+import { System } from 'common';
 import { PageHandler } from './page-handler';
 import { MockableLogger } from './test-utilities/mockable-logger';
 import { scrollToBottom } from './page-client-lib';
-import { System } from 'common';
 
 type Writeable<T> = { -readonly [P in keyof T]: Writeable<T[P]> };
 
