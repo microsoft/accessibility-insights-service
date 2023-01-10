@@ -115,7 +115,9 @@ export class Page {
         await this.reopenBrowser();
         await this.setExtraHTTPHeaders();
         await this.addNetworkTrace(true);
-        await this.pageNavigator.navigate(url, this.page, async () => {});
+        await this.pageNavigator.navigate(url, this.page, async () => {
+            return Promise.resolve();
+        });
         await this.removeNetworkTrace(true);
     }
 

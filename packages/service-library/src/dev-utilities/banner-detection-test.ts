@@ -49,7 +49,7 @@ const pageNavigator = new PageNavigator(
 );
 const privacyScenarioRunner = new PrivacyScenarioRunner(serviceConfig, new CookieCollector(), new IpGeolocationProvider(), logger);
 const privacyScannerCore = new PrivacyScannerCore(privacyScenarioRunner, logger);
-const page = new Page(webDriver, undefined, pageNavigator, logger);
+const page = new Page(webDriver, undefined, pageNavigator, undefined, logger);
 
 function getArguments(): BannerDetectionTestArgs {
     yargs.option<keyof BannerDetectionTestArgs, yargs.Options>('urlsListPath', {
