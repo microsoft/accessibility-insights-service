@@ -25,6 +25,7 @@ export const puppeteerTimeoutConfig = {
      * in docker. Hence do not increase this value as it will not mitigate navigation timeout error.
      */
     navigationTimeoutMsecs: 60000,
+    navigationTimeoutDefaultMsecs: 60000,
 
     /**
      * Maximum wait time, in milliseconds, to wait when network is idle.

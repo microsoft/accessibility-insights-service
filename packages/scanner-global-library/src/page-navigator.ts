@@ -31,6 +31,8 @@ export interface PageOperationResult {
 
 @injectable()
 export class PageNavigator {
+    public enableRetryOnTimeout = true;
+
     private readonly navigationCondition = 'networkidle2'; // use of networkidle0 will break websites scanning
 
     constructor(
@@ -140,7 +142,7 @@ export class PageNavigator {
         const op1Elapsed = System.getElapsedTime(timestamp);
 
         let op2Elapsed = 0;
-        if (opResult.browserError?.errorType === 'UrlNavigationTimeout') {
+        if (opResult.browserError?.errorType === 'UrlNavigationTimeout' && this.enableRetryOnTimeout === true) {
             // Fallback to load partial page resources on navigation timeout.
             // This mitigates cases when page has active network connections,
             // for example streaming video controls.

@@ -87,7 +87,14 @@ describe(Page, () => {
         puppeteerRequestMock.setup((o) => o.redirectChain()).returns(() => [] as Puppeteer.HTTPRequest[]);
         setupPuppeteerResponseMock();
 
-        page = new Page(webDriverMock.object, axePuppeteerFactoryMock.object, pageNavigatorMock.object, loggerMock.object, scrollToTopMock);
+        page = new Page(
+            webDriverMock.object,
+            axePuppeteerFactoryMock.object,
+            pageNavigatorMock.object,
+            undefined,
+            loggerMock.object,
+            scrollToTopMock,
+        );
     });
 
     afterEach(() => {
