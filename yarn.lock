@@ -4100,7 +4100,7 @@ __metadata:
     browser-pool: ^3.1.4
     cli-spinner: ^0.2.10
     common: "workspace:*"
-    convict: ^6.2.3
+    convict: ^6.2.4
     copy-webpack-plugin: ^11.0.0
     dotenv: ^16.0.1
     dts-bundle-generator: ^6.12.0
@@ -5783,7 +5783,7 @@ __metadata:
     "@types/node": ^16.18.11
     "@types/normalize-path": ^3.0.0
     "@types/sha.js": ^2.4.0
-    convict: ^6.2.3
+    convict: ^6.2.4
     exponential-backoff: ^3.1.0
     got: ^11.8.5
     inversify: ^6.0.1
@@ -5864,13 +5864,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"convict@npm:^6.2.3":
-  version: 6.2.3
-  resolution: "convict@npm:6.2.3"
+"convict@npm:^6.2.4":
+  version: 6.2.4
+  resolution: "convict@npm:6.2.4"
   dependencies:
     lodash.clonedeep: ^4.5.0
     yargs-parser: ^20.2.7
-  checksum: 69e44ac26405bf4abcc452a95cf5b9f0ef55786cdf19526a83165e2746a93d86187e3705ebf7e7efc8f06e904143acb228ba21604202ec5a937aed0958d49ac7
+  checksum: e14da5c359e3b0452d39c005429e5e4ab1192fa94e51824e135ca8e6b921e95dfd803c15993ea6d23837b6cecb5a402e981a5dd37bee52a62a7a0924798eefe0
   languageName: node
   linkType: hard
 
