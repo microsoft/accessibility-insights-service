@@ -18,6 +18,7 @@ import { WebDriver } from './web-driver';
 import { PageNavigator, NavigationResponse } from './page-navigator';
 import { PageNavigationTiming } from './page-timeout-config';
 import { scrollToTop } from './page-client-lib';
+import { PageNetworkTracer } from './page-network-tracer';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -52,6 +53,7 @@ let puppeteerResponseMock: IMock<Puppeteer.HTTPResponse>;
 let puppeteerRequestMock: IMock<Puppeteer.HTTPRequest>;
 let axePuppeteerMock: IMock<AxePuppeteer>;
 let cdpSessionMock: IMock<Puppeteer.CDPSession>;
+let pageNetworkTracerMock: IMock<PageNetworkTracer>;
 
 describe(Page, () => {
     beforeEach(() => {
@@ -73,11 +75,13 @@ describe(Page, () => {
         puppeteerRequestMock = getPromisableDynamicMock(Mock.ofType<Puppeteer.HTTPRequest>());
         axePuppeteerMock = getPromisableDynamicMock(Mock.ofType<AxePuppeteer>());
         cdpSessionMock = getPromisableDynamicMock(Mock.ofType<Puppeteer.CDPSession>());
+        pageNetworkTracerMock = Mock.ofType<PageNetworkTracer>();
         scrollToTopMock = jest.fn().mockImplementation(() => Promise.resolve());
         navigationResponse = {
             httpResponse: puppeteerResponseMock.object,
             pageNavigationTiming: pageNavigationTiming,
         };
+        System.wait = async () => Promise.resolve();
 
         browserMock
             .setup(async (o) => o.version())
@@ -91,7 +95,7 @@ describe(Page, () => {
             webDriverMock.object,
             axePuppeteerFactoryMock.object,
             pageNavigatorMock.object,
-            undefined,
+            pageNetworkTracerMock.object,
             loggerMock.object,
             scrollToTopMock,
         );
@@ -105,6 +109,7 @@ describe(Page, () => {
         loggerMock.verifyAll();
         puppeteerRequestMock.verifyAll();
         cdpSessionMock.verifyAll();
+        pageNetworkTracerMock.verifyAll();
     });
 
     describe('scanForA11yIssues()', () => {
@@ -260,6 +265,26 @@ describe(Page, () => {
                     await fn(browserError, error);
                 })
                 .returns(() => Promise.resolve(undefined))
+                .verifiable(Times.exactly(2));
+            browserMock
+                .setup((o) => o.userAgent())
+                .returns(() => Promise.resolve(userAgent))
+                .verifiable();
+            browserMock
+                .setup(async (o) => o.newPage())
+                .returns(() => Promise.resolve(puppeteerPageMock.object))
+                .verifiable();
+            webDriverMock
+                .setup(async (o) => o.launch(It.isAny()))
+                .returns(() => Promise.resolve(browserMock.object))
+                .verifiable();
+            pageNetworkTracerMock
+                .setup((o) => o.addNetworkTrace(puppeteerPageMock.object))
+                .returns(() => Promise.resolve())
+                .verifiable();
+            pageNetworkTracerMock
+                .setup((o) => o.removeNetworkTrace(puppeteerPageMock.object))
+                .returns(() => Promise.resolve())
                 .verifiable();
 
             await page.navigateToUrl(url);
