@@ -268,7 +268,7 @@ export class Page {
                 timing[key] = `${this.pageNavigationTiming[key]}`;
             });
 
-            this.logger.logInfo(`Total page ${operation} time ${totalNavigationElapsed}, msec`, {
+            this.logger?.logInfo(`Total page ${operation} time ${totalNavigationElapsed}, msec`, {
                 total: totalNavigationElapsed.toString(),
                 ...timing,
             });

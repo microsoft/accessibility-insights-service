@@ -196,7 +196,7 @@ export class PageNavigator {
             );
         } while (count < maxRetryCount && opResult.response?.status() === 304 && opResult.error === undefined);
 
-        this.logger.logWarn('Reload page on HTTP 304 (Not Modified) web server response.', { retryCount: `${count}` });
+        this.logger?.logWarn('Reload page on HTTP 304 (Not Modified) web server response.', { retryCount: `${count}` });
 
         return opResult;
     }
@@ -230,7 +230,7 @@ export class PageNavigator {
                     });
                 }
             } catch (e) {
-                this.logger.logError(`Error handling 'request' page event`, { error: System.serializeError(e) });
+                this.logger?.logError(`Error handling 'request' page event`, { error: System.serializeError(e) });
             }
 
             await request.continue();
@@ -244,7 +244,7 @@ export class PageNavigator {
                     pendingRequest.opResult = { response };
                 }
             } catch (e) {
-                this.logger.logError(`Error handling 'requestFinished' page event`, { error: System.serializeError(e) });
+                this.logger?.logError(`Error handling 'requestFinished' page event`, { error: System.serializeError(e) });
             }
         };
         page.on('response', pageOnResponseEventHandler);
@@ -261,7 +261,7 @@ export class PageNavigator {
                     };
                 }
             } catch (e) {
-                this.logger.logError(`Error handling 'requestFailed' page event`, { error: System.serializeError(e) });
+                this.logger?.logError(`Error handling 'requestFailed' page event`, { error: System.serializeError(e) });
             }
         };
         page.on('requestfailed', pageOnRequestFailedEventHandler);
@@ -280,7 +280,7 @@ export class PageNavigator {
         page.removeListener('requestfailed', pageOnRequestFailedEventHandler);
         await page.setRequestInterception(false);
 
-        this.logger.logWarn(`Indirect page redirection handled.`, {
+        this.logger?.logWarn(`Indirect page redirection handled.`, {
             redirectChain: JSON.stringify(requests.map((r) => r.url)),
         });
 
@@ -294,7 +294,7 @@ export class PageNavigator {
         try {
             await page.evaluate(() => history.pushState(null, null, null));
         } catch (error) {
-            this.logger.logWarn('Error while resetting browser session history.', {
+            this.logger?.logWarn('Error while resetting browser session history.', {
                 error: System.serializeError(error),
             });
         }
@@ -310,7 +310,7 @@ export class PageNavigator {
             try {
                 return await page.waitForNavigation({ waitUntil: 'networkidle0', timeout: puppeteerTimeoutConfig.networkIdleTimeoutMsec });
             } catch (error) {
-                this.logger.logWarn('Error while waiting for page network idle state.', {
+                this.logger?.logWarn('Error while waiting for page network idle state.', {
                     timeout: `${puppeteerTimeoutConfig.networkIdleTimeoutMsec}`,
                     error: System.serializeError(error),
                 });

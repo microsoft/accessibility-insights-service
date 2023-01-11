@@ -14,3 +14,4 @@ export { PageNavigationHooks } from './page-navigation-hooks';
 export * from './page-navigator';
 export { PrivacyScanResult } from './privacy-scan-result';
 export * from './browser-extensions/extension-loader';
+export * from './page-network-tracer';

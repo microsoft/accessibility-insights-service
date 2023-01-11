@@ -42,13 +42,13 @@ export class PageNetworkTracer {
                     url: request.url(),
                 });
 
-                this.logger.logInfo(`[Network] Processing URL`, { traceUrl: request.url() });
+                this.logger?.logInfo(`[Network] Processing URL`, { traceUrl: request.url() });
 
                 if (!request.isInterceptResolutionHandled()) {
                     await request.continue();
                 }
             } catch (error) {
-                this.logger.logError(`The 'request' page event handle failed`, {
+                this.logger?.logError(`The 'request' page event handle failed`, {
                     traceUrl: request.url(),
                     error: System.serializeError(error),
                 });
@@ -73,12 +73,12 @@ export class PageNetworkTracer {
                     traceRequest.completed = true;
                 }
 
-                this.logger.logInfo(`[Network] Request completed`, { data: JSON.stringify(data, undefined, 2) });
+                this.logger?.logInfo(`[Network] Request completed`, { data: JSON.stringify(data, undefined, 2) });
                 if (!request.isInterceptResolutionHandled()) {
                     await request.continue();
                 }
             } catch (error) {
-                this.logger.logError(`The 'requestfinished' page event handle failed`, {
+                this.logger?.logError(`The 'requestfinished' page event handle failed`, {
                     traceUrl: request.url(),
                     error: System.serializeError(error),
                 });
@@ -103,12 +103,12 @@ export class PageNetworkTracer {
                     traceRequest.completed = true;
                 }
 
-                this.logger.logInfo(`[Network] Request failed`, { data: JSON.stringify(data, undefined, 2) });
+                this.logger?.logInfo(`[Network] Request failed`, { data: JSON.stringify(data, undefined, 2) });
                 if (!request.isInterceptResolutionHandled()) {
                     await request.continue();
                 }
             } catch (error) {
-                this.logger.logError(`The 'requestfailed' page event handle failed`, {
+                this.logger?.logError(`The 'requestfailed' page event handle failed`, {
                     traceUrl: request.url(),
                     error: System.serializeError(error),
                 });
@@ -121,17 +121,17 @@ export class PageNetworkTracer {
         this.pageEventHandlers.map((handler) => page.removeListener(handler.name, handler.eventHandler));
         await page.setRequestInterception(false);
         this.logPendingRequests();
-        this.logger.logInfo(`[Network] Disable page network trace`);
+        this.logger?.logInfo(`[Network] Disable page network trace`);
     }
 
     private logPendingRequests(): void {
         const urls = this.networkTraceData.requests.filter((r) => r.completed !== true).map((r) => `${r.sequenceNumber}: ${r.url}`);
         if (urls.length > 0) {
-            this.logger.logWarn(`[Network] Pending requests`, {
+            this.logger?.logWarn(`[Network] Pending requests`, {
                 pendingRequests: JSON.stringify(urls, undefined, 2),
             });
         } else {
-            this.logger.logWarn(`[Network] No pending requests`);
+            this.logger?.logWarn(`[Network] No pending requests`);
         }
     }
 
@@ -144,7 +144,7 @@ export class PageNetworkTracer {
     }
 
     private init(): void {
-        this.logger.logInfo(`[Network] Enable page network trace`);
+        this.logger?.logInfo(`[Network] Enable page network trace`);
 
         this.pageEventHandlers = [];
         this.networkTraceData = {

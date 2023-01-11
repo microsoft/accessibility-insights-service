@@ -14,6 +14,7 @@ import {
     PageNavigator,
     PageResponseProcessor,
     WebDriver,
+    PageNetworkTracer,
 } from 'scanner-global-library';
 import { ConsoleLoggerClient, GlobalLogger } from 'logger';
 import { PromiseUtils, ServiceConfiguration } from 'common';
@@ -49,7 +50,8 @@ const pageNavigator = new PageNavigator(
 );
 const privacyScenarioRunner = new PrivacyScenarioRunner(serviceConfig, new CookieCollector(), new IpGeolocationProvider(), logger);
 const privacyScannerCore = new PrivacyScannerCore(privacyScenarioRunner, logger);
-const page = new Page(webDriver, undefined, pageNavigator, undefined, logger);
+const pageNetworkTracer = new PageNetworkTracer(logger);
+const page = new Page(webDriver, undefined, pageNavigator, pageNetworkTracer, logger);
 
 function getArguments(): BannerDetectionTestArgs {
     yargs.option<keyof BannerDetectionTestArgs, yargs.Options>('urlsListPath', {
