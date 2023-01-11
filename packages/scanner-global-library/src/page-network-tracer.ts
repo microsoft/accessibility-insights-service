@@ -14,7 +14,6 @@ export interface NetworkTraceData {
     requests: {
         sequenceNumber: number;
         url: string;
-        data?: any;
         completed?: boolean;
     }[];
 }
@@ -72,7 +71,6 @@ export class PageNetworkTracer {
                 const traceRequest = this.networkTraceData.requests.find((r) => r.url === request.url());
                 if (traceRequest) {
                     traceRequest.completed = true;
-                    traceRequest.data = data;
                 }
 
                 this.logger.logInfo(`[Network] Request completed`, { data: JSON.stringify(data, undefined, 2) });
@@ -103,7 +101,6 @@ export class PageNetworkTracer {
                 const traceRequest = this.networkTraceData.requests.find((r) => r.url === request.url());
                 if (traceRequest) {
                     traceRequest.completed = true;
-                    traceRequest.data = data;
                 }
 
                 this.logger.logInfo(`[Network] Request failed`, { data: JSON.stringify(data, undefined, 2) });
@@ -128,8 +125,8 @@ export class PageNetworkTracer {
     }
 
     private logPendingRequests(): void {
-        if (this.networkTraceData.requests.length > 0) {
-            const urls = this.networkTraceData.requests.filter((r) => r.completed !== true).map((r) => `${r.sequenceNumber}: ${r.url}`);
+        const urls = this.networkTraceData.requests.filter((r) => r.completed !== true).map((r) => `${r.sequenceNumber}: ${r.url}`);
+        if (urls.length > 0) {
             this.logger.logWarn(`[Network] Pending requests`, {
                 pendingRequests: JSON.stringify(urls, undefined, 2),
             });

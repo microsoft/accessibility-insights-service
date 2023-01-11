@@ -96,12 +96,9 @@ export class Page {
             this.lastBrowserError = browserError;
         });
 
-        if (
-            this.lastBrowserError?.errorType === 'UrlNavigationTimeout' &&
-            this.networkTraceGlobalFlag !== true /** not in network trace mode already */
-        ) {
-            this.logger?.logWarn('Reload page with network trace enabled on navigation timeout.');
-            await this.navigateWithNetworkTrace(url);
+        if (this.lastBrowserError?.errorType && this.networkTraceGlobalFlag !== true /** not in network trace mode already */) {
+            this.logger?.logWarn('Reload page with network trace on navigation error.');
+            await this.navigateToUrlWithNetworkTrace(url);
         }
 
         await this.removeNetworkTrace(enableNetworkTrace);
@@ -111,7 +108,7 @@ export class Page {
         this.logPageNavigationTiming('load');
     }
 
-    private async navigateWithNetworkTrace(url: string): Promise<void> {
+    private async navigateToUrlWithNetworkTrace(url: string): Promise<void> {
         await this.reopenBrowser();
         await this.setExtraHTTPHeaders();
         await this.addNetworkTrace(true);
@@ -226,6 +223,8 @@ export class Page {
     private async reopenBrowser(): Promise<void> {
         await this.close();
         await this.create({ ...this.lastBrowserStartOptions, clearBrowserCache: false });
+        // wait for browser to complete reload
+        await System.wait(5000);
     }
 
     private async setExtraHTTPHeaders(): Promise<void> {
