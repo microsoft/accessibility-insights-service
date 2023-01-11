@@ -122,7 +122,7 @@ export class Page {
      * Reload browser page
      * @param options - Optional reload parameters
      *
-     * `hardReload === true` will restart browser instance and delete browser storage, settings, etc. but use browser disk cache.
+     * `options.hardReload === true` will restart browser instance and delete browser storage, settings, etc. but use browser disk cache.
      */
     public async reload(options?: { hardReload: boolean }): Promise<void> {
         await this.reloadImpl(options);
@@ -160,11 +160,18 @@ export class Page {
     }
 
     public async getPageSnapshot(): Promise<string> {
-        const client = await this.page.target().createCDPSession();
-        const { data } = await client.send('Page.captureSnapshot', { format: 'mhtml' });
-        await client.detach();
+        // In rare cases Puppeteer fails to generate mhtml snapshot file.
+        try {
+            const client = await this.page.target().createCDPSession();
+            const { data } = await client.send('Page.captureSnapshot', { format: 'mhtml' });
+            await client.detach();
 
-        return data;
+            return data;
+        } catch (error) {
+            this.logger?.logError('Failed to generate page mhtml snapshot file', { error: System.serializeError(error) });
+
+            return '';
+        }
     }
 
     public async getAllCookies(): Promise<Puppeteer.Protocol.Network.Cookie[]> {
