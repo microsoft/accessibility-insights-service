@@ -121,7 +121,7 @@ export class PageNetworkTracer {
         this.pageEventHandlers.map((handler) => page.removeListener(handler.name, handler.eventHandler));
         await page.setRequestInterception(false);
         this.logPendingRequests();
-        this.logger.logInfo(`[Network] Disable page network trace.`);
+        this.logger.logInfo(`[Network] Disable page network trace`);
     }
 
     private logPendingRequests(): void {
@@ -144,7 +144,7 @@ export class PageNetworkTracer {
     }
 
     private init(): void {
-        this.logger.logInfo(`[Network] Enable page network trace.`);
+        this.logger.logInfo(`[Network] Enable page network trace`);
 
         this.pageEventHandlers = [];
         this.networkTraceData = {
