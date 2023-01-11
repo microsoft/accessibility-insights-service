@@ -3,10 +3,12 @@
 
 import 'reflect-metadata';
 
-import { PageNetworkTracer, PageEventHandler } from './page-network-tracer';
-import { MockableLogger } from './test-utilities/mockable-logger';
 import { IMock, Mock, It, Times } from 'typemoq';
 import * as Puppeteer from 'puppeteer';
+import { PageNetworkTracer, PageEventHandler } from './page-network-tracer';
+import { MockableLogger } from './test-utilities/mockable-logger';
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 let loggerMock: IMock<MockableLogger>;
 let puppeteerPageMock: IMock<Puppeteer.Page>;

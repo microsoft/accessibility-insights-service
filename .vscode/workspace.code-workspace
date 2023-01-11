@@ -138,11 +138,14 @@
         "files.eol": "\n",
         "files.insertFinalNewline": true,
         "prettier.requireConfig": true,
+        "eslint.enable": true,
+        "eslint.packageManager": "yarn",
+        "eslint.alwaysShowStatus": true,
+        "eslint.workingDirectories": [{ "mode": "auto" }],
         "eslint.validate": [
             "typescript",
             "javascript"
         ],
-        "eslint.enable": true,
         "editor.codeActionsOnSave": {
             "source.fixAll.eslint": true
         },
