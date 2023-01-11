@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 import * as Puppeteer from 'puppeteer';
-import { injectable, inject, optional } from 'inversify';
+import { injectable, inject } from 'inversify';
 import { GlobalLogger } from 'logger';
 import { PageEventObject } from 'puppeteer';
 import { System } from 'common';
@@ -29,7 +29,7 @@ export class PageNetworkTracer {
 
     private networkTraceData: NetworkTraceData;
 
-    constructor(@inject(GlobalLogger) @optional() private readonly logger: GlobalLogger) {}
+    constructor(@inject(GlobalLogger) private readonly logger: GlobalLogger) {}
 
     public async addNetworkTrace(page: Puppeteer.Page): Promise<void> {
         this.init();
