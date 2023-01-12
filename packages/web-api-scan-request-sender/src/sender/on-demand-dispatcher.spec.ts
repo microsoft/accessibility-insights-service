@@ -177,65 +177,68 @@ describe(OnDemandDispatcher, () => {
         await onDemandDispatcher.dispatchScanRequests();
     });
 
-    it('update website`s page scan metadata on delete', async () => {
-        const scanRequests = {
-            accessibilityRequestsToQueue: [],
-            privacyRequestsToQueue: [],
-            requestsToDelete: [
-                {
-                    request: { id: 'id2' },
-                    result: {
-                        id: 'scanId',
-                        url: 'url',
-                        scanResult: {
-                            state: 'fail',
-                        },
-                        run: {
-                            state: 'running',
-                            timestamp: new Date().toJSON(),
-                            retryCount: 2,
-                        },
-                        websiteScanRefs: [
-                            {
-                                id: 'websiteScanRefId',
-                                scanGroupType: 'deep-scan',
+    it.each([undefined, {}, { scanId: 'scanId' }, { scanId: 'otherId' }])(
+        'update website`s page scan metadata on delete when pageScans is [%s]',
+        async (pageScanPart) => {
+            const scanRequests = {
+                accessibilityRequestsToQueue: [],
+                privacyRequestsToQueue: [],
+                requestsToDelete: [
+                    {
+                        request: { id: 'id2' },
+                        result: {
+                            id: 'scanId',
+                            url: 'url',
+                            scanResult: {
+                                state: 'fail',
                             },
-                        ],
+                            run: {
+                                state: 'running',
+                                timestamp: new Date().toJSON(),
+                                retryCount: 2,
+                            },
+                            websiteScanRefs: [
+                                {
+                                    id: 'websiteScanRefId',
+                                    scanGroupType: 'deep-scan',
+                                },
+                            ],
+                        },
+                        condition: 'noRetry',
                     },
-                    condition: 'noRetry',
-                },
-            ],
-        } as ScanRequests;
+                ],
+            } as ScanRequests;
 
-        setupServiceConfiguration();
-        setupQueue();
-        setupScanRequestSelector(scanRequests);
-        setupPageScanRequestProvider(scanRequests);
+            setupServiceConfiguration();
+            setupQueue();
+            setupScanRequestSelector(scanRequests);
+            setupPageScanRequestProvider(scanRequests);
 
-        const pageScanResult = scanRequests.requestsToDelete[0].result;
-        websiteScanResultProviderMock
-            .setup((o) => o.read(pageScanResult.websiteScanRefs[0].id, false, pageScanResult.id))
-            .returns(() => Promise.resolve({ pageScans: [] } as WebsiteScanResult))
-            .verifiable();
-        const updatedWebsiteScanResult: Partial<WebsiteScanResult> = {
-            id: pageScanResult.websiteScanRefs[0].id,
-            pageScans: [
-                {
-                    scanId: pageScanResult.id,
-                    url: pageScanResult.url,
-                    scanState: pageScanResult.scanResult?.state,
-                    runState: 'failed',
-                    timestamp: new Date().toJSON(),
-                },
-            ],
-        };
-        websiteScanResultProviderMock
-            .setup((o) => o.mergeOrCreate(pageScanResult.id, It.isValue(updatedWebsiteScanResult), It.isAny()))
-            .returns(() => Promise.resolve(undefined))
-            .verifiable();
+            const pageScanResult = scanRequests.requestsToDelete[0].result;
+            websiteScanResultProviderMock
+                .setup((o) => o.read(pageScanResult.websiteScanRefs[0].id, false, pageScanResult.id))
+                .returns(() => Promise.resolve({ pageScans: pageScanPart ? [pageScanPart] : undefined } as WebsiteScanResult))
+                .verifiable();
+            const updatedWebsiteScanResult: Partial<WebsiteScanResult> = {
+                id: pageScanResult.websiteScanRefs[0].id,
+                pageScans: [
+                    {
+                        scanId: pageScanResult.id,
+                        url: pageScanResult.url,
+                        scanState: pageScanResult.scanResult?.state,
+                        runState: 'failed',
+                        timestamp: new Date().toJSON(),
+                    },
+                ],
+            };
+            websiteScanResultProviderMock
+                .setup((o) => o.mergeOrCreate(pageScanResult.id, It.isValue(updatedWebsiteScanResult), It.isAny()))
+                .returns(() => Promise.resolve(undefined))
+                .verifiable();
 
-        await onDemandDispatcher.dispatchScanRequests();
-    });
+            await onDemandDispatcher.dispatchScanRequests();
+        },
+    );
 
     it('queue scan requests', async () => {
         const accessibilityError: ScanError = {

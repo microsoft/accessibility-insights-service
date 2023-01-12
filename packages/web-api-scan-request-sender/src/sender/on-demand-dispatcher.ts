@@ -117,9 +117,7 @@ export class OnDemandDispatcher {
         }
 
         // set scan run state to failed when scan is stale
-        let abandonedScan = false;
         if ((['noRetry', 'abandoned'] as DispatchCondition[]).includes(scanRequest.condition) && pageScanResult.run.state !== 'failed') {
-            abandonedScan = true;
             pageScanResult.run = {
                 ...pageScanResult.run,
                 state: 'failed',
@@ -135,11 +133,12 @@ export class OnDemandDispatcher {
             });
         }
 
-        // update website's page scan metadata if missing
+        // ensure that website scan result has final state of a page scan to generate up-to-date website scan status result
         const websiteScanRef = pageScanResult.websiteScanRefs?.find((ref) => ref.scanGroupType === 'deep-scan');
         if (websiteScanRef) {
             const websiteScanResult = await this.websiteScanResultProvider.read(websiteScanRef.id, false, pageScanResult.id);
-            if (isEmpty(websiteScanResult.pageScans) || abandonedScan) {
+            const pageScan = websiteScanResult.pageScans?.find((s) => s.scanId === pageScanResult.id);
+            if (pageScan?.runState === undefined) {
                 const updatedWebsiteScanResult: Partial<WebsiteScanResult> = {
                     id: websiteScanRef.id,
                     pageScans: [
