@@ -120,7 +120,7 @@ describe(PageNetworkTracer, () => {
             .verifiable();
         loggerMock
             .setup((o) =>
-                o.logInfo('[Network] Request failed', {
+                o.logWarn('[Network] Request failed', {
                     status: 'failed',
                     traceUrl: 'url',
                     httpStatus: '200 OK',

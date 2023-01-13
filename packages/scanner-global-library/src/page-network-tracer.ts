@@ -107,7 +107,7 @@ export class PageNetworkTracer {
                 if (traceRequest) {
                     traceRequest.completed = true;
                 }
-                this.logger?.logInfo(`[Network] Request failed`, {
+                this.logger?.logWarn(`[Network] Request failed`, {
                     status: 'failed',
                     traceUrl: data.url,
                     httpStatus: data.httpStatus,
@@ -141,7 +141,7 @@ export class PageNetworkTracer {
                 pendingRequests: JSON.stringify(urls, undefined, 2),
             });
         } else {
-            this.logger?.logWarn(`[Network] No pending requests`);
+            this.logger?.logInfo(`[Network] No pending requests`);
         }
     }
 
