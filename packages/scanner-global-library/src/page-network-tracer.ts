@@ -72,8 +72,13 @@ export class PageNetworkTracer {
                 if (traceRequest) {
                     traceRequest.completed = true;
                 }
-
-                this.logger?.logInfo(`[Network] Request completed`, { data: JSON.stringify(data, undefined, 2) });
+                this.logger?.logInfo(`[Network] Request completed`, {
+                    status: 'completed',
+                    traceUrl: data.url,
+                    httpStatus: data.httpStatus,
+                    serverResponseTiming: `${serverResponseTiming}`,
+                    data: JSON.stringify(data, undefined, 2),
+                });
                 if (!request.isInterceptResolutionHandled()) {
                     await request.continue();
                 }
@@ -102,8 +107,13 @@ export class PageNetworkTracer {
                 if (traceRequest) {
                     traceRequest.completed = true;
                 }
-
-                this.logger?.logInfo(`[Network] Request failed`, { data: JSON.stringify(data, undefined, 2) });
+                this.logger?.logInfo(`[Network] Request failed`, {
+                    status: 'failed',
+                    traceUrl: data.url,
+                    httpStatus: data.httpStatus,
+                    serverResponseTiming: `${serverResponseTiming}`,
+                    data: JSON.stringify(data, undefined, 2),
+                });
                 if (!request.isInterceptResolutionHandled()) {
                     await request.continue();
                 }
