@@ -14,7 +14,7 @@ import {
     StorageDocument,
     websiteScanResultPartModelKeys,
 } from 'storage-documents';
-import { HashGenerator, RetryHelper, ServiceConfiguration, CrawlConfig } from 'common';
+import { HashGenerator, ServiceConfiguration, CrawlConfig, ExponentialRetryOptions } from 'common';
 import { GlobalLogger } from 'logger';
 import * as MockDate from 'mockdate';
 import { cloneDeep, pick } from 'lodash';
@@ -25,8 +25,6 @@ import { WebsiteScanResultAggregator } from './website-scan-result-aggregator';
 
 type TestWorkflow = 'merge' | 'create' | 'skip-merge';
 
-const maxRetryCount: number = 5;
-const msecBetweenRetries: number = 1000;
 const deepScanDiscoveryLimit = 2;
 const scanId = 'scanId';
 const websiteScanResultBaseId = 'websiteScanResultBaseId';
@@ -38,7 +36,6 @@ let cosmosContainerClientMock: IMock<CosmosContainerClient>;
 let websiteScanResultAggregatorMock: IMock<WebsiteScanResultAggregator>;
 let serviceConfigurationMock: IMock<ServiceConfiguration>;
 let partitionKeyFactoryMock: IMock<PartitionKeyFactory>;
-let retryHelperMock: IMock<RetryHelper<WebsiteScanResult>>;
 let hashGeneratorMock: IMock<HashGenerator>;
 let globalLoggerMock: IMock<GlobalLogger>;
 let dateNow: Date;
@@ -52,6 +49,15 @@ let websiteScanResultBaseDbDocumentExisting: WebsiteScanResultBase;
 let websiteScanResultBaseDbDocumentCreated: WebsiteScanResultBase;
 let websiteScanResultBaseDbDocumentMerged: WebsiteScanResultBase;
 
+const retryOptions: ExponentialRetryOptions = {
+    jitter: 'full',
+    delayFirstAttempt: false,
+    numOfAttempts: 1,
+    maxDelay: 10,
+    startingDelay: 1,
+    retry: () => true,
+};
+
 describe(WebsiteScanResultProvider, () => {
     beforeEach(() => {
         dateNow = new Date();
@@ -61,7 +67,6 @@ describe(WebsiteScanResultProvider, () => {
         websiteScanResultAggregatorMock = Mock.ofType<WebsiteScanResultAggregator>();
         serviceConfigurationMock = Mock.ofType(ServiceConfiguration);
         partitionKeyFactoryMock = Mock.ofType<PartitionKeyFactory>();
-        retryHelperMock = Mock.ofType<RetryHelper<WebsiteScanResult>>();
         hashGeneratorMock = Mock.ofType<HashGenerator>();
         globalLoggerMock = Mock.ofType<GlobalLogger>();
 
@@ -72,7 +77,7 @@ describe(WebsiteScanResultProvider, () => {
             partitionKeyFactoryMock.object,
             hashGeneratorMock.object,
             globalLoggerMock.object,
-            retryHelperMock.object,
+            retryOptions,
         );
     });
 
@@ -83,7 +88,6 @@ describe(WebsiteScanResultProvider, () => {
         websiteScanResultAggregatorMock.verifyAll();
         serviceConfigurationMock.verifyAll();
         partitionKeyFactoryMock.verifyAll();
-        retryHelperMock.verifyAll();
         hashGeneratorMock.verifyAll();
         globalLoggerMock.verifyAll();
     });
@@ -94,7 +98,6 @@ describe(WebsiteScanResultProvider, () => {
         setupWebsiteScanResultAggregatorMock('merge');
         setupPartitionKeyFactoryMock();
         setupCosmosContainerClientMock('merge');
-        setupRetryHelperMock();
 
         const actualWebsiteScanResult = await websiteScanResultProvider.mergeOrCreate(scanId, websiteScanResult);
 
@@ -107,7 +110,6 @@ describe(WebsiteScanResultProvider, () => {
         setupWebsiteScanResultAggregatorMock('merge');
         setupPartitionKeyFactoryMock();
         setupCosmosContainerClientMock('merge');
-        setupRetryHelperMock();
         const onMergeCallbackFn = jest.fn().mockImplementation((dbDoc: WebsiteScanResultBase) => {
             expect(dbDoc).toEqual(websiteScanResultBaseDbDocumentExisting);
 
@@ -126,7 +128,6 @@ describe(WebsiteScanResultProvider, () => {
         setupWebsiteScanResultAggregatorMock('merge');
         setupPartitionKeyFactoryMock();
         setupCosmosContainerClientMock('merge');
-        setupRetryHelperMock();
 
         websiteScanResultProvider.read = jest.fn().mockImplementationOnce(async (websiteScanId: string, readCompleteDocument: boolean) => {
             return websiteScanId === websiteScanResultBaseId && readCompleteDocument
@@ -144,7 +145,6 @@ describe(WebsiteScanResultProvider, () => {
         setupWebsiteScanResultAggregatorMock('merge');
         setupPartitionKeyFactoryMock();
         setupCosmosContainerClientMock('merge');
-        setupRetryHelperMock();
 
         await websiteScanResultProvider.mergeOrCreateBatch([{ scanId, websiteScanResult }]);
     });
@@ -155,7 +155,6 @@ describe(WebsiteScanResultProvider, () => {
         setupWebsiteScanResultAggregatorMock('skip-merge');
         setupPartitionKeyFactoryMock();
         setupCosmosContainerClientMock('skip-merge');
-        setupRetryHelperMock();
 
         const actualWebsiteScanResult = await websiteScanResultProvider.mergeOrCreate(scanId, websiteScanResult);
 
@@ -171,7 +170,6 @@ describe(WebsiteScanResultProvider, () => {
         setupWebsiteScanResultAggregatorMock('create');
         setupPartitionKeyFactoryMock();
         setupCosmosContainerClientMock('create');
-        setupRetryHelperMock();
         serviceConfigurationMock
             .setup((o) => o.getConfigValue('crawlConfig'))
             .returns(() => Promise.resolve({ deepScanDiscoveryLimit: deepScanDiscoveryLimit } as CrawlConfig))
@@ -199,7 +197,6 @@ describe(WebsiteScanResultProvider, () => {
         setupWebsiteScanResultAggregatorMock('create');
         setupPartitionKeyFactoryMock();
         setupCosmosContainerClientMock('create');
-        setupRetryHelperMock();
         serviceConfigurationMock
             .setup((o) => o.getConfigValue('crawlConfig'))
             .returns(() => Promise.resolve({ deepScanDiscoveryLimit: deepScanDiscoveryLimit } as CrawlConfig))
@@ -448,15 +445,6 @@ function setupCosmosContainerClientMock(workflow: TestWorkflow): void {
             )
             .verifiable();
     }
-}
-
-function setupRetryHelperMock(): void {
-    retryHelperMock
-        .setup(async (o) => o.executeWithRetries(It.isAny(), It.isAny(), maxRetryCount, msecBetweenRetries))
-        .returns(async (action: () => Promise<WebsiteScanResult>, errorHandler: (err: Error) => Promise<void>, maxRetries: number) => {
-            return action();
-        })
-        .verifiable();
 }
 
 function setupWebsiteScanResultAggregatorMock(workflow: TestWorkflow): void {

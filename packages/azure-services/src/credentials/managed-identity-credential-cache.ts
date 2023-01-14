@@ -25,10 +25,11 @@ export class ManagedIdentityCredentialCache implements TokenCredential {
     private static readonly tokenValidForSec = 10 * 60;
 
     private static readonly msiRetryOptions: ExponentialRetryOptions = {
+        jitter: 'full',
         delayFirstAttempt: false,
         numOfAttempts: 5,
         maxDelay: 6000,
-        startingDelay: 0,
+        startingDelay: 200,
         retry: () => true,
     };
 

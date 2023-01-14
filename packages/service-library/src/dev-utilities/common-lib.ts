@@ -18,10 +18,11 @@ import { Mutex } from 'async-mutex';
 const mutex = new Mutex();
 
 const retryOptions: ExponentialRetryOptions = {
+    jitter: 'full',
     delayFirstAttempt: false,
     numOfAttempts: 5,
     maxDelay: 6000,
-    startingDelay: 0,
+    startingDelay: 200,
     retry: (error, retry) => {
         console.log(`Retrying error ${retry} time: `, System.serializeError(error));
 
