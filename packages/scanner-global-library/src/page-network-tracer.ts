@@ -94,7 +94,7 @@ export class PageNetworkTracer {
         const pageOnRequestFailedEventHandler = async (request: Puppeteer.HTTPRequest) => {
             try {
                 const response = request.response();
-                const serverResponseTiming = response.timing()?.receiveHeadersEnd - response.timing()?.sendStart;
+                const serverResponseTiming = response?.timing()?.receiveHeadersEnd - response?.timing()?.sendStart;
                 const data = {
                     status: 'failed',
                     url: request.url(),
