@@ -3,7 +3,7 @@
 
 import { inject, injectable } from 'inversify';
 import { cosmosContainerClientTypes, CosmosContainerClient, client, CosmosOperationResponse } from 'azure-services';
-import { System, HashGenerator, RetryHelper, ServiceConfiguration } from 'common';
+import { executeWithExponentialRetry, ExponentialRetryOptions, System, HashGenerator, ServiceConfiguration } from 'common';
 import {
     WebsiteScanResult,
     ItemType,
@@ -56,12 +56,17 @@ export const getOnMergeCallbackToUpdateRunResult = (runState: OnDemandPageScanRu
     return onMergeCallbackFn;
 };
 
+const providerRetryOptions: ExponentialRetryOptions = {
+    jitter: 'full',
+    delayFirstAttempt: false,
+    numOfAttempts: 8,
+    maxDelay: 10000,
+    startingDelay: 500,
+    retry: () => true,
+};
+
 @injectable()
 export class WebsiteScanResultProvider {
-    private readonly maxRetryCount: number = 5;
-
-    private readonly msecBetweenRetries: number = 1000;
-
     // Passing a high number of documents to merge at once will reduce process creation operations when processing in batches.
     public maxBatchItems = 5000;
 
@@ -75,7 +80,7 @@ export class WebsiteScanResultProvider {
         @inject(PartitionKeyFactory) private readonly partitionKeyFactory: PartitionKeyFactory,
         @inject(HashGenerator) private readonly hashGenerator: HashGenerator,
         @inject(GlobalLogger) private readonly logger: GlobalLogger,
-        @inject(RetryHelper) private readonly retryHelper: RetryHelper<WebsiteScanResult> = new RetryHelper<WebsiteScanResult>(),
+        private readonly retryOptions: ExponentialRetryOptions = providerRetryOptions,
     ) {}
 
     public async read(
@@ -131,8 +136,8 @@ export class WebsiteScanResultProvider {
     ): Promise<WebsiteScanResultBase> {
         const dbDocument = this.convertToDbDocument(scanId, websiteScanResult);
 
-        return (await this.retryHelper.executeWithRetries(
-            async () => {
+        return executeWithExponentialRetry(async () => {
+            try {
                 if (readCompleteDocument) {
                     const baseDocument = await this.mergeOrCreateImpl(dbDocument, onMergeCallbackFn);
 
@@ -140,18 +145,18 @@ export class WebsiteScanResultProvider {
                 } else {
                     return this.mergeOrCreateImpl(dbDocument, onMergeCallbackFn);
                 }
-            },
-            async (err) =>
+            } catch (error) {
                 this.logger.logError(`Failed to update website scan result Cosmos DB document. Retrying on error.`, {
                     baseId: dbDocument?.baseDocument.id,
                     partId: dbDocument?.partDocument.id,
                     baseDocument: JSON.stringify(dbDocument.baseDocument),
                     partDocument: JSON.stringify(dbDocument.partDocument),
-                    error: System.serializeError(err),
-                }),
-            this.maxRetryCount,
-            this.msecBetweenRetries,
-        )) as WebsiteScanResultBase;
+                    error: System.serializeError(error),
+                });
+
+                throw error;
+            }
+        }, this.retryOptions);
     }
 
     /**

@@ -13,8 +13,9 @@ import { AxePuppeteerFactory } from './factories/axe-puppeteer-factory';
 import { WebDriver } from './web-driver';
 import { PageNavigator } from './page-navigator';
 import { BrowserError } from './browser-error';
-import { PageNavigationTiming } from './page-timeout-config';
+import { PageNavigationTiming, puppeteerTimeoutConfig } from './page-timeout-config';
 import { scrollToTop } from './page-client-lib';
+import { PageNetworkTracer } from './page-network-tracer';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -48,13 +49,18 @@ export class Page {
 
     private page: Puppeteer.Page;
 
+    private readonly networkTraceGlobalFlag: boolean;
+
     constructor(
         @inject(WebDriver) private readonly webDriver: WebDriver,
         @inject(AxePuppeteerFactory) private readonly axePuppeteerFactory: AxePuppeteerFactory,
         @inject(PageNavigator) private readonly pageNavigator: PageNavigator,
+        @inject(PageNetworkTracer) private readonly pageNetworkTracer: PageNetworkTracer,
         @inject(GlobalLogger) @optional() private readonly logger: GlobalLogger,
         private readonly scrollToPageTop: typeof scrollToTop = scrollToTop,
-    ) {}
+    ) {
+        this.networkTraceGlobalFlag = process.env.NETWORK_TRACE === 'true' ? true : false;
+    }
 
     public get puppeteerPage(): Puppeteer.Page {
         return this.page;
@@ -79,27 +85,44 @@ export class Page {
         this.page = await this.browser.newPage();
     }
 
-    public async navigateToUrl(url: string): Promise<void> {
+    public async navigateToUrl(url: string, enableNetworkTrace?: boolean): Promise<void> {
         this.requestUrl = url;
         this.lastBrowserError = undefined;
 
+        await this.addNetworkTrace(enableNetworkTrace);
         await this.setExtraHTTPHeaders();
-
         const navigationResponse = await this.pageNavigator.navigate(url, this.page, async (browserError) => {
             this.logger?.logError('Page navigation error', { browserError: System.serializeError(browserError) });
             this.lastBrowserError = browserError;
         });
+
+        if (this.lastBrowserError?.errorType && this.networkTraceGlobalFlag !== true /** not in network trace mode already */) {
+            this.logger?.logWarn('Reload page with network trace on navigation error.');
+            await this.navigateToUrlWithNetworkTrace(url);
+        }
+
+        await this.removeNetworkTrace(enableNetworkTrace);
 
         this.lastNavigationResponse = navigationResponse?.httpResponse;
         this.pageNavigationTiming = navigationResponse?.pageNavigationTiming;
         this.logPageNavigationTiming('load');
     }
 
+    private async navigateToUrlWithNetworkTrace(url: string): Promise<void> {
+        await this.reopenBrowser();
+        await this.setExtraHTTPHeaders();
+        await this.addNetworkTrace(true);
+        await this.pageNavigator.navigate(url, this.page, async () => {
+            return Promise.resolve();
+        });
+        await this.removeNetworkTrace(true);
+    }
+
     /**
      * Reload browser page
      * @param options - Optional reload parameters
      *
-     * parameter `hardReload === true` will restart browser instance and delete browser storage, settings, etc. but use browser disk cache.
+     * `options.hardReload === true` will restart browser instance and delete browser storage, settings, etc. but use browser disk cache.
      */
     public async reload(options?: { hardReload: boolean }): Promise<void> {
         await this.reloadImpl(options);
@@ -137,11 +160,18 @@ export class Page {
     }
 
     public async getPageSnapshot(): Promise<string> {
-        const client = await this.page.target().createCDPSession();
-        const { data } = await client.send('Page.captureSnapshot', { format: 'mhtml' });
-        await client.detach();
+        // In rare cases Puppeteer fails to generate mhtml snapshot file.
+        try {
+            const client = await this.page.target().createCDPSession();
+            const { data } = await client.send('Page.captureSnapshot', { format: 'mhtml' });
+            await client.detach();
 
-        return data;
+            return data;
+        } catch (error) {
+            this.logger?.logError('Failed to generate page mhtml snapshot file', { error: System.serializeError(error) });
+
+            return '';
+        }
     }
 
     public async getAllCookies(): Promise<Puppeteer.Protocol.Network.Cookie[]> {
@@ -181,8 +211,7 @@ export class Page {
      * Hard reload (close and reopen browser) will delete all browser's data but preserve html/image/script/css/etc. cached files.
      */
     private async hardReload(): Promise<void> {
-        await this.close();
-        await this.create({ ...this.lastBrowserStartOptions, clearBrowserCache: false });
+        await this.reopenBrowser();
         await this.navigateToUrl(this.requestUrl);
     }
 
@@ -196,6 +225,13 @@ export class Page {
         this.lastNavigationResponse = navigationResponse?.httpResponse;
         this.pageNavigationTiming = navigationResponse?.pageNavigationTiming;
         this.logPageNavigationTiming('reload');
+    }
+
+    private async reopenBrowser(): Promise<void> {
+        await this.close();
+        await this.create({ ...this.lastBrowserStartOptions, clearBrowserCache: false });
+        // wait for browser to complete reload
+        await System.wait(5000);
     }
 
     private async setExtraHTTPHeaders(): Promise<void> {
@@ -232,10 +268,28 @@ export class Page {
                 timing[key] = `${this.pageNavigationTiming[key]}`;
             });
 
-            this.logger.logInfo(`Total page ${operation} time ${totalNavigationElapsed}, msec`, {
+            this.logger?.logInfo(`Total page ${operation} time ${totalNavigationElapsed}, msec`, {
                 total: totalNavigationElapsed.toString(),
                 ...timing,
             });
+        }
+    }
+
+    private async addNetworkTrace(enableNetworkTrace: boolean): Promise<void> {
+        if (enableNetworkTrace === true || this.networkTraceGlobalFlag === true) {
+            // increase page load timeout
+            puppeteerTimeoutConfig.navigationTimeoutMsecs = puppeteerTimeoutConfig.navigationTimeoutDefaultMsecs * 2;
+            // disable page reload on timeout
+            this.pageNavigator.enableRetryOnTimeout = false;
+            await this.pageNetworkTracer.addNetworkTrace(this.page);
+        }
+    }
+
+    private async removeNetworkTrace(enableNetworkTrace: boolean): Promise<void> {
+        if (enableNetworkTrace === true || this.networkTraceGlobalFlag === true) {
+            puppeteerTimeoutConfig.navigationTimeoutMsecs = puppeteerTimeoutConfig.navigationTimeoutDefaultMsecs;
+            this.pageNavigator.enableRetryOnTimeout = true;
+            await this.pageNetworkTracer.removeNetworkTrace(this.page);
         }
     }
 

@@ -13,7 +13,6 @@ module.exports = {
     },
     plugins: [
         'eslint-plugin-import',
-        'eslint-plugin-unicorn',
         'eslint-plugin-jsdoc',
         'eslint-plugin-prefer-arrow',
         '@typescript-eslint',
@@ -22,6 +21,7 @@ module.exports = {
         'jest',
         'security',
         'header',
+        'check-file',
     ],
     ignorePatterns: ['**/dist/*', '**/node_modules/*'],
     extends: ['eslint:recommended', 'plugin:@typescript-eslint/recommended', 'plugin:security/recommended'],
@@ -170,7 +170,6 @@ module.exports = {
         'security/detect-object-injection': 'off',
         'space-before-function-paren': 'off',
         'space-in-parens': ['error', 'never'],
-        'unicorn/filename-case': 'error',
         'valid-typeof': 'off',
         yoda: 'error',
         '@typescript-eslint/tslint/config': [
@@ -214,6 +213,16 @@ module.exports = {
                 accessorPairPositioning: 'getThenSet',
             },
         ],
+        'check-file/filename-naming-convention': [
+            'error',
+            {
+                '**/*.{js,ts,txt,html,json,yaml,sh,ps1,cmd}': 'KEBAB_CASE',
+            },
+            {
+                ignoreMiddleExtensions: true,
+            },
+        ],
+        'check-file/folder-naming-convention': ['error', { './**/': 'KEBAB_CASE' }],
     },
     overrides: [
         {

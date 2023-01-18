@@ -79,6 +79,9 @@ export class OnDemandDispatcher {
                 if (success === true) {
                     count++;
                     await this.updateScanResultState(scanRequest.result, 'queued');
+                    this.logger.logInfo(`Added a scan request message to the ${scanQueue} scan queue.`, {
+                        scanId: scanRequest.request.id,
+                    });
                     await this.trace(scanRequest);
                 } else {
                     const error: ScanError = {
@@ -117,9 +120,7 @@ export class OnDemandDispatcher {
         }
 
         // set scan run state to failed when scan is stale
-        let abandonedScan = false;
         if ((['noRetry', 'abandoned'] as DispatchCondition[]).includes(scanRequest.condition) && pageScanResult.run.state !== 'failed') {
-            abandonedScan = true;
             pageScanResult.run = {
                 ...pageScanResult.run,
                 state: 'failed',
@@ -135,11 +136,12 @@ export class OnDemandDispatcher {
             });
         }
 
-        // update website's page scan metadata if missing
+        // ensure that website scan result has final state of a page scan to generate up-to-date website scan status result
         const websiteScanRef = pageScanResult.websiteScanRefs?.find((ref) => ref.scanGroupType === 'deep-scan');
-        if (websiteScanRef) {
+        if (websiteScanRef !== undefined) {
             const websiteScanResult = await this.websiteScanResultProvider.read(websiteScanRef.id, false, pageScanResult.id);
-            if (isEmpty(websiteScanResult.pageScans) || abandonedScan) {
+            const pageScan = websiteScanResult.pageScans?.find((s) => s.scanId === pageScanResult.id);
+            if (pageScan?.runState === undefined) {
                 const updatedWebsiteScanResult: Partial<WebsiteScanResult> = {
                     id: websiteScanRef.id,
                     pageScans: [
@@ -147,7 +149,7 @@ export class OnDemandDispatcher {
                             scanId: pageScanResult.id,
                             url: pageScanResult.url,
                             scanState: pageScanResult.scanResult?.state,
-                            runState: pageScanResult.run.state,
+                            runState: pageScanResult.run.state === 'completed' ? 'completed' : 'failed',
                             timestamp: new Date().toJSON(),
                         },
                     ],
@@ -155,6 +157,10 @@ export class OnDemandDispatcher {
 
                 const onMergeCallbackFn = getOnMergeCallbackToUpdateRunResult(pageScanResult.run.state);
                 await this.websiteScanResultProvider.mergeOrCreate(pageScanResult.id, updatedWebsiteScanResult, onMergeCallbackFn);
+
+                this.logger.logWarn(`Updated website page scan run state for a failed run.`, {
+                    scanId: pageScanResult.id,
+                });
             }
         }
     }
