@@ -3999,7 +3999,7 @@ __metadata:
     "@types/puppeteer": ^5.4.6
     accessibility-insights-report: 4.4.1
     apify: ^2.3.2
-    axe-core: 4.4.1
+    axe-core: 4.6.3
     browser-pool: ^3.1.4
     common: "workspace:*"
     dotenv: ^16.0.1
@@ -4063,7 +4063,7 @@ __metadata:
     ajv: ^8.11.2
     apify: ^2.3.2
     applicationinsights: ^2.3.1
-    axe-core: 4.4.1
+    axe-core: 4.6.3
     axe-result-converter: "workspace:*"
     browser-pool: ^3.1.4
     cli-spinner: ^0.2.10
@@ -4741,10 +4741,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"axe-core@npm:4.4.1":
-  version: 4.4.1
-  resolution: "axe-core@npm:4.4.1"
-  checksum: ad14c5b71059dc3d24ef2519b8cd96e98b4a572379396201ce449d1c4262181821d6ca9550df65b22371faf06d28bbe94d391fe5675f2a08e6550f7b5da8416d
+"axe-core@npm:4.6.3":
+  version: 4.6.3
+  resolution: "axe-core@npm:4.6.3"
+  checksum: d0c46be92b9707c48b88a53cd5f471b155a2bfc8bf6beffb514ecd14e30b4863e340b5fc4f496d82a3c562048088c1f3ff5b93b9b3b026cb9c3bfacfd535da10
   languageName: node
   linkType: hard
 
@@ -4756,7 +4756,7 @@ __metadata:
     "@types/lodash": ^4.14.182
     "@types/node": ^16.18.11
     accessibility-insights-report: 4.4.1
-    axe-core: 4.4.1
+    axe-core: 4.6.3
     common: "workspace:*"
     inversify: ^6.0.1
     jest: ^27.5.1
@@ -13029,7 +13029,7 @@ __metadata:
     "@types/lodash": ^4.14.182
     "@types/node": ^16.18.11
     "@types/puppeteer": ^5.4.6
-    axe-core: 4.4.1
+    axe-core: 4.6.3
     common: "workspace:*"
     cpy-cli: ^4.1.0
     inversify: ^6.0.1
@@ -13192,7 +13192,7 @@ __metadata:
     "@types/yargs": ^17.0.18
     accessibility-insights-report: 4.4.1
     async-mutex: ^0.3.2
-    axe-core: 4.4.1
+    axe-core: 4.6.3
     axe-result-converter: "workspace:*"
     azure-services: "workspace:*"
     common: "workspace:*"
@@ -14963,7 +14963,7 @@ __metadata:
     accessibility-insights-report: 4.4.1
     apify: ^2.3.2
     applicationinsights: ^2.3.1
-    axe-core: 4.4.1
+    axe-core: 4.6.3
     axe-result-converter: "workspace:*"
     axe-sarif-converter: ^2.9.0
     azure-services: "workspace:*"

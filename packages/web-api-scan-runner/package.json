@@ -54,7 +54,7 @@
         "accessibility-insights-report": "4.4.1",
         "apify": "^2.3.2",
         "applicationinsights": "^2.3.1",
-        "axe-core": "4.4.1",
+        "axe-core": "4.6.3",
         "axe-result-converter": "workspace:*",
         "axe-sarif-converter": "^2.9.0",
         "azure-services": "workspace:*",
@@ -80,7 +80,7 @@
         "yargs": "^17.6.2"
     },
     "resolutions": {
-        "axe-core": "4.4.1"
+        "axe-core": "4.6.3"
     },
     "overrides": {
         "apify": {
