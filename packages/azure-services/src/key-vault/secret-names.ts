@@ -10,5 +10,5 @@ export const secretNames = {
     authorityUrl: 'authorityUrl',
     appInsightsApiKey: 'appInsightsApiKey',
     scanBehindAuthUsername: 'scanBehindAuthUsername',
-    scanBehindAuthPassword: 'scanBehindAuthPassword',
+    azureServicePrincipalAuthClientPassword: 'scanBehindAuthPassword',
 };
