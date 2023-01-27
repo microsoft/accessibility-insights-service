@@ -4145,7 +4145,7 @@ __metadata:
     npm-run-all: ^4.1.5
     prettier: 2.8.1
     rimraf: ^3.0.2
-    simple-git: ^3.10.0
+    simple-git: ^3.16.0
     syncpack: ^8.4.11
     ts-jest: ^27.1.4
     tslint: ^6.1.3
@@ -13374,14 +13374,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"simple-git@npm:^3.10.0":
-  version: 3.10.0
-  resolution: "simple-git@npm:3.10.0"
+"simple-git@npm:^3.16.0":
+  version: 3.16.0
+  resolution: "simple-git@npm:3.16.0"
   dependencies:
     "@kwsites/file-exists": ^1.1.1
     "@kwsites/promise-deferred": ^1.1.1
     debug: ^4.3.4
-  checksum: 167a6c4b2634bfcc4353a87ccbd7f66ecffa9111990341f7208614e70750f7b920c8858202dd8a535e4534f7539e0d94e89704a2d98cff47002f7dc989a4075f
+  checksum: fd28eb43be39d158d2c321cd34eb00f61c365513478ff2bb31f4da06315dcd018e03c6ece9f99558f3fd8834171072850aed1376bf50f8d922b0e2dadede0c2d
   languageName: node
   linkType: hard
 
