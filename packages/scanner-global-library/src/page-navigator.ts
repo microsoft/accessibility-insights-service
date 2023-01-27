@@ -18,8 +18,9 @@ export type OnNavigationError = (browserError: BrowserError, error?: unknown) =>
 export type NavigationOperation = (navigationCondition?: Puppeteer.PuppeteerLifeCycleEvent) => Promise<Puppeteer.HTTPResponse>;
 
 export interface NavigationResponse {
-    httpResponse: Puppeteer.HTTPResponse;
-    pageNavigationTiming: PageNavigationTiming;
+    httpResponse?: Puppeteer.HTTPResponse;
+    pageNavigationTiming?: PageNavigationTiming;
+    browserError?: BrowserError;
 }
 
 export interface PageOperationResult {
@@ -33,7 +34,8 @@ export interface PageOperationResult {
 export class PageNavigator {
     public enableRetryOnTimeout = true;
 
-    private readonly navigationCondition = 'networkidle2'; // use of networkidle0 will break websites scanning
+    // usage of networkidle0 will break websites scanning
+    private readonly navigationCondition: Puppeteer.PuppeteerLifeCycleEvent = 'networkidle2';
 
     constructor(
         @inject(PageResponseProcessor) public readonly pageResponseProcessor: PageResponseProcessor,
@@ -45,27 +47,22 @@ export class PageNavigator {
         return this.pageNavigationHooks.pageConfigurator;
     }
 
-    public async navigate(
-        url: string,
-        page: Puppeteer.Page,
-        onNavigationError: (browserError: BrowserError, error?: unknown) => Promise<void> = () => Promise.resolve(),
-    ): Promise<NavigationResponse> {
+    public async navigate(url: string, page: Puppeteer.Page): Promise<NavigationResponse> {
         await this.pageNavigationHooks.preNavigation(page);
 
         const opResult = await this.navigatePage(this.createPageNavigationOperation('goto', page, url), page);
 
         if (opResult.browserError) {
-            this.logger?.logError('Page navigation error.', {
-                timeout: `${puppeteerTimeoutConfig.navigationTimeoutMsecs}`,
-                browserError: System.serializeError(opResult.browserError),
-            });
-
-            await onNavigationError(opResult.browserError, opResult.error);
-
-            return undefined;
+            return {
+                httpResponse: undefined,
+                pageNavigationTiming: opResult.navigationTiming,
+                browserError: opResult.browserError,
+            };
         }
 
-        const postNavigationPageTiming = await this.pageNavigationHooks.postNavigation(page, opResult.response, onNavigationError);
+        const postNavigationPageTiming = await this.pageNavigationHooks.postNavigation(page, opResult.response, async (browserError) => {
+            opResult.browserError = browserError;
+        });
 
         return {
             httpResponse: opResult.response,
@@ -76,57 +73,66 @@ export class PageNavigator {
         };
     }
 
-    public async reload(
-        page: Puppeteer.Page,
-        onNavigationError: (browserError: BrowserError, error?: unknown) => Promise<void> = () => Promise.resolve(),
-    ): Promise<NavigationResponse> {
+    public async reload(page: Puppeteer.Page): Promise<NavigationResponse> {
         const opResult = await this.navigatePage(this.createPageNavigationOperation('reload', page), page);
 
         if (opResult.browserError) {
-            this.logger?.logError('Page navigation error while reload page.', {
-                timeout: `${puppeteerTimeoutConfig.navigationTimeoutMsecs}`,
-                browserError: System.serializeError(opResult.browserError),
-            });
-
-            await onNavigationError(opResult.browserError, opResult.error);
-
-            return undefined;
+            return {
+                httpResponse: undefined,
+                pageNavigationTiming: opResult.navigationTiming,
+                browserError: opResult.browserError,
+            };
         }
 
-        const postNavigationPageTiming = await this.pageNavigationHooks.postNavigation(page, opResult.response, onNavigationError);
+        const postNavigationPageTiming = await this.pageNavigationHooks.postNavigation(page, opResult.response, async (browserError) => {
+            opResult.browserError = browserError;
+        });
 
         return {
             httpResponse: opResult.response,
             pageNavigationTiming: {
                 ...opResult.navigationTiming,
                 ...postNavigationPageTiming,
+            } as PageNavigationTiming,
+        };
+    }
+
+    public async waitForNavigation(page: Puppeteer.Page): Promise<NavigationResponse> {
+        const navigationOperation = async (waitUntil = this.navigationCondition) => {
+            return page.waitForNavigation({ waitUntil, timeout: puppeteerTimeoutConfig.navigationTimeoutMsecs });
+        };
+
+        const timestamp = System.getTimestamp();
+        const opResult = await this.invokePageOperation(navigationOperation);
+        const opElapsed = System.getElapsedTime(timestamp);
+
+        if (opResult.error) {
+            return {
+                httpResponse: undefined,
+                pageNavigationTiming: opResult.navigationTiming,
+                browserError: opResult.browserError,
+            };
+        }
+
+        return {
+            httpResponse: opResult.response,
+            pageNavigationTiming: {
+                goto1: opElapsed,
             } as PageNavigationTiming,
         };
     }
 
     protected async navigatePage(navigationOperation: NavigationOperation, page: Puppeteer.Page): Promise<PageOperationResult> {
-        const getErrorResult = (result: PageOperationResult): PageOperationResult => {
-            this.logger?.logError(`Page navigation error.`, {
-                error: System.serializeError(result.error),
-                browserError: System.serializeError(result.browserError),
-            });
-
-            return {
-                ...result,
-                response: undefined,
-            };
-        };
-
         let opResult = await this.invokePageNavigationOperation(navigationOperation);
 
         opResult = await this.handleIndirectPageRedirection(navigationOperation, opResult, page);
         if (opResult.error) {
-            return getErrorResult(opResult);
+            return this.getOperationErrorResult(opResult);
         }
 
         opResult = await this.handleCachedResponse(opResult, page);
         if (opResult.error) {
-            return getErrorResult(opResult);
+            return this.getOperationErrorResult(opResult);
         }
 
         await this.resetBrowserSessionHistory(page);
@@ -337,5 +343,17 @@ export class PageNavigator {
             default:
                 return undefined;
         }
+    }
+
+    private getOperationErrorResult(result: PageOperationResult): PageOperationResult {
+        this.logger?.logError(`Page navigation error.`, {
+            error: System.serializeError(result.error),
+            browserError: System.serializeError(result.browserError),
+        });
+
+        return {
+            ...result,
+            response: undefined,
+        };
     }
 }

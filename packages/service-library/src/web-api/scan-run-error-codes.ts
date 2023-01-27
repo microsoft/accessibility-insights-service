@@ -15,7 +15,8 @@ export declare type ScanRunErrorCodeName =
     | 'InvalidContentType'
     | 'UrlNotResolved'
     | 'ScanTimeout'
-    | 'BannerXPathNotDetected';
+    | 'BannerXPathNotDetected'
+    | 'AuthenticationError';
 
 export interface ScanRunErrorCode {
     // This type is part of the REST API client response.
@@ -98,6 +99,12 @@ export class ScanRunErrorCodes {
         codeId: 9012,
         message: 'Privacy banner was not detected',
     };
+
+    public static authenticationError: ScanRunErrorCode = {
+        code: 'AuthenticationError',
+        codeId: 9013,
+        message: 'Resource authentication error',
+    };
 }
 
 export const scanErrorNameToErrorMap: { [key in ScanRunErrorCodeName]: ScanRunErrorCode } = {
@@ -113,4 +120,5 @@ export const scanErrorNameToErrorMap: { [key in ScanRunErrorCodeName]: ScanRunEr
     UrlNotResolved: ScanRunErrorCodes.urlNotResolved,
     ScanTimeout: ScanRunErrorCodes.scanTimedOut,
     BannerXPathNotDetected: ScanRunErrorCodes.bannerXPathNotDetected,
+    AuthenticationError: ScanRunErrorCodes.authenticationError,
 };

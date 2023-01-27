@@ -16,6 +16,7 @@ import { BrowserError } from './browser-error';
 import { PageNavigationTiming, puppeteerTimeoutConfig } from './page-timeout-config';
 import { scrollToTop } from './page-client-lib';
 import { PageNetworkTracer } from './page-network-tracer';
+import { ResourceAuthenticator } from './authenticator/resource-authenticator';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -47,6 +48,8 @@ export class Page {
 
     public userAgent: string;
 
+    public authenticated: boolean;
+
     private page: Puppeteer.Page;
 
     private readonly networkTraceGlobalFlag: boolean;
@@ -56,6 +59,7 @@ export class Page {
         @inject(AxePuppeteerFactory) private readonly axePuppeteerFactory: AxePuppeteerFactory,
         @inject(PageNavigator) private readonly pageNavigator: PageNavigator,
         @inject(PageNetworkTracer) private readonly pageNetworkTracer: PageNetworkTracer,
+        @inject(ResourceAuthenticator) private readonly resourceAuthenticator: ResourceAuthenticator,
         @inject(GlobalLogger) @optional() private readonly logger: GlobalLogger,
         private readonly scrollToPageTop: typeof scrollToTop = scrollToTop,
     ) {
@@ -85,26 +89,41 @@ export class Page {
         this.page = await this.browser.newPage();
     }
 
-    public async navigateToUrl(url: string, enableNetworkTrace?: boolean): Promise<void> {
+    public async navigateToUrl(url: string, options?: { enableNetworkTrace?: boolean; enableAuthentication?: boolean }): Promise<void> {
         this.requestUrl = url;
         this.lastBrowserError = undefined;
+        this.authenticated = false;
 
-        await this.addNetworkTrace(enableNetworkTrace);
+        await this.addNetworkTrace(options?.enableNetworkTrace);
         await this.setExtraHTTPHeaders();
-        const navigationResponse = await this.pageNavigator.navigate(url, this.page, async (browserError) => {
-            this.logger?.logError('Page navigation error', { browserError: System.serializeError(browserError) });
-            this.lastBrowserError = browserError;
-        });
 
-        if (this.lastBrowserError?.errorType && this.networkTraceGlobalFlag !== true /** not in network trace mode already */) {
+        let navigationResponse = await this.pageNavigator.navigate(url, this.page);
+
+        // eslint-disable-next-line no-param-reassign
+        // options = { enableAuthentication: true };
+
+        if (options?.enableAuthentication) {
+            const authResponse = await this.resourceAuthenticator.authenticate(this.page);
+            if (authResponse) {
+                navigationResponse = authResponse;
+                this.authenticated = true;
+            }
+        }
+
+        if (
+            navigationResponse?.browserError &&
+            this.networkTraceGlobalFlag !== true /** not in network trace mode already */ &&
+            options?.enableAuthentication !== true
+        ) {
             this.logger?.logWarn('Reload page with network trace on navigation error.');
             await this.navigateToUrlWithNetworkTrace(url);
         }
 
-        await this.removeNetworkTrace(enableNetworkTrace);
+        await this.removeNetworkTrace(options?.enableNetworkTrace);
 
         this.lastNavigationResponse = navigationResponse?.httpResponse;
         this.pageNavigationTiming = navigationResponse?.pageNavigationTiming;
+        this.lastBrowserError = navigationResponse?.browserError;
         this.logPageNavigationTiming('load');
     }
 
@@ -112,9 +131,7 @@ export class Page {
         await this.reopenBrowser();
         await this.setExtraHTTPHeaders();
         await this.addNetworkTrace(true);
-        await this.pageNavigator.navigate(url, this.page, async () => {
-            return Promise.resolve();
-        });
+        await this.pageNavigator.navigate(url, this.page);
         await this.removeNetworkTrace(true);
     }
 
@@ -124,7 +141,7 @@ export class Page {
      *
      * `options.hardReload === true` will restart browser instance and delete browser storage, settings, etc. but use browser disk cache.
      */
-    public async reload(options?: { hardReload: boolean }): Promise<void> {
+    public async reload(options?: { hardReload?: boolean }): Promise<void> {
         await this.reloadImpl(options);
         if (this.lastNavigationResponse?.status() === 304) {
             this.logger?.logWarn('Page reload has failed. Reload page without browser cache.');
@@ -198,7 +215,7 @@ export class Page {
         return { width: windowSize.width, height: windowSize.height, deviceScaleFactor: windowSize.deviceScaleFactor };
     }
 
-    private async reloadImpl(options?: { hardReload: boolean }): Promise<void> {
+    private async reloadImpl(options?: { hardReload?: boolean }): Promise<void> {
         this.requestUrl = this.url;
         if (options?.hardReload === true) {
             await this.hardReload();
@@ -217,13 +234,11 @@ export class Page {
 
     private async softReload(): Promise<void> {
         this.lastBrowserError = undefined;
-        const navigationResponse = await this.pageNavigator.reload(this.page, async (browserError) => {
-            this.logger?.logError('Page reload error', { browserError: System.serializeError(browserError) });
-            this.lastBrowserError = browserError;
-        });
+        const navigationResponse = await this.pageNavigator.reload(this.page);
 
         this.lastNavigationResponse = navigationResponse?.httpResponse;
         this.pageNavigationTiming = navigationResponse?.pageNavigationTiming;
+        this.lastBrowserError = navigationResponse?.browserError;
         this.logPageNavigationTiming('reload');
     }
 

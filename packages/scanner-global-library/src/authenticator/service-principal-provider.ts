@@ -11,13 +11,17 @@ export interface ServicePrincipal {
 
 @injectable()
 export class ServicePrincipalProvider {
-    constructor(private readonly defaultServicePrincipal?: ServicePrincipal) {
+    constructor(private readonly defaultServicePrincipal: ServicePrincipal = undefined) {
         if (isEmpty(defaultServicePrincipal)) {
             this.defaultServicePrincipal = {
                 name: process.env.SERVICE_PRINCIPAL_NAME,
                 password: process.env.SERVICE_PRINCIPAL_PASSWORD,
             };
         }
+
+        // set service principal properties to an empty string to trigger login page input validation
+        this.defaultServicePrincipal.name = this.defaultServicePrincipal.name ?? '';
+        this.defaultServicePrincipal.password = this.defaultServicePrincipal.password ?? '';
     }
 
     public getDefaultServicePrincipal(): ServicePrincipal {

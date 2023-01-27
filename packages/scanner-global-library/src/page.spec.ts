@@ -96,6 +96,7 @@ describe(Page, () => {
             axePuppeteerFactoryMock.object,
             pageNavigatorMock.object,
             pageNetworkTracerMock.object,
+            undefined,
             loggerMock.object,
             scrollToTopMock,
         );
@@ -225,7 +226,7 @@ describe(Page, () => {
         });
 
         it('scan throws error if navigateToUrl was not called first', async () => {
-            pageNavigatorMock.setup(async (o) => o.navigate(It.isAny(), It.isAny(), It.isAny())).verifiable(Times.never());
+            pageNavigatorMock.setup(async (o) => o.navigate(It.isAny(), It.isAny())).verifiable(Times.never());
 
             await expect(page.scanForA11yIssues(url)).rejects.toThrow();
         });
@@ -238,7 +239,7 @@ describe(Page, () => {
 
         it('navigates to page and saves response', async () => {
             pageNavigatorMock
-                .setup(async (o) => o.navigate(url, puppeteerPageMock.object, It.isAny()))
+                .setup(async (o) => o.navigate(url, puppeteerPageMock.object))
                 .returns(() => Promise.resolve(navigationResponse))
                 .verifiable();
 
@@ -260,7 +261,7 @@ describe(Page, () => {
                 .setup((o) => o.logError('Page navigation error', { browserError: System.serializeError(browserError) }))
                 .verifiable();
             pageNavigatorMock
-                .setup(async (o) => o.navigate(url, puppeteerPageMock.object, It.isAny()))
+                .setup(async (o) => o.navigate(url, puppeteerPageMock.object))
                 .callback(async (u, p, fn) => {
                     await fn(browserError, error);
                 })
@@ -295,7 +296,7 @@ describe(Page, () => {
         it('set extra HTTP headers on navigate', async () => {
             process.env.X_FORWARDED_FOR_HTTP_HEADER = '1.1.1.1';
             pageNavigatorMock
-                .setup(async (o) => o.navigate(url, puppeteerPageMock.object, It.isAny()))
+                .setup(async (o) => o.navigate(url, puppeteerPageMock.object))
                 .returns(() => Promise.resolve(navigationResponse))
                 .verifiable();
             puppeteerPageMock
@@ -315,7 +316,7 @@ describe(Page, () => {
 
         it('reload page and saves response', async () => {
             pageNavigatorMock
-                .setup(async (o) => o.reload(puppeteerPageMock.object, It.isAny()))
+                .setup(async (o) => o.reload(puppeteerPageMock.object))
                 .returns(() => Promise.resolve(navigationResponse))
                 .verifiable();
 
@@ -333,7 +334,7 @@ describe(Page, () => {
         it('reload page with browser cache deleted', async () => {
             setupPuppeteerResponseMock(304);
             pageNavigatorMock
-                .setup(async (o) => o.reload(puppeteerPageMock.object, It.isAny()))
+                .setup(async (o) => o.reload(puppeteerPageMock.object))
                 .returns(() => Promise.resolve(navigationResponse))
                 .verifiable(Times.exactly(2));
 
@@ -371,12 +372,12 @@ describe(Page, () => {
                 .verifiable();
             // navigate url
             pageNavigatorMock
-                .setup(async (o) => o.navigate(url, puppeteerPageMock.object, It.isAny()))
+                .setup(async (o) => o.navigate(url, puppeteerPageMock.object))
                 .returns(() => Promise.resolve(navigationResponse))
                 .verifiable();
             // reload page
             pageNavigatorMock
-                .setup(async (o) => o.reload(puppeteerPageMock.object, It.isAny()))
+                .setup(async (o) => o.reload(puppeteerPageMock.object))
                 .returns(() => Promise.resolve(navigationResponse))
                 .verifiable(Times.never());
 
@@ -390,7 +391,7 @@ describe(Page, () => {
             const browserError = { errorType: 'SslError', statusCode: 500 } as BrowserError;
             loggerMock.setup((o) => o.logError('Page reload error', { browserError: System.serializeError(browserError) })).verifiable();
             pageNavigatorMock
-                .setup(async (o) => o.reload(puppeteerPageMock.object, It.isAny()))
+                .setup(async (o) => o.reload(puppeteerPageMock.object))
                 .callback(async (p, fn) => {
                     await fn(browserError, error);
                 })
