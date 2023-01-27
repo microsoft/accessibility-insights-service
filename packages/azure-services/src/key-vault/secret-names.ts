@@ -9,4 +9,6 @@ export const secretNames = {
     restApiSpSecret: 'restApiSpSecret',
     authorityUrl: 'authorityUrl',
     appInsightsApiKey: 'appInsightsApiKey',
+    azureServicePrincipalAuthClientName: 'scanBehindAuthUsername',
+    azureServicePrincipalAuthClientPassword: 'scanBehindAuthPassword',
 };
