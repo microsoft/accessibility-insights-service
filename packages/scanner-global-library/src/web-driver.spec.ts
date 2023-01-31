@@ -9,12 +9,13 @@ import * as Puppeteer from 'puppeteer';
 import { IMock, It, Mock, Times, MockBehavior } from 'typemoq';
 import { PromiseUtils } from 'common';
 // eslint-disable-next-line @typescript-eslint/tslint/config
-import PuppeteerExtra from 'puppeteer-extra';
+import PuppeteerExtra, { PuppeteerExtraPlugin } from 'puppeteer-extra';
 // eslint-disable-next-line @typescript-eslint/tslint/config
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 import { MockableLogger } from './test-utilities/mockable-logger';
 import { WebDriver } from './web-driver';
 import { StealthPluginType } from './stealth-plugin-type';
+import { UserAgentPlugin } from './user-agent-plugin';
 
 /* eslint-disable @typescript-eslint/consistent-type-assertions, @typescript-eslint/no-explicit-any*/
 
@@ -49,12 +50,14 @@ let loggerMock: IMock<MockableLogger>;
 let puppeteerBrowserMock: PuppeteerBrowserMock;
 let promiseUtilsMock: IMock<PromiseUtils>;
 let puppeteerExtraMock: IMock<typeof PuppeteerExtra>;
+let userAgentPluginMock: IMock<UserAgentPlugin>;
 let fsMock: IMock<typeof fs>;
 
 beforeEach(() => {
     puppeteerBrowserMock = new PuppeteerBrowserMock();
     promiseUtilsMock = Mock.ofType<PromiseUtils>();
     puppeteerExtraMock = Mock.ofType<typeof PuppeteerExtra>();
+    userAgentPluginMock = Mock.ofType<UserAgentPlugin>();
     fsMock = Mock.ofType<typeof fs>();
     loggerMock = Mock.ofType(MockableLogger);
     testSubject = new WebDriver(
@@ -63,6 +66,7 @@ beforeEach(() => {
         Puppeteer,
         puppeteerExtraMock.object,
         StealthPlugin(),
+        userAgentPluginMock.object,
         fsMock.object,
     );
 });
@@ -133,8 +137,14 @@ describe('WebDriver', () => {
     });
 
     it('should launch puppeteer browser', async () => {
+        const userAgentPlugin = { name: 'user-agent-plugin' } as unknown as PuppeteerExtraPlugin;
+        const stealthAgentPlugin = { name: 'stealth' } as unknown as PuppeteerExtraPlugin;
         puppeteerExtraMock
-            .setup((o) => o.use(It.isAny()))
+            .setup((o) => o.use(It.isObjectWith(userAgentPlugin)))
+            .returns(() => puppeteerExtraMock.object)
+            .verifiable();
+        puppeteerExtraMock
+            .setup((o) => o.use(It.isObjectWith(stealthAgentPlugin)))
             .returns(() => puppeteerExtraMock.object)
             .verifiable();
         puppeteerExtraMock

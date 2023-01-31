@@ -32,6 +32,11 @@ export interface Viewport {
     deviceScaleFactor: number;
 }
 
+export interface PageNavigationOptions {
+    enableNetworkTrace?: boolean;
+    enableAuthentication?: boolean;
+}
+
 @injectable()
 export class Page {
     public browser: Puppeteer.Browser;
@@ -89,7 +94,7 @@ export class Page {
         this.page = await this.browser.newPage();
     }
 
-    public async navigateToUrl(url: string, options?: { enableNetworkTrace?: boolean; enableAuthentication?: boolean }): Promise<void> {
+    public async navigateToUrl(url: string, options?: PageNavigationOptions): Promise<void> {
         this.requestUrl = url;
         this.lastBrowserError = undefined;
         this.authenticated = false;
@@ -99,13 +104,14 @@ export class Page {
 
         let navigationResponse = await this.pageNavigator.navigate(url, this.page);
 
+        // todo remove test flag
         // eslint-disable-next-line no-param-reassign
         // options = { enableAuthentication: true };
 
-        if (options?.enableAuthentication) {
-            const authResponse = await this.resourceAuthenticator.authenticate(this.page);
-            if (authResponse) {
-                navigationResponse = authResponse;
+        if (options?.enableAuthentication === true) {
+            const authNavigationResponse = await this.resourceAuthenticator.authenticate(this.page);
+            if (authNavigationResponse) {
+                navigationResponse = authNavigationResponse;
                 this.authenticated = true;
             }
         }
@@ -113,7 +119,7 @@ export class Page {
         if (
             navigationResponse?.browserError &&
             this.networkTraceGlobalFlag !== true /** not in network trace mode already */ &&
-            options?.enableAuthentication !== true
+            this.authenticated !== true
         ) {
             this.logger?.logWarn('Reload page with network trace on navigation error.');
             await this.navigateToUrlWithNetworkTrace(url);

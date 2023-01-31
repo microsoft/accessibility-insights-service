@@ -3,7 +3,7 @@
 
 import * as Puppeteer from 'puppeteer';
 import { inject, optional, injectable } from 'inversify';
-import { Url } from 'common';
+// import { Url } from 'common';
 import { PageNavigator, NavigationResponse } from '../page-navigator';
 import { ServicePrincipalProvider } from './service-principal-provider';
 
@@ -27,9 +27,6 @@ export class AzureLoginPageClient implements LoginPageClient {
 
     public async login(page: Puppeteer.Page): Promise<NavigationResponse> {
         const servicePrincipal = this.servicePrincipalProvider.getDefaultServicePrincipal();
-
-        const redirectUrl = Url.getParameterValue('redirect_uri', page.url());
-        console.log(redirectUrl);
 
         // Enter account name
         try {
@@ -103,13 +100,10 @@ export class AzureLoginPageClient implements LoginPageClient {
         }
 
         // todo add target redirect validation
+        // const redirectUrl = Url.getParameterValue('redirect_uri', page.url());
+        // console.log(redirectUrl);
 
         await this.handleKmsiPageIfShown(page);
-
-        // if (!this.authenticationSucceeded(page)) {
-        //     const errorText: string = await page.$eval('#errorText', (el) => el.textContent).catch(() => '');
-        //     throw new Error(`Authentication failed${isEmpty(errorText) ? '' : ` with error: ${errorText}`}`);
-        // }
 
         return navigationResponse;
     }

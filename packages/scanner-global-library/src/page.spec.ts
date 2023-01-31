@@ -8,17 +8,18 @@ import { AxeResults } from 'axe-core';
 import Puppeteer, { HTTPResponse, ScreenshotOptions } from 'puppeteer';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { System } from 'common';
+import { GlobalLogger } from 'logger';
 import { AxeScanResults } from './axe-scan-results';
 import { BrowserError } from './browser-error';
 import { AxePuppeteerFactory } from './factories/axe-puppeteer-factory';
 import { Page } from './page';
-import { MockableLogger } from './test-utilities/mockable-logger';
 import { getPromisableDynamicMock } from './test-utilities/promisable-mock';
 import { WebDriver } from './web-driver';
 import { PageNavigator, NavigationResponse } from './page-navigator';
 import { PageNavigationTiming } from './page-timeout-config';
 import { scrollToTop } from './page-client-lib';
 import { PageNetworkTracer } from './page-network-tracer';
+import { ResourceAuthenticator } from './authenticator/resource-authenticator';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -46,7 +47,7 @@ let navigationResponse: NavigationResponse;
 let webDriverMock: IMock<WebDriver>;
 let axePuppeteerFactoryMock: IMock<AxePuppeteerFactory>;
 let pageNavigatorMock: IMock<PageNavigator>;
-let loggerMock: IMock<MockableLogger>;
+let loggerMock: IMock<GlobalLogger>;
 let browserMock: IMock<Puppeteer.Browser>;
 let puppeteerPageMock: IMock<Puppeteer.Page>;
 let puppeteerResponseMock: IMock<Puppeteer.HTTPResponse>;
@@ -54,6 +55,7 @@ let puppeteerRequestMock: IMock<Puppeteer.HTTPRequest>;
 let axePuppeteerMock: IMock<AxePuppeteer>;
 let cdpSessionMock: IMock<Puppeteer.CDPSession>;
 let pageNetworkTracerMock: IMock<PageNetworkTracer>;
+let resourceAuthenticatorMock: IMock<ResourceAuthenticator>;
 
 describe(Page, () => {
     beforeEach(() => {
@@ -65,10 +67,10 @@ describe(Page, () => {
             browserResolution,
         };
 
-        webDriverMock = Mock.ofType(WebDriver);
+        webDriverMock = getPromisableDynamicMock(Mock.ofType<WebDriver>());
         axePuppeteerFactoryMock = Mock.ofType(AxePuppeteerFactory);
         pageNavigatorMock = Mock.ofType(PageNavigator);
-        loggerMock = Mock.ofType(MockableLogger);
+        loggerMock = Mock.ofType<GlobalLogger>();
         browserMock = getPromisableDynamicMock(Mock.ofType<Puppeteer.Browser>());
         puppeteerPageMock = getPromisableDynamicMock(Mock.ofType<Puppeteer.Page>());
         puppeteerResponseMock = getPromisableDynamicMock(Mock.ofType<Puppeteer.HTTPResponse>());
@@ -76,6 +78,7 @@ describe(Page, () => {
         axePuppeteerMock = getPromisableDynamicMock(Mock.ofType<AxePuppeteer>());
         cdpSessionMock = getPromisableDynamicMock(Mock.ofType<Puppeteer.CDPSession>());
         pageNetworkTracerMock = Mock.ofType<PageNetworkTracer>();
+        resourceAuthenticatorMock = Mock.ofType<ResourceAuthenticator>();
         scrollToTopMock = jest.fn().mockImplementation(() => Promise.resolve());
         navigationResponse = {
             httpResponse: puppeteerResponseMock.object,
@@ -96,7 +99,7 @@ describe(Page, () => {
             axePuppeteerFactoryMock.object,
             pageNavigatorMock.object,
             pageNetworkTracerMock.object,
-            undefined,
+            resourceAuthenticatorMock.object,
             loggerMock.object,
             scrollToTopMock,
         );
@@ -111,6 +114,7 @@ describe(Page, () => {
         puppeteerRequestMock.verifyAll();
         cdpSessionMock.verifyAll();
         pageNetworkTracerMock.verifyAll();
+        resourceAuthenticatorMock.verifyAll();
     });
 
     describe('scanForA11yIssues()', () => {
@@ -254,18 +258,30 @@ describe(Page, () => {
             expect(page.lastNavigationResponse).toEqual(puppeteerResponseMock.object);
         });
 
+        it('navigates to page with authentication', async () => {
+            pageNavigatorMock
+                .setup(async (o) => o.navigate(url, puppeteerPageMock.object))
+                .returns(() => Promise.resolve(navigationResponse))
+                .verifiable();
+
+            const authNavigationResponse = { httpResponse: { url: () => 'localhost' } } as NavigationResponse;
+            resourceAuthenticatorMock
+                .setup((o) => o.authenticate(puppeteerPageMock.object))
+                .returns(() => Promise.resolve(authNavigationResponse))
+                .verifiable();
+
+            await page.navigateToUrl(url, { enableAuthentication: true });
+
+            expect(page.lastNavigationResponse).toEqual(authNavigationResponse.httpResponse);
+            expect(page.authenticated).toEqual(true);
+        });
+
         it('handles browser error on navigate', async () => {
             const error = new Error('navigation error');
             const browserError = { errorType: 'SslError', statusCode: 500 } as BrowserError;
-            loggerMock
-                .setup((o) => o.logError('Page navigation error', { browserError: System.serializeError(browserError) }))
-                .verifiable();
             pageNavigatorMock
                 .setup(async (o) => o.navigate(url, puppeteerPageMock.object))
-                .callback(async (u, p, fn) => {
-                    await fn(browserError, error);
-                })
-                .returns(() => Promise.resolve(undefined))
+                .returns(() => Promise.resolve({ error, browserError }))
                 .verifiable(Times.exactly(2));
             browserMock
                 .setup((o) => o.userAgent())
@@ -389,13 +405,9 @@ describe(Page, () => {
         it('handles browser error on reload', async () => {
             const error = new Error('navigation error');
             const browserError = { errorType: 'SslError', statusCode: 500 } as BrowserError;
-            loggerMock.setup((o) => o.logError('Page reload error', { browserError: System.serializeError(browserError) })).verifiable();
             pageNavigatorMock
                 .setup(async (o) => o.reload(puppeteerPageMock.object))
-                .callback(async (p, fn) => {
-                    await fn(browserError, error);
-                })
-                .returns(() => Promise.resolve(undefined))
+                .returns(() => Promise.resolve({ error, browserError }))
                 .verifiable();
 
             await page.reload();
