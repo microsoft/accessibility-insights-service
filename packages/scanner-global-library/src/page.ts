@@ -47,6 +47,8 @@ export class Page {
 
     public lastBrowserStartOptions: BrowserStartOptions;
 
+    public lastPageNavigationOptions: PageNavigationOptions;
+
     public pageNavigationTiming: PageNavigationTiming;
 
     public requestUrl: string;
@@ -96,6 +98,7 @@ export class Page {
 
     public async navigateToUrl(url: string, options?: PageNavigationOptions): Promise<void> {
         this.requestUrl = url;
+        this.lastPageNavigationOptions = options;
         this.lastBrowserError = undefined;
         this.authenticated = false;
 
@@ -235,7 +238,7 @@ export class Page {
      */
     private async hardReload(): Promise<void> {
         await this.reopenBrowser();
-        await this.navigateToUrl(this.requestUrl);
+        await this.navigateToUrl(this.requestUrl, this.lastPageNavigationOptions);
     }
 
     private async softReload(): Promise<void> {
