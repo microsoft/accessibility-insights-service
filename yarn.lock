@@ -4135,7 +4135,7 @@ __metadata:
     eslint-plugin-jest: ^26.9.0
     eslint-plugin-jsdoc: ^38.1.6
     eslint-plugin-prefer-arrow: ^1.2.3
-    eslint-plugin-security: ^1.5.0
+    eslint-plugin-security: ^1.7.0
     eslint-plugin-sort-class-members: ^1.16.0
     jest: ^27.5.1
     jest-extended: ^3.2.0
@@ -6932,12 +6932,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-plugin-security@npm:^1.5.0":
-  version: 1.5.0
-  resolution: "eslint-plugin-security@npm:1.5.0"
+"eslint-plugin-security@npm:^1.7.0":
+  version: 1.7.0
+  resolution: "eslint-plugin-security@npm:1.7.0"
   dependencies:
     safe-regex: ^2.1.1
-  checksum: c51c9d43d1ef1eaf803d136ae73522369f1e0b4f2633a56fc3226afd64ad3936943080bf506353c25422d1d73e8395946d016847e0ac5c0b5886c394fe848b9f
+  checksum: e6ef5123c4ae7ea0953a97cdb8b34146abec2d88d6c5f96d0c5930c8c6d3c77826f1be1fae346fe2f6c4631c107dbacf345a5952c8451bf1c4dc05375279505e
   languageName: node
   linkType: hard
 
