@@ -49,7 +49,7 @@
     "dependencies": {
         "azure-services": "workspace:*",
         "common": "workspace:*",
-        "durable-functions": "^1.5.4",
+        "durable-functions": "^2.1.1",
         "functional-tests": "workspace:*",
         "inversify": "^6.0.1",
         "lodash": "^4.17.21",
