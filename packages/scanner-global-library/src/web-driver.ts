@@ -120,6 +120,7 @@ export class WebDriver {
         this.stealthPlugin.enabledEvasions.delete('iframe.contentWindow');
         // Plugin to hide puppeteer automation from a webserver
         this.puppeteerExtra.use(this.stealthPlugin);
+
         // Plugin to set non-Windows platform in user agent string
         this.puppeteerExtra.use(this.userAgentPlugin);
     }

@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { PuppeteerExtraPlugin, PluginOptions } from 'puppeteer-extra-plugin';
+import { PuppeteerExtraPlugin, PluginOptions, PluginRequirements } from 'puppeteer-extra-plugin';
 import Puppeteer from 'puppeteer';
 
 export class UserAgentPlugin extends PuppeteerExtraPlugin {
@@ -11,6 +11,10 @@ export class UserAgentPlugin extends PuppeteerExtraPlugin {
 
     public get name(): string {
         return 'user-agent-plugin';
+    }
+
+    public get requirements(): PluginRequirements {
+        return new Set(['runLast']);
     }
 
     /**
