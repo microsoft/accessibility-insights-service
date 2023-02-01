@@ -4014,7 +4014,7 @@ __metadata:
     npm-run-all: ^4.1.5
     puppeteer: 18.1.0
     reflect-metadata: ^0.1.13
-    rimraf: ^3.0.2
+    rimraf: ^4.1.2
     rollup: ^3.9.0
     scanner-global-library: "workspace:*"
     sha.js: ^2.4.11
@@ -4098,7 +4098,7 @@ __metadata:
     puppeteer-extra-plugin-stealth: ^2.11.1
     raw-body: ^2.5.1
     reflect-metadata: ^0.1.13
-    rimraf: ^3.0.2
+    rimraf: ^4.1.2
     scanner-global-library: "workspace:*"
     serialize-error: ^8.1.0
     sha.js: ^2.4.11
@@ -4144,7 +4144,7 @@ __metadata:
     license-check-and-add: ^4.0.5
     npm-run-all: ^4.1.5
     prettier: 2.8.1
-    rimraf: ^3.0.2
+    rimraf: ^4.1.2
     simple-git: ^3.10.0
     syncpack: ^8.4.11
     ts-jest: ^27.1.4
@@ -4764,7 +4764,7 @@ __metadata:
     lodash: ^4.17.21
     npm-run-all: ^4.1.5
     reflect-metadata: ^0.1.13
-    rimraf: ^3.0.2
+    rimraf: ^4.1.2
     ts-jest: ^27.1.4
     typemoq: ^2.1.0
     typescript: ^4.9.4
@@ -4825,7 +4825,7 @@ __metadata:
     p-limit: ^3.1.0
     pretty-format: ^29.3.1
     reflect-metadata: ^0.1.13
-    rimraf: ^3.0.2
+    rimraf: ^4.1.2
     storage-documents: "workspace:*"
     ts-jest: ^27.1.4
     ts-loader: ^9.4.2
@@ -5756,7 +5756,7 @@ __metadata:
     npm-run-all: ^4.1.5
     raw-body: ^2.5.1
     reflect-metadata: ^0.1.13
-    rimraf: ^3.0.2
+    rimraf: ^4.1.2
     serialize-error: ^8.1.0
     sha.js: ^2.4.11
     ts-jest: ^27.1.4
@@ -6494,7 +6494,7 @@ __metadata:
   dependencies:
     cpy-cli: ^4.1.0
     npm-run-all: ^4.1.5
-    rimraf: ^3.0.2
+    rimraf: ^4.1.2
   languageName: unknown
   linkType: soft
 
@@ -6519,7 +6519,7 @@ __metadata:
     npm-run-all: ^4.1.5
     parallel-workers: "workspace:*"
     reflect-metadata: ^0.1.13
-    rimraf: ^3.0.2
+    rimraf: ^4.1.2
     ts-jest: ^27.1.4
     ts-loader: ^9.4.2
     typescript: ^4.9.4
@@ -7766,7 +7766,7 @@ __metadata:
     mockdate: ^3.0.5
     npm-run-all: ^4.1.5
     reflect-metadata: ^0.1.13
-    rimraf: ^3.0.2
+    rimraf: ^4.1.2
     service-library: "workspace:*"
     storage-documents: "workspace:*"
     ts-jest: ^27.1.4
@@ -8209,7 +8209,7 @@ __metadata:
     logger: "workspace:*"
     npm-run-all: ^4.1.5
     reflect-metadata: ^0.1.13
-    rimraf: ^3.0.2
+    rimraf: ^4.1.2
     service-library: "workspace:*"
     shebang-loader: ^0.0.1
     ts-jest: ^27.1.4
@@ -10360,7 +10360,7 @@ __metadata:
     moment: ^2.29.4
     npm-run-all: ^4.1.5
     reflect-metadata: ^0.1.13
-    rimraf: ^3.0.2
+    rimraf: ^4.1.2
     ts-jest: ^27.1.4
     typemoq: ^2.1.0
     typescript: ^4.9.4
@@ -11544,7 +11544,7 @@ __metadata:
     lodash: ^4.17.21
     moment: ^2.29.4
     npm-run-all: ^4.1.5
-    rimraf: ^3.0.2
+    rimraf: ^4.1.2
     storage-documents: "workspace:*"
     ts-jest: ^27.1.4
     ts-loader: ^9.4.2
@@ -11902,7 +11902,7 @@ __metadata:
     npm-run-all: ^4.1.5
     puppeteer: 18.1.0
     reflect-metadata: ^0.1.13
-    rimraf: ^3.0.2
+    rimraf: ^4.1.2
     scanner-global-library: "workspace:*"
     storage-documents: "workspace:*"
     ts-jest: ^27.1.4
@@ -11937,7 +11937,7 @@ __metadata:
     node-loader: ^2.0.0
     npm-run-all: ^4.1.5
     reflect-metadata: ^0.1.13
-    rimraf: ^3.0.2
+    rimraf: ^4.1.2
     service-library: "workspace:*"
     storage-documents: "workspace:*"
     ts-jest: ^27.1.4
@@ -11985,7 +11985,7 @@ __metadata:
     puppeteer-extra-plugin: ^3.2.2
     puppeteer-extra-plugin-stealth: ^2.11.1
     reflect-metadata: ^0.1.13
-    rimraf: ^3.0.2
+    rimraf: ^4.1.2
     scanner-global-library: "workspace:*"
     service-library: "workspace:*"
     storage-documents: "workspace:*"
@@ -12644,7 +12644,7 @@ __metadata:
     node-loader: ^2.0.0
     npm-run-all: ^4.1.5
     reflect-metadata: ^0.1.13
-    rimraf: ^3.0.2
+    rimraf: ^4.1.2
     service-library: "workspace:*"
     storage-documents: "workspace:*"
     ts-jest: ^27.1.4
@@ -12691,7 +12691,7 @@ __metadata:
     puppeteer-extra-plugin: ^3.2.2
     puppeteer-extra-plugin-stealth: ^2.11.1
     reflect-metadata: ^0.1.13
-    rimraf: ^3.0.2
+    rimraf: ^4.1.2
     scanner-global-library: "workspace:*"
     service-library: "workspace:*"
     storage-documents: "workspace:*"
@@ -12871,7 +12871,7 @@ __metadata:
   dependencies:
     cpy-cli: ^4.1.0
     npm-run-all: ^4.1.5
-    rimraf: ^3.0.2
+    rimraf: ^4.1.2
   languageName: unknown
   linkType: soft
 
@@ -12923,6 +12923,15 @@ __metadata:
   bin:
     rimraf: bin.js
   checksum: 87f4164e396f0171b0a3386cc1877a817f572148ee13a7e113b238e48e8a9f2f31d009a92ec38a591ff1567d9662c6b67fd8818a2dbbaed74bc26a87a2a4a9a0
+  languageName: node
+  linkType: hard
+
+"rimraf@npm:^4.1.2":
+  version: 4.1.2
+  resolution: "rimraf@npm:4.1.2"
+  bin:
+    rimraf: dist/cjs/src/bin.js
+  checksum: 480b8147fd9bcbef3ac118f88a7b1169c3872977a3411a0c84df838bfc30e175a394c0db6f9619fc8b8a886a18c6d779d5e74f380a0075ecc710afaf81b3f50c
   languageName: node
   linkType: hard
 
@@ -13043,7 +13052,7 @@ __metadata:
     puppeteer-extra-plugin: ^3.2.2
     puppeteer-extra-plugin-stealth: ^2.11.1
     reflect-metadata: ^0.1.13
-    rimraf: ^3.0.2
+    rimraf: ^4.1.2
     storage-documents: "workspace:*"
     ts-jest: ^27.1.4
     typemoq: ^2.1.0
@@ -13213,7 +13222,7 @@ __metadata:
     privacy-scan-core: "workspace:*"
     puppeteer: 18.1.0
     reflect-metadata: ^0.1.13
-    rimraf: ^3.0.2
+    rimraf: ^4.1.2
     scanner-global-library: "workspace:*"
     sha.js: ^2.4.11
     storage-documents: "workspace:*"
@@ -13630,7 +13639,7 @@ __metadata:
     jest-junit: ^15.0.0
     npm-run-all: ^4.1.5
     reflect-metadata: ^0.1.13
-    rimraf: ^3.0.2
+    rimraf: ^4.1.2
     ts-jest: ^27.1.4
     ts-transformer-keys: ^0.4.4
     ttypescript: ^1.5.15
@@ -14863,7 +14872,7 @@ __metadata:
     logger: "workspace:*"
     npm-run-all: ^4.1.5
     reflect-metadata: ^0.1.13
-    rimraf: ^3.0.2
+    rimraf: ^4.1.2
     service-library: "workspace:*"
     ts-jest: ^27.1.4
     typemoq: ^2.1.0
@@ -14897,7 +14906,7 @@ __metadata:
     node-loader: ^2.0.0
     npm-run-all: ^4.1.5
     reflect-metadata: ^0.1.13
-    rimraf: ^3.0.2
+    rimraf: ^4.1.2
     service-library: "workspace:*"
     storage-documents: "workspace:*"
     ts-jest: ^27.1.4
@@ -14931,7 +14940,7 @@ __metadata:
     node-loader: ^2.0.0
     npm-run-all: ^4.1.5
     reflect-metadata: ^0.1.13
-    rimraf: ^3.0.2
+    rimraf: ^4.1.2
     service-library: "workspace:*"
     storage-documents: "workspace:*"
     ts-jest: ^27.1.4
@@ -14989,7 +14998,7 @@ __metadata:
     puppeteer-extra-plugin-stealth: ^2.11.1
     reflect-metadata: ^0.1.13
     request: ^2.88.2
-    rimraf: ^3.0.2
+    rimraf: ^4.1.2
     scanner-global-library: "workspace:*"
     service-library: "workspace:*"
     sha.js: ^2.4.11
@@ -15031,7 +15040,7 @@ __metadata:
     node-loader: ^2.0.0
     npm-run-all: ^4.1.5
     reflect-metadata: ^0.1.13
-    rimraf: ^3.0.2
+    rimraf: ^4.1.2
     service-library: "workspace:*"
     storage-documents: "workspace:*"
     ts-jest: ^27.1.4
@@ -15074,7 +15083,7 @@ __metadata:
     node-loader: ^2.0.0
     npm-run-all: ^4.1.5
     reflect-metadata: ^0.1.13
-    rimraf: ^3.0.2
+    rimraf: ^4.1.2
     service-library: "workspace:*"
     sha.js: ^2.4.11
     storage-documents: "workspace:*"
@@ -15113,7 +15122,7 @@ __metadata:
     node-loader: ^2.0.0
     npm-run-all: ^4.1.5
     reflect-metadata: ^0.1.13
-    rimraf: ^3.0.2
+    rimraf: ^4.1.2
     service-library: "workspace:*"
     storage-documents: "workspace:*"
     ts-jest: ^27.1.4
@@ -15153,7 +15162,7 @@ __metadata:
     npm-run-all: ^4.1.5
     p-limit: ^3.1.0
     reflect-metadata: ^0.1.13
-    rimraf: ^3.0.2
+    rimraf: ^4.1.2
     service-library: "workspace:*"
     storage-documents: "workspace:*"
     ts-jest: ^27.1.4
