@@ -4085,7 +4085,7 @@ __metadata:
     leveldown: ^6.1.1
     levelup: ^5.1.1
     lodash: ^4.17.21
-    mkdirp: ^1.0.4
+    mkdirp: ^2.1.3
     mockdate: ^3.0.5
     moment: ^2.29.4
     normalize-path: ^3.0.0
@@ -10804,6 +10804,15 @@ __metadata:
   bin:
     mkdirp: bin/cmd.js
   checksum: a96865108c6c3b1b8e1d5e9f11843de1e077e57737602de1b82030815f311be11f96f09cce59bd5b903d0b29834733e5313f9301e3ed6d6f6fba2eae0df4298f
+  languageName: node
+  linkType: hard
+
+"mkdirp@npm:^2.1.3":
+  version: 2.1.3
+  resolution: "mkdirp@npm:2.1.3"
+  bin:
+    mkdirp: dist/cjs/src/bin.js
+  checksum: 5d7d7997e38a962e8b66dd4db1974bdcb841f084531ba8c9e1f3d52d71f5e6639677a96b2eb5d5940406d729a2153d820f396077ed3a6716058d3e75041dc1f2
   languageName: node
   linkType: hard
 
