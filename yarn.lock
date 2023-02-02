@@ -3997,9 +3997,9 @@ __metadata:
     "@types/levelup": ^5.1.1
     "@types/node": ^16.18.11
     "@types/puppeteer": ^5.4.6
-    accessibility-insights-report: 4.4.1
+    accessibility-insights-report: 4.6.3
     apify: ^2.3.2
-    axe-core: 4.4.1
+    axe-core: 4.6.3
     browser-pool: ^3.1.4
     common: "workspace:*"
     dotenv: ^16.0.1
@@ -4025,20 +4025,20 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"accessibility-insights-report@npm:4.4.1":
-  version: 4.4.1
-  resolution: "accessibility-insights-report@npm:4.4.1"
+"accessibility-insights-report@npm:4.6.3":
+  version: 4.6.3
+  resolution: "accessibility-insights-report@npm:4.6.3"
   dependencies:
     "@fluentui/react": ^8.96.1
-    axe-core: 4.4.1
+    axe-core: 4.6.3
     classnames: ^2.3.2
     lodash: ^4.17.21
-    luxon: ^3.1.1
+    luxon: ^3.2.1
     react: ^16.14.0
     react-dom: ^16.14.0
     react-helmet: ^6.1.0
     uuid: ^9.0.0
-  checksum: d63df40f517184dd80fb32796efc8c10ec1dbb6a68a8401776cfdb20e1295434896a529faf8172bafdf384dc6c8f29a9e00a96e0dd9f213027bf9c9211a65442
+  checksum: 34ba89cd5b1fbe1e2e126212148f5c4728c2dd31085e0ee97bb3ef3bc46e1cbb9c54c6f9fb5762fe152bdb4e54edc95593123d565d33ce0bc378fdf9f2d44e7a
   languageName: node
   linkType: hard
 
@@ -4059,11 +4059,11 @@ __metadata:
     "@types/puppeteer": ^5.4.6
     "@types/table": ^6.3.2
     accessibility-insights-crawler: "workspace:*"
-    accessibility-insights-report: 4.4.1
+    accessibility-insights-report: 4.6.3
     ajv: ^8.11.2
     apify: ^2.3.2
     applicationinsights: ^2.3.1
-    axe-core: 4.4.1
+    axe-core: 4.6.3
     axe-result-converter: "workspace:*"
     browser-pool: ^3.1.4
     cli-spinner: ^0.2.10
@@ -4125,7 +4125,7 @@ __metadata:
     "@typescript-eslint/eslint-plugin": ^5.48.1
     "@typescript-eslint/eslint-plugin-tslint": ^5.48.1
     "@typescript-eslint/parser": ^5.48.1
-    accessibility-insights-report: 4.4.1
+    accessibility-insights-report: 4.6.3
     combine-dependabot-prs: ^1.0.5
     commander: ^9.4.1
     eslint: ^7.32.0
@@ -4741,10 +4741,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"axe-core@npm:4.4.1":
-  version: 4.4.1
-  resolution: "axe-core@npm:4.4.1"
-  checksum: ad14c5b71059dc3d24ef2519b8cd96e98b4a572379396201ce449d1c4262181821d6ca9550df65b22371faf06d28bbe94d391fe5675f2a08e6550f7b5da8416d
+"axe-core@npm:4.6.3":
+  version: 4.6.3
+  resolution: "axe-core@npm:4.6.3"
+  checksum: d0c46be92b9707c48b88a53cd5f471b155a2bfc8bf6beffb514ecd14e30b4863e340b5fc4f496d82a3c562048088c1f3ff5b93b9b3b026cb9c3bfacfd535da10
   languageName: node
   linkType: hard
 
@@ -4755,8 +4755,8 @@ __metadata:
     "@types/jest": ^27.4.1
     "@types/lodash": ^4.14.182
     "@types/node": ^16.18.11
-    accessibility-insights-report: 4.4.1
-    axe-core: 4.4.1
+    accessibility-insights-report: 4.6.3
+    axe-core: 4.6.3
     common: "workspace:*"
     inversify: ^6.0.1
     jest: ^27.5.1
@@ -10427,7 +10427,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"luxon@npm:^3.1.1":
+"luxon@npm:^3.2.1":
   version: 3.2.1
   resolution: "luxon@npm:3.2.1"
   checksum: 3fa3def2c5f5d3032b4c46220c4da8aeb467ac979888fc9d2557adcd22195f93516b4ad5909a75862bec8dc6ddc0953b0f38e6d2f4a8ab8450ddc531a83cf20d
@@ -13029,7 +13029,7 @@ __metadata:
     "@types/lodash": ^4.14.182
     "@types/node": ^16.18.11
     "@types/puppeteer": ^5.4.6
-    axe-core: 4.4.1
+    axe-core: 4.6.3
     common: "workspace:*"
     cpy-cli: ^4.1.0
     inversify: ^6.0.1
@@ -13190,9 +13190,9 @@ __metadata:
     "@types/puppeteer": ^5.4.6
     "@types/sha.js": ^2.4.0
     "@types/yargs": ^17.0.18
-    accessibility-insights-report: 4.4.1
+    accessibility-insights-report: 4.6.3
     async-mutex: ^0.3.2
-    axe-core: 4.4.1
+    axe-core: 4.6.3
     axe-result-converter: "workspace:*"
     azure-services: "workspace:*"
     common: "workspace:*"
@@ -14960,10 +14960,10 @@ __metadata:
     "@types/sha.js": ^2.4.0
     "@types/yargs": ^17.0.18
     accessibility-insights-crawler: "workspace:*"
-    accessibility-insights-report: 4.4.1
+    accessibility-insights-report: 4.6.3
     apify: ^2.3.2
     applicationinsights: ^2.3.1
-    axe-core: 4.4.1
+    axe-core: 4.6.3
     axe-result-converter: "workspace:*"
     axe-sarif-converter: ^2.9.0
     azure-services: "workspace:*"
