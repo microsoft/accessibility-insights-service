@@ -3,7 +3,6 @@
 
 import * as Puppeteer from 'puppeteer';
 import { inject, optional, injectable } from 'inversify';
-// import { Url } from 'common';
 import { PageNavigator, NavigationResponse } from '../page-navigator';
 import { ServicePrincipalCredentialProvider } from './service-principal-credential-provider';
 
@@ -99,11 +98,22 @@ export class AzureLoginPageClient implements LoginPageClient {
             };
         }
 
-        // todo add target redirect validation
-        // const redirectUrl = Url.getParameterValue('redirect_uri', page.url());
-        // console.log(redirectUrl);
-
-        await this.handleKmsiPageIfShown(page);
+        // Enable Keep Me Signed In (KMSI) if prompted
+        // eslint-disable-next-line max-len
+        // https://learn.microsoft.com/en-us/azure/active-directory/fundamentals/active-directory-users-profile-azure-portal#learn-about-the-stay-signed-in-prompt
+        try {
+            await Promise.all([this.pageNavigator.waitForNavigation(page), page.keyboard.press('Enter')]);
+        } catch (error) {
+            if (error.name !== 'TimeoutError') {
+                return {
+                    browserError: {
+                        errorType: 'AuthenticationError',
+                        message: error.message,
+                        stack: error.stack,
+                    },
+                };
+            }
+        }
 
         return navigationResponse;
     }
@@ -125,18 +135,5 @@ export class AzureLoginPageClient implements LoginPageClient {
 
     private async getElementContent(errorMessageSelector: string, page: Puppeteer.Page): Promise<string> {
         return page.$eval(errorMessageSelector, (div) => div.textContent).catch(() => undefined);
-    }
-
-    // Keep Me Signed In (KMSI)
-    // eslint-disable-next-line max-len
-    // https://learn.microsoft.com/en-us/azure/active-directory/fundamentals/active-directory-users-profile-azure-portal#learn-about-the-stay-signed-in-prompt
-    private async handleKmsiPageIfShown(page: Puppeteer.Page): Promise<void> {
-        try {
-            await page.waitForSelector('#idBtn_Back', { timeout: this.selectorTimeoutMsec });
-            await Promise.all([page.waitForNavigation({ waitUntil: 'networkidle0' }), page.click('#idBtn_Back')]);
-            console.info('KMSI page handled.');
-        } catch (error) {
-            console.info('KMSI page not shown.');
-        }
     }
 }
