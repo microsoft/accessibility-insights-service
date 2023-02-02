@@ -18,6 +18,14 @@ Object {
                     "data": "check-data-node-31",
                     "id": "check-id-node-31",
                     "message": "check-message-node-31",
+                    "relatedNodes": Array [
+                      Object {
+                        "html": "check-related-nodes-html-node-31",
+                        "target": Array [
+                          "check-related-nodes-target-node-31",
+                        ],
+                      },
+                    ],
                   },
                 ],
                 "failureSummary": "failureSummary-node-31",
@@ -47,6 +55,14 @@ Object {
                     "data": "check-data-node-32",
                     "id": "check-id-node-32",
                     "message": "check-message-node-32",
+                    "relatedNodes": Array [
+                      Object {
+                        "html": "check-related-nodes-html-node-32",
+                        "target": Array [
+                          "check-related-nodes-target-node-32",
+                        ],
+                      },
+                    ],
                   },
                 ],
                 "failureSummary": "failureSummary-node-32",
@@ -75,6 +91,14 @@ Object {
                     "data": "check-data-node-33",
                     "id": "check-id-node-33",
                     "message": "check-message-node-33",
+                    "relatedNodes": Array [
+                      Object {
+                        "html": "check-related-nodes-html-node-33",
+                        "target": Array [
+                          "check-related-nodes-target-node-33",
+                        ],
+                      },
+                    ],
                   },
                 ],
                 "failureSummary": "failureSummary-node-33",
@@ -107,6 +131,14 @@ Object {
                     "data": "check-data-node-12",
                     "id": "check-id-node-12",
                     "message": "check-message-node-12",
+                    "relatedNodes": Array [
+                      Object {
+                        "html": "check-related-nodes-html-node-12",
+                        "target": Array [
+                          "check-related-nodes-target-node-12",
+                        ],
+                      },
+                    ],
                   },
                 ],
                 "failureSummary": "failureSummary-node-12",
@@ -135,6 +167,14 @@ Object {
                     "data": "check-data-node-22",
                     "id": "check-id-node-22",
                     "message": "check-message-node-22",
+                    "relatedNodes": Array [
+                      Object {
+                        "html": "check-related-nodes-html-node-22",
+                        "target": Array [
+                          "check-related-nodes-target-node-22",
+                        ],
+                      },
+                    ],
                   },
                 ],
                 "failureSummary": "failureSummary-node-22",
@@ -167,6 +207,14 @@ Object {
                     "data": "check-data-node-41",
                     "id": "check-id-node-41",
                     "message": "check-message-node-41",
+                    "relatedNodes": Array [
+                      Object {
+                        "html": "check-related-nodes-html-node-41",
+                        "target": Array [
+                          "check-related-nodes-target-node-41",
+                        ],
+                      },
+                    ],
                   },
                 ],
                 "failureSummary": "failureSummary-node-41",
@@ -206,6 +254,14 @@ Object {
                     "data": "check-data-node-11",
                     "id": "check-id-node-11",
                     "message": "check-message-node-11",
+                    "relatedNodes": Array [
+                      Object {
+                        "html": "check-related-nodes-html-node-11",
+                        "target": Array [
+                          "check-related-nodes-target-node-11",
+                        ],
+                      },
+                    ],
                   },
                 ],
                 "failureSummary": "failureSummary-node-11",
@@ -301,6 +357,14 @@ Object {
                     "data": "check-data-node-1",
                     "id": "check-id-node-1",
                     "message": "check-message-node-1",
+                    "relatedNodes": Array [
+                      Object {
+                        "html": "check-related-nodes-html-node-1",
+                        "target": Array [
+                          "check-related-nodes-target-node-1",
+                        ],
+                      },
+                    ],
                   },
                 ],
                 "failureSummary": "failureSummary-node-1",
@@ -330,6 +394,14 @@ Object {
                     "data": "check-data-node-2",
                     "id": "check-id-node-2",
                     "message": "check-message-node-2",
+                    "relatedNodes": Array [
+                      Object {
+                        "html": "check-related-nodes-html-node-2",
+                        "target": Array [
+                          "check-related-nodes-target-node-2",
+                        ],
+                      },
+                    ],
                   },
                 ],
                 "failureSummary": "failureSummary-node-2",
@@ -358,6 +430,14 @@ Object {
                     "data": "check-data-node-3",
                     "id": "check-id-node-3",
                     "message": "check-message-node-3",
+                    "relatedNodes": Array [
+                      Object {
+                        "html": "check-related-nodes-html-node-3",
+                        "target": Array [
+                          "check-related-nodes-target-node-3",
+                        ],
+                      },
+                    ],
                   },
                 ],
                 "failureSummary": "failureSummary-node-3",
@@ -386,6 +466,14 @@ Object {
                     "data": "check-data-node-4",
                     "id": "check-id-node-4",
                     "message": "check-message-node-4",
+                    "relatedNodes": Array [
+                      Object {
+                        "html": "check-related-nodes-html-node-4",
+                        "target": Array [
+                          "check-related-nodes-target-node-4",
+                        ],
+                      },
+                    ],
                   },
                 ],
                 "failureSummary": "failureSummary-node-4",

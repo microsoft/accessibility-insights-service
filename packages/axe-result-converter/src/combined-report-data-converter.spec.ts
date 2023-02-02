@@ -33,6 +33,10 @@ const getAccumulatedNode = (nodeId: string) => {
                 id: `check-id-${nodeId}`,
                 data: `check-data-${nodeId}`,
                 message: `check-message-${nodeId}`,
+                relatedNodes: [{
+                    target: [`check-related-nodes-target-${nodeId}`],
+                    html: `check-related-nodes-html-${nodeId}`
+                }]
             },
         ],
         all: [],
