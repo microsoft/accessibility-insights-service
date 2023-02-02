@@ -107,10 +107,6 @@ export class Page {
 
         let navigationResponse = await this.pageNavigator.navigate(url, this.page);
 
-        // todo remove test flag
-        // eslint-disable-next-line no-param-reassign
-        options = { enableAuthentication: true };
-
         if (options?.enableAuthentication === true) {
             const authNavigationResponse = await this.resourceAuthenticator.authenticate(this.page);
             if (authNavigationResponse) {
