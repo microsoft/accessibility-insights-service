@@ -53,6 +53,7 @@ export function registerAzureServicesToContainer(
 
     setupSingletonCosmosCredential(container);
     setupSingletonStorageCredential(container);
+    setupAzureAuthClientCredential(container);
 
     setupCosmosClientProvider(container, cosmosClientFactory);
 
@@ -172,6 +173,16 @@ function setupSingletonStorageCredential(container: Container): void {
         const tokenCredential = credentialProvider.getAzureCredential();
 
         return { accountName, tokenCredential };
+    });
+}
+
+function setupAzureAuthClientCredential(container: Container): void {
+    IoC.setupSingletonProvider(iocTypeNames.AzureAuthClientCredentialProvider, container, async (context) => {
+        const secretProvider = context.container.get(SecretProvider);
+        const name = await secretProvider.getSecret(secretNames.azureAuthClientName);
+        const password = await secretProvider.getSecret(secretNames.azureAuthClientPassword);
+
+        return { name, password };
     });
 }
 

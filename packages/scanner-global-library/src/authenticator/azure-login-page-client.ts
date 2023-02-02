@@ -5,7 +5,7 @@ import * as Puppeteer from 'puppeteer';
 import { inject, optional, injectable } from 'inversify';
 // import { Url } from 'common';
 import { PageNavigator, NavigationResponse } from '../page-navigator';
-import { ServicePrincipalProvider } from './service-principal-provider';
+import { ServicePrincipalCredentialProvider } from './service-principal-credential-provider';
 
 export interface LoginPageClient {
     login(page: Puppeteer.Page): Promise<NavigationResponse>;
@@ -20,18 +20,18 @@ export class AzureLoginPageClient implements LoginPageClient {
 
     constructor(
         @inject(PageNavigator) private readonly pageNavigator: PageNavigator,
-        @inject(ServicePrincipalProvider)
+        @inject(ServicePrincipalCredentialProvider)
         @optional()
-        private readonly servicePrincipalProvider: ServicePrincipalProvider = new ServicePrincipalProvider(),
+        private readonly servicePrincipalCredentialProvider: ServicePrincipalCredentialProvider = new ServicePrincipalCredentialProvider(),
     ) {}
 
     public async login(page: Puppeteer.Page): Promise<NavigationResponse> {
-        const servicePrincipal = this.servicePrincipalProvider.getDefaultServicePrincipal();
+        const azureAuthClientCredential = await this.servicePrincipalCredentialProvider.getAzureAuthClientCredential();
 
         // Enter account name
         try {
             await page.waitForSelector('input[name="loginfmt"]', { timeout: this.selectorTimeoutMsec });
-            await page.type('input[name="loginfmt"]', servicePrincipal.name);
+            await page.type('input[name="loginfmt"]', azureAuthClientCredential.name);
         } catch (error) {
             return {
                 browserError: {
@@ -66,7 +66,7 @@ export class AzureLoginPageClient implements LoginPageClient {
         // Enter account password
         try {
             await page.waitForSelector('input[type="password"]', { timeout: this.selectorTimeoutMsec });
-            await page.type('input[type="password"]', servicePrincipal.password);
+            await page.type('input[type="password"]', azureAuthClientCredential.password);
         } catch (error) {
             return {
                 browserError: {

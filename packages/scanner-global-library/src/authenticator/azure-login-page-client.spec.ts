@@ -7,40 +7,40 @@ import { IMock, Mock, It, Times } from 'typemoq';
 import * as Puppeteer from 'puppeteer';
 import { PageNavigator, NavigationResponse } from '../page-navigator';
 import { AzureLoginPageClient } from './azure-login-page-client';
-import { ServicePrincipalProvider, ServicePrincipal } from './service-principal-provider';
+import { ServicePrincipalCredentialProvider, ServicePrincipalCredential } from './service-principal-credential-provider';
 
 const selectorTimeoutMsec = 10000;
 
 let pageNavigatorMock: IMock<PageNavigator>;
-let servicePrincipalProviderMock: IMock<ServicePrincipalProvider>;
-let servicePrincipal: ServicePrincipal;
+let servicePrincipalCredentialProviderMock: IMock<ServicePrincipalCredentialProvider>;
+let servicePrincipalCredential: ServicePrincipalCredential;
 let azureLoginPageClient: AzureLoginPageClient;
 let puppeteerPageMock: IMock<Puppeteer.Page>;
 let puppeteerKeyboardMock: IMock<Puppeteer.Keyboard>;
 
 describe(AzureLoginPageClient, () => {
     beforeEach(() => {
-        servicePrincipal = {
+        servicePrincipalCredential = {
             name: 'name',
             password: 'password',
         };
         puppeteerPageMock = Mock.ofType<Puppeteer.Page>();
         pageNavigatorMock = Mock.ofType<PageNavigator>();
-        servicePrincipalProviderMock = Mock.ofType<ServicePrincipalProvider>();
+        servicePrincipalCredentialProviderMock = Mock.ofType<ServicePrincipalCredentialProvider>();
         puppeteerKeyboardMock = Mock.ofType<Puppeteer.Keyboard>();
         puppeteerPageMock.setup((o) => o.keyboard).returns(() => puppeteerKeyboardMock.object);
-        servicePrincipalProviderMock
-            .setup((o) => o.getDefaultServicePrincipal())
-            .returns(() => servicePrincipal)
+        servicePrincipalCredentialProviderMock
+            .setup((o) => o.getAzureAuthClientCredential())
+            .returns(() => Promise.resolve(servicePrincipalCredential))
             .verifiable();
 
-        azureLoginPageClient = new AzureLoginPageClient(pageNavigatorMock.object, servicePrincipalProviderMock.object);
+        azureLoginPageClient = new AzureLoginPageClient(pageNavigatorMock.object, servicePrincipalCredentialProviderMock.object);
     });
 
     afterEach(() => {
         puppeteerPageMock.verifyAll();
         pageNavigatorMock.verifyAll();
-        servicePrincipalProviderMock.verifyAll();
+        servicePrincipalCredentialProviderMock.verifyAll();
         puppeteerKeyboardMock.verifyAll();
     });
 
@@ -77,7 +77,7 @@ function setupSubmitForAuthentication(navigationResponse: NavigationResponse = {
 function setupEnterAccountPassword(): void {
     setupPageWaitForSelector('input[type="password"]');
     puppeteerPageMock
-        .setup((o) => o.type('input[type="password"]', servicePrincipal.password))
+        .setup((o) => o.type('input[type="password"]', servicePrincipalCredential.password))
         .returns(() => Promise.resolve())
         .verifiable();
 }
@@ -104,7 +104,7 @@ function setupClickNextButton(navigationResponse: NavigationResponse = {}): void
 function setupEnterAccountName(): void {
     setupPageWaitForSelector('input[name="loginfmt"]');
     puppeteerPageMock
-        .setup((o) => o.type('input[name="loginfmt"]', servicePrincipal.name))
+        .setup((o) => o.type('input[name="loginfmt"]', servicePrincipalCredential.name))
         .returns(() => Promise.resolve())
         .verifiable();
 }

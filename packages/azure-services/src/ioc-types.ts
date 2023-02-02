@@ -6,6 +6,7 @@ import { CosmosClient } from '@azure/cosmos';
 import { SecretClient } from '@azure/keyvault-secrets';
 import { BlobServiceClient } from '@azure/storage-blob';
 import { QueueServiceClient } from '@azure/storage-queue';
+import { ServicePrincipalCredential } from './credentials/service-principal-credential';
 
 export const iocTypeNames = {
     AzureKeyVaultClientProvider: 'AzureKeyVaultClientProvider',
@@ -18,6 +19,7 @@ export const iocTypeNames = {
     CredentialType: 'CredentialType',
     StorageCredential: 'StorageCredential',
     CosmosCredential: 'CosmosCredential',
+    AzureAuthClientCredentialProvider: 'azureAuthClientCredentialProvider',
 };
 
 export type AzureKeyVaultClientProvider = () => Promise<SecretClient>;
@@ -25,6 +27,7 @@ export type BlobServiceClientProvider = () => Promise<BlobServiceClient>;
 export type CosmosClientProvider = () => Promise<CosmosClient>;
 export type QueueServiceClientProvider = () => Promise<QueueServiceClient>;
 export type BatchServiceClientProvider = () => Promise<BatchServiceClient>;
+export type AzureAuthClientCredentialProvider = () => Promise<ServicePrincipalCredential>;
 
 export const cosmosContainerClientTypes = {
     OnDemandScanBatchRequestsCosmosContainerClient: 'onDemandScanBatchRequestsCosmosContainerClient',
