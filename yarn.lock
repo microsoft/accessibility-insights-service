@@ -3519,12 +3519,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/yargs@npm:^17.0.18":
-  version: 17.0.18
-  resolution: "@types/yargs@npm:17.0.18"
+"@types/yargs@npm:^17.0.22":
+  version: 17.0.22
+  resolution: "@types/yargs@npm:17.0.22"
   dependencies:
     "@types/yargs-parser": "*"
-  checksum: 9b6143730e1e12c0b871b5abfb0fcd5409fd498379b7a043b54a1d6168a754cb1058fe4b98251fa6e220a90e5a5e57ce252b8d2e2db026b6e3ea8257d354830b
+  checksum: 0773523fda71bafdc52f13f5970039e535a353665a60ba9261149a5c9c2b908242e6e77fbb7a8c06931ec78ce889d64d09673c68ba23eb5f5742d5385d0d1982
   languageName: node
   linkType: hard
 
@@ -11961,7 +11961,7 @@ __metadata:
     "@types/lodash": ^4.14.182
     "@types/node": ^16.18.11
     "@types/puppeteer": ^5.4.6
-    "@types/yargs": ^17.0.18
+    "@types/yargs": ^17.0.22
     applicationinsights: ^2.3.1
     azure-services: "workspace:*"
     common: "workspace:*"
@@ -12668,7 +12668,7 @@ __metadata:
     "@types/lodash": ^4.14.182
     "@types/node": ^16.18.11
     "@types/puppeteer": ^5.4.6
-    "@types/yargs": ^17.0.18
+    "@types/yargs": ^17.0.22
     applicationinsights: ^2.3.1
     azure-services: "workspace:*"
     common: "workspace:*"
@@ -13189,7 +13189,7 @@ __metadata:
     "@types/paralleljs": ^0.0.21
     "@types/puppeteer": ^5.4.6
     "@types/sha.js": ^2.4.0
-    "@types/yargs": ^17.0.18
+    "@types/yargs": ^17.0.22
     accessibility-insights-report: 4.6.3
     async-mutex: ^0.3.2
     axe-core: 4.6.3
@@ -14958,7 +14958,7 @@ __metadata:
     "@types/node": ^16.18.11
     "@types/puppeteer": ^5.4.6
     "@types/sha.js": ^2.4.0
-    "@types/yargs": ^17.0.18
+    "@types/yargs": ^17.0.22
     accessibility-insights-crawler: "workspace:*"
     accessibility-insights-report: 4.6.3
     apify: ^2.3.2
@@ -15057,7 +15057,7 @@ __metadata:
     "@types/node": ^16.18.11
     "@types/puppeteer": ^5.4.6
     "@types/sha.js": ^2.4.0
-    "@types/yargs": ^17.0.18
+    "@types/yargs": ^17.0.22
     applicationinsights: ^2.3.1
     azure-services: "workspace:*"
     common: "workspace:*"
