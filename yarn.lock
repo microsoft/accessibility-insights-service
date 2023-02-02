@@ -218,7 +218,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@azure/core-http@npm:^2.0.0, @azure/core-http@npm:^2.2.3":
+"@azure/core-http@npm:^2.0.0":
   version: 2.2.4
   resolution: "@azure/core-http@npm:2.2.4"
   dependencies:
@@ -276,6 +276,24 @@ __metadata:
     tslib: ^2.2.0
     uuid: ^8.3.0
   checksum: 1503305db569f4d66353d7a93630c9f87995620312f9f05c262102e40c0f929e134aa221b2bf8f8b49f259fb0119c84a07a6a5ef2ead7f37d213b1c3f164f7fa
+  languageName: node
+  linkType: hard
+
+"@azure/core-rest-pipeline@npm:^1.10.0":
+  version: 1.10.1
+  resolution: "@azure/core-rest-pipeline@npm:1.10.1"
+  dependencies:
+    "@azure/abort-controller": ^1.0.0
+    "@azure/core-auth": ^1.4.0
+    "@azure/core-tracing": ^1.0.1
+    "@azure/core-util": ^1.0.0
+    "@azure/logger": ^1.0.0
+    form-data: ^4.0.0
+    http-proxy-agent: ^5.0.0
+    https-proxy-agent: ^5.0.0
+    tslib: ^2.2.0
+    uuid: ^8.3.0
+  checksum: d1c165047519c05b702184ffadf900a1f3eca032795b0f4f5b174c8257b663c1b1eab847236579dddcf637ea380896e17328ebf5022050441ee80672ad6c449d
   languageName: node
   linkType: hard
 
@@ -2549,6 +2567,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@microsoft/applicationinsights-web-snippet@npm:^1.0.1":
+  version: 1.0.1
+  resolution: "@microsoft/applicationinsights-web-snippet@npm:1.0.1"
+  checksum: e4e723031ce8fd9b21e0b52467ddc13f8f30e0ce3ec54b9f9f0946f9e2826050b97803f60322be3676218e77fff7234679cc488ee122e689f487bb2073cd95b4
+  languageName: node
+  linkType: hard
+
 "@microsoft/load-themed-styles@npm:^1.10.26":
   version: 1.10.224
   resolution: "@microsoft/load-themed-styles@npm:1.10.224"
@@ -4062,7 +4087,7 @@ __metadata:
     accessibility-insights-report: 4.6.3
     ajv: ^8.11.2
     apify: ^2.3.2
-    applicationinsights: ^2.3.1
+    applicationinsights: ^2.4.1
     axe-core: 4.6.3
     axe-result-converter: "workspace:*"
     browser-pool: ^3.1.4
@@ -4482,11 +4507,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"applicationinsights@npm:^2.3.1":
-  version: 2.3.1
-  resolution: "applicationinsights@npm:2.3.1"
+"applicationinsights@npm:^2.4.1":
+  version: 2.4.1
+  resolution: "applicationinsights@npm:2.4.1"
   dependencies:
-    "@azure/core-http": ^2.2.3
+    "@azure/core-auth": ^1.4.0
+    "@azure/core-rest-pipeline": ^1.10.0
+    "@microsoft/applicationinsights-web-snippet": ^1.0.1
     "@opentelemetry/api": ^1.0.4
     "@opentelemetry/core": ^1.0.1
     "@opentelemetry/sdk-trace-base": ^1.0.1
@@ -4500,7 +4527,7 @@ __metadata:
   peerDependenciesMeta:
     applicationinsights-native-metrics:
       optional: true
-  checksum: a8cc53e1a1942c4d06969befbaad69ced1d71e15f9c498a23e5ae84a93deb1110731abec0d25e6aa4bb101f846643466899911b54012839c7c2fca354d557ecf
+  checksum: c238c26dd32ebba0fe5ffcbee8826e634687a206e22b86d87e2a5bcebcbef9563420a1d5b41ea4e3860eb02bc5e157888966c5f3a329c6b8bc0bf491e6d21a5f
   languageName: node
   linkType: hard
 
@@ -10350,7 +10377,7 @@ __metadata:
     "@types/jest": ^27.4.1
     "@types/lodash": ^4.14.182
     "@types/node": ^16.18.11
-    applicationinsights: ^2.3.1
+    applicationinsights: ^2.4.1
     common: "workspace:*"
     dotenv: ^16.0.1
     inversify: ^6.0.1
@@ -11921,7 +11948,7 @@ __metadata:
     "@types/jest": ^27.4.1
     "@types/lodash": ^4.14.182
     "@types/node": ^16.18.11
-    applicationinsights: ^2.3.1
+    applicationinsights: ^2.4.1
     azure-services: "workspace:*"
     common: "workspace:*"
     copy-webpack-plugin: ^11.0.0
@@ -11962,7 +11989,7 @@ __metadata:
     "@types/node": ^16.18.11
     "@types/puppeteer": ^5.4.6
     "@types/yargs": ^17.0.18
-    applicationinsights: ^2.3.1
+    applicationinsights: ^2.4.1
     azure-services: "workspace:*"
     common: "workspace:*"
     copy-webpack-plugin: ^11.0.0
@@ -12628,7 +12655,7 @@ __metadata:
     "@types/jest": ^27.4.1
     "@types/lodash": ^4.14.182
     "@types/node": ^16.18.11
-    applicationinsights: ^2.3.1
+    applicationinsights: ^2.4.1
     azure-services: "workspace:*"
     common: "workspace:*"
     copy-webpack-plugin: ^11.0.0
@@ -12669,7 +12696,7 @@ __metadata:
     "@types/node": ^16.18.11
     "@types/puppeteer": ^5.4.6
     "@types/yargs": ^17.0.18
-    applicationinsights: ^2.3.1
+    applicationinsights: ^2.4.1
     azure-services: "workspace:*"
     common: "workspace:*"
     copy-webpack-plugin: ^11.0.0
@@ -14881,7 +14908,7 @@ __metadata:
     "@types/jest": ^27.4.1
     "@types/lodash": ^4.14.182
     "@types/node": ^16.18.11
-    applicationinsights: ^2.3.1
+    applicationinsights: ^2.4.1
     azure-services: "workspace:*"
     common: "workspace:*"
     copy-webpack-plugin: ^11.0.0
@@ -14916,7 +14943,7 @@ __metadata:
   resolution: "web-api-scan-request-sender@workspace:packages/web-api-scan-request-sender"
   dependencies:
     "@types/jest": ^27.4.1
-    applicationinsights: ^2.3.1
+    applicationinsights: ^2.4.1
     azure-services: "workspace:*"
     common: "workspace:*"
     copy-webpack-plugin: ^11.0.0
@@ -14962,7 +14989,7 @@ __metadata:
     accessibility-insights-crawler: "workspace:*"
     accessibility-insights-report: 4.6.3
     apify: ^2.3.2
-    applicationinsights: ^2.3.1
+    applicationinsights: ^2.4.1
     axe-core: 4.6.3
     axe-result-converter: "workspace:*"
     axe-sarif-converter: ^2.9.0
@@ -15016,7 +15043,7 @@ __metadata:
     "@types/jest": ^27.4.1
     "@types/lodash": ^4.14.182
     "@types/node": ^16.18.11
-    applicationinsights: ^2.3.1
+    applicationinsights: ^2.4.1
     azure-services: "workspace:*"
     common: "workspace:*"
     copy-webpack-plugin: ^11.0.0
@@ -15058,7 +15085,7 @@ __metadata:
     "@types/puppeteer": ^5.4.6
     "@types/sha.js": ^2.4.0
     "@types/yargs": ^17.0.18
-    applicationinsights: ^2.3.1
+    applicationinsights: ^2.4.1
     azure-services: "workspace:*"
     common: "workspace:*"
     copy-webpack-plugin: ^11.0.0

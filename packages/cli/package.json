@@ -65,7 +65,7 @@
         "accessibility-insights-report": "4.6.3",
         "ajv": "^8.11.2",
         "apify": "^2.3.2",
-        "applicationinsights": "^2.3.1",
+        "applicationinsights": "^2.4.1",
         "axe-core": "4.6.3",
         "browser-pool": "^3.1.4",
         "cli-spinner": "^0.2.10",
