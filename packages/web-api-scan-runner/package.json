@@ -56,7 +56,7 @@
         "applicationinsights": "^2.3.1",
         "axe-core": "4.6.3",
         "axe-result-converter": "workspace:*",
-        "axe-sarif-converter": "^2.9.0",
+        "axe-sarif-converter": "^2.9.1",
         "azure-services": "workspace:*",
         "common": "workspace:*",
         "dotenv": "^16.0.1",
