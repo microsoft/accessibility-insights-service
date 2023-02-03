@@ -363,9 +363,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@azure/identity@npm:^3.1.2":
-  version: 3.1.2
-  resolution: "@azure/identity@npm:3.1.2"
+"@azure/identity@npm:^3.1.3":
+  version: 3.1.3
+  resolution: "@azure/identity@npm:3.1.3"
   dependencies:
     "@azure/abort-controller": ^1.0.0
     "@azure/core-auth": ^1.3.0
@@ -374,16 +374,16 @@ __metadata:
     "@azure/core-tracing": ^1.0.0
     "@azure/core-util": ^1.0.0
     "@azure/logger": ^1.0.0
-    "@azure/msal-browser": ^2.32.0
-    "@azure/msal-common": ^9.0.0
-    "@azure/msal-node": ^1.14.4
+    "@azure/msal-browser": ^2.32.2
+    "@azure/msal-common": ^9.0.2
+    "@azure/msal-node": ^1.14.6
     events: ^3.0.0
     jws: ^4.0.0
     open: ^8.0.0
     stoppable: ^1.1.0
     tslib: ^2.2.0
     uuid: ^8.3.0
-  checksum: 7174f4edfefbac85225236b902eff3ab1cddb9501d1817b1fb1e2b768171fc5244ad7936306eb45c1c893ca79bbfd89ced013dfc47c4bc1f79585f56bb18cde2
+  checksum: af3ef31bfef3b0bb719bf05d37b446f9d143af9a16f523e7bc85efbc542d4a9873110f2330fc52e0bf545b2639d4c5ff3e5ac35e8a5b927f72672d7f21973d61
   languageName: node
   linkType: hard
 
@@ -461,37 +461,30 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@azure/msal-browser@npm:^2.32.0":
-  version: 2.32.1
-  resolution: "@azure/msal-browser@npm:2.32.1"
+"@azure/msal-browser@npm:^2.32.2":
+  version: 2.32.2
+  resolution: "@azure/msal-browser@npm:2.32.2"
   dependencies:
-    "@azure/msal-common": ^9.0.1
-  checksum: 3afc8aa8c3dcf17a348cc69c6e15db5c6d7d89cf656b0c585687a8885db8f82340cc38a9d9c842e2871929b7c31ce7e3c2016385153a7ba68b7d8f8b1729368f
+    "@azure/msal-common": ^9.0.2
+  checksum: a88608160bc7ed27137fc7325f804d9b807d1fb0b1708a263c49f62ef4bb8bd6fa231b078a7bed4a38e3ebd815f8395c915253d77872934b4ea603aee42fe9ad
   languageName: node
   linkType: hard
 
-"@azure/msal-common@npm:^9.0.0":
-  version: 9.0.0
-  resolution: "@azure/msal-common@npm:9.0.0"
-  checksum: e4b1fcff3a95a019761e62b6a3a7a8a5a67905826771ed262b8741efa719afb992db213b74b1000b1fee6faf8041189045fd32beb9d0e69961a7ee0980539546
+"@azure/msal-common@npm:^9.0.2":
+  version: 9.1.1
+  resolution: "@azure/msal-common@npm:9.1.1"
+  checksum: d51d645ee485b699a0fbeab6d9bb01c91f4124704f756266e109c2d1d8ea0ca8d66a9ab81f62f9f76e7358906badcf7d2dd9911c18e20f57770ec9beb4fc4fcd
   languageName: node
   linkType: hard
 
-"@azure/msal-common@npm:^9.0.1":
-  version: 9.0.1
-  resolution: "@azure/msal-common@npm:9.0.1"
-  checksum: 2e23a356c5662c999bdb1ca9878a265ff15711f78bdb701c9f0b1c4667c107e45e4abb04fb7b5e27f9d9df788604fb0ef435639d29a4e791486ed7f53ac75095
-  languageName: node
-  linkType: hard
-
-"@azure/msal-node@npm:^1.14.4":
-  version: 1.14.5
-  resolution: "@azure/msal-node@npm:1.14.5"
+"@azure/msal-node@npm:^1.14.6":
+  version: 1.14.6
+  resolution: "@azure/msal-node@npm:1.14.6"
   dependencies:
-    "@azure/msal-common": ^9.0.1
-    jsonwebtoken: ^8.5.1
+    "@azure/msal-common": ^9.0.2
+    jsonwebtoken: ^9.0.0
     uuid: ^8.3.0
-  checksum: 935ed72012a937065e390e97acfd087893bbd3e60f28e7bbc4708ae435b1cfe951474375981ca361d9ec5379f1ed64de17fccd2af9666244a665282fa51a765f
+  checksum: 7fb2085fe772474bb4c6c1e0a2467da6b2380dfa66f7c67f63d4a8774f591744dc64a6f3337d43c810ff433bc327be470ece59dcd0fa7aff4459e32beb4c738b
   languageName: node
   linkType: hard
 
@@ -4014,7 +4007,7 @@ __metadata:
     npm-run-all: ^4.1.5
     puppeteer: 18.1.0
     reflect-metadata: ^0.1.13
-    rimraf: ^3.0.2
+    rimraf: ^4.1.2
     rollup: ^3.9.0
     scanner-global-library: "workspace:*"
     sha.js: ^2.4.11
@@ -4060,7 +4053,7 @@ __metadata:
     "@types/table": ^6.3.2
     accessibility-insights-crawler: "workspace:*"
     accessibility-insights-report: 4.6.3
-    ajv: ^8.11.2
+    ajv: ^8.12.0
     apify: ^2.3.2
     applicationinsights: ^2.3.1
     axe-core: 4.6.3
@@ -4071,7 +4064,7 @@ __metadata:
     convict: ^6.2.4
     copy-webpack-plugin: ^11.0.0
     dotenv: ^16.0.1
-    dts-bundle-generator: ^6.12.0
+    dts-bundle-generator: ^7.2.0
     encoding-down: ^7.1.0
     exponential-backoff: ^3.1.0
     filenamify: ^4.3.0
@@ -4085,7 +4078,7 @@ __metadata:
     leveldown: ^6.1.1
     levelup: ^5.1.1
     lodash: ^4.17.21
-    mkdirp: ^1.0.4
+    mkdirp: ^2.1.3
     mockdate: ^3.0.5
     moment: ^2.29.4
     normalize-path: ^3.0.0
@@ -4098,7 +4091,7 @@ __metadata:
     puppeteer-extra-plugin-stealth: ^2.11.1
     raw-body: ^2.5.1
     reflect-metadata: ^0.1.13
-    rimraf: ^3.0.2
+    rimraf: ^4.1.2
     scanner-global-library: "workspace:*"
     serialize-error: ^8.1.0
     sha.js: ^2.4.11
@@ -4127,7 +4120,7 @@ __metadata:
     "@typescript-eslint/parser": ^5.48.1
     accessibility-insights-report: 4.6.3
     combine-dependabot-prs: ^1.0.5
-    commander: ^9.4.1
+    commander: ^10.0.0
     eslint: ^7.32.0
     eslint-plugin-check-file: ^1.3.0
     eslint-plugin-header: ^3.1.1
@@ -4143,9 +4136,9 @@ __metadata:
     jest-junit: ^15.0.0
     license-check-and-add: ^4.0.5
     npm-run-all: ^4.1.5
-    prettier: 2.8.1
-    rimraf: ^3.0.2
-    simple-git: ^3.10.0
+    prettier: 2.8.3
+    rimraf: ^4.1.2
+    simple-git: ^3.16.0
     syncpack: ^8.4.11
     ts-jest: ^27.1.4
     tslint: ^6.1.3
@@ -4347,15 +4340,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ajv@npm:^8.11.2":
-  version: 8.11.2
-  resolution: "ajv@npm:8.11.2"
+"ajv@npm:^8.12.0":
+  version: 8.12.0
+  resolution: "ajv@npm:8.12.0"
   dependencies:
     fast-deep-equal: ^3.1.1
     json-schema-traverse: ^1.0.0
     require-from-string: ^2.0.2
     uri-js: ^4.2.2
-  checksum: 53435bf79ee7d1eabba8085962dba4c08d08593334b304db7772887f0b7beebc1b3d957432f7437ed4b60e53b5d966a57b439869890209c50fed610459999e3e
+  checksum: 4dc13714e316e67537c8b31bc063f99a1d9d9a497eb4bbd55191ac0dcd5e4985bbb71570352ad6f1e76684fb6d790928f96ba3b2d4fd6e10024be9612fe3f001
   languageName: node
   linkType: hard
 
@@ -4764,7 +4757,7 @@ __metadata:
     lodash: ^4.17.21
     npm-run-all: ^4.1.5
     reflect-metadata: ^0.1.13
-    rimraf: ^3.0.2
+    rimraf: ^4.1.2
     ts-jest: ^27.1.4
     typemoq: ^2.1.0
     typescript: ^4.9.4
@@ -4800,7 +4793,7 @@ __metadata:
     "@azure/batch": ^10.2.0
     "@azure/core-auth": ^1.3.2
     "@azure/cosmos": ^3.17.2
-    "@azure/identity": ^3.1.2
+    "@azure/identity": ^3.1.3
     "@azure/keyvault-secrets": ^4.6.0
     "@azure/ms-rest-nodeauth": ^3.1.1
     "@azure/storage-blob": ^12.12.0
@@ -4825,7 +4818,7 @@ __metadata:
     p-limit: ^3.1.0
     pretty-format: ^29.3.1
     reflect-metadata: ^0.1.13
-    rimraf: ^3.0.2
+    rimraf: ^4.1.2
     storage-documents: "workspace:*"
     ts-jest: ^27.1.4
     ts-loader: ^9.4.2
@@ -5711,6 +5704,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"commander@npm:^10.0.0":
+  version: 10.0.0
+  resolution: "commander@npm:10.0.0"
+  checksum: 9f6495651f878213005ac744dd87a85fa3d9f2b8b90d1c19d0866d666bda7f735adfd7c2f10dfff345782e2f80ea258f98bb4efcef58e4e502f25f883940acfd
+  languageName: node
+  linkType: hard
+
 "commander@npm:^2.12.1, commander@npm:^2.20.0":
   version: 2.20.3
   resolution: "commander@npm:2.20.3"
@@ -5756,7 +5756,7 @@ __metadata:
     npm-run-all: ^4.1.5
     raw-body: ^2.5.1
     reflect-metadata: ^0.1.13
-    rimraf: ^3.0.2
+    rimraf: ^4.1.2
     serialize-error: ^8.1.0
     sha.js: ^2.4.11
     ts-jest: ^27.1.4
@@ -6449,15 +6449,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dts-bundle-generator@npm:^6.12.0":
-  version: 6.12.0
-  resolution: "dts-bundle-generator@npm:6.12.0"
+"dts-bundle-generator@npm:^7.2.0":
+  version: 7.2.0
+  resolution: "dts-bundle-generator@npm:7.2.0"
   dependencies:
-    typescript: ">=3.0.1"
-    yargs: ^17.2.1
+    typescript: ">=4.5.2"
+    yargs: ^17.6.0
   bin:
     dts-bundle-generator: dist/bin/dts-bundle-generator.js
-  checksum: 65dfac5dfa7eebf1cea505a978279f2b7f59d695186d3e9bec7c2eb37e8c386237c9381e86ccd3b7fa114b3fe36bfc9c202109cc984fb70eb0fb141726175131
+  checksum: 0f00792b604873f2c9fe59b5bb279b9592404c8c5a598a7b188269e98ad472b383b5e571c5b1dce2558821fb003ab39b32d12f89f1b48502fc9473d01d61a1e0
   languageName: node
   linkType: hard
 
@@ -6494,7 +6494,7 @@ __metadata:
   dependencies:
     cpy-cli: ^4.1.0
     npm-run-all: ^4.1.5
-    rimraf: ^3.0.2
+    rimraf: ^4.1.2
   languageName: unknown
   linkType: soft
 
@@ -6519,7 +6519,7 @@ __metadata:
     npm-run-all: ^4.1.5
     parallel-workers: "workspace:*"
     reflect-metadata: ^0.1.13
-    rimraf: ^3.0.2
+    rimraf: ^4.1.2
     ts-jest: ^27.1.4
     ts-loader: ^9.4.2
     typescript: ^4.9.4
@@ -7766,7 +7766,7 @@ __metadata:
     mockdate: ^3.0.5
     npm-run-all: ^4.1.5
     reflect-metadata: ^0.1.13
-    rimraf: ^3.0.2
+    rimraf: ^4.1.2
     service-library: "workspace:*"
     storage-documents: "workspace:*"
     ts-jest: ^27.1.4
@@ -8209,7 +8209,7 @@ __metadata:
     logger: "workspace:*"
     npm-run-all: ^4.1.5
     reflect-metadata: ^0.1.13
-    rimraf: ^3.0.2
+    rimraf: ^4.1.2
     service-library: "workspace:*"
     shebang-loader: ^0.0.1
     ts-jest: ^27.1.4
@@ -9903,7 +9903,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jsonwebtoken@npm:^8.5.1":
+"jsonwebtoken@npm:^9.0.0":
   version: 9.0.0
   resolution: "jsonwebtoken@npm:9.0.0"
   checksum: b9181cecf9df99f1dc0253f91ba000a1aa4d91f5816d1608c0dba61a5623726a0bfe200b51df25de18c1a6000825d231ad7ce2788aa54fd48dcb760ad9eb9514
@@ -10360,7 +10360,7 @@ __metadata:
     moment: ^2.29.4
     npm-run-all: ^4.1.5
     reflect-metadata: ^0.1.13
-    rimraf: ^3.0.2
+    rimraf: ^4.1.2
     ts-jest: ^27.1.4
     typemoq: ^2.1.0
     typescript: ^4.9.4
@@ -10804,6 +10804,15 @@ __metadata:
   bin:
     mkdirp: bin/cmd.js
   checksum: a96865108c6c3b1b8e1d5e9f11843de1e077e57737602de1b82030815f311be11f96f09cce59bd5b903d0b29834733e5313f9301e3ed6d6f6fba2eae0df4298f
+  languageName: node
+  linkType: hard
+
+"mkdirp@npm:^2.1.3":
+  version: 2.1.3
+  resolution: "mkdirp@npm:2.1.3"
+  bin:
+    mkdirp: dist/cjs/src/bin.js
+  checksum: 5d7d7997e38a962e8b66dd4db1974bdcb841f084531ba8c9e1f3d52d71f5e6639677a96b2eb5d5940406d729a2153d820f396077ed3a6716058d3e75041dc1f2
   languageName: node
   linkType: hard
 
@@ -11544,7 +11553,7 @@ __metadata:
     lodash: ^4.17.21
     moment: ^2.29.4
     npm-run-all: ^4.1.5
-    rimraf: ^3.0.2
+    rimraf: ^4.1.2
     storage-documents: "workspace:*"
     ts-jest: ^27.1.4
     ts-loader: ^9.4.2
@@ -11837,12 +11846,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prettier@npm:2.8.1":
-  version: 2.8.1
-  resolution: "prettier@npm:2.8.1"
+"prettier@npm:2.8.3":
+  version: 2.8.3
+  resolution: "prettier@npm:2.8.3"
   bin:
     prettier: bin-prettier.js
-  checksum: 4f21a0f1269f76fb36f54e9a8a1ea4c11e27478958bf860661fb4b6d7ac69aac1581f8724fa98ea3585e56d42a2ea317a17ff6e3324f40cb11ff9e20b73785cc
+  checksum: 92f2ceb522d454370e02082aa74ad27388672f7cee8975028b59517c069fe643bdc73e322675c8faf2ff173d7a626d1a6389f26b474000308e793aa25fff46e5
   languageName: node
   linkType: hard
 
@@ -11902,7 +11911,7 @@ __metadata:
     npm-run-all: ^4.1.5
     puppeteer: 18.1.0
     reflect-metadata: ^0.1.13
-    rimraf: ^3.0.2
+    rimraf: ^4.1.2
     scanner-global-library: "workspace:*"
     storage-documents: "workspace:*"
     ts-jest: ^27.1.4
@@ -11937,7 +11946,7 @@ __metadata:
     node-loader: ^2.0.0
     npm-run-all: ^4.1.5
     reflect-metadata: ^0.1.13
-    rimraf: ^3.0.2
+    rimraf: ^4.1.2
     service-library: "workspace:*"
     storage-documents: "workspace:*"
     ts-jest: ^27.1.4
@@ -11985,7 +11994,7 @@ __metadata:
     puppeteer-extra-plugin: ^3.2.2
     puppeteer-extra-plugin-stealth: ^2.11.1
     reflect-metadata: ^0.1.13
-    rimraf: ^3.0.2
+    rimraf: ^4.1.2
     scanner-global-library: "workspace:*"
     service-library: "workspace:*"
     storage-documents: "workspace:*"
@@ -12644,7 +12653,7 @@ __metadata:
     node-loader: ^2.0.0
     npm-run-all: ^4.1.5
     reflect-metadata: ^0.1.13
-    rimraf: ^3.0.2
+    rimraf: ^4.1.2
     service-library: "workspace:*"
     storage-documents: "workspace:*"
     ts-jest: ^27.1.4
@@ -12691,7 +12700,7 @@ __metadata:
     puppeteer-extra-plugin: ^3.2.2
     puppeteer-extra-plugin-stealth: ^2.11.1
     reflect-metadata: ^0.1.13
-    rimraf: ^3.0.2
+    rimraf: ^4.1.2
     scanner-global-library: "workspace:*"
     service-library: "workspace:*"
     storage-documents: "workspace:*"
@@ -12871,7 +12880,7 @@ __metadata:
   dependencies:
     cpy-cli: ^4.1.0
     npm-run-all: ^4.1.5
-    rimraf: ^3.0.2
+    rimraf: ^4.1.2
   languageName: unknown
   linkType: soft
 
@@ -12923,6 +12932,15 @@ __metadata:
   bin:
     rimraf: bin.js
   checksum: 87f4164e396f0171b0a3386cc1877a817f572148ee13a7e113b238e48e8a9f2f31d009a92ec38a591ff1567d9662c6b67fd8818a2dbbaed74bc26a87a2a4a9a0
+  languageName: node
+  linkType: hard
+
+"rimraf@npm:^4.1.2":
+  version: 4.1.2
+  resolution: "rimraf@npm:4.1.2"
+  bin:
+    rimraf: dist/cjs/src/bin.js
+  checksum: 480b8147fd9bcbef3ac118f88a7b1169c3872977a3411a0c84df838bfc30e175a394c0db6f9619fc8b8a886a18c6d779d5e74f380a0075ecc710afaf81b3f50c
   languageName: node
   linkType: hard
 
@@ -13043,7 +13061,7 @@ __metadata:
     puppeteer-extra-plugin: ^3.2.2
     puppeteer-extra-plugin-stealth: ^2.11.1
     reflect-metadata: ^0.1.13
-    rimraf: ^3.0.2
+    rimraf: ^4.1.2
     storage-documents: "workspace:*"
     ts-jest: ^27.1.4
     typemoq: ^2.1.0
@@ -13182,7 +13200,7 @@ __metadata:
   dependencies:
     "@azure/cosmos": ^3.17.2
     "@azure/functions": ^3.5.0
-    "@azure/identity": ^3.1.2
+    "@azure/identity": ^3.1.3
     "@azure/storage-blob": ^12.12.0
     "@types/jest": ^27.4.1
     "@types/node": ^16.18.11
@@ -13213,7 +13231,7 @@ __metadata:
     privacy-scan-core: "workspace:*"
     puppeteer: 18.1.0
     reflect-metadata: ^0.1.13
-    rimraf: ^3.0.2
+    rimraf: ^4.1.2
     scanner-global-library: "workspace:*"
     sha.js: ^2.4.11
     storage-documents: "workspace:*"
@@ -13374,14 +13392,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"simple-git@npm:^3.10.0":
-  version: 3.10.0
-  resolution: "simple-git@npm:3.10.0"
+"simple-git@npm:^3.16.0":
+  version: 3.16.0
+  resolution: "simple-git@npm:3.16.0"
   dependencies:
     "@kwsites/file-exists": ^1.1.1
     "@kwsites/promise-deferred": ^1.1.1
     debug: ^4.3.4
-  checksum: 167a6c4b2634bfcc4353a87ccbd7f66ecffa9111990341f7208614e70750f7b920c8858202dd8a535e4534f7539e0d94e89704a2d98cff47002f7dc989a4075f
+  checksum: fd28eb43be39d158d2c321cd34eb00f61c365513478ff2bb31f4da06315dcd018e03c6ece9f99558f3fd8834171072850aed1376bf50f8d922b0e2dadede0c2d
   languageName: node
   linkType: hard
 
@@ -13630,7 +13648,7 @@ __metadata:
     jest-junit: ^15.0.0
     npm-run-all: ^4.1.5
     reflect-metadata: ^0.1.13
-    rimraf: ^3.0.2
+    rimraf: ^4.1.2
     ts-jest: ^27.1.4
     ts-transformer-keys: ^0.4.4
     ttypescript: ^1.5.15
@@ -14497,13 +14515,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@npm:>=3.0.1":
-  version: 4.7.4
-  resolution: "typescript@npm:4.7.4"
+"typescript@npm:>=4.5.2":
+  version: 4.9.5
+  resolution: "typescript@npm:4.9.5"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: 5750181b1cd7e6482c4195825547e70f944114fb47e58e4aa7553e62f11b3f3173766aef9c281783edfd881f7b8299cf35e3ca8caebe73d8464528c907a164df
+  checksum: ee000bc26848147ad423b581bd250075662a354d84f0e06eb76d3b892328d8d4440b7487b5a83e851b12b255f55d71835b008a66cbf8f255a11e4400159237db
   languageName: node
   linkType: hard
 
@@ -14517,13 +14535,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@>=3.0.1#~builtin<compat/typescript>":
-  version: 4.7.4
-  resolution: "typescript@patch:typescript@npm%3A4.7.4#~builtin<compat/typescript>::version=4.7.4&hash=f456af"
+"typescript@patch:typescript@>=4.5.2#~builtin<compat/typescript>":
+  version: 4.9.5
+  resolution: "typescript@patch:typescript@npm%3A4.9.5#~builtin<compat/typescript>::version=4.9.5&hash=f456af"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: 9096d8f6c16cb80ef3bf96fcbbd055bf1c4a43bd14f3b7be45a9fbe7ada46ec977f604d5feed3263b4f2aa7d4c7477ce5f9cd87de0d6feedec69a983f3a4f93e
+  checksum: 2eee5c37cad4390385db5db5a8e81470e42e8f1401b0358d7390095d6f681b410f2c4a0c496c6ff9ebd775423c7785cdace7bcdad76c7bee283df3d9718c0f20
   languageName: node
   linkType: hard
 
@@ -14863,7 +14881,7 @@ __metadata:
     logger: "workspace:*"
     npm-run-all: ^4.1.5
     reflect-metadata: ^0.1.13
-    rimraf: ^3.0.2
+    rimraf: ^4.1.2
     service-library: "workspace:*"
     ts-jest: ^27.1.4
     typemoq: ^2.1.0
@@ -14897,7 +14915,7 @@ __metadata:
     node-loader: ^2.0.0
     npm-run-all: ^4.1.5
     reflect-metadata: ^0.1.13
-    rimraf: ^3.0.2
+    rimraf: ^4.1.2
     service-library: "workspace:*"
     storage-documents: "workspace:*"
     ts-jest: ^27.1.4
@@ -14931,7 +14949,7 @@ __metadata:
     node-loader: ^2.0.0
     npm-run-all: ^4.1.5
     reflect-metadata: ^0.1.13
-    rimraf: ^3.0.2
+    rimraf: ^4.1.2
     service-library: "workspace:*"
     storage-documents: "workspace:*"
     ts-jest: ^27.1.4
@@ -14989,7 +15007,7 @@ __metadata:
     puppeteer-extra-plugin-stealth: ^2.11.1
     reflect-metadata: ^0.1.13
     request: ^2.88.2
-    rimraf: ^3.0.2
+    rimraf: ^4.1.2
     scanner-global-library: "workspace:*"
     service-library: "workspace:*"
     sha.js: ^2.4.11
@@ -15031,7 +15049,7 @@ __metadata:
     node-loader: ^2.0.0
     npm-run-all: ^4.1.5
     reflect-metadata: ^0.1.13
-    rimraf: ^3.0.2
+    rimraf: ^4.1.2
     service-library: "workspace:*"
     storage-documents: "workspace:*"
     ts-jest: ^27.1.4
@@ -15074,7 +15092,7 @@ __metadata:
     node-loader: ^2.0.0
     npm-run-all: ^4.1.5
     reflect-metadata: ^0.1.13
-    rimraf: ^3.0.2
+    rimraf: ^4.1.2
     service-library: "workspace:*"
     sha.js: ^2.4.11
     storage-documents: "workspace:*"
@@ -15113,7 +15131,7 @@ __metadata:
     node-loader: ^2.0.0
     npm-run-all: ^4.1.5
     reflect-metadata: ^0.1.13
-    rimraf: ^3.0.2
+    rimraf: ^4.1.2
     service-library: "workspace:*"
     storage-documents: "workspace:*"
     ts-jest: ^27.1.4
@@ -15153,7 +15171,7 @@ __metadata:
     npm-run-all: ^4.1.5
     p-limit: ^3.1.0
     reflect-metadata: ^0.1.13
-    rimraf: ^3.0.2
+    rimraf: ^4.1.2
     service-library: "workspace:*"
     storage-documents: "workspace:*"
     ts-jest: ^27.1.4
@@ -15656,7 +15674,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"yargs@npm:^17.0.0, yargs@npm:^17.2.1":
+"yargs@npm:^17.0.0":
   version: 17.5.1
   resolution: "yargs@npm:17.5.1"
   dependencies:
@@ -15671,7 +15689,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"yargs@npm:^17.6.2":
+"yargs@npm:^17.6.0, yargs@npm:^17.6.2":
   version: 17.6.2
   resolution: "yargs@npm:17.6.2"
   dependencies:
