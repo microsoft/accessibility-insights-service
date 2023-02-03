@@ -136,6 +136,7 @@ export class CombinedReportDataConverter {
                     id: nodeCheckResult?.id,
                     message: nodeCheckResult?.message,
                     data: nodeCheckResult?.data,
+                    relatedNodes: nodeCheckResult?.relatedNodes,
                 });
             }
         }

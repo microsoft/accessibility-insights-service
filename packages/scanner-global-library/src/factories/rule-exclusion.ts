@@ -33,8 +33,6 @@ export class RuleExclusion {
         'landmark-no-duplicate-main',
         'landmark-one-main',
         'landmark-unique',
-        'link-in-text-block',
-        'meta-viewport',
         'meta-viewport-large',
         'no-autoplay-audio',
         'p-as-heading',
