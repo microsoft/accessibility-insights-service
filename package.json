@@ -37,7 +37,7 @@
     },
     "devDependencies": {
         "@types/node": "^16.18.11",
-        "@typescript-eslint/eslint-plugin": "^5.48.1",
+        "@typescript-eslint/eslint-plugin": "^5.50.0",
         "@typescript-eslint/eslint-plugin-tslint": "^5.50.0",
         "@typescript-eslint/parser": "^5.50.0",
         "combine-dependabot-prs": "^1.0.5",
