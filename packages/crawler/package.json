@@ -44,7 +44,7 @@
         "@axe-core/puppeteer": "^4.5.0",
         "@medv/finder": "^2.1.0",
         "accessibility-insights-report": "4.6.3",
-        "apify": "^2.3.2",
+        "apify": "^3.1.1",
         "axe-core": "4.6.3",
         "browser-pool": "^3.1.4",
         "common": "workspace:*",
