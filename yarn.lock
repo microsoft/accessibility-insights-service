@@ -2370,6 +2370,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@jest/schemas@npm:^29.4.0":
+  version: 29.4.0
+  resolution: "@jest/schemas@npm:29.4.0"
+  dependencies:
+    "@sinclair/typebox": ^0.25.16
+  checksum: 005c90b7b641af029133fa390c0c8a75b63edf651da6253d7c472a8f15ddd18aa139edcd4236e57f974006e39c67217925768115484dbd7bfed2eba224de8b7d
+  languageName: node
+  linkType: hard
+
 "@jest/source-map@npm:^27.5.1":
   version: 27.5.1
   resolution: "@jest/source-map@npm:27.5.1"
@@ -2806,9 +2815,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@rollup/plugin-commonjs@npm:^24.0.0":
-  version: 24.0.0
-  resolution: "@rollup/plugin-commonjs@npm:24.0.0"
+"@rollup/plugin-commonjs@npm:^24.0.1":
+  version: 24.0.1
+  resolution: "@rollup/plugin-commonjs@npm:24.0.1"
   dependencies:
     "@rollup/pluginutils": ^5.0.1
     commondir: ^1.0.1
@@ -2821,7 +2830,7 @@ __metadata:
   peerDependenciesMeta:
     rollup:
       optional: true
-  checksum: e2a1bf295bbb45ab56747f7ce636d4b94046bfecc758a64c7276823b80271e0ba1196642c232aa61d1b1a98abeaddad45486c7227ec19a97d19d16f7661d49a6
+  checksum: ff5b09f5c350640fe6836fcc97bf5c5612bf78b26eaaad01bf1aee955f0b136135d1a8950a02f680779aec1f16f2c6b6cf89d6080e84ed09be62737abb6b3a5f
   languageName: node
   linkType: hard
 
@@ -2874,6 +2883,13 @@ __metadata:
   version: 0.24.20
   resolution: "@sinclair/typebox@npm:0.24.20"
   checksum: bb2e95ab60236ebbcaf3c0735b01a8ce6bea068bb1214a8016f8fea7bc2027d69b08437998425d93a3ac38ded3dbe8c64e218e635c09282cb3dd5d5a64269076
+  languageName: node
+  linkType: hard
+
+"@sinclair/typebox@npm:^0.25.16":
+  version: 0.25.21
+  resolution: "@sinclair/typebox@npm:0.25.21"
+  checksum: 763af1163fe4eabee9b914d4e4548a39fbba3287d2b3b1ff043c1da3c5a321e99d50a3ca94eb182988131e00b006a6f019799cde8da2f61e2f118b30b0276a00
   languageName: node
   linkType: hard
 
@@ -3553,14 +3569,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@typescript-eslint/eslint-plugin@npm:^5.48.1":
-  version: 5.48.1
-  resolution: "@typescript-eslint/eslint-plugin@npm:5.48.1"
+"@typescript-eslint/eslint-plugin@npm:^5.50.0":
+  version: 5.50.0
+  resolution: "@typescript-eslint/eslint-plugin@npm:5.50.0"
   dependencies:
-    "@typescript-eslint/scope-manager": 5.48.1
-    "@typescript-eslint/type-utils": 5.48.1
-    "@typescript-eslint/utils": 5.48.1
+    "@typescript-eslint/scope-manager": 5.50.0
+    "@typescript-eslint/type-utils": 5.50.0
+    "@typescript-eslint/utils": 5.50.0
     debug: ^4.3.4
+    grapheme-splitter: ^1.0.4
     ignore: ^5.2.0
     natural-compare-lite: ^1.4.0
     regexpp: ^3.2.0
@@ -3572,7 +3589,7 @@ __metadata:
   peerDependenciesMeta:
     typescript:
       optional: true
-  checksum: d8d73d123d16fc9b50b500ef21816dcabdffe0d2dcfdb15089dc5a1015d57cbad709de565d1c830f5058c0d7b410069e2554c0b53d1485fe7b237ea8089e58be
+  checksum: 351c4a157a7d717cc3835bdc09324b20d649463738a029c5701e5a38cdb162305ff7d56adff196a0c3245c24ea3167bbdac7f1c30399b8c1d495abbdbc1c53d6
   languageName: node
   linkType: hard
 
@@ -3603,16 +3620,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@typescript-eslint/scope-manager@npm:5.48.1":
-  version: 5.48.1
-  resolution: "@typescript-eslint/scope-manager@npm:5.48.1"
-  dependencies:
-    "@typescript-eslint/types": 5.48.1
-    "@typescript-eslint/visitor-keys": 5.48.1
-  checksum: f60a7efe917798cccf8652925de6be58b023ded6c6ee44ce74d074f0c2a1927680398a6d73bab33d500c69474ad8c54d63b90fcc6e13256712707d12a60e0a64
-  languageName: node
-  linkType: hard
-
 "@typescript-eslint/scope-manager@npm:5.50.0":
   version: 5.50.0
   resolution: "@typescript-eslint/scope-manager@npm:5.50.0"
@@ -3623,12 +3630,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@typescript-eslint/type-utils@npm:5.48.1":
-  version: 5.48.1
-  resolution: "@typescript-eslint/type-utils@npm:5.48.1"
+"@typescript-eslint/type-utils@npm:5.50.0":
+  version: 5.50.0
+  resolution: "@typescript-eslint/type-utils@npm:5.50.0"
   dependencies:
-    "@typescript-eslint/typescript-estree": 5.48.1
-    "@typescript-eslint/utils": 5.48.1
+    "@typescript-eslint/typescript-estree": 5.50.0
+    "@typescript-eslint/utils": 5.50.0
     debug: ^4.3.4
     tsutils: ^3.21.0
   peerDependencies:
@@ -3636,7 +3643,7 @@ __metadata:
   peerDependenciesMeta:
     typescript:
       optional: true
-  checksum: 2739b35caf48c9edbeab82936de58ce0759ab34955ce7eec1786690d6a63146ae0a6c5d9c76034605d9fe200c87a73ede0772c6244c5df6e66df992d9ebbab72
+  checksum: d2fc2fd10ef300865fd6a902ae92aef6c45cddc4359445f1e5c6dc9511063b52d2170cc6b525763395d4171c177b3d0fffd77cf9a2ab7e01fcd7109bd1a5a585
   languageName: node
   linkType: hard
 
@@ -3644,13 +3651,6 @@ __metadata:
   version: 5.18.0
   resolution: "@typescript-eslint/types@npm:5.18.0"
   checksum: 25d8d6f2f70ac4e93f4759a4927290749f528bce2150a87cde08200d706a6147880ca2ceeb8c93e0f370aace096c878096cd45427a59538877ac2121df8aaa01
-  languageName: node
-  linkType: hard
-
-"@typescript-eslint/types@npm:5.48.1":
-  version: 5.48.1
-  resolution: "@typescript-eslint/types@npm:5.48.1"
-  checksum: 8437986e9d86d792b23327517ae2f9861ec55992d5a9cd55991e525409b6244169436cd708f3987ab7c579e45e59b6eab5a9d3583f7729219e25691164293094
   languageName: node
   linkType: hard
 
@@ -3679,24 +3679,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@typescript-eslint/typescript-estree@npm:5.48.1":
-  version: 5.48.1
-  resolution: "@typescript-eslint/typescript-estree@npm:5.48.1"
-  dependencies:
-    "@typescript-eslint/types": 5.48.1
-    "@typescript-eslint/visitor-keys": 5.48.1
-    debug: ^4.3.4
-    globby: ^11.1.0
-    is-glob: ^4.0.3
-    semver: ^7.3.7
-    tsutils: ^3.21.0
-  peerDependenciesMeta:
-    typescript:
-      optional: true
-  checksum: 2b26e5848ef131e1bb99ed54d8c0efa8279cf8e8f7d8b72de00c2ca6cf2799d96c20f5bbbcf26e14e81b7b9d1035ba509bff30f2d852c174815879e8f14c27ed
-  languageName: node
-  linkType: hard
-
 "@typescript-eslint/typescript-estree@npm:5.50.0":
   version: 5.50.0
   resolution: "@typescript-eslint/typescript-estree@npm:5.50.0"
@@ -3712,24 +3694,6 @@ __metadata:
     typescript:
       optional: true
   checksum: cb1ac8d39647da6d52750c713d9635750ed41245ec82f937a159a71ad3bf490ebabfad3b43eeca07bca39d60df30d3a2f31f8bed0061381731d92a62e284b867
-  languageName: node
-  linkType: hard
-
-"@typescript-eslint/utils@npm:5.48.1":
-  version: 5.48.1
-  resolution: "@typescript-eslint/utils@npm:5.48.1"
-  dependencies:
-    "@types/json-schema": ^7.0.9
-    "@types/semver": ^7.3.12
-    "@typescript-eslint/scope-manager": 5.48.1
-    "@typescript-eslint/types": 5.48.1
-    "@typescript-eslint/typescript-estree": 5.48.1
-    eslint-scope: ^5.1.1
-    eslint-utils: ^3.0.0
-    semver: ^7.3.7
-  peerDependencies:
-    eslint: ^6.0.0 || ^7.0.0 || ^8.0.0
-  checksum: 2d112cbb6a920f147c6c3322e404ca3c56c1170e1ede3bcbf16fb779960dc24cdba688b1f2d06acd242859fc1dbc8702da5f8fa8bbf53e7081e41d80bec4c236
   languageName: node
   linkType: hard
 
@@ -3774,16 +3738,6 @@ __metadata:
     "@typescript-eslint/types": 5.18.0
     eslint-visitor-keys: ^3.0.0
   checksum: c856e3cf2fde3008e1d9bea3c73bc60d9060c7cb6d6ea186c20db9d74eff84986365f518dd1b4e142dca179e9a5cd7a6ed4381173d6abfd0ebd4d16d5cf50b94
-  languageName: node
-  linkType: hard
-
-"@typescript-eslint/visitor-keys@npm:5.48.1":
-  version: 5.48.1
-  resolution: "@typescript-eslint/visitor-keys@npm:5.48.1"
-  dependencies:
-    "@typescript-eslint/types": 5.48.1
-    eslint-visitor-keys: ^3.3.0
-  checksum: 2bda10cf4e6bc48b0d463767617e48a832d708b9434665dff6ed101f7d33e0d592f02af17a2259bde1bd17e666246448ae78d0fe006148cb93d897fff9b1d134
   languageName: node
   linkType: hard
 
@@ -4045,7 +3999,7 @@ __metadata:
   dependencies:
     "@axe-core/puppeteer": ^4.5.0
     "@medv/finder": ^2.1.0
-    "@rollup/plugin-commonjs": ^24.0.0
+    "@rollup/plugin-commonjs": ^24.0.1
     "@rollup/plugin-node-resolve": ^15.0.0
     "@types/encoding-down": ^5.0.1
     "@types/jest": ^27.4.1
@@ -4071,12 +4025,12 @@ __metadata:
     puppeteer: 18.1.0
     reflect-metadata: ^0.1.13
     rimraf: ^4.1.2
-    rollup: ^3.9.0
+    rollup: ^3.12.1
     scanner-global-library: "workspace:*"
     sha.js: ^2.4.11
     ts-jest: ^27.1.4
     typemoq: ^2.1.0
-    typescript: ^4.9.4
+    typescript: ^4.9.5
     yargs: ^17.6.2
   languageName: unknown
   linkType: soft
@@ -4132,7 +4086,7 @@ __metadata:
     exponential-backoff: ^3.1.0
     filenamify: ^4.3.0
     filenamify-url: ^2.1.2
-    fork-ts-checker-webpack-plugin: ^7.2.14
+    fork-ts-checker-webpack-plugin: ^7.3.0
     got: ^11.8.5
     inversify: ^6.0.1
     jest: ^27.5.1
@@ -4147,7 +4101,7 @@ __metadata:
     normalize-path: ^3.0.0
     normalize-url: 6.1.0
     npm-run-all: ^4.1.5
-    playwright: ^1.29.1
+    playwright: ^1.30.0
     puppeteer: 18.1.0
     puppeteer-extra: ^3.3.4
     puppeteer-extra-plugin: ^3.2.2
@@ -4161,7 +4115,7 @@ __metadata:
     shebang-loader: ^0.0.1
     ts-jest: ^27.1.4
     typemoq: ^2.1.0
-    typescript: ^4.9.4
+    typescript: ^4.9.5
     uuid-with-v6: ^2.0.0
     webpack: ^5.75.0
     webpack-cli: ^5.0.1
@@ -4178,7 +4132,7 @@ __metadata:
   resolution: "accessibility-insights-service@workspace:."
   dependencies:
     "@types/node": ^16.18.11
-    "@typescript-eslint/eslint-plugin": ^5.48.1
+    "@typescript-eslint/eslint-plugin": ^5.50.0
     "@typescript-eslint/eslint-plugin-tslint": ^5.50.0
     "@typescript-eslint/parser": ^5.50.0
     accessibility-insights-report: 4.6.3
@@ -4194,7 +4148,7 @@ __metadata:
     eslint-plugin-security: ^1.7.0
     eslint-plugin-sort-class-members: ^1.16.0
     jest: ^27.5.1
-    jest-extended: ^3.2.0
+    jest-extended: ^3.2.3
     jest-html-reporter: ^3.7.0
     jest-junit: ^15.0.0
     license-check-and-add: ^4.0.5
@@ -4205,7 +4159,7 @@ __metadata:
     syncpack: ^8.4.11
     ts-jest: ^27.1.4
     tslint: ^6.1.3
-    typescript: ^4.9.4
+    typescript: ^4.9.5
   languageName: unknown
   linkType: soft
 
@@ -4843,7 +4797,7 @@ __metadata:
     rimraf: ^4.1.2
     ts-jest: ^27.1.4
     typemoq: ^2.1.0
-    typescript: ^4.9.4
+    typescript: ^4.9.5
   languageName: unknown
   linkType: soft
 
@@ -4887,7 +4841,7 @@ __metadata:
     async-mutex: ^0.3.2
     common: "workspace:*"
     dotenv: ^16.0.1
-    fork-ts-checker-webpack-plugin: ^7.2.14
+    fork-ts-checker-webpack-plugin: ^7.3.0
     got: ^11.8.5
     inversify: ^6.0.1
     jest: ^27.5.1
@@ -4899,14 +4853,14 @@ __metadata:
     node-cache: ^5.1.2
     npm-run-all: ^4.1.5
     p-limit: ^3.1.0
-    pretty-format: ^29.3.1
+    pretty-format: ^29.4.1
     reflect-metadata: ^0.1.13
     rimraf: ^4.1.2
     storage-documents: "workspace:*"
     ts-jest: ^27.1.4
     ts-loader: ^9.4.2
     typemoq: ^2.1.0
-    typescript: ^4.9.4
+    typescript: ^4.9.5
     webpack: ^5.75.0
     webpack-cli: ^5.0.1
   languageName: unknown
@@ -5844,7 +5798,7 @@ __metadata:
     sha.js: ^2.4.11
     ts-jest: ^27.1.4
     typemoq: ^2.1.0
-    typescript: ^4.9.4
+    typescript: ^4.9.5
     uuid-with-v6: ^2.0.0
   languageName: unknown
   linkType: soft
@@ -6602,7 +6556,7 @@ __metadata:
     "@types/node": ^16.18.11
     azure-services: "workspace:*"
     copy-webpack-plugin: ^11.0.0
-    fork-ts-checker-webpack-plugin: ^7.2.14
+    fork-ts-checker-webpack-plugin: ^7.3.0
     inversify: ^6.0.1
     jest: ^27.5.1
     jest-junit: ^15.0.0
@@ -6615,7 +6569,7 @@ __metadata:
     rimraf: ^4.1.2
     ts-jest: ^27.1.4
     ts-loader: ^9.4.2
-    typescript: ^4.9.4
+    typescript: ^4.9.5
     webpack: ^5.75.0
     webpack-cli: ^5.0.1
     webpack-ignore-dynamic-require: ^1.0.0
@@ -7712,9 +7666,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fork-ts-checker-webpack-plugin@npm:^7.2.14":
-  version: 7.2.14
-  resolution: "fork-ts-checker-webpack-plugin@npm:7.2.14"
+"fork-ts-checker-webpack-plugin@npm:^7.3.0":
+  version: 7.3.0
+  resolution: "fork-ts-checker-webpack-plugin@npm:7.3.0"
   dependencies:
     "@babel/code-frame": ^7.16.7
     chalk: ^4.1.2
@@ -7735,7 +7689,7 @@ __metadata:
   peerDependenciesMeta:
     vue-template-compiler:
       optional: true
-  checksum: bf4b44e606677da14c5b8127693897003607e7f13ed93a92991665aea5ad5aa3f5629c022d95dbf9380b40bfc02d34fa42857f298525c7688194d1e94f2a2850
+  checksum: 49c2af801e264349a3fdf0afe4ad33065960c43bd7e56c8351a5e0d32c8c54146cc89d6a0b70b1e0f810de96787bd0c7fd275cc8727a9aea1a077c53de99659a
   languageName: node
   linkType: hard
 
@@ -7942,7 +7896,7 @@ __metadata:
     storage-documents: "workspace:*"
     ts-jest: ^27.1.4
     typemoq: ^2.1.0
-    typescript: ^4.9.4
+    typescript: ^4.9.5
     web-api-client: "workspace:*"
     yargs: ^17.6.2
   languageName: unknown
@@ -8291,6 +8245,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"grapheme-splitter@npm:^1.0.4":
+  version: 1.0.4
+  resolution: "grapheme-splitter@npm:1.0.4"
+  checksum: 0c22ec54dee1b05cd480f78cf14f732cb5b108edc073572c4ec205df4cd63f30f8db8025afc5debc8835a8ddeacf648a1c7992fe3dcd6ad38f9a476d84906620
+  languageName: node
+  linkType: hard
+
 "har-schema@npm:^2.0.0":
   version: 2.0.0
   resolution: "har-schema@npm:2.0.0"
@@ -8451,7 +8412,7 @@ __metadata:
     shebang-loader: ^0.0.1
     ts-jest: ^27.1.4
     typemoq: ^2.1.0
-    typescript: ^4.9.4
+    typescript: ^4.9.5
     web-api-client: "workspace:*"
     webpack: ^5.75.0
     webpack-cli: ^5.0.1
@@ -9545,9 +9506,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jest-extended@npm:^3.2.0":
-  version: 3.2.1
-  resolution: "jest-extended@npm:3.2.1"
+"jest-extended@npm:^3.2.3":
+  version: 3.2.3
+  resolution: "jest-extended@npm:3.2.3"
   dependencies:
     jest-diff: ^29.0.0
     jest-get-type: ^29.0.0
@@ -9556,7 +9517,7 @@ __metadata:
   peerDependenciesMeta:
     jest:
       optional: true
-  checksum: fbcbeace957b5789c4998bdf460d997fd2266b98ca6b23f8af560f7e46357f76fc50acfa56e410191f7755b1c83995623554105620e24517673d21ca7de2f67b
+  checksum: af837ca22ed80e9542bb234d137b0d235ef04efb4a071717ec9f41f97533e44e1f1b8de2d47504804bb78e568fafca662a6ccf12b74f66f3b8e8bcb7d460d7aa
   languageName: node
   linkType: hard
 
@@ -10666,7 +10627,7 @@ __metadata:
     rimraf: ^4.1.2
     ts-jest: ^27.1.4
     typemoq: ^2.1.0
-    typescript: ^4.9.4
+    typescript: ^4.9.5
   languageName: unknown
   linkType: soft
 
@@ -11844,7 +11805,7 @@ __metadata:
     "@types/lodash": ^4.14.182
     "@types/node": ^16.18.11
     filemanager-webpack-plugin: ^8.0.0
-    fork-ts-checker-webpack-plugin: ^7.2.14
+    fork-ts-checker-webpack-plugin: ^7.3.0
     jest: ^27.5.1
     jest-junit: ^15.0.0
     lodash: ^4.17.21
@@ -11855,7 +11816,7 @@ __metadata:
     ts-jest: ^27.1.4
     ts-loader: ^9.4.2
     typemoq: ^2.1.0
-    typescript: ^4.9.4
+    typescript: ^4.9.5
     webpack: ^5.75.0
     webpack-cli: ^5.0.1
   languageName: unknown
@@ -12077,23 +12038,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"playwright-core@npm:1.29.1":
-  version: 1.29.1
-  resolution: "playwright-core@npm:1.29.1"
+"playwright-core@npm:1.30.0":
+  version: 1.30.0
+  resolution: "playwright-core@npm:1.30.0"
   bin:
     playwright: cli.js
-  checksum: e1c8423db4d28f44e5365a353f321b04a07709c8bf26d0c908f06d2c2669f715315170f84ca98a532951c2ac6324f5f48f651dca1abe43092c7637bdb4703303
+  checksum: 4c5693f27245a1168f94708ecd8e1eb0d200de435b25cc07cfa25b97a094633818954dc00baf24e0ff551825f672050b83d1309362c1f97213fe8ebd2a147ed9
   languageName: node
   linkType: hard
 
-"playwright@npm:^1.29.1":
-  version: 1.29.1
-  resolution: "playwright@npm:1.29.1"
+"playwright@npm:^1.30.0":
+  version: 1.30.0
+  resolution: "playwright@npm:1.30.0"
   dependencies:
-    playwright-core: 1.29.1
+    playwright-core: 1.30.0
   bin:
     playwright: cli.js
-  checksum: ef20f71b20420d9e0eaf45ac5f936422dc6961a863eb71192abe911d3f951722b3c464a36ea04cac8484368c876b5513db04171375f970831fb2bccb9fbb1b7b
+  checksum: 1987446ed07e25c0c6dedce8314209b49536eb4c7fa82e57e7fea9bd8128bacd08e49f9e89af30a647839bf2603b8c8321f50e23e334a11c1c29eedb838a81a3
   languageName: node
   linkType: hard
 
@@ -12174,6 +12135,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"pretty-format@npm:^29.4.1":
+  version: 29.4.1
+  resolution: "pretty-format@npm:29.4.1"
+  dependencies:
+    "@jest/schemas": ^29.4.0
+    ansi-styles: ^5.0.0
+    react-is: ^18.0.0
+  checksum: bcc8e86bcf8e7f5106c96e2ea7905912bd17ae2aac76e4e0745d2a50df4b340638ed95090ee455a1c0f78189efa05077bd655ca08bf66292e83ebd7035fc46fd
+  languageName: node
+  linkType: hard
+
 "printj@npm:~1.1.0":
   version: 1.1.2
   resolution: "printj@npm:1.1.2"
@@ -12213,7 +12185,7 @@ __metadata:
     storage-documents: "workspace:*"
     ts-jest: ^27.1.4
     typemoq: ^2.1.0
-    typescript: ^4.9.4
+    typescript: ^4.9.5
   languageName: unknown
   linkType: soft
 
@@ -12232,7 +12204,7 @@ __metadata:
     common: "workspace:*"
     copy-webpack-plugin: ^11.0.0
     dotenv: ^16.0.1
-    fork-ts-checker-webpack-plugin: ^7.2.14
+    fork-ts-checker-webpack-plugin: ^7.3.0
     inversify: ^6.0.1
     jest: ^27.5.1
     jest-junit: ^15.0.0
@@ -12249,7 +12221,7 @@ __metadata:
     ts-jest: ^27.1.4
     ts-loader: ^9.4.2
     typemoq: ^2.1.0
-    typescript: ^4.9.4
+    typescript: ^4.9.5
     webpack: ^5.75.0
     webpack-cli: ^5.0.1
     webpack-ignore-dynamic-require: ^1.0.0
@@ -12273,7 +12245,7 @@ __metadata:
     common: "workspace:*"
     copy-webpack-plugin: ^11.0.0
     dotenv: ^16.0.1
-    fork-ts-checker-webpack-plugin: ^7.2.14
+    fork-ts-checker-webpack-plugin: ^7.3.0
     inversify: ^6.0.1
     jest: ^27.5.1
     jest-junit: ^15.0.0
@@ -12298,7 +12270,7 @@ __metadata:
     ts-jest: ^27.1.4
     ts-loader: ^9.4.2
     typemoq: ^2.1.0
-    typescript: ^4.9.4
+    typescript: ^4.9.5
     webpack: ^5.75.0
     webpack-cli: ^5.0.1
     webpack-ignore-dynamic-require: ^1.0.0
@@ -12950,7 +12922,7 @@ __metadata:
     common: "workspace:*"
     copy-webpack-plugin: ^11.0.0
     dotenv: ^16.0.1
-    fork-ts-checker-webpack-plugin: ^7.2.14
+    fork-ts-checker-webpack-plugin: ^7.3.0
     inversify: ^6.0.1
     jest: ^27.5.1
     jest-junit: ^15.0.0
@@ -12967,7 +12939,7 @@ __metadata:
     ts-jest: ^27.1.4
     ts-loader: ^9.4.2
     typemoq: ^2.1.0
-    typescript: ^4.9.4
+    typescript: ^4.9.5
     webpack: ^5.75.0
     webpack-cli: ^5.0.1
     webpack-ignore-dynamic-require: ^1.0.0
@@ -12991,7 +12963,7 @@ __metadata:
     common: "workspace:*"
     copy-webpack-plugin: ^11.0.0
     dotenv: ^16.0.1
-    fork-ts-checker-webpack-plugin: ^7.2.14
+    fork-ts-checker-webpack-plugin: ^7.3.0
     inversify: ^6.0.1
     jest: ^27.5.1
     jest-junit: ^15.0.0
@@ -13015,7 +12987,7 @@ __metadata:
     ts-jest: ^27.1.4
     ts-loader: ^9.4.2
     typemoq: ^2.1.0
-    typescript: ^4.9.4
+    typescript: ^4.9.5
     webpack: ^5.75.0
     webpack-cli: ^5.0.1
     webpack-ignore-dynamic-require: ^1.0.0
@@ -13263,9 +13235,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rollup@npm:^3.9.0":
-  version: 3.9.1
-  resolution: "rollup@npm:3.9.1"
+"rollup@npm:^3.12.1":
+  version: 3.12.1
+  resolution: "rollup@npm:3.12.1"
   dependencies:
     fsevents: ~2.3.2
   dependenciesMeta:
@@ -13273,7 +13245,7 @@ __metadata:
       optional: true
   bin:
     rollup: dist/bin/rollup
-  checksum: 929cfab6b8bb2e20c28d7a4c3909b53729f4a63d8cc14f3b1a217d5f8e550737ee0903124ba58a1f2e7efd45c596e044a968aa379411731d0e76c910621d7d3f
+  checksum: b6b3aa4bcc13b1f15c1945201f3837be07b249854ed8a73bd67411ffe56f691b808d5b563246b78ecea4110afdb9e9e6cc7d5a3f82965a5592187dbb10d3671f
   languageName: node
   linkType: hard
 
@@ -13384,7 +13356,7 @@ __metadata:
     storage-documents: "workspace:*"
     ts-jest: ^27.1.4
     typemoq: ^2.1.0
-    typescript: ^4.9.4
+    typescript: ^4.9.5
   languageName: unknown
   linkType: soft
 
@@ -13537,7 +13509,7 @@ __metadata:
     dotenv: ^16.0.1
     inversify: ^6.0.1
     jest: ^27.5.1
-    jest-extended: ^3.2.0
+    jest-extended: ^3.2.3
     jest-junit: ^15.0.0
     lodash: ^4.17.21
     logger: "workspace:*"
@@ -13556,7 +13528,7 @@ __metadata:
     storage-documents: "workspace:*"
     ts-jest: ^27.1.4
     typemoq: ^2.1.0
-    typescript: ^4.9.4
+    typescript: ^4.9.5
     yargs: ^17.6.2
   languageName: unknown
   linkType: soft
@@ -13972,7 +13944,7 @@ __metadata:
     ts-transformer-keys: ^0.4.4
     ttypescript: ^1.5.15
     typemoq: ^2.1.0
-    typescript: ^4.9.4
+    typescript: ^4.9.5
   languageName: unknown
   linkType: soft
 
@@ -14867,7 +14839,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@npm:>=4.5.2":
+"typescript@npm:>=4.5.2, typescript@npm:^4.9.5":
   version: 4.9.5
   resolution: "typescript@npm:4.9.5"
   bin:
@@ -14877,33 +14849,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@npm:^4.9.4":
-  version: 4.9.4
-  resolution: "typescript@npm:4.9.4"
-  bin:
-    tsc: bin/tsc
-    tsserver: bin/tsserver
-  checksum: e782fb9e0031cb258a80000f6c13530288c6d63f1177ed43f770533fdc15740d271554cdae86701c1dd2c83b082cea808b07e97fd68b38a172a83dbf9e0d0ef9
-  languageName: node
-  linkType: hard
-
-"typescript@patch:typescript@>=4.5.2#~builtin<compat/typescript>":
+"typescript@patch:typescript@>=4.5.2#~builtin<compat/typescript>, typescript@patch:typescript@^4.9.5#~builtin<compat/typescript>":
   version: 4.9.5
   resolution: "typescript@patch:typescript@npm%3A4.9.5#~builtin<compat/typescript>::version=4.9.5&hash=f456af"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
   checksum: 2eee5c37cad4390385db5db5a8e81470e42e8f1401b0358d7390095d6f681b410f2c4a0c496c6ff9ebd775423c7785cdace7bcdad76c7bee283df3d9718c0f20
-  languageName: node
-  linkType: hard
-
-"typescript@patch:typescript@^4.9.4#~builtin<compat/typescript>":
-  version: 4.9.4
-  resolution: "typescript@patch:typescript@npm%3A4.9.4#~builtin<compat/typescript>::version=4.9.4&hash=f456af"
-  bin:
-    tsc: bin/tsc
-    tsserver: bin/tsserver
-  checksum: 37f6e2c3c5e2aa5934b85b0fddbf32eeac8b1bacf3a5b51d01946936d03f5377fe86255d4e5a4ae628fd0cd553386355ad362c57f13b4635064400f3e8e05b9d
   languageName: node
   linkType: hard
 
@@ -15249,7 +15201,7 @@ __metadata:
     service-library: "workspace:*"
     ts-jest: ^27.1.4
     typemoq: ^2.1.0
-    typescript: ^4.9.4
+    typescript: ^4.9.5
   languageName: unknown
   linkType: soft
 
@@ -15268,7 +15220,7 @@ __metadata:
     common: "workspace:*"
     copy-webpack-plugin: ^11.0.0
     dotenv: ^16.0.1
-    fork-ts-checker-webpack-plugin: ^7.2.14
+    fork-ts-checker-webpack-plugin: ^7.3.0
     inversify: ^6.0.1
     jest: ^27.5.1
     jest-junit: ^15.0.0
@@ -15285,7 +15237,7 @@ __metadata:
     ts-jest: ^27.1.4
     ts-loader: ^9.4.2
     typemoq: ^2.1.0
-    typescript: ^4.9.4
+    typescript: ^4.9.5
     webpack: ^5.75.0
     webpack-cli: ^5.0.1
     webpack-ignore-dynamic-require: ^1.0.0
@@ -15302,7 +15254,7 @@ __metadata:
     azure-services: "workspace:*"
     common: "workspace:*"
     copy-webpack-plugin: ^11.0.0
-    fork-ts-checker-webpack-plugin: ^7.2.14
+    fork-ts-checker-webpack-plugin: ^7.3.0
     inversify: ^6.0.1
     jest: ^27.5.1
     jest-junit: ^15.0.0
@@ -15319,7 +15271,7 @@ __metadata:
     ts-jest: ^27.1.4
     ts-loader: ^9.4.2
     typemoq: ^2.1.0
-    typescript: ^4.9.4
+    typescript: ^4.9.5
     webpack: ^5.75.0
     webpack-cli: ^5.0.1
     webpack-ignore-dynamic-require: ^1.0.0
@@ -15352,7 +15304,7 @@ __metadata:
     common: "workspace:*"
     copy-webpack-plugin: ^11.0.0
     dotenv: ^16.0.1
-    fork-ts-checker-webpack-plugin: ^7.2.14
+    fork-ts-checker-webpack-plugin: ^7.3.0
     inversify: ^6.0.1
     jest: ^27.5.1
     jest-junit: ^15.0.0
@@ -15379,7 +15331,7 @@ __metadata:
     ts-jest: ^27.1.4
     ts-loader: ^9.4.2
     typemoq: ^2.1.0
-    typescript: ^4.9.4
+    typescript: ^4.9.5
     webpack: ^5.75.0
     webpack-cli: ^5.0.1
     webpack-ignore-dynamic-require: ^1.0.0
@@ -15403,7 +15355,7 @@ __metadata:
     common: "workspace:*"
     copy-webpack-plugin: ^11.0.0
     dotenv: ^16.0.1
-    fork-ts-checker-webpack-plugin: ^7.2.14
+    fork-ts-checker-webpack-plugin: ^7.3.0
     inversify: ^6.0.1
     jest: ^27.5.1
     jest-junit: ^15.0.0
@@ -15419,7 +15371,7 @@ __metadata:
     ts-jest: ^27.1.4
     ts-loader: ^9.4.2
     typemoq: ^2.1.0
-    typescript: ^4.9.4
+    typescript: ^4.9.5
     webpack: ^5.75.0
     webpack-cli: ^5.0.1
     webpack-ignore-dynamic-require: ^1.0.0
@@ -15445,7 +15397,7 @@ __metadata:
     common: "workspace:*"
     copy-webpack-plugin: ^11.0.0
     dotenv: ^16.0.1
-    fork-ts-checker-webpack-plugin: ^7.2.14
+    fork-ts-checker-webpack-plugin: ^7.3.0
     got: ^11.8.5
     inversify: ^6.0.1
     jest: ^27.5.1
@@ -15463,7 +15415,7 @@ __metadata:
     ts-jest: ^27.1.4
     ts-loader: ^9.4.2
     typemoq: ^2.1.0
-    typescript: ^4.9.4
+    typescript: ^4.9.5
     webpack: ^5.75.0
     webpack-cli: ^5.0.1
     webpack-ignore-dynamic-require: ^1.0.0
@@ -15484,7 +15436,7 @@ __metadata:
     azure-services: "workspace:*"
     common: "workspace:*"
     copy-webpack-plugin: ^11.0.0
-    fork-ts-checker-webpack-plugin: ^7.2.14
+    fork-ts-checker-webpack-plugin: ^7.3.0
     functional-tests: "workspace:*"
     inversify: ^6.0.1
     jest: ^27.5.1
@@ -15501,7 +15453,7 @@ __metadata:
     ts-jest: ^27.1.4
     ts-loader: ^9.4.2
     typemoq: ^2.1.0
-    typescript: ^4.9.4
+    typescript: ^4.9.5
     webpack: ^5.75.0
     webpack-cli: ^5.0.1
     webpack-ignore-dynamic-require: ^1.0.0
@@ -15522,7 +15474,7 @@ __metadata:
     common: "workspace:*"
     copy-webpack-plugin: ^11.0.0
     durable-functions: ^1.5.4
-    fork-ts-checker-webpack-plugin: ^7.2.14
+    fork-ts-checker-webpack-plugin: ^7.3.0
     functional-tests: "workspace:*"
     inversify: ^6.0.1
     jest: ^27.5.1
@@ -15541,7 +15493,7 @@ __metadata:
     ts-jest: ^27.1.4
     ts-loader: ^9.4.2
     typemoq: ^2.1.0
-    typescript: ^4.9.4
+    typescript: ^4.9.5
     web-api-client: "workspace:*"
     webpack: ^5.75.0
     webpack-cli: ^5.0.1
