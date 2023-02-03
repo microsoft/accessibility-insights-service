@@ -4070,7 +4070,7 @@ __metadata:
     exponential-backoff: ^3.1.0
     filenamify: ^4.3.0
     filenamify-url: ^2.1.2
-    fork-ts-checker-webpack-plugin: ^7.2.14
+    fork-ts-checker-webpack-plugin: ^7.3.0
     got: ^11.8.5
     inversify: ^6.0.1
     jest: ^27.5.1
@@ -4825,7 +4825,7 @@ __metadata:
     async-mutex: ^0.3.2
     common: "workspace:*"
     dotenv: ^16.0.1
-    fork-ts-checker-webpack-plugin: ^7.2.14
+    fork-ts-checker-webpack-plugin: ^7.3.0
     got: ^11.8.5
     inversify: ^6.0.1
     jest: ^27.5.1
@@ -6540,7 +6540,7 @@ __metadata:
     "@types/node": ^16.18.11
     azure-services: "workspace:*"
     copy-webpack-plugin: ^11.0.0
-    fork-ts-checker-webpack-plugin: ^7.2.14
+    fork-ts-checker-webpack-plugin: ^7.3.0
     inversify: ^6.0.1
     jest: ^27.5.1
     jest-junit: ^15.0.0
@@ -7650,9 +7650,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fork-ts-checker-webpack-plugin@npm:^7.2.14":
-  version: 7.2.14
-  resolution: "fork-ts-checker-webpack-plugin@npm:7.2.14"
+"fork-ts-checker-webpack-plugin@npm:^7.3.0":
+  version: 7.3.0
+  resolution: "fork-ts-checker-webpack-plugin@npm:7.3.0"
   dependencies:
     "@babel/code-frame": ^7.16.7
     chalk: ^4.1.2
@@ -7673,7 +7673,7 @@ __metadata:
   peerDependenciesMeta:
     vue-template-compiler:
       optional: true
-  checksum: bf4b44e606677da14c5b8127693897003607e7f13ed93a92991665aea5ad5aa3f5629c022d95dbf9380b40bfc02d34fa42857f298525c7688194d1e94f2a2850
+  checksum: 49c2af801e264349a3fdf0afe4ad33065960c43bd7e56c8351a5e0d32c8c54146cc89d6a0b70b1e0f810de96787bd0c7fd275cc8727a9aea1a077c53de99659a
   languageName: node
   linkType: hard
 
@@ -11789,7 +11789,7 @@ __metadata:
     "@types/lodash": ^4.14.182
     "@types/node": ^16.18.11
     filemanager-webpack-plugin: ^8.0.0
-    fork-ts-checker-webpack-plugin: ^7.2.14
+    fork-ts-checker-webpack-plugin: ^7.3.0
     jest: ^27.5.1
     jest-junit: ^15.0.0
     lodash: ^4.17.21
@@ -12177,7 +12177,7 @@ __metadata:
     common: "workspace:*"
     copy-webpack-plugin: ^11.0.0
     dotenv: ^16.0.1
-    fork-ts-checker-webpack-plugin: ^7.2.14
+    fork-ts-checker-webpack-plugin: ^7.3.0
     inversify: ^6.0.1
     jest: ^27.5.1
     jest-junit: ^15.0.0
@@ -12218,7 +12218,7 @@ __metadata:
     common: "workspace:*"
     copy-webpack-plugin: ^11.0.0
     dotenv: ^16.0.1
-    fork-ts-checker-webpack-plugin: ^7.2.14
+    fork-ts-checker-webpack-plugin: ^7.3.0
     inversify: ^6.0.1
     jest: ^27.5.1
     jest-junit: ^15.0.0
@@ -12895,7 +12895,7 @@ __metadata:
     common: "workspace:*"
     copy-webpack-plugin: ^11.0.0
     dotenv: ^16.0.1
-    fork-ts-checker-webpack-plugin: ^7.2.14
+    fork-ts-checker-webpack-plugin: ^7.3.0
     inversify: ^6.0.1
     jest: ^27.5.1
     jest-junit: ^15.0.0
@@ -12936,7 +12936,7 @@ __metadata:
     common: "workspace:*"
     copy-webpack-plugin: ^11.0.0
     dotenv: ^16.0.1
-    fork-ts-checker-webpack-plugin: ^7.2.14
+    fork-ts-checker-webpack-plugin: ^7.3.0
     inversify: ^6.0.1
     jest: ^27.5.1
     jest-junit: ^15.0.0
@@ -15213,7 +15213,7 @@ __metadata:
     common: "workspace:*"
     copy-webpack-plugin: ^11.0.0
     dotenv: ^16.0.1
-    fork-ts-checker-webpack-plugin: ^7.2.14
+    fork-ts-checker-webpack-plugin: ^7.3.0
     inversify: ^6.0.1
     jest: ^27.5.1
     jest-junit: ^15.0.0
@@ -15247,7 +15247,7 @@ __metadata:
     azure-services: "workspace:*"
     common: "workspace:*"
     copy-webpack-plugin: ^11.0.0
-    fork-ts-checker-webpack-plugin: ^7.2.14
+    fork-ts-checker-webpack-plugin: ^7.3.0
     inversify: ^6.0.1
     jest: ^27.5.1
     jest-junit: ^15.0.0
@@ -15297,7 +15297,7 @@ __metadata:
     common: "workspace:*"
     copy-webpack-plugin: ^11.0.0
     dotenv: ^16.0.1
-    fork-ts-checker-webpack-plugin: ^7.2.14
+    fork-ts-checker-webpack-plugin: ^7.3.0
     inversify: ^6.0.1
     jest: ^27.5.1
     jest-junit: ^15.0.0
@@ -15348,7 +15348,7 @@ __metadata:
     common: "workspace:*"
     copy-webpack-plugin: ^11.0.0
     dotenv: ^16.0.1
-    fork-ts-checker-webpack-plugin: ^7.2.14
+    fork-ts-checker-webpack-plugin: ^7.3.0
     inversify: ^6.0.1
     jest: ^27.5.1
     jest-junit: ^15.0.0
@@ -15390,7 +15390,7 @@ __metadata:
     common: "workspace:*"
     copy-webpack-plugin: ^11.0.0
     dotenv: ^16.0.1
-    fork-ts-checker-webpack-plugin: ^7.2.14
+    fork-ts-checker-webpack-plugin: ^7.3.0
     got: ^11.8.5
     inversify: ^6.0.1
     jest: ^27.5.1
@@ -15429,7 +15429,7 @@ __metadata:
     azure-services: "workspace:*"
     common: "workspace:*"
     copy-webpack-plugin: ^11.0.0
-    fork-ts-checker-webpack-plugin: ^7.2.14
+    fork-ts-checker-webpack-plugin: ^7.3.0
     functional-tests: "workspace:*"
     inversify: ^6.0.1
     jest: ^27.5.1
@@ -15467,7 +15467,7 @@ __metadata:
     common: "workspace:*"
     copy-webpack-plugin: ^11.0.0
     durable-functions: ^1.5.4
-    fork-ts-checker-webpack-plugin: ^7.2.14
+    fork-ts-checker-webpack-plugin: ^7.3.0
     functional-tests: "workspace:*"
     inversify: ^6.0.1
     jest: ^27.5.1
