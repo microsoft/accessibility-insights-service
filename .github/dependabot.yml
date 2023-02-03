@@ -64,3 +64,13 @@ updates:
   - dependency-name: node-fetch
     versions:
     - "> 2.6.7"
+    # Newest versions of eslint* will not work with VS Code ESLint extension
+  - dependency-name: eslint
+    versions:
+    - "> 7.32.0"
+  - dependency-name: eslint-plugin-jsdoc
+    versions:
+    - "> 38.1.6"
+  - dependency-name: eslint-plugin-jest
+    versions:
+    - "> 26.9.0"
