@@ -259,20 +259,24 @@ describe(Page, () => {
         });
 
         it('navigates to page with authentication', async () => {
+            const authNavigationResponse = { httpResponse: { url: () => 'localhost/1' } } as NavigationResponse;
+            const reloadNavigationResponse = { httpResponse: { url: () => 'localhost/2' } } as NavigationResponse;
             pageNavigatorMock
-                .setup(async (o) => o.navigate(url, puppeteerPageMock.object))
-                .returns(() => Promise.resolve(navigationResponse))
+                .setup((o) => o.navigatePageOperation(url, puppeteerPageMock.object))
+                .returns(() => Promise.resolve({} as NavigationResponse))
                 .verifiable();
-
-            const authNavigationResponse = { httpResponse: { url: () => 'localhost' } } as NavigationResponse;
             resourceAuthenticatorMock
                 .setup((o) => o.authenticate(puppeteerPageMock.object))
                 .returns(() => Promise.resolve(authNavigationResponse))
                 .verifiable();
+            pageNavigatorMock
+                .setup(async (o) => o.reload(puppeteerPageMock.object))
+                .returns(() => Promise.resolve(reloadNavigationResponse))
+                .verifiable();
 
             await page.navigateToUrl(url, { enableAuthentication: true });
 
-            expect(page.lastNavigationResponse).toEqual(authNavigationResponse.httpResponse);
+            expect(page.lastNavigationResponse).toEqual(reloadNavigationResponse.httpResponse);
             expect(page.authenticated).toEqual(true);
         });
 
@@ -341,25 +345,6 @@ describe(Page, () => {
                 timing[key] = `${navigationResponse.pageNavigationTiming[key]}`;
             });
             loggerMock.setup((o) => o.logInfo('Total page reload time 10, msec', { ...timing })).verifiable();
-
-            await page.reload();
-
-            expect(page.lastNavigationResponse).toEqual(puppeteerResponseMock.object);
-        });
-
-        it('reload page with browser cache deleted', async () => {
-            setupPuppeteerResponseMock(304);
-            pageNavigatorMock
-                .setup(async (o) => o.reload(puppeteerPageMock.object))
-                .returns(() => Promise.resolve(navigationResponse))
-                .verifiable(Times.exactly(2));
-
-            const timing = { total: '10' } as any;
-            Object.keys(navigationResponse.pageNavigationTiming).forEach((key: keyof PageNavigationTiming) => {
-                timing[key] = `${navigationResponse.pageNavigationTiming[key]}`;
-            });
-            loggerMock.setup((o) => o.logInfo('Total page reload time 10, msec', { ...timing })).verifiable(Times.exactly(2));
-            loggerMock.setup((o) => o.logWarn('Page reload has failed. Reload page without browser cache.')).verifiable();
 
             await page.reload();
 

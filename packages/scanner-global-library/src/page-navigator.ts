@@ -97,6 +97,24 @@ export class PageNavigator {
         };
     }
 
+    public async navigatePageOperation(url: string, page: Puppeteer.Page): Promise<NavigationResponse> {
+        const opResult = await this.invokePageNavigationOperation(this.createPageNavigationOperation('goto', page, url));
+        if (opResult.browserError) {
+            return {
+                httpResponse: undefined,
+                pageNavigationTiming: opResult.navigationTiming,
+                browserError: opResult.browserError,
+            };
+        }
+
+        return {
+            httpResponse: opResult.response,
+            pageNavigationTiming: {
+                ...opResult.navigationTiming,
+            } as PageNavigationTiming,
+        };
+    }
+
     public async waitForNavigation(page: Puppeteer.Page): Promise<NavigationResponse> {
         const navigationOperation = async (waitUntil = this.navigationCondition) => {
             return page.waitForNavigation({ waitUntil, timeout: puppeteerTimeoutConfig.navigationTimeoutMsecs });
