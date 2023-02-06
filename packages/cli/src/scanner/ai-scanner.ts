@@ -13,7 +13,7 @@ export class AIScanner {
         try {
             console.log(`Starting accessibility scanning of URL ${url}`);
             await this.page.create({ browserExecutablePath });
-            await this.page.navigateToUrl(url);
+            await this.page.navigate(url);
 
             return await this.page.scanForA11yIssues(sourcePath);
         } catch (error) {

@@ -56,7 +56,7 @@ describe('AIScanner', () => {
     }
 
     function setupPageNavigateCall(url: string): void {
-        pageMock.setup((p) => p.navigateToUrl(url)).verifiable(Times.once());
+        pageMock.setup((p) => p.navigate(url)).verifiable(Times.once());
     }
 
     function setupPageScanCall(url: string, axeResults: AxeResults): void {

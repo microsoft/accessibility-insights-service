@@ -11,11 +11,12 @@ import { AxePuppeteer } from '@axe-core/puppeteer';
 import { AxeScanResults } from './axe-scan-results';
 import { AxePuppeteerFactory } from './factories/axe-puppeteer-factory';
 import { WebDriver } from './web-driver';
-import { PageNavigator } from './page-navigator';
+import { PageNavigator, NavigationResponse } from './page-navigator';
 import { BrowserError } from './browser-error';
 import { PageNavigationTiming, puppeteerTimeoutConfig } from './page-timeout-config';
 import { scrollToTop } from './page-client-lib';
 import { PageNetworkTracer } from './page-network-tracer';
+import { ResourceAuthenticator } from './authenticator/resource-authenticator';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -31,6 +32,11 @@ export interface Viewport {
     deviceScaleFactor: number;
 }
 
+export interface PageNavigationOptions {
+    enableNetworkTrace?: boolean;
+    enableAuthentication?: boolean;
+}
+
 @injectable()
 export class Page {
     public browser: Puppeteer.Browser;
@@ -41,11 +47,15 @@ export class Page {
 
     public lastBrowserStartOptions: BrowserStartOptions;
 
+    public lastPageNavigationOptions: PageNavigationOptions;
+
     public pageNavigationTiming: PageNavigationTiming;
 
     public requestUrl: string;
 
     public userAgent: string;
+
+    public authenticated: boolean;
 
     private page: Puppeteer.Page;
 
@@ -56,6 +66,7 @@ export class Page {
         @inject(AxePuppeteerFactory) private readonly axePuppeteerFactory: AxePuppeteerFactory,
         @inject(PageNavigator) private readonly pageNavigator: PageNavigator,
         @inject(PageNetworkTracer) private readonly pageNetworkTracer: PageNetworkTracer,
+        @inject(ResourceAuthenticator) private readonly resourceAuthenticator: ResourceAuthenticator,
         @inject(GlobalLogger) @optional() private readonly logger: GlobalLogger,
         private readonly scrollToPageTop: typeof scrollToTop = scrollToTop,
     ) {
@@ -85,37 +96,24 @@ export class Page {
         this.page = await this.browser.newPage();
     }
 
-    public async navigateToUrl(url: string, enableNetworkTrace?: boolean): Promise<void> {
+    public async navigate(url: string, options?: PageNavigationOptions): Promise<void> {
         this.requestUrl = url;
-        this.lastBrowserError = undefined;
+        this.lastPageNavigationOptions = options;
 
-        await this.addNetworkTrace(enableNetworkTrace);
+        await this.addNetworkTrace(options?.enableNetworkTrace);
         await this.setExtraHTTPHeaders();
-        const navigationResponse = await this.pageNavigator.navigate(url, this.page, async (browserError) => {
-            this.logger?.logError('Page navigation error', { browserError: System.serializeError(browserError) });
-            this.lastBrowserError = browserError;
-        });
+        await this.navigateImpl(options);
 
-        if (this.lastBrowserError?.errorType && this.networkTraceGlobalFlag !== true /** not in network trace mode already */) {
+        if (
+            this.lastBrowserError &&
+            this.networkTraceGlobalFlag !== true /** not in network trace mode already */ &&
+            this.authenticated !== true
+        ) {
             this.logger?.logWarn('Reload page with network trace on navigation error.');
-            await this.navigateToUrlWithNetworkTrace(url);
+            await this.navigateWithNetworkTrace(url);
         }
 
-        await this.removeNetworkTrace(enableNetworkTrace);
-
-        this.lastNavigationResponse = navigationResponse?.httpResponse;
-        this.pageNavigationTiming = navigationResponse?.pageNavigationTiming;
-        this.logPageNavigationTiming('load');
-    }
-
-    private async navigateToUrlWithNetworkTrace(url: string): Promise<void> {
-        await this.reopenBrowser();
-        await this.setExtraHTTPHeaders();
-        await this.addNetworkTrace(true);
-        await this.pageNavigator.navigate(url, this.page, async () => {
-            return Promise.resolve();
-        });
-        await this.removeNetworkTrace(true);
+        await this.removeNetworkTrace(options?.enableNetworkTrace);
     }
 
     /**
@@ -124,14 +122,12 @@ export class Page {
      *
      * `options.hardReload === true` will restart browser instance and delete browser storage, settings, etc. but use browser disk cache.
      */
-    public async reload(options?: { hardReload: boolean }): Promise<void> {
-        await this.reloadImpl(options);
-        if (this.lastNavigationResponse?.status() === 304) {
-            this.logger?.logWarn('Page reload has failed. Reload page without browser cache.');
-
-            // Reload has failed due to browser cache presence. Reload without browser cache.
-            this.webDriver.clearDiskCache();
-            await this.reloadImpl({ ...options, hardReload: false });
+    public async reload(options?: { hardReload?: boolean }): Promise<void> {
+        this.requestUrl = this.url;
+        if (options?.hardReload === true) {
+            await this.hardReload();
+        } else {
+            await this.softReload();
         }
     }
 
@@ -198,12 +194,53 @@ export class Page {
         return { width: windowSize.width, height: windowSize.height, deviceScaleFactor: windowSize.deviceScaleFactor };
     }
 
-    private async reloadImpl(options?: { hardReload: boolean }): Promise<void> {
-        this.requestUrl = this.url;
-        if (options?.hardReload === true) {
-            await this.hardReload();
+    private async navigateWithNetworkTrace(url: string): Promise<void> {
+        await this.reopenBrowser();
+        await this.setExtraHTTPHeaders();
+        await this.addNetworkTrace(true);
+        await this.pageNavigator.navigate(url, this.page);
+        await this.removeNetworkTrace(true);
+    }
+
+    private async navigateImpl(options?: PageNavigationOptions): Promise<void> {
+        this.lastBrowserError = undefined;
+
+        if (options?.enableAuthentication === true) {
+            await this.preloadWithAuth();
+        }
+
+        if (this.lastBrowserError !== undefined) {
+            return;
+        }
+
+        if (this.authenticated === true) {
+            // Reload authenticated page to execute navigation workflow
+            await this.reload();
         } else {
-            await this.softReload();
+            const navigationResponse = await this.pageNavigator.navigate(this.requestUrl, this.page);
+            this.setLastNavigationResponse('load', navigationResponse);
+        }
+    }
+
+    private async preloadWithAuth(): Promise<void> {
+        this.authenticated = false;
+
+        let navigationResponse = await this.pageNavigator.navigatePageOperation(this.requestUrl, this.page);
+        if (navigationResponse.browserError !== undefined) {
+            this.setLastNavigationResponse('preload', navigationResponse);
+
+            return;
+        }
+
+        navigationResponse = await this.resourceAuthenticator.authenticate(this.page);
+        if (navigationResponse !== undefined) {
+            if (navigationResponse.browserError !== undefined) {
+                this.setLastNavigationResponse('auth', navigationResponse);
+            } else {
+                this.authenticated = true;
+            }
+
+            return;
         }
     }
 
@@ -212,19 +249,13 @@ export class Page {
      */
     private async hardReload(): Promise<void> {
         await this.reopenBrowser();
-        await this.navigateToUrl(this.requestUrl);
+        await this.navigate(this.requestUrl, this.lastPageNavigationOptions);
     }
 
     private async softReload(): Promise<void> {
         this.lastBrowserError = undefined;
-        const navigationResponse = await this.pageNavigator.reload(this.page, async (browserError) => {
-            this.logger?.logError('Page reload error', { browserError: System.serializeError(browserError) });
-            this.lastBrowserError = browserError;
-        });
-
-        this.lastNavigationResponse = navigationResponse?.httpResponse;
-        this.pageNavigationTiming = navigationResponse?.pageNavigationTiming;
-        this.logPageNavigationTiming('reload');
+        const navigationResponse = await this.pageNavigator.reload(this.page);
+        this.setLastNavigationResponse('reload', navigationResponse);
     }
 
     private async reopenBrowser(): Promise<void> {
@@ -293,6 +324,13 @@ export class Page {
         }
     }
 
+    private setLastNavigationResponse(operation: 'load' | 'reload' | 'preload' | 'auth', navigationResponse: NavigationResponse): void {
+        this.lastNavigationResponse = navigationResponse?.httpResponse;
+        this.pageNavigationTiming = navigationResponse?.pageNavigationTiming;
+        this.lastBrowserError = navigationResponse?.browserError;
+        this.logPageNavigationTiming(operation);
+    }
+
     public async scanForA11yIssues(contentSourcePath?: string): Promise<AxeScanResults> {
         return this.runIfNavigationSucceeded(async () => this.scanPageForIssues(contentSourcePath));
     }
@@ -305,7 +343,7 @@ export class Page {
         }
 
         if (!this.isOpen()) {
-            throw new Error('Page is not ready. Call create() and navigateToUrl() before scan.');
+            throw new Error('Page is not ready. Call create() and navigate() before scan.');
         }
 
         return action();
