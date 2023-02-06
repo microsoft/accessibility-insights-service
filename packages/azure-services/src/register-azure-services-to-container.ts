@@ -178,11 +178,15 @@ function setupSingletonStorageCredential(container: Container): void {
 
 function setupAzureAuthClientCredential(container: Container): void {
     IoC.setupSingletonProvider(iocTypeNames.AzureAuthClientCredentialProvider, container, async (context) => {
-        const secretProvider = context.container.get(SecretProvider);
-        const name = await secretProvider.getSecret(secretNames.azureAuthClientName);
-        const password = await secretProvider.getSecret(secretNames.azureAuthClientPassword);
+        if (!isEmpty(process.env.AZURE_AUTH_CLIENT_NAME) && !isEmpty(process.env.AZURE_AUTH_CLIENT_PASSWORD)) {
+            return { name: process.env.AZURE_AUTH_CLIENT_NAME, password: process.env.AZURE_AUTH_CLIENT_PASSWORD };
+        } else {
+            const secretProvider = context.container.get(SecretProvider);
+            const name = await secretProvider.getSecret(secretNames.azureAuthClientName);
+            const password = await secretProvider.getSecret(secretNames.azureAuthClientPassword);
 
-        return { name, password };
+            return { name, password };
+        }
     });
 }
 

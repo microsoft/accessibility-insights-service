@@ -24,7 +24,7 @@ describe(LoginPageDetector, () => {
     it('should return MicrosoftAzure client type', () => {
         puppeteerPageMock
             .setup((o) => o.url())
-            .returns(() => 'https://login.microsoftonline.com/12345-67890/oauth2/authorize?client_id=1')
+            .returns(() => 'https://login.MicrosoftOnline.com/12345-67890/oauth2/authorize?client_id=1')
             .verifiable();
 
         expect(loginPageDetector.getLoginPageType(puppeteerPageMock.object)).toEqual('MicrosoftAzure');

@@ -44,7 +44,7 @@ export class AzureLoginPageClient implements LoginPageClient {
         // Click Next button
         let responses = await Promise.all([this.pageNavigator.waitForNavigation(page), page.keyboard.press('Enter')]);
         let navigationResponse = responses[0];
-        if (navigationResponse.browserError) {
+        if (navigationResponse.browserError !== undefined) {
             return this.getErrorResponse(navigationResponse, page, '#usernameError');
         }
 
@@ -79,14 +79,14 @@ export class AzureLoginPageClient implements LoginPageClient {
         // Submit account credentials for authentication
         responses = await Promise.all([this.pageNavigator.waitForNavigation(page), page.keyboard.press('Enter')]);
         navigationResponse = responses[0];
-        if (navigationResponse.browserError) {
+        if (navigationResponse.browserError !== undefined) {
             return this.getErrorResponse(navigationResponse, page, '#errorTextOption');
         }
 
         // Validate multi-factor authentication prompt
         const smartcardPrompt = await this.getElementContent('#CertificateAuthentication', page);
         const phonePrompt = await this.getElementContent('#WindowsAzureMultiFactorAuthentication', page);
-        if (smartcardPrompt || phonePrompt) {
+        if (smartcardPrompt !== undefined || phonePrompt !== undefined) {
             const message = 'Multi-factor authentication user prompt is detected.';
 
             return {
@@ -102,7 +102,10 @@ export class AzureLoginPageClient implements LoginPageClient {
         // eslint-disable-next-line max-len
         // https://learn.microsoft.com/en-us/azure/active-directory/fundamentals/active-directory-users-profile-azure-portal#learn-about-the-stay-signed-in-prompt
         try {
-            await Promise.all([this.pageNavigator.waitForNavigation(page), page.keyboard.press('Enter')]);
+            const acceptPrompt = await this.getElementContent('#idSIButton9', page);
+            if (acceptPrompt !== undefined) {
+                await Promise.all([this.pageNavigator.waitForNavigation(page), page.keyboard.press('Enter')]);
+            }
         } catch (error) {
             if (error.name !== 'TimeoutError') {
                 return {

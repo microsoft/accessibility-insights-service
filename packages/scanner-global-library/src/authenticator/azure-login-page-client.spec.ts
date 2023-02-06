@@ -52,11 +52,20 @@ describe(AzureLoginPageClient, () => {
         setupEnterAccountPassword();
         setupSubmitForAuthentication(authNavigationResponse);
         setupValidateMfaPrompt();
+        setupKMSIPrompt();
 
         const navigationResponse = await azureLoginPageClient.login(puppeteerPageMock.object);
         expect(navigationResponse).toEqual(authNavigationResponse);
     });
 });
+
+function setupKMSIPrompt(): void {
+    setupGetElementContent('#idSIButton9', '');
+    puppeteerKeyboardMock
+        .setup((o) => o.press('Enter'))
+        .returns(() => Promise.resolve())
+        .verifiable(Times.atLeast(3));
+}
 
 function setupValidateMfaPrompt(): void {
     setupGetElementContent('#CertificateAuthentication');
@@ -116,9 +125,9 @@ function setupPageWaitForSelector(selector: string): void {
         .verifiable();
 }
 
-function setupGetElementContent(errorMessageSelector: string): void {
+function setupGetElementContent(errorMessageSelector: string, content?: string): void {
     puppeteerPageMock
         .setup((o) => o.$eval(errorMessageSelector, It.isAny()))
-        .returns(() => Promise.resolve(undefined))
+        .returns(() => Promise.resolve(content))
         .verifiable(Times.atLeast(1));
 }

@@ -5,6 +5,7 @@ import 'reflect-metadata';
 
 import { IMock, Mock } from 'typemoq';
 import * as Puppeteer from 'puppeteer';
+import { GlobalLogger } from 'logger';
 import { NavigationResponse } from '../page-navigator';
 import { ResourceAuthenticator } from './resource-authenticator';
 import { LoginPageDetector } from './login-page-detector';
@@ -15,6 +16,7 @@ let loginPageDetectorMock: IMock<LoginPageDetector>;
 let loginPageClientFactoryMock: IMock<LoginPageClientFactory>;
 let puppeteerPageMock: IMock<Puppeteer.Page>;
 let loginPageClientMock: IMock<LoginPageClient>;
+let loggerMock: IMock<GlobalLogger>;
 let resourceAuthenticator: ResourceAuthenticator;
 
 describe(ResourceAuthenticator, () => {
@@ -23,7 +25,12 @@ describe(ResourceAuthenticator, () => {
         loginPageDetectorMock = Mock.ofType<LoginPageDetector>();
         loginPageClientFactoryMock = Mock.ofType<LoginPageClientFactory>();
         puppeteerPageMock = Mock.ofType<Puppeteer.Page>();
-        resourceAuthenticator = new ResourceAuthenticator(loginPageDetectorMock.object, loginPageClientFactoryMock.object);
+        loggerMock = Mock.ofType<GlobalLogger>();
+        resourceAuthenticator = new ResourceAuthenticator(
+            loginPageDetectorMock.object,
+            loginPageClientFactoryMock.object,
+            loggerMock.object,
+        );
     });
 
     afterEach(() => {
@@ -31,6 +38,7 @@ describe(ResourceAuthenticator, () => {
         loginPageClientFactoryMock.verifyAll();
         puppeteerPageMock.verifyAll();
         loginPageClientMock.verifyAll();
+        loggerMock.verifyAll();
     });
 
     it('should authenticate resource', async () => {
