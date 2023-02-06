@@ -14,4 +14,5 @@ export interface OnDemandPageScanRequest extends StorageDocument {
     scanNotifyUrl?: string;
     deepScan?: boolean;
     privacyScan?: PrivacyScan;
+    authenticationType?: string;
 }

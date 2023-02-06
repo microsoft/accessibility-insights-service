@@ -37,4 +37,5 @@ export interface ScanRunBatchRequest {
     scanNotifyUrl?: string;
     deepScan?: boolean;
     privacyScan?: PrivacyScan;
+    authenticationType?: string;
 }

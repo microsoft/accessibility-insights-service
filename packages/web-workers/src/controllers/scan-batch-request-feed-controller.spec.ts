@@ -261,6 +261,7 @@ function setupOnDemandPageScanRunResultProviderMock(
                     id: request.scanId,
                     url: request.url,
                     priority: request.priority,
+                    authenticationType: request.authenticationType,
                     itemType: ItemType.onDemandPageScanRunResult,
                     partitionKey: `pk-${request.scanId}`,
                     run: {
@@ -295,6 +296,7 @@ function setupPageScanRequestProviderMock(documents: OnDemandPageScanBatchReques
                     id: scanRequest.scanId,
                     url: scanRequest.url,
                     priority: scanRequest.priority,
+                    authenticationType: scanRequest.authenticationType,
                     itemType: ItemType.onDemandPageScanRequest,
                     partitionKey: PartitionKey.pageScanRequestDocuments,
                     deepScan: scanRequest.deepScan,

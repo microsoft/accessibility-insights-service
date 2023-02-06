@@ -110,6 +110,7 @@ export class ScanBatchRequestFeedController extends WebController {
                 id: request.scanId,
                 url: request.url,
                 priority: request.priority,
+                authenticationType: request.authenticationType,
                 itemType: ItemType.onDemandPageScanRunResult,
                 partitionKey: this.partitionKeyFactory.createPartitionKeyForDocument(ItemType.onDemandPageScanRunResult, request.scanId),
                 run: {
@@ -181,6 +182,7 @@ export class ScanBatchRequestFeedController extends WebController {
                 url: request.url,
                 priority: request.priority,
                 deepScan: request.deepScan,
+                authenticationType: request.authenticationType,
                 itemType: ItemType.onDemandPageScanRequest,
                 partitionKey: PartitionKey.pageScanRequestDocuments,
                 ...scanNotifyUrl,
