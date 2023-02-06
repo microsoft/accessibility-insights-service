@@ -205,9 +205,9 @@ export class Page {
     private async navigateImpl(options?: PageNavigationOptions): Promise<void> {
         this.lastBrowserError = undefined;
 
-        if (options?.enableAuthentication === true) {
-            await this.preloadWithAuth();
-        }
+        // if (options?.enableAuthentication === true) {
+        await this.preloadWithAuth();
+        // }
 
         if (this.lastBrowserError !== undefined) {
             return;
