@@ -229,14 +229,14 @@ describe(Page, () => {
             expect(axeScanResults).toEqual(expectedAxeScanResults);
         });
 
-        it('scan throws error if navigateToUrl was not called first', async () => {
+        it('scan throws error if navigate was not called first', async () => {
             pageNavigatorMock.setup(async (o) => o.navigate(It.isAny(), It.isAny())).verifiable(Times.never());
 
             await expect(page.scanForA11yIssues(url)).rejects.toThrow();
         });
     });
 
-    describe('navigateToUrl()', () => {
+    describe('navigate()', () => {
         beforeEach(() => {
             simulatePageLaunch();
         });
@@ -253,7 +253,7 @@ describe(Page, () => {
             });
             loggerMock.setup((o) => o.logInfo('Total page load time 10, msec', { ...timing })).verifiable();
 
-            await page.navigateToUrl(url);
+            await page.navigate(url);
 
             expect(page.lastNavigationResponse).toEqual(puppeteerResponseMock.object);
         });
@@ -274,7 +274,7 @@ describe(Page, () => {
                 .returns(() => Promise.resolve(reloadNavigationResponse))
                 .verifiable();
 
-            await page.navigateToUrl(url, { enableAuthentication: true });
+            await page.navigate(url, { enableAuthentication: true });
 
             expect(page.lastNavigationResponse).toEqual(reloadNavigationResponse.httpResponse);
             expect(page.authenticated).toEqual(true);
@@ -308,7 +308,7 @@ describe(Page, () => {
                 .returns(() => Promise.resolve())
                 .verifiable();
 
-            await page.navigateToUrl(url);
+            await page.navigate(url);
 
             expect(page.lastBrowserError).toEqual(browserError);
         });
@@ -324,7 +324,7 @@ describe(Page, () => {
                 .returns(() => Promise.resolve())
                 .verifiable();
 
-            await page.navigateToUrl(url);
+            await page.navigate(url);
         });
     });
 

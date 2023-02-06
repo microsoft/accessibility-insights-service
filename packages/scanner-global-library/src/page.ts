@@ -96,7 +96,7 @@ export class Page {
         this.page = await this.browser.newPage();
     }
 
-    public async navigateToUrl(url: string, options?: PageNavigationOptions): Promise<void> {
+    public async navigate(url: string, options?: PageNavigationOptions): Promise<void> {
         this.requestUrl = url;
         this.lastPageNavigationOptions = options;
 
@@ -249,7 +249,7 @@ export class Page {
      */
     private async hardReload(): Promise<void> {
         await this.reopenBrowser();
-        await this.navigateToUrl(this.requestUrl, this.lastPageNavigationOptions);
+        await this.navigate(this.requestUrl, this.lastPageNavigationOptions);
     }
 
     private async softReload(): Promise<void> {
@@ -343,7 +343,7 @@ export class Page {
         }
 
         if (!this.isOpen()) {
-            throw new Error('Page is not ready. Call create() and navigateToUrl() before scan.');
+            throw new Error('Page is not ready. Call create() and navigate() before scan.');
         }
 
         return action();
