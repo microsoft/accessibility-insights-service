@@ -23,7 +23,7 @@ export class PageScanProcessor {
     public async scan(runnerScanMetadata: RunnerScanMetadata, pageScanResult: OnDemandPageScanResult): Promise<AxeScanResults> {
         let axeScanResults: AxeScanResults;
         try {
-            await this.openPage(runnerScanMetadata.url);
+            await this.openPage(runnerScanMetadata.url, pageScanResult.authenticationType !== undefined);
             if (!isEmpty(this.page.lastBrowserError)) {
                 return { error: this.page.lastBrowserError, pageResponseCode: this.page.lastBrowserError.statusCode };
             }
@@ -57,9 +57,9 @@ export class PageScanProcessor {
         };
     }
 
-    private async openPage(url: string): Promise<void> {
+    private async openPage(url: string, enableAuthentication: boolean): Promise<void> {
         await this.page.create();
-        await this.page.navigate(url);
+        await this.page.navigate(url, { enableAuthentication });
     }
 
     private async closePage(): Promise<void> {

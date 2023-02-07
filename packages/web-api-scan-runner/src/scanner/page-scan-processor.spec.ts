@@ -21,9 +21,9 @@ describe(PageScanProcessor, () => {
     let puppeteerPageMock: IMock<Puppeteer.Page>;
     let testSubject: PageScanProcessor;
     let axeScanResults: AxeScanResults;
+    let pageScanResult: OnDemandPageScanResult;
 
     const url = 'url';
-    const pageScanResult = { id: 'id' } as OnDemandPageScanResult;
     const pageScreenshot = 'page screenshot';
     const pageSnapshot = 'page snapshot';
 
@@ -34,6 +34,8 @@ describe(PageScanProcessor, () => {
         deepScannerMock = Mock.ofType<DeepScanner>();
         puppeteerPageMock = Mock.ofType<Puppeteer.Page>();
         axeScanResults = { scannedUrl: url } as AxeScanResults;
+        pageScanResult = { id: 'id' } as OnDemandPageScanResult;
+
         pageMock
             .setup((o) => o.getPageScreenshot())
             .returns(() => Promise.resolve(pageScreenshot))
@@ -69,6 +71,30 @@ describe(PageScanProcessor, () => {
             .returns(() => Promise.resolve(axeScanResults))
             .verifiable();
         deepScannerMock.setup((d) => d.runDeepScan(It.isAny(), It.isAny(), It.isAny())).verifiable(Times.never());
+
+        const results = await testSubject.scan(scanMetadata, pageScanResult);
+
+        expect(results).toEqual(axeScanResults);
+    });
+
+    it('scan with authentication enabled', async () => {
+        const scanMetadata = {
+            url: url,
+            id: 'id',
+        };
+        axeScanResults = { ...axeScanResults, pageScreenshot, pageSnapshot };
+
+        setupOpenPage(true);
+        setupClosePage();
+        axeScannerMock
+            .setup((s) => s.scan(pageMock.object))
+            .returns(() => Promise.resolve(axeScanResults))
+            .verifiable();
+        deepScannerMock.setup((d) => d.runDeepScan(It.isAny(), It.isAny(), It.isAny())).verifiable(Times.never());
+        pageScanResult = {
+            ...pageScanResult,
+            authenticationType: '',
+        };
 
         const results = await testSubject.scan(scanMetadata, pageScanResult);
 
@@ -181,9 +207,9 @@ describe(PageScanProcessor, () => {
         await testSubject.scan(scanMetadata, pageScanResult);
     });
 
-    function setupOpenPage(): void {
+    function setupOpenPage(enableAuthentication: boolean = false): void {
         pageMock.setup((p) => p.create()).verifiable();
-        pageMock.setup((p) => p.navigate(url)).verifiable();
+        pageMock.setup((p) => p.navigate(url, { enableAuthentication })).verifiable();
     }
 
     function setupClosePage(): void {
