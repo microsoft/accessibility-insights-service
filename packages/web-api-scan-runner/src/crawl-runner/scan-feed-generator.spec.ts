@@ -165,6 +165,7 @@ function createScanRequests(urls: string[]): ScanRunBatchRequest[] {
                     consolidatedId: websiteScanResult.scanGroupId,
                 },
             ],
+            ...(pageScanResult.authenticationType === undefined ? {} : { authenticationType: pageScanResult.authenticationType }),
         } as ScanRunBatchRequest;
     });
 }
