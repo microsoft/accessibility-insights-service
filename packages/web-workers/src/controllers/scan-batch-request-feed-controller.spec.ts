@@ -261,7 +261,6 @@ function setupOnDemandPageScanRunResultProviderMock(
                     id: request.scanId,
                     url: request.url,
                     priority: request.priority,
-                    authenticationType: request.authenticationType,
                     itemType: ItemType.onDemandPageScanRunResult,
                     partitionKey: `pk-${request.scanId}`,
                     run: {
@@ -279,6 +278,7 @@ function setupOnDemandPageScanRunResultProviderMock(
                           }),
                     websiteScanRefs: websiteScanRefs.length > 0 ? websiteScanRefs : undefined,
                     ...(request.privacyScan === undefined ? {} : { privacyScan: request.privacyScan }),
+                    ...(request.authenticationType === undefined ? {} : { authenticationType: request.authenticationType }),
                 };
 
                 return result;
@@ -296,10 +296,10 @@ function setupPageScanRequestProviderMock(documents: OnDemandPageScanBatchReques
                     id: scanRequest.scanId,
                     url: scanRequest.url,
                     priority: scanRequest.priority,
-                    authenticationType: scanRequest.authenticationType,
                     itemType: ItemType.onDemandPageScanRequest,
                     partitionKey: PartitionKey.pageScanRequestDocuments,
                     deepScan: scanRequest.deepScan,
+                    ...(scanRequest.authenticationType === undefined ? {} : { authenticationType: scanRequest.authenticationType }),
                 };
 
                 if (!isNil(scanRequest.scanNotifyUrl)) {

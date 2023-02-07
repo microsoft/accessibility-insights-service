@@ -21,6 +21,7 @@ export interface ScanRunRequest {
      * Privacy scan request takes precedence over accessibility scan request
      */
     privacyScan?: PrivacyScan;
+    authenticationType?: string;
 }
 
 export interface Website {

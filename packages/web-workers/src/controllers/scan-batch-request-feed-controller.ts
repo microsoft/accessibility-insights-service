@@ -110,7 +110,6 @@ export class ScanBatchRequestFeedController extends WebController {
                 id: request.scanId,
                 url: request.url,
                 priority: request.priority,
-                authenticationType: request.authenticationType,
                 itemType: ItemType.onDemandPageScanRunResult,
                 partitionKey: this.partitionKeyFactory.createPartitionKeyForDocument(ItemType.onDemandPageScanRunResult, request.scanId),
                 run: {
@@ -128,6 +127,7 @@ export class ScanBatchRequestFeedController extends WebController {
                       }),
                 websiteScanRefs: websiteScanRefs ? [websiteScanRefs] : undefined,
                 ...(request.privacyScan === undefined ? {} : { privacyScan: request.privacyScan }),
+                ...(request.authenticationType === undefined ? {} : { authenticationType: request.authenticationType }),
             };
         });
 
@@ -182,13 +182,13 @@ export class ScanBatchRequestFeedController extends WebController {
                 url: request.url,
                 priority: request.priority,
                 deepScan: request.deepScan,
-                authenticationType: request.authenticationType,
                 itemType: ItemType.onDemandPageScanRequest,
                 partitionKey: PartitionKey.pageScanRequestDocuments,
                 ...scanNotifyUrl,
                 ...(isEmpty(request.site) ? {} : { site: request.site }),
                 ...(isEmpty(request.reportGroups) ? {} : { reportGroups: request.reportGroups }),
                 ...(request.privacyScan === undefined ? {} : { privacyScan: request.privacyScan }),
+                ...(request.authenticationType === undefined ? {} : { authenticationType: request.authenticationType }),
             };
         });
 
