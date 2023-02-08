@@ -23,7 +23,8 @@
         "**/packages",
         "**/.DS_Store",
         ".yarn/",
-        ".yarnrc.yml"
+        ".yarnrc.yml",
+        "**/*.patch"
     ],
     "license": "./copyright-header.txt",
     "licenseFormats": {
