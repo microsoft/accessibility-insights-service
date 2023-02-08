@@ -178,7 +178,7 @@ describe(PageNetworkTracer, () => {
 });
 
 function setupRequest(): void {
-    const requestHeaders: Record<string, string> = { 'x-request-name': 'x-request-value' };
+    const requestHeaders: Record<string, string> = { 'x-request-name': 'x-request-value', authorization: 'should-be-removed' };
     const responseHeaders: Record<string, string> = { 'x-response-name': 'x-response-value' };
     const timing = {
         receiveHeadersEnd: 7,

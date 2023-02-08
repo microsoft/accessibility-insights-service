@@ -59,7 +59,7 @@ export class PageScanProcessor {
 
     private async openPage(url: string): Promise<void> {
         await this.page.create();
-        await this.page.navigateToUrl(url);
+        await this.page.navigate(url);
     }
 
     private async closePage(): Promise<void> {

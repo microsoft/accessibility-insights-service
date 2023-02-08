@@ -183,7 +183,7 @@ describe(PageScanProcessor, () => {
 
     function setupOpenPage(): void {
         pageMock.setup((p) => p.create()).verifiable();
-        pageMock.setup((p) => p.navigateToUrl(url)).verifiable();
+        pageMock.setup((p) => p.navigate(url)).verifiable();
     }
 
     function setupClosePage(): void {

@@ -12,7 +12,8 @@ export type BrowserErrorTypes =
     | 'InvalidContentType'
     | 'UrlNotResolved'
     | 'ScanTimeout'
-    | 'BannerXPathNotDetected';
+    | 'BannerXPathNotDetected'
+    | 'AuthenticationError';
 
 export interface BrowserError {
     errorType: BrowserErrorTypes;

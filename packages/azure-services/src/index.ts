@@ -31,3 +31,4 @@ export * from './azure-batch/job-task';
 export { BatchServiceClientProvider } from './ioc-types';
 export { ApplicationInsightsClient } from './app-insights-api-client/application-insights-client';
 export * from './app-insights-api-client/query-response';
+export { ServicePrincipalCredential } from './credentials/service-principal-credential';

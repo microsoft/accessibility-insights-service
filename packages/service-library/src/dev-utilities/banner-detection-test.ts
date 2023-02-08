@@ -51,7 +51,7 @@ const pageNavigator = new PageNavigator(
 const privacyScenarioRunner = new PrivacyScenarioRunner(serviceConfig, new CookieCollector(), new IpGeolocationProvider(), logger);
 const privacyScannerCore = new PrivacyScannerCore(privacyScenarioRunner, logger);
 const pageNetworkTracer = new PageNetworkTracer(logger);
-const page = new Page(webDriver, undefined, pageNavigator, pageNetworkTracer, logger);
+const page = new Page(webDriver, pageNavigator, pageNetworkTracer, undefined, logger);
 
 function getArguments(): BannerDetectionTestArgs {
     yargs.option<keyof BannerDetectionTestArgs, yargs.Options>('urlsListPath', {
@@ -112,7 +112,7 @@ async function scanAllUrls(urls: string[]): Promise<BannerDetectionResults> {
     // Process urls sequentially because opening all URLs in parallel can affect load times
     // and prevent the banner from being detected
     for (const url of urls) {
-        await page.navigateToUrl(url);
+        await page.navigate(url);
         const privacyScanResult = await privacyScannerCore.scan(url, page);
 
         if (privacyScanResult.error !== undefined || privacyScanResult.results === undefined) {

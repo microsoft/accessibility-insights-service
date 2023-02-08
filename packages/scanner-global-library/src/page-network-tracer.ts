@@ -60,11 +60,12 @@ export class PageNetworkTracer {
             try {
                 const response = request.response();
                 const serverResponseTiming = response.timing()?.receiveHeadersEnd - response.timing()?.sendStart;
+                const requestHeaders = this.sanitizeHeaders(request.headers());
                 const data = {
                     status: 'completed',
                     url: request.url(),
                     httpStatus: `${response.status()} ${response.statusText()}`,
-                    requestHeaders: request.headers(),
+                    requestHeaders: requestHeaders,
                     responseHeaders: response.headers(),
                     serverResponseTiming,
                 };
@@ -95,11 +96,12 @@ export class PageNetworkTracer {
             try {
                 const response = request.response();
                 const serverResponseTiming = response?.timing()?.receiveHeadersEnd - response?.timing()?.sendStart;
+                const requestHeaders = this.sanitizeHeaders(request.headers());
                 const data = {
                     status: 'failed',
                     url: request.url(),
                     httpStatus: `${response?.status()} ${response?.statusText()}`,
-                    requestHeaders: request.headers(),
+                    requestHeaders: requestHeaders,
                     responseHeaders: response?.headers(),
                     serverResponseTiming,
                 };
@@ -161,5 +163,16 @@ export class PageNetworkTracer {
             lastSequenceNumber: 0,
             requests: [],
         };
+    }
+
+    private sanitizeHeaders(headers: Record<string, string>): Record<string, string> {
+        const list: Record<string, string> = {};
+        Object.keys(headers).forEach((key) => {
+            if (key !== 'authorization') {
+                list[key] = headers[key];
+            }
+        });
+
+        return list;
     }
 }

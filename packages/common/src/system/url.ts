@@ -34,4 +34,11 @@ export namespace Url {
     export function normalizeUrl(url: string): string {
         return normalizeUrlExt.default(url, { stripHash: true, removeQueryParameters: false });
     }
+
+    export function getParameterValue(name: string, url: string): string {
+        const urlObj = new nodeUrl.URL(url);
+        const value = urlObj.searchParams.get(name);
+
+        return value ?? undefined;
+    }
 }

@@ -35,7 +35,9 @@ export declare type ScanErrorTypes =
     | 'UrlNotResolved'
     | 'ScanTimeout'
     | 'InternalError'
-    | 'BannerXPathNotDetected';
+    | 'BannerXPathNotDetected'
+    | 'AuthenticationError';
+
 export interface ScanError {
     errorType: ScanErrorTypes;
     message: string;

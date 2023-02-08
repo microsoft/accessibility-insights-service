@@ -126,7 +126,7 @@ describe(PageNavigator, () => {
             });
             pageNavigator.navigatePage = navigatePageFn;
 
-            const actualNavigationResponse = await pageNavigator.reload(puppeteerPageMock.object, undefined);
+            const actualNavigationResponse = await pageNavigator.reload(puppeteerPageMock.object);
 
             const expectedNavigationResponse = {
                 httpResponse: pageOperationResult.response,
@@ -143,17 +143,15 @@ describe(PageNavigator, () => {
             pageOperationResult = {
                 response: undefined,
                 error: new Error(),
-                browserError: {} as BrowserError,
+                browserError: { message: 'browserError' } as BrowserError,
             };
             const navigatePageFn = jest.fn().mockImplementation(() => Promise.resolve(pageOperationResult));
             pageNavigator.navigatePage = navigatePageFn;
-            const onNavigationErrorFn = jest.fn().mockImplementation(async () => Promise.resolve());
 
-            const actualNavigationResponse = await pageNavigator.reload(puppeteerPageMock.object, onNavigationErrorFn);
+            const actualNavigationResponse = await pageNavigator.reload(puppeteerPageMock.object);
 
             expect(navigatePageFn).toBeCalledWith(expect.any(Function), puppeteerPageMock.object);
-            expect(onNavigationErrorFn).toHaveBeenCalledWith(pageOperationResult.browserError, pageOperationResult.error);
-            expect(actualNavigationResponse).toEqual(undefined);
+            expect(actualNavigationResponse).toEqual({ browserError: { message: 'browserError' } });
         });
     });
 
@@ -189,7 +187,7 @@ describe(PageNavigator, () => {
             });
             pageNavigator.navigatePage = navigatePageFn;
 
-            const actualNavigationResponse = await pageNavigator.navigate(url, puppeteerPageMock.object, undefined);
+            const actualNavigationResponse = await pageNavigator.navigate(url, puppeteerPageMock.object);
 
             const expectedNavigationResponse = {
                 httpResponse: pageOperationResult.response,
@@ -206,7 +204,7 @@ describe(PageNavigator, () => {
             pageOperationResult = {
                 response: undefined,
                 error: new Error(),
-                browserError: {} as BrowserError,
+                browserError: { message: 'browserError' } as BrowserError,
             };
             pageNavigationHooksMock
                 .setup((o) => o.preNavigation(puppeteerPageMock.object))
@@ -214,13 +212,11 @@ describe(PageNavigator, () => {
                 .verifiable();
             const navigatePageFn = jest.fn().mockImplementation(() => Promise.resolve(pageOperationResult));
             pageNavigator.navigatePage = navigatePageFn;
-            const onNavigationErrorFn = jest.fn().mockImplementation(async () => Promise.resolve());
 
-            const actualNavigationResponse = await pageNavigator.navigate(url, puppeteerPageMock.object, onNavigationErrorFn);
+            const actualNavigationResponse = await pageNavigator.navigate(url, puppeteerPageMock.object);
 
             expect(navigatePageFn).toBeCalledWith(expect.any(Function), puppeteerPageMock.object);
-            expect(onNavigationErrorFn).toHaveBeenCalledWith(pageOperationResult.browserError, pageOperationResult.error);
-            expect(actualNavigationResponse).toEqual(undefined);
+            expect(actualNavigationResponse).toEqual({ browserError: { message: 'browserError' } });
         });
     });
 
@@ -327,7 +323,7 @@ describe(PageNavigator, () => {
             });
             pageNavigator.navigatePage = navigatePageFn;
 
-            const actualNavigationResponse = await pageNavigator.navigate(url, puppeteerPageMock.object, undefined);
+            const actualNavigationResponse = await pageNavigator.navigate(url, puppeteerPageMock.object);
 
             const expectedNavigationResponse = {
                 httpResponse: pageOperationResult.response,

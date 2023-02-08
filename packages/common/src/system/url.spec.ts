@@ -53,4 +53,12 @@ describe('tryParseUrlString()', () => {
         url = Url.normalizeUrl('https://example.com?b=two&a=one&c=three');
         expect(url).toEqual('https://example.com/?a=one&b=two&c=three');
     });
+
+    it('getParameterValue', () => {
+        let parameterValue = Url.getParameterValue('a', 'https://example.com?b=two&a=one&c=three');
+        expect(parameterValue).toEqual('one');
+
+        parameterValue = Url.getParameterValue('none', 'https://example.com?b=two&a=one&c=three');
+        expect(parameterValue).toBeUndefined();
+    });
 });

@@ -4,26 +4,24 @@
 import 'reflect-metadata';
 
 import { AxePuppeteer } from '@axe-core/puppeteer';
-import { AxeResults } from 'axe-core';
 import Puppeteer, { HTTPResponse, ScreenshotOptions } from 'puppeteer';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { System } from 'common';
-import { AxeScanResults } from './axe-scan-results';
+import { GlobalLogger } from 'logger';
+import { AxeScanResults } from './axe-scanner/axe-scan-results';
 import { BrowserError } from './browser-error';
-import { AxePuppeteerFactory } from './factories/axe-puppeteer-factory';
 import { Page } from './page';
-import { MockableLogger } from './test-utilities/mockable-logger';
 import { getPromisableDynamicMock } from './test-utilities/promisable-mock';
 import { WebDriver } from './web-driver';
 import { PageNavigator, NavigationResponse } from './page-navigator';
 import { PageNavigationTiming } from './page-timeout-config';
 import { scrollToTop } from './page-client-lib';
 import { PageNetworkTracer } from './page-network-tracer';
+import { ResourceAuthenticator } from './authenticator/resource-authenticator';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 const url = 'url';
-const redirectUrl = 'redirect url';
 const userAgent = 'user agent';
 const browserResolution = '1920x1080';
 const pageNavigationTiming: PageNavigationTiming = {
@@ -39,14 +37,12 @@ const pageNavigationTiming: PageNavigationTiming = {
 };
 
 let scrollToTopMock: typeof scrollToTop;
-let axeResults: AxeResults;
 let scanResults: AxeScanResults;
 let page: Page;
 let navigationResponse: NavigationResponse;
 let webDriverMock: IMock<WebDriver>;
-let axePuppeteerFactoryMock: IMock<AxePuppeteerFactory>;
 let pageNavigatorMock: IMock<PageNavigator>;
-let loggerMock: IMock<MockableLogger>;
+let loggerMock: IMock<GlobalLogger>;
 let browserMock: IMock<Puppeteer.Browser>;
 let puppeteerPageMock: IMock<Puppeteer.Page>;
 let puppeteerResponseMock: IMock<Puppeteer.HTTPResponse>;
@@ -54,6 +50,7 @@ let puppeteerRequestMock: IMock<Puppeteer.HTTPRequest>;
 let axePuppeteerMock: IMock<AxePuppeteer>;
 let cdpSessionMock: IMock<Puppeteer.CDPSession>;
 let pageNetworkTracerMock: IMock<PageNetworkTracer>;
+let resourceAuthenticatorMock: IMock<ResourceAuthenticator>;
 
 describe(Page, () => {
     beforeEach(() => {
@@ -65,10 +62,9 @@ describe(Page, () => {
             browserResolution,
         };
 
-        webDriverMock = Mock.ofType(WebDriver);
-        axePuppeteerFactoryMock = Mock.ofType(AxePuppeteerFactory);
+        webDriverMock = getPromisableDynamicMock(Mock.ofType<WebDriver>());
         pageNavigatorMock = Mock.ofType(PageNavigator);
-        loggerMock = Mock.ofType(MockableLogger);
+        loggerMock = Mock.ofType<GlobalLogger>();
         browserMock = getPromisableDynamicMock(Mock.ofType<Puppeteer.Browser>());
         puppeteerPageMock = getPromisableDynamicMock(Mock.ofType<Puppeteer.Page>());
         puppeteerResponseMock = getPromisableDynamicMock(Mock.ofType<Puppeteer.HTTPResponse>());
@@ -76,6 +72,7 @@ describe(Page, () => {
         axePuppeteerMock = getPromisableDynamicMock(Mock.ofType<AxePuppeteer>());
         cdpSessionMock = getPromisableDynamicMock(Mock.ofType<Puppeteer.CDPSession>());
         pageNetworkTracerMock = Mock.ofType<PageNetworkTracer>();
+        resourceAuthenticatorMock = Mock.ofType<ResourceAuthenticator>();
         scrollToTopMock = jest.fn().mockImplementation(() => Promise.resolve());
         navigationResponse = {
             httpResponse: puppeteerResponseMock.object,
@@ -93,9 +90,9 @@ describe(Page, () => {
 
         page = new Page(
             webDriverMock.object,
-            axePuppeteerFactoryMock.object,
             pageNavigatorMock.object,
             pageNetworkTracerMock.object,
+            resourceAuthenticatorMock.object,
             loggerMock.object,
             scrollToTopMock,
         );
@@ -103,142 +100,23 @@ describe(Page, () => {
 
     afterEach(() => {
         webDriverMock.verifyAll();
-        axePuppeteerFactoryMock.verifyAll();
         pageNavigatorMock.verifyAll();
         axePuppeteerMock.verifyAll();
         loggerMock.verifyAll();
         puppeteerRequestMock.verifyAll();
         cdpSessionMock.verifyAll();
         pageNetworkTracerMock.verifyAll();
+        resourceAuthenticatorMock.verifyAll();
     });
 
-    describe('scanForA11yIssues()', () => {
-        beforeEach(() => {
-            simulatePageLaunch();
-        });
-
-        it('scan page', async () => {
-            setupAxePuppeteerFactoryMock();
-            simulatePageNavigation(puppeteerResponseMock.object);
-            const expectedAxeScanResults = {
-                results: axeResults,
-                ...scanResults,
-            } as AxeScanResults;
-
-            const axeScanResults = await page.scanForA11yIssues();
-
-            expect(axeScanResults).toEqual(expectedAxeScanResults);
-        });
-
-        it('handles error thrown by scan engine', async () => {
-            const scanError = { name: 'Error', message: 'error message' } as Error;
-            const expectedResult = { error: `Axe core engine error. ${System.serializeError(scanError)}`, scannedUrl: url };
-
-            puppeteerPageMock.setup((p) => p.url()).returns(() => url);
-            setupAxePuppeteerFactoryMock();
-            axePuppeteerFactoryMock
-                .setup((o) => o.createAxePuppeteer(puppeteerPageMock.object, It.isAny(), true))
-                .returns(() => Promise.resolve(axePuppeteerMock.object))
-                .verifiable();
-            axePuppeteerMock.reset();
-            axePuppeteerMock = getPromisableDynamicMock(axePuppeteerMock);
-            axePuppeteerMock.setup((ap) => ap.analyze()).throws(scanError);
-            simulatePageNavigation(puppeteerResponseMock.object);
-
-            const axeScanResults = await page.scanForA11yIssues();
-
-            expect(axeScanResults).toEqual(expectedResult);
-        });
-
-        it('scan page without redirected flag on encoded URL', async () => {
-            const requestUrl = 'http://localhost/страница';
-            const encodedRequestUrl = encodeURI(requestUrl);
-
-            setupAxePuppeteerFactoryMock(encodedRequestUrl);
-            simulatePageNavigation(puppeteerResponseMock.object);
-            const expectedAxeScanResults = {
-                results: { url: encodedRequestUrl },
-                ...scanResults,
-                scannedUrl: undefined, // redirected flag
-            } as AxeScanResults;
-            page.requestUrl = requestUrl;
-
-            const axeScanResults = await page.scanForA11yIssues();
-
-            expect(axeScanResults).toEqual(expectedAxeScanResults);
-        });
-
-        it('scan page with navigation error', async () => {
-            const browserError = { errorType: 'SslError', statusCode: 500 } as BrowserError;
-            simulatePageNavigation(undefined, browserError);
-            const expectedAxeScanResults = {
-                error: browserError,
-                pageResponseCode: browserError.statusCode,
-            } as AxeScanResults;
-
-            const axeScanResults = await page.scanForA11yIssues();
-
-            expect(axeScanResults).toEqual(expectedAxeScanResults);
-        });
-
-        it('scan page with redirect', async () => {
-            setupAxePuppeteerFactoryMock();
-
-            puppeteerRequestMock.reset();
-            puppeteerRequestMock
-                .setup((o) => o.redirectChain())
-                .returns(() => [{}] as Puppeteer.HTTPRequest[])
-                .verifiable();
-            simulatePageNavigation(puppeteerResponseMock.object);
-            const expectedAxeScanResults = {
-                results: axeResults,
-                scannedUrl: axeResults.url,
-                ...scanResults,
-            } as AxeScanResults;
-            loggerMock.setup((o) => o.logWarn(`Scanning performed on redirected page`, { redirectedUrl: axeResults.url })).verifiable();
-
-            const axeScanResults = await page.scanForA11yIssues();
-
-            expect(axeScanResults).toEqual(expectedAxeScanResults);
-        });
-
-        it('scan page with redirect but no response chain', async () => {
-            setupAxePuppeteerFactoryMock();
-
-            puppeteerRequestMock.reset();
-            puppeteerRequestMock
-                .setup((o) => o.redirectChain())
-                .returns(() => [] as Puppeteer.HTTPRequest[])
-                .verifiable();
-            simulatePageNavigation(puppeteerResponseMock.object);
-            const expectedAxeScanResults = {
-                results: axeResults,
-                scannedUrl: axeResults.url,
-                ...scanResults,
-            } as AxeScanResults;
-            loggerMock.setup((o) => o.logWarn(`Scanning performed on redirected page`, { redirectedUrl: axeResults.url })).verifiable();
-            page.requestUrl = 'request page';
-
-            const axeScanResults = await page.scanForA11yIssues();
-
-            expect(axeScanResults).toEqual(expectedAxeScanResults);
-        });
-
-        it('scan throws error if navigateToUrl was not called first', async () => {
-            pageNavigatorMock.setup(async (o) => o.navigate(It.isAny(), It.isAny(), It.isAny())).verifiable(Times.never());
-
-            await expect(page.scanForA11yIssues(url)).rejects.toThrow();
-        });
-    });
-
-    describe('navigateToUrl()', () => {
+    describe('navigate()', () => {
         beforeEach(() => {
             simulatePageLaunch();
         });
 
         it('navigates to page and saves response', async () => {
             pageNavigatorMock
-                .setup(async (o) => o.navigate(url, puppeteerPageMock.object, It.isAny()))
+                .setup(async (o) => o.navigate(url, puppeteerPageMock.object))
                 .returns(() => Promise.resolve(navigationResponse))
                 .verifiable();
 
@@ -248,23 +126,39 @@ describe(Page, () => {
             });
             loggerMock.setup((o) => o.logInfo('Total page load time 10, msec', { ...timing })).verifiable();
 
-            await page.navigateToUrl(url);
+            await page.navigate(url);
 
             expect(page.lastNavigationResponse).toEqual(puppeteerResponseMock.object);
+        });
+
+        it('navigates to page with authentication', async () => {
+            const authNavigationResponse = { httpResponse: { url: () => 'localhost/1' } } as NavigationResponse;
+            const reloadNavigationResponse = { httpResponse: { url: () => 'localhost/2' } } as NavigationResponse;
+            pageNavigatorMock
+                .setup((o) => o.navigatePageOperation(url, puppeteerPageMock.object))
+                .returns(() => Promise.resolve({} as NavigationResponse))
+                .verifiable();
+            resourceAuthenticatorMock
+                .setup((o) => o.authenticate(puppeteerPageMock.object))
+                .returns(() => Promise.resolve(authNavigationResponse))
+                .verifiable();
+            pageNavigatorMock
+                .setup(async (o) => o.reload(puppeteerPageMock.object))
+                .returns(() => Promise.resolve(reloadNavigationResponse))
+                .verifiable();
+
+            await page.navigate(url, { enableAuthentication: true });
+
+            expect(page.lastNavigationResponse).toEqual(reloadNavigationResponse.httpResponse);
+            expect(page.authenticated).toEqual(true);
         });
 
         it('handles browser error on navigate', async () => {
             const error = new Error('navigation error');
             const browserError = { errorType: 'SslError', statusCode: 500 } as BrowserError;
-            loggerMock
-                .setup((o) => o.logError('Page navigation error', { browserError: System.serializeError(browserError) }))
-                .verifiable();
             pageNavigatorMock
-                .setup(async (o) => o.navigate(url, puppeteerPageMock.object, It.isAny()))
-                .callback(async (u, p, fn) => {
-                    await fn(browserError, error);
-                })
-                .returns(() => Promise.resolve(undefined))
+                .setup(async (o) => o.navigate(url, puppeteerPageMock.object))
+                .returns(() => Promise.resolve({ error, browserError }))
                 .verifiable(Times.exactly(2));
             browserMock
                 .setup((o) => o.userAgent())
@@ -287,7 +181,7 @@ describe(Page, () => {
                 .returns(() => Promise.resolve())
                 .verifiable();
 
-            await page.navigateToUrl(url);
+            await page.navigate(url);
 
             expect(page.lastBrowserError).toEqual(browserError);
         });
@@ -295,7 +189,7 @@ describe(Page, () => {
         it('set extra HTTP headers on navigate', async () => {
             process.env.X_FORWARDED_FOR_HTTP_HEADER = '1.1.1.1';
             pageNavigatorMock
-                .setup(async (o) => o.navigate(url, puppeteerPageMock.object, It.isAny()))
+                .setup(async (o) => o.navigate(url, puppeteerPageMock.object))
                 .returns(() => Promise.resolve(navigationResponse))
                 .verifiable();
             puppeteerPageMock
@@ -303,7 +197,7 @@ describe(Page, () => {
                 .returns(() => Promise.resolve())
                 .verifiable();
 
-            await page.navigateToUrl(url);
+            await page.navigate(url);
         });
     });
 
@@ -315,7 +209,7 @@ describe(Page, () => {
 
         it('reload page and saves response', async () => {
             pageNavigatorMock
-                .setup(async (o) => o.reload(puppeteerPageMock.object, It.isAny()))
+                .setup(async (o) => o.reload(puppeteerPageMock.object))
                 .returns(() => Promise.resolve(navigationResponse))
                 .verifiable();
 
@@ -324,25 +218,6 @@ describe(Page, () => {
                 timing[key] = `${navigationResponse.pageNavigationTiming[key]}`;
             });
             loggerMock.setup((o) => o.logInfo('Total page reload time 10, msec', { ...timing })).verifiable();
-
-            await page.reload();
-
-            expect(page.lastNavigationResponse).toEqual(puppeteerResponseMock.object);
-        });
-
-        it('reload page with browser cache deleted', async () => {
-            setupPuppeteerResponseMock(304);
-            pageNavigatorMock
-                .setup(async (o) => o.reload(puppeteerPageMock.object, It.isAny()))
-                .returns(() => Promise.resolve(navigationResponse))
-                .verifiable(Times.exactly(2));
-
-            const timing = { total: '10' } as any;
-            Object.keys(navigationResponse.pageNavigationTiming).forEach((key: keyof PageNavigationTiming) => {
-                timing[key] = `${navigationResponse.pageNavigationTiming[key]}`;
-            });
-            loggerMock.setup((o) => o.logInfo('Total page reload time 10, msec', { ...timing })).verifiable(Times.exactly(2));
-            loggerMock.setup((o) => o.logWarn('Page reload has failed. Reload page without browser cache.')).verifiable();
 
             await page.reload();
 
@@ -371,12 +246,12 @@ describe(Page, () => {
                 .verifiable();
             // navigate url
             pageNavigatorMock
-                .setup(async (o) => o.navigate(url, puppeteerPageMock.object, It.isAny()))
+                .setup(async (o) => o.navigate(url, puppeteerPageMock.object))
                 .returns(() => Promise.resolve(navigationResponse))
                 .verifiable();
             // reload page
             pageNavigatorMock
-                .setup(async (o) => o.reload(puppeteerPageMock.object, It.isAny()))
+                .setup(async (o) => o.reload(puppeteerPageMock.object))
                 .returns(() => Promise.resolve(navigationResponse))
                 .verifiable(Times.never());
 
@@ -388,13 +263,9 @@ describe(Page, () => {
         it('handles browser error on reload', async () => {
             const error = new Error('navigation error');
             const browserError = { errorType: 'SslError', statusCode: 500 } as BrowserError;
-            loggerMock.setup((o) => o.logError('Page reload error', { browserError: System.serializeError(browserError) })).verifiable();
             pageNavigatorMock
-                .setup(async (o) => o.reload(puppeteerPageMock.object, It.isAny()))
-                .callback(async (p, fn) => {
-                    await fn(browserError, error);
-                })
-                .returns(() => Promise.resolve(undefined))
+                .setup(async (o) => o.reload(puppeteerPageMock.object))
+                .returns(() => Promise.resolve({ error, browserError }))
                 .verifiable();
 
             await page.reload();
@@ -542,22 +413,6 @@ describe(Page, () => {
         });
     });
 });
-
-function setupAxePuppeteerFactoryMock(axeResultUrl: string = redirectUrl): void {
-    puppeteerPageMock
-        .setup(async (o) => o.title())
-        .returns(() => Promise.resolve(scanResults.pageTitle))
-        .verifiable();
-    axeResults = { url: axeResultUrl } as AxeResults;
-    axePuppeteerMock
-        .setup((o) => o.analyze())
-        .returns(() => Promise.resolve(axeResults))
-        .verifiable();
-    axePuppeteerFactoryMock
-        .setup((o) => o.createAxePuppeteer(puppeteerPageMock.object, It.isAny()))
-        .returns(() => Promise.resolve(axePuppeteerMock.object))
-        .verifiable();
-}
 
 function simulatePageNavigation(response: Puppeteer.HTTPResponse, browserError?: BrowserError): void {
     page.lastNavigationResponse = response;

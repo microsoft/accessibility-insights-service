@@ -13,6 +13,7 @@ import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 import { StealthPluginType } from './stealth-plugin-type';
 import { defaultBrowserOptions, defaultLaunchOptions } from './puppeteer-options';
 import { ExtensionLoader } from './browser-extensions/extension-loader';
+import { UserAgentPlugin } from './user-agent-plugin';
 
 export interface WebDriverConfigurationOptions {
     browserExecutablePath?: string;
@@ -33,6 +34,7 @@ export class WebDriver {
         private readonly puppeteer: typeof Puppeteer = Puppeteer,
         private readonly puppeteerExtra: typeof PuppeteerExtra = PuppeteerExtra,
         private readonly stealthPlugin: StealthPluginType = StealthPlugin(),
+        private readonly userAgentPlugin: UserAgentPlugin = new UserAgentPlugin(),
         private readonly fs: typeof fsNode = fsNode,
     ) {}
 
@@ -47,7 +49,7 @@ export class WebDriver {
     }
 
     public async launch(options: WebDriverConfigurationOptions = { clearDiskCache: true }): Promise<Puppeteer.Browser> {
-        this.addStealthPlugin();
+        this.addPuppeteerPlugins();
 
         if (options.clearDiskCache === true) {
             this.clearDiskCache();
@@ -113,10 +115,13 @@ export class WebDriver {
         return options;
     }
 
-    private addStealthPlugin(): void {
+    private addPuppeteerPlugins(): void {
         // Disable iframe.contentWindow evasion to avoid interference with privacy banner
         this.stealthPlugin.enabledEvasions.delete('iframe.contentWindow');
-        // Chromium browser extension to hide puppeteer automation from a webserver
+        // Plugin to hide puppeteer automation from a webserver
         this.puppeteerExtra.use(this.stealthPlugin);
+
+        // Plugin to set non-Windows platform in user agent string
+        this.puppeteerExtra.use(this.userAgentPlugin);
     }
 }
