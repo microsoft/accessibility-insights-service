@@ -7,7 +7,7 @@ import { Context } from '@azure/functions';
 import { GuidGenerator, RestApiConfig, ServiceConfiguration, CrawlConfig } from 'common';
 import { ScanRequestReceivedMeasurements } from 'logger';
 import { HttpResponse, ScanDataProvider, ScanRunResponse, WebApiErrorCodes } from 'service-library';
-import { ScanRunBatchRequest, PrivacyScan } from 'storage-documents';
+import { ScanRunBatchRequest, PrivacyScan, AuthenticationType } from 'storage-documents';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { MockableLogger } from '../test-utilities/mockable-logger';
 
@@ -339,6 +339,30 @@ describe(ScanRequestController, () => {
 
             expect(context.res.status).toEqual(202);
             expect(responseSorted).toEqual(expectedResponseSorted);
+            scanDataProviderMock.verifyAll();
+            guidGeneratorMock.verifyAll();
+        });
+
+        it.each(['azure-ad', undefined])('accepts request with authenticationType=%s', async (authType: AuthenticationType) => {
+            const guid1 = '1e9cefa6-538a-6df0-aaaa-ffffffffffff';
+            const guid2 = '1e9cefa6-538a-6df0-bbbb-ffffffffffff';
+            guidGeneratorMock.setup((g) => g.createGuid()).returns(() => guid1);
+            guidGeneratorMock.setup((g) => g.createGuidFromBaseGuid(guid1)).returns(() => guid2);
+            const priority = 10;
+
+            context.req.rawBody = JSON.stringify([{ url: 'https://abs/path/', priority: priority, authenticationType: authType }]);
+            const expectedResponse = [{ scanId: guid2, url: 'https://abs/path/' }];
+            const expectedSavedRequest: ScanRunBatchRequest[] = authType
+                ? [{ scanId: guid2, url: 'https://abs/path/', priority: priority, authenticationType: authType }]
+                : [{ scanId: guid2, url: 'https://abs/path/', priority: priority }];
+            scanDataProviderMock.setup(async (o) => o.writeScanRunBatchRequest(guid1, expectedSavedRequest)).verifiable(Times.once());
+
+            scanRequestController = createScanRequestController(context);
+
+            await scanRequestController.handleRequest();
+
+            expect(context.res.status).toEqual(202);
+            expect(context.res.body).toEqual(expectedResponse);
             scanDataProviderMock.verifyAll();
             guidGeneratorMock.verifyAll();
         });

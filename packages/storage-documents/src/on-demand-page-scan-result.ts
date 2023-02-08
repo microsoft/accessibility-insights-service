@@ -4,7 +4,7 @@
 import { ItemType } from './item-type';
 import { StorageDocument } from './storage-document';
 import { ScanGroupType } from './website-scan-result';
-import { PrivacyScan } from './on-demand-page-scan-batch-request';
+import { PrivacyScan, AuthenticationType } from './on-demand-page-scan-batch-request';
 import { ReportScanRunResult } from './report-generator-request';
 
 export declare type ScanState = 'pending' | 'pass' | 'fail';
@@ -36,7 +36,6 @@ export declare type ScanErrorTypes =
     | 'ScanTimeout'
     | 'InternalError'
     | 'BannerXPathNotDetected';
-
 export interface ScanError {
     errorType: ScanErrorTypes;
     message: string;
@@ -58,7 +57,7 @@ export interface OnDemandPageScanResult extends StorageDocument {
     subRuns?: WorkflowRunResults;
     notification?: ScanCompletedNotification;
     privacyScan?: PrivacyScan;
-    authenticationType?: string;
+    authenticationType?: AuthenticationType;
 }
 
 export interface ScanCompletedNotification {

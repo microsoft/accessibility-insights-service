@@ -5,6 +5,7 @@ import { StorageDocument } from './storage-document';
 import { ItemType } from './item-type';
 
 export declare type CookieBannerType = 'standard';
+export declare type AuthenticationType = 'azure-ad';
 
 /**
  * The client page scan run batch request document.
@@ -37,5 +38,5 @@ export interface ScanRunBatchRequest {
     scanNotifyUrl?: string;
     deepScan?: boolean;
     privacyScan?: PrivacyScan;
-    authenticationType?: string;
+    authenticationType?: AuthenticationType;
 }
