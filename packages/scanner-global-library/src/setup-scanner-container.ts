@@ -2,8 +2,8 @@
 // Licensed under the MIT License.
 
 import * as inversify from 'inversify';
-import { cloudAxeConfiguration, localAxeConfiguration } from './factories/axe-configuration';
-import { AxePuppeteerFactory } from './factories/axe-puppeteer-factory';
+import { cloudAxeConfiguration, localAxeConfiguration } from './axe-scanner/axe-configuration';
+import { AxePuppeteerFactory } from './axe-scanner/axe-puppeteer-factory';
 import { iocTypes } from './ioc-types';
 
 export function setupCloudScannerContainer(container: inversify.Container): inversify.Container {

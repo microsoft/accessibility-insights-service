@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 import { PrivacyPageScanReport } from 'storage-documents';
-import { BrowserError } from './browser-error';
+import { BrowserError } from '../browser-error';
 
 export interface PrivacyScanResult {
     results?: PrivacyPageScanReport;

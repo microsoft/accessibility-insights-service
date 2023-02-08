@@ -4,9 +4,9 @@
 import 'reflect-metadata';
 
 import { Container } from 'inversify';
-import { AxePuppeteerFactory } from './factories/axe-puppeteer-factory';
+import { AxePuppeteerFactory } from './axe-scanner/axe-puppeteer-factory';
 import { setupCloudScannerContainer, setupLocalScannerContainer } from './setup-scanner-container';
-import { cloudAxeConfiguration, localAxeConfiguration } from './factories/axe-configuration';
+import { cloudAxeConfiguration, localAxeConfiguration } from './axe-scanner/axe-configuration';
 import { iocTypes } from './ioc-types';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */

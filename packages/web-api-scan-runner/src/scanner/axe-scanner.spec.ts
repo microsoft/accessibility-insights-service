@@ -5,7 +5,7 @@ import 'reflect-metadata';
 
 import { AxeResults } from 'axe-core';
 import { PromiseUtils, ScanRunTimeConfig, ServiceConfiguration, System } from 'common';
-import { AxePuppeteerFactory, AxeScanResults, BrowserError, Page } from 'scanner-global-library';
+import { AxePuppeteerFactory, AxeScanResults, BrowserError, Page, AxePuppeteerScanner } from 'scanner-global-library';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { MockableLogger } from '../test-utilities/mockable-logger';
 import { AxeScanner } from './axe-scanner';
@@ -19,6 +19,7 @@ describe(AxeScanner, () => {
     let loggerMock: IMock<MockableLogger>;
     let serviceConfigMock: IMock<ServiceConfiguration>;
     let promiseUtilsMock: IMock<PromiseUtils>;
+    let axePuppeteerScannerMock: IMock<AxePuppeteerScanner>;
     let scanConfig: ScanRunTimeConfig;
 
     beforeEach(() => {
@@ -27,12 +28,13 @@ describe(AxeScanner, () => {
         loggerMock = Mock.ofType(MockableLogger);
         serviceConfigMock = Mock.ofType(ServiceConfiguration);
         promiseUtilsMock = Mock.ofType(PromiseUtils);
+        axePuppeteerScannerMock = Mock.ofType<AxePuppeteerScanner>();
 
         scanConfig = {
             scanTimeoutInMin: 5,
         } as ScanRunTimeConfig;
 
-        axeScanner = new AxeScanner(promiseUtilsMock.object, serviceConfigMock.object, loggerMock.object);
+        axeScanner = new AxeScanner(promiseUtilsMock.object, serviceConfigMock.object, axePuppeteerScannerMock.object, loggerMock.object);
     });
 
     it('should create instance', () => {
@@ -117,16 +119,16 @@ describe(AxeScanner, () => {
     });
 
     function setupPageScanCall(axeResults: AxeResults): void {
-        pageMock
-            .setup(async (p) => p.scanForA11yIssues())
+        axePuppeteerScannerMock
+            .setup(async (p) => p.scan(pageMock.object))
             .returns(async () => Promise.resolve({ results: axeResults, pageResponseCode: 101 }))
             .verifiable(Times.once());
     }
 
     function setupPageErrorScanCall(errorMessage: string): AxeScanResults {
         const error = { error: errorMessage, pageResponseCode: 101 };
-        pageMock
-            .setup(async (p) => p.scanForA11yIssues())
+        axePuppeteerScannerMock
+            .setup(async (p) => p.scan(pageMock.object))
             .returns(async () => Promise.reject(error))
             .verifiable(Times.once());
 
