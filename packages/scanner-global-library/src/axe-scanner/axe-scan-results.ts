@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 import { AxeResults } from 'axe-core';
-import { BrowserError } from './browser-error';
+import { BrowserError } from '../browser-error';
 
 export interface AxeScanResults {
     results?: AxeResults;

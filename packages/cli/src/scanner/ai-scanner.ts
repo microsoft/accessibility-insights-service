@@ -2,12 +2,15 @@
 // Licensed under the MIT License.
 
 import { inject, injectable } from 'inversify';
-import { AxeScanResults, Page } from 'scanner-global-library';
+import { AxeScanResults, Page, AxePuppeteerScanner } from 'scanner-global-library';
 import { System } from 'common';
 
 @injectable()
 export class AIScanner {
-    constructor(@inject(Page) private readonly page: Page) {}
+    constructor(
+        @inject(Page) private readonly page: Page,
+        @inject(AxePuppeteerScanner) private readonly axePuppeteerScanner: AxePuppeteerScanner,
+    ) {}
 
     public async scan(url: string, browserExecutablePath?: string, sourcePath?: string): Promise<AxeScanResults> {
         try {
@@ -15,7 +18,7 @@ export class AIScanner {
             await this.page.create({ browserExecutablePath });
             await this.page.navigate(url);
 
-            return await this.page.scanForA11yIssues(sourcePath);
+            return await this.axePuppeteerScanner.scan(this.page, sourcePath);
         } catch (error) {
             console.log(error, `An error occurred while scanning website page ${url}`);
 

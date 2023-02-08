@@ -4,13 +4,14 @@
 import { PromiseUtils, ServiceConfiguration, System } from 'common';
 import { inject, injectable } from 'inversify';
 import { GlobalLogger } from 'logger';
-import { AxeScanResults, Page } from 'scanner-global-library';
+import { AxeScanResults, Page, AxePuppeteerScanner } from 'scanner-global-library';
 
 @injectable()
 export class AxeScanner {
     constructor(
         @inject(PromiseUtils) private readonly promiseUtils: PromiseUtils,
         @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
+        @inject(AxePuppeteerScanner) private readonly axePuppeteerScanner: AxePuppeteerScanner,
         @inject(GlobalLogger) private readonly logger: GlobalLogger,
     ) {}
 
@@ -33,7 +34,7 @@ export class AxeScanner {
     private async scanImpl(page: Page): Promise<AxeScanResults> {
         try {
             this.logger.logInfo(`Starting accessibility website page scanning.`);
-            const scanResult = await page.scanForA11yIssues();
+            const scanResult = await this.axePuppeteerScanner.scan(page);
             this.logger.logInfo(`Accessibility scanning of website page successfully completed.`);
 
             return scanResult;

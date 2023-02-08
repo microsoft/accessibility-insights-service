@@ -4,7 +4,7 @@
 import 'reflect-metadata';
 
 import { AxeResults } from 'axe-core';
-import { AxePuppeteerFactory, AxeScanResults, Page } from 'scanner-global-library';
+import { AxePuppeteerFactory, AxeScanResults, Page, AxePuppeteerScanner } from 'scanner-global-library';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { AIScanner } from './ai-scanner';
 
@@ -12,13 +12,15 @@ import { AIScanner } from './ai-scanner';
 
 describe('AIScanner', () => {
     let pageMock: IMock<Page>;
+    let axePuppeteerScannerMock: IMock<AxePuppeteerScanner>;
     let scanner: AIScanner;
     let axeBrowserFactoryMock: IMock<AxePuppeteerFactory>;
 
     beforeEach(() => {
         axeBrowserFactoryMock = Mock.ofType();
         pageMock = Mock.ofType2<Page>(Page, [axeBrowserFactoryMock.object]);
-        scanner = new AIScanner(pageMock.object);
+        axePuppeteerScannerMock = Mock.ofType<AxePuppeteerScanner>();
+        scanner = new AIScanner(pageMock.object, axePuppeteerScannerMock.object);
     });
 
     it('should create instance', () => {
@@ -60,15 +62,15 @@ describe('AIScanner', () => {
     }
 
     function setupPageScanCall(url: string, axeResults: AxeResults): void {
-        pageMock
-            .setup(async (p) => p.scanForA11yIssues(undefined))
+        axePuppeteerScannerMock
+            .setup(async (p) => p.scan(pageMock.object, undefined))
             .returns(async () => Promise.resolve({ results: axeResults }))
             .verifiable(Times.once());
     }
 
     function setupPageErrorScanCall(url: string, errorMessage: string): void {
-        pageMock
-            .setup(async (p) => p.scanForA11yIssues(undefined))
+        axePuppeteerScannerMock
+            .setup(async (p) => p.scan(pageMock.object, undefined))
             .returns(async () => Promise.resolve({ error: errorMessage }))
             .verifiable(Times.once());
     }
