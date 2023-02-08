@@ -22,6 +22,7 @@ import {
     PartitionKey,
     WebsiteScanResult,
     WebsiteScanRef,
+    AuthenticationType,
 } from 'storage-documents';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { MockableLogger } from '../test-utilities/mockable-logger';
@@ -99,6 +100,38 @@ describe(ScanBatchRequestFeedController, () => {
             (<unknown>[{ ItemType: ItemType.scanRunBatchRequest }])
         ));
     });
+
+    it.each(['azure-ad', undefined])(
+        'propagates authenticationType=%s to requests and results only if defined',
+        async (authType: AuthenticationType) => {
+            const document = [
+                {
+                    id: '1',
+                    partitionKey: 'pk-1',
+                    itemType: ItemType.scanRunBatchRequest,
+                    scanRunBatchRequest: [
+                        {
+                            scanId: 'scan-1',
+                            url: 'url-1',
+                            priority: 1,
+                            scanNotifyUrl: 'reply-url-1',
+                            site: {
+                                baseUrl: 'base-url-1',
+                            },
+                            reportGroups: [{ consolidatedId: 'consolidated-id-1' }],
+                            ...(authType === undefined ? {} : { authenticationType: authType }),
+                        },
+                    ],
+                },
+            ] as OnDemandPageScanBatchRequest[];
+            const websiteScanResults = setupWebsiteScanResultProviderMock(document);
+            setupOnDemandPageScanRunResultProviderMock(document, websiteScanResults);
+            setupPageScanRequestProviderMock(document);
+            setupPartitionKeyFactoryMock(document);
+
+            await scanBatchRequestFeedController.invoke(context, document);
+        },
+    );
 
     it('should process valid scans', async () => {
         const documents = [
@@ -278,6 +311,7 @@ function setupOnDemandPageScanRunResultProviderMock(
                           }),
                     websiteScanRefs: websiteScanRefs.length > 0 ? websiteScanRefs : undefined,
                     ...(request.privacyScan === undefined ? {} : { privacyScan: request.privacyScan }),
+                    ...(request.authenticationType === undefined ? {} : { authenticationType: request.authenticationType }),
                 };
 
                 return result;
@@ -298,6 +332,7 @@ function setupPageScanRequestProviderMock(documents: OnDemandPageScanBatchReques
                     itemType: ItemType.onDemandPageScanRequest,
                     partitionKey: PartitionKey.pageScanRequestDocuments,
                     deepScan: scanRequest.deepScan,
+                    ...(scanRequest.authenticationType === undefined ? {} : { authenticationType: scanRequest.authenticationType }),
                 };
 
                 if (!isNil(scanRequest.scanNotifyUrl)) {

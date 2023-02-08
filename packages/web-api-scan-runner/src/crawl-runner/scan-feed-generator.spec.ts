@@ -7,7 +7,7 @@ import { IMock, Mock, It, Times } from 'typemoq';
 import { ScanDataProvider, WebsiteScanResultProvider } from 'service-library';
 import { RetryHelper, GuidGenerator, System } from 'common';
 import { GlobalLogger } from 'logger';
-import { WebsiteScanResult, OnDemandPageScanResult, ScanRunBatchRequest, PageScan } from 'storage-documents';
+import { WebsiteScanResult, OnDemandPageScanResult, ScanRunBatchRequest, PageScan, AuthenticationType } from 'storage-documents';
 import * as MockDate from 'mockdate';
 import moment from 'moment';
 import { ScanFeedGenerator } from './scan-feed-generator';
@@ -130,6 +130,33 @@ describe(ScanFeedGenerator, () => {
         await scanFeedGenerator.queueDiscoveredPages(websiteScanResult, pageScanResult);
         expect(websiteScanResult.pageCount).toEqual(newPages.length + 1);
     });
+
+    it.each(['azure-ad', undefined])(
+        'propagates authenticationType=%s to scan run batch requests only if defined',
+        async (authType: AuthenticationType) => {
+            // it('propagates authenticationType flag to scan run batch requests', async () => {
+            const newPages = ['page3', 'page4'];
+            pageScanResult = authType ? { ...pageScanResult, authenticationType: authType } : { ...pageScanResult };
+            const scanRequests = createScanRequests(newPages);
+            const pageScans = createPageScans(newPages);
+            const updatedWebsiteScanResult: Partial<WebsiteScanResult> = {
+                id: websiteScanResult.id,
+                pageScans,
+            };
+            websiteScanResult.knownPages.push(...newPages);
+            websiteScanResult.pageCount = 1;
+            setupGuidGeneratorMock(newPages);
+
+            websiteScanResultProviderMock
+                .setup((o) => o.mergeOrCreate(pageScanResult.id, updatedWebsiteScanResult, It.isAny()))
+                .callback((id, result, callback) => callback(websiteScanResult));
+
+            setupScanDataProviderMock(scanRequests);
+
+            await scanFeedGenerator.queueDiscoveredPages(websiteScanResult, pageScanResult);
+            expect(websiteScanResult.pageCount).toEqual(newPages.length + 1);
+        },
+    );
 });
 
 function setupScanDataProviderMock(scanRequests: ScanRunBatchRequest[]): void {
@@ -165,6 +192,7 @@ function createScanRequests(urls: string[]): ScanRunBatchRequest[] {
                     consolidatedId: websiteScanResult.scanGroupId,
                 },
             ],
+            ...(pageScanResult.authenticationType === undefined ? {} : { authenticationType: pageScanResult.authenticationType }),
         } as ScanRunBatchRequest;
     });
 }

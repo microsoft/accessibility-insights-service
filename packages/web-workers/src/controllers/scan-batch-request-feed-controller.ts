@@ -127,6 +127,7 @@ export class ScanBatchRequestFeedController extends WebController {
                       }),
                 websiteScanRefs: websiteScanRefs ? [websiteScanRefs] : undefined,
                 ...(request.privacyScan === undefined ? {} : { privacyScan: request.privacyScan }),
+                ...(request.authenticationType === undefined ? {} : { authenticationType: request.authenticationType }),
             };
         });
 
@@ -187,6 +188,7 @@ export class ScanBatchRequestFeedController extends WebController {
                 ...(isEmpty(request.site) ? {} : { site: request.site }),
                 ...(isEmpty(request.reportGroups) ? {} : { reportGroups: request.reportGroups }),
                 ...(request.privacyScan === undefined ? {} : { privacyScan: request.privacyScan }),
+                ...(request.authenticationType === undefined ? {} : { authenticationType: request.authenticationType }),
             };
         });
 
