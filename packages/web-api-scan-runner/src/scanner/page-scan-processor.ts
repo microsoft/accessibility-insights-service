@@ -23,7 +23,7 @@ export class PageScanProcessor {
     public async scan(runnerScanMetadata: RunnerScanMetadata, pageScanResult: OnDemandPageScanResult): Promise<AxeScanResults> {
         let axeScanResults: AxeScanResults;
         try {
-            await this.openPage(runnerScanMetadata.url, pageScanResult.authenticationType !== undefined);
+            await this.openPage(runnerScanMetadata.url, pageScanResult.authenticationResult?.hint !== undefined);
             if (!isEmpty(this.page.lastBrowserError)) {
                 return { error: this.page.lastBrowserError, pageResponseCode: this.page.lastBrowserError.statusCode };
             }

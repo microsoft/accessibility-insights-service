@@ -21,6 +21,9 @@ export interface ScanRunRequest {
      * Privacy scan request takes precedence over accessibility scan request
      */
     privacyScan?: PrivacyScan;
+    /**
+     * Resource authentication type hint
+     */
     authenticationType?: AuthenticationType;
 }
 

@@ -93,7 +93,7 @@ describe(PageScanProcessor, () => {
         deepScannerMock.setup((d) => d.runDeepScan(It.isAny(), It.isAny(), It.isAny())).verifiable(Times.never());
         pageScanResult = {
             ...pageScanResult,
-            authenticationType: '',
+            authenticationResult: { hint: 'azure-ad' },
         };
 
         const results = await testSubject.scan(scanMetadata, pageScanResult);

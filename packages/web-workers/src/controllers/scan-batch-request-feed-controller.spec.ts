@@ -22,7 +22,7 @@ import {
     PartitionKey,
     WebsiteScanResult,
     WebsiteScanRef,
-    AuthenticationType,
+    ScanRunBatchRequest,
 } from 'storage-documents';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { MockableLogger } from '../test-utilities/mockable-logger';
@@ -101,9 +101,12 @@ describe(ScanBatchRequestFeedController, () => {
         ));
     });
 
-    it.each(['azure-ad', undefined])(
-        'propagates authenticationType=%s to requests and results only if defined',
-        async (authType: AuthenticationType) => {
+    it.each([
+        {},
+        { scanNotifyUrl: 'url', privacyScan: { cookieBannerType: 'standard' }, authenticationType: 'azure-ad' } as ScanRunBatchRequest,
+    ])(
+        'propagates batch request properties %s to scan request and scan result documents',
+        async (scanRunBatchRequestOverride: ScanRunBatchRequest) => {
             const document = [
                 {
                     id: '1',
@@ -114,12 +117,11 @@ describe(ScanBatchRequestFeedController, () => {
                             scanId: 'scan-1',
                             url: 'url-1',
                             priority: 1,
-                            scanNotifyUrl: 'reply-url-1',
                             site: {
                                 baseUrl: 'base-url-1',
                             },
                             reportGroups: [{ consolidatedId: 'consolidated-id-1' }],
-                            ...(authType === undefined ? {} : { authenticationType: authType }),
+                            ...scanRunBatchRequestOverride,
                         },
                     ],
                 },
@@ -311,7 +313,7 @@ function setupOnDemandPageScanRunResultProviderMock(
                           }),
                     websiteScanRefs: websiteScanRefs.length > 0 ? websiteScanRefs : undefined,
                     ...(request.privacyScan === undefined ? {} : { privacyScan: request.privacyScan }),
-                    ...(request.authenticationType === undefined ? {} : { authenticationType: request.authenticationType }),
+                    ...(request.authenticationType === undefined ? {} : { authenticationResult: { hint: request.authenticationType } }),
                 };
 
                 return result;

@@ -176,8 +176,10 @@ components:
                                 description: The unique report ID for the given reporting period
                                 type: string
                 authenticationType:
+                    description: If present, the type of authentication to be used to authenticate web pages.
                     type: string
-                    description: If present, the type of authentication to be used to authenticate web pages. Currently supports 'azure-ad'.
+                    enum:
+                        - azure-ad
                 privacyScan:
                     type: object
                     description: If present, the url will be scanned for cookies instead of accessibility issues. In this case, the deepScan and scanNotifyUrl fields will be ignored.

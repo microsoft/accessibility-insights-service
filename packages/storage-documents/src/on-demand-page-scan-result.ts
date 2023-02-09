@@ -10,6 +10,7 @@ import { ReportScanRunResult } from './report-generator-request';
 export declare type ScanState = 'pending' | 'pass' | 'fail';
 export declare type NotificationState = 'pending' | 'queued' | 'queueFailed' | 'sending' | 'sent' | 'sendFailed';
 export declare type NotificationErrorTypes = 'InternalError' | 'HttpErrorCode';
+export declare type AuthenticationState = 'succeeded' | 'failed' | 'notDetected';
 
 export declare type ReportFormat =
     | 'axe'
@@ -59,7 +60,13 @@ export interface OnDemandPageScanResult extends StorageDocument {
     subRuns?: WorkflowRunResults;
     notification?: ScanCompletedNotification;
     privacyScan?: PrivacyScan;
-    authenticationType?: AuthenticationType;
+    authenticationResult?: AuthenticationResult;
+}
+
+export interface AuthenticationResult {
+    hint: AuthenticationType;
+    detected?: AuthenticationType;
+    state?: AuthenticationState;
 }
 
 export interface ScanCompletedNotification {
