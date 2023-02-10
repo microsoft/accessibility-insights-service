@@ -12,7 +12,7 @@ import { BrowserError } from './browser-error';
 import { PageNavigationTiming, puppeteerTimeoutConfig } from './page-timeout-config';
 import { scrollToTop } from './page-client-lib';
 import { PageNetworkTracer } from './page-network-tracer';
-import { ResourceAuthenticator } from './authenticator/resource-authenticator';
+import { ResourceAuthenticator, ResourceAuthenticationResult } from './authenticator/resource-authenticator';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -33,6 +33,8 @@ export interface PageNavigationOptions {
     enableAuthentication?: boolean;
 }
 
+type Operation = 'load' | 'reload' | 'preload' | 'auth';
+
 @injectable()
 export class Page {
     public browser: Puppeteer.Browser;
@@ -45,13 +47,13 @@ export class Page {
 
     public lastPageNavigationOptions: PageNavigationOptions;
 
+    public lastAuthenticationResult: ResourceAuthenticationResult;
+
     public pageNavigationTiming: PageNavigationTiming;
 
     public requestUrl: string;
 
     public userAgent: string;
-
-    public authenticated: boolean;
 
     private page: Puppeteer.Page;
 
@@ -94,6 +96,7 @@ export class Page {
     public async navigate(url: string, options?: PageNavigationOptions): Promise<void> {
         this.requestUrl = url;
         this.lastPageNavigationOptions = options;
+        this.resetLastNavigationState();
 
         await this.addNetworkTrace(options?.enableNetworkTrace);
         await this.setExtraHTTPHeaders();
@@ -102,7 +105,7 @@ export class Page {
         if (
             this.lastBrowserError &&
             this.networkTraceGlobalFlag !== true /** not in network trace mode already */ &&
-            this.authenticated !== true
+            this.lastAuthenticationResult?.authenticated !== true
         ) {
             this.logger?.logWarn('Reload page with network trace on navigation error.');
             await this.navigateWithNetworkTrace(url);
@@ -119,6 +122,8 @@ export class Page {
      */
     public async reload(options?: { hardReload?: boolean }): Promise<void> {
         this.requestUrl = this.url;
+        this.resetLastNavigationState();
+
         if (options?.hardReload === true) {
             await this.hardReload();
         } else {
@@ -190,8 +195,6 @@ export class Page {
     }
 
     private async navigateImpl(options?: PageNavigationOptions): Promise<void> {
-        this.lastBrowserError = undefined;
-
         if (options?.enableAuthentication === true) {
             await this.preloadWithAuth();
         }
@@ -200,34 +203,29 @@ export class Page {
             return;
         }
 
-        if (this.authenticated === true) {
+        if (this.lastAuthenticationResult?.authenticated === true) {
             // Reload authenticated page to execute navigation workflow
             await this.reload();
         } else {
             const navigationResponse = await this.pageNavigator.navigate(this.requestUrl, this.page);
-            this.setLastNavigationResponse('load', navigationResponse);
+            this.setLastNavigationState('load', navigationResponse);
         }
     }
 
     private async preloadWithAuth(): Promise<void> {
-        this.authenticated = false;
-
-        let navigationResponse = await this.pageNavigator.navigatePageOperation(this.requestUrl, this.page);
+        // Preload page to detect authentication request
+        const navigationResponse = await this.pageNavigator.navigatePageOperation(this.requestUrl, this.page);
         if (navigationResponse.browserError !== undefined) {
-            this.setLastNavigationResponse('preload', navigationResponse);
+            this.setLastNavigationState('preload', navigationResponse);
 
             return;
         }
 
-        navigationResponse = await this.resourceAuthenticator.authenticate(this.page);
-        if (navigationResponse !== undefined) {
-            if (navigationResponse.browserError !== undefined) {
-                this.setLastNavigationResponse('auth', navigationResponse);
-            } else {
-                this.authenticated = true;
-            }
-
-            return;
+        // Invoke authentication client
+        const authenticationResult = await this.resourceAuthenticator.authenticate(this.page);
+        this.lastAuthenticationResult = authenticationResult;
+        if (authenticationResult?.navigationResponse?.browserError !== undefined) {
+            this.setLastNavigationState('auth', authenticationResult.navigationResponse);
         }
     }
 
@@ -248,9 +246,8 @@ export class Page {
     }
 
     private async softReload(): Promise<void> {
-        this.lastBrowserError = undefined;
         const navigationResponse = await this.pageNavigator.reload(this.page);
-        this.setLastNavigationResponse('reload', navigationResponse);
+        this.setLastNavigationState('reload', navigationResponse);
     }
 
     private async reopenBrowser(): Promise<void> {
@@ -319,10 +316,17 @@ export class Page {
         }
     }
 
-    private setLastNavigationResponse(operation: 'load' | 'reload' | 'preload' | 'auth', navigationResponse: NavigationResponse): void {
+    private resetLastNavigationState(): void {
+        this.lastNavigationResponse = undefined;
+        this.pageNavigationTiming = undefined;
+        this.lastBrowserError = undefined;
+    }
+
+    private setLastNavigationState(operation: Operation, navigationResponse: NavigationResponse): void {
         this.lastNavigationResponse = navigationResponse?.httpResponse;
         this.pageNavigationTiming = navigationResponse?.pageNavigationTiming;
         this.lastBrowserError = navigationResponse?.browserError;
+
         this.logPageNavigationTiming(operation);
     }
 }

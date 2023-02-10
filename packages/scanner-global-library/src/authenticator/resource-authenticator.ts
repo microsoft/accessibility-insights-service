@@ -5,8 +5,14 @@ import { injectable, inject, optional } from 'inversify';
 import * as Puppeteer from 'puppeteer';
 import { GlobalLogger } from 'logger';
 import { NavigationResponse } from '../page-navigator';
-import { LoginPageDetector } from './login-page-detector';
+import { LoginPageDetector, LoginPageType } from './login-page-detector';
 import { LoginPageClientFactory } from './login-page-client-factory';
+
+export interface ResourceAuthenticationResult {
+    navigationResponse?: NavigationResponse;
+    loginPageType?: LoginPageType;
+    authenticated?: boolean;
+}
 
 @injectable()
 export class ResourceAuthenticator {
@@ -16,7 +22,7 @@ export class ResourceAuthenticator {
         @inject(GlobalLogger) @optional() private readonly logger: GlobalLogger,
     ) {}
 
-    public async authenticate(page: Puppeteer.Page): Promise<NavigationResponse> {
+    public async authenticate(page: Puppeteer.Page): Promise<ResourceAuthenticationResult> {
         const loginPageType = this.loginPageDetector.getLoginPageType(page);
         if (loginPageType === undefined) {
             return undefined;
@@ -25,6 +31,13 @@ export class ResourceAuthenticator {
         this.logger.logInfo(`Detected ${loginPageType} login page type.`, { loginPageType });
         const loginPageClient = this.loginPageClientFactory.getPageClient(loginPageType);
 
-        return loginPageClient.login(page);
+        const navigationResponse = await loginPageClient.login(page);
+        const authenticated = navigationResponse.browserError === undefined;
+
+        return {
+            navigationResponse,
+            loginPageType,
+            authenticated,
+        };
     }
 }
