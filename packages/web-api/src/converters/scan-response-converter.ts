@@ -87,7 +87,14 @@ export class ScanResponseConverter {
                 state: pageScanResult.scanResult.state,
                 issueCount: pageScanResult.scanResult.issueCount,
             },
-            reports: this.getScanReports(baseUrl, apiVersion, pageScanResult),
+            ...(pageScanResult.authenticationResult !== undefined
+                ? {
+                      authenticationResult: {
+                          detected: pageScanResult.authenticationResult.detected,
+                          state: pageScanResult.authenticationResult.state,
+                      },
+                  }
+                : {}),
             run: {
                 state: effectiveRunState,
                 timestamp: pageScanResult.run.timestamp,
@@ -95,6 +102,7 @@ export class ScanResponseConverter {
                 pageTitle: pageScanResult.run.pageTitle,
             },
             ...this.getRunCompleteNotificationResponse(pageScanResult.notification),
+            reports: this.getScanReports(baseUrl, apiVersion, pageScanResult),
             ...this.getDeepScanResult(websiteScanResult),
         };
 

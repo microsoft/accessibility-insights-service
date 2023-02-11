@@ -3,9 +3,7 @@
 
 import { StorageDocument } from './storage-document';
 import { ItemType } from './item-type';
-
-export declare type CookieBannerType = 'standard';
-export declare type AuthenticationType = 'azure-ad';
+import { CookieBannerType, AuthenticationType } from './on-demand-page-scan-result';
 
 /**
  * The client page scan run batch request document.

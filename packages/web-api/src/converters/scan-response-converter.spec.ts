@@ -99,15 +99,22 @@ describe(ScanResponseConverter, () => {
     });
 
     it('return completed scan result, when deepScan is disabled', async () => {
-        const pageScanDbResult = getPageScanResult('completed', false, false);
-        const responseExpected = getScanResultClientResponseFull('completed', false, false);
+        const pageScanDbResult = getPageScanResult('completed');
+        const responseExpected = getScanResultClientResponseFull('completed');
+        const response = await scanResponseConverter.getScanResultResponse(baseUrl, apiVersion, pageScanDbResult, websiteScanResult);
+        expect(response).toEqual(responseExpected);
+    });
+
+    it('return completed scan result with authentication result', async () => {
+        const pageScanDbResult = getPageScanResult('completed', false, false, true);
+        const responseExpected = getScanResultClientResponseFull('completed', false, false, false, true);
         const response = await scanResponseConverter.getScanResultResponse(baseUrl, apiVersion, pageScanDbResult, websiteScanResult);
         expect(response).toEqual(responseExpected);
     });
 
     it('return completed privacy scan result', async () => {
-        const pageScanDbResult = getPageScanResult('completed', false, false);
-        const responseExpected = getScanResultClientResponseFull('completed', false, false);
+        const pageScanDbResult = getPageScanResult('completed');
+        const responseExpected = getScanResultClientResponseFull('completed');
         const response = await scanResponseConverter.getScanResultResponse(baseUrl, apiVersion, pageScanDbResult, websiteScanResult);
         expect(response).toEqual(responseExpected);
     });
@@ -213,7 +220,12 @@ function getWebsiteScanResult(deepScanOverallState: RunState = 'pending'): Websi
     return result;
 }
 
-function getPageScanResult(state: RunStateDb, isNotificationEnabled = false, isDeepScanEnabled = false): OnDemandPageScanResult {
+function getPageScanResult(
+    state: RunStateDb,
+    isNotificationEnabled = false,
+    isDeepScanEnabled = false,
+    isAuthenticationEnabled = false,
+): OnDemandPageScanResult {
     if (!isDeepScanEnabled) {
         websiteScanResult = undefined;
     }
@@ -248,6 +260,15 @@ function getPageScanResult(state: RunStateDb, isNotificationEnabled = false, isD
         },
         batchRequestId: 'batch-id',
         ...(isNotificationEnabled ? { notification: notificationDb } : {}),
+        ...(isAuthenticationEnabled
+            ? {
+                  authenticationResult: {
+                      hint: 'azure-ad',
+                      detected: 'azure-ad',
+                      state: 'succeeded',
+                  },
+              }
+            : {}),
     };
 }
 
@@ -256,6 +277,7 @@ function getScanResultClientResponseFull(
     isNotificationEnabled = false,
     isDeepScanEnabled = false,
     isPrivacyScan = false,
+    isAuthenticationEnabled = false,
 ): ScanResultResponse {
     if (!isDeepScanEnabled) {
         websiteScanResult = undefined;
@@ -294,6 +316,14 @@ function getScanResultClientResponseFull(
         },
         ...(isNotificationEnabled ? { notification: notificationResponse } : {}),
         ...(isDeepScanEnabled ? { deepScanResult: deepScanResult } : {}),
+        ...(isAuthenticationEnabled
+            ? {
+                  authenticationResult: {
+                      detected: 'azure-ad',
+                      state: 'succeeded',
+                  },
+              }
+            : {}),
     };
 }
 

@@ -309,6 +309,8 @@ components:
                         $ref: '#/components/schemas/ScanReport'
                 run:
                     $ref: '#/components/schemas/ScanRun'
+                authenticationResult:
+                    $ref: '#/components/schemas/AuthenticationResult'
         WebApiError:
             type: object
             required:
@@ -392,3 +394,19 @@ components:
                 - running
                 - completed
                 - failed
+        AuthenticationResult:
+            type: object
+            required:
+                - detected
+                - state
+            properties:
+                detected:
+                    type: string
+                    enum:
+                        - azure-ad
+                state:
+                    type: string
+                    enum:
+                        - succeeded
+                        - failed
+                        - notDetected

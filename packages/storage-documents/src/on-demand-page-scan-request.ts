@@ -3,7 +3,8 @@
 
 import { ItemType } from './item-type';
 import { StorageDocument } from './storage-document';
-import { WebsiteRequest, ReportGroupRequest, PrivacyScan, AuthenticationType } from './on-demand-page-scan-batch-request';
+import { WebsiteRequest, ReportGroupRequest, PrivacyScan } from './on-demand-page-scan-batch-request';
+import { AuthenticationType } from './on-demand-page-scan-result';
 
 export interface OnDemandPageScanRequest extends StorageDocument {
     itemType: ItemType.onDemandPageScanRequest;
