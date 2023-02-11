@@ -45,6 +45,7 @@ describe(ResourceAuthenticator, () => {
         const authenticationResult = {
             navigationResponse: { httpResponse: { url: () => 'url' } } as NavigationResponse,
             loginPageType: 'MicrosoftAzure',
+            authenticationType: 'azure-ad',
             authenticated: true,
         };
         loginPageDetectorMock
@@ -54,6 +55,10 @@ describe(ResourceAuthenticator, () => {
         loginPageClientMock
             .setup((o) => o.login(puppeteerPageMock.object))
             .returns(() => Promise.resolve(authenticationResult.navigationResponse))
+            .verifiable();
+        loginPageClientMock
+            .setup((o) => o.authenticationType)
+            .returns(() => 'azure-ad')
             .verifiable();
         loginPageClientFactoryMock
             .setup((o) => o.getPageClient('MicrosoftAzure'))

@@ -23,7 +23,12 @@ export class PageScanProcessor {
     public async scan(runnerScanMetadata: RunnerScanMetadata, pageScanResult: OnDemandPageScanResult): Promise<AxeScanResults> {
         let axeScanResults: AxeScanResults;
         try {
-            await this.openPage(runnerScanMetadata.url, pageScanResult.authenticationResult?.hint !== undefined);
+            const enableAuthentication = pageScanResult.authenticationResult?.hint !== undefined;
+            await this.openPage(runnerScanMetadata.url, enableAuthentication);
+            if (enableAuthentication === true) {
+                this.setAuthenticationResult(pageScanResult);
+            }
+
             if (!isEmpty(this.page.lastBrowserError)) {
                 return { error: this.page.lastBrowserError, pageResponseCode: this.page.lastBrowserError.statusCode };
             }
@@ -67,6 +72,22 @@ export class PageScanProcessor {
             await this.page.close();
         } catch (error) {
             this.logger.logError('An error occurred while closing web browser.', { error: System.serializeError(error) });
+        }
+    }
+
+    private setAuthenticationResult(pageScanResult: OnDemandPageScanResult): void {
+        const authenticationResult = this.page.lastAuthenticationResult;
+        if (authenticationResult === undefined) {
+            pageScanResult.authenticationResult = {
+                ...pageScanResult.authenticationResult,
+                state: 'notDetected',
+            };
+        } else {
+            pageScanResult.authenticationResult = {
+                ...pageScanResult.authenticationResult,
+                detected: authenticationResult.authenticationType,
+                state: authenticationResult.authenticated === true ? 'succeeded' : 'failed',
+            };
         }
     }
 }

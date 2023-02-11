@@ -134,7 +134,6 @@ describe(Page, () => {
         it('navigates to page with authentication', async () => {
             const authenticationResult = {
                 navigationResponse: { httpResponse: { url: () => 'localhost/1' } },
-                loginPageType: 'MicrosoftAzure',
                 authenticated: true,
             } as ResourceAuthenticationResult;
             const reloadNavigationResponse = { httpResponse: { url: () => 'localhost/2' } } as NavigationResponse;

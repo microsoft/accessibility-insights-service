@@ -5,10 +5,11 @@ import 'reflect-metadata';
 
 import { IMock, It, Mock, Times } from 'typemoq';
 import { GlobalLogger } from 'logger';
-import { AxeScanResults, Page, BrowserError } from 'scanner-global-library';
+import { AxeScanResults, Page, BrowserError, ResourceAuthenticationResult } from 'scanner-global-library';
 import { OnDemandPageScanResult } from 'storage-documents';
 import { System } from 'common';
 import * as Puppeteer from 'puppeteer';
+import { cloneDeep } from 'lodash';
 import { AxeScanner } from '../scanner/axe-scanner';
 import { PageScanProcessor } from './page-scan-processor';
 import { DeepScanner } from './deep-scanner';
@@ -96,8 +97,26 @@ describe(PageScanProcessor, () => {
             authenticationResult: { hint: 'azure-ad' },
         };
 
+        const lastAuthenticationResult = {
+            authenticationType: 'azure-ad',
+            authenticated: true,
+        } as ResourceAuthenticationResult;
+        pageMock
+            .setup((p) => p.lastAuthenticationResult)
+            .returns(() => lastAuthenticationResult)
+            .verifiable();
+
         const results = await testSubject.scan(scanMetadata, pageScanResult);
 
+        const expectedPageScanResult = cloneDeep({
+            ...pageScanResult,
+            authenticationResult: {
+                hint: 'azure-ad',
+                detected: 'azure-ad',
+                state: 'succeeded',
+            },
+        });
+        expect(pageScanResult).toEqual(expectedPageScanResult);
         expect(results).toEqual(axeScanResults);
     });
 
