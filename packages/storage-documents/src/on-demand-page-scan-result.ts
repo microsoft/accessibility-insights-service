@@ -61,7 +61,7 @@ export interface OnDemandPageScanResult extends StorageDocument {
     subRuns?: WorkflowRunResults;
     notification?: ScanCompletedNotification;
     privacyScan?: PrivacyScan;
-    authenticationResult?: AuthenticationResult;
+    authentication?: AuthenticationResult;
 }
 
 export interface AuthenticationResult {

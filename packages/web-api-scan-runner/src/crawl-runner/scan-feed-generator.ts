@@ -116,7 +116,7 @@ export class ScanFeedGenerator {
                         consolidatedId: websiteScanResult.scanGroupId,
                     },
                 ],
-                authenticationType: pageScanResult.authenticationResult?.hint ?? undefined,
+                authenticationType: pageScanResult.authentication?.hint ?? undefined,
             };
         });
     }

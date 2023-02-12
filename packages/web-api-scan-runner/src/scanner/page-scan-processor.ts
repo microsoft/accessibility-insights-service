@@ -23,7 +23,7 @@ export class PageScanProcessor {
     public async scan(runnerScanMetadata: RunnerScanMetadata, pageScanResult: OnDemandPageScanResult): Promise<AxeScanResults> {
         let axeScanResults: AxeScanResults;
         try {
-            const enableAuthentication = pageScanResult.authenticationResult?.hint !== undefined;
+            const enableAuthentication = pageScanResult.authentication?.hint !== undefined;
             await this.openPage(runnerScanMetadata.url, enableAuthentication);
             if (enableAuthentication === true) {
                 this.setAuthenticationResult(pageScanResult);
@@ -78,13 +78,13 @@ export class PageScanProcessor {
     private setAuthenticationResult(pageScanResult: OnDemandPageScanResult): void {
         const authenticationResult = this.page.lastAuthenticationResult;
         if (authenticationResult === undefined) {
-            pageScanResult.authenticationResult = {
-                ...pageScanResult.authenticationResult,
+            pageScanResult.authentication = {
+                ...pageScanResult.authentication,
                 state: 'notDetected',
             };
         } else {
-            pageScanResult.authenticationResult = {
-                ...pageScanResult.authenticationResult,
+            pageScanResult.authentication = {
+                ...pageScanResult.authentication,
                 detected: authenticationResult.authenticationType,
                 state: authenticationResult.authenticated === true ? 'succeeded' : 'failed',
             };

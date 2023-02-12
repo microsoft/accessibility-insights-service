@@ -136,7 +136,7 @@ describe(ScanFeedGenerator, () => {
         {
             priority: 7,
             notification: { scanNotifyUrl: 'url' },
-            authenticationResult: { hint: 'azure-ad' },
+            authentication: { hint: 'azure-ad' },
         } as OnDemandPageScanResult,
     ])('propagates page scan result properties %s to scan run batch requests', async (pageScanResultOverride: OnDemandPageScanResult) => {
         pageScanResult = {
@@ -196,7 +196,7 @@ function createScanRequests(urls: string[]): ScanRunBatchRequest[] {
                     consolidatedId: websiteScanResult.scanGroupId,
                 },
             ],
-            authenticationType: pageScanResult.authenticationResult?.hint ?? undefined,
+            authenticationType: pageScanResult.authentication?.hint ?? undefined,
         } as ScanRunBatchRequest;
     });
 }

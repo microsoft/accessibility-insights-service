@@ -38,7 +38,7 @@ export interface ScanRunResultResponse {
     reports?: ScanReport[];
     run: ScanRun;
     notification?: ScanCompletedNotification;
-    authenticationResult?: AuthenticationResult;
+    authentication?: AuthenticationResult;
 }
 
 export interface ScanRunErrorResponse {

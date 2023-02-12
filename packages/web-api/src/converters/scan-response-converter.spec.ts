@@ -262,7 +262,7 @@ function getPageScanResult(
         ...(isNotificationEnabled ? { notification: notificationDb } : {}),
         ...(isAuthenticationEnabled
             ? {
-                  authenticationResult: {
+                  authentication: {
                       hint: 'azure-ad',
                       detected: 'azure-ad',
                       state: 'succeeded',
@@ -318,7 +318,7 @@ function getScanResultClientResponseFull(
         ...(isDeepScanEnabled ? { deepScanResult: deepScanResult } : {}),
         ...(isAuthenticationEnabled
             ? {
-                  authenticationResult: {
+                  authentication: {
                       detected: 'azure-ad',
                       state: 'succeeded',
                   },

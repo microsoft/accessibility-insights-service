@@ -87,11 +87,11 @@ export class ScanResponseConverter {
                 state: pageScanResult.scanResult.state,
                 issueCount: pageScanResult.scanResult.issueCount,
             },
-            ...(pageScanResult.authenticationResult !== undefined
+            ...(pageScanResult.authentication !== undefined
                 ? {
-                      authenticationResult: {
-                          detected: pageScanResult.authenticationResult.detected,
-                          state: pageScanResult.authenticationResult.state,
+                      authentication: {
+                          detected: pageScanResult.authentication.detected,
+                          state: pageScanResult.authentication.state,
                       },
                   }
                 : {}),

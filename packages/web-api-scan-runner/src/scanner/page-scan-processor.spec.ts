@@ -94,7 +94,7 @@ describe(PageScanProcessor, () => {
         deepScannerMock.setup((d) => d.runDeepScan(It.isAny(), It.isAny(), It.isAny())).verifiable(Times.never());
         pageScanResult = {
             ...pageScanResult,
-            authenticationResult: { hint: 'azure-ad' },
+            authentication: { hint: 'azure-ad' },
         };
 
         const lastAuthenticationResult = {
@@ -110,7 +110,7 @@ describe(PageScanProcessor, () => {
 
         const expectedPageScanResult = cloneDeep({
             ...pageScanResult,
-            authenticationResult: {
+            authentication: {
                 hint: 'azure-ad',
                 detected: 'azure-ad',
                 state: 'succeeded',

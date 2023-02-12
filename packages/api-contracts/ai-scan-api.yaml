@@ -309,7 +309,7 @@ components:
                         $ref: '#/components/schemas/ScanReport'
                 run:
                     $ref: '#/components/schemas/ScanRun'
-                authenticationResult:
+                authentication:
                     $ref: '#/components/schemas/AuthenticationResult'
         WebApiError:
             type: object

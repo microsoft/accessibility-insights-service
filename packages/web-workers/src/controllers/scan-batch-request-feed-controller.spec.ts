@@ -313,7 +313,7 @@ function setupOnDemandPageScanRunResultProviderMock(
                           }),
                     websiteScanRefs: websiteScanRefs.length > 0 ? websiteScanRefs : undefined,
                     ...(request.privacyScan === undefined ? {} : { privacyScan: request.privacyScan }),
-                    ...(request.authenticationType === undefined ? {} : { authenticationResult: { hint: request.authenticationType } }),
+                    ...(request.authenticationType === undefined ? {} : { authentication: { hint: request.authenticationType } }),
                 };
 
                 return result;
