@@ -30,7 +30,7 @@ export class CrawlRunner {
 
         this.logger.logInfo('Starting web page crawling.');
 
-        let result: string[] | undefined;
+        let result: string[] = [];
         try {
             const commonOptions = await this.getCommonCrawlOptions();
             const crawlerRunOptions: CrawlerRunOptions = {
