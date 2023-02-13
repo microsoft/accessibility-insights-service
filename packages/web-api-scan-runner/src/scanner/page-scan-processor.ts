@@ -23,7 +23,12 @@ export class PageScanProcessor {
     public async scan(runnerScanMetadata: RunnerScanMetadata, pageScanResult: OnDemandPageScanResult): Promise<AxeScanResults> {
         let axeScanResults: AxeScanResults;
         try {
-            await this.openPage(runnerScanMetadata.url);
+            const enableAuthentication = pageScanResult.authentication?.hint !== undefined;
+            await this.openPage(runnerScanMetadata.url, enableAuthentication);
+            if (enableAuthentication === true) {
+                this.setAuthenticationResult(pageScanResult);
+            }
+
             if (!isEmpty(this.page.lastBrowserError)) {
                 return { error: this.page.lastBrowserError, pageResponseCode: this.page.lastBrowserError.statusCode };
             }
@@ -57,9 +62,9 @@ export class PageScanProcessor {
         };
     }
 
-    private async openPage(url: string): Promise<void> {
+    private async openPage(url: string, enableAuthentication: boolean): Promise<void> {
         await this.page.create();
-        await this.page.navigate(url);
+        await this.page.navigate(url, { enableAuthentication });
     }
 
     private async closePage(): Promise<void> {
@@ -67,6 +72,22 @@ export class PageScanProcessor {
             await this.page.close();
         } catch (error) {
             this.logger.logError('An error occurred while closing web browser.', { error: System.serializeError(error) });
+        }
+    }
+
+    private setAuthenticationResult(pageScanResult: OnDemandPageScanResult): void {
+        const authenticationResult = this.page.lastAuthenticationResult;
+        if (authenticationResult === undefined) {
+            pageScanResult.authentication = {
+                ...pageScanResult.authentication,
+                state: 'notDetected',
+            };
+        } else {
+            pageScanResult.authentication = {
+                ...pageScanResult.authentication,
+                detected: authenticationResult.authenticationType,
+                state: authenticationResult.authenticated === true ? 'succeeded' : 'failed',
+            };
         }
     }
 }

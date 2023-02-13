@@ -5,10 +5,11 @@ import 'reflect-metadata';
 
 import { IMock, It, Mock, Times } from 'typemoq';
 import { GlobalLogger } from 'logger';
-import { AxeScanResults, Page, BrowserError } from 'scanner-global-library';
+import { AxeScanResults, Page, BrowserError, ResourceAuthenticationResult } from 'scanner-global-library';
 import { OnDemandPageScanResult } from 'storage-documents';
 import { System } from 'common';
 import * as Puppeteer from 'puppeteer';
+import { cloneDeep } from 'lodash';
 import { AxeScanner } from '../scanner/axe-scanner';
 import { PageScanProcessor } from './page-scan-processor';
 import { DeepScanner } from './deep-scanner';
@@ -21,9 +22,9 @@ describe(PageScanProcessor, () => {
     let puppeteerPageMock: IMock<Puppeteer.Page>;
     let testSubject: PageScanProcessor;
     let axeScanResults: AxeScanResults;
+    let pageScanResult: OnDemandPageScanResult;
 
     const url = 'url';
-    const pageScanResult = { id: 'id' } as OnDemandPageScanResult;
     const pageScreenshot = 'page screenshot';
     const pageSnapshot = 'page snapshot';
 
@@ -34,6 +35,8 @@ describe(PageScanProcessor, () => {
         deepScannerMock = Mock.ofType<DeepScanner>();
         puppeteerPageMock = Mock.ofType<Puppeteer.Page>();
         axeScanResults = { scannedUrl: url } as AxeScanResults;
+        pageScanResult = { id: 'id' } as OnDemandPageScanResult;
+
         pageMock
             .setup((o) => o.getPageScreenshot())
             .returns(() => Promise.resolve(pageScreenshot))
@@ -72,6 +75,48 @@ describe(PageScanProcessor, () => {
 
         const results = await testSubject.scan(scanMetadata, pageScanResult);
 
+        expect(results).toEqual(axeScanResults);
+    });
+
+    it('scan with authentication enabled', async () => {
+        const scanMetadata = {
+            url: url,
+            id: 'id',
+        };
+        axeScanResults = { ...axeScanResults, pageScreenshot, pageSnapshot };
+
+        setupOpenPage(true);
+        setupClosePage();
+        axeScannerMock
+            .setup((s) => s.scan(pageMock.object))
+            .returns(() => Promise.resolve(axeScanResults))
+            .verifiable();
+        deepScannerMock.setup((d) => d.runDeepScan(It.isAny(), It.isAny(), It.isAny())).verifiable(Times.never());
+        pageScanResult = {
+            ...pageScanResult,
+            authentication: { hint: 'azure-ad' },
+        };
+
+        const lastAuthenticationResult = {
+            authenticationType: 'azure-ad',
+            authenticated: true,
+        } as ResourceAuthenticationResult;
+        pageMock
+            .setup((p) => p.lastAuthenticationResult)
+            .returns(() => lastAuthenticationResult)
+            .verifiable();
+
+        const results = await testSubject.scan(scanMetadata, pageScanResult);
+
+        const expectedPageScanResult = cloneDeep({
+            ...pageScanResult,
+            authentication: {
+                hint: 'azure-ad',
+                detected: 'azure-ad',
+                state: 'succeeded',
+            },
+        });
+        expect(pageScanResult).toEqual(expectedPageScanResult);
         expect(results).toEqual(axeScanResults);
     });
 
@@ -181,9 +226,9 @@ describe(PageScanProcessor, () => {
         await testSubject.scan(scanMetadata, pageScanResult);
     });
 
-    function setupOpenPage(): void {
+    function setupOpenPage(enableAuthentication: boolean = false): void {
         pageMock.setup((p) => p.create()).verifiable();
-        pageMock.setup((p) => p.navigate(url)).verifiable();
+        pageMock.setup((p) => p.navigate(url, { enableAuthentication })).verifiable();
     }
 
     function setupClosePage(): void {

@@ -17,7 +17,7 @@ import { PageNavigator, NavigationResponse } from './page-navigator';
 import { PageNavigationTiming } from './page-timeout-config';
 import { scrollToTop } from './page-client-lib';
 import { PageNetworkTracer } from './page-network-tracer';
-import { ResourceAuthenticator } from './authenticator/resource-authenticator';
+import { ResourceAuthenticator, ResourceAuthenticationResult } from './authenticator/resource-authenticator';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -132,7 +132,10 @@ describe(Page, () => {
         });
 
         it('navigates to page with authentication', async () => {
-            const authNavigationResponse = { httpResponse: { url: () => 'localhost/1' } } as NavigationResponse;
+            const authenticationResult = {
+                navigationResponse: { httpResponse: { url: () => 'localhost/1' } },
+                authenticated: true,
+            } as ResourceAuthenticationResult;
             const reloadNavigationResponse = { httpResponse: { url: () => 'localhost/2' } } as NavigationResponse;
             pageNavigatorMock
                 .setup((o) => o.navigatePageOperation(url, puppeteerPageMock.object))
@@ -140,7 +143,7 @@ describe(Page, () => {
                 .verifiable();
             resourceAuthenticatorMock
                 .setup((o) => o.authenticate(puppeteerPageMock.object))
-                .returns(() => Promise.resolve(authNavigationResponse))
+                .returns(() => Promise.resolve(authenticationResult))
                 .verifiable();
             pageNavigatorMock
                 .setup(async (o) => o.reload(puppeteerPageMock.object))
@@ -150,7 +153,7 @@ describe(Page, () => {
             await page.navigate(url, { enableAuthentication: true });
 
             expect(page.lastNavigationResponse).toEqual(reloadNavigationResponse.httpResponse);
-            expect(page.authenticated).toEqual(true);
+            expect(page.lastAuthenticationResult).toEqual(authenticationResult);
         });
 
         it('handles browser error on navigate', async () => {

@@ -35,3 +35,4 @@ copyright-header.txt
 **/*.ps1
 **/*.cmd
 .yarn/
+**/*.patch

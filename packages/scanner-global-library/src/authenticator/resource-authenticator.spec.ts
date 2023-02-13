@@ -42,14 +42,23 @@ describe(ResourceAuthenticator, () => {
     });
 
     it('should authenticate resource', async () => {
-        const navigationResponse = { httpResponse: { url: () => 'url' } } as NavigationResponse;
+        const authenticationResult = {
+            navigationResponse: { httpResponse: { url: () => 'url' } } as NavigationResponse,
+            loginPageType: 'MicrosoftAzure',
+            authenticationType: 'azure-ad',
+            authenticated: true,
+        };
         loginPageDetectorMock
             .setup((o) => o.getLoginPageType(puppeteerPageMock.object))
             .returns(() => 'MicrosoftAzure')
             .verifiable();
         loginPageClientMock
             .setup((o) => o.login(puppeteerPageMock.object))
-            .returns(() => Promise.resolve(navigationResponse))
+            .returns(() => Promise.resolve(authenticationResult.navigationResponse))
+            .verifiable();
+        loginPageClientMock
+            .setup((o) => o.authenticationType)
+            .returns(() => 'azure-ad')
             .verifiable();
         loginPageClientFactoryMock
             .setup((o) => o.getPageClient('MicrosoftAzure'))
@@ -57,7 +66,7 @@ describe(ResourceAuthenticator, () => {
             .verifiable();
 
         const response = await resourceAuthenticator.authenticate(puppeteerPageMock.object);
-        expect(response).toEqual(navigationResponse);
+        expect(response).toEqual(authenticationResult);
     });
 
     it('should skip if no login page detected', async () => {

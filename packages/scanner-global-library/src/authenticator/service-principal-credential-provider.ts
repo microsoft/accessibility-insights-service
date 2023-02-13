@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 import { injectable, inject, optional } from 'inversify';
+import { iocTypes } from '../ioc-types';
 
 export interface ServicePrincipalCredential {
     name: string;
@@ -14,7 +15,7 @@ export type CredentialProvider = () => Promise<ServicePrincipalCredential>;
 export class ServicePrincipalCredentialProvider {
     constructor(
         @optional()
-        @inject('azureAuthClientCredentialProvider')
+        @inject(iocTypes.AzureAuthClientCredentialProvider)
         private readonly azureAuthClientCredentialProvider?: CredentialProvider,
     ) {}
 

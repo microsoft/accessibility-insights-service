@@ -3,10 +3,12 @@
 
 import * as Puppeteer from 'puppeteer';
 import { inject, optional, injectable } from 'inversify';
+import { AuthenticationType } from 'storage-documents';
 import { PageNavigator, NavigationResponse } from '../page-navigator';
 import { ServicePrincipalCredentialProvider } from './service-principal-credential-provider';
 
 export interface LoginPageClient {
+    authenticationType: AuthenticationType;
     login(page: Puppeteer.Page): Promise<NavigationResponse>;
 }
 
@@ -15,6 +17,8 @@ export interface LoginPageClient {
  */
 @injectable()
 export class AzureLoginPageClient implements LoginPageClient {
+    public readonly authenticationType = 'azure-ad';
+
     private readonly selectorTimeoutMsec = 10000;
 
     constructor(

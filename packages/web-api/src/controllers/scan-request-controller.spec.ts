@@ -343,17 +343,17 @@ describe(ScanRequestController, () => {
             guidGeneratorMock.verifyAll();
         });
 
-        it.each(['azure-ad', undefined])('accepts request with authenticationType=%s', async (authType: AuthenticationType) => {
+        it.each(['azure-ad', undefined])('accepts request with authenticationType = %s', async (authenticationType: AuthenticationType) => {
             const guid1 = '1e9cefa6-538a-6df0-aaaa-ffffffffffff';
             const guid2 = '1e9cefa6-538a-6df0-bbbb-ffffffffffff';
             guidGeneratorMock.setup((g) => g.createGuid()).returns(() => guid1);
             guidGeneratorMock.setup((g) => g.createGuidFromBaseGuid(guid1)).returns(() => guid2);
             const priority = 10;
 
-            context.req.rawBody = JSON.stringify([{ url: 'https://abs/path/', priority: priority, authenticationType: authType }]);
+            context.req.rawBody = JSON.stringify([{ url: 'https://abs/path/', priority: priority, authenticationType }]);
             const expectedResponse = [{ scanId: guid2, url: 'https://abs/path/' }];
-            const expectedSavedRequest: ScanRunBatchRequest[] = authType
-                ? [{ scanId: guid2, url: 'https://abs/path/', priority: priority, authenticationType: authType }]
+            const expectedSavedRequest: ScanRunBatchRequest[] = authenticationType
+                ? [{ scanId: guid2, url: 'https://abs/path/', priority: priority, authenticationType }]
                 : [{ scanId: guid2, url: 'https://abs/path/', priority: priority }];
             scanDataProviderMock.setup(async (o) => o.writeScanRunBatchRequest(guid1, expectedSavedRequest)).verifiable(Times.once());
 

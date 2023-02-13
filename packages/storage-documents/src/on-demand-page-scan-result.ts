@@ -4,12 +4,16 @@
 import { ItemType } from './item-type';
 import { StorageDocument } from './storage-document';
 import { ScanGroupType } from './website-scan-result';
-import { PrivacyScan, AuthenticationType } from './on-demand-page-scan-batch-request';
+import { PrivacyScan } from './on-demand-page-scan-batch-request';
 import { ReportScanRunResult } from './report-generator-request';
 
+export declare type OnDemandPageScanRunState = 'pending' | 'accepted' | 'queued' | 'running' | 'report' | 'completed' | 'failed';
 export declare type ScanState = 'pending' | 'pass' | 'fail';
 export declare type NotificationState = 'pending' | 'queued' | 'queueFailed' | 'sending' | 'sent' | 'sendFailed';
 export declare type NotificationErrorTypes = 'InternalError' | 'HttpErrorCode';
+export declare type AuthenticationState = 'succeeded' | 'failed' | 'notDetected';
+export declare type CookieBannerType = 'standard';
+export declare type AuthenticationType = 'azure-ad';
 
 export declare type ReportFormat =
     | 'axe'
@@ -20,8 +24,6 @@ export declare type ReportFormat =
     | 'consolidated.json'
     | 'page.mhtml'
     | 'page.png';
-
-export declare type OnDemandPageScanRunState = 'pending' | 'accepted' | 'queued' | 'running' | 'report' | 'completed' | 'failed';
 
 export declare type ScanErrorTypes =
     | 'UrlNavigationTimeout'
@@ -59,7 +61,13 @@ export interface OnDemandPageScanResult extends StorageDocument {
     subRuns?: WorkflowRunResults;
     notification?: ScanCompletedNotification;
     privacyScan?: PrivacyScan;
-    authenticationType?: AuthenticationType;
+    authentication?: AuthenticationResult;
+}
+
+export interface AuthenticationResult {
+    hint: AuthenticationType;
+    detected?: AuthenticationType;
+    state?: AuthenticationState;
 }
 
 export interface ScanCompletedNotification {

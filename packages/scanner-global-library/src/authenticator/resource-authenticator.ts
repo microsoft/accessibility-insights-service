@@ -4,9 +4,18 @@
 import { injectable, inject, optional } from 'inversify';
 import * as Puppeteer from 'puppeteer';
 import { GlobalLogger } from 'logger';
+import { AuthenticationType } from 'storage-documents';
+import { System } from 'common';
 import { NavigationResponse } from '../page-navigator';
-import { LoginPageDetector } from './login-page-detector';
+import { LoginPageDetector, LoginPageType } from './login-page-detector';
 import { LoginPageClientFactory } from './login-page-client-factory';
+
+export interface ResourceAuthenticationResult {
+    navigationResponse?: NavigationResponse;
+    loginPageType?: LoginPageType;
+    authenticationType?: AuthenticationType;
+    authenticated?: boolean;
+}
 
 @injectable()
 export class ResourceAuthenticator {
@@ -16,15 +25,37 @@ export class ResourceAuthenticator {
         @inject(GlobalLogger) @optional() private readonly logger: GlobalLogger,
     ) {}
 
-    public async authenticate(page: Puppeteer.Page): Promise<NavigationResponse> {
+    public async authenticate(page: Puppeteer.Page): Promise<ResourceAuthenticationResult> {
         const loginPageType = this.loginPageDetector.getLoginPageType(page);
         if (loginPageType === undefined) {
             return undefined;
         }
 
-        this.logger.logInfo(`Detected ${loginPageType} login page type.`, { loginPageType });
         const loginPageClient = this.loginPageClientFactory.getPageClient(loginPageType);
+        const navigationResponse = await loginPageClient.login(page);
 
-        return loginPageClient.login(page);
+        const authenticationType = loginPageClient.authenticationType;
+        const authenticated = navigationResponse.browserError === undefined;
+        if (authenticated === true) {
+            this.logger.logInfo(`Page was successfully authenticated.`, {
+                loginPageType,
+                authenticationType,
+                authenticated: `${authenticated}`,
+            });
+        } else {
+            this.logger.logError(`Page authentication has failed.`, {
+                loginPageType,
+                authenticationType,
+                authenticated: `${authenticated}`,
+                error: System.serializeError(navigationResponse.browserError),
+            });
+        }
+
+        return {
+            navigationResponse,
+            loginPageType,
+            authenticationType,
+            authenticated,
+        };
     }
 }

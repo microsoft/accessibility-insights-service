@@ -1,8 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+import { AuthenticationType } from './scan-result-response';
+
 export declare type CookieBannerType = 'standard';
-export declare type AuthenticationType = 'azure-ad';
+
 /**
  * Defines REST API HTTP POST scan request contract
  */
@@ -21,6 +23,9 @@ export interface ScanRunRequest {
      * Privacy scan request takes precedence over accessibility scan request
      */
     privacyScan?: PrivacyScan;
+    /**
+     * Resource authentication type hint
+     */
     authenticationType?: AuthenticationType;
 }
 
