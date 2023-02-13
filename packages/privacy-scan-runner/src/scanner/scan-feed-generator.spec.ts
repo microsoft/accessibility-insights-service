@@ -80,12 +80,12 @@ describe(ScanFeedGenerator, () => {
         loggerMock.verifyAll();
     });
 
-    it('do not queue scan requests if no discovered pages', async () => {
+    it('do not queue scan requests if no known pages', async () => {
         loggerMock.setup((o) => o.logInfo(`Found no known pages to scan.`)).verifiable();
         await scanFeedGenerator.queuePrivacyPages(websiteScanResult, pageScanResult);
     });
 
-    it('queue scan requests for new discovered pages', async () => {
+    it('queue scan requests for known pages', async () => {
         const newPages = ['page3', 'page4'];
         const scanRequests = createScanRequests(newPages);
         const pageScans = createPageScans(newPages);

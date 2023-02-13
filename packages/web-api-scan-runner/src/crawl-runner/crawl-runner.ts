@@ -47,7 +47,10 @@ export class CrawlRunner {
             return undefined;
         }
 
-        this.logger.logInfo(`Web page crawling completed successfully. Found ${result ? result.length : 0} urls.`);
+        this.logger.logInfo(`Crawler found ${result ? result.length : 0} urls on web page.`, {
+            discoveryPatterns: JSON.stringify(discoveryPatterns),
+            discoveredUrls: JSON.stringify(result),
+        });
 
         return result;
     }
