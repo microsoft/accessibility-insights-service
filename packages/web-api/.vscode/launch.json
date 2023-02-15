@@ -2,7 +2,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Attach to Azure Functions host",
+            "name": "Attach to web-api",
             "type": "node",
             "request": "attach",
             "port": 9229,
