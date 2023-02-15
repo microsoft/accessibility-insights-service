@@ -39,20 +39,4 @@ describe(UserAgentPlugin, () => {
 
         await userAgentPlugin.onPageCreated(puppeteerPageMock.object);
     });
-
-    it('should keep non-Windows platform', async () => {
-        puppeteerBrowserStub = {
-            userAgent: () => Promise.resolve(linuxUserAgent),
-        } as Puppeteer.Browser;
-        puppeteerPageMock
-            .setup((o) => o.browser())
-            .returns(() => puppeteerBrowserStub)
-            .verifiable();
-        puppeteerPageMock
-            .setup((o) => o.setUserAgent(linuxUserAgent))
-            .returns(() => Promise.resolve())
-            .verifiable();
-
-        await userAgentPlugin.onPageCreated(puppeteerPageMock.object);
-    });
 });

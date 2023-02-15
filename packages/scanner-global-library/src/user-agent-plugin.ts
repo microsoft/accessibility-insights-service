@@ -24,7 +24,7 @@ export class UserAgentPlugin extends PuppeteerExtraPlugin {
         const platform = 'X11; Linux x86_64';
 
         let userAgent = await page.browser().userAgent();
-        userAgent = userAgent.replace(/(.*)(Windows[^)]*)(.*)/i, `$1${platform}$3`);
+        userAgent = userAgent.replace(/([^(]*\()([^)]*)(.*)/i, `$1${platform}$3`);
 
         await page.setUserAgent(userAgent);
     }
