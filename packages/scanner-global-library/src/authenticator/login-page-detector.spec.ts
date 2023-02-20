@@ -21,10 +21,19 @@ describe(LoginPageDetector, () => {
         puppeteerPageMock.verifyAll();
     });
 
-    it('should return MicrosoftAzure client type', () => {
+    it('should return MicrosoftAzure client type for Microsoft Azure login', () => {
         puppeteerPageMock
             .setup((o) => o.url())
             .returns(() => 'https://login.MicrosoftOnline.com/12345-67890/oauth2/authorize?client_id=1')
+            .verifiable();
+
+        expect(loginPageDetector.getLoginPageType(puppeteerPageMock.object)).toEqual('MicrosoftAzure');
+    });
+
+    it('should return MicrosoftAzure client type for Microsoft Live login', () => {
+        puppeteerPageMock
+            .setup((o) => o.url())
+            .returns(() => 'https://login.live.com/login.srf?wa=wsignin1.0&rpsnv=13')
             .verifiable();
 
         expect(loginPageDetector.getLoginPageType(puppeteerPageMock.object)).toEqual('MicrosoftAzure');

@@ -88,8 +88,8 @@ module.exports = (env) => {
                         to: '',
                     },
                     {
-                        context: '.',
-                        from: './blank-page.html',
+                        context: '../../packages/scanner-global-library',
+                        from: 'blank-page.html',
                         to: '',
                     },
                 ],

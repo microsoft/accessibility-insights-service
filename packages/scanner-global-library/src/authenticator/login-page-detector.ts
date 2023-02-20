@@ -9,6 +9,7 @@ export declare type LoginPageType = 'MicrosoftAzure';
 
 export const loginPageDomain = {
     MicrosoftAzure: 'login.microsoftonline.com',
+    MicrosoftLive: 'login.live.com',
 };
 
 @injectable()
@@ -21,6 +22,7 @@ export class LoginPageDetector {
 
         switch (url.hostname) {
             case loginPageDomain.MicrosoftAzure:
+            case loginPageDomain.MicrosoftLive:
                 return 'MicrosoftAzure';
             default:
                 return undefined;
