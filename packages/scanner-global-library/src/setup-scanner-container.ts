@@ -3,11 +3,13 @@
 
 import * as inversify from 'inversify';
 import { cloudAxeConfiguration, localAxeConfiguration } from './axe-scanner/axe-configuration';
+import { webAxeRunOptions } from './axe-scanner/axe-run-options';
 import { AxePuppeteerFactory } from './axe-scanner/axe-puppeteer-factory';
 import { iocTypes } from './ioc-types';
 
 export function setupCloudScannerContainer(container: inversify.Container): inversify.Container {
     container.bind(iocTypes.AxeConfiguration).toConstantValue(cloudAxeConfiguration);
+    container.bind(iocTypes.AxeRunOptions).toConstantValue(webAxeRunOptions);
     container.bind(AxePuppeteerFactory).toSelf().inSingletonScope();
 
     return container;
@@ -15,6 +17,7 @@ export function setupCloudScannerContainer(container: inversify.Container): inve
 
 export function setupLocalScannerContainer(container: inversify.Container): inversify.Container {
     container.bind(iocTypes.AxeConfiguration).toConstantValue(localAxeConfiguration);
+    container.bind(iocTypes.AxeRunOptions).toConstantValue(webAxeRunOptions);
 
     return container;
 }

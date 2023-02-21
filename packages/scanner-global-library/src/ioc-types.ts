@@ -3,5 +3,6 @@
 
 export const iocTypes = {
     AxeConfiguration: 'AxeConfiguration',
+    AxeRunOptions: 'AxeRunOptions',
     AzureAuthClientCredentialProvider: 'azureAuthClientCredentialProvider',
 };
