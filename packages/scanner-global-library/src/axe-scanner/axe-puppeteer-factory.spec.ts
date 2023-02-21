@@ -8,7 +8,6 @@ import { AxePuppeteer } from '@axe-core/puppeteer';
 import * as Puppeteer from 'puppeteer';
 import { IMock, Mock, MockBehavior, Times } from 'typemoq';
 import { AxePuppeteerFactory } from './axe-puppeteer-factory';
-import { RuleExclusion } from './rule-exclusion';
 import { AxeConfiguration } from './axe-configuration';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -23,7 +22,7 @@ describe('AxePuppeteerFactory', () => {
         page = Mock.ofType<Puppeteer.Page>();
         fsMock = Mock.ofInstance(fs, MockBehavior.Strict);
         axeConfiguration = { allowedOrigins: ['test origin'] };
-        testSubject = new AxePuppeteerFactory(axeConfiguration, new RuleExclusion(), fsMock.object);
+        testSubject = new AxePuppeteerFactory(axeConfiguration, fsMock.object);
     });
 
     it('create axe puppeteer instance', async () => {

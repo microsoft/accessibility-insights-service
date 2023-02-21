@@ -7,14 +7,12 @@ import { inject, injectable } from 'inversify';
 import { isEmpty } from 'lodash';
 import * as Puppeteer from 'puppeteer';
 import { iocTypes } from '../ioc-types';
-import { RuleExclusion } from './rule-exclusion';
 import { AxeConfiguration } from './axe-configuration';
 
 @injectable()
 export class AxePuppeteerFactory {
     constructor(
         @inject(iocTypes.AxeConfiguration) private readonly axeConfiguration: AxeConfiguration,
-        private readonly ruleExclusion: RuleExclusion = new RuleExclusion(),
         private readonly fileSystemObj: typeof fs = fs,
     ) {}
 
@@ -23,7 +21,6 @@ export class AxePuppeteerFactory {
 
         return new AxePuppeteer(page, axeSource)
             .configure(this.axeConfiguration)
-            .disableRules(this.ruleExclusion.accessibilityRuleExclusionList)
             .setLegacyMode(legacyMode);
     }
 
