@@ -19,9 +19,7 @@ export class AxePuppeteerFactory {
     public async createAxePuppeteer(page: Puppeteer.Page, contentSourcePath?: string, legacyMode: boolean = false): Promise<AxePuppeteer> {
         const axeSource = await this.getAxeSource(contentSourcePath);
 
-        return new AxePuppeteer(page, axeSource)
-            .configure(this.axeConfiguration)
-            .setLegacyMode(legacyMode);
+        return new AxePuppeteer(page, axeSource).configure(this.axeConfiguration).setLegacyMode(legacyMode);
     }
 
     private async getAxeSource(contentSourcePath?: string): Promise<string> {
