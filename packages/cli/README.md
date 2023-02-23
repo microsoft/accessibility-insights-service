@@ -233,3 +233,24 @@ If the results do not match the baseline file, a new baseline will be written to
 type: boolean
 describe: Use with --baselineFile to update the baseline file in-place, rather than writing any updated baseline to the output directory.
 ```
+
+-   authType: --authType
+
+```sh
+type: string
+describe: For sites with authenticated pages, specify the authentication type. The CLI currently supports "AAD" (Azure Active Directory). Use with --serviceAccountName and --serviceAccountPassword.
+```
+
+-   serviceAccountName: --serviceAccountName
+
+```sh
+type: string
+describe: For sites with authenticated pages, set the email address for the non-people service account.
+```
+
+-   serviceAccountPassword: --serviceAccountPassword
+
+```sh
+type: string
+describe: For sites with authenticated pages, set the password for the non-people service account.
+```
