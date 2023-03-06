@@ -70,6 +70,7 @@ export class PageNavigator {
                 ...opResult.navigationTiming,
                 ...postNavigationPageTiming,
             } as PageNavigationTiming,
+            browserError: opResult.browserError,
         };
     }
 
@@ -94,6 +95,7 @@ export class PageNavigator {
                 ...opResult.navigationTiming,
                 ...postNavigationPageTiming,
             } as PageNavigationTiming,
+            browserError: opResult.browserError,
         };
     }
 
