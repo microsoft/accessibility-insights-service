@@ -3,7 +3,7 @@
 
 import 'reflect-metadata';
 
-import { IMock, Mock } from 'typemoq';
+import { IMock, Mock, It, Times } from 'typemoq';
 import { Page, HTTPResponse } from 'puppeteer';
 import { PageResponseProcessor } from './page-response-processor';
 import { PageConfigurator } from './page-configurator';
@@ -52,6 +52,28 @@ describe(PageNavigationHooks, () => {
 
     it('preNavigation', async () => {
         pageConfiguratorMock.setup((p) => p.configurePage(pageMock.object)).verifiable();
+        pageMock
+            .setup((o) => o.listenerCount('dialog'))
+            .returns(() => 0)
+            .verifiable();
+        pageMock
+            .setup((o) => o.on('dialog', It.isAny()))
+            .returns(() => undefined)
+            .verifiable();
+
+        await navigationHooks.preNavigation(pageMock.object);
+    });
+
+    it('preNavigation call on reenter', async () => {
+        pageConfiguratorMock.setup((p) => p.configurePage(pageMock.object)).verifiable();
+        pageMock
+            .setup((o) => o.listenerCount('dialog'))
+            .returns(() => 1)
+            .verifiable();
+        pageMock
+            .setup((o) => o.on('dialog', It.isAny()))
+            .returns(() => undefined)
+            .verifiable(Times.never());
 
         await navigationHooks.preNavigation(pageMock.object);
     });

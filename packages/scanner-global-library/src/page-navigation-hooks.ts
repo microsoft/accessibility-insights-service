@@ -21,8 +21,8 @@ export class PageNavigationHooks {
     ) {}
 
     public async preNavigation(page: Puppeteer.Page): Promise<void> {
-        // Configure page settings before navigating to URL
         await this.pageConfigurator.configurePage(page);
+        this.dismissAlertBox(page);
     }
 
     public async postNavigation(
@@ -51,6 +51,16 @@ export class PageNavigationHooks {
         await this.disableAnimation(page);
 
         return this.pageRenderingHandler.waitForPageToCompleteRendering(page, this.scrollTimeoutMsecs, this.pageRenderingTimeoutMsecs);
+    }
+
+    private dismissAlertBox(page: Puppeteer.Page): void {
+        const listenerCount = page.listenerCount('dialog');
+        if (listenerCount === 0) {
+            page.on('dialog', async (dialog) => {
+                // dialog.dismiss() can terminate page network connection
+                await dialog.accept();
+            });
+        }
     }
 
     private async disableAnimation(page: Puppeteer.Page): Promise<void> {
