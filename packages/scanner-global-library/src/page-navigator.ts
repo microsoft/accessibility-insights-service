@@ -100,6 +100,7 @@ export class PageNavigator {
     }
 
     public async navigatePageOperation(url: string, page: Puppeteer.Page): Promise<NavigationResponse> {
+        await this.pageNavigationHooks.preNavigation(page);
         const opResult = await this.invokePageNavigationOperation(this.createPageNavigationOperation('goto', page, url));
         if (opResult.browserError) {
             return {
@@ -336,10 +337,13 @@ export class PageNavigator {
             try {
                 return await page.waitForNavigation({ waitUntil: 'networkidle0', timeout: puppeteerTimeoutConfig.networkIdleTimeoutMsec });
             } catch (error) {
-                this.logger?.logWarn('Error while waiting for page network idle state.', {
-                    timeout: `${puppeteerTimeoutConfig.networkIdleTimeoutMsec}`,
-                    error: System.serializeError(error),
-                });
+                this.logger?.logWarn(
+                    `Page still has network activity after ${puppeteerTimeoutConfig.networkIdleTimeoutMsec / 1000} secs.`,
+                    {
+                        timeout: `${puppeteerTimeoutConfig.networkIdleTimeoutMsec}`,
+                        error: System.serializeError(error),
+                    },
+                );
 
                 return undefined;
             }
