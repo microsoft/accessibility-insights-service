@@ -34,6 +34,8 @@ if ([string]::IsNullOrEmpty($global:keyvault)) {
 
 installBootstrapPackages
 
+./install-docker.ps1
+
 ./pull-image-from-container-registry.ps1 -k $global:keyvault
 
 Write-Output "Invoking custom pool startup script"
