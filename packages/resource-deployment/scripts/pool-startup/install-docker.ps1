@@ -1,7 +1,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
 
-function instllDocker() {
+function installDocker() {
     Write-Output "Installing WSL..."
     wsl --install --no-distribution
 
@@ -12,7 +12,6 @@ function instllDocker() {
     Start-Process "D:\Docker Desktop Installer.exe" -Wait -NoNewWindow "install --quiet --accept-license"
 
     Write-Output "Docker Desktop successfully installed. Rebooting VM..."
-
     shutdown /r /t 0 /d p:4:2
 }
 
@@ -22,6 +21,6 @@ if ($? -eq "True") {
     docker --version
 }
 else {
-    Write-Host "Docker service is not running. Installing Docker service..."
-    instllDocker
+    Write-Host "Docker service not found. Installing Docker..."
+    installDocker
 }
