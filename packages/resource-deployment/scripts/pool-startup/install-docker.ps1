@@ -3,7 +3,7 @@
 
 function installDocker() {
     Write-Output "Installing WSL..."
-    wsl --install --no-distribution
+    wsl --install --no-launch
 
     Write-Output "Downloading Docker installer..."
     Invoke-WebRequest https://desktop.docker.com/win/main/amd64/Docker%20Desktop%20Installer.exe -OutFile "D:\Docker Desktop Installer.exe"
