@@ -17,7 +17,7 @@ function installDocker() {
 
 Get-Process "com.docker.service" -ErrorAction SilentlyContinue 
 if ($? -eq "True") {
-    Write-Output
+    Write-Output ""
     docker --version
 }
 else {
