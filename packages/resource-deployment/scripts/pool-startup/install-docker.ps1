@@ -17,10 +17,10 @@ function installDocker() {
 
 Get-Process "com.docker.service" -ErrorAction SilentlyContinue 
 if ($? -eq "True") {
-    Write-Host
+    Write-Output
     docker --version
 }
 else {
-    Write-Host "Docker service processes is not running. Installing Docker..."
+    Write-Output "Docker service processes is not running. Installing Docker..."
     installDocker
 }
