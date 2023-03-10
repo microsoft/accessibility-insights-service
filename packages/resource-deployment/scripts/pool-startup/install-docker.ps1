@@ -6,7 +6,7 @@ function installDocker() {
     wsl --install --no-distribution
 
     Write-Output "Downloading Docker installer..."
-    Start-BitsTransfer -Source https://desktop.docker.com/win/main/amd64/Docker%20Desktop%20Installer.exe -Destination "D:\Docker Desktop Installer.exe"
+    Invoke-WebRequest https://desktop.docker.com/win/main/amd64/Docker%20Desktop%20Installer.exe -OutFile "D:\Docker Desktop Installer.exe"
 
     Write-Output "Running Docker installer..."
     Start-Process "D:\Docker Desktop Installer.exe" -Wait -NoNewWindow "install --quiet --accept-license"
