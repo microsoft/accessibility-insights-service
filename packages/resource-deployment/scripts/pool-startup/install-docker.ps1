@@ -11,16 +11,16 @@ function installDocker() {
     Write-Output "Running Docker installer..."
     Start-Process "D:\Docker Desktop Installer.exe" -Wait -NoNewWindow "install --quiet --accept-license"
 
-    Write-Output "Docker Desktop successfully installed. Rebooting VM..."
+    Write-Output "Docker Desktop successfully installed. Rebooting machine..."
     shutdown /r /t 0 /d p:4:2
 }
 
-Get-Process "com.docker.service"
+Get-Process "com.docker.service" -ErrorAction SilentlyContinue 
 if ($? -eq "True") {
     Write-Host
     docker --version
 }
 else {
-    Write-Host "Docker service not found. Installing Docker..."
+    Write-Host "Docker service processes is not running. Installing Docker..."
     installDocker
 }
