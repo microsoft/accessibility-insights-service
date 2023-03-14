@@ -14,7 +14,8 @@
             "preLaunchTask": "run",
             "console": "integratedTerminal",
             "internalConsoleOptions": "neverOpen",
-            "smartStep": true
+            "smartStep": true,
+            "resolveSourceMapLocations": ["${workspaceFolder}/dist/**/*.js", "${workspaceFolder}/../**/dist/**/*.js"]
         }
     ]
 }
