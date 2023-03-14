@@ -15,6 +15,7 @@
             "console": "integratedTerminal",
             "internalConsoleOptions": "neverOpen",
             "smartStep": true,
+            "resolveSourceMapLocations": ["${workspaceFolder}/dist/**/*.js", "${workspaceFolder}/../**/dist/**/*.js"],
             "args": [
                 "--clientId",
                 "",

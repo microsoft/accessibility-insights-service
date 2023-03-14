@@ -15,6 +15,7 @@
             "console": "integratedTerminal",
             "internalConsoleOptions": "neverOpen",
             "smartStep": true,
+            "resolveSourceMapLocations": ["${workspaceFolder}/dist/**/*.js", "${workspaceFolder}/../**/dist/**/*.js"],
             "args": ["--crawl", "--url", "https://github.com/microsoft/accessibility-insights-service", "--maxUrls", "3", "--restart"]
         }
     ]
