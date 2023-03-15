@@ -5,7 +5,6 @@ function installDockerEngine() {
     Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force
     Install-Module -Name DockerMsftProvider -Repository PSGallery -Force
     Install-Package -Name docker -ProviderName DockerMsftProvider -Force
-    Start-Service Docker
     
     shutdown /r /t 0 /d p:4:2
 }

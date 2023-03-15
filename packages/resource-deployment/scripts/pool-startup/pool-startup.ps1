@@ -34,7 +34,7 @@ if ([string]::IsNullOrEmpty($global:keyvault)) {
 
 installBootstrapPackages
 
-./install-docker.ps1
+./install-docker-engine.ps1
 
 ./pull-image-from-container-registry.ps1 -k $global:keyvault
 
