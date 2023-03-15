@@ -100,18 +100,13 @@ describe(BatchTaskConfigGenerator, () => {
         const expectedEnvironmentSettings = getEnvironmentSettings(taskArgsString);
         const expectedTaskConfig = {
             id: 'taskId',
-            commandLine: '',
+            commandLine: `docker run --init --rm --shm-size=2gb --workdir /app -e APPINSIGHTS_INSTRUMENTATIONKEY -e KEY_VAULT_URL -e TASK_ARGUMENTS -e arg1=arg1Value -e arg2=arg2Value -e arg3=arg3Value --addon option 'allyContainerRegistry.azurecr.io/imageNameValue'`,
             resourceFiles: [
                 {
                     autoStorageContainerName: 'containerName',
                 },
             ],
             environmentSettings: expectedEnvironmentSettings,
-            containerSettings: {
-                imageName: 'allyContainerRegistry.azurecr.io/imageNameValue',
-                containerRunOptions:
-                    '--init --rm --shm-size=2gb --workdir /app -e APPINSIGHTS_INSTRUMENTATIONKEY -e KEY_VAULT_URL -e TASK_ARGUMENTS -e arg1=arg1Value -e arg2=arg2Value -e arg3=arg3Value --addon option',
-            },
             constraints: {
                 maxWallClockTime: `PT${taskRuntimeConfig.taskTimeoutInMinutes}M`,
                 retentionTime: `P${taskRuntimeConfig.retentionTimeInDays}D`,

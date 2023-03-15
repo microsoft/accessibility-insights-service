@@ -11,11 +11,7 @@
         },
         "jobManagerTask": {
             "id": "on-demand-scan-req-sender-task",
-            "commandLine": "",
-            "containerSettings": {
-                "containerRunOptions": "--init --rm --workdir /app -e APPINSIGHTS_INSTRUMENTATIONKEY -e AZURE_STORAGE_SCAN_QUEUE -e KEY_VAULT_URL",
-                "imageName": "%CONTAINER_REGISTRY_TOKEN%.azurecr.io/batch-scan-request-sender"
-            },
+            "commandLine": "docker run --init --rm --workdir /app -e APPINSIGHTS_INSTRUMENTATIONKEY -e AZURE_STORAGE_SCAN_QUEUE -e KEY_VAULT_URL '%CONTAINER_REGISTRY_TOKEN%.azurecr.io/batch-scan-request-sender'",
             "constraints": {
                 "maxWallClockTime": "PT1H",
                 "retentionTime": "P3D",

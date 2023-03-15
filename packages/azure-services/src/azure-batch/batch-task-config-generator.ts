@@ -65,13 +65,9 @@ export class BatchTaskConfigGenerator {
 
         return {
             id: taskId,
-            commandLine: '',
+            commandLine: `docker run ${containerRunOptions} '${imageName}'`,
             environmentSettings,
             resourceFiles,
-            containerSettings: {
-                imageName,
-                containerRunOptions,
-            },
             constraints: {
                 maxWallClockTime: moment.duration({ minute: batchTaskConfig.taskTimeoutInMinutes }).toISOString(),
                 retentionTime: moment.duration({ day: batchTaskConfig.retentionTimeInDays }).toISOString(),
