@@ -11,7 +11,7 @@
         },
         "jobManagerTask": {
             "id": "on-demand-send-notification-job-manager-task",
-            "commandLine": "cmd /c \"docker run --init --rm --workdir /app -e APPINSIGHTS_INSTRUMENTATIONKEY -e AZURE_STORAGE_NOTIFICATION_QUEUE -e KEY_VAULT_URL '%CONTAINER_REGISTRY_TOKEN%.azurecr.io/batch-scan-notification-manager'\"",
+            "commandLine": "cmd /c \"docker run --init --rm --workdir /app -e APPINSIGHTS_INSTRUMENTATIONKEY -e AZURE_STORAGE_NOTIFICATION_QUEUE -e KEY_VAULT_URL %CONTAINER_REGISTRY_TOKEN%.azurecr.io/batch-scan-notification-manager\"",
             "constraints": {
                 "maxWallClockTime": "PT1H",
                 "retentionTime": "P3D",

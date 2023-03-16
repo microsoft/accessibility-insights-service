@@ -65,7 +65,7 @@ export class BatchTaskConfigGenerator {
 
         return {
             id: taskId,
-            commandLine: `cmd /c "docker run ${containerRunOptions} '${imageName}'"`,
+            commandLine: `cmd /c "docker run ${containerRunOptions} ${imageName}"`,
             environmentSettings,
             resourceFiles,
             constraints: {

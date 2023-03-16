@@ -1,8 +1,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
 
-$ErrorActionPreference = "Stop"
-
 $global:rebootRequired = $false
 
 function startTranscript() {
@@ -21,30 +19,37 @@ function startTranscript() {
 
 function rebootIfRequired() {
     if ($global:rebootRequired -eq $true) {
-        shutdown /r /t 0 /d p:4:2
+        Start-Sleep -Seconds 20
+        shutdown /r /d p:4:2
     }
 }
 
 function installDockerEngine() {
+    Write-Output "Installing Docker Engine..."
+
     Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force
     Install-Module -Name DockerMsftProvider -Repository PSGallery -Force
     Install-Package -Name docker -ProviderName DockerMsftProvider -Force
-    Start-Service Docker
 
     $global:rebootRequired = $true
 }
 
 function validateDockerEngine () {
-    Write-Output "Checking Docker Engine daemon..."
-
     Get-Process "dockerd" -ErrorAction SilentlyContinue
     if ($? -eq "True") {
-        Write-Output "Docker Engine daemon is up and running."
+        Write-Output "Docker is running."
         docker info
     }
     else {
-        Write-Output "Docker Engine daemon is not running. Installing Docker Engine..."
-        installDockerEngine
+        Write-Output "Docker is not running. Starting Docker service..."
+        Start-Service Docker
+        if ($? -eq "True") {
+            Write-Output "Docker service has been started successfully."
+        }
+        else {
+            Write-Output "Docker service failed to start."
+            installDockerEngine
+        }
     }
 }
 
