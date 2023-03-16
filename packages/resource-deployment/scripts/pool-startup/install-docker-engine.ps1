@@ -4,8 +4,7 @@
 $global:rebootRequired = $false
 
 function startTranscript() {
-    $transcriptFileName = "vm-docker-install.log"
-
+    $transcriptFileName = "docker-install.log"
     $nodeRootDir = $env:AZ_BATCH_NODE_ROOT_DIR
     if ($nodeRootDir) {
         $transcriptPath = "$nodeRootDir\$transcriptFileName"
@@ -27,9 +26,9 @@ function rebootIfRequired() {
 function installDockerEngine() {
     Write-Output "Installing Docker Engine..."
 
-    Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force
-    Install-Module -Name DockerMsftProvider -Repository PSGallery -Force
-    Install-Package -Name docker -ProviderName DockerMsftProvider -Force
+    $scriptName = "$env:TEMP\install-docker-ce.ps1"
+    Invoke-WebRequest -UseBasicParsing "https://raw.githubusercontent.com/microsoft/Windows-Containers/Main/helpful_tools/Install-DockerCE/install-docker-ce.ps1" -o $scriptName
+    Invoke-Expression $scriptName
 
     $global:rebootRequired = $true
 }
@@ -41,15 +40,7 @@ function validateDockerEngine () {
         docker info
     }
     else {
-        Write-Output "Docker is not running. Starting Docker service..."
-        Start-Service Docker
-        if ($? -eq "True") {
-            Write-Output "Docker service has been started successfully."
-        }
-        else {
-            Write-Output "Docker service failed to start."
-            installDockerEngine
-        }
+        installDockerEngine
     }
 }
 
