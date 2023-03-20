@@ -27,7 +27,6 @@ class BatchTaskPropertyProviderStub extends BatchTaskPropertyProvider {
 }
 
 const appInsightsKey = 'appInsightsKeyEnvValue';
-const keyVaultUrl = 'keyVaultUrlEnvValue';
 const taskRuntimeConfig: TaskRuntimeConfig = {
     retentionTimeInDays: 1,
     taskTimeoutInMinutes: 5,
@@ -53,7 +52,6 @@ describe(BatchTaskConfigGenerator, () => {
 
         environmentSettingsMock = Mock.ofType(EnvironmentSettings);
         environmentSettingsMock.setup((s) => s.getValue('APPINSIGHTS_INSTRUMENTATIONKEY')).returns(() => appInsightsKey);
-        environmentSettingsMock.setup((s) => s.getValue('KEY_VAULT_URL')).returns(() => keyVaultUrl);
 
         testSubject = new BatchTaskConfigGenerator(batchTaskPropertyProviderStub, serviceConfigMock.object, environmentSettingsMock.object);
     });
@@ -68,7 +66,7 @@ describe(BatchTaskConfigGenerator, () => {
         const environmentSettings = getEnvironmentSettings(taskArgsString);
         const actualContainerRunOptions = testSubject.getContainerRunOptions(taskArgsString, environmentSettings);
         expect(actualContainerRunOptions).toEqual(
-            '--init --rm --shm-size=2gb --workdir /app -e APPINSIGHTS_INSTRUMENTATIONKEY -e KEY_VAULT_URL -e TASK_ARGUMENTS -e arg1=arg1Value -e arg2=arg2Value -e arg3=arg3Value --addon option',
+            '--init --rm --shm-size=2gb --workdir /app --env-file %AZ_BATCH_TASK_WORKING_DIR%\\.env -e APPINSIGHTS_INSTRUMENTATIONKEY -e TASK_ARGUMENTS -e arg1=arg1Value -e arg2=arg2Value -e arg3=arg3Value --addon option',
         );
     });
 
@@ -79,7 +77,7 @@ describe(BatchTaskConfigGenerator, () => {
         const environmentSettings = getEnvironmentSettings(taskArgsString);
         const actualContainerRunOptions = testSubject.getContainerRunOptions(taskArgsString, environmentSettings);
         expect(actualContainerRunOptions).toEqual(
-            '--init --rm --shm-size=2gb --workdir /app -e APPINSIGHTS_INSTRUMENTATIONKEY -e KEY_VAULT_URL -e TASK_ARGUMENTS -e url=https://localhost/support%20page/ --addon option',
+            '--init --rm --shm-size=2gb --workdir /app --env-file %AZ_BATCH_TASK_WORKING_DIR%\\.env -e APPINSIGHTS_INSTRUMENTATIONKEY -e TASK_ARGUMENTS -e url=https://localhost/support%20page/ --addon option',
         );
     });
 
@@ -100,7 +98,7 @@ describe(BatchTaskConfigGenerator, () => {
         const expectedEnvironmentSettings = getEnvironmentSettings(taskArgsString);
         const expectedTaskConfig = {
             id: 'taskId',
-            commandLine: `cmd /c "docker run --init --rm --shm-size=2gb --workdir /app -e APPINSIGHTS_INSTRUMENTATIONKEY -e KEY_VAULT_URL -e TASK_ARGUMENTS -e arg1=arg1Value -e arg2=arg2Value -e arg3=arg3Value --addon option allyContainerRegistry.azurecr.io/imageNameValue"`,
+            commandLine: `cmd /c "powershell.exe prepare-run.ps1 && docker run --init --rm --shm-size=2gb --workdir /app --env-file %AZ_BATCH_TASK_WORKING_DIR%\\.env -e APPINSIGHTS_INSTRUMENTATIONKEY -e TASK_ARGUMENTS -e arg1=arg1Value -e arg2=arg2Value -e arg3=arg3Value --addon option allyContainerRegistry.azurecr.io/imageNameValue"`,
             resourceFiles: [
                 {
                     autoStorageContainerName: 'containerName',
@@ -131,10 +129,7 @@ describe(BatchTaskConfigGenerator, () => {
                 name: 'APPINSIGHTS_INSTRUMENTATIONKEY',
                 value: appInsightsKey,
             },
-            {
-                name: 'KEY_VAULT_URL',
-                value: keyVaultUrl,
-            },
+
             {
                 name: 'TASK_ARGUMENTS',
                 value: taskArgsString,

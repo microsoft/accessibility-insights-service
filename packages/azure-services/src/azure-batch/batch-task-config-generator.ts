@@ -38,13 +38,11 @@ export class BatchTaskConfigGenerator {
 
     private readonly appInsightKeyValueName = 'APPINSIGHTS_INSTRUMENTATIONKEY';
 
-    private readonly keyVaultUrlValueName = 'KEY_VAULT_URL';
-
     // The --rm container option removes the container after the task finishes
     // The --workdir container option defines task working directory
     // The --init arg to reap zombie processes
     // The --shm-size increases shared memory allocated to a container
-    private readonly containerRunOptions = '--init --rm --shm-size=2gb --workdir /app';
+    private readonly containerRunOptions = '--init --rm --shm-size=2gb --workdir /app --env-file %AZ_BATCH_TASK_WORKING_DIR%\\.env';
 
     public constructor(
         @inject(BatchTaskPropertyProvider) protected readonly batchTaskPropertyProvider: BatchTaskPropertyProvider,
@@ -65,7 +63,7 @@ export class BatchTaskConfigGenerator {
 
         return {
             id: taskId,
-            commandLine: `cmd /c "docker run ${containerRunOptions} ${imageName}"`,
+            commandLine: `cmd /c "powershell.exe prepare-run.ps1 && docker run ${containerRunOptions} ${imageName}"`,
             environmentSettings,
             resourceFiles,
             constraints: {
@@ -121,7 +119,7 @@ export class BatchTaskConfigGenerator {
         // To pass environment variable from host to container value should be empty
         environmentSettings.forEach((env) => (options += `-e ${env.name} `));
 
-        return options.trimRight();
+        return options.trimEnd();
     }
 
     private getHostEnvironmentSettings(): BatchServiceModels.EnvironmentSetting[] {
@@ -129,10 +127,6 @@ export class BatchTaskConfigGenerator {
             {
                 name: this.appInsightKeyValueName,
                 value: this.environmentSettings.getValue(this.appInsightKeyValueName),
-            },
-            {
-                name: this.keyVaultUrlValueName,
-                value: this.environmentSettings.getValue(this.keyVaultUrlValueName),
             },
         ];
     }
