@@ -118,6 +118,8 @@ export class WebDriver {
     private addPuppeteerPlugins(): void {
         // Disable iframe.contentWindow evasion to avoid interference with privacy banner
         this.stealthPlugin.enabledEvasions.delete('iframe.contentWindow');
+        // Disable user-agent-override evasion as it will not set User Agent string in headless mode
+        this.stealthPlugin.enabledEvasions.delete('user-agent-override');
         // Plugin to hide puppeteer automation from a webserver
         this.puppeteerExtra.use(this.stealthPlugin);
 
