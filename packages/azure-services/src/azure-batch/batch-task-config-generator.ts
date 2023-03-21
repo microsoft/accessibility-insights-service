@@ -63,7 +63,7 @@ export class BatchTaskConfigGenerator {
 
         return {
             id: taskId,
-            commandLine: `cmd /c "powershell.exe prepare-run.ps1 && docker run ${containerRunOptions} ${imageName}"`,
+            commandLine: `cmd /c "powershell.exe %AZ_BATCH_NODE_STARTUP_WORKING_DIR%\\prepare-run.ps1 && docker run ${containerRunOptions} ${imageName}"`,
             environmentSettings,
             resourceFiles,
             constraints: {
