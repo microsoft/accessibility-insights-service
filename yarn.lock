@@ -4105,7 +4105,7 @@ __metadata:
     typemoq: ^2.1.0
     typescript: ^4.9.5
     uuid-with-v6: ^2.0.0
-    webpack: ^5.76.2
+    webpack: ^5.75.0
     webpack-cli: ^5.0.1
     webpack-node-externals: ^3.0.0
     wtfnode: ^0.9.0
@@ -4817,7 +4817,7 @@ __metadata:
     ts-loader: ^9.4.2
     typemoq: ^2.1.0
     typescript: ^4.9.5
-    webpack: ^5.76.2
+    webpack: ^5.75.0
     webpack-cli: ^5.0.1
   languageName: unknown
   linkType: soft
@@ -6483,7 +6483,7 @@ __metadata:
     ts-jest: ^27.1.4
     ts-loader: ^9.4.2
     typescript: ^4.9.5
-    webpack: ^5.76.2
+    webpack: ^5.75.0
     webpack-cli: ^5.0.1
     webpack-ignore-dynamic-require: ^1.0.0
   languageName: unknown
@@ -8298,7 +8298,7 @@ __metadata:
     typemoq: ^2.1.0
     typescript: ^4.9.5
     web-api-client: "workspace:*"
-    webpack: ^5.76.2
+    webpack: ^5.75.0
     webpack-cli: ^5.0.1
     webpack-ignore-dynamic-require: ^1.0.0
     yargs: ^17.6.2
@@ -11683,7 +11683,7 @@ __metadata:
     ts-loader: ^9.4.2
     typemoq: ^2.1.0
     typescript: ^4.9.5
-    webpack: ^5.76.2
+    webpack: ^5.75.0
     webpack-cli: ^5.0.1
   languageName: unknown
   linkType: soft
@@ -12103,7 +12103,7 @@ __metadata:
     ts-loader: ^9.4.2
     typemoq: ^2.1.0
     typescript: ^4.9.5
-    webpack: ^5.76.2
+    webpack: ^5.75.0
     webpack-cli: ^5.0.1
     webpack-ignore-dynamic-require: ^1.0.0
     yargs: ^17.6.2
@@ -12152,7 +12152,7 @@ __metadata:
     ts-loader: ^9.4.2
     typemoq: ^2.1.0
     typescript: ^4.9.5
-    webpack: ^5.76.2
+    webpack: ^5.75.0
     webpack-cli: ^5.0.1
     webpack-ignore-dynamic-require: ^1.0.0
     yargs: ^17.6.2
@@ -12812,7 +12812,7 @@ __metadata:
     ts-loader: ^9.4.2
     typemoq: ^2.1.0
     typescript: ^4.9.5
-    webpack: ^5.76.2
+    webpack: ^5.75.0
     webpack-cli: ^5.0.1
     webpack-ignore-dynamic-require: ^1.0.0
     yargs: ^17.6.2
@@ -12860,7 +12860,7 @@ __metadata:
     ts-loader: ^9.4.2
     typemoq: ^2.1.0
     typescript: ^4.9.5
-    webpack: ^5.76.2
+    webpack: ^5.75.0
     webpack-cli: ^5.0.1
     webpack-ignore-dynamic-require: ^1.0.0
     yargs: ^17.6.2
@@ -15128,7 +15128,7 @@ __metadata:
     ts-loader: ^9.4.2
     typemoq: ^2.1.0
     typescript: ^4.9.5
-    webpack: ^5.76.2
+    webpack: ^5.75.0
     webpack-cli: ^5.0.1
     webpack-ignore-dynamic-require: ^1.0.0
     yargs: ^17.6.2
@@ -15162,7 +15162,7 @@ __metadata:
     ts-loader: ^9.4.2
     typemoq: ^2.1.0
     typescript: ^4.9.5
-    webpack: ^5.76.2
+    webpack: ^5.75.0
     webpack-cli: ^5.0.1
     webpack-ignore-dynamic-require: ^1.0.0
     why-is-node-running: ^2.2.2
@@ -15222,7 +15222,7 @@ __metadata:
     ts-loader: ^9.4.2
     typemoq: ^2.1.0
     typescript: ^4.9.5
-    webpack: ^5.76.2
+    webpack: ^5.75.0
     webpack-cli: ^5.0.1
     webpack-ignore-dynamic-require: ^1.0.0
     yamlparser: ^0.0.2
@@ -15262,7 +15262,7 @@ __metadata:
     ts-loader: ^9.4.2
     typemoq: ^2.1.0
     typescript: ^4.9.5
-    webpack: ^5.76.2
+    webpack: ^5.75.0
     webpack-cli: ^5.0.1
     webpack-ignore-dynamic-require: ^1.0.0
     yargs: ^17.6.2
@@ -15306,7 +15306,7 @@ __metadata:
     ts-loader: ^9.4.2
     typemoq: ^2.1.0
     typescript: ^4.9.5
-    webpack: ^5.76.2
+    webpack: ^5.75.0
     webpack-cli: ^5.0.1
     webpack-ignore-dynamic-require: ^1.0.0
     yargs: ^17.6.2
@@ -15344,7 +15344,7 @@ __metadata:
     ts-loader: ^9.4.2
     typemoq: ^2.1.0
     typescript: ^4.9.5
-    webpack: ^5.76.2
+    webpack: ^5.75.0
     webpack-cli: ^5.0.1
     webpack-ignore-dynamic-require: ^1.0.0
   languageName: unknown
@@ -15385,7 +15385,7 @@ __metadata:
     typemoq: ^2.1.0
     typescript: ^4.9.5
     web-api-client: "workspace:*"
-    webpack: ^5.76.2
+    webpack: ^5.75.0
     webpack-cli: ^5.0.1
     webpack-ignore-dynamic-require: ^1.0.0
   languageName: unknown
@@ -15475,7 +15475,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"webpack@npm:^5.76.2":
+"webpack@npm:^5.75.0":
   version: 5.76.2
   resolution: "webpack@npm:5.76.2"
   dependencies:
