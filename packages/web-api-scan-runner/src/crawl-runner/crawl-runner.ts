@@ -56,7 +56,7 @@ export class CrawlRunner {
     }
 
     private async getCommonCrawlOptions(): Promise<Partial<CrawlerRunOptions>> {
-        const outputDir = `${this.batchConfig.taskWorkingDir}/${this.storageDirName}`;
+        const outputDir = `${this.batchConfig.taskWorkingDir}\\${this.storageDirName}`;
 
         return {
             // defines maximum number of links to discover on a page

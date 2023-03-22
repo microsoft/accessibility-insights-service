@@ -21,8 +21,7 @@ function createEnvironmentFile() {
         Set-Content $dotenvTaskPath -Value $dotenv -Force
     }
 
-    Write-Output "Created environment variables .env file with content:"
-    Get-Content $dotenvTaskPath 
+    Write-Output "Created environment variables file."
 }
 
 createEnvironmentFile

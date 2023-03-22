@@ -52,7 +52,7 @@ function setDockerDataLocation() {
     }
 }
 
-# See https://github.com/microsoft/Windows-Containers
+# See https://github.com/microsoft/Windows-Containers/tree/Main/helpful_tools/Install-DockerCE
 #
 # The Docker installation requires script to run twice with intermediate reboot. The second run is
 # configured as Windows startup task that runs on user login. We do not want to handle the startup
