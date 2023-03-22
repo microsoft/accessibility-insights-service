@@ -5,6 +5,11 @@
 
 $global:rebootRequired = $false
 
+function setPrerequisite() {
+    # Disable need to run Internet Explorer's first launch configuration
+    Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Internet Explorer\Main" -Name "DisableFirstRunCustomize" -Value 2
+}
+
 function startTranscript() {
     $transcriptFileName = "docker-install.log"
     $nodeRootDir = $env:AZ_BATCH_NODE_ROOT_DIR
@@ -21,29 +26,45 @@ function startTranscript() {
 
 function rebootIfRequired() {
     if ($global:rebootRequired -eq $true) {
+        Write-Output "Rebooting machine to complete installation..."
         Start-Sleep -Seconds 20
+        Stop-Transcript
+
         shutdown /r /d p:4:2
+    }
+    else {
+        Stop-Transcript
     }
 }
 
 # See https://learn.microsoft.com/en-us/virtualization/windowscontainers/manage-docker/configure-docker-daemon#configure-docker-with-a-configuration-file
 function setDockerDataLocation() {
     $dataRootValue = "D:\docker"
-    $configPath = "C:\ProgramData\Docker\config\daemon.json"
+    $configFolder = "C:\ProgramData\Docker\config"
+    $configName = "daemon.json"
+    $configPath = "$configFolder\$configName"
+
+    if (-not (Test-Path -Path $configFolder)) {
+        # Docker installation does not exists 
+        return
+    }
 
     if (-not (Test-Path -Path $configPath -PathType Leaf)) {
+        # Docker configuration file does not exist
         "{}" | Out-File -FilePath $configPath -Force
     }
 
     $config = Get-Content $configPath -Raw | ConvertFrom-Json
     if ($config."data-root" -and $config."data-root" -ne $dataRootValue) {
+        # Update property value
         $config."data-root" = $dataRootValue
         $global:rebootRequired = $true
     }
     elseif (-not $config."data-root") {
+        # Add property value
         $config | Add-Member -Name "data-root" -Value $dataRootValue -MemberType NoteProperty
         $global:rebootRequired = $true
-    } 
+    }
 
     $config | ConvertTo-Json | Set-Content $configPath -Force
 
@@ -62,7 +83,7 @@ function installDockerEngine() {
     Write-Output "Installing Docker Engine..."
 
     $scriptName = "$env:TEMP\install-docker-ce.ps1"
-    Invoke-WebRequest -UseBasicParsing "https://raw.githubusercontent.com/microsoft/Windows-Containers/Main/helpful_tools/Install-DockerCE/install-docker-ce.ps1" -o $scriptName
+    Invoke-WebRequest "https://raw.githubusercontent.com/microsoft/Windows-Containers/Main/helpful_tools/Install-DockerCE/install-docker-ce.ps1" -OutFile $scriptName
     Invoke-Expression "$scriptName -NoRestart"
 
     $global:rebootRequired = $true
@@ -85,7 +106,7 @@ trap {
 }
 
 startTranscript
+setPrerequisite
 validateDockerEngine
 setDockerDataLocation
-Stop-Transcript
 rebootIfRequired
