@@ -38,11 +38,12 @@ export class BatchTaskConfigGenerator {
 
     private readonly appInsightKeyValueName = 'APPINSIGHTS_INSTRUMENTATIONKEY';
 
-    // The --rm container option removes the container after the task finishes
-    // The --workdir container option defines task working directory
-    // The --init arg to reap zombie processes
-    // The --shm-size increases shared memory allocated to a container
-    private readonly containerRunOptions = '--init --rm --shm-size=2gb --workdir /app --env-file %AZ_BATCH_TASK_WORKING_DIR%\\.env';
+    // The --rm option removes the container after the task finishes
+    // The --workdir option defines task working directory
+    // The --init option reaps zombie processes
+    // The --shm-size option increases shared memory allocated to a container
+    // The -v option mounts D: drive in container
+    private readonly containerRunOptions = '--init --rm --shm-size=2gb --workdir /app -v d: --env-file %AZ_BATCH_TASK_WORKING_DIR%\\.env';
 
     public constructor(
         @inject(BatchTaskPropertyProvider) protected readonly batchTaskPropertyProvider: BatchTaskPropertyProvider,

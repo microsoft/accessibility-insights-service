@@ -5,8 +5,9 @@ $dotenvTaskPath = "$env:AZ_BATCH_TASK_WORKING_DIR\.env"
 $dotenvCommonPath = "$env:AZ_BATCH_NODE_SHARED_DIR\.env"
 
 function createEnvironmentFile() {
-    # Select environment variables to pass into Docker container
     $dotenv = ""
+
+    # Select environment variables to pass into container
     $vars = Get-ChildItem Env: | Select-Object -Property Name, Value | Where-Object { $_.Name -match "^AZ_*|^AI_*" }
     foreach ($var in $vars) {
         $dotenv += "$($var.Name)=$($var.Value)`n"
