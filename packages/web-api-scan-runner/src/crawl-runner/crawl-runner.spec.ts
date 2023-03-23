@@ -73,7 +73,7 @@ describe('CrawlRunner', () => {
             maxRequestsPerCrawl: 1000,
             silentMode: true,
             restartCrawl: true,
-            localOutputDir: `${workingDir}/crawler_storage`,
+            localOutputDir: `${workingDir}\\crawler_storage`,
         } as CrawlerRunOptions;
 
         const expectedRetVal = ['discoveredUrl'];

@@ -15,6 +15,10 @@ export class SendNotificationTaskPropertyProvider extends BatchTaskPropertyProvi
         return (await this.serviceConfig.getConfigValue('jobManagerConfig')).sendNotificationTaskImageName;
     }
 
+    public getAdditionalContainerRunOptions?(): string {
+        return '';
+    }
+
     public getUserElevationLevel(): UserAccessLevels {
         return 'admin';
     }

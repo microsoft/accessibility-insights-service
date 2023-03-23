@@ -111,7 +111,7 @@
                             "value": "[first(listConnectionStrings(resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('cosmosAccountName')), '2015-11-06').connectionStrings).connectionString]"
                         },
                         {
-                            "name": "KEY_VAULT_URL",
+                            "name": "AI_KEY_VAULT_URL",
                             "value": "[concat('https://', parameters('keyVaultName'), '.vault.azure.net/')]"
                         },
                         {

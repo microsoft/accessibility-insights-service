@@ -90,11 +90,11 @@ RESOURCE_GROUP=$resourceGroupName
 
 AZ_BATCH_ACCOUNT_NAME=$batchAccountName
 AZ_BATCH_ACCOUNT_URL=https://$batchAccountEndpoint/
-AZURE_STORAGE_SCAN_QUEUE=ondemand-scanrequest
-AZURE_STORAGE_PRIVACY_SCAN_QUEUE=privacy-scan-request
-AZURE_STORAGE_NAME=$storageAccountName
-KEY_VAULT_URL=https://$keyVault.vault.azure.net/
+AI_STORAGE_SCAN_QUEUE=ondemand-scanrequest
+AI_STORAGE_PRIVACY_SCAN_QUEUE=privacy-scan-request
+AI_KEY_VAULT_URL=https://$keyVault.vault.azure.net/
 APPINSIGHTS_INSTRUMENTATIONKEY=$appInsightInstrumentationKey
+AZURE_STORAGE_NAME=$storageAccountName
 COSMOS_DB_URL=$cosmosDbUrl
 COSMOS_DB_KEY=$cosmosDbAccessKey
 

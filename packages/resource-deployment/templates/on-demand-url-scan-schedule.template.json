@@ -11,11 +11,7 @@
         },
         "jobManagerTask": {
             "id": "on-demand-url-scan-job-manager-task",
-            "commandLine": "",
-            "containerSettings": {
-                "containerRunOptions": "--init --rm --workdir /app -e APPINSIGHTS_INSTRUMENTATIONKEY -e AZURE_STORAGE_SCAN_QUEUE -e AZURE_STORAGE_NOTIFICATION_QUEUE -e KEY_VAULT_URL",
-                "imageName": "%CONTAINER_REGISTRY_TOKEN%.azurecr.io/batch-scan-manager"
-            },
+            "commandLine": "cmd /c \"powershell.exe %AZ_BATCH_NODE_STARTUP_WORKING_DIR%\\prepare-run.ps1 && docker run --init --rm --workdir /app -v d: --env-file %AZ_BATCH_TASK_WORKING_DIR%\\.env -e APPINSIGHTS_INSTRUMENTATIONKEY %CONTAINER_REGISTRY_TOKEN%.azurecr.io/batch-scan-manager\"",
             "constraints": {
                 "maxWallClockTime": "PT1H",
                 "retentionTime": "P3D",
@@ -36,15 +32,15 @@
                 "value": "%APP_INSIGHTS_TOKEN%"
             },
             {
-                "name": "AZURE_STORAGE_SCAN_QUEUE",
+                "name": "AI_STORAGE_SCAN_QUEUE",
                 "value": "ondemand-scanrequest"
             },
             {
-                "name": "AZURE_STORAGE_NOTIFICATION_QUEUE",
+                "name": "AI_STORAGE_NOTIFICATION_QUEUE",
                 "value": "ondemand-send-notification"
             },
             {
-                "name": "KEY_VAULT_URL",
+                "name": "AI_KEY_VAULT_URL",
                 "value": "%KEY_VAULT_TOKEN%"
             }
         ],

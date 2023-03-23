@@ -125,7 +125,6 @@
     "variables": {
         "keyVaultUrl": "[concat('https://', parameters('keyVault'), '.vault.azure.net/')]",
         "vnetResource": "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnetName'))]",
-        "containerRegistryServerName": "[concat(parameters('containerRegistryName'), '.azurecr.io')]",
         "onDemandUrlScanPoolName": "on-demand-url-scan-pool",
         "onDemandScanRequestPoolName": "on-demand-scan-request-pool",
         "privacyScanPoolName": "privacy-scan-pool"
@@ -164,26 +163,12 @@
                         "imageReference": {
                             "publisher": "microsoftwindowsserver",
                             "offer": "windowsserver",
-                            "sku": "2019-datacenter-with-containers",
+                            "sku": "2019-datacenter-smalldisk",
                             "version": "latest"
                         },
                         "nodeAgentSkuId": "batch.node.windows amd64",
                         "diskEncryptionConfiguration": {
                             "targets": ["TemporaryDisk", "OsDisk"]
-                        },
-                        "containerConfiguration": {
-                            "type": "dockerCompatible",
-                            "containerImageNames": [
-                                "[concat(variables('containerRegistryServerName'), '/batch-scan-manager')]",
-                                "[concat(variables('containerRegistryServerName'), '/batch-scan-runner')]"
-                            ],
-                            "containerRegistries": [
-                                {
-                                    "registryServer": "[variables('containerRegistryServerName')]",
-                                    "username": "[parameters('containerRegistryServerUserName')]",
-                                    "password": "[parameters('containerRegistryServerPassword')]"
-                                }
-                            ]
                         }
                     }
                 },
@@ -244,29 +229,12 @@
                         "imageReference": {
                             "publisher": "microsoftwindowsserver",
                             "offer": "windowsserver",
-                            "sku": "2019-datacenter-with-containers",
+                            "sku": "2019-datacenter-smalldisk",
                             "version": "latest"
                         },
                         "nodeAgentSkuId": "batch.node.windows amd64",
                         "diskEncryptionConfiguration": {
                             "targets": ["TemporaryDisk", "OsDisk"]
-                        },
-                        "containerConfiguration": {
-                            "type": "dockerCompatible",
-                            "containerImageNames": [
-                                "[concat(variables('containerRegistryServerName'), '/batch-scan-notification-manager')]",
-                                "[concat(variables('containerRegistryServerName'), '/batch-scan-notification-runner')]",
-                                "[concat(variables('containerRegistryServerName'), '/batch-report-generator-manager')]",
-                                "[concat(variables('containerRegistryServerName'), '/batch-report-generator-runner')]",
-                                "[concat(variables('containerRegistryServerName'), '/batch-scan-request-sender')]"
-                            ],
-                            "containerRegistries": [
-                                {
-                                    "registryServer": "[variables('containerRegistryServerName')]",
-                                    "username": "[parameters('containerRegistryServerUserName')]",
-                                    "password": "[parameters('containerRegistryServerPassword')]"
-                                }
-                            ]
                         }
                     }
                 },
@@ -327,26 +295,12 @@
                         "imageReference": {
                             "publisher": "microsoftwindowsserver",
                             "offer": "windowsserver",
-                            "sku": "2019-datacenter-with-containers",
+                            "sku": "2019-datacenter-smalldisk",
                             "version": "latest"
                         },
                         "nodeAgentSkuId": "batch.node.windows amd64",
                         "diskEncryptionConfiguration": {
                             "targets": ["TemporaryDisk", "OsDisk"]
-                        },
-                        "containerConfiguration": {
-                            "type": "dockerCompatible",
-                            "containerImageNames": [
-                                "[concat(variables('containerRegistryServerName'), '/batch-privacy-scan-manager')]",
-                                "[concat(variables('containerRegistryServerName'), '/batch-privacy-scan-runner')]"
-                            ],
-                            "containerRegistries": [
-                                {
-                                    "registryServer": "[variables('containerRegistryServerName')]",
-                                    "username": "[parameters('containerRegistryServerUserName')]",
-                                    "password": "[parameters('containerRegistryServerPassword')]"
-                                }
-                            ]
                         }
                     }
                 },

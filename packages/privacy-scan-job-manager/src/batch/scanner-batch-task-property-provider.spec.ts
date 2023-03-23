@@ -14,7 +14,6 @@ describe(ScannerBatchTaskPropertyProvider, () => {
     let serviceConfigMock: IMock<ServiceConfiguration>;
 
     beforeEach(() => {
-        process.env.AZ_BATCH_NODE_SHARED_DIR = 'C:\\node_shared_dir\\';
         serviceConfigMock = Mock.ofType(ServiceConfiguration);
         testSubject = new ScannerBatchTaskPropertyProvider(serviceConfigMock.object);
     });
@@ -35,7 +34,7 @@ describe(ScannerBatchTaskPropertyProvider, () => {
 
     it('get additional container run options', () => {
         const actualRunOptions = testSubject.getAdditionalContainerRunOptions();
-        expect(actualRunOptions).toEqual('--env-file C:\\node_shared_dir\\.env');
+        expect(actualRunOptions).toEqual('');
     });
 
     it('get get user elevation level', () => {
