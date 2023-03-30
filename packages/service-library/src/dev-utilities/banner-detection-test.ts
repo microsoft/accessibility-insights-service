@@ -15,13 +15,13 @@ import {
     PageResponseProcessor,
     WebDriver,
     PageNetworkTracer,
+    UserAgentPlugin,
 } from 'scanner-global-library';
 import { ConsoleLoggerClient, GlobalLogger } from 'logger';
 import { PromiseUtils, ServiceConfiguration } from 'common';
 import yargs from 'yargs';
 import { isEmpty } from 'lodash';
 import { PrivacyScannerCore, PrivacyScenarioRunner, CookieCollector, IpGeolocationProvider } from 'privacy-scan-core';
-import { UserAgentPlugin } from 'scanner-global-library';
 
 type BannerDetectionTestArgs = {
     urlsListPath: string;
