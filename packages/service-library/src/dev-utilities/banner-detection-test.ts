@@ -21,6 +21,7 @@ import { PromiseUtils, ServiceConfiguration } from 'common';
 import yargs from 'yargs';
 import { isEmpty } from 'lodash';
 import { PrivacyScannerCore, PrivacyScenarioRunner, CookieCollector, IpGeolocationProvider } from 'privacy-scan-core';
+import { UserAgentPlugin } from 'scanner-global-library';
 
 type BannerDetectionTestArgs = {
     urlsListPath: string;
@@ -40,8 +41,9 @@ type BannerDetectionResults = {
 };
 
 const serviceConfig = new ServiceConfiguration();
+const plugin = new UserAgentPlugin(() => Promise.resolve({ webScannerBypassKey: '' }));
 const logger = new GlobalLogger([new ConsoleLoggerClient(serviceConfig, console)], process);
-const webDriver = new WebDriver(new PromiseUtils(), logger);
+const webDriver = new WebDriver(new PromiseUtils(), plugin, logger);
 const pageResponseProcessor = new PageResponseProcessor();
 const pageNavigator = new PageNavigator(
     pageResponseProcessor,
