@@ -72,12 +72,12 @@ describe(BatchTaskConfigGenerator, () => {
 
     it('create container run options with encoded URL', async () => {
         const taskArgsString = JSON.stringify({
-            url: 'https://localhost/support page/',
+            url: 'https://localhost/index.html?param1=value one&id=2',
         });
         const environmentSettings = getEnvironmentSettings(taskArgsString);
         const actualContainerRunOptions = testSubject.getContainerRunOptions(taskArgsString, environmentSettings);
         expect(actualContainerRunOptions).toEqual(
-            '--init --rm --shm-size=2gb --workdir /app -v d: --env-file %AZ_BATCH_TASK_WORKING_DIR%\\.env -e APPINSIGHTS_INSTRUMENTATIONKEY -e TASK_ARGUMENTS -e url=https://localhost/support%20page/ --addon option',
+            '--init --rm --shm-size=2gb --workdir /app -v d: --env-file %AZ_BATCH_TASK_WORKING_DIR%\\.env -e APPINSIGHTS_INSTRUMENTATIONKEY -e TASK_ARGUMENTS -e url=https%3A%2F%2Flocalhost%2Findex.html%3Fparam1%3Dvalue%20one%26id%3D2 --addon option',
         );
     });
 
