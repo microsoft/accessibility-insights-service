@@ -14,7 +14,8 @@ dist/
 drop/
 test-results/
 out/
-crawler_storage/
+crawler_storage*
+undefined*
 /data*
 ai_scan_cli_output*
 codecov

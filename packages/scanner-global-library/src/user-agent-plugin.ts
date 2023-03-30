@@ -3,14 +3,24 @@
 
 import { PuppeteerExtraPlugin, PluginOptions, PluginRequirements } from 'puppeteer-extra-plugin';
 import Puppeteer, { Protocol } from 'puppeteer';
+import { inject, injectable } from 'inversify';
+import { iocTypes, SecretVault } from './ioc-types';
 
+@injectable()
 export class UserAgentPlugin extends PuppeteerExtraPlugin {
-    constructor(opts?: PluginOptions) {
+    public static Name = 'user-agent-plugin';
+
+    private secretVault: SecretVault;
+
+    constructor(
+        @inject(iocTypes.SecretVaultProvider) private readonly secretVaultProvider: () => Promise<SecretVault>,
+        opts: PluginOptions = undefined,
+    ) {
         super(opts);
     }
 
     public get name(): string {
-        return 'user-agent-plugin';
+        return UserAgentPlugin.Name;
     }
 
     public get requirements(): PluginRequirements {
@@ -18,6 +28,8 @@ export class UserAgentPlugin extends PuppeteerExtraPlugin {
     }
 
     public async onPageCreated(page: Puppeteer.Page): Promise<void> {
+        this.secretVault = await this.secretVaultProvider();
+
         const userAgentString = await this.getUserAgentString(page);
         const userAgentMetadata = await this.getUserAgentMetadata(page);
 
@@ -33,6 +45,9 @@ export class UserAgentPlugin extends PuppeteerExtraPlugin {
 
         // Remove Headless flag
         userAgent = userAgent.replace('HeadlessChrome/', 'Chrome/');
+
+        // Add bypass key
+        userAgent = `${userAgent} Web-Scanner-Bypass/${this.secretVault.webScannerBypassKey}`;
 
         return userAgent;
     }

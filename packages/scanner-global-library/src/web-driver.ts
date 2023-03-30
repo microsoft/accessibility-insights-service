@@ -30,11 +30,11 @@ export class WebDriver {
 
     constructor(
         @inject(PromiseUtils) private readonly promiseUtils: PromiseUtils,
+        @inject(UserAgentPlugin) private readonly userAgentPlugin: UserAgentPlugin,
         @inject(GlobalLogger) @optional() private readonly logger: Logger,
         private readonly puppeteer: typeof Puppeteer = Puppeteer,
         private readonly puppeteerExtra: typeof PuppeteerExtra = PuppeteerExtra,
         private readonly stealthPlugin: StealthPluginType = StealthPlugin(),
-        private readonly userAgentPlugin: UserAgentPlugin = new UserAgentPlugin(),
         private readonly fs: typeof fsNode = fsNode,
     ) {}
 

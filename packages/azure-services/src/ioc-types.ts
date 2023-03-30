@@ -20,6 +20,7 @@ export const iocTypeNames = {
     StorageCredential: 'StorageCredential',
     CosmosCredential: 'CosmosCredential',
     AzureAuthClientCredentialProvider: 'azureAuthClientCredentialProvider',
+    SecretVaultProvider: 'secretVaultProvider',
 };
 
 export type AzureKeyVaultClientProvider = () => Promise<SecretClient>;
