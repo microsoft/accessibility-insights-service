@@ -35,6 +35,10 @@ export interface StorageCredential {
     tokenCredential: TokenCredential;
 }
 
+export interface SecretVault {
+    [key: string]: string;
+}
+
 export function registerAzureServicesToContainer(
     container: Container,
     credentialType: CredentialType = CredentialType.VM,
@@ -51,9 +55,10 @@ export function registerAzureServicesToContainer(
 
     container.bind(StorageConfig).toSelf().inSingletonScope();
 
-    setupSingletonCosmosCredential(container);
-    setupSingletonStorageCredential(container);
-    setupAzureAuthClientCredential(container);
+    setupCosmosCredentialProvider(container);
+    setupStorageCredentialProvider(container);
+    setupAzureAuthClientCredentialProvider(container);
+    setupSecretVaultProvider(container);
 
     setupCosmosClientProvider(container, cosmosClientFactory);
 
@@ -84,12 +89,12 @@ export function registerAzureServicesToContainer(
     container.bind(StorageContainerSASUrlProvider).toSelf().inSingletonScope();
     container.bind(Queue).toSelf();
 
-    setupSingletonAzureBatchServiceClientProvider(container);
+    setupAzureBatchServiceClientProvider(container);
     container.bind(BatchConfig).toSelf().inSingletonScope();
     container.bind(Batch).toSelf().inSingletonScope();
 }
 
-function setupSingletonAzureBatchServiceClientProvider(container: Container): void {
+function setupAzureBatchServiceClientProvider(container: Container): void {
     IoC.setupSingletonProvider(iocTypeNames.BatchServiceClientProvider, container, async (context) => {
         const batchConfig = context.container.get(BatchConfig);
         const credentialProvider = context.container.get(CredentialsProvider);
@@ -155,7 +160,7 @@ function setupCosmosClientProvider(container: Container, cosmosClientFactory: (o
     });
 }
 
-function setupSingletonCosmosCredential(container: Container): void {
+function setupCosmosCredentialProvider(container: Container): void {
     IoC.setupSingletonProvider(iocTypeNames.CosmosCredential, container, async (context) => {
         const secretProvider = context.container.get(SecretProvider);
         const endpoint = await secretProvider.getSecret(secretNames.cosmosDbUrl);
@@ -166,7 +171,7 @@ function setupSingletonCosmosCredential(container: Container): void {
     });
 }
 
-function setupSingletonStorageCredential(container: Container): void {
+function setupStorageCredentialProvider(container: Container): void {
     IoC.setupSingletonProvider(iocTypeNames.StorageCredential, container, async (context) => {
         const accountName = await getStorageAccountName(context);
         const credentialProvider = container.get(CredentialsProvider);
@@ -176,7 +181,7 @@ function setupSingletonStorageCredential(container: Container): void {
     });
 }
 
-function setupAzureAuthClientCredential(container: Container): void {
+function setupAzureAuthClientCredentialProvider(container: Container): void {
     IoC.setupSingletonProvider(iocTypeNames.AzureAuthClientCredentialProvider, container, async (context) => {
         if (!isEmpty(process.env.AZURE_AUTH_CLIENT_NAME) && !isEmpty(process.env.AZURE_AUTH_CLIENT_PASSWORD)) {
             return { name: process.env.AZURE_AUTH_CLIENT_NAME, password: process.env.AZURE_AUTH_CLIENT_PASSWORD };
@@ -186,6 +191,20 @@ function setupAzureAuthClientCredential(container: Container): void {
             const password = await secretProvider.getSecret(secretNames.azureAuthClientPassword);
 
             return { name, password };
+        }
+    });
+}
+
+// The secret vault is key-value pair object. Add new pair to expose a secret.
+function setupSecretVaultProvider(container: Container): void {
+    IoC.setupSingletonProvider(iocTypeNames.SecretVaultProvider, container, async (context): Promise<SecretVault> => {
+        if (!isEmpty(process.env.AI_WEB_SCANNER_BYPASS_KEY)) {
+            return { webScannerBypassKey: process.env.AI_WEB_SCANNER_BYPASS_KEY };
+        } else {
+            const secretProvider = context.container.get(SecretProvider);
+            const webScannerBypassKey = await secretProvider.getSecret(secretNames.webScannerBypassKey);
+
+            return { webScannerBypassKey };
         }
     });
 }

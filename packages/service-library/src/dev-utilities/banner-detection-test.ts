@@ -15,6 +15,7 @@ import {
     PageResponseProcessor,
     WebDriver,
     PageNetworkTracer,
+    UserAgentPlugin,
 } from 'scanner-global-library';
 import { ConsoleLoggerClient, GlobalLogger } from 'logger';
 import { PromiseUtils, ServiceConfiguration } from 'common';
@@ -40,8 +41,9 @@ type BannerDetectionResults = {
 };
 
 const serviceConfig = new ServiceConfiguration();
+const plugin = new UserAgentPlugin(() => Promise.resolve({ webScannerBypassKey: '' }));
 const logger = new GlobalLogger([new ConsoleLoggerClient(serviceConfig, console)], process);
-const webDriver = new WebDriver(new PromiseUtils(), logger);
+const webDriver = new WebDriver(new PromiseUtils(), plugin, logger);
 const pageResponseProcessor = new PageResponseProcessor();
 const pageNavigator = new PageNavigator(
     pageResponseProcessor,

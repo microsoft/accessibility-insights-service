@@ -59,6 +59,8 @@ export class Page {
 
     private readonly networkTraceGlobalFlag: boolean;
 
+    private readonly enableAuthenticationGlobalFlag: boolean;
+
     constructor(
         @inject(WebDriver) private readonly webDriver: WebDriver,
         @inject(PageNavigator) private readonly pageNavigator: PageNavigator,
@@ -68,6 +70,7 @@ export class Page {
         private readonly scrollToPageTop: typeof scrollToTop = scrollToTop,
     ) {
         this.networkTraceGlobalFlag = process.env.NETWORK_TRACE === 'true' ? true : false;
+        this.enableAuthenticationGlobalFlag = process.env.ENABLE_AUTHENTICATION === 'true' ? true : false;
     }
 
     public get puppeteerPage(): Puppeteer.Page {
@@ -195,7 +198,7 @@ export class Page {
     }
 
     private async navigateImpl(options?: PageNavigationOptions): Promise<void> {
-        if (options?.enableAuthentication === true) {
+        if (options?.enableAuthentication === true || this.enableAuthenticationGlobalFlag === true) {
             await this.preloadWithAuth();
         }
 

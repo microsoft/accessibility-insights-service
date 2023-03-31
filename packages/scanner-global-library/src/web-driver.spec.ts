@@ -62,11 +62,11 @@ beforeEach(() => {
     loggerMock = Mock.ofType(MockableLogger);
     testSubject = new WebDriver(
         promiseUtilsMock.object,
+        userAgentPluginMock.object,
         loggerMock.object,
         Puppeteer,
         puppeteerExtraMock.object,
         StealthPlugin(),
-        userAgentPluginMock.object,
         fsMock.object,
     );
 });

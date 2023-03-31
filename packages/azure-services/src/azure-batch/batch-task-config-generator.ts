@@ -88,7 +88,7 @@ export class BatchTaskConfigGenerator {
             this.containerRunOptions
         } ${environmentVariableOptions} ${runArgsOptions} ${this.batchTaskPropertyProvider.getAdditionalContainerRunOptions()}`;
 
-        return containerRunOptions.trimRight();
+        return containerRunOptions.trimEnd();
     }
 
     public getEnvironmentSettings(taskArgs: string): BatchServiceModels.EnvironmentSetting[] {
@@ -110,9 +110,9 @@ export class BatchTaskConfigGenerator {
         let options = '';
         const taskArgs = JSON.parse(taskArgsString) as { [key: string]: string };
         // encode parameters to pass into docker hosted process
-        Object.keys(taskArgs).forEach((arg) => (options += `-e ${arg}=${encodeURI(taskArgs[arg])} `));
+        Object.keys(taskArgs).forEach((arg) => (options += `-e ${arg}=${encodeURIComponent(taskArgs[arg])} `));
 
-        return options.trimRight();
+        return options.trimEnd();
     }
 
     private createEnvironmentVariableOptions(environmentSettings: BatchServiceModels.EnvironmentSetting[]): string {
