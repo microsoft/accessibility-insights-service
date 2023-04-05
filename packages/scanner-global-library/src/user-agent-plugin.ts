@@ -5,15 +5,24 @@ import { PuppeteerExtraPlugin, PluginOptions, PluginRequirements } from 'puppete
 import Puppeteer, { Protocol } from 'puppeteer';
 import { inject, injectable } from 'inversify';
 import { iocTypes, SecretVault } from './ioc-types';
+import { LoginPageDetector } from './authenticator/login-page-detector';
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 @injectable()
 export class UserAgentPlugin extends PuppeteerExtraPlugin {
     public static Name = 'user-agent-plugin';
 
+    private readonly loadCompletedDataKey = 'loadCompleted';
+
     private secretVault: SecretVault;
+
+    private readonly pluginData: Map<string, any> = new Map();
 
     constructor(
         @inject(iocTypes.SecretVaultProvider) private readonly secretVaultProvider: () => Promise<SecretVault>,
+        @inject(LoginPageDetector) private readonly loginPageDetector: LoginPageDetector,
+
         opts: PluginOptions = undefined,
     ) {
         super(opts);
@@ -27,7 +36,17 @@ export class UserAgentPlugin extends PuppeteerExtraPlugin {
         return new Set(['runLast']);
     }
 
+    public get loadCompleted(): boolean {
+        return this.pluginData.get(this.loadCompletedDataKey);
+    }
+
     public async onPageCreated(page: Puppeteer.Page): Promise<void> {
+        this.pluginData.delete(this.loadCompletedDataKey);
+        await this.setUserAgent(page);
+        this.pluginData.set(this.loadCompletedDataKey, true);
+    }
+
+    private async setUserAgent(page: Puppeteer.Page): Promise<void> {
         this.secretVault = await this.secretVaultProvider();
 
         const userAgentString = await this.getUserAgentString(page);
@@ -37,17 +56,12 @@ export class UserAgentPlugin extends PuppeteerExtraPlugin {
     }
 
     private async getUserAgentString(page: Puppeteer.Page): Promise<string> {
-        // Set to Linux to disable default Windows user authentication fallback
-        const platform = 'X11; Linux x86_64';
-
         let userAgent = await page.browser().userAgent();
-        userAgent = userAgent.replace(/([^(]*\()([^)]*)(.*)/i, `$1${platform}$3`);
-
-        // Remove Headless flag
+        userAgent = this.setUserAgentPlatform(userAgent, page);
+        // Remove headless chromium flag
         userAgent = userAgent.replace('HeadlessChrome/', 'Chrome/');
-
-        // Add bypass key
-        userAgent = `${userAgent} Web-Scanner-Bypass/${this.secretVault.webScannerBypassKey}`;
+        // Add scanner bypass key
+        userAgent = `${userAgent} WebInsights/${this.secretVault.webScannerBypassKey}`;
 
         return userAgent;
     }
@@ -56,36 +70,82 @@ export class UserAgentPlugin extends PuppeteerExtraPlugin {
         const brands = await this.getBrands(page);
         const browserVersion = await page.browser().version();
         const fullVersion = browserVersion.match(/Chrome\/([\d|.]+)/)[1];
+        const platform = this.getPlatform();
 
         return {
             brands,
             fullVersion,
-            platform: 'Linux',
+            platform,
             platformVersion: '',
             architecture: 'x86',
             model: '',
             mobile: false,
             bitness: '64',
+            wow64: false,
         };
     }
 
+    /**
+     * Build HTTP Sec-CH-UA request header metadata
+     * https://source.chromium.org/chromium/chromium/src/+/refs/heads/main:components/embedder_support/user_agent_utils.cc
+     */
     private async getBrands(page: Puppeteer.Page): Promise<Protocol.Emulation.UserAgentBrandVersion[]> {
         const browserVersion = await page.browser().version();
-        const version = browserVersion.match(/Chrome\/(\d+)\.(.*)/i)[1];
+        const majorVersion = browserVersion.match(/Chrome\/(\d+)\.(.*)/i)[1];
+        const seed = Number(majorVersion);
+        const brandOrder = [
+            [0, 1, 2],
+            [0, 2, 1],
+            [1, 0, 2],
+            [1, 2, 0],
+            [2, 0, 1],
+            [2, 1, 0],
+        ][seed % 6];
+        const chars = [' ', '(', ':', '-', '.', '/', ')', ';', '=', '?', '_'];
+        const versions = ['8', '99', '24'];
+        const greaseBrand = `Not${chars[seed % chars.length]}A${chars[(seed + 1) % chars.length]}Brand`;
+        const greaseVersion = versions[seed % versions.length];
 
-        return [
-            {
-                brand: 'Google Chrome',
-                version: `${version}`,
-            },
-            {
-                brand: 'Chromium',
-                version: `${version}`,
-            },
-            {
-                brand: 'Not(A.Brand',
-                version: '8',
-            },
-        ];
+        const brandList = [];
+        brandList[brandOrder[0]] = {
+            brand: greaseBrand,
+            version: greaseVersion,
+        };
+        brandList[brandOrder[1]] = {
+            brand: 'Chromium',
+            version: `${majorVersion}`,
+        };
+        brandList[brandOrder[2]] = {
+            brand: 'Google Chrome',
+            version: `${majorVersion}`,
+        };
+
+        return brandList;
+    }
+
+    private setUserAgentPlatform(userAgent: string, page: Puppeteer.Page): string {
+        // Set to Linux platform to disable authentication fallback to currently logged in Windows user
+        const platform = 'X11; Linux x86_64';
+
+        const loginPageType = this.loginPageDetector.getLoginPageType(page);
+        if (loginPageType === undefined) {
+            return userAgent;
+        }
+
+        return userAgent.replace(/([^(]*\()([^)]*)(.*)/i, `$1${platform}$3`);
+    }
+
+    private getPlatform(): string {
+        const platform = process.platform;
+        switch (platform) {
+            case 'darwin':
+                return 'macOS';
+            case 'linux':
+                return 'Linux';
+            case 'win32':
+                return 'Windows';
+            default:
+                return '';
+        }
     }
 }

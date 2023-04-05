@@ -4,7 +4,6 @@
 import 'reflect-metadata';
 
 import { ChildProcess } from 'child_process';
-import fs from 'fs';
 import * as Puppeteer from 'puppeteer';
 import { IMock, It, Mock, Times, MockBehavior } from 'typemoq';
 import { PromiseUtils } from 'common';
@@ -16,6 +15,7 @@ import { MockableLogger } from './test-utilities/mockable-logger';
 import { WebDriver } from './web-driver';
 import { StealthPluginType } from './stealth-plugin-type';
 import { UserAgentPlugin } from './user-agent-plugin';
+import { BrowserCache } from './browser-cache';
 
 /* eslint-disable @typescript-eslint/consistent-type-assertions, @typescript-eslint/no-explicit-any*/
 
@@ -51,28 +51,28 @@ let puppeteerBrowserMock: PuppeteerBrowserMock;
 let promiseUtilsMock: IMock<PromiseUtils>;
 let puppeteerExtraMock: IMock<typeof PuppeteerExtra>;
 let userAgentPluginMock: IMock<UserAgentPlugin>;
-let fsMock: IMock<typeof fs>;
+let browserCacheMock: IMock<BrowserCache>;
 
 beforeEach(() => {
     puppeteerBrowserMock = new PuppeteerBrowserMock();
     promiseUtilsMock = Mock.ofType<PromiseUtils>();
     puppeteerExtraMock = Mock.ofType<typeof PuppeteerExtra>();
     userAgentPluginMock = Mock.ofType<UserAgentPlugin>();
-    fsMock = Mock.ofType<typeof fs>();
+    browserCacheMock = Mock.ofType<BrowserCache>();
     loggerMock = Mock.ofType(MockableLogger);
     testSubject = new WebDriver(
         promiseUtilsMock.object,
         userAgentPluginMock.object,
+        browserCacheMock.object,
         loggerMock.object,
         Puppeteer,
         puppeteerExtraMock.object,
         StealthPlugin(),
-        fsMock.object,
     );
 });
 
 afterEach(() => {
-    fsMock.verifyAll();
+    browserCacheMock.verifyAll();
 });
 
 describe('WebDriver', () => {
@@ -166,7 +166,7 @@ describe('WebDriver', () => {
             .setup((o) => o.launch(It.isAny()))
             .returns(() => Promise.resolve(<Puppeteer.Browser>(<unknown>puppeteerBrowserMock)))
             .verifiable(Times.once());
-        fsMock.setup((o) => o.rmSync(`${__dirname}/browser-cache`, { recursive: true, force: true })).verifiable();
+        browserCacheMock.setup((o) => o.clear()).verifiable();
 
         const browser = await testSubject.launch({ clearDiskCache: true });
 
@@ -197,6 +197,15 @@ describe('WebDriver', () => {
 
         expect(browser).toEqual(puppeteerBrowserMock);
         expect(connectFn).toBeCalledWith({ browserWSEndpoint: 'ws', defaultViewport: null });
+    });
+
+    it('return plugin completion result', async () => {
+        userAgentPluginMock
+            .setup((o) => o.loadCompleted)
+            .returns(() => true)
+            .verifiable();
+        const pageCreated = await testSubject.pageCreated();
+        expect(pageCreated).toEqual(true);
     });
 
     function setupPromiseUtils(simulateTimeout: boolean): void {

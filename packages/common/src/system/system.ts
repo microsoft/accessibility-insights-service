@@ -92,4 +92,22 @@ export namespace System {
     export function getTimestamp(): number {
         return Number(process.hrtime.bigint() / 1000000n);
     }
+
+    export async function waitLoop<T>(
+        loopFunc: () => Promise<T>,
+        exitFunc: (result: T) => Promise<boolean>,
+        timeoutMsec: number = 10000,
+        waitMsec: number = 100,
+    ): Promise<T> {
+        let result;
+        let exit;
+        const end = getTimestamp() + timeoutMsec;
+        do {
+            await wait(waitMsec);
+            result = await loopFunc();
+            exit = await exitFunc(result);
+        } while (exit !== true && getElapsedTime(end) < 0);
+
+        return result;
+    }
 }

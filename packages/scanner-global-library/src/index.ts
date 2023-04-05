@@ -18,3 +18,4 @@ export * from './page-network-tracer';
 export { AxePuppeteerScanner } from './axe-scanner/axe-puppeteer-scanner';
 export * from './authenticator/resource-authenticator';
 export * from './user-agent-plugin';
+export { BrowserCache } from './browser-cache';

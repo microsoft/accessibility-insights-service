@@ -11,6 +11,7 @@ import { BrowserError } from './browser-error';
 import { PageNavigationHooks } from './page-navigation-hooks';
 import { PageConfigurator } from './page-configurator';
 import { puppeteerTimeoutConfig, PageNavigationTiming } from './page-timeout-config';
+import { BrowserCache } from './browser-cache';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -40,6 +41,7 @@ export class PageNavigator {
     constructor(
         @inject(PageResponseProcessor) public readonly pageResponseProcessor: PageResponseProcessor,
         @inject(PageNavigationHooks) public readonly pageNavigationHooks: PageNavigationHooks,
+        @inject(BrowserCache) public readonly browserCache: BrowserCache,
         @inject(GlobalLogger) @optional() private readonly logger: GlobalLogger,
     ) {}
 
@@ -205,25 +207,36 @@ export class PageNavigator {
      * Reloads page if server returns HTTP 304 (Not Modified) when browser uses disk cache.
      */
     protected async handleCachedResponse(pageOperationResult: PageOperationResult, page: Puppeteer.Page): Promise<PageOperationResult> {
-        const maxRetryCount = 2;
+        const maxRetryCount = 3;
 
         if (pageOperationResult.response?.status() !== 304) {
             return pageOperationResult;
         }
 
+        this.logger?.logWarn('Reload page on HTTP 304 web server response.');
+
         let count = 0;
         let opResult;
         do {
             count++;
-            await page.goto(`file:///${__dirname}/blank-page.html`);
-            await System.wait(500);
+            if (count > maxRetryCount - 1) {
+                // Navigation did not solve the cache error. Clear browser cache and reload page.
+                await page.goto(`file:///${__dirname}/blank-page.html`);
+                await System.wait(1000);
+                this.browserCache.clear();
+                this.logger?.logWarn('Reload page on HTTP 304 web server response has failed. Reload page without browser cache.', {
+                    retryCount: `${count}`,
+                });
+            } else {
+                // Navigate forward and back to mitigate the cache error.
+                await page.goto(`file:///${__dirname}/blank-page.html`);
+                await System.wait(1000);
+            }
 
             opResult = await this.invokePageNavigationOperation((waitUntil = this.navigationCondition) =>
                 page.goBack({ waitUntil, timeout: puppeteerTimeoutConfig.navigationTimeoutMsecs }),
             );
         } while (count < maxRetryCount && opResult.response?.status() === 304 && opResult.error === undefined);
-
-        this.logger?.logWarn('Reload page on HTTP 304 (Not Modified) web server response.', { retryCount: `${count}` });
 
         return opResult;
     }
@@ -302,9 +315,9 @@ export class PageNavigator {
             noPendingRequests = requests.every((r) => r.opResult?.response || r.opResult?.error);
         } while (!noPendingRequests && System.getElapsedTime(timestamp) < puppeteerTimeoutConfig.navigationTimeoutMsecs);
 
-        page.removeListener('request', pageOnRequestEventHandler);
-        page.removeListener('response', pageOnResponseEventHandler);
-        page.removeListener('requestfailed', pageOnRequestFailedEventHandler);
+        page.off('request', pageOnRequestEventHandler);
+        page.off('response', pageOnResponseEventHandler);
+        page.off('requestfailed', pageOnRequestFailedEventHandler);
         await page.setRequestInterception(false);
 
         this.logger?.logWarn(`Indirect page redirection handled.`, {

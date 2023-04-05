@@ -159,4 +159,25 @@ describe('getElapsedTime()', () => {
         const elapsed = System.getTimestamp();
         expect(elapsed).toEqual(10000);
     });
+
+    describe('waitLoop', () => {
+        it('loop without timeout', async () => {
+            let count = 0;
+            const expectedResult = await System.waitLoop(
+                async () => count++,
+                async (r) => r === 3,
+            );
+            expect(expectedResult).toEqual(3);
+        });
+
+        it('loop with timeout', async () => {
+            let count = 0;
+            const expectedResult = await System.waitLoop(
+                async () => count++,
+                async (r) => r === 10000,
+                1,
+            );
+            expect(expectedResult).toEqual(0);
+        });
+    });
 });

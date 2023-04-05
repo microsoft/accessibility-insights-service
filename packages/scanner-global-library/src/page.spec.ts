@@ -124,7 +124,7 @@ describe(Page, () => {
             Object.keys(navigationResponse.pageNavigationTiming).forEach((key: keyof PageNavigationTiming) => {
                 timing[key] = `${navigationResponse.pageNavigationTiming[key]}`;
             });
-            loggerMock.setup((o) => o.logInfo('Total page load time 10, msec', { ...timing })).verifiable();
+            loggerMock.setup((o) => o.logInfo('Total page load time 10, msec', { status: 200, ...timing })).verifiable();
 
             await page.navigate(url);
 
@@ -175,6 +175,10 @@ describe(Page, () => {
                 .setup(async (o) => o.launch(It.isAny()))
                 .returns(() => Promise.resolve(browserMock.object))
                 .verifiable();
+            webDriverMock
+                .setup(async (o) => o.pageCreated())
+                .returns(() => Promise.resolve(true))
+                .verifiable();
             pageNetworkTracerMock
                 .setup((o) => o.addNetworkTrace(puppeteerPageMock.object))
                 .returns(() => Promise.resolve())
@@ -220,7 +224,7 @@ describe(Page, () => {
             Object.keys(navigationResponse.pageNavigationTiming).forEach((key: keyof PageNavigationTiming) => {
                 timing[key] = `${navigationResponse.pageNavigationTiming[key]}`;
             });
-            loggerMock.setup((o) => o.logInfo('Total page reload time 10, msec', { ...timing })).verifiable();
+            loggerMock.setup((o) => o.logInfo('Total page reload time 10, msec', { status: 200, ...timing })).verifiable();
 
             await page.reload();
 
@@ -246,6 +250,10 @@ describe(Page, () => {
             webDriverMock
                 .setup(async (m) => m.launch({ browserExecutablePath: 'path', clearDiskCache: false }))
                 .returns(() => Promise.resolve(browserMock.object))
+                .verifiable();
+            webDriverMock
+                .setup(async (o) => o.pageCreated())
+                .returns(() => Promise.resolve(true))
                 .verifiable();
             // navigate url
             pageNavigatorMock
@@ -318,6 +326,10 @@ describe(Page, () => {
                 .setup(async (o) => o.launch(It.isAny()))
                 .returns(() => Promise.resolve(browserMock.object))
                 .verifiable();
+            webDriverMock
+                .setup(async (o) => o.pageCreated())
+                .returns(() => Promise.resolve(true))
+                .verifiable();
             page.browser = undefined;
             (page as any).page = undefined;
 
@@ -335,6 +347,10 @@ describe(Page, () => {
             webDriverMock
                 .setup(async (m) => m.launch(It.isValue({ browserExecutablePath: 'path', clearDiskCache: undefined })))
                 .returns(() => Promise.resolve(browserMock.object))
+                .verifiable();
+            webDriverMock
+                .setup(async (o) => o.pageCreated())
+                .returns(() => Promise.resolve(true))
                 .verifiable();
             page.browser = undefined;
             (page as any).page = undefined;
@@ -354,6 +370,10 @@ describe(Page, () => {
             webDriverMock
                 .setup(async (m) => m.connect(It.isValue('ws')))
                 .returns(() => Promise.resolve(browserMock.object))
+                .verifiable();
+            webDriverMock
+                .setup(async (o) => o.pageCreated())
+                .returns(() => Promise.resolve(true))
                 .verifiable();
             page.browser = undefined;
             (page as any).page = undefined;
