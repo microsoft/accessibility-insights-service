@@ -80,7 +80,7 @@ describe(UserAgentPlugin, () => {
                 { brand: 'Not=A?Brand', version: '24' },
             ],
             fullVersion: '107.1.2.3',
-            platform: 'macOS',
+            platform: getPlatform(),
             platformVersion: '',
             architecture: 'x86',
             model: '',
@@ -97,3 +97,17 @@ describe(UserAgentPlugin, () => {
         await userAgentPlugin.onPageCreated(puppeteerPageMock.object);
     });
 });
+
+function getPlatform(): string {
+    const platform = process.platform;
+    switch (platform) {
+        case 'darwin':
+            return 'macOS';
+        case 'linux':
+            return 'Linux';
+        case 'win32':
+            return 'Windows';
+        default:
+            return '';
+    }
+}
