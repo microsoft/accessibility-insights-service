@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 import * as nodeOs from 'os';
-import * as nodeFs from 'fs';
+import * as fs from 'fs';
 import { injectable } from 'inversify';
 import { isEmpty } from 'lodash';
 
@@ -25,7 +25,7 @@ export interface Extension {
 export class ExtensionLoader {
     private separator: string;
 
-    constructor(private readonly os: typeof nodeOs = nodeOs, private readonly fs: typeof nodeFs = nodeFs) {}
+    constructor(private readonly os: typeof nodeOs = nodeOs, private readonly filesystem: typeof fs = fs) {}
 
     public getExtension(extensionName: string, extensionId: string): Extension {
         this.separator = process.platform === 'win32' ? '\\' : '/';
@@ -35,13 +35,13 @@ export class ExtensionLoader {
     }
 
     private getManifest(path: string): Manifest {
-        const content = this.fs.readFileSync(path, { encoding: 'utf8' });
+        const content = this.filesystem.readFileSync(path, { encoding: 'utf8' });
 
         return (isEmpty(content) ? {} : JSON.parse(content)) as Manifest;
     }
 
     private getManifestFile(path: string, validator: (manifest: Manifest, path: string) => boolean): { manifest: Manifest; path: string } {
-        const entries = this.fs.readdirSync(path, { withFileTypes: true });
+        const entries = this.filesystem.readdirSync(path, { withFileTypes: true });
         const files = entries.filter((file) => !file.isDirectory() && file.name === 'manifest.json');
         const folders = entries.filter((folder) => folder.isDirectory());
         for (const file of files) {
