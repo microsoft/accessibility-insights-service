@@ -1,8 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import * as fsNode from 'fs';
-import { PromiseUtils } from 'common';
+import { PromiseUtils, System } from 'common';
 import { inject, injectable, optional } from 'inversify';
 import { GlobalLogger, Logger } from 'logger';
 import Puppeteer from 'puppeteer';
@@ -14,6 +13,7 @@ import { StealthPluginType } from './stealth-plugin-type';
 import { defaultBrowserOptions, defaultLaunchOptions } from './puppeteer-options';
 import { ExtensionLoader } from './browser-extensions/extension-loader';
 import { UserAgentPlugin } from './user-agent-plugin';
+import { BrowserCache } from './browser-cache';
 
 export interface WebDriverConfigurationOptions {
     browserExecutablePath?: string;
@@ -24,19 +24,27 @@ export interface WebDriverConfigurationOptions {
 export class WebDriver {
     public browser: Puppeteer.Browser;
 
-    private readonly diskCacheDir = `${__dirname}/browser-cache`;
-
     private readonly browserCloseTimeoutMsecs = 60000;
 
     constructor(
         @inject(PromiseUtils) private readonly promiseUtils: PromiseUtils,
         @inject(UserAgentPlugin) private readonly userAgentPlugin: UserAgentPlugin,
+        @inject(BrowserCache) private readonly browserCache: BrowserCache,
         @inject(GlobalLogger) @optional() private readonly logger: Logger,
         private readonly puppeteer: typeof Puppeteer = Puppeteer,
         private readonly puppeteerExtra: typeof PuppeteerExtra = PuppeteerExtra,
         private readonly stealthPlugin: StealthPluginType = StealthPlugin(),
-        private readonly fs: typeof fsNode = fsNode,
     ) {}
+
+    public async pageCreated(): Promise<boolean> {
+        // Waiting for the last plugin in a plugins chain to complete processing
+        const loadCompleted = await System.waitLoop(
+            async () => this.userAgentPlugin.loadCompleted,
+            async (completed) => completed === true,
+        );
+
+        return loadCompleted;
+    }
 
     public async connect(wsEndpoint: string): Promise<Puppeteer.Browser> {
         this.browser = await this.puppeteer.connect({
@@ -52,7 +60,7 @@ export class WebDriver {
         this.addPuppeteerPlugins();
 
         if (options.clearDiskCache === true) {
-            this.clearDiskCache();
+            this.browserCache.clear();
         }
 
         const launchOptions = this.createLaunchOptions();
@@ -80,10 +88,6 @@ export class WebDriver {
         }
     }
 
-    public clearDiskCache(): void {
-        this.fs.rmSync(this.diskCacheDir, { recursive: true, force: true });
-    }
-
     private async closeBrowser(): Promise<void> {
         const browserPages = await this.browser.pages();
         await Promise.all(browserPages.map((p) => p.close()));
@@ -99,7 +103,7 @@ export class WebDriver {
 
         // Define browser cache location to allow reuse it after browser relaunch.
         // Browser profile (storage, settings, etc.) is not part of the cache and will be deleted after browser relaunch.
-        options.args.push(`--disk-cache-dir=${this.diskCacheDir}`);
+        options.args.push(`--disk-cache-dir=${this.browserCache.dirname}`);
 
         const isDebugEnabled = /--debug|--inspect/i.test(process.execArgv.join(' '));
         if (isDebugEnabled === true) {

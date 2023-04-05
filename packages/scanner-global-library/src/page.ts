@@ -94,6 +94,11 @@ export class Page {
 
         this.userAgent = await this.browser.userAgent();
         this.page = await this.browser.newPage();
+
+        const pageCreated = await this.webDriver.pageCreated();
+        if (pageCreated !== true) {
+            this.logger?.logWarn('Browser plugins did not complete load on page create event.');
+        }
     }
 
     public async navigate(url: string, options?: PageNavigationOptions): Promise<void> {
@@ -295,6 +300,7 @@ export class Page {
             });
 
             this.logger?.logInfo(`Total page ${operation} time ${totalNavigationElapsed}, msec`, {
+                status: this.lastNavigationResponse?.status(),
                 total: totalNavigationElapsed.toString(),
                 ...timing,
             });

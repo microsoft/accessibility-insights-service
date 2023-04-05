@@ -3,7 +3,7 @@
 
 import 'reflect-metadata';
 
-import { IMock, Mock, It } from 'typemoq';
+import { IMock, Mock, It, Times } from 'typemoq';
 import * as Puppeteer from 'puppeteer';
 import { GlobalLogger } from 'logger';
 import { cloneDeep } from 'lodash';
@@ -13,6 +13,7 @@ import { PageNavigationHooks } from './page-navigation-hooks';
 import { puppeteerTimeoutConfig, PageNavigationTiming } from './page-timeout-config';
 import { MockableLogger } from './test-utilities/mockable-logger';
 import { BrowserError } from './browser-error';
+import { BrowserCache } from './browser-cache';
 
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/consistent-type-assertions */
 
@@ -21,9 +22,10 @@ class PageNavigatorStub extends PageNavigator {
     constructor(
         public readonly pageResponseProcessor: PageResponseProcessor,
         public readonly pageNavigationHooks: PageNavigationHooks,
+        public readonly browserCache: BrowserCache,
         public readonly logger: GlobalLogger,
     ) {
-        super(pageResponseProcessor, pageNavigationHooks, logger);
+        super(pageResponseProcessor, pageNavigationHooks, browserCache, logger);
     }
 
     public async handleCachedResponse(pageOperationResult: PageOperationResult, page: Puppeteer.Page): Promise<PageOperationResult> {
@@ -48,12 +50,14 @@ class PageNavigatorStub extends PageNavigator {
 }
 
 const url = 'url';
+const max304RetryCount = 3;
 
 let pageNavigator: PageNavigatorStub;
 let pageResponseProcessorMock: IMock<PageResponseProcessor>;
 let pageNavigationHooksMock: IMock<PageNavigationHooks>;
 let puppeteerPageMock: IMock<Puppeteer.Page>;
 let loggerMock: IMock<MockableLogger>;
+let browserCacheMock: IMock<BrowserCache>;
 let timingCount: number;
 let pageOperationResult: PageOperationResult;
 let navigationOperation: NavigationOperation;
@@ -66,6 +70,7 @@ describe(PageNavigator, () => {
         pageResponseProcessorMock = Mock.ofType<PageResponseProcessor>();
         pageNavigationHooksMock = Mock.ofType<PageNavigationHooks>();
         puppeteerPageMock = Mock.ofType<Puppeteer.Page>();
+        browserCacheMock = Mock.ofType<BrowserCache>();
         loggerMock = Mock.ofType(MockableLogger);
         pageOperationResult = {} as PageOperationResult;
 
@@ -88,7 +93,12 @@ describe(PageNavigator, () => {
             .returns(() => {
                 return puppeteerFrame;
             });
-        pageNavigator = new PageNavigatorStub(pageResponseProcessorMock.object, pageNavigationHooksMock.object, loggerMock.object);
+        pageNavigator = new PageNavigatorStub(
+            pageResponseProcessorMock.object,
+            pageNavigationHooksMock.object,
+            browserCacheMock.object,
+            loggerMock.object,
+        );
     });
 
     afterEach(() => {
@@ -411,6 +421,27 @@ describe(PageNavigator, () => {
             expect(opResponse.navigationTiming).toEqual(navigationTiming);
             expect(opResponse.response).toEqual(okResponse);
         });
+
+        it('handle page HTTP 304 with subsequent cache removal', async () => {
+            pageOperationResult.response = {
+                status: () => 304,
+            } as Puppeteer.HTTPResponse;
+            const cachedResponse = {
+                status: () => 304,
+            } as Puppeteer.HTTPResponse;
+            puppeteerPageMock
+                .setup((o) => o.goto(`file:///${__dirname}/blank-page.html`))
+                .returns(() => Promise.resolve(response))
+                .verifiable(Times.atLeast(max304RetryCount - 1));
+            puppeteerPageMock
+                .setup((o) => o.goBack({ waitUntil: 'networkidle2', timeout: puppeteerTimeoutConfig.navigationTimeoutMsecs }))
+                .returns(() => Promise.resolve(cachedResponse))
+                .verifiable(Times.atLeast(max304RetryCount));
+            browserCacheMock.setup((o) => o.clear()).verifiable();
+
+            const opResponse = await pageNavigator.handleCachedResponse(pageOperationResult, puppeteerPageMock.object);
+            expect(opResponse.response).toEqual(cachedResponse);
+        });
     });
 
     describe('handleIndirectPageRedirection', () => {
@@ -510,19 +541,19 @@ describe(PageNavigator, () => {
                     return {} as Puppeteer.EventEmitter;
                 });
             puppeteerPageMock
-                .setup((o) => o.removeListener('request', It.isAny()))
+                .setup((o) => o.off('request', It.isAny()))
                 .returns(() => {
                     return {} as Puppeteer.EventEmitter;
                 })
                 .verifiable();
             puppeteerPageMock
-                .setup((o) => o.removeListener('response', It.isAny()))
+                .setup((o) => o.off('response', It.isAny()))
                 .returns(() => {
                     return {} as Puppeteer.EventEmitter;
                 })
                 .verifiable();
             puppeteerPageMock
-                .setup((o) => o.removeListener('requestfailed', It.isAny()))
+                .setup((o) => o.off('requestfailed', It.isAny()))
                 .returns(() => {
                     return {} as Puppeteer.EventEmitter;
                 })
