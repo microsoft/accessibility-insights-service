@@ -82,27 +82,27 @@ setupVmss() {
         # Wait until we are certain the resource group exists
         . "${0%/*}/wait-for-deployment.sh" -n "$vmssResourceGroup" -t "1800" -q "az group exists --name $vmssResourceGroup"
 
+        echo "Waiting for VMSS under $pool pool deployment..."
         vmssQueryConditions="?tags.PoolName=='$pool' && tags.BatchAccountName=='$batchAccountName' && resourceGroup=='$vmssResourceGroup'"
-        vmssDeployedSearchPattern="[$vmssQueryConditions && provisioningState!='Creating' && provisioningState!='Updating'].name"
+        vmssDeployedSearchPattern="[$vmssQueryConditions && provisioningState=='Succeeded'].name"
         vmssCreatedQuery="az vmss list --query \"$vmssDeployedSearchPattern\" -o tsv"
 
         . "${0%/*}/wait-for-deployment.sh" -n "$vmssResourceGroup" -t "1800" -q "$vmssCreatedQuery"
 
+        echo "Checking status for $vmssName VMSS under $pool pool..."
         vmssName=$(az vmss list --query "[$vmssQueryConditions].name" -o tsv)
         vmssLocation=$(az vmss list --query "[$vmssQueryConditions].location" -o tsv)
-
-        echo "Checking vmss status - $vmssName"
         vmssStatus=$(az vmss list --query "[$vmssQueryConditions].provisioningState" -o tsv)
         if [ "$vmssStatus" != "Succeeded" ]; then
-            echo "Deployment of vmss $vmssName failed with status $vmssStatus"
+            echo "Deployment of VMSS $vmssName under $pool pool failed with status $vmssStatus"
             exit 1
         fi
 
         echo "Invoking command: $commandName"
         eval "$command"
-
     done
 }
+
 . "${0%/*}/get-resource-names.sh"
 
 echo "Invoked command to run all VMSS for pools:
@@ -145,5 +145,5 @@ getPoolNodeCount
 # Get Batch pool Azure VMSS resource group and name
 getVmssInfo
 
-# Invoke command on each vmss
+# Invoke command on each VMSS
 setupVmss
