@@ -69,7 +69,7 @@ function createKeyvaultIfNotExists() {
 }
 
 function createOrRecoverKeyvault() {
-    recoverIfSoftDeleted
+    # recoverIfSoftDeleted
     if [[ -z "$keyvaultRecovered" ]]; then
         createKeyvaultIfNotExists
     fi
