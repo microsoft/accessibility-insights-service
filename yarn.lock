@@ -6636,6 +6636,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"detect-node@npm:^2.0.4":
+  version: 2.1.0
+  resolution: "detect-node@npm:2.1.0"
+  checksum: 832184ec458353e41533ac9c622f16c19f7c02d8b10c303dfd3a756f56be93e903616c0bb2d4226183c9351c15fc0b3dba41a17a2308262afabcfa3776e6ae6e
+  languageName: node
+  linkType: hard
+
 "devtools-protocol@npm:0.0.1107588":
   version: 0.0.1107588
   resolution: "devtools-protocol@npm:0.0.1107588"
@@ -13687,7 +13694,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"semver@npm:7.3.8, semver@npm:^7.2.1":
+"semver@npm:7.3.8, semver@npm:^7.2.1, semver@npm:^7.3.2":
   version: 7.3.8
   resolution: "semver@npm:7.3.8"
   dependencies:
