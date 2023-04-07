@@ -3,5 +3,5 @@
 const baseConfig = require('../../prettier.config');
 
 module.exports = {
-    ...baseConfig,
+    preset: '../../jest.config.base.js',
 };

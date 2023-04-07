@@ -2,22 +2,12 @@
 // Licensed under the MIT License.
 
 module.exports = {
+    displayName: 'unit tests',
     clearMocks: true,
-    collectCoverage: true,
-    displayName: 'all unit tests',
-    globals: {
-        'ts-jest': {
-            tsconfig: '<rootDir>/tsconfig.json',
-        },
-    },
-    moduleDirectories: ['node_modules'],
-    moduleFileExtensions: ['ts', 'js', 'json'],
-    transform: {
-        '^.+\\.(ts)$': 'ts-jest',
-    },
-    testMatch: ['**/*.spec.[tj]s'],
-    testPathIgnorePatterns: ['/dist/', '/out/'],
     verbose: true,
+    testEnvironment: 'node',
+
+    collectCoverage: true,
     coverageDirectory: '<rootDir>/test-results/unit/coverage',
     coverageReporters: ['text', 'lcov', 'cobertura'],
     collectCoverageFrom: [
@@ -35,6 +25,20 @@ module.exports = {
         '!<rootDir>/**/jump-consistent-hash.*',
         '!<rootDir>/**/guid-generator.*',
     ],
+
+    moduleDirectories: ['node_modules'],
+    moduleFileExtensions: ['ts', 'js', 'json'],
+
+    transform: {
+        '^.+\\.(ts)$': [
+            'ts-jest',
+            {
+                tsconfig: '<rootDir>/tsconfig.json',
+            },
+        ],
+    },
+    testMatch: ['**/*.spec.[tj]s'],
+    testPathIgnorePatterns: ['/dist/', '/out/'],
     reporters: [
         'default',
         [
@@ -52,6 +56,5 @@ module.exports = {
             },
         ],
     ],
-    testEnvironment: 'node',
     setupFilesAfterEnv: ['jest-extended'],
 };

@@ -3,7 +3,7 @@
 
 import 'reflect-metadata';
 
-import Puppeteer from 'puppeteer';
+import * as Puppeteer from 'puppeteer';
 import { IMock, Mock } from 'typemoq';
 import { getPromisableDynamicMock } from '../test-utilities/promisable-mock';
 import { AuthenticationMethod } from './authentication-method';

@@ -120,7 +120,7 @@ describe('CrawlerCommandRunner', () => {
         await testSubject.runCommand(scanArguments);
 
         expect(stdout).toMatchInlineSnapshot(`
-            Array [
+            [
               "The last scan result was found on a disk. Use --continue option to continue scan for the last URL provided, or --restart option to delete the last scan result.",
             ]
         `);
@@ -146,11 +146,11 @@ describe('CrawlerCommandRunner', () => {
         await testSubject.runCommand(scanArguments);
 
         expect(stdout).toMatchInlineSnapshot(`
-Array [
-  "Generating summary scan report...",
-  "Summary report was saved as /path/to/report",
-]
-`);
+            [
+              "Generating summary scan report...",
+              "Summary report was saved as /path/to/report",
+            ]
+        `);
     });
 
     it('continue run with --continue when last scan data persisted', async () => {
@@ -172,11 +172,11 @@ Array [
         await testSubject.runCommand(scanArguments);
 
         expect(stdout).toMatchInlineSnapshot(`
-Array [
-  "Generating summary scan report...",
-  "Summary report was saved as /path/to/report",
-]
-`);
+            [
+              "Generating summary scan report...",
+              "Summary report was saved as /path/to/report",
+            ]
+        `);
     });
 
     it('run crawler', async () => {
@@ -190,7 +190,7 @@ Array [
         await testSubject.runCommand(scanArguments);
 
         expect(stdout).toMatchInlineSnapshot(`
-            Array [
+            [
               "Generating summary scan report...",
               "Summary report was saved as /path/to/report",
             ]
@@ -229,7 +229,7 @@ Array [
         await testSubject.runCommand(scanArguments);
 
         expect(stdout).toMatchInlineSnapshot(`
-            Array [
+            [
               "Web browser failed to open URL(s). Please check error log for details that was saved as /path/to/log",
               "No scan result found. If this persists, check error log(s), search for a known issue, or file a new one at https://github.com/microsoft/accessibility-insights-service/issues.",
             ]
@@ -257,7 +257,7 @@ Array [
         await testSubject.runCommand(scanArguments);
 
         expect(stdout).toMatchInlineSnapshot(`
-            Array [
+            [
               "Generating summary scan report...",
               "Summary report was saved as /path/to/report",
             ]

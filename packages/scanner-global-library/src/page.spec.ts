@@ -4,7 +4,7 @@
 import 'reflect-metadata';
 
 import { AxePuppeteer } from '@axe-core/puppeteer';
-import Puppeteer, { HTTPResponse, ScreenshotOptions } from 'puppeteer';
+import * as Puppeteer from 'puppeteer';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { System } from 'common';
 import { GlobalLogger } from 'logger';
@@ -211,7 +211,7 @@ describe(Page, () => {
     describe('reload()', () => {
         beforeEach(() => {
             simulatePageLaunch();
-            page.lastNavigationResponse = { _url: 'url' } as unknown as HTTPResponse;
+            page.lastNavigationResponse = { _url: 'url' } as unknown as Puppeteer.HTTPResponse;
         });
 
         it('reload page and saves response', async () => {
@@ -400,7 +400,7 @@ describe(Page, () => {
             const options = {
                 fullPage: true,
                 encoding: 'base64',
-            } as ScreenshotOptions;
+            } as Puppeteer.ScreenshotOptions;
             puppeteerPageMock
                 .setup((o) => o.screenshot(options))
                 .returns(() => Promise.resolve('data'))

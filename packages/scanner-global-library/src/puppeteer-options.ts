@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import Puppeteer from 'puppeteer';
+import * as Puppeteer from 'puppeteer';
 
 export const windowSize = {
     width: 1920,

@@ -5,7 +5,7 @@ import 'reflect-metadata';
 
 import Apify, { PuppeteerCrawlerOptions } from 'apify';
 import { IMock, It, Mock } from 'typemoq';
-import Puppeteer from 'puppeteer';
+import * as Puppeteer from 'puppeteer';
 import { PageProcessor, PageProcessorBase } from '../page-processors/page-processor-base';
 import { CrawlerRunOptions } from '../types/crawler-run-options';
 import { ApifyRequestQueueProvider } from '../types/ioc-types';

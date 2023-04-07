@@ -4,7 +4,7 @@
 import { PromiseUtils, System } from 'common';
 import { inject, injectable, optional } from 'inversify';
 import { GlobalLogger, Logger } from 'logger';
-import Puppeteer from 'puppeteer';
+import * as Puppeteer from 'puppeteer';
 // eslint-disable-next-line @typescript-eslint/tslint/config
 import PuppeteerExtra from 'puppeteer-extra';
 // eslint-disable-next-line @typescript-eslint/tslint/config

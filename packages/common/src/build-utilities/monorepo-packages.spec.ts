@@ -6,7 +6,7 @@ import { listMonorepoPackageNames } from './monorepo-packages';
 describe('listMonorepoPackageNames', () => {
     it('returns the pinned set of package names', () => {
         expect(listMonorepoPackageNames()).toMatchInlineSnapshot(`
-            Array [
+            [
               "axe-result-converter",
               "azure-services",
               "accessibility-insights-scan",
