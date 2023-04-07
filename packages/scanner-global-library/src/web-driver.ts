@@ -66,7 +66,7 @@ export class WebDriver {
         const launchOptions = this.createLaunchOptions();
         this.browser = await this.puppeteerExtra.launch({
             ...launchOptions,
-            executablePath: options.browserExecutablePath,
+            executablePath: options.browserExecutablePath ?? Puppeteer.executablePath(),
         });
 
         this.logger?.logInfo('Chromium browser instance started.');
