@@ -19,7 +19,7 @@
         "publish-code-coverage": "./upload-to-codecov.sh",
         "lint:check": "yarn packages run lint",
         "lint:fix": "yarn packages run lint:fix",
-        "precheckin": "npm-run-all --serial format:check lint:check copyright:check syncpack:check",
+        "precheckin": "npm-run-all --serial format:check lint:check copyright:check syncpack:check cbuild test",
         "format:fix": "npx prettier --write \"**/*\"",
         "format:check": "npx prettier --check \"**/*\"",
         "copyright:check": "license-check-and-add check -f ./license-check-and-add-config.json",
