@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 import { PuppeteerExtraPlugin, PluginOptions, PluginRequirements } from 'puppeteer-extra-plugin';
-import Puppeteer, { Protocol } from 'puppeteer';
+import * as Puppeteer from 'puppeteer';
 import { inject, injectable } from 'inversify';
 import { iocTypes, SecretVault } from './ioc-types';
 import { LoginPageDetector } from './authenticator/login-page-detector';
@@ -66,7 +66,7 @@ export class UserAgentPlugin extends PuppeteerExtraPlugin {
         return userAgent;
     }
 
-    private async getUserAgentMetadata(page: Puppeteer.Page): Promise<Protocol.Emulation.UserAgentMetadata> {
+    private async getUserAgentMetadata(page: Puppeteer.Page): Promise<Puppeteer.Protocol.Emulation.UserAgentMetadata> {
         const brands = await this.getBrands(page);
         const browserVersion = await page.browser().version();
         const fullVersion = browserVersion.match(/Chrome\/([\d|.]+)/)[1];
@@ -89,7 +89,7 @@ export class UserAgentPlugin extends PuppeteerExtraPlugin {
      * Build HTTP Sec-CH-UA request header metadata
      * https://source.chromium.org/chromium/chromium/src/+/refs/heads/main:components/embedder_support/user_agent_utils.cc
      */
-    private async getBrands(page: Puppeteer.Page): Promise<Protocol.Emulation.UserAgentBrandVersion[]> {
+    private async getBrands(page: Puppeteer.Page): Promise<Puppeteer.Protocol.Emulation.UserAgentBrandVersion[]> {
         const browserVersion = await page.browser().version();
         const majorVersion = browserVersion.match(/Chrome\/(\d+)\.(.*)/i)[1];
         const seed = Number(majorVersion);

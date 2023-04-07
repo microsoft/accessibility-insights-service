@@ -1,227 +1,227 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`ServiceConfiguration verifies custom config 1`] = `
-Object {
-  "availabilityTestConfig": Object {
-    "consolidatedIdBase": Object {
+{
+  "availabilityTestConfig": {
+    "consolidatedIdBase": {
       "default": "e2e-consolidated-report-id",
       "doc": "The id prefix for the consolidated report",
       "format": "String",
     },
-    "environmentDefinition": Object {
+    "environmentDefinition": {
       "default": "canary",
       "doc": "The environment definition used to select tests to run",
       "format": [Function],
     },
-    "logQueryTimeRange": Object {
+    "logQueryTimeRange": {
       "default": "P1D",
       "doc": "The Application Insights query time range",
       "format": [Function],
     },
-    "maxDeepScanWaitTimeInSeconds": Object {
+    "maxDeepScanWaitTimeInSeconds": {
       "default": 3600,
       "doc": "Maximum wait time for deep scan to complete",
       "format": "int",
     },
-    "maxScanCompletionNotificationWaitTimeInSeconds": Object {
+    "maxScanCompletionNotificationWaitTimeInSeconds": {
       "default": 600,
       "doc": "Maximum wait time for scan notification request to complete",
       "format": "int",
     },
-    "maxScanWaitTimeInSeconds": Object {
+    "maxScanWaitTimeInSeconds": {
       "default": 3600,
       "doc": "Maximum wait time for scan request to complete",
       "format": "int",
     },
-    "scanNotifyApiEndpoint": Object {
+    "scanNotifyApiEndpoint": {
       "default": "/scan-notification-url",
       "doc": "The end-point to hit when a scan is completed and will respond successfully",
       "format": "String",
     },
-    "scanNotifyFailApiEndpoint": Object {
+    "scanNotifyFailApiEndpoint": {
       "default": "/scan-notification-url-fail",
       "doc": "The end-point to hit when a scan is completed and will respond unsuccessfully",
       "format": "String",
     },
-    "scanWaitIntervalInSeconds": Object {
+    "scanWaitIntervalInSeconds": {
       "default": 180,
       "doc": "Time to wait before checking E2E test orchestration workflow activity result",
       "format": "int",
     },
-    "urlToScan": Object {
+    "urlToScan": {
       "default": "https://teststorage57bzoqjjclekk.z13.web.core.windows.net/2021-05-04/",
       "doc": "Url to scan for availability testing",
       "format": "String",
     },
   },
-  "crawlConfig": Object {
-    "deepScanDiscoveryLimit": Object {
+  "crawlConfig": {
+    "deepScanDiscoveryLimit": {
       "default": 6,
       "doc": "The maximum number of URLs that will be discovered for a deep scan request",
       "format": "int",
     },
-    "deepScanUpperLimit": Object {
+    "deepScanUpperLimit": {
       "default": 10,
       "doc": "The maximum number of URLs that will be processed for a deep scan request",
       "format": "int",
     },
   },
-  "featureFlags": Object {
-    "sendNotification": Object {
+  "featureFlags": {
+    "sendNotification": {
       "default": false,
       "doc": "Property to decide if we should notify after scan completed.",
       "format": "Boolean",
     },
   },
-  "jobManagerConfig": Object {
-    "accessibilityScanJobGroup": Object {
+  "jobManagerConfig": {
+    "accessibilityScanJobGroup": {
       "default": "on-demand-url-scan-schedule",
       "doc": "The prefix for accessibility scan batch job id.",
       "format": "String",
     },
-    "activeToRunningTasksRatio": Object {
+    "activeToRunningTasksRatio": {
       "default": 3,
       "doc": "The target overload ratio of queued to running tasks. Higher ratio value will result higher queued tasks count.",
       "format": [Function],
     },
-    "addTasksIntervalInSeconds": Object {
+    "addTasksIntervalInSeconds": {
       "default": 20,
       "doc": "The time interval at which a job manager adds tasks to the job.",
       "format": "int",
     },
-    "maxWallClockTimeInMinutes": Object {
+    "maxWallClockTimeInMinutes": {
       "default": 30,
       "doc": "The amount of time the job manager instance will run continuously. Must correlate with queueConfig.messageVisibilityTimeoutInSeconds config value.",
       "format": "int",
     },
-    "privacyScanJobGroup": Object {
+    "privacyScanJobGroup": {
       "default": "privacy-scan-schedule",
       "doc": "The prefix for privacy scan batch job id.",
       "format": "String",
     },
-    "privacyScanRunnerTaskImageName": Object {
+    "privacyScanRunnerTaskImageName": {
       "default": "batch-privacy-scan-runner",
       "doc": "The container image name used for task creation.",
       "format": "String",
     },
-    "reportGeneratorJobGroup": Object {
+    "reportGeneratorJobGroup": {
       "default": "report-generator-schedule",
       "doc": "The prefix for report generator batch job id.",
       "format": "String",
     },
-    "reportGeneratorRunnerTaskImageName": Object {
+    "reportGeneratorRunnerTaskImageName": {
       "default": "batch-report-generator-runner",
       "doc": "The container image name used for task creation.",
       "format": "String",
     },
-    "scanRunnerTaskImageName": Object {
+    "scanRunnerTaskImageName": {
       "default": "batch-scan-runner",
       "doc": "The container image name used for task creation.",
       "format": "String",
     },
-    "sendNotificationJobGroup": Object {
+    "sendNotificationJobGroup": {
       "default": "on-demand-send-notification-schedule",
       "doc": "The prefix for send notification batch job id.",
       "format": "String",
     },
-    "sendNotificationTaskImageName": Object {
+    "sendNotificationTaskImageName": {
       "default": "batch-scan-notification-runner",
       "doc": "The container image name used for task creation.",
       "format": "String",
     },
-    "sendNotificationTasksCount": Object {
+    "sendNotificationTasksCount": {
       "default": 100,
       "doc": "Number of scan notification tasks that can be in active/running state",
       "format": "int",
     },
   },
-  "logConfig": Object {
-    "logInConsole": Object {
+  "logConfig": {
+    "logInConsole": {
       "default": true,
       "doc": "Property to decide if console logging is enabled",
       "format": "Boolean",
     },
   },
-  "privacyScanConfig": Object {
-    "bannerDetectionTimeout": Object {
+  "privacyScanConfig": {
+    "bannerDetectionTimeout": {
       "default": 10000,
       "doc": "The maximum time in milliseconds to wait for the banner XPath after the initial page load has completed",
       "format": "int",
     },
-    "bannerXPath": Object {
-      "default": "//div[@id=\\"wcpConsentBannerCtrl\\"]",
+    "bannerXPath": {
+      "default": "//div[@id="wcpConsentBannerCtrl"]",
       "doc": "The default XPath to use for consent banner detection",
       "format": "String",
     },
   },
-  "queueConfig": Object {
-    "maxQueueSize": Object {
+  "queueConfig": {
+    "maxQueueSize": {
       "default": 10,
       "doc": "Maximum message count in scan request queue.",
       "format": "int",
     },
-    "messageVisibilityTimeoutInSeconds": Object {
+    "messageVisibilityTimeoutInSeconds": {
       "default": 2700,
       "doc": "Message visibility timeout in seconds. Must correlate with jobManagerConfig.maxWallClockTimeInMinutes config value.",
       "format": "int",
     },
   },
-  "restApiConfig": Object {
-    "maxScanPriorityValue": Object {
+  "restApiConfig": {
+    "maxScanPriorityValue": {
       "default": 1000,
       "doc": "Priority values can range from -1000 to 1000, with -1000 being the lowest priority and 1000 being the highest priority.                        This range correlates with Azure Batch pool task priority range.",
       "format": "int",
     },
-    "maxScanRequestBatchCount": Object {
+    "maxScanRequestBatchCount": {
       "default": 250,
       "doc": "Maximum number of scan requests in a single HTTP client request.",
       "format": "int",
     },
-    "minScanPriorityValue": Object {
+    "minScanPriorityValue": {
       "default": -1000,
       "doc": "Priority values can range from -1000 to 1000, with -1000 being the lowest priority and 1000 being the highest priority.                        This range correlates with Azure Batch pool task priority range.",
       "format": "int",
     },
-    "scanRequestProcessingDelayInSeconds": Object {
+    "scanRequestProcessingDelayInSeconds": {
       "default": 600,
       "doc": "The scan request processing delay interval in seconds for a new submitted request.",
       "format": "int",
     },
   },
-  "scanConfig": Object {
-    "failedScanRetryIntervalInMinutes": Object {
+  "scanConfig": {
+    "failedScanRetryIntervalInMinutes": {
       "default": 45,
       "doc": "The minimum wait time before next retry of a failed scan request.",
       "format": "int",
     },
-    "maxFailedScanRetryCount": Object {
+    "maxFailedScanRetryCount": {
       "default": 2,
       "doc": "Maximum number of retries (additional times to re-run a scan) allowed for a failed scan request.",
       "format": "int",
     },
-    "maxScanStaleTimeoutInMinutes": Object {
+    "maxScanStaleTimeoutInMinutes": {
       "default": 4320,
       "doc": "Maximum sliding window for a scan to complete.",
       "format": "int",
     },
-    "maxSendNotificationRetryCount": Object {
+    "maxSendNotificationRetryCount": {
       "default": 5,
       "doc": "Maximum number of retries allowed for a scan notification sending",
       "format": "int",
     },
-    "scanTimeoutInMin": Object {
+    "scanTimeoutInMin": {
       "default": 3,
       "doc": "Maximum allowed time for scanning a web page in minutes",
       "format": "int",
     },
   },
-  "taskConfig": Object {
-    "retentionTimeInDays": Object {
+  "taskConfig": {
+    "retentionTimeInDays": {
       "default": 3,
       "doc": "The minimum time to retain the working directory for the task on the compute node where it ran, from the time it completes execution. After this time, the Batch service may delete the working directory and all its contents.",
       "format": "int",
     },
-    "taskTimeoutInMinutes": Object {
+    "taskTimeoutInMinutes": {
       "default": 20,
       "doc": "Timeout value after which the task has to be terminated. Must correlate with queueConfig.messageVisibilityTimeoutInSeconds config value.",
       "format": "int",
@@ -231,227 +231,227 @@ Object {
 `;
 
 exports[`ServiceConfiguration verifies dev config 1`] = `
-Object {
-  "availabilityTestConfig": Object {
-    "consolidatedIdBase": Object {
+{
+  "availabilityTestConfig": {
+    "consolidatedIdBase": {
       "default": "e2e-consolidated-report-id",
       "doc": "The id prefix for the consolidated report",
       "format": "String",
     },
-    "environmentDefinition": Object {
+    "environmentDefinition": {
       "default": "canary",
       "doc": "The environment definition used to select tests to run",
       "format": [Function],
     },
-    "logQueryTimeRange": Object {
+    "logQueryTimeRange": {
       "default": "P1D",
       "doc": "The Application Insights query time range",
       "format": [Function],
     },
-    "maxDeepScanWaitTimeInSeconds": Object {
+    "maxDeepScanWaitTimeInSeconds": {
       "default": 3600,
       "doc": "Maximum wait time for deep scan to complete",
       "format": "int",
     },
-    "maxScanCompletionNotificationWaitTimeInSeconds": Object {
+    "maxScanCompletionNotificationWaitTimeInSeconds": {
       "default": 600,
       "doc": "Maximum wait time for scan notification request to complete",
       "format": "int",
     },
-    "maxScanWaitTimeInSeconds": Object {
+    "maxScanWaitTimeInSeconds": {
       "default": 3600,
       "doc": "Maximum wait time for scan request to complete",
       "format": "int",
     },
-    "scanNotifyApiEndpoint": Object {
+    "scanNotifyApiEndpoint": {
       "default": "/scan-notification-url",
       "doc": "The end-point to hit when a scan is completed and will respond successfully",
       "format": "String",
     },
-    "scanNotifyFailApiEndpoint": Object {
+    "scanNotifyFailApiEndpoint": {
       "default": "/scan-notification-url-fail",
       "doc": "The end-point to hit when a scan is completed and will respond unsuccessfully",
       "format": "String",
     },
-    "scanWaitIntervalInSeconds": Object {
+    "scanWaitIntervalInSeconds": {
       "default": 180,
       "doc": "Time to wait before checking E2E test orchestration workflow activity result",
       "format": "int",
     },
-    "urlToScan": Object {
+    "urlToScan": {
       "default": "https://teststorage57bzoqjjclekk.z13.web.core.windows.net/2021-05-04/",
       "doc": "Url to scan for availability testing",
       "format": "String",
     },
   },
-  "crawlConfig": Object {
-    "deepScanDiscoveryLimit": Object {
+  "crawlConfig": {
+    "deepScanDiscoveryLimit": {
       "default": 6,
       "doc": "The maximum number of URLs that will be discovered for a deep scan request",
       "format": "int",
     },
-    "deepScanUpperLimit": Object {
+    "deepScanUpperLimit": {
       "default": 10,
       "doc": "The maximum number of URLs that will be processed for a deep scan request",
       "format": "int",
     },
   },
-  "featureFlags": Object {
-    "sendNotification": Object {
+  "featureFlags": {
+    "sendNotification": {
       "default": false,
       "doc": "Property to decide if we should notify after scan completed.",
       "format": "Boolean",
     },
   },
-  "jobManagerConfig": Object {
-    "accessibilityScanJobGroup": Object {
+  "jobManagerConfig": {
+    "accessibilityScanJobGroup": {
       "default": "on-demand-url-scan-schedule",
       "doc": "The prefix for accessibility scan batch job id.",
       "format": "String",
     },
-    "activeToRunningTasksRatio": Object {
+    "activeToRunningTasksRatio": {
       "default": 3,
       "doc": "The target overload ratio of queued to running tasks. Higher ratio value will result higher queued tasks count.",
       "format": [Function],
     },
-    "addTasksIntervalInSeconds": Object {
+    "addTasksIntervalInSeconds": {
       "default": 20,
       "doc": "The time interval at which a job manager adds tasks to the job.",
       "format": "int",
     },
-    "maxWallClockTimeInMinutes": Object {
+    "maxWallClockTimeInMinutes": {
       "default": 30,
       "doc": "The amount of time the job manager instance will run continuously. Must correlate with queueConfig.messageVisibilityTimeoutInSeconds config value.",
       "format": "int",
     },
-    "privacyScanJobGroup": Object {
+    "privacyScanJobGroup": {
       "default": "privacy-scan-schedule",
       "doc": "The prefix for privacy scan batch job id.",
       "format": "String",
     },
-    "privacyScanRunnerTaskImageName": Object {
+    "privacyScanRunnerTaskImageName": {
       "default": "batch-privacy-scan-runner",
       "doc": "The container image name used for task creation.",
       "format": "String",
     },
-    "reportGeneratorJobGroup": Object {
+    "reportGeneratorJobGroup": {
       "default": "report-generator-schedule",
       "doc": "The prefix for report generator batch job id.",
       "format": "String",
     },
-    "reportGeneratorRunnerTaskImageName": Object {
+    "reportGeneratorRunnerTaskImageName": {
       "default": "batch-report-generator-runner",
       "doc": "The container image name used for task creation.",
       "format": "String",
     },
-    "scanRunnerTaskImageName": Object {
+    "scanRunnerTaskImageName": {
       "default": "batch-scan-runner",
       "doc": "The container image name used for task creation.",
       "format": "String",
     },
-    "sendNotificationJobGroup": Object {
+    "sendNotificationJobGroup": {
       "default": "on-demand-send-notification-schedule",
       "doc": "The prefix for send notification batch job id.",
       "format": "String",
     },
-    "sendNotificationTaskImageName": Object {
+    "sendNotificationTaskImageName": {
       "default": "batch-scan-notification-runner",
       "doc": "The container image name used for task creation.",
       "format": "String",
     },
-    "sendNotificationTasksCount": Object {
+    "sendNotificationTasksCount": {
       "default": 100,
       "doc": "Number of scan notification tasks that can be in active/running state",
       "format": "int",
     },
   },
-  "logConfig": Object {
-    "logInConsole": Object {
+  "logConfig": {
+    "logInConsole": {
       "default": true,
       "doc": "Property to decide if console logging is enabled",
       "format": "Boolean",
     },
   },
-  "privacyScanConfig": Object {
-    "bannerDetectionTimeout": Object {
+  "privacyScanConfig": {
+    "bannerDetectionTimeout": {
       "default": 10000,
       "doc": "The maximum time in milliseconds to wait for the banner XPath after the initial page load has completed",
       "format": "int",
     },
-    "bannerXPath": Object {
-      "default": "//div[@id=\\"wcpConsentBannerCtrl\\"]",
+    "bannerXPath": {
+      "default": "//div[@id="wcpConsentBannerCtrl"]",
       "doc": "The default XPath to use for consent banner detection",
       "format": "String",
     },
   },
-  "queueConfig": Object {
-    "maxQueueSize": Object {
+  "queueConfig": {
+    "maxQueueSize": {
       "default": 10,
       "doc": "Maximum message count in scan request queue.",
       "format": "int",
     },
-    "messageVisibilityTimeoutInSeconds": Object {
+    "messageVisibilityTimeoutInSeconds": {
       "default": 2700,
       "doc": "Message visibility timeout in seconds. Must correlate with jobManagerConfig.maxWallClockTimeInMinutes config value.",
       "format": "int",
     },
   },
-  "restApiConfig": Object {
-    "maxScanPriorityValue": Object {
+  "restApiConfig": {
+    "maxScanPriorityValue": {
       "default": 1000,
       "doc": "Priority values can range from -1000 to 1000, with -1000 being the lowest priority and 1000 being the highest priority.                        This range correlates with Azure Batch pool task priority range.",
       "format": "int",
     },
-    "maxScanRequestBatchCount": Object {
+    "maxScanRequestBatchCount": {
       "default": 250,
       "doc": "Maximum number of scan requests in a single HTTP client request.",
       "format": "int",
     },
-    "minScanPriorityValue": Object {
+    "minScanPriorityValue": {
       "default": -1000,
       "doc": "Priority values can range from -1000 to 1000, with -1000 being the lowest priority and 1000 being the highest priority.                        This range correlates with Azure Batch pool task priority range.",
       "format": "int",
     },
-    "scanRequestProcessingDelayInSeconds": Object {
+    "scanRequestProcessingDelayInSeconds": {
       "default": 600,
       "doc": "The scan request processing delay interval in seconds for a new submitted request.",
       "format": "int",
     },
   },
-  "scanConfig": Object {
-    "failedScanRetryIntervalInMinutes": Object {
+  "scanConfig": {
+    "failedScanRetryIntervalInMinutes": {
       "default": 45,
       "doc": "The minimum wait time before next retry of a failed scan request.",
       "format": "int",
     },
-    "maxFailedScanRetryCount": Object {
+    "maxFailedScanRetryCount": {
       "default": 2,
       "doc": "Maximum number of retries (additional times to re-run a scan) allowed for a failed scan request.",
       "format": "int",
     },
-    "maxScanStaleTimeoutInMinutes": Object {
+    "maxScanStaleTimeoutInMinutes": {
       "default": 4320,
       "doc": "Maximum sliding window for a scan to complete.",
       "format": "int",
     },
-    "maxSendNotificationRetryCount": Object {
+    "maxSendNotificationRetryCount": {
       "default": 5,
       "doc": "Maximum number of retries allowed for a scan notification sending",
       "format": "int",
     },
-    "scanTimeoutInMin": Object {
+    "scanTimeoutInMin": {
       "default": 3,
       "doc": "Maximum allowed time for scanning a web page in minutes",
       "format": "int",
     },
   },
-  "taskConfig": Object {
-    "retentionTimeInDays": Object {
+  "taskConfig": {
+    "retentionTimeInDays": {
       "default": 3,
       "doc": "The minimum time to retain the working directory for the task on the compute node where it ran, from the time it completes execution. After this time, the Batch service may delete the working directory and all its contents.",
       "format": "int",
     },
-    "taskTimeoutInMinutes": Object {
+    "taskTimeoutInMinutes": {
       "default": 20,
       "doc": "Timeout value after which the task has to be terminated. Must correlate with queueConfig.messageVisibilityTimeoutInSeconds config value.",
       "format": "int",

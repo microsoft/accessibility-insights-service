@@ -4,7 +4,7 @@
 import { PromiseUtils, System } from 'common';
 import { inject, injectable, optional } from 'inversify';
 import { GlobalLogger, Logger } from 'logger';
-import Puppeteer from 'puppeteer';
+import * as Puppeteer from 'puppeteer';
 // eslint-disable-next-line @typescript-eslint/tslint/config
 import PuppeteerExtra from 'puppeteer-extra';
 // eslint-disable-next-line @typescript-eslint/tslint/config
@@ -66,7 +66,7 @@ export class WebDriver {
         const launchOptions = this.createLaunchOptions();
         this.browser = await this.puppeteerExtra.launch({
             ...launchOptions,
-            executablePath: options.browserExecutablePath,
+            executablePath: options.browserExecutablePath ?? Puppeteer.executablePath(),
         });
 
         this.logger?.logInfo('Chromium browser instance started.');

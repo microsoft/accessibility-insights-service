@@ -1,13 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-const baseConfig = require('../../jest.config.base');
 const package = require('./package');
 
 module.exports = {
-    ...baseConfig,
+    preset: '../../jest.config.base.js',
     displayName: package.name,
-    moduleNameMapper: {
-        '@fluentui/react': '@fluentui/react/lib-commonjs',
-    },
 };

@@ -29,5 +29,6 @@ codecov.*
 **/*.DS_Store
 **/bin
 **/obj
+**/coverage
 
 yarn-error.log

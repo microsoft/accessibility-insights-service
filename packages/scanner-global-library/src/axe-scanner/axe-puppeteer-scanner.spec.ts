@@ -5,7 +5,7 @@ import 'reflect-metadata';
 
 import { AxePuppeteer } from '@axe-core/puppeteer';
 import { AxeResults } from 'axe-core';
-import Puppeteer from 'puppeteer';
+import * as Puppeteer from 'puppeteer';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { System } from 'common';
 import { GlobalLogger } from 'logger';

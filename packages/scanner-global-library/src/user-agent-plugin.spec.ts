@@ -3,7 +3,7 @@
 
 import 'reflect-metadata';
 
-import Puppeteer from 'puppeteer';
+import * as Puppeteer from 'puppeteer';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { UserAgentPlugin } from './user-agent-plugin';
 import { SecretVault } from './ioc-types';

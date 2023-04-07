@@ -66,7 +66,7 @@ describe(BaselineFileUpdater, () => {
             await testSubject.updateBaseline(scanArguments, updateSuggestedEvaluation);
 
             expect(stdout).toMatchInlineSnapshot(`
-                Array [
+                [
                   "Found 1 new violations compared to the baseline.",
                   "Found 0 cases where a previously baselined violation was fixed.",
                   "Saved updated baseline file at /path/from/output-file-writer",
@@ -109,13 +109,13 @@ describe(BaselineFileUpdater, () => {
             await testSubject.updateBaseline(scanArguments, updateSuggestedEvaluation);
 
             expect(stdout).toMatchInlineSnapshot(`
-Array [
-  "Found 1 new violations compared to the baseline.",
-  "Found 0 cases where a previously baselined violation was fixed.",
-  "Saved new baseline file at /path/from/output-file-writer.baseline",
-  "To update the baseline with these changes, either rerun with --updateBaseline or copy the updated baseline file to /scan-arguments/baselineFile",
-]
-`);
+                [
+                  "Found 1 new violations compared to the baseline.",
+                  "Found 0 cases where a previously baselined violation was fixed.",
+                  "Saved new baseline file at /path/from/output-file-writer.baseline",
+                  "To update the baseline with these changes, either rerun with --updateBaseline or copy the updated baseline file to /scan-arguments/baselineFile",
+                ]
+            `);
         });
 
         it('propagates errors from baselineFileFormatter', async () => {

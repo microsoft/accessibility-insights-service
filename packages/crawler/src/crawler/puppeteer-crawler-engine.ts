@@ -5,7 +5,7 @@ import Apify from 'apify';
 import { BrowserController, BrowserPoolOptions, PuppeteerPlugin } from 'browser-pool';
 import { inject, injectable } from 'inversify';
 import { isEmpty } from 'lodash';
-import Puppeteer from 'puppeteer';
+import * as Puppeteer from 'puppeteer';
 import { AuthenticatorFactory } from '../authenticator/authenticator-factory';
 import { CrawlerRunOptions } from '../types/crawler-run-options';
 import { ApifyRequestQueueProvider, crawlerIocTypes, PageProcessorFactory } from '../types/ioc-types';
