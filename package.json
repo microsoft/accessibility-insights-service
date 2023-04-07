@@ -26,7 +26,7 @@
         "copyright:fix": "license-check-and-add add -f ./license-check-and-add-config.json",
         "syncpack:check": "npx syncpack list-mismatches",
         "syncpack:fix": "npx syncpack fix-mismatches",
-        "shellcheck": "./node_modules/shellcheck/shellcheck-stable/shellcheck ./packages/**/*.sh",
+        "shellcheck": "npx shellcheck ./packages/**/*.sh",
         "pr:combine": "git push origin :combined-prs ; npx combine-dependabot-prs microsoft/accessibility-insights-service",
         "circular:check": "npx madge --warning --circular --extensions js ./"
     },
@@ -60,6 +60,7 @@
         "patch-package": "^6.5.1",
         "prettier": "2.8.3",
         "rimraf": "^4.1.2",
+        "shellcheck": "^2.2.0",
         "simple-git": "^3.16.0",
         "syncpack": "^8.4.11",
         "ts-jest": "^29.1.0",
