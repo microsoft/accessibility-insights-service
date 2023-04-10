@@ -20,6 +20,7 @@ export function setupLocalScannerContainer(container: inversify.Container): inve
     container.options.skipBaseClassChecks = true;
     container.bind(iocTypes.AxeConfiguration).toConstantValue(localAxeConfiguration);
     container.bind(iocTypes.AxeRunOptions).toConstantValue(webAxeRunOptions);
+    container.bind(iocTypes.SecretVaultProvider).toFunction(() => Promise.resolve({ webScannerBypassKey: '1.0' }));
 
     return container;
 }

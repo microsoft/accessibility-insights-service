@@ -46,6 +46,7 @@ describe(PuppeteerCrawlerEngine, () => {
     let crawlerEngine: PuppeteerCrawlerEngine;
     let requestQueueProvider: ApifyRequestQueueProvider;
     let authenticatorMock: IMock<Authenticator>;
+    let puppeteerMock: IMock<typeof Puppeteer>;
 
     beforeEach(() => {
         authenticatorFactoryMock = Mock.ofType<AuthenticatorFactory>();
@@ -54,6 +55,9 @@ describe(PuppeteerCrawlerEngine, () => {
         puppeteerCrawlerMock = Mock.ofType<Apify.PuppeteerCrawler>();
         crawlerConfigurationMock = Mock.ofType(CrawlerConfiguration);
         authenticatorMock = Mock.ofType<Authenticator>();
+        puppeteerMock = Mock.ofType<typeof Puppeteer>();
+
+        puppeteerMock.setup((o) => o.executablePath()).returns(() => 'executablePath');
 
         crawlerRunOptions = {
             localOutputDir: 'localOutputDir',
@@ -88,6 +92,7 @@ describe(PuppeteerCrawlerEngine, () => {
                         height: 1080,
                         deviceScaleFactor: 1,
                     },
+                    executablePath: crawlerRunOptions.chromePath ?? 'executablePath',
                 } as Puppeteer.LaunchOptions,
             },
         };
@@ -102,6 +107,7 @@ describe(PuppeteerCrawlerEngine, () => {
             crawlerFactoryMock.object,
             authenticatorFactoryMock.object,
             crawlerConfigurationMock.object,
+            puppeteerMock.object,
         );
     });
 
@@ -119,6 +125,7 @@ describe(PuppeteerCrawlerEngine, () => {
         crawlerConfigurationMock.setup((o) => o.setChromePath(crawlerRunOptions.chromePath)).verifiable();
 
         baseCrawlerOptions.launchContext.useChrome = true;
+        baseCrawlerOptions.launchContext.launchOptions.executablePath = crawlerRunOptions.chromePath;
         crawlerFactoryMock
             .setup((o) => o.createPuppeteerCrawler(baseCrawlerOptions))
             .returns(() => puppeteerCrawlerMock.object)
