@@ -22,6 +22,7 @@ export class PuppeteerCrawlerEngine {
         @inject(CrawlerFactory) private readonly crawlerFactory: CrawlerFactory,
         @inject(AuthenticatorFactory) private readonly authenticatorFactory: AuthenticatorFactory,
         @inject(CrawlerConfiguration) private readonly crawlerConfiguration: CrawlerConfiguration,
+        private readonly puppeteer: typeof Puppeteer = Puppeteer,
     ) {}
 
     public async start(crawlerRunOptions: CrawlerRunOptions): Promise<void> {
@@ -54,6 +55,7 @@ export class PuppeteerCrawlerEngine {
                         height: 1080,
                         deviceScaleFactor: 1,
                     },
+                    executablePath: crawlerRunOptions.chromePath ?? this.puppeteer.executablePath(),
                 } as Puppeteer.LaunchOptions,
             },
         };
