@@ -3,6 +3,7 @@
 
 import * as fs from 'fs';
 import { injectable } from 'inversify';
+import * as Puppeteer from 'puppeteer';
 
 @injectable()
 export class BrowserCache {
@@ -10,7 +11,20 @@ export class BrowserCache {
 
     constructor(private readonly filesystem: typeof fs = fs) {}
 
-    public clear(): void {
+    /**
+     * Clears browser cache.
+     */
+    public async clear(page: Puppeteer.Page): Promise<void> {
+        const session = await page.target().createCDPSession();
+        await session.send('Network.clearBrowserCache');
+        await session.detach();
+    }
+
+    /**
+     * Deletes browser cache files. Will require browser restart.
+     * To clear current browser cache use {@link BrowserCache.clear} method.
+     */
+    public clearStorage(): void {
         this.filesystem.rmSync(this.dirname, { recursive: true, force: true });
     }
 }

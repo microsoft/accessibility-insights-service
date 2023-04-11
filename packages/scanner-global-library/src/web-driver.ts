@@ -60,7 +60,7 @@ export class WebDriver {
         this.addPuppeteerPlugins();
 
         if (options.clearDiskCache === true) {
-            this.browserCache.clear();
+            this.browserCache.clearStorage();
         }
 
         const launchOptions = this.createLaunchOptions();

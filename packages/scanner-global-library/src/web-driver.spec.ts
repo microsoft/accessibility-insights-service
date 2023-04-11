@@ -166,7 +166,7 @@ describe('WebDriver', () => {
             .setup((o) => o.launch(It.isAny()))
             .returns(() => Promise.resolve(<Puppeteer.Browser>(<unknown>puppeteerBrowserMock)))
             .verifiable(Times.once());
-        browserCacheMock.setup((o) => o.clear()).verifiable();
+        browserCacheMock.setup((o) => o.clearStorage()).verifiable();
 
         const browser = await testSubject.launch({ clearDiskCache: true });
 

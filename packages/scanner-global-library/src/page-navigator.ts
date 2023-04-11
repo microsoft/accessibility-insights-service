@@ -222,8 +222,8 @@ export class PageNavigator {
             if (count > maxRetryCount - 1) {
                 // Navigation did not solve the cache error. Clear browser cache and reload page.
                 await page.goto(`file:///${__dirname}/blank-page.html`);
+                await this.browserCache.clear(page);
                 await System.wait(1000);
-                this.browserCache.clear();
                 this.logger?.logWarn('Reload page on HTTP 304 web server response has failed. Reload page without browser cache.', {
                     retryCount: `${count}`,
                 });
