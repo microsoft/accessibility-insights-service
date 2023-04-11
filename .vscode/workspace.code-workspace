@@ -187,11 +187,12 @@
             "dbaeumer.vscode-eslint",
             "ms-dotnettools.csharp",
             "esbenp.prettier-vscode",
-            "rbbit.typescript-hero",
             "foxundermoon.shell-format",
             "rogalmic.bash-debug",
             "streetsidesoftware.code-spell-checker",
-            "ms-azuretools.vscode-azurefunctions"
+            "ms-azuretools.vscode-azurefunctions",
+            "christian-kohler.npm-intellisense",
+            "ms-vscode.powershell"
         ]
     },
 }
