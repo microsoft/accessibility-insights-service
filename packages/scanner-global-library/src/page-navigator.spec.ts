@@ -437,7 +437,10 @@ describe(PageNavigator, () => {
                 .setup((o) => o.goBack({ waitUntil: 'networkidle2', timeout: puppeteerTimeoutConfig.navigationTimeoutMsecs }))
                 .returns(() => Promise.resolve(cachedResponse))
                 .verifiable(Times.atLeast(max304RetryCount));
-            browserCacheMock.setup((o) => o.clear()).verifiable();
+            browserCacheMock
+                .setup((o) => o.clear(puppeteerPageMock.object))
+                .returns(() => Promise.resolve())
+                .verifiable();
 
             const opResponse = await pageNavigator.handleCachedResponse(pageOperationResult, puppeteerPageMock.object);
             expect(opResponse.response).toEqual(cachedResponse);
