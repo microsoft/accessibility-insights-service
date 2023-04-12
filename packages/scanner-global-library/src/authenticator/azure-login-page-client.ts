@@ -4,6 +4,7 @@
 import * as Puppeteer from 'puppeteer';
 import { inject, optional, injectable } from 'inversify';
 import { AuthenticationType } from 'storage-documents';
+import { System } from 'common';
 import { PageNavigator, NavigationResponse } from '../page-navigator';
 import { ServicePrincipalCredentialProvider } from './service-principal-credential-provider';
 
@@ -51,6 +52,8 @@ export class AzureLoginPageClient implements LoginPageClient {
         if (navigationResponse.browserError !== undefined) {
             return this.getErrorResponse(navigationResponse, page, '#usernameError');
         }
+
+        await System.wait(10000);
 
         // Select Password authentication option
         try {
