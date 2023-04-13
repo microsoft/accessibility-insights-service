@@ -106,8 +106,7 @@ export class WebsiteScanResultAggregator {
     }
 
     private getDirName(): string {
-        const isDebugEnabled = /--debug|--inspect/i.test(process.execArgv.join(' '));
-        if (isDebugEnabled === true) {
+        if (System.isDebugEnabled() === true) {
             const buildDir = '/dist/';
             if (__dirname.lastIndexOf(buildDir) > -1) {
                 // return build directory

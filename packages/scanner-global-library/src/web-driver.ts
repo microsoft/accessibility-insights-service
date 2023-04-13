@@ -105,15 +105,15 @@ export class WebDriver {
         // Browser profile (storage, settings, etc.) is not part of the cache and will be deleted after browser relaunch.
         options.args.push(`--disk-cache-dir=${this.browserCache.dirname}`);
 
-        const isDebugEnabled = /--debug|--inspect/i.test(process.execArgv.join(' '));
-        if (isDebugEnabled === true) {
-            options.args.push('--disable-web-security');
-        }
+        if (System.isDebugEnabled() === true) {
+            options.args.push('--disable-web-security'); // disable the same-origin policy
+            options.args.push('--enable-remote-extensions');
 
-        if (process.env.EXTENSION_NAME || process.env.EXTENSION_ID) {
-            const extensionLoader = new ExtensionLoader();
-            const extension = extensionLoader.getExtension(process.env.EXTENSION_NAME, process.env.EXTENSION_ID);
-            options.args.push(...[`--disable-extensions-except=${extension.path}`, `--load-extension=${extension.path}`]);
+            if (process.env.EXTENSION_NAME || process.env.EXTENSION_ID) {
+                const extensionLoader = new ExtensionLoader();
+                const extension = extensionLoader.getExtension(process.env.EXTENSION_NAME, process.env.EXTENSION_ID);
+                options.args.push(...[`--load-extension=${extension.path}`]);
+            }
         }
 
         return options;
