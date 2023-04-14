@@ -5,7 +5,6 @@ import 'reflect-metadata';
 
 import { IMock, Mock, It, Times } from 'typemoq';
 import * as Puppeteer from 'puppeteer';
-import { System } from 'common';
 import { PageNavigator, NavigationResponse } from '../page-navigator';
 import { AzureLoginPageClient } from './azure-login-page-client';
 import { ServicePrincipalCredentialProvider, ServicePrincipalCredential } from './service-principal-credential-provider';
@@ -101,7 +100,6 @@ function setupSelectPasswordAuthenticationOption(): void {
 }
 
 function setupClickNextButton(navigationResponse: NavigationResponse = {}): void {
-    System.wait = () => Promise.resolve();
     pageNavigatorMock
         .setup((o) => o.waitForNavigation(puppeteerPageMock.object))
         .returns(() => Promise.resolve(navigationResponse))
