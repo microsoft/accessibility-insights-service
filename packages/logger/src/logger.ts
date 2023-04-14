@@ -32,7 +32,7 @@ export abstract class Logger {
         }
 
         await this.initializeClients(baseProperties);
-        this.isDebugEnabled = /--debug|--inspect/i.test(this.currentProcess.execArgv.join(' '));
+        this.isDebugEnabled = System.isDebugEnabled();
         this.initialized = true;
     }
 

@@ -110,4 +110,8 @@ export namespace System {
 
         return result;
     }
+
+    export function isDebugEnabled(): boolean {
+        return process.env.VSCODE_INSPECTOR_OPTIONS !== undefined || /--debug|--inspect/i.test(process.env.NODE_OPTIONS);
+    }
 }
