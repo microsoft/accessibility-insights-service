@@ -112,8 +112,8 @@ export class Page {
 
         if (
             this.lastBrowserError &&
-            this.networkTraceGlobalFlag !== true /** not in network trace mode already */ &&
-            this.lastAuthenticationResult?.authenticated !== true
+            this.networkTraceGlobalFlag !== true /** not in network trace mode yet */ &&
+            this.lastAuthenticationResult?.authenticated === undefined /** no authentication trace */
         ) {
             this.logger?.logWarn('Reload page with network trace on navigation error.');
             await this.navigateWithNetworkTrace(url);

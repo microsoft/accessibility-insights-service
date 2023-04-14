@@ -103,7 +103,11 @@ export class PageNavigator {
 
     public async navigatePageOperation(url: string, page: Puppeteer.Page): Promise<NavigationResponse> {
         await this.pageNavigationHooks.preNavigation(page);
-        const opResult = await this.invokePageNavigationOperation(this.createPageNavigationOperation('goto', page, url));
+
+        const navigationOperation = this.createPageNavigationOperation('goto', page, url);
+        let opResult = await this.invokePageNavigationOperation(navigationOperation);
+        opResult = await this.handleIndirectPageRedirection(navigationOperation, opResult, page);
+
         if (opResult.browserError) {
             return {
                 httpResponse: undefined,
@@ -126,7 +130,8 @@ export class PageNavigator {
         };
 
         const timestamp = System.getTimestamp();
-        const opResult = await this.invokePageOperation(navigationOperation);
+        let opResult = await this.invokePageOperation(navigationOperation);
+        opResult = await this.handleIndirectPageRedirection(navigationOperation, opResult, page);
         const opElapsed = System.getElapsedTime(timestamp);
 
         if (opResult.error) {
