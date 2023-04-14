@@ -6,7 +6,7 @@ import { CosmosClient, CosmosClientOptions } from '@azure/cosmos';
 import * as msRestNodeAuth from '@azure/ms-rest-nodeauth';
 import { BlobServiceClient } from '@azure/storage-blob';
 import { QueueServiceClient } from '@azure/storage-queue';
-import { IoC } from 'common';
+import { IoC, System } from 'common';
 import { Container, interfaces } from 'inversify';
 import { ContextAwareLogger } from 'logger';
 import { SecretClient } from '@azure/keyvault-secrets';
@@ -221,11 +221,10 @@ function defaultCosmosClientFactory(cosmosClientOptions: CosmosClientOptions): C
 }
 
 function setupAuthenticationMethod(container: Container): void {
-    const isDebugEnabled = /--debug|--inspect/i.test(process.execArgv.join(' '));
     container
         .bind(iocTypeNames.AuthenticationMethod)
         .toConstantValue(
-            isDebugEnabled || process.env.LOCAL_AUTH === 'true'
+            System.isDebugEnabled() === true || process.env.LOCAL_AUTH === 'true'
                 ? AuthenticationMethod.servicePrincipal
                 : AuthenticationMethod.managedIdentity,
         );

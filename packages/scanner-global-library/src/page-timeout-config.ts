@@ -45,5 +45,5 @@ export const puppeteerTimeoutConfig = {
     /**
      * Maximum wait time, in milliseconds, to scroll to the bottom of the page.
      */
-    scrollTimeoutMsecs: 15000,
+    scrollTimeoutMsecs: 30000,
 };

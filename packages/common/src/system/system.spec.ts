@@ -180,4 +180,25 @@ describe('getElapsedTime()', () => {
             expect(expectedResult).toEqual(0);
         });
     });
+
+    describe('isDebugEnabled', () => {
+        beforeEach(() => {
+            delete process.env.VSCODE_INSPECTOR_OPTIONS;
+            delete process.env.NODE_OPTIONS;
+        });
+
+        it('debug enabled by vs code', () => {
+            process.env.VSCODE_INSPECTOR_OPTIONS = 'options inspectorIpc options';
+            expect(System.isDebugEnabled()).toEqual(true);
+        });
+
+        it('debug enabled by node', () => {
+            process.env.NODE_OPTIONS = 'options --inspect-publish-uid options';
+            expect(System.isDebugEnabled()).toEqual(true);
+        });
+
+        it('debug is not enabled', () => {
+            expect(System.isDebugEnabled()).toEqual(false);
+        });
+    });
 });
