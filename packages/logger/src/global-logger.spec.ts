@@ -22,7 +22,7 @@ describe(GlobalLogger, () => {
     let processStub: typeof process;
 
     beforeEach(() => {
-        processStub = { execArgv: ['--test'] } as typeof process;
+        processStub = {} as typeof process;
         loggerClient1Mock = Mock.ofType2(ConsoleLoggerClient, null, MockBehavior.Strict);
         loggerClient2Mock = Mock.ofType2(ConsoleLoggerClient, null, MockBehavior.Strict);
         setupAllLoggerClientsInit();
@@ -268,19 +268,10 @@ describe(GlobalLogger, () => {
     });
 
     describe('logVerbose', () => {
-        it('--debug is case insensitive', async () => {
-            processStub.execArgv = ['--t', '--DEBUG'];
-            await testSubject.setup();
-            invokeAllLoggerClientMocks((m) => m.setup((c) => c.log('HealthCheck', LogLevel.verbose, undefined)).verifiable(Times.once()));
-
-            testSubject.logVerbose('HealthCheck');
-
-            verifyMocks();
-        });
-
         describe('in debug mode', () => {
             beforeEach(async () => {
-                processStub.execArgv = ['--t', '--debug'];
+                System.isDebugEnabled = () => true;
+                processStub.execArgv = ['--t'];
                 await testSubject.setup();
             });
 
@@ -307,6 +298,10 @@ describe(GlobalLogger, () => {
         });
 
         describe('in normal mode', () => {
+            beforeEach(async () => {
+                System.isDebugEnabled = () => false;
+            });
+
             it('when properties not passed', async () => {
                 await testSubject.setup();
 
