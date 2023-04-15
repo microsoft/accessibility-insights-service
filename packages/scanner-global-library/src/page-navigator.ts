@@ -129,24 +129,22 @@ export class PageNavigator {
 
         const timestamp = System.getTimestamp();
         let opResult = await this.invokePageOperation(navigationOperation);
-        opResult = await this.handleIndirectPageRedirection(navigationOperation, opResult, page);
         const opElapsed = System.getElapsedTime(timestamp);
+
+        opResult = await this.handleIndirectPageRedirection(navigationOperation, opResult, page);
+        const pageNavigationTiming = opResult.navigationTiming ?? ({ goto1: opElapsed } as PageNavigationTiming);
 
         if (opResult.browserError) {
             return {
                 httpResponse: undefined,
-                pageNavigationTiming: {
-                    goto1: opElapsed,
-                } as PageNavigationTiming,
+                pageNavigationTiming,
                 browserError: opResult.browserError,
             };
         }
 
         return {
             httpResponse: opResult.response,
-            pageNavigationTiming: {
-                goto1: opElapsed,
-            } as PageNavigationTiming,
+            pageNavigationTiming,
         };
     }
 
