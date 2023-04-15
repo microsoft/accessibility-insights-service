@@ -138,7 +138,7 @@ describe(Page, () => {
             } as ResourceAuthenticationResult;
             const reloadNavigationResponse = { httpResponse: { url: () => 'localhost/2' } } as NavigationResponse;
             pageNavigatorMock
-                .setup((o) => o.navigatePageOperation(url, puppeteerPageMock.object))
+                .setup((o) => o.navigatePageSimplified(url, puppeteerPageMock.object))
                 .returns(() => Promise.resolve({} as NavigationResponse))
                 .verifiable();
             resourceAuthenticatorMock
