@@ -101,51 +101,17 @@ export class PageNavigator {
         };
     }
 
-    public async navigatePageSimplified(url: string, page: Puppeteer.Page): Promise<NavigationResponse> {
+    public async navigateDirect(url: string, page: Puppeteer.Page): Promise<NavigationResponse> {
         await this.pageNavigationHooks.preNavigation(page);
-
         const navigationOperation = this.createPageNavigationOperation('goto', page, url);
-        let opResult = await this.invokePageNavigationOperation(navigationOperation);
-        opResult = await this.handleIndirectPageRedirection(navigationOperation, opResult, page);
 
-        if (opResult.browserError) {
-            return {
-                httpResponse: undefined,
-                pageNavigationTiming: opResult.navigationTiming,
-                browserError: opResult.browserError,
-            };
-        }
-
-        return {
-            httpResponse: opResult.response,
-            pageNavigationTiming: {
-                ...opResult.navigationTiming,
-            } as PageNavigationTiming,
-        };
+        return this.navigatePageDirect(navigationOperation, page, false);
     }
 
     public async waitForNavigation(page: Puppeteer.Page): Promise<NavigationResponse> {
         const navigationOperation = this.createPageNavigationOperation('wait', page);
 
-        const timestamp = System.getTimestamp();
-        let opResult = await this.invokePageOperation(navigationOperation);
-        const opElapsed = System.getElapsedTime(timestamp);
-
-        opResult = await this.handleIndirectPageRedirection(navigationOperation, opResult, page);
-        const pageNavigationTiming = opResult.navigationTiming ?? ({ goto1: opElapsed } as PageNavigationTiming);
-
-        if (opResult.browserError) {
-            return {
-                httpResponse: undefined,
-                pageNavigationTiming,
-                browserError: opResult.browserError,
-            };
-        }
-
-        return {
-            httpResponse: opResult.response,
-            pageNavigationTiming,
-        };
+        return this.navigatePageDirect(navigationOperation, page, false);
     }
 
     private async navigatePage(navigationOperation: NavigationOperation, page: Puppeteer.Page): Promise<PageOperationResult> {
@@ -166,7 +132,32 @@ export class PageNavigator {
         return opResult;
     }
 
-    private async invokePageNavigationOperation(navigationOperation: NavigationOperation): Promise<PageOperationResult> {
+    private async navigatePageDirect(
+        navigationOperation: NavigationOperation,
+        page: Puppeteer.Page,
+        retryOnTimeout: boolean = this.enableRetryOnTimeout,
+    ): Promise<NavigationResponse> {
+        let opResult = await this.invokePageNavigationOperation(navigationOperation, retryOnTimeout);
+        opResult = await this.handleIndirectPageRedirection(navigationOperation, opResult, page);
+
+        if (opResult.browserError) {
+            return {
+                httpResponse: undefined,
+                pageNavigationTiming: opResult.navigationTiming,
+                browserError: opResult.browserError,
+            };
+        }
+
+        return {
+            httpResponse: opResult.response,
+            pageNavigationTiming: opResult.navigationTiming,
+        };
+    }
+
+    private async invokePageNavigationOperation(
+        navigationOperation: NavigationOperation,
+        retryOnTimeout: boolean = this.enableRetryOnTimeout,
+    ): Promise<PageOperationResult> {
         let opTimeout = false;
 
         let timestamp = System.getTimestamp();
@@ -174,7 +165,7 @@ export class PageNavigator {
         const op1Elapsed = System.getElapsedTime(timestamp);
 
         let op2Elapsed = 0;
-        if (opResult.browserError?.errorType === 'UrlNavigationTimeout' && this.enableRetryOnTimeout === true) {
+        if (opResult.browserError?.errorType === 'UrlNavigationTimeout' && retryOnTimeout === true) {
             // Fallback to load partial page resources on navigation timeout.
             // This mitigates cases when page has active network connections,
             // for example streaming video controls.
@@ -309,7 +300,7 @@ export class PageNavigator {
         };
         page.on('requestfailed', pageOnRequestFailedEventHandler);
 
-        const opResult = await this.invokePageNavigationOperation(navigationOperation);
+        const opResult = await this.invokePageNavigationOperation(navigationOperation, false);
 
         const timestamp = System.getTimestamp();
         let noPendingRequests = false;

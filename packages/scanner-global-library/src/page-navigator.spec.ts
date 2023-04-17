@@ -74,7 +74,7 @@ let loggerMock: IMock<MockableLogger>;
 let browserCacheMock: IMock<BrowserCache>;
 let timingCount: number;
 let pageOperationResult: PageOperationResult;
-let navigationOperation: NavigationOperation;
+let pageNavigationOperation: NavigationOperation;
 let puppeteerFrame: Puppeteer.Frame;
 let onEventRequest: Puppeteer.HTTPRequest;
 let response: Puppeteer.HTTPResponse;
@@ -246,7 +246,7 @@ describe(PageNavigator, () => {
 
     describe('navigatePage', () => {
         it('simple navigation', async () => {
-            navigationOperation = async (waitUntil = 'networkidle2') => {
+            pageNavigationOperation = async (waitUntil = 'networkidle2') => {
                 return puppeteerPageMock.object.goto(url, { waitUntil, timeout: puppeteerTimeoutConfig.navigationTimeoutMsecs });
             };
 
@@ -257,16 +257,16 @@ describe(PageNavigator, () => {
             const handleCachedResponseFn = jest.fn().mockImplementation(() => Promise.resolve(pageOperationResult));
             pageNavigator.handleCachedResponse = handleCachedResponseFn;
 
-            const opResponse = await pageNavigator.navigatePage(navigationOperation, puppeteerPageMock.object);
+            const opResponse = await pageNavigator.navigatePage(pageNavigationOperation, puppeteerPageMock.object);
 
-            expect(invokePageNavigationOperationFn).toBeCalledWith(navigationOperation);
-            expect(handleIndirectPageRedirectionFn).toBeCalledWith(navigationOperation, pageOperationResult, puppeteerPageMock.object);
+            expect(invokePageNavigationOperationFn).toBeCalledWith(pageNavigationOperation);
+            expect(handleIndirectPageRedirectionFn).toBeCalledWith(pageNavigationOperation, pageOperationResult, puppeteerPageMock.object);
             expect(handleCachedResponseFn).toBeCalledWith(pageOperationResult, puppeteerPageMock.object);
             expect(opResponse).toEqual(pageOperationResult);
         });
 
         it('navigation with redirection failure', async () => {
-            navigationOperation = async (waitUntil = 'networkidle2') => {
+            pageNavigationOperation = async (waitUntil = 'networkidle2') => {
                 return puppeteerPageMock.object.goto(url, { waitUntil, timeout: puppeteerTimeoutConfig.navigationTimeoutMsecs });
             };
             const pageOperationResultError = {
@@ -281,16 +281,16 @@ describe(PageNavigator, () => {
             const handleCachedResponseFn = jest.fn().mockImplementation(() => Promise.resolve(pageOperationResult));
             pageNavigator.handleCachedResponse = handleCachedResponseFn;
 
-            const opResponse = await pageNavigator.navigatePage(navigationOperation, puppeteerPageMock.object);
+            const opResponse = await pageNavigator.navigatePage(pageNavigationOperation, puppeteerPageMock.object);
 
-            expect(invokePageNavigationOperationFn).toBeCalledWith(navigationOperation);
-            expect(handleIndirectPageRedirectionFn).toBeCalledWith(navigationOperation, pageOperationResult, puppeteerPageMock.object);
+            expect(invokePageNavigationOperationFn).toBeCalledWith(pageNavigationOperation);
+            expect(handleIndirectPageRedirectionFn).toBeCalledWith(pageNavigationOperation, pageOperationResult, puppeteerPageMock.object);
             expect(handleCachedResponseFn).not.toBeCalled();
             expect(opResponse).toEqual(pageOperationResultError);
         });
 
         it('navigation with cache reload failure', async () => {
-            navigationOperation = async (waitUntil = 'networkidle2') => {
+            pageNavigationOperation = async (waitUntil = 'networkidle2') => {
                 return puppeteerPageMock.object.goto(url, { waitUntil, timeout: puppeteerTimeoutConfig.navigationTimeoutMsecs });
             };
             const pageOperationResultError = {
@@ -305,21 +305,21 @@ describe(PageNavigator, () => {
             const handleCachedResponseFn = jest.fn().mockImplementation(() => Promise.resolve(pageOperationResultError));
             pageNavigator.handleCachedResponse = handleCachedResponseFn;
 
-            const opResponse = await pageNavigator.navigatePage(navigationOperation, puppeteerPageMock.object);
+            const opResponse = await pageNavigator.navigatePage(pageNavigationOperation, puppeteerPageMock.object);
 
-            expect(invokePageNavigationOperationFn).toBeCalledWith(navigationOperation);
-            expect(handleIndirectPageRedirectionFn).toBeCalledWith(navigationOperation, pageOperationResult, puppeteerPageMock.object);
+            expect(invokePageNavigationOperationFn).toBeCalledWith(pageNavigationOperation);
+            expect(handleIndirectPageRedirectionFn).toBeCalledWith(pageNavigationOperation, pageOperationResult, puppeteerPageMock.object);
             expect(handleCachedResponseFn).toBeCalledWith(pageOperationResult, puppeteerPageMock.object);
             expect(opResponse).toEqual(pageOperationResultError);
         });
     });
 
-    describe('navigatePageSimplified', () => {
+    describe('navigateDirect', () => {
         it.each([
             { ...pageOperationResult, response: {}, navigationTiming: {} },
             { ...pageOperationResult, response: {}, navigationTiming: {}, browserError: {} },
         ])('navigate', async (pageOpResult) => {
-            const pageNavigationOperation = () => {
+            pageNavigationOperation = async () => {
                 return {} as Puppeteer.HTTPResponse;
             };
             pageNavigationHooksMock
@@ -333,7 +333,7 @@ describe(PageNavigator, () => {
             const handleIndirectPageRedirectionFn = jest.fn().mockImplementation(() => Promise.resolve(pageOpResult));
             pageNavigator.handleIndirectPageRedirection = handleIndirectPageRedirectionFn;
 
-            const opResponse = await pageNavigator.navigatePageSimplified(url, puppeteerPageMock.object);
+            const opResponse = await pageNavigator.navigateDirect(url, puppeteerPageMock.object);
 
             const expectedOpResponse = pageOpResult.browserError
                 ? {
@@ -343,12 +343,10 @@ describe(PageNavigator, () => {
                   }
                 : {
                       httpResponse: pageOpResult.response,
-                      pageNavigationTiming: {
-                          ...pageOpResult.navigationTiming,
-                      } as PageNavigationTiming,
+                      pageNavigationTiming: pageOpResult.navigationTiming,
                   };
             expect(createPageNavigationOperationFn).toBeCalledWith('goto', puppeteerPageMock.object, url);
-            expect(invokePageNavigationOperationFn).toBeCalledWith(pageNavigationOperation);
+            expect(invokePageNavigationOperationFn).toBeCalledWith(pageNavigationOperation, false);
             expect(handleIndirectPageRedirectionFn).toBeCalledWith(pageNavigationOperation, pageOpResult, puppeteerPageMock.object);
             expect(opResponse).toEqual(expectedOpResponse);
         });
@@ -356,19 +354,16 @@ describe(PageNavigator, () => {
 
     describe('waitForNavigation', () => {
         it.each([
-            { ...pageOperationResult, response: {} },
-            { ...pageOperationResult, response: {}, browserError: {} },
+            { ...pageOperationResult, response: {}, navigationTiming: {} },
+            { ...pageOperationResult, response: {}, navigationTiming: {}, browserError: {} },
         ])('wait', async (pageOpResult) => {
-            navigationOperation = async (waitUntil = 'networkidle2') => {
-                return puppeteerPageMock.object.waitForNavigation({
-                    waitUntil,
-                    timeout: puppeteerTimeoutConfig.navigationTimeoutMsecs,
-                });
+            pageNavigationOperation = async () => {
+                return {} as Puppeteer.HTTPResponse;
             };
-            const createPageNavigationOperationFn = jest.fn().mockImplementation(() => navigationOperation);
+            const createPageNavigationOperationFn = jest.fn().mockImplementation(() => pageNavigationOperation);
             pageNavigator.createPageNavigationOperation = createPageNavigationOperationFn;
-            const invokePageOperationFn = jest.fn().mockImplementation(() => Promise.resolve(pageOpResult));
-            pageNavigator.invokePageOperation = invokePageOperationFn;
+            const invokePageNavigationOperationFn = jest.fn().mockImplementation(() => Promise.resolve(pageOpResult));
+            pageNavigator.invokePageNavigationOperation = invokePageNavigationOperationFn;
             const handleIndirectPageRedirectionFn = jest.fn().mockImplementation(() => Promise.resolve(pageOpResult));
             pageNavigator.handleIndirectPageRedirection = handleIndirectPageRedirectionFn;
 
@@ -377,20 +372,16 @@ describe(PageNavigator, () => {
             const expectedOpResponse = pageOpResult.browserError
                 ? {
                       httpResponse: undefined as Puppeteer.HTTPResponse,
-                      pageNavigationTiming: {
-                          goto1: 10000,
-                      },
+                      pageNavigationTiming: pageOpResult.navigationTiming,
                       browserError: pageOpResult.browserError,
                   }
                 : {
                       httpResponse: pageOpResult.response,
-                      pageNavigationTiming: {
-                          goto1: 10000,
-                      },
+                      pageNavigationTiming: pageOpResult.navigationTiming,
                   };
             expect(createPageNavigationOperationFn).toBeCalledWith('wait', puppeteerPageMock.object);
-            expect(invokePageOperationFn).toBeCalledWith(navigationOperation);
-            expect(handleIndirectPageRedirectionFn).toBeCalledWith(navigationOperation, pageOpResult, puppeteerPageMock.object);
+            expect(invokePageNavigationOperationFn).toBeCalledWith(pageNavigationOperation, false);
+            expect(handleIndirectPageRedirectionFn).toBeCalledWith(pageNavigationOperation, pageOpResult, puppeteerPageMock.object);
             expect(opResponse).toEqual(expectedOpResponse);
         });
     });
@@ -444,7 +435,7 @@ describe(PageNavigator, () => {
 
     describe('invokePageNavigationOperation', () => {
         it('invoke without fallback to `load` wait condition', async () => {
-            navigationOperation = async (waitUntil = 'networkidle2') => {
+            pageNavigationOperation = async (waitUntil = 'networkidle2') => {
                 return puppeteerPageMock.object.goto(url, { waitUntil, timeout: puppeteerTimeoutConfig.navigationTimeoutMsecs });
             };
             puppeteerPageMock
@@ -452,13 +443,13 @@ describe(PageNavigator, () => {
                 .returns(() => Promise.resolve(response))
                 .verifiable();
 
-            const opResponse = await pageNavigator.invokePageNavigationOperation(navigationOperation);
+            const opResponse = await pageNavigator.invokePageNavigationOperation(pageNavigationOperation);
             expect(opResponse.response).toEqual(response);
         });
 
         it('invoke with fallback to `load` wait condition', async () => {
             const timeoutError = new Error('Navigation timeout');
-            navigationOperation = async (waitUntil = 'networkidle2') => {
+            pageNavigationOperation = async (waitUntil = 'networkidle2') => {
                 return puppeteerPageMock.object.goto(url, { waitUntil, timeout: puppeteerTimeoutConfig.navigationTimeoutMsecs });
             };
             puppeteerPageMock
@@ -476,7 +467,7 @@ describe(PageNavigator, () => {
                 })
                 .verifiable();
 
-            const opResponse = await pageNavigator.invokePageNavigationOperation(navigationOperation);
+            const opResponse = await pageNavigator.invokePageNavigationOperation(pageNavigationOperation);
             expect(opResponse.response).toEqual(response);
         });
     });
@@ -554,13 +545,13 @@ describe(PageNavigator, () => {
         });
 
         it('skip handler if response received', async () => {
-            navigationOperation = () => {
+            pageNavigationOperation = () => {
                 return undefined;
             };
             pageOperationResult.response = {} as Puppeteer.HTTPResponse;
 
             const opResponse = await pageNavigator.handleIndirectPageRedirection(
-                navigationOperation,
+                pageNavigationOperation,
                 pageOperationResult,
                 puppeteerPageMock.object,
             );
@@ -568,13 +559,13 @@ describe(PageNavigator, () => {
         });
 
         it('skip handler if error received', async () => {
-            navigationOperation = () => {
+            pageNavigationOperation = () => {
                 return undefined;
             };
             pageOperationResult.error = {} as Error;
 
             const opResponse = await pageNavigator.handleIndirectPageRedirection(
-                navigationOperation,
+                pageNavigationOperation,
                 pageOperationResult,
                 puppeteerPageMock.object,
             );
@@ -600,7 +591,7 @@ describe(PageNavigator, () => {
                     },
                 } as Puppeteer.HTTPRequest,
             ];
-            navigationOperation = async (waitUntil = 'networkidle2') => {
+            pageNavigationOperation = async (waitUntil = 'networkidle2') => {
                 return puppeteerPageMock.object.goto(url, { waitUntil, timeout: puppeteerTimeoutConfig.navigationTimeoutMsecs });
             };
             puppeteerPageMock
@@ -658,7 +649,7 @@ describe(PageNavigator, () => {
                 .verifiable();
 
             const opResponse = await pageNavigator.handleIndirectPageRedirection(
-                navigationOperation,
+                pageNavigationOperation,
                 pageOperationResult,
                 puppeteerPageMock.object,
             );

@@ -222,7 +222,7 @@ export class Page {
 
     private async preloadWithAuth(): Promise<void> {
         // Preload page to detect authentication request
-        const navigationResponse = await this.pageNavigator.navigatePageSimplified(this.requestUrl, this.page);
+        const navigationResponse = await this.pageNavigator.navigateDirect(this.requestUrl, this.page);
         if (navigationResponse.browserError !== undefined) {
             this.setLastNavigationState('preload', navigationResponse);
 
