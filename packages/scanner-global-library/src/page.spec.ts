@@ -138,7 +138,7 @@ describe(Page, () => {
 
             await page.navigate(url);
 
-            expect(page.lastNavigationResponse).toEqual(puppeteerResponseMock.object);
+            expect(page.navigationResponse).toEqual(puppeteerResponseMock.object);
         });
 
         it('navigates to page with authentication', async () => {
@@ -163,8 +163,8 @@ describe(Page, () => {
 
             await page.navigate(url, { enableAuthentication: true });
 
-            expect(page.lastNavigationResponse).toEqual(reloadNavigationResponse.httpResponse);
-            expect(page.lastAuthenticationResult).toEqual(authenticationResult);
+            expect(page.navigationResponse).toEqual(reloadNavigationResponse.httpResponse);
+            expect(page.authenticationResult).toEqual(authenticationResult);
         });
 
         it('handles browser error on navigate', async () => {
@@ -201,7 +201,7 @@ describe(Page, () => {
 
             await page.navigate(url);
 
-            expect(page.lastBrowserError).toEqual(browserError);
+            expect(page.browserError).toEqual(browserError);
         });
 
         it('set extra HTTP headers on navigate', async () => {
@@ -222,7 +222,7 @@ describe(Page, () => {
     describe('reload()', () => {
         beforeEach(() => {
             simulatePageLaunch();
-            page.lastNavigationResponse = { _url: 'url' } as unknown as Puppeteer.HTTPResponse;
+            page.navigationResponse = { _url: 'url' } as unknown as Puppeteer.HTTPResponse;
         });
 
         it('reload page and saves response', async () => {
@@ -239,11 +239,11 @@ describe(Page, () => {
 
             await page.reload();
 
-            expect(page.lastNavigationResponse).toEqual(puppeteerResponseMock.object);
+            expect(page.navigationResponse).toEqual(puppeteerResponseMock.object);
         });
 
         it('hard page reload', async () => {
-            (page as any).lastBrowserStartOptions = {
+            (page as any).browserStartOptions = {
                 browserExecutablePath: 'path',
                 clearBrowserCache: true,
             };
@@ -280,7 +280,7 @@ describe(Page, () => {
 
             await page.reload({ hardReload: true });
 
-            expect(page.lastNavigationResponse).toEqual(puppeteerResponseMock.object);
+            expect(page.navigationResponse).toEqual(puppeteerResponseMock.object);
         });
 
         it('handles browser error on reload', async () => {
@@ -293,7 +293,7 @@ describe(Page, () => {
 
             await page.reload();
 
-            expect(page.lastBrowserError).toEqual(browserError);
+            expect(page.browserError).toEqual(browserError);
         });
     });
 
@@ -450,8 +450,8 @@ describe(Page, () => {
 });
 
 function simulatePageNavigation(response: Puppeteer.HTTPResponse, browserError?: BrowserError): void {
-    page.lastNavigationResponse = response;
-    page.lastBrowserError = browserError;
+    page.navigationResponse = response;
+    page.browserError = browserError;
 }
 
 function simulatePageLaunch(): void {

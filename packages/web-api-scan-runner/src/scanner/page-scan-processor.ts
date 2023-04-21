@@ -29,8 +29,8 @@ export class PageScanProcessor {
                 this.setAuthenticationResult(pageScanResult);
             }
 
-            if (!isEmpty(this.page.lastBrowserError)) {
-                return { error: this.page.lastBrowserError, pageResponseCode: this.page.lastBrowserError.statusCode };
+            if (!isEmpty(this.page.browserError)) {
+                return { error: this.page.browserError, pageResponseCode: this.page.browserError.statusCode };
             }
 
             const pageState = await this.capturePageState();
@@ -76,7 +76,7 @@ export class PageScanProcessor {
     }
 
     private setAuthenticationResult(pageScanResult: OnDemandPageScanResult): void {
-        const authenticationResult = this.page.lastAuthenticationResult;
+        const authenticationResult = this.page.authenticationResult;
         if (authenticationResult === undefined) {
             pageScanResult.authentication = {
                 ...pageScanResult.authentication,

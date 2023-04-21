@@ -24,8 +24,8 @@ export class PageScanProcessor {
         let privacyScanResults: PrivacyScanResult;
         try {
             await this.openPage(scanMetadata.url);
-            if (!isEmpty(this.page.lastBrowserError)) {
-                return { error: this.page.lastBrowserError, pageResponseCode: this.page.lastBrowserError.statusCode };
+            if (!isEmpty(this.page.browserError)) {
+                return { error: this.page.browserError, pageResponseCode: this.page.browserError.statusCode };
             }
 
             const pageState = await this.capturePageState();

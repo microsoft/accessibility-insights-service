@@ -11,16 +11,16 @@ import { CookieScenario } from './cookie-scenarios';
 export class CookieCollector {
     public async getCookiesForScenario(page: Page, cookieScenario: CookieScenario): Promise<ConsentResult> {
         await page.reload({ hardReload: true });
-        if (!page.lastNavigationResponse?.ok()) {
-            return { error: page.lastBrowserError };
+        if (!page.navigationResponse?.ok()) {
+            return { error: page.browserError };
         }
 
         const cookiesBeforeConsent = await this.getCurrentCookies(page);
 
         await page.setCookies([cookieScenario]);
         await page.reload();
-        if (!page.lastNavigationResponse?.ok()) {
-            return { error: page.lastBrowserError };
+        if (!page.navigationResponse?.ok()) {
+            return { error: page.browserError };
         }
 
         const cookiesAfterConsent = await this.getCurrentCookies(page);

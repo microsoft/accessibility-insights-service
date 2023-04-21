@@ -182,7 +182,7 @@ describe(AxePuppeteerScanner, () => {
 
     it('throw error if page is not open', async () => {
         pageMock
-            .setup((o) => o.lastBrowserError)
+            .setup((o) => o.browserError)
             .returns(() => undefined)
             .verifiable();
         pageMock
@@ -221,11 +221,11 @@ function setupAxePuppeteerFactoryMock(axeCoreError?: Error): void {
 
 function setupPageNavigation(response: Puppeteer.HTTPResponse, browserError?: BrowserError): void {
     pageMock
-        .setup((o) => o.lastBrowserError)
+        .setup((o) => o.browserError)
         .returns(() => browserError)
         .verifiable();
     pageMock
-        .setup((o) => o.lastNavigationResponse)
+        .setup((o) => o.navigationResponse)
         .returns(() => response)
         .verifiable();
     pageMock

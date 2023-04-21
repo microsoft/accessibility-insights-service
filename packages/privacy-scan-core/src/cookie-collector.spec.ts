@@ -145,7 +145,7 @@ describe(CookieCollector, () => {
 
     function setupNavigationResult(fail: boolean = false): void {
         pageMock
-            .setup((o) => o.lastNavigationResponse)
+            .setup((o) => o.navigationResponse)
             .returns(() => {
                 return {
                     ok: () => !fail,
@@ -155,7 +155,7 @@ describe(CookieCollector, () => {
 
         if (fail) {
             pageMock
-                .setup((o) => o.lastBrowserError)
+                .setup((o) => o.browserError)
                 .returns(() => browserError)
                 .verifiable();
         }

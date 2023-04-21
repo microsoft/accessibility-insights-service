@@ -17,11 +17,11 @@ export class PrivacyScannerCore {
     ) {}
 
     public async scan(url: string, page: Page): Promise<PrivacyScanResult> {
-        if (!isEmpty(page.lastBrowserError)) {
-            return { error: page.lastBrowserError, pageResponseCode: page.lastBrowserError.statusCode };
+        if (!isEmpty(page.browserError)) {
+            return { error: page.browserError, pageResponseCode: page.browserError.statusCode };
         }
 
-        const navigationStatusCode = page.lastNavigationResponse.status();
+        const navigationStatusCode = page.navigationResponse.status();
 
         let privacyResult: PrivacyResults;
         try {
@@ -45,7 +45,7 @@ export class PrivacyScannerCore {
         };
 
         if (
-            page.lastNavigationResponse?.request()?.redirectChain()?.length > 0 ||
+            page.navigationResponse?.request()?.redirectChain()?.length > 0 ||
             // should compare encoded Urls
             encodeURI(url) !== page.url
         ) {
