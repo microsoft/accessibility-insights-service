@@ -101,13 +101,6 @@ export class PageNavigator {
         };
     }
 
-    public async navigateDirect(url: string, page: Puppeteer.Page): Promise<NavigationResponse> {
-        await this.pageNavigationHooks.preNavigation(page);
-        const navigationOperation = this.createPageNavigationOperation('goto', page, url);
-
-        return this.navigatePageDirect(navigationOperation, page, false);
-    }
-
     public async waitForNavigation(page: Puppeteer.Page): Promise<NavigationResponse> {
         const navigationOperation = this.createPageNavigationOperation('wait', page);
 
@@ -140,17 +133,12 @@ export class PageNavigator {
         let opResult = await this.invokePageNavigationOperation(navigationOperation, retryOnTimeout);
         opResult = await this.handleIndirectPageRedirection(navigationOperation, opResult, page);
 
-        if (opResult.browserError) {
-            return {
-                httpResponse: undefined,
-                pageNavigationTiming: opResult.navigationTiming,
-                browserError: opResult.browserError,
-            };
-        }
+        opResult = opResult.browserError ? this.getOperationErrorResult(opResult) : opResult;
 
         return {
             httpResponse: opResult.response,
             pageNavigationTiming: opResult.navigationTiming,
+            browserError: opResult.browserError,
         };
     }
 
@@ -302,12 +290,15 @@ export class PageNavigator {
 
         const opResult = await this.invokePageNavigationOperation(navigationOperation, false);
 
-        const timestamp = System.getTimestamp();
-        let noPendingRequests = false;
-        do {
-            await System.wait(3000);
-            noPendingRequests = requests.every((r) => r.opResult?.response || r.opResult?.error);
-        } while (!noPendingRequests && System.getElapsedTime(timestamp) < puppeteerTimeoutConfig.navigationTimeoutMsecs);
+        await System.waitLoop(
+            async () => {
+                // returns if there is no pending requests
+                return requests.every((r) => r.opResult?.response || r.opResult?.error);
+            },
+            async (noPendingRequests) => noPendingRequests,
+            puppeteerTimeoutConfig.navigationTimeoutMsecs,
+            2000,
+        );
 
         page.off('request', pageOnRequestEventHandler);
         page.off('response', pageOnResponseEventHandler);

@@ -15,6 +15,7 @@ const chromiumUserAgent =
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/107.1.2.3 Safari/537.36';
 const expectedUserAgent = `Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.1.2.3 Safari/537.36 WebInsights/${secretVaultData.webScannerBypassKey}`;
 const expectedLinuxUserAgent = `Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.1.2.3 Safari/537.36 WebInsights/${secretVaultData.webScannerBypassKey}`;
+const url = 'authUrl';
 
 let puppeteerPageMock: IMock<Puppeteer.Page>;
 let loginPageDetectorMock: IMock<LoginPageDetector>;
@@ -28,7 +29,7 @@ describe(UserAgentPlugin, () => {
         puppeteerPageMock = Mock.ofType<Puppeteer.Page>();
         loginPageDetectorMock = Mock.ofType<LoginPageDetector>();
         loginPageDetectorMock
-            .setup((o) => o.getLoginPageType(puppeteerPageMock.object))
+            .setup((o) => o.getLoginPageType(url))
             .returns(() => undefined)
             .verifiable();
         puppeteerBrowserStub = {
@@ -39,6 +40,10 @@ describe(UserAgentPlugin, () => {
             .setup((o) => o.browser())
             .returns(() => puppeteerBrowserStub)
             .verifiable(Times.atLeastOnce());
+        puppeteerPageMock
+            .setup((o) => o.url())
+            .returns(() => url)
+            .verifiable();
         secretVaultProvider = () => Promise.resolve(secretVaultData);
 
         userAgentPlugin = new UserAgentPlugin(secretVaultProvider, loginPageDetectorMock.object);
@@ -61,7 +66,7 @@ describe(UserAgentPlugin, () => {
     it('set user agent platform to Linux for auth workflow', async () => {
         loginPageDetectorMock.reset();
         loginPageDetectorMock
-            .setup((o) => o.getLoginPageType(puppeteerPageMock.object))
+            .setup((o) => o.getLoginPageType(url))
             .returns(() => 'MicrosoftAzure')
             .verifiable();
         puppeteerPageMock

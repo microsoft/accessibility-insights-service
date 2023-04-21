@@ -3,57 +3,31 @@
 
 import 'reflect-metadata';
 
-import * as Puppeteer from 'puppeteer';
-import { IMock, Mock } from 'typemoq';
-
 import { LoginPageDetector } from './login-page-detector';
 
 let loginPageDetector: LoginPageDetector;
-let puppeteerPageMock: IMock<Puppeteer.Page>;
 
 describe(LoginPageDetector, () => {
     beforeEach(() => {
-        puppeteerPageMock = Mock.ofType<Puppeteer.Page>();
         loginPageDetector = new LoginPageDetector();
     });
 
-    afterEach(() => {
-        puppeteerPageMock.verifyAll();
-    });
-
     it('should return MicrosoftAzure client type for Microsoft Azure login', () => {
-        puppeteerPageMock
-            .setup((o) => o.url())
-            .returns(() => 'https://login.MicrosoftOnline.com/12345-67890/oauth2/authorize?client_id=1')
-            .verifiable();
-
-        expect(loginPageDetector.getLoginPageType(puppeteerPageMock.object)).toEqual('MicrosoftAzure');
+        const url = 'https://login.MicrosoftOnline.com/12345-67890/oauth2/authorize?client_id=1';
+        expect(loginPageDetector.getLoginPageType(url)).toEqual('MicrosoftAzure');
     });
 
     it('should return MicrosoftAzure client type for Microsoft Live login', () => {
-        puppeteerPageMock
-            .setup((o) => o.url())
-            .returns(() => 'https://login.live.com/login.srf?wa=wsignin1.0&rpsnv=13')
-            .verifiable();
-
-        expect(loginPageDetector.getLoginPageType(puppeteerPageMock.object)).toEqual('MicrosoftAzure');
+        const url = 'https://login.live.com/login.srf?wa=wsignin1.0&rpsnv=13';
+        expect(loginPageDetector.getLoginPageType(url)).toEqual('MicrosoftAzure');
     });
 
     it('should skip for unknown URL', () => {
-        puppeteerPageMock
-            .setup((o) => o.url())
-            .returns(() => 'https://localhost/')
-            .verifiable();
-
-        expect(loginPageDetector.getLoginPageType(puppeteerPageMock.object)).toBeUndefined();
+        const url = 'https://localhost/';
+        expect(loginPageDetector.getLoginPageType(url)).toBeUndefined();
     });
 
     it('should skip for empty URL', () => {
-        puppeteerPageMock
-            .setup((o) => o.url())
-            .returns(() => undefined)
-            .verifiable();
-
-        expect(loginPageDetector.getLoginPageType(puppeteerPageMock.object)).toBeUndefined();
+        expect(loginPageDetector.getLoginPageType(undefined)).toBeUndefined();
     });
 });

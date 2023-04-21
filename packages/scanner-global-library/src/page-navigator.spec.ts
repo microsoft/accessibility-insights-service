@@ -314,44 +314,6 @@ describe(PageNavigator, () => {
         });
     });
 
-    describe('navigateDirect', () => {
-        it.each([
-            { ...pageOperationResult, response: {}, navigationTiming: {} },
-            { ...pageOperationResult, response: {}, navigationTiming: {}, browserError: {} },
-        ])('navigate', async (pageOpResult) => {
-            pageNavigationOperation = async () => {
-                return {} as Puppeteer.HTTPResponse;
-            };
-            pageNavigationHooksMock
-                .setup((o) => o.preNavigation(puppeteerPageMock.object))
-                .returns(() => Promise.resolve())
-                .verifiable();
-            const createPageNavigationOperationFn = jest.fn().mockImplementation(() => pageNavigationOperation);
-            pageNavigator.createPageNavigationOperation = createPageNavigationOperationFn;
-            const invokePageNavigationOperationFn = jest.fn().mockImplementation(() => Promise.resolve(pageOpResult));
-            pageNavigator.invokePageNavigationOperation = invokePageNavigationOperationFn;
-            const handleIndirectPageRedirectionFn = jest.fn().mockImplementation(() => Promise.resolve(pageOpResult));
-            pageNavigator.handleIndirectPageRedirection = handleIndirectPageRedirectionFn;
-
-            const opResponse = await pageNavigator.navigateDirect(url, puppeteerPageMock.object);
-
-            const expectedOpResponse = pageOpResult.browserError
-                ? {
-                      httpResponse: undefined as Puppeteer.HTTPResponse,
-                      pageNavigationTiming: pageOpResult.navigationTiming,
-                      browserError: pageOpResult.browserError,
-                  }
-                : {
-                      httpResponse: pageOpResult.response,
-                      pageNavigationTiming: pageOpResult.navigationTiming,
-                  };
-            expect(createPageNavigationOperationFn).toBeCalledWith('goto', puppeteerPageMock.object, url);
-            expect(invokePageNavigationOperationFn).toBeCalledWith(pageNavigationOperation, false);
-            expect(handleIndirectPageRedirectionFn).toBeCalledWith(pageNavigationOperation, pageOpResult, puppeteerPageMock.object);
-            expect(opResponse).toEqual(expectedOpResponse);
-        });
-    });
-
     describe('waitForNavigation', () => {
         it.each([
             { ...pageOperationResult, response: {}, navigationTiming: {} },

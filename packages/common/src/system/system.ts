@@ -106,7 +106,7 @@ export namespace System {
             await wait(waitMsec);
             result = await loopFunc();
             exit = await exitFunc(result);
-        } while (exit !== true && getElapsedTime(end) < 0);
+        } while (exit !== true && getElapsedTime(end) <= 0);
 
         return result;
     }

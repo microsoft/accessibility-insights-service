@@ -26,7 +26,7 @@ export class ResourceAuthenticator {
     ) {}
 
     public async authenticate(page: Puppeteer.Page): Promise<ResourceAuthenticationResult> {
-        const loginPageType = this.loginPageDetector.getLoginPageType(page);
+        const loginPageType = this.loginPageDetector.getLoginPageType(page.url());
         if (loginPageType === undefined) {
             return undefined;
         }

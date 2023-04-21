@@ -127,7 +127,7 @@ export class UserAgentPlugin extends PuppeteerExtraPlugin {
         // Set to Linux platform to disable authentication fallback to currently logged in Windows user
         const platform = 'X11; Linux x86_64';
 
-        const loginPageType = this.loginPageDetector.getLoginPageType(page);
+        const loginPageType = this.loginPageDetector.getLoginPageType(page.url());
         if (loginPageType === undefined) {
             return userAgent;
         }
