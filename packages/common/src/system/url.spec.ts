@@ -61,4 +61,15 @@ describe('tryParseUrlString()', () => {
         parameterValue = Url.getParameterValue('none', 'https://example.com?b=two&a=one&c=three');
         expect(parameterValue).toBeUndefined();
     });
+
+    it('getAbsoluteUrl', () => {
+        let absoluteUrl = Url.getAbsoluteUrl('/en-us', 'https://localhost.com/');
+        expect(absoluteUrl).toEqual('https://localhost.com/en-us');
+
+        absoluteUrl = Url.getAbsoluteUrl('https://localhost.com/en-us', 'https://localhost.com/');
+        expect(absoluteUrl).toEqual('https://localhost.com/en-us');
+
+        absoluteUrl = Url.getAbsoluteUrl('https://localhost3.com/en-us', 'https://localhost2.com/');
+        expect(absoluteUrl).toEqual('https://localhost3.com/en-us');
+    });
 });

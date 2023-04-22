@@ -3,7 +3,7 @@
 
 import * as Puppeteer from 'puppeteer';
 import { injectable, inject, optional } from 'inversify';
-import { System } from 'common';
+import { System, Url } from 'common';
 import { GlobalLogger } from 'logger';
 import { NavigationResponse, PageOperationResult } from './page-navigator';
 import { PageNavigationTiming, puppeteerTimeoutConfig } from './page-timeout-config';
@@ -11,14 +11,16 @@ import { PageResponseProcessor } from './page-response-processor';
 import { LoginPageDetector } from './authenticator/login-page-detector';
 
 export interface PageAnalysisResult {
-    redirection: boolean;
     authentication: boolean;
+    redirection: boolean;
     navigationResponse: NavigationResponse;
 }
 
-interface RedirectChain {
-    timestamp: number;
+interface RedirectRequest {
     url: string;
+    status?: number;
+    location?: string;
+    error?: string;
 }
 
 interface RedirectResult {
@@ -28,7 +30,7 @@ interface RedirectResult {
 
 @injectable()
 export class PageAnalyzer {
-    private redirectChain: RedirectChain[];
+    private redirectRequest: RedirectRequest[];
 
     constructor(
         @inject(PageResponseProcessor) public readonly pageResponseProcessor: PageResponseProcessor,
@@ -38,7 +40,7 @@ export class PageAnalyzer {
 
     public async analyze(url: string, page: Puppeteer.Page): Promise<PageAnalysisResult> {
         const redirectResult = await this.detectRedirection(url, page);
-        const authResult = this.detectAuth();
+        const authResult = this.detectAuth(page);
 
         return {
             redirection: redirectResult.redirection,
@@ -47,31 +49,28 @@ export class PageAnalyzer {
         };
     }
 
-    private detectAuth(): boolean {
+    private detectAuth(page: Puppeteer.Page): boolean {
         let authDetected = false;
-        for (const redirect of this.redirectChain) {
-            const loginPageType = this.loginPageDetector.getLoginPageType(redirect.url);
-            if (loginPageType !== undefined) {
-                authDetected = true;
-                this.logger?.logWarn('Page authentication was detected.', {
-                    loginPageType,
-                });
-
-                break;
-            }
+        const loginPageType = this.loginPageDetector.getLoginPageType(page.url());
+        if (loginPageType !== undefined) {
+            authDetected = true;
+            this.logger?.logWarn('Page authentication was detected.', {
+                loginPageType,
+            });
         }
 
         return authDetected;
     }
 
     private async detectRedirection(url: string, page: Puppeteer.Page): Promise<RedirectResult> {
-        this.redirectChain = [];
+        this.redirectRequest = [];
 
         await page.setRequestInterception(true);
         const pageOnRequestEventHandler = async (request: Puppeteer.HTTPRequest) => {
             try {
-                if (request.isNavigationRequest() && request.redirectChain().length > 0) {
-                    this.redirectChain.push({ timestamp: System.getTimestamp(), url: request.url() });
+                // Trace only main frame navigational requests
+                if (request.isNavigationRequest() && request.frame() === page.mainFrame()) {
+                    this.redirectRequest.push({ url: request.url() });
                 }
             } catch (e) {
                 this.logger?.logError(`Error handling 'request' page event`, { error: System.serializeError(e) });
@@ -81,34 +80,60 @@ export class PageAnalyzer {
         };
         page.on('request', pageOnRequestEventHandler);
 
+        const pageOnResponseEventHandler = async (response: Puppeteer.HTTPResponse) => {
+            try {
+                const traceUrl = this.redirectRequest.find((r) => r.url === response.url());
+                if (traceUrl !== undefined) {
+                    traceUrl.status = response.status();
+                    const locationHeader = response.headers()?.location;
+                    if (locationHeader !== undefined) {
+                        traceUrl.location = Url.getAbsoluteUrl(locationHeader, url);
+                    }
+                }
+            } catch (e) {
+                this.logger?.logError(`Error handling 'response' page event`, { error: System.serializeError(e) });
+            }
+        };
+        page.on('response', pageOnResponseEventHandler);
+
+        const pageOnRequestFailedEventHandler = async (request: Puppeteer.HTTPRequest) => {
+            try {
+                const traceUrl = this.redirectRequest.find((r) => r.url === request.url());
+                if (traceUrl !== undefined) {
+                    traceUrl.error = request.failure()?.errorText ?? 'unknown';
+                }
+            } catch (e) {
+                this.logger?.logError(`Error handling 'requestFailed' page event`, { error: System.serializeError(e) });
+            }
+        };
+        page.on('requestfailed', pageOnRequestFailedEventHandler);
+
         const operationResult = await this.navigate(url, page);
 
-        let lastRedirectChainCount = 0;
         await System.waitLoop(
             async () => {
-                return this.redirectChain.length;
+                // returns if there is no pending requests
+                return this.redirectRequest.every((r) => r.status || r.error);
             },
-            async (count) => {
-                const lastCount = lastRedirectChainCount;
-                lastRedirectChainCount = count;
-
-                return lastCount === count;
-            },
-            puppeteerTimeoutConfig.redirectChainTimeoutMsecs,
-            2000,
+            async (noPendingRequests) => noPendingRequests,
+            puppeteerTimeoutConfig.redirectTimeoutMsecs,
+            this.getTimeout(),
         );
 
         page.off('request', pageOnRequestEventHandler);
+        page.off('response', pageOnResponseEventHandler);
+        page.off('requestfailed', pageOnRequestFailedEventHandler);
         await page.setRequestInterception(false);
 
-        if (this.redirectChain.length > 0) {
-            this.logger?.logWarn('Page redirection was detected.', {
-                redirectChain: JSON.stringify(this.redirectChain),
+        const indirectRedirect = this.getIndirectRedirect(url);
+        if (indirectRedirect.length > 0) {
+            this.logger?.logWarn('Page indirect redirection was detected.', {
+                redirect: JSON.stringify(indirectRedirect.map((r) => r.url)),
             });
         }
 
         return {
-            redirection: this.redirectChain.length > 0,
+            redirection: indirectRedirect.length > 0,
             operationResult,
         };
     }
@@ -128,5 +153,22 @@ export class PageAnalyzer {
 
             return { response: undefined, browserError, error };
         }
+    }
+
+    private getIndirectRedirect(url: string): RedirectRequest[] {
+        // Select server originated redirect
+        const serverRedirects = this.redirectRequest
+            .filter((r) => [301, 302, 303, 307, 308].includes(r.status) && r.location)
+            .map((r) => r.location);
+        // Exclude original URL
+        serverRedirects.push(url);
+
+        // Exclude server originated redirect
+        return this.redirectRequest.filter((r) => !serverRedirects.includes(r.url));
+    }
+
+    private getTimeout(): number {
+        // Reduce wait time when debugging
+        return System.isDebugEnabled() === true ? 1500 : 5000;
     }
 }

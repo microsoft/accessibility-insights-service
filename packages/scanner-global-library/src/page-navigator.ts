@@ -35,6 +35,8 @@ export interface PageOperationResult {
 export class PageNavigator {
     public enableRetryOnTimeout = true;
 
+    public waitForRedirection = false;
+
     // usage of networkidle0 will break websites scanning
     private readonly navigationCondition: Puppeteer.PuppeteerLifeCycleEvent = 'networkidle2';
 
@@ -244,7 +246,7 @@ export class PageNavigator {
         await page.setRequestInterception(true);
         const pageOnRequestEventHandler = async (request: Puppeteer.HTTPRequest) => {
             try {
-                // handle only main frame navigational requests
+                // Trace only main frame navigational requests
                 const isNavigationRequest = request.isNavigationRequest() && request.frame() === page.mainFrame();
                 if (isNavigationRequest) {
                     requests.push({
@@ -297,7 +299,7 @@ export class PageNavigator {
             },
             async (noPendingRequests) => noPendingRequests,
             puppeteerTimeoutConfig.navigationTimeoutMsecs,
-            2000,
+            this.getTimeout(),
         );
 
         page.off('request', pageOnRequestEventHandler);
@@ -347,11 +349,22 @@ export class PageNavigator {
             }
         };
 
+        /**
+         * Waits for page script redirection after initial page navigation was completed.
+         */
+        const waitForScriptRedirectionFn = async () => {
+            if (this.waitForRedirection === true) {
+                const timeout = this.getTimeout();
+                await System.wait(timeout);
+            }
+        };
+
         switch (operation) {
             case 'goto':
                 return async (waitUntil = this.navigationCondition) => {
                     const gotoPromise = page.goto(url, { waitUntil, timeout: puppeteerTimeoutConfig.navigationTimeoutMsecs });
                     const responses = await Promise.all([gotoPromise, waitForNavigationFn()]);
+                    await waitForScriptRedirectionFn();
 
                     return responses[0];
                 };
@@ -359,6 +372,7 @@ export class PageNavigator {
                 return async (waitUntil = this.navigationCondition) => {
                     const reloadPromise = page.reload({ waitUntil, timeout: puppeteerTimeoutConfig.navigationTimeoutMsecs });
                     const responses = await Promise.all([reloadPromise, waitForNavigationFn()]);
+                    await waitForScriptRedirectionFn();
 
                     return responses[0];
                 };
@@ -381,5 +395,10 @@ export class PageNavigator {
             ...result,
             response: undefined,
         };
+    }
+
+    private getTimeout(): number {
+        // Reduce wait time when debugging
+        return System.isDebugEnabled() === true ? 1500 : 5000;
     }
 }

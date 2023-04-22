@@ -50,5 +50,5 @@ export const puppeteerTimeoutConfig = {
     /**
      * Maximum wait time, in milliseconds, to complete page redirection.
      */
-    redirectChainTimeoutMsecs: 15000,
+    redirectTimeoutMsecs: 15000,
 };

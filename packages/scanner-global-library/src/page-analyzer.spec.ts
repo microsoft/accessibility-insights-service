@@ -15,8 +15,8 @@ import { PageOperationResult } from './page-navigator';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-const url = 'url-1';
-const authUrl = 'url-2';
+const url = 'https://localhost/';
+const authUrl = 'https://auth/';
 
 let puppeteerPageMock: IMock<Puppeteer.Page>;
 let loggerMock: IMock<GlobalLogger>;
@@ -40,10 +40,12 @@ describe(PageAnalyzer, () => {
 
             return { hasRef: () => false } as NodeJS.Timeout;
         });
-        System.getElapsedTime = () => 1000;
+        System.getElapsedTime = () => 100;
+        puppeteerTimeoutConfig.redirectTimeoutMsecs = 100;
 
         puppeteerGotoResponse = {} as Puppeteer.HTTPResponse;
-        pageOperationResult = { response: puppeteerGotoResponse, navigationTiming: { goto1: 1000 } as PageNavigationTiming };
+        pageOperationResult = { response: puppeteerGotoResponse, navigationTiming: { goto1: 100 } as PageNavigationTiming };
+        puppeteerPageMock.setup((o) => o.mainFrame()).returns(() => 'mainFrame' as unknown as Puppeteer.Frame);
         puppeteerPageMock
             .setup((o) => o.setRequestInterception(true))
             .returns(() => Promise.resolve())
@@ -67,7 +69,7 @@ describe(PageAnalyzer, () => {
         loginPageDetectorMock.verifyAll();
     });
 
-    it('detect no page redirection', async () => {
+    it('no redirection', async () => {
         puppeteerPageMock
             .setup((o) => o.on('request', It.isAny()))
             .returns(() => undefined)
@@ -88,35 +90,30 @@ describe(PageAnalyzer, () => {
         expect(actualResult).toEqual(expectedResult);
     });
 
-    it('detect page redirection and authentication', async () => {
-        let pageOnRequestEventHandler: (request: Puppeteer.HTTPRequest) => Promise<void>;
+    it('indirect redirection to authentication', async () => {
         const request = {
             url: () => authUrl,
             isNavigationRequest: () => true,
-            redirectChain: () => [{}],
+            frame: () => 'mainFrame',
             continue: () => Promise.resolve(),
-        } as unknown as Puppeteer.HTTPRequest;
+        };
+        const response = {
+            url: () => authUrl,
+            status: () => 200,
+            headers: () => ({}),
+        };
 
+        puppeteerPageMock
+            .setup((o) => o.url())
+            .returns(() => authUrl)
+            .verifiable(Times.atLeastOnce());
         loginPageDetectorMock
             .setup((o) => o.getLoginPageType(authUrl))
             .returns(() => 'MicrosoftAzure')
-            .verifiable();
-
-        // mock to get event handler
-        puppeteerPageMock
-            .setup((o) => o.on('request', It.isAny()))
-            .callback((name, handler) => {
-                if (pageOnRequestEventHandler === undefined) {
-                    pageOnRequestEventHandler = handler;
-                }
-            })
-            .returns(() => undefined);
-        puppeteerPageMock.setup((o) => o.off('request', It.isAny())).returns(() => undefined);
-        // call to get event handler from callback() above
-        await pageAnalyzer.analyze(url, puppeteerPageMock.object);
+            .verifiable(Times.atLeastOnce());
 
         // run test
-        const actualResult = await Promise.all([pageAnalyzer.analyze(url, puppeteerPageMock.object), pageOnRequestEventHandler(request)]);
+        const actualResult = await runAnalyze([request], [response]);
 
         const expectedResult = {
             redirection: true,
@@ -124,6 +121,78 @@ describe(PageAnalyzer, () => {
             navigationResponse: pageOperationResult,
         };
 
-        expect(actualResult[0]).toEqual(expectedResult);
+        expect(actualResult).toEqual(expectedResult);
+    });
+
+    it('ignore server redirection', async () => {
+        const request1 = {
+            url: () => 'https://localhost/1',
+            isNavigationRequest: () => true,
+            frame: () => 'mainFrame',
+            continue: () => Promise.resolve(),
+        };
+        const response1 = {
+            url: () => 'https://localhost/1',
+            status: () => 302,
+            headers: () => ({ location: 'https://localhost/2' }),
+        };
+        const request2 = {
+            ...request1,
+            url: () => 'https://localhost/2',
+        };
+        const response2 = {
+            url: () => 'https://localhost/2',
+            status: () => 302,
+            headers: () => ({ location: 'https://localhost/1' }),
+        };
+
+        // run test
+        const actualResult = await runAnalyze([request1, request2], [response1, response2]);
+
+        const expectedResult = {
+            redirection: false,
+            authentication: false,
+            navigationResponse: pageOperationResult,
+        };
+
+        expect(actualResult).toEqual(expectedResult);
     });
 });
+
+async function runAnalyze(requests: any[], responses: any[]): Promise<any> {
+    let pageOnRequestEventHandler: (request: any) => Promise<void>;
+    let pageOnResponseEventHandler: (response: any) => Promise<void>;
+
+    // mock to get event handler
+    puppeteerPageMock
+        .setup((o) => o.on('request', It.isAny()))
+        .callback((name, handler) => {
+            if (pageOnRequestEventHandler === undefined) {
+                pageOnRequestEventHandler = handler;
+            }
+        })
+        .returns(() => undefined);
+    puppeteerPageMock.setup((o) => o.off('request', It.isAny())).returns(() => undefined);
+
+    puppeteerPageMock
+        .setup((o) => o.on('response', It.isAny()))
+        .callback((name, handler) => {
+            if (pageOnResponseEventHandler === undefined) {
+                pageOnResponseEventHandler = handler;
+            }
+        })
+        .returns(() => undefined);
+    puppeteerPageMock.setup((o) => o.off('response', It.isAny())).returns(() => undefined);
+
+    // call to get event handler from callback() above
+    await pageAnalyzer.analyze(url, puppeteerPageMock.object);
+
+    // run test
+    const results = await Promise.all([
+        pageAnalyzer.analyze(url, puppeteerPageMock.object),
+        requests.map(pageOnRequestEventHandler),
+        responses.map(pageOnResponseEventHandler),
+    ]);
+
+    return results[0];
+}

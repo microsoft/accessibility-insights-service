@@ -22,7 +22,7 @@ export namespace Url {
     export function getRootUrl(url: string): string {
         let rootUrl = url.trim();
         const lastSlashPos = rootUrl.lastIndexOf('/');
-        rootUrl = rootUrl.substr(0, lastSlashPos + 1);
+        rootUrl = rootUrl.substring(0, lastSlashPos + 1);
 
         return rootUrl;
     }
@@ -40,5 +40,15 @@ export namespace Url {
         const value = urlObj.searchParams.get(name);
 
         return value ?? undefined;
+    }
+
+    /**
+     * Returns absolute URL of base URL.
+     * If URL has has different origin from base URL will return URL.
+     */
+    export function getAbsoluteUrl(url: string, base: string): string {
+        const urlObj = new nodeUrl.URL(url, base);
+
+        return urlObj.toString();
     }
 }

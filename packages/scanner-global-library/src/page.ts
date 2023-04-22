@@ -29,7 +29,7 @@ export interface Viewport {
     deviceScaleFactor: number;
 }
 
-export interface PageNavigationOptions {
+export interface PageOptions {
     enableNetworkTrace?: boolean;
     enableAuthentication?: boolean;
 }
@@ -46,7 +46,7 @@ export class Page {
 
     public browserStartOptions: BrowserStartOptions;
 
-    public pageNavigationOptions: PageNavigationOptions;
+    public pageOptions: PageOptions;
 
     public authenticationResult: ResourceAuthenticationResult;
 
@@ -74,7 +74,7 @@ export class Page {
         private readonly scrollToPageTop: typeof scrollToTop = scrollToTop,
     ) {
         this.networkTraceGlobalFlag = process.env.NETWORK_TRACE === 'true' ? true : false;
-        this.enableAuthenticationGlobalFlag = process.env.ENABLE_AUTHENTICATION === 'true' ? true : false;
+        this.enableAuthenticationGlobalFlag = process.env.AUTHENTICATION === 'true' ? true : false;
     }
 
     public get puppeteerPage(): Puppeteer.Page {
@@ -105,9 +105,9 @@ export class Page {
         }
     }
 
-    public async navigate(url: string, options?: PageNavigationOptions): Promise<void> {
+    public async navigate(url: string, options?: PageOptions): Promise<void> {
         this.requestUrl = url;
-        this.pageNavigationOptions = options;
+        this.pageOptions = options;
         this.resetLastNavigationState();
 
         await this.addNetworkTrace(options?.enableNetworkTrace);
@@ -205,7 +205,7 @@ export class Page {
         return { width: windowSize.width, height: windowSize.height, deviceScaleFactor: windowSize.deviceScaleFactor };
     }
 
-    private async navigateImpl(options?: PageNavigationOptions): Promise<void> {
+    private async navigateImpl(options?: PageOptions): Promise<void> {
         await this.analyze();
         if (this.browserError !== undefined) {
             return;
@@ -232,12 +232,13 @@ export class Page {
         }
 
         this.pageAnalysisResult = await this.pageAnalyzer.analyze(this.requestUrl, this.page);
+        this.pageNavigator.waitForRedirection = this.pageAnalysisResult.redirection;
         if (this.pageAnalysisResult.navigationResponse.browserError !== undefined) {
             this.setLastNavigationState('analysis', this.pageAnalysisResult.navigationResponse);
         }
     }
 
-    private async authenticate(options?: PageNavigationOptions): Promise<void> {
+    private async authenticate(options?: PageOptions): Promise<void> {
         if (this.pageAnalysisResult.authentication !== true) {
             return;
         }
@@ -273,7 +274,7 @@ export class Page {
      */
     private async hardReload(): Promise<void> {
         await this.reopenBrowser();
-        await this.navigate(this.requestUrl, this.pageNavigationOptions);
+        await this.navigate(this.requestUrl, this.pageOptions);
     }
 
     private async softReload(): Promise<void> {

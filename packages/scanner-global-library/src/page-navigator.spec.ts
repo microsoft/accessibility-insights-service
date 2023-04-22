@@ -88,6 +88,14 @@ describe(PageNavigator, () => {
         loggerMock = Mock.ofType(MockableLogger);
         pageOperationResult = {} as PageOperationResult;
 
+        jest.spyOn(global, 'setTimeout').mockImplementation((callback) => {
+            if (typeof callback === 'function') {
+                callback();
+            }
+
+            return { hasRef: () => false } as NodeJS.Timeout;
+        });
+
         timingCount = 0;
         process.hrtime = {
             bigint: () => {
