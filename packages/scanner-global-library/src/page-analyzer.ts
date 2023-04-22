@@ -82,12 +82,12 @@ export class PageAnalyzer {
 
         const pageOnResponseEventHandler = async (response: Puppeteer.HTTPResponse) => {
             try {
-                const traceUrl = this.redirectRequest.find((r) => r.url === response.url());
-                if (traceUrl !== undefined) {
-                    traceUrl.status = response.status();
+                const pendingRequest = this.redirectRequest.find((r) => r.url === response.url());
+                if (pendingRequest !== undefined) {
+                    pendingRequest.status = response.status();
                     const locationHeader = response.headers()?.location;
                     if (locationHeader !== undefined) {
-                        traceUrl.location = Url.getAbsoluteUrl(locationHeader, url);
+                        pendingRequest.location = Url.getAbsoluteUrl(locationHeader, url);
                     }
                 }
             } catch (e) {
@@ -98,9 +98,9 @@ export class PageAnalyzer {
 
         const pageOnRequestFailedEventHandler = async (request: Puppeteer.HTTPRequest) => {
             try {
-                const traceUrl = this.redirectRequest.find((r) => r.url === request.url());
-                if (traceUrl !== undefined) {
-                    traceUrl.error = request.failure()?.errorText ?? 'unknown';
+                const pendingRequest = this.redirectRequest.find((r) => r.url === request.url());
+                if (pendingRequest !== undefined) {
+                    pendingRequest.error = request.failure()?.errorText ?? 'unknown';
                 }
             } catch (e) {
                 this.logger?.logError(`Error handling 'requestFailed' page event`, { error: System.serializeError(e) });

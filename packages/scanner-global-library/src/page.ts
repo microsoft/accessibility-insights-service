@@ -74,7 +74,7 @@ export class Page {
         private readonly scrollToPageTop: typeof scrollToTop = scrollToTop,
     ) {
         this.networkTraceGlobalFlag = process.env.NETWORK_TRACE === 'true' ? true : false;
-        this.enableAuthenticationGlobalFlag = process.env.AUTHENTICATION === 'true' ? true : false;
+        this.enableAuthenticationGlobalFlag = process.env.PAGE_AUTH === 'true' ? true : false;
     }
 
     public get puppeteerPage(): Puppeteer.Page {
