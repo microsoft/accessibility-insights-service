@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Debug web-api-scan-runner",
+            "name": "Debug [*] web-api-scan-runner",
             "type": "node",
             "request": "launch",
             "outFiles": ["${workspaceFolder}/dist/**/*.js"],

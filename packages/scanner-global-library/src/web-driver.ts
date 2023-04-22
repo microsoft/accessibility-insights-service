@@ -106,7 +106,7 @@ export class WebDriver {
         options.args.push(`--disk-cache-dir=${this.browserCache.dirname}`);
 
         if (System.isDebugEnabled() === true) {
-            options.args.push('--disable-web-security'); // disable the same-origin policy
+            // options.args.push('--disable-web-security'); // disable the same-origin policy
             options.args.push('--enable-remote-extensions');
 
             if (process.env.EXTENSION_NAME || process.env.EXTENSION_ID) {

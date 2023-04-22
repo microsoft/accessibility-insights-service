@@ -97,13 +97,13 @@ describe(PageScanProcessor, () => {
             authentication: { hint: 'azure-ad' },
         };
 
-        const lastAuthenticationResult = {
+        const authenticationResult = {
             authenticationType: 'azure-ad',
             authenticated: true,
         } as ResourceAuthenticationResult;
         pageMock
-            .setup((p) => p.lastAuthenticationResult)
-            .returns(() => lastAuthenticationResult)
+            .setup((p) => p.authenticationResult)
+            .returns(() => authenticationResult)
             .verifiable();
 
         const results = await testSubject.scan(scanMetadata, pageScanResult);
@@ -174,7 +174,7 @@ describe(PageScanProcessor, () => {
         setupOpenPage();
         setupClosePage();
         pageMock
-            .setup((o) => o.lastBrowserError)
+            .setup((o) => o.browserError)
             .returns(() => browserError)
             .verifiable(Times.atLeastOnce());
 

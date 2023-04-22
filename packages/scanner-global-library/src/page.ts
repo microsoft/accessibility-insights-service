@@ -13,6 +13,7 @@ import { PageNavigationTiming, puppeteerTimeoutConfig } from './page-timeout-con
 import { scrollToTop } from './page-client-lib';
 import { PageNetworkTracer } from './page-network-tracer';
 import { ResourceAuthenticator, ResourceAuthenticationResult } from './authenticator/resource-authenticator';
+import { PageAnalysisResult, PageAnalyzer } from './page-analyzer';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -28,28 +29,30 @@ export interface Viewport {
     deviceScaleFactor: number;
 }
 
-export interface PageNavigationOptions {
+export interface PageOptions {
     enableNetworkTrace?: boolean;
     enableAuthentication?: boolean;
 }
 
-type Operation = 'load' | 'reload' | 'preload' | 'auth';
+type Operation = 'load' | 'reload' | 'analysis' | 'auth';
 
 @injectable()
 export class Page {
     public browser: Puppeteer.Browser;
 
-    public lastNavigationResponse: Puppeteer.HTTPResponse;
+    public navigationResponse: Puppeteer.HTTPResponse;
 
-    public lastBrowserError: BrowserError;
+    public browserError: BrowserError;
 
-    public lastBrowserStartOptions: BrowserStartOptions;
+    public browserStartOptions: BrowserStartOptions;
 
-    public lastPageNavigationOptions: PageNavigationOptions;
+    public pageOptions: PageOptions;
 
-    public lastAuthenticationResult: ResourceAuthenticationResult;
+    public authenticationResult: ResourceAuthenticationResult;
 
     public pageNavigationTiming: PageNavigationTiming;
+
+    public pageAnalysisResult: PageAnalysisResult;
 
     public requestUrl: string;
 
@@ -66,11 +69,12 @@ export class Page {
         @inject(PageNavigator) private readonly pageNavigator: PageNavigator,
         @inject(PageNetworkTracer) private readonly pageNetworkTracer: PageNetworkTracer,
         @inject(ResourceAuthenticator) private readonly resourceAuthenticator: ResourceAuthenticator,
+        @inject(PageAnalyzer) private readonly pageAnalyzer: PageAnalyzer,
         @inject(GlobalLogger) @optional() private readonly logger: GlobalLogger,
         private readonly scrollToPageTop: typeof scrollToTop = scrollToTop,
     ) {
         this.networkTraceGlobalFlag = process.env.NETWORK_TRACE === 'true' ? true : false;
-        this.enableAuthenticationGlobalFlag = process.env.ENABLE_AUTHENTICATION === 'true' ? true : false;
+        this.enableAuthenticationGlobalFlag = process.env.PAGE_AUTH === 'true' ? true : false;
     }
 
     public get puppeteerPage(): Puppeteer.Page {
@@ -82,7 +86,7 @@ export class Page {
     }
 
     public async create(options: BrowserStartOptions = { clearBrowserCache: true }): Promise<void> {
-        this.lastBrowserStartOptions = options;
+        this.browserStartOptions = options;
         if (options?.browserWSEndpoint !== undefined) {
             this.browser = await this.webDriver.connect(options?.browserWSEndpoint);
         } else {
@@ -101,9 +105,9 @@ export class Page {
         }
     }
 
-    public async navigate(url: string, options?: PageNavigationOptions): Promise<void> {
+    public async navigate(url: string, options?: PageOptions): Promise<void> {
         this.requestUrl = url;
-        this.lastPageNavigationOptions = options;
+        this.pageOptions = options;
         this.resetLastNavigationState();
 
         await this.addNetworkTrace(options?.enableNetworkTrace);
@@ -111,11 +115,10 @@ export class Page {
         await this.navigateImpl(options);
 
         if (
-            this.lastBrowserError &&
-            this.networkTraceGlobalFlag !== true /** not in network trace mode already */ &&
-            this.lastAuthenticationResult?.authenticated !== true
+            this.navigationResponse?.ok() === false /** trace to record web server error response */ &&
+            this.networkTraceGlobalFlag !== true /** not in network trace mode yet */
         ) {
-            this.logger?.logWarn('Reload page with network trace on navigation error.');
+            this.logger?.logWarn('Reload page with network trace on web server error.');
             await this.navigateWithNetworkTrace(url);
         }
 
@@ -146,7 +149,7 @@ export class Page {
     }
 
     public isOpen(): boolean {
-        return !isNil(this.page) && !this.page.isClosed() && isNil(this.lastBrowserError) && !isNil(this.lastNavigationResponse);
+        return !isNil(this.page) && !this.page.isClosed() && isNil(this.browserError) && !isNil(this.navigationResponse);
     }
 
     public async getPageScreenshot(): Promise<string> {
@@ -202,38 +205,59 @@ export class Page {
         return { width: windowSize.width, height: windowSize.height, deviceScaleFactor: windowSize.deviceScaleFactor };
     }
 
-    private async navigateImpl(options?: PageNavigationOptions): Promise<void> {
-        if (options?.enableAuthentication === true || this.enableAuthenticationGlobalFlag === true) {
-            await this.preloadWithAuth();
-        }
-
-        if (this.lastBrowserError !== undefined) {
+    private async navigateImpl(options?: PageOptions): Promise<void> {
+        await this.analyze();
+        if (this.browserError !== undefined) {
             return;
         }
 
-        if (this.lastAuthenticationResult?.authenticated === true) {
+        await this.authenticate(options);
+        if (this.browserError !== undefined) {
+            return;
+        }
+
+        if (this.authenticationResult?.authenticated === true) {
             // Reload authenticated page to execute navigation workflow
             await this.reload();
         } else {
-            const navigationResponse = await this.pageNavigator.navigate(this.requestUrl, this.page);
-            this.setLastNavigationState('load', navigationResponse);
+            const response = await this.pageNavigator.navigate(this.requestUrl, this.page);
+            this.setLastNavigationState('load', response);
         }
     }
 
-    private async preloadWithAuth(): Promise<void> {
-        // Preload page to detect authentication request
-        const navigationResponse = await this.pageNavigator.navigatePageOperation(this.requestUrl, this.page);
-        if (navigationResponse.browserError !== undefined) {
-            this.setLastNavigationState('preload', navigationResponse);
+    private async analyze(): Promise<void> {
+        // Invoke on initial page navigation only
+        if (this.pageAnalysisResult !== undefined) {
+            return;
+        }
+
+        this.pageAnalysisResult = await this.pageAnalyzer.analyze(this.requestUrl, this.page);
+        this.pageNavigator.waitForRedirection = this.pageAnalysisResult.redirection;
+        if (this.pageAnalysisResult.navigationResponse.browserError !== undefined) {
+            this.setLastNavigationState('analysis', this.pageAnalysisResult.navigationResponse);
+        }
+    }
+
+    private async authenticate(options?: PageOptions): Promise<void> {
+        if (this.pageAnalysisResult.authentication !== true) {
+            return;
+        }
+
+        if (options?.enableAuthentication !== true && this.enableAuthenticationGlobalFlag !== true) {
+            this.logger?.logError('Page authentication is required.');
+            this.browserError = {
+                errorType: 'AuthenticationError',
+                message: 'Page authentication is required.',
+                stack: new Error().stack,
+            };
 
             return;
         }
 
         // Invoke authentication client
-        const authenticationResult = await this.resourceAuthenticator.authenticate(this.page);
-        this.lastAuthenticationResult = authenticationResult;
-        if (authenticationResult?.navigationResponse?.browserError !== undefined) {
-            this.setLastNavigationState('auth', authenticationResult.navigationResponse);
+        this.authenticationResult = await this.resourceAuthenticator.authenticate(this.page);
+        if (this.authenticationResult?.navigationResponse?.browserError !== undefined) {
+            this.setLastNavigationState('auth', this.authenticationResult.navigationResponse);
         }
     }
 
@@ -250,17 +274,17 @@ export class Page {
      */
     private async hardReload(): Promise<void> {
         await this.reopenBrowser();
-        await this.navigate(this.requestUrl, this.lastPageNavigationOptions);
+        await this.navigate(this.requestUrl, this.pageOptions);
     }
 
     private async softReload(): Promise<void> {
-        const navigationResponse = await this.pageNavigator.reload(this.page);
-        this.setLastNavigationState('reload', navigationResponse);
+        const response = await this.pageNavigator.reload(this.page);
+        this.setLastNavigationState('reload', response);
     }
 
     private async reopenBrowser(): Promise<void> {
         await this.close();
-        await this.create({ ...this.lastBrowserStartOptions, clearBrowserCache: false });
+        await this.create({ ...this.browserStartOptions, clearBrowserCache: false });
         // wait for browser to complete reload
         await System.wait(5000);
     }
@@ -300,7 +324,7 @@ export class Page {
             });
 
             this.logger?.logInfo(`Total page ${operation} time ${totalNavigationElapsed}, msec`, {
-                status: this.lastNavigationResponse?.status(),
+                status: this.navigationResponse?.status(),
                 total: totalNavigationElapsed.toString(),
                 ...timing,
             });
@@ -326,15 +350,15 @@ export class Page {
     }
 
     private resetLastNavigationState(): void {
-        this.lastNavigationResponse = undefined;
+        this.navigationResponse = undefined;
         this.pageNavigationTiming = undefined;
-        this.lastBrowserError = undefined;
+        this.browserError = undefined;
     }
 
-    private setLastNavigationState(operation: Operation, navigationResponse: NavigationResponse): void {
-        this.lastNavigationResponse = navigationResponse?.httpResponse;
-        this.pageNavigationTiming = navigationResponse?.pageNavigationTiming;
-        this.lastBrowserError = navigationResponse?.browserError;
+    private setLastNavigationState(operation: Operation, response: NavigationResponse): void {
+        this.navigationResponse = response?.httpResponse;
+        this.pageNavigationTiming = response?.pageNavigationTiming;
+        this.browserError = response?.browserError;
 
         this.logPageNavigationTiming(operation);
     }

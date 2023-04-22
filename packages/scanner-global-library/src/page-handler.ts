@@ -42,7 +42,7 @@ export class PageHandler {
                 this.logger?.logError(`The page scrolling failed.`, { error: System.serializeError(error) });
             }
 
-            await page.waitForTimeout(this.checkIntervalMsecs);
+            await System.wait(this.checkIntervalMsecs);
         }
 
         const elapsed = System.getElapsedTime(timestamp);
@@ -85,7 +85,7 @@ export class PageHandler {
                 break;
             }
 
-            await page.waitForTimeout(this.checkIntervalMsecs);
+            await System.wait(this.checkIntervalMsecs);
         }
 
         const elapsed = System.getElapsedTime(timestamp);

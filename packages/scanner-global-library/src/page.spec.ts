@@ -18,6 +18,7 @@ import { PageNavigationTiming } from './page-timeout-config';
 import { scrollToTop } from './page-client-lib';
 import { PageNetworkTracer } from './page-network-tracer';
 import { ResourceAuthenticator, ResourceAuthenticationResult } from './authenticator/resource-authenticator';
+import { PageAnalysisResult, PageAnalyzer } from './page-analyzer';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -51,6 +52,7 @@ let axePuppeteerMock: IMock<AxePuppeteer>;
 let cdpSessionMock: IMock<Puppeteer.CDPSession>;
 let pageNetworkTracerMock: IMock<PageNetworkTracer>;
 let resourceAuthenticatorMock: IMock<ResourceAuthenticator>;
+let pageAnalyzerMock: IMock<PageAnalyzer>;
 
 describe(Page, () => {
     beforeEach(() => {
@@ -73,7 +75,9 @@ describe(Page, () => {
         cdpSessionMock = getPromisableDynamicMock(Mock.ofType<Puppeteer.CDPSession>());
         pageNetworkTracerMock = Mock.ofType<PageNetworkTracer>();
         resourceAuthenticatorMock = Mock.ofType<ResourceAuthenticator>();
+        pageAnalyzerMock = Mock.ofType<PageAnalyzer>();
         scrollToTopMock = jest.fn().mockImplementation(() => Promise.resolve());
+        puppeteerResponseMock.setup((o) => o.ok()).returns(() => true);
         navigationResponse = {
             httpResponse: puppeteerResponseMock.object,
             pageNavigationTiming: pageNavigationTiming,
@@ -93,6 +97,7 @@ describe(Page, () => {
             pageNavigatorMock.object,
             pageNetworkTracerMock.object,
             resourceAuthenticatorMock.object,
+            pageAnalyzerMock.object,
             loggerMock.object,
             scrollToTopMock,
         );
@@ -107,11 +112,16 @@ describe(Page, () => {
         cdpSessionMock.verifyAll();
         pageNetworkTracerMock.verifyAll();
         resourceAuthenticatorMock.verifyAll();
+        pageAnalyzerMock.verifyAll();
     });
 
     describe('navigate()', () => {
         beforeEach(() => {
             simulatePageLaunch();
+            pageAnalyzerMock
+                .setup((o) => o.analyze(url, puppeteerPageMock.object))
+                .returns(() => Promise.resolve({ navigationResponse } as PageAnalysisResult))
+                .verifiable();
         });
 
         it('navigates to page and saves response', async () => {
@@ -128,7 +138,7 @@ describe(Page, () => {
 
             await page.navigate(url);
 
-            expect(page.lastNavigationResponse).toEqual(puppeteerResponseMock.object);
+            expect(page.navigationResponse).toEqual(puppeteerResponseMock.object);
         });
 
         it('navigates to page with authentication', async () => {
@@ -136,10 +146,11 @@ describe(Page, () => {
                 navigationResponse: { httpResponse: { url: () => 'localhost/1' } },
                 authenticated: true,
             } as ResourceAuthenticationResult;
-            const reloadNavigationResponse = { httpResponse: { url: () => 'localhost/2' } } as NavigationResponse;
-            pageNavigatorMock
-                .setup((o) => o.navigatePageOperation(url, puppeteerPageMock.object))
-                .returns(() => Promise.resolve({} as NavigationResponse))
+            const reloadNavigationResponse = { httpResponse: { url: () => 'localhost/2', ok: () => true } } as NavigationResponse;
+            pageAnalyzerMock.reset();
+            pageAnalyzerMock
+                .setup((o) => o.analyze(url, puppeteerPageMock.object))
+                .returns(() => Promise.resolve({ navigationResponse, authentication: true } as PageAnalysisResult))
                 .verifiable();
             resourceAuthenticatorMock
                 .setup((o) => o.authenticate(puppeteerPageMock.object))
@@ -152,17 +163,17 @@ describe(Page, () => {
 
             await page.navigate(url, { enableAuthentication: true });
 
-            expect(page.lastNavigationResponse).toEqual(reloadNavigationResponse.httpResponse);
-            expect(page.lastAuthenticationResult).toEqual(authenticationResult);
+            expect(page.navigationResponse).toEqual(reloadNavigationResponse.httpResponse);
+            expect(page.authenticationResult).toEqual(authenticationResult);
         });
 
         it('handles browser error on navigate', async () => {
-            const error = new Error('navigation error');
             const browserError = { errorType: 'SslError', statusCode: 500 } as BrowserError;
+            navigationResponse = { browserError, httpResponse: { ok: () => false } as Puppeteer.HTTPResponse };
             pageNavigatorMock
                 .setup(async (o) => o.navigate(url, puppeteerPageMock.object))
-                .returns(() => Promise.resolve({ error, browserError }))
-                .verifiable(Times.exactly(2));
+                .returns(() => Promise.resolve(navigationResponse))
+                .verifiable();
             browserMock
                 .setup((o) => o.userAgent())
                 .returns(() => Promise.resolve(userAgent))
@@ -190,7 +201,7 @@ describe(Page, () => {
 
             await page.navigate(url);
 
-            expect(page.lastBrowserError).toEqual(browserError);
+            expect(page.browserError).toEqual(browserError);
         });
 
         it('set extra HTTP headers on navigate', async () => {
@@ -211,7 +222,7 @@ describe(Page, () => {
     describe('reload()', () => {
         beforeEach(() => {
             simulatePageLaunch();
-            page.lastNavigationResponse = { _url: 'url' } as unknown as Puppeteer.HTTPResponse;
+            page.navigationResponse = { _url: 'url' } as unknown as Puppeteer.HTTPResponse;
         });
 
         it('reload page and saves response', async () => {
@@ -228,14 +239,15 @@ describe(Page, () => {
 
             await page.reload();
 
-            expect(page.lastNavigationResponse).toEqual(puppeteerResponseMock.object);
+            expect(page.navigationResponse).toEqual(puppeteerResponseMock.object);
         });
 
         it('hard page reload', async () => {
-            (page as any).lastBrowserStartOptions = {
+            (page as any).browserStartOptions = {
                 browserExecutablePath: 'path',
                 clearBrowserCache: true,
             };
+            (page as any).pageAnalysisResult = {};
             puppeteerPageMock.setup((p) => p.url()).returns(() => url);
             // close browser
             webDriverMock
@@ -268,7 +280,7 @@ describe(Page, () => {
 
             await page.reload({ hardReload: true });
 
-            expect(page.lastNavigationResponse).toEqual(puppeteerResponseMock.object);
+            expect(page.navigationResponse).toEqual(puppeteerResponseMock.object);
         });
 
         it('handles browser error on reload', async () => {
@@ -281,7 +293,7 @@ describe(Page, () => {
 
             await page.reload();
 
-            expect(page.lastBrowserError).toEqual(browserError);
+            expect(page.browserError).toEqual(browserError);
         });
     });
 
@@ -438,8 +450,8 @@ describe(Page, () => {
 });
 
 function simulatePageNavigation(response: Puppeteer.HTTPResponse, browserError?: BrowserError): void {
-    page.lastNavigationResponse = response;
-    page.lastBrowserError = browserError;
+    page.navigationResponse = response;
+    page.browserError = browserError;
 }
 
 function simulatePageLaunch(): void {

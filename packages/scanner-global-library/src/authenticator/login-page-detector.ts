@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 import { injectable } from 'inversify';
-import * as Puppeteer from 'puppeteer';
 import { Url } from 'common';
 
 export declare type LoginPageType = 'MicrosoftAzure';
@@ -14,13 +13,13 @@ export const loginPageDomain = {
 
 @injectable()
 export class LoginPageDetector {
-    public getLoginPageType(page: Puppeteer.Page): LoginPageType {
-        const url = Url.tryParseUrlString(page.url());
-        if (url === undefined) {
+    public getLoginPageType(url: string): LoginPageType {
+        const urlObj = Url.tryParseUrlString(url);
+        if (urlObj === undefined) {
             return undefined;
         }
 
-        switch (url.hostname) {
+        switch (urlObj.hostname) {
             case loginPageDomain.MicrosoftAzure:
             case loginPageDomain.MicrosoftLive:
                 return 'MicrosoftAzure';

@@ -105,7 +105,7 @@ describe(PageScanProcessor, () => {
         setupOpenPage();
         setupClosePage();
         pageMock
-            .setup((o) => o.lastBrowserError)
+            .setup((o) => o.browserError)
             .returns(() => browserError)
             .verifiable(Times.atLeastOnce());
         privacyScanResult = {

@@ -40,13 +40,13 @@ export class AxePuppeteerScanner {
             results: axeRunResult.axeResults,
             pageTitle: await page.puppeteerPage.title(),
             browserSpec: await page.browser.version(),
-            pageResponseCode: page.lastNavigationResponse.status(),
+            pageResponseCode: page.navigationResponse.status(),
             userAgent: page.userAgent,
             browserResolution: `${browserResolution.width}x${browserResolution.height}`,
         };
 
         if (
-            page.lastNavigationResponse.request()?.redirectChain()?.length > 0 ||
+            page.navigationResponse.request()?.redirectChain()?.length > 0 ||
             // Should compare encoded Urls
             (page.requestUrl !== undefined && encodeURI(page.requestUrl) !== axeRunResult.axeResults.url)
         ) {
@@ -74,8 +74,8 @@ export class AxePuppeteerScanner {
         page: Page,
         action: () => Promise<T>,
     ): Promise<T | { error?: BrowserError | string; pageResponseCode?: number }> {
-        if (page.lastBrowserError !== undefined) {
-            return { error: page.lastBrowserError, pageResponseCode: page.lastBrowserError.statusCode };
+        if (page.browserError !== undefined) {
+            return { error: page.browserError, pageResponseCode: page.browserError.statusCode };
         }
 
         if (page.isOpen() !== true) {

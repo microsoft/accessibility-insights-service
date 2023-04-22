@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Debug privacy-scan-runner",
+            "name": "Debug [*] privacy-scan-runner",
             "type": "node",
             "request": "launch",
             "outFiles": ["${workspaceFolder}/dist/**/*.js"],

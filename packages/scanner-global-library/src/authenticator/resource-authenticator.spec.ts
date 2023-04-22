@@ -12,6 +12,8 @@ import { LoginPageDetector } from './login-page-detector';
 import { LoginPageClientFactory } from './login-page-client-factory';
 import { LoginPageClient } from './azure-login-page-client';
 
+const url = 'authUrl';
+
 let loginPageDetectorMock: IMock<LoginPageDetector>;
 let loginPageClientFactoryMock: IMock<LoginPageClientFactory>;
 let puppeteerPageMock: IMock<Puppeteer.Page>;
@@ -26,6 +28,12 @@ describe(ResourceAuthenticator, () => {
         loginPageClientFactoryMock = Mock.ofType<LoginPageClientFactory>();
         puppeteerPageMock = Mock.ofType<Puppeteer.Page>();
         loggerMock = Mock.ofType<GlobalLogger>();
+
+        puppeteerPageMock
+            .setup((o) => o.url())
+            .returns(() => url)
+            .verifiable();
+
         resourceAuthenticator = new ResourceAuthenticator(
             loginPageDetectorMock.object,
             loginPageClientFactoryMock.object,
@@ -49,7 +57,7 @@ describe(ResourceAuthenticator, () => {
             authenticated: true,
         };
         loginPageDetectorMock
-            .setup((o) => o.getLoginPageType(puppeteerPageMock.object))
+            .setup((o) => o.getLoginPageType(url))
             .returns(() => 'MicrosoftAzure')
             .verifiable();
         loginPageClientMock
@@ -71,7 +79,7 @@ describe(ResourceAuthenticator, () => {
 
     it('should skip if no login page detected', async () => {
         loginPageDetectorMock
-            .setup((o) => o.getLoginPageType(puppeteerPageMock.object))
+            .setup((o) => o.getLoginPageType(url))
             .returns(() => undefined)
             .verifiable();
 

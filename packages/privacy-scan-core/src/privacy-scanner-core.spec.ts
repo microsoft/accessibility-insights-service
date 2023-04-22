@@ -158,7 +158,7 @@ describe(PrivacyScannerCore, () => {
 
     it('return error result if navigation was unsuccessfully', async () => {
         pageMock
-            .setup((o) => o.lastBrowserError)
+            .setup((o) => o.browserError)
             .returns(() => browserError)
             .verifiable(Times.atLeastOnce());
         const expectedResult = {
@@ -184,7 +184,7 @@ function setupPageUrl(): void {
 
 function setupLastNavigationResponse(): void {
     pageMock
-        .setup((o) => o.lastNavigationResponse)
+        .setup((o) => o.navigationResponse)
         .returns(() => {
             return {
                 status: () => 200,
