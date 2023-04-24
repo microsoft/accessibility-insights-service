@@ -378,7 +378,10 @@ export class PageNavigator {
                 };
             case 'wait':
                 return async (waitUntil = this.navigationCondition) => {
-                    return page.waitForNavigation({ waitUntil, timeout: puppeteerTimeoutConfig.navigationTimeoutMsecs });
+                    const response = await page.waitForNavigation({ waitUntil, timeout: puppeteerTimeoutConfig.navigationTimeoutMsecs });
+                    await waitForScriptRedirectionFn();
+
+                    return response;
                 };
             default:
                 return undefined;
