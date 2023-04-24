@@ -14,7 +14,6 @@ import { PrivacyScanner } from './privacy-scanner';
 /* eslint-disable @typescript-eslint/consistent-type-assertions, @typescript-eslint/no-explicit-any */
 
 describe(PrivacyScanner, () => {
-    const taskRunBufferTimeMinute = 5;
     const url = 'url';
 
     let privacyScanner: PrivacyScanner;
@@ -104,7 +103,7 @@ describe(PrivacyScanner, () => {
         expect(scanResult).toEqual({
             error: {
                 errorType: 'ScanTimeout',
-                message: `Privacy scan timed out after ${taskConfig.taskTimeoutInMinutes - taskRunBufferTimeMinute} minutes`,
+                message: `Privacy scan timed out after ${taskConfig.taskTimeoutInMinutes} minutes`,
                 stack: 'stack',
             },
         } as PrivacyScanResult);
@@ -112,7 +111,7 @@ describe(PrivacyScanner, () => {
 
     function setupWaitForPromisetoReturnOriginalPromise(): void {
         promiseUtilsMock
-            .setup((o) => o.waitFor(It.isAny(), (taskConfig.taskTimeoutInMinutes - taskRunBufferTimeMinute) * 60000, It.isAny()))
+            .setup((o) => o.waitFor(It.isAny(), taskConfig.taskTimeoutInMinutes * 60000, It.isAny()))
             .returns(async (scanPromiseObj, timeout, timeoutCb) => {
                 return scanPromiseObj;
             })
@@ -121,7 +120,7 @@ describe(PrivacyScanner, () => {
 
     function setupWaitForPromiseToReturnTimeoutPromise(): void {
         promiseUtilsMock
-            .setup((o) => o.waitFor(It.isAny(), (taskConfig.taskTimeoutInMinutes - taskRunBufferTimeMinute) * 60000, It.isAny()))
+            .setup((o) => o.waitFor(It.isAny(), taskConfig.taskTimeoutInMinutes * 60000, It.isAny()))
             .returns(async (scanPromiseObj, timeout, timeoutCb) => {
                 return timeoutCb();
             })
