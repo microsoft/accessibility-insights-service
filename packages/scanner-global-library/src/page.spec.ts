@@ -16,9 +16,9 @@ import { WebDriver } from './web-driver';
 import { PageNavigator, NavigationResponse } from './page-navigator';
 import { PageNavigationTiming } from './page-timeout-config';
 import { scrollToTop } from './page-client-lib';
-import { PageNetworkTracer } from './page-network-tracer';
+import { PageNetworkTracer } from './network/page-network-tracer';
 import { ResourceAuthenticator, ResourceAuthenticationResult } from './authenticator/resource-authenticator';
-import { PageAnalysisResult, PageAnalyzer } from './page-analyzer';
+import { PageAnalysisResult, PageAnalyzer } from './network/page-analyzer';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -26,9 +26,8 @@ const url = 'url';
 const userAgent = 'user agent';
 const browserResolution = '1920x1080';
 const pageNavigationTiming: PageNavigationTiming = {
-    goto1: 1,
-    goto1Timeout: false,
-    goto2: 2,
+    goto: 1,
+    gotoTimeout: false,
     networkIdle: 0,
     networkIdleTimeout: false,
     scroll: 3,
@@ -130,11 +129,11 @@ describe(Page, () => {
                 .returns(() => Promise.resolve(navigationResponse))
                 .verifiable();
 
-            const timing = { total: '10' } as any;
+            const timing = { total: '8' } as any;
             Object.keys(navigationResponse.pageNavigationTiming).forEach((key: keyof PageNavigationTiming) => {
                 timing[key] = `${navigationResponse.pageNavigationTiming[key]}`;
             });
-            loggerMock.setup((o) => o.logInfo('Total page load time 10, msec', { status: 200, ...timing })).verifiable();
+            loggerMock.setup((o) => o.logInfo('Total page load time 8, msec', { status: 200, ...timing })).verifiable();
 
             await page.navigate(url);
 
@@ -170,9 +169,9 @@ describe(Page, () => {
         it('handles browser error on navigate', async () => {
             const browserError = { errorType: 'SslError', statusCode: 500 } as BrowserError;
             navigationResponse = { browserError, httpResponse: { ok: () => false } as Puppeteer.HTTPResponse };
-            pageNavigatorMock
-                .setup(async (o) => o.navigate(url, puppeteerPageMock.object))
-                .returns(() => Promise.resolve(navigationResponse))
+            pageNetworkTracerMock
+                .setup(async (o) => o.trace(url, puppeteerPageMock.object))
+                .returns(() => Promise.resolve())
                 .verifiable();
             browserMock
                 .setup((o) => o.userAgent())
@@ -189,14 +188,6 @@ describe(Page, () => {
             webDriverMock
                 .setup(async (o) => o.pageCreated())
                 .returns(() => Promise.resolve(true))
-                .verifiable();
-            pageNetworkTracerMock
-                .setup((o) => o.addNetworkTrace(puppeteerPageMock.object))
-                .returns(() => Promise.resolve())
-                .verifiable();
-            pageNetworkTracerMock
-                .setup((o) => o.removeNetworkTrace(puppeteerPageMock.object))
-                .returns(() => Promise.resolve())
                 .verifiable();
 
             await page.navigate(url);
@@ -231,11 +222,11 @@ describe(Page, () => {
                 .returns(() => Promise.resolve(navigationResponse))
                 .verifiable();
 
-            const timing = { total: '10' } as any;
+            const timing = { total: '8' } as any;
             Object.keys(navigationResponse.pageNavigationTiming).forEach((key: keyof PageNavigationTiming) => {
                 timing[key] = `${navigationResponse.pageNavigationTiming[key]}`;
             });
-            loggerMock.setup((o) => o.logInfo('Total page reload time 10, msec', { status: 200, ...timing })).verifiable();
+            loggerMock.setup((o) => o.logInfo('Total page reload time 8, msec', { status: 200, ...timing })).verifiable();
 
             await page.reload();
 

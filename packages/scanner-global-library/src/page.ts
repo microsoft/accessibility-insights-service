@@ -9,11 +9,11 @@ import { isNil, isNumber, isEmpty } from 'lodash';
 import { WebDriver } from './web-driver';
 import { PageNavigator, NavigationResponse } from './page-navigator';
 import { BrowserError } from './browser-error';
-import { PageNavigationTiming, puppeteerTimeoutConfig } from './page-timeout-config';
+import { PageNavigationTiming } from './page-timeout-config';
 import { scrollToTop } from './page-client-lib';
-import { PageNetworkTracer } from './page-network-tracer';
+import { PageNetworkTracer } from './network/page-network-tracer';
 import { ResourceAuthenticator, ResourceAuthenticationResult } from './authenticator/resource-authenticator';
-import { PageAnalysisResult, PageAnalyzer } from './page-analyzer';
+import { PageAnalysisResult, PageAnalyzer } from './network/page-analyzer';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -110,19 +110,16 @@ export class Page {
         this.pageOptions = options;
         this.resetLastNavigationState();
 
-        await this.addNetworkTrace(options?.enableNetworkTrace);
         await this.setExtraHTTPHeaders();
         await this.navigateImpl(options);
 
         if (
-            this.navigationResponse?.ok() === false /** trace to record web server error response */ &&
-            this.networkTraceGlobalFlag !== true /** not in network trace mode yet */
+            this.navigationResponse?.ok() === false /** trace to record web server error response */ ||
+            this.networkTraceGlobalFlag === true
         ) {
             this.logger?.logWarn('Reload page with network trace on web server error.');
             await this.navigateWithNetworkTrace(url);
         }
-
-        await this.removeNetworkTrace(options?.enableNetworkTrace);
     }
 
     /**
@@ -232,7 +229,6 @@ export class Page {
         }
 
         this.pageAnalysisResult = await this.pageAnalyzer.analyze(this.requestUrl, this.page);
-        this.pageNavigator.waitForRedirection = this.pageAnalysisResult.redirection;
         if (this.pageAnalysisResult.navigationResponse.browserError !== undefined) {
             this.setLastNavigationState('analysis', this.pageAnalysisResult.navigationResponse);
         }
@@ -264,9 +260,7 @@ export class Page {
     private async navigateWithNetworkTrace(url: string): Promise<void> {
         await this.reopenBrowser();
         await this.setExtraHTTPHeaders();
-        await this.addNetworkTrace(true);
-        await this.pageNavigator.navigate(url, this.page);
-        await this.removeNetworkTrace(true);
+        await this.pageNetworkTracer.trace(url, this.page);
     }
 
     /**
@@ -285,7 +279,7 @@ export class Page {
     private async reopenBrowser(): Promise<void> {
         await this.close();
         await this.create({ ...this.browserStartOptions, clearBrowserCache: false });
-        // wait for browser to complete reload
+        // wait for browser to start
         await System.wait(5000);
     }
 
@@ -328,24 +322,6 @@ export class Page {
                 total: totalNavigationElapsed.toString(),
                 ...timing,
             });
-        }
-    }
-
-    private async addNetworkTrace(enableNetworkTrace: boolean): Promise<void> {
-        if (enableNetworkTrace === true || this.networkTraceGlobalFlag === true) {
-            // increase page load timeout
-            puppeteerTimeoutConfig.navigationTimeoutMsecs = puppeteerTimeoutConfig.navigationTimeoutDefaultMsecs * 2;
-            // disable page reload on timeout
-            this.pageNavigator.enableRetryOnTimeout = false;
-            await this.pageNetworkTracer.addNetworkTrace(this.page);
-        }
-    }
-
-    private async removeNetworkTrace(enableNetworkTrace: boolean): Promise<void> {
-        if (enableNetworkTrace === true || this.networkTraceGlobalFlag === true) {
-            puppeteerTimeoutConfig.navigationTimeoutMsecs = puppeteerTimeoutConfig.navigationTimeoutDefaultMsecs;
-            this.pageNavigator.enableRetryOnTimeout = true;
-            await this.pageNetworkTracer.removeNetworkTrace(this.page);
         }
     }
 

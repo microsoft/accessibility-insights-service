@@ -14,7 +14,7 @@ export { PageNavigationHooks } from './page-navigation-hooks';
 export * from './page-navigator';
 export { PrivacyScanResult } from './privacy-scanner/privacy-scan-result';
 export * from './browser-extensions/extension-loader';
-export * from './page-network-tracer';
+export * from './network/page-network-tracer';
 export { AxePuppeteerScanner } from './axe-scanner/axe-puppeteer-scanner';
 export * from './authenticator/resource-authenticator';
 export * from './user-agent-plugin';
