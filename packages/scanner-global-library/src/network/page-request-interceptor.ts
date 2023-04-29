@@ -152,7 +152,7 @@ export class PageRequestInterceptor {
             async (requests) => requests,
             timeoutMsecs,
             // Reduce wait time at debug
-            System.isDebugEnabled() === true ? 1500 : 5000,
+            System.isDebugEnabled() === true ? 1000 : 3000,
         );
 
         return System.getElapsedTime(timestamp);

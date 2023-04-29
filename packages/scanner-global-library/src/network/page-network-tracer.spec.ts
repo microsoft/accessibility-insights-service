@@ -94,7 +94,7 @@ describe(PageNetworkTracer, () => {
     it('trace', async () => {
         let pageOperation: any;
         pageRequestInterceptorMock
-            .setup((o) => o.intercept(It.isAny(), puppeteerPageMock.object, puppeteerTimeoutConfig.redirectTimeoutMsec, true))
+            .setup((o) => o.intercept(It.isAny(), puppeteerPageMock.object, puppeteerTimeoutConfig.navigationTimeoutMsec, true))
             .callback(async (fn) => (pageOperation = fn))
             .returns(async () => pageOperation(url, puppeteerPageMock.object))
             .verifiable();

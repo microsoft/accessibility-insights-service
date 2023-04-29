@@ -29,7 +29,7 @@ export class PageNetworkTracer {
         await this.pageRequestInterceptor.intercept(
             async () => this.navigate(url, page),
             page,
-            puppeteerTimeoutConfig.redirectTimeoutMsec,
+            puppeteerTimeoutConfig.navigationTimeoutMsec,
             true,
         );
         this.logger?.logInfo(`[Network] Disable page network trace`);

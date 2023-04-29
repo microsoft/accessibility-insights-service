@@ -20,15 +20,15 @@ export const puppeteerTimeoutConfig = {
     /**
      * Maximum wait time, in milliseconds, to complete page navigation.
      *
-     * Puppeteer will not render page properly for some webpages and timeout on page.goto() when running
-     * in docker. Hence do not increase this value as it will not mitigate navigation timeout error.
+     * Puppeteer will not render page properly for some webpages and timeout on page navigation when running
+     * in headless mode. Hence do not increase this value as it will not mitigate navigation timeout error.
      */
-    navigationTimeoutMsec: 60000,
+    navigationTimeoutMsec: 30000,
 
     /**
      * Maximum wait time, in milliseconds, to wait when network is idle.
      */
-    networkIdleTimeoutMsec: 40000,
+    networkIdleTimeoutMsec: 30000,
 
     /**
      * Maximum wait time, in milliseconds, to complete async page rendering.
@@ -48,5 +48,5 @@ export const puppeteerTimeoutConfig = {
     /**
      * Maximum wait time, in milliseconds, to complete page redirection.
      */
-    redirectTimeoutMsec: 15000,
+    redirectTimeoutMsec: 10000,
 };
