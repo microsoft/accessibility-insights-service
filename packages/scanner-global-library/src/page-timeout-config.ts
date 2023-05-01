@@ -20,8 +20,10 @@ export const puppeteerTimeoutConfig = {
     /**
      * Maximum wait time, in milliseconds, to complete page navigation.
      *
-     * Puppeteer will not render page properly for some webpages and timeout on page navigation when running
-     * in headless mode. Hence do not increase this value as it will not mitigate navigation timeout error.
+     * Puppeteer may render some webpage properly but timeout on page navigation when running in
+     * headless mode. The {@link PageOperationHandler} will override puppeteer timeout error on
+     * successful webserver response to mitigate this issue. Hence do not increase navigation timeout
+     * value as it will not mitigate puppeteer navigation timeout error.
      */
     navigationTimeoutMsec: 30000,
 

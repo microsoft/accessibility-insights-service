@@ -33,8 +33,8 @@ export class PageOperationHandler {
             puppeteerTimeoutConfig.navigationTimeoutMsec,
         );
 
-        // Handle indirect page redirection. Puppeteer will fail the initial URL navigation and return
-        // empty response object.
+        // Handle indirect page redirection. Puppeteer will fail the initial URL navigation and
+        // return empty response object.
         if (isNil(opResult.response) && isNil(opResult.error)) {
             opResult.response = this.pageRequestInterceptor.interceptedRequests.at(-1).response;
 
@@ -43,10 +43,12 @@ export class PageOperationHandler {
             });
         }
 
-        // Handle navigation timeout error
+        // Puppeteer may render some webpage properly but timeout on page navigation when running in
+        // headless mode. Override puppeteer timeout error on successful webserver response to
+        // mitigate this issue.
         if (opResult.browserError?.errorType === 'UrlNavigationTimeout') {
             opResult.response = this.pageRequestInterceptor.interceptedRequests.at(-1).response;
-            this.logger?.logError('Page operation has failed with navigation timeout. Overriding with the last successful response.', {
+            this.logger?.logError('Page operation has failed with navigation timeout. Overriding with the last response.', {
                 error: System.serializeError(opResult.error),
                 browserError: System.serializeError(opResult.browserError),
             });
@@ -64,7 +66,8 @@ export class PageOperationHandler {
             const response = await pageOperation();
             const elapsed = System.getElapsedTime(timestamp);
 
-            await this.waitForScriptRedirection();
+            // Waits for page script redirection after initial page navigation was completed.
+            await System.wait(5000);
 
             return { response, navigationTiming: { goto: elapsed } as PageNavigationTiming };
         } catch (error) {
@@ -81,14 +84,5 @@ export class PageOperationHandler {
                 error,
             };
         }
-    }
-
-    /**
-     * Waits for page script redirection after initial page navigation was completed.
-     */
-    private async waitForScriptRedirection(): Promise<void> {
-        // Reduce wait time at debug
-        const timeout = System.isDebugEnabled() === true ? 1500 : 5000;
-        await System.wait(timeout);
     }
 }
