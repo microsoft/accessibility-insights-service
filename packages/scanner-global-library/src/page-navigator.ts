@@ -166,7 +166,9 @@ export class PageNavigator {
                 return await page.waitForNavigation({ waitUntil: 'networkidle0', timeout: puppeteerTimeoutConfig.networkIdleTimeoutMsec });
             } catch (error) {
                 this.logger?.logWarn(
-                    `Page still has network activity after ${puppeteerTimeoutConfig.networkIdleTimeoutMsec / 1000} secs.`,
+                    `Page still has network activity or stale requests after waiting for ${
+                        puppeteerTimeoutConfig.networkIdleTimeoutMsec / 1000
+                    } secs.`,
                     {
                         timeout: `${puppeteerTimeoutConfig.networkIdleTimeoutMsec}`,
                         error: System.serializeError(error),
