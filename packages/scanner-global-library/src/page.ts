@@ -213,13 +213,8 @@ export class Page {
             return;
         }
 
-        if (this.authenticationResult?.authenticated === true) {
-            // Reload authenticated page to execute navigation workflow
-            await this.reload();
-        } else {
-            const response = await this.pageNavigator.navigate(this.requestUrl, this.page);
-            this.setLastNavigationState('load', response);
-        }
+        const response = await this.pageNavigator.navigate(this.requestUrl, this.page);
+        this.setLastNavigationState('load', response);
     }
 
     private async analyze(): Promise<void> {
@@ -254,6 +249,10 @@ export class Page {
         this.authenticationResult = await this.resourceAuthenticator.authenticate(this.page);
         if (this.authenticationResult?.navigationResponse?.browserError !== undefined) {
             this.setLastNavigationState('auth', this.authenticationResult.navigationResponse);
+        }
+
+        if (this.authenticationResult?.authenticated === true) {
+            this.requestUrl = this.url;
         }
     }
 

@@ -122,6 +122,10 @@ export class PageRequestInterceptor {
     }
 
     public async disableInterception(page: Puppeteer.Page): Promise<void> {
+        if (this.interceptionEnabled === false) {
+            return;
+        }
+
         if (this.pageOnRequestEventHandler) {
             page.off('request', this.pageOnRequestEventHandler);
         }

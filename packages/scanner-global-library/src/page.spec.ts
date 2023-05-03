@@ -146,6 +146,10 @@ describe(Page, () => {
                 authenticated: true,
             } as ResourceAuthenticationResult;
             const reloadNavigationResponse = { httpResponse: { url: () => 'localhost/2', ok: () => true } } as NavigationResponse;
+            puppeteerPageMock
+                .setup((o) => o.url())
+                .returns(() => 'localhost/2')
+                .verifiable();
             pageAnalyzerMock.reset();
             pageAnalyzerMock
                 .setup((o) => o.analyze(url, puppeteerPageMock.object))
@@ -156,7 +160,7 @@ describe(Page, () => {
                 .returns(() => Promise.resolve(authenticationResult))
                 .verifiable();
             pageNavigatorMock
-                .setup(async (o) => o.reload(puppeteerPageMock.object))
+                .setup(async (o) => o.navigate('localhost/2', puppeteerPageMock.object))
                 .returns(() => Promise.resolve(reloadNavigationResponse))
                 .verifiable();
 

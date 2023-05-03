@@ -27,11 +27,16 @@ export class PageOperationHandler {
      * redirected URL, if any, or original request URL.
      */
     public async invoke(pageOperation: PageOperation, page: Puppeteer.Page): Promise<PageOperationResult> {
-        const opResult = await this.pageRequestInterceptor.intercept(
+        let opResult = await this.pageRequestInterceptor.intercept(
             async () => this.invokePageOperation(pageOperation),
             page,
             puppeteerTimeoutConfig.navigationTimeoutMsec,
         );
+
+        if (isNil(opResult.response) && isNil(opResult.error) && this.pageRequestInterceptor.interceptedRequests.length === 0) {
+            this.logger?.logWarn(`No page requests were intercepted. Invoke unhandled page navigation.`);
+            opResult = await this.invokePageOperation(pageOperation);
+        }
 
         // Handle indirect page redirection. Puppeteer will fail the initial URL navigation and
         // return empty response object.

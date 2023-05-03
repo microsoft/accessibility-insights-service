@@ -30,7 +30,7 @@ export const puppeteerTimeoutConfig = {
     /**
      * Maximum wait time, in milliseconds, to wait when network is idle.
      */
-    networkIdleTimeoutMsec: 30000,
+    networkIdleTimeoutMsec: 25000,
 
     /**
      * Maximum wait time, in milliseconds, to complete async page rendering.

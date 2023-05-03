@@ -37,13 +37,21 @@ export class PageAnalyzer {
         const redirectResult = await this.detectRedirection(url, page);
         const authResult = this.detectAuth(page);
         const loadTimeoutResult = this.detectLoadTimeout(redirectResult);
-
-        return {
+        const result = {
             redirection: redirectResult.redirection,
             authentication: authResult,
             loadTimeout: loadTimeoutResult.loadTimeout,
             navigationResponse: loadTimeoutResult.operationResult,
         };
+
+        this.logger?.logInfo('Page analysis result.', {
+            authentication: `${result.authentication}`,
+            loadTimeout: `${result.loadTimeout}`,
+            redirection: `${result.redirection}`,
+            loadTime: `${redirectResult.navigationResult?.navigationTiming?.goto}`,
+        });
+
+        return result;
     }
 
     private detectAuth(page: Puppeteer.Page): boolean {
@@ -107,8 +115,9 @@ export class PageAnalyzer {
     }
 
     private async navigate(url: string, page: Puppeteer.Page): Promise<PageOperationResult> {
+        const timestamp = System.getTimestamp();
         try {
-            const timestamp = System.getTimestamp();
+            this.logger?.logInfo('Navigate page to URL for analysis.');
             const response = await page.goto(url, { waitUntil: 'networkidle2', timeout: puppeteerTimeoutConfig.navigationTimeoutMsec });
 
             return { response, navigationTiming: { goto: System.getElapsedTime(timestamp) } as PageNavigationTiming };
@@ -119,7 +128,12 @@ export class PageAnalyzer {
                 browserError: System.serializeError(browserError),
             });
 
-            return { response: undefined, browserError, error };
+            return {
+                response: undefined,
+                navigationTiming: { goto: System.getElapsedTime(timestamp) } as PageNavigationTiming,
+                browserError,
+                error,
+            };
         }
     }
 

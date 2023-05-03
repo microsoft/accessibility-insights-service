@@ -181,25 +181,22 @@ export class PageNavigator {
             case 'goto':
                 return async () => {
                     this.logger?.logInfo('Navigate page to URL.');
-                    const gotoPromise = page.goto(url, this.waitForOptions);
-                    const responses = await Promise.all([gotoPromise, waitForNavigationFn()]);
+                    const responses = await Promise.all([page.goto(url, this.waitForOptions), waitForNavigationFn()]);
 
                     return responses[0];
                 };
             case 'reload':
                 return async () => {
                     this.logger?.logInfo('Wait for the page to reload URL.');
-                    const reloadPromise = page.reload(this.waitForOptions);
-                    const responses = await Promise.all([reloadPromise, waitForNavigationFn()]);
+                    const responses = await Promise.all([page.reload(this.waitForOptions), waitForNavigationFn()]);
 
                     return responses[0];
                 };
             case 'wait':
                 return async () => {
                     this.logger?.logInfo('Wait for the page to navigate to URL.');
-                    const response = await page.waitForNavigation(this.waitForOptions);
 
-                    return response;
+                    return page.waitForNavigation(this.waitForOptions);
                 };
             default:
                 return undefined;
