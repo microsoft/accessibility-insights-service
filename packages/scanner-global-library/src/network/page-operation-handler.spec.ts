@@ -79,29 +79,6 @@ describe(PageOperationHandler, () => {
         expect(actualResponse).toEqual(expectedResponse);
     });
 
-    it('reload when no requests were intercepted', async () => {
-        let count = 0;
-        response = {
-            url: () => url,
-        } as Puppeteer.HTTPResponse;
-        pageOperation = () => {
-            if (count === 0) {
-                count++;
-
-                return Promise.resolve(null);
-            }
-
-            return Promise.resolve(response);
-        };
-        const expectedResponse = {
-            response,
-            navigationTiming: { goto: 100 } as PageNavigationTiming,
-        };
-
-        const actualResponse = await pageOperationHandler.invoke(pageOperation, puppeteerPageMock.object);
-        expect(actualResponse).toEqual(expectedResponse);
-    });
-
     it('override when request timeout', async () => {
         response = {
             url: () => url,
@@ -149,7 +126,7 @@ describe(PageOperationHandler, () => {
         pageRequestInterceptorMock
             .setup((o) => o.interceptedRequests)
             .returns(() => interceptedRequests)
-            .verifiable(Times.exactly(3));
+            .verifiable(Times.exactly(2));
         const expectedResponse = {
             response,
             navigationTiming: { goto: 100 } as PageNavigationTiming,

@@ -27,21 +27,16 @@ export class PageOperationHandler {
      * redirected URL, if any, or original request URL.
      */
     public async invoke(pageOperation: PageOperation, page: Puppeteer.Page): Promise<PageOperationResult> {
-        let opResult = await this.pageRequestInterceptor.intercept(
+        const opResult = await this.pageRequestInterceptor.intercept(
             async () => this.invokePageOperation(pageOperation),
             page,
             puppeteerTimeoutConfig.navigationTimeoutMsec,
         );
 
-        if (isNil(opResult.response) && isNil(opResult.error) && this.pageRequestInterceptor.interceptedRequests.length === 0) {
-            this.logger?.logWarn(`No page requests were intercepted. Invoke unhandled page navigation.`);
-            opResult = await this.invokePageOperation(pageOperation);
-        }
-
         // Handle indirect page redirection. Puppeteer will fail the initial URL navigation and
         // return empty response object.
         if (isNil(opResult.response) && isNil(opResult.error)) {
-            opResult.response = this.pageRequestInterceptor.interceptedRequests.at(-1).response;
+            opResult.response = this.pageRequestInterceptor.interceptedRequests.at(-1)?.response;
 
             this.logger?.logWarn(`Indirect page redirection was handled.`, {
                 redirectChain: JSON.stringify(this.pageRequestInterceptor.interceptedRequests.map((r) => r.url)),
@@ -52,8 +47,8 @@ export class PageOperationHandler {
         // headless mode. Override puppeteer timeout error on successful webserver response to
         // mitigate this issue.
         if (opResult.browserError?.errorType === 'UrlNavigationTimeout') {
-            opResult.response = this.pageRequestInterceptor.interceptedRequests.at(-1).response;
-            this.logger?.logError('Page operation has failed with navigation timeout. Overriding with the last response.', {
+            opResult.response = this.pageRequestInterceptor.interceptedRequests.at(-1)?.response;
+            this.logger?.logError('Page operation has failed with navigation timeout. Overriding with the network response.', {
                 error: System.serializeError(opResult.error),
                 browserError: System.serializeError(opResult.browserError),
             });

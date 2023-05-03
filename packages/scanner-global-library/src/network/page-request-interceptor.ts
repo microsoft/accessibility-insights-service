@@ -38,6 +38,8 @@ export class PageRequestInterceptor {
 
     private interceptionEnabled = false;
 
+    private session: Puppeteer.CDPSession;
+
     constructor(@inject(GlobalLogger) @optional() private readonly logger: GlobalLogger) {}
 
     public async intercept<T>(
@@ -66,6 +68,8 @@ export class PageRequestInterceptor {
         this.interceptionEnabled = true;
         this.interceptedRequests = [];
         this.errors = [];
+
+        await this.enableBypassServiceWorker(page);
         await page.setRequestInterception(true);
 
         this.pageOnRequestEventHandler = async (request: Puppeteer.HTTPRequest) => {
@@ -138,6 +142,7 @@ export class PageRequestInterceptor {
             page.off('requestfailed', this.pageOnRequestFailedEventHandler);
         }
 
+        await this.disableBypassServiceWorker();
         await page.setRequestInterception(false);
         this.interceptionEnabled = false;
     }
@@ -159,6 +164,23 @@ export class PageRequestInterceptor {
         );
 
         return System.getElapsedTime(timestamp);
+    }
+
+    private async disableBypassServiceWorker(): Promise<void> {
+        if (this.session === undefined) {
+            return;
+        }
+
+        await this.session.send('Network.disable');
+        await this.session.send('Network.setBypassServiceWorker', { bypass: false });
+        await this.session.detach();
+        this.session = undefined;
+    }
+
+    private async enableBypassServiceWorker(page: Puppeteer.Page): Promise<void> {
+        this.session = await page.target().createCDPSession();
+        await this.session.send('Network.enable');
+        await this.session.send('Network.setBypassServiceWorker', { bypass: true });
     }
 
     private traceError(eventName: string, error: any): void {
