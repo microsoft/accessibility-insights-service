@@ -16,8 +16,8 @@ export class PageNavigationHooks {
         @inject(PageConfigurator) public readonly pageConfigurator: PageConfigurator,
         @inject(PageResponseProcessor) protected readonly pageResponseProcessor: PageResponseProcessor,
         @inject(PageHandler) protected readonly pageRenderingHandler: PageHandler,
-        private readonly scrollTimeoutMsecs = puppeteerTimeoutConfig.scrollTimeoutMsecs,
-        private readonly pageRenderingTimeoutMsecs = puppeteerTimeoutConfig.pageRenderingTimeoutMsecs,
+        private readonly scrollTimeoutMsec = puppeteerTimeoutConfig.scrollTimeoutMsec,
+        private readonly pageRenderingTimeoutMsec = puppeteerTimeoutConfig.pageRenderingTimeoutMsec,
     ) {}
 
     public async preNavigation(page: Puppeteer.Page): Promise<void> {
@@ -50,7 +50,7 @@ export class PageNavigationHooks {
 
         await this.disableAnimation(page);
 
-        return this.pageRenderingHandler.waitForPageToCompleteRendering(page, this.scrollTimeoutMsecs, this.pageRenderingTimeoutMsecs);
+        return this.pageRenderingHandler.waitForPageToCompleteRendering(page, this.scrollTimeoutMsec, this.pageRenderingTimeoutMsec);
     }
 
     private dismissAlertBox(page: Puppeteer.Page): void {

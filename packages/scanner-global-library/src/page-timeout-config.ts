@@ -2,9 +2,8 @@
 // Licensed under the MIT License.
 
 export interface PageNavigationTiming {
-    goto1: number;
-    goto1Timeout: boolean;
-    goto2: number;
+    goto: number;
+    gotoTimeout: boolean;
     networkIdle: number;
     networkIdleTimeout: boolean;
     scroll: number;
@@ -21,34 +20,35 @@ export const puppeteerTimeoutConfig = {
     /**
      * Maximum wait time, in milliseconds, to complete page navigation.
      *
-     * Puppeteer will not render page properly for some webpages and timeout on page.goto() when running
-     * in docker. Hence do not increase this value as it will not mitigate navigation timeout error.
+     * Puppeteer may render some webpage properly but timeout on page navigation when running in
+     * headless mode. The {@link PageOperationHandler} will override puppeteer timeout error on
+     * successful webserver response to mitigate this issue. Hence do not increase navigation timeout
+     * value as it will not mitigate puppeteer navigation timeout error.
      */
-    navigationTimeoutMsecs: 60000,
-    navigationTimeoutDefaultMsecs: 60000,
+    navigationTimeoutMsec: 30000,
 
     /**
      * Maximum wait time, in milliseconds, to wait when network is idle.
      */
-    networkIdleTimeoutMsec: 40000,
+    networkIdleTimeoutMsec: 25000,
 
     /**
      * Maximum wait time, in milliseconds, to complete async page rendering.
      */
-    pageRenderingTimeoutMsecs: 15000,
+    pageRenderingTimeoutMsec: 15000,
 
     /**
      * The minimum time the HTML DOM should be stable to accept page rendering.
      */
-    pageDomStableTimeMsecs: 1000,
+    pageDomStableTimeMsec: 1000,
 
     /**
      * Maximum wait time, in milliseconds, to scroll to the bottom of the page.
      */
-    scrollTimeoutMsecs: 30000,
+    scrollTimeoutMsec: 30000,
 
     /**
      * Maximum wait time, in milliseconds, to complete page redirection.
      */
-    redirectTimeoutMsecs: 15000,
+    redirectTimeoutMsec: 10000,
 };

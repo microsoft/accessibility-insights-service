@@ -5,18 +5,17 @@ import * as Puppeteer from 'puppeteer';
 import { injectable, inject, optional } from 'inversify';
 import { System } from 'common';
 import { GlobalLogger } from 'logger';
-import { isNil } from 'lodash';
 import { PageResponseProcessor } from './page-response-processor';
 import { BrowserError } from './browser-error';
 import { PageNavigationHooks } from './page-navigation-hooks';
 import { PageConfigurator } from './page-configurator';
 import { puppeteerTimeoutConfig, PageNavigationTiming } from './page-timeout-config';
 import { BrowserCache } from './browser-cache';
+import { PageOperation, PageOperationHandler } from './network/page-operation-handler';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-export type OnNavigationError = (browserError: BrowserError, error?: unknown) => Promise<void>;
-export type NavigationOperation = (navigationCondition?: Puppeteer.PuppeteerLifeCycleEvent) => Promise<Puppeteer.HTTPResponse>;
+export declare type OnNavigationError = (browserError: BrowserError, error?: unknown) => Promise<void>;
 
 export interface NavigationResponse {
     httpResponse?: Puppeteer.HTTPResponse;
@@ -33,17 +32,17 @@ export interface PageOperationResult {
 
 @injectable()
 export class PageNavigator {
-    public enableRetryOnTimeout = true;
-
-    public waitForRedirection = false;
-
-    // usage of networkidle0 will break websites scanning
-    private readonly navigationCondition: Puppeteer.PuppeteerLifeCycleEvent = 'networkidle2';
+    private readonly waitForOptions: Puppeteer.WaitForOptions = {
+        // usage of networkidle0 will break websites scanning
+        waitUntil: 'networkidle2',
+        timeout: puppeteerTimeoutConfig.navigationTimeoutMsec,
+    };
 
     constructor(
         @inject(PageResponseProcessor) public readonly pageResponseProcessor: PageResponseProcessor,
         @inject(PageNavigationHooks) public readonly pageNavigationHooks: PageNavigationHooks,
         @inject(BrowserCache) public readonly browserCache: BrowserCache,
+        @inject(PageOperationHandler) private readonly pageOperationHandler: PageOperationHandler,
         @inject(GlobalLogger) @optional() private readonly logger: GlobalLogger,
     ) {}
 
@@ -53,33 +52,33 @@ export class PageNavigator {
 
     public async navigate(url: string, page: Puppeteer.Page): Promise<NavigationResponse> {
         await this.pageNavigationHooks.preNavigation(page);
+        const pageOperation = this.createPageOperation('goto', page, url);
 
-        const opResult = await this.navigatePage(this.createPageNavigationOperation('goto', page, url), page);
-
-        if (opResult.browserError) {
-            return {
-                httpResponse: undefined,
-                pageNavigationTiming: opResult.navigationTiming,
-                browserError: opResult.browserError,
-            };
-        }
-
-        const postNavigationPageTiming = await this.pageNavigationHooks.postNavigation(page, opResult.response, async (browserError) => {
-            opResult.browserError = browserError;
-        });
-
-        return {
-            httpResponse: opResult.response,
-            pageNavigationTiming: {
-                ...opResult.navigationTiming,
-                ...postNavigationPageTiming,
-            } as PageNavigationTiming,
-            browserError: opResult.browserError,
-        };
+        return this.navigatePage(pageOperation, page);
     }
 
     public async reload(page: Puppeteer.Page): Promise<NavigationResponse> {
-        const opResult = await this.navigatePage(this.createPageNavigationOperation('reload', page), page);
+        const pageOperation = this.createPageOperation('reload', page);
+
+        return this.navigatePage(pageOperation, page);
+    }
+
+    public async waitForNavigation(page: Puppeteer.Page): Promise<NavigationResponse> {
+        const pageOperation = this.createPageOperation('wait', page);
+        const opResult = await this.pageOperationHandler.invoke(pageOperation, page);
+        if (opResult.error) {
+            return this.getOperationErrorResult(opResult);
+        }
+
+        return {
+            httpResponse: opResult.response,
+            pageNavigationTiming: opResult.navigationTiming,
+            browserError: opResult.browserError,
+        };
+    }
+
+    private async navigatePage(pageOperation: PageOperation, page: Puppeteer.Page): Promise<NavigationResponse> {
+        const opResult = await this.navigatePageImpl(pageOperation, page);
 
         if (opResult.browserError) {
             return {
@@ -103,16 +102,8 @@ export class PageNavigator {
         };
     }
 
-    public async waitForNavigation(page: Puppeteer.Page): Promise<NavigationResponse> {
-        const navigationOperation = this.createPageNavigationOperation('wait', page);
-
-        return this.navigatePageDirect(navigationOperation, page, false);
-    }
-
-    private async navigatePage(navigationOperation: NavigationOperation, page: Puppeteer.Page): Promise<PageOperationResult> {
-        let opResult = await this.invokePageNavigationOperation(navigationOperation);
-
-        opResult = await this.handleIndirectPageRedirection(navigationOperation, opResult, page);
+    private async navigatePageImpl(pageOperation: PageOperation, page: Puppeteer.Page): Promise<PageOperationResult> {
+        let opResult = await this.pageOperationHandler.invoke(pageOperation, page);
         if (opResult.error) {
             return this.getOperationErrorResult(opResult);
         }
@@ -125,66 +116,6 @@ export class PageNavigator {
         await this.resetBrowserSessionHistory(page);
 
         return opResult;
-    }
-
-    private async navigatePageDirect(
-        navigationOperation: NavigationOperation,
-        page: Puppeteer.Page,
-        retryOnTimeout: boolean = this.enableRetryOnTimeout,
-    ): Promise<NavigationResponse> {
-        let opResult = await this.invokePageNavigationOperation(navigationOperation, retryOnTimeout);
-        opResult = await this.handleIndirectPageRedirection(navigationOperation, opResult, page);
-
-        opResult = opResult.browserError ? this.getOperationErrorResult(opResult) : opResult;
-
-        return {
-            httpResponse: opResult.response,
-            pageNavigationTiming: opResult.navigationTiming,
-            browserError: opResult.browserError,
-        };
-    }
-
-    private async invokePageNavigationOperation(
-        navigationOperation: NavigationOperation,
-        retryOnTimeout: boolean = this.enableRetryOnTimeout,
-    ): Promise<PageOperationResult> {
-        let opTimeout = false;
-
-        let timestamp = System.getTimestamp();
-        let opResult = await this.invokePageOperation(navigationOperation);
-        const op1Elapsed = System.getElapsedTime(timestamp);
-
-        let op2Elapsed = 0;
-        if (opResult.browserError?.errorType === 'UrlNavigationTimeout' && retryOnTimeout === true) {
-            // Fallback to load partial page resources on navigation timeout.
-            // This mitigates cases when page has active network connections,
-            // for example streaming video controls.
-            opTimeout = true;
-
-            timestamp = System.getTimestamp();
-            opResult = await this.invokePageOperation(() => navigationOperation('load'));
-            op2Elapsed = System.getElapsedTime(timestamp);
-        }
-
-        opResult.navigationTiming = {
-            goto1: op1Elapsed,
-            goto1Timeout: opTimeout,
-            goto2: op2Elapsed,
-        } as PageNavigationTiming;
-
-        return opResult;
-    }
-
-    private async invokePageOperation(pageOperation: () => Promise<Puppeteer.HTTPResponse>): Promise<PageOperationResult> {
-        try {
-            const response = await pageOperation();
-
-            return { response };
-        } catch (error) {
-            const browserError = this.pageResponseProcessor.getNavigationError(error as Error);
-
-            return { response: undefined, browserError, error };
-        }
     }
 
     /**
@@ -217,121 +148,18 @@ export class PageNavigator {
                 await System.wait(1000);
             }
 
-            opResult = await this.invokePageNavigationOperation((waitUntil = this.navigationCondition) =>
-                page.goBack({ waitUntil, timeout: puppeteerTimeoutConfig.navigationTimeoutMsecs }),
-            );
+            const pageOperation = async () => page.goBack(this.waitForOptions);
+            opResult = await this.pageOperationHandler.invoke(pageOperation, page);
         } while (count < maxRetryCount && opResult.response?.status() === 304 && opResult.error === undefined);
 
         return opResult;
     }
 
-    /**
-     * This function handles case when page has indirect redirection.
-     * For example, page has a script with window.location set to a new URL.
-     * Puppeteer will fail the initial URL navigation and return empty response object.
-     * The function waits for all navigational requests to complete and return response
-     * for the last navigational request.
-     */
-    private async handleIndirectPageRedirection(
-        navigationOperation: NavigationOperation,
-        pageOperationResult: PageOperationResult,
-        page: Puppeteer.Page,
-    ): Promise<PageOperationResult> {
-        const requests: { url: string; opResult?: PageOperationResult }[] = [];
-
-        if (!isNil(pageOperationResult.response) || !isNil(pageOperationResult.error)) {
-            return pageOperationResult;
-        }
-
-        await page.setRequestInterception(true);
-        const pageOnRequestEventHandler = async (request: Puppeteer.HTTPRequest) => {
-            try {
-                // Trace only main frame navigational requests
-                const isNavigationRequest = request.isNavigationRequest() && request.frame() === page.mainFrame();
-                if (isNavigationRequest) {
-                    requests.push({
-                        url: request.url(),
-                    });
-                }
-            } catch (e) {
-                this.logger?.logError(`Error handling 'request' page event`, { error: System.serializeError(e) });
-            }
-
-            await request.continue();
-        };
-        page.on('request', pageOnRequestEventHandler);
-
-        const pageOnResponseEventHandler = async (response: Puppeteer.HTTPResponse) => {
-            try {
-                const pendingRequest = requests.find((r) => r.url === response.url());
-                if (pendingRequest !== undefined) {
-                    pendingRequest.opResult = { response };
-                }
-            } catch (e) {
-                this.logger?.logError(`Error handling 'requestFinished' page event`, { error: System.serializeError(e) });
-            }
-        };
-        page.on('response', pageOnResponseEventHandler);
-
-        const pageOnRequestFailedEventHandler = async (request: Puppeteer.HTTPRequest) => {
-            try {
-                const pendingRequest = requests.find((r) => r.url === request.url());
-                if (pendingRequest !== undefined) {
-                    const error = new Error(request.failure()?.errorText);
-                    pendingRequest.opResult = {
-                        response: undefined,
-                        error,
-                        browserError: this.pageResponseProcessor.getNavigationError(error),
-                    };
-                }
-            } catch (e) {
-                this.logger?.logError(`Error handling 'requestFailed' page event`, { error: System.serializeError(e) });
-            }
-        };
-        page.on('requestfailed', pageOnRequestFailedEventHandler);
-
-        const opResult = await this.invokePageNavigationOperation(navigationOperation, false);
-
-        await System.waitLoop(
-            async () => {
-                // returns if there is no pending requests
-                return requests.every((r) => r.opResult?.response || r.opResult?.error);
-            },
-            async (noPendingRequests) => noPendingRequests,
-            puppeteerTimeoutConfig.navigationTimeoutMsecs,
-            this.getTimeout(),
-        );
-
-        page.off('request', pageOnRequestEventHandler);
-        page.off('response', pageOnResponseEventHandler);
-        page.off('requestfailed', pageOnRequestFailedEventHandler);
-        await page.setRequestInterception(false);
-
-        this.logger?.logWarn(`Indirect page redirection handled.`, {
-            redirectChain: JSON.stringify(requests.map((r) => r.url)),
-        });
-
-        return requests.at(-1)?.opResult ?? opResult;
-    }
-
-    /**
-     * Resets browser session history to support page reload.
-     */
-    private async resetBrowserSessionHistory(page: Puppeteer.Page): Promise<void> {
-        try {
-            await page.evaluate(() => history.pushState(null, null, null));
-        } catch (error) {
-            this.logger?.logWarn('Error while resetting browser session history.', {
-                error: System.serializeError(error),
-            });
-        }
-    }
-
-    private createPageNavigationOperation(operation: 'goto' | 'reload' | 'wait', page: Puppeteer.Page, url?: string): NavigationOperation {
+    private createPageOperation(operation: 'goto' | 'reload' | 'wait', page: Puppeteer.Page, url?: string): PageOperation {
         /**
          * Waits for page network activity to reach idle state.
          * This mitigates cases when page needs load pending frame/content.
-         * Will not throw on timeout if page still has network activity.
+         * Should not throw on timeout if page still has network activity.
          */
         const waitForNavigationFn = async () => {
             try {
@@ -349,39 +177,26 @@ export class PageNavigator {
             }
         };
 
-        /**
-         * Waits for page script redirection after initial page navigation was completed.
-         */
-        const waitForScriptRedirectionFn = async () => {
-            if (this.waitForRedirection === true) {
-                const timeout = this.getTimeout();
-                await System.wait(timeout);
-            }
-        };
-
         switch (operation) {
             case 'goto':
-                return async (waitUntil = this.navigationCondition) => {
-                    const gotoPromise = page.goto(url, { waitUntil, timeout: puppeteerTimeoutConfig.navigationTimeoutMsecs });
-                    const responses = await Promise.all([gotoPromise, waitForNavigationFn()]);
-                    await waitForScriptRedirectionFn();
+                return async () => {
+                    this.logger?.logInfo('Navigate page to URL.');
+                    const responses = await Promise.all([page.goto(url, this.waitForOptions), waitForNavigationFn()]);
 
                     return responses[0];
                 };
             case 'reload':
-                return async (waitUntil = this.navigationCondition) => {
-                    const reloadPromise = page.reload({ waitUntil, timeout: puppeteerTimeoutConfig.navigationTimeoutMsecs });
-                    const responses = await Promise.all([reloadPromise, waitForNavigationFn()]);
-                    await waitForScriptRedirectionFn();
+                return async () => {
+                    this.logger?.logInfo('Wait for the page to reload URL.');
+                    const responses = await Promise.all([page.reload(this.waitForOptions), waitForNavigationFn()]);
 
                     return responses[0];
                 };
             case 'wait':
-                return async (waitUntil = this.navigationCondition) => {
-                    const response = await page.waitForNavigation({ waitUntil, timeout: puppeteerTimeoutConfig.navigationTimeoutMsecs });
-                    await waitForScriptRedirectionFn();
+                return async () => {
+                    this.logger?.logInfo('Wait for the page to navigate to URL.');
 
-                    return response;
+                    return page.waitForNavigation(this.waitForOptions);
                 };
             default:
                 return undefined;
@@ -400,8 +215,16 @@ export class PageNavigator {
         };
     }
 
-    private getTimeout(): number {
-        // Reduce wait time when debugging
-        return System.isDebugEnabled() === true ? 1500 : 5000;
+    /**
+     * Resets browser session history to support page reload.
+     */
+    private async resetBrowserSessionHistory(page: Puppeteer.Page): Promise<void> {
+        try {
+            await page.evaluate(() => history.pushState(null, null, null));
+        } catch (error) {
+            this.logger?.logWarn('Error while resetting browser session history.', {
+                error: System.serializeError(error),
+            });
+        }
     }
 }

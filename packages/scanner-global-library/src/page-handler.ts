@@ -13,17 +13,17 @@ export class PageHandler {
     constructor(
         @inject(GlobalLogger) @optional() private readonly logger: GlobalLogger,
         private readonly checkIntervalMsecs: number = 200,
-        private readonly pageDomStableTimeMsecs: number = puppeteerTimeoutConfig.pageDomStableTimeMsecs,
+        private readonly pageDomStableTimeMsec: number = puppeteerTimeoutConfig.pageDomStableTimeMsec,
         private readonly scrollToPageBottom: typeof scrollToBottom = scrollToBottom,
     ) {}
 
     public async waitForPageToCompleteRendering(
         page: Puppeteer.Page,
-        scrollTimeoutMsecs: number,
+        scrollTimeoutMsec: number,
         renderTimeoutMsecs: number,
     ): Promise<Partial<PageNavigationTiming>> {
         // Scroll to the bottom of the page to resolve pending page operations and load lazily-rendered content
-        const scroll = await this.scrollToBottom(page, scrollTimeoutMsecs);
+        const scroll = await this.scrollToBottom(page, scrollTimeoutMsec);
         const render = await this.waitForStableContent(page, renderTimeoutMsecs);
 
         return { ...scroll, ...render };
@@ -56,7 +56,7 @@ export class PageHandler {
     }
 
     private async waitForStableContent(page: Puppeteer.Page, timeoutMsecs: number): Promise<Partial<PageNavigationTiming>> {
-        const minCheckBreakCount = this.pageDomStableTimeMsecs / this.checkIntervalMsecs;
+        const minCheckBreakCount = this.pageDomStableTimeMsec / this.checkIntervalMsecs;
 
         let continuousStableCheckCount = 0;
         let lastCheckPageHtmlContentSize = 0;

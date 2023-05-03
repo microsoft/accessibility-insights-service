@@ -89,14 +89,9 @@ setupVmss() {
 
         . "${0%/*}/wait-for-deployment.sh" -n "$vmssResourceGroup" -t "1800" -q "$vmssCreatedQuery"
 
-        echo "Checking status for $vmssName VMSS under $pool pool..."
+        # Set exported variables
         vmssName=$(az vmss list --query "[$vmssQueryConditions].name" -o tsv)
         vmssLocation=$(az vmss list --query "[$vmssQueryConditions].location" -o tsv)
-        vmssStatus=$(az vmss list --query "[$vmssQueryConditions].provisioningState" -o tsv)
-        if [ "$vmssStatus" != "Succeeded" ]; then
-            echo "Deployment of VMSS $vmssName under $pool pool failed with status $vmssStatus"
-            exit 1
-        fi
 
         echo "Invoking command: $commandName"
         eval "$command"

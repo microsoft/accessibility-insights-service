@@ -23,8 +23,8 @@ describe(PageHandler, () => {
 
     const windowHeight = 100;
     const checkIntervalMsecs = 100;
-    const pageDomStableTimeMsecs = 200;
-    const scrollTimeoutMsecs = 500;
+    const pageDomStableTimeMsec = 200;
+    const scrollTimeoutMsec = 500;
     const renderTimeoutMsecs = 500;
 
     beforeEach(() => {
@@ -47,7 +47,7 @@ describe(PageHandler, () => {
         pageMock.setup((o) => o.evaluate(It.isAny())).returns(async (action) => action());
         pageMock.setup((o) => o.isClosed()).returns(() => false);
 
-        pageHandler = new PageHandler(loggerMock.object, checkIntervalMsecs, pageDomStableTimeMsecs, scrollToBottomMock);
+        pageHandler = new PageHandler(loggerMock.object, checkIntervalMsecs, pageDomStableTimeMsec, scrollToBottomMock);
     });
 
     afterEach(() => {
@@ -58,15 +58,15 @@ describe(PageHandler, () => {
 
     it('scroll to bottom of page and wait until page is fully rendered', async () => {
         timeoutScroll = false;
-        const pageTiming = await pageHandler.waitForPageToCompleteRendering(pageMock.object, scrollTimeoutMsecs, renderTimeoutMsecs);
+        const pageTiming = await pageHandler.waitForPageToCompleteRendering(pageMock.object, scrollTimeoutMsec, renderTimeoutMsecs);
         expect(pageTiming.scrollTimeout).toEqual(false);
         expect(pageTiming.renderTimeout).toEqual(false);
     });
 
     it('terminate wait and warn if scrolling exceeds timeout', async () => {
         timeoutScroll = true;
-        loggerMock.setup((o) => o.logWarn(It.isAny(), { timeout: `${scrollTimeoutMsecs}` })).verifiable();
-        const pageTiming = await pageHandler.waitForPageToCompleteRendering(pageMock.object, scrollTimeoutMsecs, renderTimeoutMsecs);
+        loggerMock.setup((o) => o.logWarn(It.isAny(), { timeout: `${scrollTimeoutMsec}` })).verifiable();
+        const pageTiming = await pageHandler.waitForPageToCompleteRendering(pageMock.object, scrollTimeoutMsec, renderTimeoutMsecs);
         expect(pageTiming.scrollTimeout).toEqual(true);
         expect(pageTiming.renderTimeout).toEqual(false);
     });
@@ -84,7 +84,7 @@ describe(PageHandler, () => {
             });
         loggerMock.setup((l) => l.logWarn(It.isAny(), { timeout: `${renderTimeoutMsecs}` })).verifiable();
 
-        const pageTiming = await pageHandler.waitForPageToCompleteRendering(pageMock.object, scrollTimeoutMsecs, renderTimeoutMsecs);
+        const pageTiming = await pageHandler.waitForPageToCompleteRendering(pageMock.object, scrollTimeoutMsec, renderTimeoutMsecs);
         expect(pageTiming.scrollTimeout).toEqual(false);
         expect(pageTiming.renderTimeout).toEqual(true);
     });
@@ -92,7 +92,7 @@ describe(PageHandler, () => {
     function getScrollToPageBottomFunc(): (page: Page) => Promise<boolean> {
         return async (): Promise<boolean> => {
             if (timeoutScroll === true) {
-                await System.wait(scrollTimeoutMsecs * 2);
+                await System.wait(scrollTimeoutMsec * 2);
             } else {
                 await System.wait(10);
             }

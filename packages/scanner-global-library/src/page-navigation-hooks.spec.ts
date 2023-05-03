@@ -13,8 +13,8 @@ import { PageNavigationHooks } from './page-navigation-hooks';
 import { PageNavigationTiming } from './page-timeout-config';
 
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/consistent-type-assertions */
-const scrollTimeoutMsecs = 15000;
-const pageRenderingTimeoutMsecs = 1000;
+const scrollTimeoutMsec = 15000;
+const pageRenderingTimeoutMsec = 1000;
 const pageNavigationTiming: Partial<PageNavigationTiming> = {
     scroll: 1,
     render: 2,
@@ -38,8 +38,8 @@ describe(PageNavigationHooks, () => {
             pageConfiguratorMock.object,
             pageResponseProcessorMock.object,
             pageHandlerMock.object,
-            scrollTimeoutMsecs,
-            pageRenderingTimeoutMsecs,
+            scrollTimeoutMsec,
+            pageRenderingTimeoutMsec,
         );
     });
 
@@ -85,7 +85,7 @@ describe(PageNavigationHooks, () => {
             .returns(() => undefined)
             .verifiable();
         pageHandlerMock
-            .setup(async (o) => o.waitForPageToCompleteRendering(pageMock.object, scrollTimeoutMsecs, pageRenderingTimeoutMsecs))
+            .setup(async (o) => o.waitForPageToCompleteRendering(pageMock.object, scrollTimeoutMsec, pageRenderingTimeoutMsec))
             .returns(() => Promise.resolve(pageNavigationTiming))
             .verifiable();
 
