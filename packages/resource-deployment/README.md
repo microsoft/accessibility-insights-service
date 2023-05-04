@@ -89,7 +89,7 @@ When installing Azure CLI for [Windows Subsystem for Linux (WSL)](https://docs.m
 
 The service health can be monitored via deployed Azure Shared dashboard.
 
-Documentation for the Azure dashboard can be found [here](packages/resource-deployment/templates/dashboard.md)
+Documentation for the Azure dashboard can be found [here](https://github.com/microsoft/accessibility-insights-service/blob/main/packages/resource-deployment/templates/dashboard.md)
 
 # Contributing
 
