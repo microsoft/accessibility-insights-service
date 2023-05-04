@@ -3,42 +3,34 @@ Copyright (c) Microsoft Corporation. All rights reserved.
 Licensed under the MIT License.
 -->
 
-Before you start, make sure you have the Owner permission, or Contributor with User Access Administrator permission for the subscription. To learn more about how to give role based access, check [Manage access to Azure resources using RBAC and the Azure portal](https://docs.microsoft.com/en-us/azure/role-based-access-control/role-assignments-portal).
-
 # Deploy Resources for Accessibility Insights Service
 
-The deployment script is going to create Resource Group and deploy Storage Account, Batch Account and CosmosDB under it.
+The deployment script will create Azure resource group and deploy Azure services under it.
 
-### 1. Accept Azure Marketplace legal terms
+Before you start, make sure you have the Owner permission, or Contributor with User Access Administrator permission for the subscription. To learn more about how to give role based access, check [Manage access to Azure resources using RBAC and the Azure portal](https://docs.microsoft.com/en-us/azure/role-based-access-control/role-assignments-portal).
 
-Before deploying the Azure Batch pool virtual machine image you need to accept the Azure Marketplace legal terms one time on Azure subscription level. To accept legal terms use PowerShell Get-AzureRmMarketplaceTerms and Set-AzureRmMarketplaceTerms [API](https://go.microsoft.com/fwlink/?linkid=862451).
+## Prerequisites
 
-You can use the following PowerShell commands to accept the Azure Marketplace legal terms:
+-   Docker Desktop
+-   Azure CLI
+-   Postman
 
-```PowerShell
-Connect-AzAccount
-Set-AzContext -Subscription <The name or id of the subscription> -Tenant <Tenant name or ID>
-Get-AzMarketplaceTerms -Publisher 'microsoft-azure-batch' -Product 'ubuntu-server-container' -Name '16-04-lts' | Set-AzMarketplaceTerms -Accept
-```
+Follow instructions from https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest to install Azure CLI.
 
-### 2. Clone the repository
+When installing Azure CLI for [Windows Subsystem for Linux (WSL)](https://docs.microsoft.com/en-us/windows/wsl/about) select a Linux corresponding distribution used with WSL.
 
--   Clone the repository using one of the following commands
-    ```bash
-    git clone https://github.com/Microsoft/accessibility-insights-service.git
-    ```
+## Deployment
+
+### 1. Clone the repository and build the solution
+
+-   Follow this [README](https://github.com/microsoft/accessibility-insights-service/blob/main/README.md) to clone the repository and build the solution
 -   Select the deployment directory
+
     ```bash
-    cd accessibility-insights-service/resource-deployment
+    cd accessibility-insights-service/packages/resource-deployment
     ```
 
-### 3. Install Azure-Cli
-
--   Follow instructions from https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest
-
-    When installing Azure CLI for [Windows Subsystem for Linux (WSL)](https://docs.microsoft.com/en-us/windows/wsl/about) select a Linux corresponding distribution used with WSL.
-
-### 4. Login to Azure-Cli
+### 2. Login to Azure
 
 -   Login to Azure account and set the current active subscription:
 
@@ -47,35 +39,57 @@ Get-AzMarketplaceTerms -Publisher 'microsoft-azure-batch' -Product 'ubuntu-serve
     az account set --subscription <Name or ID of subscription>
     ```
 
-### 5. Build repository
+### 3. Create Azure Active Directory application registration
 
--   Run the below command from repository root folder to build all packages
+-   Sign in to the Azure portal and create new application registration in Azure Active Directory with provided default settings
+-   Add a client secret
+-   Use Application (client) ID and secret value in a service deployment
 
-    ```bash
-    yarn build
-    ```
+### 4. Deploy service
 
-### 6. Delete resource group
-
--   Run below command to delete the resource group if it exists
+-   Run below script with required parameters as specified in a [script's help](https://github.com/microsoft/accessibility-insights-service/blob/main/packages/resource-deployment/scripts/install-parallel.sh) to deploy Azure resources and binaries
 
     ```bash
-    ./dist/scripts/delete-resource-group.sh -r <resourceGroupName>
+    ./dist/scripts/install-parallel.sh -r "<resource group>" -s "<subscription Id>" -l "<location>" -e "<environment (dev|ppe|prod)>" -o "<organization name>" -p "<publisher email>" -c "<app client Id>" -t "<app client secret>" -v "<release Id>"
     ```
 
-### 7. Deploy
+## Submit scan request
 
--   Run below script with required parameters as specified in a script's help to deploy Azure resources and binaries
+### 1. Create Azure Active Directory client registration
 
-    ```bash
-    ./dist/scripts/install-parallel.sh
-    ```
+-   Create Azure Active Directory client registration to use with Postman client
+-   Sign in to the Azure portal and create new application registration in Azure Active Directory with provided default settings
+-   Add a client secret
+-   Use Application (client) ID and secret value in Postman client
 
-### 8. Login to Azure portal to verify the resources are being created
+### 2. Postman setup
 
--   Resource group is created
--   All the resources are deployed under the resource group
--   And all Batch jobs are scheduled
+-   Open Postman
+-   Import all files from [Postman](https://github.com/microsoft/accessibility-insights-service/tree/main/packages/resource-deployment/postman) directory
+-   Open "Accessibility Insights Service" environment
+-   Set Current Values as follows:
+    -   client_id - Azure AD client registration ID
+    -   client_secret - Azure AD client registration secret
+    -   base_url **and** call_back_url - API Management service Gateway URL (Copy from Azure portal service overview page)
+    -   target_client_id - Azure AD application registration ID
+    -   token_url - `https://login.microsoftonline.com/<Azure AD (tenant) ID>/oauth2/v2.0/token`
+    -   auth_url - `https://login.microsoftonline.com/<Azure AD (tenant) ID>/oauth2/v2.0/authorize`
+-   Save environment
+
+### 3. Submit scan request
+
+-   Select "Accessibility Insights Service" environment as active from the top right drop down menu
+-   Open "Accessibility Insights Service" collection
+-   Select "Get access token" and send request. Token is valid for 24 hours
+-   Select "Submit accessibility scan" and send request
+-   Select "Get scan status" and send request
+-   Monitor scan status by re-submitting request
+
+## Service health
+
+The service health can be monitored via deployed Azure Shared dashboard.
+
+Documentation for the Azure dashboard can be found [here](packages/resource-deployment/templates/dashboard.md)
 
 # Contributing
 

@@ -8,76 +8,75 @@ Licensed under the MIT License.
 [![Build Status](https://dev.azure.com/accessibility-insights/Accessibility%20Insights%20Service/_apis/build/status/Accessibility-Insights-Service%20CI?branchName=main)](https://dev.azure.com/accessibility-insights/Accessibility%20Insights%20Service/_build/latest?definitionId=28&branchName=main)
 [![codecov](https://codecov.io/gh/microsoft/accessibility-insights-service/branch/main/graph/badge.svg)](https://codecov.io/gh/microsoft/accessibility-insights-service)
 
-Accessibility Insights Service is a service that can be used to scan websites for accessibility issues on a periodic basis. It is Typescript project with shell scripts for install and update scenarios.
+Accessibility Insights Service is a service that can be used to scan websites for accessibility issues on a periodic basis. It is TypeScript project with shell scripts for install and update scenarios.
 
 This project can be run in an Azure environment and can be set up easily using the install scripts provided.
+
+## Prerequisites
+
+-   Git
+-   Node.js v16
+-   TypeScript
+-   Yarn v3
+-   Visual Studio Code
+-   Docker Desktop
+-   Ubuntu, WSL, Git Bash, or similar Linux environment
 
 ## Building the code
 
 ### 1. Clone the repository
 
--   Clone the repository using one of the following commands
+-   Clone the repository
+
     ```bash
     git clone https://github.com/Microsoft/accessibility-insights-service.git
     ```
--   Select the created directory
+
+-   Select the solution directory
+
     ```bash
     cd accessibility-insights-service
     ```
 
-### 2. Install package specific dependencies
+### 2. Install packages
 
--   Goto the package (under /packages) that you will be working on & follow the readme file under that package.
+-   Run yarn to install initial npm packages
 
-### 3. Install packages
-
--   We use yarn for dependencies management. You can install it from [here](https://yarnpkg.com/en/docs/install).
     ```bash
     yarn install
     ```
 
-### 4. Working from Visual Studio Code
+### 3. Working from Visual Studio Code
 
 -   Open workspace.code-workspace from .vscode\ folder under root directory.
 -   On opening the workspace, it will suggest you to install the recommended extensions. Install them.
 
-### 5. Build from command line
+### 4. Build solution
 
--   Build project
+-   Run yarn to build solution
 
     ```bash
        yarn build
     ```
 
-### 6. Commands to run before check in
+### 5. Run before check-in
 
--   Run the below command to build, test, check file format styling & eslint issues
+-   Run the below command to build, test, check file format styling and eslint issues
     ```bash
     yarn precheckin
-    ```
--   If the above command failed for formatting issues, run the below command to format all files
-    ```bash
-    yarn format:fix
     ```
 
 ## Testing
 
-### 1. Run Unit tests from command line
+### 1. Run unit tests
 
--   Run the below command
+-   Run the below command from the command line to execute all unit tests
+
     ```bash
           yarn test
     ```
 
-### 2. Run current test file from Visual Studio Code
-
--   Execute "Debug current unit test file" launch task. This build the project & deploys azure function locally.
-    You can do this by either of the below two options -
-
-    -   Press F5. (Make sure the correct launch task is selected from the drop down that appears).
-    -   Or Press Ctrl+P and then type "debug" followed by space ' '. And then select "Debug current unit test file" from the list that appears.
-
-### 3. Run test in watch mode
+### 2. Run test in watch mode
 
 -   Goto the package you want to watch for. You can run tests whenever source code is modified in watch mode.
 
@@ -87,28 +86,28 @@ This project can be run in an Azure environment and can be set up easily using t
 
 ## Deployment
 
--   Follow this [README](https://github.com/Microsoft/accessibility-insights-service/blob/main/packages/resource-deployment/README.md) to deploy required Azure resources.
+-   Follow this [README](https://github.com/microsoft/accessibility-insights-service/blob/main/packages/resource-deployment/README.md) to deploy required Azure resources.
 
 ## Debugging
 
 To debug packages locally follow the generic steps below.
 
-1.  Complete deployment of Azure resources in your test subscription.
-2.  Run the following script to create the `.env` plain text file under package root folder with environment variables required for the package to run locally:
+1.  Complete deployment of the service in your Azure subscription
+2.  Run the following script to get the content of the `.env` plain text file:
 
     ```bash
-          ./dist/scripts/create-env-file-for-debug.sh -r <resourceGroupName>
+          ./packages/resource-deployment/scripts/create-env-file-for-debug.sh -r <resourceGroupName>
     ```
 
-3.  Run the TypeScript compiler `tsc` for the selected package.
-4.  Debug selected package using Visual Studio Code selecting respective debug configuration. For instance, select `Start debugging runner (runner)` configuration to debug `runner` package.
+3.  Create the `.env` plain text file under package root folder to debug it locally
+4.  Debug selected package using Visual Studio Code selecting respective debug configuration
 
 ## Telemetry and Monitoring
 
 During deployment, the Azure dashboard will be created to track service metrics and telemetry data.
 
 -   Documentation for all telemetry events sent can be found [here](packages/logger/README.md)
--   Documentation for the azure dashboard created upon deployment can be found [here](packages/resource-deployment/templates/README.md)
+-   Documentation for the Azure dashboard created upon deployment can be found [here](packages/resource-deployment/templates/dashboard.md)
 
 ## Contributing
 
