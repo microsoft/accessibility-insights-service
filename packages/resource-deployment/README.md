@@ -45,7 +45,12 @@ When installing Azure CLI for [Windows Subsystem for Linux (WSL)](https://docs.m
 -   Add a client secret
 -   Use Application (client) ID and secret value in a service deployment
 
-### 4. Deploy service
+### 4. Allow Azure Batch API to access the subscription
+
+-   Follow this [documentation](https://learn.microsoft.com/en-us/azure/batch/batch-account-create-portal#allow-batch-to-access-the-subscription) to allow Batch to access the subscription
+-   Sign in to the Azure portal and assign _Contributor_ role to _Microsoft Azure Batch_ enterprise application on subscription. Follow this [documentation](https://learn.microsoft.com/en-us/azure/role-based-access-control/role-assignments-portal) to assign Azure role.
+
+### 5. Deploy service
 
 -   Run below script with required parameters as specified in a [script's help](https://github.com/microsoft/accessibility-insights-service/blob/main/packages/resource-deployment/scripts/install-parallel.sh) to deploy Azure resources and binaries
 
