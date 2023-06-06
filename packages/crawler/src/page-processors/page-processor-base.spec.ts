@@ -7,15 +7,14 @@ import { Page, Browser } from 'puppeteer';
 import { BrowserError, PageNavigationHooks } from 'scanner-global-library';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { System } from 'common';
-import Apify from 'apify';
+import * as Crawlee from '@crawlee/puppeteer';
 import { CrawlerConfiguration } from '../crawler/crawler-configuration';
 import { DataBase } from '../level-storage/data-base';
 import { AccessibilityScanOperation } from '../page-operations/accessibility-scan-operation';
 import { BlobStore, DataStore } from '../storage/store-types';
-import { ApifyRequestQueueProvider } from '../types/ioc-types';
 import { ScanData } from '../types/scan-data';
 import { ScanResult } from '../level-storage/storage-documents';
-import { PageProcessorBase, PuppeteerCrawlingContext, PuppeteerHandlePageInputs } from './page-processor-base';
+import { PageProcessorBase } from './page-processor-base';
 
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/consistent-type-assertions */
 
@@ -25,12 +24,16 @@ describe(PageProcessorBase, () => {
 
         public baseUrl: string;
 
-        public processPage = async (inputs: PuppeteerHandlePageInputs) => {
+        public processPage: Crawlee.PuppeteerRequestHandler = async () => {
             return;
         };
 
         public async saveSnapshot(page: Page, id: string): Promise<void> {
             await super.saveSnapshot(page, id);
+        }
+
+        public async enqueueLinks(context: Crawlee.PuppeteerCrawlingContext): Promise<void> {
+            await super.enqueueLinks(context);
         }
     }
 
@@ -43,31 +46,26 @@ describe(PageProcessorBase, () => {
         stack: 'stack',
     };
 
-    let requestQueueStub: Apify.RequestQueue;
     let accessibilityScanOpMock: IMock<AccessibilityScanOperation>;
     let dataStoreMock: IMock<DataStore>;
     let blobStoreMock: IMock<BlobStore>;
     let dataBaseMock: IMock<DataBase>;
-    let enqueueLinksExtMock: IMock<typeof Apify.utils.enqueueLinks>;
-    let saveSnapshotMock: IMock<typeof Apify.utils.puppeteer.saveSnapshot>;
-    let processPageMock: IMock<Apify.PuppeteerHandlePage>;
+    let saveSnapshotMock: IMock<typeof Crawlee.puppeteerUtils.saveSnapshot>;
+    let processPageMock: IMock<Crawlee.PuppeteerRequestHandler>;
     let pageNavigationHooksMock: IMock<PageNavigationHooks>;
     let crawlerConfigurationMock: IMock<CrawlerConfiguration>;
-    let requestQueueProvider: ApifyRequestQueueProvider;
-    let requestStub: Apify.Request;
-    let pageStub: Page;
+    let requestStub: Crawlee.Request;
+    let puppeteerPageStub: Page;
     let pageProcessorBase: TestablePageProcessor;
     let browserMock: IMock<Browser>;
 
     beforeEach(() => {
-        requestQueueStub = {} as Apify.RequestQueue;
         accessibilityScanOpMock = Mock.ofType<AccessibilityScanOperation>();
         dataStoreMock = Mock.ofType<DataStore>();
         blobStoreMock = Mock.ofType<BlobStore>();
         dataBaseMock = Mock.ofType<DataBase>();
-        enqueueLinksExtMock = Mock.ofType<typeof Apify.utils.enqueueLinks>();
-        saveSnapshotMock = Mock.ofType<typeof Apify.utils.puppeteer.saveSnapshot>();
-        processPageMock = Mock.ofType<Apify.PuppeteerHandlePage>();
+        saveSnapshotMock = Mock.ofType<typeof Crawlee.puppeteerUtils.saveSnapshot>();
+        processPageMock = Mock.ofType<Crawlee.PuppeteerRequestHandler>();
         pageNavigationHooksMock = Mock.ofType<PageNavigationHooks>();
         crawlerConfigurationMock = Mock.ofType(CrawlerConfiguration);
         browserMock = Mock.ofType<Browser>();
@@ -79,15 +77,14 @@ describe(PageProcessorBase, () => {
             .setup((o) => o.snapshot())
             .returns(() => false)
             .verifiable();
-
         requestStub = {
             id: testId,
             url: testUrl,
             userData: {},
             errorMessages: [],
-        } as any;
+        } as Crawlee.Request;
 
-        pageStub = {
+        puppeteerPageStub = {
             browser: () => browserMock.object,
             url: () => testUrl,
             setBypassCSP: (op: boolean) => {
@@ -101,16 +98,13 @@ describe(PageProcessorBase, () => {
                 }),
         } as any;
 
-        requestQueueProvider = () => Promise.resolve(requestQueueStub);
         pageProcessorBase = new TestablePageProcessor(
             accessibilityScanOpMock.object,
             dataStoreMock.object,
             blobStoreMock.object,
             dataBaseMock.object,
             pageNavigationHooksMock.object,
-            requestQueueProvider,
             crawlerConfigurationMock.object,
-            enqueueLinksExtMock.object,
             saveSnapshotMock.object,
         );
         pageProcessorBase.processPage = processPageMock.object;
@@ -127,8 +121,8 @@ describe(PageProcessorBase, () => {
     });
 
     it('preNavigation', async () => {
-        const crawlingContext: PuppeteerCrawlingContext = {
-            page: pageStub,
+        const context: Crawlee.PuppeteerCrawlingContext = {
+            page: puppeteerPageStub,
             request: requestStub,
             response: {},
             session: {
@@ -137,9 +131,9 @@ describe(PageProcessorBase, () => {
         } as any;
         const gotoOptions = {};
 
-        pageNavigationHooksMock.setup((o) => o.preNavigation(crawlingContext.page)).verifiable();
+        pageNavigationHooksMock.setup((o) => o.preNavigation(context.page)).verifiable();
 
-        await pageProcessorBase.preNavigation(crawlingContext, gotoOptions);
+        await pageProcessorBase.preNavigationHook(context, gotoOptions);
         expect(gotoOptions).toEqual({ waitUntil: 'networkidle2' });
     });
 
@@ -151,29 +145,29 @@ describe(PageProcessorBase, () => {
             .setup((o) => o.userAgent())
             .returns(() => Promise.resolve(userAgent))
             .verifiable();
-        const crawlingContext: PuppeteerCrawlingContext = {
-            page: pageStub,
+        const context: Crawlee.PuppeteerCrawlingContext = {
+            page: puppeteerPageStub,
             request: requestStub,
             response: {} as Response,
         } as any;
 
-        pageNavigationHooksMock.setup(async (o) => o.postNavigation(crawlingContext.page, It.isAny(), It.isAny())).verifiable();
+        pageNavigationHooksMock.setup(async (o) => o.postNavigation(context.page, It.isAny(), It.isAny())).verifiable();
         dataBaseMock
             .setup((o) => o.addScanMetadata({ baseUrl: testUrl, basePageTitle: 'title', userAgent, browserResolution }))
             .verifiable();
 
-        await pageProcessorBase.postNavigation(crawlingContext);
+        await pageProcessorBase.postNavigationHook(context, undefined);
     });
 
-    it('postNavigationHook logs browser errors', async () => {
+    it('postNavigationHook should logs browser errors', async () => {
         pageProcessorBase.baseUrl = testUrl;
         const browserError = {
             errorType: 'HttpErrorCode',
             message: 'message',
             stack: 'stack',
         };
-        const crawlingContext: PuppeteerCrawlingContext = {
-            page: pageStub,
+        const context: Crawlee.PuppeteerCrawlingContext = {
+            page: puppeteerPageStub,
             request: requestStub,
             session: {
                 userData: [],
@@ -181,7 +175,7 @@ describe(PageProcessorBase, () => {
             response: {},
         } as any;
         pageNavigationHooksMock
-            .setup(async (nh) => nh.postNavigation(crawlingContext.page, crawlingContext.response, It.isAny()))
+            .setup(async (o) => o.postNavigation(context.page, context.response, It.isAny()))
             .returns((page, response, errorCallback) => errorCallback(browserError, undefined))
             .verifiable();
         dataBaseMock
@@ -195,13 +189,13 @@ describe(PageProcessorBase, () => {
             )
             .verifiable();
 
-        await pageProcessorBase.postNavigation(crawlingContext);
-        expect(crawlingContext.session.userData).toContainEqual({ requestId: requestStub.id, browserError: browserError });
+        await pageProcessorBase.postNavigationHook(context, undefined);
+        expect(context.session.userData).toContainEqual({ requestId: requestStub.id, browserError: browserError });
     });
 
-    it('postNavigationHook throws errors', async () => {
-        const crawlingContext: PuppeteerCrawlingContext = {
-            page: pageStub,
+    it('handle when postNavigationHook throws errors', async () => {
+        const context: Crawlee.PuppeteerCrawlingContext = {
+            page: puppeteerPageStub,
             request: requestStub,
             session: {
                 userData: [],
@@ -215,7 +209,7 @@ describe(PageProcessorBase, () => {
             stack: 'stack',
         } as BrowserError;
         pageNavigationHooksMock
-            .setup(async (o) => o.postNavigation(crawlingContext.page, It.isAny(), It.isAny()))
+            .setup(async (o) => o.postNavigation(context.page, It.isAny(), It.isAny()))
             .returns((url, page, errorCallback) => errorCallback(browserError, error))
             .verifiable();
         const scanResult = {
@@ -227,14 +221,14 @@ describe(PageProcessorBase, () => {
         dataBaseMock.setup((o) => o.addScanResult(testId, scanResult)).verifiable();
 
         try {
-            await pageProcessorBase.postNavigation(crawlingContext);
+            await pageProcessorBase.postNavigationHook(context, undefined);
             fail('postNavigation() should throw an error');
         } catch (e) {
             expect(e).toEqual(error);
         }
     });
 
-    it('pageErrorProcessor()', async () => {
+    it('failedRequestHandler', async () => {
         const expectedScanData: ScanData = {
             id: requestStub.id as string,
             url: requestStub.url,
@@ -244,27 +238,28 @@ describe(PageProcessorBase, () => {
             requestErrors: requestStub.errorMessages as string[],
             issueCount: 0,
         };
-        dataStoreMock.setup((ds) => ds.pushData(expectedScanData)).verifiable();
+        dataStoreMock.setup((o) => o.pushData(expectedScanData)).verifiable();
         setupScanErrorLogging();
+        const context = { request: requestStub } as Crawlee.PuppeteerCrawlingContext;
 
-        await pageProcessorBase.pageErrorProcessor({ request: requestStub, error } as Apify.HandleFailedRequestInput);
+        await pageProcessorBase.failedRequestHandler(context, error);
     });
 
-    it('invoke processPage()', async () => {
-        const inputs: PuppeteerHandlePageInputs = {
-            page: pageStub,
+    it('requestHandler', async () => {
+        const context: Crawlee.PuppeteerCrawlingContext = {
+            page: puppeteerPageStub,
             request: requestStub,
             session: {
                 userData: [],
             },
         } as any;
-        processPageMock.setup((pp) => pp(inputs)).verifiable();
+        processPageMock.setup((o) => o(context)).verifiable();
 
-        await pageProcessorBase.pageHandler(inputs);
+        await pageProcessorBase.requestHandler(context);
     });
 
-    it('skip invoking processPage() when web browser failed to load web page', async () => {
-        const inputs: PuppeteerHandlePageInputs = {
+    it('skip invoking requestHandler when web browser failed to load web page', async () => {
+        const context: Crawlee.PuppeteerCrawlingContext = {
             request: {
                 id: 'requestId',
             },
@@ -276,58 +271,67 @@ describe(PageProcessorBase, () => {
                 ],
             },
         } as any;
-        processPageMock.setup((pp) => pp(inputs)).verifiable(Times.never());
+        processPageMock.setup((o) => o(context)).verifiable(Times.never());
 
-        await pageProcessorBase.pageHandler(inputs);
+        await pageProcessorBase.requestHandler(context);
     });
 
-    it('processPage() logs errors', async () => {
-        const inputs: PuppeteerHandlePageInputs = {
-            page: pageStub,
+    it('requestHandler should logs errors', async () => {
+        const context: Crawlee.PuppeteerCrawlingContext = {
+            page: puppeteerPageStub,
             request: requestStub,
             session: {
                 userData: [],
             },
         } as any;
         processPageMock
-            .setup((pp) => pp(inputs))
+            .setup((o) => o(context))
             .throws(error)
             .verifiable();
         setupScanErrorLogging();
 
         try {
-            await pageProcessorBase.pageHandler(inputs);
+            await pageProcessorBase.requestHandler(context);
             fail('pageProcessor should have thrown error');
         } catch (err) {
             expect(err).toBe(error);
         }
     });
 
-    it('saveSnapshot()', async () => {
-        setupSaveSnapshot();
-        pageProcessorBase.snapshot = true;
-
-        pageProcessorBase.processPage = processPageMock.object;
-        await pageProcessorBase.saveSnapshot(pageStub, testId);
-    });
-
-    function setupSaveSnapshot(): void {
+    it('saveSnapshot', async () => {
         saveSnapshotMock.reset();
         saveSnapshotMock
-            .setup((ssm) =>
-                ssm(pageStub, {
+            .setup((o) =>
+                o(puppeteerPageStub, {
                     key: `${testId}.screenshot`,
                     saveHtml: false,
                     keyValueStoreName: 'scan-results',
                 }),
             )
             .verifiable();
-    }
+        pageProcessorBase.snapshot = true;
+
+        pageProcessorBase.processPage = processPageMock.object;
+        await pageProcessorBase.saveSnapshot(puppeteerPageStub, testId);
+    });
+
+    it('enqueueLinks', async () => {
+        const context = {
+            page: {
+                url: () => 'url',
+            },
+        } as Crawlee.PuppeteerCrawlingContext;
+        context.enqueueLinks = jest.fn().mockImplementation(() => Promise.resolve({ unprocessedRequests: [{}] }));
+        (pageProcessorBase as any).discoverLinks = true;
+
+        await pageProcessorBase.enqueueLinks(context);
+        expect(context.enqueueLinks).toHaveBeenCalledWith({ globs: discoveryPatterns });
+    });
 
     function setupScanErrorLogging(): void {
         blobStoreMock
-            .setup((bs) => bs.setValue(`${testId}.data`, { id: requestStub.id as string, url: requestStub.url, succeeded: false }))
+            .setup((o) => o.setValue(`${testId}.data`, { id: requestStub.id as string, url: requestStub.url, succeeded: false }))
             .verifiable();
-        blobStoreMock.setup((bs) => bs.setValue(`${testId}.err`, `${error.stack}`, { contentType: 'text/plain' })).verifiable();
+        blobStoreMock.setup((o) => o.setValue(`${testId}.err`, `${error.stack}`, { contentType: 'text/plain' })).verifiable();
     }
 });

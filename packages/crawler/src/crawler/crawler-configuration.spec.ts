@@ -8,7 +8,7 @@ import { IMock, Mock, Times } from 'typemoq';
 import { ApifySettings, ApifySettingsHandler } from '../apify/apify-settings';
 import { DiscoveryPatternFactory } from '../apify/discovery-patterns';
 import { CrawlerRunOptions } from '../types/crawler-run-options';
-import { RequestQueueOptions } from '../types/resource-creator';
+import { RequestQueueOptions } from '../apify/apify-resource-creator';
 import { CrawlerConfiguration } from './crawler-configuration';
 
 describe(CrawlerConfiguration, () => {
@@ -66,7 +66,7 @@ describe(CrawlerConfiguration, () => {
         const restartCrawl = true;
         const inputUrls = ['input url'];
         const baseCrawlPage = {} as Puppeteer.Page;
-        const discoveryPatterns = ['discoveryPatterh'];
+        const discoveryPatterns = ['discoveryPattern'];
         const expectedOptions: RequestQueueOptions = {
             clear: restartCrawl,
             inputUrls: inputUrls,

@@ -1,18 +1,16 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import Apify from 'apify';
-import { BrowserController, BrowserPoolOptions, PuppeteerPlugin } from 'browser-pool';
+import * as Crawlee from '@crawlee/puppeteer';
 import { inject, injectable } from 'inversify';
 import { isEmpty } from 'lodash';
-import * as Puppeteer from 'puppeteer';
+import puppeteer from 'puppeteer';
+import * as CrawleeBrowserPool from '@crawlee/browser-pool';
 import { AuthenticatorFactory } from '../authenticator/authenticator-factory';
 import { CrawlerRunOptions } from '../types/crawler-run-options';
 import { ApifyRequestQueueProvider, crawlerIocTypes, PageProcessorFactory } from '../types/ioc-types';
 import { CrawlerConfiguration } from './crawler-configuration';
 import { CrawlerFactory } from './crawler-factory';
-
-/* eslint-disable @typescript-eslint/consistent-type-assertions */
 
 @injectable()
 export class PuppeteerCrawlerEngine {
@@ -22,7 +20,6 @@ export class PuppeteerCrawlerEngine {
         @inject(CrawlerFactory) private readonly crawlerFactory: CrawlerFactory,
         @inject(AuthenticatorFactory) private readonly authenticatorFactory: AuthenticatorFactory,
         @inject(CrawlerConfiguration) private readonly crawlerConfiguration: CrawlerConfiguration,
-        private readonly puppeteer: typeof Puppeteer = Puppeteer,
     ) {}
 
     public async start(crawlerRunOptions: CrawlerRunOptions): Promise<void> {
@@ -38,14 +35,15 @@ export class PuppeteerCrawlerEngine {
             '--js-flags=--max-old-space-size=8192',
         ];
         const pageProcessor = this.pageProcessorFactory();
-        const puppeteerCrawlerOptions: Apify.PuppeteerCrawlerOptions = {
+        const puppeteerCrawlerOptions: Crawlee.PuppeteerCrawlerOptions = {
             useSessionPool: true,
-            handlePageTimeoutSecs: 300, // timeout includes all page processing activity (navigation, rendering, accessibility scan, etc.)
+            // timeout includes all page processing activity (navigation, rendering, accessibility scan, etc.)
+            requestHandlerTimeoutSecs: 180,
             requestQueue: await this.requestQueueProvider(),
-            handlePageFunction: pageProcessor.pageHandler,
-            preNavigationHooks: [pageProcessor.preNavigation],
-            postNavigationHooks: [pageProcessor.postNavigation],
-            handleFailedRequestFunction: pageProcessor.pageErrorProcessor,
+            requestHandler: pageProcessor.requestHandler,
+            failedRequestHandler: pageProcessor.failedRequestHandler,
+            preNavigationHooks: [pageProcessor.preNavigationHook],
+            postNavigationHooks: [pageProcessor.postNavigationHook],
             maxRequestsPerCrawl: this.crawlerConfiguration.maxRequestsPerCrawl(),
             launchContext: {
                 launchOptions: {
@@ -55,8 +53,8 @@ export class PuppeteerCrawlerEngine {
                         height: 1080,
                         deviceScaleFactor: 1,
                     },
-                    executablePath: crawlerRunOptions.chromePath ?? this.puppeteer.executablePath(),
-                } as Puppeteer.LaunchOptions,
+                    executablePath: crawlerRunOptions.chromePath ?? puppeteer.executablePath(),
+                },
             },
         };
 
@@ -70,11 +68,11 @@ export class PuppeteerCrawlerEngine {
             puppeteerCrawlerOptions.maxConcurrency = 1;
         }
 
-        let browserPoolOptions: BrowserPoolOptions;
+        let browserPoolOptions: CrawleeBrowserPool.BrowserPoolOptions;
         if (crawlerRunOptions.debug === true) {
             this.crawlerConfiguration.setSilentMode(false);
 
-            puppeteerCrawlerOptions.handlePageTimeoutSecs = 3600;
+            puppeteerCrawlerOptions.requestHandlerTimeoutSecs = 3600;
             puppeteerCrawlerOptions.navigationTimeoutSecs = 3600;
             puppeteerCrawlerOptions.maxConcurrency = 1;
             puppeteerCrawlerOptions.sessionPoolOptions = {
@@ -88,11 +86,11 @@ export class PuppeteerCrawlerEngine {
                 ...puppeteerDefaultOptions,
             ];
             puppeteerCrawlerOptions.browserPoolOptions = {
-                browserPlugins: [new PuppeteerPlugin(Puppeteer)],
+                browserPlugins: [new CrawleeBrowserPool.PuppeteerPlugin(puppeteer)],
                 operationTimeoutSecs: 3600,
                 closeInactiveBrowserAfterSecs: 3600,
                 maxOpenPagesPerBrowser: 1,
-            } as BrowserPoolOptions;
+            };
         }
 
         if (!isEmpty(crawlerRunOptions.serviceAccountName)) {
@@ -104,12 +102,9 @@ export class PuppeteerCrawlerEngine {
 
             puppeteerCrawlerOptions.browserPoolOptions = {
                 ...browserPoolOptions,
-                browserPlugins: [new PuppeteerPlugin(Puppeteer)],
-                postLaunchHooks: [
-                    (pageId: string, browserController: BrowserController) =>
-                        authenticator.run(browserController.browser as Puppeteer.Browser),
-                ],
-            } as BrowserPoolOptions;
+                browserPlugins: [new CrawleeBrowserPool.PuppeteerPlugin(puppeteer)],
+                postLaunchHooks: [(pageId, browserController) => authenticator.run(browserController.browser)],
+            };
         }
         const crawler = this.crawlerFactory.createPuppeteerCrawler(puppeteerCrawlerOptions);
         await crawler.run();

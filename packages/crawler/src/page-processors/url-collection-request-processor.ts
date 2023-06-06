@@ -2,33 +2,38 @@
 // Licensed under the MIT License.
 
 import path from 'path';
-import { HandleRequestInputs, HandleFailedRequestInput } from 'apify';
+import * as Crawlee from '@crawlee/puppeteer';
 import { System } from 'common';
 import { inject, injectable } from 'inversify';
 import { GlobalLogger } from 'logger';
-import { CrawlRequestProcessor } from './crawl-request-processor';
 
 /* eslint-disable no-invalid-this */
 
+export interface CrawlRequestProcessor {
+    requestHandler: Crawlee.RequestHandler;
+    failedRequestHandler: Crawlee.ErrorHandler;
+    getResults(): string[];
+}
+
 @injectable()
 export class UrlCollectionRequestProcessor implements CrawlRequestProcessor {
-    public handleRequest = async (inputs: HandleRequestInputs): Promise<void> => {
+    public requestHandler: Crawlee.PuppeteerRequestHandler = async ({ request }) => {
         // workaround to skip known non-html content to unblock WCP
         // the web page content type can be detected only after receiving HTTP Content-Type header value
         // after page content type is detected the page should be marked as non-scannable and processed respectively
         // this will be implemented in web insights service
-        const ext = path.extname(inputs.request.url);
+        const ext = path.extname(request.url);
         if (ext === '.xml') {
             return;
         }
 
-        this.urlList.push(inputs.request.url);
+        this.urlList.push(request.url);
     };
 
-    public handleRequestError = async (inputs: HandleFailedRequestInput): Promise<void> => {
+    public failedRequestHandler: Crawlee.ErrorHandler = async ({ request }, error) => {
         this.logger.logError('Error processing crawl request in UrlCollectionRequestProcessor', {
-            error: System.serializeError(inputs.error),
-            request: JSON.stringify(inputs.request),
+            error: System.serializeError(error),
+            request: JSON.stringify(request),
         });
     };
 

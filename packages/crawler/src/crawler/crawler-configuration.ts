@@ -6,7 +6,7 @@ import { isEmpty } from 'lodash';
 import { ApifySettings, ApifySettingsHandler, apifySettingsHandler } from '../apify/apify-settings';
 import { CrawlerRunOptions } from '../types/crawler-run-options';
 import { DiscoveryPatternFactory, getDiscoveryPatternForUrl } from '../apify/discovery-patterns';
-import { RequestQueueOptions } from '../types/resource-creator';
+import { RequestQueueOptions } from '../apify/apify-resource-creator';
 
 @injectable()
 export class CrawlerConfiguration {

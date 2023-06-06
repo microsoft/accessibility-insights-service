@@ -3,9 +3,9 @@
 
 import 'reflect-metadata';
 
-import Apify, { PuppeteerCrawlerOptions } from 'apify';
+import * as Crawlee from '@crawlee/puppeteer';
 import { IMock, It, Mock } from 'typemoq';
-import * as Puppeteer from 'puppeteer';
+import puppeteer, * as Puppeteer from 'puppeteer';
 import { PageProcessor, PageProcessorBase } from '../page-processors/page-processor-base';
 import { CrawlerRunOptions } from '../types/crawler-run-options';
 import { ApifyRequestQueueProvider } from '../types/ioc-types';
@@ -29,35 +29,35 @@ describe(PuppeteerCrawlerEngine, () => {
     ];
     const maxRequestsPerCrawl: number = 100;
     const pageProcessorStub: PageProcessor = {
-        pageHandler: () => null,
-        preNavigation: () => null,
-        postNavigation: () => null,
-        pageErrorProcessor: () => null,
+        requestHandler: () => null,
+        failedRequestHandler: () => null,
+        preNavigationHook: () => null,
+        postNavigationHook: () => null,
     };
 
     let pageProcessorFactoryStub: () => PageProcessorBase;
     let authenticatorFactoryMock: IMock<AuthenticatorFactory>;
     let crawlerRunOptions: CrawlerRunOptions;
     let crawlerFactoryMock: IMock<CrawlerFactory>;
-    let requestQueueStub: Apify.RequestQueue;
-    let puppeteerCrawlerMock: IMock<Apify.PuppeteerCrawler>;
+    let requestQueueStub: Crawlee.RequestQueue;
+    let puppeteerCrawlerMock: IMock<Crawlee.PuppeteerCrawler>;
     let crawlerConfigurationMock: IMock<CrawlerConfiguration>;
-    let baseCrawlerOptions: Apify.PuppeteerCrawlerOptions;
+    let puppeteerCrawlerOptions: Crawlee.PuppeteerCrawlerOptions;
     let crawlerEngine: PuppeteerCrawlerEngine;
     let requestQueueProvider: ApifyRequestQueueProvider;
     let authenticatorMock: IMock<Authenticator>;
-    let puppeteerMock: IMock<typeof Puppeteer>;
+    // let puppeteerMock: IMock<typeof Puppeteer>;
 
     beforeEach(() => {
         authenticatorFactoryMock = Mock.ofType<AuthenticatorFactory>();
         crawlerFactoryMock = Mock.ofType<CrawlerFactory>();
-        requestQueueStub = {} as Apify.RequestQueue;
-        puppeteerCrawlerMock = Mock.ofType<Apify.PuppeteerCrawler>();
+        requestQueueStub = {} as Crawlee.RequestQueue;
+        puppeteerCrawlerMock = Mock.ofType<Crawlee.PuppeteerCrawler>();
         crawlerConfigurationMock = Mock.ofType(CrawlerConfiguration);
         authenticatorMock = Mock.ofType<Authenticator>();
-        puppeteerMock = Mock.ofType<typeof Puppeteer>();
+        // puppeteerMock = Mock.ofType<typeof Puppeteer>();
 
-        puppeteerMock.setup((o) => o.executablePath()).returns(() => 'executablePath');
+        puppeteer.executablePath = () => 'executablePath';
 
         crawlerRunOptions = {
             localOutputDir: 'localOutputDir',
@@ -75,14 +75,14 @@ describe(PuppeteerCrawlerEngine, () => {
         crawlerConfigurationMock.setup((o) => o.setMemoryMBytes(crawlerRunOptions.memoryMBytes)).verifiable();
         crawlerConfigurationMock.setup((o) => o.setSilentMode(crawlerRunOptions.silentMode)).verifiable();
 
-        baseCrawlerOptions = {
+        puppeteerCrawlerOptions = {
             useSessionPool: true,
-            handlePageTimeoutSecs: 300,
+            requestHandlerTimeoutSecs: 180,
             requestQueue: requestQueueStub,
-            handlePageFunction: pageProcessorStub.pageHandler,
-            preNavigationHooks: [pageProcessorStub.preNavigation],
-            postNavigationHooks: [pageProcessorStub.postNavigation],
-            handleFailedRequestFunction: pageProcessorStub.pageErrorProcessor,
+            requestHandler: pageProcessorStub.requestHandler,
+            failedRequestHandler: pageProcessorStub.failedRequestHandler,
+            preNavigationHooks: [pageProcessorStub.preNavigationHook],
+            postNavigationHooks: [pageProcessorStub.postNavigationHook],
             maxRequestsPerCrawl: maxRequestsPerCrawl,
             launchContext: {
                 launchOptions: {
@@ -107,13 +107,12 @@ describe(PuppeteerCrawlerEngine, () => {
             crawlerFactoryMock.object,
             authenticatorFactoryMock.object,
             crawlerConfigurationMock.object,
-            puppeteerMock.object,
         );
     });
 
     it('Run crawler with settings validation', async () => {
         crawlerFactoryMock
-            .setup((o) => o.createPuppeteerCrawler(baseCrawlerOptions))
+            .setup((o) => o.createPuppeteerCrawler(puppeteerCrawlerOptions))
             .returns(() => puppeteerCrawlerMock.object)
             .verifiable();
 
@@ -124,10 +123,10 @@ describe(PuppeteerCrawlerEngine, () => {
         crawlerRunOptions.chromePath = 'chrome path';
         crawlerConfigurationMock.setup((o) => o.setChromePath(crawlerRunOptions.chromePath)).verifiable();
 
-        baseCrawlerOptions.launchContext.useChrome = true;
-        baseCrawlerOptions.launchContext.launchOptions.executablePath = crawlerRunOptions.chromePath;
+        puppeteerCrawlerOptions.launchContext.useChrome = true;
+        puppeteerCrawlerOptions.launchContext.launchOptions.executablePath = crawlerRunOptions.chromePath;
         crawlerFactoryMock
-            .setup((o) => o.createPuppeteerCrawler(baseCrawlerOptions))
+            .setup((o) => o.createPuppeteerCrawler(puppeteerCrawlerOptions))
             .returns(() => puppeteerCrawlerMock.object)
             .verifiable();
 
@@ -138,12 +137,12 @@ describe(PuppeteerCrawlerEngine, () => {
         crawlerRunOptions.singleWorker = singleWorker;
 
         if (singleWorker) {
-            baseCrawlerOptions.minConcurrency = 1;
-            baseCrawlerOptions.maxConcurrency = 1;
+            puppeteerCrawlerOptions.minConcurrency = 1;
+            puppeteerCrawlerOptions.maxConcurrency = 1;
         }
 
         crawlerFactoryMock
-            .setup((o) => o.createPuppeteerCrawler(baseCrawlerOptions))
+            .setup((o) => o.createPuppeteerCrawler(puppeteerCrawlerOptions))
             .returns(() => puppeteerCrawlerMock.object)
             .verifiable();
 
@@ -166,7 +165,7 @@ describe(PuppeteerCrawlerEngine, () => {
         crawlerFactoryMock
             .setup((o) =>
                 o.createPuppeteerCrawler(
-                    It.is<PuppeteerCrawlerOptions>((options) => {
+                    It.is<Crawlee.PuppeteerCrawlerOptions>((options) => {
                         return options.browserPoolOptions.browserPlugins[0].name === 'PuppeteerPlugin';
                     }),
                 ),

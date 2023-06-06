@@ -2,29 +2,39 @@
 // Licensed under the MIT License.
 
 import * as fs from 'fs';
-import Apify from 'apify';
 import { injectable } from 'inversify';
 import * as Puppeteer from 'puppeteer';
+import * as Crawlee from '@crawlee/puppeteer';
 import { ApifySettingsHandler, apifySettingsHandler } from '../apify/apify-settings';
-import { RequestQueueOptions, ResourceCreator } from '../types/resource-creator';
+
+/* eslint-disable security/detect-non-literal-fs-filename */
+
+export type RequestQueueOptions = {
+    clear?: boolean;
+    inputUrls?: string[];
+    page?: Puppeteer.Page;
+    discoveryPatterns?: string[]; // Only needed if page is provided
+};
+
+export interface ResourceCreator {
+    createRequestQueue(baseUrl: string, options?: RequestQueueOptions): Promise<Crawlee.RequestQueue>;
+}
 
 @injectable()
 export class ApifyResourceCreator implements ResourceCreator {
     private readonly requestQueueName = 'scanRequests';
 
     public constructor(
-        private readonly apify: typeof Apify = Apify,
         private readonly settingsHandler: ApifySettingsHandler = apifySettingsHandler,
         private readonly filesystem: typeof fs = fs,
-        private readonly enqueueLinksExt: typeof Apify.utils.enqueueLinks = Apify.utils.enqueueLinks,
     ) {}
 
-    public async createRequestQueue(baseUrl: string, options?: RequestQueueOptions): Promise<Apify.RequestQueue> {
+    public async createRequestQueue(baseUrl: string, options?: RequestQueueOptions): Promise<Crawlee.RequestQueue> {
         if (options?.clear === true) {
             this.clearRequestQueue();
         }
 
-        const requestQueue = await this.apify.openRequestQueue(this.requestQueueName);
+        const requestQueue = await Crawlee.RequestQueue.open(this.requestQueueName);
         if (baseUrl) {
             await requestQueue.addRequest({ url: baseUrl.trim() });
         }
@@ -34,9 +44,9 @@ export class ApifyResourceCreator implements ResourceCreator {
         return requestQueue;
     }
 
-    private async addUrlsFromList(requestQueue: Apify.RequestQueue, inputUrls?: string[]): Promise<void> {
+    private async addUrlsFromList(requestQueue: Crawlee.RequestQueue, inputUrls?: string[]): Promise<void> {
         if (inputUrls === undefined) {
-            return Promise.resolve();
+            return;
         }
 
         for (const url of inputUrls) {
@@ -45,7 +55,7 @@ export class ApifyResourceCreator implements ResourceCreator {
     }
 
     private async addUrlsDiscoveredInPage(
-        requestQueue: Apify.RequestQueue,
+        requestQueue: Crawlee.RequestQueue,
         page?: Puppeteer.Page,
         discoveryPatterns?: string[],
     ): Promise<void> {
@@ -53,18 +63,13 @@ export class ApifyResourceCreator implements ResourceCreator {
             return;
         }
 
-        await this.enqueueLinksExt({
-            page: page,
-            requestQueue: requestQueue,
-            pseudoUrls: discoveryPatterns?.length > 0 ? discoveryPatterns : undefined, // prevents from crawling all links
-        });
+        // TODO validate applicability of this workflow
+        throw new Error('Not implemented');
     }
 
     private clearRequestQueue(): void {
         const outputDir = this.settingsHandler.getApifySettings().APIFY_LOCAL_STORAGE_DIR;
-        // eslint-disable-next-line security/detect-non-literal-fs-filename
         if (this.filesystem.existsSync(outputDir)) {
-            // eslint-disable-next-line security/detect-non-literal-fs-filename
             this.filesystem.rmSync(outputDir, { recursive: true });
         }
     }

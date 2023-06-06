@@ -3,18 +3,17 @@
 
 import 'reflect-metadata';
 
-import Apify from 'apify';
+import * as Crawlee from '@crawlee/puppeteer';
 import { GlobalLogger } from 'logger';
 import { IMock, It, Mock } from 'typemoq';
 import { UrlCollectionRequestProcessor } from './url-collection-request-processor';
 
 describe(UrlCollectionRequestProcessor, () => {
-    const requestInputs = {
+    const context = {
         request: {
             url: 'url',
         },
-    } as Apify.HandleRequestInputs;
-
+    } as Crawlee.PuppeteerCrawlingContext;
     let loggerMock: IMock<GlobalLogger>;
     let testSubject: UrlCollectionRequestProcessor;
 
@@ -23,45 +22,46 @@ describe(UrlCollectionRequestProcessor, () => {
         testSubject = new UrlCollectionRequestProcessor(loggerMock.object);
     });
 
-    it('handleRequest adds to UrlList', async () => {
-        await testSubject.handleRequest(requestInputs);
+    it('requestHandler adds to UrlList', async () => {
+        await testSubject.requestHandler(context);
 
-        expect(await testSubject.getResults()).toEqual(['url']);
+        expect(testSubject.getResults()).toEqual(['url']);
     });
 
-    it('handleRequest adds multiple URLs to list', async () => {
-        const requestInputs2 = {
+    it('requestHandler adds multiple URLs to list', async () => {
+        const context2 = {
             request: {
                 url: 'url2',
             },
-        } as Apify.HandleRequestInputs;
+        } as Crawlee.PuppeteerCrawlingContext;
 
-        await testSubject.handleRequest(requestInputs);
-        await testSubject.handleRequest(requestInputs2);
+        await testSubject.requestHandler(context);
+        await testSubject.requestHandler(context2);
 
-        expect(await testSubject.getResults()).toEqual(['url', 'url2']);
+        expect(testSubject.getResults()).toEqual(['url', 'url2']);
     });
 
-    it('handleRequest adds only html links to list', async () => {
-        const requestInputs2 = {
+    it('requestHandler adds only html links to list', async () => {
+        const context2 = {
             request: {
                 url: 'url.xml',
             },
-        } as Apify.HandleRequestInputs;
-        await testSubject.handleRequest(requestInputs);
-        await testSubject.handleRequest(requestInputs2);
+        } as Crawlee.PuppeteerCrawlingContext;
+        await testSubject.requestHandler(context);
+        await testSubject.requestHandler(context2);
 
-        expect(await testSubject.getResults()).toEqual(['url']);
+        expect(testSubject.getResults()).toEqual(['url']);
     });
 
     it('handleFailedRequest logs error', async () => {
         const requestInputWithError = {
-            request: requestInputs.request,
-            error: new Error('error'),
-        };
+            request: {
+                url: '',
+            },
+        } as Crawlee.PuppeteerCrawlingContext;
         loggerMock.setup((l) => l.logError(It.isAny(), It.isAny())).verifiable();
 
-        await testSubject.handleRequestError(requestInputWithError as Apify.HandleFailedRequestInput);
+        await testSubject.failedRequestHandler(requestInputWithError, new Error('error'));
 
         loggerMock.verifyAll();
     });

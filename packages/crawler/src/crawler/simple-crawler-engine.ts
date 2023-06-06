@@ -2,10 +2,10 @@
 // Licensed under the MIT License.
 
 import { inject, injectable } from 'inversify';
-import Apify from 'apify';
+import * as Crawlee from '@crawlee/puppeteer';
 import { ApifyRequestQueueProvider, crawlerIocTypes } from '../types/ioc-types';
-import { CrawlRequestProcessor } from '../page-processors/crawl-request-processor';
 import { CrawlerRunOptions } from '..';
+import { CrawlRequestProcessor } from '../page-processors/url-collection-request-processor';
 import { CrawlerEngine } from './crawler-engine';
 import { CrawlerFactory } from './crawler-factory';
 import { CrawlerConfiguration } from './crawler-configuration';
@@ -27,11 +27,11 @@ export class SimpleCrawlerEngine implements CrawlerEngine<string[]> {
 
         const requestQueue = await this.requestQueueProvider();
 
-        const basicCrawlerOptions: Apify.BasicCrawlerOptions = {
-            handleRequestTimeoutSecs: 300,
+        const basicCrawlerOptions: Crawlee.BasicCrawlerOptions = {
+            handleRequestTimeoutSecs: 180,
             requestQueue: requestQueue,
-            handleRequestFunction: this.requestProcessor.handleRequest,
-            handleFailedRequestFunction: this.requestProcessor.handleRequestError,
+            requestHandler: this.requestProcessor.requestHandler,
+            failedRequestHandler: this.requestProcessor.failedRequestHandler,
             maxRequestsPerCrawl: this.crawlerConfiguration.maxRequestsPerCrawl(),
             useSessionPool: true,
         };

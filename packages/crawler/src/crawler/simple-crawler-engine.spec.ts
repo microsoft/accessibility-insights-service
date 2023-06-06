@@ -3,12 +3,12 @@
 
 import 'reflect-metadata';
 
-import Apify from 'apify';
 import { Page } from 'puppeteer';
 import { IMock, It, Mock } from 'typemoq';
-import { CrawlRequestProcessor } from '../page-processors/crawl-request-processor';
+import * as Crawlee from '@crawlee/puppeteer';
 import { CrawlerRunOptions } from '../types/crawler-run-options';
 import { ApifyRequestQueueProvider } from '../types/ioc-types';
+import { CrawlRequestProcessor } from '../page-processors/url-collection-request-processor';
 import { CrawlerConfiguration } from './crawler-configuration';
 import { CrawlerFactory } from './crawler-factory';
 import { SimpleCrawlerEngine } from './simple-crawler-engine';
@@ -17,9 +17,8 @@ describe(SimpleCrawlerEngine, () => {
     let requestQueueProviderMock: IMock<ApifyRequestQueueProvider>;
     let crawlerFactoryMock: IMock<CrawlerFactory>;
     let crawlerConfigurationMock: IMock<CrawlerConfiguration>;
-    let requestQueueStub: Apify.RequestQueue;
-    let basicCrawlerMock: IMock<Apify.BasicCrawler>;
-
+    let requestQueueStub: Crawlee.RequestQueue;
+    let basicCrawlerMock: IMock<Crawlee.BasicCrawler>;
     let testSubject: SimpleCrawlerEngine;
     let crawlerRunOptions: CrawlerRunOptions;
 
@@ -29,17 +28,17 @@ describe(SimpleCrawlerEngine, () => {
     const pageStub = {} as Page;
     const crawlResults = ['url1', 'url2'];
     const requestProcessorStub = {
-        handleRequest: () => null,
-        handleRequestError: () => null,
+        requestHandler: () => null,
+        failedRequestHandler: () => null,
         getResults: () => crawlResults,
     } as CrawlRequestProcessor;
 
     beforeEach(() => {
-        requestQueueStub = {} as Apify.RequestQueue;
+        requestQueueStub = {} as Crawlee.RequestQueue;
         requestQueueProviderMock = Mock.ofInstance(() => null);
         crawlerFactoryMock = Mock.ofType<CrawlerFactory>();
         crawlerConfigurationMock = Mock.ofType<CrawlerConfiguration>();
-        basicCrawlerMock = Mock.ofType<Apify.BasicCrawler>();
+        basicCrawlerMock = Mock.ofType<Crawlee.BasicCrawler>();
 
         testSubject = new SimpleCrawlerEngine(
             requestQueueProviderMock.object,
@@ -121,9 +120,9 @@ describe(SimpleCrawlerEngine, () => {
         crawlerConfigurationMock.setup((cc) => cc.maxRequestsPerCrawl()).returns(() => maxRequestsPerCrawl);
     }
 
-    function getCrawlerOptions(debug: boolean, singleWorker: boolean): Partial<Apify.BasicCrawlerOptions> {
-        const options: Partial<Apify.BasicCrawlerOptions> = {
-            handleRequestTimeoutSecs: 300,
+    function getCrawlerOptions(debug: boolean, singleWorker: boolean): Partial<Crawlee.BasicCrawlerOptions> {
+        const options: Partial<Crawlee.BasicCrawlerOptions> = {
+            handleRequestTimeoutSecs: 180,
             requestQueue: requestQueueStub,
             maxRequestsPerCrawl: maxRequestsPerCrawl,
         };
