@@ -34,6 +34,8 @@ export interface SessionData {
     browserError: BrowserError;
 }
 
+export type PageProcessorFactory = () => PageProcessorBase;
+
 @injectable()
 export abstract class PageProcessorBase implements PageProcessor {
     protected readonly baseUrl: string;
@@ -172,8 +174,11 @@ export abstract class PageProcessorBase implements PageProcessor {
             return;
         }
 
-        const enqueued = await context.enqueueLinks({ globs: this.discoveryPatterns?.length > 0 ? this.discoveryPatterns : undefined });
-        console.log(`Discovered ${enqueued.unprocessedRequests.length} new links on page ${context.page.url()}`);
+        const enqueued = await context.enqueueLinks({
+            // eslint-disable-next-line security/detect-non-literal-regexp
+            regexps: this.discoveryPatterns?.length > 0 ? this.discoveryPatterns.map((p) => new RegExp(p)) : undefined,
+        });
+        console.log(`Discovered ${enqueued.processedRequests.length} new links on page ${context.page.url()}`);
     }
 
     protected async pushScanData(scanData: PartialScanData): Promise<void> {

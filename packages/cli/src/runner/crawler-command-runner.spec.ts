@@ -3,7 +3,7 @@
 
 import 'reflect-metadata';
 
-import * as fs from 'fs';
+import fs from 'fs';
 import { CrawlerRunOptions } from 'accessibility-insights-crawler';
 import { IMock, It, Mock, Times } from 'typemoq';
 import * as MockDate from 'mockdate';
@@ -32,7 +32,7 @@ describe('CrawlerCommandRunner', () => {
     let consolidatedReportGeneratorMock: IMock<ConsolidatedReportGenerator>;
     let baselineOptionsBuilderMock: IMock<BaselineOptionsBuilder>;
     let baselineFileUpdaterMock: IMock<BaselineFileUpdater>;
-    let fsMock: IMock<typeof fs>;
+    let fileSystemMock: IMock<typeof fs>;
     let reportNameGeneratorMock: IMock<ReportNameGenerator>;
     let testSubject: CrawlerCommandRunner;
     let stubCombinedScanResults: CombinedScanResult;
@@ -68,9 +68,9 @@ describe('CrawlerCommandRunner', () => {
         baselineOptionsBuilderMock = Mock.ofType<BaselineOptionsBuilder>();
         baselineFileUpdaterMock = Mock.ofType<BaselineFileUpdater>();
         reportNameGeneratorMock = Mock.ofType(ReportNameGenerator);
-        fsMock = Mock.ofInstance(fs);
+        fileSystemMock = Mock.ofInstance(fs);
 
-        fsMock
+        fileSystemMock
             .setup((o) => o.existsSync(scanArguments.output))
             .returns(() => false)
             .verifiable();
@@ -94,7 +94,7 @@ describe('CrawlerCommandRunner', () => {
             baselineOptionsBuilderMock.object,
             baselineFileUpdaterMock.object,
             reportNameGeneratorMock.object,
-            fsMock.object,
+            fileSystemMock.object,
             stdoutWriter,
         );
     });
@@ -105,12 +105,12 @@ describe('CrawlerCommandRunner', () => {
         outputFileWriterMock.verifyAll();
         consolidatedReportGeneratorMock.verifyAll();
         reportNameGeneratorMock.verifyAll();
-        fsMock.verifyAll();
+        fileSystemMock.verifyAll();
     });
 
     it('skip run when last scan data persisted', async () => {
-        fsMock.reset();
-        fsMock
+        fileSystemMock.reset();
+        fileSystemMock
             .setup((o) => o.existsSync(scanArguments.output))
             .returns(() => true)
             .verifiable();
@@ -132,8 +132,8 @@ describe('CrawlerCommandRunner', () => {
         scanArguments = { url: testUrl, output: './dir', restart: true };
         crawlerOptions.restartCrawl = true;
 
-        fsMock.reset();
-        fsMock
+        fileSystemMock.reset();
+        fileSystemMock
             .setup((o) => o.existsSync(scanArguments.output))
             .returns(() => true)
             .verifiable();
@@ -158,8 +158,8 @@ describe('CrawlerCommandRunner', () => {
 
         scanArguments = { url: testUrl, output: './dir', continue: true };
 
-        fsMock.reset();
-        fsMock
+        fileSystemMock.reset();
+        fileSystemMock
             .setup((o) => o.existsSync(scanArguments.output))
             .returns(() => true)
             .verifiable();

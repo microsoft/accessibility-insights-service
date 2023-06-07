@@ -3,25 +3,25 @@
 
 import 'reflect-metadata';
 
-import * as fs from 'fs';
+import fs from 'fs';
 import { IMock, It, Mock, Times } from 'typemoq';
 import * as Crawlee from '@crawlee/puppeteer';
-import { apifySettingsHandler, ApifySettingsHandler } from '../apify/apify-settings';
 import { getPromisableDynamicMock } from '../test-utilities/promisable-mock';
-import { ApifyResourceCreator } from './apify-resource-creator';
+import { apifySettingsHandler, ApifySettingsHandler } from './apify-settings';
+import { ApifyRequestQueueCreator } from './apify-request-queue-creator';
 
-describe(ApifyResourceCreator, () => {
+describe(ApifyRequestQueueCreator, () => {
     let settingsHandlerMock: IMock<typeof apifySettingsHandler>;
-    let fsMock: IMock<typeof fs>;
+    let fileSystemMock: IMock<typeof fs>;
     let queueMock: IMock<Crawlee.RequestQueue>;
-    let apifyResourceCreator: ApifyResourceCreator;
+    let apifyResourceCreator: ApifyRequestQueueCreator;
 
     const baseUrl = 'url';
     const requestQueueName = 'scanRequests';
 
     beforeEach(() => {
         settingsHandlerMock = Mock.ofType<ApifySettingsHandler>();
-        fsMock = Mock.ofType<typeof fs>();
+        fileSystemMock = Mock.ofType<typeof fs>();
         queueMock = getPromisableDynamicMock(Mock.ofType<Crawlee.RequestQueue>());
 
         Crawlee.RequestQueue.open = jest.fn().mockImplementation(() => Promise.resolve(queueMock.object));
@@ -30,19 +30,19 @@ describe(ApifyResourceCreator, () => {
             .returns(() => Promise.resolve(undefined))
             .verifiable();
 
-        apifyResourceCreator = new ApifyResourceCreator(settingsHandlerMock.object, fsMock.object);
+        apifyResourceCreator = new ApifyRequestQueueCreator(settingsHandlerMock.object, fileSystemMock.object);
     });
 
     afterEach(() => {
         settingsHandlerMock.verifyAll();
-        fsMock.verifyAll();
+        fileSystemMock.verifyAll();
         queueMock.verifyAll();
         expect(Crawlee.RequestQueue.open).toBeCalledWith(requestQueueName);
     });
 
     describe('createRequestQueue', () => {
         it('with clear=false', async () => {
-            fsMock.setup((o) => o.rmSync(It.isAny(), It.isAny())).verifiable(Times.never());
+            fileSystemMock.setup((o) => o.rmSync(It.isAny(), It.isAny())).verifiable(Times.never());
 
             const queue = await apifyResourceCreator.createRequestQueue(baseUrl);
             expect(queue).toBe(queueMock.object);
@@ -84,9 +84,9 @@ describe(ApifyResourceCreator, () => {
         settingsHandlerMock
             .setup((o) => o.getApifySettings())
             .returns(() => {
-                return { APIFY_LOCAL_STORAGE_DIR: localStorageDir };
+                return { CRAWLEE_STORAGE_DIR: localStorageDir };
             });
-        fsMock.setup((o) => o.existsSync(localStorageDir)).returns(() => dirExists);
-        fsMock.setup((o) => o.rmSync(localStorageDir, { recursive: true })).verifiable(dirExists ? Times.once() : Times.never());
+        fileSystemMock.setup((o) => o.existsSync(localStorageDir)).returns(() => dirExists);
+        fileSystemMock.setup((o) => o.rmSync(localStorageDir, { recursive: true })).verifiable(dirExists ? Times.once() : Times.never());
     }
 });

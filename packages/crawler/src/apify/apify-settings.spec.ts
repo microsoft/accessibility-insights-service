@@ -6,9 +6,9 @@ import { ApifySettings, apifySettingsHandler } from './apify-settings';
 
 describe('Apify settings', () => {
     const defaultEnv: ApifySettings = {
-        APIFY_HEADLESS: '',
-        APIFY_LOCAL_STORAGE_DIR: '',
-        APIFY_CHROME_EXECUTABLE_PATH: '',
+        CRAWLEE_HEADLESS: '',
+        CRAWLEE_STORAGE_DIR: '',
+        CRAWLEE_CHROME_EXECUTABLE_PATH: '',
     };
 
     beforeEach(() => {
@@ -21,8 +21,8 @@ describe('Apify settings', () => {
 
     it('sets env vars', () => {
         const overrideSettings: ApifySettings = {
-            APIFY_HEADLESS: '0',
-            APIFY_LOCAL_STORAGE_DIR: 'local storage dir',
+            CRAWLEE_HEADLESS: '0',
+            CRAWLEE_STORAGE_DIR: 'local storage dir',
         };
 
         verifyEnvVarsSet(defaultEnv);
@@ -35,13 +35,13 @@ describe('Apify settings', () => {
     it('does not override setting if undefined', () => {
         const presetLocalStorageDir = 'local storage dir';
         const expectedEnvVars: ApifySettings = {
-            APIFY_LOCAL_STORAGE_DIR: presetLocalStorageDir,
+            CRAWLEE_STORAGE_DIR: presetLocalStorageDir,
         };
         const settings: ApifySettings = {
-            APIFY_LOCAL_STORAGE_DIR: undefined,
+            CRAWLEE_STORAGE_DIR: undefined,
         };
 
-        process.env.APIFY_LOCAL_STORAGE_DIR = presetLocalStorageDir;
+        process.env.CRAWLEE_STORAGE_DIR = presetLocalStorageDir;
         verifyEnvVarsSet(expectedEnvVars);
 
         apifySettingsHandler.setApifySettings(settings);

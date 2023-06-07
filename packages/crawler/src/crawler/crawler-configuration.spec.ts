@@ -8,7 +8,7 @@ import { IMock, Mock, Times } from 'typemoq';
 import { ApifySettings, ApifySettingsHandler } from '../apify/apify-settings';
 import { DiscoveryPatternFactory } from '../apify/discovery-patterns';
 import { CrawlerRunOptions } from '../types/crawler-run-options';
-import { RequestQueueOptions } from '../apify/apify-resource-creator';
+import { RequestQueueOptions } from '../apify/apify-request-queue-creator';
 import { CrawlerConfiguration } from './crawler-configuration';
 
 describe(CrawlerConfiguration, () => {
@@ -240,31 +240,31 @@ describe(CrawlerConfiguration, () => {
 
         beforeEach(() => {
             existingSettings = {
-                APIFY_HEADLESS: prevApifyHeadless,
-                APIFY_LOCAL_STORAGE_DIR: prevApifyStorageDir,
-                APIFY_CHROME_EXECUTABLE_PATH: prevChromePath,
+                CRAWLEE_HEADLESS: prevApifyHeadless,
+                CRAWLEE_STORAGE_DIR: prevApifyStorageDir,
+                CRAWLEE_CHROME_EXECUTABLE_PATH: prevChromePath,
             };
             apifySettingsHandlerMock.setup((ash) => ash.getApifySettings()).returns(() => existingSettings);
         });
 
-        it('setDefaultApifySettings does not override existing APIFY_LOCAL_STORAGE_DIR', () => {
+        it('setDefaultApifySettings does not override existing CRAWLEE_STORAGE_DIR', () => {
             const expectedSettings = {
-                APIFY_HEADLESS: defaultApifyHeadless,
-                APIFY_LOCAL_STORAGE_DIR: prevApifyStorageDir,
+                CRAWLEE_HEADLESS: defaultApifyHeadless,
+                CRAWLEE_STORAGE_DIR: prevApifyStorageDir,
             };
             apifySettingsHandlerMock.setup((ash) => ash.setApifySettings(expectedSettings)).verifiable();
 
             crawlerConfiguration.setDefaultApifySettings();
         });
 
-        it('setDefaultApifySettings sets APIFY_LOCAL_STORAGE_DIR, APIFY_HEADLESS and APIFY_CHROME_EXECUTABLE_PATH', () => {
+        it('setDefaultApifySettings sets CRAWLEE_STORAGE_DIR, CRAWLEE_HEADLESS and CRAWLEE_CHROME_EXECUTABLE_PATH', () => {
             const expectedSettings = {
-                APIFY_HEADLESS: defaultApifyHeadless,
-                APIFY_LOCAL_STORAGE_DIR: defaultApifyStorageDir,
+                CRAWLEE_HEADLESS: defaultApifyHeadless,
+                CRAWLEE_STORAGE_DIR: defaultApifyStorageDir,
             };
             apifySettingsHandlerMock.setup((ash) => ash.setApifySettings(expectedSettings)).verifiable();
-            existingSettings.APIFY_LOCAL_STORAGE_DIR = undefined;
-            existingSettings.APIFY_HEADLESS = undefined;
+            existingSettings.CRAWLEE_STORAGE_DIR = undefined;
+            existingSettings.CRAWLEE_HEADLESS = undefined;
 
             crawlerConfiguration.setDefaultApifySettings();
         });
@@ -272,7 +272,7 @@ describe(CrawlerConfiguration, () => {
         it('setLocalOutputDir', () => {
             const outputDir = 'localOutputDir';
             const expectedSettings = {
-                APIFY_LOCAL_STORAGE_DIR: outputDir,
+                CRAWLEE_STORAGE_DIR: outputDir,
             };
             apifySettingsHandlerMock.setup((ash) => ash.setApifySettings(expectedSettings)).verifiable();
 
@@ -282,7 +282,7 @@ describe(CrawlerConfiguration, () => {
         it('setMemoryMBytes', () => {
             const memoryMBytes = 1024;
             const expectedSettings = {
-                APIFY_MEMORY_MBYTES: `${memoryMBytes}`,
+                CRAWLEE_MEMORY_MBYTES: `${memoryMBytes}`,
             };
             apifySettingsHandlerMock.setup((ash) => ash.setApifySettings(expectedSettings)).verifiable();
 
@@ -292,7 +292,7 @@ describe(CrawlerConfiguration, () => {
         it('setChromePath', () => {
             const chromePath = 'new chrome path';
             const expectedSettings = {
-                APIFY_CHROME_EXECUTABLE_PATH: chromePath,
+                CRAWLEE_CHROME_EXECUTABLE_PATH: chromePath,
             };
             apifySettingsHandlerMock.setup((ash) => ash.setApifySettings(expectedSettings)).verifiable();
 
@@ -302,7 +302,7 @@ describe(CrawlerConfiguration, () => {
         it('setSilentMode', () => {
             const silentMode = false;
             const expectedSettings = {
-                APIFY_HEADLESS: '0',
+                CRAWLEE_HEADLESS: '0',
             };
             apifySettingsHandlerMock.setup((ash) => ash.setApifySettings(expectedSettings)).verifiable();
 

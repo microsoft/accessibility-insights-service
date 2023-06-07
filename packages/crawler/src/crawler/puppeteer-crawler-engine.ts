@@ -8,7 +8,9 @@ import puppeteer from 'puppeteer';
 import * as CrawleeBrowserPool from '@crawlee/browser-pool';
 import { AuthenticatorFactory } from '../authenticator/authenticator-factory';
 import { CrawlerRunOptions } from '../types/crawler-run-options';
-import { ApifyRequestQueueProvider, crawlerIocTypes, PageProcessorFactory } from '../types/ioc-types';
+import { crawlerIocTypes } from '../types/ioc-types';
+import { PageProcessorFactory } from '../page-processors/page-processor-base';
+import { ApifyRequestQueueProvider } from '../apify/apify-request-queue-creator';
 import { CrawlerConfiguration } from './crawler-configuration';
 import { CrawlerFactory } from './crawler-factory';
 

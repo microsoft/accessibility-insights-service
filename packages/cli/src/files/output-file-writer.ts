@@ -1,14 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import * as fs from 'fs';
+import fs from 'fs';
+import path from 'path';
 import filenamifyCombined from 'filenamify';
 import { injectable } from 'inversify';
 import normalizePath from 'normalize-path';
 import { ensureDirectory } from 'common';
 
 /* eslint-disable @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires */
-const path = require('path');
 const filenamifyUrl = require('filenamify-url');
 
 /* eslint-disable security/detect-non-literal-fs-filename */
@@ -16,8 +16,8 @@ const filenamifyUrl = require('filenamify-url');
 @injectable()
 export class OutputFileWriter {
     constructor(
-        private readonly fileSystemObj: typeof fs = fs,
-        private readonly pathObj = path,
+        private readonly fileSystem: typeof fs = fs,
+        private readonly fileSystemPath = path,
         private readonly ensureDirectoryFunc: typeof ensureDirectory = ensureDirectory,
     ) {}
 
@@ -33,26 +33,26 @@ export class OutputFileWriter {
     }
 
     public writeToDirectoryWithOriginalFilename(directory: string, originalFilePath: string, content: string): string {
-        const originalFileName = this.pathObj.basename(originalFilePath);
+        const originalFileName = this.fileSystemPath.basename(originalFilePath);
 
         return this.writeToDirectoryWithPreSanitizedFilename(directory, originalFileName, content);
     }
 
     // Returns a normalized, absolute version of the original filePath
     public writeToFile(filePath: string, content: string): string {
-        const normalizedPath = normalizePath(this.pathObj.resolve(filePath));
-        const dirName = this.pathObj.dirname(normalizedPath);
+        const normalizedPath = normalizePath(this.fileSystemPath.resolve(filePath));
+        const dirName = this.fileSystemPath.dirname(normalizedPath);
         this.ensureDirectoryFunc(dirName);
 
-        this.fileSystemObj.writeFileSync(normalizedPath, content);
+        this.fileSystem.writeFileSync(normalizedPath, content);
 
         return normalizedPath;
     }
 
     private writeToDirectoryWithPreSanitizedFilename(directory: string, fileName: string, content: string): string {
         const normalizedDirectory = this.ensureDirectoryFunc(directory);
-        const filePath = normalizePath(this.pathObj.resolve(normalizedDirectory, fileName));
-        this.fileSystemObj.writeFileSync(filePath, content);
+        const filePath = normalizePath(this.fileSystemPath.resolve(normalizedDirectory, fileName));
+        this.fileSystem.writeFileSync(filePath, content);
 
         return filePath;
     }

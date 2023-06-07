@@ -8,7 +8,7 @@ import { AzureActiveDirectoryAuthentication } from './azure-active-directory-aut
 @injectable()
 export class AuthenticatorFactory {
     public createAuthenticator(accountName: string, accountPassword: string, authType: string): Authenticator {
-        switch (authType) {
+        switch (authType?.toUpperCase()) {
             case 'AAD':
                 return new Authenticator(new AzureActiveDirectoryAuthentication(accountName, accountPassword));
             default:

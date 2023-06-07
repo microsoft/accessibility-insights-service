@@ -14,7 +14,7 @@ describe(getDiscoveryPatternForUrl, () => {
     });
 
     it('Creates discovery pattern for url', () => {
-        const expectedPattern = `http[s?]://${host}${path}[.*]`;
+        const expectedPattern = `http(s?)://${host}${path}(.*)`;
 
         const actualPattern = getDiscoveryPatternForUrl(url);
 

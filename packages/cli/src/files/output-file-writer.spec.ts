@@ -3,7 +3,7 @@
 
 import 'reflect-metadata';
 
-import * as fs from 'fs';
+import fs from 'fs';
 import path from 'path';
 import { IMock, Mock, MockBehavior, Times } from 'typemoq';
 import { ensureDirectory } from 'common';
@@ -15,20 +15,20 @@ const filenamifyUrl = require('filenamify-url');
 /* eslint-disable no-empty,@typescript-eslint/no-empty-function, @typescript-eslint/consistent-type-assertions */
 
 describe('OutputFileWriter', () => {
-    let fsMock: IMock<typeof fs>;
+    let fileSystemMock: IMock<typeof fs>;
     let pathMock: IMock<typeof path>;
     let ensureDirectoryMock: IMock<typeof ensureDirectory>;
     let testSubject: OutputFileWriter;
 
     beforeEach(() => {
-        fsMock = Mock.ofInstance(fs, MockBehavior.Strict);
+        fileSystemMock = Mock.ofInstance(fs, MockBehavior.Strict);
         pathMock = Mock.ofInstance(path, MockBehavior.Strict);
         ensureDirectoryMock = Mock.ofInstance(() => null);
-        testSubject = new OutputFileWriter(fsMock.object, pathMock.object, ensureDirectoryMock.object);
+        testSubject = new OutputFileWriter(fileSystemMock.object, pathMock.object, ensureDirectoryMock.object);
     });
 
     afterEach(() => {
-        fsMock.verifyAll();
+        fileSystemMock.verifyAll();
         pathMock.verifyAll();
         ensureDirectoryMock.verifyAll();
     });
@@ -52,7 +52,7 @@ describe('OutputFileWriter', () => {
                 .setup((ed) => ed(directory))
                 .returns(() => expectedDirectory)
                 .verifiable();
-            fsMock
+            fileSystemMock
                 .setup((fsm) => fsm.writeFileSync(reportFilePath, content))
                 .returns(() => {})
                 .verifiable(Times.once());
@@ -77,7 +77,7 @@ describe('OutputFileWriter', () => {
                 .setup((ed) => ed(directory))
                 .returns(() => directory)
                 .verifiable();
-            fsMock
+            fileSystemMock
                 .setup((fsm) => fsm.writeFileSync(filePathFromPathResolve, content))
                 .returns(() => {})
                 .verifiable(Times.once());
@@ -104,7 +104,7 @@ describe('OutputFileWriter', () => {
                 .setup((ed) => ed(directory))
                 .returns(() => directory)
                 .verifiable();
-            fsMock
+            fileSystemMock
                 .setup((fsm) => fsm.writeFileSync(filePathFromPathResolve, content))
                 .returns(() => {})
                 .verifiable(Times.once());
@@ -132,7 +132,7 @@ describe('OutputFileWriter', () => {
                 .setup((ed) => ed(pathDirnameOutput))
                 .returns(() => pathDirnameOutput)
                 .verifiable();
-            fsMock
+            fileSystemMock
                 .setup((fsm) => fsm.writeFileSync(pathResolveOutput, content))
                 .returns(() => {})
                 .verifiable(Times.once());

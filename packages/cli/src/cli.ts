@@ -4,9 +4,6 @@
 
 import 'reflect-metadata';
 
-// eslint-disable-next-line import/no-unassigned-import
-import './module-name-mapper';
-
 import yargs from 'yargs';
 import { System } from 'common';
 import { CliEntryPoint } from './cli-entry-point';
@@ -54,7 +51,7 @@ function getScanArguments(): ScanArguments {
             },
             output: {
                 type: 'string',
-                describe: `Output directory. Defaults to the value of APIFY_LOCAL_STORAGE_DIR, if set, or ./${defaultOutputDir}, if not.`,
+                describe: `Output directory. Defaults to the value of CRAWLEE_STORAGE_DIR, if set, or ./${defaultOutputDir}, if not.`,
                 default: defaultOutputDir,
             },
             maxUrls: {
@@ -143,7 +140,8 @@ function getScanArguments(): ScanArguments {
             },
             authType: {
                 type: 'string',
-                describe: 'Use with --serviceAccountName and --serviceAccountPassword to specify the authentication type.',
+                describe:
+                    'Use with --serviceAccountName and --serviceAccountPassword to specify the authentication type. Supported type: AAD',
             },
         })
         .check((args) => {

@@ -76,7 +76,7 @@ export class DataBase implements AsyncIterable<ScanResult> {
         return value as ScanMetadata;
     }
 
-    public async openDb(outputDir: string = process.env.APIFY_LOCAL_STORAGE_DIR): Promise<void> {
+    public async openDb(outputDir: string = process.env.CRAWLEE_STORAGE_DIR): Promise<void> {
         if (this.db === undefined) {
             this.db = this.levelupObj(
                 this.encodeObj(this.leveldownObj(`${outputDir}/database`), { valueEncoding: 'json', keyEncoding: 'json' }),

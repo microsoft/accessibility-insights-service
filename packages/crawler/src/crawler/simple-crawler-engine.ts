@@ -3,9 +3,10 @@
 
 import { inject, injectable } from 'inversify';
 import * as Crawlee from '@crawlee/puppeteer';
-import { ApifyRequestQueueProvider, crawlerIocTypes } from '../types/ioc-types';
+import { crawlerIocTypes } from '../types/ioc-types';
 import { CrawlerRunOptions } from '..';
 import { CrawlRequestProcessor } from '../page-processors/url-collection-request-processor';
+import { ApifyRequestQueueProvider } from '../apify/apify-request-queue-creator';
 import { CrawlerEngine } from './crawler-engine';
 import { CrawlerFactory } from './crawler-factory';
 import { CrawlerConfiguration } from './crawler-configuration';

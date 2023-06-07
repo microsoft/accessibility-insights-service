@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import * as fs from 'fs';
+import fs from 'fs';
 import { injectable } from 'inversify';
 import * as Puppeteer from 'puppeteer';
 import * as Crawlee from '@crawlee/puppeteer';
-import { ApifySettingsHandler, apifySettingsHandler } from '../apify/apify-settings';
+import { ApifySettingsHandler, apifySettingsHandler } from './apify-settings';
 
 /* eslint-disable security/detect-non-literal-fs-filename */
 
@@ -16,17 +16,19 @@ export type RequestQueueOptions = {
     discoveryPatterns?: string[]; // Only needed if page is provided
 };
 
+export type ApifyRequestQueueProvider = () => Promise<Crawlee.RequestQueue>;
+
 export interface ResourceCreator {
     createRequestQueue(baseUrl: string, options?: RequestQueueOptions): Promise<Crawlee.RequestQueue>;
 }
 
 @injectable()
-export class ApifyResourceCreator implements ResourceCreator {
+export class ApifyRequestQueueCreator implements ResourceCreator {
     private readonly requestQueueName = 'scanRequests';
 
     public constructor(
         private readonly settingsHandler: ApifySettingsHandler = apifySettingsHandler,
-        private readonly filesystem: typeof fs = fs,
+        private readonly fileSystem: typeof fs = fs,
     ) {}
 
     public async createRequestQueue(baseUrl: string, options?: RequestQueueOptions): Promise<Crawlee.RequestQueue> {
@@ -68,9 +70,9 @@ export class ApifyResourceCreator implements ResourceCreator {
     }
 
     private clearRequestQueue(): void {
-        const outputDir = this.settingsHandler.getApifySettings().APIFY_LOCAL_STORAGE_DIR;
-        if (this.filesystem.existsSync(outputDir)) {
-            this.filesystem.rmSync(outputDir, { recursive: true });
+        const outputDir = this.settingsHandler.getApifySettings().CRAWLEE_STORAGE_DIR;
+        if (this.fileSystem.existsSync(outputDir)) {
+            this.fileSystem.rmSync(outputDir, { recursive: true });
         }
     }
 }
