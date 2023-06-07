@@ -3,7 +3,6 @@
 
 import fs from 'fs';
 import { injectable } from 'inversify';
-import * as Puppeteer from 'puppeteer';
 import * as Crawlee from '@crawlee/puppeteer';
 import { ApifySettingsHandler, apifySettingsHandler } from './apify-settings';
 
@@ -12,8 +11,6 @@ import { ApifySettingsHandler, apifySettingsHandler } from './apify-settings';
 export type RequestQueueOptions = {
     clear?: boolean;
     inputUrls?: string[];
-    page?: Puppeteer.Page;
-    discoveryPatterns?: string[]; // Only needed if page is provided
 };
 
 export type ApifyRequestQueueProvider = () => Promise<Crawlee.RequestQueue>;
@@ -41,7 +38,6 @@ export class ApifyRequestQueueCreator implements ResourceCreator {
             await requestQueue.addRequest({ url: baseUrl.trim() });
         }
         await this.addUrlsFromList(requestQueue, options?.inputUrls);
-        await this.addUrlsDiscoveredInPage(requestQueue, options?.page, options?.discoveryPatterns);
 
         return requestQueue;
     }
@@ -54,19 +50,6 @@ export class ApifyRequestQueueCreator implements ResourceCreator {
         for (const url of inputUrls) {
             await requestQueue.addRequest({ url: url }, { forefront: true });
         }
-    }
-
-    private async addUrlsDiscoveredInPage(
-        requestQueue: Crawlee.RequestQueue,
-        page?: Puppeteer.Page,
-        discoveryPatterns?: string[],
-    ): Promise<void> {
-        if (page === undefined || discoveryPatterns === undefined) {
-            return;
-        }
-
-        // TODO validate applicability of this workflow
-        throw new Error('Not implemented');
     }
 
     private clearRequestQueue(): void {

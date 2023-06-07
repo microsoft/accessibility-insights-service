@@ -70,8 +70,6 @@ describe(CrawlerConfiguration, () => {
         const expectedOptions: RequestQueueOptions = {
             clear: restartCrawl,
             inputUrls: inputUrls,
-            page: baseCrawlPage,
-            discoveryPatterns: discoveryPatterns,
         };
 
         crawlerRunOptionsMock.setup((o) => o.restartCrawl).returns(() => restartCrawl);

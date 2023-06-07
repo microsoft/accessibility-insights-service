@@ -12,7 +12,7 @@ import { AuthenticatorFactory } from '../authenticator/authenticator-factory';
 import { Authenticator } from '../authenticator/authenticator';
 import { ApifyRequestQueueProvider } from '../apify/apify-request-queue-creator';
 import { CrawlerConfiguration } from './crawler-configuration';
-import { PuppeteerCrawlerEngine } from './puppeteer-crawler-engine';
+import { SiteCrawlerEngine } from './site-crawler-engine';
 import { CrawlerFactory } from './crawler-factory';
 
 /* eslint-disable
@@ -20,7 +20,7 @@ import { CrawlerFactory } from './crawler-factory';
    no-empty,@typescript-eslint/no-empty-function,
    @typescript-eslint/consistent-type-assertions */
 
-describe(PuppeteerCrawlerEngine, () => {
+describe(SiteCrawlerEngine, () => {
     const puppeteerDefaultOptions = [
         '--disable-dev-shm-usage',
         '--no-sandbox',
@@ -43,10 +43,9 @@ describe(PuppeteerCrawlerEngine, () => {
     let puppeteerCrawlerMock: IMock<Crawlee.PuppeteerCrawler>;
     let crawlerConfigurationMock: IMock<CrawlerConfiguration>;
     let puppeteerCrawlerOptions: Crawlee.PuppeteerCrawlerOptions;
-    let crawlerEngine: PuppeteerCrawlerEngine;
+    let crawlerEngine: SiteCrawlerEngine;
     let requestQueueProvider: ApifyRequestQueueProvider;
     let authenticatorMock: IMock<Authenticator>;
-    // let puppeteerMock: IMock<typeof Puppeteer>;
 
     beforeEach(() => {
         authenticatorFactoryMock = Mock.ofType<AuthenticatorFactory>();
@@ -55,7 +54,6 @@ describe(PuppeteerCrawlerEngine, () => {
         puppeteerCrawlerMock = Mock.ofType<Crawlee.PuppeteerCrawler>();
         crawlerConfigurationMock = Mock.ofType(CrawlerConfiguration);
         authenticatorMock = Mock.ofType<Authenticator>();
-        // puppeteerMock = Mock.ofType<typeof Puppeteer>();
 
         puppeteer.executablePath = () => 'executablePath';
 
@@ -101,13 +99,22 @@ describe(PuppeteerCrawlerEngine, () => {
 
         requestQueueProvider = () => Promise.resolve(requestQueueStub);
         pageProcessorFactoryStub = jest.fn().mockImplementation(() => pageProcessorStub as PageProcessorBase);
-        crawlerEngine = new PuppeteerCrawlerEngine(
+        crawlerEngine = new SiteCrawlerEngine(
             pageProcessorFactoryStub,
             requestQueueProvider,
             crawlerFactoryMock.object,
             authenticatorFactoryMock.object,
             crawlerConfigurationMock.object,
         );
+    });
+
+    afterEach(() => {
+        crawlerFactoryMock.verifyAll();
+        puppeteerCrawlerMock.verifyAll();
+        crawlerConfigurationMock.verifyAll();
+        authenticatorFactoryMock.verifyAll();
+        authenticatorMock.verifyAll();
+        expect(pageProcessorFactoryStub).toHaveBeenCalledTimes(1);
     });
 
     it('Run crawler with settings validation', async () => {
@@ -174,14 +181,5 @@ describe(PuppeteerCrawlerEngine, () => {
             .verifiable();
 
         await crawlerEngine.start(crawlerRunOptions);
-    });
-
-    afterEach(() => {
-        crawlerFactoryMock.verifyAll();
-        puppeteerCrawlerMock.verifyAll();
-        crawlerConfigurationMock.verifyAll();
-        authenticatorFactoryMock.verifyAll();
-        authenticatorMock.verifyAll();
-        expect(pageProcessorFactoryStub).toHaveBeenCalledTimes(1);
     });
 });

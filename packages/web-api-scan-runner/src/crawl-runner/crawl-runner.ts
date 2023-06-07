@@ -21,14 +21,8 @@ export class CrawlRunner {
     ) {}
 
     public async run(baseUrl: string, discoveryPatterns: string[], page: Puppeteer.Page): Promise<string[] | undefined> {
-        const crawler = await this.getCrawler();
-        if (crawler == null) {
-            this.logger.logInfo('No crawler instance created by crawler provider.');
-
-            return undefined;
-        }
-
         this.logger.logInfo('Starting web page crawling.');
+        const crawler = await this.getCrawler();
 
         let result: string[] = [];
         try {
@@ -50,20 +44,17 @@ export class CrawlRunner {
         this.logger.logInfo(`Crawler found ${result ? result.length : 0} urls on web page.`, {
             discoveryPatterns: JSON.stringify(discoveryPatterns),
             discoveredUrls: JSON.stringify(result),
+            crawlUrl: page.url(),
         });
 
         return result;
     }
 
     private async getCommonCrawlOptions(): Promise<Partial<CrawlerRunOptions>> {
-        const outputDir = `${this.batchConfig.taskWorkingDir}\\${this.storageDirName}`;
+        const outputDir = `${this.batchConfig.taskWorkingDir ?? __dirname}\\${this.storageDirName}`;
 
         return {
-            // defines maximum number of links to discover on a page
-            // the crawler will open only baseURL page per run
-            maxRequestsPerCrawl: 1000,
             localOutputDir: outputDir,
-            silentMode: true,
             restartCrawl: true,
         };
     }

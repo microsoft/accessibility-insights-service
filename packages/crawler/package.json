@@ -62,6 +62,9 @@
         "yargs": "^17.6.2"
     },
     "overrides": {
+        "@crawlee/browser-pool": {
+            "puppeteer": "$puppeteer"
+        },
         "@crawlee/puppeteer": {
             "puppeteer": "$puppeteer"
         }

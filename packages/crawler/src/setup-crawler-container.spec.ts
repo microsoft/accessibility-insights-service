@@ -34,7 +34,6 @@ describe(setupCloudCrawlerContainer, () => {
 
         expect(container.get(CrawlerConfiguration)).toBeDefined();
         expect(container.get(crawlerIocTypes.ApifyRequestQueueProvider)).toBeDefined();
-        expect(container.get(crawlerIocTypes.RequestProcessor)).toBeDefined();
         expect(container.get(crawlerIocTypes.CrawlerEngine)).toBeDefined();
     });
 });

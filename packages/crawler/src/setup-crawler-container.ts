@@ -6,20 +6,19 @@ import * as inversify from 'inversify';
 import { ApifyRequestQueueCreator } from './apify/apify-request-queue-creator';
 import { Crawler } from './crawler';
 import { CrawlerConfiguration } from './crawler/crawler-configuration';
-import { PuppeteerCrawlerEngine } from './crawler/puppeteer-crawler-engine';
-import { SimpleCrawlerEngine } from './crawler/simple-crawler-engine';
+import { SiteCrawlerEngine } from './crawler/site-crawler-engine';
+import { PageCrawlerEngine } from './crawler/page-crawler-engine';
 import { DataBase } from './level-storage/data-base';
 import { ClassicPageProcessor } from './page-processors/classic-page-processor';
 import { PageProcessor } from './page-processors/page-processor-base';
 import { SimulatorPageProcessor } from './page-processors/simulator-page-processor';
-import { UrlCollectionRequestProcessor } from './page-processors/url-collection-request-processor';
 import { crawlerIocTypes } from './types/ioc-types';
 
 export function setupLocalCrawlerContainer(container: inversify.Container): inversify.Container {
     container.bind(DataBase).toSelf().inSingletonScope();
     container.bind(CrawlerConfiguration).toSelf().inSingletonScope();
     container.bind(crawlerIocTypes.ReporterFactory).toConstantValue(reporterFactory);
-    container.bind(crawlerIocTypes.CrawlerEngine).to(PuppeteerCrawlerEngine);
+    container.bind(crawlerIocTypes.CrawlerEngine).to(SiteCrawlerEngine);
 
     setupSingletonProvider(crawlerIocTypes.ApifyRequestQueueProvider, container, async (context: inversify.interfaces.Context) => {
         const apifyResourceCreator = context.container.get(ApifyRequestQueueCreator);
@@ -46,7 +45,7 @@ export function setupLocalCrawlerContainer(container: inversify.Container): inve
 }
 
 export function setupCloudCrawlerContainer(container: inversify.Container): inversify.Container {
-    container.bind(crawlerIocTypes.CrawlerEngine).to(SimpleCrawlerEngine);
+    container.bind(crawlerIocTypes.CrawlerEngine).to(PageCrawlerEngine);
     container.bind(CrawlerConfiguration).toSelf().inSingletonScope();
     setupSingletonProvider(crawlerIocTypes.ApifyRequestQueueProvider, container, async (context: inversify.interfaces.Context) => {
         const apifyResourceCreator = context.container.get(ApifyRequestQueueCreator);
@@ -54,8 +53,6 @@ export function setupCloudCrawlerContainer(container: inversify.Container): inve
 
         return apifyResourceCreator.createRequestQueue(crawlerConfiguration.baseUrl(), crawlerConfiguration.requestQueueOptions());
     });
-
-    container.bind(crawlerIocTypes.RequestProcessor).to(UrlCollectionRequestProcessor);
 
     setupSingletonProvider(crawlerIocTypes.CrawlerProvider, container, async (context: inversify.interfaces.Context) => {
         return new Crawler(context.container);

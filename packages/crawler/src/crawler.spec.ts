@@ -8,20 +8,20 @@ import { IMock, Mock } from 'typemoq';
 import { CrawlerRunOptions } from './types/crawler-run-options';
 import { crawlerIocTypes } from './types/ioc-types';
 import { Crawler } from './crawler';
-import { PuppeteerCrawlerEngine } from './crawler/puppeteer-crawler-engine';
+import { SiteCrawlerEngine } from './crawler/site-crawler-engine';
 import { CrawlerConfiguration } from './crawler/crawler-configuration';
 
 describe(Crawler, () => {
     let testSubject: Crawler<void>;
     let containerMock: IMock<Container>;
     let crawlerConfigMock: IMock<CrawlerConfiguration>;
-    let crawlerEngineMock: IMock<PuppeteerCrawlerEngine>;
+    let crawlerEngineMock: IMock<SiteCrawlerEngine>;
     let containerBindMock: IMock<interfaces.BindingToSyntax<CrawlerRunOptions>>;
 
     beforeEach(() => {
         containerMock = Mock.ofType(Container);
         crawlerConfigMock = Mock.ofType(CrawlerConfiguration);
-        crawlerEngineMock = Mock.ofType(PuppeteerCrawlerEngine);
+        crawlerEngineMock = Mock.ofType(SiteCrawlerEngine);
         containerBindMock = Mock.ofType<interfaces.BindingToSyntax<CrawlerRunOptions>>();
 
         testSubject = new Crawler(containerMock.object);

@@ -41,7 +41,7 @@ describe(ApifyRequestQueueCreator, () => {
     });
 
     describe('createRequestQueue', () => {
-        it('with clear=false', async () => {
+        it('create queue', async () => {
             fileSystemMock.setup((o) => o.rmSync(It.isAny(), It.isAny())).verifiable(Times.never());
 
             const queue = await apifyResourceCreator.createRequestQueue(baseUrl);
@@ -62,7 +62,7 @@ describe(ApifyRequestQueueCreator, () => {
             expect(queue).toBe(queueMock.object);
         });
 
-        it('with input urls"', async () => {
+        it('create queue with input urls"', async () => {
             const inputUrls = ['url1', 'url2'];
 
             queueMock

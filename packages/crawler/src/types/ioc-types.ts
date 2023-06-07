@@ -3,10 +3,9 @@
 
 export const crawlerIocTypes = {
     ReporterFactory: 'ReporterFactory',
-    PageProcessorFactory: 'Factory<PageProcessor>',
-    ApifyRequestQueueProvider: 'Provider<ApifyRequestQueue>',
-    LevelUp: 'levelup.LevelUp',
+    PageProcessorFactory: 'PageProcessorFactory',
+    ApifyRequestQueueProvider: 'ApifyRequestQueueProvider',
+    LevelUp: 'LevelUp',
     CrawlerEngine: 'CrawlerEngine',
-    RequestProcessor: 'RequestProcessor',
     CrawlerProvider: 'CrawlerProvider',
 };

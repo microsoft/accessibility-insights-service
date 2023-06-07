@@ -13,9 +13,10 @@ import { PageProcessorFactory } from '../page-processors/page-processor-base';
 import { ApifyRequestQueueProvider } from '../apify/apify-request-queue-creator';
 import { CrawlerConfiguration } from './crawler-configuration';
 import { CrawlerFactory } from './crawler-factory';
+import { CrawlerEngine } from './crawler-engine';
 
 @injectable()
-export class PuppeteerCrawlerEngine {
+export class SiteCrawlerEngine implements CrawlerEngine {
     public constructor(
         @inject(crawlerIocTypes.PageProcessorFactory) private readonly pageProcessorFactory: PageProcessorFactory,
         @inject(crawlerIocTypes.ApifyRequestQueueProvider) protected readonly requestQueueProvider: ApifyRequestQueueProvider,

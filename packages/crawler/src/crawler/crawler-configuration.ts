@@ -69,8 +69,6 @@ export class CrawlerConfiguration {
         return {
             clear: this.crawlerRunOptions.restartCrawl,
             inputUrls: this.crawlerRunOptions.inputUrls,
-            page: this.crawlerRunOptions.baseCrawlPage,
-            discoveryPatterns: this.crawlerRunOptions.discoveryPatterns,
         };
     }
 
