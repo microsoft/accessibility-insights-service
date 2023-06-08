@@ -112,7 +112,7 @@ export const E2EScanFactories: E2EScanScenarioDefinitionFactory[] = [
                     webApiConfig.releaseId
                 }-deepScanDiscoveryPatterns-${Date.now()}`,
                 deepScanOptions: {
-                    discoveryPatterns: [`${baseUrl}linked1[.*]`],
+                    discoveryPatterns: [`${baseUrl}linked1(.*)`],
                 },
             },
             initialTestContextData: {
