@@ -6,63 +6,55 @@ import 'reflect-metadata';
 import { Crawler, CrawlerRunOptions } from 'accessibility-insights-crawler';
 import { GlobalLogger } from 'logger';
 import { Page } from 'puppeteer';
-import { IMock, It, Mock, MockBehavior } from 'typemoq';
+import { IMock, It, Mock } from 'typemoq';
 import { BatchConfig } from 'azure-services';
+import { getPromisableDynamicMock } from '../test-utilities/promisable-mock';
 import { CrawlRunner } from './crawl-runner';
-
-// This class exists because trying to mock a Crawler without it
-// caused an unexplained timeout while calling the real Crawler class' constructor
-class CrawlerMock extends Crawler<string[]> {
-    constructor() {
-        super(null);
-    }
-}
 
 type CrawlerProvider = () => Promise<Crawler<string[]>>;
 
+let crawlerMock: IMock<Crawler<string[]>>;
+let loggerMock: IMock<GlobalLogger>;
+let crawlerProviderMock: IMock<CrawlerProvider>;
+let crawlRunner: CrawlRunner;
+
 describe('CrawlRunner', () => {
-    const baseUrl = 'testUrl';
-    const discoveryPatterns = ['testPattern'];
-    const page = {} as Page;
+    const baseUrl = 'baseUrl';
+    const discoveryPatterns = ['discoveryPattern'];
+    const page = {
+        url: () => 'pageUrl',
+    } as Page;
     const workingDir = '/workingDir';
     const batchConfigStub = {
         taskWorkingDir: workingDir,
     } as BatchConfig;
 
-    let loggerMock: IMock<GlobalLogger>;
-
     beforeEach(() => {
-        loggerMock = Mock.ofType<GlobalLogger>(undefined, MockBehavior.Loose);
+        crawlerMock = getPromisableDynamicMock(Mock.ofType<Crawler<string[]>>());
+        loggerMock = Mock.ofType<GlobalLogger>();
+        crawlerProviderMock = Mock.ofType<CrawlerProvider>();
+        crawlerProviderMock
+            .setup((o) => o())
+            .returns(async () => crawlerMock.object)
+            .verifiable();
+
+        crawlRunner = new CrawlRunner(crawlerProviderMock.object, loggerMock.object, batchConfigStub);
     });
 
     afterEach(() => {
+        crawlerMock.verifyAll();
         loggerMock.verifyAll();
-    });
-
-    it('returns undefined when crawler provider returns null', async () => {
-        const crawlerProviderMock = createCrawlerProviderMock(null);
-        const crawlRunner = new CrawlRunner(crawlerProviderMock.object, loggerMock.object, batchConfigStub);
-
-        expect(await crawlRunner.run(baseUrl, discoveryPatterns, page)).toBeUndefined();
-
         crawlerProviderMock.verifyAll();
     });
 
     it('returns undefined if crawler throws exception', async () => {
-        const crawlerMock = Mock.ofType(CrawlerMock);
         crawlerMock
-            .setup((m) => m.crawl(It.isAny()))
+            .setup((o) => o.crawl(It.isAny()))
             .throws(Error())
             .verifiable();
-        const crawlerProviderMock = createCrawlerProviderMock(crawlerMock.object);
-        const crawlRunner = new CrawlRunner(crawlerProviderMock.object, loggerMock.object, batchConfigStub);
 
         const result = await crawlRunner.run(baseUrl, discoveryPatterns, page);
-
         expect(result).toBeUndefined();
-
-        crawlerProviderMock.verifyAll();
-        crawlerMock.verifyAll();
     });
 
     it('crawler receives expected data and run returns value from crawler', async () => {
@@ -70,38 +62,16 @@ describe('CrawlRunner', () => {
             baseUrl,
             discoveryPatterns,
             baseCrawlPage: page,
-            maxRequestsPerCrawl: 1000,
-            silentMode: true,
             restartCrawl: true,
             localOutputDir: `${workingDir}\\crawler_storage`,
         } as CrawlerRunOptions;
-
-        const expectedRetVal = ['discoveredUrl'];
-
-        const crawlerMock = Mock.ofType(CrawlerMock);
+        const expectedResult = ['discoveredUrl'];
         crawlerMock
             .setup((m) => m.crawl(expectedRunOptions))
-            .returns(async () => expectedRetVal)
+            .returns(async () => expectedResult)
             .verifiable();
 
-        const crawlerProviderMock = createCrawlerProviderMock(crawlerMock.object);
-        const crawlRunner = new CrawlRunner(crawlerProviderMock.object, loggerMock.object, batchConfigStub);
-
-        const actualRetVal = await crawlRunner.run(baseUrl, discoveryPatterns, page);
-
-        expect(actualRetVal).toBe(expectedRetVal);
-
-        crawlerProviderMock.verifyAll();
-        crawlerMock.verifyAll();
+        const actualResult = await crawlRunner.run(baseUrl, discoveryPatterns, page);
+        expect(actualResult).toBe(expectedResult);
     });
-
-    function createCrawlerProviderMock(crawler: Crawler<string[]> | null): IMock<CrawlerProvider> {
-        const crawlerProviderMock = Mock.ofType<CrawlerProvider>();
-        crawlerProviderMock
-            .setup((m) => m())
-            .returns(async () => crawler)
-            .verifiable();
-
-        return crawlerProviderMock;
-    }
 });

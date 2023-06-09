@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import * as fs from 'fs';
+import fs from 'fs';
 import { inject, injectable } from 'inversify';
 import { isEmpty } from 'lodash';
 import { ScanArguments } from '../scan-arguments';
@@ -24,7 +24,7 @@ export class CrawlerCommandRunner implements CommandRunner {
         @inject(BaselineOptionsBuilder) private readonly baselineOptionsBuilder: BaselineOptionsBuilder,
         @inject(BaselineFileUpdater) private readonly baselineFileUpdater: BaselineFileUpdater,
         @inject(ReportNameGenerator) private readonly reportNameGenerator: ReportNameGenerator,
-        private readonly filesystem: typeof fs = fs,
+        private readonly fileSystem: typeof fs = fs,
         private readonly stdoutWriter: (output: string) => void = console.log,
     ) {}
 
@@ -69,7 +69,7 @@ export class CrawlerCommandRunner implements CommandRunner {
 
     private canRunCommand(scanArguments: ScanArguments): boolean {
         // eslint-disable-next-line security/detect-non-literal-fs-filename
-        if (this.filesystem.existsSync(scanArguments.output) && !scanArguments.restart && !scanArguments.continue) {
+        if (this.fileSystem.existsSync(scanArguments.output) && !scanArguments.restart && !scanArguments.continue) {
             this.stdoutWriter(
                 'The last scan result was found on a disk. Use --continue option to continue scan for the last URL provided, or --restart option to delete the last scan result.',
             );

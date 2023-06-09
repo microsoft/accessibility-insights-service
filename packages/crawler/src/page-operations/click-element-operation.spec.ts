@@ -3,36 +3,28 @@
 
 import 'reflect-metadata';
 
-import Apify from 'apify';
-import { Page } from 'puppeteer';
-import { IMock, It, Mock } from 'typemoq';
+import * as Crawlee from '@crawlee/puppeteer';
 import { ClickElementOperation } from './click-element-operation';
 
-/* eslint-disable @typescript-eslint/no-explicit-any, no-empty,@typescript-eslint/no-empty-function */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 describe(ClickElementOperation, () => {
     let clickElementOp: ClickElementOperation;
-    let enqueueLinksByClickingElementsExtMock: IMock<typeof Apify.utils.puppeteer.enqueueLinksByClickingElements>;
-    let pageStub: Page;
 
     beforeEach(() => {
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        pageStub = {
-            url: () => 'pageUrl',
-        } as any;
-        enqueueLinksByClickingElementsExtMock = Mock.ofType<typeof Apify.utils.puppeteer.enqueueLinksByClickingElements>();
-        clickElementOp = new ClickElementOperation(enqueueLinksByClickingElementsExtMock.object);
+        clickElementOp = new ClickElementOperation();
     });
 
     it('Click', async () => {
-        enqueueLinksByClickingElementsExtMock
-            .setup((elm) => elm(It.isAny()))
-            .returns(async () => [])
-            .verifiable();
+        const context = {
+            page: {
+                url: () => 'url',
+            },
+        } as Crawlee.PuppeteerCrawlingContext;
+        const enqueueLinksByClickingElementsFn = jest.fn().mockImplementation(() => Promise.resolve());
+        context.enqueueLinksByClickingElements = enqueueLinksByClickingElementsFn;
 
-        await clickElementOp.click(pageStub, '', undefined, []);
-    });
-
-    afterEach(() => {
-        enqueueLinksByClickingElementsExtMock.verifyAll();
+        await clickElementOp.click(context, 'button', []);
+        expect(enqueueLinksByClickingElementsFn).toBeCalled();
     });
 });

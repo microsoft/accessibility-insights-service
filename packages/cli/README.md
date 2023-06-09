@@ -139,7 +139,7 @@ default: ['button']
 
 ```sh
 type: string
-describe: Output directory. Defaults to the value of APIFY_LOCAL_STORAGE_DIR, if set, or ./ai_scan_cli_output, if not, if you use the same output for different runs, an existing result might be overwritten.
+describe: Output directory. Defaults to the value of CRAWLEE_STORAGE_DIR, if set, or ./ai_scan_cli_output, if not, if you use the same output for different runs, an existing result might be overwritten.
 default: './ai_scan_cli_output'
 ```
 

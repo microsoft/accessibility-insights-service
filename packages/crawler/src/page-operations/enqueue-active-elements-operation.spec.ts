@@ -3,59 +3,61 @@
 
 import 'reflect-metadata';
 
-import Apify from 'apify';
-import { Page } from 'puppeteer';
-import { IMock, It, Mock, Times } from 'typemoq';
+import { IMock, Mock } from 'typemoq';
+import * as Crawlee from '@crawlee/puppeteer';
 import { ActiveElementsFinder } from '../browser-components/active-elements-finder';
 import { EnqueueActiveElementsOperation } from './enqueue-active-elements-operation';
 
 /* eslint-disable @typescript-eslint/no-explicit-any, no-empty,@typescript-eslint/no-empty-function */
+
 describe(EnqueueActiveElementsOperation, () => {
     let enqueueActiveElementsOp: EnqueueActiveElementsOperation;
     let activeElementFinderMock: IMock<ActiveElementsFinder>;
-    let requestQueueMock: IMock<Apify.RequestQueue>;
-    let pageStub: Page;
     const selectors: string[] = ['button'];
+    const url = 'https://localhost/';
 
     beforeEach(() => {
-        pageStub = {
-            url: () => 'pageUrl',
-        } as any;
         activeElementFinderMock = Mock.ofType<ActiveElementsFinder>();
-        requestQueueMock = Mock.ofType<Apify.RequestQueue>();
         enqueueActiveElementsOp = new EnqueueActiveElementsOperation(activeElementFinderMock.object);
     });
 
-    it('Find, active elements', async () => {
-        activeElementFinderMock
-            .setup(async (aefm) => aefm.getActiveElements(pageStub, selectors))
-            .returns(async () => [{ html: 'html', selector: 'button', hash: null }])
-            .verifiable();
-
-        requestQueueMock
-            .setup(async (rqm) => rqm.addRequest(It.isAny()))
-            .returns(async () => Promise.resolve(null))
-            .verifiable();
-
-        await enqueueActiveElementsOp.find(pageStub, selectors, requestQueueMock.object);
-    });
-
-    it('Find, No active elements', async () => {
-        activeElementFinderMock
-            .setup(async (aefm) => aefm.getActiveElements(pageStub, selectors))
-            .returns(async () => [])
-            .verifiable();
-
-        requestQueueMock
-            .setup(async (rqm) => rqm.addRequest(It.isAny()))
-            .returns(async () => Promise.resolve(null))
-            .verifiable(Times.never());
-
-        await enqueueActiveElementsOp.find(pageStub, selectors, requestQueueMock.object);
-    });
-
     afterEach(() => {
-        requestQueueMock.verifyAll();
         activeElementFinderMock.verifyAll();
+    });
+
+    it('enqueue with active elements', async () => {
+        const element = { html: 'html', selector: 'button', hash: 'hash' } as any;
+        const context = {
+            page: {
+                url: () => url,
+            },
+        } as Crawlee.PuppeteerCrawlingContext;
+
+        activeElementFinderMock
+            .setup((o) => o.getActiveElements(context.page, selectors))
+            .returns(() => Promise.resolve([element]))
+            .verifiable();
+        const enqueueLinksFn = jest.fn().mockImplementation(() => Promise.resolve());
+        context.enqueueLinks = enqueueLinksFn;
+
+        await enqueueActiveElementsOp.enqueue(context, selectors);
+        expect(enqueueLinksFn).toBeCalled();
+    });
+
+    it('do not enqueue when no active elements', async () => {
+        const context = {
+            page: {
+                url: () => url,
+            },
+        } as Crawlee.PuppeteerCrawlingContext;
+        activeElementFinderMock
+            .setup((o) => o.getActiveElements(context.page, selectors))
+            .returns(() => Promise.resolve([]))
+            .verifiable();
+        const enqueueLinksFn = jest.fn().mockImplementation(() => Promise.resolve());
+        context.enqueueLinks = enqueueLinksFn;
+
+        await enqueueActiveElementsOp.enqueue(context, selectors);
+        expect(enqueueLinksFn).not.toBeCalled();
     });
 });

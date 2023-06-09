@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import Apify from 'apify';
+import * as Crawlee from '@crawlee/puppeteer';
 import { inject, injectable } from 'inversify';
 import { PageNavigationHooks } from 'scanner-global-library';
 import { ActiveElement } from '../browser-components/active-elements-finder';
@@ -14,7 +14,6 @@ import { Operation } from '../page-operations/operation';
 import { LocalBlobStore } from '../storage/local-blob-store';
 import { LocalDataStore } from '../storage/local-data-store';
 import { BlobStore, DataStore } from '../storage/store-types';
-import { ApifyRequestQueueProvider, crawlerIocTypes } from '../types/ioc-types';
 import { PageProcessorBase } from './page-processor-base';
 
 /* eslint-disable no-invalid-this */
@@ -23,37 +22,45 @@ import { PageProcessorBase } from './page-processor-base';
 export class SimulatorPageProcessor extends PageProcessorBase {
     private readonly selectors: string[];
 
-    public processPage: Apify.PuppeteerHandlePage = async ({ page, request }) => {
-        const operation = request.userData as Operation;
-        const requestQueue = await this.requestQueueProvider();
+    public processPage: Crawlee.PuppeteerRequestHandler = async (context) => {
+        const operation = context.request.userData as Operation;
         if (operation.operationType === undefined || operation.operationType === 'no-op') {
-            console.log(`Processing page ${page.url()}`);
-            await this.enqueueLinks(page);
-            await this.enqueueActiveElementsOp.find(page, this.selectors, requestQueue);
-            const axeResults = await this.accessibilityScanOp.run(page, request.id as string, this.crawlerConfiguration.axeSourcePath());
+            console.log(`Processing page ${context.page.url()}`);
+            await this.enqueueLinks(context);
+            await this.enqueueActiveElementsOp.enqueue(context, this.selectors);
+            const axeResults = await this.accessibilityScanOp.run(
+                context.page,
+                context.request.id as string,
+                this.crawlerConfiguration.axeSourcePath(),
+            );
             const issueCount = axeResults?.violations?.length > 0 ? axeResults.violations.reduce((a, b) => a + b.nodes.length, 0) : 0;
-            await this.saveSnapshot(page, request.id as string);
-            await this.pushScanData({ succeeded: true, id: request.id as string, url: request.url, issueCount: issueCount });
-            await this.saveScanResult(request, issueCount);
+            await this.saveSnapshot(context.page, context.request.id as string);
+            await this.pushScanData({
+                succeeded: true,
+                id: context.request.id as string,
+                url: context.request.url,
+                issueCount: issueCount,
+            });
+            await this.saveScanResult(context.request, issueCount);
         } else if (operation.operationType === 'click') {
             const activeElement = operation.data as ActiveElement;
-            console.log(`Processing page ${page.url()} with simulation click on element with selector '${activeElement.selector}'`);
-            const operationResult = await this.clickElementOp.click(page, activeElement.selector, requestQueue, this.discoveryPatterns);
+            console.log(`Processing page ${context.page.url()} with simulation click on element with selector '${activeElement.selector}'`);
+            const operationResult = await this.clickElementOp.click(context, activeElement.selector, this.discoveryPatterns);
             let issueCount;
             if (operationResult.clickAction === 'page-action') {
-                await this.enqueueLinks(page);
+                await this.enqueueLinks(context);
                 const axeResults = await this.accessibilityScanOp.run(
-                    page,
-                    request.id as string,
+                    context.page,
+                    context.request.id as string,
                     this.crawlerConfiguration.axeSourcePath(),
                 );
                 issueCount = axeResults?.violations?.length > 0 ? axeResults.violations.reduce((a, b) => a + b.nodes.length, 0) : 0;
-                await this.saveSnapshot(page, request.id as string);
-                await this.saveScanResult(request, issueCount, activeElement.selector);
+                await this.saveSnapshot(context.page, context.request.id as string);
+                await this.saveScanResult(context.request, issueCount, activeElement.selector);
             }
             await this.pushScanData({
-                id: request.id as string,
-                url: request.url,
+                id: context.request.id as string,
+                url: context.request.url,
                 succeeded: true,
                 activatedElement: {
                     ...activeElement,
@@ -73,22 +80,10 @@ export class SimulatorPageProcessor extends PageProcessorBase {
         @inject(EnqueueActiveElementsOperation) protected readonly enqueueActiveElementsOp: EnqueueActiveElementsOperation,
         @inject(ClickElementOperation) protected readonly clickElementOp: ClickElementOperation,
         @inject(PageNavigationHooks) protected readonly pageNavigationHooks: PageNavigationHooks,
-        @inject(crawlerIocTypes.ApifyRequestQueueProvider) protected readonly requestQueueProvider: ApifyRequestQueueProvider,
         @inject(CrawlerConfiguration) protected readonly crawlerConfiguration: CrawlerConfiguration,
-        protected readonly enqueueLinksExt: typeof Apify.utils.enqueueLinks = Apify.utils.enqueueLinks,
-        protected readonly saveSnapshotExt: typeof Apify.utils.puppeteer.saveSnapshot = Apify.utils.puppeteer.saveSnapshot,
+        protected readonly saveSnapshotExt: typeof Crawlee.puppeteerUtils.saveSnapshot = Crawlee.puppeteerUtils.saveSnapshot,
     ) {
-        super(
-            accessibilityScanOp,
-            dataStore,
-            blobStore,
-            dataBase,
-            pageNavigationHooks,
-            requestQueueProvider,
-            crawlerConfiguration,
-            enqueueLinksExt,
-            saveSnapshotExt,
-        );
+        super(accessibilityScanOp, dataStore, blobStore, dataBase, pageNavigationHooks, crawlerConfiguration, saveSnapshotExt);
         this.selectors = this.crawlerConfiguration.selectors();
     }
 }

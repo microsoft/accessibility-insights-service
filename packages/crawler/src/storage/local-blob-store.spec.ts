@@ -3,83 +3,51 @@
 
 import 'reflect-metadata';
 
-import Apify from 'apify';
-import { IMock, Mock, MockBehavior, Times } from 'typemoq';
+import * as Crawlee from '@crawlee/puppeteer';
+import { IMock, Mock } from 'typemoq';
+import { getPromisableDynamicMock } from '../test-utilities/promisable-mock';
 import { LocalBlobStore } from './local-blob-store';
 import { scanResultStorageName } from './store-types';
 
-/* eslint-disable @typescript-eslint/no-explicit-any, no-empty,@typescript-eslint/no-empty-function */
 describe(LocalBlobStore, () => {
-    let keyValueStoreMock: IMock<Apify.KeyValueStore>;
+    let keyValueStoreMock: IMock<Crawlee.KeyValueStore>;
     let store: LocalBlobStore;
-    let apifyMock: IMock<typeof Apify>;
-    const storeName = scanResultStorageName;
+
     const key = 'key';
     const value = 'value';
+    const options = {};
 
     beforeEach(() => {
-        keyValueStoreMock = Mock.ofType(Apify.KeyValueStore);
-        apifyMock = Mock.ofInstance(Apify, MockBehavior.Strict);
-    });
-
-    it('get value', async () => {
-        apifyMock
-            .setup((am) => am.openKeyValueStore(storeName))
-            .returns(async () => keyValueStoreMock.object)
-            .verifiable(Times.never());
-
-        keyValueStoreMock
-            .setup((kvsm) => kvsm.getValue(key))
-            .returns(async () => value)
-            .verifiable(Times.once());
-
-        store = new LocalBlobStore(keyValueStoreMock.object, apifyMock.object);
-        const actualValue = await store.getValue(key);
-
-        expect(actualValue).toBe(value);
-    });
-
-    it('setValue while store is open', async () => {
-        apifyMock
-            .setup((am) => am.openKeyValueStore(storeName))
-            .returns(async () => keyValueStoreMock.object)
-            .verifiable(Times.never());
-
-        keyValueStoreMock
-            .setup((kvsm) => kvsm.setValue(key, value, undefined))
-            .returns(async () => {})
-            .verifiable(Times.once());
-
-        store = new LocalBlobStore(keyValueStoreMock.object, apifyMock.object);
-        await store.setValue(key, value);
-    });
-
-    it('setValue while store is not open', async () => {
-        let isKeyValueStoreOpen = false;
-
-        /* eslint-disable no-shadow */
-        const keyValueStoreStub: any = {
-            setValue: async (k: string, v: string): Promise<void> => {},
-        };
-
-        const apifyStub: any = {
-            openKeyValueStore: (localStoreName: string): any => {
-                if (storeName === localStoreName) {
-                    isKeyValueStoreOpen = true;
-                }
-
-                return keyValueStoreStub;
-            },
-        };
-
-        store = new LocalBlobStore(undefined, apifyStub);
-        await store.setValue(key, value).then(() => {
-            expect(isKeyValueStoreOpen).toEqual(true);
-        });
+        keyValueStoreMock = getPromisableDynamicMock(Mock.ofType<Crawlee.KeyValueStore>());
+        store = new LocalBlobStore();
     });
 
     afterEach(() => {
         keyValueStoreMock.verifyAll();
-        apifyMock.verifyAll();
+    });
+
+    it('get value', async () => {
+        keyValueStoreMock
+            .setup((o) => o.getValue(key))
+            .returns(() => Promise.resolve(value))
+            .verifiable();
+        const openFn = jest.fn().mockImplementation(() => Promise.resolve(keyValueStoreMock.object));
+        Crawlee.KeyValueStore.open = openFn;
+
+        const actualValue = await store.getValue(key);
+        expect(actualValue).toBe(value);
+        expect(openFn).toBeCalledWith(scanResultStorageName);
+    });
+
+    it('set value', async () => {
+        keyValueStoreMock
+            .setup((o) => o.setValue(key, value, options))
+            .returns(() => Promise.resolve())
+            .verifiable();
+        const openFn = jest.fn().mockImplementation(() => Promise.resolve(keyValueStoreMock.object));
+        Crawlee.KeyValueStore.open = openFn;
+
+        await store.setValue(key, value, options);
+        expect(openFn).toBeCalledWith(scanResultStorageName);
     });
 });

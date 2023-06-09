@@ -3,18 +3,16 @@
 
 import 'reflect-metadata';
 
-import Apify from 'apify';
 import { Page } from 'puppeteer';
 import { PageNavigationHooks } from 'scanner-global-library';
 import { IMock, It, Mock } from 'typemoq';
 import { AxeResults } from 'axe-core';
+import * as Crawlee from '@crawlee/puppeteer';
 import { CrawlerConfiguration } from '../crawler/crawler-configuration';
 import { DataBase } from '../level-storage/data-base';
 import { AccessibilityScanOperation } from '../page-operations/accessibility-scan-operation';
 import { BlobStore, DataStore } from '../storage/store-types';
-import { ApifyRequestQueueProvider } from '../types/ioc-types';
 import { ClassicPageProcessor } from './classic-page-processor';
-import { PartialScanData, PuppeteerHandlePageInputs } from './page-processor-base';
 
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/consistent-type-assertions */
 
@@ -23,27 +21,22 @@ describe(ClassicPageProcessor, () => {
     const testId = 'test id';
     const discoveryPatterns = ['pattern1', 'pattern2'];
 
-    let requestQueueStub: Apify.RequestQueue;
     let accessibilityScanOpMock: IMock<AccessibilityScanOperation>;
     let dataStoreMock: IMock<DataStore>;
     let blobStoreMock: IMock<BlobStore>;
     let dataBaseMock: IMock<DataBase>;
-    let enqueueLinksExtMock: IMock<typeof Apify.utils.enqueueLinks>;
     let pageNavigationHooks: IMock<PageNavigationHooks>;
     let crawlerConfigurationMock: IMock<CrawlerConfiguration>;
-    let requestStub: Apify.Request;
-    let pageStub: Page;
+    let requestStub: Crawlee.Request;
+    let puppeteerPageStub: Page;
     let classicPageProcessor: ClassicPageProcessor;
-    let requestQueueProvider: ApifyRequestQueueProvider;
     let axeResults: AxeResults;
 
     beforeEach(() => {
-        requestQueueStub = {} as Apify.RequestQueue;
         accessibilityScanOpMock = Mock.ofType<AccessibilityScanOperation>();
         dataStoreMock = Mock.ofType<DataStore>();
         blobStoreMock = Mock.ofType<BlobStore>();
         dataBaseMock = Mock.ofType<DataBase>();
-        enqueueLinksExtMock = Mock.ofType<typeof Apify.utils.enqueueLinks>();
         pageNavigationHooks = Mock.ofType<PageNavigationHooks>();
         crawlerConfigurationMock = Mock.ofType(CrawlerConfiguration);
         crawlerConfigurationMock
@@ -73,61 +66,55 @@ describe(ClassicPageProcessor, () => {
             errorMessages: [],
         } as any;
 
-        pageStub = {
+        puppeteerPageStub = {
             url: () => testUrl,
         } as any;
 
-        requestQueueProvider = () => Promise.resolve(requestQueueStub);
         classicPageProcessor = new ClassicPageProcessor(
             accessibilityScanOpMock.object,
             dataStoreMock.object,
             blobStoreMock.object,
             dataBaseMock.object,
             pageNavigationHooks.object,
-            requestQueueProvider,
             crawlerConfigurationMock.object,
-            enqueueLinksExtMock.object,
         );
     });
 
     afterEach(() => {
-        enqueueLinksExtMock.verifyAll();
         accessibilityScanOpMock.verifyAll();
+        dataStoreMock.verifyAll();
         blobStoreMock.verifyAll();
+        dataBaseMock.verifyAll();
+        pageNavigationHooks.verifyAll();
+        crawlerConfigurationMock.verifyAll();
     });
 
-    it('pageProcessor', async () => {
-        setupEnqueueLinks(pageStub);
-        accessibilityScanOpMock
-            .setup((aso) => aso.run(pageStub, testId, It.isAny()))
-            .returns(async () => Promise.resolve(axeResults))
-            .verifiable();
+    it('processPage', async () => {
         const expectedScanData = {
             id: testId,
             url: testUrl,
             succeeded: true,
             issueCount: 1,
         };
-        setupPushScanData(expectedScanData);
-
-        const inputs: PuppeteerHandlePageInputs = { page: pageStub, request: requestStub } as any;
-        await classicPageProcessor.pageHandler(inputs);
-    });
-
-    function setupEnqueueLinks(page: Page): void {
-        const options = {
-            page,
-            requestQueue: requestQueueStub,
-            pseudoUrls: discoveryPatterns,
-        };
-        enqueueLinksExtMock
-            .setup((el) => el(options))
-            .returns(async () => [])
+        const context = { page: puppeteerPageStub, request: requestStub } as Crawlee.PuppeteerCrawlingContext;
+        accessibilityScanOpMock
+            .setup((o) => o.run(puppeteerPageStub, testId, It.isAny()))
+            .returns(async () => Promise.resolve(axeResults))
             .verifiable();
-    }
 
-    function setupPushScanData(expectedScanData: PartialScanData): void {
-        const id = `${expectedScanData.id}.data`;
-        blobStoreMock.setup((bs) => bs.setValue(id, expectedScanData)).verifiable();
-    }
+        const enqueueLinksFn = jest.fn().mockImplementation(() => Promise.resolve());
+        (classicPageProcessor as any).enqueueLinks = enqueueLinksFn;
+        const saveSnapshotFn = jest.fn().mockImplementation(() => Promise.resolve());
+        (classicPageProcessor as any).saveSnapshot = saveSnapshotFn;
+        const pushScanDataFn = jest.fn().mockImplementation(() => Promise.resolve());
+        (classicPageProcessor as any).pushScanData = pushScanDataFn;
+        const saveScanResultFn = jest.fn().mockImplementation(() => Promise.resolve());
+        (classicPageProcessor as any).saveScanResult = saveScanResultFn;
+
+        await classicPageProcessor.requestHandler(context);
+        expect(enqueueLinksFn).toBeCalledWith(context);
+        expect(saveSnapshotFn).toBeCalledWith(context.page, context.request.id);
+        expect(pushScanDataFn).toBeCalledWith(expectedScanData);
+        expect(saveScanResultFn).toBeCalledWith(context.request, expectedScanData.issueCount);
+    });
 });

@@ -45,7 +45,7 @@ describe('E2EScanScenarioDefinitions', () => {
                 deepScan: true,
                 consolidatedId: `consolidated-id-base-test-release-version-deepScanDiscoveryPatterns-${fakeDate.getTime()}`,
                 deepScanOptions: {
-                    discoveryPatterns: [`url-to-scan/linked1[.*]`],
+                    discoveryPatterns: [`url-to-scan/linked1(.*)`],
                 },
             },
             {

@@ -20,7 +20,6 @@ module.exports = (env) => {
             '@axe-core/puppeteer',
             'applicationinsights',
             'accessibility-insights-report',
-            'apify',
             'leveldown',
             'puppeteer-extra',
             'puppeteer-extra-plugin',

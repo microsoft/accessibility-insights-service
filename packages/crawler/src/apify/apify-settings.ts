@@ -2,10 +2,10 @@
 // Licensed under the MIT License.
 
 export interface ApifySettings {
-    APIFY_HEADLESS?: string;
-    APIFY_LOCAL_STORAGE_DIR?: string;
-    APIFY_MEMORY_MBYTES?: string;
-    APIFY_CHROME_EXECUTABLE_PATH?: string;
+    CRAWLEE_HEADLESS?: string;
+    CRAWLEE_STORAGE_DIR?: string;
+    CRAWLEE_MEMORY_MBYTES?: string;
+    CRAWLEE_CHROME_EXECUTABLE_PATH?: string;
 }
 
 export interface ApifySettingsHandler {

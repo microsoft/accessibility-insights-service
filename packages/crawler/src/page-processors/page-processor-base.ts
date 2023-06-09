@@ -1,19 +1,18 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import Apify from 'apify';
 import { inject, injectable } from 'inversify';
 import * as Puppeteer from 'puppeteer';
 import { BrowserError, PageNavigationHooks } from 'scanner-global-library';
 import { System } from 'common';
 import { isArray } from 'lodash';
+import * as Crawlee from '@crawlee/puppeteer';
 import { CrawlerConfiguration } from '../crawler/crawler-configuration';
 import { DataBase } from '../level-storage/data-base';
 import { AccessibilityScanOperation } from '../page-operations/accessibility-scan-operation';
 import { LocalBlobStore } from '../storage/local-blob-store';
 import { LocalDataStore } from '../storage/local-data-store';
 import { BlobStore, DataStore, scanResultStorageName } from '../storage/store-types';
-import { ApifyRequestQueueProvider, crawlerIocTypes } from '../types/ioc-types';
 import { ScanData } from '../types/scan-data';
 
 /* eslint-disable no-invalid-this, @typescript-eslint/no-explicit-any */
@@ -24,19 +23,18 @@ export type PartialScanData = {
 } & Partial<ScanData>;
 
 export interface PageProcessor {
-    pageHandler: Apify.PuppeteerHandlePage;
-    pageErrorProcessor: Apify.HandleFailedRequest;
-    preNavigation(crawlingContext: PuppeteerCrawlingContext, gotoOptions: any): Promise<void>;
-    postNavigation(crawlingContext: PuppeteerCrawlingContext): Promise<void>;
+    requestHandler: Crawlee.PuppeteerRequestHandler;
+    failedRequestHandler: Crawlee.BrowserErrorHandler;
+    preNavigationHook: Crawlee.PuppeteerHook;
+    postNavigationHook: Crawlee.PuppeteerHook;
 }
-
-export type PuppeteerCrawlingContext = Apify.CrawlingContext & { page: Puppeteer.Page };
-export type PuppeteerHandlePageInputs = Apify.CrawlingContext & Apify.BrowserCrawlingContext & Apify.PuppeteerHandlePageFunctionParam;
 
 export interface SessionData {
     requestId: string;
     browserError: BrowserError;
 }
+
+export type PageProcessorFactory = () => PageProcessorBase;
 
 @injectable()
 export abstract class PageProcessorBase implements PageProcessor {
@@ -51,45 +49,51 @@ export abstract class PageProcessorBase implements PageProcessor {
     private scanMetadataSaved: boolean;
 
     /**
-     * Function that is called to process each request.
+     * Function that is called for each URL to crawl.
      */
-    public pageHandler: Apify.PuppeteerHandlePage = async (inputs: PuppeteerHandlePageInputs) => {
+    public requestHandler: Crawlee.PuppeteerRequestHandler = async (context) => {
         try {
             if (
-                isArray(inputs.session?.userData) &&
-                (inputs.session.userData as SessionData[]).find((s) => s.requestId === inputs.request.id)
+                isArray(context.session?.userData) &&
+                (context.session.userData as SessionData[]).find((s) => s.requestId === context.request.id)
             ) {
                 return;
             }
 
-            await this.processPage(inputs);
+            await this.processPage(context);
         } catch (err) {
-            await this.pushScanData({ succeeded: false, id: inputs.request.id as string, url: inputs.request.url });
-            await this.logPageError(inputs.request, err as Error);
-            await this.saveRunError(inputs.request, err);
+            await this.pushScanData({ succeeded: false, id: context.request.id as string, url: context.request.url });
+            await this.logPageError(context.request, err as Error);
+            await this.saveRunError(context.request, err);
 
-            // Throw the error so Apify puts it back into the queue to retry
+            // Throw the error so Apify puts it back into the request queue to retry
             throw err;
         }
     };
 
-    // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-    public preNavigation = async (crawlingContext: PuppeteerCrawlingContext, gotoOptions: any): Promise<void> => {
-        if (!isArray(crawlingContext.session.userData)) {
-            crawlingContext.session.userData = [];
+    /**
+     *
+     * This function is called before the navigation.
+     */
+    public preNavigationHook: Crawlee.PuppeteerHook = async (context, gotoOptions): Promise<void> => {
+        if (!isArray(context.session.userData)) {
+            context.session.userData = [];
         }
 
         gotoOptions.waitUntil = 'networkidle2';
-        await this.pageNavigationHooks.preNavigation(crawlingContext.page);
+        await this.pageNavigationHooks.preNavigation(context.page);
     };
 
-    public postNavigation = async (crawlingContext: PuppeteerCrawlingContext): Promise<void> => {
+    /**
+     * This function is called after the navigation.
+     */
+    public postNavigationHook: Crawlee.PuppeteerHook = async (context): Promise<void> => {
         let navigationError: BrowserError;
         let runError: unknown;
         try {
             await this.pageNavigationHooks.postNavigation(
-                crawlingContext.page,
-                crawlingContext.response,
+                context.page,
+                context.response,
                 async (browserError: BrowserError, error?: unknown) => {
                     if (error !== undefined) {
                         throw error;
@@ -99,19 +103,19 @@ export abstract class PageProcessorBase implements PageProcessor {
                 },
             );
         } catch (err) {
-            await this.pushScanData({ succeeded: false, id: crawlingContext.request.id as string, url: crawlingContext.request.url });
-            await this.logPageError(crawlingContext.request, err as Error);
+            await this.pushScanData({ succeeded: false, id: context.request.id as string, url: context.request.url });
+            await this.logPageError(context.request, err as Error);
             runError = err;
 
-            // Throw the error so Apify puts it back into the queue to retry
+            // Throw the error so Apify puts it back into the request queue to retry
             throw err;
         } finally {
             if (runError !== undefined) {
-                await this.saveRunError(crawlingContext.request, runError);
+                await this.saveRunError(context.request, runError);
             } else if (navigationError !== undefined) {
-                await this.saveBrowserError(crawlingContext.request, navigationError, crawlingContext.session);
+                await this.saveBrowserError(context.request, navigationError, context.session);
             } else {
-                await this.saveScanMetadata(crawlingContext.request.url, crawlingContext.page);
+                await this.saveScanMetadata(context.request.url, context.page);
             }
         }
     };
@@ -119,7 +123,7 @@ export abstract class PageProcessorBase implements PageProcessor {
     /**
      * This function is called when the crawling of a request failed after several reties
      */
-    public pageErrorProcessor: Apify.HandleFailedRequest = async ({ request, error, session }: Apify.HandleFailedRequestInput) => {
+    public failedRequestHandler: Crawlee.BrowserErrorHandler = async ({ request }, error) => {
         const scanData: ScanData = {
             id: request.id as string,
             url: request.url,
@@ -141,10 +145,8 @@ export abstract class PageProcessorBase implements PageProcessor {
         @inject(LocalBlobStore) protected readonly blobStore: BlobStore,
         @inject(DataBase) protected readonly dataBase: DataBase,
         @inject(PageNavigationHooks) protected readonly pageNavigationHooks: PageNavigationHooks,
-        @inject(crawlerIocTypes.ApifyRequestQueueProvider) protected readonly requestQueueProvider: ApifyRequestQueueProvider,
         @inject(CrawlerConfiguration) protected readonly crawlerConfiguration: CrawlerConfiguration,
-        protected readonly enqueueLinksExt: typeof Apify.utils.enqueueLinks = Apify.utils.enqueueLinks,
-        protected readonly saveSnapshotExt: typeof Apify.utils.puppeteer.saveSnapshot = Apify.utils.puppeteer.saveSnapshot,
+        protected readonly saveSnapshotExt: typeof Crawlee.puppeteerUtils.saveSnapshot = Crawlee.puppeteerUtils.saveSnapshot,
     ) {
         this.baseUrl = this.crawlerConfiguration.baseUrl();
         this.snapshot = this.crawlerConfiguration.snapshot();
@@ -153,11 +155,9 @@ export abstract class PageProcessorBase implements PageProcessor {
     }
 
     /**
-     * This function is called to extract data from a single web page
-     * 'page' is an instance of Puppeteer.Page with page.goto(request.url) already called
-     * 'request' is an instance of Request class with information about the page to load
+     * This function is called to extract data from a single web page.
      */
-    protected abstract processPage: Apify.PuppeteerHandlePage;
+    protected abstract processPage: Crawlee.PuppeteerRequestHandler;
 
     protected async saveSnapshot(page: Puppeteer.Page, id: string): Promise<void> {
         if (this.snapshot) {
@@ -169,27 +169,23 @@ export abstract class PageProcessorBase implements PageProcessor {
         }
     }
 
-    protected async enqueueLinks(page: Puppeteer.Page): Promise<Apify.QueueOperationInfo[]> {
-        if (!this.discoverLinks) {
-            return [];
+    protected async enqueueLinks(context: Crawlee.PuppeteerCrawlingContext): Promise<void> {
+        if (this.discoverLinks !== true) {
+            return;
         }
 
-        const requestQueue = await this.requestQueueProvider();
-        const enqueued = await this.enqueueLinksExt({
-            page,
-            requestQueue,
-            pseudoUrls: this.discoveryPatterns?.length > 0 ? this.discoveryPatterns : undefined, // prevents from crawling all links
+        const enqueued = await context.enqueueLinks({
+            // eslint-disable-next-line security/detect-non-literal-regexp
+            regexps: this.discoveryPatterns?.length > 0 ? this.discoveryPatterns.map((p) => new RegExp(p)) : undefined,
         });
-        console.log(`Discovered ${enqueued.length} links on page ${page.url()}`);
-
-        return enqueued;
+        console.log(`Discovered ${enqueued.processedRequests.length} new links on page ${context.page.url()}`);
     }
 
     protected async pushScanData(scanData: PartialScanData): Promise<void> {
         await this.blobStore.setValue(`${scanData.id}.data`, scanData);
     }
 
-    protected async saveRunError(request: Apify.Request, error: unknown): Promise<void> {
+    protected async saveRunError(request: Crawlee.Request, error: unknown): Promise<void> {
         await this.dataBase.addScanResult(request.id as string, {
             id: request.id,
             url: request.url,
@@ -198,7 +194,7 @@ export abstract class PageProcessorBase implements PageProcessor {
         });
     }
 
-    protected async saveBrowserError(request: Apify.Request, error: BrowserError, session: Apify.Session): Promise<void> {
+    protected async saveBrowserError(request: Crawlee.Request, error: BrowserError, session: Crawlee.Session): Promise<void> {
         (session.userData as SessionData[]).push({
             requestId: request.id,
             browserError: error,
@@ -211,7 +207,7 @@ export abstract class PageProcessorBase implements PageProcessor {
         });
     }
 
-    protected async saveScanResult(request: Apify.Request, issueCount: number, selector?: string): Promise<void> {
+    protected async saveScanResult(request: Crawlee.Request, issueCount: number, selector?: string): Promise<void> {
         // add CSS selector of simulated element as URL bookmark part
         const url = selector === undefined ? request.url : `${request.url}#selector|${selector}`;
         await this.dataBase.addScanResult(request.id as string, {
@@ -243,11 +239,11 @@ export abstract class PageProcessorBase implements PageProcessor {
         }
     }
 
-    protected async logBrowserFailure(request: Apify.Request, browserError: BrowserError): Promise<void> {
+    protected async logBrowserFailure(request: Crawlee.Request, browserError: BrowserError): Promise<void> {
         await this.blobStore.setValue(`${request.id}.browser.err`, `${browserError.stack}`, { contentType: 'text/plain' });
     }
 
-    protected async logPageError(request: Apify.Request, error: Error): Promise<void> {
+    protected async logPageError(request: Crawlee.Request, error: Error): Promise<void> {
         await this.blobStore.setValue(`${request.id}.err`, `${error.stack}`, { contentType: 'text/plain' });
     }
 }

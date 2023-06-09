@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import * as fs from 'fs';
+import fs from 'fs';
 import { inject, injectable } from 'inversify';
 import { ScanArguments } from '../scan-arguments';
 import { BaselineFileFormatter } from './baseline-file-formatter';
@@ -36,7 +36,7 @@ export class BaselineOptionsBuilder {
             rawBaselineContent = this.fileSystem.readFileSync(baselineFile, { encoding: 'utf8' });
         } catch (e) {
             if (e.code === 'ENOENT') {
-                // This is expected; it just means a user is onboarding to baselining for the first time
+                // This is expected; it just means a user is onboarding to baseline for the first time
                 // and we're generating an initial baseline file.
                 return null;
             } else {

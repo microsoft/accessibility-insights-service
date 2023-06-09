@@ -2,8 +2,6 @@
 // Licensed under the MIT License.
 
 import 'reflect-metadata';
-// eslint-disable-next-line import/no-unassigned-import
-import './global-overrides';
 
 import { System } from 'common';
 import * as dotenv from 'dotenv';

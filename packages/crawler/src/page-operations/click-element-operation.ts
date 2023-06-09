@@ -1,9 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import Apify from 'apify';
 import { injectable } from 'inversify';
-import * as Puppeteer from 'puppeteer';
+import * as Crawlee from '@crawlee/puppeteer';
 
 export declare type ElementClickAction = 'navigation' | 'page-action';
 
@@ -14,29 +13,21 @@ export interface ElementClickOperationResult {
 
 @injectable()
 export class ClickElementOperation {
-    constructor(
-        private readonly enqueueLinksByClickingElementsExt: typeof Apify.utils.puppeteer.enqueueLinksByClickingElements = Apify.utils
-            .puppeteer.enqueueLinksByClickingElements,
-    ) {}
-
     public async click(
-        page: Puppeteer.Page,
+        context: Crawlee.PuppeteerCrawlingContext,
         selector: string,
-        requestQueue: Apify.RequestQueue,
         discoveryPatterns: string[],
     ): Promise<ElementClickOperationResult> {
         let navigated = false;
         let navigationUrl: string;
-        await this.enqueueLinksByClickingElementsExt({
-            page,
-            requestQueue,
+        await context.enqueueLinksByClickingElements({
             selector,
             pseudoUrls: discoveryPatterns?.length > 0 ? discoveryPatterns : undefined, // prevents from crawling all links
-            transformRequestFunction: (request: Apify.RequestOptions) => {
+            transformRequestFunction: (request) => {
                 navigated = true;
                 navigationUrl = request.url;
                 console.log(
-                    `Click on element with selector '${selector}' from page ${page.url()} resulted navigation to URL ${request.url}`,
+                    `Click on element with selector '${selector}' on page ${context.page.url()} resulted navigation to URL ${request.url}`,
                 );
 
                 return request;

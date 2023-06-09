@@ -11,5 +11,5 @@ export function generateHash(...values: string[]): string {
         .update(hashSeed)
         .digest('base64')
         .replace(/(\+|\/|=)/g, '')
-        .substr(0, 15);
+        .substring(0, 15);
 }

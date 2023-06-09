@@ -4,8 +4,8 @@
 import * as Puppeteer from 'puppeteer';
 
 export interface CrawlerRunOptions {
-    crawl?: boolean;
     baseUrl: string;
+    crawl?: boolean;
     inputUrls?: string[];
     discoveryPatterns?: string[];
     simulate?: boolean;

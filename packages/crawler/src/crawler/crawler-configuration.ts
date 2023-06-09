@@ -6,7 +6,7 @@ import { isEmpty } from 'lodash';
 import { ApifySettings, ApifySettingsHandler, apifySettingsHandler } from '../apify/apify-settings';
 import { CrawlerRunOptions } from '../types/crawler-run-options';
 import { DiscoveryPatternFactory, getDiscoveryPatternForUrl } from '../apify/discovery-patterns';
-import { RequestQueueOptions } from '../types/resource-creator';
+import { RequestQueueOptions } from '../apify/apify-request-queue-creator';
 
 @injectable()
 export class CrawlerConfiguration {
@@ -69,8 +69,6 @@ export class CrawlerConfiguration {
         return {
             clear: this.crawlerRunOptions.restartCrawl,
             inputUrls: this.crawlerRunOptions.inputUrls,
-            page: this.crawlerRunOptions.baseCrawlPage,
-            discoveryPatterns: this.crawlerRunOptions.discoveryPatterns,
         };
     }
 
@@ -79,19 +77,19 @@ export class CrawlerConfiguration {
     }
 
     public setLocalOutputDir(outputDir: string): void {
-        this.settingsHandler.setApifySettings({ APIFY_LOCAL_STORAGE_DIR: outputDir });
+        this.settingsHandler.setApifySettings({ CRAWLEE_STORAGE_DIR: outputDir });
     }
 
     public setMemoryMBytes(memoryMBytes: number): void {
-        this.settingsHandler.setApifySettings({ APIFY_MEMORY_MBYTES: memoryMBytes?.toString() });
+        this.settingsHandler.setApifySettings({ CRAWLEE_MEMORY_MBYTES: memoryMBytes?.toString() });
     }
 
     public setSilentMode(silentMode: boolean): void {
-        this.settingsHandler.setApifySettings({ APIFY_HEADLESS: silentMode === undefined ? undefined : silentMode ? '1' : '0' });
+        this.settingsHandler.setApifySettings({ CRAWLEE_HEADLESS: silentMode === undefined ? undefined : silentMode ? '1' : '0' });
     }
 
     public setChromePath(chromePath: string): void {
-        this.settingsHandler.setApifySettings({ APIFY_CHROME_EXECUTABLE_PATH: chromePath });
+        this.settingsHandler.setApifySettings({ CRAWLEE_CHROME_EXECUTABLE_PATH: chromePath });
     }
 
     private getMaxRequestsPerCrawl(maxRequestsPerCrawl: number): number {
@@ -122,10 +120,10 @@ export class CrawlerConfiguration {
         const currentSettings = this.settingsHandler.getApifySettings();
 
         return {
-            APIFY_HEADLESS: '1',
-            APIFY_LOCAL_STORAGE_DIR: isEmpty(currentSettings.APIFY_LOCAL_STORAGE_DIR)
+            CRAWLEE_HEADLESS: '1',
+            CRAWLEE_STORAGE_DIR: isEmpty(currentSettings.CRAWLEE_STORAGE_DIR)
                 ? './ai_scan_cli_output'
-                : currentSettings.APIFY_LOCAL_STORAGE_DIR,
+                : currentSettings.CRAWLEE_STORAGE_DIR,
         };
     }
 }

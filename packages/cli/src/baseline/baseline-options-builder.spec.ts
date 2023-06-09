@@ -11,13 +11,13 @@ import { BaselineFileFormatter } from './baseline-file-formatter';
 
 describe(BaselineOptionsBuilder, () => {
     let baselineFileFormatterMock: IMock<BaselineFileFormatter>;
-    let fsMock: IMock<typeof fs>;
+    let fileSystemMock: IMock<typeof fs>;
     let testSubject: BaselineOptionsBuilder;
 
     beforeEach(() => {
         baselineFileFormatterMock = Mock.ofType<BaselineFileFormatter>();
-        fsMock = Mock.ofInstance(fs);
-        testSubject = new BaselineOptionsBuilder(baselineFileFormatterMock.object, fsMock.object);
+        fileSystemMock = Mock.ofInstance(fs);
+        testSubject = new BaselineOptionsBuilder(baselineFileFormatterMock.object, fileSystemMock.object);
     });
 
     it('produces null options if no baseline scanArguments are specified', () => {
@@ -34,7 +34,7 @@ describe(BaselineOptionsBuilder, () => {
         const baselineFileInput = '/path/to/baseline';
         const nonEnoentError = new Error('from readFileSync');
 
-        fsMock.setup((f) => f.readFileSync(baselineFileInput, { encoding: 'utf8' })).throws(nonEnoentError);
+        fileSystemMock.setup((f) => f.readFileSync(baselineFileInput, { encoding: 'utf8' })).throws(nonEnoentError);
 
         expect(() => testSubject.build({ baselineFile: baselineFileInput })).toThrowError(nonEnoentError);
     });
@@ -44,7 +44,7 @@ describe(BaselineOptionsBuilder, () => {
         const readFileSyncOutput = 'readFileSync output';
         const parseError = new Error('from parse');
 
-        fsMock.setup((f) => f.readFileSync(baselineFileInput, { encoding: 'utf8' })).returns(() => readFileSyncOutput);
+        fileSystemMock.setup((f) => f.readFileSync(baselineFileInput, { encoding: 'utf8' })).returns(() => readFileSyncOutput);
         baselineFileFormatterMock.setup((f) => f.parse(readFileSyncOutput)).throws(parseError);
 
         expect(() => testSubject.build({ baselineFile: baselineFileInput })).toThrowError(parseError);
@@ -55,7 +55,7 @@ describe(BaselineOptionsBuilder, () => {
         const readFileSyncOutput = 'readFileSync output';
         const parseOutput = {} as BaselineFileContent;
 
-        fsMock.setup((f) => f.readFileSync(baselineFileInput, { encoding: 'utf8' })).returns(() => readFileSyncOutput);
+        fileSystemMock.setup((f) => f.readFileSync(baselineFileInput, { encoding: 'utf8' })).returns(() => readFileSyncOutput);
         baselineFileFormatterMock.setup((f) => f.parse(readFileSyncOutput)).returns(() => parseOutput);
 
         const output = testSubject.build({ baselineFile: baselineFileInput });
@@ -71,7 +71,7 @@ describe(BaselineOptionsBuilder, () => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (enoentError as any).code = 'ENOENT';
 
-        fsMock.setup((f) => f.readFileSync(baselineFileInput, { encoding: 'utf8' })).throws(enoentError);
+        fileSystemMock.setup((f) => f.readFileSync(baselineFileInput, { encoding: 'utf8' })).throws(enoentError);
 
         const output = testSubject.build({ baselineFile: baselineFileInput });
         expect(output.baselineContent).toBeNull();
