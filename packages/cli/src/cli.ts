@@ -141,7 +141,12 @@ function getScanArguments(): ScanArguments {
             authType: {
                 type: 'string',
                 describe:
-                    'Use with --serviceAccountName and --serviceAccountPassword to specify the authentication type. Supported type: AAD',
+                    'Use with --serviceAccountName and --serviceAccountPassword to specify the authentication type. Supported type: AAD.',
+            },
+            userAgent: {
+                type: 'string',
+                describe:
+                    'The custom value of the User-Agent HTTP request header. Defaults to the value of USER_AGENT environment variable. The option will take precedence over environment variable.',
             },
         })
         .check((args) => {

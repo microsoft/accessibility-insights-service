@@ -36,7 +36,7 @@ export class WebDriver {
         private readonly stealthPlugin: StealthPluginType = StealthPlugin(),
     ) {}
 
-    public async pageCreated(): Promise<boolean> {
+    public async waitForPageCreation(): Promise<boolean> {
         // Waiting for the last plugin in a plugins chain to complete processing
         const loadCompleted = await System.waitLoop(
             async () => this.userAgentPlugin.loadCompleted,
@@ -57,7 +57,7 @@ export class WebDriver {
     }
 
     public async launch(options: WebDriverConfigurationOptions = { clearDiskCache: true }): Promise<Puppeteer.Browser> {
-        this.addPuppeteerPlugins();
+        this.setupPuppeteerPlugins();
 
         if (options.clearDiskCache === true) {
             this.browserCache.clearStorage();
@@ -119,15 +119,14 @@ export class WebDriver {
         return options;
     }
 
-    private addPuppeteerPlugins(): void {
+    private setupPuppeteerPlugins(): void {
         // Disable iframe.contentWindow evasion to avoid interference with privacy banner
         this.stealthPlugin.enabledEvasions.delete('iframe.contentWindow');
         // Disable user-agent-override evasion as it will not set User Agent string in headless mode
         this.stealthPlugin.enabledEvasions.delete('user-agent-override');
         // Plugin to hide puppeteer automation from a webserver
         this.puppeteerExtra.use(this.stealthPlugin);
-
-        // Plugin to set non-Windows platform in user agent string
+        // Custom user agent plugin to override default user agent string
         this.puppeteerExtra.use(this.userAgentPlugin);
     }
 }

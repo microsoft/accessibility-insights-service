@@ -3,7 +3,7 @@
 
 import * as Crawlee from '@crawlee/puppeteer';
 import { inject, injectable } from 'inversify';
-import { PageNavigationHooks } from 'scanner-global-library';
+import { PageNavigator } from 'scanner-global-library';
 import { ActiveElement } from '../browser-components/active-elements-finder';
 import { CrawlerConfiguration } from '../crawler/crawler-configuration';
 import { DataBase } from '../level-storage/data-base';
@@ -79,11 +79,11 @@ export class SimulatorPageProcessor extends PageProcessorBase {
         @inject(DataBase) protected readonly dataBase: DataBase,
         @inject(EnqueueActiveElementsOperation) protected readonly enqueueActiveElementsOp: EnqueueActiveElementsOperation,
         @inject(ClickElementOperation) protected readonly clickElementOp: ClickElementOperation,
-        @inject(PageNavigationHooks) protected readonly pageNavigationHooks: PageNavigationHooks,
+        @inject(PageNavigator) protected readonly pageNavigator: PageNavigator,
         @inject(CrawlerConfiguration) protected readonly crawlerConfiguration: CrawlerConfiguration,
         protected readonly saveSnapshotExt: typeof Crawlee.puppeteerUtils.saveSnapshot = Crawlee.puppeteerUtils.saveSnapshot,
     ) {
-        super(accessibilityScanOp, dataStore, blobStore, dataBase, pageNavigationHooks, crawlerConfiguration, saveSnapshotExt);
+        super(accessibilityScanOp, dataStore, blobStore, dataBase, pageNavigator, crawlerConfiguration, saveSnapshotExt);
         this.selectors = this.crawlerConfiguration.selectors();
     }
 }

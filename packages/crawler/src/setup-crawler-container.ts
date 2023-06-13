@@ -15,6 +15,7 @@ import { SimulatorPageProcessor } from './page-processors/simulator-page-process
 import { crawlerIocTypes } from './types/ioc-types';
 
 export function setupLocalCrawlerContainer(container: inversify.Container): inversify.Container {
+    container.options.skipBaseClassChecks = true;
     container.bind(DataBase).toSelf().inSingletonScope();
     container.bind(CrawlerConfiguration).toSelf().inSingletonScope();
     container.bind(crawlerIocTypes.ReporterFactory).toConstantValue(reporterFactory);
@@ -45,6 +46,7 @@ export function setupLocalCrawlerContainer(container: inversify.Container): inve
 }
 
 export function setupCloudCrawlerContainer(container: inversify.Container): inversify.Container {
+    container.options.skipBaseClassChecks = true;
     container.bind(crawlerIocTypes.CrawlerEngine).to(PageCrawlerEngine);
     container.bind(CrawlerConfiguration).toSelf().inSingletonScope();
     setupSingletonProvider(crawlerIocTypes.ApifyRequestQueueProvider, container, async (context: inversify.interfaces.Context) => {

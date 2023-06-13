@@ -4,7 +4,7 @@
 import 'reflect-metadata';
 
 import { Page } from 'puppeteer';
-import { PageNavigationHooks } from 'scanner-global-library';
+import { PageNavigator } from 'scanner-global-library';
 import { IMock, It, Mock } from 'typemoq';
 import { AxeResults } from 'axe-core';
 import * as Crawlee from '@crawlee/puppeteer';
@@ -25,7 +25,7 @@ describe(ClassicPageProcessor, () => {
     let dataStoreMock: IMock<DataStore>;
     let blobStoreMock: IMock<BlobStore>;
     let dataBaseMock: IMock<DataBase>;
-    let pageNavigationHooks: IMock<PageNavigationHooks>;
+    let pageNavigatorMock: IMock<PageNavigator>;
     let crawlerConfigurationMock: IMock<CrawlerConfiguration>;
     let requestStub: Crawlee.Request;
     let puppeteerPageStub: Page;
@@ -37,7 +37,7 @@ describe(ClassicPageProcessor, () => {
         dataStoreMock = Mock.ofType<DataStore>();
         blobStoreMock = Mock.ofType<BlobStore>();
         dataBaseMock = Mock.ofType<DataBase>();
-        pageNavigationHooks = Mock.ofType<PageNavigationHooks>();
+        pageNavigatorMock = Mock.ofType<PageNavigator>();
         crawlerConfigurationMock = Mock.ofType(CrawlerConfiguration);
         crawlerConfigurationMock
             .setup((o) => o.discoveryPatterns())
@@ -58,24 +58,26 @@ describe(ClassicPageProcessor, () => {
             incomplete: [],
             inapplicable: [],
         } as AxeResults;
-
         requestStub = {
             id: testId,
             url: testUrl,
             userData: {},
             errorMessages: [],
         } as any;
-
         puppeteerPageStub = {
             url: () => testUrl,
         } as any;
+        pageNavigatorMock
+            .setup((o) => o.navigate(testUrl, puppeteerPageStub))
+            .returns(() => Promise.resolve({}))
+            .verifiable();
 
         classicPageProcessor = new ClassicPageProcessor(
             accessibilityScanOpMock.object,
             dataStoreMock.object,
             blobStoreMock.object,
             dataBaseMock.object,
-            pageNavigationHooks.object,
+            pageNavigatorMock.object,
             crawlerConfigurationMock.object,
         );
     });
@@ -85,7 +87,7 @@ describe(ClassicPageProcessor, () => {
         dataStoreMock.verifyAll();
         blobStoreMock.verifyAll();
         dataBaseMock.verifyAll();
-        pageNavigationHooks.verifyAll();
+        pageNavigatorMock.verifyAll();
         crawlerConfigurationMock.verifyAll();
     });
 
@@ -110,11 +112,14 @@ describe(ClassicPageProcessor, () => {
         (classicPageProcessor as any).pushScanData = pushScanDataFn;
         const saveScanResultFn = jest.fn().mockImplementation(() => Promise.resolve());
         (classicPageProcessor as any).saveScanResult = saveScanResultFn;
+        const saveScanMetadataFn = jest.fn().mockImplementation(() => Promise.resolve());
+        (classicPageProcessor as any).saveScanMetadata = saveScanMetadataFn;
 
         await classicPageProcessor.requestHandler(context);
         expect(enqueueLinksFn).toBeCalledWith(context);
         expect(saveSnapshotFn).toBeCalledWith(context.page, context.request.id);
         expect(pushScanDataFn).toBeCalledWith(expectedScanData);
         expect(saveScanResultFn).toBeCalledWith(context.request, expectedScanData.issueCount);
+        expect(saveScanMetadataFn).toBeCalledWith(testUrl, puppeteerPageStub);
     });
 });

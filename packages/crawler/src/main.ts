@@ -26,11 +26,15 @@ interface ScanArguments {
     debug: boolean;
     crawl: boolean;
     singleWorker: boolean;
+    userAgent: string;
 }
 
 (async () => {
     dotenv.config();
     const scanArguments = yargs.argv as unknown as ScanArguments;
+    if (scanArguments.userAgent) {
+        process.env.USER_AGENT = scanArguments.userAgent;
+    }
 
     const container = new inversify.Container({ autoBindInjectable: true });
     setupLocalScannerContainer(container);

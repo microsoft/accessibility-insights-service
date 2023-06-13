@@ -30,6 +30,10 @@ export function validateScanArguments(args: ScanArguments): void {
     }
 
     validateAuthInputs(args);
+
+    if (args.userAgent) {
+        process.env.USER_AGENT = args.userAgent;
+    }
 }
 
 function validateAuthInputs(args: ScanArguments): void {

@@ -254,3 +254,10 @@ describe: For sites with authenticated pages, set the email address for the non-
 type: string
 describe: For sites with authenticated pages, set the password for the non-people service account.
 ```
+
+-   userAgent: --userAgent
+
+```sh
+type: string
+describe: The custom value of the User-Agent HTTP request header. Defaults to the value of USER_AGENT environment variable. The option will take precedence over environment variable.
+```

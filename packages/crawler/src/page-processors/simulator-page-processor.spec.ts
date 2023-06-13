@@ -5,7 +5,7 @@ import 'reflect-metadata';
 
 import * as Crawlee from '@crawlee/puppeteer';
 import { Page } from 'puppeteer';
-import { PageNavigationHooks } from 'scanner-global-library';
+import { PageNavigator } from 'scanner-global-library';
 import { IMock, It, Mock } from 'typemoq';
 import { AxeResults } from 'axe-core';
 import { CrawlerConfiguration } from '../crawler/crawler-configuration';
@@ -30,7 +30,7 @@ describe(SimulatorPageProcessor, () => {
     let dataBaseMock: IMock<DataBase>;
     let clickElementOpMock: IMock<ClickElementOperation>;
     let enqueueActiveElementsOpExtMock: IMock<EnqueueActiveElementsOperation>;
-    let pageNavigationHooks: IMock<PageNavigationHooks>;
+    let pageNavigatorMock: IMock<PageNavigator>;
     let crawlerConfigurationMock: IMock<CrawlerConfiguration>;
     let requestStub: Crawlee.Request;
     let puppeteerPageStub: Page;
@@ -44,7 +44,7 @@ describe(SimulatorPageProcessor, () => {
         dataBaseMock = Mock.ofType<DataBase>();
         clickElementOpMock = Mock.ofType<ClickElementOperation>();
         enqueueActiveElementsOpExtMock = Mock.ofType<EnqueueActiveElementsOperation>();
-        pageNavigationHooks = Mock.ofType<PageNavigationHooks>();
+        pageNavigatorMock = Mock.ofType<PageNavigator>();
         crawlerConfigurationMock = Mock.ofType(CrawlerConfiguration);
 
         crawlerConfigurationMock
@@ -79,6 +79,10 @@ describe(SimulatorPageProcessor, () => {
         puppeteerPageStub = {
             url: () => testUrl,
         } as Page;
+        pageNavigatorMock
+            .setup((o) => o.navigate(testUrl, puppeteerPageStub))
+            .returns(() => Promise.resolve({}))
+            .verifiable();
 
         simulatorPageProcessor = new SimulatorPageProcessor(
             accessibilityScanOpMock.object,
@@ -87,7 +91,7 @@ describe(SimulatorPageProcessor, () => {
             dataBaseMock.object,
             enqueueActiveElementsOpExtMock.object,
             clickElementOpMock.object,
-            pageNavigationHooks.object,
+            pageNavigatorMock.object,
             crawlerConfigurationMock.object,
         );
     });
@@ -99,7 +103,7 @@ describe(SimulatorPageProcessor, () => {
         dataBaseMock.verifyAll();
         enqueueActiveElementsOpExtMock.verifyAll();
         clickElementOpMock.verifyAll();
-        pageNavigationHooks.verifyAll();
+        pageNavigatorMock.verifyAll();
         crawlerConfigurationMock.verifyAll();
     });
 
@@ -127,12 +131,15 @@ describe(SimulatorPageProcessor, () => {
         (simulatorPageProcessor as any).pushScanData = pushScanDataFn;
         const saveScanResultFn = jest.fn().mockImplementation(() => Promise.resolve());
         (simulatorPageProcessor as any).saveScanResult = saveScanResultFn;
+        const saveScanMetadataFn = jest.fn().mockImplementation(() => Promise.resolve());
+        (simulatorPageProcessor as any).saveScanMetadata = saveScanMetadataFn;
 
         await simulatorPageProcessor.requestHandler(context);
         expect(enqueueLinksFn).toBeCalledWith(context);
         expect(saveSnapshotFn).toBeCalledWith(context.page, context.request.id);
         expect(pushScanDataFn).toBeCalledWith(expectedScanData);
         expect(saveScanResultFn).toBeCalledWith(context.request, expectedScanData.issueCount);
+        expect(saveScanMetadataFn).toBeCalledWith(testUrl, puppeteerPageStub);
     });
 
     it('pageProcessor, click', async () => {
@@ -166,11 +173,14 @@ describe(SimulatorPageProcessor, () => {
         (simulatorPageProcessor as any).pushScanData = pushScanDataFn;
         const saveScanResultFn = jest.fn().mockImplementation(() => Promise.resolve());
         (simulatorPageProcessor as any).saveScanResult = saveScanResultFn;
+        const saveScanMetadataFn = jest.fn().mockImplementation(() => Promise.resolve());
+        (simulatorPageProcessor as any).saveScanMetadata = saveScanMetadataFn;
 
         await simulatorPageProcessor.requestHandler(context);
         expect(enqueueLinksFn).toBeCalledWith(context);
         expect(saveSnapshotFn).toBeCalledWith(context.page, context.request.id);
         expect(pushScanDataFn).toBeCalledWith(expectedScanData);
         expect(saveScanResultFn).toBeCalledWith(context.request, expectedScanData.issueCount, activeElement.selector);
+        expect(saveScanMetadataFn).toBeCalledWith(testUrl, puppeteerPageStub);
     });
 });

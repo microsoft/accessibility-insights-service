@@ -26,7 +26,7 @@ describe(ApifyRequestQueueCreator, () => {
 
         Crawlee.RequestQueue.open = jest.fn().mockImplementation(() => Promise.resolve(queueMock.object));
         queueMock
-            .setup((o) => o.addRequest({ url: baseUrl }))
+            .setup((o) => o.addRequest({ url: baseUrl, skipNavigation: true }))
             .returns(() => Promise.resolve(undefined))
             .verifiable();
 
@@ -66,11 +66,11 @@ describe(ApifyRequestQueueCreator, () => {
             const inputUrls = ['url1', 'url2'];
 
             queueMock
-                .setup((o) => o.addRequest({ url: 'url1' }, { forefront: true }))
+                .setup((o) => o.addRequest({ url: 'url1', skipNavigation: true }, { forefront: true }))
                 .returns(() => Promise.resolve(undefined))
                 .verifiable();
             queueMock
-                .setup((o) => o.addRequest({ url: 'url2' }, { forefront: true }))
+                .setup((o) => o.addRequest({ url: 'url2', skipNavigation: true }, { forefront: true }))
                 .returns(() => Promise.resolve(undefined))
                 .verifiable();
 

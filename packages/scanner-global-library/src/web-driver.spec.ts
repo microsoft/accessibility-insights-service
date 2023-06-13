@@ -187,6 +187,7 @@ describe('WebDriver', () => {
         const stealthPlugin = (testSubject as any).stealthPlugin as StealthPluginType;
 
         expect(stealthPlugin.enabledEvasions.has('iframe.contentWindow')).toEqual(false);
+        expect(stealthPlugin.enabledEvasions.has('user-agent-override')).toEqual(false);
     });
 
     it('should connect to existing puppeteer browser', async () => {
@@ -204,7 +205,7 @@ describe('WebDriver', () => {
             .setup((o) => o.loadCompleted)
             .returns(() => true)
             .verifiable();
-        const pageCreated = await testSubject.pageCreated();
+        const pageCreated = await testSubject.waitForPageCreation();
         expect(pageCreated).toEqual(true);
     });
 

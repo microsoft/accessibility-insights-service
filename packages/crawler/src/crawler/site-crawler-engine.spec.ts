@@ -5,7 +5,12 @@ import 'reflect-metadata';
 
 import * as Crawlee from '@crawlee/puppeteer';
 import { IMock, It, Mock } from 'typemoq';
-import puppeteer, * as Puppeteer from 'puppeteer';
+import * as Puppeteer from 'puppeteer';
+// eslint-disable-next-line @typescript-eslint/tslint/config
+import PuppeteerExtra, { PuppeteerExtraPlugin } from 'puppeteer-extra';
+// eslint-disable-next-line @typescript-eslint/tslint/config
+import StealthPlugin from 'puppeteer-extra-plugin-stealth';
+import { StealthPluginType, UserAgentPlugin } from 'scanner-global-library';
 import { PageProcessor, PageProcessorBase } from '../page-processors/page-processor-base';
 import { CrawlerRunOptions } from '../types/crawler-run-options';
 import { AuthenticatorFactory } from '../authenticator/authenticator-factory';
@@ -20,33 +25,35 @@ import { CrawlerFactory } from './crawler-factory';
    no-empty,@typescript-eslint/no-empty-function,
    @typescript-eslint/consistent-type-assertions */
 
+const puppeteerDefaultOptions = [
+    '--disable-dev-shm-usage',
+    '--no-sandbox',
+    '--disable-setuid-sandbox',
+    '--js-flags=--max-old-space-size=8192',
+];
+const maxRequestsPerCrawl: number = 100;
+const pageProcessorStub: PageProcessor = {
+    requestHandler: () => Promise.resolve(null),
+    failedRequestHandler: () => Promise.resolve(null),
+};
+
+let pageProcessorFactoryStub: () => PageProcessorBase;
+let authenticatorFactoryMock: IMock<AuthenticatorFactory>;
+let crawlerRunOptions: CrawlerRunOptions;
+let crawlerFactoryMock: IMock<CrawlerFactory>;
+let requestQueueStub: Crawlee.RequestQueue;
+let puppeteerCrawlerMock: IMock<Crawlee.PuppeteerCrawler>;
+let crawlerConfigurationMock: IMock<CrawlerConfiguration>;
+let puppeteerCrawlerOptions: Crawlee.PuppeteerCrawlerOptions;
+let crawlerEngine: SiteCrawlerEngine;
+let requestQueueProvider: ApifyRequestQueueProvider;
+let authenticatorMock: IMock<Authenticator>;
+let puppeteerExtraMock: IMock<typeof PuppeteerExtra>;
+let userAgentPluginMock: IMock<UserAgentPlugin>;
+let ItIsOptionsWith: () => Crawlee.PuppeteerCrawlerOptions;
+let puppeteerMock: IMock<typeof Puppeteer>;
+
 describe(SiteCrawlerEngine, () => {
-    const puppeteerDefaultOptions = [
-        '--disable-dev-shm-usage',
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--js-flags=--max-old-space-size=8192',
-    ];
-    const maxRequestsPerCrawl: number = 100;
-    const pageProcessorStub: PageProcessor = {
-        requestHandler: () => null,
-        failedRequestHandler: () => null,
-        preNavigationHook: () => null,
-        postNavigationHook: () => null,
-    };
-
-    let pageProcessorFactoryStub: () => PageProcessorBase;
-    let authenticatorFactoryMock: IMock<AuthenticatorFactory>;
-    let crawlerRunOptions: CrawlerRunOptions;
-    let crawlerFactoryMock: IMock<CrawlerFactory>;
-    let requestQueueStub: Crawlee.RequestQueue;
-    let puppeteerCrawlerMock: IMock<Crawlee.PuppeteerCrawler>;
-    let crawlerConfigurationMock: IMock<CrawlerConfiguration>;
-    let puppeteerCrawlerOptions: Crawlee.PuppeteerCrawlerOptions;
-    let crawlerEngine: SiteCrawlerEngine;
-    let requestQueueProvider: ApifyRequestQueueProvider;
-    let authenticatorMock: IMock<Authenticator>;
-
     beforeEach(() => {
         authenticatorFactoryMock = Mock.ofType<AuthenticatorFactory>();
         crawlerFactoryMock = Mock.ofType<CrawlerFactory>();
@@ -54,8 +61,11 @@ describe(SiteCrawlerEngine, () => {
         puppeteerCrawlerMock = Mock.ofType<Crawlee.PuppeteerCrawler>();
         crawlerConfigurationMock = Mock.ofType(CrawlerConfiguration);
         authenticatorMock = Mock.ofType<Authenticator>();
+        puppeteerExtraMock = Mock.ofType<typeof PuppeteerExtra>();
+        userAgentPluginMock = Mock.ofType<UserAgentPlugin>();
+        puppeteerMock = Mock.ofType<typeof Puppeteer>();
 
-        puppeteer.executablePath = () => 'executablePath';
+        puppeteerMock.setup((o) => o.executablePath()).returns(() => 'executablePath');
 
         crawlerRunOptions = {
             localOutputDir: 'localOutputDir',
@@ -79,10 +89,9 @@ describe(SiteCrawlerEngine, () => {
             requestQueue: requestQueueStub,
             requestHandler: pageProcessorStub.requestHandler,
             failedRequestHandler: pageProcessorStub.failedRequestHandler,
-            preNavigationHooks: [pageProcessorStub.preNavigationHook],
-            postNavigationHooks: [pageProcessorStub.postNavigationHook],
             maxRequestsPerCrawl: maxRequestsPerCrawl,
             launchContext: {
+                launcher: puppeteerExtraMock.object,
                 launchOptions: {
                     ignoreDefaultArgs: puppeteerDefaultOptions,
                     defaultViewport: {
@@ -91,11 +100,18 @@ describe(SiteCrawlerEngine, () => {
                         deviceScaleFactor: 1,
                     },
                     executablePath: crawlerRunOptions.chromePath ?? 'executablePath',
-                } as Puppeteer.LaunchOptions,
+                },
             },
         };
+        ItIsOptionsWith = () =>
+            It.isObjectWith(puppeteerCrawlerOptions) &&
+            It.is(
+                (o: Crawlee.PuppeteerCrawlerOptions) =>
+                    o.browserPoolOptions.useFingerprints === false && o.browserPoolOptions.postPageCreateHooks !== undefined,
+            );
 
         puppeteerCrawlerMock.setup((o) => o.run()).verifiable();
+        setupPuppeteerPlugins();
 
         requestQueueProvider = () => Promise.resolve(requestQueueStub);
         pageProcessorFactoryStub = jest.fn().mockImplementation(() => pageProcessorStub as PageProcessorBase);
@@ -105,6 +121,10 @@ describe(SiteCrawlerEngine, () => {
             crawlerFactoryMock.object,
             authenticatorFactoryMock.object,
             crawlerConfigurationMock.object,
+            userAgentPluginMock.object,
+            puppeteerMock.object,
+            puppeteerExtraMock.object,
+            StealthPlugin(),
         );
     });
 
@@ -115,25 +135,26 @@ describe(SiteCrawlerEngine, () => {
         authenticatorFactoryMock.verifyAll();
         authenticatorMock.verifyAll();
         expect(pageProcessorFactoryStub).toHaveBeenCalledTimes(1);
+        validateStealthPlugins();
     });
 
-    it('Run crawler with settings validation', async () => {
+    it('run crawler with settings validation', async () => {
         crawlerFactoryMock
-            .setup((o) => o.createPuppeteerCrawler(puppeteerCrawlerOptions))
+            .setup((o) => o.createPuppeteerCrawler(ItIsOptionsWith()))
             .returns(() => puppeteerCrawlerMock.object)
             .verifiable();
 
         await crawlerEngine.start(crawlerRunOptions);
     });
 
-    it('Run crawler while chrome path is set', async () => {
+    it('run crawler while chrome path is set', async () => {
         crawlerRunOptions.chromePath = 'chrome path';
         crawlerConfigurationMock.setup((o) => o.setChromePath(crawlerRunOptions.chromePath)).verifiable();
 
         puppeteerCrawlerOptions.launchContext.useChrome = true;
         puppeteerCrawlerOptions.launchContext.launchOptions.executablePath = crawlerRunOptions.chromePath;
         crawlerFactoryMock
-            .setup((o) => o.createPuppeteerCrawler(puppeteerCrawlerOptions))
+            .setup((o) => o.createPuppeteerCrawler(ItIsOptionsWith()))
             .returns(() => puppeteerCrawlerMock.object)
             .verifiable();
 
@@ -149,14 +170,14 @@ describe(SiteCrawlerEngine, () => {
         }
 
         crawlerFactoryMock
-            .setup((o) => o.createPuppeteerCrawler(puppeteerCrawlerOptions))
+            .setup((o) => o.createPuppeteerCrawler(ItIsOptionsWith()))
             .returns(() => puppeteerCrawlerMock.object)
             .verifiable();
 
         await crawlerEngine.start(crawlerRunOptions);
     });
 
-    it('Run crawler while serviceAccountName, serviceAccountPassword, and authType are set', async () => {
+    it('run crawler while serviceAccountName, serviceAccountPassword, and authType are set', async () => {
         const testAccountName = 'testAccount@microsoft.com';
         const testAccountPassword = 'testpassword';
         const testAuthType = 'AAD';
@@ -170,16 +191,29 @@ describe(SiteCrawlerEngine, () => {
             .verifiable();
 
         crawlerFactoryMock
-            .setup((o) =>
-                o.createPuppeteerCrawler(
-                    It.is<Crawlee.PuppeteerCrawlerOptions>((options) => {
-                        return options.browserPoolOptions.browserPlugins[0].name === 'PuppeteerPlugin';
-                    }),
-                ),
-            )
+            .setup((o) => o.createPuppeteerCrawler(ItIsOptionsWith()))
             .returns(() => puppeteerCrawlerMock.object)
             .verifiable();
 
         await crawlerEngine.start(crawlerRunOptions);
     });
 });
+
+function setupPuppeteerPlugins(): void {
+    const userAgentPlugin = { name: 'user-agent-plugin' } as unknown as PuppeteerExtraPlugin;
+    const stealthAgentPlugin = { name: 'stealth' } as unknown as PuppeteerExtraPlugin;
+    puppeteerExtraMock
+        .setup((o) => o.use(It.isObjectWith(userAgentPlugin)))
+        .returns(() => puppeteerExtraMock.object)
+        .verifiable();
+    puppeteerExtraMock
+        .setup((o) => o.use(It.isObjectWith(stealthAgentPlugin)))
+        .returns(() => puppeteerExtraMock.object)
+        .verifiable();
+}
+
+function validateStealthPlugins(): void {
+    const stealthPlugin = (crawlerEngine as any).stealthPlugin as StealthPluginType;
+    expect(stealthPlugin.enabledEvasions.has('iframe.contentWindow')).toEqual(false);
+    expect(stealthPlugin.enabledEvasions.has('user-agent-override')).toEqual(false);
+}

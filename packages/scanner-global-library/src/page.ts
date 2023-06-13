@@ -99,7 +99,7 @@ export class Page {
         this.userAgent = await this.browser.userAgent();
         this.page = await this.browser.newPage();
 
-        const pageCreated = await this.webDriver.pageCreated();
+        const pageCreated = await this.webDriver.waitForPageCreation();
         if (pageCreated !== true) {
             this.logger?.logWarn('Browser plugins did not complete load on page create event.');
         }
