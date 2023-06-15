@@ -8,13 +8,13 @@ import { IMock, Mock } from 'typemoq';
 import * as Crawlee from '@crawlee/puppeteer';
 import { SetRequired } from 'type-fest';
 import { CrawlerRunOptions } from '../types/crawler-run-options';
-import { ApifyRequestQueueProvider } from '../apify/apify-request-queue-creator';
+import { ApifyRequestQueueFactory } from '../apify/apify-request-queue-creator';
 import { CrawlerConfiguration } from './crawler-configuration';
 import { PageCrawlerEngine } from './page-crawler-engine';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-let requestQueueProviderMock: IMock<ApifyRequestQueueProvider>;
+let requestQueueProviderMock: IMock<ApifyRequestQueueFactory>;
 let crawlerConfigurationMock: IMock<CrawlerConfiguration>;
 let requestQueueStub: Crawlee.RequestQueue;
 let pageStub: Page;

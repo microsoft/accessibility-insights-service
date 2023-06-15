@@ -3,7 +3,6 @@
 
 import * as Crawlee from '@crawlee/puppeteer';
 import { inject, injectable } from 'inversify';
-import { PageNavigator } from 'scanner-global-library';
 import { ActiveElement } from '../browser-components/active-elements-finder';
 import { CrawlerConfiguration } from '../crawler/crawler-configuration';
 import { DataBase } from '../level-storage/data-base';
@@ -14,6 +13,7 @@ import { Operation } from '../page-operations/operation';
 import { LocalBlobStore } from '../storage/local-blob-store';
 import { LocalDataStore } from '../storage/local-data-store';
 import { BlobStore, DataStore } from '../storage/store-types';
+import { PageNavigatorFactory, crawlerIocTypes } from '../types/ioc-types';
 import { PageProcessorBase } from './page-processor-base';
 
 /* eslint-disable no-invalid-this */
@@ -79,11 +79,11 @@ export class SimulatorPageProcessor extends PageProcessorBase {
         @inject(DataBase) protected readonly dataBase: DataBase,
         @inject(EnqueueActiveElementsOperation) protected readonly enqueueActiveElementsOp: EnqueueActiveElementsOperation,
         @inject(ClickElementOperation) protected readonly clickElementOp: ClickElementOperation,
-        @inject(PageNavigator) protected readonly pageNavigator: PageNavigator,
         @inject(CrawlerConfiguration) protected readonly crawlerConfiguration: CrawlerConfiguration,
+        @inject(crawlerIocTypes.PageNavigatorFactory) protected readonly pageNavigatorFactory: PageNavigatorFactory,
         protected readonly saveSnapshotExt: typeof Crawlee.puppeteerUtils.saveSnapshot = Crawlee.puppeteerUtils.saveSnapshot,
     ) {
-        super(accessibilityScanOp, dataStore, blobStore, dataBase, pageNavigator, crawlerConfiguration, saveSnapshotExt);
+        super(accessibilityScanOp, dataStore, blobStore, dataBase, crawlerConfiguration, pageNavigatorFactory, saveSnapshotExt);
         this.selectors = this.crawlerConfiguration.selectors();
     }
 }

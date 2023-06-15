@@ -13,7 +13,7 @@ export type RequestQueueOptions = {
     inputUrls?: string[];
 };
 
-export type ApifyRequestQueueProvider = () => Promise<Crawlee.RequestQueue>;
+export type ApifyRequestQueueFactory = () => Promise<Crawlee.RequestQueue>;
 
 export interface ResourceCreator {
     createRequestQueue(baseUrl: string, options?: RequestQueueOptions): Promise<Crawlee.RequestQueue>;

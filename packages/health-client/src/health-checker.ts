@@ -7,11 +7,11 @@ import { ServiceConfiguration, System } from 'common';
 import { ConsoleLoggerClient, GlobalLogger } from 'logger';
 import { A11yServiceClient, A11yServiceCredential } from 'web-api-client';
 import * as yargs from 'yargs';
-import _ from 'lodash';
 import { ScanReportDownloader } from './scan-report-downloader';
 import { DeploymentHealthChecker } from './deployment-health-checker';
 
 /* eslint-disable radix, @typescript-eslint/no-explicit-any, @typescript-eslint/strict-boolean-expressions */
+
 type Argv = {
     clientId: string;
     clientSecret: string;
@@ -27,7 +27,7 @@ const testTimeoutInMinutes = 75;
 const argv: Argv = yargs.argv as any;
 
 (async () => {
-    const logger = new GlobalLogger([new ConsoleLoggerClient(new ServiceConfiguration(), console)], process);
+    const logger = new GlobalLogger([new ConsoleLoggerClient(new ServiceConfiguration(), console)]);
     await logger.setup();
 
     const serviceCredential = new A11yServiceCredential(argv.clientId, argv.clientSecret, argv.clientId, argv.authorityUrl, logger);

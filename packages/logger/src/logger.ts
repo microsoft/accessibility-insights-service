@@ -16,15 +16,11 @@ export enum LogLevel {
 }
 
 export abstract class Logger {
-    protected initialized: boolean = false;
+    public initialized: boolean = false;
 
     protected isDebugEnabled: boolean = false;
 
-    constructor(
-        protected readonly loggerClients: LoggerClient[],
-        protected readonly currentProcess: typeof process,
-        protected readonly initializationTimeout: number = 5000,
-    ) {}
+    constructor(public readonly loggerClients: LoggerClient[], protected readonly initializationTimeout: number = 5000) {}
 
     public async setup(baseProperties?: { [property: string]: string }): Promise<void> {
         if (this.initialized === true) {
@@ -103,12 +99,10 @@ export abstract class Logger {
     }
 
     private async initializeClients(baseProperties?: { [property: string]: string }): Promise<void> {
-        const threshold = new Date().valueOf() + this.initializationTimeout;
-        while (this.loggerClients.some((client) => !client.initialized) && new Date().valueOf() <= threshold) {
-            // eslint-disable-next-line @typescript-eslint/no-floating-promises
-            this.invokeLoggerClientAsync(async (client) => client.setup(baseProperties));
-            await System.wait(100);
-        }
+        await Promise.race([
+            this.invokeLoggerClientAsync(async (client) => client.setup(baseProperties)),
+            System.wait(this.initializationTimeout),
+        ]);
 
         if (this.loggerClients.some((client) => !client.initialized)) {
             throw new Error(

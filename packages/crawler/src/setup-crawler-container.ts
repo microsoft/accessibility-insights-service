@@ -3,6 +3,9 @@
 
 import { reporterFactory } from 'accessibility-insights-report';
 import * as inversify from 'inversify';
+import { PageNavigator } from 'scanner-global-library';
+import { ApifyConsoleLoggerClient, GlobalLogger } from 'logger';
+import * as Crawlee from '@crawlee/puppeteer';
 import { ApifyRequestQueueCreator } from './apify/apify-request-queue-creator';
 import { Crawler } from './crawler';
 import { CrawlerConfiguration } from './crawler/crawler-configuration';
@@ -21,7 +24,7 @@ export function setupLocalCrawlerContainer(container: inversify.Container): inve
     container.bind(crawlerIocTypes.ReporterFactory).toConstantValue(reporterFactory);
     container.bind(crawlerIocTypes.CrawlerEngine).to(SiteCrawlerEngine);
 
-    setupSingletonProvider(crawlerIocTypes.ApifyRequestQueueProvider, container, async (context: inversify.interfaces.Context) => {
+    setupSingletonProvider(crawlerIocTypes.ApifyRequestQueueFactory, container, async (context: inversify.interfaces.Context) => {
         const apifyResourceCreator = context.container.get(ApifyRequestQueueCreator);
         const crawlerConfiguration = context.container.get(CrawlerConfiguration);
 
@@ -42,6 +45,23 @@ export function setupLocalCrawlerContainer(container: inversify.Container): inve
             };
         });
 
+    // factory to create PageNavigator isolated object instance per crawler request
+    container
+        .bind<inversify.interfaces.Factory<Promise<PageNavigator>>>(crawlerIocTypes.PageNavigatorFactory)
+        .toFactory<Promise<PageNavigator>>((context: inversify.interfaces.Context) => {
+            return async (log?: Crawlee.Log) => {
+                const client = new ApifyConsoleLoggerClient(log);
+                const logger = new GlobalLogger([client]);
+                await logger.setup();
+
+                const childContainer = context.container.createChild();
+                childContainer.bind(GlobalLogger).toConstantValue(logger);
+                const pageNavigator = childContainer.get<PageNavigator>(PageNavigator);
+
+                return pageNavigator;
+            };
+        });
+
     return container;
 }
 
@@ -49,14 +69,14 @@ export function setupCloudCrawlerContainer(container: inversify.Container): inve
     container.options.skipBaseClassChecks = true;
     container.bind(crawlerIocTypes.CrawlerEngine).to(PageCrawlerEngine);
     container.bind(CrawlerConfiguration).toSelf().inSingletonScope();
-    setupSingletonProvider(crawlerIocTypes.ApifyRequestQueueProvider, container, async (context: inversify.interfaces.Context) => {
+    setupSingletonProvider(crawlerIocTypes.ApifyRequestQueueFactory, container, async (context: inversify.interfaces.Context) => {
         const apifyResourceCreator = context.container.get(ApifyRequestQueueCreator);
         const crawlerConfiguration = context.container.get(CrawlerConfiguration);
 
         return apifyResourceCreator.createRequestQueue(crawlerConfiguration.baseUrl(), crawlerConfiguration.requestQueueOptions());
     });
 
-    setupSingletonProvider(crawlerIocTypes.CrawlerProvider, container, async (context: inversify.interfaces.Context) => {
+    setupSingletonProvider(crawlerIocTypes.CrawlerFactory, container, async (context: inversify.interfaces.Context) => {
         return new Crawler(context.container);
     });
 

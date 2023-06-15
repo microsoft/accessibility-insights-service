@@ -82,12 +82,12 @@ export class PageRequestInterceptor {
                         await this.pageOnRequest(interceptedRequest);
                     }
                 }
+
+                if (!request.isInterceptResolutionHandled()) {
+                    await request.continue();
+                }
             } catch (e) {
                 this.traceError('request', e);
-            }
-
-            if (!request.isInterceptResolutionHandled()) {
-                await request.continue();
             }
         };
         page.on('request', this.pageOnRequestEventHandler);

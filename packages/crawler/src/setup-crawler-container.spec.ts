@@ -8,7 +8,7 @@ import { registerLoggerToContainer } from 'logger';
 import { CrawlerConfiguration } from './crawler/crawler-configuration';
 import { DataBase } from './level-storage/data-base';
 import { setupCloudCrawlerContainer, setupLocalCrawlerContainer } from './setup-crawler-container';
-import { crawlerIocTypes } from './types/ioc-types';
+import { crawlerIocTypes, PageNavigatorFactory } from './types/ioc-types';
 
 /* eslint-disable @typescript-eslint/consistent-type-assertions */
 
@@ -20,9 +20,10 @@ describe(setupLocalCrawlerContainer, () => {
         expect(container.get(CrawlerConfiguration)).toBeDefined();
         expect(container.get(DataBase)).toBeDefined();
         expect(container.get(crawlerIocTypes.ReporterFactory)).toBeDefined();
-        expect(container.get(crawlerIocTypes.ApifyRequestQueueProvider)).toBeDefined();
+        expect(container.get(crawlerIocTypes.ApifyRequestQueueFactory)).toBeDefined();
         expect(container.get(crawlerIocTypes.PageProcessorFactory)).toBeDefined();
         expect(container.get(crawlerIocTypes.CrawlerEngine)).toBeDefined();
+        expect(container.get<PageNavigatorFactory>).toBeDefined();
     });
 });
 
@@ -33,7 +34,7 @@ describe(setupCloudCrawlerContainer, () => {
         setupCloudCrawlerContainer(container);
 
         expect(container.get(CrawlerConfiguration)).toBeDefined();
-        expect(container.get(crawlerIocTypes.ApifyRequestQueueProvider)).toBeDefined();
+        expect(container.get(crawlerIocTypes.ApifyRequestQueueFactory)).toBeDefined();
         expect(container.get(crawlerIocTypes.CrawlerEngine)).toBeDefined();
     });
 });

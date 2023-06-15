@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 export { CrawlerRunOptions } from './types/crawler-run-options';
-export { crawlerIocTypes } from './types/ioc-types';
+export * from './types/ioc-types';
 export { Crawler } from './crawler';
 export { setupLocalCrawlerContainer, setupCloudCrawlerContainer } from './setup-crawler-container';
 export * from './level-storage/storage-documents';

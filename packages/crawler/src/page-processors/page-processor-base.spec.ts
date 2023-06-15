@@ -5,14 +5,17 @@ import 'reflect-metadata';
 
 import { Page, Browser } from 'puppeteer';
 import { NavigationResponse, PageNavigator } from 'scanner-global-library';
-import { IMock, Mock, Times } from 'typemoq';
+import { IMock, Mock, Times, It } from 'typemoq';
 import { System } from 'common';
 import * as Crawlee from '@crawlee/puppeteer';
+import { GlobalLogger } from 'logger';
 import { CrawlerConfiguration } from '../crawler/crawler-configuration';
 import { DataBase } from '../level-storage/data-base';
 import { AccessibilityScanOperation } from '../page-operations/accessibility-scan-operation';
 import { BlobStore, DataStore } from '../storage/store-types';
 import { ScanData } from '../types/scan-data';
+import { PageNavigatorFactory } from '../types/ioc-types';
+import { getPromisableDynamicMock } from '../test-utilities/promisable-mock';
 import { PageProcessorBase } from './page-processor-base';
 
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/consistent-type-assertions */
@@ -57,6 +60,8 @@ describe(PageProcessorBase, () => {
     let puppeteerPageStub: Page;
     let pageProcessorBase: TestablePageProcessor;
     let browserMock: IMock<Browser>;
+    let pageNavigatorFactoryMock: IMock<PageNavigatorFactory>;
+    let loggerMock: IMock<GlobalLogger>;
 
     beforeEach(() => {
         accessibilityScanOpMock = Mock.ofType<AccessibilityScanOperation>();
@@ -65,9 +70,11 @@ describe(PageProcessorBase, () => {
         dataBaseMock = Mock.ofType<DataBase>();
         saveSnapshotMock = Mock.ofType<typeof Crawlee.puppeteerUtils.saveSnapshot>();
         processPageMock = Mock.ofType<Crawlee.PuppeteerRequestHandler>();
-        pageNavigatorMock = Mock.ofType<PageNavigator>();
+        pageNavigatorMock = getPromisableDynamicMock(Mock.ofType<PageNavigator>());
         crawlerConfigurationMock = Mock.ofType(CrawlerConfiguration);
         browserMock = Mock.ofType<Browser>();
+        loggerMock = Mock.ofType<GlobalLogger>();
+        pageNavigatorFactoryMock = Mock.ofType<PageNavigatorFactory>();
         crawlerConfigurationMock
             .setup((o) => o.discoveryPatterns())
             .returns(() => discoveryPatterns)
@@ -95,14 +102,16 @@ describe(PageProcessorBase, () => {
                     height: 1080,
                 }),
         } as any;
+        pageNavigatorMock.setup((o) => o.logger).returns(() => loggerMock.object);
+        pageNavigatorFactoryMock.setup((o) => o(It.isAny())).returns(() => Promise.resolve(pageNavigatorMock.object));
 
         pageProcessorBase = new TestablePageProcessor(
             accessibilityScanOpMock.object,
             dataStoreMock.object,
             blobStoreMock.object,
             dataBaseMock.object,
-            pageNavigatorMock.object,
             crawlerConfigurationMock.object,
+            pageNavigatorFactoryMock.object,
             saveSnapshotMock.object,
         );
         pageProcessorBase.processPage = processPageMock.object;
@@ -116,6 +125,7 @@ describe(PageProcessorBase, () => {
         pageNavigatorMock.verifyAll();
         dataBaseMock.verifyAll();
         crawlerConfigurationMock.verifyAll();
+        loggerMock.verifyAll();
     });
 
     it('failedRequestHandler', async () => {
@@ -144,6 +154,7 @@ describe(PageProcessorBase, () => {
             },
         } as any;
         processPageMock.setup((o) => o(context)).verifiable();
+        loggerMock.setup((o) => o.setCommonProperties({ requestId: requestStub.id, url: requestStub.url })).verifiable();
         pageNavigatorMock
             .setup((o) => o.navigate(testUrl, puppeteerPageStub))
             .returns(() => Promise.resolve({}))
@@ -165,6 +176,7 @@ describe(PageProcessorBase, () => {
         } as any;
         const response = { browserError: {} } as NavigationResponse;
         processPageMock.setup((o) => o(context)).verifiable(Times.never());
+        loggerMock.setup((o) => o.setCommonProperties({ requestId: requestStub.id, url: requestStub.url })).verifiable();
         pageNavigatorMock
             .setup((o) => o.navigate(testUrl, puppeteerPageStub))
             .returns(() => Promise.resolve(response))
@@ -188,6 +200,7 @@ describe(PageProcessorBase, () => {
             .throws(error)
             .verifiable();
         setupScanErrorLogging();
+        loggerMock.setup((o) => o.setCommonProperties({ requestId: requestStub.id, url: requestStub.url })).verifiable();
         pageNavigatorMock
             .setup((o) => o.navigate(testUrl, puppeteerPageStub))
             .returns(() => Promise.resolve({}))

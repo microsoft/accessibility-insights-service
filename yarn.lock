@@ -64,7 +64,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@apify/log@npm:^2.0.0, @apify/log@npm:^2.2.18, @apify/log@npm:^2.2.8":
+"@apify/log@npm:2.2.18, @apify/log@npm:^2.0.0, @apify/log@npm:^2.2.18, @apify/log@npm:^2.2.8":
   version: 2.2.18
   resolution: "@apify/log@npm:2.2.18"
   dependencies:
@@ -10754,6 +10754,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "logger@workspace:packages/logger"
   dependencies:
+    "@apify/log": 2.2.18
     "@types/dotenv": ^8.2.0
     "@types/jest": ^29.5.0
     "@types/lodash": ^4.14.182

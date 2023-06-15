@@ -20,9 +20,7 @@ export class UserAgentPlugin extends PuppeteerExtraPlugin {
     constructor(
         @inject(iocTypes.SecretVaultProvider)
         @optional()
-        private readonly secretVaultProvider: () => Promise<SecretVault> = async () => {
-            return { webScannerBypassKey: '1' };
-        },
+        private readonly secretVaultProvider: () => Promise<SecretVault> = () => Promise.resolve({ webScannerBypassKey: '1.0' }),
         @inject(LoginPageDetector) @optional() private readonly loginPageDetector: LoginPageDetector,
         private readonly userAgent: string = process.env.USER_AGENT,
         opts: PluginOptions = undefined,

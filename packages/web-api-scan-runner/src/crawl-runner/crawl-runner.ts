@@ -8,14 +8,14 @@ import * as Puppeteer from 'puppeteer';
 import { BatchConfig } from 'azure-services';
 import { System } from 'common';
 
-type CrawlerProvider = () => Promise<Crawler<string[]>>;
+type CrawlerFactory = () => Promise<Crawler<string[]>>;
 
 @injectable()
 export class CrawlRunner {
     private readonly storageDirName = 'crawler_storage';
 
     constructor(
-        @inject(crawlerIocTypes.CrawlerProvider) private readonly getCrawler: CrawlerProvider,
+        @inject(crawlerIocTypes.CrawlerFactory) private readonly getCrawler: CrawlerFactory,
         @inject(GlobalLogger) private readonly logger: GlobalLogger,
         @inject(BatchConfig) private readonly batchConfig: BatchConfig,
     ) {}

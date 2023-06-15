@@ -132,7 +132,7 @@ describe('functional tests', () => {
         const container = new Container({ autoBindInjectable: true });
         setupRuntimeConfigContainer(container);
         container.bind(GlobalLogger).toDynamicValue((_) => {
-            return new GlobalLogger([new ConsoleLoggerClient(container.get(ServiceConfiguration), console)], process);
+            return new GlobalLogger([new ConsoleLoggerClient(container.get(ServiceConfiguration), console)]);
         });
         registerAzureServicesToContainer(container, CredentialType.AppService);
 

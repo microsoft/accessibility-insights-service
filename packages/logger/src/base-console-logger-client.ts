@@ -4,8 +4,8 @@
 import * as utils from 'util';
 import { ServiceConfiguration, System } from 'common';
 import { inject, injectable } from 'inversify';
-import _ from 'lodash';
 import moment from 'moment';
+import { isEmpty } from 'lodash';
 import { AvailabilityTelemetry } from './availability-telemetry';
 import { BaseTelemetryProperties } from './base-telemetry-properties';
 import { LogLevel } from './logger';
@@ -81,11 +81,11 @@ export abstract class BaseConsoleLoggerClient implements LoggerClient {
     private getPrintablePropertiesString(properties?: { [name: string]: string }): string {
         const allProperties = { ...this.baseProperties, ...this.getPropertiesToAddToEvent(), ...properties };
 
-        return _.isEmpty(allProperties) ? '' : `${this.getPrintableString(allProperties)}`;
+        return isEmpty(allProperties) ? '' : `${this.getPrintableString(allProperties)}`;
     }
 
     private getPrintableMeasurementsString(measurements?: BaseTelemetryMeasurements): string {
-        return _.isEmpty(measurements) ? '' : `${this.getPrintableString(measurements)}`;
+        return isEmpty(measurements) ? '' : `${this.getPrintableString(measurements)}`;
     }
 
     private executeInDebugMode(action: () => void): void {

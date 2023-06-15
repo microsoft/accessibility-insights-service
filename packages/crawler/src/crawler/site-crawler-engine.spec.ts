@@ -15,7 +15,7 @@ import { PageProcessor, PageProcessorBase } from '../page-processors/page-proces
 import { CrawlerRunOptions } from '../types/crawler-run-options';
 import { AuthenticatorFactory } from '../authenticator/authenticator-factory';
 import { Authenticator } from '../authenticator/authenticator';
-import { ApifyRequestQueueProvider } from '../apify/apify-request-queue-creator';
+import { ApifyRequestQueueFactory } from '../apify/apify-request-queue-creator';
 import { CrawlerConfiguration } from './crawler-configuration';
 import { SiteCrawlerEngine } from './site-crawler-engine';
 import { CrawlerFactory } from './crawler-factory';
@@ -46,7 +46,7 @@ let puppeteerCrawlerMock: IMock<Crawlee.PuppeteerCrawler>;
 let crawlerConfigurationMock: IMock<CrawlerConfiguration>;
 let puppeteerCrawlerOptions: Crawlee.PuppeteerCrawlerOptions;
 let crawlerEngine: SiteCrawlerEngine;
-let requestQueueProvider: ApifyRequestQueueProvider;
+let requestQueueProvider: ApifyRequestQueueFactory;
 let authenticatorMock: IMock<Authenticator>;
 let puppeteerExtraMock: IMock<typeof PuppeteerExtra>;
 let userAgentPluginMock: IMock<UserAgentPlugin>;

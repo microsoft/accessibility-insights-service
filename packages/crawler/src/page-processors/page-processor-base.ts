@@ -3,7 +3,7 @@
 
 import { inject, injectable } from 'inversify';
 import * as Puppeteer from 'puppeteer';
-import { BrowserError, PageNavigator } from 'scanner-global-library';
+import { BrowserError } from 'scanner-global-library';
 import { System } from 'common';
 import { isArray } from 'lodash';
 import * as Crawlee from '@crawlee/puppeteer';
@@ -14,6 +14,7 @@ import { LocalBlobStore } from '../storage/local-blob-store';
 import { LocalDataStore } from '../storage/local-data-store';
 import { BlobStore, DataStore, scanResultStorageName } from '../storage/store-types';
 import { ScanData } from '../types/scan-data';
+import { PageNavigatorFactory, crawlerIocTypes } from '../types/ioc-types';
 
 /* eslint-disable no-invalid-this, @typescript-eslint/no-explicit-any */
 
@@ -52,14 +53,18 @@ export abstract class PageProcessorBase implements PageProcessor {
     public requestHandler: Crawlee.PuppeteerRequestHandler = async (context) => {
         let response;
         try {
-            if (
-                isArray(context.session?.userData) &&
-                (context.session.userData as SessionData[]).find((s) => s.requestId === context.request.id)
-            ) {
+            if (!isArray(context.session?.userData)) {
+                context.session.userData = [];
+            }
+
+            if ((context.session.userData as SessionData[]).find((s) => s.requestId === context.request.id)) {
                 return;
             }
 
-            response = await this.pageNavigator.navigate(context.request.url, context.page);
+            const pageNavigator = await this.pageNavigatorFactory(context.log);
+            pageNavigator.logger.setCommonProperties({ requestId: context.request.id, url: context.request.url });
+
+            response = await pageNavigator.navigate(context.request.url, context.page);
             if (response.browserError) {
                 return;
             }
@@ -73,7 +78,7 @@ export abstract class PageProcessorBase implements PageProcessor {
             // Throw the error so Apify puts it back into the request queue to retry
             throw err;
         } finally {
-            if (response.browserError) {
+            if (response?.browserError) {
                 await this.saveBrowserError(context.request, response.browserError, context.session);
             } else {
                 await this.saveScanMetadata(context.request.url, context.page);
@@ -105,8 +110,8 @@ export abstract class PageProcessorBase implements PageProcessor {
         @inject(LocalDataStore) protected readonly dataStore: DataStore,
         @inject(LocalBlobStore) protected readonly blobStore: BlobStore,
         @inject(DataBase) protected readonly dataBase: DataBase,
-        @inject(PageNavigator) protected readonly pageNavigator: PageNavigator,
         @inject(CrawlerConfiguration) protected readonly crawlerConfiguration: CrawlerConfiguration,
+        @inject(crawlerIocTypes.PageNavigatorFactory) protected readonly pageNavigatorFactory: PageNavigatorFactory,
         protected readonly saveSnapshotExt: typeof Crawlee.puppeteerUtils.saveSnapshot = Crawlee.puppeteerUtils.saveSnapshot,
     ) {
         this.baseUrl = this.crawlerConfiguration.baseUrl();
