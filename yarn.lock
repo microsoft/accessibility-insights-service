@@ -4533,6 +4533,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "accessibility-insights-scan@workspace:packages/cli"
   dependencies:
+    "@apify/log": 2.2.18
     "@axe-core/puppeteer": ^4.5.0
     "@crawlee/browser-pool": ^3.3.3
     "@crawlee/puppeteer": ^3.3.3
