@@ -10,7 +10,9 @@ import { PageProcessorBase } from './page-processor-base';
 @injectable()
 export class ClassicPageProcessor extends PageProcessorBase {
     public processPage: Crawlee.PuppeteerRequestHandler = async (context) => {
-        console.log(`Processing page ${context.page.url()}`);
+        this.logger.logInfo(`Processing loaded page.`, {
+            url: context.page.url(),
+        });
         await this.enqueueLinks(context);
         const axeResults = await this.accessibilityScanOp.run(
             context.page,

@@ -148,6 +148,10 @@ function getScanArguments(): ScanArguments {
                 describe:
                     'The custom value of the User-Agent HTTP request header. Defaults to the value of USER_AGENT environment variable. The option will take precedence over environment variable.',
             },
+            httpHeaders: {
+                type: 'string',
+                describe: `The custom HTTP header(s) to be send on each crawl request. Accepts JSON formatted string like {"name": "value"}.`,
+            },
         })
         .check((args) => {
             validateScanArguments(args as ScanArguments);

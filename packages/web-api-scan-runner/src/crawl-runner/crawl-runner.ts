@@ -44,7 +44,7 @@ export class CrawlRunner {
         this.logger.logInfo(`Crawler found ${result ? result.length : 0} urls on web page.`, {
             discoveryPatterns: JSON.stringify(discoveryPatterns),
             discoveredUrls: JSON.stringify(result),
-            crawlUrl: page.url(),
+            crawledUrl: page.url(),
         });
 
         return result;

@@ -5,7 +5,6 @@ import { reporterFactory } from 'accessibility-insights-report';
 import * as inversify from 'inversify';
 import { PageNavigator } from 'scanner-global-library';
 import { ApifyConsoleLoggerClient, GlobalLogger } from 'logger';
-import * as Crawlee from '@crawlee/puppeteer';
 import { ApifyRequestQueueCreator } from './apify/apify-request-queue-creator';
 import { Crawler } from './crawler';
 import { CrawlerConfiguration } from './crawler/crawler-configuration';
@@ -45,12 +44,23 @@ export function setupLocalCrawlerContainer(container: inversify.Container): inve
             };
         });
 
+    container
+        .bind(GlobalLogger)
+        .toDynamicValue(() => {
+            const client = new ApifyConsoleLoggerClient();
+            const logger = new GlobalLogger([client]);
+            logger.initialized = true;
+
+            return logger;
+        })
+        .inSingletonScope();
+
     // factory to create PageNavigator isolated object instance per crawler request
     container
         .bind<inversify.interfaces.Factory<Promise<PageNavigator>>>(crawlerIocTypes.PageNavigatorFactory)
         .toFactory<Promise<PageNavigator>>((context: inversify.interfaces.Context) => {
-            return async (log?: Crawlee.Log) => {
-                const client = new ApifyConsoleLoggerClient(log);
+            return async () => {
+                const client = new ApifyConsoleLoggerClient();
                 const logger = new GlobalLogger([client]);
                 await logger.setup();
 

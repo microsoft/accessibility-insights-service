@@ -4,12 +4,16 @@
 import { inject, injectable } from 'inversify';
 import * as Crawlee from '@crawlee/puppeteer';
 import { Url } from 'common';
+import { GlobalLogger } from 'logger';
 import { ActiveElementsFinder } from '../browser-components/active-elements-finder';
 import { Operation } from './operation';
 
 @injectable()
 export class EnqueueActiveElementsOperation {
-    constructor(@inject(ActiveElementsFinder) private readonly activeElementFinder: ActiveElementsFinder) {}
+    constructor(
+        @inject(ActiveElementsFinder) private readonly activeElementFinder: ActiveElementsFinder,
+        @inject(GlobalLogger) private readonly logger: GlobalLogger,
+    ) {}
 
     public async enqueue(context: Crawlee.PuppeteerCrawlingContext, selectors: string[]): Promise<void> {
         const url = context.page.url();
@@ -35,7 +39,7 @@ export class EnqueueActiveElementsOperation {
         );
 
         if (elements.length > 0) {
-            console.log(`Discovered ${elements.length} active elements on page ${url}`);
+            this.logger.logInfo(`Discovered ${elements.length} active HTML elements on a page.`, { url });
         }
     }
 }

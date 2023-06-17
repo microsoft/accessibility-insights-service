@@ -5,6 +5,7 @@ import { inject, injectable } from 'inversify';
 import * as Crawlee from '@crawlee/puppeteer';
 import { isEmpty } from 'lodash';
 import { SetRequired } from 'type-fest';
+import { GlobalLogger } from 'logger';
 import { crawlerIocTypes } from '../types/ioc-types';
 import { CrawlerRunOptions } from '..';
 import { ApifyRequestQueueFactory } from '../apify/apify-request-queue-creator';
@@ -16,6 +17,7 @@ export class PageCrawlerEngine implements CrawlerEngine<string[]> {
     public constructor(
         @inject(crawlerIocTypes.ApifyRequestQueueFactory) protected readonly requestQueueProvider: ApifyRequestQueueFactory,
         @inject(CrawlerConfiguration) private readonly crawlerConfiguration: CrawlerConfiguration,
+        @inject(GlobalLogger) private readonly logger: GlobalLogger,
         private readonly browserCrawlerEnqueueLinks: typeof Crawlee.browserCrawlerEnqueueLinks = Crawlee.browserCrawlerEnqueueLinks,
     ) {}
 
@@ -37,8 +39,11 @@ export class PageCrawlerEngine implements CrawlerEngine<string[]> {
             requestQueue,
             originalRequestUrl: crawlerRunOptions.baseUrl,
         };
+
         const enqueued = await this.browserCrawlerEnqueueLinks(enqueueLinksOptions);
-        console.log(`Discovered ${enqueued.processedRequests.length} new links on page ${crawlerRunOptions.baseCrawlPage.url()}`);
+        this.logger.logInfo(`Enqueued ${enqueued.processedRequests.length} new links.`, {
+            url: crawlerRunOptions.baseCrawlPage.url(),
+        });
 
         const urls: string[] = [];
         let nextRequest;

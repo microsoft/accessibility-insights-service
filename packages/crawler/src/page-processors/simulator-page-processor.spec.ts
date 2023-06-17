@@ -102,6 +102,7 @@ describe(SimulatorPageProcessor, () => {
             clickElementOpMock.object,
             crawlerConfigurationMock.object,
             pageNavigatorFactoryMock.object,
+            loggerMock.object,
         );
     });
 
@@ -114,6 +115,7 @@ describe(SimulatorPageProcessor, () => {
         clickElementOpMock.verifyAll();
         pageNavigatorMock.verifyAll();
         crawlerConfigurationMock.verifyAll();
+        loggerMock.verifyAll();
     });
 
     it('pageProcessor, no-op', async () => {

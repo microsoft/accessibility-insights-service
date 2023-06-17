@@ -5,6 +5,7 @@ import { inject, injectable } from 'inversify';
 import * as Puppeteer from 'puppeteer';
 import { AxeResults } from 'axe-core';
 import { PromiseUtils } from 'common';
+import { GlobalLogger } from 'logger';
 import { PageScanner } from '../scanners/page-scanner';
 import { BlobStore } from '../storage/store-types';
 import { ReportGenerator } from '../reports/report-generator';
@@ -21,6 +22,7 @@ export class AccessibilityScanOperation {
         @inject(ReportGenerator) private readonly reportGenerator: ReportGenerator,
         @inject(LocalBlobStore) protected readonly blobStore: BlobStore,
         @inject(PromiseUtils) private readonly promiseUtils: PromiseUtils,
+        @inject(GlobalLogger) private readonly logger: GlobalLogger,
     ) {}
 
     public async run(page: Puppeteer.Page, id: string, axeSourcePath?: string): Promise<AxeResults> {
@@ -31,7 +33,9 @@ export class AccessibilityScanOperation {
         await this.blobStore.setValue(`${id}.report`, report.asHTML(), { contentType: 'text/html' });
 
         if (axeResults.violations.length > 0) {
-            console.log(`Found ${axeResults.violations.length} accessibility issues on page ${page.url()}`);
+            this.logger.logWarn(`Found ${axeResults.violations.length} accessibility issues.`, {
+                url: page.url(),
+            });
         }
 
         return axeResults;
@@ -41,7 +45,9 @@ export class AccessibilityScanOperation {
         const axeResults = await this.runA11yScan(page, axeSourcePath);
 
         if (axeResults === 'ScanTimeout') {
-            throw new Error(`Accessibility scan timed out after ${AccessibilityScanOperation.axeScanTimeoutSec} seconds.`);
+            throw new Error(
+                `Accessibility core scanner timed out after ${AccessibilityScanOperation.axeScanTimeoutSec} seconds. Url: ${page.url()}`,
+            );
         }
 
         return axeResults;
@@ -52,7 +58,12 @@ export class AccessibilityScanOperation {
             this.scanner.scan(page, axeSourcePath),
             AccessibilityScanOperation.axeScanTimeoutSec * 1000,
             () => {
-                console.log(`Accessibility scan timed out after ${AccessibilityScanOperation.axeScanTimeoutSec} seconds.`);
+                this.logger.logError(
+                    `Accessibility core scanner timed out after ${AccessibilityScanOperation.axeScanTimeoutSec} seconds.`,
+                    {
+                        url: page.url(),
+                    },
+                );
 
                 return Promise.resolve('ScanTimeout');
             },

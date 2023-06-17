@@ -21,9 +21,23 @@ export class CrawlerParametersBuilder {
             const urls = this.validateInputUrls(scanArguments.inputUrls);
             urls.forEach((url) => inputUrlSet.add(url));
         }
+
         if (scanArguments.inputFile) {
             const urls = this.validateInputFileContent(scanArguments.inputFile);
             urls.forEach((url) => inputUrlSet.add(url));
+        }
+
+        if (scanArguments.userAgent) {
+            process.env.USER_AGENT = scanArguments.userAgent;
+        }
+
+        let headers;
+        if (scanArguments.httpHeaders) {
+            try {
+                headers = JSON.parse(scanArguments.httpHeaders);
+            } catch (error) {
+                throw new Error(`The httpHeaders option has invalid JSON string value. ${error.message}`);
+            }
         }
 
         return {
@@ -46,6 +60,7 @@ export class CrawlerParametersBuilder {
             serviceAccountName: scanArguments.serviceAccountName,
             serviceAccountPassword: scanArguments.serviceAccountPassword,
             authType: scanArguments.authType,
+            httpHeaders: headers,
         };
     }
 

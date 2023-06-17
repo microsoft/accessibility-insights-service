@@ -24,4 +24,5 @@ export interface CrawlerRunOptions {
     serviceAccountName?: string;
     serviceAccountPassword?: string;
     authType?: string;
+    httpHeaders?: Record<string, string>;
 }

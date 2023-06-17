@@ -27,6 +27,7 @@ interface ScanArguments {
     crawl: boolean;
     singleWorker: boolean;
     userAgent: string;
+    httpHeaders: string;
 }
 
 (async () => {
@@ -54,6 +55,7 @@ interface ScanArguments {
         discoveryPatterns: scanArguments.discoveryPatterns,
         debug: scanArguments.debug,
         singleWorker: scanArguments.singleWorker,
+        httpHeaders: scanArguments.httpHeaders ? JSON.parse(scanArguments.httpHeaders) : undefined,
     });
 })().catch((error) => {
     console.log('Exception: ', System.serializeError(error));

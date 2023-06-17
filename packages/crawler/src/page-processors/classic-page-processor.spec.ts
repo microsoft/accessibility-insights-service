@@ -88,6 +88,7 @@ describe(ClassicPageProcessor, () => {
             dataBaseMock.object,
             crawlerConfigurationMock.object,
             pageNavigatorFactoryMock.object,
+            loggerMock.object,
         );
     });
 
@@ -98,6 +99,7 @@ describe(ClassicPageProcessor, () => {
         dataBaseMock.verifyAll();
         pageNavigatorMock.verifyAll();
         crawlerConfigurationMock.verifyAll();
+        loggerMock.verifyAll();
     });
 
     it('processPage', async () => {

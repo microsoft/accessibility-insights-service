@@ -261,3 +261,10 @@ describe: For sites with authenticated pages, set the password for the non-peopl
 type: string
 describe: The custom value of the User-Agent HTTP request header. Defaults to the value of USER_AGENT environment variable. The option will take precedence over environment variable.
 ```
+
+-   httpHeaders: --httpHeaders
+
+```sh
+type: string
+describe: The custom HTTP header(s) to be send on each crawl request. Accepts JSON formatted string like {"name": "value"}.
+```

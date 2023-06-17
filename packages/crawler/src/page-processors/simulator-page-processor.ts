@@ -3,6 +3,7 @@
 
 import * as Crawlee from '@crawlee/puppeteer';
 import { inject, injectable } from 'inversify';
+import { GlobalLogger } from 'logger';
 import { ActiveElement } from '../browser-components/active-elements-finder';
 import { CrawlerConfiguration } from '../crawler/crawler-configuration';
 import { DataBase } from '../level-storage/data-base';
@@ -25,7 +26,9 @@ export class SimulatorPageProcessor extends PageProcessorBase {
     public processPage: Crawlee.PuppeteerRequestHandler = async (context) => {
         const operation = context.request.userData as Operation;
         if (operation.operationType === undefined || operation.operationType === 'no-op') {
-            console.log(`Processing page ${context.page.url()}`);
+            this.logger.logInfo(`Processing loaded page.`, {
+                url: context.page.url(),
+            });
             await this.enqueueLinks(context);
             await this.enqueueActiveElementsOp.enqueue(context, this.selectors);
             const axeResults = await this.accessibilityScanOp.run(
@@ -44,7 +47,10 @@ export class SimulatorPageProcessor extends PageProcessorBase {
             await this.saveScanResult(context.request, issueCount);
         } else if (operation.operationType === 'click') {
             const activeElement = operation.data as ActiveElement;
-            console.log(`Processing page ${context.page.url()} with simulation click on element with selector '${activeElement.selector}'`);
+            this.logger.logInfo(`Processing loaded page with element click simulation.`, {
+                url: context.page.url(),
+                selector: activeElement.selector,
+            });
             const operationResult = await this.clickElementOp.click(context, activeElement.selector, this.discoveryPatterns);
             let issueCount;
             if (operationResult.clickAction === 'page-action') {
@@ -81,9 +87,10 @@ export class SimulatorPageProcessor extends PageProcessorBase {
         @inject(ClickElementOperation) protected readonly clickElementOp: ClickElementOperation,
         @inject(CrawlerConfiguration) protected readonly crawlerConfiguration: CrawlerConfiguration,
         @inject(crawlerIocTypes.PageNavigatorFactory) protected readonly pageNavigatorFactory: PageNavigatorFactory,
+        @inject(GlobalLogger) protected readonly logger: GlobalLogger,
         protected readonly saveSnapshotExt: typeof Crawlee.puppeteerUtils.saveSnapshot = Crawlee.puppeteerUtils.saveSnapshot,
     ) {
-        super(accessibilityScanOp, dataStore, blobStore, dataBase, crawlerConfiguration, pageNavigatorFactory, saveSnapshotExt);
+        super(accessibilityScanOp, dataStore, blobStore, dataBase, crawlerConfiguration, pageNavigatorFactory, logger, saveSnapshotExt);
         this.selectors = this.crawlerConfiguration.selectors();
     }
 }

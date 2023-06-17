@@ -7,6 +7,7 @@ import { BrowserError } from 'scanner-global-library';
 import { System } from 'common';
 import { isArray } from 'lodash';
 import * as Crawlee from '@crawlee/puppeteer';
+import { GlobalLogger } from 'logger';
 import { CrawlerConfiguration } from '../crawler/crawler-configuration';
 import { DataBase } from '../level-storage/data-base';
 import { AccessibilityScanOperation } from '../page-operations/accessibility-scan-operation';
@@ -61,7 +62,7 @@ export abstract class PageProcessorBase implements PageProcessor {
                 return;
             }
 
-            const pageNavigator = await this.pageNavigatorFactory(context.log);
+            const pageNavigator = await this.pageNavigatorFactory();
             pageNavigator.logger.setCommonProperties({ requestId: context.request.id, url: context.request.url });
 
             response = await pageNavigator.navigate(context.request.url, context.page);
@@ -112,6 +113,7 @@ export abstract class PageProcessorBase implements PageProcessor {
         @inject(DataBase) protected readonly dataBase: DataBase,
         @inject(CrawlerConfiguration) protected readonly crawlerConfiguration: CrawlerConfiguration,
         @inject(crawlerIocTypes.PageNavigatorFactory) protected readonly pageNavigatorFactory: PageNavigatorFactory,
+        @inject(GlobalLogger) protected readonly logger: GlobalLogger,
         protected readonly saveSnapshotExt: typeof Crawlee.puppeteerUtils.saveSnapshot = Crawlee.puppeteerUtils.saveSnapshot,
     ) {
         this.baseUrl = this.crawlerConfiguration.baseUrl();
@@ -144,7 +146,9 @@ export abstract class PageProcessorBase implements PageProcessor {
             // eslint-disable-next-line security/detect-non-literal-regexp
             regexps: this.discoveryPatterns?.length > 0 ? this.discoveryPatterns.map((p) => new RegExp(p)) : undefined,
         });
-        console.log(`Discovered ${enqueued.processedRequests.length} new links on page ${context.page.url()}`);
+        this.logger.logInfo(`Enqueued ${enqueued.processedRequests.length} new links.`, {
+            crawledUrl: context.page.url(),
+        });
     }
 
     protected async pushScanData(scanData: PartialScanData): Promise<void> {

@@ -73,8 +73,12 @@ export class SiteCrawlerEngine implements CrawlerEngine {
                 // disable Apify default user agent generation route
                 useFingerprints: false,
                 postPageCreateHooks: [
-                    async () => {
-                        // Waiting for the puppeteer plugin to complete processing
+                    async (page) => {
+                        // add custom HTTP headers
+                        if (crawlerRunOptions.httpHeaders) {
+                            await page.setExtraHTTPHeaders(crawlerRunOptions.httpHeaders);
+                        }
+                        // wait for the puppeteer plugin to complete processing
                         await System.waitLoop(
                             async () => this.userAgentPlugin.loadCompleted,
                             async (completed) => completed === true,
@@ -89,14 +93,12 @@ export class SiteCrawlerEngine implements CrawlerEngine {
             this.crawlerConfiguration.setChromePath(crawlerRunOptions.chromePath);
         }
 
-        if (crawlerRunOptions.singleWorker === true) {
-            puppeteerCrawlerOptions.minConcurrency = 1;
+        if (crawlerRunOptions.singleWorker === true || crawlerRunOptions.maxRequestsPerCrawl === 1) {
             puppeteerCrawlerOptions.maxConcurrency = 1;
         }
 
         if (crawlerRunOptions.debug === true) {
             this.crawlerConfiguration.setSilentMode(false);
-
             puppeteerCrawlerOptions.requestHandlerTimeoutSecs = 3600;
             puppeteerCrawlerOptions.navigationTimeoutSecs = 3600;
             puppeteerCrawlerOptions.maxConcurrency = 1;

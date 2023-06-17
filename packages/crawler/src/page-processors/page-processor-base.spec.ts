@@ -112,6 +112,7 @@ describe(PageProcessorBase, () => {
             dataBaseMock.object,
             crawlerConfigurationMock.object,
             pageNavigatorFactoryMock.object,
+            loggerMock.object,
             saveSnapshotMock.object,
         );
         pageProcessorBase.processPage = processPageMock.object;
