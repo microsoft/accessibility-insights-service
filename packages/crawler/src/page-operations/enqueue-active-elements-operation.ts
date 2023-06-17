@@ -39,7 +39,7 @@ export class EnqueueActiveElementsOperation {
         );
 
         if (elements.length > 0) {
-            this.logger.logInfo(`Discovered ${elements.length} active HTML elements on a page.`, { url });
+            this.logger.logInfo(`Discovered ${elements.length} active HTML elements on page.`, { url });
         }
     }
 }

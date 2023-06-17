@@ -70,7 +70,7 @@ export class SiteCrawlerEngine implements CrawlerEngine {
                 },
             },
             browserPoolOptions: {
-                // disable Apify default user agent generation route
+                // disable default user agent string generation
                 useFingerprints: false,
                 postPageCreateHooks: [
                     async (page) => {

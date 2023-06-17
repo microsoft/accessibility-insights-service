@@ -147,7 +147,7 @@ export abstract class PageProcessorBase implements PageProcessor {
             regexps: this.discoveryPatterns?.length > 0 ? this.discoveryPatterns.map((p) => new RegExp(p)) : undefined,
         });
         this.logger.logInfo(`Enqueued ${enqueued.processedRequests.length} new links.`, {
-            crawledUrl: context.page.url(),
+            url: context.page.url(),
         });
     }
 
