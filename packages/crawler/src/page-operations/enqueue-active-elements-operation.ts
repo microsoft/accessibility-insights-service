@@ -5,7 +5,7 @@ import { inject, injectable } from 'inversify';
 import * as Crawlee from '@crawlee/puppeteer';
 import { Url } from 'common';
 import { GlobalLogger } from 'logger';
-import { ActiveElementsFinder } from '../browser-components/active-elements-finder';
+import { ActiveElementsFinder } from '../active-elements-finder';
 import { Operation } from './operation';
 
 @injectable()

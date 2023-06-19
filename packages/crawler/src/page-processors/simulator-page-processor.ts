@@ -4,7 +4,7 @@
 import * as Crawlee from '@crawlee/puppeteer';
 import { inject, injectable } from 'inversify';
 import { GlobalLogger } from 'logger';
-import { ActiveElement } from '../browser-components/active-elements-finder';
+import { ActiveElement } from '../active-elements-finder';
 import { CrawlerConfiguration } from '../crawler/crawler-configuration';
 import { DataBase } from '../level-storage/data-base';
 import { AccessibilityScanOperation } from '../page-operations/accessibility-scan-operation';
