@@ -4,7 +4,7 @@
     "codebaseAdmins": ["REDMOND\\a11y-services-dev"],
     "instanceUrl": "https://mseng.visualstudio.com/",
     "projectName": "AzureDevOps",
-    "areaPath": "AzureDevOps\\z_Deprecated - Do Not Use\\enSPIRe\\Keros",
+    "areaPath": "1ES\\Accessibility Insights",
     "iterationPath": "AzureDevOps\\OneVS",
     "tools": ["ARMory", "CredScan", "PoliCheck"]
 }

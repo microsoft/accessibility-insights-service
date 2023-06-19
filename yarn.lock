@@ -64,7 +64,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@apify/log@npm:^2.0.0, @apify/log@npm:^2.2.18, @apify/log@npm:^2.2.8":
+"@apify/log@npm:2.2.18, @apify/log@npm:^2.0.0, @apify/log@npm:^2.2.18, @apify/log@npm:^2.2.8":
   version: 2.2.18
   resolution: "@apify/log@npm:2.2.18"
   dependencies:
@@ -4497,6 +4497,9 @@ __metadata:
     logger: "workspace:*"
     npm-run-all: ^4.1.5
     puppeteer: ^19.8.5
+    puppeteer-extra: ^3.3.6
+    puppeteer-extra-plugin: ^3.2.3
+    puppeteer-extra-plugin-stealth: ^2.11.2
     reflect-metadata: ^0.1.13
     rimraf: ^4.1.2
     rollup: ^3.13.0
@@ -4530,6 +4533,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "accessibility-insights-scan@workspace:packages/cli"
   dependencies:
+    "@apify/log": 2.2.18
     "@axe-core/puppeteer": ^4.5.0
     "@crawlee/browser-pool": ^3.3.3
     "@crawlee/puppeteer": ^3.3.3
@@ -10751,6 +10755,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "logger@workspace:packages/logger"
   dependencies:
+    "@apify/log": 2.2.18
     "@types/dotenv": ^8.2.0
     "@types/jest": ^29.5.0
     "@types/lodash": ^4.14.182

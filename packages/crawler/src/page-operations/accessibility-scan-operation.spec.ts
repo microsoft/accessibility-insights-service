@@ -8,6 +8,7 @@ import { Page } from 'puppeteer';
 import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
 import { AxeResults } from 'axe-core';
 import { PromiseUtils } from 'common';
+import { GlobalLogger } from 'logger';
 import { PageScanner } from '../scanners/page-scanner';
 import { BlobStore } from '../storage/store-types';
 import { ReportGenerator } from '../reports/report-generator';
@@ -29,6 +30,7 @@ describe(AccessibilityScanOperation, () => {
     let pageMock: IMock<Page>;
     let blobStoreMock: IMock<BlobStore>;
     let reportGeneratorMock: IMock<ReportGenerator>;
+    let loggerMock: IMock<GlobalLogger>;
     let axeResults: AxeResults;
     let promiseUtilsMock: IMock<PromiseUtils>;
 
@@ -39,6 +41,7 @@ describe(AccessibilityScanOperation, () => {
         blobStoreMock = Mock.ofType<BlobStore>();
         reportGeneratorMock = Mock.ofType<ReportGenerator>();
         scannerMock = Mock.ofType(PageScanner, MockBehavior.Strict, true, Mock.ofType<AxePuppeteerFactory>().object);
+        loggerMock = Mock.ofType<GlobalLogger>();
         promiseUtilsMock = Mock.ofType(PromiseUtils);
 
         accessibilityScanOp = new AccessibilityScanOperation(
@@ -46,6 +49,7 @@ describe(AccessibilityScanOperation, () => {
             reportGeneratorMock.object,
             blobStoreMock.object,
             promiseUtilsMock.object,
+            loggerMock.object,
         );
     });
 
@@ -55,6 +59,7 @@ describe(AccessibilityScanOperation, () => {
         scannerMock.verifyAll();
         reportGeneratorMock.verifyAll();
         promiseUtilsMock.verifyAll();
+        loggerMock.verifyAll();
     });
 
     it('Run page scan operation, no violations', async () => {
@@ -103,7 +108,7 @@ describe(AccessibilityScanOperation, () => {
         pageMock.reset();
         reportGeneratorMock.reset();
 
-        await expect(() => accessibilityScanOp.run(pageMock.object, id)).rejects.toThrowError(`Accessibility scan timed out`);
+        await expect(() => accessibilityScanOp.run(pageMock.object, id)).rejects.toThrowError(`Accessibility core scanner timed out`);
     });
 
     function setMocks(axeResult: AxeResults): void {

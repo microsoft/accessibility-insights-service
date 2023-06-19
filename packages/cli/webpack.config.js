@@ -64,7 +64,12 @@ function getCommonConfig(version, generateTypings) {
             new webpack.DefinePlugin({
                 __IMAGE_VERSION__: JSON.stringify(version),
             }),
-            new copyFilesPlugin({ patterns: [{ from: './../crawler/dist/browser-imports.js', to: '.' }] }),
+            new copyFilesPlugin({
+                patterns: [
+                    { from: './../crawler/dist/browser-imports.js', to: '.' },
+                    { from: '../../packages/scanner-global-library/blank-page.html', to: '.' },
+                ],
+            }),
         ]
             .concat(
                 generateTypings

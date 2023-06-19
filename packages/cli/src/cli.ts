@@ -130,6 +130,11 @@ function getScanArguments(): ScanArguments {
                 default: false,
                 alias: 'singleworker',
             },
+            authType: {
+                type: 'string',
+                describe:
+                    'Use with --serviceAccountName and --serviceAccountPassword to specify the authentication type. Supported type: AAD.',
+            },
             serviceAccountName: {
                 type: 'string',
                 describe: 'Use with --serviceAccountPassword and --authType to crawl pages requiring authentication.',
@@ -138,10 +143,14 @@ function getScanArguments(): ScanArguments {
                 type: 'string',
                 describe: 'Use with --serviceAccountName and --authType to crawl pages requiring authentication.',
             },
-            authType: {
+            userAgent: {
                 type: 'string',
                 describe:
-                    'Use with --serviceAccountName and --serviceAccountPassword to specify the authentication type. Supported type: AAD',
+                    'The custom value of the User-Agent HTTP request header. Defaults to the value of USER_AGENT environment variable. The option will take precedence over environment variable.',
+            },
+            httpHeaders: {
+                type: 'string',
+                describe: `The custom HTTP header(s) to be send on each crawl request. Accepts JSON formatted string like {"name": "value"}.`,
             },
         })
         .check((args) => {

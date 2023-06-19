@@ -3,7 +3,6 @@
 
 import { ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
-import * as _ from 'lodash';
 import { BaseConsoleLoggerClient } from './base-console-logger-client';
 import { ConsoleLoggerClient } from './console-logger-client';
 import { loggerTypes } from './logger-types';

@@ -3,7 +3,7 @@
 
 import { PuppeteerExtraPlugin, PluginOptions, PluginRequirements } from 'puppeteer-extra-plugin';
 import * as Puppeteer from 'puppeteer';
-import { inject, injectable } from 'inversify';
+import { inject, injectable, optional } from 'inversify';
 import { iocTypes, SecretVault } from './ioc-types';
 import { LoginPageDetector } from './authenticator/login-page-detector';
 
@@ -15,14 +15,14 @@ export class UserAgentPlugin extends PuppeteerExtraPlugin {
 
     private readonly loadCompletedDataKey = 'loadCompleted';
 
-    private secretVault: SecretVault;
-
     private readonly pluginData: Map<string, any> = new Map();
 
     constructor(
-        @inject(iocTypes.SecretVaultProvider) private readonly secretVaultProvider: () => Promise<SecretVault>,
-        @inject(LoginPageDetector) private readonly loginPageDetector: LoginPageDetector,
-
+        @inject(iocTypes.SecretVaultProvider)
+        @optional()
+        private readonly secretVaultProvider: () => Promise<SecretVault> = () => Promise.resolve({ webScannerBypassKey: '1.0' }),
+        @inject(LoginPageDetector) @optional() private readonly loginPageDetector: LoginPageDetector,
+        private readonly userAgent: string = process.env.USER_AGENT,
         opts: PluginOptions = undefined,
     ) {
         super(opts);
@@ -47,21 +47,24 @@ export class UserAgentPlugin extends PuppeteerExtraPlugin {
     }
 
     private async setUserAgent(page: Puppeteer.Page): Promise<void> {
-        this.secretVault = await this.secretVaultProvider();
+        if (this.userAgent) {
+            await page.setUserAgent(this.userAgent);
+        } else {
+            const userAgentString = await this.getUserAgentString(page);
+            const userAgentMetadata = await this.getUserAgentMetadata(page);
 
-        const userAgentString = await this.getUserAgentString(page);
-        const userAgentMetadata = await this.getUserAgentMetadata(page);
-
-        await page.setUserAgent(userAgentString, userAgentMetadata);
+            await page.setUserAgent(userAgentString, userAgentMetadata);
+        }
     }
 
     private async getUserAgentString(page: Puppeteer.Page): Promise<string> {
+        const secretVault = await this.secretVaultProvider();
         let userAgent = await page.browser().userAgent();
         userAgent = this.setUserAgentPlatform(userAgent, page);
         // Remove headless chromium flag
         userAgent = userAgent.replace('HeadlessChrome/', 'Chrome/');
         // Add scanner bypass key
-        userAgent = `${userAgent} WebInsights/${this.secretVault.webScannerBypassKey}`;
+        userAgent = `${userAgent} WebInsights/${secretVault.webScannerBypassKey}`;
 
         return userAgent;
     }
@@ -127,7 +130,7 @@ export class UserAgentPlugin extends PuppeteerExtraPlugin {
         // Set to Linux platform to disable authentication fallback to currently logged in Windows user
         const platform = 'X11; Linux x86_64';
 
-        const loginPageType = this.loginPageDetector.getLoginPageType(page.url());
+        const loginPageType = this.loginPageDetector?.getLoginPageType(page.url());
         if (loginPageType === undefined) {
             return userAgent;
         }

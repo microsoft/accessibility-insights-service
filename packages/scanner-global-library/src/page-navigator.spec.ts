@@ -5,7 +5,6 @@ import 'reflect-metadata';
 
 import { IMock, Mock, It, Times } from 'typemoq';
 import * as Puppeteer from 'puppeteer';
-import { PageResponseProcessor } from './page-response-processor';
 import { PageNavigator, PageOperationResult, NavigationResponse } from './page-navigator';
 import { PageNavigationHooks } from './page-navigation-hooks';
 import { puppeteerTimeoutConfig, PageNavigationTiming } from './page-timeout-config';
@@ -17,10 +16,9 @@ import { PageOperation, PageOperationHandler } from './network/page-operation-ha
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/consistent-type-assertions */
 
 const url = 'url';
-const max304RetryCount = 3;
+const max304RetryCount = 2;
 
 let pageNavigator: PageNavigator;
-let pageResponseProcessorMock: IMock<PageResponseProcessor>;
 let pageNavigationHooksMock: IMock<PageNavigationHooks>;
 let puppeteerPageMock: IMock<Puppeteer.Page>;
 let loggerMock: IMock<MockableLogger>;
@@ -33,7 +31,6 @@ let pageOperation: PageOperation;
 
 describe(PageNavigator, () => {
     beforeEach(() => {
-        pageResponseProcessorMock = Mock.ofType<PageResponseProcessor>();
         pageNavigationHooksMock = Mock.ofType<PageNavigationHooks>();
         puppeteerPageMock = Mock.ofType<Puppeteer.Page>();
         browserCacheMock = Mock.ofType<BrowserCache>();
@@ -59,7 +56,6 @@ describe(PageNavigator, () => {
         } as NodeJS.HRTime;
 
         pageNavigator = new PageNavigator(
-            pageResponseProcessorMock.object,
             pageNavigationHooksMock.object,
             browserCacheMock.object,
             pageOperationHandlerMock.object,
@@ -68,7 +64,6 @@ describe(PageNavigator, () => {
     });
 
     afterEach(() => {
-        pageResponseProcessorMock.verifyAll();
         pageNavigationHooksMock.verifyAll();
         browserCacheMock.verifyAll();
         puppeteerPageMock.verifyAll();

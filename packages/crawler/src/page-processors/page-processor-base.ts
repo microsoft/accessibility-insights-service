@@ -3,10 +3,11 @@
 
 import { inject, injectable } from 'inversify';
 import * as Puppeteer from 'puppeteer';
-import { BrowserError, PageNavigationHooks } from 'scanner-global-library';
+import { BrowserError } from 'scanner-global-library';
 import { System } from 'common';
 import { isArray } from 'lodash';
 import * as Crawlee from '@crawlee/puppeteer';
+import { GlobalLogger } from 'logger';
 import { CrawlerConfiguration } from '../crawler/crawler-configuration';
 import { DataBase } from '../level-storage/data-base';
 import { AccessibilityScanOperation } from '../page-operations/accessibility-scan-operation';
@@ -14,6 +15,7 @@ import { LocalBlobStore } from '../storage/local-blob-store';
 import { LocalDataStore } from '../storage/local-data-store';
 import { BlobStore, DataStore, scanResultStorageName } from '../storage/store-types';
 import { ScanData } from '../types/scan-data';
+import { PageNavigatorFactory, crawlerIocTypes } from '../types/ioc-types';
 
 /* eslint-disable no-invalid-this, @typescript-eslint/no-explicit-any */
 
@@ -25,8 +27,6 @@ export type PartialScanData = {
 export interface PageProcessor {
     requestHandler: Crawlee.PuppeteerRequestHandler;
     failedRequestHandler: Crawlee.BrowserErrorHandler;
-    preNavigationHook: Crawlee.PuppeteerHook;
-    postNavigationHook: Crawlee.PuppeteerHook;
 }
 
 export interface SessionData {
@@ -52,11 +52,21 @@ export abstract class PageProcessorBase implements PageProcessor {
      * Function that is called for each URL to crawl.
      */
     public requestHandler: Crawlee.PuppeteerRequestHandler = async (context) => {
+        let response;
         try {
-            if (
-                isArray(context.session?.userData) &&
-                (context.session.userData as SessionData[]).find((s) => s.requestId === context.request.id)
-            ) {
+            if (!isArray(context.session?.userData)) {
+                context.session.userData = [];
+            }
+
+            if ((context.session.userData as SessionData[]).find((s) => s.requestId === context.request.id)) {
+                return;
+            }
+
+            const pageNavigator = await this.pageNavigatorFactory();
+            pageNavigator.logger.setCommonProperties({ requestId: context.request.id, url: context.request.url });
+
+            response = await pageNavigator.navigate(context.request.url, context.page);
+            if (response.browserError) {
                 return;
             }
 
@@ -68,52 +78,9 @@ export abstract class PageProcessorBase implements PageProcessor {
 
             // Throw the error so Apify puts it back into the request queue to retry
             throw err;
-        }
-    };
-
-    /**
-     *
-     * This function is called before the navigation.
-     */
-    public preNavigationHook: Crawlee.PuppeteerHook = async (context, gotoOptions): Promise<void> => {
-        if (!isArray(context.session.userData)) {
-            context.session.userData = [];
-        }
-
-        gotoOptions.waitUntil = 'networkidle2';
-        await this.pageNavigationHooks.preNavigation(context.page);
-    };
-
-    /**
-     * This function is called after the navigation.
-     */
-    public postNavigationHook: Crawlee.PuppeteerHook = async (context): Promise<void> => {
-        let navigationError: BrowserError;
-        let runError: unknown;
-        try {
-            await this.pageNavigationHooks.postNavigation(
-                context.page,
-                context.response,
-                async (browserError: BrowserError, error?: unknown) => {
-                    if (error !== undefined) {
-                        throw error;
-                    } else {
-                        navigationError = browserError;
-                    }
-                },
-            );
-        } catch (err) {
-            await this.pushScanData({ succeeded: false, id: context.request.id as string, url: context.request.url });
-            await this.logPageError(context.request, err as Error);
-            runError = err;
-
-            // Throw the error so Apify puts it back into the request queue to retry
-            throw err;
         } finally {
-            if (runError !== undefined) {
-                await this.saveRunError(context.request, runError);
-            } else if (navigationError !== undefined) {
-                await this.saveBrowserError(context.request, navigationError, context.session);
+            if (response?.browserError) {
+                await this.saveBrowserError(context.request, response.browserError, context.session);
             } else {
                 await this.saveScanMetadata(context.request.url, context.page);
             }
@@ -144,8 +111,9 @@ export abstract class PageProcessorBase implements PageProcessor {
         @inject(LocalDataStore) protected readonly dataStore: DataStore,
         @inject(LocalBlobStore) protected readonly blobStore: BlobStore,
         @inject(DataBase) protected readonly dataBase: DataBase,
-        @inject(PageNavigationHooks) protected readonly pageNavigationHooks: PageNavigationHooks,
         @inject(CrawlerConfiguration) protected readonly crawlerConfiguration: CrawlerConfiguration,
+        @inject(crawlerIocTypes.PageNavigatorFactory) protected readonly pageNavigatorFactory: PageNavigatorFactory,
+        @inject(GlobalLogger) protected readonly logger: GlobalLogger,
         protected readonly saveSnapshotExt: typeof Crawlee.puppeteerUtils.saveSnapshot = Crawlee.puppeteerUtils.saveSnapshot,
     ) {
         this.baseUrl = this.crawlerConfiguration.baseUrl();
@@ -178,7 +146,9 @@ export abstract class PageProcessorBase implements PageProcessor {
             // eslint-disable-next-line security/detect-non-literal-regexp
             regexps: this.discoveryPatterns?.length > 0 ? this.discoveryPatterns.map((p) => new RegExp(p)) : undefined,
         });
-        console.log(`Discovered ${enqueued.processedRequests.length} new links on page ${context.page.url()}`);
+        this.logger.logInfo(`Enqueued ${enqueued.processedRequests.length} new links.`, {
+            url: context.page.url(),
+        });
     }
 
     protected async pushScanData(scanData: PartialScanData): Promise<void> {

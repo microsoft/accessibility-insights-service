@@ -26,4 +26,6 @@ export interface ScanArguments {
     serviceAccountName?: string;
     serviceAccountPassword?: string;
     authType?: string;
+    userAgent?: string;
+    httpHeaders?: string;
 }

@@ -4,7 +4,6 @@
 import 'reflect-metadata';
 
 import { System } from 'common';
-import _ from 'lodash';
 import { IMock, Mock, Times, It, MockBehavior } from 'typemoq';
 import { AvailabilityTelemetry } from './availability-telemetry';
 import { BaseTelemetryProperties } from './base-telemetry-properties';
@@ -19,15 +18,13 @@ describe(GlobalLogger, () => {
     let loggerClient1Mock: IMock<LoggerClient>;
     let loggerClient2Mock: IMock<LoggerClient>;
     let testSubject: GlobalLogger;
-    let processStub: typeof process;
 
     beforeEach(() => {
-        processStub = {} as typeof process;
         loggerClient1Mock = Mock.ofType2(ConsoleLoggerClient, null, MockBehavior.Strict);
         loggerClient2Mock = Mock.ofType2(ConsoleLoggerClient, null, MockBehavior.Strict);
         setupAllLoggerClientsInit();
 
-        testSubject = new GlobalLogger([loggerClient1Mock.object, loggerClient2Mock.object], processStub, 500);
+        testSubject = new GlobalLogger([loggerClient1Mock.object, loggerClient2Mock.object], 500);
     });
 
     describe('setup', () => {
@@ -271,7 +268,6 @@ describe(GlobalLogger, () => {
         describe('in debug mode', () => {
             beforeEach(async () => {
                 System.isDebugEnabled = () => true;
-                processStub.execArgv = ['--t'];
                 await testSubject.setup();
             });
 

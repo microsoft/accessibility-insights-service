@@ -13,7 +13,7 @@ export type RequestQueueOptions = {
     inputUrls?: string[];
 };
 
-export type ApifyRequestQueueProvider = () => Promise<Crawlee.RequestQueue>;
+export type ApifyRequestQueueFactory = () => Promise<Crawlee.RequestQueue>;
 
 export interface ResourceCreator {
     createRequestQueue(baseUrl: string, options?: RequestQueueOptions): Promise<Crawlee.RequestQueue>;
@@ -35,7 +35,7 @@ export class ApifyRequestQueueCreator implements ResourceCreator {
 
         const requestQueue = await Crawlee.RequestQueue.open(this.requestQueueName);
         if (baseUrl) {
-            await requestQueue.addRequest({ url: baseUrl.trim() });
+            await requestQueue.addRequest({ url: baseUrl.trim(), skipNavigation: true });
         }
         await this.addUrlsFromList(requestQueue, options?.inputUrls);
 
@@ -48,7 +48,7 @@ export class ApifyRequestQueueCreator implements ResourceCreator {
         }
 
         for (const url of inputUrls) {
-            await requestQueue.addRequest({ url: url }, { forefront: true });
+            await requestQueue.addRequest({ url: url.trim(), skipNavigation: true }, { forefront: true });
         }
     }
 

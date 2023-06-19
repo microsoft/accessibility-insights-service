@@ -4,6 +4,10 @@
 import { isEmpty } from 'lodash';
 import { ScanArguments } from './scan-arguments';
 
+/**
+ * The simple argument validation used by yargs parser.
+ * To parse arguments values use {@link CrawlerParametersBuilder.build} function.
+ */
 export function validateScanArguments(args: ScanArguments): void {
     if (args.crawl && isEmpty(args.url)) {
         throw new Error('The --url option is required for website crawling.');

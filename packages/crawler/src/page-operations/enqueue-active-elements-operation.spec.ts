@@ -5,7 +5,8 @@ import 'reflect-metadata';
 
 import { IMock, Mock } from 'typemoq';
 import * as Crawlee from '@crawlee/puppeteer';
-import { ActiveElementsFinder } from '../browser-components/active-elements-finder';
+import { GlobalLogger } from 'logger';
+import { ActiveElementsFinder } from '../active-elements-finder';
 import { EnqueueActiveElementsOperation } from './enqueue-active-elements-operation';
 
 /* eslint-disable @typescript-eslint/no-explicit-any, no-empty,@typescript-eslint/no-empty-function */
@@ -13,16 +14,19 @@ import { EnqueueActiveElementsOperation } from './enqueue-active-elements-operat
 describe(EnqueueActiveElementsOperation, () => {
     let enqueueActiveElementsOp: EnqueueActiveElementsOperation;
     let activeElementFinderMock: IMock<ActiveElementsFinder>;
+    let loggerMock: IMock<GlobalLogger>;
     const selectors: string[] = ['button'];
     const url = 'https://localhost/';
 
     beforeEach(() => {
         activeElementFinderMock = Mock.ofType<ActiveElementsFinder>();
-        enqueueActiveElementsOp = new EnqueueActiveElementsOperation(activeElementFinderMock.object);
+        loggerMock = Mock.ofType<GlobalLogger>();
+        enqueueActiveElementsOp = new EnqueueActiveElementsOperation(activeElementFinderMock.object, loggerMock.object);
     });
 
     afterEach(() => {
         activeElementFinderMock.verifyAll();
+        loggerMock.verifyAll();
     });
 
     it('enqueue with active elements', async () => {

@@ -28,7 +28,7 @@ export function registerContextAwareLoggerToContainer(container: Container): voi
             const appInsightsLoggerClient = context.container.get(ContextAwareAppInsightsLoggerClient);
             const consoleLoggerClient = context.container.get(ContextAwareConsoleLoggerClient);
 
-            return new ContextAwareLogger([appInsightsLoggerClient, consoleLoggerClient], context.container.get(loggerTypes.Process));
+            return new ContextAwareLogger([appInsightsLoggerClient, consoleLoggerClient]);
         })
         .inSingletonScope();
 }
@@ -40,7 +40,7 @@ function registerGlobalLoggerToContainer(container: Container): void {
             const appInsightsLoggerClient = context.container.get(AppInsightsLoggerClient);
             const consoleLoggerClient = context.container.get(ConsoleLoggerClient);
 
-            return new GlobalLogger([appInsightsLoggerClient, consoleLoggerClient], context.container.get(loggerTypes.Process));
+            return new GlobalLogger([appInsightsLoggerClient, consoleLoggerClient]);
         })
         .inSingletonScope();
 }

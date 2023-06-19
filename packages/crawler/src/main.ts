@@ -26,11 +26,16 @@ interface ScanArguments {
     debug: boolean;
     crawl: boolean;
     singleWorker: boolean;
+    userAgent: string;
+    httpHeaders: string;
 }
 
 (async () => {
     dotenv.config();
     const scanArguments = yargs.argv as unknown as ScanArguments;
+    if (scanArguments.userAgent) {
+        process.env.USER_AGENT = scanArguments.userAgent;
+    }
 
     const container = new inversify.Container({ autoBindInjectable: true });
     setupLocalScannerContainer(container);
@@ -50,6 +55,7 @@ interface ScanArguments {
         discoveryPatterns: scanArguments.discoveryPatterns,
         debug: scanArguments.debug,
         singleWorker: scanArguments.singleWorker,
+        httpHeaders: scanArguments.httpHeaders ? JSON.parse(scanArguments.httpHeaders) : undefined,
     });
 })().catch((error) => {
     console.log('Exception: ', System.serializeError(error));

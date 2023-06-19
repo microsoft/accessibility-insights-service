@@ -67,7 +67,7 @@ export class PageOperationHandler {
             const elapsed = System.getElapsedTime(timestamp);
 
             // Waits for page script redirection after initial page navigation was completed.
-            await System.wait(5000);
+            await System.wait(3000);
 
             return { response, navigationTiming: { goto: elapsed } as PageNavigationTiming };
         } catch (error) {

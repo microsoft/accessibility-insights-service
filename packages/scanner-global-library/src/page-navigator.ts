@@ -5,7 +5,6 @@ import * as Puppeteer from 'puppeteer';
 import { injectable, inject, optional } from 'inversify';
 import { System } from 'common';
 import { GlobalLogger } from 'logger';
-import { PageResponseProcessor } from './page-response-processor';
 import { BrowserError } from './browser-error';
 import { PageNavigationHooks } from './page-navigation-hooks';
 import { PageConfigurator } from './page-configurator';
@@ -39,11 +38,10 @@ export class PageNavigator {
     };
 
     constructor(
-        @inject(PageResponseProcessor) public readonly pageResponseProcessor: PageResponseProcessor,
-        @inject(PageNavigationHooks) public readonly pageNavigationHooks: PageNavigationHooks,
-        @inject(BrowserCache) public readonly browserCache: BrowserCache,
+        @inject(PageNavigationHooks) private readonly pageNavigationHooks: PageNavigationHooks,
+        @inject(BrowserCache) private readonly browserCache: BrowserCache,
         @inject(PageOperationHandler) private readonly pageOperationHandler: PageOperationHandler,
-        @inject(GlobalLogger) @optional() private readonly logger: GlobalLogger,
+        @inject(GlobalLogger) @optional() public readonly logger: GlobalLogger,
     ) {}
 
     public get pageConfigurator(): PageConfigurator {
@@ -122,7 +120,8 @@ export class PageNavigator {
      * Reloads page if server returns HTTP 304 (Not Modified) when browser uses disk cache.
      */
     private async handleCachedResponse(pageOperationResult: PageOperationResult, page: Puppeteer.Page): Promise<PageOperationResult> {
-        const maxRetryCount = 3;
+        // the last retry attempt will remove the page cache
+        const maxRetryCount = 2;
 
         if (pageOperationResult.response?.status() !== 304) {
             return pageOperationResult;
@@ -136,12 +135,12 @@ export class PageNavigator {
             count++;
             if (count > maxRetryCount - 1) {
                 // Navigation did not solve the cache error. Clear browser cache and reload page.
-                await page.goto(`file:///${__dirname}/blank-page.html`);
-                await this.browserCache.clear(page);
-                await System.wait(1000);
                 this.logger?.logWarn('Reload page on HTTP 304 web server response has failed. Reload page without browser cache.', {
                     retryCount: `${count}`,
                 });
+                await page.goto(`file:///${__dirname}/blank-page.html`);
+                await this.browserCache.clear(page);
+                await System.wait(1000);
             } else {
                 // Navigate forward and back to mitigate the cache error.
                 await page.goto(`file:///${__dirname}/blank-page.html`);

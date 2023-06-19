@@ -63,6 +63,19 @@ describe(UserAgentPlugin, () => {
         await userAgentPlugin.onPageCreated(puppeteerPageMock.object);
     });
 
+    it('override user agent string', async () => {
+        const userAgentOverride = 'userAgentOverride';
+        puppeteerPageMock.reset();
+        loginPageDetectorMock.reset();
+        puppeteerPageMock
+            .setup((o) => o.setUserAgent(userAgentOverride))
+            .returns(() => Promise.resolve())
+            .verifiable(Times.atLeastOnce());
+        userAgentPlugin = new UserAgentPlugin(secretVaultProvider, loginPageDetectorMock.object, userAgentOverride);
+
+        await userAgentPlugin.onPageCreated(puppeteerPageMock.object);
+    });
+
     it('set user agent platform to Linux for auth workflow', async () => {
         loginPageDetectorMock.reset();
         loginPageDetectorMock

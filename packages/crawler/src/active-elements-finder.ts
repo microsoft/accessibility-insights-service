@@ -4,7 +4,7 @@
 import * as path from 'path';
 import { injectable } from 'inversify';
 import * as Puppeteer from 'puppeteer';
-import * as utilities from '../utility/crypto';
+import * as utilities from './utility/crypto';
 
 export interface ActiveElement {
     html: string;
@@ -86,8 +86,7 @@ export class ActiveElementsFinder {
     }
 
     private async importLibToPage(page: Puppeteer.Page): Promise<void> {
-        // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
-        const rootDir = path.dirname(require.main.filename || process.mainModule.filename);
-        await page.addScriptTag({ path: path.resolve(rootDir, 'browser-imports.js') });
+        const scriptPath = path.resolve(__dirname, 'browser-imports.js');
+        await page.addScriptTag({ path: scriptPath });
     }
 }

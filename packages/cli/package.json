@@ -1,6 +1,6 @@
 {
     "name": "accessibility-insights-scan",
-    "version": "2.0.0",
+    "version": "2.1.0",
     "description": "This project welcomes contributions and suggestions.  Most contributions require you to agree to a Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us the rights to use your contribution. For details, visit https://cla.microsoft.com.",
     "scripts": {
         "build": "webpack --config ./webpack.config.js \"$@\"",
@@ -59,6 +59,7 @@
         "webpack-node-externals": "^3.0.0"
     },
     "dependencies": {
+        "@apify/log": "2.2.18",
         "@axe-core/puppeteer": "^4.5.0",
         "@crawlee/browser-pool": "^3.3.3",
         "@crawlee/puppeteer": "^3.3.3",

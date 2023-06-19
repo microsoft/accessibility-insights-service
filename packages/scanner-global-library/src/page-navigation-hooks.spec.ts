@@ -100,7 +100,7 @@ describe(PageNavigationHooks, () => {
         };
 
         let navigationError: BrowserError;
-        const onNavigationErrorStub = async (browserError: BrowserError, error?: any) => {
+        const onNavigationErrorStub = async (browserError: BrowserError) => {
             navigationError = browserError;
         };
 
@@ -120,7 +120,7 @@ describe(PageNavigationHooks, () => {
             .returns(() => browserError)
             .verifiable();
         const onNavigationErrorMock = jest.fn();
-        onNavigationErrorMock.mockImplementation((browserErr) => Promise.resolve());
+        onNavigationErrorMock.mockImplementation(() => Promise.resolve());
 
         await navigationHooks.postNavigation(pageMock.object, response, onNavigationErrorMock);
         expect(onNavigationErrorMock).toHaveBeenCalledWith(browserError);

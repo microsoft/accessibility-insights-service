@@ -29,7 +29,6 @@ describe('registerGlobalLoggerToContainer', () => {
         registerLoggerToContainer(container);
 
         expect(container.get(loggerTypes.AppInsights)).toStrictEqual(appInsights);
-        expect(container.get(loggerTypes.Process)).toStrictEqual(process);
         expect(container.get(loggerTypes.Console)).toStrictEqual(console);
         expect(container.get(loggerTypes.DotEnvConfig)).toStrictEqual(dotenv.config());
 

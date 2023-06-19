@@ -190,7 +190,7 @@ describe(Page, () => {
                 .returns(() => Promise.resolve(browserMock.object))
                 .verifiable();
             webDriverMock
-                .setup(async (o) => o.pageCreated())
+                .setup(async (o) => o.waitForPageCreation())
                 .returns(() => Promise.resolve(true))
                 .verifiable();
 
@@ -259,7 +259,7 @@ describe(Page, () => {
                 .returns(() => Promise.resolve(browserMock.object))
                 .verifiable();
             webDriverMock
-                .setup(async (o) => o.pageCreated())
+                .setup(async (o) => o.waitForPageCreation())
                 .returns(() => Promise.resolve(true))
                 .verifiable();
             // navigate url
@@ -334,7 +334,7 @@ describe(Page, () => {
                 .returns(() => Promise.resolve(browserMock.object))
                 .verifiable();
             webDriverMock
-                .setup(async (o) => o.pageCreated())
+                .setup(async (o) => o.waitForPageCreation())
                 .returns(() => Promise.resolve(true))
                 .verifiable();
             page.browser = undefined;
@@ -356,7 +356,7 @@ describe(Page, () => {
                 .returns(() => Promise.resolve(browserMock.object))
                 .verifiable();
             webDriverMock
-                .setup(async (o) => o.pageCreated())
+                .setup(async (o) => o.waitForPageCreation())
                 .returns(() => Promise.resolve(true))
                 .verifiable();
             page.browser = undefined;
@@ -379,7 +379,7 @@ describe(Page, () => {
                 .returns(() => Promise.resolve(browserMock.object))
                 .verifiable();
             webDriverMock
-                .setup(async (o) => o.pageCreated())
+                .setup(async (o) => o.waitForPageCreation())
                 .returns(() => Promise.resolve(true))
                 .verifiable();
             page.browser = undefined;
