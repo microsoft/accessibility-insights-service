@@ -130,6 +130,11 @@ function getScanArguments(): ScanArguments {
                 default: false,
                 alias: 'singleworker',
             },
+            authType: {
+                type: 'string',
+                describe:
+                    'Use with --serviceAccountName and --serviceAccountPassword to specify the authentication type. Supported type: AAD.',
+            },
             serviceAccountName: {
                 type: 'string',
                 describe: 'Use with --serviceAccountPassword and --authType to crawl pages requiring authentication.',
@@ -137,11 +142,6 @@ function getScanArguments(): ScanArguments {
             serviceAccountPassword: {
                 type: 'string',
                 describe: 'Use with --serviceAccountName and --authType to crawl pages requiring authentication.',
-            },
-            authType: {
-                type: 'string',
-                describe:
-                    'Use with --serviceAccountName and --serviceAccountPassword to specify the authentication type. Supported type: AAD.',
             },
             userAgent: {
                 type: 'string',

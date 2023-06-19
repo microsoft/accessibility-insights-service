@@ -36,7 +36,7 @@ When installing package on [Windows Subsystem for Linux (WSL)](https://docs.micr
 -   An HTML report will be generated in the output folder, previous result for same URL will be overwritten.
 
 ```sh
-  ai-scan --url https://www.example.com/
+  npx ai-scan --url https://www.example.com/
 ```
 
 ### Options
@@ -65,7 +65,7 @@ default: './ai_scan_cli_output'
 -   The error log will be generated in case of any error.
 
 ```sh
-  ai-scan --inputFile 'input file path'
+  npx ai-scan --inputFile 'input file path'
 ```
 
 ### Options
@@ -99,7 +99,7 @@ default: './ai_scan_cli_output'
     -   If base URL is specified as https://www.example.com/bar/foo/ , only URLs that are in https://www.example.com/bar/foo/ folder will be considered for crawling and scanning.
 
 ```sh
-  ai-scan --crawl --url https://www.example.com/
+  npx ai-scan --crawl --url https://www.example.com/
 ```
 
 ### Options
@@ -212,13 +212,6 @@ type: array
 describe: List of RegEx patterns to crawl in addition to the provided URL, separated by space.
 ```
 
--   singleWorker: --singleWorker
-
-```sh
-type: boolean
-describe: Uses a single crawler worker.
-```
-
 -   baselineFile: --baselineFile
 
 ```sh
@@ -232,6 +225,20 @@ If the results do not match the baseline file, a new baseline will be written to
 ```sh
 type: boolean
 describe: Use with --baselineFile to update the baseline file in-place, rather than writing any updated baseline to the output directory.
+```
+
+-   singleWorker: --singleWorker
+
+```sh
+type: boolean
+describe: Uses a single crawler worker.
+```
+
+-   debug: --debug
+
+```sh
+type: boolean
+describe: Enables crawler engine debug mode.
 ```
 
 -   authType: --authType

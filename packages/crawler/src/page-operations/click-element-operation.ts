@@ -25,7 +25,7 @@ export class ClickElementOperation {
         let navigationUrl: string;
         await context.enqueueLinksByClickingElements({
             selector,
-            pseudoUrls: discoveryPatterns?.length > 0 ? discoveryPatterns : undefined, // prevents from crawling all links
+            globs: discoveryPatterns?.length > 0 ? discoveryPatterns : undefined, // prevents from crawling all links
             transformRequestFunction: (request) => {
                 navigated = true;
                 navigationUrl = request.url;
