@@ -5,7 +5,7 @@
     "codebase": "NewOrUpdate",
     "tsaStamp": "DevDiv",
     "tsaEnvironment": "Prod",
-    "template": "TFSPowerBI",
+    "template": "TFSVSO",
     "instanceUrl": "https://mseng.visualstudio.com/",
     "projectName": "1ES",
     "areaPath": "1ES\\Accessibility Insights",
