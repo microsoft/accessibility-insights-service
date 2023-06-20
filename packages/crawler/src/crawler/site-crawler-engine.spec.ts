@@ -93,7 +93,7 @@ describe(SiteCrawlerEngine, () => {
             launchContext: {
                 launcher: puppeteerExtraMock.object,
                 launchOptions: {
-                    ignoreDefaultArgs: puppeteerDefaultOptions,
+                    args: puppeteerDefaultOptions,
                     defaultViewport: {
                         width: 1920,
                         height: 1080,

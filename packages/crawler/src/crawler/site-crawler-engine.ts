@@ -20,6 +20,11 @@ import { CrawlerConfiguration } from './crawler-configuration';
 import { CrawlerFactory } from './crawler-factory';
 import { CrawlerEngine } from './crawler-engine';
 
+const windowSize = {
+    width: 1920,
+    height: 1080,
+};
+
 @injectable()
 export class SiteCrawlerEngine implements CrawlerEngine {
     public constructor(
@@ -60,10 +65,9 @@ export class SiteCrawlerEngine implements CrawlerEngine {
             launchContext: {
                 launcher: this.puppeteerExtra,
                 launchOptions: {
-                    ignoreDefaultArgs: puppeteerDefaultOptions,
+                    args: puppeteerDefaultOptions,
                     defaultViewport: {
-                        width: 1920,
-                        height: 1080,
+                        ...windowSize,
                         deviceScaleFactor: 1,
                     },
                     executablePath: crawlerRunOptions.chromePath ?? this.puppeteer.executablePath(),
