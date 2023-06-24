@@ -60,8 +60,6 @@ export class Page {
 
     private page: Puppeteer.Page;
 
-    private readonly networkTraceGlobalFlag: boolean;
-
     private readonly enableAuthenticationGlobalFlag: boolean;
 
     constructor(
@@ -73,7 +71,6 @@ export class Page {
         @inject(GlobalLogger) @optional() private readonly logger: GlobalLogger,
         private readonly scrollToPageTop: typeof scrollToTop = scrollToTop,
     ) {
-        this.networkTraceGlobalFlag = process.env.NETWORK_TRACE === 'true' ? true : false;
         this.enableAuthenticationGlobalFlag = process.env.PAGE_AUTH === 'true' ? true : false;
     }
 
@@ -113,10 +110,7 @@ export class Page {
         await this.setExtraHTTPHeaders();
         await this.navigateImpl(options);
 
-        if (
-            this.navigationResponse?.ok() === false /** trace to record web server error response */ ||
-            this.networkTraceGlobalFlag === true
-        ) {
+        if (this.navigationResponse?.ok() === false /** trace to record web server error response */) {
             this.logger?.logWarn('Reload page with network trace on web server error.');
             await this.navigateWithNetworkTrace(url);
         }
@@ -283,6 +277,9 @@ export class Page {
     }
 
     private async setExtraHTTPHeaders(): Promise<void> {
+        process.env.PRAGMA_HTTP_HEADER =
+            'akamai-x-get-client-ip, akamai-x-cache-on, akamai-x-cache-remote-on, akamai-x-check-cacheable, akamai-x-get-cache-key, akamai-x-get-extracted-values, akamai-x-get-nonces, akamai-x-get-ssl-client-session-id, akamai-x-get-true-cache-key, akamai-x-serial-no, akamai-x-feo-trace, akamai-x-get-request-id';
+
         const nameSuffix = '_HTTP_HEADER';
         const headers = [];
         const headersObj = {} as any;
