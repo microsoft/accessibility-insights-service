@@ -47,14 +47,14 @@ describe(PageNetworkTracerHandler, () => {
         await pageOnResponseHandler(interceptedRequests[0]);
 
         loggerMock
-            .setup((o) => o.logInfo('[Network] Processing URL', { traceUrl: 'url' }))
+            .setup((o) => o.logInfo('[Network] Processing URL', { networkTraceUrl: 'url' }))
             .returns(() => Promise.resolve())
             .verifiable();
         loggerMock
             .setup((o) =>
                 o.logInfo('[Network] Request completed', {
                     status: 'completed',
-                    traceUrl: 'url',
+                    networkTraceUrl: 'url',
                     httpStatus: '200 OK',
                     serverResponseTiming: '6',
                     data: '{\n  "status": "completed",\n  "url": "url",\n  "httpStatus": "200 OK",\n  "requestHeaders": {\n    "x-request-name": "x-request-value"\n  },\n  "responseHeaders": {\n    "x-response-name": "x-response-value"\n  },\n  "serverResponseTiming": 6\n}',
@@ -73,14 +73,14 @@ describe(PageNetworkTracerHandler, () => {
         await pageOnRequestFailedHandler(interceptedRequests[0]);
 
         loggerMock
-            .setup((o) => o.logInfo('[Network] Processing URL', { traceUrl: 'url' }))
+            .setup((o) => o.logInfo('[Network] Processing URL', { networkTraceUrl: 'url' }))
             .returns(() => Promise.resolve())
             .verifiable();
         loggerMock
             .setup((o) =>
                 o.logWarn('[Network] Request failed', {
                     status: 'failed',
-                    traceUrl: 'url',
+                    networkTraceUrl: 'url',
                     httpStatus: '200 OK',
                     serverResponseTiming: '6',
                     data: '{\n  "status": "failed",\n  "url": "url",\n  "httpStatus": "200 OK",\n  "requestHeaders": {\n    "x-request-name": "x-request-value"\n  },\n  "responseHeaders": {\n    "x-response-name": "x-response-value"\n  },\n  "serverResponseTiming": 6\n}',

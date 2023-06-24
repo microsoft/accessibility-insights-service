@@ -11,7 +11,7 @@ export class PageNetworkTracerHandler {
 
     public getPageOnRequestHandler(): PageEventHandler {
         return async (interceptedRequest) => {
-            this.logger?.logInfo(`[Network] Processing URL`, { traceUrl: interceptedRequest.url });
+            this.logger?.logInfo(`[Network] Processing URL`, { networkTraceUrl: interceptedRequest.url });
         };
     }
 
@@ -30,7 +30,7 @@ export class PageNetworkTracerHandler {
             };
             this.logger?.logInfo(`[Network] Request completed`, {
                 status: 'completed',
-                traceUrl: data.url,
+                networkTraceUrl: data.url,
                 httpStatus: data.httpStatus,
                 serverResponseTiming: `${serverResponseTiming}`,
                 data: JSON.stringify(data, undefined, 2),
@@ -53,7 +53,7 @@ export class PageNetworkTracerHandler {
             };
             this.logger?.logWarn(`[Network] Request failed`, {
                 status: 'failed',
-                traceUrl: data.url,
+                networkTraceUrl: data.url,
                 httpStatus: data.httpStatus,
                 serverResponseTiming: `${serverResponseTiming}`,
                 data: JSON.stringify(data, undefined, 2),

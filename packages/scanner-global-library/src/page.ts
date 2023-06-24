@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { System } from 'common';
+import { GuidGenerator, System } from 'common';
 import { inject, injectable, optional } from 'inversify';
 import { GlobalLogger } from 'logger';
 import * as Puppeteer from 'puppeteer';
@@ -68,6 +68,7 @@ export class Page {
         @inject(PageNetworkTracer) private readonly pageNetworkTracer: PageNetworkTracer,
         @inject(ResourceAuthenticator) private readonly resourceAuthenticator: ResourceAuthenticator,
         @inject(PageAnalyzer) private readonly pageAnalyzer: PageAnalyzer,
+        @inject(GuidGenerator) private readonly guidGenerator: GuidGenerator,
         @inject(GlobalLogger) @optional() private readonly logger: GlobalLogger,
         private readonly scrollToPageTop: typeof scrollToTop = scrollToTop,
     ) {
@@ -103,6 +104,8 @@ export class Page {
     }
 
     public async navigate(url: string, options?: PageOptions): Promise<void> {
+        this.logger?.setCommonProperties({ pageNavigationId: this.guidGenerator.createGuid() });
+
         this.requestUrl = url;
         this.pageOptions = options;
         this.resetLastNavigationState();
@@ -123,6 +126,8 @@ export class Page {
      * `options.hardReload === true` will restart browser instance and delete browser storage, settings, etc. but use browser disk cache.
      */
     public async reload(options?: { hardReload?: boolean }): Promise<void> {
+        this.logger?.setCommonProperties({ pageNavigationId: this.guidGenerator.createGuid() });
+
         this.requestUrl = this.url;
         this.resetLastNavigationState();
 

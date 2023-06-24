@@ -6,7 +6,7 @@ import 'reflect-metadata';
 import { AxePuppeteer } from '@axe-core/puppeteer';
 import * as Puppeteer from 'puppeteer';
 import { IMock, It, Mock, Times } from 'typemoq';
-import { System } from 'common';
+import { GuidGenerator, System } from 'common';
 import { GlobalLogger } from 'logger';
 import { AxeScanResults } from './axe-scanner/axe-scan-results';
 import { BrowserError } from './browser-error';
@@ -52,6 +52,7 @@ let cdpSessionMock: IMock<Puppeteer.CDPSession>;
 let pageNetworkTracerMock: IMock<PageNetworkTracer>;
 let resourceAuthenticatorMock: IMock<ResourceAuthenticator>;
 let pageAnalyzerMock: IMock<PageAnalyzer>;
+let guidGeneratorMock: IMock<GuidGenerator>;
 
 describe(Page, () => {
     beforeEach(() => {
@@ -75,6 +76,8 @@ describe(Page, () => {
         pageNetworkTracerMock = Mock.ofType<PageNetworkTracer>();
         resourceAuthenticatorMock = Mock.ofType<ResourceAuthenticator>();
         pageAnalyzerMock = Mock.ofType<PageAnalyzer>();
+        guidGeneratorMock = Mock.ofType<GuidGenerator>();
+
         scrollToTopMock = jest.fn().mockImplementation(() => Promise.resolve());
         puppeteerResponseMock.setup((o) => o.ok()).returns(() => true);
         navigationResponse = {
@@ -97,6 +100,7 @@ describe(Page, () => {
             pageNetworkTracerMock.object,
             resourceAuthenticatorMock.object,
             pageAnalyzerMock.object,
+            guidGeneratorMock.object,
             loggerMock.object,
             scrollToTopMock,
         );
