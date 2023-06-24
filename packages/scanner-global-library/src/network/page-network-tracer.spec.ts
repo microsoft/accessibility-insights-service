@@ -7,8 +7,9 @@ import { IMock, It, Mock } from 'typemoq';
 import * as Puppeteer from 'puppeteer';
 import { MockableLogger } from '../test-utilities/mockable-logger';
 import { puppeteerTimeoutConfig } from '../page-timeout-config';
+import { PageRequestInterceptor } from './page-request-interceptor';
+import { InterceptedRequest } from './page-event-handler';
 import { PageNetworkTracer } from './page-network-tracer';
-import { InterceptedRequest, PageRequestInterceptor } from './page-request-interceptor';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -39,58 +40,6 @@ describe(PageNetworkTracer, () => {
         pageRequestInterceptorMock.verifyAll();
     });
 
-    it('handle completed request', async () => {
-        setupInterceptedRequests();
-        pageRequestInterceptorMock.setup((o) => o.interceptedRequests).returns(() => interceptedRequests);
-        const pageOnRequestHandler = (pageNetworkTracer as any).getPageOnRequestHandler();
-        const pageOnResponseHandler = (pageNetworkTracer as any).getPageOnResponseHandler();
-        await pageOnRequestHandler(interceptedRequests[0]);
-        await pageOnResponseHandler(interceptedRequests[0]);
-
-        loggerMock
-            .setup((o) => o.logInfo('[Network] Processing URL', { traceUrl: 'url' }))
-            .returns(() => Promise.resolve())
-            .verifiable();
-        loggerMock
-            .setup((o) =>
-                o.logInfo('[Network] Request completed', {
-                    status: 'completed',
-                    traceUrl: 'url',
-                    httpStatus: '200 OK',
-                    serverResponseTiming: '6',
-                    data: '{\n  "status": "completed",\n  "url": "url",\n  "httpStatus": "200 OK",\n  "requestHeaders": {\n    "x-request-name": "x-request-value"\n  },\n  "responseHeaders": {\n    "x-response-name": "x-response-value"\n  },\n  "serverResponseTiming": 6\n}',
-                }),
-            )
-            .returns(() => Promise.resolve())
-            .verifiable();
-    });
-
-    it('handle failed request', async () => {
-        setupInterceptedRequests();
-        pageRequestInterceptorMock.setup((o) => o.interceptedRequests).returns(() => interceptedRequests);
-        const pageOnRequestHandler = (pageNetworkTracer as any).getPageOnRequestHandler();
-        const pageOnRequestFailedHandler = (pageNetworkTracer as any).getPageOnRequestFailedHandler();
-        await pageOnRequestHandler(interceptedRequests[0]);
-        await pageOnRequestFailedHandler(interceptedRequests[0]);
-
-        loggerMock
-            .setup((o) => o.logInfo('[Network] Processing URL', { traceUrl: 'url' }))
-            .returns(() => Promise.resolve())
-            .verifiable();
-        loggerMock
-            .setup((o) =>
-                o.logWarn('[Network] Request failed', {
-                    status: 'failed',
-                    traceUrl: 'url',
-                    httpStatus: '200 OK',
-                    serverResponseTiming: '6',
-                    data: '{\n  "status": "failed",\n  "url": "url",\n  "httpStatus": "200 OK",\n  "requestHeaders": {\n    "x-request-name": "x-request-value"\n  },\n  "responseHeaders": {\n    "x-response-name": "x-response-value"\n  },\n  "serverResponseTiming": 6\n}',
-                }),
-            )
-            .returns(() => Promise.resolve())
-            .verifiable();
-    });
-
     it('trace', async () => {
         let pageOperation: any;
         pageRequestInterceptorMock
@@ -115,29 +64,3 @@ describe(PageNetworkTracer, () => {
             .verifiable();
     });
 });
-
-function setupInterceptedRequests(): void {
-    const requestHeaders: Record<string, string> = { 'x-request-name': 'x-request-value', authorization: 'should-be-removed' };
-    const responseHeaders: Record<string, string> = { 'x-response-name': 'x-response-value' };
-    const timing = {
-        receiveHeadersEnd: 7,
-        sendStart: 1,
-    } as Puppeteer.Protocol.Network.ResourceTiming;
-    const response = {
-        status: () => 200,
-        statusText: () => 'OK',
-        headers: () => responseHeaders,
-        timing: () => timing,
-    } as Puppeteer.HTTPResponse;
-    const request = {
-        url,
-        headers: () => requestHeaders,
-    } as unknown as Puppeteer.HTTPRequest;
-    interceptedRequests = [
-        {
-            url,
-            request,
-            response,
-        },
-    ];
-}

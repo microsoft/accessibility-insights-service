@@ -5,18 +5,10 @@ import * as Puppeteer from 'puppeteer';
 import { injectable, inject, optional } from 'inversify';
 import { System } from 'common';
 import { GlobalLogger } from 'logger';
+import { InterceptedRequest, PageEventHandler } from './page-event-handler';
+import { PageNetworkTracerHandler } from './page-network-tracer-handler';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-
-export declare type PageEventHandler = (interceptedRequest: InterceptedRequest) => Promise<void>;
-
-export interface InterceptedRequest {
-    url: string;
-    request: Puppeteer.HTTPRequest;
-    response?: Puppeteer.HTTPResponse;
-    error?: string;
-    data?: any;
-}
 
 @injectable()
 export class PageRequestInterceptor {
@@ -40,15 +32,19 @@ export class PageRequestInterceptor {
 
     private session: Puppeteer.CDPSession;
 
-    constructor(@inject(GlobalLogger) @optional() private readonly logger: GlobalLogger) {}
+    constructor(
+        @inject(PageNetworkTracerHandler) private readonly pageNetworkTracerHandler: PageNetworkTracerHandler,
+        @inject(GlobalLogger) @optional() private readonly logger: GlobalLogger,
+        private readonly globalNetworkTrace: boolean = process.env.NETWORK_TRACE === 'true',
+    ) {}
 
     public async intercept<T>(
         pageOperation: () => Promise<T>,
         page: Puppeteer.Page,
         timeoutMsec: number,
-        interceptAllRequests: boolean = false,
+        networkTrace: boolean = false,
     ): Promise<T> {
-        await this.enableInterception(page, interceptAllRequests);
+        await this.enableInterception(page, networkTrace);
         const operationResult = await pageOperation();
         await this.waitForAllRequests(timeoutMsec);
         await this.disableInterception(page);
@@ -58,9 +54,8 @@ export class PageRequestInterceptor {
 
     /**
      * Intercepts only main frame navigational requests.
-     * Set `interceptAllRequests` to `true` to Intercept all page requests.
      */
-    public async enableInterception(page: Puppeteer.Page, interceptAllRequests: boolean = false): Promise<void> {
+    public async enableInterception(page: Puppeteer.Page, networkTrace: boolean = false): Promise<void> {
         if (this.interceptionEnabled === true) {
             return;
         }
@@ -74,9 +69,17 @@ export class PageRequestInterceptor {
 
         this.pageOnRequestEventHandler = async (request: Puppeteer.HTTPRequest) => {
             try {
-                if (interceptAllRequests === true || (request.isNavigationRequest() && request.frame() === page.mainFrame())) {
+                if (
+                    networkTrace === true ||
+                    this.globalNetworkTrace === true ||
+                    (request.isNavigationRequest() && request.frame() === page.mainFrame())
+                ) {
                     const interceptedRequest = { url: request.url(), request };
                     this.interceptedRequests.push(interceptedRequest);
+
+                    if (networkTrace === true || this.globalNetworkTrace === true) {
+                        await this.pageNetworkTracerHandler.getPageOnRequestHandler()(interceptedRequest);
+                    }
 
                     if (this.pageOnRequest !== undefined) {
                         await this.pageOnRequest(interceptedRequest);
@@ -98,6 +101,10 @@ export class PageRequestInterceptor {
                 if (interceptedRequest !== undefined) {
                     interceptedRequest.response = response;
 
+                    if (networkTrace === true || this.globalNetworkTrace === true) {
+                        await this.pageNetworkTracerHandler.getPageOnResponseHandler()(interceptedRequest);
+                    }
+
                     if (this.pageOnResponse !== undefined) {
                         await this.pageOnResponse(interceptedRequest);
                     }
@@ -113,6 +120,10 @@ export class PageRequestInterceptor {
                 const interceptedRequest = this.interceptedRequests.find((r) => r.url === request.url());
                 if (interceptedRequest !== undefined) {
                     interceptedRequest.error = request.failure()?.errorText ?? 'unknown';
+
+                    if (networkTrace === true || this.globalNetworkTrace === true) {
+                        await this.pageNetworkTracerHandler.getPageOnRequestFailedHandler()(interceptedRequest);
+                    }
 
                     if (this.pageOnRequestFailed !== undefined) {
                         await this.pageOnRequestFailed(interceptedRequest);

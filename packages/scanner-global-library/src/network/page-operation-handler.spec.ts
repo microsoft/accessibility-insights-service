@@ -11,7 +11,8 @@ import { PageResponseProcessor } from '../page-response-processor';
 import { BrowserError } from '../browser-error';
 import { PageNavigationTiming, puppeteerTimeoutConfig } from '../page-timeout-config';
 import { PageOperationHandler, PageOperation } from './page-operation-handler';
-import { InterceptedRequest, PageRequestInterceptor } from './page-request-interceptor';
+import { PageRequestInterceptor } from './page-request-interceptor';
+import { InterceptedRequest } from './page-event-handler';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 

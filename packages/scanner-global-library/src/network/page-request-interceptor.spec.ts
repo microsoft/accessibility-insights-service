@@ -28,7 +28,7 @@ describe(PageRequestInterceptor, () => {
 
         setupEnableBypassServiceWorker();
 
-        pageRequestInterceptor = new PageRequestInterceptor(loggerMock.object);
+        pageRequestInterceptor = new PageRequestInterceptor(undefined, loggerMock.object);
     });
 
     afterEach(() => {
