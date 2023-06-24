@@ -12,6 +12,8 @@ export class PrivacyScanRunnerEntryPoint extends ProcessEntryPointBase {
     }
 
     protected async runCustomAction(container: Container): Promise<void> {
+        process.env.NETWORK_TRACE = 'true';
+
         const logger = container.get(ContextAwareLogger);
         await logger.setup();
 
