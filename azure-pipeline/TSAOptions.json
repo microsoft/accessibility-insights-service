@@ -3,8 +3,8 @@
     "notificationAliases": ["a11y-services-dev@microsoft.com"],
     "codebaseAdmins": ["REDMOND\\a11y-services-dev"],
     "instanceUrl": "https://mseng.visualstudio.com/",
-    "projectName": "AzureDevOps",
+    "projectName": "1ES",
     "areaPath": "1ES\\Accessibility Insights",
-    "iterationPath": "AzureDevOps\\OneVS",
+    "iterationPath": "1ES",
     "tools": ["ARMory", "CredScan", "PoliCheck"]
 }
