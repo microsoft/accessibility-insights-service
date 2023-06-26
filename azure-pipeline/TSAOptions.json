@@ -1,16 +1,10 @@
 {
     "codebaseName": "accessibility-insights-service_main",
-    "repositoryName": "accessibility-insights-service_main",
-    "tsaVersion": "TsaV2",
-    "codebase": "NewOrUpdate",
-    "tsaStamp": "DevDiv",
-    "tsaEnvironment": "Prod",
-    "template": "TFSPowerBI",
+    "notificationAliases": ["a11y-services-dev@microsoft.com"],
+    "codebaseAdmins": ["REDMOND\\a11y-services-dev"],
     "instanceUrl": "https://mseng.visualstudio.com/",
     "projectName": "1ES",
     "areaPath": "1ES\\Accessibility Insights",
     "iterationPath": "1ES",
-    "notificationAliases": ["a11y-services-dev@microsoft.com"],
-    "codebaseAdmins": ["REDMOND\\a11y-services-dev"],
     "tools": ["ARMory", "CredScan", "PoliCheck"]
 }
