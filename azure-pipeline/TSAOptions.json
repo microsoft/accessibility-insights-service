@@ -6,5 +6,6 @@
     "projectName": "1ES",
     "areaPath": "1ES\\Accessibility Insights",
     "iterationPath": "1ES",
+    "template": "TFSVSO",
     "tools": ["ARMory", "CredScan", "PoliCheck"]
 }
