@@ -1,5 +1,5 @@
 {
-    "codebaseName": "accessibility-insights-service_main",
+    "codebaseName": "accessibility-insights-service_main-2",
     "notificationAliases": ["a11y-services-dev@microsoft.com"],
     "codebaseAdmins": ["REDMOND\\a11y-services-dev"],
     "tsaEnvironment": "Prod",
