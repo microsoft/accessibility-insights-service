@@ -13,7 +13,8 @@ import { PageNavigationTiming, puppeteerTimeoutConfig } from '../page-timeout-co
 import { PageOperationResult } from '../page-navigator';
 import { BrowserError } from '../browser-error';
 import { PageAnalyzer } from './page-analyzer';
-import { InterceptedRequest, PageRequestInterceptor } from './page-request-interceptor';
+import { PageRequestInterceptor } from './page-request-interceptor';
+import { InterceptedRequest } from './page-event-handler';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 

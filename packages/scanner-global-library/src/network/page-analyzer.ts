@@ -9,7 +9,8 @@ import { LoginPageDetector } from '../authenticator/login-page-detector';
 import { NavigationResponse, PageOperationResult } from '../page-navigator';
 import { PageResponseProcessor } from '../page-response-processor';
 import { puppeteerTimeoutConfig, PageNavigationTiming } from '../page-timeout-config';
-import { PageRequestInterceptor, InterceptedRequest, PageEventHandler } from './page-request-interceptor';
+import { PageRequestInterceptor } from './page-request-interceptor';
+import { InterceptedRequest, PageEventHandler } from './page-event-handler';
 
 export interface PageAnalysisResult {
     authentication: boolean;

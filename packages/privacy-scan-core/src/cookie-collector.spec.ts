@@ -7,8 +7,11 @@ import * as Puppeteer from 'puppeteer';
 import { IMock, Mock, Times, It } from 'typemoq';
 import { ConsentResult, CookieByDomain } from 'storage-documents';
 import { Page, BrowserError } from 'scanner-global-library';
+import { GlobalLogger } from 'logger';
 import { CookieCollector } from './cookie-collector';
 import { CookieScenario } from './cookie-scenarios';
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 describe(CookieCollector, () => {
     const browserError = {
@@ -18,6 +21,7 @@ describe(CookieCollector, () => {
     const cookieScenario: CookieScenario = {
         name: 'cookie name',
         value: 'cookie value',
+        scenario: 'scenario',
     };
     const expiryDate = new Date(0, 1, 2, 3);
     const expiryDateSec = expiryDate.getTime() / 1000;
@@ -26,9 +30,11 @@ describe(CookieCollector, () => {
     let pageCookiesByDomain: CookieByDomain[];
     let pageMock: IMock<Page>;
     let testSubject: CookieCollector;
+    let loggerMock: IMock<GlobalLogger>;
 
     beforeEach(() => {
         pageMock = Mock.ofType<Page>();
+        loggerMock = Mock.ofType<GlobalLogger>();
         pageCookies = [
             {
                 name: 'domain1-cookie1',
@@ -60,11 +66,12 @@ describe(CookieCollector, () => {
             },
         ];
 
-        testSubject = new CookieCollector();
+        testSubject = new CookieCollector(loggerMock.object);
     });
 
     afterEach(() => {
         pageMock.verifyAll();
+        loggerMock.verifyAll();
     });
 
     it('Returns error if hard reload fails', async () => {
@@ -162,8 +169,11 @@ describe(CookieCollector, () => {
     }
 
     function setupSetCookie(newCookiesAfterLoad: CookieScenario[]): void {
+        const cookies = newCookiesAfterLoad.map((o) => {
+            return { name: o.name, value: o.value };
+        });
         pageMock
-            .setup((o) => o.setCookies(It.isValue(newCookiesAfterLoad as Puppeteer.Protocol.Network.Cookie[])))
+            .setup((o) => o.setCookies(It.isValue(cookies as any)))
             .returns(() => Promise.resolve())
             .verifiable();
     }

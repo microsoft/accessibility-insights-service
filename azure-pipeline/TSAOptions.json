@@ -1,10 +1,12 @@
 {
-    "codebaseName": "accessibility-insights-service_main",
+    "codebaseName": "accessibility-insights-service_main-2",
     "notificationAliases": ["a11y-services-dev@microsoft.com"],
     "codebaseAdmins": ["REDMOND\\a11y-services-dev"],
+    "tsaEnvironment": "Prod",
     "instanceUrl": "https://mseng.visualstudio.com/",
-    "projectName": "AzureDevOps",
+    "template": "TFSPowerBI",
+    "projectName": "1ES",
     "areaPath": "1ES\\Accessibility Insights",
-    "iterationPath": "AzureDevOps\\OneVS",
+    "iterationPath": "1ES",
     "tools": ["ARMory", "CredScan", "PoliCheck"]
 }

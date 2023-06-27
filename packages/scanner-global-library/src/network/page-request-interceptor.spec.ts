@@ -8,6 +8,8 @@ import * as Puppeteer from 'puppeteer';
 import { GlobalLogger } from 'logger';
 import { getPromisableDynamicMock } from '../test-utilities/promisable-mock';
 import { PageRequestInterceptor } from './page-request-interceptor';
+import { PageNetworkTracerHandler } from './page-network-tracer-handler';
+import { InterceptedRequest } from './page-event-handler';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -15,6 +17,7 @@ let pageRequestInterceptor: PageRequestInterceptor;
 let puppeteerPageMock: IMock<Puppeteer.Page>;
 let loggerMock: IMock<GlobalLogger>;
 let cdpSessionMock: IMock<Puppeteer.CDPSession>;
+let pageNetworkTracerHandlerMock: IMock<PageNetworkTracerHandler>;
 let puppeteerTargetMock: IMock<Puppeteer.Target>;
 
 const mainFrame = { name: () => 'main' } as Puppeteer.Frame;
@@ -24,18 +27,20 @@ describe(PageRequestInterceptor, () => {
         puppeteerPageMock = Mock.ofType<Puppeteer.Page>();
         loggerMock = Mock.ofType(GlobalLogger);
         cdpSessionMock = getPromisableDynamicMock(Mock.ofType<Puppeteer.CDPSession>());
+        pageNetworkTracerHandlerMock = Mock.ofType<PageNetworkTracerHandler>();
         puppeteerTargetMock = Mock.ofType<Puppeteer.Target>();
 
         setupEnableBypassServiceWorker();
 
-        pageRequestInterceptor = new PageRequestInterceptor(loggerMock.object);
+        pageRequestInterceptor = new PageRequestInterceptor(pageNetworkTracerHandlerMock.object, loggerMock.object);
     });
 
     afterEach(() => {
         puppeteerPageMock.verifyAll();
         loggerMock.verifyAll();
-        puppeteerTargetMock.verifyAll();
         cdpSessionMock.verifyAll();
+        pageNetworkTracerHandlerMock.verifyAll();
+        puppeteerTargetMock.verifyAll();
     });
 
     it('should invoke pageOnRequest', async () => {
@@ -61,11 +66,30 @@ describe(PageRequestInterceptor, () => {
         expect(pageRequestInterceptor.errors).toEqual([]);
     });
 
-    it('should invoke pageOnResponse', async () => {
-        puppeteerPageMock
-            .setup((o) => o.mainFrame())
-            .returns(() => mainFrame)
+    it('should invoke pageOnRequest with network trace', async () => {
+        const request = {
+            url: () => 'url',
+            isNavigationRequest: () => true,
+            frame: () => mainFrame,
+            continue: () => Promise.resolve(),
+            isInterceptResolutionHandled: () => false,
+        };
+        const pageOnRequest = jest.fn().mockImplementation(async () => Promise.resolve());
+        pageRequestInterceptor.pageOnRequest = pageOnRequest;
+
+        const traceRequestHandler = jest.fn().mockImplementation(async () => Promise.resolve());
+        pageNetworkTracerHandlerMock
+            .setup((o) => o.getPageOnRequestHandler())
+            .returns(() => traceRequestHandler)
             .verifiable();
+
+        await pageRequestInterceptor.enableInterception(puppeteerPageMock.object, true);
+        await (pageRequestInterceptor as any).pageOnRequestEventHandler(request);
+
+        expect(traceRequestHandler).toBeCalledWith({ url: 'url', request });
+    });
+
+    it('should invoke pageOnResponse', async () => {
         const request = {
             url: () => 'url',
             isNavigationRequest: () => true,
@@ -76,27 +100,50 @@ describe(PageRequestInterceptor, () => {
         const response = {
             url: () => 'url',
         };
+        const interceptedRequest = { url: request.url(), request } as InterceptedRequest;
 
-        const pageOnRequest = jest.fn().mockImplementation(async () => Promise.resolve());
-        pageRequestInterceptor.pageOnRequest = pageOnRequest;
         const pageOnResponse = jest.fn().mockImplementation(async () => Promise.resolve());
         pageRequestInterceptor.pageOnResponse = pageOnResponse;
 
         await pageRequestInterceptor.enableInterception(puppeteerPageMock.object);
-        await (pageRequestInterceptor as any).pageOnRequestEventHandler(request);
+        pageRequestInterceptor.interceptedRequests = [interceptedRequest];
         await (pageRequestInterceptor as any).pageOnResponseEventHandler(response);
 
-        expect(pageOnRequest).toBeCalledWith(pageRequestInterceptor.interceptedRequests[0]);
         expect(pageOnResponse).toBeCalledWith(pageRequestInterceptor.interceptedRequests[0]);
         expect(pageRequestInterceptor.interceptedRequests).toEqual([{ url: 'url', request, response }]);
         expect(pageRequestInterceptor.errors).toEqual([]);
     });
 
-    it('should invoke pageOnRequestFailed', async () => {
-        puppeteerPageMock
-            .setup((o) => o.mainFrame())
-            .returns(() => mainFrame)
+    it('should invoke pageOnResponse with network trace', async () => {
+        const request = {
+            url: () => 'url',
+            isNavigationRequest: () => true,
+            frame: () => mainFrame,
+            continue: () => Promise.resolve(),
+            isInterceptResolutionHandled: () => false,
+        };
+        const response = {
+            url: () => 'url',
+        };
+        const interceptedRequest = { url: request.url(), request } as InterceptedRequest;
+
+        const pageOnResponse = jest.fn().mockImplementation(async () => Promise.resolve());
+        pageRequestInterceptor.pageOnResponse = pageOnResponse;
+
+        const traceRequestHandler = jest.fn().mockImplementation(async () => Promise.resolve());
+        pageNetworkTracerHandlerMock
+            .setup((o) => o.getPageOnResponseHandler())
+            .returns(() => traceRequestHandler)
             .verifiable();
+
+        await pageRequestInterceptor.enableInterception(puppeteerPageMock.object, true);
+        pageRequestInterceptor.interceptedRequests = [interceptedRequest];
+        await (pageRequestInterceptor as any).pageOnResponseEventHandler(response);
+
+        expect(traceRequestHandler).toBeCalledWith(interceptedRequest);
+    });
+
+    it('should invoke pageOnRequestFailed', async () => {
         const request = {
             url: () => 'url',
             isNavigationRequest: () => true,
@@ -107,20 +154,47 @@ describe(PageRequestInterceptor, () => {
                 errorText: 'errorText',
             }),
         };
+        const interceptedRequest = { url: request.url(), request } as InterceptedRequest;
 
-        const pageOnRequest = jest.fn().mockImplementation(async () => Promise.resolve());
-        pageRequestInterceptor.pageOnRequest = pageOnRequest;
         const pageOnRequestFailed = jest.fn().mockImplementation(async () => Promise.resolve());
         pageRequestInterceptor.pageOnRequestFailed = pageOnRequestFailed;
 
         await pageRequestInterceptor.enableInterception(puppeteerPageMock.object);
-        await (pageRequestInterceptor as any).pageOnRequestEventHandler(request);
+        pageRequestInterceptor.interceptedRequests = [interceptedRequest];
         await (pageRequestInterceptor as any).pageOnRequestFailedEventHandler(request);
 
-        expect(pageOnRequest).toBeCalledWith(pageRequestInterceptor.interceptedRequests[0]);
         expect(pageOnRequestFailed).toBeCalledWith(pageRequestInterceptor.interceptedRequests[0]);
         expect(pageRequestInterceptor.interceptedRequests).toEqual([{ url: 'url', error: 'errorText', request }]);
         expect(pageRequestInterceptor.errors).toEqual([]);
+    });
+
+    it('should invoke pageOnRequestFailed with network trace', async () => {
+        const request = {
+            url: () => 'url',
+            isNavigationRequest: () => true,
+            frame: () => mainFrame,
+            continue: () => Promise.resolve(),
+            isInterceptResolutionHandled: () => false,
+            failure: () => ({
+                errorText: 'errorText',
+            }),
+        };
+        const interceptedRequest = { url: request.url(), request } as InterceptedRequest;
+
+        const pageOnRequestFailed = jest.fn().mockImplementation(async () => Promise.resolve());
+        pageRequestInterceptor.pageOnRequestFailed = pageOnRequestFailed;
+
+        const traceRequestHandler = jest.fn().mockImplementation(async () => Promise.resolve());
+        pageNetworkTracerHandlerMock
+            .setup((o) => o.getPageOnRequestFailedHandler())
+            .returns(() => traceRequestHandler)
+            .verifiable();
+
+        await pageRequestInterceptor.enableInterception(puppeteerPageMock.object, true);
+        pageRequestInterceptor.interceptedRequests = [interceptedRequest];
+        await (pageRequestInterceptor as any).pageOnRequestFailedEventHandler(request);
+
+        expect(traceRequestHandler).toBeCalledWith(interceptedRequest);
     });
 
     it('should enable interception', async () => {
