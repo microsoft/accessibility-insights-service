@@ -8,8 +8,6 @@ import { Page } from 'scanner-global-library';
 import { GlobalLogger } from 'logger';
 import { CookieScenario } from './cookie-scenarios';
 
-/* eslint-disable security/detect-non-literal-fs-filename */
-
 @injectable()
 export class CookieCollector {
     constructor(@inject(GlobalLogger) @optional() private readonly logger: GlobalLogger = undefined) {}
@@ -21,9 +19,6 @@ export class CookieCollector {
         }
 
         const cookiesBeforeConsent = await this.getCurrentCookies(page);
-        this.logger.logInfo(`Cookies before consent for ${cookieScenario.scenario} scenario.`, {
-            cookies: JSON.stringify(cookiesBeforeConsent),
-        });
 
         await page.setCookies([{ name: cookieScenario.name, value: cookieScenario.value }]);
         await page.reload();
@@ -32,8 +27,9 @@ export class CookieCollector {
         }
 
         const cookiesAfterConsent = await this.getCurrentCookies(page);
-        this.logger.logInfo(`Cookies after consent for ${cookieScenario.scenario} scenario.`, {
-            cookies: JSON.stringify(cookiesBeforeConsent),
+
+        this.logger.logInfo(`Run the accept ${cookieScenario.scenario} consent scenario.`, {
+            cookieScenario: cookieScenario.scenario,
         });
 
         return {

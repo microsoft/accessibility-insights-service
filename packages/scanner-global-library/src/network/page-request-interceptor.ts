@@ -60,6 +60,8 @@ export class PageRequestInterceptor {
             return;
         }
 
+        const networkTraceEnabled = networkTrace === true || this.globalNetworkTrace === true;
+
         this.interceptionEnabled = true;
         this.interceptedRequests = [];
         this.errors = [];
@@ -69,15 +71,11 @@ export class PageRequestInterceptor {
 
         this.pageOnRequestEventHandler = async (request: Puppeteer.HTTPRequest) => {
             try {
-                if (
-                    networkTrace === true ||
-                    this.globalNetworkTrace === true ||
-                    (request.isNavigationRequest() && request.frame() === page.mainFrame())
-                ) {
+                if (networkTraceEnabled === true || (request.isNavigationRequest() && request.frame() === page.mainFrame())) {
                     const interceptedRequest = { url: request.url(), request };
                     this.interceptedRequests.push(interceptedRequest);
 
-                    if (networkTrace === true || this.globalNetworkTrace === true) {
+                    if (networkTraceEnabled === true) {
                         await this.pageNetworkTracerHandler.getPageOnRequestHandler()(interceptedRequest);
                     }
 
@@ -101,7 +99,7 @@ export class PageRequestInterceptor {
                 if (interceptedRequest !== undefined) {
                     interceptedRequest.response = response;
 
-                    if (networkTrace === true || this.globalNetworkTrace === true) {
+                    if (networkTraceEnabled === true) {
                         await this.pageNetworkTracerHandler.getPageOnResponseHandler()(interceptedRequest);
                     }
 
@@ -121,7 +119,7 @@ export class PageRequestInterceptor {
                 if (interceptedRequest !== undefined) {
                     interceptedRequest.error = request.failure()?.errorText ?? 'unknown';
 
-                    if (networkTrace === true || this.globalNetworkTrace === true) {
+                    if (networkTraceEnabled === true) {
                         await this.pageNetworkTracerHandler.getPageOnRequestFailedHandler()(interceptedRequest);
                     }
 
