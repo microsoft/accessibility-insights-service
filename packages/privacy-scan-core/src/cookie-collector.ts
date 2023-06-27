@@ -28,7 +28,7 @@ export class CookieCollector {
 
         const cookiesAfterConsent = await this.getCurrentCookies(page);
 
-        this.logger.logInfo(`Run the accept ${cookieScenario.scenario} consent scenario.`, {
+        this.logger?.logInfo(`Run the ${cookieScenario.scenario} consent scenario.`, {
             cookieScenario: cookieScenario.scenario,
         });
 
