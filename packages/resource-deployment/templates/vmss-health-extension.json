@@ -1,4 +1,4 @@
 {
-    "protocol": "HTTP",
-    "requestPath": "/"
+    "protocol": "tcp",
+    "port": 135
 }
