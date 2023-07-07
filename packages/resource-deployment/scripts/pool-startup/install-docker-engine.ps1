@@ -15,7 +15,7 @@ function startTranscript() {
     $nodeRootDir = $env:AZ_BATCH_NODE_ROOT_DIR
 
     if ($nodeRootDir) {
-        $transcriptPath = "$nodeRootDir\startup\$transcriptFileName"
+        $transcriptPath = "$nodeRootDir\$transcriptFileName"
     }
     else {
         $transcriptPath = "$env:TEMP\$transcriptFileName"
@@ -88,7 +88,8 @@ function setDockerConfig() {
     $config | ConvertTo-Json | Set-Content $configPath -Force
 
     if ($global:rebootRequired -eq $true) {
-        Write-Output "Docker data location is updated to $dataRootValue"
+        Write-Output "Docker config file was successfully updated."
+        Write-Output $config | ConvertTo-Json
     }
 }
 
