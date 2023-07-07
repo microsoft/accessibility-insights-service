@@ -15,7 +15,7 @@ function startTranscript() {
     $nodeRootDir = $env:AZ_BATCH_NODE_ROOT_DIR
 
     if ($nodeRootDir) {
-        $transcriptPath = "$nodeRootDir\$transcriptFileName"
+        $transcriptPath = "$nodeRootDir\startup\$transcriptFileName"
     }
     else {
         $transcriptPath = "$env:TEMP\$transcriptFileName"
@@ -38,14 +38,14 @@ function rebootIfRequired() {
 }
 
 # See https://learn.microsoft.com/en-us/virtualization/windowscontainers/manage-docker/configure-docker-daemon#configure-docker-with-a-configuration-file
-function setDockerDataLocation() {
+function setDockerConfig() {
     $dataRootValue = "D:\docker"
     $configFolder = "C:\ProgramData\Docker\config"
     $configName = "daemon.json"
     $configPath = "$configFolder\$configName"
 
     if (-not (Test-Path -Path $configFolder)) {
-        # Docker installation does not exists 
+        # Docker installation does not exist
         return
     }
 
@@ -55,6 +55,7 @@ function setDockerDataLocation() {
     }
 
     $config = Get-Content $configPath -Raw | ConvertFrom-Json
+    # Set data location
     if ($config."data-root" -and $config."data-root" -ne $dataRootValue) {
         # Update property value
         $config."data-root" = $dataRootValue
@@ -65,6 +66,24 @@ function setDockerDataLocation() {
         $config | Add-Member -Name "data-root" -Value $dataRootValue -MemberType NoteProperty
         $global:rebootRequired = $true
     }
+
+    # Set Hyper-V isolation
+    $hypervIsolation = "isolation=hyperv"
+    if ($config."exec-opts" -is [array]) {
+        $isolationOpt = @($config."exec-opts" | Where-Object {$_ -like "isolation*"})
+        if (-not ($isolationOpt.Count -eq 1 -and $isolationOpt[0] -eq $hypervIsolation)) {
+            # Update property value
+            $execOpts = @($config."exec-opts" | Where-Object {$_ -notlike "isolation*"})
+            $execOpts += $hypervIsolation
+            $config."exec-opts" = $execOpts
+            $global:rebootRequired = $true
+        }
+    }
+    elseif (-not $config."exec-opts") {
+        # Add property value
+        $config | Add-Member -Name "exec-opts" -Value @($hypervIsolation) -MemberType NoteProperty
+        $global:rebootRequired = $true
+    } 
 
     $config | ConvertTo-Json | Set-Content $configPath -Force
 
@@ -108,5 +127,5 @@ trap {
 startTranscript
 setPrerequisite
 validateDockerEngine
-setDockerDataLocation
+setDockerConfig
 rebootIfRequired
