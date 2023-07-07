@@ -154,12 +154,19 @@ export class Page {
 
         // Note: changing page.screenshot() options may break page layout
         // Setting BrowserConnectOptions.defaultViewport == null is required for not breaking page layout
-        const data = await this.page.screenshot({
-            fullPage: true,
-            encoding: 'base64',
-        });
+        // Puppeteer fails to generate screenshot for a large page.
+        try {
+            const data = await this.page.screenshot({
+                fullPage: true,
+                encoding: 'base64',
+            });
 
-        return data as string;
+            return data as string;
+        } catch (error) {
+            this.logger?.logError('Failed to generate page screenshot', { error: System.serializeError(error) });
+
+            return '';
+        }
     }
 
     public async getPageSnapshot(): Promise<string> {
