@@ -98,12 +98,14 @@ function installHyperV() {
     if (($feature | Where-Object { $_.Name -eq "Hyper-V" }).InstallState -ne "Installed" -or ($feature | Where-Object { $_.Name -eq "Hyper-V-PowerShell" }).InstallState -ne "Installed") {
         Write-Output "Installing Hyper-V..."
         Install-WindowsFeature -Name Hyper-V, Hyper-V-PowerShell -Restart
+        Start-Sleep -Seconds 3
     }
     else {
         Write-Output "Hyper-V is installed."
     }
 
     Set-VMHost -VirtualMachinePath "D:\Hyper-V" -VirtualHardDiskPath "D:\Hyper-V"
+
     $switch = Get-VMSwitch | Where-Object { $_.Name -eq "vEthernet" }
     if ($switch -eq $null) {
         Write-Output "Creating Hyper-V external virtual switch..."
