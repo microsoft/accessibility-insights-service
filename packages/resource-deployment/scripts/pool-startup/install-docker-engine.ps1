@@ -27,7 +27,7 @@ function startTranscript() {
 function rebootIfRequired() {
     if ($global:rebootRequired -eq $true) {
         Write-Output "Rebooting machine to complete installation..."
-        Start-Sleep -Seconds 20
+        Start-Sleep -Seconds 10
         Stop-Transcript
 
         shutdown /r /d p:4:2
@@ -98,7 +98,7 @@ function installHyperV() {
     if (($feature | Where-Object { $_.Name -eq "Hyper-V" }).InstallState -ne "Installed" -or ($feature | Where-Object { $_.Name -eq "Hyper-V-PowerShell" }).InstallState -ne "Installed") {
         Write-Output "Installing Hyper-V..."
         Install-WindowsFeature -Name Hyper-V, Hyper-V-PowerShell -Restart
-        Start-Sleep -Seconds 3
+        Start-Sleep -Seconds 10
     }
     else {
         Write-Output "Hyper-V is installed."
