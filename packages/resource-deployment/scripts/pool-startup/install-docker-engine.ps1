@@ -27,7 +27,7 @@ function startTranscript() {
 function rebootIfRequired() {
     if ($global:rebootRequired -eq $true) {
         Write-Output "Rebooting machine to complete installation..."
-        Start-Sleep -Seconds 20
+        Start-Sleep -Seconds 10
         Stop-Transcript
 
         shutdown /r /d p:4:2
@@ -38,14 +38,14 @@ function rebootIfRequired() {
 }
 
 # See https://learn.microsoft.com/en-us/virtualization/windowscontainers/manage-docker/configure-docker-daemon#configure-docker-with-a-configuration-file
-function setDockerDataLocation() {
+function setDockerConfig() {
     $dataRootValue = "D:\docker"
     $configFolder = "C:\ProgramData\Docker\config"
     $configName = "daemon.json"
     $configPath = "$configFolder\$configName"
 
     if (-not (Test-Path -Path $configFolder)) {
-        # Docker installation does not exists 
+        # Docker installation does not exist
         return
     }
 
@@ -55,6 +55,7 @@ function setDockerDataLocation() {
     }
 
     $config = Get-Content $configPath -Raw | ConvertFrom-Json
+    # Set data location
     if ($config."data-root" -and $config."data-root" -ne $dataRootValue) {
         # Update property value
         $config."data-root" = $dataRootValue
@@ -66,10 +67,49 @@ function setDockerDataLocation() {
         $global:rebootRequired = $true
     }
 
+    # Set Hyper-V isolation
+    $hypervIsolation = "isolation=hyperv"
+    if ($config."exec-opts" -is [array]) {
+        $isolationOpt = @($config."exec-opts" | Where-Object { $_ -like "isolation*" })
+        if (-not ($isolationOpt.Count -eq 1 -and $isolationOpt[0] -eq $hypervIsolation)) {
+            # Update property value
+            $execOpts = @($config."exec-opts" | Where-Object { $_ -notlike "isolation*" })
+            $execOpts += $hypervIsolation
+            $config."exec-opts" = $execOpts
+            $global:rebootRequired = $true
+        }
+    }
+    elseif (-not $config."exec-opts") {
+        # Add property value
+        $config | Add-Member -Name "exec-opts" -Value @($hypervIsolation) -MemberType NoteProperty
+        $global:rebootRequired = $true
+    } 
+
     $config | ConvertTo-Json | Set-Content $configPath -Force
 
     if ($global:rebootRequired -eq $true) {
-        Write-Output "Docker data location is updated to $dataRootValue"
+        Write-Output "Docker config file was successfully updated."
+        Write-Output $config | ConvertTo-Json
+    }
+}
+
+function installHyperV() {
+    $feature = Get-WindowsFeature "*hyper-v*"
+    if (($feature | Where-Object { $_.Name -eq "Hyper-V" }).InstallState -ne "Installed" -or ($feature | Where-Object { $_.Name -eq "Hyper-V-PowerShell" }).InstallState -ne "Installed") {
+        Write-Output "Installing Hyper-V..."
+        Install-WindowsFeature -Name Hyper-V, Hyper-V-PowerShell -Restart
+        Start-Sleep -Seconds 10
+    }
+    else {
+        Write-Output "Hyper-V is installed."
+    }
+
+    Set-VMHost -VirtualMachinePath "D:\Hyper-V" -VirtualHardDiskPath "D:\Hyper-V"
+
+    $switch = Get-VMSwitch | Where-Object { $_.Name -eq "vEthernet" }
+    if ($switch -eq $null) {
+        Write-Output "Creating Hyper-V external virtual switch..."
+        New-VMSwitch -Name "vEthernet" -NetAdapterName Ethernet -AllowManagementOS:$true
     }
 }
 
@@ -107,6 +147,7 @@ trap {
 
 startTranscript
 setPrerequisite
+installHyperV
 validateDockerEngine
-setDockerDataLocation
+setDockerConfig
 rebootIfRequired

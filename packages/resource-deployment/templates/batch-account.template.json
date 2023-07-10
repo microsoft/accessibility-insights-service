@@ -163,7 +163,7 @@
                         "imageReference": {
                             "publisher": "microsoftwindowsserver",
                             "offer": "windowsserver",
-                            "sku": "2019-datacenter-smalldisk",
+                            "sku": "2022-datacenter-smalldisk",
                             "version": "latest"
                         },
                         "nodeAgentSkuId": "batch.node.windows amd64",
@@ -229,7 +229,7 @@
                         "imageReference": {
                             "publisher": "microsoftwindowsserver",
                             "offer": "windowsserver",
-                            "sku": "2019-datacenter-smalldisk",
+                            "sku": "2022-datacenter-smalldisk",
                             "version": "latest"
                         },
                         "nodeAgentSkuId": "batch.node.windows amd64",
@@ -295,7 +295,7 @@
                         "imageReference": {
                             "publisher": "microsoftwindowsserver",
                             "offer": "windowsserver",
-                            "sku": "2019-datacenter-smalldisk",
+                            "sku": "2022-datacenter-smalldisk",
                             "version": "latest"
                         },
                         "nodeAgentSkuId": "batch.node.windows amd64",
