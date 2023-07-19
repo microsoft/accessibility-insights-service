@@ -55,4 +55,5 @@ function registerLoggerDependenciesToContainer(container: Container): void {
     container.bind(ConsoleLoggerClient).toSelf().inSingletonScope();
     container.bind(loggerTypes.DotEnvConfig).toConstantValue(dotenv.config());
     container.bind(loggerTypes.Console).toConstantValue(console);
+    container.bind(OTelLoggerClient).toSelf().inSingletonScope();
 }

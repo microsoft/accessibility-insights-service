@@ -1,12 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { injectable } from 'inversify';
+import { inject, injectable } from 'inversify';
 import { Resource } from '@opentelemetry/resources';
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
 import {
     AggregationTemporality,
-    // ConsoleMetricExporter,
     MeterProvider,
     MetricReader,
     PeriodicExportingMetricReader,
@@ -21,12 +20,15 @@ import { TelemetryMeasurements } from './logger-event-measurements';
 import { AvailabilityTelemetry } from './availability-telemetry';
 import { LoggerProperties } from './logger-properties';
 import { LogLevel } from './logger';
+import { OTelConfigProvider } from './otel-config-provider';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 @injectable()
 export class OTelLoggerClient implements LoggerClient {
     public initialized = false;
+
+    private enabled = false;
 
     private baseProperties: BaseTelemetryProperties;
 
@@ -36,11 +38,14 @@ export class OTelLoggerClient implements LoggerClient {
 
     private exporter: PushMetricExporter;
 
-    constructor(private readonly resource: Resource = Resource.default()) {}
+    constructor(
+        @inject(OTelConfigProvider) private readonly otelConfigProvider: OTelConfigProvider,
+        private readonly resource: Resource = Resource.default(),
+    ) {}
 
     public async setup(baseProperties?: BaseTelemetryProperties): Promise<void> {
         this.baseProperties = baseProperties;
-        this.setupOTel();
+        await this.setupOTel();
         this.initialized = true;
     }
 
@@ -49,6 +54,10 @@ export class OTelLoggerClient implements LoggerClient {
     }
 
     public trackEvent(name: LoggerEvent, properties?: { [name: string]: string }, measurements?: TelemetryMeasurements[LoggerEvent]): void {
+        if (this.enabled !== true) {
+            return;
+        }
+
         const meter = opentelemetry.metrics.getMeter(name);
         Object.keys(measurements).map((key) => {
             const counterName = `${name}.${key}`;
@@ -73,6 +82,10 @@ export class OTelLoggerClient implements LoggerClient {
     }
 
     public async flush(): Promise<void> {
+        if (this.enabled !== true) {
+            return;
+        }
+
         await this.meterProvider.forceFlush();
         await this.exporter.forceFlush();
     }
@@ -85,16 +98,22 @@ export class OTelLoggerClient implements LoggerClient {
         return { ...this.baseProperties, ...properties };
     }
 
-    private setupOTel(): void {
+    private async setupOTel(): Promise<void> {
+        const config = await this.otelConfigProvider.getConfig();
+        this.enabled = config.hasOTelListener;
+
+        if (this.enabled !== true) {
+            return;
+        }
+
         this.resource.merge(
             new Resource({
                 [SemanticResourceAttributes.SERVICE_NAME]: 'WebInsightsService',
-                [SemanticResourceAttributes.SERVICE_VERSION]: '1.0.0',
             }),
         );
 
-        // this.exporter  = new ConsoleMetricExporter({ temporalitySelector: () => AggregationTemporality.DELTA });
         this.exporter = new OTLPMetricExporter({
+            url: config.otelListenerUrl,
             temporalityPreference: AggregationTemporality.DELTA,
         });
 

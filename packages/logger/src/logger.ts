@@ -20,7 +20,7 @@ export abstract class Logger {
 
     protected isDebugEnabled: boolean = false;
 
-    constructor(public readonly loggerClients: LoggerClient[], protected readonly initializationTimeout: number = 5000) {}
+    constructor(public readonly loggerClients: LoggerClient[], protected readonly initializationTimeout: number = 15000) {}
 
     public async setup(baseProperties?: { [property: string]: string }): Promise<void> {
         if (this.initialized === true) {

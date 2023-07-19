@@ -24,7 +24,7 @@ describe(GlobalLogger, () => {
         loggerClient2Mock = Mock.ofType2(ConsoleLoggerClient, null, MockBehavior.Strict);
         setupAllLoggerClientsInit();
 
-        testSubject = new GlobalLogger([loggerClient1Mock.object, loggerClient2Mock.object], 500);
+        testSubject = new GlobalLogger([loggerClient1Mock.object, loggerClient2Mock.object]);
     });
 
     describe('setup', () => {
