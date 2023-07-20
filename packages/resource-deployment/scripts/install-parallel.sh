@@ -9,7 +9,6 @@ set -eo pipefail
 export apiManagementName
 export batchAccountName
 export cosmosAccountName
-export datalakeStorageAccountName
 export dropFolder="${0%/*}/../../../"
 export environment
 export webApiFuncAppName
@@ -136,7 +135,6 @@ function install() {
     apiManagmentProcessId="$!"
 
     parallelProcesses=(
-        # "${0%/*}/create-datalake-storage-account.sh"
         "${0%/*}/upload-files.sh"
         "${0%/*}/create-queues.sh"
         "${0%/*}/setup-cosmos-db.sh"
