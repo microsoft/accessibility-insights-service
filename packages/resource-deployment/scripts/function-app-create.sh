@@ -13,6 +13,11 @@ export environment
 export keyVault
 export principalId
 
+templatesFolder="${0%/*}/../templates/"
+webApiFuncTemplateFilePath=$templatesFolder/function-web-api-app-template.json
+webWorkersFuncTemplateFilePath=$templatesFolder/function-web-workers-app-template.json
+e2eWebApiFuncTemplateFilePath=$templatesFolder/function-e2e-web-api-app-template.json
+
 if [[ -z $dropFolder ]]; then
     dropFolder="${0%/*}/../../../"
 fi
@@ -27,6 +32,24 @@ Usage: $0 \
 -v <release version>
 "
     exit 1
+}
+
+addAadAcl() {
+    if [[ $environment == "prod" ]] || [[ $environment == "prod-pr" ]]; then
+        aclFilePath="${0%/*}/../templates/web-api-aad-acl-prod.json"
+    elif [[ $environment == "ppe" ]] || [[ $environment == "ppe-pr" ]]; then
+        aclFilePath="${0%/*}/../templates/web-api-aad-acl-ppe.json"
+    else
+        aclFilePath="${0%/*}/../templates/web-api-aad-acl-dev.json"
+    fi
+
+    if [[ -f $aclFilePath ]]; then
+        echo "Updating Azure Functions AAD ACL for $webApiFuncTemplateFilePath template..."
+        acl=$(<$aclFilePath)
+        tempFilePath=$templatesFolder/temp-func-acl.json
+
+        jq ".resources[].properties.siteConfig.appSettings += [$acl]" $webApiFuncTemplateFilePath >$tempFilePath && mv $tempFilePath $webApiFuncTemplateFilePath
+    fi
 }
 
 copyConfigFileToScriptFolder() {
@@ -143,15 +166,15 @@ deployFunctionApp() {
 }
 
 function deployWebApiFunction() {
-    deployFunctionApp "web-api-allyfuncapp" "${0%/*}/../templates/function-web-api-app-template.json" "$webApiFuncAppName" "clientId=$webApiAdClientId"
+    deployFunctionApp "web-api-allyfuncapp" "$webApiFuncTemplateFilePath" "$webApiFuncAppName" "clientId=$webApiAdClientId"
 }
 
 function deployWebWorkersFunction() {
-    deployFunctionApp "web-workers-allyfuncapp" "${0%/*}/../templates/function-web-workers-app-template.json" "$webWorkersFuncAppName"
+    deployFunctionApp "web-workers-allyfuncapp" "$webWorkersFuncTemplateFilePath" "$webWorkersFuncAppName"
 }
 
 function deployE2EWebApisFunction() {
-    deployFunctionApp "e2e-web-apis-allyfuncapp" "${0%/*}/../templates/function-e2e-web-apis-app-template.json" "$e2eWebApisFuncAppName"
+    deployFunctionApp "e2e-web-apis-allyfuncapp" "$e2eWebApiFuncTemplateFilePath" "$e2eWebApisFuncAppName"
 }
 
 function enableStorageAccess() {
@@ -276,4 +299,5 @@ fi
 # Get the default subscription
 subscription=$(az account show --query "id" -o tsv)
 
+addAadAcl
 setupAzureFunctions
