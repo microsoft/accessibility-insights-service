@@ -94,16 +94,16 @@ export abstract class BaseAppInsightsLoggerClient implements LoggerClient {
 
     private getAppInsightsSeverityLevel(logLevel: LogLevel): Contracts.SeverityLevel {
         switch (logLevel) {
-            case LogLevel.info:
+            case LogLevel.Info:
                 return Contracts.SeverityLevel.Information;
 
-            case LogLevel.error:
+            case LogLevel.Error:
                 return Contracts.SeverityLevel.Error;
 
-            case LogLevel.verbose:
+            case LogLevel.Verbose:
                 return Contracts.SeverityLevel.Verbose;
 
-            case LogLevel.warn:
+            case LogLevel.Warn:
                 return Contracts.SeverityLevel.Warning;
 
             default:

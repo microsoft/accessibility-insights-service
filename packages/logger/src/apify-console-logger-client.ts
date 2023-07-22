@@ -43,16 +43,16 @@ export class ApifyConsoleLoggerClient implements LoggerClient {
 
     public log(message: string, logLevel: LogLevel, properties?: { [name: string]: string }): void {
         switch (logLevel) {
-            case LogLevel.error:
+            case LogLevel.Error:
                 this.logger.error(message, this.getProperties(properties));
                 break;
-            case LogLevel.info:
+            case LogLevel.Info:
                 this.logger.info(message, this.getProperties(properties));
                 break;
-            case LogLevel.verbose:
+            case LogLevel.Verbose:
                 this.logger.debug(message, this.getProperties(properties));
                 break;
-            case LogLevel.warn:
+            case LogLevel.Warn:
                 this.logger.warning(message, this.getProperties(properties));
                 break;
             default:

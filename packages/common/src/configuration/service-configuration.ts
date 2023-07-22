@@ -6,6 +6,20 @@ import convict from 'convict';
 import { injectable } from 'inversify';
 import { isNil } from 'lodash';
 
+export interface RuntimeConfig {
+    featureFlags: FeatureFlags;
+    logConfig: LogRuntimeConfig;
+    taskConfig: TaskRuntimeConfig;
+    queueConfig: QueueRuntimeConfig;
+    scanConfig: ScanRunTimeConfig;
+    jobManagerConfig: JobManagerConfig;
+    restApiConfig: RestApiConfig;
+    availabilityTestConfig: AvailabilityTestConfig;
+    crawlConfig: CrawlConfig;
+    privacyScanConfig: PrivacyScanConfig;
+    metricsConfig?: MetricsConfig;
+}
+
 export interface TaskRuntimeConfig {
     taskTimeoutInMinutes: number;
     retentionTimeInDays: number;
@@ -50,19 +64,6 @@ export interface RestApiConfig {
     maxScanPriorityValue: number;
 }
 
-export interface RuntimeConfig {
-    featureFlags: FeatureFlags;
-    logConfig: LogRuntimeConfig;
-    taskConfig: TaskRuntimeConfig;
-    queueConfig: QueueRuntimeConfig;
-    scanConfig: ScanRunTimeConfig;
-    jobManagerConfig: JobManagerConfig;
-    restApiConfig: RestApiConfig;
-    availabilityTestConfig: AvailabilityTestConfig;
-    crawlConfig: CrawlConfig;
-    privacyScanConfig: PrivacyScanConfig;
-}
-
 export interface FeatureFlags {
     sendNotification: boolean;
 }
@@ -88,6 +89,12 @@ export interface CrawlConfig {
 export interface PrivacyScanConfig {
     bannerXPath: string;
     bannerDetectionTimeout: number;
+}
+
+export interface MetricsConfig {
+    account: string;
+    namespace: string;
+    resourceId: string;
 }
 
 export declare type ResourceType = 'batch' | 'registry';

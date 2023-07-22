@@ -99,8 +99,9 @@ export class OTelLoggerClient implements LoggerClient {
     }
 
     private async setupOTel(): Promise<void> {
+        // TODO use config
         const config = await this.otelConfigProvider.getConfig();
-        this.enabled = config.hasOTelListener;
+        this.enabled = config.supported;
 
         if (this.enabled !== true) {
             return;

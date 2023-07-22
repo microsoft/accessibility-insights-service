@@ -2,16 +2,22 @@
 // Licensed under the MIT License.
 
 import * as net from 'net';
-import { injectable } from 'inversify';
+import { inject, injectable } from 'inversify';
 import { PowerShell } from 'node-powershell';
+import { IpGeolocation, IpGeolocationProvider, MetricsConfig, ServiceConfiguration } from 'common';
+import moment from 'moment';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 export interface OTelConfig {
-    container: boolean;
-    hasOTelListener: boolean;
-    otelListenerUrl: string;
-    host: string;
+    supported: boolean;
+    container?: boolean;
+    hasOTelListener?: boolean;
+    otelListenerUrl?: string;
+    account?: string;
+    namespace?: string;
+    resourceId?: string;
+    locationId?: string;
 }
 
 interface MachineInfo {
@@ -21,30 +27,34 @@ interface MachineInfo {
 
 @injectable()
 export class OTelConfigProvider {
-    private readonly OTelListenerPort = 4317; // default OTLP agent gRPC listener port
+    private readonly OTelListenerPort = 4317; // default agent listener port
 
     private readonly localhost = '127.0.0.1';
+
+    public constructor(
+        @inject(IpGeolocationProvider) private readonly ipGeolocationProvider: IpGeolocationProvider,
+        @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
+    ) {}
 
     public async getConfig(): Promise<OTelConfig> {
         // OTLP metrics collection is enabled for Windows platform only
         if (process.platform !== 'win32') {
+            this.logTrace(`OTLP metrics collection is not supported on this platform.`);
+
             return {
-                container: false,
-                host: this.localhost,
-                hasOTelListener: false,
-                otelListenerUrl: this.getOTelListenerUrl(this.localhost),
+                supported: false,
             };
         }
 
         const machineInfo = await this.getMachineInfo();
         const hasOTelListener = await this.validateOTelListeners(machineInfo.host);
+        const metricsConfig = await this.getMetricsConfig();
+        const ipGeolocation = this.ipGeolocationProvider.getIpGeolocation();
 
-        return {
-            container: machineInfo.container,
-            host: machineInfo.host,
-            hasOTelListener,
-            otelListenerUrl: this.getOTelListenerUrl(machineInfo.host),
-        };
+        const config = this.getOTelConfig(hasOTelListener, machineInfo, metricsConfig, ipGeolocation);
+        this.logTrace(`OTLP metrics collection configuration.`, config);
+
+        return config;
     }
 
     private async getMachineInfo(): Promise<MachineInfo> {
@@ -102,7 +112,45 @@ export class OTelConfigProvider {
         return timerExpired === false && error === undefined;
     }
 
+    private getOTelConfig(
+        hasOTelListener: boolean,
+        machineInfo: MachineInfo,
+        metricsConfig: MetricsConfig,
+        ipGeolocation: IpGeolocation,
+    ): OTelConfig {
+        const supported =
+            hasOTelListener === true ||
+            metricsConfig?.account !== undefined ||
+            metricsConfig?.namespace !== undefined ||
+            metricsConfig?.resourceId !== undefined;
+
+        return {
+            supported,
+            container: machineInfo.container,
+            hasOTelListener,
+            otelListenerUrl: this.getOTelListenerUrl(machineInfo.host),
+            ...metricsConfig,
+            locationId: this.getLocationId(ipGeolocation.region),
+        };
+    }
+
     private getOTelListenerUrl(host: string): string {
         return `http://${host}:${this.OTelListenerPort}`;
+    }
+
+    private getLocationId(region: string): string {
+        return `ms-loc://az/Public/${region}`;
+    }
+
+    private async getMetricsConfig(): Promise<MetricsConfig> {
+        return this.serviceConfig.getConfigValue('metricsConfig');
+    }
+
+    private logTrace(message: string, properties: any = {}): void {
+        const data = {
+            source: 'OTelLoggerClient',
+            ...properties,
+        };
+        console.log(`[${moment.utc().toISOString()}][Trace][Info] ${message}\n${JSON.stringify(data)}`);
     }
 }
