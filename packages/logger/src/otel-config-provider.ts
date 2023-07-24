@@ -139,7 +139,7 @@ export class OTelConfigProvider {
     }
 
     private getLocationId(region: string): string {
-        return `ms-loc://az/Public/${region}`;
+        return `ms-loc://az/public/${region}`;
     }
 
     private async getMetricsConfig(): Promise<MetricsConfig> {
