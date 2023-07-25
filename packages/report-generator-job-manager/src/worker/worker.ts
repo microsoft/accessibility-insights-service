@@ -116,13 +116,12 @@ export class Worker extends BatchTaskCreator {
         );
     }
 
-    private async readReportMessages(requestCount: number): Promise<ScanReportGroup[]> {
+    private async readReportMessages(maxMessages: number): Promise<ScanReportGroup[]> {
         const reportMessages: ScanReportGroup[] = [];
         let continuationToken: string;
         do {
             const response: CosmosOperationResponse<ScanReportGroup[]> = await this.reportGeneratorRequestProvider.readScanGroupIds(
                 this.runDurationInMinutes,
-                requestCount,
                 continuationToken,
             );
             client.ensureSuccessStatusCode(response);
@@ -131,9 +130,9 @@ export class Worker extends BatchTaskCreator {
             if (response.item?.length > 0) {
                 reportMessages.push(...response.item);
             }
-        } while (reportMessages.length < requestCount && continuationToken !== undefined);
+        } while (reportMessages.length < maxMessages && continuationToken !== undefined);
 
-        return reportMessages;
+        return reportMessages.slice(0, maxMessages);
     }
 
     private reduceReportMessages(reportRequests: ScanReportGroup[]): ScanReportGroup[] {

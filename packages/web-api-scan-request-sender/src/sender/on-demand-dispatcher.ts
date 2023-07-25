@@ -18,6 +18,8 @@ import { ScanRequestSelector, ScanRequest, DispatchCondition } from './scan-requ
 /* eslint-disable max-len */
 @injectable()
 export class OnDemandDispatcher {
+    public readonly maxRequestsToDelete = 100;
+
     constructor(
         @inject(Queue) private readonly queue: Queue,
         @inject(PageScanRequestProvider) private readonly pageScanRequestProvider: PageScanRequestProvider,
@@ -48,6 +50,7 @@ export class OnDemandDispatcher {
         const scanRequests = await this.scanRequestSelector.getRequests(
             configQueueSize - accessibilityCurrentQueueSize,
             configQueueSize - privacyCurrentQueueSize,
+            this.maxRequestsToDelete,
         );
         await this.addScanRequests(scanRequests.accessibilityRequestsToQueue, this.storageConfig.scanQueue);
         await this.addScanRequests(scanRequests.privacyRequestsToQueue, this.storageConfig.privacyScanQueue);

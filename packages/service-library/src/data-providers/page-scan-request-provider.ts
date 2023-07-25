@@ -15,17 +15,10 @@ export class PageScanRequestProvider {
         private readonly cosmosContainerClient: CosmosContainerClient,
     ) {}
 
-    public async getRequests(
-        continuationToken?: string,
-        itemsCount: number = 100,
-    ): Promise<CosmosOperationResponse<OnDemandPageScanRequest[]>> {
+    public async getRequests(continuationToken?: string): Promise<CosmosOperationResponse<OnDemandPageScanRequest[]>> {
         const query = {
-            query: 'SELECT TOP @itemsCount * FROM c WHERE c.partitionKey = @partitionKey and c.itemType = @itemType ORDER BY c.priority DESC',
+            query: 'SELECT * FROM c WHERE c.partitionKey = @partitionKey and c.itemType = @itemType ORDER BY c.priority DESC',
             parameters: [
-                {
-                    name: '@itemsCount',
-                    value: itemsCount,
-                },
                 {
                     name: '@partitionKey',
                     value: PartitionKey.pageScanRequestDocuments,

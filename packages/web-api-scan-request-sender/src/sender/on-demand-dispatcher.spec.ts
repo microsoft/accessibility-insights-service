@@ -17,6 +17,7 @@ import { ScanRequestSelector, ScanRequests } from './scan-request-selector';
 /* eslint-disable @typescript-eslint/no-explicit-any */
 const accessabilityScanQueueName = 'accessabilityScanQueueName';
 const privacyScanQueueName = 'privacyScanQueueName';
+const maxRequestsToDelete = 100;
 
 let queueMock: IMock<Queue>;
 let pageScanRequestProviderMock: IMock<PageScanRequestProvider>;
@@ -342,7 +343,7 @@ function setupPageScanRequestProvider(scanRequests: ScanRequests): void {
 
 function setupScanRequestSelector(scanRequests: ScanRequests): void {
     scanRequestSelectorMock
-        .setup((o) => o.getRequests(maxQueueSize - accessibilityMessageCount, maxQueueSize - privacyMessageCount))
+        .setup((o) => o.getRequests(maxQueueSize - accessibilityMessageCount, maxQueueSize - privacyMessageCount, maxRequestsToDelete))
         .returns(() => Promise.resolve(scanRequests))
         .verifiable();
 }

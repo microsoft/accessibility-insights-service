@@ -16,6 +16,8 @@ import { ReportProcessor } from '../report-processor/report-processor';
 import { RequestSelector, QueuedRequests, QueuedRequest, DispatchCondition } from './request-selector';
 import { Runner } from './runner';
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 const maxQueuedRequests = 10;
 
 interface ReportGeneratorRequestMockType extends ReportGeneratorRequest {
@@ -94,7 +96,7 @@ describe(Runner, () => {
             reportGeneratorRunnerTelemetryManagerMock.object,
             loggerMock.object,
         );
-        runner.maxQueuedRequests = maxQueuedRequests;
+        (runner as any).maxRequestsToMerge = maxQueuedRequests;
     });
 
     afterEach(() => {
@@ -326,7 +328,7 @@ function setupDeleteRequests(queuedRequests: ReportGeneratorRequest[]): void {
 
 function setupGetQueuedRequests(queuedRequests: QueuedRequests): void {
     requestSelectorMock
-        .setup((o) => o.getQueuedRequests(reportGeneratorMetadata.scanGroupId, maxQueuedRequests))
+        .setup((o) => o.getQueuedRequests(reportGeneratorMetadata.scanGroupId, maxQueuedRequests, runner.maxRequestsToDelete))
         .returns(() => Promise.resolve(queuedRequests))
         .verifiable();
 }

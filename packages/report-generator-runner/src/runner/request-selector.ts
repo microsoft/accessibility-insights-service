@@ -32,7 +32,11 @@ export class RequestSelector {
         @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
     ) {}
 
-    public async getQueuedRequests(scanGroupId: string, queryCount: number = 50): Promise<QueuedRequests> {
+    public async getQueuedRequests(
+        scanGroupId: string,
+        maxRequestsToProcess: number,
+        maxRequestsToDelete: number,
+    ): Promise<QueuedRequests> {
         await this.init();
 
         const queuedRequests: QueuedRequests = {
@@ -44,7 +48,6 @@ export class RequestSelector {
         do {
             const response: CosmosOperationResponse<ReportGeneratorRequest[]> = await this.reportGeneratorRequestProvider.readRequests(
                 scanGroupId,
-                queryCount,
                 continuationToken,
             );
             client.ensureSuccessStatusCode(response);
@@ -53,7 +56,14 @@ export class RequestSelector {
             if (response.item?.length > 0) {
                 this.filterRequests(queuedRequests, response.item);
             }
-        } while (queuedRequests.requestsToProcess.length < queryCount && continuationToken !== undefined);
+        } while (
+            queuedRequests.requestsToProcess.length < maxRequestsToProcess &&
+            queuedRequests.requestsToDelete.length < maxRequestsToDelete &&
+            continuationToken !== undefined
+        );
+
+        queuedRequests.requestsToProcess = queuedRequests.requestsToProcess.slice(0, maxRequestsToProcess);
+        queuedRequests.requestsToDelete = queuedRequests.requestsToDelete.slice(0, maxRequestsToDelete);
 
         return queuedRequests;
     }
