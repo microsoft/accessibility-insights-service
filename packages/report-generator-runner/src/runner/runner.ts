@@ -26,9 +26,9 @@ import { RequestSelector, QueuedRequest, QueuedRequests } from './request-select
 
 @injectable()
 export class Runner {
-    public readonly maxRequestsToMerge = 10;
+    private readonly maxRequestsToMerge = 10;
 
-    public readonly maxRequestsToDelete = 100;
+    private readonly maxRequestsToDelete = 100;
 
     constructor(
         @inject(RunMetadataConfig) private readonly runMetadataConfig: RunMetadataConfig,

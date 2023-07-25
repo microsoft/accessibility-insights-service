@@ -18,7 +18,7 @@ import { ScanRequestSelector, ScanRequest, DispatchCondition } from './scan-requ
 /* eslint-disable max-len */
 @injectable()
 export class OnDemandDispatcher {
-    public readonly maxRequestsToDelete = 100;
+    private readonly maxRequestsToDelete = 100;
 
     constructor(
         @inject(Queue) private readonly queue: Queue,
