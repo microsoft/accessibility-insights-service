@@ -57,7 +57,7 @@ export class CombinedScanResultProcessor {
         const length = Buffer.byteLength(JSON.stringify(combinedResultsBlob), 'utf8');
         if (length > this.maxCombinedResultsBlobSize) {
             this.logger.logError(
-                `Failure to generate combined scan result. Combined scan result blob exceeds maximum supported size of ${
+                `Failure to generate combined scan result. Combined scan result blob exceeded maximum supported size of ${
                     this.maxCombinedResultsBlobSize / (1024 * 1024)
                 } MB.`,
             );
