@@ -36,7 +36,11 @@ export class ScanRequestSelector {
         @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
     ) {}
 
-    public async getRequests(accessibilityRequestCount: number, privacyRequestCount: number): Promise<ScanRequests> {
+    public async getRequests(
+        maxAccessibilityRequestsToQueue: number,
+        maxPrivacyRequestsToQueue: number,
+        maxRequestsToDelete: number,
+    ): Promise<ScanRequests> {
         await this.init();
 
         const scanRequests: ScanRequests = {
@@ -45,12 +49,10 @@ export class ScanRequestSelector {
             requestsToDelete: [],
         };
 
-        const queryCount = (accessibilityRequestCount + privacyRequestCount) * 10;
         let continuationToken: string;
         do {
             const response: CosmosOperationResponse<OnDemandPageScanRequest[]> = await this.pageScanRequestProvider.getRequests(
                 continuationToken,
-                queryCount,
             );
             client.ensureSuccessStatusCode(response);
 
@@ -59,13 +61,15 @@ export class ScanRequestSelector {
                 await this.filterRequests(scanRequests, response.item);
             }
         } while (
-            scanRequests.accessibilityRequestsToQueue.length < accessibilityRequestCount &&
-            scanRequests.privacyRequestsToQueue.length < privacyRequestCount &&
+            scanRequests.accessibilityRequestsToQueue.length < maxAccessibilityRequestsToQueue &&
+            scanRequests.privacyRequestsToQueue.length < maxPrivacyRequestsToQueue &&
+            scanRequests.requestsToDelete.length < maxRequestsToDelete &&
             continuationToken !== undefined
         );
 
-        scanRequests.accessibilityRequestsToQueue = scanRequests.accessibilityRequestsToQueue.slice(0, accessibilityRequestCount);
-        scanRequests.privacyRequestsToQueue = scanRequests.privacyRequestsToQueue.slice(0, privacyRequestCount);
+        scanRequests.accessibilityRequestsToQueue = scanRequests.accessibilityRequestsToQueue.slice(0, maxAccessibilityRequestsToQueue);
+        scanRequests.privacyRequestsToQueue = scanRequests.privacyRequestsToQueue.slice(0, maxPrivacyRequestsToQueue);
+        scanRequests.requestsToDelete = scanRequests.requestsToDelete.slice(0, maxRequestsToDelete);
 
         return scanRequests;
     }

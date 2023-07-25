@@ -55,7 +55,7 @@ export class ReportProcessor {
     private async generateReport(targetReportProcessor: TargetReportProcessor, queuedRequest: QueuedRequest): Promise<QueuedRequest> {
         let pageScanResult: OnDemandPageScanResult;
         try {
-            this.logger.logInfo(`Generating accessibility consolidated report.`, {
+            this.logger.logInfo(`Generating consolidated report.`, {
                 scanId: queuedRequest.request.scanId,
                 scanGroupId: queuedRequest.request.scanGroupId,
             });
@@ -65,7 +65,7 @@ export class ReportProcessor {
 
             this.setRunResult(pageScanResult, 'completed');
             queuedRequest.condition = 'completed';
-            this.logger.logInfo(`The accessibility consolidated report generated successfully.`, {
+            this.logger.logInfo(`The consolidated report generated successfully.`, {
                 scanId: queuedRequest.request.scanId,
                 scanGroupId: queuedRequest.request.scanGroupId,
             });

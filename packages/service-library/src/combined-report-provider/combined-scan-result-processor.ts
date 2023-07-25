@@ -18,6 +18,8 @@ export class CombinedScanResultProcessor {
 
     private readonly msecBetweenRetries: number = 1000;
 
+    private readonly maxCombinedResultsBlobSize = 50 * 1024 * 1024;
+
     constructor(
         @inject(CombinedAxeResultBuilder) protected readonly combinedAxeResultBuilder: CombinedAxeResultBuilder,
         @inject(CombinedReportGenerator) protected readonly combinedReportGenerator: CombinedReportGenerator,
@@ -51,6 +53,17 @@ export class CombinedScanResultProcessor {
             combinedResultsBlobId,
             websiteScanId: websiteScanRef.id,
         });
+
+        const length = Buffer.byteLength(JSON.stringify(combinedResultsBlob), 'utf8');
+        if (length > this.maxCombinedResultsBlobSize) {
+            this.logger.logError(
+                `Failure to generate combined scan result. Combined scan result blob exceeded maximum supported size of ${
+                    this.maxCombinedResultsBlobSize / (1024 * 1024)
+                } MB.`,
+            );
+
+            return;
+        }
 
         const combinedAxeResults = await this.combinedAxeResultBuilder.mergeAxeResults(axeScanResults.results, combinedResultsBlob);
         const generatedReport = this.combinedReportGenerator.generate(

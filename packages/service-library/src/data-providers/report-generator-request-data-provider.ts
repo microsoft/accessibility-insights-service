@@ -28,18 +28,10 @@ export class ReportGeneratorRequestProvider {
         @inject(GlobalLogger) private readonly logger: GlobalLogger,
     ) {}
 
-    public async readRequests(
-        scanGroupId: string,
-        itemCount: number = 100,
-        continuationToken?: string,
-    ): Promise<CosmosOperationResponse<ReportGeneratorRequest[]>> {
+    public async readRequests(scanGroupId: string, continuationToken?: string): Promise<CosmosOperationResponse<ReportGeneratorRequest[]>> {
         const query = {
-            query: 'SELECT TOP @itemCount * FROM c WHERE c.itemType = @itemType AND c.scanGroupId = @scanGroupId ORDER BY c.priority DESC',
+            query: 'SELECT * FROM c WHERE c.itemType = @itemType AND c.scanGroupId = @scanGroupId ORDER BY c.priority DESC',
             parameters: [
-                {
-                    name: '@itemCount',
-                    value: itemCount,
-                },
                 {
                     name: '@itemType',
                     value: ItemType.reportGeneratorRequest,
@@ -56,18 +48,13 @@ export class ReportGeneratorRequestProvider {
 
     public async readScanGroupIds(
         runDurationInMinutes: number,
-        itemCount: number = 100,
         continuationToken?: string,
     ): Promise<CosmosOperationResponse<ScanReportGroup[]>> {
         const query = {
-            query: `SELECT TOP @itemCount COUNT(1) as scanCount, t.scanGroupId, t.targetReport FROM (
+            query: `SELECT COUNT(1) as scanCount, t.scanGroupId, t.targetReport FROM (
                 SELECT * FROM c WHERE c.itemType = @itemType AND (NOT IS_DEFINED(c.run.state) OR c.run.state != "running" OR (c.run.state = "running" AND DateTimeToTimestamp(c.run.timestamp) < @availabilityTimestamp))
                 ) t GROUP BY t.scanGroupId, t.targetReport`,
             parameters: [
-                {
-                    name: '@itemCount',
-                    value: itemCount,
-                },
                 {
                     name: '@itemType',
                     value: ItemType.reportGeneratorRequest,

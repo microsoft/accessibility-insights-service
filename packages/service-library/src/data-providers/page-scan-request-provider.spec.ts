@@ -54,7 +54,6 @@ describe(PageScanRequestProvider, () => {
             itemType: ItemType.onDemandPageScanRequest,
             partitionKey: PartitionKey.pageScanRequestDocuments,
         };
-        const itemCount = 5;
         const continuationToken = 'token1';
         const response = {
             continuationToken: 'token2',
@@ -64,11 +63,11 @@ describe(PageScanRequestProvider, () => {
         } as CosmosOperationResponse<OnDemandPageScanRequest[]>;
 
         cosmosContainerClientMock
-            .setup((o) => o.queryDocuments(getQuery(itemCount), continuationToken))
+            .setup((o) => o.queryDocuments(getQuery(), continuationToken))
             .returns(() => Promise.resolve(response))
             .verifiable();
 
-        const actualResponse = await testSubject.getRequests(continuationToken, itemCount);
+        const actualResponse = await testSubject.getRequests(continuationToken);
 
         cosmosContainerClientMock.verifyAll();
         expect(actualResponse).toBe(response);
@@ -92,14 +91,10 @@ describe(PageScanRequestProvider, () => {
         cosmosContainerClientMock.verifyAll();
     });
 
-    function getQuery(itemsCount: number): cosmos.SqlQuerySpec {
+    function getQuery(): cosmos.SqlQuerySpec {
         return {
-            query: 'SELECT TOP @itemsCount * FROM c WHERE c.partitionKey = @partitionKey and c.itemType = @itemType ORDER BY c.priority DESC',
+            query: 'SELECT * FROM c WHERE c.partitionKey = @partitionKey and c.itemType = @itemType ORDER BY c.priority DESC',
             parameters: [
-                {
-                    name: '@itemsCount',
-                    value: itemsCount,
-                },
                 {
                     name: '@partitionKey',
                     value: PartitionKey.pageScanRequestDocuments,

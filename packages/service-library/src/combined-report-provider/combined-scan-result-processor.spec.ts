@@ -16,6 +16,8 @@ import { CombinedAxeResultBuilder } from './combined-axe-result-builder';
 import { CombinedReportGenerator } from './combined-report-generator';
 import { CombinedResultsBlobProvider, CombinedResultsBlob } from './combined-results-blob-provider';
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 let combinedAxeResultBuilderMock: IMock<CombinedAxeResultBuilder>;
 let combinedReportGeneratorMock: IMock<CombinedReportGenerator>;
 let combinedResultsBlobProviderMock: IMock<CombinedResultsBlobProvider>;
@@ -89,6 +91,34 @@ describe(CombinedScanResultProcessor, () => {
         reportWriterMock.verifyAll();
         retryHelperMock.verifyAll();
         loggerMock.verifyAll();
+    });
+
+    it('skip generating combined report for a large blob', async () => {
+        (combinedScanResultProcessor as any).maxCombinedResultsBlobSize = 2;
+        pageScanResult = {
+            id: 'id',
+            websiteScanRefs: [
+                {
+                    id: websiteScanId,
+                    scanGroupType: 'consolidated-scan-report',
+                },
+            ],
+        } as OnDemandPageScanResult;
+
+        setupFullPass();
+        combinedAxeResultBuilderMock.reset();
+        combinedReportGeneratorMock.reset();
+        websiteScanResultProviderMock.reset();
+        reportWriterMock.reset();
+
+        websiteScanResultProviderMock
+            .setup((o) => o.read(websiteScanId))
+            .returns(() => Promise.resolve(websiteScanResult))
+            .verifiable();
+
+        await combinedScanResultProcessor.generateCombinedScanResults(axeScanResults, pageScanResult);
+
+        expect(pageScanResult.reports).toBeUndefined();
     });
 
     it('generate combined report for consolidated scan request', async () => {
