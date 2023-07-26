@@ -43,6 +43,9 @@ export class Runner {
     public async run(): Promise<void> {
         const runMetadata = this.runMetadataConfig.getConfig();
 
+        // decode id back from docker parameter encoding
+        runMetadata.scanGroupId = decodeURIComponent(runMetadata.scanGroupId);
+
         this.logger.setCommonProperties({ scanGroupId: runMetadata.scanGroupId });
         this.logger.logInfo('Start report generator runner.');
 
@@ -103,7 +106,7 @@ export class Runner {
             } as Partial<ReportGeneratorRequest>;
 
             const scanResult = {
-                id: queuedRequest.request.id,
+                id: queuedRequest.request.scanId,
                 subRuns: {
                     report: {
                         ...run,
@@ -141,7 +144,7 @@ export class Runner {
             } as Partial<ReportGeneratorRequest>;
 
             const scanResult = {
-                id: queuedRequest.request.id,
+                id: queuedRequest.request.scanId,
                 subRuns: {
                     report: run,
                 },
@@ -181,7 +184,7 @@ export class Runner {
             };
 
             return {
-                id: queuedRequest.request.id,
+                id: queuedRequest.request.scanId,
                 run,
                 subRuns: {
                     report: run,

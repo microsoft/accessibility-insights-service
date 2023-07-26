@@ -34,6 +34,10 @@ export interface PageOptions {
     enableAuthentication?: boolean;
 }
 
+export interface PuppeteerPageExt extends Puppeteer.Page {
+    id?: string;
+}
+
 type Operation = 'load' | 'reload' | 'analysis' | 'auth';
 
 @injectable()
@@ -96,6 +100,7 @@ export class Page {
 
         this.userAgent = await this.browser.userAgent();
         this.page = await this.browser.newPage();
+        (this.page as PuppeteerPageExt).id = this.guidGenerator.createGuid();
 
         const pageCreated = await this.webDriver.waitForPageCreation();
         if (pageCreated !== true) {

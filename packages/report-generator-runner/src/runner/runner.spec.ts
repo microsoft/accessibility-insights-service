@@ -32,6 +32,7 @@ let reportProcessorMock: IMock<ReportProcessor>;
 let reportGeneratorRunnerTelemetryManagerMock: IMock<ReportGeneratorRunnerTelemetryManager>;
 let loggerMock: IMock<GlobalLogger>;
 let runner: Runner;
+let reportGeneratorMetadataInput: ReportGeneratorMetadata;
 let reportGeneratorMetadata: ReportGeneratorMetadata;
 let dateNow: Date;
 let reportGeneratorRequests: ReportGeneratorRequest[];
@@ -73,13 +74,18 @@ describe(Runner, () => {
         reportGeneratorRunnerTelemetryManagerMock = Mock.ofType<ReportGeneratorRunnerTelemetryManager>();
         loggerMock = Mock.ofType<GlobalLogger>();
 
+        reportGeneratorMetadataInput = {
+            targetReport: 'accessibility',
+            scanGroupId: 'scanGroupId%2F1',
+        } as ReportGeneratorMetadata;
         reportGeneratorMetadata = {
             targetReport: 'accessibility',
-            scanGroupId: 'scanGroupId',
+            scanGroupId: 'scanGroupId/1',
         } as ReportGeneratorMetadata;
+
         runMetadataConfigMock
             .setup((o) => o.getConfig())
-            .returns(() => reportGeneratorMetadata)
+            .returns(() => reportGeneratorMetadataInput)
             .verifiable();
         reportGeneratorRunnerTelemetryManagerMock.setup((o) => o.trackRequestStarted(reportGeneratorMetadata.id)).verifiable();
         reportGeneratorRunnerTelemetryManagerMock.setup((o) => o.trackRequestCompleted()).verifiable();
@@ -211,7 +217,7 @@ function setupTryUpdateRequestsWithRunningState(
         } as Partial<ReportGeneratorRequest>;
 
         const scanResult = {
-            id: request.id,
+            id: request.scanId,
             subRuns: {
                 report: {
                     state: 'running',
@@ -259,7 +265,7 @@ function setupTryUpdateRequestsWithFailedState(
         } as Partial<ReportGeneratorRequest>;
 
         const scanResult = {
-            id: request.id,
+            id: request.scanId,
             subRuns: {
                 report: {
                     state: 'failed',
@@ -296,7 +302,7 @@ function setupSetScanRunStatesOnCompletion(queuedRequests: ReportGeneratorReques
     const requestsToProcess = queuedRequests.filter((r) => r.run?.state === 'completed');
     const requestsToUpdate = requestsToProcess.map((request) => {
         return {
-            id: request.id,
+            id: request.scanId,
             run: {
                 state: request.run?.state,
                 timestamp: dateNow.toJSON(),

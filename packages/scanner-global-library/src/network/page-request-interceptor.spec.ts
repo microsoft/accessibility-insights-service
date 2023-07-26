@@ -219,11 +219,6 @@ describe(PageRequestInterceptor, () => {
     });
 
     it('should disable interception', async () => {
-        setupDisableBypassServiceWorker();
-        puppeteerPageMock
-            .setup((o) => o.setRequestInterception(false))
-            .returns(() => Promise.resolve())
-            .verifiable(Times.atLeastOnce());
         puppeteerPageMock
             .setup((o) => o.off('request', It.isAny()))
             .returns(() => undefined)
@@ -253,25 +248,6 @@ function setupEnableBypassServiceWorker(): void {
         .verifiable();
     cdpSessionMock
         .setup((o) => o.send('Network.setBypassServiceWorker', { bypass: true }))
-        .returns(() => Promise.resolve())
-        .verifiable();
-    puppeteerTargetMock
-        .setup((o) => o.createCDPSession())
-        .returns(() => Promise.resolve(cdpSessionMock.object))
-        .verifiable();
-}
-
-function setupDisableBypassServiceWorker(): void {
-    cdpSessionMock
-        .setup((o) => o.send('Network.disable'))
-        .returns(() => Promise.resolve())
-        .verifiable();
-    cdpSessionMock
-        .setup((o) => o.send('Network.setBypassServiceWorker', { bypass: false }))
-        .returns(() => Promise.resolve())
-        .verifiable();
-    cdpSessionMock
-        .setup((o) => o.detach())
         .returns(() => Promise.resolve())
         .verifiable();
     puppeteerTargetMock
