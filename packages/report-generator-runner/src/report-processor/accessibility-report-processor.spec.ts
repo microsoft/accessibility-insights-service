@@ -27,19 +27,19 @@ describe(AccessibilityReportProcessor, () => {
         pageScanRunReportProviderMock = Mock.ofType<PageScanRunReportProvider>();
         loggerMock = Mock.ofType<GlobalLogger>();
 
-        pageScanResult = {
-            id: 'id',
-        } as OnDemandPageScanResult;
-
         axeReport = {
             reportId: 'reportId',
             format: 'axe',
         } as OnDemandPageScanReport;
 
+        pageScanResult = {
+            id: 'id',
+            reports: [axeReport],
+        } as OnDemandPageScanResult;
+
         queuedRequest = {
             request: {
                 scanGroupId: 'scanGroupId',
-                reports: [axeReport],
             },
         } as QueuedRequest;
 

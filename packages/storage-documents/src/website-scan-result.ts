@@ -32,7 +32,6 @@ export interface WebsiteScanResultBase extends StorageDocument {
     scanGroupType: ScanGroupType;
     deepScanId?: string;
     discoveryPatterns?: string[];
-    combinedResultsBlobId?: string;
     reports?: WebsiteScanReport[];
     runResult?: WebsiteScanRunResult;
     pageCount?: number;

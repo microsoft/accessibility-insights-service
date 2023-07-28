@@ -22,5 +22,6 @@ export interface ReportGeneratorRequest extends StorageDocument {
 }
 
 export interface ReportScanRunResult extends Omit<OnDemandPageScanRunResult, 'state'> {
+    id?: string;
     state: ReportScanRunState;
 }
