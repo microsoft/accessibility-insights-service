@@ -46,7 +46,6 @@ export class PageRequestInterceptor {
         await this.enableInterception(page, networkTrace);
         const operationResult = await pageOperation();
         await this.waitForAllRequests(timeoutMsec);
-        await this.disableInterception(page);
 
         return operationResult;
     }
@@ -55,15 +54,16 @@ export class PageRequestInterceptor {
      * Intercepts only main frame navigational requests.
      */
     public async enableInterception(page: PuppeteerPageExt, networkTrace: boolean = false): Promise<void> {
-        if (this.pageId === page.id) {
-            return;
-        }
-
-        this.pageId = page.id;
+        // Reset trace data
         this.errors = [];
         this.interceptedRequests = [];
-
         const networkTraceEnabled = networkTrace === true || this.globalNetworkTrace === true;
+
+        // Add trace event handlers for a new page instance only
+        if (page.id !== undefined && this.pageId === page.id) {
+            return;
+        }
+        this.pageId = page.id;
 
         await this.enableBypassServiceWorker(page);
         await page.setRequestInterception(true);
@@ -131,22 +131,6 @@ export class PageRequestInterceptor {
             }
         };
         page.on('requestfailed', this.pageOnRequestFailedEventHandler);
-    }
-
-    public async disableInterception(page: Puppeteer.Page): Promise<void> {
-        if (this.pageOnRequestEventHandler) {
-            page.off('request', this.pageOnRequestEventHandler);
-        }
-
-        if (this.pageOnResponseEventHandler) {
-            page.off('response', this.pageOnResponseEventHandler);
-        }
-
-        if (this.pageOnRequestFailedEventHandler) {
-            page.off('requestfailed', this.pageOnRequestFailedEventHandler);
-        }
-
-        this.pageId = undefined;
     }
 
     /**

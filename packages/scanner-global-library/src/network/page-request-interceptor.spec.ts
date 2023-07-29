@@ -217,24 +217,6 @@ describe(PageRequestInterceptor, () => {
 
         await pageRequestInterceptor.enableInterception(puppeteerPageMock.object);
     });
-
-    it('should disable interception', async () => {
-        puppeteerPageMock
-            .setup((o) => o.off('request', It.isAny()))
-            .returns(() => undefined)
-            .verifiable(Times.atLeastOnce());
-        puppeteerPageMock
-            .setup((o) => o.off('response', It.isAny()))
-            .returns(() => undefined)
-            .verifiable(Times.atLeastOnce());
-        puppeteerPageMock
-            .setup((o) => o.off('requestfailed', It.isAny()))
-            .returns(() => undefined)
-            .verifiable(Times.atLeastOnce());
-
-        await pageRequestInterceptor.enableInterception(puppeteerPageMock.object);
-        await pageRequestInterceptor.disableInterception(puppeteerPageMock.object);
-    });
 });
 
 function setupEnableBypassServiceWorker(): void {
