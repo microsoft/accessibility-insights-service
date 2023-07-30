@@ -284,7 +284,6 @@ function setupReportGeneratorRequestProvider(): void {
         scanGroupId: pageScanResultDbDocument.websiteScanRefs[0].scanGroupId,
         targetReport: 'accessibility',
         priority: pageScanResult.priority,
-        reports: pageScanResult.reports,
     };
     reportGeneratorRequestProviderMock.setup((o) => o.writeRequest(It.isValue(reportGeneratorRequest))).verifiable();
 }

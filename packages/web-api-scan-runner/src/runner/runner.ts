@@ -222,7 +222,6 @@ export class Runner {
             scanGroupId: websiteScanRef.scanGroupId,
             targetReport: 'accessibility',
             priority: pageScanResult.priority,
-            reports: pageScanResult.reports,
         };
         await this.reportGeneratorRequestProvider.writeRequest(reportGeneratorRequest);
 

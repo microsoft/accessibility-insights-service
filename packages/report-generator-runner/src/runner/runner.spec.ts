@@ -4,9 +4,16 @@
 import 'reflect-metadata';
 
 import { IMock, Mock, It } from 'typemoq';
-import { ReportGeneratorRequestProvider, OnDemandPageScanRunResultProvider, OperationResult } from 'service-library';
+import {
+    ReportGeneratorRequestProvider,
+    OnDemandPageScanRunResultProvider,
+    OperationResult,
+    WebsiteScanResultProvider,
+    ScanNotificationProcessor,
+    RunnerScanMetadata,
+} from 'service-library';
 import { GlobalLogger } from 'logger';
-import { ReportGeneratorRequest, OnDemandPageScanResult, ReportScanRunState } from 'storage-documents';
+import { ReportGeneratorRequest, OnDemandPageScanResult, ReportScanRunState, WebsiteScanResult } from 'storage-documents';
 import * as MockDate from 'mockdate';
 import { isEmpty, cloneDeep } from 'lodash';
 import { RunMetadataConfig } from '../run-metadata-config';
@@ -30,8 +37,11 @@ let onDemandPageScanRunResultProviderMock: IMock<OnDemandPageScanRunResultProvid
 let requestSelectorMock: IMock<RequestSelector>;
 let reportProcessorMock: IMock<ReportProcessor>;
 let reportGeneratorRunnerTelemetryManagerMock: IMock<ReportGeneratorRunnerTelemetryManager>;
+let websiteScanResultProviderMock: IMock<WebsiteScanResultProvider>;
+let scanNotificationProcessorMock: IMock<ScanNotificationProcessor>;
 let loggerMock: IMock<GlobalLogger>;
 let runner: Runner;
+let reportGeneratorMetadataInput: ReportGeneratorMetadata;
 let reportGeneratorMetadata: ReportGeneratorMetadata;
 let dateNow: Date;
 let reportGeneratorRequests: ReportGeneratorRequest[];
@@ -44,18 +54,21 @@ describe(Runner, () => {
         reportGeneratorRequests = [
             {
                 id: 'id-1',
+                scanId: 'scanId-1',
                 scanGroupId: 'scanGroupId-1',
                 reports: [{}],
                 condition: 'pending',
             },
             {
                 id: 'id-2',
+                scanId: 'scanId-2',
                 scanGroupId: 'scanGroupId-1',
                 reports: [{}],
                 condition: 'pending',
             },
             {
                 id: 'id-3',
+                scanId: 'scanId-3',
                 scanGroupId: 'scanGroupId-1',
                 reports: [{}],
                 run: {
@@ -71,15 +84,22 @@ describe(Runner, () => {
         requestSelectorMock = Mock.ofType<RequestSelector>();
         reportProcessorMock = Mock.ofType<ReportProcessor>();
         reportGeneratorRunnerTelemetryManagerMock = Mock.ofType<ReportGeneratorRunnerTelemetryManager>();
+        websiteScanResultProviderMock = Mock.ofType<WebsiteScanResultProvider>();
+        scanNotificationProcessorMock = Mock.ofType<ScanNotificationProcessor>();
         loggerMock = Mock.ofType<GlobalLogger>();
 
+        reportGeneratorMetadataInput = {
+            targetReport: 'accessibility',
+            scanGroupId: 'scanGroupId%2F1',
+        } as ReportGeneratorMetadata;
         reportGeneratorMetadata = {
             targetReport: 'accessibility',
-            scanGroupId: 'scanGroupId',
+            scanGroupId: 'scanGroupId/1',
         } as ReportGeneratorMetadata;
+
         runMetadataConfigMock
             .setup((o) => o.getConfig())
-            .returns(() => reportGeneratorMetadata)
+            .returns(() => reportGeneratorMetadataInput)
             .verifiable();
         reportGeneratorRunnerTelemetryManagerMock.setup((o) => o.trackRequestStarted(reportGeneratorMetadata.id)).verifiable();
         reportGeneratorRunnerTelemetryManagerMock.setup((o) => o.trackRequestCompleted()).verifiable();
@@ -91,9 +111,11 @@ describe(Runner, () => {
             runMetadataConfigMock.object,
             reportGeneratorRequestProviderMock.object,
             onDemandPageScanRunResultProviderMock.object,
+            websiteScanResultProviderMock.object,
             requestSelectorMock.object,
             reportProcessorMock.object,
             reportGeneratorRunnerTelemetryManagerMock.object,
+            scanNotificationProcessorMock.object,
             loggerMock.object,
         );
         (runner as any).maxRequestsToMerge = maxQueuedRequests;
@@ -107,6 +129,7 @@ describe(Runner, () => {
         requestSelectorMock.verifyAll();
         reportProcessorMock.verifyAll();
         reportGeneratorRunnerTelemetryManagerMock.verifyAll();
+        websiteScanResultProviderMock.verifyAll();
         loggerMock.verifyAll();
     });
 
@@ -211,15 +234,16 @@ function setupTryUpdateRequestsWithRunningState(
         } as Partial<ReportGeneratorRequest>;
 
         const scanResult = {
-            id: request.id,
+            id: request.scanId,
             subRuns: {
                 report: {
+                    id: request.id,
                     state: 'running',
                     timestamp: dateNow.toJSON(),
+                    retryCount: request.run?.retryCount !== undefined ? request.run.retryCount + 1 : 0,
                     error: null,
                 },
             },
-            reports: request.reports,
         } as Partial<OnDemandPageScanResult>;
 
         return {
@@ -259,7 +283,7 @@ function setupTryUpdateRequestsWithFailedState(
         } as Partial<ReportGeneratorRequest>;
 
         const scanResult = {
-            id: request.id,
+            id: request.scanId,
             subRuns: {
                 report: {
                     state: 'failed',
@@ -267,8 +291,6 @@ function setupTryUpdateRequestsWithFailedState(
                     error: isEmpty(request.run?.error) ? null : request.run.error.toString().substring(0, 2048),
                 },
             },
-            // write entire reports[] array when merge with existing DB document due to internal merge logic
-            reports: request.reports,
         } as Partial<OnDemandPageScanResult>;
 
         return {
@@ -293,10 +315,12 @@ function setupTryUpdateRequestsWithFailedState(
 }
 
 function setupSetScanRunStatesOnCompletion(queuedRequests: ReportGeneratorRequest[]): void {
+    let id = 0;
     const requestsToProcess = queuedRequests.filter((r) => r.run?.state === 'completed');
-    const requestsToUpdate = requestsToProcess.map((request) => {
-        return {
-            id: request.id,
+
+    requestsToProcess.map((request) => {
+        const scansToUpdate = {
+            id: request.scanId,
             run: {
                 state: request.run?.state,
                 timestamp: dateNow.toJSON(),
@@ -307,15 +331,71 @@ function setupSetScanRunStatesOnCompletion(queuedRequests: ReportGeneratorReques
                     state: request.run?.state,
                     timestamp: dateNow.toJSON(),
                     error: isEmpty(request.run?.error) ? null : request.run.error.toString().substring(0, 2048),
+                    retryCount: request.run?.retryCount,
                 },
             },
-            reports: request.reports,
         } as Partial<OnDemandPageScanResult>;
+
+        const websiteScanRefId = `websiteScanId-${id++}`;
+        const pageScanResultUpdated = {
+            succeeded: true,
+            result: {
+                id: request.scanId,
+                url: 'url',
+                scanResult: {
+                    state: 'pass',
+                },
+                run: {
+                    state: request.run?.state,
+                },
+                websiteScanRefs: [
+                    {
+                        id: websiteScanRefId,
+                        scanGroupId: request.scanGroupId,
+                        scanGroupType: 'deep-scan',
+                    },
+                ],
+            } as OnDemandPageScanResult,
+        };
+
+        onDemandPageScanRunResultProviderMock
+            .setup((o) => o.tryUpdateScanRun(It.isValue(scansToUpdate)))
+            .returns(() => Promise.resolve(pageScanResultUpdated))
+            .verifiable();
+
+        const updatedWebsiteScanResult: Partial<WebsiteScanResult> = {
+            id: websiteScanRefId,
+            pageScans: [
+                {
+                    scanId: pageScanResultUpdated.result.id,
+                    url: pageScanResultUpdated.result.url,
+                    scanState: pageScanResultUpdated.result.scanResult?.state,
+                    runState: pageScanResultUpdated.result.run.state,
+                    timestamp: dateNow.toJSON(),
+                },
+            ],
+        };
+        websiteScanResultProviderMock
+            .setup((o) => o.mergeOrCreate(pageScanResultUpdated.result.id, updatedWebsiteScanResult, It.isAny()))
+            .returns(() => Promise.resolve(updatedWebsiteScanResult as WebsiteScanResult))
+            .verifiable();
+
+        const runnerScanMetadata: RunnerScanMetadata = {
+            id: pageScanResultUpdated.result.id,
+            url: pageScanResultUpdated.result.url,
+            deepScan: updatedWebsiteScanResult?.deepScanId !== undefined ? true : false,
+        };
+        scanNotificationProcessorMock
+            .setup((o) =>
+                o.sendScanCompletionNotification(
+                    It.isValue(runnerScanMetadata),
+                    It.isValue(pageScanResultUpdated.result),
+                    It.isValue(updatedWebsiteScanResult as WebsiteScanResult),
+                ),
+            )
+            .returns(() => Promise.resolve())
+            .verifiable();
     });
-    onDemandPageScanRunResultProviderMock
-        .setup((o) => o.tryUpdateScanRuns(It.isValue(requestsToUpdate)))
-        .returns(() => Promise.resolve(undefined))
-        .verifiable();
 }
 
 function setupDeleteRequests(queuedRequests: ReportGeneratorRequest[]): void {

@@ -46,8 +46,10 @@ export class CombinedScanResultProcessor {
     private async generateCombinedScanResultsImpl(axeScanResults: AxeScanResults, pageScanResult: OnDemandPageScanResult): Promise<void> {
         const websiteScanRef = this.getWebsiteScanRefs(pageScanResult);
         const websiteScanResult = await this.websiteScanResultProvider.read(websiteScanRef.id);
-        const combinedResultsBlob = await this.combinedResultsBlobProvider.getBlob(websiteScanResult.combinedResultsBlobId);
-        const combinedResultsBlobId = combinedResultsBlob.blobId;
+
+        let combinedResultsBlobId = websiteScanResult.reports?.find((report) => report.format === 'consolidated.html')?.reportId;
+        const combinedResultsBlob = await this.combinedResultsBlobProvider.getBlob(combinedResultsBlobId);
+        combinedResultsBlobId = combinedResultsBlobId || combinedResultsBlob.blobId;
 
         this.logger.setCommonProperties({
             combinedResultsBlobId,
@@ -67,6 +69,7 @@ export class CombinedScanResultProcessor {
 
         const combinedAxeResults = await this.combinedAxeResultBuilder.mergeAxeResults(axeScanResults.results, combinedResultsBlob);
         const generatedReport = this.combinedReportGenerator.generate(
+            combinedResultsBlobId,
             combinedAxeResults,
             websiteScanResult,
             axeScanResults.userAgent,
@@ -76,7 +79,6 @@ export class CombinedScanResultProcessor {
 
         const updatedWebsiteScanResults = {
             id: websiteScanResult.id,
-            combinedResultsBlobId: combinedResultsBlobId,
             reports: [pageScanReport],
         } as Partial<WebsiteScanResult>;
         await this.websiteScanResultProvider.mergeOrCreate(pageScanResult.id, updatedWebsiteScanResults);

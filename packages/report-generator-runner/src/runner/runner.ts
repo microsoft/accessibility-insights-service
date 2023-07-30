@@ -3,10 +3,19 @@
 
 import { inject, injectable } from 'inversify';
 import { GlobalLogger } from 'logger';
-import { OnDemandPageScanRunResultProvider, ReportGeneratorRequestProvider, OperationResult } from 'service-library';
-import { OnDemandPageScanResult, ReportGeneratorRequest, OnDemandPageScanRunState } from 'storage-documents';
+import {
+    OnDemandPageScanRunResultProvider,
+    ReportGeneratorRequestProvider,
+    OperationResult,
+    getOnMergeCallbackToUpdateRunResult,
+    WebsiteScanResultProvider,
+    RunnerScanMetadata,
+    ScanNotificationProcessor,
+} from 'service-library';
+import { OnDemandPageScanResult, ReportGeneratorRequest, OnDemandPageScanRunState, WebsiteScanResult } from 'storage-documents';
 import { System } from 'common';
 import { isEmpty } from 'lodash';
+import pLimit from 'p-limit';
 import { RunMetadataConfig } from '../run-metadata-config';
 import { ReportGeneratorRunnerTelemetryManager } from '../report-generator-runner-telemetry-manager';
 import { ReportProcessor } from '../report-processor/report-processor';
@@ -28,20 +37,27 @@ import { RequestSelector, QueuedRequest, QueuedRequests } from './request-select
 export class Runner {
     private readonly maxRequestsToMerge = 10;
 
-    private readonly maxRequestsToDelete = 100;
+    private readonly maxRequestsToDelete = 20;
+
+    private readonly maxConcurrencyLimit = 5;
 
     constructor(
         @inject(RunMetadataConfig) private readonly runMetadataConfig: RunMetadataConfig,
         @inject(ReportGeneratorRequestProvider) private readonly reportGeneratorRequestProvider: ReportGeneratorRequestProvider,
         @inject(OnDemandPageScanRunResultProvider) private readonly onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider,
+        @inject(WebsiteScanResultProvider) protected readonly websiteScanResultProvider: WebsiteScanResultProvider,
         @inject(RequestSelector) protected readonly requestSelector: RequestSelector,
         @inject(ReportProcessor) protected readonly reportProcessor: ReportProcessor,
         @inject(ReportGeneratorRunnerTelemetryManager) private readonly telemetryManager: ReportGeneratorRunnerTelemetryManager,
+        @inject(ScanNotificationProcessor) protected readonly scanNotificationProcessor: ScanNotificationProcessor,
         @inject(GlobalLogger) private readonly logger: GlobalLogger,
     ) {}
 
     public async run(): Promise<void> {
         const runMetadata = this.runMetadataConfig.getConfig();
+
+        // decode id back from docker parameter encoding
+        runMetadata.scanGroupId = decodeURIComponent(runMetadata.scanGroupId);
 
         this.logger.setCommonProperties({ scanGroupId: runMetadata.scanGroupId });
         this.logger.logInfo('Start report generator runner.');
@@ -91,26 +107,25 @@ export class Runner {
             const run = {
                 state: 'running',
                 timestamp: new Date().toJSON(),
-                error: <string>null,
+                retryCount: queuedRequest.request.run?.retryCount !== undefined ? queuedRequest.request.run.retryCount + 1 : 0,
+                error: <string>null, // reset db document property
             };
 
             const reportRequest = {
                 id: queuedRequest.request.id,
                 run: {
                     ...run,
-                    retryCount: queuedRequest.request.run?.retryCount !== undefined ? queuedRequest.request.run.retryCount + 1 : 0,
                 },
             } as Partial<ReportGeneratorRequest>;
 
             const scanResult = {
-                id: queuedRequest.request.id,
+                id: queuedRequest.request.scanId,
                 subRuns: {
                     report: {
+                        id: queuedRequest.request.id,
                         ...run,
                     },
                 },
-                // write entire reports[] array when merge with existing DB document due to internal merge logic
-                reports: queuedRequest.request.reports,
             } as Partial<OnDemandPageScanResult>;
 
             return {
@@ -141,12 +156,10 @@ export class Runner {
             } as Partial<ReportGeneratorRequest>;
 
             const scanResult = {
-                id: queuedRequest.request.id,
+                id: queuedRequest.request.scanId,
                 subRuns: {
                     report: run,
                 },
-                // write entire reports[] array when merge with existing DB document due to internal merge logic
-                reports: queuedRequest.request.reports,
             } as Partial<OnDemandPageScanResult>;
 
             return {
@@ -164,34 +177,80 @@ export class Runner {
     }
 
     private async updateScanRunStatesOnCompletion(queuedRequests: QueuedRequest[]): Promise<void> {
-        const scansToUpdate = queuedRequests.map((queuedRequest) => {
-            this.logger.logInfo(`Updating report request run state to ${queuedRequest.condition}.`, {
-                id: queuedRequest.request.id,
-                scanId: queuedRequest.request.scanId,
-                condition: queuedRequest.condition,
-                runState: queuedRequest.request.run?.state,
-                retryCount: `${queuedRequest.request.run?.retryCount}`,
-                runTimestamp: queuedRequest.request.run?.timestamp,
-            });
+        const limit = pLimit(this.maxConcurrencyLimit);
+        await Promise.all(
+            queuedRequests.map(async (queuedRequest) => {
+                return limit(async () => {
+                    this.logger.logInfo(`Updating report request run state to ${queuedRequest.condition}.`, {
+                        id: queuedRequest.request.id,
+                        scanId: queuedRequest.request.scanId,
+                        condition: queuedRequest.condition,
+                        runState: queuedRequest.request.run?.state,
+                        retryCount: `${queuedRequest.request.run?.retryCount}`,
+                        runTimestamp: queuedRequest.request.run?.timestamp,
+                    });
+                    const run = {
+                        state: queuedRequest.condition === 'completed' ? 'completed' : 'failed',
+                        timestamp: new Date().toJSON(),
+                        error: isEmpty(queuedRequest.request.run?.error)
+                            ? null
+                            : queuedRequest.request.run.error.toString().substring(0, 2048),
+                    };
+                    const scanResult = {
+                        id: queuedRequest.request.scanId,
+                        run,
+                        subRuns: {
+                            report: {
+                                ...run,
+                                retryCount: queuedRequest.request.run?.retryCount,
+                            },
+                        },
+                    } as Partial<OnDemandPageScanResult>;
 
-            const run = {
-                state: queuedRequest.condition === 'completed' ? 'completed' : 'failed',
-                timestamp: new Date().toJSON(),
-                error: isEmpty(queuedRequest.error) ? null : queuedRequest.error.toString().substring(0, 2048),
+                    const pageScanResult = await this.onDemandPageScanRunResultProvider.tryUpdateScanRun(scanResult);
+                    const websiteScanResult = await this.updateWebsiteScanResult(pageScanResult.result);
+                    await this.sendScanCompletionNotification(pageScanResult.result, websiteScanResult);
+                });
+            }),
+        );
+    }
+
+    private async updateWebsiteScanResult(pageScanResult: Partial<OnDemandPageScanResult>): Promise<WebsiteScanResult> {
+        // Update website scan result for deep-scan scan request type
+        const websiteScanRef = pageScanResult.websiteScanRefs?.find((ref) => ref.scanGroupType === 'deep-scan');
+        if (websiteScanRef) {
+            const updatedWebsiteScanResult: Partial<WebsiteScanResult> = {
+                id: websiteScanRef.id,
+                pageScans: [
+                    {
+                        scanId: pageScanResult.id,
+                        url: pageScanResult.url,
+                        scanState: pageScanResult.scanResult?.state,
+                        runState: pageScanResult.run.state,
+                        timestamp: new Date().toJSON(),
+                    },
+                ],
             };
+            const onMergeCallbackFn = getOnMergeCallbackToUpdateRunResult(pageScanResult.run.state);
 
-            return {
-                id: queuedRequest.request.id,
-                run,
-                subRuns: {
-                    report: run,
-                },
-                // write entire reports[] array when merge with existing DB document due to internal merge logic
-                reports: queuedRequest.request.reports,
-            } as Partial<OnDemandPageScanResult>;
-        });
+            return this.websiteScanResultProvider.mergeOrCreate(pageScanResult.id, updatedWebsiteScanResult, onMergeCallbackFn);
+        }
 
-        await this.onDemandPageScanRunResultProvider.tryUpdateScanRuns(scansToUpdate);
+        return undefined;
+    }
+
+    private async sendScanCompletionNotification(
+        pageScanResult: OnDemandPageScanResult,
+        websiteScanResult: WebsiteScanResult,
+    ): Promise<void> {
+        const runnerScanMetadata: RunnerScanMetadata = {
+            id: pageScanResult.id,
+            url: pageScanResult.url,
+            deepScan: websiteScanResult?.deepScanId !== undefined ? true : false,
+        };
+
+        // the scan notification processor will detect if notification should be sent
+        await this.scanNotificationProcessor.sendScanCompletionNotification(runnerScanMetadata, pageScanResult, websiteScanResult);
     }
 
     private async deleteRequests(queuedRequests: QueuedRequest[]): Promise<void> {

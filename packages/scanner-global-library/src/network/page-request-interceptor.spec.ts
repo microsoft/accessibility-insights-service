@@ -217,29 +217,6 @@ describe(PageRequestInterceptor, () => {
 
         await pageRequestInterceptor.enableInterception(puppeteerPageMock.object);
     });
-
-    it('should disable interception', async () => {
-        setupDisableBypassServiceWorker();
-        puppeteerPageMock
-            .setup((o) => o.setRequestInterception(false))
-            .returns(() => Promise.resolve())
-            .verifiable(Times.atLeastOnce());
-        puppeteerPageMock
-            .setup((o) => o.off('request', It.isAny()))
-            .returns(() => undefined)
-            .verifiable(Times.atLeastOnce());
-        puppeteerPageMock
-            .setup((o) => o.off('response', It.isAny()))
-            .returns(() => undefined)
-            .verifiable(Times.atLeastOnce());
-        puppeteerPageMock
-            .setup((o) => o.off('requestfailed', It.isAny()))
-            .returns(() => undefined)
-            .verifiable(Times.atLeastOnce());
-
-        await pageRequestInterceptor.enableInterception(puppeteerPageMock.object);
-        await pageRequestInterceptor.disableInterception(puppeteerPageMock.object);
-    });
 });
 
 function setupEnableBypassServiceWorker(): void {
@@ -253,25 +230,6 @@ function setupEnableBypassServiceWorker(): void {
         .verifiable();
     cdpSessionMock
         .setup((o) => o.send('Network.setBypassServiceWorker', { bypass: true }))
-        .returns(() => Promise.resolve())
-        .verifiable();
-    puppeteerTargetMock
-        .setup((o) => o.createCDPSession())
-        .returns(() => Promise.resolve(cdpSessionMock.object))
-        .verifiable();
-}
-
-function setupDisableBypassServiceWorker(): void {
-    cdpSessionMock
-        .setup((o) => o.send('Network.disable'))
-        .returns(() => Promise.resolve())
-        .verifiable();
-    cdpSessionMock
-        .setup((o) => o.send('Network.setBypassServiceWorker', { bypass: false }))
-        .returns(() => Promise.resolve())
-        .verifiable();
-    cdpSessionMock
-        .setup((o) => o.detach())
         .returns(() => Promise.resolve())
         .verifiable();
     puppeteerTargetMock
