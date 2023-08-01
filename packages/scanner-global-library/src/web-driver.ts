@@ -24,7 +24,7 @@ export interface WebDriverConfigurationOptions {
 export class WebDriver {
     public browser: Puppeteer.Browser;
 
-    private readonly browserCloseTimeoutMsecs = 60000;
+    private readonly browserCloseTimeoutMsecs = 10000;
 
     constructor(
         @inject(PromiseUtils) private readonly promiseUtils: PromiseUtils,
@@ -76,22 +76,16 @@ export class WebDriver {
 
     public async close(): Promise<void> {
         if (this.browser !== undefined) {
-            await this.promiseUtils.waitFor(this.closeBrowser(), this.browserCloseTimeoutMsecs, async () => {
-                this.logger?.logError(`Browser failed to close with timeout of ${this.browserCloseTimeoutMsecs} ms.`);
+            await this.promiseUtils.waitFor(this.browser.close(), this.browserCloseTimeoutMsecs, async () => {
+                this.logger?.logError(`Chromium browser did not close after ${this.browserCloseTimeoutMsecs} ms.`);
                 if (this.browser.process()) {
-                    this.logger?.logInfo('Sending kill signal to browser process');
+                    this.logger?.logInfo('Sending kill signal to browser process.');
                     this.browser.process().kill('SIGINT');
                 }
             });
 
             this.logger?.logInfo('Chromium browser instance stopped.');
         }
-    }
-
-    private async closeBrowser(): Promise<void> {
-        const browserPages = await this.browser.pages();
-        await Promise.all(browserPages.map((p) => p.close()));
-        await this.browser.close();
     }
 
     private createLaunchOptions(): Puppeteer.LaunchOptions & Puppeteer.BrowserLaunchArgumentOptions {

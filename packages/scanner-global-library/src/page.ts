@@ -161,10 +161,11 @@ export class Page {
         // Setting BrowserConnectOptions.defaultViewport == null is required for not breaking page layout
         // Puppeteer fails to generate screenshot for a large page.
         try {
-            const data = await this.page.screenshot({
+            const getScreenshot = this.page.screenshot({
                 fullPage: true,
                 encoding: 'base64',
             });
+            const data = await Promise.race([getScreenshot, System.wait(60000)]);
 
             return data as string;
         } catch (error) {
@@ -178,10 +179,12 @@ export class Page {
         // In rare cases Puppeteer fails to generate mhtml snapshot file.
         try {
             const client = await this.page.target().createCDPSession();
-            const { data } = await client.send('Page.captureSnapshot', { format: 'mhtml' });
+            const getSnapshot = client.send('Page.captureSnapshot', { format: 'mhtml' });
+
+            const response = await Promise.race([getSnapshot, System.wait(60000)]);
             await client.detach();
 
-            return data;
+            return (response as Puppeteer.Protocol.Page.CaptureSnapshotResponse).data as string;
         } catch (error) {
             this.logger?.logError('Failed to generate page mhtml snapshot file', { error: System.serializeError(error) });
 
