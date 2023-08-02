@@ -13779,6 +13779,7 @@ __metadata:
     ts-jest: ^29.1.0
     typemoq: ^2.1.0
     typescript: ^4.9.5
+    zone.js: 0.13.1
   languageName: unknown
   linkType: soft
 
@@ -15055,7 +15056,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tslib@npm:^2.0.1":
+"tslib@npm:^2.0.1, tslib@npm:^2.3.0":
   version: 2.6.1
   resolution: "tslib@npm:2.6.1"
   checksum: b0d176d176487905b66ae4d5856647df50e37beea7571c53b8d10ba9222c074b81f1410fb91da13debaf2cbc970663609068bdebafa844ea9d69b146527c38fe
@@ -16432,5 +16433,14 @@ __metadata:
   version: 0.1.0
   resolution: "yocto-queue@npm:0.1.0"
   checksum: f77b3d8d00310def622123df93d4ee654fc6a0096182af8bd60679ddcdfb3474c56c6c7190817c84a2785648cdee9d721c0154eb45698c62176c322fb46fc700
+  languageName: node
+  linkType: hard
+
+"zone.js@npm:0.13.1":
+  version: 0.13.1
+  resolution: "zone.js@npm:0.13.1"
+  dependencies:
+    tslib: ^2.3.0
+  checksum: 35d18f7a3016c5c98d793ef7dd78acd53da7df38f45dc4739c562ff04189682ee8d2f9ee25faf1ac756d97fdb19bbaa73f3dc0acb192e5c56786ff33a31db56f
   languageName: node
   linkType: hard
