@@ -47,7 +47,6 @@
         "puppeteer-extra-plugin": "^3.2.3",
         "puppeteer-extra-plugin-stealth": "^2.11.2",
         "reflect-metadata": "^0.1.13",
-        "storage-documents": "workspace:*",
-        "zone.js": "0.13.1"
+        "storage-documents": "workspace:*"
     }
 }

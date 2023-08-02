@@ -6,8 +6,6 @@ import { inject, injectable, optional } from 'inversify';
 import { GlobalLogger } from 'logger';
 import * as Puppeteer from 'puppeteer';
 import { isNil, isNumber, isEmpty } from 'lodash';
-// @ts-expect-error
-import Zone from 'zone.js';
 import { WebDriver } from './web-driver';
 import { PageNavigator, NavigationResponse } from './page-navigator';
 import { BrowserError } from './browser-error';
@@ -180,24 +178,13 @@ export class Page {
     public async getPageSnapshot(): Promise<string> {
         // In rare cases Puppeteer fails to generate mhtml snapshot file.
         try {
-            return Zone.current
-                .fork({
-                    name: 'getPageSnapshot',
-                    onHandleError: (parent: any, current: any, target: any, error: any) => {
-                        this.logger?.logError('Zone error', { error: System.serializeError(error) });
+            const client = await this.page.target().createCDPSession();
+            const getSnapshot = client.send('Page.captureSnapshot', { format: 'mhtml' });
 
-                        return false;
-                    },
-                })
-                .runGuarded(async () => {
-                    const client = await this.page.target().createCDPSession();
-                    const getSnapshot = client.send('Page.captureSnapshot', { format: 'mhtml' });
+            const response = await Promise.race([getSnapshot, System.wait(60000)]);
+            await client.detach();
 
-                    const response = await Promise.race([getSnapshot, System.wait(60000)]);
-                    await client.detach();
-
-                    return (response as Puppeteer.Protocol.Page.CaptureSnapshotResponse).data as string;
-                });
+            return (response as Puppeteer.Protocol.Page.CaptureSnapshotResponse).data as string;
         } catch (error) {
             this.logger?.logError('Failed to generate page mhtml snapshot file', { error: System.serializeError(error) });
 
