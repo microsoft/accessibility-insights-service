@@ -164,7 +164,7 @@ export class OrchestrationSteps {
         const body = response.body as ScanRunResponse[];
         const scanRunResponse = body[0];
         if (scanRunResponse.error !== undefined) {
-            this.logger.logOrchestrationStep('Scan request failed', LogLevel.error, {
+            this.logger.logOrchestrationStep('Scan request failed', LogLevel.Error, {
                 requestResponse: JSON.stringify(response),
             });
 

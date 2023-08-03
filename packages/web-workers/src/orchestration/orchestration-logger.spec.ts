@@ -41,7 +41,7 @@ describe(OrchestrationLogger, () => {
             currentUtcDateTime: orchestrationContext.currentUtcDateTime.toUTCString(),
         };
         const message = 'log message';
-        loggerMock.setup((l) => l.log(message, LogLevel.info, expectedProperties)).verifiable();
+        loggerMock.setup((l) => l.log(message, LogLevel.Info, expectedProperties)).verifiable();
 
         testSubject.logOrchestrationStep(message);
     });
@@ -57,8 +57,8 @@ describe(OrchestrationLogger, () => {
             activityName: customProperties.activityName,
         };
         const message = 'log message';
-        loggerMock.setup((l) => l.log(message, LogLevel.error, expectedProperties)).verifiable();
+        loggerMock.setup((l) => l.log(message, LogLevel.Error, expectedProperties)).verifiable();
 
-        testSubject.logOrchestrationStep(message, LogLevel.error, expectedProperties);
+        testSubject.logOrchestrationStep(message, LogLevel.Error, expectedProperties);
     });
 });

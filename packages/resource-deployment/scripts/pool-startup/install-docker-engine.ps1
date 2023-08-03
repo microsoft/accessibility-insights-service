@@ -109,7 +109,6 @@ function installHyperV() {
         Write-Output "Hyper-V is installed."
     }
 
-    Import-Module Hyper-V
     Set-VMHost -VirtualMachinePath "D:\Hyper-V" -VirtualHardDiskPath "D:\Hyper-V"
 
     $switch = Get-VMSwitch | Where-Object { $_.Name -eq "vEthernet" }
