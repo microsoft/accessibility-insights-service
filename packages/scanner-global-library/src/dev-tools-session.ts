@@ -13,46 +13,48 @@ import * as Puppeteer from 'puppeteer';
  * reject promise from setTimeout() callback on connection timeout. The promise reject will
  * throw uncaught exception from within calling context. The workaround to handle
  * connection timeout uncaught exception is to resolve connection promise before puppeteer
- * API will reject it. See *puppeteer/packages/puppeteer-core/src/common/Connection.ts* for details.
+ * API will reject it. See puppeteer/packages/puppeteer-core/src/common/Connection.ts for details.
  */
 @injectable()
 export class DevToolsSession {
     // Default puppeteer CDP protocol timeout is 180 secs. Increasing protocolTimeout beyond
     // default value will require to increase the 'protocolTimeout' setting in browser
     // launch/connect calls.
-    public readonly protocolTimeout = 10000;
-
-    public timedOut: boolean;
+    public protocolTimeout = 30000;
 
     public async send<T extends keyof Puppeteer.ProtocolMapping.Commands>(
         page: Puppeteer.Page,
         method: T,
         ...paramArgs: Puppeteer.ProtocolMapping.Commands[T]['paramsType']
     ): Promise<Puppeteer.ProtocolMapping.Commands[T]['returnType']> {
+        let timer;
         let client;
+
         try {
-            this.timedOut = undefined;
+            let timedOut;
 
             client = await page.target().createCDPSession();
-            const connection = client.connection();
-            const wait = await new Promise<void>((resolve) => {
-                return setTimeout(() => {
-                    this.timedOut = true;
+            const wait = new Promise<void>((resolve) => {
+                timer = setTimeout(() => {
+                    timedOut = true;
                     resolve();
                 }, this.protocolTimeout);
+
+                return timer;
             });
             const send = client.send(method, ...paramArgs);
             const result = await Promise.race([send, wait]);
 
-            if (this.timedOut === true) {
-                // Resolve connection promise before puppeteer API will reject it
-                (connection.session(client.id()) as any)._onMessage({ id: 1 } /** CDPSessionOnMessageObject */);
+            if (timedOut === true) {
+                // Resolve connection promise before puppeteer API rejects it
+                (client as any)._onMessage({ id: 1 } /** CDPSessionOnMessageObject */);
 
                 throw new Error('The CDP session timed out.');
             }
 
             return result;
         } finally {
+            clearTimeout(timer);
             await client?.detach().catch();
         }
     }

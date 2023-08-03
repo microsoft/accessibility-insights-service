@@ -156,13 +156,13 @@ export class Page {
     }
 
     public async getPageScreenshot(): Promise<string> {
-        // Scrolling to the top of the page to capture full page screenshot
+        // Scrolling to the top of the page to capture full page screenshot.
         await this.scrollToPageTop(this.page);
 
         // Puppeteer fails to generate screenshot for a large page.
         try {
-            // Note: Changing page.screenshot() options will break page layout
-            // The BrowserConnectOptions.defaultViewport should be equal to null to preserve page layout
+            // Note: Changing page.screenshot() options will break page layout.
+            // The BrowserConnectOptions.defaultViewport should be equal to null to preserve page layout.
             const data = await this.page.screenshot({
                 fullPage: true,
                 encoding: 'base64',
@@ -177,11 +177,11 @@ export class Page {
     }
 
     public async getPageSnapshot(): Promise<string> {
-        // In rare cases Puppeteer fails to generate mhtml snapshot file.
+        // Puppeteer may fail to generate mhtml snapshot.
         try {
-            const response = await this.devToolsSession.send(this.page, 'Page.captureSnapshot', { format: 'mhtml' });
+            const { data } = await this.devToolsSession.send(this.page, 'Page.captureSnapshot', { format: 'mhtml' });
 
-            return (response as Puppeteer.Protocol.Page.CaptureSnapshotResponse).data as string;
+            return data;
         } catch (error) {
             this.logger?.logError('Failed to generate page mhtml snapshot file', { error: System.serializeError(error) });
 
@@ -190,9 +190,7 @@ export class Page {
     }
 
     public async getAllCookies(): Promise<Puppeteer.Protocol.Network.Cookie[]> {
-        const client = await this.page.target().createCDPSession();
-        const { cookies } = await client.send('Network.getAllCookies');
-        await client.detach();
+        const { cookies } = await this.devToolsSession.send(this.page, 'Network.getAllCookies');
 
         return cookies;
     }
