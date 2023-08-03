@@ -259,7 +259,7 @@ describe(Worker, () => {
             statusCode: 200,
         };
         reportGeneratorRequestProviderMock
-            .setup((o) => o.readScanGroupIds(failedScanRetryIntervalInMinutes, poolLoadSnapshot.tasksIncrementCountPerInterval, undefined))
+            .setup((o) => o.readScanGroupIds(failedScanRetryIntervalInMinutes, undefined))
             .returns(() => Promise.resolve(cosmosOperationResponse))
             .verifiable();
 
@@ -283,8 +283,7 @@ describe(Worker, () => {
     });
 
     it('get report requests for new scan report groups only', async () => {
-        const poolLoadSnapshot = setupPoolLoadSnapshot();
-
+        setupPoolLoadSnapshot();
         reportRequestGenerator.queueMessagesGeneratorFn()();
         const scanReportGroups = reportRequestGenerator.scanMessages.map((m) => {
             return {
@@ -303,7 +302,7 @@ describe(Worker, () => {
             statusCode: 200,
         };
         reportGeneratorRequestProviderMock
-            .setup((o) => o.readScanGroupIds(failedScanRetryIntervalInMinutes, poolLoadSnapshot.tasksIncrementCountPerInterval, undefined))
+            .setup((o) => o.readScanGroupIds(failedScanRetryIntervalInMinutes, undefined))
             .returns(() => Promise.resolve(cosmosOperationResponse))
             .verifiable();
 

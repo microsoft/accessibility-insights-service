@@ -3,7 +3,6 @@
 
 import 'reflect-metadata';
 
-import { GuidGenerator } from 'common';
 import { AxeScanResults } from 'scanner-global-library';
 import { CombinedScanResults, WebsiteScanResult } from 'storage-documents';
 import { IMock, Mock } from 'typemoq';
@@ -12,7 +11,6 @@ import { CombinedReportGenerator } from './combined-report-generator';
 import { AxeResultToConsolidatedHtmlConverter } from './axe-result-to-consolidated-html-converter';
 
 describe(CombinedReportGenerator, () => {
-    let guidGeneratorMock: IMock<GuidGenerator>;
     let axeResultToConsolidatedHtmlConverterMock: IMock<AxeResultToConsolidatedHtmlConverter>;
     let scanStarted: Date;
     let websiteScanResult: WebsiteScanResult;
@@ -31,7 +29,6 @@ describe(CombinedReportGenerator, () => {
 
     beforeEach(() => {
         scanStarted = new Date(2020, 11, 12);
-        guidGeneratorMock = Mock.ofType(GuidGenerator);
         axeResultToConsolidatedHtmlConverterMock = Mock.ofType<AxeResultToConsolidatedHtmlConverter>();
 
         websiteScanResult = {
@@ -54,15 +51,14 @@ describe(CombinedReportGenerator, () => {
             format: 'consolidated.html',
         } as GeneratedReport;
 
-        testSubject = new CombinedReportGenerator(axeResultToConsolidatedHtmlConverterMock.object, guidGeneratorMock.object);
+        testSubject = new CombinedReportGenerator(axeResultToConsolidatedHtmlConverterMock.object);
     });
 
     afterEach(() => {
-        guidGeneratorMock.verifyAll();
         axeResultToConsolidatedHtmlConverterMock.verifyAll();
     });
 
-    it('generate combined scan report with existing combined result', () => {
+    it('generate combined scan report', () => {
         websiteScanResult.reports = [
             {
                 reportId,
@@ -74,36 +70,7 @@ describe(CombinedReportGenerator, () => {
         setupAxeResultToConsolidatedHtmlConverterMock();
 
         const actualResult = testSubject.generate(
-            combinedScanResults,
-            websiteScanResult,
-            passedAxeScanResults.userAgent,
-            passedAxeScanResults.browserResolution,
-        );
-
-        expect(actualResult).toEqual(generatedReportStub);
-    });
-
-    it('generate combined scan report with non-existing combined result', () => {
-        guidGeneratorMock.setup((mock) => mock.createGuid()).returns(() => reportId);
-        setupAxeResultToConsolidatedHtmlConverterMock();
-
-        const actualResult = testSubject.generate(
-            combinedScanResults,
-            websiteScanResult,
-            passedAxeScanResults.userAgent,
-            passedAxeScanResults.browserResolution,
-        );
-
-        expect(actualResult).toEqual(generatedReportStub);
-    });
-
-    it('generate combined scan report with combined result without reports', () => {
-        websiteScanResult.reports = [];
-
-        guidGeneratorMock.setup((mock) => mock.createGuid()).returns(() => reportId);
-        setupAxeResultToConsolidatedHtmlConverterMock();
-
-        const actualResult = testSubject.generate(
+            reportId,
             combinedScanResults,
             websiteScanResult,
             passedAxeScanResults.userAgent,

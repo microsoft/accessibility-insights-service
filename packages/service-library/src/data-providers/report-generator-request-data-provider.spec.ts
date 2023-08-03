@@ -47,7 +47,6 @@ describe(ReportGeneratorRequestProvider, () => {
     });
 
     it('read requests', async () => {
-        const itemCount = 5;
         const scanGroupId = 'scanGroupId';
         const continuationToken = 'continuationToken';
         const response = {
@@ -55,28 +54,27 @@ describe(ReportGeneratorRequestProvider, () => {
             statusCode: 200,
         } as CosmosOperationResponse<ReportGeneratorRequest[]>;
         cosmosContainerClientMock
-            .setup((o) => o.queryDocuments(getQueryForReadRequests(scanGroupId, itemCount), continuationToken))
+            .setup((o) => o.queryDocuments(getQueryForReadRequests(scanGroupId), continuationToken))
             .returns(() => Promise.resolve(response))
             .verifiable();
 
-        const actualResponse = await reportGeneratorRequestProvider.readRequests(scanGroupId, itemCount, continuationToken);
+        const actualResponse = await reportGeneratorRequestProvider.readRequests(scanGroupId, continuationToken);
 
         expect(actualResponse).toEqual(response);
     });
 
     it('read scan group ids', async () => {
-        const itemCount = 5;
         const continuationToken = 'continuationToken';
         const response = {
             item: [{ scanCount: 1, scanGroupId: 'scanGroupId', targetReport: 'accessibility' } as ScanReportGroup],
             statusCode: 200,
         } as CosmosOperationResponse<ScanReportGroup[]>;
         cosmosContainerClientMock
-            .setup((o) => o.queryDocuments(It.isValue(getQueryForReadScanGroupIds(runDurationInMinutes, itemCount)), continuationToken))
+            .setup((o) => o.queryDocuments(It.isValue(getQueryForReadScanGroupIds(runDurationInMinutes)), continuationToken))
             .returns(() => Promise.resolve(response))
             .verifiable();
 
-        const actualResponse = await reportGeneratorRequestProvider.readScanGroupIds(runDurationInMinutes, itemCount, continuationToken);
+        const actualResponse = await reportGeneratorRequestProvider.readScanGroupIds(runDurationInMinutes, continuationToken);
 
         expect(actualResponse).toEqual(response);
     });
@@ -277,16 +275,12 @@ describe(ReportGeneratorRequestProvider, () => {
             .verifiable();
     }
 
-    function getQueryForReadScanGroupIds(runDuration: number, itemCount: number): cosmos.SqlQuerySpec {
+    function getQueryForReadScanGroupIds(runDuration: number): cosmos.SqlQuerySpec {
         return {
-            query: `SELECT TOP @itemCount COUNT(1) as scanCount, t.scanGroupId, t.targetReport FROM (
+            query: `SELECT COUNT(1) as scanCount, t.scanGroupId, t.targetReport FROM (
                 SELECT * FROM c WHERE c.itemType = @itemType AND (NOT IS_DEFINED(c.run.state) OR c.run.state != "running" OR (c.run.state = "running" AND DateTimeToTimestamp(c.run.timestamp) < @availabilityTimestamp))
                 ) t GROUP BY t.scanGroupId, t.targetReport`,
             parameters: [
-                {
-                    name: '@itemCount',
-                    value: itemCount,
-                },
                 {
                     name: '@itemType',
                     value: ItemType.reportGeneratorRequest,
@@ -299,14 +293,10 @@ describe(ReportGeneratorRequestProvider, () => {
         };
     }
 
-    function getQueryForReadRequests(scanGroupId: string, itemCount: number): cosmos.SqlQuerySpec {
+    function getQueryForReadRequests(scanGroupId: string): cosmos.SqlQuerySpec {
         return {
-            query: 'SELECT TOP @itemCount * FROM c WHERE c.itemType = @itemType AND c.scanGroupId = @scanGroupId ORDER BY c.priority DESC',
+            query: 'SELECT * FROM c WHERE c.itemType = @itemType AND c.scanGroupId = @scanGroupId ORDER BY c.priority DESC',
             parameters: [
-                {
-                    name: '@itemCount',
-                    value: itemCount,
-                },
                 {
                     name: '@itemType',
                     value: ItemType.reportGeneratorRequest,

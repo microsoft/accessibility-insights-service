@@ -18,7 +18,8 @@ const scanGroupId = 'scanGroupId';
 let reportGeneratorRequestProviderMock: IMock<ReportGeneratorRequestProvider>;
 let serviceConfigMock: IMock<ServiceConfiguration>;
 let requestSelector: RequestSelector;
-let queryCount: number;
+let maxRequestsToProcess: number;
+let maxRequestsToDelete: number;
 let dateNow: Date;
 
 describe(RequestSelector, () => {
@@ -26,7 +27,8 @@ describe(RequestSelector, () => {
         dateNow = new Date();
         MockDate.set(dateNow);
 
-        queryCount = 10;
+        maxRequestsToProcess = 10;
+        maxRequestsToDelete = 20;
 
         reportGeneratorRequestProviderMock = Mock.ofType<ReportGeneratorRequestProvider>();
         serviceConfigMock = Mock.ofType<ServiceConfiguration>();
@@ -106,7 +108,7 @@ describe(RequestSelector, () => {
             continuationToken,
         };
         reportGeneratorRequestProviderMock
-            .setup((o) => o.readRequests(scanGroupId, queryCount, undefined))
+            .setup((o) => o.readRequests(scanGroupId, undefined))
             .returns(() => Promise.resolve(response1 as CosmosOperationResponse<ReportGeneratorRequest[]>))
             .verifiable();
 
@@ -115,7 +117,7 @@ describe(RequestSelector, () => {
             statusCode: 200,
         };
         reportGeneratorRequestProviderMock
-            .setup((o) => o.readRequests(scanGroupId, queryCount, continuationToken))
+            .setup((o) => o.readRequests(scanGroupId, continuationToken))
             .returns(() => Promise.resolve(response2 as CosmosOperationResponse<ReportGeneratorRequest[]>))
             .verifiable();
 
@@ -132,7 +134,7 @@ describe(RequestSelector, () => {
             ],
         };
 
-        const result = await requestSelector.getQueuedRequests(scanGroupId, queryCount);
+        const result = await requestSelector.getQueuedRequests(scanGroupId, maxRequestsToProcess, maxRequestsToDelete);
 
         expect(result.requestsToDelete).toEqual(filteredRequests.requestsToDelete);
         expect(result.requestsToProcess).toEqual(filteredRequests.requestsToProcess);

@@ -48,7 +48,8 @@ export class PageOperationHandler {
         // mitigate this issue.
         if (opResult.browserError?.errorType === 'UrlNavigationTimeout') {
             opResult.response = this.pageRequestInterceptor.interceptedRequests.at(-1)?.response;
-            this.logger?.logError('Page operation has failed with navigation timeout. Overriding with the network response.', {
+            this.logger?.logError('Page operation has failed with navigation timeout. Overriding with the network trace response.', {
+                responseUrl: opResult.response?.url(),
                 error: System.serializeError(opResult.error),
                 browserError: System.serializeError(opResult.browserError),
             });

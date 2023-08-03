@@ -6,7 +6,7 @@ import 'reflect-metadata';
 import { IMock, It, Mock, Times } from 'typemoq';
 import * as Puppeteer from 'puppeteer';
 import { GlobalLogger } from 'logger';
-import { getPromisableDynamicMock } from '../test-utilities/promisable-mock';
+import { DevToolsSession } from '../dev-tools-session';
 import { PageRequestInterceptor } from './page-request-interceptor';
 import { PageNetworkTracerHandler } from './page-network-tracer-handler';
 import { InterceptedRequest } from './page-event-handler';
@@ -16,9 +16,8 @@ import { InterceptedRequest } from './page-event-handler';
 let pageRequestInterceptor: PageRequestInterceptor;
 let puppeteerPageMock: IMock<Puppeteer.Page>;
 let loggerMock: IMock<GlobalLogger>;
-let cdpSessionMock: IMock<Puppeteer.CDPSession>;
+let devToolsSessionMock: IMock<DevToolsSession>;
 let pageNetworkTracerHandlerMock: IMock<PageNetworkTracerHandler>;
-let puppeteerTargetMock: IMock<Puppeteer.Target>;
 
 const mainFrame = { name: () => 'main' } as Puppeteer.Frame;
 
@@ -26,21 +25,23 @@ describe(PageRequestInterceptor, () => {
     beforeEach(() => {
         puppeteerPageMock = Mock.ofType<Puppeteer.Page>();
         loggerMock = Mock.ofType(GlobalLogger);
-        cdpSessionMock = getPromisableDynamicMock(Mock.ofType<Puppeteer.CDPSession>());
+        devToolsSessionMock = Mock.ofType<DevToolsSession>();
         pageNetworkTracerHandlerMock = Mock.ofType<PageNetworkTracerHandler>();
-        puppeteerTargetMock = Mock.ofType<Puppeteer.Target>();
 
         setupEnableBypassServiceWorker();
 
-        pageRequestInterceptor = new PageRequestInterceptor(pageNetworkTracerHandlerMock.object, loggerMock.object);
+        pageRequestInterceptor = new PageRequestInterceptor(
+            pageNetworkTracerHandlerMock.object,
+            devToolsSessionMock.object,
+            loggerMock.object,
+        );
     });
 
     afterEach(() => {
         puppeteerPageMock.verifyAll();
         loggerMock.verifyAll();
-        cdpSessionMock.verifyAll();
+        devToolsSessionMock.verifyAll();
         pageNetworkTracerHandlerMock.verifyAll();
-        puppeteerTargetMock.verifyAll();
     });
 
     it('should invoke pageOnRequest', async () => {
@@ -217,65 +218,15 @@ describe(PageRequestInterceptor, () => {
 
         await pageRequestInterceptor.enableInterception(puppeteerPageMock.object);
     });
-
-    it('should disable interception', async () => {
-        setupDisableBypassServiceWorker();
-        puppeteerPageMock
-            .setup((o) => o.setRequestInterception(false))
-            .returns(() => Promise.resolve())
-            .verifiable(Times.atLeastOnce());
-        puppeteerPageMock
-            .setup((o) => o.off('request', It.isAny()))
-            .returns(() => undefined)
-            .verifiable(Times.atLeastOnce());
-        puppeteerPageMock
-            .setup((o) => o.off('response', It.isAny()))
-            .returns(() => undefined)
-            .verifiable(Times.atLeastOnce());
-        puppeteerPageMock
-            .setup((o) => o.off('requestfailed', It.isAny()))
-            .returns(() => undefined)
-            .verifiable(Times.atLeastOnce());
-
-        await pageRequestInterceptor.enableInterception(puppeteerPageMock.object);
-        await pageRequestInterceptor.disableInterception(puppeteerPageMock.object);
-    });
 });
 
 function setupEnableBypassServiceWorker(): void {
-    puppeteerPageMock
-        .setup((o) => o.target())
-        .returns(() => puppeteerTargetMock.object)
-        .verifiable();
-    cdpSessionMock
-        .setup((o) => o.send('Network.enable'))
+    devToolsSessionMock
+        .setup((o) => o.send(puppeteerPageMock.object, 'Network.enable'))
         .returns(() => Promise.resolve())
         .verifiable();
-    cdpSessionMock
-        .setup((o) => o.send('Network.setBypassServiceWorker', { bypass: true }))
+    devToolsSessionMock
+        .setup((o) => o.send(puppeteerPageMock.object, 'Network.setBypassServiceWorker', { bypass: true }))
         .returns(() => Promise.resolve())
-        .verifiable();
-    puppeteerTargetMock
-        .setup((o) => o.createCDPSession())
-        .returns(() => Promise.resolve(cdpSessionMock.object))
-        .verifiable();
-}
-
-function setupDisableBypassServiceWorker(): void {
-    cdpSessionMock
-        .setup((o) => o.send('Network.disable'))
-        .returns(() => Promise.resolve())
-        .verifiable();
-    cdpSessionMock
-        .setup((o) => o.send('Network.setBypassServiceWorker', { bypass: false }))
-        .returns(() => Promise.resolve())
-        .verifiable();
-    cdpSessionMock
-        .setup((o) => o.detach())
-        .returns(() => Promise.resolve())
-        .verifiable();
-    puppeteerTargetMock
-        .setup((o) => o.createCDPSession())
-        .returns(() => Promise.resolve(cdpSessionMock.object))
         .verifiable();
 }

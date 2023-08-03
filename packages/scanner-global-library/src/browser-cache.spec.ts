@@ -7,48 +7,34 @@ import fs from 'fs';
 import { IMock, Mock } from 'typemoq';
 import * as Puppeteer from 'puppeteer';
 import { BrowserCache } from './browser-cache';
-import { getPromisableDynamicMock } from './test-utilities/promisable-mock';
+import { DevToolsSession } from './dev-tools-session';
 
 let fsMock: IMock<typeof fs>;
 let browserCache: BrowserCache;
-let cdpSessionMock: IMock<Puppeteer.CDPSession>;
-let puppeteerTargetMock: IMock<Puppeteer.Target>;
 let puppeteerPageMock: IMock<Puppeteer.Page>;
+let devToolsSessionMock: IMock<DevToolsSession>;
 
 describe(BrowserCache, () => {
     beforeEach(() => {
         fsMock = Mock.ofType<typeof fs>();
-        puppeteerTargetMock = Mock.ofType<Puppeteer.Target>();
+        devToolsSessionMock = Mock.ofType<DevToolsSession>();
         puppeteerPageMock = Mock.ofType<Puppeteer.Page>();
-        cdpSessionMock = getPromisableDynamicMock(Mock.ofType<Puppeteer.CDPSession>());
 
-        browserCache = new BrowserCache(fsMock.object);
+        browserCache = new BrowserCache(devToolsSessionMock.object, fsMock.object);
     });
 
     afterEach(() => {
         fsMock.verifyAll();
-        puppeteerTargetMock.verifyAll();
-        cdpSessionMock.verifyAll();
+        devToolsSessionMock.verifyAll();
         puppeteerPageMock.verifyAll();
     });
 
     it('Clears browser cache', async () => {
-        puppeteerPageMock
-            .setup((o) => o.target())
-            .returns(() => puppeteerTargetMock.object)
-            .verifiable();
-        cdpSessionMock
-            .setup((o) => o.send('Network.clearBrowserCache'))
+        devToolsSessionMock
+            .setup((o) => o.send(puppeteerPageMock.object, 'Network.clearBrowserCache'))
             .returns(() => Promise.resolve())
             .verifiable();
-        cdpSessionMock
-            .setup((o) => o.detach())
-            .returns(() => Promise.resolve())
-            .verifiable();
-        puppeteerTargetMock
-            .setup((o) => o.createCDPSession())
-            .returns(() => Promise.resolve(cdpSessionMock.object))
-            .verifiable();
+
         await browserCache.clear(puppeteerPageMock.object);
     });
 

@@ -77,7 +77,7 @@ installAzureFunctionsCoreToolsOnLinux() {
     sudo apt-get update -y
 
     # Install the Core Tools package
-    sudo apt-get install azure-functions-core-tools-4=4.0.3971-1 -y
+    sudo apt-get install azure-functions-core-tools-4 -y
     echo "Azure Functions Core Tools installed successfully"
 }
 

@@ -19,6 +19,7 @@ import { scrollToTop } from './page-client-lib';
 import { PageNetworkTracer } from './network/page-network-tracer';
 import { ResourceAuthenticator, ResourceAuthenticationResult } from './authenticator/resource-authenticator';
 import { PageAnalysisResult, PageAnalyzer } from './network/page-analyzer';
+import { DevToolsSession } from './dev-tools-session';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -48,11 +49,11 @@ let puppeteerPageMock: IMock<Puppeteer.Page>;
 let puppeteerResponseMock: IMock<Puppeteer.HTTPResponse>;
 let puppeteerRequestMock: IMock<Puppeteer.HTTPRequest>;
 let axePuppeteerMock: IMock<AxePuppeteer>;
-let cdpSessionMock: IMock<Puppeteer.CDPSession>;
 let pageNetworkTracerMock: IMock<PageNetworkTracer>;
 let resourceAuthenticatorMock: IMock<ResourceAuthenticator>;
 let pageAnalyzerMock: IMock<PageAnalyzer>;
 let guidGeneratorMock: IMock<GuidGenerator>;
+let devToolsSessionMock: IMock<DevToolsSession>;
 
 describe(Page, () => {
     beforeEach(() => {
@@ -72,11 +73,11 @@ describe(Page, () => {
         puppeteerResponseMock = getPromisableDynamicMock(Mock.ofType<Puppeteer.HTTPResponse>());
         puppeteerRequestMock = getPromisableDynamicMock(Mock.ofType<Puppeteer.HTTPRequest>());
         axePuppeteerMock = getPromisableDynamicMock(Mock.ofType<AxePuppeteer>());
-        cdpSessionMock = getPromisableDynamicMock(Mock.ofType<Puppeteer.CDPSession>());
         pageNetworkTracerMock = Mock.ofType<PageNetworkTracer>();
         resourceAuthenticatorMock = Mock.ofType<ResourceAuthenticator>();
         pageAnalyzerMock = Mock.ofType<PageAnalyzer>();
         guidGeneratorMock = Mock.ofType<GuidGenerator>();
+        devToolsSessionMock = Mock.ofType<DevToolsSession>();
 
         scrollToTopMock = jest.fn().mockImplementation(() => Promise.resolve());
         puppeteerResponseMock.setup((o) => o.ok()).returns(() => true);
@@ -100,6 +101,7 @@ describe(Page, () => {
             pageNetworkTracerMock.object,
             resourceAuthenticatorMock.object,
             pageAnalyzerMock.object,
+            devToolsSessionMock.object,
             guidGeneratorMock.object,
             loggerMock.object,
             scrollToTopMock,
@@ -112,7 +114,7 @@ describe(Page, () => {
         axePuppeteerMock.verifyAll();
         loggerMock.verifyAll();
         puppeteerRequestMock.verifyAll();
-        cdpSessionMock.verifyAll();
+        devToolsSessionMock.verifyAll();
         pageNetworkTracerMock.verifyAll();
         resourceAuthenticatorMock.verifyAll();
         pageAnalyzerMock.verifyAll();
@@ -470,32 +472,18 @@ function simulatePageLaunch(): void {
 }
 
 function setupCDPSessionForCaptureSnapshot(data: string): void {
-    cdpSessionMock = getPromisableDynamicMock(Mock.ofType<Puppeteer.CDPSession>());
-    const targetStub = {
-        createCDPSession: async () => cdpSessionMock.object,
-    } as Puppeteer.Target;
-    puppeteerPageMock.setup((o) => o.target()).returns(() => targetStub);
-
     const snapshot = { data };
-    cdpSessionMock.setup((o) => o.send('Page.captureSnapshot', { format: 'mhtml' })).returns(async () => snapshot);
-    cdpSessionMock
-        .setup((o) => o.detach())
-        .returns(() => Promise.resolve())
+    devToolsSessionMock
+        .setup((o) => o.send(puppeteerPageMock.object, 'Page.captureSnapshot', { format: 'mhtml' }))
+        .returns(async () => snapshot)
         .verifiable();
 }
 
 function setupCDPSessionForGetAllCookies(cookies: Puppeteer.Protocol.Network.Cookie[]): void {
-    cdpSessionMock = getPromisableDynamicMock(Mock.ofType<Puppeteer.CDPSession>());
-    const targetStub = {
-        createCDPSession: async () => cdpSessionMock.object,
-    } as Puppeteer.Target;
-    puppeteerPageMock.setup((o) => o.target()).returns(() => targetStub);
-
     const data = { cookies };
-    cdpSessionMock.setup((o) => o.send('Network.getAllCookies')).returns(async () => data);
-    cdpSessionMock
-        .setup((o) => o.detach())
-        .returns(() => Promise.resolve())
+    devToolsSessionMock
+        .setup((o) => o.send(puppeteerPageMock.object, 'Network.getAllCookies'))
+        .returns(async () => data)
         .verifiable();
 }
 

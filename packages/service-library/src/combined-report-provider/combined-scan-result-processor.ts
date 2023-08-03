@@ -18,6 +18,8 @@ export class CombinedScanResultProcessor {
 
     private readonly msecBetweenRetries: number = 1000;
 
+    private readonly maxCombinedResultsBlobSize = 50 * 1024 * 1024;
+
     constructor(
         @inject(CombinedAxeResultBuilder) protected readonly combinedAxeResultBuilder: CombinedAxeResultBuilder,
         @inject(CombinedReportGenerator) protected readonly combinedReportGenerator: CombinedReportGenerator,
@@ -44,16 +46,30 @@ export class CombinedScanResultProcessor {
     private async generateCombinedScanResultsImpl(axeScanResults: AxeScanResults, pageScanResult: OnDemandPageScanResult): Promise<void> {
         const websiteScanRef = this.getWebsiteScanRefs(pageScanResult);
         const websiteScanResult = await this.websiteScanResultProvider.read(websiteScanRef.id);
-        const combinedResultsBlob = await this.combinedResultsBlobProvider.getBlob(websiteScanResult.combinedResultsBlobId);
-        const combinedResultsBlobId = combinedResultsBlob.blobId;
+
+        let combinedResultsBlobId = websiteScanResult.reports?.find((report) => report.format === 'consolidated.html')?.reportId;
+        const combinedResultsBlob = await this.combinedResultsBlobProvider.getBlob(combinedResultsBlobId);
+        combinedResultsBlobId = combinedResultsBlobId || combinedResultsBlob.blobId;
 
         this.logger.setCommonProperties({
             combinedResultsBlobId,
             websiteScanId: websiteScanRef.id,
         });
 
+        const length = Buffer.byteLength(JSON.stringify(combinedResultsBlob), 'utf8');
+        if (length > this.maxCombinedResultsBlobSize) {
+            this.logger.logError(
+                `Failure to generate combined scan result. Combined scan result blob exceeded maximum supported size of ${
+                    this.maxCombinedResultsBlobSize / (1024 * 1024)
+                } MB.`,
+            );
+
+            return;
+        }
+
         const combinedAxeResults = await this.combinedAxeResultBuilder.mergeAxeResults(axeScanResults.results, combinedResultsBlob);
         const generatedReport = this.combinedReportGenerator.generate(
+            combinedResultsBlobId,
             combinedAxeResults,
             websiteScanResult,
             axeScanResults.userAgent,
@@ -63,7 +79,6 @@ export class CombinedScanResultProcessor {
 
         const updatedWebsiteScanResults = {
             id: websiteScanResult.id,
-            combinedResultsBlobId: combinedResultsBlobId,
             reports: [pageScanReport],
         } as Partial<WebsiteScanResult>;
         await this.websiteScanResultProvider.mergeOrCreate(pageScanResult.id, updatedWebsiteScanResults);

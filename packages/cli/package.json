@@ -91,7 +91,7 @@
         "node-powershell": "5.0.1",
         "normalize-path": "^3.0.0",
         "normalize-url": "6.1.0",
-        "puppeteer": "^19.8.5",
+        "puppeteer": "^21.0.0",
         "puppeteer-extra": "^3.3.6",
         "puppeteer-extra-plugin": "^3.2.3",
         "puppeteer-extra-plugin-stealth": "^2.11.2",

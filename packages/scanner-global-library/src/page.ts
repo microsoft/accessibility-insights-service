@@ -14,6 +14,7 @@ import { scrollToTop } from './page-client-lib';
 import { PageNetworkTracer } from './network/page-network-tracer';
 import { ResourceAuthenticator, ResourceAuthenticationResult } from './authenticator/resource-authenticator';
 import { PageAnalysisResult, PageAnalyzer } from './network/page-analyzer';
+import { DevToolsSession } from './dev-tools-session';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -32,6 +33,10 @@ export interface Viewport {
 export interface PageOptions {
     enableNetworkTrace?: boolean;
     enableAuthentication?: boolean;
+}
+
+export interface PuppeteerPageExt extends Puppeteer.Page {
+    id?: string;
 }
 
 type Operation = 'load' | 'reload' | 'analysis' | 'auth';
@@ -68,6 +73,7 @@ export class Page {
         @inject(PageNetworkTracer) private readonly pageNetworkTracer: PageNetworkTracer,
         @inject(ResourceAuthenticator) private readonly resourceAuthenticator: ResourceAuthenticator,
         @inject(PageAnalyzer) private readonly pageAnalyzer: PageAnalyzer,
+        @inject(DevToolsSession) private readonly devToolsSession: DevToolsSession,
         @inject(GuidGenerator) private readonly guidGenerator: GuidGenerator,
         @inject(GlobalLogger) @optional() private readonly logger: GlobalLogger,
         private readonly scrollToPageTop: typeof scrollToTop = scrollToTop,
@@ -96,6 +102,7 @@ export class Page {
 
         this.userAgent = await this.browser.userAgent();
         this.page = await this.browser.newPage();
+        (this.page as PuppeteerPageExt).id = this.guidGenerator.createGuid();
 
         const pageCreated = await this.webDriver.waitForPageCreation();
         if (pageCreated !== true) {
@@ -149,19 +156,19 @@ export class Page {
     }
 
     public async getPageScreenshot(): Promise<string> {
-        // Scrolling to the top of the page to capture full page rendering as page might be scrolled down after initial load
+        // Scrolling to the top of the page to capture full page screenshot.
         await this.scrollToPageTop(this.page);
 
-        // Note: changing page.screenshot() options may break page layout
-        // Setting BrowserConnectOptions.defaultViewport == null is required for not breaking page layout
         // Puppeteer fails to generate screenshot for a large page.
         try {
+            // Note: Changing page.screenshot() options will break page layout.
+            // The BrowserConnectOptions.defaultViewport should be equal to null to preserve page layout.
             const data = await this.page.screenshot({
                 fullPage: true,
                 encoding: 'base64',
             });
 
-            return data as string;
+            return data;
         } catch (error) {
             this.logger?.logError('Failed to generate page screenshot', { error: System.serializeError(error) });
 
@@ -170,11 +177,9 @@ export class Page {
     }
 
     public async getPageSnapshot(): Promise<string> {
-        // In rare cases Puppeteer fails to generate mhtml snapshot file.
+        // Puppeteer may fail to generate mhtml snapshot.
         try {
-            const client = await this.page.target().createCDPSession();
-            const { data } = await client.send('Page.captureSnapshot', { format: 'mhtml' });
-            await client.detach();
+            const { data } = await this.devToolsSession.send(this.page, 'Page.captureSnapshot', { format: 'mhtml' });
 
             return data;
         } catch (error) {
@@ -185,9 +190,7 @@ export class Page {
     }
 
     public async getAllCookies(): Promise<Puppeteer.Protocol.Network.Cookie[]> {
-        const client = await this.page.target().createCDPSession();
-        const { cookies } = await client.send('Network.getAllCookies');
-        await client.detach();
+        const { cookies } = await this.devToolsSession.send(this.page, 'Network.getAllCookies');
 
         return cookies;
     }
