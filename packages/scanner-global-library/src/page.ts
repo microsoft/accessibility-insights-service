@@ -14,43 +14,9 @@ import { scrollToTop } from './page-client-lib';
 import { PageNetworkTracer } from './network/page-network-tracer';
 import { ResourceAuthenticator, ResourceAuthenticationResult } from './authenticator/resource-authenticator';
 import { PageAnalysisResult, PageAnalyzer } from './network/page-analyzer';
+import { DevToolsSession } from './dev-tools-session';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-
-export class DevToolsSession {
-    public async send<T extends keyof Puppeteer.ProtocolMapping.Commands>(
-        page: Puppeteer.Page,
-        method: T,
-        ...paramArgs: Puppeteer.ProtocolMapping.Commands[T]['paramsType']
-    ): Promise<Puppeteer.ProtocolMapping.Commands[T]['returnType']> {
-        let client;
-        try {
-            let timeout;
-
-            client = await page.target().createCDPSession();
-            const connection = client.connection();
-            const wait = await new Promise<void>((resolve) => {
-                return setTimeout(() => {
-                    timeout = true;
-                    resolve();
-                }, 10000);
-            });
-            const send = client.send(method, ...paramArgs);
-            const result = await Promise.race([send, wait]);
-
-            if (timeout === true) {
-                // See puppeteer/packages/puppeteer-core/src/common/Connection.ts
-                (connection.session(client.id()) as any)._onMessage({ id: 1 } /** CDPSessionOnMessageObject */);
-            }
-
-            return result;
-        } catch {
-            return undefined;
-        } finally {
-            await client?.detach().catch();
-        }
-    }
-}
 
 export interface BrowserStartOptions {
     browserExecutablePath?: string;
@@ -107,6 +73,7 @@ export class Page {
         @inject(PageNetworkTracer) private readonly pageNetworkTracer: PageNetworkTracer,
         @inject(ResourceAuthenticator) private readonly resourceAuthenticator: ResourceAuthenticator,
         @inject(PageAnalyzer) private readonly pageAnalyzer: PageAnalyzer,
+        @inject(DevToolsSession) private readonly devToolsSession: DevToolsSession,
         @inject(GuidGenerator) private readonly guidGenerator: GuidGenerator,
         @inject(GlobalLogger) @optional() private readonly logger: GlobalLogger,
         private readonly scrollToPageTop: typeof scrollToTop = scrollToTop,
@@ -189,20 +156,19 @@ export class Page {
     }
 
     public async getPageScreenshot(): Promise<string> {
-        // Scrolling to the top of the page to capture full page rendering as page might be scrolled down after initial load
+        // Scrolling to the top of the page to capture full page screenshot
         await this.scrollToPageTop(this.page);
 
-        // Note: changing page.screenshot() options may break page layout
-        // Setting BrowserConnectOptions.defaultViewport == null is required for not breaking page layout
         // Puppeteer fails to generate screenshot for a large page.
         try {
-            const getScreenshot = this.page.screenshot({
+            // Note: Changing page.screenshot() options will break page layout
+            // The BrowserConnectOptions.defaultViewport should be equal to null to preserve page layout
+            const data = await this.page.screenshot({
                 fullPage: true,
                 encoding: 'base64',
             });
-            const data = await Promise.race([getScreenshot, System.wait(60000)]);
 
-            return data as string;
+            return data;
         } catch (error) {
             this.logger?.logError('Failed to generate page screenshot', { error: System.serializeError(error) });
 
@@ -213,8 +179,7 @@ export class Page {
     public async getPageSnapshot(): Promise<string> {
         // In rare cases Puppeteer fails to generate mhtml snapshot file.
         try {
-            const devToolsSession = new DevToolsSession();
-            const response = await devToolsSession.send(this.page, 'Page.captureSnapshot', { format: 'mhtml' });
+            const response = await this.devToolsSession.send(this.page, 'Page.captureSnapshot', { format: 'mhtml' });
 
             return (response as Puppeteer.Protocol.Page.CaptureSnapshotResponse).data as string;
         } catch (error) {

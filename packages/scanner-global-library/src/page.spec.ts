@@ -19,6 +19,7 @@ import { scrollToTop } from './page-client-lib';
 import { PageNetworkTracer } from './network/page-network-tracer';
 import { ResourceAuthenticator, ResourceAuthenticationResult } from './authenticator/resource-authenticator';
 import { PageAnalysisResult, PageAnalyzer } from './network/page-analyzer';
+import { DevToolsSession } from './dev-tools-session';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -53,6 +54,7 @@ let pageNetworkTracerMock: IMock<PageNetworkTracer>;
 let resourceAuthenticatorMock: IMock<ResourceAuthenticator>;
 let pageAnalyzerMock: IMock<PageAnalyzer>;
 let guidGeneratorMock: IMock<GuidGenerator>;
+let devToolsSessionMock: IMock<DevToolsSession>;
 
 describe(Page, () => {
     beforeEach(() => {
@@ -77,6 +79,7 @@ describe(Page, () => {
         resourceAuthenticatorMock = Mock.ofType<ResourceAuthenticator>();
         pageAnalyzerMock = Mock.ofType<PageAnalyzer>();
         guidGeneratorMock = Mock.ofType<GuidGenerator>();
+        devToolsSessionMock = Mock.ofType<DevToolsSession>();
 
         scrollToTopMock = jest.fn().mockImplementation(() => Promise.resolve());
         puppeteerResponseMock.setup((o) => o.ok()).returns(() => true);
@@ -100,6 +103,7 @@ describe(Page, () => {
             pageNetworkTracerMock.object,
             resourceAuthenticatorMock.object,
             pageAnalyzerMock.object,
+            devToolsSessionMock.object,
             guidGeneratorMock.object,
             loggerMock.object,
             scrollToTopMock,
