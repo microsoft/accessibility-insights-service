@@ -13,7 +13,7 @@ import * as Puppeteer from 'puppeteer';
  * reject promise from setTimeout() callback on connection timeout. The promise reject will
  * throw uncaught exception from within calling context. The workaround to handle
  * connection timeout uncaught exception is to resolve connection promise before puppeteer
- * API will reject it. See puppeteer/packages/puppeteer-core/src/common/Connection.ts for details.
+ * API rejects it. See puppeteer/packages/puppeteer-core/src/common/Connection.ts for details.
  */
 @injectable()
 export class DevToolsSession {
