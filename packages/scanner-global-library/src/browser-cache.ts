@@ -2,22 +2,21 @@
 // Licensed under the MIT License.
 
 import * as fs from 'fs';
-import { injectable } from 'inversify';
+import { inject, injectable } from 'inversify';
 import * as Puppeteer from 'puppeteer';
+import { DevToolsSession } from './dev-tools-session';
 
 @injectable()
 export class BrowserCache {
     public readonly dirname = `${__dirname}/browser-cache`;
 
-    constructor(private readonly filesystem: typeof fs = fs) {}
+    constructor(@inject(DevToolsSession) private readonly devToolsSession: DevToolsSession, private readonly filesystem: typeof fs = fs) {}
 
     /**
      * Clears browser cache.
      */
     public async clear(page: Puppeteer.Page): Promise<void> {
-        const session = await page.target().createCDPSession();
-        await session.send('Network.clearBrowserCache');
-        await session.detach();
+        await this.devToolsSession.send(page, 'Network.clearBrowserCache');
     }
 
     /**
