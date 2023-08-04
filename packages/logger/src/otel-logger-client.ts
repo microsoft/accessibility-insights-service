@@ -99,9 +99,8 @@ export class OTelLoggerClient implements LoggerClient {
     }
 
     private async setupOTel(): Promise<void> {
-        // TODO use config
         const config = await this.otelConfigProvider.getConfig();
-        this.enabled = config.supported;
+        this.enabled = config.otelSupported;
 
         if (this.enabled !== true) {
             return;
@@ -110,6 +109,10 @@ export class OTelLoggerClient implements LoggerClient {
         this.resource.merge(
             new Resource({
                 [SemanticResourceAttributes.SERVICE_NAME]: 'WebInsightsService',
+                _microsoft_metrics_account: config.account,
+                _microsoft_metrics_namespace: config.namespace,
+                customerResourceId: config.resourceId,
+                locationId: config.locationId,
             }),
         );
 

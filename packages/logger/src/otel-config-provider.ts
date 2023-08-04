@@ -10,7 +10,7 @@ import moment from 'moment';
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 export interface OTelConfig {
-    supported: boolean;
+    otelSupported: boolean;
     container?: boolean;
     hasOTelListener?: boolean;
     otelListenerUrl?: string;
@@ -39,10 +39,10 @@ export class OTelConfigProvider {
     public async getConfig(): Promise<OTelConfig> {
         // OTLP metrics collection is enabled for Windows platform only
         if (process.platform !== 'win32') {
-            this.logTrace(`OTLP metrics collection is not supported on this platform.`);
+            this.logTrace(`OTLP metrics collection is not supported on ${process.platform} platform.`);
 
             return {
-                supported: false,
+                otelSupported: false,
             };
         }
 
@@ -125,7 +125,7 @@ export class OTelConfigProvider {
             metricsConfig?.resourceId !== undefined;
 
         return {
-            supported,
+            otelSupported: supported,
             container: machineInfo.container,
             hasOTelListener,
             otelListenerUrl: this.getOTelListenerUrl(machineInfo.host),
