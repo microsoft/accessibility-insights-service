@@ -178,7 +178,7 @@ describe(BaseConsoleLoggerClient, () => {
 
             testSubject.log('trace1', LogLevel.Verbose);
 
-            consoleMock.verify((c) => c.log(`[${timestamp}][Trace][verbose] trace1`), Times.once());
+            consoleMock.verify((c) => c.log(`[${timestamp}][Trace][Verbose] trace1`), Times.once());
         });
 
         it('log data with base properties', async () => {
@@ -187,7 +187,7 @@ describe(BaseConsoleLoggerClient, () => {
 
             testSubject.log('trace1', LogLevel.Warn);
 
-            consoleMock.verify((c) => c.log(`[${timestamp}][Trace][warn] trace1\n${util.inspect(baseProps)}`), Times.once());
+            consoleMock.verify((c) => c.log(`[${timestamp}][Trace][Warn] trace1\n${util.inspect(baseProps)}`), Times.once());
         });
 
         it('log trace data with custom runtime properties', async () => {
@@ -199,7 +199,7 @@ describe(BaseConsoleLoggerClient, () => {
 
             testSubject.log('trace1', LogLevel.Warn);
 
-            consoleMock.verify((c) => c.log(`[${timestamp}][Trace][warn] trace1\n${util.inspect(mergedProps)}`), Times.once());
+            consoleMock.verify((c) => c.log(`[${timestamp}][Trace][Warn] trace1\n${util.inspect(mergedProps)}`), Times.once());
         });
 
         it('log trace data with added custom runtime properties', async () => {
@@ -217,7 +217,7 @@ describe(BaseConsoleLoggerClient, () => {
 
             testSubject.log('trace1', LogLevel.Warn);
 
-            consoleMock.verify((c) => c.log(`[${timestamp}][Trace][warn] trace1\n${util.inspect(mergedProps)}`), Times.once());
+            consoleMock.verify((c) => c.log(`[${timestamp}][Trace][Warn] trace1\n${util.inspect(mergedProps)}`), Times.once());
         });
 
         it('log data with event properties', async () => {
@@ -228,7 +228,7 @@ describe(BaseConsoleLoggerClient, () => {
             testSubject.log('trace1', LogLevel.Warn, traceProps);
 
             consoleMock.verify(
-                (c) => c.log(`[${timestamp}][Trace][warn] trace1\n${util.inspect({ ...baseProps, ...traceProps })}`),
+                (c) => c.log(`[${timestamp}][Trace][Warn] trace1\n${util.inspect({ ...baseProps, ...traceProps })}`),
                 Times.once(),
             );
         });
