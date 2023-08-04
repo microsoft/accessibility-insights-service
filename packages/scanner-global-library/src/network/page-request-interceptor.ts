@@ -6,7 +6,6 @@ import { injectable, inject, optional } from 'inversify';
 import { System } from 'common';
 import { GlobalLogger } from 'logger';
 import { PuppeteerPageExt } from '../page';
-import { DevToolsSession } from '../dev-tools-session';
 import { InterceptedRequest, PageEventHandler } from './page-event-handler';
 import { PageNetworkTracerHandler } from './page-network-tracer-handler';
 
@@ -34,7 +33,6 @@ export class PageRequestInterceptor {
 
     constructor(
         @inject(PageNetworkTracerHandler) private readonly pageNetworkTracerHandler: PageNetworkTracerHandler,
-        @inject(DevToolsSession) private readonly devToolsSession: DevToolsSession,
         @inject(GlobalLogger) @optional() private readonly logger: GlobalLogger,
         private readonly globalNetworkTrace: boolean = process.env.NETWORK_TRACE === 'true',
     ) {}
@@ -67,7 +65,7 @@ export class PageRequestInterceptor {
         }
         this.pageId = page.id;
 
-        await this.enableBypassServiceWorker(page);
+        await page.setBypassServiceWorker(true);
         await page.setRequestInterception(true);
 
         this.pageOnRequestEventHandler = async (request: Puppeteer.HTTPRequest) => {
@@ -152,11 +150,6 @@ export class PageRequestInterceptor {
         );
 
         return System.getElapsedTime(timestamp);
-    }
-
-    private async enableBypassServiceWorker(page: Puppeteer.Page): Promise<void> {
-        await this.devToolsSession.send(page, 'Network.enable');
-        await this.devToolsSession.send(page, 'Network.setBypassServiceWorker', { bypass: true });
     }
 
     private traceError(eventName: string, error: any): void {

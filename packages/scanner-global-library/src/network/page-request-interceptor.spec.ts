@@ -6,7 +6,6 @@ import 'reflect-metadata';
 import { IMock, It, Mock, Times } from 'typemoq';
 import * as Puppeteer from 'puppeteer';
 import { GlobalLogger } from 'logger';
-import { DevToolsSession } from '../dev-tools-session';
 import { PageRequestInterceptor } from './page-request-interceptor';
 import { PageNetworkTracerHandler } from './page-network-tracer-handler';
 import { InterceptedRequest } from './page-event-handler';
@@ -16,7 +15,6 @@ import { InterceptedRequest } from './page-event-handler';
 let pageRequestInterceptor: PageRequestInterceptor;
 let puppeteerPageMock: IMock<Puppeteer.Page>;
 let loggerMock: IMock<GlobalLogger>;
-let devToolsSessionMock: IMock<DevToolsSession>;
 let pageNetworkTracerHandlerMock: IMock<PageNetworkTracerHandler>;
 
 const mainFrame = { name: () => 'main' } as Puppeteer.Frame;
@@ -25,22 +23,14 @@ describe(PageRequestInterceptor, () => {
     beforeEach(() => {
         puppeteerPageMock = Mock.ofType<Puppeteer.Page>();
         loggerMock = Mock.ofType(GlobalLogger);
-        devToolsSessionMock = Mock.ofType<DevToolsSession>();
         pageNetworkTracerHandlerMock = Mock.ofType<PageNetworkTracerHandler>();
 
-        setupEnableBypassServiceWorker();
-
-        pageRequestInterceptor = new PageRequestInterceptor(
-            pageNetworkTracerHandlerMock.object,
-            devToolsSessionMock.object,
-            loggerMock.object,
-        );
+        pageRequestInterceptor = new PageRequestInterceptor(pageNetworkTracerHandlerMock.object, loggerMock.object);
     });
 
     afterEach(() => {
         puppeteerPageMock.verifyAll();
         loggerMock.verifyAll();
-        devToolsSessionMock.verifyAll();
         pageNetworkTracerHandlerMock.verifyAll();
     });
 
@@ -200,6 +190,10 @@ describe(PageRequestInterceptor, () => {
 
     it('should enable interception', async () => {
         puppeteerPageMock
+            .setup((o) => o.setBypassServiceWorker(true))
+            .returns(() => Promise.resolve())
+            .verifiable(Times.atLeastOnce());
+        puppeteerPageMock
             .setup((o) => o.setRequestInterception(true))
             .returns(() => Promise.resolve())
             .verifiable(Times.atLeastOnce());
@@ -219,14 +213,3 @@ describe(PageRequestInterceptor, () => {
         await pageRequestInterceptor.enableInterception(puppeteerPageMock.object);
     });
 });
-
-function setupEnableBypassServiceWorker(): void {
-    devToolsSessionMock
-        .setup((o) => o.send(puppeteerPageMock.object, 'Network.enable'))
-        .returns(() => Promise.resolve())
-        .verifiable();
-    devToolsSessionMock
-        .setup((o) => o.send(puppeteerPageMock.object, 'Network.setBypassServiceWorker', { bypass: true }))
-        .returns(() => Promise.resolve())
-        .verifiable();
-}
