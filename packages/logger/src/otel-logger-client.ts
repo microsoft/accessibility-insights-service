@@ -44,6 +44,10 @@ export class OTelLoggerClient implements LoggerClient {
     ) {}
 
     public async setup(baseProperties?: BaseTelemetryProperties): Promise<void> {
+        if (this.initialized === true) {
+            return;
+        }
+
         this.baseProperties = baseProperties;
         await this.setupOTel();
         this.initialized = true;

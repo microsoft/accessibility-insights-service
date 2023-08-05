@@ -17,7 +17,7 @@ export interface RuntimeConfig {
     availabilityTestConfig: AvailabilityTestConfig;
     crawlConfig: CrawlConfig;
     privacyScanConfig: PrivacyScanConfig;
-    metricsConfig?: MetricsConfig;
+    metricsConfig: MetricsConfig;
 }
 
 export interface TaskRuntimeConfig {
@@ -133,12 +133,13 @@ export class ServiceConfiguration {
                 const config = this.convictModule<RuntimeConfig>(this.getRuntimeConfigSchema());
 
                 // eslint-disable-next-line security/detect-non-literal-fs-filename
+                console.log(`Loading config file ${ServiceConfiguration.profilePath}`);
                 this.fileSystem.exists(ServiceConfiguration.profilePath, (exists) => {
                     if (exists === true) {
                         config.loadFile(ServiceConfiguration.profilePath);
                         config.validate({ allowed: 'strict' });
                     } else {
-                        console.log(`Unable to load custom configuration. Using default config  - ${config}`);
+                        console.log(`Unable to load config file. Using default config settings ${config}`);
                     }
                     resolve(config);
                 });
@@ -375,6 +376,20 @@ export class ServiceConfiguration {
                     format: 'int',
                     default: 10000,
                     doc: 'The maximum time in milliseconds to wait for the banner XPath after the initial page load has completed',
+                },
+            },
+            metricsConfig: {
+                account: {
+                    format: 'String',
+                    default: undefined,
+                },
+                namespace: {
+                    format: 'String',
+                    default: undefined,
+                },
+                resourceId: {
+                    format: 'String',
+                    default: undefined,
                 },
             },
         };

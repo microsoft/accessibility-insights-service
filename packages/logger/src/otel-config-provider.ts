@@ -37,9 +37,9 @@ export class OTelConfigProvider {
     ) {}
 
     public async getConfig(): Promise<OTelConfig> {
-        // OTLP metrics collection is enabled for Windows platform only
+        // OTel metrics collection is enabled for Windows platform only
         if (process.platform !== 'win32') {
-            this.logTrace(`OTLP metrics collection is not supported on ${process.platform} platform.`);
+            this.logTrace(`OTel metrics collection is not supported on ${process.platform} platform.`);
 
             return {
                 otelSupported: false,
@@ -52,7 +52,14 @@ export class OTelConfigProvider {
         const ipGeolocation = this.ipGeolocationProvider.getIpGeolocation();
 
         const config = this.getOTelConfig(hasOTelListener, machineInfo, metricsConfig, ipGeolocation);
-        this.logTrace(`OTLP metrics collection configuration.`, config);
+        this.logTrace(
+            `OTel metrics collection is ${
+                config.otelSupported === true
+                    ? 'enabled.'
+                    : 'disabled. All metricsConfig properties should be defined and OTel listener is available on a host.'
+            }`,
+            config,
+        );
 
         return config;
     }
@@ -119,9 +126,10 @@ export class OTelConfigProvider {
         ipGeolocation: IpGeolocation,
     ): OTelConfig {
         const supported =
-            hasOTelListener === true ||
-            metricsConfig?.account !== undefined ||
-            metricsConfig?.namespace !== undefined ||
+            hasOTelListener === true &&
+            ipGeolocation?.region !== undefined &&
+            metricsConfig?.account !== undefined &&
+            metricsConfig?.namespace !== undefined &&
             metricsConfig?.resourceId !== undefined;
 
         return {
@@ -129,8 +137,10 @@ export class OTelConfigProvider {
             container: machineInfo.container,
             hasOTelListener,
             otelListenerUrl: this.getOTelListenerUrl(machineInfo.host),
-            ...metricsConfig,
-            locationId: this.getLocationId(ipGeolocation.region),
+            account: metricsConfig?.account,
+            namespace: metricsConfig?.namespace,
+            resourceId: metricsConfig?.resourceId,
+            locationId: ipGeolocation?.region !== undefined ? this.getLocationId(ipGeolocation.region) : undefined,
         };
     }
 
@@ -151,6 +161,6 @@ export class OTelConfigProvider {
             source: 'OTelLoggerClient',
             ...properties,
         };
-        console.log(`[${moment.utc().toISOString()}][Trace][Info] ${message}\n${JSON.stringify(data)}`);
+        console.log(`[${moment.utc().toISOString()}][Trace][Info] ${message}\n${JSON.stringify(data, (k, v) => v ?? 'undefined', 2)}`);
     }
 }
