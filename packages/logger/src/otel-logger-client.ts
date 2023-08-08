@@ -105,37 +105,35 @@ export class OTelLoggerClient implements LoggerClient {
     private async setupOTel(): Promise<void> {
         const config = await this.otelConfigProvider.getConfig();
         this.enabled = config.otelSupported;
-
         if (this.enabled !== true) {
             return;
         }
 
+        // OTel common attributes are not supported by injection pipeline. Submitting with event's attributes instead.
+        this.baseProperties = {
+            ...this.baseProperties,
+            [SemanticResourceAttributes.SERVICE_NAME]: 'WebInsightsService',
+            customerResourceId: config.resourceId,
+            locationId: config.locationId,
+        };
         this.resource.merge(
             new Resource({
-                [SemanticResourceAttributes.SERVICE_NAME]: 'WebInsightsService',
                 _microsoft_metrics_account: config.account,
                 _microsoft_metrics_namespace: config.namespace,
-                customerResourceId: config.resourceId,
-                locationId: config.locationId,
             }),
         );
-
         this.exporter = new OTLPMetricExporter({
             url: config.otelListenerUrl,
             temporalityPreference: AggregationTemporality.DELTA,
         });
-
         this.metricReader = new PeriodicExportingMetricReader({
             exporter: this.exporter,
-            exportIntervalMillis: 5000,
+            exportIntervalMillis: 3000,
         });
-
         this.meterProvider = new MeterProvider({
             resource: this.resource,
         });
-
         this.meterProvider.addMetricReader(this.metricReader);
-
         opentelemetry.metrics.setGlobalMeterProvider(this.meterProvider);
     }
 }

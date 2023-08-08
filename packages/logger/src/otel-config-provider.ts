@@ -27,6 +27,8 @@ interface MachineInfo {
 
 @injectable()
 export class OTelConfigProvider {
+    private readonly otelListenerTimeout = 5000;
+
     private readonly OTelListenerPort = 4317; // default agent listener port
 
     private readonly localhost = '127.0.0.1';
@@ -47,7 +49,7 @@ export class OTelConfigProvider {
         }
 
         const machineInfo = await this.getMachineInfo();
-        const hasOTelListener = await this.validateOTelListeners(machineInfo.host);
+        const hasOTelListener = await this.validateOTelListener(machineInfo.host);
         const metricsConfig = await this.getMetricsConfig();
         const ipGeolocation = this.ipGeolocationProvider.getIpGeolocation();
 
@@ -82,9 +84,7 @@ export class OTelConfigProvider {
         return { container: systemInfo.container, host };
     }
 
-    private async validateOTelListeners(host: string): Promise<boolean> {
-        const timeout = 3000;
-
+    private async validateOTelListener(host: string): Promise<boolean> {
         let timerId;
         let timerExpired = false;
         let error: any;
@@ -93,7 +93,7 @@ export class OTelConfigProvider {
             timerId = setTimeout(() => {
                 timerExpired = true;
                 resolve();
-            }, timeout);
+            }, this.otelListenerTimeout);
         });
 
         const client = new Promise<boolean>((resolve, reject) => {
