@@ -28,4 +28,5 @@ export interface ScanArguments {
     authType?: string;
     userAgent?: string;
     httpHeaders?: string;
+    adhereFolderPattern?: boolean;
 }

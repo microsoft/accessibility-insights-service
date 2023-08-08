@@ -61,6 +61,7 @@ export class CrawlerParametersBuilder {
             serviceAccountPassword: scanArguments.serviceAccountPassword,
             authType: scanArguments.authType,
             httpHeaders: headers,
+            adhereFolderPattern: scanArguments.adhereFolderPattern,
         };
     }
 

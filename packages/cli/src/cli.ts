@@ -152,6 +152,12 @@ function getScanArguments(): ScanArguments {
                 type: 'string',
                 describe: `The custom HTTP header(s) to be send on each crawl request. Accepts JSON formatted string like {"name": "value"}.`,
             },
+            adhereFolderPattern: {
+                type: 'boolean',
+                describe:
+                    'Adhere to the pattern when URLs with a trailing slash indicates a directory, and those without a trailing slash denotes a file.',
+                default: false,
+            },
         })
         .check((args) => {
             validateScanArguments(args as ScanArguments);
