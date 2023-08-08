@@ -6,6 +6,20 @@ import convict from 'convict';
 import { injectable } from 'inversify';
 import { isNil } from 'lodash';
 
+export interface RuntimeConfig {
+    featureFlags: FeatureFlags;
+    logConfig: LogRuntimeConfig;
+    taskConfig: TaskRuntimeConfig;
+    queueConfig: QueueRuntimeConfig;
+    scanConfig: ScanRunTimeConfig;
+    jobManagerConfig: JobManagerConfig;
+    restApiConfig: RestApiConfig;
+    availabilityTestConfig: AvailabilityTestConfig;
+    crawlConfig: CrawlConfig;
+    privacyScanConfig: PrivacyScanConfig;
+    metricsConfig: MetricsConfig;
+}
+
 export interface TaskRuntimeConfig {
     taskTimeoutInMinutes: number;
     retentionTimeInDays: number;
@@ -50,19 +64,6 @@ export interface RestApiConfig {
     maxScanPriorityValue: number;
 }
 
-export interface RuntimeConfig {
-    featureFlags: FeatureFlags;
-    logConfig: LogRuntimeConfig;
-    taskConfig: TaskRuntimeConfig;
-    queueConfig: QueueRuntimeConfig;
-    scanConfig: ScanRunTimeConfig;
-    jobManagerConfig: JobManagerConfig;
-    restApiConfig: RestApiConfig;
-    availabilityTestConfig: AvailabilityTestConfig;
-    crawlConfig: CrawlConfig;
-    privacyScanConfig: PrivacyScanConfig;
-}
-
 export interface FeatureFlags {
     sendNotification: boolean;
 }
@@ -88,6 +89,12 @@ export interface CrawlConfig {
 export interface PrivacyScanConfig {
     bannerXPath: string;
     bannerDetectionTimeout: number;
+}
+
+export interface MetricsConfig {
+    account: string;
+    namespace: string;
+    resourceId: string;
 }
 
 export declare type ResourceType = 'batch' | 'registry';
@@ -126,12 +133,13 @@ export class ServiceConfiguration {
                 const config = this.convictModule<RuntimeConfig>(this.getRuntimeConfigSchema());
 
                 // eslint-disable-next-line security/detect-non-literal-fs-filename
+                console.log(`Loading config file ${ServiceConfiguration.profilePath}`);
                 this.fileSystem.exists(ServiceConfiguration.profilePath, (exists) => {
                     if (exists === true) {
                         config.loadFile(ServiceConfiguration.profilePath);
                         config.validate({ allowed: 'strict' });
                     } else {
-                        console.log(`Unable to load custom configuration. Using default config  - ${config}`);
+                        console.log(`Unable to load config file. Using default config settings ${config}`);
                     }
                     resolve(config);
                 });
@@ -368,6 +376,20 @@ export class ServiceConfiguration {
                     format: 'int',
                     default: 10000,
                     doc: 'The maximum time in milliseconds to wait for the banner XPath after the initial page load has completed',
+                },
+            },
+            metricsConfig: {
+                account: {
+                    format: 'String',
+                    default: undefined,
+                },
+                namespace: {
+                    format: 'String',
+                    default: undefined,
+                },
+                resourceId: {
+                    format: 'String',
+                    default: undefined,
                 },
             },
         };

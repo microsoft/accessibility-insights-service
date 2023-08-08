@@ -3,7 +3,7 @@
 
 import 'reflect-metadata';
 
-import { ServiceConfiguration, PrivacyScanConfig } from 'common';
+import { ServiceConfiguration, PrivacyScanConfig, IpGeolocation, IpGeolocationProvider } from 'common';
 import { GlobalLogger } from 'logger';
 import { Mock, IMock, Times } from 'typemoq';
 import { Page } from 'scanner-global-library';
@@ -13,7 +13,6 @@ import * as MockDate from 'mockdate';
 import { PrivacyScenarioRunner } from './privacy-scenario-runner';
 import { CookieCollector } from './cookie-collector';
 import { CookieScenario } from './cookie-scenarios';
-import { IpGeolocationProvider, IpGeolocation } from './ip-geolocation-provider';
 
 const privacyScanConfig = {
     bannerXPath: 'bannerXPath',

@@ -53,7 +53,7 @@ export class ScanWaitOrchestrator {
         const totalWaitTimeInSeconds = moment.utc(this.context.df.currentUtcDateTime).diff(moment.utc(waitStartTime), 'seconds');
 
         if (completed === true && !waitConditions.isFailed(scanStatus)) {
-            this.orchestrationLogger.logOrchestrationStep(`Orchestration activity ${activityName} has succeeded`, LogLevel.info, {
+            this.orchestrationLogger.logOrchestrationStep(`Orchestration activity ${activityName} has succeeded`, LogLevel.Info, {
                 totalWaitTimeInSeconds: totalWaitTimeInSeconds.toString(),
                 waitStartTime: waitStartTime.toJSON(),
                 waitEndTime: waitEndTime.toJSON(),
@@ -76,7 +76,7 @@ export class ScanWaitOrchestrator {
         overallStartTime: moment.Moment,
         overallEndTime: moment.Moment,
     ): Generator<Task, void, SerializableResponse & void> {
-        this.orchestrationLogger.logOrchestrationStep(`Starting timer with wait time ${duration}`, LogLevel.info, {
+        this.orchestrationLogger.logOrchestrationStep(`Starting timer with wait time ${duration}`, LogLevel.Info, {
             waitStartTime: overallStartTime.toJSON(),
             waitEndTime: overallEndTime.toJSON(),
         });
@@ -85,7 +85,7 @@ export class ScanWaitOrchestrator {
             moment.utc(this.context.df.currentUtcDateTime).add(duration, 'seconds').toDate(),
         );
 
-        this.orchestrationLogger.logOrchestrationStep('Timer completed', LogLevel.info, {
+        this.orchestrationLogger.logOrchestrationStep('Timer completed', LogLevel.Info, {
             requestResponse: JSON.stringify(timerOutput),
             waitStartTime: overallStartTime.toJSON(),
             waitEndTime: overallEndTime.toJSON(),
@@ -103,7 +103,7 @@ export class ScanWaitOrchestrator {
         activityName: string,
         traceData?: OrchestrationTelemetryProperties,
     ): Generator<Task, void, SerializableResponse & void> {
-        this.orchestrationLogger.logOrchestrationStep(`Orchestration activity ${activityName} has failed`, LogLevel.error, {
+        this.orchestrationLogger.logOrchestrationStep(`Orchestration activity ${activityName} has failed`, LogLevel.Error, {
             requestResponse: JSON.stringify(response),
             ...traceData,
         });

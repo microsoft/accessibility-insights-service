@@ -5,4 +5,3 @@ export * from './privacy-results';
 export { CookieCollector } from './cookie-collector';
 export { PrivacyScannerCore } from './privacy-scanner-core';
 export { PrivacyScenarioRunner } from './privacy-scenario-runner';
-export * from './ip-geolocation-provider';

@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { PrivacyScanConfig, ServiceConfiguration, System } from 'common';
+import { PrivacyScanConfig, ServiceConfiguration, System, IpGeolocationProvider } from 'common';
 import { inject, injectable, optional } from 'inversify';
 import { ConsentResult } from 'storage-documents';
 import { GlobalLogger } from 'logger';
@@ -9,7 +9,6 @@ import { Page } from 'scanner-global-library';
 import { CookieScenario, getAllCookieScenarios } from './cookie-scenarios';
 import { CookieCollector } from './cookie-collector';
 import { PrivacyResults } from './privacy-results';
-import { IpGeolocationProvider } from './ip-geolocation-provider';
 
 @injectable()
 export class PrivacyScenarioRunner {

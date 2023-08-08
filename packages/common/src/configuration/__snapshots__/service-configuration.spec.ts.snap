@@ -142,6 +142,20 @@ exports[`ServiceConfiguration verifies custom config 1`] = `
       "format": "Boolean",
     },
   },
+  "metricsConfig": {
+    "account": {
+      "default": undefined,
+      "format": "String",
+    },
+    "namespace": {
+      "default": undefined,
+      "format": "String",
+    },
+    "resourceId": {
+      "default": undefined,
+      "format": "String",
+    },
+  },
   "privacyScanConfig": {
     "bannerDetectionTimeout": {
       "default": 10000,
@@ -370,6 +384,20 @@ exports[`ServiceConfiguration verifies dev config 1`] = `
       "default": true,
       "doc": "Property to decide if console logging is enabled",
       "format": "Boolean",
+    },
+  },
+  "metricsConfig": {
+    "account": {
+      "default": undefined,
+      "format": "String",
+    },
+    "namespace": {
+      "default": undefined,
+      "format": "String",
+    },
+    "resourceId": {
+      "default": undefined,
+      "format": "String",
     },
   },
   "privacyScanConfig": {

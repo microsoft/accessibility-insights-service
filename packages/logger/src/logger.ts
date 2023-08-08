@@ -9,10 +9,10 @@ import { TelemetryMeasurements } from './logger-event-measurements';
 import { LoggerProperties } from './logger-properties';
 
 export enum LogLevel {
-    info,
-    warn,
-    verbose,
-    error,
+    Info,
+    Warn,
+    Verbose,
+    Error,
 }
 
 export abstract class Logger {
@@ -20,7 +20,7 @@ export abstract class Logger {
 
     protected isDebugEnabled: boolean = false;
 
-    constructor(public readonly loggerClients: LoggerClient[], protected readonly initializationTimeout: number = 5000) {}
+    constructor(public readonly loggerClients: LoggerClient[], protected readonly initializationTimeout: number = 15000) {}
 
     public async setup(baseProperties?: { [property: string]: string }): Promise<void> {
         if (this.initialized === true) {
@@ -63,21 +63,21 @@ export abstract class Logger {
     }
 
     public logInfo(message: string, properties?: { [name: string]: string }): void {
-        this.log(message, LogLevel.info, properties);
+        this.log(message, LogLevel.Info, properties);
     }
 
     public logVerbose(message: string, properties?: { [name: string]: string }): void {
         if (this.isDebugEnabled) {
-            this.log(message, LogLevel.verbose, properties);
+            this.log(message, LogLevel.Verbose, properties);
         }
     }
 
     public logWarn(message: string, properties?: { [name: string]: string }): void {
-        this.log(message, LogLevel.warn, properties);
+        this.log(message, LogLevel.Warn, properties);
     }
 
     public logError(message: string, properties?: { [name: string]: string }): void {
-        this.log(message, LogLevel.error, properties);
+        this.log(message, LogLevel.Error, properties);
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

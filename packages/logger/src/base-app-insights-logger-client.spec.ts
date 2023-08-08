@@ -178,7 +178,7 @@ describe(BaseAppInsightsLoggerClient, () => {
                 )
                 .verifiable();
 
-            testSubject.log('trace1', LogLevel.info);
+            testSubject.log('trace1', LogLevel.Info);
 
             verifyMocks();
         });
@@ -198,26 +198,26 @@ describe(BaseAppInsightsLoggerClient, () => {
                 )
                 .verifiable();
 
-            testSubject.log('log message', LogLevel.info);
+            testSubject.log('log message', LogLevel.Info);
 
             verifyMocks();
         });
 
         test.each([
             {
-                logLevel: LogLevel.error,
+                logLevel: LogLevel.Error,
                 appInsightsLogLevel: appInsights.Contracts.SeverityLevel.Error,
             },
             {
-                logLevel: LogLevel.warn,
+                logLevel: LogLevel.Warn,
                 appInsightsLogLevel: appInsights.Contracts.SeverityLevel.Warning,
             },
             {
-                logLevel: LogLevel.info,
+                logLevel: LogLevel.Info,
                 appInsightsLogLevel: appInsights.Contracts.SeverityLevel.Information,
             },
             {
-                logLevel: LogLevel.verbose,
+                logLevel: LogLevel.Verbose,
                 appInsightsLogLevel: appInsights.Contracts.SeverityLevel.Verbose,
             },
         ])('when properties passed %o', async (testCase: TrackTraceTestCase) => {

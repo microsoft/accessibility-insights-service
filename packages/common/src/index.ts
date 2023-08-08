@@ -20,3 +20,4 @@ export { BodyParser } from './body-parser';
 export { listMonorepoPackageNames } from './build-utilities/monorepo-packages';
 export { ensureDirectory } from './ensure-directory';
 export * from './system/exponential-retry';
+export * from './ip-geolocation-provider';

@@ -24,7 +24,7 @@ describe(GlobalLogger, () => {
         loggerClient2Mock = Mock.ofType2(ConsoleLoggerClient, null, MockBehavior.Strict);
         setupAllLoggerClientsInit();
 
-        testSubject = new GlobalLogger([loggerClient1Mock.object, loggerClient2Mock.object], 500);
+        testSubject = new GlobalLogger([loggerClient1Mock.object, loggerClient2Mock.object]);
     });
 
     describe('setup', () => {
@@ -151,7 +151,7 @@ describe(GlobalLogger, () => {
     describe('log', () => {
         it('throw if called before setup', () => {
             expect(() => {
-                testSubject.log('trace1', LogLevel.warn);
+                testSubject.log('trace1', LogLevel.Warn);
             }).toThrowError(
                 'The logger instance is not initialized. Ensure the setup() method is invoked by derived class implementation.',
             );
@@ -159,9 +159,9 @@ describe(GlobalLogger, () => {
 
         it('when properties not passed', async () => {
             await testSubject.setup();
-            invokeAllLoggerClientMocks((m) => m.setup((c) => c.log('trace1', LogLevel.error, undefined)).verifiable(Times.once()));
+            invokeAllLoggerClientMocks((m) => m.setup((c) => c.log('trace1', LogLevel.Error, undefined)).verifiable(Times.once()));
 
-            testSubject.log('trace1', LogLevel.error);
+            testSubject.log('trace1', LogLevel.Error);
 
             verifyMocks();
         });
@@ -169,9 +169,9 @@ describe(GlobalLogger, () => {
         it('when properties passed', async () => {
             const properties = { foo: 'bar' };
             await testSubject.setup();
-            invokeAllLoggerClientMocks((m) => m.setup((c) => c.log('trace1', LogLevel.error, properties)).verifiable(Times.once()));
+            invokeAllLoggerClientMocks((m) => m.setup((c) => c.log('trace1', LogLevel.Error, properties)).verifiable(Times.once()));
 
-            testSubject.log('trace1', LogLevel.error, properties);
+            testSubject.log('trace1', LogLevel.Error, properties);
 
             verifyMocks();
         });
@@ -188,7 +188,7 @@ describe(GlobalLogger, () => {
 
         it('when properties not passed', async () => {
             await testSubject.setup();
-            invokeAllLoggerClientMocks((m) => m.setup((c) => c.log('info1', LogLevel.info, undefined)).verifiable(Times.once()));
+            invokeAllLoggerClientMocks((m) => m.setup((c) => c.log('info1', LogLevel.Info, undefined)).verifiable(Times.once()));
 
             testSubject.logInfo('info1');
 
@@ -198,7 +198,7 @@ describe(GlobalLogger, () => {
         it('when properties passed', async () => {
             const properties = { foo: 'bar' };
             await testSubject.setup();
-            invokeAllLoggerClientMocks((m) => m.setup((c) => c.log('info1', LogLevel.info, properties)).verifiable(Times.once()));
+            invokeAllLoggerClientMocks((m) => m.setup((c) => c.log('info1', LogLevel.Info, properties)).verifiable(Times.once()));
 
             testSubject.logInfo('info1', properties);
 
@@ -217,7 +217,7 @@ describe(GlobalLogger, () => {
 
         it('when properties not passed', async () => {
             await testSubject.setup();
-            invokeAllLoggerClientMocks((m) => m.setup((c) => c.log('warn1', LogLevel.warn, undefined)).verifiable(Times.once()));
+            invokeAllLoggerClientMocks((m) => m.setup((c) => c.log('warn1', LogLevel.Warn, undefined)).verifiable(Times.once()));
 
             testSubject.logWarn('warn1');
 
@@ -227,7 +227,7 @@ describe(GlobalLogger, () => {
         it('when properties passed', async () => {
             const properties = { foo: 'bar' };
             await testSubject.setup();
-            invokeAllLoggerClientMocks((m) => m.setup((c) => c.log('warn1', LogLevel.warn, properties)).verifiable(Times.once()));
+            invokeAllLoggerClientMocks((m) => m.setup((c) => c.log('warn1', LogLevel.Warn, properties)).verifiable(Times.once()));
 
             testSubject.logWarn('warn1', properties);
 
@@ -246,7 +246,7 @@ describe(GlobalLogger, () => {
 
         it('when properties not passed', async () => {
             await testSubject.setup();
-            invokeAllLoggerClientMocks((m) => m.setup((c) => c.log('error1', LogLevel.error, undefined)).verifiable(Times.once()));
+            invokeAllLoggerClientMocks((m) => m.setup((c) => c.log('error1', LogLevel.Error, undefined)).verifiable(Times.once()));
 
             testSubject.logError('error1');
 
@@ -256,7 +256,7 @@ describe(GlobalLogger, () => {
         it('when properties passed', async () => {
             const properties = { foo: 'bar' };
             await testSubject.setup();
-            invokeAllLoggerClientMocks((m) => m.setup((c) => c.log('error1', LogLevel.error, properties)).verifiable(Times.once()));
+            invokeAllLoggerClientMocks((m) => m.setup((c) => c.log('error1', LogLevel.Error, properties)).verifiable(Times.once()));
 
             testSubject.logError('error1', properties);
 
@@ -273,7 +273,7 @@ describe(GlobalLogger, () => {
 
             it('when properties not passed', () => {
                 invokeAllLoggerClientMocks((m) =>
-                    m.setup((c) => c.log('HealthCheck', LogLevel.verbose, undefined)).verifiable(Times.once()),
+                    m.setup((c) => c.log('HealthCheck', LogLevel.Verbose, undefined)).verifiable(Times.once()),
                 );
 
                 testSubject.logVerbose('HealthCheck');
@@ -284,7 +284,7 @@ describe(GlobalLogger, () => {
             it('when properties passed', () => {
                 const properties = { foo: 'bar' };
                 invokeAllLoggerClientMocks((m) =>
-                    m.setup((c) => c.log('HealthCheck', LogLevel.verbose, properties)).verifiable(Times.once()),
+                    m.setup((c) => c.log('HealthCheck', LogLevel.Verbose, properties)).verifiable(Times.once()),
                 );
 
                 testSubject.logVerbose('HealthCheck', properties);

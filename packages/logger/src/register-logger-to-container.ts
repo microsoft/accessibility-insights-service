@@ -11,6 +11,7 @@ import { ContextAwareConsoleLoggerClient } from './context-aware-console-logger-
 import { ContextAwareLogger } from './context-aware-logger';
 import { GlobalLogger } from './global-logger';
 import { loggerTypes } from './logger-types';
+import { OTelLoggerClient } from './otel-logger-client';
 
 export function registerLoggerToContainer(container: Container): void {
     registerLoggerDependenciesToContainer(container);
@@ -27,8 +28,9 @@ export function registerContextAwareLoggerToContainer(container: Container): voi
         .toDynamicValue((context) => {
             const appInsightsLoggerClient = context.container.get(ContextAwareAppInsightsLoggerClient);
             const consoleLoggerClient = context.container.get(ContextAwareConsoleLoggerClient);
+            const oTelLoggerClient = context.container.get(OTelLoggerClient);
 
-            return new ContextAwareLogger([appInsightsLoggerClient, consoleLoggerClient]);
+            return new ContextAwareLogger([appInsightsLoggerClient, consoleLoggerClient, oTelLoggerClient]);
         })
         .inSingletonScope();
 }
@@ -39,8 +41,9 @@ function registerGlobalLoggerToContainer(container: Container): void {
         .toDynamicValue((context) => {
             const appInsightsLoggerClient = context.container.get(AppInsightsLoggerClient);
             const consoleLoggerClient = context.container.get(ConsoleLoggerClient);
+            const oTelLoggerClient = context.container.get(OTelLoggerClient);
 
-            return new GlobalLogger([appInsightsLoggerClient, consoleLoggerClient]);
+            return new GlobalLogger([appInsightsLoggerClient, consoleLoggerClient, oTelLoggerClient]);
         })
         .inSingletonScope();
 }
@@ -52,4 +55,5 @@ function registerLoggerDependenciesToContainer(container: Container): void {
     container.bind(ConsoleLoggerClient).toSelf().inSingletonScope();
     container.bind(loggerTypes.DotEnvConfig).toConstantValue(dotenv.config());
     container.bind(loggerTypes.Console).toConstantValue(console);
+    container.bind(OTelLoggerClient).toSelf().inSingletonScope();
 }

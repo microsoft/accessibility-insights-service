@@ -9,7 +9,7 @@ import { OrchestrationTelemetryProperties } from './orchestration-telemetry-prop
 export class OrchestrationLogger {
     constructor(private readonly context: IOrchestrationFunctionContext, private readonly logger: Logger) {}
 
-    public logOrchestrationStep(message: string, logType: LogLevel = LogLevel.info, properties?: OrchestrationTelemetryProperties): void {
+    public logOrchestrationStep(message: string, logType: LogLevel = LogLevel.Info, properties?: OrchestrationTelemetryProperties): void {
         this.logger.log(message, logType, {
             ...this.getDefaultLogProperties(),
             ...properties,

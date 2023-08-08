@@ -116,6 +116,7 @@ describe(ServiceConfiguration, () => {
     function setupVerifiableCustomConfigLoadCall(): void {
         configMock.setup((c) => c.loadFile(ServiceConfiguration.profilePath)).verifiable(Times.once());
     }
+
     function setupLoadCustomFileConfigCallsNotCalled(): void {
         configMock.setup((c) => c.loadFile(It.isAny())).verifiable(Times.never());
         configMock.setup((c) => c.validate(It.isAny())).verifiable(Times.never());
@@ -130,6 +131,7 @@ describe(ServiceConfiguration, () => {
             .returns(() => configMock.object)
             .verifiable(Times.once());
     }
+
     function setupVerifiableFileExistsCall(profilePath: string, fileExistsValue: boolean): void {
         fsMock
             .setup((f) => f.exists(profilePath, It.isAny()))

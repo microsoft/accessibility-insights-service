@@ -3,13 +3,12 @@
 
 import 'reflect-metadata';
 
-import { GuidGenerator } from 'common';
+import { GuidGenerator, IpGeolocation } from 'common';
 import { IMock, Mock } from 'typemoq';
 import * as mockDate from 'mockdate';
 import { PrivacyScanResult, BrowserError } from 'scanner-global-library';
 import { FailedUrl, PrivacyPageScanReport, PrivacyScanCombinedReport, PrivacyScanStatus } from 'storage-documents';
 import { cloneDeep } from 'lodash';
-import { IpGeolocation } from 'privacy-scan-core';
 import { PrivacyReportMetadata, PrivacyReportReducer } from './privacy-report-reducer';
 
 describe(PrivacyReportReducer, () => {

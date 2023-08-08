@@ -27,7 +27,7 @@ export class ActivityActionDispatcher {
         const response = (yield* this.callActivityImpl(activityName, false, data)) as SerializableResponse;
 
         if (response.statusCode < 200 || response.statusCode >= 300) {
-            this.orchestrationLogger.logOrchestrationStep(`${activityName} activity failed`, LogLevel.error, {
+            this.orchestrationLogger.logOrchestrationStep(`${activityName} activity failed`, LogLevel.Error, {
                 requestResponse: JSON.stringify(response),
                 activityName,
             });
@@ -39,7 +39,7 @@ export class ActivityActionDispatcher {
 
             throw new Error(`Request failed ${JSON.stringify(response)}`);
         } else {
-            this.orchestrationLogger.logOrchestrationStep(`${activityName} activity completed`, LogLevel.info, {
+            this.orchestrationLogger.logOrchestrationStep(`${activityName} activity completed`, LogLevel.Info, {
                 activityName,
                 requestResponse: JSON.stringify(response),
             });
