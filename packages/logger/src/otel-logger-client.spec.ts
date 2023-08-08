@@ -23,7 +23,7 @@ describe(OTelLoggerClient, () => {
     });
 
     afterEach(() => {
-        // otelConfigProviderMock.verifyAll();
+        otelConfigProviderMock.verifyAll();
     });
 
     it('skip OTel setup when not supported', async () => {
