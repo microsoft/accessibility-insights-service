@@ -84,7 +84,27 @@ describe(CrawlerConfiguration, () => {
         const baseUrl = 'base url string';
         const baseUrlDiscoveryPattern = 'discovery pattern';
 
-        it('with no list provided', () => {
+        it('without list provided and adhereFolderPattern option is enabled', () => {
+            createDiscoveryPatternMock.setup((cdp) => cdp(baseUrl)).returns(() => baseUrlDiscoveryPattern);
+            crawlerRunOptionsMock
+                .setup((o) => o.baseUrl)
+                .returns(() => baseUrl)
+                .verifiable();
+            crawlerRunOptionsMock
+                .setup((o) => o.discoveryPatterns)
+                .returns(() => undefined)
+                .verifiable();
+            crawlerRunOptionsMock
+                .setup((o) => o.adhereFolderPattern)
+                .returns(() => true)
+                .verifiable();
+
+            const discoveryPatterns = crawlerConfiguration.discoveryPatterns();
+
+            expect(discoveryPatterns).toEqual([baseUrlDiscoveryPattern]);
+        });
+
+        it('without list provided and adhereFolderPattern option is disabled', () => {
             createDiscoveryPatternMock.setup((cdp) => cdp(baseUrl)).returns(() => baseUrlDiscoveryPattern);
             crawlerRunOptionsMock
                 .setup((o) => o.baseUrl)
@@ -97,7 +117,7 @@ describe(CrawlerConfiguration, () => {
 
             const discoveryPatterns = crawlerConfiguration.discoveryPatterns();
 
-            expect(discoveryPatterns).toEqual([baseUrlDiscoveryPattern]);
+            expect(discoveryPatterns).toEqual([]);
         });
 
         it('with list provided', () => {

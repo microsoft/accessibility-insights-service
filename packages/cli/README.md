@@ -94,7 +94,7 @@ default: './ai_scan_cli_output'
 -   The error log will be generated in case of any error.
 -   The crawler will start with the base URL specified in the command line and progressively discover links (URLs) to be crawled and scanned.
 -   A base URL to crawl is defined as URL host and should not have query and parameters.
--   Only URLs that located within the base URL folder would be considered for crawling and scanning. The URL folder is a resource location equal to base URL up-to the last forward slash in the specified base URL, or e.g:
+-   When --adhereFolderPattern option is enabled only URLs that located within the base URL folder would be considered for crawling and scanning. The URL folder is a resource location equal to base URL up-to the last forward slash in the specified base URL, or e.g:
     -   If base URL is specified as https://www.example.com/bar/foo , URLs that are in https://www.example.com/bar/ folder will be considered for crawling and scanning.
     -   If base URL is specified as https://www.example.com/bar/foo/ , only URLs that are in https://www.example.com/bar/foo/ folder will be considered for crawling and scanning.
 
@@ -274,4 +274,11 @@ describe: The custom value of the User-Agent HTTP request header. Defaults to th
 ```sh
 type: string
 describe: The custom HTTP header(s) to be send on each crawl request. Accepts JSON formatted string like {"name": "value"}.
+```
+
+-   adhereFolderPattern: --adhereFolderPattern
+
+```sh
+type: boolean
+describe: Adhere to the pattern when URLs with a trailing slash indicates a directory, and those without a trailing slash denotes a file.
 ```

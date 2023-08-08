@@ -28,6 +28,7 @@ interface ScanArguments {
     singleWorker: boolean;
     userAgent: string;
     httpHeaders: string;
+    adhereFolderPattern: boolean;
 }
 
 (async () => {
@@ -56,6 +57,7 @@ interface ScanArguments {
         debug: scanArguments.debug,
         singleWorker: scanArguments.singleWorker,
         httpHeaders: scanArguments.httpHeaders ? JSON.parse(scanArguments.httpHeaders) : undefined,
+        adhereFolderPattern: scanArguments.adhereFolderPattern,
     });
 })().catch((error) => {
     console.log('Exception: ', System.serializeError(error));

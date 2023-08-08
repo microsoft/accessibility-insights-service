@@ -25,4 +25,5 @@ export interface CrawlerRunOptions {
     serviceAccountPassword?: string;
     authType?: string;
     httpHeaders?: Record<string, string>;
+    adhereFolderPattern?: boolean;
 }
