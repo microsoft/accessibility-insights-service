@@ -50,10 +50,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@apify/consts@npm:^2.11.0, @apify/consts@npm:^2.15.0":
+"@apify/consts@npm:^2.15.0":
   version: 2.15.0
   resolution: "@apify/consts@npm:2.15.0"
   checksum: 287878b99a0e4f925a6a31664acf5e0846a1a790ecf0a036fceb65a99fc45c9d25d240a119a5470e6ebee08f3c3e30014131e3a67cea487923aa4906f8c28bd5
+  languageName: node
+  linkType: hard
+
+"@apify/consts@npm:^2.20.0":
+  version: 2.20.0
+  resolution: "@apify/consts@npm:2.20.0"
+  checksum: 6a016fab9e5f2503e8c68565e6bcc9fd098341d0ca697bfbaed550d472123c8d0a3036a1dd133eaa064db8343453dab1d272af1b869cb3ca909686096732dad5
   languageName: node
   linkType: hard
 
@@ -64,7 +71,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@apify/log@npm:2.2.18, @apify/log@npm:^2.0.0, @apify/log@npm:^2.2.18, @apify/log@npm:^2.2.8":
+"@apify/log@npm:2.2.18":
   version: 2.2.18
   resolution: "@apify/log@npm:2.2.18"
   dependencies:
@@ -74,24 +81,34 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@apify/ps-tree@npm:^1.1.4":
-  version: 1.1.4
-  resolution: "@apify/ps-tree@npm:1.1.4"
+"@apify/log@npm:^2.4.0":
+  version: 2.4.0
+  resolution: "@apify/log@npm:2.4.0"
+  dependencies:
+    "@apify/consts": ^2.20.0
+    ansi-colors: ^4.1.1
+  checksum: fae3bfa6c0b4988a7ac1daccf388f9e3ca7f3bee1c46f5e30dcd4bfb42f2259cc72eb3b73e47adbb491573b519ee3d894e49a55ab01e4cd5d7055c3de6450cbe
+  languageName: node
+  linkType: hard
+
+"@apify/ps-tree@npm:^1.2.0":
+  version: 1.2.0
+  resolution: "@apify/ps-tree@npm:1.2.0"
   dependencies:
     event-stream: 3.3.4
   bin:
     ps-tree: bin/ps-tree.js
-  checksum: cdb53de5dcbc9cb991f94ace9cd3770bf434bc4b965b9cbaf4deac63e512ab530874a1f3ca5b3fdd36a0f22af451bea27d12437b649ebd1c6335d4305f20ff21
+  checksum: bf7372fc0beb9f4f42671eb664178a8f9e32971b8cbe74684c4c29819511c44ecb27984f4a106402ab0d8810bc208b49d13ab82e23a9f7e99982a65d7bc5e795
   languageName: node
   linkType: hard
 
-"@apify/pseudo_url@npm:^2.0.14":
-  version: 2.0.24
-  resolution: "@apify/pseudo_url@npm:2.0.24"
+"@apify/pseudo_url@npm:^2.0.30":
+  version: 2.0.30
+  resolution: "@apify/pseudo_url@npm:2.0.30"
   dependencies:
-    "@apify/log": ^2.2.18
+    "@apify/log": ^2.4.0
     "@sapphire/shapeshift": ^3.6.0
-  checksum: 6c9c01f29086303129ce9b13fa319fde6fba5e82a8184eb468e557b2393c4b76fe8ee9d524165832766d11a872cb3a74981e49b54f7d3884e8261275fd13c5b4
+  checksum: d100c4bbe00754dbb208b48c3ab8364b5742e64cb60a3d334e0249a283f59cfea88d1916d0b9f0c7394640a3dde22f4c25f64c45dbe0050bc51adb344e6aeca9
   languageName: node
   linkType: hard
 
@@ -102,13 +119,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@apify/utilities@npm:^2.0.0, @apify/utilities@npm:^2.3.3":
-  version: 2.7.4
-  resolution: "@apify/utilities@npm:2.7.4"
+"@apify/utilities@npm:^2.7.10":
+  version: 2.7.10
+  resolution: "@apify/utilities@npm:2.7.10"
   dependencies:
-    "@apify/consts": ^2.15.0
-    "@apify/log": ^2.2.18
-  checksum: e3781a8ed7e7ce4d479bed35f2d186756fb30911b9dc898b6a29e92c3c20f173a1b9424c92ea3c05b93f823b145c0d25d1a8e274dbfeb05e13680c6b9765a725
+    "@apify/consts": ^2.20.0
+    "@apify/log": ^2.4.0
+  checksum: a5a55c4561c0f57aa5daf7ca3a939fec00ad3c40c9f229cba89a20eca5f3c63503a6e4876888cf8b0c7e79ceee84697b28151cea091eb94c944b9c3e22854eac
   languageName: node
   linkType: hard
 
@@ -2171,31 +2188,32 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@crawlee/basic@npm:^3.3.3":
-  version: 3.3.3
-  resolution: "@crawlee/basic@npm:3.3.3"
+"@crawlee/basic@npm:^3.5.0":
+  version: 3.5.0
+  resolution: "@crawlee/basic@npm:3.5.0"
   dependencies:
-    "@apify/log": ^2.0.0
+    "@apify/log": ^2.4.0
     "@apify/timeout": ^0.3.0
-    "@apify/utilities": ^2.0.0
-    "@crawlee/core": ^3.3.3
-    "@crawlee/types": ^3.3.3
-    "@crawlee/utils": ^3.3.3
+    "@apify/utilities": ^2.7.10
+    "@crawlee/core": ^3.5.0
+    "@crawlee/types": ^3.5.0
+    "@crawlee/utils": ^3.5.0
     got-scraping: ^3.2.9
     ow: ^0.28.1
+    tldts: ^6.0.0
     tslib: ^2.4.0
-    type-fest: ^3.0.0
-  checksum: 2154262b1838e9b9482230ef5fca245dffaa35d8330b0928ef9dbb7f4462053953e036c6fee4db69ed65f5b2ed567adf0c7d00c3cf5d121e677c7431233ea717
+    type-fest: ^4.0.0
+  checksum: d9510d1d7dda878a1e88408d768de43785117c49f4604755931a400702cf292e845146e607387c5b934ee38c3e5208c04cc06ab3fba5a18b42f2510bfb0dacba
   languageName: node
   linkType: hard
 
-"@crawlee/browser-pool@npm:^3.3.3":
-  version: 3.3.3
-  resolution: "@crawlee/browser-pool@npm:3.3.3"
+"@crawlee/browser-pool@npm:^3.5.0":
+  version: 3.5.0
+  resolution: "@crawlee/browser-pool@npm:3.5.0"
   dependencies:
-    "@apify/log": ^2.0.0
+    "@apify/log": ^2.4.0
     "@apify/timeout": ^0.3.0
-    "@crawlee/types": ^3.3.3
+    "@crawlee/types": ^3.5.0
     fingerprint-generator: ^2.0.6
     fingerprint-injector: ^2.0.5
     lodash.merge: ^4.6.2
@@ -2214,41 +2232,41 @@ __metadata:
       optional: true
     puppeteer:
       optional: true
-  checksum: bb75f44dd002240398cc5db2ce9450c47bcd8b7b0c6dc688fabdd89eaaddcac849af7339185320369311c9f5a9078def09b9bb8e7f025672efbbb775a1235236
+  checksum: 6f12c63e09db8abc2aaf4d2849494c499f2cb32e92b55646d89ae6ab8d3369181445b70250e97a27834493750e0d2f9d2424a1004b8357413e6e8d5bc25f6fc8
   languageName: node
   linkType: hard
 
-"@crawlee/browser@npm:^3.3.3":
-  version: 3.3.3
-  resolution: "@crawlee/browser@npm:3.3.3"
+"@crawlee/browser@npm:^3.5.0":
+  version: 3.5.0
+  resolution: "@crawlee/browser@npm:3.5.0"
   dependencies:
     "@apify/timeout": ^0.3.0
-    "@crawlee/basic": ^3.3.3
-    "@crawlee/browser-pool": ^3.3.3
-    "@crawlee/types": ^3.3.3
-    "@crawlee/utils": ^3.3.3
+    "@crawlee/basic": ^3.5.0
+    "@crawlee/browser-pool": ^3.5.0
+    "@crawlee/types": ^3.5.0
+    "@crawlee/utils": ^3.5.0
     ow: ^0.28.1
     tslib: ^2.4.0
-  checksum: 7d447602786794e8117ba2da8cacc6348e8988c477495e561bab1465c72ae6b297b3d86b16ff5331da6b847ff2462b90bbb457ef6f16e8157e89f9b3482a28fc
+  checksum: d30c923a99156789da3fb41366da8f5ecd797de243254843b0e5a31a893ad44c183f14be97fe68569f49e4100704462ac3b0308ce1a1e51982b568f3fa2b124e
   languageName: node
   linkType: hard
 
-"@crawlee/core@npm:^3.3.3":
-  version: 3.3.3
-  resolution: "@crawlee/core@npm:3.3.3"
+"@crawlee/core@npm:^3.5.0":
+  version: 3.5.0
+  resolution: "@crawlee/core@npm:3.5.0"
   dependencies:
-    "@apify/consts": ^2.11.0
+    "@apify/consts": ^2.20.0
     "@apify/datastructures": ^2.0.0
-    "@apify/log": ^2.2.8
-    "@apify/pseudo_url": ^2.0.14
+    "@apify/log": ^2.4.0
+    "@apify/pseudo_url": ^2.0.30
     "@apify/timeout": ^0.3.0
-    "@apify/utilities": ^2.3.3
-    "@crawlee/memory-storage": ^3.3.3
-    "@crawlee/types": ^3.3.3
-    "@crawlee/utils": ^3.3.3
+    "@apify/utilities": ^2.7.10
+    "@crawlee/memory-storage": ^3.5.0
+    "@crawlee/types": ^3.5.0
+    "@crawlee/utils": ^3.5.0
     "@sapphire/async-queue": ^1.5.0
     "@types/tough-cookie": ^4.0.2
-    "@vladfrangu/async_event_emitter": ^2.0.0
+    "@vladfrangu/async_event_emitter": ^2.2.2
     csv-stringify: ^6.2.0
     fs-extra: ^11.0.0
     json5: ^2.2.3
@@ -2259,17 +2277,17 @@ __metadata:
     tldts: ^6.0.0
     tough-cookie: ^4.0.0
     tslib: ^2.4.0
-    type-fest: ^3.0.0
-  checksum: b61f9958781ac768fcb8224875dbcd90aee93ae156df6d8c47315f5ab8bc8ae66d5d3d5d8788f52c27fe4999b6767b5eb606c5c8dcc3b95e2941bd152d6d033f
+    type-fest: ^4.0.0
+  checksum: 3d4109dbe87c2dfe8962f4f796e38bd9108647770db805243596c63e8e0246c0898f98c7454dc1d27053cfe14747cc23ab91609316192dac5e8faa2823aaf9c7
   languageName: node
   linkType: hard
 
-"@crawlee/memory-storage@npm:^3.3.3":
-  version: 3.3.3
-  resolution: "@crawlee/memory-storage@npm:3.3.3"
+"@crawlee/memory-storage@npm:^3.5.0":
+  version: 3.5.0
+  resolution: "@crawlee/memory-storage@npm:3.5.0"
   dependencies:
-    "@apify/log": ^2.0.0
-    "@crawlee/types": ^3.3.3
+    "@apify/log": ^2.4.0
+    "@crawlee/types": ^3.5.0
     "@sapphire/async-queue": ^1.5.0
     "@sapphire/shapeshift": ^3.0.0
     content-type: ^1.0.4
@@ -2278,22 +2296,23 @@ __metadata:
     mime-types: ^2.1.35
     proper-lockfile: ^4.1.2
     tslib: ^2.4.0
-  checksum: e0ab7d8dfaf2c1ae6123b1f5f687e14ce4b4b9da3ce4c90487cbf301553e69357474821c58f6cb164fe360eb37d8b46f1195b039fedf42cf97671ea629fb0a58
+  checksum: 456e28fc1bc208d2cc6369675f349a341a331337c60396c102dcdea5a7e34b577032b22586acf758f89421f08e0d39cd50b371c30b68bc40252f074b4dcf18be
   languageName: node
   linkType: hard
 
-"@crawlee/puppeteer@npm:^3.3.3":
-  version: 3.3.3
-  resolution: "@crawlee/puppeteer@npm:3.3.3"
+"@crawlee/puppeteer@npm:^3.5.0":
+  version: 3.5.0
+  resolution: "@crawlee/puppeteer@npm:3.5.0"
   dependencies:
     "@apify/datastructures": ^2.0.0
-    "@apify/log": ^2.0.0
-    "@crawlee/browser": ^3.3.3
-    "@crawlee/browser-pool": ^3.3.3
-    "@crawlee/types": ^3.3.3
-    "@crawlee/utils": ^3.3.3
+    "@apify/log": ^2.4.0
+    "@crawlee/browser": ^3.5.0
+    "@crawlee/browser-pool": ^3.5.0
+    "@crawlee/types": ^3.5.0
+    "@crawlee/utils": ^3.5.0
     cheerio: ^1.0.0-rc.12
     devtools-protocol: "*"
+    idcac-playwright: ^0.1.2
     jquery: ^3.6.0
     ow: ^0.28.1
     tslib: ^2.4.0
@@ -2302,31 +2321,31 @@ __metadata:
   peerDependenciesMeta:
     puppeteer:
       optional: true
-  checksum: e9341fc1126e50732429816fb2cd419703961ec6b7c2440d720bdd7d30a527b270058df47f374040ab29a80113e0e66c23051155ab697e32ba2cac93c4991edc
+  checksum: e1694ba188b789569d5ab26592743d377c069f3b74d70c890c4d24ffce063dffd041517adffb69c36751f985d41da8b8c38f316e85bce9f33357affb41e7fed0
   languageName: node
   linkType: hard
 
-"@crawlee/types@npm:^3.3.3":
-  version: 3.3.3
-  resolution: "@crawlee/types@npm:3.3.3"
+"@crawlee/types@npm:^3.5.0":
+  version: 3.5.0
+  resolution: "@crawlee/types@npm:3.5.0"
   dependencies:
     tslib: ^2.4.0
-  checksum: faefe1db34879e5bf653e44499dd5a1677f173a5aa3d865dfb86c37f842ae687ff694a3fb3c005f77cb19aef16b639c14c57577d5473aa96c271866a9719e03e
+  checksum: 5b9d4b4e363973c0d303b782a8a17646dcd6991dd5c554f494b3a809a0b572c86275e4655338ce14e820c243c651a68eb44dd20d1aca950e89d55537531205ab
   languageName: node
   linkType: hard
 
-"@crawlee/utils@npm:^3.3.3":
-  version: 3.3.3
-  resolution: "@crawlee/utils@npm:3.3.3"
+"@crawlee/utils@npm:^3.5.0":
+  version: 3.5.0
+  resolution: "@crawlee/utils@npm:3.5.0"
   dependencies:
-    "@apify/log": ^2.0.0
-    "@apify/ps-tree": ^1.1.4
-    "@crawlee/types": ^3.3.3
+    "@apify/log": ^2.4.0
+    "@apify/ps-tree": ^1.2.0
+    "@crawlee/types": ^3.5.0
     cheerio: ^1.0.0-rc.12
     got-scraping: ^3.2.9
     ow: ^0.28.1
     tslib: ^2.4.0
-  checksum: 87eab7f9aed9614faa5d055a9586ae91b40a967466c45cfcfa9d2ec10f808af7dd73a62086cba7d928663e6c012056720ed5971b87bb08da496f3ffaec7fba65
+  checksum: f86b33e6332da47dff6a4d99d3bb868bbcd469b4f544f4ff0330f559c80338168224d9e5114a05051a2797d0ef4b9b6eb89af00c9675ca40395d04dc6dc0abe5
   languageName: node
   linkType: hard
 
@@ -4518,7 +4537,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@vladfrangu/async_event_emitter@npm:^2.0.0":
+"@vladfrangu/async_event_emitter@npm:^2.2.2":
   version: 2.2.2
   resolution: "@vladfrangu/async_event_emitter@npm:2.2.2"
   checksum: ed948294fea1a2dc8b8f307f4061bf65e2043a946132f288702f0572a806ebe3123b8c7e522e70d2abbd3616f5d67027c9e59df9ef80b0195f7502a848a426ba
@@ -4772,8 +4791,8 @@ __metadata:
   resolution: "accessibility-insights-crawler@workspace:packages/crawler"
   dependencies:
     "@axe-core/puppeteer": ^4.5.0
-    "@crawlee/browser-pool": ^3.3.3
-    "@crawlee/puppeteer": ^3.3.3
+    "@crawlee/browser-pool": ^3.5.0
+    "@crawlee/puppeteer": ^3.5.0
     "@medv/finder": ^2.1.0
     "@rollup/plugin-commonjs": ^24.0.1
     "@rollup/plugin-node-resolve": ^15.0.0
@@ -4835,8 +4854,8 @@ __metadata:
   dependencies:
     "@apify/log": 2.2.18
     "@axe-core/puppeteer": ^4.5.0
-    "@crawlee/browser-pool": ^3.3.3
-    "@crawlee/puppeteer": ^3.3.3
+    "@crawlee/browser-pool": ^3.5.0
+    "@crawlee/puppeteer": ^3.5.0
     "@medv/finder": ^2.1.0
     "@opentelemetry/api": ^1.4.1
     "@opentelemetry/exporter-metrics-otlp-grpc": ^0.41.0
@@ -9420,6 +9439,13 @@ __metadata:
   dependencies:
     safer-buffer: ">= 2.1.2 < 3.0.0"
   checksum: 3f60d47a5c8fc3313317edfd29a00a692cc87a19cac0159e2ce711d0ebc9019064108323b5e493625e25594f11c6236647d8e256fbe7a58f4a3b33b89e6d30bf
+  languageName: node
+  linkType: hard
+
+"idcac-playwright@npm:^0.1.2":
+  version: 0.1.2
+  resolution: "idcac-playwright@npm:0.1.2"
+  checksum: 09a157649baf08c9ed779c7e1fdc7dabc80f8723c480699beb5e0ba80214a5bc1254148845193daab5d0a749915c8dd787636c35c014c5805db3e0098978313e
   languageName: node
   linkType: hard
 
@@ -15628,10 +15654,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"type-fest@npm:^3.0.0":
-  version: 3.11.1
-  resolution: "type-fest@npm:3.11.1"
-  checksum: 33be49e3b671c2ff3b5e320ef8c160c488205b08ab7631369116909a1baf2aebfcf45234c045e6902b8aa35730ac2bfd0655ea9e0fe3f8d26af9d99a16b07abd
+"type-fest@npm:^4.0.0":
+  version: 4.2.0
+  resolution: "type-fest@npm:4.2.0"
+  checksum: 76c5dfde9293b1b185b266a07df669f68d58ae3e19c06e33f0ff0dd0ba68628f05389bc26bcee8476e29a79ab7da054653670b9778399ceb079c4c259bac29f0
   languageName: node
   linkType: hard
 

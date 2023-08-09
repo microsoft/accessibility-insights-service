@@ -142,6 +142,11 @@ export abstract class PageProcessorBase implements PageProcessor {
             return;
         }
 
+        // Set actually loaded URL in crawler context. This is required to correctly convert relative
+        // path to absolute URL. Crawlee incorrectly builds absolute URL. This can be removed when
+        // crawlee fixed the bug.
+        context.request.loadedUrl = context.page.url();
+
         const enqueued = await context.enqueueLinks({
             // eslint-disable-next-line security/detect-non-literal-regexp
             regexps: this.discoveryPatterns?.length > 0 ? this.discoveryPatterns.map((p) => new RegExp(p)) : undefined,
