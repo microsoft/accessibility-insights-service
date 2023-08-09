@@ -84,7 +84,7 @@ describe(CrawlerConfiguration, () => {
         const baseUrl = 'base url string';
         const baseUrlDiscoveryPattern = 'discovery pattern';
 
-        it('without list provided and adhereFolderPattern option is enabled', () => {
+        it('without list provided and adhereFilesystemPattern option is enabled', () => {
             createDiscoveryPatternMock.setup((cdp) => cdp(baseUrl)).returns(() => baseUrlDiscoveryPattern);
             crawlerRunOptionsMock
                 .setup((o) => o.baseUrl)
@@ -95,7 +95,7 @@ describe(CrawlerConfiguration, () => {
                 .returns(() => undefined)
                 .verifiable();
             crawlerRunOptionsMock
-                .setup((o) => o.adhereFolderPattern)
+                .setup((o) => o.adhereFilesystemPattern)
                 .returns(() => true)
                 .verifiable();
 
@@ -104,7 +104,7 @@ describe(CrawlerConfiguration, () => {
             expect(discoveryPatterns).toEqual([baseUrlDiscoveryPattern]);
         });
 
-        it('without list provided and adhereFolderPattern option is disabled', () => {
+        it('without list provided and adhereFilesystemPattern option is disabled', () => {
             createDiscoveryPatternMock.setup((cdp) => cdp(baseUrl)).returns(() => baseUrlDiscoveryPattern);
             crawlerRunOptionsMock
                 .setup((o) => o.baseUrl)

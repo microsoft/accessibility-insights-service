@@ -240,6 +240,9 @@ describe(PageProcessorBase, () => {
             page: {
                 url: () => 'url',
             },
+            request: {
+                loadedUrl: undefined,
+            },
         } as Crawlee.PuppeteerCrawlingContext;
         context.enqueueLinks = jest.fn().mockImplementation(() => Promise.resolve({ processedRequests: [{}] }));
         (pageProcessorBase as any).discoverLinks = true;
@@ -247,6 +250,7 @@ describe(PageProcessorBase, () => {
         const discoveryPatternsRegEx = discoveryPatterns.map((p) => new RegExp(p));
         await pageProcessorBase.enqueueLinks(context);
         expect(context.enqueueLinks).toHaveBeenCalledWith({ regexps: discoveryPatternsRegEx });
+        expect(context.request.loadedUrl).toEqual('url');
     });
 
     function setupScanErrorLogging(): void {

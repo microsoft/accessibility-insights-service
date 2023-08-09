@@ -142,6 +142,10 @@ export abstract class PageProcessorBase implements PageProcessor {
             return;
         }
 
+        // Set actually loaded URL in crawler context. This is workaround of crawler bug the prevents
+        // converting relative href link to absolute link.
+        context.request.loadedUrl = context.page.url();
+
         const enqueued = await context.enqueueLinks({
             // eslint-disable-next-line security/detect-non-literal-regexp
             regexps: this.discoveryPatterns?.length > 0 ? this.discoveryPatterns.map((p) => new RegExp(p)) : undefined,
