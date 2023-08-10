@@ -6,6 +6,7 @@ import { System } from 'common';
 import { injectable } from 'inversify';
 import { isEmpty } from 'lodash';
 import { Log } from '@apify/log';
+import moment from 'moment';
 import { AvailabilityTelemetry } from './availability-telemetry';
 import { BaseTelemetryProperties } from './base-telemetry-properties';
 import { LogLevel } from './logger';
@@ -22,19 +23,19 @@ export class ApifyConsoleLoggerClient implements LoggerClient {
 
     private baseProperties: BaseTelemetryProperties;
 
-    constructor(private readonly logger: Log = new Log()) {}
+    constructor(private readonly logger: Log = new Log({ prefix: 'Scanner' })) {}
 
     public async setup(baseProperties?: BaseTelemetryProperties): Promise<void> {
         this.baseProperties = baseProperties;
     }
 
     public trackMetric(name: string, value: number): void {
-        this.logger.info(`Metric ${name}: ${value}`, this.baseProperties);
+        this.logger.info(`[${moment.utc().toISOString()}] Metric ${name}: ${value}`, this.baseProperties);
     }
 
     public trackEvent(name: LoggerEvent, properties?: { [name: string]: string }, measurements?: TelemetryMeasurements[LoggerEvent]): void {
         const message = isEmpty(measurements) ? '' : ` ${utils.inspect(measurements, { depth: null })}`;
-        this.logger.info(`Event ${name}${message}`, this.getProperties(properties));
+        this.logger.info(`[${moment.utc().toISOString()}] Event ${name}${message}`, this.getProperties(properties));
     }
 
     public trackAvailability(name: string, telemetry: AvailabilityTelemetry): void {
@@ -42,26 +43,27 @@ export class ApifyConsoleLoggerClient implements LoggerClient {
     }
 
     public log(message: string, logLevel: LogLevel, properties?: { [name: string]: string }): void {
+        const logMessage = `[${moment.utc().toISOString()}] ${message}`;
         switch (logLevel) {
             case LogLevel.Error:
-                this.logger.error(message, this.getProperties(properties));
+                this.logger.error(logMessage, this.getProperties(properties));
                 break;
             case LogLevel.Info:
-                this.logger.info(message, this.getProperties(properties));
+                this.logger.info(logMessage, this.getProperties(properties));
                 break;
             case LogLevel.Verbose:
-                this.logger.debug(message, this.getProperties(properties));
+                this.logger.debug(logMessage, this.getProperties(properties));
                 break;
             case LogLevel.Warn:
-                this.logger.warning(message, this.getProperties(properties));
+                this.logger.warning(logMessage, this.getProperties(properties));
                 break;
             default:
-                this.logger.info(message, this.getProperties(properties));
+                this.logger.info(logMessage, this.getProperties(properties));
         }
     }
 
     public trackException(error: Error): void {
-        this.logger.error(System.serializeError(error), this.baseProperties);
+        this.logger.error(`[${moment.utc().toISOString()}] ${System.serializeError(error)}`, this.baseProperties);
     }
 
     public async flush(): Promise<void> {

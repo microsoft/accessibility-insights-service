@@ -156,7 +156,7 @@ function getScanArguments(): ScanArguments {
                 type: 'boolean',
                 describe:
                     'Adhere to the pattern when URLs with a trailing slash indicates a directory, and those without a trailing slash denotes a file.',
-                default: false,
+                default: true,
             },
         })
         .check((args) => {

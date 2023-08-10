@@ -105,7 +105,7 @@ export class CrawlerConfiguration {
     }
 
     private getDefaultDiscoveryPattern(baseUrl: string): string[] {
-        if ((this.crawl() || baseUrl) && this.crawlerRunOptions.adhereFilesystemPattern === true) {
+        if ((this.crawl() || baseUrl) && this.crawlerRunOptions.adhereFilesystemPattern !== false) {
             return [this.createDiscoveryPattern(baseUrl)];
         }
 
