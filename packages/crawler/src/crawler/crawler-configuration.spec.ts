@@ -114,6 +114,10 @@ describe(CrawlerConfiguration, () => {
                 .setup((o) => o.discoveryPatterns)
                 .returns(() => undefined)
                 .verifiable();
+            crawlerRunOptionsMock
+                .setup((o) => o.adhereFilesystemPattern)
+                .returns(() => false)
+                .verifiable();
 
             const discoveryPatterns = crawlerConfiguration.discoveryPatterns();
 

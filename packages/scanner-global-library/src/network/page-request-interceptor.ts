@@ -69,7 +69,7 @@ export class PageRequestInterceptor {
 
         // trace page instance to manage requests interception
         if (page.id === undefined) {
-            page.id = `${System.getTimestamp}`;
+            page.id = `${System.getTimestamp()}`;
         }
         this.pageId = page.id;
 
