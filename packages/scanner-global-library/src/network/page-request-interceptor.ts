@@ -5,11 +5,14 @@ import * as Puppeteer from 'puppeteer';
 import { injectable, inject, optional } from 'inversify';
 import { System } from 'common';
 import { GlobalLogger } from 'logger';
-import { PuppeteerPageExt } from '../page';
 import { InterceptedRequest, PageEventHandler } from './page-event-handler';
 import { PageNetworkTracerHandler } from './page-network-tracer-handler';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
+
+export interface PuppeteerPageExt extends Puppeteer.Page {
+    id?: string;
+}
 
 @injectable()
 export class PageRequestInterceptor {
@@ -62,6 +65,11 @@ export class PageRequestInterceptor {
         // Add trace event handlers for a new page instance only
         if (page.id !== undefined && this.pageId === page.id) {
             return;
+        }
+
+        // trace page instance to manage requests interception
+        if (page.id === undefined) {
+            page.id = `${System.getTimestamp()}`;
         }
         this.pageId = page.id;
 
@@ -146,7 +154,7 @@ export class PageRequestInterceptor {
             },
             async (requests) => requests,
             timeoutMsecs,
-            2000,
+            1000,
         );
 
         return System.getElapsedTime(timestamp);

@@ -6,7 +6,8 @@ import { getDiscoveryPatternForUrl } from './discovery-patterns';
 
 describe(getDiscoveryPatternForUrl, () => {
     const host = 'hostname.com';
-    const path = '/path/to/page';
+    const pathname = '/path/to/page';
+    const path = `${pathname}?q=1`;
     let url: string;
 
     beforeEach(() => {
@@ -14,10 +15,8 @@ describe(getDiscoveryPatternForUrl, () => {
     });
 
     it('Creates discovery pattern for url', () => {
-        const expectedPattern = `http(s?)://${host}${path}(.*)`;
-
+        const expectedPattern = `http(s?)://${host}${pathname}(.*)`;
         const actualPattern = getDiscoveryPatternForUrl(url);
-
         expect(actualPattern).toEqual(expectedPattern);
     });
 });

@@ -277,6 +277,7 @@ describe: The custom HTTP header(s) to be send on each crawl request. Accepts JS
 
 ```sh
 type: boolean
+default: true
 describe: Adhere to the pattern when URLs with a trailing slash indicates a directory, and those without a trailing slash denotes a file.
 The URL folder is a resource location equal to base URL up-to the last forward slash in the specified base URL, or e.g:
     -   If base URL is specified as https://www.example.com/bar/foo , URLs that are in https://www.example.com/bar/ folder will be considered for crawling and scanning.
