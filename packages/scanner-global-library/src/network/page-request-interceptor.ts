@@ -154,7 +154,7 @@ export class PageRequestInterceptor {
             },
             async (requests) => requests,
             timeoutMsecs,
-            2000,
+            1000,
         );
 
         return System.getElapsedTime(timestamp);

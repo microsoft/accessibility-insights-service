@@ -8,5 +8,5 @@ export type DiscoveryPatternFactory = (pseudoUrl: string) => string;
 export const getDiscoveryPatternForUrl: DiscoveryPatternFactory = (pseudoUrl: string): string => {
     const urlObj = url.parse(pseudoUrl);
 
-    return `http(s?)://${urlObj.host}${urlObj.path}(.*)`;
+    return `http(s?)://${urlObj.host}${urlObj.pathname}(.*)`;
 };
