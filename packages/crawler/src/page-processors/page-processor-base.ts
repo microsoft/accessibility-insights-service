@@ -142,7 +142,7 @@ export abstract class PageProcessorBase implements PageProcessor {
             return;
         }
 
-        // Set actually loaded URL in crawler context. This is workaround of crawler bug the prevents
+        // Set actually loaded URL in crawler context. This is workaround for crawler bug the prevents
         // converting relative href link to absolute link.
         context.request.loadedUrl = context.page.url();
 

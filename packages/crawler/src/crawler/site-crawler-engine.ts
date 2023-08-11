@@ -20,6 +20,8 @@ import { CrawlerConfiguration } from './crawler-configuration';
 import { CrawlerFactory } from './crawler-factory';
 import { CrawlerEngine } from './crawler-engine';
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 const windowSize = {
     width: 1920,
     height: 1080,
@@ -74,8 +76,14 @@ export class SiteCrawlerEngine implements CrawlerEngine {
                 },
             },
             browserPoolOptions: {
-                // disable default user agent string generation
+                // disable default user agent string generation as part of fingerprints
                 useFingerprints: false,
+                preLaunchHooks: [
+                    async (pageId, launchContext) => {
+                        // workaround to disable --user-agent browser launch option
+                        launchContext.fingerprint = {} as any;
+                    },
+                ],
                 postPageCreateHooks: [
                     async (page) => {
                         // add custom HTTP headers

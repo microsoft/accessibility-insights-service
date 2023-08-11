@@ -283,7 +283,7 @@ export class Page {
         await this.close();
         await this.create({ ...this.browserStartOptions, clearBrowserCache: false });
         // wait for browser to start
-        await System.wait(5000);
+        await System.wait(3000);
     }
 
     private async setExtraHTTPHeaders(): Promise<void> {
