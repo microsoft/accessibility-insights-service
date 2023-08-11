@@ -34,10 +34,10 @@ if [[ ! -d "$packagesDirectoryPath" ]]; then
     exitWithUsageInfo
 fi
 
-echo "Setup docker image binaries"
+echo "Prepare docker image binaries"
 cp -rf "${0%/*}/docker-image/"*.* "$packagesDirectoryPath/web-api-scan-runner/dist"
 cp -rf "${0%/*}/docker-image/"*.* "$packagesDirectoryPath/privacy-scan-runner/dist"
 cp -rf "${0%/*}/docker-image/"*.* "$packagesDirectoryPath/report-generator-runner/dist"
 
-echo "Setup resource deployment templates"
+echo "Prepare resource deployment templates"
 cp -f "${0%/*}/resource-deployment/templates/"*.* "$packagesDirectoryPath/resource-deployment/dist/templates"
