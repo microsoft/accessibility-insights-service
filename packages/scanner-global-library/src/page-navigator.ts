@@ -140,11 +140,11 @@ export class PageNavigator {
                 });
                 await page.goto(`file:///${__dirname}/blank-page.html`);
                 await this.browserCache.clear(page);
-                await System.wait(1000);
+                await System.wait(500);
             } else {
                 // Navigate forward and back to mitigate the cache error.
                 await page.goto(`file:///${__dirname}/blank-page.html`);
-                await System.wait(1000);
+                await System.wait(500);
             }
 
             const pageOperation = async () => page.goBack(this.waitForOptions);

@@ -67,13 +67,15 @@ export class PageRequestInterceptor {
             return;
         }
 
-        // trace page instance to manage requests interception
+        // Trace page instance to not break requests interception events
         if (page.id === undefined) {
             page.id = `${System.getTimestamp()}`;
         }
         this.pageId = page.id;
 
         await page.setBypassServiceWorker(true);
+        // Enable requests interception for a life duration of the page instance.
+        // Disabling requests interception will break web page load.
         await page.setRequestInterception(true);
 
         this.pageOnRequestEventHandler = async (request: Puppeteer.HTTPRequest) => {
