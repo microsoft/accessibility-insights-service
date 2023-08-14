@@ -27,7 +27,7 @@ interface MachineInfo {
 
 @injectable()
 export class OTelConfigProvider {
-    private readonly otelListenerTimeout = 5000;
+    private readonly otelListenerTimeout = 3000;
 
     private readonly OTelListenerPort = 4317; // default agent listener port
 
