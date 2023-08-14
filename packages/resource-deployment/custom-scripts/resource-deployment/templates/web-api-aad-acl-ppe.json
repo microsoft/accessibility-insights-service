@@ -1,4 +1,4 @@
 {
     "name": "WEBSITE_AUTH_AAD_ACL",
-    "value": "{\"allowed_client_applications\":[]}"
+    "value": "{\"allowed_client_applications\":[\"client-id-placeholder\"]}"
 }
