@@ -34,7 +34,7 @@ When installing Azure CLI for [Windows Subsystem for Linux (WSL)](https://docs.m
 
 -   Add PowerShell script and fonts archive file to install Windows fonts in docker images [here](https://github.com/microsoft/accessibility-insights-service/tree/main/packages/resource-deployment/custom-scripts/docker-image).
 -   Add Azure Active Directory Application (client) ID(s) to web-api-aad-acl-\*.json [template files](https://github.com/microsoft/accessibility-insights-service/tree/main/packages/resource-deployment/custom-scripts/resource-deployment/templates). This client(s) will be authorized to access service REST APIs.
--   Run [prepare-deployment.sh](https://github.com/microsoft/accessibility-insights-service/tree/main/packages/resource-deployment/custom-scripts/prepare-deployment.sh) script to prepare deployment.
+-   Run [packages/resource-deployment/custom-scripts/prepare-deployment.sh](https://github.com/microsoft/accessibility-insights-service/tree/main/packages/resource-deployment/custom-scripts/prepare-deployment.sh) script to prepare deployment.
 
 ### 3. Login to Azure
 
