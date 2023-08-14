@@ -18,7 +18,7 @@ export enum LogLevel {
 export abstract class Logger {
     public initialized: boolean = false;
 
-    protected readonly defaultClientInitializationTimeout: number = 3000;
+    protected readonly defaultClientInitializationTimeout: number = 5000;
 
     protected isDebugEnabled: boolean = false;
 
