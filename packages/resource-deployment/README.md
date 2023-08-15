@@ -30,7 +30,13 @@ When installing Azure CLI for [Windows Subsystem for Linux (WSL)](https://docs.m
     cd accessibility-insights-service/packages/resource-deployment
     ```
 
-### 2. Login to Azure
+### 2. Prepare deployment
+
+-   Add PowerShell script and fonts archive file to install Windows fonts in docker images [here](https://github.com/microsoft/accessibility-insights-service/tree/main/packages/resource-deployment/custom-scripts/docker-image).
+-   Add Azure Active Directory Application (client) ID(s) (comma separated) to web-api-aad-acl-\*.json [template files](https://github.com/microsoft/accessibility-insights-service/tree/main/packages/resource-deployment/custom-scripts/resource-deployment/templates). This client(s) will be authorized to access service REST APIs.
+-   Run [packages/resource-deployment/custom-scripts/prepare-deployment.sh](https://github.com/microsoft/accessibility-insights-service/tree/main/packages/resource-deployment/custom-scripts/prepare-deployment.sh) script to prepare deployment.
+
+### 3. Login to Azure
 
 -   Login to Azure account and set the current active subscription:
 
@@ -39,18 +45,18 @@ When installing Azure CLI for [Windows Subsystem for Linux (WSL)](https://docs.m
     az account set --subscription <Name or ID of subscription>
     ```
 
-### 3. Create Azure Active Directory application registration
+### 4. Create Azure Active Directory application registration
 
 -   Sign in to the Azure portal and create new application registration in Azure Active Directory with provided default settings
 -   Add a client secret
 -   Use Application (client) ID and secret value in a service deployment
 
-### 4. Allow Azure Batch API to access the subscription
+### 5. Allow Azure Batch API to access the subscription
 
 -   Follow this [documentation](https://learn.microsoft.com/en-us/azure/batch/batch-account-create-portal#allow-batch-to-access-the-subscription) to allow Batch to access the subscription
 -   Sign in to the Azure portal and assign _Contributor_ role to _Microsoft Azure Batch_ enterprise application on subscription. Follow this [documentation](https://learn.microsoft.com/en-us/azure/role-based-access-control/role-assignments-portal) to assign Azure role.
 
-### 5. Deploy service
+### 6. Deploy service
 
 -   Run below script with required parameters as specified in a [script's help](https://github.com/microsoft/accessibility-insights-service/blob/main/packages/resource-deployment/scripts/install-parallel.sh) to deploy Azure resources and binaries
 

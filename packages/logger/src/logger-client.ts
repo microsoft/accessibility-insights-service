@@ -17,4 +17,5 @@ export interface LoggerClient {
     flush(): Promise<void>;
     setCommonProperties(properties: LoggerProperties): void;
     initialized: boolean;
+    initializationTimeout?: number;
 }

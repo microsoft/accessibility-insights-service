@@ -15,6 +15,7 @@ import { GlobalLogger } from './global-logger';
 import { LoggerClient } from './logger-client';
 import { loggerTypes } from './logger-types';
 import { registerContextAwareLoggerToContainer, registerLoggerToContainer } from './register-logger-to-container';
+import { OTelLoggerClient } from './otel-logger-client';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -35,6 +36,7 @@ describe('registerGlobalLoggerToContainer', () => {
         verifySingletonDependencyResolution(AppInsightsLoggerClient);
         verifySingletonDependencyResolution(ConsoleLoggerClient);
         verifySingletonDependencyResolution(loggerTypes.DotEnvConfig);
+        verifySingletonDependencyResolution(OTelLoggerClient);
     });
 
     it('verify GlobalLogger resolution', () => {
@@ -45,6 +47,7 @@ describe('registerGlobalLoggerToContainer', () => {
         const telemetryClients = (logger as any).loggerClients as LoggerClient[];
         expect(telemetryClients.filter((c) => c instanceof AppInsightsLoggerClient)).toHaveLength(1);
         expect(telemetryClients.filter((c) => c instanceof ConsoleLoggerClient)).toHaveLength(1);
+        expect(telemetryClients.filter((c) => c instanceof OTelLoggerClient)).toHaveLength(1);
     });
 });
 
@@ -79,6 +82,7 @@ describe('registerContextAwareLoggerToContainer', () => {
         const telemetryClients = (logger as any).loggerClients as LoggerClient[];
         expect(telemetryClients.filter((c) => c instanceof ContextAwareAppInsightsLoggerClient)).toHaveLength(1);
         expect(telemetryClients.filter((c) => c instanceof ContextAwareConsoleLoggerClient)).toHaveLength(1);
+        expect(telemetryClients.filter((c) => c instanceof OTelLoggerClient)).toHaveLength(1);
     });
 });
 

@@ -18,9 +18,11 @@ export enum LogLevel {
 export abstract class Logger {
     public initialized: boolean = false;
 
+    protected readonly defaultClientInitializationTimeout: number = 5000;
+
     protected isDebugEnabled: boolean = false;
 
-    constructor(public readonly loggerClients: LoggerClient[], protected readonly initializationTimeout: number = 15000) {}
+    constructor(public readonly loggerClients: LoggerClient[]) {}
 
     public async setup(baseProperties?: { [property: string]: string }): Promise<void> {
         if (this.initialized === true) {
@@ -99,10 +101,12 @@ export abstract class Logger {
     }
 
     private async initializeClients(baseProperties?: { [property: string]: string }): Promise<void> {
-        await Promise.race([
-            this.invokeLoggerClientAsync(async (client) => client.setup(baseProperties)),
-            System.wait(this.initializationTimeout),
-        ]);
+        const initClientFn = async (client: LoggerClient) => {
+            const timeout = client.initializationTimeout ?? this.defaultClientInitializationTimeout;
+            await Promise.race([client.setup(baseProperties), System.wait(timeout)]);
+        };
+
+        await this.invokeLoggerClientAsync(initClientFn);
 
         if (this.loggerClients.some((client) => !client.initialized)) {
             throw new Error(
