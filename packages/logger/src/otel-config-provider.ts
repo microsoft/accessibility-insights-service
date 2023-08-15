@@ -69,15 +69,16 @@ export class OTelConfigProvider {
     private async getMachineInfo(): Promise<MachineInfo> {
         const result = await PowerShell.$`
         try {
+            $error.clear()
             $container = (Get-ItemProperty "HKLM:\\SYSTEM\\CurrentControlSet\\Control").ContainerType -eq 2
-            # Not supported if process has insufficient privileges
             $defaultGateway = (Get-NetRoute '0.0.0.0/0').NextHop
         }
         catch {
+            $err = $error.Exception.Message
             $defaultGateway = '127.0.0.1'
         }
 
-        return @{container = $container; gateway = $defaultGateway; error = $error.Exception.Message} | ConvertTo-Json 
+        return @{container = $container; gateway = $defaultGateway; error = $err} | ConvertTo-Json  
         `;
 
         const systemInfo = JSON.parse(result.raw);
