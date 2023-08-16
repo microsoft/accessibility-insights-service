@@ -26,6 +26,14 @@ export interface ScanRequestQueuedMeasurements extends BaseTelemetryMeasurements
     queuedScanRequests: number;
 }
 
+export interface ScanRequestScheduledMeasurements extends BaseTelemetryMeasurements {
+    scheduledScanRequests: number;
+}
+
+export interface ScanRequestSchedulingFailedMeasurements extends BaseTelemetryMeasurements {
+    failedScheduleScanRequests: number;
+}
+
 export interface ScanRequestRunningMeasurements extends BaseTelemetryMeasurements {
     runningScanRequests: number;
 }
@@ -121,6 +129,8 @@ export type TelemetryMeasurements = {
     ScanRequestReceived: ScanRequestReceivedMeasurements;
     ScanRequestAccepted: ScanRequestAcceptedMeasurements;
     ScanRequestQueued: ScanRequestQueuedMeasurements;
+    ScanRequestScheduled: ScanRequestScheduledMeasurements;
+    ScanRequestSchedulingFailed: ScanRequestSchedulingFailedMeasurements;
     ScanRequestRunning: ScanRequestRunningMeasurements;
     ScanRequestCompleted: ScanRequestCompletedMeasurements;
     ScanRequestFailed: ScanRequestFailedMeasurements;

@@ -8,6 +8,8 @@ export declare type LoggerEvent =
     | 'ScanRequestReceived'
     | 'ScanRequestAccepted'
     | 'ScanRequestQueued'
+    | 'ScanRequestScheduled'
+    | 'ScanRequestSchedulingFailed'
     | 'ScanRequestRunning'
     | 'ScanRequestCompleted'
     | 'ScanRequestFailed'
