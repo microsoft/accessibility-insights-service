@@ -91,7 +91,8 @@ export class WebDriver {
     private createLaunchOptions(): Puppeteer.LaunchOptions & Puppeteer.BrowserLaunchArgumentOptions {
         const options = {
             ...defaultLaunchOptions,
-            headless: process.env.HEADLESS === 'false' ? false : true,
+            // The new headless mode https://developer.chrome.com/articles/new-headless
+            headless: process.env.HEADLESS === 'false' ? false : 'new',
             devtools: process.env.DEV_TOOLS === 'true' ? true : false,
         };
 
@@ -110,7 +111,7 @@ export class WebDriver {
             }
         }
 
-        return options;
+        return options as Puppeteer.LaunchOptions;
     }
 
     private setupPuppeteerPlugins(): void {

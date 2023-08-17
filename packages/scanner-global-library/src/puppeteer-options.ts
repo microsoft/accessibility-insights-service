@@ -13,7 +13,8 @@ export const defaultBrowserOptions: Puppeteer.BrowserConnectOptions = {
 };
 
 export const defaultLaunchOptions: Puppeteer.PuppeteerNodeLaunchOptions = {
-    headless: true,
+    // The new headless mode https://developer.chrome.com/articles/new-headless
+    headless: 'new',
     args: [
         '--disable-dev-shm-usage',
         '--no-sandbox',
@@ -21,5 +22,6 @@ export const defaultLaunchOptions: Puppeteer.PuppeteerNodeLaunchOptions = {
         '--js-flags=--max-old-space-size=8192',
         `--window-size=${windowSize.width},${windowSize.height}`,
     ],
+    protocolTimeout: 30000,
     ...defaultBrowserOptions,
 };

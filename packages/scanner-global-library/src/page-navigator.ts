@@ -11,6 +11,7 @@ import { PageConfigurator } from './page-configurator';
 import { puppeteerTimeoutConfig, PageNavigationTiming } from './page-timeout-config';
 import { BrowserCache } from './browser-cache';
 import { PageOperation, PageOperationHandler } from './network/page-operation-handler';
+import { resetSessionHistory } from './page-client-lib';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -42,6 +43,7 @@ export class PageNavigator {
         @inject(BrowserCache) private readonly browserCache: BrowserCache,
         @inject(PageOperationHandler) private readonly pageOperationHandler: PageOperationHandler,
         @inject(GlobalLogger) @optional() public readonly logger: GlobalLogger,
+        private readonly resetSessionHistoryFn: typeof resetSessionHistory = resetSessionHistory,
     ) {}
 
     public get pageConfigurator(): PageConfigurator {
@@ -111,7 +113,7 @@ export class PageNavigator {
             return this.getOperationErrorResult(opResult);
         }
 
-        await this.resetBrowserSessionHistory(page);
+        await this.resetPageSessionHistory(page);
 
         return opResult;
     }
@@ -217,15 +219,13 @@ export class PageNavigator {
     }
 
     /**
-     * Resets browser session history to support page reload.
+     * Resets page session history to support page reload.
      */
-    private async resetBrowserSessionHistory(page: Puppeteer.Page): Promise<void> {
+    private async resetPageSessionHistory(page: Puppeteer.Page): Promise<void> {
         try {
-            await page.evaluate(() => history.pushState(null, null, null));
+            await this.resetSessionHistoryFn(page);
         } catch (error) {
-            this.logger?.logWarn('Error while resetting browser session history.', {
-                error: System.serializeError(error),
-            });
+            this.logger?.logWarn('Error while resetting page session history.', { error: System.serializeError(error) });
         }
     }
 }
