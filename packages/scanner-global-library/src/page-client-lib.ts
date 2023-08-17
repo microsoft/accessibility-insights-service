@@ -51,7 +51,7 @@ export async function evaluate<Params extends unknown[], Func extends Puppeteer.
     page: Puppeteer.Page,
     pageFunction: Func,
 ): Promise<any> {
-    // Scripts running on a page is optional and should not block page scanning for an extended period
+    // Script running on a page is optional and should not block page scanning for an extended period
     const scriptTimeout = 7000;
     const script = page.evaluate(pageFunction);
     const result = await Promise.race([script, System.wait(scriptTimeout)]);
