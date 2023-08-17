@@ -67,7 +67,7 @@ async function invokeWithTimeout(op: any): Promise<any> {
 
     let result;
     let completed;
-    // call in a separate thread to unblock if operation freezes
+    // Call in a separate thread to unblock if operation freezes
     setTimeout(() => {
         try {
             result = op();
