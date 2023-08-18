@@ -3,9 +3,9 @@
 
 import * as net from 'net';
 import { inject, injectable } from 'inversify';
-import { PowerShell } from 'node-powershell';
 import { IpGeolocation, IpGeolocationProvider, MetricsConfig, ServiceConfiguration } from 'common';
 import moment from 'moment';
+import { isEmpty } from 'lodash';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -27,7 +27,7 @@ interface MachineInfo {
 
 @injectable()
 export class OTelConfigProvider {
-    private readonly otelListenerTimeout = 5000;
+    private readonly otelListenerTimeout = 3000;
 
     private readonly OTelListenerPort = 4317; // default agent listener port
 
@@ -69,28 +69,14 @@ export class OTelConfigProvider {
     }
 
     private async getMachineInfo(): Promise<MachineInfo> {
-        const result = await PowerShell.$`
-        try {
-            $error.clear()
-            $container = (Get-ItemProperty "HKLM:\\SYSTEM\\CurrentControlSet\\Control").ContainerType -eq 2
-            $defaultGateway = (Get-NetRoute '0.0.0.0/0').NextHop
-        }
-        catch {
-            $err = $error.Exception.Message
-            $defaultGateway = '127.0.0.1'
+        if (isEmpty(process.env.MACHINE_INFO)) {
+            return { container: false, host: this.localhost };
         }
 
-        return @{container = $container; gateway = $defaultGateway; error = $err} | ConvertTo-Json  
-        `;
+        const machineInfo = JSON.parse(process.env.MACHINE_INFO) as MachineInfo;
+        machineInfo.host = machineInfo.container === true ? machineInfo.host : this.localhost;
 
-        const systemInfo = JSON.parse(result.raw);
-        if (systemInfo.error) {
-            this.logTrace(`Error when executing a PowerShell script.`, { error: systemInfo.error });
-        }
-
-        const host = systemInfo.container === true ? systemInfo.gateway : this.localhost;
-
-        return { container: systemInfo.container, host };
+        return { container: machineInfo.container, host: machineInfo.host };
     }
 
     private async validateOTelListener(host: string): Promise<boolean> {

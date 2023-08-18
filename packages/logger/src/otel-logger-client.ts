@@ -27,8 +27,6 @@ import { OTelConfigProvider } from './otel-config-provider';
 export class OTelLoggerClient implements LoggerClient {
     public initialized = false;
 
-    public readonly initializationTimeout = 30000;
-
     private enabled = false;
 
     private baseProperties: BaseTelemetryProperties;
