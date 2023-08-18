@@ -16,6 +16,8 @@ import { CombinedPrivacyScanResultProcessor } from '../combined-report/combined-
 
 @injectable()
 export class Runner {
+    private maxFailedScanRetryCount: number;
+
     constructor(
         @inject(ScanMetadataConfig) private readonly scanMetadataConfig: ScanMetadataConfig,
         @inject(OnDemandPageScanRunResultProvider) private readonly onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider,
@@ -30,6 +32,8 @@ export class Runner {
     ) {}
 
     public async run(): Promise<void> {
+        await this.init();
+
         const scanMetadata = this.scanMetadataConfig.getConfig();
         // decode URL back from docker parameter encoding
         scanMetadata.url = decodeURIComponent(scanMetadata.url);
@@ -108,10 +112,20 @@ export class Runner {
 
     private async onFailedScan(privacyScanResult: PrivacyScanResult, pageScanResult: OnDemandPageScanResult): Promise<void> {
         let runState: OnDemandPageScanRunState = 'failed';
-        // Retry privacy banner detection or mark scan as completed since banner detection error considered as non-fatal
+
+        // Retry scan on a banner detection error if retry is available or mark scan as completed otherwise.
+        // The banner detection error is not a true scan run error.
         if ((privacyScanResult.error as BrowserError)?.errorType === 'BannerXPathNotDetected') {
-            const scanConfig = await this.getScanConfig();
-            runState = pageScanResult.run?.retryCount >= scanConfig.maxFailedScanRetryCount ? 'completed' : 'failed';
+            const noRetry = pageScanResult.run?.retryCount >= this.maxFailedScanRetryCount;
+            if (noRetry === true) {
+                runState = 'completed';
+            } else {
+                runState = 'failed';
+                this.logger.logWarn(`The privacy banner was not detected. Mark a scan for retry.`);
+            }
+        } else {
+            this.logger.logError('Browser has failed to scan a webpage.', { error: System.serializeError(privacyScanResult.error) });
+            this.telemetryManager.trackBrowserScanFailed();
         }
 
         pageScanResult.scanResult = {
@@ -119,8 +133,6 @@ export class Runner {
         };
 
         this.setRunResult(pageScanResult, runState, this.convertToScanError(privacyScanResult.error));
-        this.logger.logError('Browser has failed to scan a webpage.', { error: System.serializeError(privacyScanResult.error) });
-        this.telemetryManager.trackBrowserScanFailed();
     }
 
     private async updateScanResult(
@@ -131,9 +143,8 @@ export class Runner {
 
         const websiteScanRef = pageScanResult.websiteScanRefs?.find((ref) => ref.scanGroupType === 'deep-scan');
         if (websiteScanRef) {
-            const scanConfig = await this.getScanConfig();
             const runState =
-                pageScanResult.run.state === 'completed' || pageScanResult.run.retryCount >= scanConfig.maxFailedScanRetryCount
+                pageScanResult.run.state === 'completed' || pageScanResult.run.retryCount >= this.maxFailedScanRetryCount
                     ? pageScanResult.run.state
                     : undefined;
 
@@ -206,5 +217,10 @@ export class Runner {
 
     private async getScanConfig(): Promise<ScanRunTimeConfig> {
         return this.serviceConfig.getConfigValue('scanConfig');
+    }
+
+    private async init(): Promise<void> {
+        const scanConfig = await this.getScanConfig();
+        this.maxFailedScanRetryCount = scanConfig.maxFailedScanRetryCount;
     }
 }

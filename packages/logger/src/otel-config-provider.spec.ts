@@ -33,6 +33,7 @@ describe(OTelConfigProvider, () => {
         socketStub.destroy = () => socketStub;
 
         otelConfigProvider = new OTelConfigProvider(ipGeolocationProviderMock.object, serviceConfigurationMock.object);
+        (otelConfigProvider as any).otelListenerTimeout = 200;
     });
 
     afterEach(() => {
@@ -55,21 +56,22 @@ describe(OTelConfigProvider, () => {
         expect(actualConfig.otelSupported).toEqual(false);
     });
 
-    it('get windows machine configuration for docker container', async () => {
+    it('get Windows machine configuration for docker container', async () => {
+        (otelConfigProvider as any).localhost = 'localhost';
         const machineInfo = {
             container: true,
-            gateway: 'host-gateway-ip',
+            gateway: '127.0.0.1',
         };
         const result = { raw: JSON.stringify(machineInfo) } as InvocationResult;
         PowerShell.$ = () => Promise.resolve(result);
 
         const actualConfig = await otelConfigProvider.getConfig();
 
-        expect(actualConfig.otelListenerUrl).toEqual('http://host-gateway-ip:4317');
+        expect(actualConfig.otelListenerUrl).toEqual('http://127.0.0.1:4317');
         expect(actualConfig.container).toEqual(true);
     });
 
-    it('get windows machine configuration for host', async () => {
+    it('get Windows machine configuration for host', async () => {
         const machineInfo = {
             container: false,
             gateway: 'host-gateway-ip',
@@ -164,7 +166,6 @@ describe(OTelConfigProvider, () => {
     });
 
     it('get OTel listener status when listener socket is timed out', async () => {
-        (otelConfigProvider as any).otelListenerTimeout = 100;
         let socketCallbackFn: () => void;
         let socketOnErrorCallbackFn: (e: Error) => void;
 

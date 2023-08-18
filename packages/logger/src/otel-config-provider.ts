@@ -48,6 +48,8 @@ export class OTelConfigProvider {
             };
         }
 
+        this.logTrace(`Start OTel metrics collection initialization.`);
+
         const machineInfo = await this.getMachineInfo();
         const hasOTelListener = await this.validateOTelListener(machineInfo.host);
         const metricsConfig = await this.getMetricsConfig();

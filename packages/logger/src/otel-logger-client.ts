@@ -3,7 +3,6 @@
 
 import { inject, injectable } from 'inversify';
 import { Resource } from '@opentelemetry/resources';
-import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
 import {
     AggregationTemporality,
     MeterProvider,
@@ -28,7 +27,7 @@ import { OTelConfigProvider } from './otel-config-provider';
 export class OTelLoggerClient implements LoggerClient {
     public initialized = false;
 
-    public readonly initializationTimeout = 20000;
+    public readonly initializationTimeout = 30000;
 
     private enabled = false;
 
@@ -114,9 +113,9 @@ export class OTelLoggerClient implements LoggerClient {
         // OTel common attributes are not supported by injection pipeline. Submitting with event's attributes instead.
         this.baseProperties = {
             ...this.baseProperties,
-            [SemanticResourceAttributes.SERVICE_NAME]: 'WebInsightsService',
-            customerResourceId: config.resourceId,
-            locationId: config.locationId,
+            ServiceName: 'WebInsightsService',
+            CustomerResourceId: config.resourceId,
+            LocationId: config.locationId,
         };
         this.resource.merge(
             new Resource({

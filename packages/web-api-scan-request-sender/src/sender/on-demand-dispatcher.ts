@@ -16,6 +16,9 @@ import { isEmpty } from 'lodash';
 import { ScanRequestSelector, ScanRequest, DispatchCondition } from './scan-request-selector';
 
 /* eslint-disable max-len */
+
+export type ScheduledScan = 'accessibility' | 'privacy';
+
 @injectable()
 export class OnDemandDispatcher {
     private readonly maxRequestsToDelete = 100;
@@ -52,14 +55,14 @@ export class OnDemandDispatcher {
             configQueueSize - privacyCurrentQueueSize,
             this.maxRequestsToDelete,
         );
-        await this.addScanRequests(scanRequests.accessibilityRequestsToQueue, this.storageConfig.scanQueue);
-        await this.addScanRequests(scanRequests.privacyRequestsToQueue, this.storageConfig.privacyScanQueue);
+        await this.addScanRequests(scanRequests.accessibilityRequestsToQueue, this.storageConfig.scanQueue, 'accessibility');
+        await this.addScanRequests(scanRequests.privacyRequestsToQueue, this.storageConfig.privacyScanQueue, 'privacy');
         await this.deleteScanRequests(scanRequests.requestsToDelete);
 
         this.logger.logInfo(`Adding scan requests to the scan queue completed.`);
     }
 
-    private async addScanRequests(scanRequests: ScanRequest[], scanQueue: string): Promise<void> {
+    private async addScanRequests(scanRequests: ScanRequest[], scanQueue: string, scheduledScan: ScheduledScan): Promise<void> {
         if (scanRequests.length === 0) {
             this.logger.logInfo(`No pending scan requests available for a ${scanQueue} scan queue.`);
 
@@ -85,6 +88,17 @@ export class OnDemandDispatcher {
                     this.logger.logInfo(`Added a scan request message to the ${scanQueue} scan queue.`, {
                         scanId: scanRequest.request.id,
                     });
+                    this.logger.trackEvent(
+                        'ScanRequestScheduled',
+                        {
+                            scanId: scanRequest.request.id,
+                            url: scanRequest.request.url,
+                            scheduledScan,
+                        },
+                        {
+                            scheduledScanRequests: 1,
+                        },
+                    );
                     await this.trace(scanRequest);
                 } else {
                     const error: ScanError = {
@@ -95,6 +109,17 @@ export class OnDemandDispatcher {
                     this.logger.logError(`Failed to add a scan request message to the ${scanQueue} scan queue.`, {
                         scanId: scanRequest.request.id,
                     });
+                    this.logger.trackEvent(
+                        'ScanRequestSchedulingFailed',
+                        {
+                            scanId: scanRequest.request.id,
+                            url: scanRequest.request.url,
+                            scheduledScan,
+                        },
+                        {
+                            failedScheduleScanRequests: 1,
+                        },
+                    );
                 }
             }),
         );
