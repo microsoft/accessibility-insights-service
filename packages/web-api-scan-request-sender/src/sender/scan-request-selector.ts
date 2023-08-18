@@ -126,7 +126,7 @@ export class ScanRequestSelector {
                     // scan was terminated or failed
                     (['queued', 'running', 'failed'] as OnDemandPageScanRunState[]).includes(scanResult.run.state) &&
                     // still below maximum retry threshold
-                    scanResult.run.retryCount < this.maxFailedScanRetryCount &&
+                    !(scanResult.run.retryCount >= this.maxFailedScanRetryCount) &&
                     // retry delay has passed
                     moment.utc(scanResult.run.timestamp).add(this.failedScanRetryIntervalInMinutes, 'minutes') <= moment.utc()
                 ) {

@@ -183,7 +183,7 @@ describe(Runner, () => {
 
         setupScanMetadataConfig();
         setupUpdateScanRunStateToRunning();
-        setupScanRunnerTelemetryManager(true, false);
+        setupScanRunnerTelemetryManager(true, true);
         setupPageScanProcessor();
         setupProcessScanResult();
         setupUpdateScanResult();
@@ -198,7 +198,7 @@ describe(Runner, () => {
 
         setupScanMetadataConfig();
         setupUpdateScanRunStateToRunning();
-        setupScanRunnerTelemetryManager(true, false);
+        setupScanRunnerTelemetryManager(true, true);
         setupPageScanProcessor();
         setupProcessScanResult();
 
@@ -244,6 +244,12 @@ function setupProcessScanResult(): void {
         let runState: OnDemandPageScanRunState = 'failed';
         if ((privacyScanResults.error as BrowserError)?.errorType === 'BannerXPathNotDetected') {
             runState = pageScanResult.run?.retryCount >= maxFailedScanRetryCount ? 'completed' : 'failed';
+        } else {
+            loggerMock
+                .setup((o) =>
+                    o.logError(`Browser has failed to scan a webpage.`, { error: System.serializeError(privacyScanResults.error) }),
+                )
+                .verifiable();
         }
         const scanError: ScanError = {
             errorType: 'InternalError',
@@ -257,9 +263,6 @@ function setupProcessScanResult(): void {
         pageScanResult.scanResult = {
             state: 'fail',
         };
-        loggerMock
-            .setup((o) => o.logError(`Browser has failed to scan a webpage.`, { error: System.serializeError(privacyScanResults.error) }))
-            .verifiable();
     } else {
         pageScanResult.scanResult = {
             state: 'pass',
