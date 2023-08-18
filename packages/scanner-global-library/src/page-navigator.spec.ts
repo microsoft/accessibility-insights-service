@@ -12,6 +12,7 @@ import { MockableLogger } from './test-utilities/mockable-logger';
 import { BrowserError } from './browser-error';
 import { BrowserCache } from './browser-cache';
 import { PageOperation, PageOperationHandler } from './network/page-operation-handler';
+import { resetSessionHistory } from './page-client-lib';
 
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/consistent-type-assertions */
 
@@ -28,6 +29,7 @@ let timingCount: number;
 let pageOperationResult: PageOperationResult;
 let response: Puppeteer.HTTPResponse;
 let pageOperation: PageOperation;
+let resetSessionHistoryMock: typeof resetSessionHistory;
 
 describe(PageNavigator, () => {
     beforeEach(() => {
@@ -38,6 +40,7 @@ describe(PageNavigator, () => {
         loggerMock = Mock.ofType(MockableLogger);
         pageOperationResult = {} as PageOperationResult;
 
+        resetSessionHistoryMock = jest.fn().mockImplementation(() => Promise.resolve());
         jest.spyOn(global, 'setTimeout').mockImplementation((callback) => {
             if (typeof callback === 'function') {
                 callback();
@@ -60,6 +63,7 @@ describe(PageNavigator, () => {
             browserCacheMock.object,
             pageOperationHandlerMock.object,
             loggerMock.object,
+            resetSessionHistoryMock,
         );
     });
 
@@ -100,10 +104,6 @@ describe(PageNavigator, () => {
                 .setup((o) => o.invoke(It.isAny(), puppeteerPageMock.object))
                 .returns(() => Promise.resolve(pageOperationResult))
                 .verifiable();
-            puppeteerPageMock
-                .setup((o) => o.evaluate(It.isAny()))
-                .returns(() => Promise.resolve())
-                .verifiable();
             const expectedResponse = {
                 httpResponse: pageOperationResult.response,
                 pageNavigationTiming: {
@@ -117,6 +117,7 @@ describe(PageNavigator, () => {
             expect(actualResponse).toEqual(expectedResponse);
             expect(createPageOperationFn).toBeCalledWith('goto', puppeteerPageMock.object, url);
             expect(handleCachedResponseFn).toBeCalledWith(pageOperationResult, puppeteerPageMock.object);
+            expect(resetSessionHistoryMock).toBeCalledWith(puppeteerPageMock.object);
         });
 
         it('navigate to url with navigation error', async () => {
@@ -209,10 +210,6 @@ describe(PageNavigator, () => {
                 .setup((o) => o.invoke(It.isAny(), puppeteerPageMock.object))
                 .returns(() => Promise.resolve(pageOperationResult))
                 .verifiable();
-            puppeteerPageMock
-                .setup((o) => o.evaluate(It.isAny()))
-                .returns(() => Promise.resolve())
-                .verifiable();
             const expectedResponse = {
                 httpResponse: pageOperationResult.response,
                 pageNavigationTiming: {
@@ -226,6 +223,7 @@ describe(PageNavigator, () => {
             expect(actualResponse).toEqual(expectedResponse);
             expect(createPageOperationFn).toBeCalledWith('reload', puppeteerPageMock.object);
             expect(handleCachedResponseFn).toBeCalledWith(pageOperationResult, puppeteerPageMock.object);
+            expect(resetSessionHistoryMock).toBeCalledWith(puppeteerPageMock.object);
         });
     });
 
