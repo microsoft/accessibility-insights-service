@@ -74,9 +74,11 @@ export class OTelConfigProvider {
         }
 
         const machineInfo = JSON.parse(process.env.MACHINE_INFO) as MachineInfo;
-        machineInfo.host = machineInfo.container === true ? machineInfo.host : this.localhost;
 
-        return { container: machineInfo.container, host: machineInfo.host };
+        return {
+            container: machineInfo.container,
+            host: machineInfo.container === true ? machineInfo.host : this.localhost,
+        };
     }
 
     private async validateOTelListener(host: string): Promise<boolean> {
