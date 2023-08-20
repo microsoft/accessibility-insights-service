@@ -169,10 +169,9 @@ export class Page {
                 encoding: 'base64',
             });
 
-            if (System.isDebugEnabled() === true) {
-                const filePath = __dirname.endsWith('dist') ? __dirname : `${__dirname}/../dist`;
+            if (System.isDebugEnabled() === true && System.isUnitTest() !== true) {
                 // eslint-disable-next-line security/detect-non-literal-fs-filename
-                fs.writeFileSync(`${filePath}/screenshot-${new Date().valueOf()}.base64`, data);
+                fs.writeFileSync(`${__dirname}/screenshot-${new Date().valueOf()}.base64`, data);
             }
 
             return data;

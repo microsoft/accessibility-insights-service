@@ -111,7 +111,7 @@ export class OTelLoggerClient implements LoggerClient {
         // OTel common attributes are not supported by injection pipeline. Submitting with event's attributes instead.
         this.baseProperties = {
             ...this.baseProperties,
-            ServiceName: 'WebInsightsService',
+            serviceName: 'WebInsightsService',
             CustomerResourceId: config.resourceId,
             LocationId: config.locationId,
         };

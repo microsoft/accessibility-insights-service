@@ -114,4 +114,8 @@ export namespace System {
     export function isDebugEnabled(): boolean {
         return process.env.VSCODE_INSPECTOR_OPTIONS !== undefined || /--debug|--inspect/i.test(process.env.NODE_OPTIONS);
     }
+
+    export function isUnitTest(): boolean {
+        return process.env.JEST_WORKER_ID !== undefined || /jest/i.test(process.argv[1]);
+    }
 }
