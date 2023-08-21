@@ -27,8 +27,6 @@ import { OTelConfigProvider } from './otel-config-provider';
 export class OTelLoggerClient implements LoggerClient {
     public initialized = false;
 
-    public readonly initializationTimeout = 30000;
-
     private enabled = false;
 
     private baseProperties: BaseTelemetryProperties;
@@ -113,7 +111,7 @@ export class OTelLoggerClient implements LoggerClient {
         // OTel common attributes are not supported by injection pipeline. Submitting with event's attributes instead.
         this.baseProperties = {
             ...this.baseProperties,
-            ServiceName: 'WebInsightsService',
+            serviceName: 'WebInsightsService',
             CustomerResourceId: config.resourceId,
             LocationId: config.locationId,
         };

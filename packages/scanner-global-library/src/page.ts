@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+import fs from 'fs';
 import { GuidGenerator, System } from 'common';
 import { inject, injectable, optional } from 'inversify';
 import { GlobalLogger } from 'logger';
@@ -115,7 +116,12 @@ export class Page {
         await this.setExtraHTTPHeaders();
         await this.navigateImpl(options);
 
-        if (this.navigationResponse?.ok() === false /** trace to record web server error response */) {
+        if (
+            this.navigationResponse?.ok() === false /* Trace error response */ ||
+            (this.pageAnalysisResult.authentication === true /* Trace authentication response */ &&
+                options?.enableAuthentication !== true &&
+                this.enableAuthenticationGlobalFlag !== true)
+        ) {
             this.logger?.logWarn('Reload page with network trace on web server error.');
             await this.navigateWithNetworkTrace(url);
         }
@@ -162,6 +168,11 @@ export class Page {
                 fullPage: true,
                 encoding: 'base64',
             });
+
+            if (System.isDebugEnabled() === true && System.isUnitTest() !== true) {
+                // eslint-disable-next-line security/detect-non-literal-fs-filename
+                fs.writeFileSync(`${__dirname}/screenshot-${new Date().valueOf()}.base64`, data);
+            }
 
             return data;
         } catch (error) {

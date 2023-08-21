@@ -6,7 +6,6 @@ import 'reflect-metadata';
 import net, { Socket } from 'net';
 import { IMock, Mock } from 'typemoq';
 import { IpGeolocation, IpGeolocationProvider, MetricsConfig, ServiceConfiguration, System } from 'common';
-import { InvocationResult, PowerShell } from 'node-powershell';
 import { OTelConfigProvider } from './otel-config-provider';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -60,10 +59,9 @@ describe(OTelConfigProvider, () => {
         (otelConfigProvider as any).localhost = 'localhost';
         const machineInfo = {
             container: true,
-            gateway: '127.0.0.1',
+            host: '127.0.0.1',
         };
-        const result = { raw: JSON.stringify(machineInfo) } as InvocationResult;
-        PowerShell.$ = () => Promise.resolve(result);
+        process.env.MACHINE_INFO = JSON.stringify(machineInfo);
 
         const actualConfig = await otelConfigProvider.getConfig();
 
@@ -74,10 +72,9 @@ describe(OTelConfigProvider, () => {
     it('get Windows machine configuration for host', async () => {
         const machineInfo = {
             container: false,
-            gateway: 'host-gateway-ip',
+            host: 'container-gateway',
         };
-        const result = { raw: JSON.stringify(machineInfo) } as InvocationResult;
-        PowerShell.$ = () => Promise.resolve(result);
+        process.env.MACHINE_INFO = JSON.stringify(machineInfo);
 
         const actualConfig = await otelConfigProvider.getConfig();
 

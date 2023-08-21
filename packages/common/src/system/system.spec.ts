@@ -201,4 +201,25 @@ describe('getElapsedTime()', () => {
             expect(System.isDebugEnabled()).toEqual(false);
         });
     });
+
+    describe('isUnitTest', () => {
+        beforeEach(() => {
+            process.argv[1] = '';
+            delete process.env.JEST_WORKER_ID;
+        });
+
+        it('unit test enabled in env var', () => {
+            process.env.JEST_WORKER_ID = '1';
+            expect(System.isUnitTest()).toEqual(true);
+        });
+
+        it('unit test enabled in command', () => {
+            process.argv[1] = '/node_modules/jest/bin/jest system.spec.ts';
+            expect(System.isUnitTest()).toEqual(true);
+        });
+
+        it('unit test is not enabled', () => {
+            expect(System.isUnitTest()).toEqual(false);
+        });
+    });
 });
