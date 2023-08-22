@@ -15,6 +15,7 @@ export principalId
 
 templatesFolder="${0%/*}/../templates/"
 webApiFuncTemplateFilePath=$templatesFolder/function-web-api-app-template.json
+webApiFuncTemplateUpdatedFilePath=$templatesFolder/function-web-api-app-template-updated.json
 webWorkersFuncTemplateFilePath=$templatesFolder/function-web-workers-app-template.json
 e2eWebApiFuncTemplateFilePath=$templatesFolder/function-e2e-web-api-app-template.json
 
@@ -48,7 +49,9 @@ addAadAcl() {
         acl=$(<$aclFilePath)
         tempFilePath=$templatesFolder/temp-func-acl.json
 
-        jq ".resources[].properties.siteConfig.appSettings += [$acl]" $webApiFuncTemplateFilePath >$tempFilePath && mv $tempFilePath $webApiFuncTemplateFilePath
+        jq ".resources[].properties.siteConfig.appSettings += [$acl]" $webApiFuncTemplateFilePath >$tempFilePath && mv $tempFilePath $webApiFuncTemplateUpdatedFilePath
+    else
+        cp $webApiFuncTemplateFilePath $webApiFuncTemplateUpdatedFilePath
     fi
 }
 
@@ -166,7 +169,7 @@ deployFunctionApp() {
 }
 
 function deployWebApiFunction() {
-    deployFunctionApp "web-api-allyfuncapp" "$webApiFuncTemplateFilePath" "$webApiFuncAppName" "clientId=$webApiAdClientId"
+    deployFunctionApp "web-api-allyfuncapp" "$webApiFuncTemplateUpdatedFilePath" "$webApiFuncAppName" "clientId=$webApiAdClientId"
 }
 
 function deployWebWorkersFunction() {
