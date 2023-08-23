@@ -3,4 +3,4 @@ Copyright (c) Microsoft Corporation. All rights reserved.
 Licensed under the MIT License.
 -->
 
-Placeholder directory for docker image build files.
+Placeholder directory for docker image files.

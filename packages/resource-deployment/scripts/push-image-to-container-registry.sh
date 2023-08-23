@@ -113,6 +113,7 @@ checkPrerequisites() {
             [ ! -f "${batchReportGeneratorRunnerDist}Add-Font.ps1" ] || [ ! -f "${batchReportGeneratorRunnerDist}Fonts.tar" ]
     then
         echo "
+ERROR: Docker image fonts files not found.
 Copy Add-Font.ps1 and Fonts.tar to packages/resource-deployment/custom-scripts/docker-image directory 
 and run packages/resource-deployment/custom-scripts/prepare-deployment.sh before service deployment.
 "
