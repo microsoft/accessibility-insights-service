@@ -69,7 +69,7 @@ enableStaticSiteHosting() {
 
 uploadSiteContents() {
     echo "Uploading site contents from source folder $siteContentFolder in storage account"
-    az storage blob upload-batch --account-name $storageAccountName --destination "\$web" --source "$siteContentFolder" 1>/dev/null
+    az storage blob upload-batch --account-name $storageAccountName --destination "\$web" --source "$siteContentFolder" --overwrite=true 1>/dev/null
 }
 
 updateConfigFiles() {
