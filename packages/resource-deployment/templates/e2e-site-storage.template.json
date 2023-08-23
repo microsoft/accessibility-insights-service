@@ -3,7 +3,7 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "storageAccountName": {
-            "defaultValue": "[concat('teststorage',toLower(uniqueString(resourceGroup().id)))]",
+            "defaultValue": "[concat('website',toLower(uniqueString(resourceGroup().id)))]",
             "type": "string",
             "metadata": {
                 "description": "The name of the Azure Storage account."

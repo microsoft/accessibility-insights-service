@@ -6,11 +6,12 @@
 # shellcheck disable=SC1090
 set -eo pipefail
 
-defaultSiteContentFolder="../../../e2e-test-site/dist/site-content/"
+defaultSiteContentFolder="${0%/*}/../../../e2e-test-site/dist/site-content"
+defaultConfigFileFolder="${0%/*}/../runtime-config"
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -r <resource group> -s <subscription> [-c <site content folder location, defaults to $defaultSiteContentFolder>]
+Usage: $0 -r <resource group> -s <subscription> [-c <site content directory, default $defaultSiteContentFolder> -f <service config files directory, default $defaultConfigFileFolder >]
 "
     exit 1
 }
@@ -20,6 +21,7 @@ while getopts ":r:c:s:" option; do
     r) resourceGroupName=${OPTARG} ;;
     c) siteContentFolder=${OPTARG} ;;
     s) subscription=${OPTARG} ;;
+    f) configFileFolder=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
@@ -37,6 +39,10 @@ if [[ -z $siteContentFolder ]]; then
     siteContentFolder=$defaultSiteContentFolder
 fi
 
+if [[ -z $configFileFolder ]]; then
+    configFileFolder=$defaultConfigFileFolder
+fi
+
 templateFile="${0%/*}/../templates/e2e-site-storage.template.json"
 
 deployStorageAccount() {
@@ -51,8 +57,6 @@ deployStorageAccount() {
         echo "Unable to get storage account name from storage account creation response"
         exit 1
     fi
-
-    enableStaticSiteHosting
 }
 
 enableStaticSiteHosting() {
@@ -64,16 +68,21 @@ enableStaticSiteHosting() {
 }
 
 uploadSiteContents() {
-    sitePath=$(date "+%Y-%m-%d")
+    echo "Uploading site contents from source folder $siteContentFolder in storage account"
+    az storage blob upload-batch --account-name $storageAccountName --destination "\$web" --source "$siteContentFolder" 1>/dev/null
+}
 
-    echo "Uploading site contents to folder $sitePath from source folder $siteContentFolder in storage account"
-
-    az storage blob upload-batch --account-name $storageAccountName --destination "\$web" --destination-path "/$sitePath/" --source "$siteContentFolder" 1>/dev/null
+updateConfigFiles() {
+    echo "Updating service configuration test website endpoint"
+    for configFilePath in "$configFileFolder"/*.json; do
+        tempFilePath="${0%/*}/temp-$(date +%s)$RANDOM.json"
+        jq "if (.availabilityTestConfig.urlToScan) then . else .availabilityTestConfig += {\"urlToScan\": \"$siteUrl\"} end" $configFilePath >$tempFilePath && mv $tempFilePath $configFilePath
+    done
 }
 
 deployStorageAccount
+enableStaticSiteHosting
 uploadSiteContents
+updateConfigFiles
 
-echo "Deployment of E2E test site complete"
-echo "The test site homepage can be found at $siteUrl$sitePath/"
-
+echo "Deployment of test website completed. Website URL $siteUrl"

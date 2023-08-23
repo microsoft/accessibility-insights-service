@@ -49,7 +49,7 @@ exports[`ServiceConfiguration verifies custom config 1`] = `
       "format": "int",
     },
     "urlToScan": {
-      "default": "https://teststorage57bzoqjjclekk.z13.web.core.windows.net/2021-05-04/",
+      "default": undefined,
       "doc": "Url to scan for availability testing",
       "format": "String",
     },
@@ -293,7 +293,7 @@ exports[`ServiceConfiguration verifies dev config 1`] = `
       "format": "int",
     },
     "urlToScan": {
-      "default": "https://teststorage57bzoqjjclekk.z13.web.core.windows.net/2021-05-04/",
+      "default": undefined,
       "doc": "Url to scan for availability testing",
       "format": "String",
     },
