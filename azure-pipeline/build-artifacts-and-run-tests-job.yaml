@@ -46,6 +46,7 @@ steps:
               web-api/dist/**/*
               web-workers/dist/**/*
               e2e-web-apis/dist/**/*
+              e2e-test-site/dist/**/*
               functional-tests/dist/**/*
               health-client/dist/**/*
               cli/drop/*
