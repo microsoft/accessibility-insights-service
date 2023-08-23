@@ -76,7 +76,7 @@ updateConfigFiles() {
     echo "Updating service configuration test website endpoint"
     for configFilePath in "$configFileFolder"/*.json; do
         tempFilePath="${0%/*}/temp-$(date +%s)$RANDOM.json"
-        jq "if (.availabilityTestConfig.urlToScan) then . else .availabilityTestConfig += {\"urlToScan\": \"$siteUrl\"} end" $configFilePath >$tempFilePath && mv $tempFilePath $configFilePath
+        jq "if .availabilityTestConfig.urlToScan then . else .availabilityTestConfig += {\"urlToScan\": \"$siteUrl\"} end" $configFilePath >$tempFilePath && mv $tempFilePath $configFilePath
     done
 }
 

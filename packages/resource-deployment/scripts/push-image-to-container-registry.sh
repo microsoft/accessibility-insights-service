@@ -106,6 +106,20 @@ pushImagesToRegistry() (
     runCommandsWithoutSecretsInParallel imageBuildProcesses
 )
 
+checkPrerequisites() {
+    if
+        [ ! -f "${batchScanRunnerDist}Add-Font.ps1" ] || [ ! -f "${batchScanRunnerDist}Fonts.tar" ] ||
+            [ ! -f "${batchPrivacyScanRunnerDist}Add-Font.ps1" ] || [ ! -f "${batchPrivacyScanRunnerDist}Fonts.tar" ] ||
+            [ ! -f "${batchReportGeneratorRunnerDist}Add-Font.ps1" ] || [ ! -f "${batchReportGeneratorRunnerDist}Fonts.tar" ]
+    then
+        echo "
+Copy Add-Font.ps1 and Fonts.tar to packages/resource-deployment/custom-scripts/docker-image directory 
+and run packages/resource-deployment/custom-scripts/prepare-deployment.sh before service deployment.
+"
+        exit 1
+    fi
+}
+
 if [[ $keepImages != true ]]; then
     . "${0%/*}/get-resource-names.sh"
     . "${0%/*}/process-utilities.sh"
@@ -114,6 +128,7 @@ if [[ $keepImages != true ]]; then
     az acr login --name "$containerRegistryName"
 
     setImageBuildSource
+    checkPrerequisites
     prepareImageBuildSource
     pushImagesToRegistry
 else
