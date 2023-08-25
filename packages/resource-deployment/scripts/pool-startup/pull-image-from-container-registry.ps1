@@ -89,18 +89,18 @@ function pullDockerImages() {
     Write-Output "Pulling container images from a registry for the $pool pool..."
     if ( $pool -eq "on-demand-url-scan-pool" ) {
         docker pull "$azurecr/batch-scan-manager:latest"
-        docker pull "$azurecr/batch-scan-runner:latest"    
+        docker pull "$azurecr/batch-scan-runner:latest"
     }
     elseif ( $pool -eq "privacy-scan-pool" ) {
         docker pull "$azurecr/batch-privacy-scan-manager:latest"
-        docker pull "$azurecr/batch-privacy-scan-runner:latest"    
+        docker pull "$azurecr/batch-privacy-scan-runner:latest"
     }
     elseif ( $pool -eq "on-demand-scan-request-pool" ) {
         docker pull "$azurecr/batch-scan-notification-manager:latest"
-        docker pull "$azurecr/batch-scan-notification-runner:latest"    
+        docker pull "$azurecr/batch-scan-notification-runner:latest"
         docker pull "$azurecr/batch-report-generator-manager:latest"
-        docker pull "$azurecr/batch-report-generator-runner:latest"    
-        docker pull "$azurecr/batch-scan-request-sender:latest"    
+        docker pull "$azurecr/batch-report-generator-runner:latest"
+        docker pull "$azurecr/batch-scan-request-sender:latest"
     }
     else {
         Write-Output "Unable to pull container images. Environment variable AZ_BATCH_POOL_ID is not defined or $pool pool is not supported."

@@ -1,7 +1,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
 
-# See https://learn.microsoft.com/en-us/virtualization/windowscontainers/quick-start/set-up-environment?tabs=dockerce#windows-server-1
+# Reference https://learn.microsoft.com/en-us/virtualization/windowscontainers/quick-start/set-up-environment?tabs=dockerce#windows-server-1
 
 $global:rebootRequired = $false
 
@@ -37,7 +37,7 @@ function rebootIfRequired() {
     }
 }
 
-# See https://learn.microsoft.com/en-us/virtualization/windowscontainers/manage-docker/configure-docker-daemon#configure-docker-with-a-configuration-file
+# Reference https://learn.microsoft.com/en-us/virtualization/windowscontainers/manage-docker/configure-docker-daemon#configure-docker-with-a-configuration-file
 function setDockerConfig() {
     $dataRootValue = "D:\docker"
     $configFolder = "C:\ProgramData\Docker\config"
@@ -118,7 +118,7 @@ function installHyperV() {
     }
 }
 
-# See https://github.com/microsoft/Windows-Containers/tree/Main/helpful_tools/Install-DockerCE
+# Reference https://github.com/microsoft/Windows-Containers/tree/Main/helpful_tools/Install-DockerCE
 #
 # The Docker installation requires script to run twice with intermediate reboot. The second run is
 # configured as Windows startup task that runs on user login. We do not want to handle the startup
