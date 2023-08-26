@@ -17,6 +17,9 @@ RUN powershell -Command \
     Rename-Item -Path $('C:\node-v{0}-win-x64' -f $env:NODE_VERSION) -NewName 'C:\nodejs'
 RUN setx /m PATH "%PATH%;C:\nodejs"
 
+# Bundle app package
+COPY . .
+
 # Install app dependencies
 RUN npm install
 
