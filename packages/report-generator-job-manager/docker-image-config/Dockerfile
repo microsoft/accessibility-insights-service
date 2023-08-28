@@ -1,7 +1,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
 
-FROM mcr.microsoft.com/windows/servercore:1809-amd64
+FROM mcr.microsoft.com/windows/servercore:ltsc2022-amd64
 
 ENV NODE_VERSION 16.20.1
 
