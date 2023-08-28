@@ -89,11 +89,11 @@ function pullImages() {
     Write-Output "Pulling container images from a registry for the $pool pool..."
     if ( $pool -eq "on-demand-url-scan-pool" ) {
         docker pull "$azurecr/batch-scan-manager:latest"
-        docker pull "$azurecr/batch-scan-runner:latest"
+        docker pull "$azurecr/batch-scan-runner:prescanner"
     }
     elseif ( $pool -eq "privacy-scan-pool" ) {
         docker pull "$azurecr/batch-privacy-scan-manager:latest"
-        docker pull "$azurecr/batch-privacy-scan-runner:latest"
+        docker pull "$azurecr/batch-privacy-scan-runner:prescanner"
     }
     elseif ( $pool -eq "on-demand-scan-request-pool" ) {
         docker pull "$azurecr/batch-scan-notification-manager:latest"
