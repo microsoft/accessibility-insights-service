@@ -5,8 +5,6 @@ FROM mcr.microsoft.com/windows/servercore:ltsc2022-amd64
 
 ENV NODE_VERSION 16.20.1
 
-USER ContainerAdministrator
-
 WORKDIR /app
 
 # Install Node.js

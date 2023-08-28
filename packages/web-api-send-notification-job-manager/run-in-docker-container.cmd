@@ -11,5 +11,5 @@ copy .\.env .\dist\
 yarn build &&^
 cd .\dist &&^
 docker build --tag web-api-send-notification-job-manager . &&^
-docker run --init --ipc=host --env-file .env web-api-send-notification-job-manager
+docker run --init --ipc=host --env-file .env web-api-send-notification-job-manager &&^
 cd ..

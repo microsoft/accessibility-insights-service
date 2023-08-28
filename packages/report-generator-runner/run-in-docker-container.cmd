@@ -11,5 +11,5 @@ copy .\.env .\dist\
 yarn build &&^
 cd .\dist &&^
 docker build --tag report-generator-runner . &&^
-docker run --init --ipc=host --env-file .env report-generator-runner
+docker run --init --ipc=host --env-file .env report-generator-runner &&^
 cd ..

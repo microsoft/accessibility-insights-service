@@ -11,5 +11,5 @@ copy .\.env .\dist\
 yarn build &&^
 cd .\dist &&^
 docker build --tag web-api-scan-runner . &&^
-docker run --init --ipc=host --env-file .env web-api-scan-runner
+docker run --init --ipc=host --env-file .env web-api-scan-runner &&^
 cd ..

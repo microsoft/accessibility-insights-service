@@ -11,5 +11,5 @@ copy .\.env .\dist\
 yarn build &&^
 cd .\dist &&^
 docker build --tag privacy-scan-job-manager . &&^
-docker run --init --ipc=host --env-file .env privacy-scan-job-manager
+docker run --init --ipc=host --env-file .env privacy-scan-job-manager &&^
 cd ..
