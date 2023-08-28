@@ -1,7 +1,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
 
-Write-Output "Enable Windows features"
+Write-Output "Installing font packages..."
 
 $gateway = (Get-NetRoute '0.0.0.0/0').NextHop
 net use S: \\$gateway\WinSxS /user:DockerBuild "${env:BUILD_KEY}" | Out-Null
