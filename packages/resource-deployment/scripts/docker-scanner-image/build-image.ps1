@@ -26,13 +26,13 @@ function createShare() {
 }
 
 function buildImage() {
-    $baseImages = docker images --no-trunc --format "{{json .}}" | ConvertFrom-Json | Where-Object { $_.Tag -eq "base-scanner" }
+    $baseImages = docker images --no-trunc --format "{{json .}}" | ConvertFrom-Json | Where-Object { $_.Tag -eq "prescanner" }
     if ($baseImages) {
         foreach ($baseImage in $baseImages) {
             Write-Output "Building docker image for $($baseImage.Repository)"
 
             $baseImageTag = "$($baseImage.Repository):$($baseImage.Tag)"
-            docker tag $baseImageTag "base-scanner"
+            docker tag $baseImageTag "prescanner"
             docker build --tag $baseImage.Repository --build-arg BUILD_KEY=$env:BUILD_KEY .
         }
     }

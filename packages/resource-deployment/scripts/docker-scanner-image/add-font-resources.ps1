@@ -13,6 +13,7 @@ namespace FontResource
     {
         [DllImport("gdi32.dll")]
         static extern int AddFontResource(string lpFilename);
+
         public static int AddFont(string fontFilePath) {
             try 
             {
@@ -28,7 +29,8 @@ namespace FontResource
 '@
  
 Add-Type $fontCSharpCode
+Write-Output -NoNewline "Adding the font resources..."
 foreach ($font in $(Get-ChildItem ${env:windir}\Fonts)) {
-    Write-Output "Loading $($font.FullName)"
+    Write-Output -NoNewline "."
     [FontResource.AddRemoveFonts]::AddFont($font.FullName) | Out-Null
 }

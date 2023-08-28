@@ -48,7 +48,7 @@ pushImageToRegistry() {
     local source=$2
     local platform=$3
 
-    az acr build --platform $platform --image $containerRegistryName.azurecr.io/$name:latest --registry $containerRegistryName $source | sed -e "s/^/[$name] /"
+    az acr build --platform $platform --image $containerRegistryName.azurecr.io/$name --registry $containerRegistryName $source | sed -e "s/^/[$name] /"
 }
 
 setImageBuildSource() {
@@ -83,15 +83,15 @@ pushImagesToRegistry() (
 
     # shellcheck disable=SC2034
     local imageBuildProcesses=(
-        "pushImageToRegistry \"batch-scan-runner\" $batchScanRunnerDist windows"
-        "pushImageToRegistry \"batch-scan-manager\" $batchScanManagerDist windows"
-        "pushImageToRegistry \"batch-scan-request-sender\" $batchScanRequestSenderDist windows"
-        "pushImageToRegistry \"batch-scan-notification-manager\" $batchScanNotificationManagerDist windows"
-        "pushImageToRegistry \"batch-scan-notification-runner\" $batchScanNotificationRunnerDist windows"
-        "pushImageToRegistry \"batch-privacy-scan-runner\" $batchPrivacyScanRunnerDist windows"
-        "pushImageToRegistry \"batch-privacy-scan-manager\" $batchPrivacyScanJobManagerDist windows"
-        "pushImageToRegistry \"batch-report-generator-runner\" $batchReportGeneratorRunnerDist windows"
-        "pushImageToRegistry \"batch-report-generator-manager\" $batchReportGeneratorJobManagerDist windows"
+        "pushImageToRegistry \"batch-scan-runner:prescanner\" $batchScanRunnerDist windows"
+        "pushImageToRegistry \"batch-scan-manager:latest\" $batchScanManagerDist windows"
+        "pushImageToRegistry \"batch-scan-request-sender:latest\" $batchScanRequestSenderDist windows"
+        "pushImageToRegistry \"batch-scan-notification-manager:latest\" $batchScanNotificationManagerDist windows"
+        "pushImageToRegistry \"batch-scan-notification-runner:latest\" $batchScanNotificationRunnerDist windows"
+        "pushImageToRegistry \"batch-privacy-scan-runner:prescanner\" $batchPrivacyScanRunnerDist windows"
+        "pushImageToRegistry \"batch-privacy-scan-manager:latest\" $batchPrivacyScanJobManagerDist windows"
+        "pushImageToRegistry \"batch-report-generator-runner:latest\" $batchReportGeneratorRunnerDist windows"
+        "pushImageToRegistry \"batch-report-generator-manager:latest\" $batchReportGeneratorJobManagerDist windows"
     )
 
     echo "Pushing images to Azure Container Registry."

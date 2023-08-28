@@ -44,18 +44,19 @@ function setDockerConfig() {
     $configName = "daemon.json"
     $configPath = "$configFolder\$configName"
 
+    # Exit if docker installation does not exist
     if (-not (Test-Path -Path $configFolder)) {
-        # Docker installation does not exist
         return
     }
 
+    # Create docker configuration file if it does not exist
     if (-not (Test-Path -Path $configPath -PathType Leaf)) {
-        # Docker configuration file does not exist
         "{}" | Out-File -FilePath $configPath -Force
     }
 
     $config = Get-Content $configPath -Raw | ConvertFrom-Json
-    # Set data location
+
+    # Set docker data location
     if ($config."data-root" -and $config."data-root" -ne $dataRootValue) {
         # Update property value
         $config."data-root" = $dataRootValue
@@ -83,10 +84,13 @@ function setDockerConfig() {
         # Add property value
         $config | Add-Member -Name "exec-opts" -Value @($hypervIsolation) -MemberType NoteProperty
         $global:rebootRequired = $true
-    } 
+    }
 
+    # Set docker temp directory
+    [Environment]::SetEnvironmentVariable("DOCKER_TMPDIR", "$dataRootValue\tmp", "Machine")
+
+    # Trace updated config
     $config | ConvertTo-Json | Set-Content $configPath -Force
-
     if ($global:rebootRequired -eq $true) {
         Write-Output "Docker config file was successfully updated."
         Write-Output $config | ConvertTo-Json

@@ -84,7 +84,7 @@ function loginToContainerRegistry() {
     Write-Output "$containerRegistryPassword" | docker login -u "$containerRegistryUsername" --password-stdin "$azurecr"
 }
 
-function pullDockerImages() {
+function pullImages() {
     $pool = $env:AZ_BATCH_POOL_ID;
     Write-Output "Pulling container images from a registry for the $pool pool..."
     if ( $pool -eq "on-demand-url-scan-pool" ) {
@@ -108,6 +108,13 @@ function pullDockerImages() {
     }
 }
 
+function buildScannerImage() {
+    Push-Location
+    Set-Location -Path ".\..\docker-scanner-image"
+    .\build-image.ps1
+    Pop-Location
+}
+
 if ([string]::IsNullOrEmpty($global:keyvault)) {
     $global:keyvault = $env:KEY_VAULT_NAME;
 }
@@ -125,4 +132,5 @@ getCurrentUserDetails
 loginToAzure
 grantUserAccessToKeyVault
 loginToContainerRegistry
-pullDockerImages
+pullImages
+buildScannerImage
