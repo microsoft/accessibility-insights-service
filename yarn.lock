@@ -4819,8 +4819,8 @@ __metadata:
     "@types/levelup": ^5.1.1
     "@types/node": ^16.18.11
     "@types/puppeteer": ^7.0.4
-    accessibility-insights-report: 4.7.0
-    axe-core: 4.7.2
+    accessibility-insights-report: ^4.7.0
+    axe-core: ^4.7.2
     common: "workspace:*"
     dotenv: ^16.0.1
     encoding-down: ^7.1.0
@@ -4848,7 +4848,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"accessibility-insights-report@npm:4.7.0, accessibility-insights-report@npm:^4.7.0":
+"accessibility-insights-report@npm:^4.7.0":
   version: 4.7.0
   resolution: "accessibility-insights-report@npm:4.7.0"
   dependencies:
@@ -4890,7 +4890,7 @@ __metadata:
     "@types/puppeteer": ^7.0.4
     "@types/table": ^6.3.2
     accessibility-insights-crawler: "workspace:*"
-    accessibility-insights-report: 4.7.0
+    accessibility-insights-report: ^4.7.0
     ajv: ^8.12.0
     applicationinsights: ^2.3.1
     axe-core: ^4.7.2
@@ -4954,7 +4954,7 @@ __metadata:
     "@typescript-eslint/eslint-plugin": ^5.50.0
     "@typescript-eslint/eslint-plugin-tslint": ^5.50.0
     "@typescript-eslint/parser": ^5.50.0
-    accessibility-insights-report: 4.7.0
+    accessibility-insights-report: ^4.7.0
     combine-dependabot-prs: ^1.0.5
     commander: ^10.0.0
     eslint: ^7.32.0
@@ -5478,7 +5478,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"axe-core@npm:4.7.2":
+"axe-core@npm:^4.7.2":
   version: 4.7.2
   resolution: "axe-core@npm:4.7.2"
   checksum: 5d86fa0f45213b0e54cbb5d713ce885c4a8fe3a72b92dd915a47aa396d6fd149c4a87fec53aa978511f6d941402256cfeb26f2db35129e370f25a453c688655a
@@ -14124,7 +14124,7 @@ __metadata:
     "@types/lodash": ^4.14.182
     "@types/node": ^16.18.11
     "@types/puppeteer": ^7.0.4
-    axe-core: 4.7.2
+    axe-core: ^4.7.2
     common: "workspace:*"
     cpy-cli: ^4.1.0
     inversify: ^6.0.1
@@ -14266,9 +14266,9 @@ __metadata:
     "@types/puppeteer": ^7.0.4
     "@types/sha.js": ^2.4.0
     "@types/yargs": ^17.0.22
-    accessibility-insights-report: 4.7.0
+    accessibility-insights-report: ^4.7.0
     async-mutex: ^0.3.2
-    axe-core: 4.7.2
+    axe-core: ^4.7.2
     axe-result-converter: "workspace:*"
     azure-services: "workspace:*"
     common: "workspace:*"
@@ -16095,9 +16095,9 @@ __metadata:
     "@types/sha.js": ^2.4.0
     "@types/yargs": ^17.0.22
     accessibility-insights-crawler: "workspace:*"
-    accessibility-insights-report: 4.7.0
+    accessibility-insights-report: ^4.7.0
     applicationinsights: ^2.3.1
-    axe-core: 4.7.2
+    axe-core: ^4.7.2
     axe-result-converter: "workspace:*"
     axe-sarif-converter: ^2.11.0
     azure-services: "workspace:*"
