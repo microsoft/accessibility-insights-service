@@ -129,14 +129,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@axe-core/puppeteer@npm:^4.5.0":
-  version: 4.5.0
-  resolution: "@axe-core/puppeteer@npm:4.5.0"
+"@axe-core/puppeteer@npm:^4.7.3":
+  version: 4.7.3
+  resolution: "@axe-core/puppeteer@npm:4.7.3"
   dependencies:
-    axe-core: ^4.5.0
+    axe-core: ^4.7.0
   peerDependencies:
-    puppeteer: ">=1.10.0 <= 18"
-  checksum: 21a5a2f068564907be029e5d47ccb6890362be3a2e3292d296a93ddbb678556e6b7d81c5ed7cba80256080b960a6a8e9406a76c4b860057dde7b72df6337cebf
+    puppeteer: ">=1.10.0"
+  checksum: 38141bf016216f7ac829d294b09ba59d76727eb4f42273186abcadc966936545d0fce9b95b1be79fbf7a1e3a39b1d578deae14024336efb5e24bf39a07079e0d
   languageName: node
   linkType: hard
 
@@ -3589,6 +3589,23 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@puppeteer/browsers@npm:^1.5.0":
+  version: 1.7.0
+  resolution: "@puppeteer/browsers@npm:1.7.0"
+  dependencies:
+    debug: 4.3.4
+    extract-zip: 2.0.1
+    progress: 2.0.3
+    proxy-agent: 6.3.0
+    tar-fs: 3.0.4
+    unbzip2-stream: 1.4.3
+    yargs: 17.7.1
+  bin:
+    browsers: lib/cjs/main-cli.js
+  checksum: 0a2aecc72fb94a8d94246188f94cfaad730d1d372b34df94ca51ff8a94596bf475a0fee162c317a768fa4b2a707bfa8afd582d594958f49e1019effadfe744b6
+  languageName: node
+  linkType: hard
+
 "@rollup/plugin-commonjs@npm:^24.0.1":
   version: 24.0.1
   resolution: "@rollup/plugin-commonjs@npm:24.0.1"
@@ -4790,7 +4807,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "accessibility-insights-crawler@workspace:packages/crawler"
   dependencies:
-    "@axe-core/puppeteer": ^4.5.0
+    "@axe-core/puppeteer": ^4.7.3
     "@crawlee/browser-pool": ^3.5.0
     "@crawlee/puppeteer": ^3.5.0
     "@medv/finder": ^2.1.0
@@ -4802,8 +4819,8 @@ __metadata:
     "@types/levelup": ^5.1.1
     "@types/node": ^16.18.11
     "@types/puppeteer": ^7.0.4
-    accessibility-insights-report: 4.6.3
-    axe-core: 4.6.3
+    accessibility-insights-report: 4.7.0
+    axe-core: 4.7.2
     common: "workspace:*"
     dotenv: ^16.0.1
     encoding-down: ^7.1.0
@@ -4831,20 +4848,20 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"accessibility-insights-report@npm:4.6.3":
-  version: 4.6.3
-  resolution: "accessibility-insights-report@npm:4.6.3"
+"accessibility-insights-report@npm:4.7.0, accessibility-insights-report@npm:^4.7.0":
+  version: 4.7.0
+  resolution: "accessibility-insights-report@npm:4.7.0"
   dependencies:
     "@fluentui/react": ^8.96.1
-    axe-core: 4.6.3
+    axe-core: 4.7.2
     classnames: ^2.3.2
     lodash: ^4.17.21
-    luxon: ^3.2.1
+    luxon: ^3.3.0
     react: ^16.14.0
     react-dom: ^16.14.0
     react-helmet: ^6.1.0
     uuid: ^9.0.0
-  checksum: 34ba89cd5b1fbe1e2e126212148f5c4728c2dd31085e0ee97bb3ef3bc46e1cbb9c54c6f9fb5762fe152bdb4e54edc95593123d565d33ce0bc378fdf9f2d44e7a
+  checksum: ae49ce196e7aaff01352326956a9719cff232af46313f8faa0730f0dcb6829e8e2c5a2295f774c8c12c5a9a05e3c080447fc5225ed16ee69dec49dcb21ca70b8
   languageName: node
   linkType: hard
 
@@ -4853,7 +4870,7 @@ __metadata:
   resolution: "accessibility-insights-scan@workspace:packages/cli"
   dependencies:
     "@apify/log": 2.2.18
-    "@axe-core/puppeteer": ^4.5.0
+    "@axe-core/puppeteer": ^4.7.3
     "@crawlee/browser-pool": ^3.5.0
     "@crawlee/puppeteer": ^3.5.0
     "@medv/finder": ^2.1.0
@@ -4873,10 +4890,10 @@ __metadata:
     "@types/puppeteer": ^7.0.4
     "@types/table": ^6.3.2
     accessibility-insights-crawler: "workspace:*"
-    accessibility-insights-report: 4.6.3
+    accessibility-insights-report: 4.7.0
     ajv: ^8.12.0
     applicationinsights: ^2.3.1
-    axe-core: 4.6.3
+    axe-core: ^4.7.2
     axe-result-converter: "workspace:*"
     cli-spinner: ^0.2.10
     common: "workspace:*"
@@ -4937,7 +4954,7 @@ __metadata:
     "@typescript-eslint/eslint-plugin": ^5.50.0
     "@typescript-eslint/eslint-plugin-tslint": ^5.50.0
     "@typescript-eslint/parser": ^5.50.0
-    accessibility-insights-report: 4.6.3
+    accessibility-insights-report: 4.7.0
     combine-dependabot-prs: ^1.0.5
     commander: ^10.0.0
     eslint: ^7.32.0
@@ -5461,10 +5478,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"axe-core@npm:4.6.3":
-  version: 4.6.3
-  resolution: "axe-core@npm:4.6.3"
-  checksum: d0c46be92b9707c48b88a53cd5f471b155a2bfc8bf6beffb514ecd14e30b4863e340b5fc4f496d82a3c562048088c1f3ff5b93b9b3b026cb9c3bfacfd535da10
+"axe-core@npm:4.7.2":
+  version: 4.7.2
+  resolution: "axe-core@npm:4.7.2"
+  checksum: 5d86fa0f45213b0e54cbb5d713ce885c4a8fe3a72b92dd915a47aa396d6fd149c4a87fec53aa978511f6d941402256cfeb26f2db35129e370f25a453c688655a
   languageName: node
   linkType: hard
 
@@ -5475,8 +5492,8 @@ __metadata:
     "@types/jest": ^29.5.0
     "@types/lodash": ^4.14.182
     "@types/node": ^16.18.11
-    accessibility-insights-report: 4.6.3
-    axe-core: 4.6.3
+    accessibility-insights-report: ^4.7.0
+    axe-core: ^4.7.2
     common: "workspace:*"
     inversify: ^6.0.1
     jest: ^29.5.0
@@ -5491,16 +5508,17 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"axe-sarif-converter@npm:^2.9.1":
-  version: 2.9.1
-  resolution: "axe-sarif-converter@npm:2.9.1"
+"axe-sarif-converter@npm:^2.11.0":
+  version: 2.11.0
+  resolution: "axe-sarif-converter@npm:2.11.0"
   dependencies:
+    "@puppeteer/browsers": ^1.5.0
     "@types/sarif": ">=2.1.1 <=2.1.4"
     axe-core: ^3.2.2 || ^4.0.0
     yargs: ^17.0.0
   bin:
     axe-sarif-converter: dist/cli.js
-  checksum: bb343ee56f304ee873bd97dcc0841703c83f4763860dd7c7193aba2937b77c9c6a18a1f7abb344f64dd3a6ed8fc3e0d276d673a7c2e3f1ca7484dd1f4b91c31e
+  checksum: 3e59ed698c939f3df338abb79b3606218e8153a91f0a4a6761370214bcc8d5c932ff15d959f4958e54725c5b4a789439c7162979cd5523ab1c6bf9b0708a19ac
   languageName: node
   linkType: hard
 
@@ -11346,10 +11364,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"luxon@npm:^3.2.1":
-  version: 3.2.1
-  resolution: "luxon@npm:3.2.1"
-  checksum: 3fa3def2c5f5d3032b4c46220c4da8aeb467ac979888fc9d2557adcd22195f93516b4ad5909a75862bec8dc6ddc0953b0f38e6d2f4a8ab8450ddc531a83cf20d
+"luxon@npm:^3.3.0":
+  version: 3.4.2
+  resolution: "luxon@npm:3.4.2"
+  checksum: efefdfaea90f4c8e502db8eb255385e6dac6733b6a9e1372eaf1a866cc1118363e235a3f6df505b837abc8bbcdfd8f0718a8de387b80cef9ee624d8791ca0844
   languageName: node
   linkType: hard
 
@@ -14101,12 +14119,12 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "scanner-global-library@workspace:packages/scanner-global-library"
   dependencies:
-    "@axe-core/puppeteer": ^4.5.0
+    "@axe-core/puppeteer": ^4.7.3
     "@types/jest": ^29.5.0
     "@types/lodash": ^4.14.182
     "@types/node": ^16.18.11
     "@types/puppeteer": ^7.0.4
-    axe-core: 4.6.3
+    axe-core: 4.7.2
     common: "workspace:*"
     cpy-cli: ^4.1.0
     inversify: ^6.0.1
@@ -14248,9 +14266,9 @@ __metadata:
     "@types/puppeteer": ^7.0.4
     "@types/sha.js": ^2.4.0
     "@types/yargs": ^17.0.22
-    accessibility-insights-report: 4.6.3
+    accessibility-insights-report: 4.7.0
     async-mutex: ^0.3.2
-    axe-core: 4.6.3
+    axe-core: 4.7.2
     axe-result-converter: "workspace:*"
     azure-services: "workspace:*"
     common: "workspace:*"
@@ -16067,7 +16085,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "web-api-scan-runner@workspace:packages/web-api-scan-runner"
   dependencies:
-    "@axe-core/puppeteer": ^4.5.0
+    "@axe-core/puppeteer": ^4.7.3
     "@azure/cosmos": ^3.17.2
     "@types/dotenv": ^8.2.0
     "@types/jest": ^29.5.0
@@ -16077,11 +16095,11 @@ __metadata:
     "@types/sha.js": ^2.4.0
     "@types/yargs": ^17.0.22
     accessibility-insights-crawler: "workspace:*"
-    accessibility-insights-report: 4.6.3
+    accessibility-insights-report: 4.7.0
     applicationinsights: ^2.3.1
-    axe-core: 4.6.3
+    axe-core: 4.7.2
     axe-result-converter: "workspace:*"
-    axe-sarif-converter: ^2.9.1
+    axe-sarif-converter: ^2.11.0
     azure-services: "workspace:*"
     common: "workspace:*"
     copy-webpack-plugin: ^11.0.0
