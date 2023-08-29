@@ -75,7 +75,7 @@
         "@npmcli/git": ">=2.1.0",
         "ansi-regex": "5.0.1",
         "async": ">=3.2.2",
-        "axe-core": "4.6.3",
+        "axe-core": "^4.7.2",
         "glob-parent": ">=5.1.2",
         "json-schema": ">=0.4.0",
         "minimist": ">=1.2.6",
@@ -89,7 +89,7 @@
         "semver": ">=7.5.2"
     },
     "dependencies": {
-        "accessibility-insights-report": "4.6.3"
+        "accessibility-insights-report": "^4.7.0"
     },
     "packageManager": "yarn@3.2.2"
 }
