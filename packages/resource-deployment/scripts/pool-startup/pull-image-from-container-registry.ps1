@@ -109,10 +109,7 @@ function pullImages() {
 }
 
 function buildScannerImage() {
-    Push-Location
-    Set-Location -Path ".\..\docker-scanner-image"
-    .\build-image.ps1
-    Pop-Location
+    .\build-scanner-image.ps1
 }
 
 if ([string]::IsNullOrEmpty($global:keyvault)) {
