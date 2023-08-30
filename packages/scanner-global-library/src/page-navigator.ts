@@ -151,7 +151,10 @@ export class PageNavigator {
 
             const pageOperation = async () => page.goBack(this.waitForOptions);
             opResult = await this.pageOperationHandler.invoke(pageOperation, page);
-        } while (count < maxRetryCount && (opResult.response?.status() === undefined || opResult.response?.status() === 304));
+        } while (
+            count < maxRetryCount &&
+            (opResult.error !== undefined || opResult.response?.status() === undefined || opResult.response?.status() === 304)
+        );
 
         return opResult;
     }
