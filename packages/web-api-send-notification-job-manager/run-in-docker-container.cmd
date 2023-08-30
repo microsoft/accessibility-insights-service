@@ -5,9 +5,7 @@ echo off
 
 rem The script builds and runs the docker image
 
-copy ..\resource-deployment\runtime-config\runtime-config.dev.json .\dist\runtime-config.json
-copy .\.env .\dist\
-
+copy ..\resource-deployment\runtime-config\runtime-config.dev.json .\dist\runtime-config.json &&^
 yarn build &&^
 cd .\dist &&^
 docker build --tag web-api-send-notification-job-manager . &&^
