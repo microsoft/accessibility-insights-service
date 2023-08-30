@@ -5,6 +5,7 @@ import * as Puppeteer from 'puppeteer';
 import { injectable, inject, optional } from 'inversify';
 import { System } from 'common';
 import { GlobalLogger } from 'logger';
+import { isEmpty } from 'lodash';
 import { InterceptedRequest, PageEventHandler } from './page-event-handler';
 import { PageNetworkTracerHandler } from './page-network-tracer-handler';
 
@@ -31,8 +32,6 @@ export class PageRequestInterceptor {
     private pageOnResponseEventHandler: (response: Puppeteer.HTTPResponse) => Promise<void>;
 
     private pageOnRequestFailedEventHandler: (request: Puppeteer.HTTPRequest) => Promise<void>;
-
-    private pageId: string;
 
     constructor(
         @inject(PageNetworkTracerHandler) private readonly pageNetworkTracerHandler: PageNetworkTracerHandler,
@@ -62,16 +61,12 @@ export class PageRequestInterceptor {
         this.interceptedRequests = [];
         const networkTraceEnabled = networkTrace === true || this.globalNetworkTrace === true;
 
-        // Add trace event handlers for a new page instance only
-        if (page.id !== undefined && this.pageId === page.id) {
+        // Adding event handlers to a new page only once
+        if (isEmpty(page.id)) {
+            page.id = (Math.random() + 1).toString(36);
+        } else {
             return;
         }
-
-        // Trace page instance to not break requests interception events
-        if (page.id === undefined) {
-            page.id = `${System.getTimestamp()}`;
-        }
-        this.pageId = page.id;
 
         await page.setBypassServiceWorker(true);
         // Enable requests interception for a life duration of the page instance.

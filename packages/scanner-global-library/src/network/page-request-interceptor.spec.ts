@@ -6,14 +6,26 @@ import 'reflect-metadata';
 import { IMock, It, Mock, Times } from 'typemoq';
 import * as Puppeteer from 'puppeteer';
 import { GlobalLogger } from 'logger';
-import { PageRequestInterceptor } from './page-request-interceptor';
+import { PageRequestInterceptor, PuppeteerPageExt } from './page-request-interceptor';
 import { PageNetworkTracerHandler } from './page-network-tracer-handler';
 import { InterceptedRequest } from './page-event-handler';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+class PuppeteerPageExtMock extends Puppeteer.Page {
+    private _id: string;
+
+    public get id(): string {
+        return this._id;
+    }
+
+    public set id(value: string) {
+        this._id = value;
+    }
+}
+
 let pageRequestInterceptor: PageRequestInterceptor;
-let puppeteerPageMock: IMock<Puppeteer.Page>;
+let puppeteerPageMock: IMock<PuppeteerPageExt>;
 let loggerMock: IMock<GlobalLogger>;
 let pageNetworkTracerHandlerMock: IMock<PageNetworkTracerHandler>;
 
@@ -21,7 +33,7 @@ const mainFrame = { name: () => 'main' } as Puppeteer.Frame;
 
 describe(PageRequestInterceptor, () => {
     beforeEach(() => {
-        puppeteerPageMock = Mock.ofType<Puppeteer.Page>();
+        puppeteerPageMock = Mock.ofInstance(new PuppeteerPageExtMock());
         loggerMock = Mock.ofType(GlobalLogger);
         pageNetworkTracerHandlerMock = Mock.ofType<PageNetworkTracerHandler>();
 
