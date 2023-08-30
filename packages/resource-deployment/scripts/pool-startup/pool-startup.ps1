@@ -23,6 +23,16 @@ function installBootstrapPackages() {
     az version
 }
 
+function checkSystemVolume() {
+    $drive = Get-PSDrive ${env:SystemDrive}.Substring(0, 1) | Select-Object Used, Free
+    Write-Output "System volume $env:SystemDrive `
+    Used space: $(($drive.Used / 1073741824).ToString('0.00')) GB `
+    Free space: $(($drive.Free / 1073741824).ToString('0.00')) GB"
+
+    # System volume check will reclaim hidden drive space
+    Write-Output "Scheduling system volume check..."
+    Write-Output Y | chkdsk $env:SystemDrive /R /F
+}
 
 if ([string]::IsNullOrEmpty($global:keyvault)) {
     $global:keyvault = $env:KEY_VAULT_NAME;
@@ -40,5 +50,7 @@ installBootstrapPackages
 
 Write-Output "Invoking custom pool startup script"
 ./custom-pool-post-startup.ps1
+
+checkSystemVolume
 
 Write-Output "Successfully completed pool startup script execution"
