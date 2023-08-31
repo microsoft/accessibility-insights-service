@@ -14,7 +14,7 @@ $global:azurecr = ""
 $global:keyvault = $keyvault
 
 function exitWithUsageInfo {
-    Write-Output "Usage: pull-image-from-container-registry.ps1 -k <key vault name>"
+    Write-Output "Usage: pull-image-from-registry.ps1 -k <key vault name>"
     exit 1
 }
 
