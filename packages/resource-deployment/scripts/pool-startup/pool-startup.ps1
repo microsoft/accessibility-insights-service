@@ -30,8 +30,8 @@ function checkSystemVolume() {
     Free space: $(($drive.Free / 1073741824).ToString('0.00')) GB"
 
     # System volume check will reclaim hidden drive space
-    Write-Output "Scheduling system volume check..."
-    Write-Output Y | chkdsk $env:SystemDrive /R /F
+    # Write-Output "Scheduling system volume check..."
+    # Write-Output Y | chkdsk $env:SystemDrive /R /F
 }
 
 if ([string]::IsNullOrEmpty($global:keyvault)) {
