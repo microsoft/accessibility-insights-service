@@ -24,14 +24,16 @@ function installBootstrapPackages() {
 }
 
 function checkSystemVolume() {
-    $drive = Get-PSDrive ${env:SystemDrive}.Substring(0, 1) | Select-Object Used, Free
-    Write-Output "System volume $env:SystemDrive `
-    Used space: $(($drive.Used / 1073741824).ToString('0.00')) GB `
-    Free space: $(($drive.Free / 1073741824).ToString('0.00')) GB"
+    $drive = Get-CimInstance Win32_LogicalDisk -Filter "DeviceID='${env:SystemDrive}'" | Select-Object Size, FreeSpace
+    Write-Output "System volume ${env:SystemDrive} `
+    Capacity: $(($drive.Size / 1073741824).ToString('0.00')) GB `
+    Free space: $(($drive.FreeSpace / 1073741824).ToString('0.00')) GB"
 
-    # System volume check will reclaim hidden drive space
-    # Write-Output "Scheduling system volume check..."
-    # Write-Output Y | chkdsk $env:SystemDrive /R /F
+    if ($($drive.FreeSpace / $drive.Size) -le 0.1 ) {
+        # System volume check will reclaim hidden drive space
+        Write-Output "System volume has low free space. Scheduling system volume check on the next system restart..."
+        Write-Output Y | chkdsk $env:SystemDrive /R /F | Out-Null
+    }
 }
 
 if ([string]::IsNullOrEmpty($global:keyvault)) {

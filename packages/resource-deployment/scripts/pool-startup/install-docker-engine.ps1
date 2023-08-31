@@ -87,7 +87,10 @@ function setDockerConfig() {
     }
 
     # Set docker temp directory
-    [Environment]::SetEnvironmentVariable("DOCKER_TMPDIR", "$dataRootValue\tmp", "Machine")
+    if (-not $env:DOCKER_TMPDIR) {
+        [Environment]::SetEnvironmentVariable("DOCKER_TMPDIR", "$dataRootValue\tmp", "Machine")
+        $global:rebootRequired = $true
+    }
 
     # Trace updated config
     $config | ConvertTo-Json | Set-Content $configPath -Force
