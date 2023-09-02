@@ -58,6 +58,7 @@
         "webpack-cli": "^5.0.1",
         "webpack-node-externals": "^3.0.0"
     },
+    "standAlonePackage": "This is a stand-alone package. Do NOT add dependencies to any service packages.",
     "dependencies": {
         "@apify/log": "2.2.18",
         "@axe-core/puppeteer": "^4.7.3",

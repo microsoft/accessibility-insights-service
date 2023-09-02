@@ -6,8 +6,8 @@ import 'reflect-metadata';
 import { AxePuppeteer } from '@axe-core/puppeteer';
 import { AxeResults } from 'axe-core';
 import { Page } from 'puppeteer';
-import { AxePuppeteerFactory } from 'scanner-global-library';
 import { IMock, It, Mock } from 'typemoq';
+import { AxePuppeteerFactory } from 'axe-core-scanner';
 import { getPromisableDynamicMock } from '../test-utilities/promisable-mock';
 import { PageScanner } from './page-scanner';
 

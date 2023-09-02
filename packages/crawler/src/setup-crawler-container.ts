@@ -3,8 +3,7 @@
 
 import { reporterFactory } from 'accessibility-insights-report';
 import * as inversify from 'inversify';
-import { PageNavigator } from 'scanner-global-library';
-import { ApifyConsoleLoggerClient, GlobalLogger } from 'logger';
+import { axeScannerIocTypes, localAxeConfiguration, webAxeRunOptions } from 'axe-core-scanner';
 import { ApifyRequestQueueCreator } from './apify/apify-request-queue-creator';
 import { Crawler } from './crawler';
 import { CrawlerConfiguration } from './crawler/crawler-configuration';
@@ -22,6 +21,8 @@ export function setupLocalCrawlerContainer(container: inversify.Container): inve
     container.bind(CrawlerConfiguration).toSelf().inSingletonScope();
     container.bind(crawlerIocTypes.ReporterFactory).toConstantValue(reporterFactory);
     container.bind(crawlerIocTypes.CrawlerEngine).to(SiteCrawlerEngine);
+    container.bind(axeScannerIocTypes.AxeConfiguration).toConstantValue(localAxeConfiguration);
+    container.bind(axeScannerIocTypes.AxeRunOptions).toConstantValue(webAxeRunOptions);
 
     setupSingletonProvider(crawlerIocTypes.ApifyRequestQueueFactory, container, async (context: inversify.interfaces.Context) => {
         const apifyResourceCreator = context.container.get(ApifyRequestQueueCreator);
@@ -41,34 +42,6 @@ export function setupLocalCrawlerContainer(container: inversify.Container): inve
                 } else {
                     return context.container.get(ClassicPageProcessor);
                 }
-            };
-        });
-
-    container
-        .bind(GlobalLogger)
-        .toDynamicValue(() => {
-            const client = new ApifyConsoleLoggerClient();
-            const logger = new GlobalLogger([client]);
-            logger.initialized = true;
-
-            return logger;
-        })
-        .inSingletonScope();
-
-    // factory to create PageNavigator isolated object instance per crawler request
-    container
-        .bind<inversify.interfaces.Factory<Promise<PageNavigator>>>(crawlerIocTypes.PageNavigatorFactory)
-        .toFactory<Promise<PageNavigator>>((context: inversify.interfaces.Context) => {
-            return async () => {
-                const client = new ApifyConsoleLoggerClient();
-                const logger = new GlobalLogger([client]);
-                await logger.setup();
-
-                const childContainer = context.container.createChild();
-                childContainer.bind(GlobalLogger).toConstantValue(logger);
-                const pageNavigator = childContainer.get<PageNavigator>(PageNavigator);
-
-                return pageNavigator;
             };
         });
 

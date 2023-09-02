@@ -4,18 +4,18 @@
 import 'reflect-metadata';
 
 import * as Crawlee from '@crawlee/puppeteer';
-import { GlobalLogger } from 'logger';
 import { IMock, Mock } from 'typemoq';
+import { Logger } from '../logger/logger';
 import { ClickElementOperation } from './click-element-operation';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 describe(ClickElementOperation, () => {
-    let loggerMock: IMock<GlobalLogger>;
+    let loggerMock: IMock<Logger>;
     let clickElementOp: ClickElementOperation;
 
     beforeEach(() => {
-        loggerMock = Mock.ofType<GlobalLogger>();
+        loggerMock = Mock.ofType<Logger>();
         clickElementOp = new ClickElementOperation(loggerMock.object);
     });
 

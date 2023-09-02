@@ -3,11 +3,9 @@
 
 import { inject, injectable } from 'inversify';
 import * as Puppeteer from 'puppeteer';
-import { BrowserError } from 'scanner-global-library';
 import { System } from 'common';
 import { isArray } from 'lodash';
 import * as Crawlee from '@crawlee/puppeteer';
-import { GlobalLogger } from 'logger';
 import { CrawlerConfiguration } from '../crawler/crawler-configuration';
 import { DataBase } from '../level-storage/data-base';
 import { AccessibilityScanOperation } from '../page-operations/accessibility-scan-operation';
@@ -15,7 +13,9 @@ import { LocalBlobStore } from '../storage/local-blob-store';
 import { LocalDataStore } from '../storage/local-data-store';
 import { BlobStore, DataStore, scanResultStorageName } from '../storage/store-types';
 import { ScanData } from '../types/scan-data';
-import { PageNavigatorFactory, crawlerIocTypes } from '../types/ioc-types';
+import { BrowserError } from '../page-handler/browser-error';
+import { PageNavigator } from '../page-handler/page-navigator';
+import { Logger } from '../logger/logger';
 
 /* eslint-disable no-invalid-this, @typescript-eslint/no-explicit-any */
 
@@ -62,10 +62,7 @@ export abstract class PageProcessorBase implements PageProcessor {
                 return;
             }
 
-            const pageNavigator = await this.pageNavigatorFactory();
-            pageNavigator.logger.setCommonProperties({ requestId: context.request.id, url: context.request.url });
-
-            response = await pageNavigator.navigate(context.request.url, context.page);
+            response = await this.pageNavigator.navigate(context.request.url, context.page);
             if (response.browserError) {
                 return;
             }
@@ -112,8 +109,8 @@ export abstract class PageProcessorBase implements PageProcessor {
         @inject(LocalBlobStore) protected readonly blobStore: BlobStore,
         @inject(DataBase) protected readonly dataBase: DataBase,
         @inject(CrawlerConfiguration) protected readonly crawlerConfiguration: CrawlerConfiguration,
-        @inject(crawlerIocTypes.PageNavigatorFactory) protected readonly pageNavigatorFactory: PageNavigatorFactory,
-        @inject(GlobalLogger) protected readonly logger: GlobalLogger,
+        @inject(PageNavigator) protected readonly pageNavigator: PageNavigator,
+        @inject(Logger) protected readonly logger: Logger,
         protected readonly saveSnapshotExt: typeof Crawlee.puppeteerUtils.saveSnapshot = Crawlee.puppeteerUtils.saveSnapshot,
     ) {
         this.baseUrl = this.crawlerConfiguration.baseUrl();

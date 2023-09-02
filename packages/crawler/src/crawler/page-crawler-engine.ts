@@ -5,10 +5,10 @@ import { inject, injectable } from 'inversify';
 import * as Crawlee from '@crawlee/puppeteer';
 import { isEmpty } from 'lodash';
 import { SetRequired } from 'type-fest';
-import { GlobalLogger } from 'logger';
 import { crawlerIocTypes } from '../types/ioc-types';
 import { CrawlerRunOptions } from '..';
 import { ApifyRequestQueueFactory } from '../apify/apify-request-queue-creator';
+import { Logger } from '../logger/logger';
 import { CrawlerConfiguration } from './crawler-configuration';
 import { CrawlerEngine } from './crawler-engine';
 
@@ -17,7 +17,7 @@ export class PageCrawlerEngine implements CrawlerEngine<string[]> {
     public constructor(
         @inject(crawlerIocTypes.ApifyRequestQueueFactory) protected readonly requestQueueProvider: ApifyRequestQueueFactory,
         @inject(CrawlerConfiguration) private readonly crawlerConfiguration: CrawlerConfiguration,
-        @inject(GlobalLogger) private readonly logger: GlobalLogger,
+        @inject(Logger) private readonly logger: Logger,
         private readonly browserCrawlerEnqueueLinks: typeof Crawlee.browserCrawlerEnqueueLinks = Crawlee.browserCrawlerEnqueueLinks,
     ) {}
 

@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { BrowserError } from 'scanner-global-library';
 import { AxeResults } from 'axe-core';
 
 export declare type ItemType = 'scanResult' | 'scanMetadata';
@@ -30,7 +29,7 @@ export interface ScanResult {
     scanState: ScanState;
     issueCount?: number;
     axeResults?: AxeResults;
-    error?: string | BrowserError;
+    error?: string;
 }
 
 export interface ScanResults {

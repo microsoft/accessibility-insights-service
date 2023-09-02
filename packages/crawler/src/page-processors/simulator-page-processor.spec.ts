@@ -5,18 +5,17 @@ import 'reflect-metadata';
 
 import * as Crawlee from '@crawlee/puppeteer';
 import { Page } from 'puppeteer';
-import { PageNavigator } from 'scanner-global-library';
 import { IMock, It, Mock } from 'typemoq';
 import { AxeResults } from 'axe-core';
-import { GlobalLogger } from 'logger';
 import { CrawlerConfiguration } from '../crawler/crawler-configuration';
 import { DataBase } from '../level-storage/data-base';
 import { AccessibilityScanOperation } from '../page-operations/accessibility-scan-operation';
 import { ClickElementOperation } from '../page-operations/click-element-operation';
 import { EnqueueActiveElementsOperation } from '../page-operations/enqueue-active-elements-operation';
 import { BlobStore, DataStore } from '../storage/store-types';
-import { PageNavigatorFactory } from '../types/ioc-types';
 import { getPromisableDynamicMock } from '../test-utilities/promisable-mock';
+import { PageNavigator } from '../page-handler/page-navigator';
+import { Logger } from '../logger/logger';
 import { SimulatorPageProcessor } from './simulator-page-processor';
 
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/consistent-type-assertions,  */
@@ -35,8 +34,7 @@ describe(SimulatorPageProcessor, () => {
     let enqueueActiveElementsOpExtMock: IMock<EnqueueActiveElementsOperation>;
     let pageNavigatorMock: IMock<PageNavigator>;
     let crawlerConfigurationMock: IMock<CrawlerConfiguration>;
-    let pageNavigatorFactoryMock: IMock<PageNavigatorFactory>;
-    let loggerMock: IMock<GlobalLogger>;
+    let loggerMock: IMock<Logger>;
     let requestStub: Crawlee.Request;
     let puppeteerPageStub: Page;
     let simulatorPageProcessor: SimulatorPageProcessor;
@@ -50,8 +48,7 @@ describe(SimulatorPageProcessor, () => {
         clickElementOpMock = Mock.ofType<ClickElementOperation>();
         enqueueActiveElementsOpExtMock = Mock.ofType<EnqueueActiveElementsOperation>();
         pageNavigatorMock = getPromisableDynamicMock(Mock.ofType<PageNavigator>());
-        loggerMock = Mock.ofType<GlobalLogger>();
-        pageNavigatorFactoryMock = Mock.ofType<PageNavigatorFactory>();
+        loggerMock = Mock.ofType<Logger>();
         crawlerConfigurationMock = Mock.ofType(CrawlerConfiguration);
 
         crawlerConfigurationMock
@@ -91,7 +88,6 @@ describe(SimulatorPageProcessor, () => {
             .returns(() => Promise.resolve({}))
             .verifiable();
         pageNavigatorMock.setup((o) => o.logger).returns(() => loggerMock.object);
-        pageNavigatorFactoryMock.setup((o) => o(It.isAny())).returns(() => Promise.resolve(pageNavigatorMock.object));
 
         simulatorPageProcessor = new SimulatorPageProcessor(
             accessibilityScanOpMock.object,
@@ -101,7 +97,7 @@ describe(SimulatorPageProcessor, () => {
             enqueueActiveElementsOpExtMock.object,
             clickElementOpMock.object,
             crawlerConfigurationMock.object,
-            pageNavigatorFactoryMock.object,
+            pageNavigatorMock.object,
             loggerMock.object,
         );
     });

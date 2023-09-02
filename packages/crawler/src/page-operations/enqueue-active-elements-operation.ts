@@ -4,15 +4,15 @@
 import { inject, injectable } from 'inversify';
 import * as Crawlee from '@crawlee/puppeteer';
 import { Url } from 'common';
-import { GlobalLogger } from 'logger';
 import { ActiveElementsFinder } from '../active-elements-finder';
+import { Logger } from '../logger/logger';
 import { Operation } from './operation';
 
 @injectable()
 export class EnqueueActiveElementsOperation {
     constructor(
         @inject(ActiveElementsFinder) private readonly activeElementFinder: ActiveElementsFinder,
-        @inject(GlobalLogger) private readonly logger: GlobalLogger,
+        @inject(Logger) private readonly logger: Logger,
     ) {}
 
     public async enqueue(context: Crawlee.PuppeteerCrawlingContext, selectors: string[]): Promise<void> {

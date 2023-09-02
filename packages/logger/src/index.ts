@@ -12,4 +12,3 @@ export { AvailabilityTelemetry } from './availability-telemetry';
 export { LoggerProperties } from './logger-properties';
 export { ConsoleLoggerClient } from './console-logger-client';
 export { LoggerEvent } from './logger-event';
-export { ApifyConsoleLoggerClient } from './apify-console-logger-client';

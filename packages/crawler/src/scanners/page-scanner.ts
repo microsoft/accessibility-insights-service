@@ -4,8 +4,8 @@
 import { AxePuppeteer } from '@axe-core/puppeteer';
 import { inject, injectable } from 'inversify';
 import * as Puppeteer from 'puppeteer';
-import { AxePuppeteerFactory } from 'scanner-global-library';
 import { AxeResults } from 'axe-core';
+import { AxePuppeteerFactory } from 'axe-core-scanner';
 
 @injectable()
 export class PageScanner {

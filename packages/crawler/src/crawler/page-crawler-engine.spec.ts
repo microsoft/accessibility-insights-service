@@ -7,9 +7,9 @@ import { Page } from 'puppeteer';
 import { IMock, Mock } from 'typemoq';
 import * as Crawlee from '@crawlee/puppeteer';
 import { SetRequired } from 'type-fest';
-import { GlobalLogger } from 'logger';
 import { CrawlerRunOptions } from '../types/crawler-run-options';
 import { ApifyRequestQueueFactory } from '../apify/apify-request-queue-creator';
+import { Logger } from '../logger/logger';
 import { CrawlerConfiguration } from './crawler-configuration';
 import { PageCrawlerEngine } from './page-crawler-engine';
 
@@ -17,7 +17,7 @@ import { PageCrawlerEngine } from './page-crawler-engine';
 
 let requestQueueProviderMock: IMock<ApifyRequestQueueFactory>;
 let crawlerConfigurationMock: IMock<CrawlerConfiguration>;
-let loggerMock: IMock<GlobalLogger>;
+let loggerMock: IMock<Logger>;
 let requestQueueStub: Crawlee.RequestQueue;
 let crawlerRunOptions: SetRequired<CrawlerRunOptions, 'baseUrl' | 'discoveryPatterns' | 'baseCrawlPage' | 'localOutputDir'>;
 let browserCrawlerEnqueueLinksFn: typeof Crawlee.browserCrawlerEnqueueLinks;
@@ -40,7 +40,7 @@ describe(PageCrawlerEngine, () => {
         } as Crawlee.RequestQueue;
         requestQueueProviderMock = Mock.ofInstance(() => null);
         crawlerConfigurationMock = Mock.ofType<CrawlerConfiguration>();
-        loggerMock = Mock.ofType<GlobalLogger>();
+        loggerMock = Mock.ofType<Logger>();
         pageStub = {
             url: () => 'url1',
         } as Page;
