@@ -1,6 +1,6 @@
 {
     "name": "accessibility-insights-scan",
-    "version": "2.3.2",
+    "version": "2.4.0",
     "description": "This project welcomes contributions and suggestions.  Most contributions require you to agree to a Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us the rights to use your contribution. For details, visit https://cla.microsoft.com.",
     "scripts": {
         "build": "webpack --config ./webpack.config.js \"$@\"",
@@ -19,15 +19,15 @@
         "README.md"
     ],
     "repository": "git+https://github.com/Microsoft/accessibility-insights-service.git",
+    "homepage": "https://github.com/Microsoft/accessibility-insights-service#readme",
     "main": "dist/index.js",
     "author": "Microsoft",
     "license": "MIT",
     "bugs": {
         "url": "https://github.com/Microsoft/accessibility-insights-service/issues"
     },
-    "homepage": "https://github.com/Microsoft/accessibility-insights-service#readme",
+    "standAlonePackage": "This is a stand-alone package. Do NOT add dependencies to any service packages.",
     "devDependencies": {
-        "@types/cli-spinner": "^0.2.0",
         "@types/escape-html": "^1.0.2",
         "@types/fingerprint-generator": "1.0.0",
         "@types/jest": "^29.5.0",
@@ -49,7 +49,6 @@
         "npm-run-all": "^4.1.5",
         "playwright": "^1.30.0",
         "rimraf": "^4.1.2",
-        "scanner-global-library": "workspace:*",
         "shebang-loader": "^0.0.1",
         "ts-jest": "^29.1.0",
         "typemoq": "^2.1.0",
@@ -58,7 +57,6 @@
         "webpack-cli": "^5.0.1",
         "webpack-node-externals": "^3.0.0"
     },
-    "standAlonePackage": "This is a stand-alone package. Do NOT add dependencies to any service packages.",
     "dependencies": {
         "@apify/log": "2.2.18",
         "@axe-core/puppeteer": "^4.7.3",
@@ -75,7 +73,6 @@
         "ajv": "^8.12.0",
         "applicationinsights": "^2.3.1",
         "axe-core": "^4.7.2",
-        "cli-spinner": "^0.2.10",
         "convict": "^6.2.4",
         "dotenv": "^16.0.1",
         "encoding-down": "^7.1.0",
@@ -92,15 +89,11 @@
         "normalize-path": "^3.0.0",
         "normalize-url": "6.1.0",
         "puppeteer": "^21.0.0",
-        "puppeteer-extra": "^3.3.6",
-        "puppeteer-extra-plugin": "^3.2.3",
-        "puppeteer-extra-plugin-stealth": "^2.11.2",
         "raw-body": "^2.5.1",
         "reflect-metadata": "^0.1.13",
         "serialize-error": "^8.1.0",
         "sha.js": "^2.4.11",
         "uuid-with-v6": "^2.0.0",
-        "wtfnode": "^0.9.0",
         "yargs": "^17.6.2"
     },
     "overrides": {

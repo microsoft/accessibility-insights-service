@@ -5,9 +5,7 @@ import { Container } from 'inversify';
 import { isEmpty } from 'lodash';
 import { System } from 'common';
 import { ReportNameGenerator } from './report/report-name-generator';
-import { CommandRunner } from './runner/command-runner';
 import { CrawlerCommandRunner } from './runner/crawler-command-runner';
-import { UrlCommandRunner } from './runner/url-command-runner';
 import { ScanArguments } from './scan-arguments';
 import { OutputFileWriter } from './files/output-file-writer';
 
@@ -16,8 +14,14 @@ export class CliEntryPoint {
 
     public async runScan(scanArguments: ScanArguments): Promise<void> {
         try {
-            const commandRunner = this.getCommandRunner(scanArguments);
-            await commandRunner.runCommand(scanArguments);
+            const runArguments = scanArguments;
+            if (!scanArguments.crawl && isEmpty(scanArguments.inputFile) && isEmpty(scanArguments.inputUrls)) {
+                runArguments.singleWorker = true;
+                runArguments.maxUrls = 1;
+            }
+
+            const commandRunner = this.container.get(CrawlerCommandRunner);
+            await commandRunner.runCommand(runArguments);
         } catch (error) {
             const outputFileWriter = this.container.get(OutputFileWriter);
             const reportNameGenerator = this.container.get(ReportNameGenerator);
@@ -33,14 +37,6 @@ export class CliEntryPoint {
                 `Something went wrong. Please try again later. If this persists, search for a known issue or file a new one at https://github.com/microsoft/accessibility-insights-service/issues.`,
             );
             console.log(`Error log was saved as ${errorLog}`);
-        }
-    }
-
-    private getCommandRunner(scanArguments: ScanArguments): CommandRunner {
-        if (!scanArguments.crawl && isEmpty(scanArguments.inputFile) && isEmpty(scanArguments.inputUrls)) {
-            return this.container.get(UrlCommandRunner);
-        } else {
-            return this.container.get(CrawlerCommandRunner);
         }
     }
 }
