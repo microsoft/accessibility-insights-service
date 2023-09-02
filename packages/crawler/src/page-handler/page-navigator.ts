@@ -3,7 +3,6 @@
 
 import { inject, injectable, optional } from 'inversify';
 import * as Puppeteer from 'puppeteer';
-import { System } from 'common';
 import { Logger } from '../logger/logger';
 import { puppeteerTimeoutConfig } from './page-timeout-config';
 import { PageNavigationHooks } from './page-navigation-hooks';
@@ -38,7 +37,7 @@ export class PageNavigator {
 
     public async navigate(url: string, page: Puppeteer.Page): Promise<NavigationResponse> {
         await this.pageNavigationHooks.preNavigation(page);
-        const pageOperation = this.createPageOperation('goto', page, url);
+        const pageOperation = this.createPageOperation(page, url);
 
         return this.navigatePage(pageOperation, page);
     }
@@ -63,42 +62,13 @@ export class PageNavigator {
         };
     }
 
-    private createPageOperation(operation: 'goto' | 'reload' | 'wait', page: Puppeteer.Page, url?: string): PageOperation {
-        /**
-         * Waits for page network activity to reach idle state.
-         * This mitigates cases when page needs load pending frame/content.
-         * Should not throw on timeout if page still has network activity.
-         */
-        const waitForNavigationFn = async () => {
-            try {
-                return await page.waitForNavigation({ waitUntil: 'networkidle0', timeout: puppeteerTimeoutConfig.networkIdleTimeoutMsec });
-            } catch (error) {
-                this.logger?.logWarn(
-                    `Page still has network activity or stale requests after waiting for ${
-                        puppeteerTimeoutConfig.networkIdleTimeoutMsec / 1000
-                    } secs.`,
-                    {
-                        url,
-                        timeout: `${puppeteerTimeoutConfig.networkIdleTimeoutMsec}`,
-                        error: System.serializeError(error),
-                    },
-                );
+    private createPageOperation(page: Puppeteer.Page, url?: string): PageOperation {
+        return async () => {
+            this.logger?.logInfo('Navigate page to URL.', { url });
+            const response = await page.goto(url, this.waitForOptions);
 
-                return undefined;
-            }
+            return response;
         };
-
-        switch (operation) {
-            case 'goto':
-                return async () => {
-                    this.logger?.logInfo('Navigate page to URL.', { url });
-                    const responses = await Promise.all([page.goto(url, this.waitForOptions), waitForNavigationFn()]);
-
-                    return responses[0];
-                };
-            default:
-                return undefined;
-        }
     }
 
     private async invokePageOperation(pageOperation: PageOperation): Promise<PageOperationResult> {

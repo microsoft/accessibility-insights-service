@@ -6,7 +6,7 @@ import 'reflect-metadata';
 import { IMock, Mock, It } from 'typemoq';
 import * as Puppeteer from 'puppeteer';
 import { Logger } from '../logger/logger';
-import { PageNavigator, PageOperationResult, NavigationResponse, PageOperation } from './page-navigator';
+import { PageNavigator, PageOperationResult, NavigationResponse } from './page-navigator';
 import { PageNavigationHooks } from './page-navigation-hooks';
 import { puppeteerTimeoutConfig } from './page-timeout-config';
 import { BrowserError } from './browser-error';
@@ -26,8 +26,6 @@ let puppeteerPageMock: IMock<Puppeteer.Page>;
 let pageResponseProcessorMock: IMock<PageResponseProcessor>;
 let loggerMock: IMock<Logger>;
 let pageOperationResult: PageOperationResult;
-let response: Puppeteer.HTTPResponse;
-let pageOperation: PageOperation;
 
 describe(PageNavigator, () => {
     beforeEach(() => {
@@ -135,29 +133,6 @@ describe(PageNavigator, () => {
             const actualResponse = await pageNavigator.navigate(url, puppeteerPageMock.object);
 
             expect(actualResponse).toEqual(expectedResponse);
-        });
-    });
-
-    describe('waitForNetworkIdle', () => {
-        it('navigate with network timeout', async () => {
-            const timeoutError = new Error('Navigation timeout');
-            response = {
-                status: () => 200,
-            } as Puppeteer.HTTPResponse;
-            puppeteerPageMock
-                .setup((o) => o.goto(url, { waitUntil: 'networkidle2', timeout: puppeteerTimeoutConfig.navigationTimeoutMsec }))
-                .returns(() => Promise.resolve(response))
-                .verifiable();
-            puppeteerPageMock
-                .setup((o) => o.waitForNavigation({ waitUntil: 'networkidle0', timeout: puppeteerTimeoutConfig.networkIdleTimeoutMsec }))
-                .returns(() => Promise.reject(timeoutError))
-                .verifiable();
-
-            pageOperation = (pageNavigator as any).createPageOperation('goto', puppeteerPageMock.object, url);
-
-            const actualResponse = await pageOperation();
-
-            expect(actualResponse).toEqual(response);
         });
     });
 });
