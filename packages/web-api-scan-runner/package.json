@@ -75,7 +75,6 @@
         "service-library": "workspace:*",
         "sha.js": "^2.4.11",
         "storage-documents": "workspace:*",
-        "yamlparser": "^0.0.2",
         "yargs": "^17.6.2"
     },
     "resolutions": {
