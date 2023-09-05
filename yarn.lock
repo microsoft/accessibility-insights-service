@@ -14125,6 +14125,7 @@ __metadata:
     "@types/node": ^16.18.11
     "@types/puppeteer": ^7.0.4
     axe-core: ^4.7.2
+    axe-core-scanner: "workspace:*"
     common: "workspace:*"
     cpy-cli: ^4.1.0
     inversify: ^6.0.1
@@ -16083,6 +16084,7 @@ __metadata:
     accessibility-insights-report: ^4.7.0
     applicationinsights: ^2.3.1
     axe-core: ^4.7.2
+    axe-core-scanner: "workspace:*"
     axe-result-converter: "workspace:*"
     axe-sarif-converter: ^2.11.0
     azure-services: "workspace:*"

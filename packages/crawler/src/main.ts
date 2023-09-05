@@ -8,7 +8,7 @@ import * as dotenv from 'dotenv';
 import * as yargs from 'yargs';
 import * as inversify from 'inversify';
 import { Crawler } from './crawler';
-import { setupLocalCrawlerContainer } from './setup-crawler-container';
+import { setupCrawlerContainer } from './setup-crawler-container';
 
 interface ScanArguments {
     url: string;
@@ -38,7 +38,7 @@ interface ScanArguments {
     }
 
     const container = new inversify.Container({ autoBindInjectable: true });
-    setupLocalCrawlerContainer(container);
+    setupCrawlerContainer(container);
     await new Crawler(container).crawl({
         crawl: scanArguments.crawl,
         baseUrl: scanArguments.url,

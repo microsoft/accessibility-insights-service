@@ -6,15 +6,15 @@ import 'reflect-metadata';
 import * as inversify from 'inversify';
 import { CrawlerConfiguration } from './crawler/crawler-configuration';
 import { DataBase } from './level-storage/data-base';
-import { setupLocalCrawlerContainer } from './setup-crawler-container';
+import { setupCrawlerContainer } from './setup-crawler-container';
 import { crawlerIocTypes } from './types/ioc-types';
 
 /* eslint-disable @typescript-eslint/consistent-type-assertions */
 
-describe(setupLocalCrawlerContainer, () => {
+describe(setupCrawlerContainer, () => {
     it('resolves dependencies', () => {
         const container = new inversify.Container({ autoBindInjectable: true });
-        setupLocalCrawlerContainer(container);
+        setupCrawlerContainer(container);
 
         expect(container.get(CrawlerConfiguration)).toBeDefined();
         expect(container.get(DataBase)).toBeDefined();

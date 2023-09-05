@@ -13,7 +13,7 @@ import { PageProcessor } from './page-processors/page-processor-base';
 import { SimulatorPageProcessor } from './page-processors/simulator-page-processor';
 import { crawlerIocTypes } from './types/ioc-types';
 
-export function setupLocalCrawlerContainer(container: inversify.Container): inversify.Container {
+export function setupCrawlerContainer(container: inversify.Container): inversify.Container {
     container.options.skipBaseClassChecks = true;
     container.bind(DataBase).toSelf().inSingletonScope();
     container.bind(CrawlerConfiguration).toSelf().inSingletonScope();

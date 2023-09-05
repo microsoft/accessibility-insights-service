@@ -2,8 +2,6 @@
 // Licensed under the MIT License.
 
 export const iocTypes = {
-    AxeConfiguration: 'AxeConfiguration',
-    AxeRunOptions: 'AxeRunOptions',
     AzureAuthClientCredentialProvider: 'azureAuthClientCredentialProvider',
     SecretVaultProvider: 'secretVaultProvider',
 };
