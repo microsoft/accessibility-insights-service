@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 import { AxeResults } from 'axe-core';
+import { BrowserError } from '../page-handler/browser-error';
 
 export declare type ItemType = 'scanResult' | 'scanMetadata';
 export declare type ScanState = 'pass' | 'fail' | 'runError' | 'browserError';
@@ -29,7 +30,7 @@ export interface ScanResult {
     scanState: ScanState;
     issueCount?: number;
     axeResults?: AxeResults;
-    error?: string;
+    error?: string | BrowserError;
 }
 
 export interface ScanResults {
