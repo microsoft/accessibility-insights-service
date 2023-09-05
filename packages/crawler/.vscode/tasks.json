@@ -6,13 +6,7 @@
         {
             "type": "shell",
             "label": "run",
-            "dependsOn": "imports",
-            "windows": {
-                "command": "xcopy .env ./dist /y /c /q"
-            },
-            "osx": {
-                "command": "cp .env ./dist 2>/dev/null || :"
-            }
+            "dependsOn": "imports"
         },
         {
             "type": "shell",
