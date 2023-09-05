@@ -10,53 +10,56 @@ import * as inversify from 'inversify';
 import { Crawler } from './crawler';
 import { setupCrawlerContainer } from './setup-crawler-container';
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 interface ScanArguments {
-    url: string;
-    simulate: boolean;
-    selectors: string[];
-    output: string;
-    maxUrls: number;
-    restart: boolean;
-    snapshot: boolean;
-    memoryMBytes: number;
-    silentMode: boolean;
-    inputUrls: string[];
-    discoveryPatterns: string[];
-    debug: boolean;
-    crawl: boolean;
-    singleWorker: boolean;
-    userAgent: string;
-    httpHeaders: string;
-    adhereFilesystemPattern: boolean;
+    url?: string;
+    output?: string;
+    maxUrls?: number;
+    restart?: boolean;
+    userAgent?: string;
+    httpHeaders?: string;
 }
 
+/**
+ * The debug entry point.
+ */
 (async () => {
     dotenv.config();
     const scanArguments = yargs.argv as unknown as ScanArguments;
-    if (scanArguments.userAgent) {
-        process.env.USER_AGENT = scanArguments.userAgent;
-    }
 
     const container = new inversify.Container({ autoBindInjectable: true });
     setupCrawlerContainer(container);
-    await new Crawler(container).crawl({
-        crawl: scanArguments.crawl,
-        baseUrl: scanArguments.url,
-        simulate: scanArguments.simulate,
-        selectors: scanArguments.selectors,
-        localOutputDir: scanArguments.output,
-        maxRequestsPerCrawl: scanArguments.maxUrls,
-        restartCrawl: scanArguments.restart,
-        snapshot: scanArguments.snapshot,
-        memoryMBytes: scanArguments.memoryMBytes,
-        silentMode: scanArguments.silentMode,
-        inputUrls: scanArguments.inputUrls,
-        discoveryPatterns: scanArguments.discoveryPatterns,
-        debug: scanArguments.debug,
-        singleWorker: scanArguments.singleWorker,
-        httpHeaders: scanArguments.httpHeaders ? JSON.parse(scanArguments.httpHeaders) : undefined,
-        adhereFilesystemPattern: scanArguments.adhereFilesystemPattern,
+
+    const crawlerRunOptions: any = {};
+    Object.keys(scanArguments).forEach((key: keyof ScanArguments) => {
+        if (scanArguments[key] !== undefined) {
+            switch (key.toString()) {
+                case 'url':
+                    crawlerRunOptions.baseUrl = scanArguments.url;
+                    break;
+                case 'output':
+                    crawlerRunOptions.localOutputDir = scanArguments.output;
+                    break;
+                case 'maxUrls':
+                    crawlerRunOptions.maxRequestsPerCrawl = scanArguments.maxUrls;
+                    break;
+                case 'restart':
+                    crawlerRunOptions.restartCrawl = scanArguments.restart;
+                    break;
+                case 'userAgent':
+                    process.env.USER_AGENT = scanArguments.userAgent;
+                    break;
+                case 'httpHeaders':
+                    crawlerRunOptions.httpHeaders = scanArguments.httpHeaders ? JSON.parse(scanArguments.httpHeaders) : undefined;
+                    break;
+                default:
+                    crawlerRunOptions[key] = scanArguments[key];
+            }
+        }
     });
+
+    await new Crawler(container).crawl(crawlerRunOptions);
 })().catch((error) => {
     console.log('Exception: ', System.serializeError(error));
     process.exitCode = 1;
