@@ -11,6 +11,7 @@ node_modules*
 !.yarn/versions
 
 dist/
+dist*
 drop/
 test-results/
 out/

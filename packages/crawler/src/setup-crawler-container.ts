@@ -3,12 +3,10 @@
 
 import { reporterFactory } from 'accessibility-insights-report';
 import * as inversify from 'inversify';
-import { axeScannerIocTypes, localAxeConfiguration, webAxeRunOptions } from 'axe-core-scanner';
+import { registerAxeCoreScannerToContainer } from 'axe-core-scanner';
 import { ApifyRequestQueueCreator } from './apify/apify-request-queue-creator';
-import { Crawler } from './crawler';
 import { CrawlerConfiguration } from './crawler/crawler-configuration';
 import { SiteCrawlerEngine } from './crawler/site-crawler-engine';
-import { PageCrawlerEngine } from './crawler/page-crawler-engine';
 import { DataBase } from './level-storage/data-base';
 import { ClassicPageProcessor } from './page-processors/classic-page-processor';
 import { PageProcessor } from './page-processors/page-processor-base';
@@ -21,8 +19,8 @@ export function setupLocalCrawlerContainer(container: inversify.Container): inve
     container.bind(CrawlerConfiguration).toSelf().inSingletonScope();
     container.bind(crawlerIocTypes.ReporterFactory).toConstantValue(reporterFactory);
     container.bind(crawlerIocTypes.CrawlerEngine).to(SiteCrawlerEngine);
-    container.bind(axeScannerIocTypes.AxeConfiguration).toConstantValue(localAxeConfiguration);
-    container.bind(axeScannerIocTypes.AxeRunOptions).toConstantValue(webAxeRunOptions);
+
+    registerAxeCoreScannerToContainer(container);
 
     setupSingletonProvider(crawlerIocTypes.ApifyRequestQueueFactory, container, async (context: inversify.interfaces.Context) => {
         const apifyResourceCreator = context.container.get(ApifyRequestQueueCreator);
@@ -44,24 +42,6 @@ export function setupLocalCrawlerContainer(container: inversify.Container): inve
                 }
             };
         });
-
-    return container;
-}
-
-export function setupCloudCrawlerContainer(container: inversify.Container): inversify.Container {
-    container.options.skipBaseClassChecks = true;
-    container.bind(crawlerIocTypes.CrawlerEngine).to(PageCrawlerEngine);
-    container.bind(CrawlerConfiguration).toSelf().inSingletonScope();
-    setupSingletonProvider(crawlerIocTypes.ApifyRequestQueueFactory, container, async (context: inversify.interfaces.Context) => {
-        const apifyResourceCreator = context.container.get(ApifyRequestQueueCreator);
-        const crawlerConfiguration = context.container.get(CrawlerConfiguration);
-
-        return apifyResourceCreator.createRequestQueue(crawlerConfiguration.baseUrl(), crawlerConfiguration.requestQueueOptions());
-    });
-
-    setupSingletonProvider(crawlerIocTypes.CrawlerFactory, container, async (context: inversify.interfaces.Context) => {
-        return new Crawler(context.container);
-    });
 
     return container;
 }

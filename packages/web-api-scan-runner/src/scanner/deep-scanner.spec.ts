@@ -3,7 +3,6 @@
 
 import 'reflect-metadata';
 
-import { DiscoveryPatternFactory } from 'accessibility-insights-crawler';
 import { GlobalLogger } from 'logger';
 import { Page } from 'scanner-global-library';
 import { WebsiteScanResultProvider, RunnerScanMetadata } from 'service-library';
@@ -15,6 +14,7 @@ import { ServiceConfiguration, CrawlConfig } from 'common';
 import { DiscoveredUrlProcessor } from '../crawl-runner/discovered-url-processor';
 import { CrawlRunner } from '../crawl-runner/crawl-runner';
 import { ScanFeedGenerator } from '../crawl-runner/scan-feed-generator';
+import { createDiscoveryPattern } from '../crawler/discovery-pattern-factory';
 import { DeepScanner } from './deep-scanner';
 
 const url = 'test url';
@@ -32,7 +32,7 @@ let crawlRunnerMock: IMock<CrawlRunner>;
 let websiteScanResultProviderMock: IMock<WebsiteScanResultProvider>;
 let serviceConfigMock: IMock<ServiceConfiguration>;
 let urlProcessorMock: IMock<DiscoveredUrlProcessor>;
-let discoveryPatternGeneratorMock: IMock<DiscoveryPatternFactory>;
+let discoveryPatternFactoryMock: IMock<typeof createDiscoveryPattern>;
 let pageMock: IMock<Page>;
 let scanFeedGeneratorMock: IMock<ScanFeedGenerator>;
 let runnerScanMetadata: RunnerScanMetadata;
@@ -49,7 +49,7 @@ describe(DeepScanner, () => {
         websiteScanResultProviderMock = Mock.ofType<WebsiteScanResultProvider>();
         serviceConfigMock = Mock.ofType<ServiceConfiguration>();
         urlProcessorMock = Mock.ofType<DiscoveredUrlProcessor>();
-        discoveryPatternGeneratorMock = Mock.ofType<DiscoveryPatternFactory>();
+        discoveryPatternFactoryMock = Mock.ofType<typeof createDiscoveryPattern>();
         pageMock = Mock.ofType<Page>();
         scanFeedGeneratorMock = Mock.ofType<ScanFeedGenerator>();
 
@@ -95,7 +95,7 @@ describe(DeepScanner, () => {
             serviceConfigMock.object,
             loggerMock.object,
             urlProcessorMock.object,
-            discoveryPatternGeneratorMock.object,
+            discoveryPatternFactoryMock.object,
         );
     });
 
@@ -104,7 +104,7 @@ describe(DeepScanner, () => {
         crawlRunnerMock.verifyAll();
         websiteScanResultProviderMock.verifyAll();
         urlProcessorMock.verifyAll();
-        discoveryPatternGeneratorMock.verifyAll();
+        discoveryPatternFactoryMock.verifyAll();
         scanFeedGeneratorMock.verifyAll();
     });
 
@@ -178,7 +178,7 @@ describe(DeepScanner, () => {
         websiteScanResult.discoveryPatterns = undefined;
         const generatedDiscoveryPattern = 'new discovery pattern';
         setupLoggerProperties();
-        discoveryPatternGeneratorMock
+        discoveryPatternFactoryMock
             .setup((d) => d(crawlBaseUrl))
             .returns(() => generatedDiscoveryPattern)
             .verifiable();

@@ -8,7 +8,7 @@ import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
 import { AxeResults } from 'axe-core';
 import { PromiseUtils } from 'common';
 import { AxePuppeteerFactory } from 'axe-core-scanner';
-import { PageScanner } from '../scanners/page-scanner';
+import { PageScanner } from '../page-scanners/page-scanner';
 import { BlobStore } from '../storage/store-types';
 import { ReportGenerator } from '../reports/report-generator';
 import { Logger } from '../logger/logger';

@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { setupCloudCrawlerContainer } from 'accessibility-insights-crawler';
 import { registerAzureServicesToContainer } from 'azure-services';
 import { setupRuntimeConfigContainer } from 'common';
 import * as inversify from 'inversify';
@@ -16,7 +15,6 @@ export function setupWebApiScanRunnerContainer(): inversify.Container {
     registerAzureServicesToContainer(container);
     setupCloudScannerContainer(container);
     registerReportGeneratorToContainer(container);
-    setupCloudCrawlerContainer(container);
 
     return container;
 }

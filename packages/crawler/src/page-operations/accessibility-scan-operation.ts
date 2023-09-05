@@ -5,7 +5,7 @@ import { inject, injectable } from 'inversify';
 import * as Puppeteer from 'puppeteer';
 import { AxeResults } from 'axe-core';
 import { PromiseUtils } from 'common';
-import { PageScanner } from '../scanners/page-scanner';
+import { PageScanner } from '../page-scanners/page-scanner';
 import { BlobStore } from '../storage/store-types';
 import { ReportGenerator } from '../reports/report-generator';
 import { LocalBlobStore } from '../storage/local-blob-store';

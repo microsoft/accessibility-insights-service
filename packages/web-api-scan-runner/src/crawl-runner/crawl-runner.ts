@@ -3,38 +3,34 @@
 
 import { GlobalLogger } from 'logger';
 import { inject, injectable } from 'inversify';
-import { Crawler, CrawlerRunOptions, crawlerIocTypes } from 'accessibility-insights-crawler';
 import * as Puppeteer from 'puppeteer';
 import { BatchConfig } from 'azure-services';
 import { System } from 'common';
-
-type CrawlerFactory = () => Promise<Crawler<string[]>>;
+import { CrawlerOptions, PageCrawlerEngine } from '../crawler/page-crawler-engine';
 
 @injectable()
 export class CrawlRunner {
     private readonly storageDirName = 'crawler_storage';
 
     constructor(
-        @inject(crawlerIocTypes.CrawlerFactory) private readonly getCrawler: CrawlerFactory,
+        @inject(PageCrawlerEngine) private readonly pageCrawlerEngine: PageCrawlerEngine,
         @inject(GlobalLogger) private readonly logger: GlobalLogger,
         @inject(BatchConfig) private readonly batchConfig: BatchConfig,
     ) {}
 
     public async run(baseUrl: string, discoveryPatterns: string[], page: Puppeteer.Page): Promise<string[] | undefined> {
         this.logger.logInfo('Starting web page crawling.');
-        const crawler = await this.getCrawler();
 
         let result: string[] = [];
         try {
-            const commonOptions = await this.getCommonCrawlOptions();
-            const crawlerRunOptions: CrawlerRunOptions = {
+            const crawlerRunOptions: CrawlerOptions = {
                 baseUrl,
                 discoveryPatterns,
                 baseCrawlPage: page,
-                ...commonOptions,
+                workingDirectory: this.getWorkingDirectory(),
             };
 
-            result = await crawler.crawl(crawlerRunOptions);
+            result = await this.pageCrawlerEngine.start(crawlerRunOptions);
         } catch (error) {
             this.logger.logError('Failure while crawling web page.', { error: System.serializeError(error) });
 
@@ -50,12 +46,7 @@ export class CrawlRunner {
         return result;
     }
 
-    private async getCommonCrawlOptions(): Promise<Partial<CrawlerRunOptions>> {
-        const outputDir = `${this.batchConfig.taskWorkingDir ?? __dirname}\\${this.storageDirName}`;
-
-        return {
-            localOutputDir: outputDir,
-            restartCrawl: true,
-        };
+    private getWorkingDirectory(): string {
+        return `${this.batchConfig.taskWorkingDir ?? __dirname}\\${this.storageDirName}`;
     }
 }
