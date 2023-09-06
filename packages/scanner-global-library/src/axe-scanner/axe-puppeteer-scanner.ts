@@ -6,10 +6,10 @@ import { System } from 'common';
 import AxePuppeteer from '@axe-core/puppeteer';
 import axe, { AxeResults } from 'axe-core';
 import { GlobalLogger } from 'logger';
+import { AxePuppeteerFactory } from 'axe-core-scanner';
 import { BrowserError } from '../browser-error';
 import { Page } from '../page';
 import { AxeScanResults } from './axe-scan-results';
-import { AxePuppeteerFactory } from './axe-puppeteer-factory';
 
 @injectable()
 export class AxePuppeteerScanner {

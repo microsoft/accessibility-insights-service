@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import fs from 'fs';
+import * as fs from 'fs';
 import { inject, injectable } from 'inversify';
 import { isEmpty } from 'lodash';
 import { ScanArguments } from '../scan-arguments';

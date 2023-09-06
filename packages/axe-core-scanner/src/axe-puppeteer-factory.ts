@@ -6,15 +6,15 @@ import { AxePuppeteer } from '@axe-core/puppeteer';
 import { inject, injectable } from 'inversify';
 import { isEmpty } from 'lodash';
 import * as Puppeteer from 'puppeteer';
-import { iocTypes } from '../ioc-types';
 import { AxeConfiguration } from './axe-configuration';
 import { AxeRunOptions } from './axe-run-options';
+import { axeScannerIocTypes } from './axe-core-scanner-ioc-types';
 
 @injectable()
 export class AxePuppeteerFactory {
     constructor(
-        @inject(iocTypes.AxeConfiguration) private readonly axeConfiguration: AxeConfiguration,
-        @inject(iocTypes.AxeRunOptions) private readonly axeRunOptions: AxeRunOptions,
+        @inject(axeScannerIocTypes.AxeConfiguration) private readonly axeConfiguration: AxeConfiguration,
+        @inject(axeScannerIocTypes.AxeRunOptions) private readonly axeRunOptions: AxeRunOptions,
         private readonly fileSystemObj: typeof fs = fs,
     ) {}
 

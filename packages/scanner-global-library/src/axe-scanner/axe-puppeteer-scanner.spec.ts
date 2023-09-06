@@ -9,12 +9,12 @@ import * as Puppeteer from 'puppeteer';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { System } from 'common';
 import { GlobalLogger } from 'logger';
+import { AxePuppeteerFactory } from 'axe-core-scanner';
 import { Page } from '../page';
 import { getPromisableDynamicMock } from '../test-utilities/promisable-mock';
 import { BrowserError } from '../browser-error';
 import { AxePuppeteerScanner } from './axe-puppeteer-scanner';
 import { AxeScanResults } from './axe-scan-results';
-import { AxePuppeteerFactory } from './axe-puppeteer-factory';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 

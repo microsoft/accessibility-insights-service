@@ -5,6 +5,10 @@
             "path": "../packages/api-contracts"
         },
         {
+            "name": "axe-core-scanner",
+            "path": "../packages/axe-core-scanner"
+        },
+        {
             "name": "axe-result-converter",
             "path": "../packages/axe-result-converter"
         },
@@ -125,13 +129,13 @@
         "editor.formatOnSave": true,
         "[javascript]": {
             "editor.defaultFormatter": "esbenp.prettier-vscode"
-        },        
+        },
         "[typescript]": {
             "editor.defaultFormatter": "esbenp.prettier-vscode"
-        },        
+        },
         "[json]": {
             "editor.defaultFormatter": "esbenp.prettier-vscode"
-        },        
+        },
         "[jsonc]": {
             "editor.defaultFormatter": "esbenp.prettier-vscode"
         },
@@ -141,7 +145,11 @@
         "eslint.enable": true,
         "eslint.packageManager": "yarn",
         "eslint.alwaysShowStatus": true,
-        "eslint.workingDirectories": [{ "mode": "auto" }],
+        "eslint.workingDirectories": [
+            {
+                "mode": "auto"
+            }
+        ],
         "eslint.validate": [
             "typescript",
             "javascript"

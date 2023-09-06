@@ -8,21 +8,18 @@ import { IMock, Mock, MockBehavior, Times } from 'typemoq';
 import { CliEntryPoint } from './cli-entry-point';
 import { ReportNameGenerator } from './report/report-name-generator';
 import { CrawlerCommandRunner } from './runner/crawler-command-runner';
-import { UrlCommandRunner } from './runner/url-command-runner';
 import { ScanArguments } from './scan-arguments';
 import { OutputFileWriter } from './files/output-file-writer';
 
 describe(CliEntryPoint, () => {
     let testSubject: CliEntryPoint;
     let containerMock: IMock<Container>;
-    let urlCommandRunnerMock: IMock<UrlCommandRunner>;
     let crawlerCommandRunnerMock: IMock<CrawlerCommandRunner>;
     let outputFileWriterMock: IMock<OutputFileWriter>;
     let reportNameGeneratorMock: IMock<ReportNameGenerator>;
 
     beforeEach(() => {
         containerMock = Mock.ofType(Container);
-        urlCommandRunnerMock = Mock.ofType(UrlCommandRunner);
         crawlerCommandRunnerMock = Mock.ofType(CrawlerCommandRunner);
         outputFileWriterMock = Mock.ofType(OutputFileWriter, MockBehavior.Strict);
         reportNameGeneratorMock = Mock.ofType(ReportNameGenerator);
@@ -31,14 +28,6 @@ describe(CliEntryPoint, () => {
     });
 
     describe('runScan', () => {
-        it('returns URL command runner', async () => {
-            const testInput: ScanArguments = { url: 'https://www.bing.com', output: '/users/xyz' };
-            containerMock.setup((o) => o.get(UrlCommandRunner)).returns(() => urlCommandRunnerMock.object);
-            const runCommand = jest.spyOn(urlCommandRunnerMock.object, 'runCommand').mockImplementationOnce(async () => Promise.resolve());
-            await testSubject.runScan(testInput);
-            expect(runCommand).toBeCalled();
-        });
-
         it('returns crawler command runner', async () => {
             const testInput: ScanArguments = { crawl: true, url: 'https://www.bing.com', output: '/users/xyz' };
             containerMock.setup((o) => o.get(CrawlerCommandRunner)).returns(() => crawlerCommandRunnerMock.object);
@@ -67,7 +56,7 @@ describe(CliEntryPoint, () => {
             containerMock.setup((o) => o.get(OutputFileWriter)).returns(() => outputFileWriterMock.object);
             containerMock.setup((o) => o.get(ReportNameGenerator)).returns(() => reportNameGeneratorMock.object);
             const runCommand = jest
-                .spyOn(urlCommandRunnerMock.object, 'runCommand')
+                .spyOn(crawlerCommandRunnerMock.object, 'runCommand')
                 .mockImplementationOnce(async () => Promise.reject(new Error(error)));
 
             await expect(runCommand).rejects.toThrowError(error);

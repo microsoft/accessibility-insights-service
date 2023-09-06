@@ -3,15 +3,15 @@
 
 import 'reflect-metadata';
 
-import { AxePuppeteerFactory } from 'scanner-global-library';
 import { Page } from 'puppeteer';
 import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
 import { AxeResults } from 'axe-core';
 import { PromiseUtils } from 'common';
-import { GlobalLogger } from 'logger';
-import { PageScanner } from '../scanners/page-scanner';
+import { AxePuppeteerFactory } from 'axe-core-scanner';
+import { PageScanner } from '../page-scanners/page-scanner';
 import { BlobStore } from '../storage/store-types';
 import { ReportGenerator } from '../reports/report-generator';
+import { Logger } from '../logger/logger';
 import { AccessibilityScanOperation } from './accessibility-scan-operation';
 
 /* eslint-disable @typescript-eslint/no-explicit-any, no-empty, @typescript-eslint/no-empty-function */
@@ -30,7 +30,7 @@ describe(AccessibilityScanOperation, () => {
     let pageMock: IMock<Page>;
     let blobStoreMock: IMock<BlobStore>;
     let reportGeneratorMock: IMock<ReportGenerator>;
-    let loggerMock: IMock<GlobalLogger>;
+    let loggerMock: IMock<Logger>;
     let axeResults: AxeResults;
     let promiseUtilsMock: IMock<PromiseUtils>;
 
@@ -41,7 +41,7 @@ describe(AccessibilityScanOperation, () => {
         blobStoreMock = Mock.ofType<BlobStore>();
         reportGeneratorMock = Mock.ofType<ReportGenerator>();
         scannerMock = Mock.ofType(PageScanner, MockBehavior.Strict, true, Mock.ofType<AxePuppeteerFactory>().object);
-        loggerMock = Mock.ofType<GlobalLogger>();
+        loggerMock = Mock.ofType<Logger>();
         promiseUtilsMock = Mock.ofType(PromiseUtils);
 
         accessibilityScanOp = new AccessibilityScanOperation(

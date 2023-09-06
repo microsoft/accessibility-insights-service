@@ -6,20 +6,16 @@ import 'reflect-metadata';
 import { Page } from 'puppeteer';
 import { IMock, Mock } from 'typemoq';
 import * as Crawlee from '@crawlee/puppeteer';
-import { SetRequired } from 'type-fest';
-import { GlobalLogger } from 'logger';
-import { CrawlerRunOptions } from '../types/crawler-run-options';
-import { ApifyRequestQueueFactory } from '../apify/apify-request-queue-creator';
 import { CrawlerConfiguration } from './crawler-configuration';
-import { PageCrawlerEngine } from './page-crawler-engine';
+import { CrawlerOptions, PageCrawlerEngine } from './page-crawler-engine';
+import { ApifyRequestQueueFactory } from './apify-request-queue-factory';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-let requestQueueProviderMock: IMock<ApifyRequestQueueFactory>;
+let apifyRequestQueueFactoryMock: IMock<ApifyRequestQueueFactory>;
 let crawlerConfigurationMock: IMock<CrawlerConfiguration>;
-let loggerMock: IMock<GlobalLogger>;
 let requestQueueStub: Crawlee.RequestQueue;
-let crawlerRunOptions: SetRequired<CrawlerRunOptions, 'baseUrl' | 'discoveryPatterns' | 'baseCrawlPage' | 'localOutputDir'>;
+let crawlerOptions: CrawlerOptions;
 let browserCrawlerEnqueueLinksFn: typeof Crawlee.browserCrawlerEnqueueLinks;
 let pageCrawlerEngine: PageCrawlerEngine;
 let pageStub: Page;
@@ -28,7 +24,7 @@ let cursor = 0;
 const baseUrl = 'base url';
 const discoveryPattern = 'discoveryPattern';
 const crawlResults = ['url1', 'url2'];
-const localOutputDir = 'localOutputDir';
+const workingDirectory = 'workingDirectory';
 const enqueued = {
     processedRequests: [{}],
 };
@@ -38,53 +34,49 @@ describe(PageCrawlerEngine, () => {
         requestQueueStub = {
             fetchNextRequest,
         } as Crawlee.RequestQueue;
-        requestQueueProviderMock = Mock.ofInstance(() => null);
+        apifyRequestQueueFactoryMock = Mock.ofType<ApifyRequestQueueFactory>();
         crawlerConfigurationMock = Mock.ofType<CrawlerConfiguration>();
-        loggerMock = Mock.ofType<GlobalLogger>();
         pageStub = {
             url: () => 'url1',
         } as Page;
-        crawlerRunOptions = {
+        crawlerOptions = {
             baseUrl: baseUrl,
             baseCrawlPage: pageStub,
             discoveryPatterns: [discoveryPattern],
-            localOutputDir,
+            workingDirectory,
         };
-        crawlerConfigurationMock.setup((o) => o.setDefaultApifySettings()).verifiable();
-        crawlerConfigurationMock.setup((o) => o.setLocalOutputDir(crawlerRunOptions.localOutputDir)).verifiable();
+        crawlerConfigurationMock.setup((o) => o.setApifySettings(crawlerOptions.workingDirectory)).verifiable();
 
-        requestQueueProviderMock
-            .setup((o) => o())
+        apifyRequestQueueFactoryMock
+            .setup((o) => o.createRequestQueue())
             .returns(() => Promise.resolve(requestQueueStub))
             .verifiable();
         browserCrawlerEnqueueLinksFn = jest.fn().mockImplementation(() => Promise.resolve(enqueued));
 
         pageCrawlerEngine = new PageCrawlerEngine(
-            requestQueueProviderMock.object,
+            apifyRequestQueueFactoryMock.object,
             crawlerConfigurationMock.object,
-            loggerMock.object,
             browserCrawlerEnqueueLinksFn,
         );
     });
 
     afterEach(() => {
         crawlerConfigurationMock.verifyAll();
-        requestQueueProviderMock.verifyAll();
-        loggerMock.verifyAll();
+        apifyRequestQueueFactoryMock.verifyAll();
     });
 
     it('crawl web page', async () => {
         const enqueueLinksOptions = {
             options: {
                 baseUrl,
-                regexps: crawlerRunOptions.discoveryPatterns.map((p) => new RegExp(p)),
+                regexps: crawlerOptions.discoveryPatterns.map((p) => new RegExp(p)),
             },
             page: pageStub,
             requestQueue: requestQueueStub,
             originalRequestUrl: baseUrl,
         };
 
-        const actualResult = await pageCrawlerEngine.start(crawlerRunOptions);
+        const actualResult = await pageCrawlerEngine.start(crawlerOptions);
         expect(actualResult).toEqual(crawlResults);
         expect(browserCrawlerEnqueueLinksFn).toBeCalledWith(enqueueLinksOptions);
     });

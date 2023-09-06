@@ -3,19 +3,15 @@
 
 import 'reflect-metadata';
 
-import { Crawler, CrawlerRunOptions } from 'accessibility-insights-crawler';
 import { GlobalLogger } from 'logger';
 import { Page } from 'puppeteer';
 import { IMock, It, Mock } from 'typemoq';
 import { BatchConfig } from 'azure-services';
-import { getPromisableDynamicMock } from '../test-utilities/promisable-mock';
+import { CrawlerOptions, PageCrawlerEngine } from '../crawler/page-crawler-engine';
 import { CrawlRunner } from './crawl-runner';
 
-type CrawlerProvider = () => Promise<Crawler<string[]>>;
-
-let crawlerMock: IMock<Crawler<string[]>>;
+let pageCrawlerEngineMock: IMock<PageCrawlerEngine>;
 let loggerMock: IMock<GlobalLogger>;
-let crawlerProviderMock: IMock<CrawlerProvider>;
 let crawlRunner: CrawlRunner;
 
 describe('CrawlRunner', () => {
@@ -30,26 +26,20 @@ describe('CrawlRunner', () => {
     } as BatchConfig;
 
     beforeEach(() => {
-        crawlerMock = getPromisableDynamicMock(Mock.ofType<Crawler<string[]>>());
+        pageCrawlerEngineMock = Mock.ofType<PageCrawlerEngine>();
         loggerMock = Mock.ofType<GlobalLogger>();
-        crawlerProviderMock = Mock.ofType<CrawlerProvider>();
-        crawlerProviderMock
-            .setup((o) => o())
-            .returns(async () => crawlerMock.object)
-            .verifiable();
 
-        crawlRunner = new CrawlRunner(crawlerProviderMock.object, loggerMock.object, batchConfigStub);
+        crawlRunner = new CrawlRunner(pageCrawlerEngineMock.object, loggerMock.object, batchConfigStub);
     });
 
     afterEach(() => {
-        crawlerMock.verifyAll();
+        pageCrawlerEngineMock.verifyAll();
         loggerMock.verifyAll();
-        crawlerProviderMock.verifyAll();
     });
 
     it('returns undefined if crawler throws exception', async () => {
-        crawlerMock
-            .setup((o) => o.crawl(It.isAny()))
+        pageCrawlerEngineMock
+            .setup((o) => o.start(It.isAny()))
             .throws(Error())
             .verifiable();
 
@@ -62,12 +52,11 @@ describe('CrawlRunner', () => {
             baseUrl,
             discoveryPatterns,
             baseCrawlPage: page,
-            restartCrawl: true,
-            localOutputDir: `${workingDir}\\crawler_storage`,
-        } as CrawlerRunOptions;
+            workingDirectory: `${workingDir}\\crawler_storage`,
+        } as CrawlerOptions;
         const expectedResult = ['discoveredUrl'];
-        crawlerMock
-            .setup((m) => m.crawl(expectedRunOptions))
+        pageCrawlerEngineMock
+            .setup((m) => m.start(expectedRunOptions))
             .returns(async () => expectedResult)
             .verifiable();
 

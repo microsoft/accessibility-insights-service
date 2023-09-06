@@ -1,12 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-export { setupCloudScannerContainer, setupLocalScannerContainer } from './setup-scanner-container';
+export { setupScannerContainer } from './setup-scanner-container';
 export { BrowserError, BrowserErrorTypes } from './browser-error';
 export { PageConfigurator } from './page-configurator';
 export { PageHandler } from './page-handler';
 export { PageResponseProcessor } from './page-response-processor';
-export { AxePuppeteerFactory } from './axe-scanner/axe-puppeteer-factory';
 export * from './page';
 export { AxeScanResults } from './axe-scanner/axe-scan-results';
 export { WebDriver, WebDriverConfigurationOptions } from './web-driver';

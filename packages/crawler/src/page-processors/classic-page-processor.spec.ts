@@ -4,17 +4,16 @@
 import 'reflect-metadata';
 
 import { Page } from 'puppeteer';
-import { PageNavigator } from 'scanner-global-library';
 import { IMock, It, Mock } from 'typemoq';
 import { AxeResults } from 'axe-core';
 import * as Crawlee from '@crawlee/puppeteer';
-import { GlobalLogger } from 'logger';
 import { CrawlerConfiguration } from '../crawler/crawler-configuration';
 import { DataBase } from '../level-storage/data-base';
 import { AccessibilityScanOperation } from '../page-operations/accessibility-scan-operation';
 import { BlobStore, DataStore } from '../storage/store-types';
-import { PageNavigatorFactory } from '../types/ioc-types';
 import { getPromisableDynamicMock } from '../test-utilities/promisable-mock';
+import { PageNavigator } from '../page-handler/page-navigator';
+import { Logger } from '../logger/logger';
 import { ClassicPageProcessor } from './classic-page-processor';
 
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/consistent-type-assertions */
@@ -30,8 +29,7 @@ describe(ClassicPageProcessor, () => {
     let dataBaseMock: IMock<DataBase>;
     let pageNavigatorMock: IMock<PageNavigator>;
     let crawlerConfigurationMock: IMock<CrawlerConfiguration>;
-    let pageNavigatorFactoryMock: IMock<PageNavigatorFactory>;
-    let loggerMock: IMock<GlobalLogger>;
+    let loggerMock: IMock<Logger>;
     let requestStub: Crawlee.Request;
     let puppeteerPageStub: Page;
     let classicPageProcessor: ClassicPageProcessor;
@@ -43,8 +41,7 @@ describe(ClassicPageProcessor, () => {
         blobStoreMock = Mock.ofType<BlobStore>();
         dataBaseMock = Mock.ofType<DataBase>();
         pageNavigatorMock = getPromisableDynamicMock(Mock.ofType<PageNavigator>());
-        pageNavigatorFactoryMock = Mock.ofType<PageNavigatorFactory>();
-        loggerMock = Mock.ofType<GlobalLogger>();
+        loggerMock = Mock.ofType<Logger>();
         crawlerConfigurationMock = Mock.ofType(CrawlerConfiguration);
         crawlerConfigurationMock
             .setup((o) => o.discoveryPatterns())
@@ -79,7 +76,6 @@ describe(ClassicPageProcessor, () => {
             .returns(() => Promise.resolve({}))
             .verifiable();
         pageNavigatorMock.setup((o) => o.logger).returns(() => loggerMock.object);
-        pageNavigatorFactoryMock.setup((o) => o(It.isAny())).returns(() => Promise.resolve(pageNavigatorMock.object));
 
         classicPageProcessor = new ClassicPageProcessor(
             accessibilityScanOpMock.object,
@@ -87,7 +83,7 @@ describe(ClassicPageProcessor, () => {
             blobStoreMock.object,
             dataBaseMock.object,
             crawlerConfigurationMock.object,
-            pageNavigatorFactoryMock.object,
+            pageNavigatorMock.object,
             loggerMock.object,
         );
     });
