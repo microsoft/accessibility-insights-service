@@ -10,7 +10,7 @@ export class PageResponseProcessor {
     constructor(private readonly navigationErrorPatterns: Partial<Record<BrowserErrorTypes, string[]>> = pageNavigationErrorPatterns) {}
 
     public getResponseError(response: Puppeteer.HTTPResponse, error: Error = new Error()): BrowserError {
-        if (!response.ok()) {
+        if (response.ok() !== true && response.status() !== 304) {
             return {
                 errorType: 'HttpErrorCode',
                 statusCode: response.status(),
@@ -20,7 +20,8 @@ export class PageResponseProcessor {
             };
         }
 
-        if (!this.isHtmlContentType(response)) {
+        // The HTTP 304 browser response has no content-type header
+        if (this.isHtmlContentType(response) !== true && response.status() !== 304) {
             const contentType = this.getContentType(response.headers());
 
             return {

@@ -4907,14 +4907,12 @@ __metadata:
     normalize-path: ^3.0.0
     normalize-url: 6.1.0
     npm-run-all: ^4.1.5
-    playwright: ^1.30.0
     puppeteer: ^21.0.0
     raw-body: ^2.5.1
     reflect-metadata: ^0.1.13
     rimraf: ^4.1.2
     serialize-error: ^8.1.0
     sha.js: ^2.4.11
-    shebang-loader: ^0.0.1
     ts-jest: ^29.1.0
     typemoq: ^2.1.0
     typescript: ^4.9.5
@@ -12783,26 +12781,6 @@ __metadata:
   dependencies:
     find-up: ^4.0.0
   checksum: 9863e3f35132bf99ae1636d31ff1e1e3501251d480336edb1c211133c8d58906bed80f154a1d723652df1fda91e01c7442c2eeaf9dc83157c7ae89087e43c8d6
-  languageName: node
-  linkType: hard
-
-"playwright-core@npm:1.30.0":
-  version: 1.30.0
-  resolution: "playwright-core@npm:1.30.0"
-  bin:
-    playwright: cli.js
-  checksum: 4c5693f27245a1168f94708ecd8e1eb0d200de435b25cc07cfa25b97a094633818954dc00baf24e0ff551825f672050b83d1309362c1f97213fe8ebd2a147ed9
-  languageName: node
-  linkType: hard
-
-"playwright@npm:^1.30.0":
-  version: 1.30.0
-  resolution: "playwright@npm:1.30.0"
-  dependencies:
-    playwright-core: 1.30.0
-  bin:
-    playwright: cli.js
-  checksum: 1987446ed07e25c0c6dedce8314209b49536eb4c7fa82e57e7fea9bd8128bacd08e49f9e89af30a647839bf2603b8c8321f50e23e334a11c1c29eedb838a81a3
   languageName: node
   linkType: hard
 
