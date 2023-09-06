@@ -6,11 +6,10 @@ import 'reflect-metadata';
 import { AxeReportParameters, Report, Reporter, ReporterFactory, SummaryScanResults } from 'accessibility-insights-report';
 import { AxeResults } from 'axe-core';
 import * as MockDate from 'mockdate';
-import { AxeScanResults } from 'scanner-global-library';
 import { IMock, Mock, Times } from 'typemoq';
 import { AxeInfo } from '../axe/axe-info';
 import { serviceName } from '../service-name';
-import { ReportGenerator } from './report-generator';
+import { AxeScanResults, ReportGenerator } from './report-generator';
 
 describe('ReportGenerator', () => {
     let reportGenerator: ReportGenerator;
@@ -35,7 +34,7 @@ describe('ReportGenerator', () => {
             url: scanUrl,
         } as unknown as AxeResults;
 
-        axeScanResults = { results: axeResults, pageTitle: 'page title', browserSpec: 'browser version' };
+        axeScanResults = { results: axeResults, pageTitle: 'page title' };
         reportGenerationTime = new Date(2019, 2, 3);
         MockDate.set(reportGenerationTime);
     });

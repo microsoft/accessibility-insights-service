@@ -3,7 +3,6 @@
 
 import * as Crawlee from '@crawlee/puppeteer';
 import { inject, injectable } from 'inversify';
-import { GlobalLogger } from 'logger';
 import { ActiveElement } from '../active-elements-finder';
 import { CrawlerConfiguration } from '../crawler/crawler-configuration';
 import { DataBase } from '../level-storage/data-base';
@@ -14,7 +13,8 @@ import { Operation } from '../page-operations/operation';
 import { LocalBlobStore } from '../storage/local-blob-store';
 import { LocalDataStore } from '../storage/local-data-store';
 import { BlobStore, DataStore } from '../storage/store-types';
-import { PageNavigatorFactory, crawlerIocTypes } from '../types/ioc-types';
+import { PageNavigator } from '../page-handler/page-navigator';
+import { Logger } from '../logger/logger';
 import { PageProcessorBase } from './page-processor-base';
 
 /* eslint-disable no-invalid-this */
@@ -86,11 +86,11 @@ export class SimulatorPageProcessor extends PageProcessorBase {
         @inject(EnqueueActiveElementsOperation) protected readonly enqueueActiveElementsOp: EnqueueActiveElementsOperation,
         @inject(ClickElementOperation) protected readonly clickElementOp: ClickElementOperation,
         @inject(CrawlerConfiguration) protected readonly crawlerConfiguration: CrawlerConfiguration,
-        @inject(crawlerIocTypes.PageNavigatorFactory) protected readonly pageNavigatorFactory: PageNavigatorFactory,
-        @inject(GlobalLogger) protected readonly logger: GlobalLogger,
+        @inject(PageNavigator) protected readonly pageNavigator: PageNavigator,
+        @inject(Logger) protected readonly logger: Logger,
         protected readonly saveSnapshotExt: typeof Crawlee.puppeteerUtils.saveSnapshot = Crawlee.puppeteerUtils.saveSnapshot,
     ) {
-        super(accessibilityScanOp, dataStore, blobStore, dataBase, crawlerConfiguration, pageNavigatorFactory, logger, saveSnapshotExt);
+        super(accessibilityScanOp, dataStore, blobStore, dataBase, crawlerConfiguration, pageNavigator, logger, saveSnapshotExt);
         this.selectors = this.crawlerConfiguration.selectors();
     }
 }

@@ -4,7 +4,7 @@
 import { PromiseUtils, ServiceConfiguration, System } from 'common';
 import { inject, injectable } from 'inversify';
 import { GlobalLogger } from 'logger';
-import { AxeScanResults, Page, AxePuppeteerScanner } from 'scanner-global-library';
+import { AxePuppeteerScanner, AxeScanResults, Page } from 'scanner-global-library';
 
 @injectable()
 export class AxeScanner {

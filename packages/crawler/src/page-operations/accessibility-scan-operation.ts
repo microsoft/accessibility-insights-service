@@ -5,11 +5,11 @@ import { inject, injectable } from 'inversify';
 import * as Puppeteer from 'puppeteer';
 import { AxeResults } from 'axe-core';
 import { PromiseUtils } from 'common';
-import { GlobalLogger } from 'logger';
-import { PageScanner } from '../scanners/page-scanner';
+import { PageScanner } from '../page-scanners/page-scanner';
 import { BlobStore } from '../storage/store-types';
 import { ReportGenerator } from '../reports/report-generator';
 import { LocalBlobStore } from '../storage/local-blob-store';
+import { Logger } from '../logger/logger';
 
 declare type AxeScanError = 'ScanTimeout';
 
@@ -22,7 +22,7 @@ export class AccessibilityScanOperation {
         @inject(ReportGenerator) private readonly reportGenerator: ReportGenerator,
         @inject(LocalBlobStore) protected readonly blobStore: BlobStore,
         @inject(PromiseUtils) private readonly promiseUtils: PromiseUtils,
-        @inject(GlobalLogger) private readonly logger: GlobalLogger,
+        @inject(Logger) private readonly logger: Logger,
     ) {}
 
     public async run(page: Puppeteer.Page, id: string, axeSourcePath?: string): Promise<AxeResults> {

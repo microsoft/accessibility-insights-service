@@ -7,6 +7,7 @@ describe('listMonorepoPackageNames', () => {
     it('returns the pinned set of package names', () => {
         expect(listMonorepoPackageNames()).toMatchInlineSnapshot(`
             [
+              "axe-core-scanner",
               "axe-result-converter",
               "azure-services",
               "accessibility-insights-scan",

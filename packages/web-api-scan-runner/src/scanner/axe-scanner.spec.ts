@@ -5,8 +5,9 @@ import 'reflect-metadata';
 
 import { AxeResults } from 'axe-core';
 import { PromiseUtils, ScanRunTimeConfig, ServiceConfiguration, System } from 'common';
-import { AxePuppeteerFactory, AxeScanResults, BrowserError, Page, AxePuppeteerScanner } from 'scanner-global-library';
+import { AxeScanResults, BrowserError, Page, AxePuppeteerScanner } from 'scanner-global-library';
 import { IMock, It, Mock, Times } from 'typemoq';
+import { AxePuppeteerFactory } from 'axe-core-scanner';
 import { MockableLogger } from '../test-utilities/mockable-logger';
 import { AxeScanner } from './axe-scanner';
 

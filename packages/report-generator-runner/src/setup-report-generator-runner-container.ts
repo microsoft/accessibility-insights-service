@@ -5,14 +5,12 @@ import { registerAzureServicesToContainer } from 'azure-services';
 import { setupRuntimeConfigContainer } from 'common';
 import * as inversify from 'inversify';
 import { registerLoggerToContainer } from 'logger';
-import { setupCloudScannerContainer } from 'scanner-global-library';
 
 export function setupReportGeneratorRunnerContainer(): inversify.Container {
-    const container = new inversify.Container({ autoBindInjectable: true });
+    const container = new inversify.Container({ autoBindInjectable: true, skipBaseClassChecks: true });
     setupRuntimeConfigContainer(container);
     registerLoggerToContainer(container);
     registerAzureServicesToContainer(container);
-    setupCloudScannerContainer(container);
 
     return container;
 }

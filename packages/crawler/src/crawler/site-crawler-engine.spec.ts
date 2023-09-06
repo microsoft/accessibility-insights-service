@@ -6,11 +6,6 @@ import 'reflect-metadata';
 import * as Crawlee from '@crawlee/puppeteer';
 import { IMock, It, Mock } from 'typemoq';
 import * as Puppeteer from 'puppeteer';
-// eslint-disable-next-line @typescript-eslint/tslint/config
-import PuppeteerExtra, { PuppeteerExtraPlugin } from 'puppeteer-extra';
-// eslint-disable-next-line @typescript-eslint/tslint/config
-import StealthPlugin from 'puppeteer-extra-plugin-stealth';
-import { StealthPluginType, UserAgentPlugin } from 'scanner-global-library';
 import { PageProcessor, PageProcessorBase } from '../page-processors/page-processor-base';
 import { CrawlerRunOptions } from '../types/crawler-run-options';
 import { AuthenticatorFactory } from '../authenticator/authenticator-factory';
@@ -48,8 +43,6 @@ let puppeteerCrawlerOptions: Crawlee.PuppeteerCrawlerOptions;
 let crawlerEngine: SiteCrawlerEngine;
 let requestQueueProvider: ApifyRequestQueueFactory;
 let authenticatorMock: IMock<Authenticator>;
-let puppeteerExtraMock: IMock<typeof PuppeteerExtra>;
-let userAgentPluginMock: IMock<UserAgentPlugin>;
 let ItIsOptionsWith: () => Crawlee.PuppeteerCrawlerOptions;
 let puppeteerMock: IMock<typeof Puppeteer>;
 
@@ -61,8 +54,6 @@ describe(SiteCrawlerEngine, () => {
         puppeteerCrawlerMock = Mock.ofType<Crawlee.PuppeteerCrawler>();
         crawlerConfigurationMock = Mock.ofType(CrawlerConfiguration);
         authenticatorMock = Mock.ofType<Authenticator>();
-        puppeteerExtraMock = Mock.ofType<typeof PuppeteerExtra>();
-        userAgentPluginMock = Mock.ofType<UserAgentPlugin>();
         puppeteerMock = Mock.ofType<typeof Puppeteer>();
 
         puppeteerMock.setup((o) => o.executablePath()).returns(() => 'executablePath');
@@ -91,7 +82,6 @@ describe(SiteCrawlerEngine, () => {
             failedRequestHandler: pageProcessorStub.failedRequestHandler,
             maxRequestsPerCrawl: maxRequestsPerCrawl,
             launchContext: {
-                launcher: puppeteerExtraMock.object,
                 launchOptions: {
                     args: puppeteerDefaultOptions,
                     defaultViewport: {
@@ -111,7 +101,6 @@ describe(SiteCrawlerEngine, () => {
             );
 
         puppeteerCrawlerMock.setup((o) => o.run()).verifiable();
-        setupPuppeteerPlugins();
 
         requestQueueProvider = () => Promise.resolve(requestQueueStub);
         pageProcessorFactoryStub = jest.fn().mockImplementation(() => pageProcessorStub as PageProcessorBase);
@@ -121,10 +110,6 @@ describe(SiteCrawlerEngine, () => {
             crawlerFactoryMock.object,
             authenticatorFactoryMock.object,
             crawlerConfigurationMock.object,
-            userAgentPluginMock.object,
-            puppeteerMock.object,
-            puppeteerExtraMock.object,
-            StealthPlugin(),
         );
     });
 
@@ -135,7 +120,6 @@ describe(SiteCrawlerEngine, () => {
         authenticatorFactoryMock.verifyAll();
         authenticatorMock.verifyAll();
         expect(pageProcessorFactoryStub).toHaveBeenCalledTimes(1);
-        validateStealthPlugins();
     });
 
     it('run crawler with settings validation', async () => {
@@ -198,22 +182,3 @@ describe(SiteCrawlerEngine, () => {
         await crawlerEngine.start(crawlerRunOptions);
     });
 });
-
-function setupPuppeteerPlugins(): void {
-    const userAgentPlugin = { name: 'user-agent-plugin' } as unknown as PuppeteerExtraPlugin;
-    const stealthAgentPlugin = { name: 'stealth' } as unknown as PuppeteerExtraPlugin;
-    puppeteerExtraMock
-        .setup((o) => o.use(It.isObjectWith(userAgentPlugin)))
-        .returns(() => puppeteerExtraMock.object)
-        .verifiable();
-    puppeteerExtraMock
-        .setup((o) => o.use(It.isObjectWith(stealthAgentPlugin)))
-        .returns(() => puppeteerExtraMock.object)
-        .verifiable();
-}
-
-function validateStealthPlugins(): void {
-    const stealthPlugin = (crawlerEngine as any).stealthPlugin as StealthPluginType;
-    expect(stealthPlugin.enabledEvasions.has('iframe.contentWindow')).toEqual(false);
-    expect(stealthPlugin.enabledEvasions.has('user-agent-override')).toEqual(false);
-}

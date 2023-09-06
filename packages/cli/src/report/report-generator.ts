@@ -9,10 +9,15 @@ import {
     SummaryScanResults,
 } from 'accessibility-insights-report';
 import { inject, injectable } from 'inversify';
-import { AxeScanResults } from 'scanner-global-library';
+import { AxeResults } from 'axe-core';
 import { AxeInfo } from '../axe/axe-info';
 import { iocTypes } from '../ioc-types';
 import { serviceName } from '../service-name';
+
+export interface AxeScanResults {
+    results?: AxeResults;
+    pageTitle?: string;
+}
 
 @injectable()
 export class ReportGenerator {

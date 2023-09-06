@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import fs from 'fs';
+import * as fs from 'fs';
 import { injectable } from 'inversify';
 import * as Crawlee from '@crawlee/puppeteer';
 import { ApifySettingsHandler, apifySettingsHandler } from './apify-settings';

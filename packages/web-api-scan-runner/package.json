@@ -50,7 +50,7 @@
     "dependencies": {
         "@axe-core/puppeteer": "^4.7.3",
         "@azure/cosmos": "^3.17.2",
-        "accessibility-insights-crawler": "workspace:*",
+        "@crawlee/puppeteer": "^3.5.0",
         "accessibility-insights-report": "^4.7.0",
         "applicationinsights": "^2.3.1",
         "axe-core": "^4.7.2",
@@ -75,10 +75,14 @@
         "service-library": "workspace:*",
         "sha.js": "^2.4.11",
         "storage-documents": "workspace:*",
-        "yamlparser": "^0.0.2",
         "yargs": "^17.6.2"
     },
     "resolutions": {
         "axe-core": "^4.7.2"
+    },
+    "overrides": {
+        "@crawlee/puppeteer": {
+            "puppeteer": "$puppeteer"
+        }
     }
 }

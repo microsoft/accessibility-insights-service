@@ -5,27 +5,17 @@ import * as Crawlee from '@crawlee/puppeteer';
 import { inject, injectable } from 'inversify';
 import { isEmpty } from 'lodash';
 import * as Puppeteer from 'puppeteer';
-// eslint-disable-next-line @typescript-eslint/tslint/config
-import PuppeteerExtra from 'puppeteer-extra';
-// eslint-disable-next-line @typescript-eslint/tslint/config
-import StealthPlugin from 'puppeteer-extra-plugin-stealth';
-import { StealthPluginType, UserAgentPlugin } from 'scanner-global-library';
-import { System } from 'common';
 import { AuthenticatorFactory } from '../authenticator/authenticator-factory';
 import { CrawlerRunOptions } from '../types/crawler-run-options';
 import { crawlerIocTypes } from '../types/ioc-types';
 import { PageProcessorFactory } from '../page-processors/page-processor-base';
 import { ApifyRequestQueueFactory } from '../apify/apify-request-queue-creator';
+import { windowSize } from '../page-handler/page-configurator';
 import { CrawlerConfiguration } from './crawler-configuration';
 import { CrawlerFactory } from './crawler-factory';
 import { CrawlerEngine } from './crawler-engine';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-
-const windowSize = {
-    width: 1920,
-    height: 1080,
-};
 
 @injectable()
 export class SiteCrawlerEngine implements CrawlerEngine {
@@ -35,10 +25,7 @@ export class SiteCrawlerEngine implements CrawlerEngine {
         @inject(CrawlerFactory) private readonly crawlerFactory: CrawlerFactory,
         @inject(AuthenticatorFactory) private readonly authenticatorFactory: AuthenticatorFactory,
         @inject(CrawlerConfiguration) private readonly crawlerConfiguration: CrawlerConfiguration,
-        @inject(UserAgentPlugin) private readonly userAgentPlugin: UserAgentPlugin,
         private readonly puppeteer: typeof Puppeteer = Puppeteer,
-        private readonly puppeteerExtra: typeof PuppeteerExtra = PuppeteerExtra,
-        private readonly stealthPlugin: StealthPluginType = StealthPlugin(),
     ) {}
 
     public async start(crawlerRunOptions: CrawlerRunOptions): Promise<void> {
@@ -47,7 +34,6 @@ export class SiteCrawlerEngine implements CrawlerEngine {
         this.crawlerConfiguration.setMemoryMBytes(crawlerRunOptions.memoryMBytes);
         this.crawlerConfiguration.setSilentMode(crawlerRunOptions.silentMode);
 
-        this.setupPuppeteerPlugins();
         const puppeteerDefaultOptions = [
             '--disable-dev-shm-usage',
             '--no-sandbox',
@@ -65,7 +51,6 @@ export class SiteCrawlerEngine implements CrawlerEngine {
             failedRequestHandler: pageProcessor.failedRequestHandler,
             maxRequestsPerCrawl: this.crawlerConfiguration.maxRequestsPerCrawl(),
             launchContext: {
-                launcher: this.puppeteerExtra,
                 launchOptions: {
                     args: puppeteerDefaultOptions,
                     defaultViewport: {
@@ -90,11 +75,6 @@ export class SiteCrawlerEngine implements CrawlerEngine {
                         if (crawlerRunOptions.httpHeaders) {
                             await page.setExtraHTTPHeaders(crawlerRunOptions.httpHeaders);
                         }
-                        // wait for the puppeteer plugin to complete processing
-                        await System.waitLoop(
-                            async () => this.userAgentPlugin.loadCompleted,
-                            async (completed) => completed === true,
-                        );
                     },
                 ],
             },
@@ -143,16 +123,5 @@ export class SiteCrawlerEngine implements CrawlerEngine {
 
         const crawler = this.crawlerFactory.createPuppeteerCrawler(puppeteerCrawlerOptions);
         await crawler.run();
-    }
-
-    private setupPuppeteerPlugins(): void {
-        // Disable iframe.contentWindow evasion to avoid interference with privacy banner
-        this.stealthPlugin.enabledEvasions.delete('iframe.contentWindow');
-        // Disable user-agent-override evasion as it will not set User Agent string in headless mode
-        this.stealthPlugin.enabledEvasions.delete('user-agent-override');
-        // Plugin to hide puppeteer automation from a webserver
-        this.puppeteerExtra.use(this.stealthPlugin);
-        // Custom user agent plugin to override Apify default user agent string
-        this.puppeteerExtra.use(this.userAgentPlugin);
     }
 }

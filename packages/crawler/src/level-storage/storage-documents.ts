@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { BrowserError } from 'scanner-global-library';
 import { AxeResults } from 'axe-core';
+import { BrowserError } from '../page-handler/browser-error';
 
 export declare type ItemType = 'scanResult' | 'scanMetadata';
 export declare type ScanState = 'pass' | 'fail' | 'runError' | 'browserError';

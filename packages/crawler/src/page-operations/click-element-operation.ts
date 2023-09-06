@@ -3,7 +3,7 @@
 
 import { inject, injectable } from 'inversify';
 import * as Crawlee from '@crawlee/puppeteer';
-import { GlobalLogger } from 'logger';
+import { Logger } from '../logger/logger';
 
 export declare type ElementClickAction = 'navigation' | 'page-action';
 
@@ -14,7 +14,7 @@ export interface ElementClickOperationResult {
 
 @injectable()
 export class ClickElementOperation {
-    constructor(@inject(GlobalLogger) private readonly logger: GlobalLogger) {}
+    constructor(@inject(Logger) private readonly logger: Logger) {}
 
     public async click(
         context: Crawlee.PuppeteerCrawlingContext,
