@@ -20,12 +20,12 @@ import { DeepScanner } from './deep-scanner';
 const url = 'test url';
 const puppeteerPageStub = {} as Puppeteer.Page;
 const websiteScanResultId = 'websiteScanResult id';
-const discoveredUrls = ['discoveredUrl1', 'discoveredUrl2'];
 const processedUrls = ['processedUrl1', 'processedUrl2'];
 const discoveryPatterns = ['discovery pattern'];
 const crawlBaseUrl = 'base url';
 const deepScanId = 'deepScanId';
 
+let discoveredUrls = ['discoveredUrl1', 'discoveredUrl2'];
 let deepScanDiscoveryLimit: number;
 let loggerMock: IMock<GlobalLogger>;
 let crawlRunnerMock: IMock<CrawlRunner>;
@@ -195,6 +195,19 @@ describe(DeepScanner, () => {
         setupReadWebsiteScanResult();
         setupLoggerProperties();
         setupCrawl(discoveryPatterns);
+        setupProcessUrls();
+        setupUpdateWebsiteScanResult(discoveryPatterns);
+        setupScanFeedGeneratorMock();
+
+        await testSubject.runDeepScan(runnerScanMetadata, pageScanResult, pageMock.object);
+    });
+
+    it('skip crawl if deep scan was not requested', async () => {
+        discoveredUrls = [];
+        runnerScanMetadata.deepScan = false;
+
+        setupReadWebsiteScanResult();
+        setupLoggerProperties();
         setupProcessUrls();
         setupUpdateWebsiteScanResult(discoveryPatterns);
         setupScanFeedGeneratorMock();

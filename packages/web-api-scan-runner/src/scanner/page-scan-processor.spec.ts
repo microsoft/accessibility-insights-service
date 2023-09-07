@@ -57,27 +57,6 @@ describe(PageScanProcessor, () => {
         puppeteerPageMock.verifyAll();
     });
 
-    it.each([false, undefined])('scans successfully with deepScan=%s', async (deepScan: boolean) => {
-        const scanMetadata = {
-            url: url,
-            id: 'id',
-            deepScan: deepScan,
-        };
-        axeScanResults = { ...axeScanResults, pageScreenshot, pageSnapshot };
-
-        setupOpenPage();
-        setupClosePage();
-        axeScannerMock
-            .setup((s) => s.scan(pageMock.object))
-            .returns(() => Promise.resolve(axeScanResults))
-            .verifiable();
-        deepScannerMock.setup((d) => d.runDeepScan(It.isAny(), It.isAny(), It.isAny())).verifiable(Times.never());
-
-        const results = await testSubject.scan(scanMetadata, pageScanResult);
-
-        expect(results).toEqual(axeScanResults);
-    });
-
     it('scan with authentication enabled', async () => {
         const scanMetadata = {
             url: url,
@@ -91,7 +70,7 @@ describe(PageScanProcessor, () => {
             .setup((s) => s.scan(pageMock.object))
             .returns(() => Promise.resolve(axeScanResults))
             .verifiable();
-        deepScannerMock.setup((d) => d.runDeepScan(It.isAny(), It.isAny(), It.isAny())).verifiable(Times.never());
+        deepScannerMock.setup((d) => d.runDeepScan(It.isAny(), It.isAny(), It.isAny())).verifiable();
         pageScanResult = {
             ...pageScanResult,
             authentication: { hint: 'azure-ad' },
@@ -133,10 +112,6 @@ describe(PageScanProcessor, () => {
         axeScannerMock
             .setup((s) => s.scan(pageMock.object))
             .returns(() => Promise.resolve(axeScanResults))
-            .verifiable();
-        pageMock
-            .setup((p) => p.isOpen())
-            .returns(() => true)
             .verifiable();
         deepScannerMock.setup((d) => d.runDeepScan(It.isAny(), It.isAny(), It.isAny())).verifiable();
 
@@ -200,10 +175,6 @@ describe(PageScanProcessor, () => {
         axeScannerMock
             .setup((s) => s.scan(pageMock.object))
             .returns(() => Promise.resolve(axeScanResults))
-            .verifiable();
-        pageMock
-            .setup((p) => p.isOpen())
-            .returns(() => true)
             .verifiable();
         deepScannerMock.setup((d) => d.runDeepScan(scanMetadata, pageScanResult, pageMock.object)).throws(error);
 
