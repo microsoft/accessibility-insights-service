@@ -46,7 +46,7 @@ export class DeepScanner {
         // fetch websiteScanResult.knownPages from a storage
         websiteScanResult = await this.readWebsiteScanResult(pageScanResult, true);
 
-        // crawl page if deep scan is requested
+        // crawling a page if deep scan was enabled
         let discoveredUrls: string[] = [];
         const discoveryPatterns = websiteScanResult.discoveryPatterns ?? [this.createDiscoveryPatternFn(websiteScanResult.baseUrl)];
         if (runnerScanMetadata.deepScan === true) {
