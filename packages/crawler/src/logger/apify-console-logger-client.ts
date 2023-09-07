@@ -12,7 +12,7 @@ import { LogLevel, LoggerClient, LoggerProperties } from './logger';
 export class ApifyConsoleLoggerClient implements LoggerClient {
     private baseProperties: LoggerProperties;
 
-    constructor(private readonly logger: Log = new Log({ prefix: 'Crawler' })) {}
+    constructor(private readonly logger: Log = new Log({ prefix: 'Scanner' })) {}
 
     public log(message: string, logLevel: LogLevel, properties?: LoggerProperties): void {
         const logMessage = `[${moment.utc().toISOString()}] ${message}`;

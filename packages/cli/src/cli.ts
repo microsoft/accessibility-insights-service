@@ -46,7 +46,7 @@ function getScanArguments(): ScanArguments {
             },
             selectors: {
                 type: 'array',
-                describe: `List of CSS selectors to match against, separated by space. Default selector is 'button'.`,
+                describe: `List of CSS selectors to match against. Default selector is 'button'.`,
                 default: [],
             },
             output: {
@@ -95,12 +95,12 @@ function getScanArguments(): ScanArguments {
             },
             inputUrls: {
                 type: 'array',
-                describe: `List of URLs to crawl in addition to URLs discovered from crawling the provided URL, separated by space.`,
+                describe: `List of URLs to crawl in addition to URLs discovered from crawling the provided URL.`,
                 alias: 'inputurls',
             },
             discoveryPatterns: {
                 type: 'array',
-                describe: `List of RegEx patterns to crawl in addition to the provided URL, separated by space.`,
+                describe: `List of RegEx patterns to crawl in addition to the provided URL.`,
                 alias: 'discoverypatterns',
             },
             baselineFile: {
@@ -157,6 +157,11 @@ function getScanArguments(): ScanArguments {
                 describe:
                     'Adhere to the pattern when URLs with a trailing slash indicates a directory, and those without a trailing slash denotes a file.',
                 default: true,
+            },
+            browserOptions: {
+                type: 'array',
+                describe: `List of Chrome command line options to pass on browser start. Can be used to disable CORS to scan protected page: --browserOptions disable-web-security`,
+                alias: 'browseroptions',
             },
         })
         .check((args) => {

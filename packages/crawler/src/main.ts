@@ -26,7 +26,20 @@ interface ScanArguments {
  */
 (async () => {
     dotenv.config();
-    const scanArguments = yargs.argv as unknown as ScanArguments;
+    const scanArguments = yargs.option({
+        selectors: {
+            type: 'array',
+        },
+        inputUrls: {
+            type: 'array',
+        },
+        discoveryPatterns: {
+            type: 'array',
+        },
+        browserOptions: {
+            type: 'array',
+        },
+    }).argv as unknown as ScanArguments;
 
     const container = new inversify.Container({ autoBindInjectable: true });
     setupCrawlerContainer(container);

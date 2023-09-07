@@ -35,7 +35,7 @@ describe(PageResponseProcessor, () => {
         responseMock
             .setup((o) => o.status())
             .returns(() => 404)
-            .verifiable();
+            .verifiable(Times.atLeast(2));
 
         const expectedError = {
             errorType: 'HttpErrorCode',
@@ -48,6 +48,27 @@ describe(PageResponseProcessor, () => {
         const actualError = pageResponseProcessor.getResponseError(responseMock.object, { stack: 'stack' } as Error);
 
         expect(actualError).toEqual(expectedError);
+    });
+
+    it('get response for HTTP 304 response code', () => {
+        responseMock
+            .setup((o) => o.ok())
+            .returns(() => false)
+            .verifiable();
+        responseMock
+            .setup((o) => o.status())
+            .returns(() => 304)
+            .verifiable(Times.atLeast(2));
+        responseMock
+            .setup((o) => o.headers())
+            .returns(() => {
+                return {}; // The HTTP 304 browser response has no content-type header
+            })
+            .verifiable();
+
+        const actualError = pageResponseProcessor.getResponseError(responseMock.object);
+
+        expect(actualError).toBeUndefined();
     });
 
     it('get response error for invalid content type', () => {

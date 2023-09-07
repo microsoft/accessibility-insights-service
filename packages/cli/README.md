@@ -128,7 +128,7 @@ default: false
 
 ```sh
 type: array
-describe: List of CSS selectors to match against, separated by space. Default selector is 'button'.
+describe: List of CSS selectors to match against. Default selector is 'button'.
 default: ['button']
 ```
 
@@ -199,14 +199,14 @@ describe: File path that contains list of URLs (each separated by a new line) to
 
 ```sh
 type: array
-describe: List of URLs to crawl in addition to URLs discovered from crawling the provided URL, separated by space.
+describe: List of URLs to crawl in addition to URLs discovered from crawling the provided URL.
 ```
 
 -   discoveryPatterns: --discoveryPatterns
 
 ```sh
 type: array
-describe: List of RegEx patterns to crawl in addition to the provided URL, separated by space.
+describe: List of RegEx patterns to crawl in addition to the provided URL.
 ```
 
 -   baselineFile: --baselineFile
@@ -282,4 +282,11 @@ describe: Adhere to the pattern when URLs with a trailing slash indicates a dire
 The URL folder is a resource location equal to base URL up-to the last forward slash in the specified base URL, or e.g:
     -   If base URL is specified as https://www.example.com/bar/foo , URLs that are in https://www.example.com/bar/ folder will be considered for crawling and scanning.
     -   If base URL is specified as https://www.example.com/bar/foo/ , only URLs that are in https://www.example.com/bar/foo/ folder will be considered for crawling and scanning.
+```
+
+-   browserOptions: --browserOptions
+
+```sh
+type: array
+describe: List of Chrome command line options to pass on browser start. Can be used to disable CORS to scan protected page: --browserOptions disable-web-security
 ```

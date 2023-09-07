@@ -34,6 +34,7 @@ export class SiteCrawlerEngine implements CrawlerEngine {
         this.crawlerConfiguration.setMemoryMBytes(crawlerRunOptions.memoryMBytes);
         this.crawlerConfiguration.setSilentMode(crawlerRunOptions.silentMode);
 
+        const puppeteerOptions = crawlerRunOptions.browserOptions ? crawlerRunOptions.browserOptions.map((o) => `--${o}`) : [];
         const puppeteerDefaultOptions = [
             '--disable-dev-shm-usage',
             '--no-sandbox',
@@ -52,7 +53,7 @@ export class SiteCrawlerEngine implements CrawlerEngine {
             maxRequestsPerCrawl: this.crawlerConfiguration.maxRequestsPerCrawl(),
             launchContext: {
                 launchOptions: {
-                    args: puppeteerDefaultOptions,
+                    args: [...puppeteerDefaultOptions, ...puppeteerOptions],
                     defaultViewport: {
                         ...windowSize,
                         deviceScaleFactor: 1,

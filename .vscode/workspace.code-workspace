@@ -142,6 +142,7 @@
         "files.eol": "\n",
         "files.insertFinalNewline": true,
         "prettier.requireConfig": true,
+        "csharp.suppressDotnetRestoreNotification": true,
         "eslint.enable": true,
         "eslint.packageManager": "yarn",
         "eslint.alwaysShowStatus": true,
@@ -190,8 +191,7 @@
             "typemoq",
             "unscannable",
             "upsert"
-        ],
-        "csharp.suppressDotnetRestoreNotification": true
+        ]
     },
     "extensions": {
         "recommendations": [
@@ -203,7 +203,8 @@
             "streetsidesoftware.code-spell-checker",
             "ms-azuretools.vscode-azurefunctions",
             "christian-kohler.npm-intellisense",
-            "ms-vscode.powershell"
+            "ms-vscode.powershell",
+            "ms-azuretools.vscode-docker"
         ]
     },
 }
