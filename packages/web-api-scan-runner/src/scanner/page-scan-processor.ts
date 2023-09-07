@@ -37,14 +37,7 @@ export class PageScanProcessor {
             axeScanResults = await this.axeScanner.scan(this.page);
             axeScanResults = { ...axeScanResults, ...pageState };
 
-            if (runnerScanMetadata.deepScan) {
-                if (this.page.isOpen()) {
-                    await this.deepScanner.runDeepScan(runnerScanMetadata, pageScanResult, this.page);
-                    this.logger.logInfo('The deep scanner completed a page scan.');
-                } else {
-                    this.logger.logError('Page is not ready. Unable to perform deep scan.');
-                }
-            }
+            await this.deepScanner.runDeepScan(runnerScanMetadata, pageScanResult, this.page);
         } finally {
             await this.closePage();
         }
