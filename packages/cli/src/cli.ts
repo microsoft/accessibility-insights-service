@@ -158,6 +158,11 @@ function getScanArguments(): ScanArguments {
                     'Adhere to the pattern when URLs with a trailing slash indicates a directory, and those without a trailing slash denotes a file.',
                 default: true,
             },
+            browserOptions: {
+                type: 'array',
+                describe: `The Chrome command line option to pass on browser start. Can be used to disable CORS to scan protected page: --browserOptions disable-web-security`,
+                alias: 'browseroptions',
+            },
         })
         .check((args) => {
             validateScanArguments(args as ScanArguments);

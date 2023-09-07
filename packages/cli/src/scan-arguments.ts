@@ -29,4 +29,5 @@ export interface ScanArguments {
     userAgent?: string;
     httpHeaders?: string;
     adhereFilesystemPattern?: boolean;
+    browserOptions?: string[];
 }

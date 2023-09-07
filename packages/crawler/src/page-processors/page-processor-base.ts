@@ -143,10 +143,24 @@ export abstract class PageProcessorBase implements PageProcessor {
         // converting relative href link to absolute link.
         context.request.loadedUrl = context.page.url();
 
-        const enqueued = await context.enqueueLinks({
-            // eslint-disable-next-line security/detect-non-literal-regexp
-            regexps: this.discoveryPatterns?.length > 0 ? this.discoveryPatterns.map((p) => new RegExp(p)) : undefined,
-        });
+        let enqueued;
+        try {
+            enqueued = await context.enqueueLinks({
+                // eslint-disable-next-line security/detect-non-literal-regexp
+                regexps: this.discoveryPatterns?.length > 0 ? this.discoveryPatterns.map((p) => new RegExp(p)) : undefined,
+            });
+        } catch (error) {
+            if ((error as Error).message?.includes('pQuerySelectorAll is not a function')) {
+                throw new Error(
+                    `Puppeteer has failed to inject an automation script due to page security settings. Try to use disable-web-security browser option to scan page. ${System.serializeError(
+                        error,
+                    )}`,
+                );
+            }
+
+            throw error;
+        }
+
         this.logger.logInfo(`Enqueued ${enqueued.processedRequests.length} new links.`, {
             url: context.page.url(),
         });

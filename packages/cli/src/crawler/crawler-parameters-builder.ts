@@ -62,6 +62,7 @@ export class CrawlerParametersBuilder {
             authType: scanArguments.authType,
             httpHeaders: headers,
             adhereFilesystemPattern: scanArguments.adhereFilesystemPattern,
+            browserOptions: scanArguments.browserOptions,
         };
     }
 

@@ -283,3 +283,10 @@ The URL folder is a resource location equal to base URL up-to the last forward s
     -   If base URL is specified as https://www.example.com/bar/foo , URLs that are in https://www.example.com/bar/ folder will be considered for crawling and scanning.
     -   If base URL is specified as https://www.example.com/bar/foo/ , only URLs that are in https://www.example.com/bar/foo/ folder will be considered for crawling and scanning.
 ```
+
+-   browserOptions: --browserOptions
+
+```sh
+type: array
+describe: The Chrome command line option to pass on browser start. Can be used to disable CORS to scan protected page: --browserOptions disable-web-security
+```

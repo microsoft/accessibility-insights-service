@@ -26,4 +26,5 @@ export interface CrawlerRunOptions {
     authType?: string;
     httpHeaders?: Record<string, string>;
     adhereFilesystemPattern?: boolean;
+    browserOptions?: string[];
 }
