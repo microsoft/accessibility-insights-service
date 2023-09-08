@@ -198,12 +198,10 @@ describe(OnDemandDispatcher, () => {
                                 timestamp: new Date().toJSON(),
                                 retryCount: 2,
                             },
-                            websiteScanRefs: [
-                                {
-                                    id: 'websiteScanRefId',
-                                    scanGroupType: 'deep-scan',
-                                },
-                            ],
+                            websiteScanRef: {
+                                id: 'websiteScanRefId',
+                                scanGroupType: 'deep-scan',
+                            },
                         },
                         condition: 'noRetry',
                     },
@@ -217,11 +215,11 @@ describe(OnDemandDispatcher, () => {
 
             const pageScanResult = scanRequests.requestsToDelete[0].result;
             websiteScanResultProviderMock
-                .setup((o) => o.read(pageScanResult.websiteScanRefs[0].id, false, pageScanResult.id))
+                .setup((o) => o.read(pageScanResult.websiteScanRef.id, false, pageScanResult.id))
                 .returns(() => Promise.resolve({ pageScans: pageScanPart ? [pageScanPart] : undefined } as WebsiteScanResult))
                 .verifiable();
             const updatedWebsiteScanResult: Partial<WebsiteScanResult> = {
-                id: pageScanResult.websiteScanRefs[0].id,
+                id: pageScanResult.websiteScanRef.id,
                 pageScans: [
                     {
                         scanId: pageScanResult.id,

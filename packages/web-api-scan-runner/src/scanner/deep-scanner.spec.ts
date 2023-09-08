@@ -65,10 +65,10 @@ describe(DeepScanner, () => {
         };
         pageScanResult = {
             url,
-            websiteScanRefs: [
-                { id: 'some id', scanGroupType: 'consolidated-scan-report' },
-                { id: websiteScanResultId, scanGroupType: 'deep-scan' },
-            ],
+            websiteScanRef: {
+                id: websiteScanResultId,
+                scanGroupType: 'consolidated-scan',
+            },
         } as OnDemandPageScanResult;
         updatedWebsiteScanResult = {
             id: websiteScanResultId,
@@ -164,14 +164,6 @@ describe(DeepScanner, () => {
             .verifiable();
 
         await testSubject.runDeepScan(runnerScanMetadata, pageScanResult, pageMock.object);
-    });
-
-    it('logs and throws if websiteScanRefs is missing', async () => {
-        pageScanResult.websiteScanRefs = undefined;
-
-        loggerMock.setup((l) => l.logError(It.isAny(), It.isAny())).verifiable();
-
-        await expect(testSubject.runDeepScan(runnerScanMetadata, pageScanResult, pageMock.object)).rejects.toThrow();
     });
 
     it('crawls and updates results with generated discovery pattern', async () => {

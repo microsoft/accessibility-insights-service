@@ -4,7 +4,7 @@
 import 'reflect-metadata';
 
 import { Context } from '@azure/functions';
-import { ServiceConfiguration } from 'common';
+import { GuidGenerator, ServiceConfiguration } from 'common';
 import { isEmpty, isNil } from 'lodash';
 import * as MockDate from 'mockdate';
 import {
@@ -23,6 +23,8 @@ import {
     WebsiteScanResult,
     WebsiteScanRef,
     ScanRunBatchRequest,
+    ReportGroupRequest,
+    ScanGroupType,
 } from 'storage-documents';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { MockableLogger } from '../test-utilities/mockable-logger';
@@ -38,8 +40,11 @@ let partitionKeyFactoryMock: IMock<PartitionKeyFactory>;
 let serviceConfigurationMock: IMock<ServiceConfiguration>;
 let loggerMock: IMock<MockableLogger>;
 let websiteScanResultProviderMock: IMock<WebsiteScanResultProvider>;
+let guidGeneratorMock: IMock<GuidGenerator>;
 let context: Context;
 let dateNow: Date;
+
+const guid = 'guid-1';
 
 beforeEach(() => {
     dateNow = new Date();
@@ -52,7 +57,10 @@ beforeEach(() => {
     serviceConfigurationMock = Mock.ofType(ServiceConfiguration);
     loggerMock = Mock.ofType(MockableLogger);
     websiteScanResultProviderMock = Mock.ofType(WebsiteScanResultProvider);
+    guidGeneratorMock = Mock.ofType<GuidGenerator>();
     context = <Context>(<unknown>{ bindingDefinitions: {} });
+
+    guidGeneratorMock.setup((o) => o.createGuid()).returns(() => guid);
 
     scanBatchRequestFeedController = new ScanBatchRequestFeedController(
         onDemandPageScanRunResultProviderMock.object,
@@ -61,6 +69,7 @@ beforeEach(() => {
         websiteScanResultProviderMock.object,
         partitionKeyFactoryMock.object,
         serviceConfigurationMock.object,
+        guidGeneratorMock.object,
         loggerMock.object,
     );
 });
@@ -73,6 +82,7 @@ afterEach(() => {
     scanDataProviderMock.verifyAll();
     websiteScanResultProviderMock.verifyAll();
     partitionKeyFactoryMock.verifyAll();
+    guidGeneratorMock.verifyAll();
     loggerMock.verifyAll();
 });
 
@@ -235,14 +245,27 @@ function setupWebsiteScanResultProviderMock(documents: OnDemandPageScanBatchRequ
         const websiteScanRequestDbDocuments: { scanId: string; websiteScanResult: Partial<WebsiteScanResult> }[] = [];
 
         document.scanRunBatchRequest
-            .filter((request) => request.reportGroups !== undefined)
+            .filter((request: any) => request.error === undefined)
             .map((request) => {
+                if (request.reportGroups === undefined) {
+                    request.reportGroups = [{} as ReportGroupRequest];
+                }
+
+                let scanGroupType: ScanGroupType;
+                if (request.deepScan === true) {
+                    scanGroupType = 'deep-scan';
+                } else if (request.reportGroups[0]?.consolidatedId || request.site?.knownPages?.length > 0) {
+                    scanGroupType = 'consolidated-scan';
+                } else {
+                    scanGroupType = 'single-scan';
+                }
+
                 request.reportGroups.map((reportGroup) => {
                     const websiteScanResult = {
-                        baseUrl: request.site.baseUrl,
-                        scanGroupId: reportGroup.consolidatedId,
-                        deepScanId: request.deepScan ? request.scanId : undefined,
-                        scanGroupType: request.deepScan ? 'deep-scan' : 'consolidated-scan-report',
+                        baseUrl: request.site?.baseUrl,
+                        scanGroupId: reportGroup.consolidatedId ?? guid,
+                        deepScanId: request.scanId,
+                        scanGroupType,
                         pageScans: [
                             {
                                 scanId: request.scanId,
@@ -250,12 +273,12 @@ function setupWebsiteScanResultProviderMock(documents: OnDemandPageScanBatchRequ
                                 timestamp: dateNow.toJSON(),
                             },
                         ],
-                        knownPages: request.site.knownPages,
-                        discoveryPatterns: request.site.discoveryPatterns,
+                        knownPages: request.site?.knownPages,
+                        discoveryPatterns: request.site?.discoveryPatterns,
                         created: dateNow.toJSON(),
                     } as WebsiteScanResult;
 
-                    const documentId = `db-id-${reportGroup.consolidatedId}`;
+                    const documentId = `db-id-${reportGroup.consolidatedId ?? guid}`;
                     const websiteScanResultDbDocument = { ...websiteScanResult, id: documentId };
                     websiteScanRequests.push(websiteScanResultDbDocument);
                     websiteScanRequestDbDocuments.push({ scanId: request.scanId, websiteScanResult: websiteScanResultDbDocument });
@@ -283,7 +306,7 @@ function setupOnDemandPageScanRunResultProviderMock(
         const dbDocuments = document.scanRunBatchRequest
             .filter((request) => request.scanId !== undefined)
             .map<OnDemandPageScanResult>((request) => {
-                const websiteScanRefs = websiteScanResults
+                const websiteScanRef = websiteScanResults
                     .filter((r) => r.pageScans[0].scanId === request.scanId)
                     .map((r) => {
                         return {
@@ -291,7 +314,7 @@ function setupOnDemandPageScanRunResultProviderMock(
                             scanGroupId: r.scanGroupId,
                             scanGroupType: r.scanGroupType,
                         } as WebsiteScanRef;
-                    });
+                    })[0];
                 const result: OnDemandPageScanResult = {
                     id: request.scanId,
                     url: request.url,
@@ -311,7 +334,7 @@ function setupOnDemandPageScanRunResultProviderMock(
                                   scanNotifyUrl: request.scanNotifyUrl,
                               },
                           }),
-                    websiteScanRefs: websiteScanRefs.length > 0 ? websiteScanRefs : undefined,
+                    websiteScanRef,
                     ...(request.privacyScan === undefined ? {} : { privacyScan: request.privacyScan }),
                     ...(request.authenticationType === undefined ? {} : { authentication: { hint: request.authenticationType } }),
                 };

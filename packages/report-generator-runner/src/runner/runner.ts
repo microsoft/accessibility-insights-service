@@ -9,7 +9,6 @@ import {
     OperationResult,
     getOnMergeCallbackToUpdateRunResult,
     WebsiteScanResultProvider,
-    RunnerScanMetadata,
     ScanNotificationProcessor,
 } from 'service-library';
 import { OnDemandPageScanResult, ReportGeneratorRequest, OnDemandPageScanRunState, WebsiteScanResult } from 'storage-documents';
@@ -209,18 +208,16 @@ export class Runner {
 
                     const pageScanResult = await this.onDemandPageScanRunResultProvider.tryUpdateScanRun(scanResult);
                     const websiteScanResult = await this.updateWebsiteScanResult(pageScanResult.result);
-                    await this.sendScanCompletionNotification(pageScanResult.result, websiteScanResult);
+                    await this.scanNotificationProcessor.sendScanCompletionNotification(pageScanResult.result, websiteScanResult);
                 });
             }),
         );
     }
 
     private async updateWebsiteScanResult(pageScanResult: Partial<OnDemandPageScanResult>): Promise<WebsiteScanResult> {
-        // Update website scan result for deep-scan scan request type
-        const websiteScanRef = pageScanResult.websiteScanRefs?.find((ref) => ref.scanGroupType === 'deep-scan');
-        if (websiteScanRef) {
+        if (pageScanResult.websiteScanRef) {
             const updatedWebsiteScanResult: Partial<WebsiteScanResult> = {
-                id: websiteScanRef.id,
+                id: pageScanResult.websiteScanRef.id,
                 pageScans: [
                     {
                         scanId: pageScanResult.id,
@@ -237,20 +234,6 @@ export class Runner {
         }
 
         return undefined;
-    }
-
-    private async sendScanCompletionNotification(
-        pageScanResult: OnDemandPageScanResult,
-        websiteScanResult: WebsiteScanResult,
-    ): Promise<void> {
-        const runnerScanMetadata: RunnerScanMetadata = {
-            id: pageScanResult.id,
-            url: pageScanResult.url,
-            deepScan: websiteScanResult?.deepScanId !== undefined ? true : false,
-        };
-
-        // the scan notification processor will detect if notification should be sent
-        await this.scanNotificationProcessor.sendScanCompletionNotification(runnerScanMetadata, pageScanResult, websiteScanResult);
     }
 
     private async deleteRequests(queuedRequests: QueuedRequest[]): Promise<void> {

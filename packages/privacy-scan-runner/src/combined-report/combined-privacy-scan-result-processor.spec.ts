@@ -4,7 +4,6 @@
 import 'reflect-metadata';
 
 import { GuidGenerator, RetryHelper } from 'common';
-import _ from 'lodash';
 import { GlobalLogger } from 'logger';
 import { PrivacyScanResult } from 'scanner-global-library';
 import {
@@ -69,12 +68,11 @@ describe(CombinedPrivacyScanResultProcessor, () => {
         } as WebsiteScanResult;
         pageScanResult = {
             id: 'page scan id',
-            websiteScanRefs: [
-                {
-                    id: websiteScanResult.id,
-                    scanGroupType: 'consolidated-scan-report',
-                },
-            ],
+            websiteScanRef: {
+                id: websiteScanResult.id,
+                scanGroupType: 'consolidated-scan',
+            },
+
             url: 'scan url',
             reports: [
                 {
@@ -106,15 +104,7 @@ describe(CombinedPrivacyScanResultProcessor, () => {
     });
 
     it('Does nothing if websiteScanRefs is undefined', async () => {
-        pageScanResult.websiteScanRefs = undefined;
-
-        websiteScanResultProviderMock.setup((w) => w.read(It.isAny())).verifiable(Times.never());
-
-        await testSubject.generateCombinedScanResults(privacyResults, pageScanResult);
-    });
-
-    it('Does nothing if websiteScanRefs is empty', async () => {
-        pageScanResult.websiteScanRefs = [];
+        pageScanResult.websiteScanRef = undefined;
 
         websiteScanResultProviderMock.setup((w) => w.read(It.isAny())).verifiable(Times.never());
 

@@ -32,9 +32,7 @@ export class PageScanProcessor {
             privacyScanResults = await this.runPrivacyScan(scanMetadata.url);
             privacyScanResults = { ...privacyScanResults, ...pageState };
 
-            if (scanMetadata.deepScan) {
-                await this.pageScanScheduler.schedulePageScan(pageScanResult);
-            }
+            await this.pageScanScheduler.schedulePageScan(pageScanResult);
         } finally {
             await this.closePage();
         }

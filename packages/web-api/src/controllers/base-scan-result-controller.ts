@@ -5,7 +5,7 @@ import { GuidGenerator } from 'common';
 import { Dictionary, keyBy } from 'lodash';
 import moment from 'moment';
 import { ApiController, OnDemandPageScanRunResultProvider, ScanResultResponse, WebsiteScanResultProvider } from 'service-library';
-import { OnDemandPageScanResult, WebsiteScanResult, ScanGroupType } from 'storage-documents';
+import { OnDemandPageScanResult, WebsiteScanResult } from 'storage-documents';
 import { ScanResponseConverter } from '../converters/scan-response-converter';
 
 export abstract class BaseScanResultController extends ApiController {
@@ -31,13 +31,9 @@ export abstract class BaseScanResultController extends ApiController {
         return keyBy(scanResultItems, (item) => item.id);
     }
 
-    protected async getWebsiteScanResult(
-        pageScanResult: OnDemandPageScanResult,
-        scanGroupType: ScanGroupType = 'deep-scan',
-    ): Promise<WebsiteScanResult> {
-        const websiteScanRef = pageScanResult.websiteScanRefs?.find((ref) => ref.scanGroupType === scanGroupType);
-        if (websiteScanRef) {
-            return this.websiteScanResultProvider.read(websiteScanRef.id, true);
+    protected async getWebsiteScanResult(pageScanResult: OnDemandPageScanResult): Promise<WebsiteScanResult> {
+        if (pageScanResult.websiteScanRef) {
+            return this.websiteScanResultProvider.read(pageScanResult.websiteScanRef.id, true);
         }
 
         return undefined;

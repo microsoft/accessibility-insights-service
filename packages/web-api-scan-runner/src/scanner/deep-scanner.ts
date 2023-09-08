@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 import { inject, injectable } from 'inversify';
-import { isNil } from 'lodash';
 import { GlobalLogger } from 'logger';
 import { Page } from 'scanner-global-library';
 import { WebsiteScanResultProvider, RunnerScanMetadata } from 'service-library';
@@ -26,7 +25,11 @@ export class DeepScanner {
     ) {}
 
     public async runDeepScan(runnerScanMetadata: RunnerScanMetadata, pageScanResult: OnDemandPageScanResult, page: Page): Promise<void> {
-        let websiteScanResult = await this.readWebsiteScanResult(pageScanResult, false);
+        if (pageScanResult.websiteScanRef === undefined || pageScanResult.websiteScanRef.scanGroupType === 'single-scan') {
+            return;
+        }
+
+        let websiteScanResult = await this.websiteScanResultProvider.read(pageScanResult.websiteScanRef.id, false);
         this.logger.setCommonProperties({
             websiteScanId: websiteScanResult.id,
             deepScanId: websiteScanResult.deepScanId,
@@ -44,7 +47,7 @@ export class DeepScanner {
         }
 
         // fetch websiteScanResult.knownPages from a storage
-        websiteScanResult = await this.readWebsiteScanResult(pageScanResult, true);
+        websiteScanResult = await this.websiteScanResultProvider.read(pageScanResult.websiteScanRef.id, true);
 
         // crawling a page if deep scan was enabled
         let discoveredUrls: string[] = [];
@@ -76,18 +79,6 @@ export class DeepScanner {
         };
 
         return this.websiteScanResultProvider.mergeOrCreate(scanId, websiteScanResultUpdate, undefined, true);
-    }
-
-    private async readWebsiteScanResult(pageScanResult: OnDemandPageScanResult, readCompleteDocument: boolean): Promise<WebsiteScanResult> {
-        const scanGroupType = 'deep-scan';
-        const websiteScanRef = pageScanResult.websiteScanRefs?.find((ref) => ref.scanGroupType === scanGroupType);
-        if (isNil(websiteScanRef)) {
-            this.logger.logError(`No websiteScanRef exists with scanGroupType ${scanGroupType}`);
-
-            throw new Error(`No websiteScanRef exists with scanGroupType ${scanGroupType}`);
-        }
-
-        return this.websiteScanResultProvider.read(websiteScanRef.id, readCompleteDocument);
     }
 
     private async canDeepScan(websiteScanResult: WebsiteScanResult): Promise<boolean> {

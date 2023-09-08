@@ -110,12 +110,10 @@ describe(CombinedScanResultProcessor, () => {
         (combinedScanResultProcessor as any).maxCombinedResultsBlobSize = 2;
         pageScanResult = {
             id: 'id',
-            websiteScanRefs: [
-                {
-                    id: websiteScanId,
-                    scanGroupType: 'consolidated-scan-report',
-                },
-            ],
+            websiteScanRef: {
+                id: websiteScanId,
+                scanGroupType: 'consolidated-scan',
+            },
         } as OnDemandPageScanResult;
 
         setupFullPass();
@@ -137,12 +135,10 @@ describe(CombinedScanResultProcessor, () => {
     it('generate combined report for consolidated scan request', async () => {
         pageScanResult = {
             id: 'id',
-            websiteScanRefs: [
-                {
-                    id: websiteScanId,
-                    scanGroupType: 'consolidated-scan-report',
-                },
-            ],
+            websiteScanRef: {
+                id: websiteScanId,
+                scanGroupType: 'consolidated-scan',
+            },
         } as OnDemandPageScanResult;
         setupFullPass();
 
@@ -154,12 +150,10 @@ describe(CombinedScanResultProcessor, () => {
     it('generate combined report for deep scan request', async () => {
         pageScanResult = {
             id: 'id',
-            websiteScanRefs: [
-                {
-                    id: websiteScanId,
-                    scanGroupType: 'deep-scan',
-                },
-            ],
+            websiteScanRef: {
+                id: websiteScanId,
+                scanGroupType: 'deep-scan',
+            },
         } as OnDemandPageScanResult;
         setupFullPass();
 
@@ -171,12 +165,10 @@ describe(CombinedScanResultProcessor, () => {
     it('should replace report reference if already exists', async () => {
         pageScanResult = {
             id: 'id',
-            websiteScanRefs: [
-                {
-                    id: websiteScanId,
-                    scanGroupType: 'deep-scan',
-                },
-            ],
+            websiteScanRef: {
+                id: websiteScanId,
+                scanGroupType: 'deep-scan',
+            },
             reports: [
                 {
                     reportId: 'reportId',

@@ -6,7 +6,6 @@ import { OnDemandPageScanResult, OnDemandNotificationRequestMessage, WebsiteScan
 import { ServiceConfiguration } from 'common';
 import { isEmpty } from 'lodash';
 import { GlobalLogger } from 'logger';
-import { RunnerScanMetadata } from '../types/runner-scan-metadata';
 import { ScanNotificationDispatcher } from './scan-notification-dispatcher';
 
 @injectable()
@@ -18,11 +17,10 @@ export class ScanNotificationProcessor {
     ) {}
 
     public async sendScanCompletionNotification(
-        runnerScanMetadata: RunnerScanMetadata,
         pageScanResult: OnDemandPageScanResult,
         websiteScanResult: WebsiteScanResult,
     ): Promise<void> {
-        if ((await this.canSendNotification(runnerScanMetadata, pageScanResult, websiteScanResult)) !== true) {
+        if ((await this.canSendNotification(pageScanResult, websiteScanResult)) !== true) {
             return;
         }
 
@@ -37,11 +35,7 @@ export class ScanNotificationProcessor {
         await this.scanNotificationDispatcher.sendNotificationMessage(notificationRequestMessage);
     }
 
-    private async canSendNotification(
-        runnerScanMetadata: RunnerScanMetadata,
-        pageScanResult: OnDemandPageScanResult,
-        websiteScanResult: WebsiteScanResult,
-    ): Promise<boolean> {
+    private async canSendNotification(pageScanResult: OnDemandPageScanResult, websiteScanResult: WebsiteScanResult): Promise<boolean> {
         const featureFlags = await this.serviceConfig.getConfigValue('featureFlags');
         if (featureFlags.sendNotification !== true) {
             this.logger.logInfo(`The scan result notification is disabled.`, {
@@ -52,20 +46,21 @@ export class ScanNotificationProcessor {
         }
 
         if (isEmpty(pageScanResult?.notification?.scanNotifyUrl)) {
-            this.logger.logInfo(`Scan result notification URL was not provided. Skip sending scan result notification message.`);
+            this.logger.logInfo(`Scan result notification URL was not provided. Skip sending scan result notification.`);
 
             return false;
         }
 
-        const scanConfig = await this.serviceConfig.getConfigValue('scanConfig');
-        if (runnerScanMetadata.deepScan !== true) {
+        if (websiteScanResult === undefined || pageScanResult.websiteScanRef?.scanGroupType === 'single-scan') {
+            const scanConfig = await this.serviceConfig.getConfigValue('scanConfig');
+
             if (
                 // completed scan
                 pageScanResult.run.state === 'completed' ||
                 // failed scan with no retry attempt
                 (pageScanResult.run.state === 'failed' && pageScanResult.run.retryCount >= scanConfig.maxFailedScanRetryCount)
             ) {
-                this.logger.logInfo(`Sending scan result notification message for a single scan.`, {
+                this.logger.logInfo(`Sending scan result notification message.`, {
                     scanNotifyUrl: pageScanResult.notification.scanNotifyUrl,
                 });
 
@@ -75,13 +70,14 @@ export class ScanNotificationProcessor {
 
         const deepScanCompleted =
             websiteScanResult.runResult &&
-            websiteScanResult.runResult.completedScans + websiteScanResult.runResult.failedScans >= websiteScanResult.pageCount;
+            (websiteScanResult.runResult?.completedScans ?? 0) + (websiteScanResult.runResult?.failedScans ?? 0) >=
+                websiteScanResult.pageCount;
 
         if (deepScanCompleted === true) {
-            this.logger.logInfo('Sending scan result notification message for a deep scan.', {
-                deepScanId: websiteScanResult?.deepScanId,
-                completedScans: `${websiteScanResult.runResult.completedScans}`,
-                failedScans: `${websiteScanResult.runResult.failedScans}`,
+            this.logger.logInfo('Sending scan result notification message.', {
+                deepScanId: websiteScanResult.deepScanId,
+                completedScans: `${websiteScanResult.runResult?.completedScans}`,
+                failedScans: `${websiteScanResult.runResult?.failedScans}`,
                 pageCount: `${websiteScanResult.pageCount}`,
                 scanNotifyUrl: pageScanResult.notification.scanNotifyUrl,
             });
