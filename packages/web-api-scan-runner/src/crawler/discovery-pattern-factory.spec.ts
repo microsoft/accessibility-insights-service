@@ -16,8 +16,13 @@ describe(createDiscoveryPattern, () => {
     });
 
     it('creates discovery pattern', () => {
-        const expectedPattern = `http(s?)://${host}${pathname}(.*)`;
+        const expectedPattern = `^http(s?)://${host}${pathname}(.*)`;
         const actualPattern = createDiscoveryPattern(url);
         expect(actualPattern).toEqual(expectedPattern);
+    });
+
+    it('ignore empty base url', () => {
+        const actualPattern = createDiscoveryPattern('');
+        expect(actualPattern).toBeUndefined();
     });
 });

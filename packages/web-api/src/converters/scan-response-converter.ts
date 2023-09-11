@@ -164,9 +164,8 @@ export class ScanResponseConverter {
         return { notification: notificationResponse };
     }
 
-    // eslint-disable-next-line @typescript-eslint/ban-types
-    private getDeepScanResult(websiteScanResult: WebsiteScanResult): { [deepScanResult: string]: DeepScanResultItem[] } | {} {
-        if (isNil(websiteScanResult) || !(websiteScanResult.pageScans?.length > 0)) {
+    private getDeepScanResult(websiteScanResult: WebsiteScanResult): { [deepScanResult: string]: DeepScanResultItem[] } {
+        if (websiteScanResult === undefined || websiteScanResult.scanGroupType === 'single-scan') {
             return {};
         }
 
