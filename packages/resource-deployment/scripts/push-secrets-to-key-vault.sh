@@ -108,7 +108,7 @@ createAppInsightsApiKey() {
     # If api key already exists, delete and recreate it
     if [[ -n "$apiKeyExists" ]]; then
         echo "Deleting existing app insights API key"
-        az monitor app-insights api-key delete $apiKeyParams 1>/dev/null
+        tmp=$(az monitor app-insights api-key delete $apiKeyParams)
     fi
 
     appInsightsApiKey=$(az monitor app-insights api-key create $apiKeyParams --read-properties ReadTelemetry --query "apiKey" -o tsv)
