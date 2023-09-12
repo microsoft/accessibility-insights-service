@@ -14,7 +14,6 @@ import {
 import { OnDemandPageScanResult, ReportGeneratorRequest, OnDemandPageScanRunState, WebsiteScanResult } from 'storage-documents';
 import { System } from 'common';
 import { isEmpty } from 'lodash';
-import pLimit from 'p-limit';
 import { RunMetadataConfig } from '../run-metadata-config';
 import { ReportGeneratorRunnerTelemetryManager } from '../report-generator-runner-telemetry-manager';
 import { ReportProcessor } from '../report-processor/report-processor';
@@ -37,8 +36,6 @@ export class Runner {
     private readonly maxRequestsToMerge = 10;
 
     private readonly maxRequestsToDelete = 20;
-
-    private readonly maxConcurrencyLimit = 5;
 
     constructor(
         @inject(RunMetadataConfig) private readonly runMetadataConfig: RunMetadataConfig,
@@ -176,42 +173,36 @@ export class Runner {
     }
 
     private async updateScanRunStatesOnCompletion(queuedRequests: QueuedRequest[]): Promise<void> {
-        const limit = pLimit(this.maxConcurrencyLimit);
-        await Promise.all(
-            queuedRequests.map(async (queuedRequest) => {
-                return limit(async () => {
-                    this.logger.logInfo(`Updating report request run state to ${queuedRequest.condition}.`, {
-                        id: queuedRequest.request.id,
-                        scanId: queuedRequest.request.scanId,
-                        condition: queuedRequest.condition,
-                        runState: queuedRequest.request.run?.state,
-                        retryCount: `${queuedRequest.request.run?.retryCount}`,
-                        runTimestamp: queuedRequest.request.run?.timestamp,
-                    });
-                    const run = {
-                        state: queuedRequest.condition === 'completed' ? 'completed' : 'failed',
-                        timestamp: new Date().toJSON(),
-                        error: isEmpty(queuedRequest.request.run?.error)
-                            ? null
-                            : queuedRequest.request.run.error.toString().substring(0, 2048),
-                    };
-                    const scanResult = {
-                        id: queuedRequest.request.scanId,
-                        run,
-                        subRuns: {
-                            report: {
-                                ...run,
-                                retryCount: queuedRequest.request.run?.retryCount,
-                            },
-                        },
-                    } as Partial<OnDemandPageScanResult>;
+        // Run sequentially to avoid storage document update contention
+        for (const queuedRequest of queuedRequests) {
+            this.logger.logInfo(`Updating report request run state to ${queuedRequest.condition}.`, {
+                id: queuedRequest.request.id,
+                scanId: queuedRequest.request.scanId,
+                condition: queuedRequest.condition,
+                runState: queuedRequest.request.run?.state,
+                retryCount: `${queuedRequest.request.run?.retryCount}`,
+                runTimestamp: queuedRequest.request.run?.timestamp,
+            });
+            const run = {
+                state: queuedRequest.condition === 'completed' ? 'completed' : 'failed',
+                timestamp: new Date().toJSON(),
+                error: isEmpty(queuedRequest.request.run?.error) ? null : queuedRequest.request.run.error.toString().substring(0, 2048),
+            };
+            const scanResult = {
+                id: queuedRequest.request.scanId,
+                run,
+                subRuns: {
+                    report: {
+                        ...run,
+                        retryCount: queuedRequest.request.run?.retryCount,
+                    },
+                },
+            } as Partial<OnDemandPageScanResult>;
 
-                    const pageScanResult = await this.onDemandPageScanRunResultProvider.tryUpdateScanRun(scanResult);
-                    const websiteScanResult = await this.updateWebsiteScanResult(pageScanResult.result);
-                    await this.scanNotificationProcessor.sendScanCompletionNotification(pageScanResult.result, websiteScanResult);
-                });
-            }),
-        );
+            const pageScanResult = await this.onDemandPageScanRunResultProvider.tryUpdateScanRun(scanResult);
+            const websiteScanResult = await this.updateWebsiteScanResult(pageScanResult.result);
+            await this.scanNotificationProcessor.sendScanCompletionNotification(pageScanResult.result, websiteScanResult);
+        }
     }
 
     private async updateWebsiteScanResult(pageScanResult: Partial<OnDemandPageScanResult>): Promise<WebsiteScanResult> {
