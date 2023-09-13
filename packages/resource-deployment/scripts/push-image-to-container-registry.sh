@@ -48,7 +48,7 @@ pushImageToRegistry() {
     local source=$2
     local platform=$3
 
-    az acr build --platform $platform --image $containerRegistryName.azurecr.io/$name:latest --registry $containerRegistryName $source | sed -e "s/^/[$name] /"
+    az acr build --platform $platform --image $containerRegistryName.azurecr.io/$name --registry $containerRegistryName $source | sed -e "s/^/[$name] /"
 }
 
 setImageBuildSource() {
@@ -64,14 +64,6 @@ setImageBuildSource() {
 }
 
 prepareImageBuildSource() {
-    if [[ $environment == "dev" ]]; then
-        privateImagePath="${0%/*}/../../../../../accessibility-insights-service-private/docker-image/"
-        if [ -d "$privateImagePath" ]; then
-            echo "Found private service repository location. Build docker image content."
-            cp -a "$privateImagePath." "$batchScanRunnerDist"
-        fi
-    fi
-
     echo "Copy '${environment}' runtime configuration to the docker image build source."
     cp "${0%/*}/../runtime-config/runtime-config.$environment.json" "${batchScanRunnerDist}runtime-config.json"
     cp "${0%/*}/../runtime-config/runtime-config.$environment.json" "${batchScanManagerDist}runtime-config.json"
@@ -91,35 +83,20 @@ pushImagesToRegistry() (
 
     # shellcheck disable=SC2034
     local imageBuildProcesses=(
-        "pushImageToRegistry \"batch-scan-runner\" $batchScanRunnerDist windows"
-        "pushImageToRegistry \"batch-scan-manager\" $batchScanManagerDist windows"
-        "pushImageToRegistry \"batch-scan-request-sender\" $batchScanRequestSenderDist windows"
-        "pushImageToRegistry \"batch-scan-notification-manager\" $batchScanNotificationManagerDist windows"
-        "pushImageToRegistry \"batch-scan-notification-runner\" $batchScanNotificationRunnerDist windows"
-        "pushImageToRegistry \"batch-privacy-scan-runner\" $batchPrivacyScanRunnerDist windows"
-        "pushImageToRegistry \"batch-privacy-scan-manager\" $batchPrivacyScanJobManagerDist windows"
-        "pushImageToRegistry \"batch-report-generator-runner\" $batchReportGeneratorRunnerDist windows"
-        "pushImageToRegistry \"batch-report-generator-manager\" $batchReportGeneratorJobManagerDist windows"
+        "pushImageToRegistry \"batch-scan-runner:prescanner\" $batchScanRunnerDist windows"
+        "pushImageToRegistry \"batch-scan-manager:latest\" $batchScanManagerDist windows"
+        "pushImageToRegistry \"batch-scan-request-sender:latest\" $batchScanRequestSenderDist windows"
+        "pushImageToRegistry \"batch-scan-notification-manager:latest\" $batchScanNotificationManagerDist windows"
+        "pushImageToRegistry \"batch-scan-notification-runner:latest\" $batchScanNotificationRunnerDist windows"
+        "pushImageToRegistry \"batch-privacy-scan-runner:prescanner\" $batchPrivacyScanRunnerDist windows"
+        "pushImageToRegistry \"batch-privacy-scan-manager:latest\" $batchPrivacyScanJobManagerDist windows"
+        "pushImageToRegistry \"batch-report-generator-runner:latest\" $batchReportGeneratorRunnerDist windows"
+        "pushImageToRegistry \"batch-report-generator-manager:latest\" $batchReportGeneratorJobManagerDist windows"
     )
 
     echo "Pushing images to Azure Container Registry."
     runCommandsWithoutSecretsInParallel imageBuildProcesses
 )
-
-checkPrerequisites() {
-    if
-        [ ! -f "${batchScanRunnerDist}Add-Font.ps1" ] || [ ! -f "${batchScanRunnerDist}Fonts.tar" ] ||
-            [ ! -f "${batchPrivacyScanRunnerDist}Add-Font.ps1" ] || [ ! -f "${batchPrivacyScanRunnerDist}Fonts.tar" ] ||
-            [ ! -f "${batchReportGeneratorRunnerDist}Add-Font.ps1" ] || [ ! -f "${batchReportGeneratorRunnerDist}Fonts.tar" ]
-    then
-        echo "
-ERROR: Docker image fonts files not found.
-Copy Add-Font.ps1 and Fonts.tar to packages/resource-deployment/custom-scripts/docker-image directory 
-and run packages/resource-deployment/custom-scripts/prepare-deployment.sh before service deployment.
-"
-        exit 1
-    fi
-}
 
 if [[ $keepImages != true ]]; then
     . "${0%/*}/get-resource-names.sh"
@@ -129,7 +106,6 @@ if [[ $keepImages != true ]]; then
     az acr login --name "$containerRegistryName"
 
     setImageBuildSource
-    checkPrerequisites
     prepareImageBuildSource
     pushImagesToRegistry
 else

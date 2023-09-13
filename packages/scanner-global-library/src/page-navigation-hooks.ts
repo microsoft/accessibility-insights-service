@@ -77,6 +77,9 @@ export class PageNavigationHooks {
                 caret-color: transparent !important;
             }`;
 
-        await page.addStyleTag({ content });
+        try {
+            await page.addStyleTag({ content });
+            // eslint-disable-next-line no-empty
+        } catch {}
     }
 }

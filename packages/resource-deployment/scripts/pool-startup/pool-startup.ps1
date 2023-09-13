@@ -23,6 +23,18 @@ function installBootstrapPackages() {
     az version
 }
 
+function checkSystemVolume() {
+    $drive = Get-CimInstance Win32_LogicalDisk -Filter "DeviceID='${env:SystemDrive}'" | Select-Object Size, FreeSpace
+    Write-Output "System volume ${env:SystemDrive} `
+    Capacity: $(($drive.Size / 1073741824).ToString('0.00')) GB `
+    Free space: $(($drive.FreeSpace / 1073741824).ToString('0.00')) GB"
+
+    if ($($drive.FreeSpace / $drive.Size) -le 0.1 ) {
+        # System volume check will reclaim hidden drive space
+        Write-Output "System volume has low free space. Scheduling system volume check on the next system restart..."
+        Write-Output Y | chkdsk $env:SystemDrive /R /F | Out-Null
+    }
+}
 
 if ([string]::IsNullOrEmpty($global:keyvault)) {
     $global:keyvault = $env:KEY_VAULT_NAME;
@@ -36,9 +48,11 @@ installBootstrapPackages
 
 ./install-docker-engine.ps1
 
-./pull-image-from-container-registry.ps1 -k $global:keyvault
+./pull-image-from-registry.ps1 -k $global:keyvault
 
 Write-Output "Invoking custom pool startup script"
 ./custom-pool-post-startup.ps1
+
+checkSystemVolume
 
 Write-Output "Successfully completed pool startup script execution"

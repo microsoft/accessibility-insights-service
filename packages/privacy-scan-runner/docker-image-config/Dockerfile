@@ -1,11 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
 
-FROM mcr.microsoft.com/windows/servercore:1809-amd64
+FROM mcr.microsoft.com/windows/servercore:ltsc2022-amd64
 
 ENV NODE_VERSION 16.20.1
-
-USER ContainerAdministrator
 
 WORKDIR /app
 
@@ -16,12 +14,6 @@ RUN powershell -Command \
     Expand-Archive node.zip -DestinationPath / ; \
     Rename-Item -Path $('C:\node-v{0}-win-x64' -f $env:NODE_VERSION) -NewName 'C:\nodejs'
 RUN setx /m PATH "%PATH%;C:\nodejs"
-
-# Install fonts to enable browser rendering
-ADD Fonts.tar /Fonts/
-COPY Add-Font.ps1 .
-RUN powershell -Command \
-    .\Add-Font.ps1 /Fonts/ > nul
 
 # Bundle app package
 COPY . .

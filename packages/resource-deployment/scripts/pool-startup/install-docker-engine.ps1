@@ -1,7 +1,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
 
-# See https://learn.microsoft.com/en-us/virtualization/windowscontainers/quick-start/set-up-environment?tabs=dockerce#windows-server-1
+# Reference https://learn.microsoft.com/en-us/virtualization/windowscontainers/quick-start/set-up-environment?tabs=dockerce#windows-server-1
 
 $global:rebootRequired = $false
 
@@ -37,25 +37,26 @@ function rebootIfRequired() {
     }
 }
 
-# See https://learn.microsoft.com/en-us/virtualization/windowscontainers/manage-docker/configure-docker-daemon#configure-docker-with-a-configuration-file
+# Reference https://learn.microsoft.com/en-us/virtualization/windowscontainers/manage-docker/configure-docker-daemon#configure-docker-with-a-configuration-file
 function setDockerConfig() {
     $dataRootValue = "D:\docker"
     $configFolder = "C:\ProgramData\Docker\config"
     $configName = "daemon.json"
     $configPath = "$configFolder\$configName"
 
+    # Exit if docker installation does not exist
     if (-not (Test-Path -Path $configFolder)) {
-        # Docker installation does not exist
         return
     }
 
+    # Create docker configuration file if it does not exist
     if (-not (Test-Path -Path $configPath -PathType Leaf)) {
-        # Docker configuration file does not exist
         "{}" | Out-File -FilePath $configPath -Force
     }
 
     $config = Get-Content $configPath -Raw | ConvertFrom-Json
-    # Set data location
+
+    # Set docker data location
     if ($config."data-root" -and $config."data-root" -ne $dataRootValue) {
         # Update property value
         $config."data-root" = $dataRootValue
@@ -83,10 +84,16 @@ function setDockerConfig() {
         # Add property value
         $config | Add-Member -Name "exec-opts" -Value @($hypervIsolation) -MemberType NoteProperty
         $global:rebootRequired = $true
-    } 
+    }
 
+    # Set docker temp directory
+    if (-not $env:DOCKER_TMPDIR) {
+        [Environment]::SetEnvironmentVariable("DOCKER_TMPDIR", "$dataRootValue\tmp", "Machine")
+        $global:rebootRequired = $true
+    }
+
+    # Trace updated config
     $config | ConvertTo-Json | Set-Content $configPath -Force
-
     if ($global:rebootRequired -eq $true) {
         Write-Output "Docker config file was successfully updated."
         Write-Output $config | ConvertTo-Json
@@ -118,7 +125,7 @@ function installHyperV() {
     }
 }
 
-# See https://github.com/microsoft/Windows-Containers/tree/Main/helpful_tools/Install-DockerCE
+# Reference https://github.com/microsoft/Windows-Containers/tree/Main/helpful_tools/Install-DockerCE
 #
 # The Docker installation requires script to run twice with intermediate reboot. The second run is
 # configured as Windows startup task that runs on user login. We do not want to handle the startup

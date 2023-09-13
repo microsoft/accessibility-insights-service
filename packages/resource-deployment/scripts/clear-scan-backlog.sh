@@ -12,6 +12,7 @@ set -eo pipefail
 
 export resourceGroupName
 export cosmosAccountName
+export storageAccountName
 
 exitWithUsageInfo() {
     echo "
@@ -21,6 +22,13 @@ Usage: $0 -r <resource group>
 }
 
 dbName="onDemandScanner"
+
+function clearRequestQueues() {
+    local queueName=$1
+
+    az storage message clear --account-name "$storageAccountName" --queue-name "$queueName" 1>/dev/null
+    echo "Queue $queueName was successfully cleared."
+}
 
 function clearCosmosContainer() {
     local cosmosContainerName=$1
@@ -48,8 +56,8 @@ function clearCosmosContainer() {
         --database-name "$dbName" \
         --name "$cosmosContainerName" \
         --resource-group "$resourceGroupName" \
-        --yes
-    
+        --yes 1>/dev/null
+
     echo "Recreating cosmos container $cosmosContainerName in database $dbName..."
     az cosmosdb sql container create \
         --account-name "$cosmosAccountName" \
@@ -59,7 +67,7 @@ function clearCosmosContainer() {
         --partition-key-path "/partitionKey" \
         --max-throughput "$throughput" \
         --ttl "$ttl" 1>/dev/null
-    
+
     echo "Container $cosmosContainerName was successfully cleared."
 }
 
@@ -67,6 +75,9 @@ function clearScanBacklog() {
     clearContainerProcesses=(
         "clearCosmosContainer \"scanBatchRequests\""
         "clearCosmosContainer \"scanRequests\""
+        "clearRequestQueues \"ondemand-scanrequest\""
+        "clearRequestQueues \"privacy-scan-request\""
+        "clearRequestQueues \"ondemand-send-notification\""
     )
 
     runCommandsWithoutSecretsInParallel clearContainerProcesses
@@ -88,9 +99,9 @@ fi
 . "${0%/*}/get-resource-names.sh"
 . "${0%/*}/process-utilities.sh"
 
-echo "This script will delete all pending, accepted, and queued scans in resource group $resourceGroupName. DO NOT run this script on production systems."
+echo "This script will delete all pending, accepted, and queued scans in resource group $resourceGroupName. Do NOT run this script on production systems."
 read -p "Proceed with deleting in-progress scans? (y/n)" -n 1 -r
-echo 
+echo
 
 if [[ $REPLY =~ ^[Yy]$ ]]; then
     clearScanBacklog

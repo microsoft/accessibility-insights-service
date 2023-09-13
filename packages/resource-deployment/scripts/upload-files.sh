@@ -66,6 +66,7 @@ function uploadFiles() {
 
     uploadProcesses=(
         "uploadFolderContents \"batch-pool-startup-script\" \"$dropFolder/resource-deployment/dist/scripts/pool-startup\" \"$storageAccountName\""
+        "uploadFolderContents \"batch-pool-startup-script\" \"$dropFolder/resource-deployment/dist/scripts/docker-scanner-image\" \"$storageAccountName\""
         "uploadFile \"runtime-configuration\" \"$dropFolder/resource-deployment/dist/runtime-config/runtime-config.$environment.json\" \"$storageAccountName\" \"runtime-config.json\""
     )
 
