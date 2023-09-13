@@ -139,7 +139,7 @@ describe(DeepScanner, () => {
         setupLoggerProperties();
         loggerMock
             .setup((o) =>
-                o.logInfo('The website deep scan completed since maximum discovered pages limit was reached.', {
+                o.logInfo('The website deep scan completed since maximum pages limit was reached.', {
                     discoveredUrls: `${websiteScanResult.pageCount}`,
                     discoveryLimit: `${websiteScanResult.deepScanLimit}`,
                 }),
@@ -156,7 +156,7 @@ describe(DeepScanner, () => {
         setupLoggerProperties();
         loggerMock
             .setup((o) =>
-                o.logInfo('The website deep scan completed since maximum discovered pages limit was reached.', {
+                o.logInfo('The website deep scan completed since maximum pages limit was reached.', {
                     discoveredUrls: `${websiteScanResult.pageCount}`,
                     discoveryLimit: `${websiteScanResult.deepScanLimit}`,
                 }),
