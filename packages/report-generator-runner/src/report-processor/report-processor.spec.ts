@@ -72,12 +72,10 @@ describe(ReportProcessor, () => {
                 run: {
                     retryCount: maxFailedScanRetryCount,
                 },
-                websiteScanRefs: [
-                    {
-                        id: `websiteScanId-${i}`,
-                        scanGroupType: 'deep-scan',
-                    },
-                ],
+                websiteScanRef: {
+                    id: `websiteScanId-${i}`,
+                    scanGroupType: 'deep-scan',
+                },
             } as OnDemandPageScanResult;
             pageScanResults.push(pageScanResult);
 
@@ -92,7 +90,7 @@ describe(ReportProcessor, () => {
             } as QueuedRequest);
 
             const websiteScanResult = {
-                id: pageScanResult.websiteScanRefs[0].id,
+                id: pageScanResult.websiteScanRef.id,
                 pageScans: [
                     {
                         scanId: pageScanResult.id,
@@ -111,38 +109,6 @@ describe(ReportProcessor, () => {
             });
         }
     }
-
-    // function setupWebsiteScanResultProviderMock(): void {
-    //     pageScanResults.map((r) => {
-    //         const websiteScanResult = websiteScanResults.find((w) => r.id === w.pageScans[0].scanId);
-    //         const websiteScanResultUpdated = websiteScanResultsUpdated.find((w) => w.id === websiteScanResult.id);
-    //         websiteScanResultProviderMock
-    //             .setup((o) => o.read(websiteScanResult.id))
-    //             .returns(() => Promise.resolve(websiteScanResultUpdated))
-    //             .verifiable();
-    //     });
-    // }
-
-    // function setupScanNotificationProcessorMock(): void {
-    //     websiteScanResultsUpdated.map((websiteScanResultUpdated) => {
-    //         const pageScanResultUpdated = pageScanResults.find((r) => r.id === websiteScanResultUpdated.pageScans[0].scanId);
-    //         const runnerScanMetadata = {
-    //             id: pageScanResultUpdated.id,
-    //             url: pageScanResultUpdated.url,
-    //             deepScan: websiteScanResultUpdated.deepScanId !== undefined ? true : false,
-    //         } as RunnerScanMetadata;
-    //         scanNotificationProcessorMock
-    //             .setup((o) =>
-    //                 o.sendScanCompletionNotification(
-    //                     It.isValue(runnerScanMetadata),
-    //                     It.isValue(pageScanResultUpdated),
-    //                     It.isValue(websiteScanResultUpdated),
-    //                 ),
-    //             )
-    //             .returns(() => Promise.resolve())
-    //             .verifiable();
-    //     });
-    // }
 
     function setupOnDemandPageScanRunResultProvider(): void {
         queuedRequests.map((queuedRequest) => {

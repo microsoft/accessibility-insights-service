@@ -165,13 +165,12 @@ export class OnDemandDispatcher {
         }
 
         // ensure that website scan result has final state of a page scan to generate up-to-date website scan status result
-        const websiteScanRef = pageScanResult.websiteScanRefs?.find((ref) => ref.scanGroupType === 'deep-scan');
-        if (websiteScanRef !== undefined) {
-            const websiteScanResult = await this.websiteScanResultProvider.read(websiteScanRef.id, false, pageScanResult.id);
+        if (pageScanResult.websiteScanRef !== undefined) {
+            const websiteScanResult = await this.websiteScanResultProvider.read(pageScanResult.websiteScanRef.id, false, pageScanResult.id);
             const pageScan = websiteScanResult.pageScans?.find((s) => s.scanId === pageScanResult.id);
             if (pageScan?.runState === undefined) {
                 const updatedWebsiteScanResult: Partial<WebsiteScanResult> = {
-                    id: websiteScanRef.id,
+                    id: pageScanResult.websiteScanRef.id,
                     pageScans: [
                         {
                             scanId: pageScanResult.id,

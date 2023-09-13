@@ -162,7 +162,7 @@ describe(ScanRequestController, () => {
         it('rejects deepScan requests if they are missing required properties', async () => {
             context.req.rawBody = JSON.stringify([
                 {
-                    // missing both site and reportGroups
+                    // missing site
                     deepScan: true,
                     url: 'https://abc/path/',
                 },
@@ -172,18 +172,11 @@ describe(ScanRequestController, () => {
                     url: 'https://def/path/',
                     reportGroups: [{ consolidatedId: 'reportGroupId' }],
                 },
-                {
-                    // missing reportGroups
-                    deepScan: true,
-                    url: 'https://hij/path/',
-                    site: { baseUrl: 'https://base/path' },
-                },
             ]);
 
             const expectedResponse = [
                 { url: 'https://abc/path/', error: WebApiErrorCodes.missingRequiredDeepScanProperties.error },
                 { url: 'https://def/path/', error: WebApiErrorCodes.missingRequiredDeepScanProperties.error },
-                { url: 'https://hij/path/', error: WebApiErrorCodes.missingRequiredDeepScanProperties.error },
             ];
 
             scanRequestController = createScanRequestController(context);

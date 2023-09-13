@@ -10,7 +10,6 @@ import {
     OperationResult,
     WebsiteScanResultProvider,
     ScanNotificationProcessor,
-    RunnerScanMetadata,
 } from 'service-library';
 import { GlobalLogger } from 'logger';
 import { ReportGeneratorRequest, OnDemandPageScanResult, ReportScanRunState, WebsiteScanResult } from 'storage-documents';
@@ -348,13 +347,11 @@ function setupSetScanRunStatesOnCompletion(queuedRequests: ReportGeneratorReques
                 run: {
                     state: request.run?.state,
                 },
-                websiteScanRefs: [
-                    {
-                        id: websiteScanRefId,
-                        scanGroupId: request.scanGroupId,
-                        scanGroupType: 'deep-scan',
-                    },
-                ],
+                websiteScanRef: {
+                    id: websiteScanRefId,
+                    scanGroupId: request.scanGroupId,
+                    scanGroupType: 'deep-scan',
+                },
             } as OnDemandPageScanResult,
         };
 
@@ -380,15 +377,9 @@ function setupSetScanRunStatesOnCompletion(queuedRequests: ReportGeneratorReques
             .returns(() => Promise.resolve(updatedWebsiteScanResult as WebsiteScanResult))
             .verifiable();
 
-        const runnerScanMetadata: RunnerScanMetadata = {
-            id: pageScanResultUpdated.result.id,
-            url: pageScanResultUpdated.result.url,
-            deepScan: updatedWebsiteScanResult?.deepScanId !== undefined ? true : false,
-        };
         scanNotificationProcessorMock
             .setup((o) =>
                 o.sendScanCompletionNotification(
-                    It.isValue(runnerScanMetadata),
                     It.isValue(pageScanResultUpdated.result),
                     It.isValue(updatedWebsiteScanResult as WebsiteScanResult),
                 ),

@@ -135,21 +135,17 @@ export class Runner {
         this.setRunResult(pageScanResult, runState, this.convertToScanError(privacyScanResult.error));
     }
 
-    private async updateScanResult(
-        scanMetadata: PrivacyScanMetadata,
-        pageScanResult: Partial<OnDemandPageScanResult>,
-    ): Promise<WebsiteScanResult> {
+    private async updateScanResult(scanMetadata: PrivacyScanMetadata, pageScanResult: Partial<OnDemandPageScanResult>): Promise<void> {
         await this.onDemandPageScanRunResultProvider.updateScanRun(pageScanResult);
 
-        const websiteScanRef = pageScanResult.websiteScanRefs?.find((ref) => ref.scanGroupType === 'deep-scan');
-        if (websiteScanRef) {
+        if (pageScanResult.websiteScanRef) {
             const runState =
                 pageScanResult.run.state === 'completed' || pageScanResult.run.retryCount >= this.maxFailedScanRetryCount
                     ? pageScanResult.run.state
                     : undefined;
 
             const updatedWebsiteScanResult: Partial<WebsiteScanResult> = {
-                id: websiteScanRef.id,
+                id: pageScanResult.websiteScanRef.id,
                 pageScans: [
                     {
                         scanId: scanMetadata.id,
@@ -161,10 +157,8 @@ export class Runner {
                 ],
             };
 
-            return this.websiteScanResultProvider.mergeOrCreate(scanMetadata.id, updatedWebsiteScanResult);
+            await this.websiteScanResultProvider.mergeOrCreate(scanMetadata.id, updatedWebsiteScanResult);
         }
-
-        return undefined;
     }
 
     private async generateScanReports(privacyScanResult: PrivacyScanResult): Promise<OnDemandPageScanReport[]> {

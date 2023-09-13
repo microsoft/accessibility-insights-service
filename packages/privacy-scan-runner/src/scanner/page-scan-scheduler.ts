@@ -2,10 +2,9 @@
 // Licensed under the MIT License.
 
 import { inject, injectable } from 'inversify';
-import { isNil } from 'lodash';
 import { GlobalLogger } from 'logger';
 import { WebsiteScanResultProvider } from 'service-library';
-import { OnDemandPageScanResult, WebsiteScanResult } from 'storage-documents';
+import { OnDemandPageScanResult } from 'storage-documents';
 import { ScanFeedGenerator } from './scan-feed-generator';
 
 @injectable()
@@ -17,7 +16,11 @@ export class PageScanScheduler {
     ) {}
 
     public async schedulePageScan(pageScanResult: OnDemandPageScanResult): Promise<void> {
-        let websiteScanResult = await this.readWebsiteScanResult(pageScanResult, false);
+        if (pageScanResult.websiteScanRef === undefined || pageScanResult.websiteScanRef.scanGroupType === 'single-scan') {
+            return;
+        }
+
+        let websiteScanResult = await this.websiteScanResultProvider.read(pageScanResult.websiteScanRef.id, false);
         this.logger.setCommonProperties({
             websiteScanId: websiteScanResult.id,
             deepScanId: websiteScanResult.deepScanId,
@@ -32,19 +35,7 @@ export class PageScanScheduler {
         }
 
         // fetch websiteScanResult.knownPages from a storage
-        websiteScanResult = await this.readWebsiteScanResult(pageScanResult, true);
+        websiteScanResult = await this.websiteScanResultProvider.read(pageScanResult.websiteScanRef.id, true);
         await this.scanFeedGenerator.queuePrivacyPages(websiteScanResult, pageScanResult);
-    }
-
-    private async readWebsiteScanResult(pageScanResult: OnDemandPageScanResult, readCompleteDocument: boolean): Promise<WebsiteScanResult> {
-        const scanGroupType = 'deep-scan';
-        const websiteScanRef = pageScanResult.websiteScanRefs?.find((ref) => ref.scanGroupType === scanGroupType);
-        if (isNil(websiteScanRef)) {
-            this.logger.logError(`No websiteScanRef exists with scanGroupType ${scanGroupType}`);
-
-            throw new Error(`No websiteScanRef exists with scanGroupType ${scanGroupType}`);
-        }
-
-        return this.websiteScanResultProvider.read(websiteScanRef.id, readCompleteDocument);
     }
 }

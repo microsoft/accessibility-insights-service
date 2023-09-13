@@ -87,12 +87,10 @@ describe(Runner, () => {
         } as RunnerScanMetadata;
         pageScanResultDbDocument = {
             id: runnerScanMetadata.id,
-            websiteScanRefs: [
-                {
-                    id: 'websiteScanId',
-                    scanGroupType: 'consolidated-scan-report',
-                },
-            ],
+            websiteScanRef: {
+                id: 'websiteScanId',
+                scanGroupType: 'consolidated-scan',
+            },
         } as OnDemandPageScanResult;
         pageScanResult = {} as OnDemandPageScanResult;
         axeScanResults = {
@@ -156,7 +154,7 @@ describe(Runner, () => {
     });
 
     it('execute runner with sending generate combined report request', async () => {
-        pageScanResultDbDocument.websiteScanRefs[0].scanGroupId = 'scanGroupId';
+        pageScanResultDbDocument.websiteScanRef.scanGroupId = 'scanGroupId';
         setupScanMetadataConfig();
         setupUpdateScanRunStateToRunning();
         setupScanRunnerTelemetryManager();
@@ -170,7 +168,7 @@ describe(Runner, () => {
     it.each([true, false])(
         'execute runner with page scanner exception with useReportGeneratorWorkflow=%s',
         async (useReportGeneratorWorkflow) => {
-            pageScanResultDbDocument.websiteScanRefs[0].scanGroupId = useReportGeneratorWorkflow ? 'scanGroupId' : undefined;
+            pageScanResultDbDocument.websiteScanRef.scanGroupId = useReportGeneratorWorkflow ? 'scanGroupId' : undefined;
             const error = new Error('page scan processor error');
             const errorMessage = System.serializeError(error);
             pageScanResult.run = {
@@ -192,7 +190,7 @@ describe(Runner, () => {
     it.each([true, false])(
         'handle scanner browser navigation error with useReportGeneratorWorkflow=%s',
         async (useReportGeneratorWorkflow: boolean) => {
-            pageScanResultDbDocument.websiteScanRefs[0].scanGroupId = useReportGeneratorWorkflow ? 'scanGroupId' : undefined;
+            pageScanResultDbDocument.websiteScanRef.scanGroupId = useReportGeneratorWorkflow ? 'scanGroupId' : undefined;
             axeScanResults.error = 'browser navigation error';
 
             setupScanMetadataConfig();
@@ -281,7 +279,7 @@ function setupReportGeneratorRequestProvider(): void {
     const reportGeneratorRequest: Partial<ReportGeneratorRequest> = {
         id: 'guid',
         scanId: pageScanResult.id,
-        scanGroupId: pageScanResultDbDocument.websiteScanRefs[0].scanGroupId,
+        scanGroupId: pageScanResultDbDocument.websiteScanRef.scanGroupId,
         targetReport: 'accessibility',
         priority: pageScanResult.priority,
     };
@@ -289,22 +287,16 @@ function setupReportGeneratorRequestProvider(): void {
 }
 
 function setupPageScanResultDbDocumentForDeepScan(): void {
-    pageScanResultDbDocument.websiteScanRefs = [
-        {
-            id: 'websiteScanRefId',
-            scanGroupType: 'deep-scan',
-        },
-    ] as WebsiteScanRef[];
+    pageScanResultDbDocument.websiteScanRef = {
+        id: 'websiteScanRefId',
+        scanGroupType: 'deep-scan',
+    } as WebsiteScanRef;
 }
 
 function setupScanNotificationProcessor(websiteScanResultUpdated: WebsiteScanResult = undefined): void {
     scanNotificationProcessorMock
         .setup((o) =>
-            o.sendScanCompletionNotification(
-                It.isValue(runnerScanMetadata),
-                It.isValue(pageScanResult),
-                It.isValue(websiteScanResultUpdated ?? websiteScanResult),
-            ),
+            o.sendScanCompletionNotification(It.isValue(pageScanResult), It.isValue(websiteScanResultUpdated ?? websiteScanResult)),
         )
         .verifiable();
 }
@@ -312,15 +304,14 @@ function setupScanNotificationProcessor(websiteScanResultUpdated: WebsiteScanRes
 function setupUpdateScanResult(): void {
     onDemandPageScanRunResultProviderMock.setup((o) => o.updateScanRun(It.isValue(pageScanResult))).verifiable();
 
-    const websiteScanRef = pageScanResult.websiteScanRefs?.find((ref) => ref.scanGroupType === 'deep-scan');
-    if (websiteScanRef) {
+    if (pageScanResult.websiteScanRef) {
         const runState =
             pageScanResult.run.state === 'completed' || pageScanResult.run.retryCount >= maxFailedScanRetryCount
                 ? pageScanResult.run.state
                 : undefined;
 
         const updatedWebsiteScanResult: Partial<WebsiteScanResult> = {
-            id: websiteScanRef.id,
+            id: pageScanResult.websiteScanRef.id,
             pageScans: [
                 {
                     scanId: runnerScanMetadata.id,

@@ -5,7 +5,7 @@ import { inject, injectable } from 'inversify';
 import { GlobalLogger } from 'logger';
 import { RetryHelper, System } from 'common';
 import { AxeScanResults } from 'scanner-global-library';
-import { OnDemandPageScanResult, WebsiteScanResult, WebsiteScanRef } from 'storage-documents';
+import { OnDemandPageScanResult, WebsiteScanResult } from 'storage-documents';
 import { WebsiteScanResultProvider } from '../data-providers/website-scan-result-provider';
 import { ReportWriter } from '../data-providers/report-writer';
 import { CombinedAxeResultBuilder } from './combined-axe-result-builder';
@@ -44,8 +44,7 @@ export class CombinedScanResultProcessor {
     }
 
     private async generateCombinedScanResultsImpl(axeScanResults: AxeScanResults, pageScanResult: OnDemandPageScanResult): Promise<void> {
-        const websiteScanRef = this.getWebsiteScanRefs(pageScanResult);
-        const websiteScanResult = await this.websiteScanResultProvider.read(websiteScanRef.id);
+        const websiteScanResult = await this.websiteScanResultProvider.read(pageScanResult.websiteScanRef.id);
 
         let combinedResultsBlobId = websiteScanResult.reports?.find((report) => report.format === 'consolidated.html')?.reportId;
         const combinedResultsBlob = await this.combinedResultsBlobProvider.getBlob(combinedResultsBlobId);
@@ -53,7 +52,7 @@ export class CombinedScanResultProcessor {
 
         this.logger.setCommonProperties({
             combinedResultsBlobId,
-            websiteScanId: websiteScanRef.id,
+            websiteScanId: pageScanResult.websiteScanRef.id,
         });
 
         const length = Buffer.byteLength(JSON.stringify(combinedResultsBlob), 'utf8');
@@ -97,11 +96,5 @@ export class CombinedScanResultProcessor {
                 pageScanResult.reports = [pageScanReport];
             }
         }
-    }
-
-    private getWebsiteScanRefs(pageScanResult: OnDemandPageScanResult): WebsiteScanRef {
-        return pageScanResult.websiteScanRefs.find(
-            (ref) => ref.scanGroupType === 'consolidated-scan-report' || ref.scanGroupType === 'deep-scan',
-        );
     }
 }

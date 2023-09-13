@@ -52,7 +52,7 @@ export interface OnDemandPageScanResult extends StorageDocument {
     itemType: ItemType.onDemandPageScanRunResult;
     batchRequestId?: string;
     url: string;
-    websiteScanRefs?: WebsiteScanRef[];
+    websiteScanRef?: WebsiteScanRef;
     priority: number;
     scannedUrl?: string;
     scanResult?: OnDemandScanResult;

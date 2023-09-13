@@ -27,10 +27,10 @@ describe(PageScanScheduler, () => {
 
         pageScanResult = {
             url: 'url',
-            websiteScanRefs: [
-                { id: 'some id', scanGroupType: 'consolidated-scan-report' },
-                { id: websiteScanResultId, scanGroupType: 'deep-scan' },
-            ],
+            websiteScanRef: {
+                id: websiteScanResultId,
+                scanGroupType: 'consolidated-scan',
+            },
         } as OnDemandPageScanResult;
         websiteScanResult = {
             id: websiteScanResultId,

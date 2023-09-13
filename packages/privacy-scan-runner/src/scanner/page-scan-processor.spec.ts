@@ -39,7 +39,7 @@ describe(PageScanProcessor, () => {
         scanMetadata = {
             url: url,
             id: 'id',
-            deepScan: false,
+            deepScan: undefined,
         };
         pageMock
             .setup((o) => o.getPageScreenshot())
@@ -77,7 +77,6 @@ describe(PageScanProcessor, () => {
     });
 
     it('run successful scan with known pages list', async () => {
-        scanMetadata.deepScan = true;
         setupOpenPage();
         setupClosePage();
         privacyScannerMock

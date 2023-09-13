@@ -45,13 +45,11 @@ describe(BatchScanResultController, () => {
         priority: 1,
         itemType: ItemType.onDemandPageScanRunResult,
         batchRequestId: 'batch-id',
-        websiteScanRefs: [
-            {
-                id: 'websiteScanId',
-                scanGroupId: 'scanGroupId',
-                scanGroupType: 'deep-scan',
-            },
-        ],
+        websiteScanRef: {
+            id: 'websiteScanId',
+            scanGroupId: 'scanGroupId',
+            scanGroupType: 'deep-scan',
+        },
     };
     const scanClientResponseForFetchedResponse: ScanResultResponse = {
         scanId: validScanId,
@@ -107,7 +105,7 @@ describe(BatchScanResultController, () => {
 
         websiteScanResultProviderMock = Mock.ofType<WebsiteScanResultProvider>();
         websiteScanResultProviderMock
-            .setup((o) => o.read(scanFetchedResponse.websiteScanRefs[0].id, true))
+            .setup((o) => o.read(scanFetchedResponse.websiteScanRef.id, true))
             .returns(() => Promise.resolve(websiteScanResult));
     });
 

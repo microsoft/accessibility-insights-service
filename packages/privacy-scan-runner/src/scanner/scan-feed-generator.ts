@@ -106,7 +106,6 @@ export class ScanFeedGenerator {
                 scanId,
                 url,
                 priority: isNil(pageScanResult.priority) ? 0 : pageScanResult.priority,
-                deepScan: true,
                 scanNotifyUrl: pageScanResult.notification?.scanNotifyUrl ?? undefined,
                 site: {
                     baseUrl: websiteScanResult.baseUrl,

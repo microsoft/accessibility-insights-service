@@ -6,7 +6,7 @@ import { StorageDocument } from './storage-document';
 import { ItemType } from './item-type';
 import { ReportFormat, OnDemandPageScanRunState, ScanState } from './on-demand-page-scan-result';
 
-export declare type ScanGroupType = 'consolidated-scan-report' | 'deep-scan';
+export declare type ScanGroupType = 'single-scan' | 'consolidated-scan' | 'deep-scan';
 
 /**
  * Represents website scan result composite document.

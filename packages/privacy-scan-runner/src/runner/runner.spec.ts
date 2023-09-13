@@ -211,10 +211,9 @@ describe(Runner, () => {
 function setupUpdateScanResult(): void {
     onDemandPageScanRunResultProviderMock.setup((o) => o.updateScanRun(It.isValue(pageScanResult))).verifiable();
 
-    const websiteScanRef = pageScanResult.websiteScanRefs?.find((ref) => ref.scanGroupType === 'deep-scan');
-    if (websiteScanRef) {
+    if (pageScanResult.websiteScanRef) {
         const updatedWebsiteScanResult: Partial<WebsiteScanResult> = {
-            id: websiteScanRef.id,
+            id: pageScanResult.websiteScanRef.id,
             pageScans: [
                 {
                     scanId: scanMetadata.id,

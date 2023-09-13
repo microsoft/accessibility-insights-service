@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { ServiceConfiguration } from 'common';
+import { GuidGenerator, ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
 import { isEmpty } from 'lodash';
 import { ContextAwareLogger, ScanRequestAcceptedMeasurements } from 'logger';
@@ -19,9 +19,9 @@ import {
     OnDemandPageScanRequest,
     OnDemandPageScanResult,
     PartitionKey,
+    ScanGroupType,
     ScanRunBatchRequest,
     WebsiteScanResult,
-    WebsiteScanRef,
 } from 'storage-documents';
 
 @injectable()
@@ -37,6 +37,7 @@ export class ScanBatchRequestFeedController extends WebController {
         @inject(WebsiteScanResultProvider) private readonly websiteScanResultProvider: WebsiteScanResultProvider,
         @inject(PartitionKeyFactory) private readonly partitionKeyFactory: PartitionKeyFactory,
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
+        @inject(GuidGenerator) private readonly guidGenerator: GuidGenerator,
         @inject(ContextAwareLogger) protected readonly logger: ContextAwareLogger,
     ) {
         super(logger);
@@ -88,23 +89,20 @@ export class ScanBatchRequestFeedController extends WebController {
                 scanId: request.scanId,
             });
 
-            let websiteScanRefs: WebsiteScanRef;
             const websiteScanResult = this.createWebsiteScanResult(request);
-            if (websiteScanResult) {
-                websiteScanRefs = {
-                    id: websiteScanResult.id,
-                    scanGroupId: websiteScanResult.scanGroupId,
-                    scanGroupType: websiteScanResult.scanGroupType,
-                };
-                websiteScanResults.push({ scanId: request.scanId, websiteScanResult });
-                this.logger.logInfo('Referenced website scan result document to the new scan result document.', {
-                    batchRequestId,
-                    scanId: request.scanId,
-                    websiteScanId: websiteScanResult.id,
-                    scanGroupId: websiteScanResult.scanGroupId,
-                    scanGroupType: websiteScanResult.scanGroupType,
-                });
-            }
+            const websiteScanRef = {
+                id: websiteScanResult.id,
+                scanGroupId: websiteScanResult.scanGroupId,
+                scanGroupType: websiteScanResult.scanGroupType,
+            };
+            websiteScanResults.push({ scanId: request.scanId, websiteScanResult });
+            this.logger.logInfo('Referenced website scan result document to the new scan result document.', {
+                batchRequestId,
+                scanId: request.scanId,
+                websiteScanId: websiteScanResult.id,
+                scanGroupId: websiteScanResult.scanGroupId,
+                scanGroupType: websiteScanResult.scanGroupType,
+            });
 
             return {
                 id: request.scanId,
@@ -125,7 +123,7 @@ export class ScanBatchRequestFeedController extends WebController {
                               scanNotifyUrl: request.scanNotifyUrl,
                           },
                       }),
-                websiteScanRefs: websiteScanRefs ? [websiteScanRefs] : undefined,
+                websiteScanRef,
                 ...(request.privacyScan === undefined ? {} : { privacyScan: request.privacyScan }),
                 ...(request.authenticationType === undefined ? {} : { authentication: { hint: request.authenticationType } }),
             };
@@ -140,33 +138,40 @@ export class ScanBatchRequestFeedController extends WebController {
     }
 
     private createWebsiteScanResult(request: ScanRunBatchRequest): WebsiteScanResult {
+        let consolidatedGroup;
         if (request.reportGroups !== undefined) {
-            const consolidatedGroup = request.reportGroups.find((group) => group.consolidatedId !== undefined);
-            if (consolidatedGroup) {
-                const websiteScanRequest: Partial<WebsiteScanResult> = {
-                    baseUrl: request.site?.baseUrl,
-                    scanGroupId: consolidatedGroup.consolidatedId,
-                    // `deepScanId` value is set only when db document is created
-                    deepScanId: request.deepScan ? request.scanId : undefined,
-                    scanGroupType: request.deepScan ? 'deep-scan' : 'consolidated-scan-report',
-                    pageScans: [
-                        {
-                            scanId: request.scanId,
-                            url: request.url,
-                            timestamp: new Date().toJSON(),
-                        },
-                    ],
-                    knownPages: request.site?.knownPages,
-                    discoveryPatterns: request.site?.discoveryPatterns?.length > 0 ? request.site.discoveryPatterns : undefined,
-                    // `created` value is set only when db document is created
-                    created: new Date().toJSON(),
-                };
-
-                return this.websiteScanResultProvider.normalizeToDbDocument(websiteScanRequest);
-            }
+            consolidatedGroup = request.reportGroups.find((g) => g.consolidatedId !== undefined);
         }
 
-        return undefined;
+        let scanGroupType: ScanGroupType;
+        if (request.deepScan === true) {
+            scanGroupType = 'deep-scan';
+        } else if (consolidatedGroup?.consolidatedId || request.site?.knownPages?.length > 0) {
+            scanGroupType = 'consolidated-scan';
+        } else {
+            scanGroupType = 'single-scan';
+        }
+
+        const websiteScanRequest: Partial<WebsiteScanResult> = {
+            baseUrl: request.site?.baseUrl,
+            scanGroupId: consolidatedGroup?.consolidatedId ?? this.guidGenerator.createGuid(),
+            scanGroupType,
+            // `deepScanId` value is set only when db document is created
+            deepScanId: request.scanId,
+            pageScans: [
+                {
+                    scanId: request.scanId,
+                    url: request.url,
+                    timestamp: new Date().toJSON(),
+                },
+            ],
+            knownPages: request.site?.knownPages,
+            discoveryPatterns: request.site?.discoveryPatterns?.length > 0 ? request.site.discoveryPatterns : undefined,
+            // `created` value is set only when db document is created
+            created: new Date().toJSON(),
+        };
+
+        return this.websiteScanResultProvider.normalizeToDbDocument(websiteScanRequest);
     }
 
     private async writeRequestsToQueueContainer(requests: ScanRunBatchRequest[], batchRequestId: string): Promise<void> {

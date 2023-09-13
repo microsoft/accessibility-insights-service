@@ -6,13 +6,7 @@ import { GlobalLogger } from 'logger';
 import { GuidGenerator, RetryHelper, System } from 'common';
 import { PrivacyReportReadResponse, PrivacyScanCombinedReportProvider, WebsiteScanResultProvider } from 'service-library';
 import { PrivacyScanResult } from 'scanner-global-library';
-import {
-    OnDemandPageScanResult,
-    WebsiteScanResult,
-    WebsiteScanRef,
-    PrivacyScanCombinedReport,
-    OnDemandPageScanReport,
-} from 'storage-documents';
+import { OnDemandPageScanResult, WebsiteScanResult, PrivacyScanCombinedReport, OnDemandPageScanReport } from 'storage-documents';
 import { PrivacyReportReducer } from './privacy-report-reducer';
 
 @injectable()
@@ -47,12 +41,11 @@ export class CombinedPrivacyScanResultProcessor {
         privacyScanResults: PrivacyScanResult,
         pageScanResult: OnDemandPageScanResult,
     ): Promise<void> {
-        const websiteScanRef = this.getWebsiteScanRefs(pageScanResult);
-        if (!websiteScanRef) {
+        if (!pageScanResult.websiteScanRef) {
             return;
         }
 
-        const websiteScanResult = await this.websiteScanResultProvider.read(websiteScanRef.id);
+        const websiteScanResult = await this.websiteScanResultProvider.read(pageScanResult.websiteScanRef.id);
         let combinedReportId = websiteScanResult.reports?.find((report) => report.format === 'consolidated.json')?.reportId;
         const combinedReportReadResponse = await this.getCombinedReport(combinedReportId);
 
@@ -82,16 +75,6 @@ export class CombinedPrivacyScanResultProcessor {
                 pageScanResult.reports = [report];
             }
         }
-    }
-
-    private getWebsiteScanRefs(pageScanResult: OnDemandPageScanResult): WebsiteScanRef {
-        if (!pageScanResult.websiteScanRefs) {
-            return undefined;
-        }
-
-        return pageScanResult.websiteScanRefs.find(
-            (ref) => ref.scanGroupType === 'consolidated-scan-report' || ref.scanGroupType === 'deep-scan',
-        );
     }
 
     private async getCombinedReport(blobId: string | undefined): Promise<PrivacyReportReadResponse | undefined> {

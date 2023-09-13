@@ -20,7 +20,6 @@ import {
     OnDemandScanResult,
     ScanError,
     WebsiteScanResult,
-    WebsiteScanRef,
     ReportGeneratorRequest,
 } from 'storage-documents';
 import { System, ServiceConfiguration, GuidGenerator, ScanRunTimeConfig } from 'common';
@@ -84,9 +83,8 @@ export class Runner {
         }
 
         const websiteScanResult = await this.updateScanResult(runnerScanMetadata, pageScanResult);
-
-        if (this.isPageScanCompleted(pageScanResult) || (await this.isPageScanFailed(pageScanResult))) {
-            await this.scanNotificationProcessor.sendScanCompletionNotification(runnerScanMetadata, pageScanResult, websiteScanResult);
+        if (this.isScanWorkflowCompleted(pageScanResult) || (await this.isPageScanFailed(pageScanResult))) {
+            await this.scanNotificationProcessor.sendScanCompletionNotification(pageScanResult, websiteScanResult);
         }
 
         this.logger.logInfo('Page scan task completed.');
@@ -99,11 +97,10 @@ export class Runner {
         }
         pageScanResult.reports = await this.generateScanReports(axeScanResults);
 
-        const websiteScanRef = this.getWebsiteScanRefs(pageScanResult);
-        if (this.isPageScanCompleted(pageScanResult)) {
+        if (this.isScanWorkflowCompleted(pageScanResult)) {
             this.setRunResult(pageScanResult, 'completed');
         } else {
-            await this.sendGenerateConsolidatedReportRequest(pageScanResult, websiteScanRef);
+            await this.sendGenerateConsolidatedReportRequest(pageScanResult);
             this.setRunResult(pageScanResult, 'report');
         }
     }
@@ -120,8 +117,7 @@ export class Runner {
     ): Promise<WebsiteScanResult> {
         await this.onDemandPageScanRunResultProvider.updateScanRun(pageScanResult);
 
-        const websiteScanRef = pageScanResult.websiteScanRefs?.find((ref) => ref.scanGroupType === 'deep-scan');
-        if (websiteScanRef) {
+        if (pageScanResult.websiteScanRef) {
             const scanConfig = await this.getScanConfig();
             const runState =
                 pageScanResult.run.state === 'completed' || pageScanResult.run.retryCount >= scanConfig.maxFailedScanRetryCount
@@ -129,7 +125,7 @@ export class Runner {
                     : undefined;
 
             const updatedWebsiteScanResult: Partial<WebsiteScanResult> = {
-                id: websiteScanRef.id,
+                id: pageScanResult.websiteScanRef.id,
                 pageScans: [
                     {
                         scanId: runnerScanMetadata.id,
@@ -212,40 +208,27 @@ export class Runner {
         }
     }
 
-    private async sendGenerateConsolidatedReportRequest(
-        pageScanResult: OnDemandPageScanResult,
-        websiteScanRef: WebsiteScanRef,
-    ): Promise<void> {
-        const reportGeneratorRequest: Partial<ReportGeneratorRequest> = {
-            id: this.guidGenerator.createGuidFromBaseGuid(pageScanResult.id),
-            scanId: pageScanResult.id,
-            scanGroupId: websiteScanRef.scanGroupId,
-            targetReport: 'accessibility',
-            priority: pageScanResult.priority,
-        };
-        await this.reportGeneratorRequestProvider.writeRequest(reportGeneratorRequest);
+    private async sendGenerateConsolidatedReportRequest(pageScanResult: OnDemandPageScanResult): Promise<void> {
+        if (pageScanResult.websiteScanRef) {
+            const reportGeneratorRequest: Partial<ReportGeneratorRequest> = {
+                id: this.guidGenerator.createGuidFromBaseGuid(pageScanResult.id),
+                scanId: pageScanResult.id,
+                scanGroupId: pageScanResult.websiteScanRef.scanGroupId,
+                targetReport: 'accessibility',
+                priority: pageScanResult.priority,
+            };
+            await this.reportGeneratorRequestProvider.writeRequest(reportGeneratorRequest);
 
-        this.logger.logInfo('Send request to generate consolidated report.', {
-            id: reportGeneratorRequest.id,
-            scanGroupId: websiteScanRef.scanGroupId,
-        });
-    }
-
-    private getWebsiteScanRefs(pageScanResult: OnDemandPageScanResult): WebsiteScanRef {
-        if (!pageScanResult.websiteScanRefs) {
-            return undefined;
+            this.logger.logInfo('Send request to generate consolidated report.', {
+                id: reportGeneratorRequest.id,
+                scanGroupId: pageScanResult.websiteScanRef.scanGroupId,
+            });
         }
-
-        return pageScanResult.websiteScanRefs.find(
-            (ref) => ref.scanGroupType === 'consolidated-scan-report' || ref.scanGroupType === 'deep-scan',
-        );
     }
 
-    /**
-     * The scan is completed if there is no combined report to generate
-     */
-    private isPageScanCompleted(pageScanResult: OnDemandPageScanResult): boolean {
-        return this.getWebsiteScanRefs(pageScanResult) === undefined;
+    // The scan workflow is completed when there is no combined report to generate
+    private isScanWorkflowCompleted(pageScanResult: OnDemandPageScanResult): boolean {
+        return pageScanResult.websiteScanRef === undefined || pageScanResult.websiteScanRef.scanGroupType === 'single-scan';
     }
 
     private async isPageScanFailed(pageScanResult: OnDemandPageScanResult): Promise<boolean> {
