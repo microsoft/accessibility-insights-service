@@ -29,7 +29,7 @@ export class ScanFeedGenerator {
         return this.retryHelper.executeWithRetries(
             () => this.queueDiscoveredPagesImpl(websiteScanResult, pageScanResult),
             async (error: Error) => {
-                this.logger.logError(`Failure to queue discovered pages to scan. Retrying on error.`, {
+                this.logger.logError(`Failure to queue new pages to scan. Retrying on error.`, {
                     error: System.serializeError(error),
                 });
             },
@@ -41,18 +41,18 @@ export class ScanFeedGenerator {
     private async queueDiscoveredPagesImpl(websiteScanResult: WebsiteScanResult, pageScanResult: OnDemandPageScanResult): Promise<void> {
         const urlsToScan = this.getUrlsToScan(websiteScanResult);
         if (urlsToScan.length > 0) {
-            this.logger.logInfo(`Discovered ${urlsToScan.length} new pages to scan.`, {
+            this.logger.logInfo(`Found ${urlsToScan.length} new pages to scan.`, {
                 discoveredUrls: JSON.stringify(urlsToScan),
             });
         } else {
-            this.logger.logInfo(`Discovered no new pages to scan.`);
+            this.logger.logInfo(`Found no new pages to scan.`);
 
             return;
         }
 
         const scanRequests = await this.createBatchRequests(urlsToScan, websiteScanResult, pageScanResult);
         await this.updateWebsiteScanResult(scanRequests, websiteScanResult, pageScanResult);
-        this.logger.logInfo(`Discovered pages has been queued for scanning.`);
+        this.logger.logInfo(`New pages has been queued for scanning.`);
     }
 
     private async createBatchRequests(
@@ -96,7 +96,7 @@ export class ScanFeedGenerator {
         return urls.map((url) => {
             // preserve GUID origin for a single batch scope
             const scanId = this.guidGenerator.createGuidFromBaseGuid(batchId);
-            this.logger.logInfo('Generated new scan id for the discovered page.', {
+            this.logger.logInfo('Generated new scan id for the found page.', {
                 batchId,
                 discoveredScanId: scanId,
                 discoveredUrl: url,
@@ -106,7 +106,7 @@ export class ScanFeedGenerator {
                 scanId,
                 url,
                 priority: isNil(pageScanResult.priority) ? 0 : pageScanResult.priority,
-                deepScan: true,
+                deepScan: pageScanResult.websiteScanRef.scanGroupType === 'deep-scan',
                 scanNotifyUrl: pageScanResult.notification?.scanNotifyUrl ?? undefined,
                 site: {
                     baseUrl: websiteScanResult.baseUrl,

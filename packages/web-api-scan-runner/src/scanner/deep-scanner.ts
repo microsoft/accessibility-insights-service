@@ -38,7 +38,7 @@ export class DeepScanner {
         const deepScanDiscoveryLimit = websiteScanResult.deepScanLimit;
         const canDeepScan = await this.canDeepScan(websiteScanResult);
         if (canDeepScan === false) {
-            this.logger.logInfo(`The website deep scan completed since maximum discovered pages limit was reached.`, {
+            this.logger.logInfo(`The website deep scan completed since maximum pages limit was reached.`, {
                 discoveredUrls: `${websiteScanResult.pageCount}`,
                 discoveryLimit: `${deepScanDiscoveryLimit}`,
             });

@@ -156,7 +156,6 @@ function createScanRequests(urls: string[]): ScanRunBatchRequest[] {
             scanId: `${url} id`,
             url,
             priority: pageScanResult.priority,
-            deepScan: true,
             scanNotifyUrl: pageScanResult.notification.scanNotifyUrl,
             site: {
                 baseUrl: websiteScanResult.baseUrl,

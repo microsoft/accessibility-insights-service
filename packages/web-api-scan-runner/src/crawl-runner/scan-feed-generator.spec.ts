@@ -39,7 +39,12 @@ describe(ScanFeedGenerator, () => {
             id: 'id',
             url: 'url',
             priority: 100,
-            notification: { scanNotifyUrl: 'scanNotifyUrl' },
+            websiteScanRef: {
+                scanGroupType: 'deep-scan',
+            },
+            notification: {
+                scanNotifyUrl: 'scanNotifyUrl',
+            },
         } as OnDemandPageScanResult;
         websiteScanResult = {
             id: 'websiteScanResultId',
@@ -80,7 +85,7 @@ describe(ScanFeedGenerator, () => {
     });
 
     it('do not queue scan requests if no discovered pages', async () => {
-        loggerMock.setup((o) => o.logInfo(`Discovered no new pages to scan.`)).verifiable();
+        loggerMock.setup((o) => o.logInfo(`Found no new pages to scan.`)).verifiable();
         await scanFeedGenerator.queueDiscoveredPages(websiteScanResult, pageScanResult);
     });
 
@@ -101,7 +106,31 @@ describe(ScanFeedGenerator, () => {
             .callback((id, result, callback) => callback(websiteScanResult))
             .verifiable();
         setupScanDataProviderMock(scanRequests);
-        loggerMock.setup((o) => o.logInfo(`Discovered pages has been queued for scanning.`)).verifiable();
+        loggerMock.setup((o) => o.logInfo(`New pages has been queued for scanning.`)).verifiable();
+
+        await scanFeedGenerator.queueDiscoveredPages(websiteScanResult, pageScanResult);
+        expect(websiteScanResult.pageCount).toEqual(newPages.length + 1);
+    });
+
+    it('queue scan requests with deep scan disabled', async () => {
+        pageScanResult.websiteScanRef.scanGroupType = 'consolidated-scan';
+        const newPages = ['page3', 'page4'];
+        const scanRequests = createScanRequests(newPages, false);
+        const pageScans = createPageScans(newPages);
+        const updatedWebsiteScanResult: Partial<WebsiteScanResult> = {
+            id: websiteScanResult.id,
+            pageScans,
+        };
+        websiteScanResult.knownPages.push(...newPages);
+        websiteScanResult.pageCount = 1;
+        setupGuidGeneratorMock(newPages);
+
+        websiteScanResultProviderMock
+            .setup((o) => o.mergeOrCreate(pageScanResult.id, updatedWebsiteScanResult, It.isAny()))
+            .callback((id, result, callback) => callback(websiteScanResult))
+            .verifiable();
+        setupScanDataProviderMock(scanRequests);
+        loggerMock.setup((o) => o.logInfo(`New pages has been queued for scanning.`)).verifiable();
 
         await scanFeedGenerator.queueDiscoveredPages(websiteScanResult, pageScanResult);
         expect(websiteScanResult.pageCount).toEqual(newPages.length + 1);
@@ -125,7 +154,7 @@ describe(ScanFeedGenerator, () => {
             .callback((id, result, callback) => callback(websiteScanResult))
             .verifiable();
         setupScanDataProviderMock(scanRequests);
-        loggerMock.setup((o) => o.logInfo(`Discovered pages has been queued for scanning.`)).verifiable();
+        loggerMock.setup((o) => o.logInfo(`New pages has been queued for scanning.`)).verifiable();
 
         await scanFeedGenerator.queueDiscoveredPages(websiteScanResult, pageScanResult);
         expect(websiteScanResult.pageCount).toEqual(newPages.length + 1);
@@ -180,13 +209,13 @@ function createPageScans(urls: string[]): PageScan[] {
     });
 }
 
-function createScanRequests(urls: string[]): ScanRunBatchRequest[] {
+function createScanRequests(urls: string[], deepScan: boolean = true): ScanRunBatchRequest[] {
     return urls.map((url) => {
         return {
             scanId: `${url} id`,
             url,
             priority: pageScanResult.priority,
-            deepScan: true,
+            deepScan,
             scanNotifyUrl: pageScanResult.notification.scanNotifyUrl,
             site: {
                 baseUrl: websiteScanResult.baseUrl,
