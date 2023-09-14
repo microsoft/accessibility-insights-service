@@ -33,7 +33,7 @@ export function processDiscoveredUrls(discoveredUrls: string[], deepScanDiscover
         return [];
     }
 
-    let processedUrls = excludeKnowsResources(discoveredUrls);
+    let processedUrls = excludeKnownResources(discoveredUrls);
     if (!isNil(knownUrls)) {
         processedUrls = removeUrlsFromList(discoveredUrls, knownUrls);
     }
@@ -55,7 +55,7 @@ function getUrlLimit(deepScanDiscoveryLimit: number, knownUrls?: string[]): numb
     return Math.max(deepScanDiscoveryLimit - knownPagesCount, 0);
 }
 
-function excludeKnowsResources(discoveredUrls: string[]): string[] {
+function excludeKnownResources(discoveredUrls: string[]): string[] {
     return discoveredUrls.filter((url) => !excludedResourceTypes.includes(getResourceType(url)));
 }
 
