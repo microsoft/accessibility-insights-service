@@ -190,7 +190,11 @@ export class OnDemandDispatcher {
                 };
 
                 const onMergeCallbackFn = getOnMergeCallbackToUpdateRunResult(pageScanResult.run.state);
-                await this.websiteScanResultProvider.mergeOrCreate(pageScanResult.id, updatedWebsiteScanResult, onMergeCallbackFn);
+                websiteScanResult = await this.websiteScanResultProvider.mergeOrCreate(
+                    pageScanResult.id,
+                    updatedWebsiteScanResult,
+                    onMergeCallbackFn,
+                );
 
                 this.logger.logWarn(`Updated website page scan run state for a failed run.`, {
                     scanId: pageScanResult.id,

@@ -241,16 +241,22 @@ describe(OnDemandDispatcher, () => {
                     },
                 ],
             };
+            const updatedWebsiteScanResultDb = {
+                ...updatedWebsiteScanResult,
+                runResult: {
+                    completedScans: 1,
+                },
+            } as WebsiteScanResult;
             websiteScanResultProviderMock
                 .setup((o) => o.mergeOrCreate(pageScanResult.id, It.isValue(updatedWebsiteScanResult), It.isAny()))
-                .returns(() => Promise.resolve(undefined))
+                .returns(() => Promise.resolve(updatedWebsiteScanResultDb))
                 .verifiable();
 
             scanNotificationProcessorMock
                 .setup((o) =>
                     o.sendScanCompletionNotification(
                         It.isObjectWith({ id: pageScanResult.id } as OnDemandPageScanResult),
-                        websiteScanResult,
+                        updatedWebsiteScanResultDb,
                     ),
                 )
                 .returns(() => Promise.resolve())
