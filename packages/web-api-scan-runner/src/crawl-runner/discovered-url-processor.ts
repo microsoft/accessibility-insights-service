@@ -50,9 +50,9 @@ function limitUrlCount(urlList: string[], numUrls: number): string[] {
 }
 
 function getUrlLimit(deepScanDiscoveryLimit: number, knownUrls?: string[]): number {
-    const numKnownPages = isNil(knownUrls) ? 0 : knownUrls.length;
+    const knownPagesCount = isNil(knownUrls) ? 0 : knownUrls.length;
 
-    return Math.max(deepScanDiscoveryLimit - numKnownPages, 0);
+    return Math.max(deepScanDiscoveryLimit - knownPagesCount, 0);
 }
 
 function excludeKnowsResources(discoveredUrls: string[]): string[] {
