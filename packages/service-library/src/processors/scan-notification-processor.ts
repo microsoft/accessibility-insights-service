@@ -45,7 +45,7 @@ export class ScanNotificationProcessor {
             return false;
         }
 
-        if (isEmpty(pageScanResult?.notification?.scanNotifyUrl)) {
+        if (isEmpty(pageScanResult.notification?.scanNotifyUrl)) {
             this.logger.logInfo(`Scan result notification URL was not provided. Skip sending scan result notification.`);
 
             return false;
@@ -53,7 +53,6 @@ export class ScanNotificationProcessor {
 
         if (websiteScanResult === undefined || pageScanResult.websiteScanRef?.scanGroupType === 'single-scan') {
             const scanConfig = await this.serviceConfig.getConfigValue('scanConfig');
-
             if (
                 // completed scan
                 pageScanResult.run.state === 'completed' ||
@@ -70,7 +69,7 @@ export class ScanNotificationProcessor {
 
         const deepScanCompleted =
             websiteScanResult.runResult &&
-            (websiteScanResult.runResult?.completedScans ?? 0) + (websiteScanResult.runResult?.failedScans ?? 0) >=
+            (websiteScanResult.runResult.completedScans ?? 0) + (websiteScanResult.runResult.failedScans ?? 0) >=
                 websiteScanResult.pageCount;
 
         if (deepScanCompleted === true) {
