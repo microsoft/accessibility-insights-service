@@ -5,7 +5,13 @@ import 'reflect-metadata';
 
 import { IMock, Mock, It, Times } from 'typemoq';
 import { Logger } from 'logger';
-import { PageScanRequestProvider, OnDemandPageScanRunResultProvider, OperationResult, WebsiteScanResultProvider } from 'service-library';
+import {
+    PageScanRequestProvider,
+    OnDemandPageScanRunResultProvider,
+    OperationResult,
+    WebsiteScanResultProvider,
+    ScanNotificationProcessor,
+} from 'service-library';
 import { ServiceConfiguration, QueueRuntimeConfig } from 'common';
 import { Queue, StorageConfig } from 'azure-services';
 import { OnDemandPageScanResult, ScanError, WebsiteScanResult } from 'storage-documents';
@@ -23,6 +29,7 @@ let queueMock: IMock<Queue>;
 let pageScanRequestProviderMock: IMock<PageScanRequestProvider>;
 let scanRequestSelectorMock: IMock<ScanRequestSelector>;
 let onDemandPageScanRunResultProviderMock: IMock<OnDemandPageScanRunResultProvider>;
+let scanNotificationProcessorMock: IMock<ScanNotificationProcessor>;
 let storageConfigMock: IMock<StorageConfig>;
 let serviceConfigurationMock: IMock<ServiceConfiguration>;
 let loggerMock: IMock<Logger>;
@@ -42,6 +49,7 @@ describe(OnDemandDispatcher, () => {
         pageScanRequestProviderMock = Mock.ofType<PageScanRequestProvider>();
         scanRequestSelectorMock = Mock.ofType<ScanRequestSelector>();
         onDemandPageScanRunResultProviderMock = Mock.ofType<OnDemandPageScanRunResultProvider>();
+        scanNotificationProcessorMock = Mock.ofType<ScanNotificationProcessor>();
         storageConfigMock = Mock.ofType<StorageConfig>();
         serviceConfigurationMock = Mock.ofType<ServiceConfiguration>();
         loggerMock = Mock.ofType<Logger>();
@@ -65,6 +73,7 @@ describe(OnDemandDispatcher, () => {
             scanRequestSelectorMock.object,
             onDemandPageScanRunResultProviderMock.object,
             websiteScanResultProviderMock.object,
+            scanNotificationProcessorMock.object,
             storageConfigMock.object,
             serviceConfigurationMock.object,
             loggerMock.object,
@@ -76,6 +85,7 @@ describe(OnDemandDispatcher, () => {
         pageScanRequestProviderMock.verifyAll();
         scanRequestSelectorMock.verifyAll();
         onDemandPageScanRunResultProviderMock.verifyAll();
+        scanNotificationProcessorMock.verifyAll();
         storageConfigMock.verifyAll();
         serviceConfigurationMock.verifyAll();
         loggerMock.verifyAll();
@@ -214,9 +224,10 @@ describe(OnDemandDispatcher, () => {
             setupPageScanRequestProvider(scanRequests);
 
             const pageScanResult = scanRequests.requestsToDelete[0].result;
+            const websiteScanResult = { pageScans: pageScanPart ? [pageScanPart] : undefined } as WebsiteScanResult;
             websiteScanResultProviderMock
                 .setup((o) => o.read(pageScanResult.websiteScanRef.id, false, pageScanResult.id))
-                .returns(() => Promise.resolve({ pageScans: pageScanPart ? [pageScanPart] : undefined } as WebsiteScanResult))
+                .returns(() => Promise.resolve(websiteScanResult))
                 .verifiable();
             const updatedWebsiteScanResult: Partial<WebsiteScanResult> = {
                 id: pageScanResult.websiteScanRef.id,
@@ -233,6 +244,16 @@ describe(OnDemandDispatcher, () => {
             websiteScanResultProviderMock
                 .setup((o) => o.mergeOrCreate(pageScanResult.id, It.isValue(updatedWebsiteScanResult), It.isAny()))
                 .returns(() => Promise.resolve(undefined))
+                .verifiable();
+
+            scanNotificationProcessorMock
+                .setup((o) =>
+                    o.sendScanCompletionNotification(
+                        It.isObjectWith({ id: pageScanResult.id } as OnDemandPageScanResult),
+                        websiteScanResult,
+                    ),
+                )
+                .returns(() => Promise.resolve())
                 .verifiable();
 
             await onDemandDispatcher.dispatchScanRequests();

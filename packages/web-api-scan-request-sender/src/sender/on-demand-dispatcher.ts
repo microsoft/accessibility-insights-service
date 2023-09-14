@@ -10,6 +10,7 @@ import {
     OnDemandPageScanRunResultProvider,
     WebsiteScanResultProvider,
     getOnMergeCallbackToUpdateRunResult,
+    ScanNotificationProcessor,
 } from 'service-library';
 import { OnDemandPageScanRunState, ScanError, OnDemandPageScanResult, WebsiteScanResult } from 'storage-documents';
 import { isEmpty } from 'lodash';
@@ -29,6 +30,7 @@ export class OnDemandDispatcher {
         @inject(ScanRequestSelector) private readonly scanRequestSelector: ScanRequestSelector,
         @inject(OnDemandPageScanRunResultProvider) private readonly onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider,
         @inject(WebsiteScanResultProvider) protected readonly websiteScanResultProvider: WebsiteScanResultProvider,
+        @inject(ScanNotificationProcessor) protected readonly scanNotificationProcessor: ScanNotificationProcessor,
         @inject(StorageConfig) private readonly storageConfig: StorageConfig,
         @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
         @inject(ContextAwareLogger) private readonly logger: ContextAwareLogger,
@@ -148,7 +150,9 @@ export class OnDemandDispatcher {
         }
 
         // set scan run state to failed when scan is stale
+        let runStateUpdated = false;
         if ((['noRetry', 'abandoned'] as DispatchCondition[]).includes(scanRequest.condition) && pageScanResult.run.state !== 'failed') {
+            runStateUpdated = true;
             pageScanResult.run = {
                 ...pageScanResult.run,
                 state: 'failed',
@@ -160,15 +164,18 @@ export class OnDemandDispatcher {
 
             this.logger.logError('The scan request was abandon in a service pipeline.', {
                 scanId: pageScanResult.id,
+                scanGroupId: pageScanResult.websiteScanRef?.scanGroupId,
                 runState: JSON.stringify(pageScanResult.run.state),
             });
         }
 
         // ensure that website scan result has final state of a page scan to generate up-to-date website scan status result
+        let websiteScanResult;
         if (pageScanResult.websiteScanRef !== undefined) {
-            const websiteScanResult = await this.websiteScanResultProvider.read(pageScanResult.websiteScanRef.id, false, pageScanResult.id);
+            websiteScanResult = await this.websiteScanResultProvider.read(pageScanResult.websiteScanRef.id, false, pageScanResult.id);
             const pageScan = websiteScanResult.pageScans?.find((s) => s.scanId === pageScanResult.id);
             if (pageScan?.runState === undefined) {
+                runStateUpdated = true;
                 const updatedWebsiteScanResult: Partial<WebsiteScanResult> = {
                     id: pageScanResult.websiteScanRef.id,
                     pageScans: [
@@ -187,8 +194,14 @@ export class OnDemandDispatcher {
 
                 this.logger.logWarn(`Updated website page scan run state for a failed run.`, {
                     scanId: pageScanResult.id,
+                    deepScanId: websiteScanResult.deepScanId,
+                    scanGroupId: websiteScanResult.scanGroupId,
                 });
             }
+        }
+
+        if (runStateUpdated) {
+            await this.scanNotificationProcessor.sendScanCompletionNotification(pageScanResult, websiteScanResult);
         }
     }
 

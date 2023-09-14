@@ -7,7 +7,7 @@ import { Page } from 'scanner-global-library';
 import { WebsiteScanResultProvider, RunnerScanMetadata } from 'service-library';
 import { OnDemandPageScanResult, WebsiteScanResult } from 'storage-documents';
 import { ServiceConfiguration } from 'common';
-import { DiscoveredUrlProcessor, discoveredUrlProcessor } from '../crawl-runner/discovered-url-processor';
+import { processDiscoveredUrls } from '../crawl-runner/discovered-url-processor';
 import { CrawlRunner } from '../crawl-runner/crawl-runner';
 import { ScanFeedGenerator } from '../crawl-runner/scan-feed-generator';
 import { createDiscoveryPattern } from '../crawler/discovery-pattern-factory';
@@ -20,7 +20,7 @@ export class DeepScanner {
         @inject(WebsiteScanResultProvider) private readonly websiteScanResultProvider: WebsiteScanResultProvider,
         @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
         @inject(GlobalLogger) private readonly logger: GlobalLogger,
-        private readonly processUrls: DiscoveredUrlProcessor = discoveredUrlProcessor,
+        private readonly processUrls: typeof processDiscoveredUrls = processDiscoveredUrls,
         private readonly createDiscoveryPatternFn: typeof createDiscoveryPattern = createDiscoveryPattern,
     ) {}
 
