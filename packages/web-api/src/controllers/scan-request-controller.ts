@@ -186,16 +186,13 @@ export class ScanRequestController extends ApiController {
             return { valid: false, error: WebApiErrorCodes.outOfRangePriority.error };
         }
 
-        const emptyBaseUrl = isEmpty(scanRunRequest.site?.baseUrl);
-        const emptyReportGroup =
-            isEmpty(scanRunRequest.reportGroups) || scanRunRequest.reportGroups.some((g) => isEmpty(g?.consolidatedId));
-
-        if (scanRunRequest.deepScan && emptyBaseUrl) {
+        if (scanRunRequest.deepScan && isEmpty(scanRunRequest.site?.baseUrl)) {
             return { valid: false, error: WebApiErrorCodes.missingRequiredDeepScanProperties.error };
         }
 
-        if (emptyBaseUrl !== emptyReportGroup) {
-            return { valid: false, error: WebApiErrorCodes.missingSiteOrReportGroups.error };
+        const invalidReportGroup = scanRunRequest.reportGroups && scanRunRequest.reportGroups.some((g) => isEmpty(g?.consolidatedId));
+        if (invalidReportGroup) {
+            return { valid: false, error: WebApiErrorCodes.invalidReportGroup.error };
         }
 
         if (scanRunRequest.site?.baseUrl && Url.tryParseUrlString(scanRunRequest.site.baseUrl) === undefined) {

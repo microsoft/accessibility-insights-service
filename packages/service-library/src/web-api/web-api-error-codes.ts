@@ -18,7 +18,7 @@ export declare type WebApiErrorCodeName =
     | 'MalformedBody'
     | 'MissingReleaseVersion'
     | 'InvalidScanNotifyUrl'
-    | 'MissingSiteOrReportGroups'
+    | 'InvalidReportGroup'
     | 'MissingRequiredDeepScanProperties'
     | 'TooManyKnownPages'
     | 'InvalidKnownPageURL'
@@ -147,12 +147,12 @@ export class WebApiErrorCodes {
         },
     };
 
-    public static missingSiteOrReportGroups: WebApiErrorCode = {
+    public static invalidReportGroup: WebApiErrorCode = {
         statusCode: 400,
         error: {
-            code: 'MissingSiteOrReportGroups',
+            code: 'InvalidReportGroup',
             codeId: 4013,
-            message: 'The request is missing either the site or report groups property. If one is defined, the other must be provided.',
+            message: 'The report group property is malformed.',
         },
     };
 
