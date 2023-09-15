@@ -150,9 +150,9 @@ function install() {
 
     . "${0%/*}/setup-key-vault.sh"
     . "${0%/*}/push-image-to-container-registry.sh"
-    . "${0%/*}/batch-account-create.sh"
-    . "${0%/*}/job-schedule-create.sh"
-    . "${0%/*}/function-app-create.sh"
+    . "${0%/*}/create-batch-account.sh"
+    . "${0%/*}/create-job-schedule.sh"
+    . "${0%/*}/create-function-app.sh"
 
     . "${0%/*}/create-dashboard.sh" &
     dashboardProcessId="$!"

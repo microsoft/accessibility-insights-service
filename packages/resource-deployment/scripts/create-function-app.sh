@@ -132,6 +132,7 @@ publishFunctionAppScripts() {
 waitForFunctionAppServiceDeploymentCompletion() {
     local functionAppName=$1
 
+    az functionapp start --resource-group $resourceGroupName --name $functionAppName
     functionAppRunningQuery="az functionapp list -g $resourceGroupName --query \"[?name=='$functionAppName' && state=='Running'].name\" -o tsv"
     . "${0%/*}/wait-for-deployment.sh" -n "$functionAppName" -t "300" -q "$functionAppRunningQuery"
 }
@@ -179,7 +180,7 @@ function deployE2EWebApisFunction() {
 function enableStorageAccess() {
     role="Storage Blob Data Contributor"
     scope="--scope /subscriptions/$subscription/resourceGroups/$resourceGroupName/providers/Microsoft.Storage/storageAccounts/$storageAccountName"
-    . "${0%/*}/role-assign-for-sp.sh"
+    . "${0%/*}/create-role-assign.sh"
 }
 
 function enableCosmosAccess() {
@@ -187,7 +188,7 @@ function enableCosmosAccess() {
     scope="--scope $cosmosAccountId"
 
     role="DocumentDB Account Contributor"
-    . "${0%/*}/role-assign-for-sp.sh"
+    . "${0%/*}/create-role-assign.sh"
 
     # Create and assign custom RBAC role
     customRoleName="CosmosDocumentRW"
@@ -211,21 +212,21 @@ function enableCosmosAccess() {
 }
 
 function enableManagedIdentityOnFunctions() {
+    echo "Granting access to $webApiFuncAppName function service principal..."
     getFunctionAppPrincipalId $webApiFuncAppName
     . "${0%/*}/key-vault-enable-msi.sh"
-
     enableStorageAccess
     enableCosmosAccess
 
+    echo "Granting access to $webWorkersFuncAppName function service principal..."
     getFunctionAppPrincipalId $webWorkersFuncAppName
     . "${0%/*}/key-vault-enable-msi.sh"
-
     enableStorageAccess
     enableCosmosAccess
 
+    echo "Granting access to $e2eWebApisFuncAppName function service principal..."
     getFunctionAppPrincipalId $e2eWebApisFuncAppName
     . "${0%/*}/key-vault-enable-msi.sh"
-
     enableStorageAccess
 }
 

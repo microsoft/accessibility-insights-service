@@ -22,13 +22,8 @@ Usage: $0 -r <resource group> -k <enable soft delete for Azure Key Vault> -c <we
 
 . "${0%/*}/process-utilities.sh"
 
-# Microsoft AAD tenant when env is not ppe or prod
-objectId='f520d84c-3fd3-4cc8-88d4-2ed25b00d27a'
-
-# PME AAD tenant when env is ppe or prod
-if [ $environment = "prod" ] || [ $environment = "ppe" ] || [ $environment = "prod-pr" ] || [ $environment = "ppe-pr" ]; then
-    objectId='8ad17ea0-4c88-4465-b8ec-a827df84f896'
-fi
+# Microsoft Azure Batch Enterprise Application ID ddbf3205-c6bd-46ae-8127-60eb93363864
+objectId=$(az ad sp show --id ddbf3205-c6bd-46ae-8127-60eb93363864 --query "id" -o tsv)
 
 function recoverIfSoftDeleted() {
     softDeleted=$(az keyvault list-deleted --resource-type vault --query "[?name=='$keyVault'].id" -o tsv)
@@ -55,7 +50,7 @@ function createKeyvaultIfNotExists() {
             az deployment group create \
                 --resource-group "$resourceGroupName" \
                 --template-file "$createKeyVaultTemplateFile" \
-                --parameters objectId=$objectId \
+                --parameters objectId="$objectId" \
                 --query "properties.outputResources[].id" \
                 -o tsv
         )

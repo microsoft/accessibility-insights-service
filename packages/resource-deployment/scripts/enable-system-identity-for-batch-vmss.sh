@@ -21,17 +21,17 @@ Usage: $0 -v <vmss name> -r <vmss resource group> -p <batch pool>
 enableResourceGroupAccess() {
     role="Contributor"
     scope="--resource-group $resourceGroupName"
-    . "${0%/*}/role-assign-for-sp.sh"
+    . "${0%/*}/create-role-assign.sh"
 }
 
 enableStorageAccess() {
     scope="--scope /subscriptions/${subscription}/resourceGroups/${resourceGroupName}/providers/Microsoft.Storage/storageAccounts/${storageAccountName}"
 
     role="Storage Blob Data Contributor"
-    . "${0%/*}/role-assign-for-sp.sh"
+    . "${0%/*}/create-role-assign.sh"
 
     role="Storage Queue Data Contributor"
-    . "${0%/*}/role-assign-for-sp.sh"
+    . "${0%/*}/create-role-assign.sh"
 }
 
 enableCosmosAccess() {
@@ -39,7 +39,7 @@ enableCosmosAccess() {
     scope="--scope ${cosmosAccountId}"
 
     role="DocumentDB Account Contributor"
-    . "${0%/*}/role-assign-for-sp.sh"
+    . "${0%/*}/create-role-assign.sh"
 
     # Create and assign custom RBAC role
     customRoleName="CosmosDocumentRW"
