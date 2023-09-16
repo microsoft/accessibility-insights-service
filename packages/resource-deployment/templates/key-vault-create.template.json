@@ -18,9 +18,9 @@
         },
         "objectId": {
             "type": "string",
-            "defaultValue": "f520d84c-3fd3-4cc8-88d4-2ed25b00d27a",
+            "defaultValue": "",
             "metadata": {
-                "description": "Microsoft.Batch service principal object id"
+                "description": "Microsoft Azure Batch service principal object ID."
             }
         }
     },

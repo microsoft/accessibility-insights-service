@@ -11,7 +11,7 @@ dashboardTemplateFile="${0%/*}/../templates/dashboard.template.json"
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -r <resource group> [-t <dashboard template file (optional)>]
+Usage: ${BASH_SOURCE} -r <resource group> [-t <dashboard template file (optional)>]
 "
     exit 1
 }

@@ -7,7 +7,7 @@ set -eo pipefail
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -r <resource group> -c <command to run> -n <command name> [-p <pool ids (if not specified, will wait for all pools to become idle)>]
+Usage: ${BASH_SOURCE} -r <resource group> -c <command to run> -n <command name> [-p <pool ids (if not specified, will wait for all pools to become idle)>]
 "
     exit 1
 }

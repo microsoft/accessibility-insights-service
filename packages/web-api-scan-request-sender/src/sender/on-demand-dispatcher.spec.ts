@@ -153,7 +153,7 @@ describe(OnDemandDispatcher, () => {
                             retryCount: 2,
                         },
                     },
-                    condition: 'noRetry',
+                    condition: 'stale',
                 },
                 {
                     request: { id: 'id3' },

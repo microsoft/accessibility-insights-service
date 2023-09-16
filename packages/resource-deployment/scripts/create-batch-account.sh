@@ -21,22 +21,12 @@ batchTemplateFile="${0%/*}/../templates/batch-account.template.json"
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -r <resource group> -e <environment> [-t <batch template file (optional)>] [-d <pass \"true\" to force pools to drop>]
+Usage: ${BASH_SOURCE} -r <resource group> -e <environment> [-t <batch template file (optional)>] [-d <pass \"true\" to force pools to drop>]
 "
     exit 1
 }
 
 . "${0%/*}/process-utilities.sh"
-
-getContainerRegistryLoginCredentials() {
-    containerRegistryUsername=$(az acr credential show --name "${containerRegistryName}" --query "username" -o tsv)
-    containerRegistryPassword=$(az acr credential show --name "${containerRegistryName}" --query "passwords[0].value" -o tsv)
-
-    if [[ -z ${containerRegistryUsername} ]] || [[ -z ${containerRegistryPassword} ]]; then
-        echo "Unable to get login credentials for container registry ${containerRegistryName}"
-        exit 1
-    fi
-}
 
 function setParameterFilePath() {
     if [ $environment = "prod" ]; then
@@ -69,8 +59,6 @@ function deployBatch() {
             --resource-group "${resourceGroupName}" \
             --template-file "${batchTemplateFile}" \
             --parameters "${parameterFilePath}" \
-            --parameters containerRegistryServerUserName="${containerRegistryUsername}" \
-            --parameters containerRegistryServerPassword="${containerRegistryPassword}" \
             --query "properties.outputResources[].id" \
             -o tsv
     )
@@ -117,9 +105,8 @@ createPublicIp "on-demand-scan-request-pool"
 createPublicIp "on-demand-url-scan-pool"
 createPublicIp "privacy-scan-pool"
 
-getContainerRegistryLoginCredentials
 deployBatch
 
-. "${0%/*}/setup-all-pools-for-batch.sh"
+. "${0%/*}/setup-batch-pools.sh"
 
 echo "The '${batchAccountName}' Azure Batch account successfully deployed"

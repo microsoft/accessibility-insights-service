@@ -9,7 +9,7 @@ set -eo pipefail
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -r <resource group> -p <service principal id> -g <Azure role name or id> -s <scope at which the role assignment applies to>
+Usage: ${BASH_SOURCE} -r <resource group> -p <service principal id> -g <Azure role name or id> -s <scope at which the role assignment applies to>
 "
     exit 1
 }

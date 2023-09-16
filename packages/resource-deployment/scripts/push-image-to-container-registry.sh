@@ -7,7 +7,7 @@ set -eo pipefail
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -r <resource group> [-e <runtime environment>]
+Usage: ${BASH_SOURCE} -r <resource group> [-e <runtime environment>]
 "
     exit 1
 }
@@ -31,7 +31,7 @@ if [[ -z $environment ]]; then
     environment="dev"
 fi
 
-function onExitPushImages() {
+onExit-key-vault-rotate-certificate() {
     local exitCode=$?
 
     if [[ $exitCode != 0 ]]; then
@@ -79,7 +79,7 @@ prepareImageBuildSource() {
 
 # function runs in a subshell to isolate trap handler
 pushImagesToRegistry() (
-    trap "onExitPushImages" EXIT
+    trap "onExit-key-vault-rotate-certificate" EXIT
 
     # shellcheck disable=SC2034
     local imageBuildProcesses=(

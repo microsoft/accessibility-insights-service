@@ -10,7 +10,7 @@ export location
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -n <resource name> -t <max wait time> [-r <resource group> | -q <existance query>] 
+Usage: ${BASH_SOURCE} -n <resource name> -t <max wait time> [-r <resource group> | -q <existance query>] 
 "
     exit 1
 }

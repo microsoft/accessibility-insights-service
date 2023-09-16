@@ -8,7 +8,7 @@ set -eo pipefail
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -r <resource group> [-a <address prefix (optional)> -s <subnet address prefix (optional)>]"
+Usage: ${BASH_SOURCE} -r <resource group> [-a <address prefix (optional)> -s <subnet address prefix (optional)>]"
     exit 1
 }
 

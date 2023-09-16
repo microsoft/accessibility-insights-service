@@ -9,7 +9,7 @@ export resourceGroupName
 
 exitWithUsageInfo() {
     echo "
-        Usage: $0 -r <resource group name> [-p <purge key vault if set to true>]
+        Usage: ${BASH_SOURCE} -r <resource group name> [-p <purge key vault if set to true>]
     "
     exit 1
 }

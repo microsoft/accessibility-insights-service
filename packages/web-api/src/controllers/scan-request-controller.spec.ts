@@ -117,35 +117,21 @@ describe(ScanRequestController, () => {
             expect(context.res.body).toEqual(expectedResponse);
         });
 
-        it("rejects request with incomplete 'site' or 'reportGroups' property", async () => {
+        it("rejects request with invalid 'reportGroups' property", async () => {
             context.req.rawBody = JSON.stringify([
                 {
                     url: 'https://abc/path/',
-                    site: { baseUrl: 'https://base/path' },
                     reportGroups: [{ consolidatedId: undefined }, { consolidatedId: 'reportGroupId' }], // empty id
                 },
                 {
                     url: 'https://def/path/',
-                    site: 'https://base/path', // invalid site object
-                    reportGroups: [{ consolidatedId: 'reportGroupId' }],
-                },
-                {
-                    // missing site
-                    url: 'https://hij/path/',
-                    reportGroups: [{ consolidatedId: 'reportGroupId' }],
-                },
-                {
-                    // missing reportGroups
-                    url: 'https://klm/path/',
-                    site: { baseUrl: 'https://base/path' },
+                    reportGroups: [{ consolidatedId: '' }], // empty id
                 },
             ]);
 
             const expectedResponse = [
-                { url: 'https://abc/path/', error: WebApiErrorCodes.missingSiteOrReportGroups.error },
-                { url: 'https://def/path/', error: WebApiErrorCodes.missingSiteOrReportGroups.error },
-                { url: 'https://hij/path/', error: WebApiErrorCodes.missingSiteOrReportGroups.error },
-                { url: 'https://klm/path/', error: WebApiErrorCodes.missingSiteOrReportGroups.error },
+                { url: 'https://abc/path/', error: WebApiErrorCodes.invalidReportGroup.error },
+                { url: 'https://def/path/', error: WebApiErrorCodes.invalidReportGroup.error },
             ];
 
             scanRequestController = createScanRequestController(context);

@@ -9,7 +9,7 @@ set -eo pipefail
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -r <resource group> [-s <subscription name or id>]
+Usage: ${BASH_SOURCE} -r <resource group> [-s <subscription name or id>]
 "
     exit 1
 }

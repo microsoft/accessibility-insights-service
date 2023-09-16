@@ -15,20 +15,12 @@ setupKeyVaultResourcesTemplateFile="${0%/*}/../templates/key-vault-setup-resourc
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -r <resource group> -k <enable soft delete for Azure Key Vault> -c <webApiAdClientId> -p <webApiAdClientSecret> [-e <environment>]
+Usage: ${BASH_SOURCE} -r <resource group> -k <enable soft delete for Azure Key Vault> -c <webApiAdClientId> -p <webApiAdClientSecret> [-e <environment>]
 "
     exit 1
 }
 
 . "${0%/*}/process-utilities.sh"
-
-# Microsoft AAD tenant when env is not ppe or prod
-objectId='f520d84c-3fd3-4cc8-88d4-2ed25b00d27a'
-
-# PME AAD tenant when env is ppe or prod
-if [ $environment = "prod" ] || [ $environment = "ppe" ] || [ $environment = "prod-pr" ] || [ $environment = "ppe-pr" ]; then
-    objectId='8ad17ea0-4c88-4465-b8ec-a827df84f896'
-fi
 
 function recoverIfSoftDeleted() {
     softDeleted=$(az keyvault list-deleted --resource-type vault --query "[?name=='$keyVault'].id" -o tsv)
@@ -55,7 +47,7 @@ function createKeyvaultIfNotExists() {
             az deployment group create \
                 --resource-group "$resourceGroupName" \
                 --template-file "$createKeyVaultTemplateFile" \
-                --parameters objectId=$objectId \
+                --parameters objectId="$azureBatchObjectId" \
                 --query "properties.outputResources[].id" \
                 -o tsv
         )
@@ -97,18 +89,19 @@ function setupKeyVaultResources() {
 }
 
 # Read script arguments
-while getopts ":r:c:p:e:" option; do
+while getopts ":r:c:p:b:e:" option; do
     case $option in
     r) resourceGroupName=${OPTARG} ;;
     c) webApiAdClientId=${OPTARG} ;;
     p) webApiAdClientSecret=${OPTARG} ;;
+    b) azureBatchObjectId=${OPTARG} ;;
     e) environment=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
 
 # Print script usage help
-if [[ -z $resourceGroupName ]] || [[ -z $webApiAdClientId ]] || [[ -z $webApiAdClientSecret ]]; then
+if [[ -z $resourceGroupName ]] || [[ -z $webApiAdClientId ]] || [[ -z $webApiAdClientSecret ]] || [[ -z $azureBatchObjectId ]]; then
     exitWithUsageInfo
 fi
 

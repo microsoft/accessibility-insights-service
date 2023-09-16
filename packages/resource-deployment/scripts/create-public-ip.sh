@@ -7,7 +7,7 @@ set -eo pipefail
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -r <resource group> -n <name of the public IP address> -d <globally unique DNS entry>
+Usage: ${BASH_SOURCE} -r <resource group> -n <name of the public IP address> -d <globally unique DNS entry>
 "
     exit 1
 }

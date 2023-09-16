@@ -6,7 +6,7 @@
 set -eo pipefail
 
 exitWithUsageInfo() {
-    echo "Usage: $0 -h <commit hash>"
+    echo "Usage: ${BASH_SOURCE} -h <commit hash>"
     exit 1
 }
 

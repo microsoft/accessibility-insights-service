@@ -7,7 +7,7 @@ set -eo pipefail
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -p <provider path> -r <ARM line-separated resource strings>
+Usage: ${BASH_SOURCE} -p <provider path> -r <ARM line-separated resource strings>
 "
     exit 1
 }

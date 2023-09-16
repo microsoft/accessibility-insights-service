@@ -43,20 +43,6 @@
                 "description": "The App registration client ID"
             }
         },
-        "tenantId": {
-            "type": "string",
-            "defaultValue": "72f988bf-86f1-41af-91ab-2d7cd011db47",
-            "metadata": {
-                "description": "The App registration tenant ID"
-            }
-        },
-        "cosmosAccountName": {
-            "type": "string",
-            "defaultValue": "[concat('allycosmos',toLower(uniqueString(resourceGroup().id)))]",
-            "metadata": {
-                "description": "Name of the cosmos account that have the scan related data"
-            }
-        },
         "keyVaultName": {
             "type": "string",
             "defaultValue": "[concat('allyvault',toLower(uniqueString(resourceGroup().id)))]",

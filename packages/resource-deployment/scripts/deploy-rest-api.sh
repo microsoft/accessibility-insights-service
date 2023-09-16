@@ -32,7 +32,7 @@ restrictWebApiAccess() {
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -t <Template Location> -r <resource group>
+Usage: ${BASH_SOURCE} -t <Template Location> -r <resource group>
     where 
     Template location - The location for the templates.
     Resource group - The resource group that the REST API needs to be deployed to.

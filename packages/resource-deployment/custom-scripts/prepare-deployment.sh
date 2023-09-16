@@ -15,7 +15,7 @@ fi
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -d <Packages directory. Default: $packagesDirectoryPath > -p <Profile name. Default: $profileName>
+Usage: ${BASH_SOURCE} -d <Packages directory. Default: $packagesDirectoryPath > -p <Profile name. Default: $profileName>
 "
     exit 1
 }

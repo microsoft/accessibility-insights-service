@@ -18,7 +18,7 @@ export password
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -r <resource group> -s <subscription name or id> -k <key vault>
+Usage: ${BASH_SOURCE} -r <resource group> -s <subscription name or id> -k <key vault>
 "
     exit 1
 }
@@ -46,18 +46,18 @@ fi
 az account set --subscription "$subscription"
 
 # Generate service principal name
-user=$(az ad signed-in-user show --query "mailNickname" -o tsv)
+user=$(az ad signed-in-user show --query "userPrincipalName" -o tsv)
 displayName="$user-$resourceGroupName"
 
 # Create or update service principal object
 # Use display name instead of service principal name to prevent az cli assiging a random display name
-echo "Creating service principal..."
+echo "Creating $displayName service principal..."
 password=$(az ad sp create-for-rbac --role contributor --scopes "/subscriptions/$subscription/resourceGroups/$resourceGroupName" --name "$displayName" --query "password" -o tsv)
 
 # Retrieve service principal object properties
-tenant=$(az ad sp list --display-name "${displayName}" --query "[0].appOwnerTenantId" -o tsv)
-clientId=$(az ad sp list --display-name "${displayName}" --query "[0].appId" -o tsv)
-objectId=$(az ad sp list --display-name "${displayName}" --query "[0].objectId" -o tsv)
+tenant=$(az ad sp list --display-name "${displayName}" --query "[].appOwnerOrganizationId" -o tsv)
+clientId=$(az ad sp list --display-name "${displayName}" --query "[].appId" -o tsv)
+objectId=$(az ad app show --id ${clientId} --query "id" -o tsv)
 
 # Set key vault access policy
 echo "Granting service principal permissions to the '$keyVault' key vault"

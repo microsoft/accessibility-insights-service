@@ -7,7 +7,7 @@ set -eo pipefail
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -v <vmss name> -r <vmss resource group> -b <batch resource group name>
+Usage: ${BASH_SOURCE} -v <vmss name> -r <vmss resource group> -b <batch resource group name>
 "
     exit 1
 }

@@ -37,27 +37,6 @@
                 "description": "Name of the virtual network to be used for the batch pool nodes"
             }
         },
-        "containerRegistryName": {
-            "defaultValue": "[concat('allyregistry',toLower(uniqueString(resourceGroup().id)))]",
-            "type": "string",
-            "metadata": {
-                "description": "Name of the Azure container registry to be used to deploy Docker containers"
-            }
-        },
-        "containerRegistryServerPassword": {
-            "defaultValue": "",
-            "type": "string",
-            "metadata": {
-                "description": "The Azure container registry server login password"
-            }
-        },
-        "containerRegistryServerUserName": {
-            "defaultValue": "",
-            "type": "string",
-            "metadata": {
-                "description": "The Azure container registry server login user name"
-            }
-        },
         "onDemandScanRequestPoolNodes": {
             "defaultValue": "2",
             "type": "string",

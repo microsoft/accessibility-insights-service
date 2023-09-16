@@ -186,7 +186,7 @@ describe(ScanRequestSelector, () => {
         createScanResults([
             {
                 run: {
-                    state: 'running',
+                    state: 'failed',
                     retryCount: 10,
                     pageResponseCode: 500,
                 },
@@ -194,7 +194,7 @@ describe(ScanRequestSelector, () => {
             {
                 // ignore due to failedScanRetryIntervalInMinutes delay
                 run: {
-                    state: 'running',
+                    state: 'failed',
                     retryCount: 10,
                     timestamp: moment(dateNow).toJSON(),
                     pageResponseCode: 501,
@@ -222,7 +222,36 @@ describe(ScanRequestSelector, () => {
         expect(result).toEqual(filteredScanRequests);
     });
 
-    it('delete scan with no retry', async () => {
+    it('delete failed scans with no retry', async () => {
+        createScanResults([
+            {
+                run: {
+                    state: 'failed',
+                    retryCount: 10,
+                    timestamp: moment(dateNow).add(-12, 'minutes').toJSON(),
+                },
+            },
+        ]);
+        maxAccessibilityRequestsToQueue = scanResults.length;
+        createScanRequests();
+        setupPageScanRequestProvider();
+        setupOnDemandPageScanRunResultProvider();
+        createFilteredScanRequests(
+            'noRetry',
+            [],
+            scanRequests.map((scanRequest) => scanRequest.id),
+        );
+
+        const result = await scanRequestSelector.getRequests(
+            maxAccessibilityRequestsToQueue,
+            maxPrivacyRequestsToQueue,
+            maxRequestsToDelete,
+        );
+
+        expect(result).toEqual(filteredScanRequests);
+    });
+
+    it('delete stale scans with no retry', async () => {
         createScanResults([
             {
                 run: {
@@ -238,20 +267,13 @@ describe(ScanRequestSelector, () => {
                     timestamp: moment(dateNow).add(-12, 'minutes').toJSON(),
                 },
             },
-            {
-                run: {
-                    state: 'failed',
-                    retryCount: 10,
-                    timestamp: moment(dateNow).add(-12, 'minutes').toJSON(),
-                },
-            },
         ]);
         maxAccessibilityRequestsToQueue = scanResults.length;
         createScanRequests();
         setupPageScanRequestProvider();
         setupOnDemandPageScanRunResultProvider();
         createFilteredScanRequests(
-            'noRetry',
+            'stale',
             [],
             scanRequests.map((scanRequest) => scanRequest.id),
         );

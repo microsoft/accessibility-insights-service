@@ -38,7 +38,7 @@ uploadFile() {
 exitWithUsageInfo() {
     echo \
         "
-Usage: $0 -r <resource group name> -d <path to drop folder. Will use '$dropFolder' folder relative to current working directory> -e <deploy environment>
+Usage: ${BASH_SOURCE} -r <resource group name> -d <path to drop folder. Will use '$dropFolder' folder relative to current working directory> -e <deploy environment>
 "
     exit 1
 }

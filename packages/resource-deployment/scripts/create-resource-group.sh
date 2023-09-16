@@ -10,7 +10,7 @@ export location
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -r <resource group> -l <Azure region>
+Usage: ${BASH_SOURCE} -r <resource group> -l <Azure region>
 
 List of available Azure regions:
 

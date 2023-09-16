@@ -24,87 +24,92 @@ Licensed under the MIT License.
 5.  After the templates have been extracted, the endpoints that refer to a function backend need to parameterized.
 
     1.  Open the `*.backends.template.json` file and add the following to the `parameters` section.
+
         ```json
         "functionName":{
             "value" : "your-function-app-value"
         }
         ```
+
     2.  Replace all occurrences of the function name with the parameter `$functionName`.
         Replace the group name in `properties>resourceId` from "`randomResourceGroup`" (Or your equivalent, see example) to `resourceGroup().name`
 
-               For example -
-              Before
-              ```json
-              {
-                "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-                "contentVersion": "1.0.0.0",
-                "parameters": {
-                  "ApimServiceName": {
+        For example the JSON template
+
+        ```json
+        {
+            "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+            "contentVersion": "1.0.0.0",
+            "parameters": {
+                "ApimServiceName": {
                     "type": "string"
-                  }
-                },
-                "resources": [
-                  {
+                }
+            },
+            "resources": [
+                {
                     "properties": {
-                      "description": "clean-function-app",
-                      "resourceId": "https://management.azure.com/subscriptions/tenant-ID/resourceGroups/<randomResourcegroup>/providers/Microsoft.Web/sites/<clean-function-app>",
-                      "credentials": {
-                        "header": {
-                          "x-functions-key": [
-                            "{{clean-function-app-key}}"
-                          ]
-                        }
-                      },
-                      "url": "https://clean-function-app.azurewebsites.net/api",
-                      "protocol": "http"
+                        "description": "clean-function-app",
+                        "resourceId": "https://management.azure.com/subscriptions/tenant-ID/resourceGroups/<randomResourcegroup>/providers/Microsoft.Web/sites/<clean-function-app>",
+                        "credentials": {
+                            "header": {
+                                "x-functions-key": ["{{clean-function-app-key}}"]
+                            }
+                        },
+                        "url": "https://clean-function-app.azurewebsites.net/api",
+                        "protocol": "http"
                     },
                     "name": "[concat(parameters('ApimServiceName'), '/clean-function-app')]",
                     "type": "Microsoft.ApiManagement/service/backends",
                     "apiVersion": "2019-01-01"
-                  }
-                ]
-              }
-              ```
-              After
-              ```json
-              {
-                "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-                "contentVersion": "1.0.0.0",
-                "parameters": {
-                  "apimServiceName": {
+                }
+            ]
+        }
+        ```
+
+        Should look like below
+
+        ```json
+        {
+            "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+            "contentVersion": "1.0.0.0",
+            "parameters": {
+                "apimServiceName": {
                     "type": "string"
-                  },
-                  "functionName":{
-                    "type": "string"
-                  }
                 },
-                "resources": [
-                  {
+                "functionName": {
+                    "type": "string"
+                }
+            },
+            "resources": [
+                {
                     "properties": {
-                      "description": "[parameters('functionName')]",
-                      "resourceId": "[concat('https://management.azure.com/subscriptions/76eb140e-abd4-4a17-ad98-534d0f8d2759/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Web/sites/',parameters('functionName'))]",
-                      "credentials": {
-                        "header": {
-                        }
-                      },
-                      "url": "[concat('https://', parameters('functionName'), '.azurewebsites.net/api')]",
-                      "protocol": "http"
+                        "description": "[parameters('functionName')]",
+                        "resourceId": "[concat('https://management.azure.com/subscriptions/12340000-0000-0000-0000-000000005678/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Web/sites/',parameters('functionName'))]",
+                        "credentials": {
+                            "header": {}
+                        },
+                        "url": "[concat('https://', parameters('functionName'), '.azurewebsites.net/api')]",
+                        "protocol": "http"
                     },
                     "name": "[concat(parameters('apimServiceName'), '/', parameters('functionName'))]",
                     "type": "Microsoft.ApiManagement/service/backends",
                     "apiVersion": "2019-01-01"
-                  }
-                ]
-              }
-              ```
-            3. Open the `*apis.template.json` file
-               1. Add the following to the parameters
-                  ```json
-                  "functionName":{
-                      "type" : "string"
-                  }
-                  ```
-                2. Change the value of the function app name wherever it is set in the policies. Search for `<set-backend-service` and change the `backend-id` property to use `$functionName` instead.
+                }
+            ]
+        }
+        ```
+
+    3.  Open the `*apis.template.json` file
+
+        1. Add the following to the parameters
+
+        ```json
+        "functionName":{
+            "type" : "string"
+        }
+        ```
+
+        2. Change the value of the function app name wherever it is set in the policies. Search for `<set-backend-service` and change the `backend-id` property to use `$functionName` instead.
 
 6.  Delete the `*-master.template.json` and the `*-parameters.json` file.
 

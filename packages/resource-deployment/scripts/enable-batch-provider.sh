@@ -9,21 +9,22 @@ set -eo pipefail
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -e <environment>
+Usage: ${BASH_SOURCE} -e <environment>
 "
     exit 1
 }
 
 # Read script arguments
-while getopts ":e:" option; do
+while getopts ":b:e:" option; do
     case $option in
+    b) azureBatchObjectId=${OPTARG} ;;
     e) environment=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
 
 # Print script usage help
-if [[ -z $environment ]]; then
+if [[ -z $azureBatchObjectId ]] || [[ -z $environment ]]; then
     exitWithUsageInfo
 fi
 
@@ -57,21 +58,7 @@ if [[ $batchProviderRegistrationState != "Registered" ]]; then
 fi
 
 # Allow Azure Batch service to access the subscription
-#   Name: Microsoft Azure Batch
-#   Application ID: ddbf3205-c6bd-46ae-8127-60eb93363864
-#   Object ID:
-#               - Microsoft: f520d84c-3fd3-4cc8-88d4-2ed25b00d27a
-#               - PME: 8ad17ea0-4c88-4465-b8ec-a827df84f896
-
-# Microsoft AAD tenant when env is not ppe or prod
-objectId='f520d84c-3fd3-4cc8-88d4-2ed25b00d27a'
-
-# PME AAD tenant when env is ppe or prod
-if [ $environment = "prod" ] || [ $environment = "ppe" ] || [ $environment = "prod-pr" ] || [ $environment = "ppe-pr" ]; then
-    objectId='8ad17ea0-4c88-4465-b8ec-a827df84f896'
-fi
-
-roleDefinitionName=$(az role assignment list --query "[?principalId=='$objectId'].roleDefinitionName" -o tsv)
+roleDefinitionName=$(az role assignment list --query "[?principalId=='$azureBatchObjectId'].roleDefinitionName" -o tsv)
 if [[ $roleDefinitionName != "Contributor" ]]; then
     echo "Granting Azure Batch service access to the '$subscription' Azure subscription"
     az role assignment create --assignee ddbf3205-c6bd-46ae-8127-60eb93363864 --role contributor 1>/dev/null

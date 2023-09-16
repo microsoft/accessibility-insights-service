@@ -8,18 +8,17 @@ set -eo pipefail
 function waitForProcesses() {
     local processesToWaitFor=$1
 
-    list="$processesToWaitFor[@]"
+    list="${processesToWaitFor}[@]"
     for pid in "${!list}"; do
-        echo "Waiting for process with pid $pid"
-        wait $pid
-        local pExitCode=$?
-        echo "Process with pid $pid exited with exit code $pExitCode"
+        echo "Waiting for process with pid ${pid}"
+        wait "${pid}"
+        local processExitCode=$?
+        echo "Process with pid ${pid} exited with exit code ${processExitCode}"
 
-        if [[ $pExitCode != 0 ]]; then
-            echo "Process - $pid failed with exit code $pExitCode. Killing current process."
-            exit $pExitCode
+        if [[ ${processExitCode} != 0 ]]; then
+            echo "Process - ${pid} failed with exit code ${processExitCode}. Killing current process."
+            exit "${processExitCode}"
         fi
-
     done
 }
 
@@ -27,55 +26,54 @@ function runCommandsWithoutSecretsInParallel {
     local commands=$1
     local -a parallelizableProcesses
 
-    local list="$commands[@]"
+    local list="${commands}[@]"
     for command in "${!list}"; do
-        eval "$command" &
-        echo "Created process with pid $! for command - $command"
+        eval "${command}" &
+        echo "Created process with pid $! for command - ${command}"
         parallelizableProcesses+=("$!")
     done
 
     waitForProcesses parallelizableProcesses
-} 
+}
 
 function sendSignalToProcessIfExists {
-    local currentPid=$1	
+    local currentPid=$1
     local signal=$2
 
-    if [[ -z $currentPid ]]; then	
-        return	
-    fi	
+    if [[ -z ${currentPid} ]]; then
+        return
+    fi
 
-    if kill -0 $currentPid > /dev/null 2>&1; then	
-        kill $signal $currentPid
+    if kill -0 "${currentPid}" >/dev/null 2>&1; then
+        kill "${signal}" "${currentPid}"
     fi
 }
 
-function killWithDescendantsIfProcessExists ()	
-{	
-    local currentPid=$1	
+function killWithDescendantsIfProcessExists() {
+    local currentPid=$1
 
-    if [[ -z $currentPid ]]; then	
-        return	
-    fi	
+    if [[ -z ${currentPid} ]]; then
+        return
+    fi
 
-    if kill -0 $currentPid > /dev/null 2>&1; then	
-        echo "stopping process $currentPid"	
-        sendSignalToProcessIfExists $currentPid -SIGSTOP
-       
-        killDescendantProcesses  $currentPid
-        echo "Killed descendant processes of $currentPid"
+    if kill -0 "${currentPid}" >/dev/null 2>&1; then
+        echo "Stopping process ${currentPid}"
+        sendSignalToProcessIfExists "${currentPid}" -SIGSTOP
 
-        sendSignalToProcessIfExists $currentPid -SIGKILL
-        echo "killed process $currentPid"	
-    fi	
-}	
+        killDescendantProcesses "${currentPid}"
+        echo "Killed descendant processes of ${currentPid}"
+
+        sendSignalToProcessIfExists "${currentPid}" -SIGKILL
+        echo "Killed process ${currentPid}"
+    fi
+}
 
 function killDescendantProcesses() {
     local processId=$1
-    
-    local children=$(pgrep -P $processId)	
-    
-    for childPid in $children; do	
-        killWithDescendantsIfProcessExists "$childPid"	
-    done	
+    local children
+
+    children=$(pgrep -P "${processId}")
+    for childPid in ${children}; do
+        killWithDescendantsIfProcessExists "${childPid}"
+    done
 }

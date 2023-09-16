@@ -8,7 +8,7 @@ import { ServiceConfiguration } from 'common';
 import { client, CosmosOperationResponse } from 'azure-services';
 import moment from 'moment';
 
-export declare type DispatchCondition = 'notFound' | 'completed' | 'noRetry' | 'accepted' | 'retry' | 'abandoned';
+export declare type DispatchCondition = 'notFound' | 'completed' | 'noRetry' | 'accepted' | 'retry' | 'stale' | 'abandoned';
 
 export interface ScanRequest {
     request: OnDemandPageScanRequest;
@@ -92,14 +92,25 @@ export class ScanRequestSelector {
                     return;
                 }
 
-                // stale or failed scan with no retry attempt left
+                // failed scan with no retry attempt left
                 if (
-                    // 'report' state is excluded here as report scan runs in standalone workflow
-                    (['queued', 'running', 'failed'] as OnDemandPageScanRunState[]).includes(scanResult.run.state) &&
+                    (['failed'] as OnDemandPageScanRunState[]).includes(scanResult.run.state) &&
                     scanResult.run.retryCount >= this.maxFailedScanRetryCount &&
                     moment.utc(scanResult.run.timestamp).add(this.failedScanRetryIntervalInMinutes, 'minutes') <= moment.utc()
                 ) {
                     filteredScanRequests.requestsToDelete.push({ request: scanRequest, result: scanResult, condition: 'noRetry' });
+
+                    return;
+                }
+
+                // stale scan with no retry attempt left
+                if (
+                    // 'report' state is excluded here as report scan runs in standalone workflow
+                    (['queued', 'running'] as OnDemandPageScanRunState[]).includes(scanResult.run.state) &&
+                    scanResult.run.retryCount >= this.maxFailedScanRetryCount &&
+                    moment.utc(scanResult.run.timestamp).add(this.failedScanRetryIntervalInMinutes, 'minutes') <= moment.utc()
+                ) {
+                    filteredScanRequests.requestsToDelete.push({ request: scanRequest, result: scanResult, condition: 'stale' });
 
                     return;
                 }

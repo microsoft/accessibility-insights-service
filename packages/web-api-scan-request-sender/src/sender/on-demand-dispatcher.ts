@@ -151,7 +151,7 @@ export class OnDemandDispatcher {
 
         // set scan run state to failed when scan is stale
         let runStateUpdated = false;
-        if ((['noRetry', 'abandoned'] as DispatchCondition[]).includes(scanRequest.condition) && pageScanResult.run.state !== 'failed') {
+        if ((['stale', 'abandoned'] as DispatchCondition[]).includes(scanRequest.condition)) {
             runStateUpdated = true;
             pageScanResult.run = {
                 ...pageScanResult.run,
@@ -162,7 +162,7 @@ export class OnDemandDispatcher {
 
             await this.onDemandPageScanRunResultProvider.updateScanRun(pageScanResult);
 
-            this.logger.logError('The scan request was abandon in a service pipeline.', {
+            this.logger.logWarn('Updated page scan run state for abandon run.', {
                 scanId: pageScanResult.id,
                 scanGroupId: pageScanResult.websiteScanRef?.scanGroupId,
                 runState: JSON.stringify(pageScanResult.run.state),
@@ -174,7 +174,10 @@ export class OnDemandDispatcher {
         if (pageScanResult.websiteScanRef !== undefined) {
             websiteScanResult = await this.websiteScanResultProvider.read(pageScanResult.websiteScanRef.id, false, pageScanResult.id);
             const pageScan = websiteScanResult.pageScans?.find((s) => s.scanId === pageScanResult.id);
-            if (pageScan?.runState === undefined) {
+            if (
+                !(['completed', 'failed'] as OnDemandPageScanRunState[]).includes(pageScan?.runState) ||
+                runStateUpdated /* read websiteScanResult on pageScanResult update to trigger scan notification */
+            ) {
                 runStateUpdated = true;
                 const updatedWebsiteScanResult: Partial<WebsiteScanResult> = {
                     id: pageScanResult.websiteScanRef.id,
@@ -196,7 +199,7 @@ export class OnDemandDispatcher {
                     onMergeCallbackFn,
                 );
 
-                this.logger.logWarn(`Updated website page scan run state for a failed run.`, {
+                this.logger.logWarn(`Updated website page scan run state for abandon run.`, {
                     scanId: pageScanResult.id,
                     deepScanId: websiteScanResult.deepScanId,
                     scanGroupId: websiteScanResult.scanGroupId,
@@ -245,8 +248,9 @@ export class OnDemandDispatcher {
                 });
                 break;
             }
-            case 'noRetry': {
-                this.logger.logError('The scan request has reached maximum retry count. Removing scan request from a request queue.', {
+            case 'noRetry':
+            case 'stale': {
+                this.logger.logWarn('The scan request has reached maximum retry count. Removing scan request from a request queue.', {
                     scanId: scanRequest.request.id,
                 });
                 break;
@@ -258,7 +262,7 @@ export class OnDemandDispatcher {
                 break;
             }
             case 'retry': {
-                this.logger.logInfo('Sending scan request to a request queue with new retry attempt.', {
+                this.logger.logWarn('Sending scan request to a request queue with new retry attempt.', {
                     scanId: scanRequest.request.id,
                     runState: scanRequest.result.run.state,
                     runTimestamp: scanRequest.result.run.timestamp,
@@ -266,8 +270,16 @@ export class OnDemandDispatcher {
                 });
                 break;
             }
+            case 'abandoned': {
+                this.logger.logError('The scan request was abandoned. Removing scan request from a request queue.', {
+                    scanId: scanRequest.request.id,
+                });
+                break;
+            }
             default: {
-                throw new Error(`The '${scanRequest.condition}' operation condition not supported.`);
+                this.logger.logInfo(`The scan request with dispatch condition ${scanRequest.condition} has been processed.`, {
+                    scanId: scanRequest.request.id,
+                });
             }
         }
     }

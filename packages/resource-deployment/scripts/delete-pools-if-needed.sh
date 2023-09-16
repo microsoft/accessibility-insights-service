@@ -16,7 +16,7 @@ recycleVmssIntervalDays=5
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -r <resource group> -p <parameter template file path> [-d <pass \"true\" to force pools to drop>]
+Usage: ${BASH_SOURCE} -r <resource group> -p <parameter template file path> [-d <pass \"true\" to force pools to drop>]
 "
     exit 1
 }
