@@ -16,7 +16,7 @@ export storageAccountName
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -r <resource group>
+Usage: ${BASH_SOURCE} -r <resource group>
 "
     exit 1
 }

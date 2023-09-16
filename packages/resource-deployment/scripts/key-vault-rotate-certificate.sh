@@ -9,7 +9,7 @@ certificateName="azSecPackCert"
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -r <resource group> [-k <key vault>] [-n <key vault certificate name>] [-s <subscription name or id>] [-e <environment: dev, ci, ppe, prod or selftest>]
+Usage: ${BASH_SOURCE} -r <resource group> [-k <key vault>] [-n <key vault certificate name>] [-s <subscription name or id>] [-e <environment: dev, ci, ppe, prod or selftest>]
 "
     exit 1
 }
@@ -42,7 +42,7 @@ grantUserAccessToKeyVault() {
     fi
 }
 
-revokeUserAccessToKeyVault() {
+onExit-key-vault-rotate-certificate() {
     if [[ $userType == "user" ]]; then
         echo "Revoking access to key vault for current user account"
         az keyvault delete-policy --name "$keyVault" --upn "$principalName" 1>/dev/null || true
@@ -95,7 +95,7 @@ if [[ -z $environment ]]; then
 fi
 
 getCurrentUserDetails
-trap 'revokeUserAccessToKeyVault' EXIT
+trap 'onExit-key-vault-rotate-certificate' EXIT
 
 loginToAzure
 grantUserAccessToKeyVault

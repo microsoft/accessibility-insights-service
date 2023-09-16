@@ -10,7 +10,7 @@ registryTemplateFile="${0%/*}/../templates/container-registry.template.json"
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -r <resource group> [-t <container registry template file (optional)>]
+Usage: ${BASH_SOURCE} -r <resource group> [-t <container registry template file (optional)>]
 "
     exit 1
 }

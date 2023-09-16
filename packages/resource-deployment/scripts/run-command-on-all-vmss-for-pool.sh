@@ -11,7 +11,7 @@ export vmssLocation
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -r <resource group> -p <batch pool> -c <command to execute> -n <command name>
+Usage: ${BASH_SOURCE} -r <resource group> -p <batch pool> -c <command to execute> -n <command name>
 "
     exit 1
 }

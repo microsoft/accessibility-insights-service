@@ -23,7 +23,7 @@ createQueue() {
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -r <resource group name>
+Usage: ${BASH_SOURCE} -r <resource group name>
 "
     exit 1
 }

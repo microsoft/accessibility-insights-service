@@ -11,7 +11,7 @@ defaultConfigFileFolder="${0%/*}/../runtime-config"
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -r <resource group> -s <subscription> [-c <site content directory, default $defaultSiteContentFolder> -f <service config files directory, default $defaultConfigFileFolder >]
+Usage: ${BASH_SOURCE} -r <resource group> -s <subscription> [-c <site content directory, default $defaultSiteContentFolder> -f <service config files directory, default $defaultConfigFileFolder >]
 "
     exit 1
 }

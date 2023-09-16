@@ -24,7 +24,7 @@ fi
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 \
+Usage: ${BASH_SOURCE} \
 -r <resource group> \
 -c <Azure AD application client ID> \
 -e <environment> \

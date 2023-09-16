@@ -11,7 +11,7 @@ export resourceName
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -o <organisation name> -p <publisher email> -r <resource group> -e <environment>
+Usage: ${BASH_SOURCE} -o <organisation name> -p <publisher email> -r <resource group> -e <environment>
     where 
     Organisation Name - This name will be used in customer interactions
     Publisher email - The email for notifications

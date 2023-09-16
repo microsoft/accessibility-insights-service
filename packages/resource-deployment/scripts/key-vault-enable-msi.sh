@@ -9,7 +9,7 @@ set -eo pipefail
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -k <key vault> -p <service principal id>
+Usage: ${BASH_SOURCE} -k <key vault> -p <service principal id>
 "
     exit 1
 }

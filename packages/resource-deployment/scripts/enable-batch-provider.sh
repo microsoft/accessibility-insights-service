@@ -9,7 +9,7 @@ set -eo pipefail
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -e <environment>
+Usage: ${BASH_SOURCE} -e <environment>
 "
     exit 1
 }

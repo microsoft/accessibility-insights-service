@@ -10,7 +10,7 @@ export resourceGroupName
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -r <resource group>
+Usage: ${BASH_SOURCE} -r <resource group>
 "
     exit 1
 }
@@ -49,7 +49,7 @@ function waitForDeployments {
         echo "There are pending deployments:
                 deployments: $pendingDeployments
                 Waiting for the deployments to complete."
-        
+
         while [[ $SECONDS -le $end ]] && [[ $noPendingDeployments == false ]]; do
             pendingDeployments=$(eval "$pendingDeploymentsQuery")
             if [[ -z $pendingDeployments ]]; then
@@ -60,9 +60,9 @@ function waitForDeployments {
                 printf '.'
                 sleep 5
             fi
-        done 
+        done
 
-        if [[ $noPendingDeployments == false ]]; then 
+        if [[ $noPendingDeployments == false ]]; then
             echo "There are still pending deployments after the maximum wait time of $maximumWaitTimeInSeconds seconds.
                 deployments: $pendingDeployments
             "

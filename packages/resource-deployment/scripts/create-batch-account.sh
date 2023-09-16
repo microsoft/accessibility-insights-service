@@ -21,7 +21,7 @@ batchTemplateFile="${0%/*}/../templates/batch-account.template.json"
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -r <resource group> -e <environment> [-t <batch template file (optional)>] [-d <pass \"true\" to force pools to drop>]
+Usage: ${BASH_SOURCE} -r <resource group> -e <environment> [-t <batch template file (optional)>] [-d <pass \"true\" to force pools to drop>]
 "
     exit 1
 }

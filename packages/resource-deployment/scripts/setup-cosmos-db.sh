@@ -111,7 +111,7 @@ function setupCosmos() {
 }
 
 exitWithUsageInfo() {
-    echo "Usage: $0 -r <resource group> -e <environment>"
+    echo "Usage: ${BASH_SOURCE} -r <resource group> -e <environment>"
     exit 1
 }
 

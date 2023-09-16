@@ -52,7 +52,7 @@ adjustJob() {
 
 exitWithUsageInfo() {
     echo "
-        Usage: $0 -b <batch account name> -r <resource group name> [-k <key vault url>] [-t <path to template folder (optional), defaults to '$templatesFolder' folder relative to the current working directory>]
+        Usage: ${BASH_SOURCE} -b <batch account name> -r <resource group name> [-k <key vault url>] [-t <path to template folder (optional), defaults to '$templatesFolder' folder relative to the current working directory>]
     "
     exit 1
 }

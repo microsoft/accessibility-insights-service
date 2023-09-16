@@ -27,7 +27,7 @@ export keepImages=false
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -e <environment> -l <Azure region> -o <organisation name> -p <publisher email> -r <resource group> -s <subscription name or id>  -c <client id>
+Usage: ${BASH_SOURCE} -e <environment> -l <Azure region> -o <organisation name> -p <publisher email> -r <resource group> -s <subscription name or id>  -c <client id>
 -t <client secret> -v <release version> [-d <pass \"true\" to force pools to drop>] [-w <pass \"true\" to preserve docker images in Azure Container Registry>]
 
 where:
@@ -48,6 +48,7 @@ Azure region - Azure region where the instances will be deployed. Available Azur
     eastus2
     westus
     westus2
+    westus3
     northcentralus
     southcentralus
     westcentralus
@@ -76,23 +77,21 @@ Azure region - Azure region where the instances will be deployed. Available Azur
 
 . "${0%/*}/process-utilities.sh"
 
-function onExit() {
+onExit-install() {
     local exitCode=$?
 
-    if [[ $exitCode != 0 ]]; then
-        echo "Installation failed with exit code $exitCode"
-        echo "Killing all descendant processes"
+    if [[ ${exitCode} != 0 ]]; then
+        echo "Installation failed with exit code ${exitCode}"
         killDescendantProcesses $$
-        echo "Killed all descendant processes"
-        echo "WARN: ARM deployments already triggered could still still be running. To kill them, you may need to goto the azure portal & cancel them."
+        echo "WARN: Deployments that already were triggered could still be running. To kill them, you may need to goto the Azure portal and cancel corresponding deployment."
     else
-        echo "Installation completed with exit code $exitCode"
+        echo "Installation completed with exit code ${exitCode}"
     fi
 
-    exit $exitCode
+    exit "${exitCode}"
 }
 
-trap "onExit" EXIT
+trap 'onExit-install' EXIT
 
 # Read script arguments
 while getopts ":r:s:l:e:o:p:c:t:v:d:w:" option; do

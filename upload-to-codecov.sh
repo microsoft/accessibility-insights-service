@@ -12,7 +12,7 @@ defaultCodecovVersion="v0.1.20"
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -t <upload token> [-v <codecov version, defaults to ${defaultCodecovVersion}>]
+Usage: ${BASH_SOURCE} -t <upload token> [-v <codecov version, defaults to ${defaultCodecovVersion}>]
 "
     exit 1
 }

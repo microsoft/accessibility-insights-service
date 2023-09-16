@@ -13,7 +13,7 @@ export scope
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -v <vmss name> -r <vmss resource group> -p <batch pool>
+Usage: ${BASH_SOURCE} -v <vmss name> -r <vmss resource group> -p <batch pool>
 "
     exit 1
 }

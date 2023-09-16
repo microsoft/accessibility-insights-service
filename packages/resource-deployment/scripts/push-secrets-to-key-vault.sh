@@ -18,7 +18,7 @@ export tenantId
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -r <resource group> -c <web API AAD client Id> -p <web API AAD client secret>
+Usage: ${BASH_SOURCE} -r <resource group> -c <web API AAD client Id> -p <web API AAD client secret>
 "
     exit 1
 }
@@ -52,7 +52,7 @@ grantWritePermissionToKeyVault() {
     fi
 }
 
-revokePermissionsToKeyVault() {
+onExit-push-secrets-to-key-vault() {
     echo "Revoking permission to key vault $keyVault for logged in user"
 
     if [[ $loggedInUserType == "user" ]]; then
@@ -121,7 +121,7 @@ pushSecretsToKeyVault() (
 
     getLoggedInUserDetails
 
-    trap 'revokePermissionsToKeyVault' EXIT
+    trap 'onExit-push-secrets-to-key-vault' EXIT
     grantWritePermissionToKeyVault
 
     getCosmosDbUrl
