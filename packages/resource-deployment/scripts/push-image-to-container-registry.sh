@@ -31,7 +31,7 @@ if [[ -z $environment ]]; then
     environment="dev"
 fi
 
-function onExit-key-vault-rotate-certificate() {
+onExit-key-vault-rotate-certificate() {
     local exitCode=$?
 
     if [[ $exitCode != 0 ]]; then
