@@ -22,9 +22,6 @@ Usage: ${BASH_SOURCE} -r <resource group> -k <enable soft delete for Azure Key V
 
 . "${0%/*}/process-utilities.sh"
 
-# Microsoft Azure Batch Enterprise Application ID ddbf3205-c6bd-46ae-8127-60eb93363864
-objectId=$(az ad sp show --id ddbf3205-c6bd-46ae-8127-60eb93363864 --query "id" -o tsv)
-
 function recoverIfSoftDeleted() {
     softDeleted=$(az keyvault list-deleted --resource-type vault --query "[?name=='$keyVault'].id" -o tsv)
     if [[ -n "$softDeleted" ]]; then
@@ -50,7 +47,7 @@ function createKeyvaultIfNotExists() {
             az deployment group create \
                 --resource-group "$resourceGroupName" \
                 --template-file "$createKeyVaultTemplateFile" \
-                --parameters objectId="$objectId" \
+                --parameters objectId="$azureBatchObjectId" \
                 --query "properties.outputResources[].id" \
                 -o tsv
         )
@@ -92,18 +89,19 @@ function setupKeyVaultResources() {
 }
 
 # Read script arguments
-while getopts ":r:c:p:e:" option; do
+while getopts ":r:c:p:b:e:" option; do
     case $option in
     r) resourceGroupName=${OPTARG} ;;
     c) webApiAdClientId=${OPTARG} ;;
     p) webApiAdClientSecret=${OPTARG} ;;
+    b) azureBatchObjectId=${OPTARG} ;;
     e) environment=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
 
 # Print script usage help
-if [[ -z $resourceGroupName ]] || [[ -z $webApiAdClientId ]] || [[ -z $webApiAdClientSecret ]]; then
+if [[ -z $resourceGroupName ]] || [[ -z $webApiAdClientId ]] || [[ -z $webApiAdClientSecret ]] || [[ -z $azureBatchObjectId ]]; then
     exitWithUsageInfo
 fi
 

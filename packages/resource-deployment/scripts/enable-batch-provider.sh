@@ -15,15 +15,16 @@ Usage: ${BASH_SOURCE} -e <environment>
 }
 
 # Read script arguments
-while getopts ":e:" option; do
+while getopts ":b:e:" option; do
     case $option in
+    b) azureBatchObjectId=${OPTARG} ;;
     e) environment=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
 
 # Print script usage help
-if [[ -z $environment ]]; then
+if [[ -z $azureBatchObjectId ]] || [[ -z $environment ]]; then
     exitWithUsageInfo
 fi
 
@@ -56,11 +57,8 @@ if [[ $batchProviderRegistrationState != "Registered" ]]; then
     echo "ERROR: Unable to register Microsoft.Batch provider on '$subscription' Azure subscription. Check Azure subscription resource providers state."
 fi
 
-# Microsoft Azure Batch Enterprise Application ID ddbf3205-c6bd-46ae-8127-60eb93363864
-objectId=$(az ad sp show --id ddbf3205-c6bd-46ae-8127-60eb93363864 --query "id" -o tsv)
-
 # Allow Azure Batch service to access the subscription
-roleDefinitionName=$(az role assignment list --query "[?principalId=='$objectId'].roleDefinitionName" -o tsv)
+roleDefinitionName=$(az role assignment list --query "[?principalId=='$azureBatchObjectId'].roleDefinitionName" -o tsv)
 if [[ $roleDefinitionName != "Contributor" ]]; then
     echo "Granting Azure Batch service access to the '$subscription' Azure subscription"
     az role assignment create --assignee ddbf3205-c6bd-46ae-8127-60eb93363864 --role contributor 1>/dev/null

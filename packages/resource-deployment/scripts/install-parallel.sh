@@ -9,7 +9,6 @@ set -eo pipefail
 export apiManagementName
 export batchAccountName
 export cosmosAccountName
-export dropFolder="${0%/*}/../../../"
 export environment
 export webApiFuncAppName
 export keyVault
@@ -20,27 +19,41 @@ export subscription
 export storageAccountName
 export webApiAdClientId
 export webApiAdClientSecret
+export azureBatchObjectId
 export releaseVersion
 export templatesFolder="${0%/*}/../templates/"
+export dropFolder="${0%/*}/../../../"
 export dropPools=false
 export keepImages=false
 
 exitWithUsageInfo() {
     echo "
-Usage: ${BASH_SOURCE} -e <environment> -l <Azure region> -o <organisation name> -p <publisher email> -r <resource group> -s <subscription name or id>  -c <client id>
--t <client secret> -v <release version> [-d <pass \"true\" to force pools to drop>] [-w <pass \"true\" to preserve docker images in Azure Container Registry>]
+Usage: ${BASH_SOURCE}
+-e <environment>
+-l <Azure region>
+-o <organisation name>
+-p <publisher email>
+-r <resource group>
+-s <subscription name or ID>
+-c <client ID>
+-t <client secret>
+-v <release version>
+-b <Azure Batch object ID>
+[-d <pass \"true\" to force pools to drop>]
+[-w <pass \"true\" to preserve docker images in Azure Container Registry>]
 
-where:
+Where:
 
-Resource group - The name of the resource group that everything will be deployed in.
-Subscription - The subscription for the resource group.
-Environment - The environment in which the set up is running.
-Organisation name - The name of organisation.
+Resource group - The name of the resource group.
+Subscription - The Azure subscription name or ID.
+Environment - The deployment environment. Supported dev, prod.
+Organization name - The name of organization.
 Publisher email - The email for notifications.
 Client ID - The app registration client ID used for function app authentication.
 Client Secret - The secret used to authenticate with the AD application.
+Azure Batch object ID - The Azure AD object ID for Microsoft Azure Batch enterprise application ddbf3205-c6bd-46ae-8127-60eb93363864.
 Release Version - The deployment release version.
-Azure region - Azure region where the instances will be deployed. Available Azure regions:
+Azure region - Azure region where the service will be deployed. Available Azure regions:
     centralus
     eastasia
     southeastasia
@@ -94,7 +107,7 @@ onExit-install() {
 trap 'onExit-install' EXIT
 
 # Read script arguments
-while getopts ":r:s:l:e:o:p:c:t:v:d:w:" option; do
+while getopts ":r:s:l:e:o:p:c:t:b:v:d:w:" option; do
     case $option in
     r) resourceGroupName=${OPTARG} ;;
     s) subscription=${OPTARG} ;;
@@ -104,6 +117,7 @@ while getopts ":r:s:l:e:o:p:c:t:v:d:w:" option; do
     p) publisherEmail=${OPTARG} ;;
     c) webApiAdClientId=${OPTARG} ;;
     t) webApiAdClientSecret=${OPTARG} ;;
+    b) azureBatchObjectId=${OPTARG} ;;
     v) releaseVersion=${OPTARG} ;;
     d) dropPools=${OPTARG} ;;
     w) keepImages=${OPTARG} ;;
@@ -111,7 +125,7 @@ while getopts ":r:s:l:e:o:p:c:t:v:d:w:" option; do
     esac
 done
 
-if [[ -z $resourceGroupName ]] || [[ -z $subscription ]] || [[ -z $location ]] || [[ -z $environment ]] || [[ -z $orgName ]] || [[ -z $publisherEmail ]] || [[ -z $webApiAdClientId ]] || [[ -z $webApiAdClientSecret ]] || [[ -z $releaseVersion ]]; then
+if [[ -z $resourceGroupName ]] || [[ -z $subscription ]] || [[ -z $location ]] || [[ -z $environment ]] || [[ -z $orgName ]] || [[ -z $publisherEmail ]] || [[ -z $webApiAdClientId ]] || [[ -z $webApiAdClientSecret ]] || [[ -z $azureBatchObjectId ]] || [[ -z $releaseVersion ]]; then
     exitWithUsageInfo
 fi
 
