@@ -39,51 +39,21 @@ Usage: ${BASH_SOURCE}
 -t <client secret>
 -v <release version>
 -b <Azure Batch object ID>
-[-d <pass \"true\" to force pools to drop>]
+[-d <pass \"true\" to force VM pools to drop>]
 [-w <pass \"true\" to preserve docker images in Azure Container Registry>]
 
 Where:
 
 Resource group - The name of the resource group.
 Subscription - The Azure subscription name or ID.
-Environment - The deployment environment. Supported dev, prod.
+Environment - The deployment environment. Supported values dev, prod.
 Organization name - The name of organization.
-Publisher email - The email for notifications.
-Client ID - The app registration client ID used for function app authentication.
-Client Secret - The secret used to authenticate with the AD application.
-Azure Batch object ID - The Azure AD object ID for Microsoft Azure Batch enterprise application ddbf3205-c6bd-46ae-8127-60eb93363864.
+Publisher email - The notification email.
+Client ID - The REST API OAuth2 client ID.
+Client Secret - The REST API OAuth2 client secret.
+Azure Batch object ID - The Azure AD object ID for Microsoft Azure Batch enterprise application, application ID ddbf3205-c6bd-46ae-8127-60eb93363864
 Release Version - The deployment release version.
-Azure region - Azure region where the service will be deployed. Available Azure regions:
-    centralus
-    eastasia
-    southeastasia
-    eastus
-    eastus2
-    westus
-    westus2
-    westus3
-    northcentralus
-    southcentralus
-    westcentralus
-    northeurope
-    westeurope
-    japaneast
-    japanwest
-    brazilsouth
-    australiasoutheast
-    australiaeast
-    westindia
-    southindia
-    centralindia
-    canadacentral
-    canadaeast
-    uksouth
-    ukwest
-    koreacentral
-    koreasouth
-    francecentral
-    southafricanorth
-    uaenorth
+Azure region - The deployment location.
 "
     exit 1
 }
