@@ -208,6 +208,11 @@ export class OnDemandDispatcher {
         }
 
         if (runStateUpdated) {
+            this.logger.logInfo('Sending scan result notification message.', {
+                scanId: scanRequest.request.id,
+                deepScanId: websiteScanResult?.deepScanId,
+            });
+
             await this.scanNotificationProcessor.sendScanCompletionNotification(pageScanResult, websiteScanResult);
         }
     }

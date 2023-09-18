@@ -99,6 +99,29 @@ if [[ -z $resourceGroupName ]] || [[ -z $subscription ]] || [[ -z $location ]] |
     exitWithUsageInfo
 fi
 
+function versionToNumber() {
+    local versionStr=$1
+
+    local temp="${versionStr/./}"
+    versionNum="${temp/./}"
+}
+
+function validateAzCliVersion() {
+    azVersionMinimum="2.52.0"
+
+    azVersionCurrent=$(az version --query '"azure-cli"' -o tsv)
+    versionToNumber $azVersionCurrent
+    azVersionCurrentNum=$versionNum
+
+    versionToNumber $azVersionMinimum
+    azVersionMinimumNum=$versionNum
+
+    if [ "$azVersionCurrentNum" -lt "$azVersionMinimumNum" ]; then
+        echo "Expected Azure CLI version $azVersionMinimum or newer. Current Azure CLI version is $azVersionCurrent. How to update the Azure CLI, see https://learn.microsoft.com/en-us/cli/azure/update-azure-cli"
+        exit 1
+    fi
+}
+
 function install() {
     # Login to Azure if required
     if ! az account show 1>/dev/null; then
@@ -149,5 +172,6 @@ function install() {
     waitForProcesses dashboardProcessId
 }
 
+validateAzCliVersion
 install
 echo "Installation completed"
