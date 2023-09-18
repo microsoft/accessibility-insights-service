@@ -55,13 +55,13 @@ echo "Creating $displayName service principal..."
 password=$(az ad sp create-for-rbac --role contributor --scopes "/subscriptions/$subscription/resourceGroups/$resourceGroupName" --name "$displayName" --query "password" -o tsv)
 
 # Retrieve service principal object properties
-tenant=$(az ad sp list --display-name "${displayName}" --query "[].appOwnerOrganizationId" -o tsv)
-clientId=$(az ad sp list --display-name "${displayName}" --query "[].appId" -o tsv)
-objectId=$(az ad app show --id ${clientId} --query "id" -o tsv)
+tenant=$(az ad sp list --display-name "$displayName" --query "[].appOwnerOrganizationId" -o tsv)
+clientId=$(az ad sp list --display-name "$displayName" --query "[].appId" -o tsv)
+objectId=$(az ad app show --id $clientId --query "id" -o tsv)
 
 # Set key vault access policy
 echo "Granting service principal permissions to the '$keyVault' key vault"
-az keyvault set-policy --name "${keyVault}" --object-id "${objectId}" --secret-permissions get list 1>/dev/null
+az keyvault set-policy --name "$keyVault" --object-id "$objectId" --secret-permissions get list 1>/dev/null
 
 # Granting access to storage blob
 echo "Granting service principal permissions to the '$storageAccountName' Blob storage"
