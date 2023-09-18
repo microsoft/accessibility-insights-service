@@ -117,7 +117,7 @@ function validateAzCliVersion() {
     azVersionMinimumNum=$versionNum
 
     if [ "$azVersionCurrentNum" -lt "$azVersionMinimumNum" ]; then
-        echo "Expected Azure CLI version $azVersionMinimum or newer. Current Azure CLI version is $azVersionCurrent. How to update the Azure CLI https://learn.microsoft.com/en-us/cli/azure/update-azure-cli"
+        echo "Expected Azure CLI version $azVersionMinimum or newer. Current Azure CLI version is $azVersionCurrent. How to update the Azure CLI, see https://learn.microsoft.com/en-us/cli/azure/update-azure-cli"
         exit 1
     fi
 }
