@@ -60,7 +60,7 @@ When installing Azure CLI for [Windows Subsystem for Linux (WSL)](https://docs.m
 -   Run below script with required parameters as specified in a [script's help](https://github.com/microsoft/accessibility-insights-service/blob/main/packages/resource-deployment/scripts/install-parallel.sh) to deploy Azure resources and binaries
 
     ```bash
-    ./dist/scripts/install-parallel.sh -r "<resource group>" -s "<subscription Id>" -l "<location>" -e "<environment (dev|ppe|prod)>" -o "<organization name>" -p "<publisher email>" -c "<app client Id>" -t "<app client secret>" -v "<release Id>"
+    ./dist/scripts/install-parallel.sh -r "<resource group>" -s "<subscription name or ID>" -l "<Azure region>" -e "<environment (dev|ppe|prod)>" -o "<organization name>" -p "<publisher email>" -c "<client ID>" -t "<client secret>" -v "<release version>" -b "<Azure Batch object ID>"
     ```
 
 ## Submit scan request

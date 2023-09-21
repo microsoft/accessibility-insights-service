@@ -217,6 +217,18 @@ export class Page {
         return { width: windowSize.width, height: windowSize.height, deviceScaleFactor: windowSize.deviceScaleFactor };
     }
 
+    public async analyze(): Promise<void> {
+        // Invoke on initial page navigation only
+        if (this.pageAnalysisResult !== undefined) {
+            return;
+        }
+
+        this.pageAnalysisResult = await this.pageAnalyzer.analyze(this.requestUrl, this.page);
+        if (this.pageAnalysisResult.navigationResponse.browserError !== undefined) {
+            this.setLastNavigationState('analysis', this.pageAnalysisResult.navigationResponse);
+        }
+    }
+
     private async navigateImpl(options?: PageOptions): Promise<void> {
         await this.analyze();
         if (this.browserError !== undefined) {
@@ -230,18 +242,6 @@ export class Page {
 
         const response = await this.pageNavigator.navigate(this.requestUrl, this.page);
         this.setLastNavigationState('load', response);
-    }
-
-    private async analyze(): Promise<void> {
-        // Invoke on initial page navigation only
-        if (this.pageAnalysisResult !== undefined) {
-            return;
-        }
-
-        this.pageAnalysisResult = await this.pageAnalyzer.analyze(this.requestUrl, this.page);
-        if (this.pageAnalysisResult.navigationResponse.browserError !== undefined) {
-            this.setLastNavigationState('analysis', this.pageAnalysisResult.navigationResponse);
-        }
     }
 
     private async authenticate(options?: PageOptions): Promise<void> {
