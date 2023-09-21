@@ -120,6 +120,18 @@ function validateAzCliVersion() {
         echo "Expected Azure CLI version $azVersionMinimum or newer. Current Azure CLI version is $azVersionCurrent. How to update the Azure CLI, see https://learn.microsoft.com/en-us/cli/azure/update-azure-cli"
         exit 1
     fi
+
+    echo "Azure CLI version $azVersionCurrent"
+}
+
+function validateJqTool() {
+    jqVersion=$(jq --version 2>/dev/null) || true
+    if [[ -z $jqVersion ]]; then
+        echo "Expected jq tool to be installed on a machine. How to install jq tool, see https://jqlang.github.io/jq/download/"
+        exit 1
+    fi
+
+    echo "jq tool version $jqVersion"
 }
 
 function install() {
@@ -173,5 +185,6 @@ function install() {
 }
 
 validateAzCliVersion
+validateJqTool
 install
 echo "Installation completed"
