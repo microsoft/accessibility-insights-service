@@ -183,31 +183,29 @@ describe(PageAnalyzer, () => {
         expect(actualResult).toEqual(expectedResult);
     });
 
-    it('ignore server side redirection', async () => {
+    it('detect server side redirection', async () => {
         interceptedRequests = [
             {
-                url: 'https://localhost/1',
+                url,
                 request: {
-                    url: () => 'https://localhost/1',
+                    url: () => url,
                 } as Puppeteer.HTTPRequest,
                 response: {
-                    url: () => 'https://localhost/1',
+                    url: () => url,
                     status: () => 302,
-                    headers: () => ({ location: 'https://localhost/2' }),
+                    headers: () => ({ location: authUrl }),
                 } as unknown as Puppeteer.HTTPResponse,
             },
             {
-                url: 'https://localhost/2',
+                url: authUrl,
                 request: {
-                    url: () => 'https://localhost/2',
+                    url: () => authUrl,
                 } as Puppeteer.HTTPRequest,
-                response: {
-                    url: () => 'https://localhost/2',
-                    status: () => 302,
-                    headers: () => ({ location: 'https://localhost/1' }),
-                } as unknown as Puppeteer.HTTPResponse,
             },
         ];
+
+        puppeteerGotoResponse.url = () => authUrl;
+
         let pageOperation: any;
         const pageOnResponseHandler = (pageAnalyzer as any).getPageOnResponseHandler(url);
         pageRequestInterceptorMock
@@ -227,8 +225,9 @@ describe(PageAnalyzer, () => {
         const actualResult = await pageAnalyzer.analyze(url, puppeteerPageMock.object);
 
         const expectedResult = {
-            redirection: false,
-            loadedUrl: url,
+            redirection: true,
+            redirectionType: 'server',
+            loadedUrl: authUrl,
             authentication: false,
             loadTimeout: false,
             navigationResponse: pageOperationResult,
