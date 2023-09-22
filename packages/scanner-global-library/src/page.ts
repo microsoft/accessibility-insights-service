@@ -6,7 +6,7 @@ import { GuidGenerator, System } from 'common';
 import { inject, injectable, optional } from 'inversify';
 import { GlobalLogger } from 'logger';
 import * as Puppeteer from 'puppeteer';
-import { isNil, isNumber, isEmpty } from 'lodash';
+import { isNumber, isEmpty } from 'lodash';
 import { WebDriver } from './web-driver';
 import { PageNavigator, NavigationResponse } from './page-navigator';
 import { BrowserError } from './browser-error';
@@ -107,6 +107,10 @@ export class Page {
     }
 
     public async navigate(url: string, options?: PageOptions): Promise<void> {
+        if (this.page === undefined) {
+            await this.create();
+        }
+
         this.logger?.setCommonProperties({ pageNavigationId: this.guidGenerator.createGuid() });
 
         this.requestUrl = url;
@@ -150,10 +154,6 @@ export class Page {
         if (this.webDriver !== undefined) {
             await this.webDriver.close();
         }
-    }
-
-    public isOpen(): boolean {
-        return !isNil(this.page) && !this.page.isClosed() && isNil(this.browserError) && !isNil(this.navigationResponse);
     }
 
     public async getPageScreenshot(): Promise<string> {

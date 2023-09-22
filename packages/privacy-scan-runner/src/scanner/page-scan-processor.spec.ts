@@ -3,10 +3,9 @@
 
 import 'reflect-metadata';
 
-import { IMock, It, Mock, Times } from 'typemoq';
+import { IMock, Mock, Times } from 'typemoq';
 import { GlobalLogger } from 'logger';
 import { PrivacyScanResult, Page, BrowserError } from 'scanner-global-library';
-import { System } from 'common';
 import * as Puppeteer from 'puppeteer';
 import { OnDemandPageScanResult } from 'storage-documents';
 import { PrivacyScanMetadata } from '../types/privacy-scan-metadata';
@@ -126,20 +125,7 @@ describe(PageScanProcessor, () => {
         await expect(testSubject.scan(scanMetadata, pageScanResult)).rejects.toThrowError('test error');
     });
 
-    it('handles browser close failure', async () => {
-        const error = new Error('browser close error');
-        setupOpenPage();
-        pageMock
-            .setup((p) => p.close())
-            .throws(error)
-            .verifiable();
-        loggerMock.setup((l) => l.logError(It.isAny(), { error: System.serializeError(error) })).verifiable();
-
-        await testSubject.scan(scanMetadata, pageScanResult);
-    });
-
     function setupOpenPage(): void {
-        pageMock.setup((p) => p.create()).verifiable();
         pageMock.setup((p) => p.navigate(url)).verifiable();
     }
 

@@ -8,10 +8,9 @@ import { ServiceConfiguration, System } from 'common';
 import moment from 'moment';
 import { IMock, Mock, MockBehavior, Times } from 'typemoq';
 import { BaseConsoleLoggerClient } from './base-console-logger-client';
-import { BaseTelemetryProperties } from './base-telemetry-properties';
 import { LogLevel } from './logger';
 import { ScanTaskFailedMeasurements } from './logger-event-measurements';
-import { LoggerProperties } from './logger-properties';
+import { BaseTelemetryProperties, LoggerProperties } from './logger-client';
 
 /* eslint-disable
    @typescript-eslint/consistent-type-assertions,

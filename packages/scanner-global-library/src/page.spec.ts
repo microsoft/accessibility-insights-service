@@ -298,33 +298,6 @@ describe(Page, () => {
         });
     });
 
-    describe('isOpen()', () => {
-        it('returns false if page not launched', () => {
-            expect(page.isOpen()).toEqual(false);
-        });
-
-        it('returns false if no url was navigated to', () => {
-            simulatePageLaunch();
-
-            expect(page.isOpen()).toEqual(false);
-        });
-
-        it('returns false if there was a browser error', () => {
-            simulatePageLaunch();
-            const browserError = { errorType: 'SslError', statusCode: 500 } as BrowserError;
-            simulatePageNavigation(puppeteerResponseMock.object, browserError);
-
-            expect(page.isOpen()).toEqual(false);
-        });
-
-        it('returns true if page was open successfully', () => {
-            simulatePageLaunch();
-            simulatePageNavigation(puppeteerResponseMock.object);
-
-            expect(page.isOpen()).toEqual(true);
-        });
-    });
-
     describe('Miscellaneous', () => {
         it('create()', async () => {
             browserMock
@@ -449,11 +422,6 @@ describe(Page, () => {
         });
     });
 });
-
-function simulatePageNavigation(response: Puppeteer.HTTPResponse, browserError?: BrowserError): void {
-    page.navigationResponse = response;
-    page.browserError = browserError;
-}
 
 function simulatePageLaunch(): void {
     page.browser = browserMock.object;

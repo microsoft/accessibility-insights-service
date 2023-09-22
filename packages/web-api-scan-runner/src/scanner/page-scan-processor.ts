@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { System } from 'common';
 import { inject, injectable } from 'inversify';
 import { GlobalLogger } from 'logger';
 import { AxeScanResults, Page } from 'scanner-global-library';
@@ -17,14 +16,15 @@ export class PageScanProcessor {
         @inject(Page) private readonly page: Page,
         @inject(AxeScanner) private readonly axeScanner: AxeScanner,
         @inject(DeepScanner) private readonly deepScanner: DeepScanner,
-        @inject(GlobalLogger) private readonly logger: GlobalLogger,
+        @inject(GlobalLogger) public readonly logger: GlobalLogger,
     ) {}
 
     public async scan(runnerScanMetadata: RunnerScanMetadata, pageScanResult: OnDemandPageScanResult): Promise<AxeScanResults> {
         let axeScanResults: AxeScanResults;
         try {
             const enableAuthentication = pageScanResult.authentication?.hint !== undefined;
-            await this.openPage(runnerScanMetadata.url, enableAuthentication);
+            await this.page.navigate(runnerScanMetadata.url, { enableAuthentication });
+
             if (enableAuthentication === true) {
                 this.setAuthenticationResult(pageScanResult);
             }
@@ -39,7 +39,7 @@ export class PageScanProcessor {
 
             await this.deepScanner.runDeepScan(runnerScanMetadata, pageScanResult, this.page);
         } finally {
-            await this.closePage();
+            await this.page.close();
         }
 
         return axeScanResults;
@@ -53,19 +53,6 @@ export class PageScanProcessor {
             pageSnapshot,
             pageScreenshot,
         };
-    }
-
-    private async openPage(url: string, enableAuthentication: boolean): Promise<void> {
-        await this.page.create();
-        await this.page.navigate(url, { enableAuthentication });
-    }
-
-    private async closePage(): Promise<void> {
-        try {
-            await this.page.close();
-        } catch (error) {
-            this.logger.logError('An error occurred while closing web browser.', { error: System.serializeError(error) });
-        }
     }
 
     private setAuthenticationResult(pageScanResult: OnDemandPageScanResult): void {

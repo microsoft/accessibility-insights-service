@@ -3,10 +3,11 @@
 
 import { injectable } from 'inversify';
 import { BaseConsoleLoggerClient } from './base-console-logger-client';
+import { LoggerProperties } from './logger-client';
 
 @injectable()
 export class ConsoleLoggerClient extends BaseConsoleLoggerClient {
-    protected getPropertiesToAddToEvent(): { [name: string]: string } {
+    protected getPropertiesToAddToEvent(): LoggerProperties {
         return {};
     }
 }

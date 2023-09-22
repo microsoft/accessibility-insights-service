@@ -6,6 +6,7 @@ import { inject, injectable } from 'inversify';
 import { BaseConsoleLoggerClient } from './base-console-logger-client';
 import { ConsoleLoggerClient } from './console-logger-client';
 import { loggerTypes } from './logger-types';
+import { LoggerProperties } from './logger-client';
 
 @injectable()
 export class ContextAwareConsoleLoggerClient extends BaseConsoleLoggerClient {
@@ -17,7 +18,7 @@ export class ContextAwareConsoleLoggerClient extends BaseConsoleLoggerClient {
         super(serviceConfig, consoleObject);
     }
 
-    protected getPropertiesToAddToEvent(): { [name: string]: string } {
+    protected getPropertiesToAddToEvent(): LoggerProperties {
         return { ...this.rootLoggerClient.getCommonProperties() };
     }
 }

@@ -12,12 +12,9 @@ import {
 } from '@opentelemetry/sdk-metrics';
 import * as opentelemetry from '@opentelemetry/api';
 import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-grpc';
-import { LoggerClient } from './logger-client';
-import { BaseTelemetryProperties } from './base-telemetry-properties';
+import { AvailabilityTelemetry, BaseTelemetryProperties, LoggerClient, LoggerProperties } from './logger-client';
 import { LoggerEvent } from './logger-event';
 import { TelemetryMeasurements } from './logger-event-measurements';
-import { AvailabilityTelemetry } from './availability-telemetry';
-import { LoggerProperties } from './logger-properties';
 import { LogLevel } from './logger';
 import { OTelConfigProvider } from './otel-config-provider';
 
@@ -56,7 +53,7 @@ export class OTelLoggerClient implements LoggerClient {
         return;
     }
 
-    public trackEvent(name: LoggerEvent, properties?: { [name: string]: string }, measurements?: TelemetryMeasurements[LoggerEvent]): void {
+    public trackEvent(name: LoggerEvent, properties?: LoggerProperties, measurements?: TelemetryMeasurements[LoggerEvent]): void {
         if (this.enabled !== true) {
             return;
         }
@@ -80,7 +77,7 @@ export class OTelLoggerClient implements LoggerClient {
         return;
     }
 
-    public log(message: string, logLevel: LogLevel, properties?: { [name: string]: string }): void {
+    public log(message: string, logLevel: LogLevel, properties?: LoggerProperties): void {
         return;
     }
 

@@ -2,11 +2,9 @@
 // Licensed under the MIT License.
 
 import { System } from 'common';
-import { AvailabilityTelemetry } from './availability-telemetry';
-import { LoggerClient } from './logger-client';
+import { AvailabilityTelemetry, LoggerClient, LoggerProperties } from './logger-client';
 import { LoggerEvent } from './logger-event';
 import { TelemetryMeasurements } from './logger-event-measurements';
-import { LoggerProperties } from './logger-properties';
 
 export enum LogLevel {
     Info,
@@ -24,7 +22,7 @@ export abstract class Logger {
 
     constructor(public readonly loggerClients: LoggerClient[]) {}
 
-    public async setup(baseProperties?: { [property: string]: string }): Promise<void> {
+    public async setup(baseProperties?: LoggerProperties): Promise<void> {
         if (this.initialized === true) {
             return;
         }
@@ -44,7 +42,7 @@ export abstract class Logger {
         this.invokeLoggerClient((client) => client.trackMetric(name, value));
     }
 
-    public trackEvent(name: LoggerEvent, properties?: { [name: string]: string }, measurements?: TelemetryMeasurements[LoggerEvent]): void {
+    public trackEvent(name: LoggerEvent, properties?: LoggerProperties, measurements?: TelemetryMeasurements[LoggerEvent]): void {
         this.ensureInitialized();
         this.invokeLoggerClient((client) => client.trackEvent(name, properties, measurements));
     }
@@ -59,26 +57,26 @@ export abstract class Logger {
         this.invokeLoggerClient((client) => client.trackException(error));
     }
 
-    public log(message: string, logLevel: LogLevel, properties?: { [name: string]: string }): void {
+    public log(message: string, logLevel: LogLevel, properties?: LoggerProperties): void {
         this.ensureInitialized();
         this.invokeLoggerClient((client) => client.log(message, logLevel, properties));
     }
 
-    public logInfo(message: string, properties?: { [name: string]: string }): void {
+    public logInfo(message: string, properties?: LoggerProperties): void {
         this.log(message, LogLevel.Info, properties);
     }
 
-    public logVerbose(message: string, properties?: { [name: string]: string }): void {
+    public logVerbose(message: string, properties?: LoggerProperties): void {
         if (this.isDebugEnabled) {
             this.log(message, LogLevel.Verbose, properties);
         }
     }
 
-    public logWarn(message: string, properties?: { [name: string]: string }): void {
+    public logWarn(message: string, properties?: LoggerProperties): void {
         this.log(message, LogLevel.Warn, properties);
     }
 
-    public logError(message: string, properties?: { [name: string]: string }): void {
+    public logError(message: string, properties?: LoggerProperties): void {
         this.log(message, LogLevel.Error, properties);
     }
 
@@ -100,7 +98,7 @@ export abstract class Logger {
         await Promise.all(this.loggerClients.map(async (client) => action(client)));
     }
 
-    private async initializeClients(baseProperties?: { [property: string]: string }): Promise<void> {
+    private async initializeClients(baseProperties?: LoggerProperties): Promise<void> {
         const initClientFn = async (client: LoggerClient) => {
             const timeout = client.initializationTimeout ?? this.defaultClientInitializationTimeout;
             await Promise.race([client.setup(baseProperties), System.wait(timeout)]);
