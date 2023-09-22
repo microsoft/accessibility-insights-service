@@ -7,7 +7,6 @@ import { IMock, It, Mock, Times } from 'typemoq';
 import { GlobalLogger } from 'logger';
 import { AxeScanResults, Page, BrowserError, ResourceAuthenticationResult } from 'scanner-global-library';
 import { OnDemandPageScanResult } from 'storage-documents';
-import { System } from 'common';
 import * as Puppeteer from 'puppeteer';
 import { cloneDeep } from 'lodash';
 import { AxeScanner } from '../scanner/axe-scanner';
@@ -181,24 +180,7 @@ describe(PageScanProcessor, () => {
         await expect(testSubject.scan(scanMetadata, pageScanResult)).rejects.toThrowError('test error');
     });
 
-    it('handles browser close failure', async () => {
-        const error = new Error('browser close error');
-        const scanMetadata = {
-            url: url,
-            id: 'id',
-        };
-        setupOpenPage();
-        pageMock
-            .setup((p) => p.close())
-            .throws(error)
-            .verifiable();
-        loggerMock.setup((l) => l.logError(It.isAny(), { error: System.serializeError(error) })).verifiable();
-
-        await testSubject.scan(scanMetadata, pageScanResult);
-    });
-
     function setupOpenPage(enableAuthentication: boolean = false): void {
-        pageMock.setup((p) => p.create()).verifiable();
         pageMock.setup((p) => p.navigate(url, { enableAuthentication })).verifiable();
     }
 
