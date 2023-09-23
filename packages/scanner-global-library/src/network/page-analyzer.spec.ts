@@ -98,6 +98,7 @@ describe(PageAnalyzer, () => {
         const actualResult = await pageAnalyzer.analyze(url, puppeteerPageMock.object);
 
         const expectedResult = {
+            url: 'https://localhost/',
             redirection: false,
             loadedUrl: url,
             authentication: false,
@@ -105,8 +106,6 @@ describe(PageAnalyzer, () => {
             navigationResponse: {
                 response: interceptedRequests[0].response,
                 navigationTiming: { goto: 100 },
-                browserError: { errorType: 'UrlNavigationTimeout' },
-                error,
             },
         };
 
@@ -125,6 +124,7 @@ describe(PageAnalyzer, () => {
         const actualResult = await pageAnalyzer.analyze(url, puppeteerPageMock.object);
 
         const expectedResult = {
+            url: 'https://localhost/',
             redirection: false,
             loadedUrl: url,
             authentication: false,
@@ -172,6 +172,7 @@ describe(PageAnalyzer, () => {
         const actualResult = await pageAnalyzer.analyze(url, puppeteerPageMock.object);
 
         const expectedResult = {
+            url: 'https://localhost/',
             redirection: true,
             redirectionType: 'client',
             loadedUrl: authUrl,
@@ -225,6 +226,7 @@ describe(PageAnalyzer, () => {
         const actualResult = await pageAnalyzer.analyze(url, puppeteerPageMock.object);
 
         const expectedResult = {
+            url: 'https://localhost/',
             redirection: true,
             redirectionType: 'server',
             loadedUrl: authUrl,

@@ -224,6 +224,24 @@ describe(Runner, () => {
         await runner.run();
     });
 
+    it('handle unscannable result', async () => {
+        axeScanResults.unscannable = true;
+        axeScanResults.error = 'Unscannable URL location';
+        const websiteScanResultObj = { id: 'websiteScanId' } as WebsiteScanResult;
+        websiteScanResultProviderMock
+            .setup((o) => o.read(pageScanResultDbDocument.websiteScanRef.id, false))
+            .returns(() => Promise.resolve(websiteScanResultObj))
+            .verifiable();
+
+        setupScanMetadataConfig();
+        setupUpdateScanRunStateToRunning();
+        setupScanRunnerTelemetryManager();
+        setupPageScanProcessor(true, undefined, websiteScanResultObj);
+        setupProcessScanResult();
+        setupUpdateScanResult();
+        await runner.run();
+    });
+
     it('update website scan result if deep scan is enabled', async () => {
         setupPageScanResultDbDocumentForDeepScan();
         setupScanMetadataConfig();
@@ -338,7 +356,13 @@ function setupUpdateScanResult(): void {
 }
 
 function setupProcessScanResult(): void {
-    if (axeScanResults.error) {
+    if (axeScanResults.unscannable) {
+        pageScanResult.run = {
+            state: 'unscannable',
+            timestamp: dateNow.toJSON(),
+            error: axeScanResults.error,
+        };
+    } else if (axeScanResults.error) {
         pageScanResult.run = {
             state: 'failed',
             timestamp: dateNow.toJSON(),
@@ -391,13 +415,17 @@ function setupProcessScanResult(): void {
     pageScanResult.run.pageResponseCode = axeScanResults.pageResponseCode;
 }
 
-function setupPageScanProcessor(succeeded: boolean = true, error: Error = undefined): void {
+function setupPageScanProcessor(
+    succeeded: boolean = true,
+    error: Error = undefined,
+    websiteScanResultObj: WebsiteScanResult = undefined,
+): void {
     if (!succeeded) {
         axeScanResults.error = 'axe scan result error';
     }
 
     pageScanProcessorMock
-        .setup((o) => o.scan(runnerScanMetadata, pageScanResultDbDocument))
+        .setup((o) => o.scan(runnerScanMetadata, pageScanResultDbDocument, websiteScanResultObj))
         .returns(() => {
             if (error) {
                 return Promise.reject(error);

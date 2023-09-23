@@ -61,8 +61,16 @@ export class Runner {
 
         this.telemetryManager.trackScanStarted(runnerScanMetadata.id);
         try {
-            const axeScanResults = await this.pageScanProcessor.scan(runnerScanMetadata, pageScanResult);
-            if (isEmpty(axeScanResults.error)) {
+            let websiteScanResult;
+            if (pageScanResult.websiteScanRef !== undefined) {
+                websiteScanResult = await this.websiteScanResultProvider.read(pageScanResult.websiteScanRef.id, false);
+            }
+
+            const axeScanResults = await this.pageScanProcessor.scan(runnerScanMetadata, pageScanResult, websiteScanResult);
+            if (axeScanResults?.unscannable === true) {
+                // unsupported URL location
+                this.setRunResult(pageScanResult, 'unscannable', axeScanResults.error);
+            } else if (axeScanResults.error === undefined) {
                 // axe scan completed successfully
                 await this.onCompletedScan(axeScanResults, pageScanResult);
             } else {
@@ -227,8 +235,13 @@ export class Runner {
     }
 
     // The scan workflow is completed when there is no combined report to generate
+    // or loaded URL location is not supported
     private isScanWorkflowCompleted(pageScanResult: OnDemandPageScanResult): boolean {
-        return pageScanResult.websiteScanRef === undefined || pageScanResult.websiteScanRef.scanGroupType === 'single-scan';
+        return (
+            pageScanResult.run?.state === 'unscannable' ||
+            pageScanResult.websiteScanRef === undefined ||
+            pageScanResult.websiteScanRef.scanGroupType === 'single-scan'
+        );
     }
 
     private async isPageScanFailed(pageScanResult: OnDemandPageScanResult): Promise<boolean> {

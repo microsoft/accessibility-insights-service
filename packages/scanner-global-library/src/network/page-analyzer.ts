@@ -16,6 +16,7 @@ import { InterceptedRequest, PageEventHandler } from './page-event-handler';
 export declare type RedirectionType = 'client' | 'server';
 
 export interface PageAnalysisResult {
+    url: string;
     navigationResponse: NavigationResponse;
     authentication?: boolean;
     redirection?: boolean;
@@ -48,6 +49,7 @@ export class PageAnalyzer {
         const operationResult = await this.navigate(url, page);
         if (operationResult.error && operationResult.browserError?.errorType !== 'UrlNavigationTimeout') {
             return {
+                url,
                 navigationResponse: operationResult,
             };
         }
@@ -56,6 +58,7 @@ export class PageAnalyzer {
         const redirectResult = await this.detectRedirection(url, actualResponse.operationResult);
         const authResult = this.detectAuth(page);
         const result = {
+            url,
             redirection: redirectResult.redirection,
             redirectionType: redirectResult.redirectionType,
             loadedUrl: redirectResult.loadedUrl,
@@ -65,9 +68,10 @@ export class PageAnalyzer {
         };
 
         this.logger?.logInfo('Page analysis result.', {
+            url,
             redirection: `${result.redirection}`,
             redirectionType: `${result.redirectionType}`,
-            loadedUrl: `${result.loadedUrl}`,
+            loadedUrl: result.loadedUrl,
             authentication: `${result.authentication}`,
             loadTimeout: `${result.loadTimeout}`,
             loadTime: `${actualResponse.operationResult?.navigationTiming?.goto}`,
@@ -98,6 +102,11 @@ export class PageAnalyzer {
 
         const loadTimeout = operationResult.browserError?.errorType === 'UrlNavigationTimeout' && actualResult.response?.ok();
         if (loadTimeout === true) {
+            // Reset timeout error if network response was received
+            if (!isNil(actualResult.response)) {
+                actualResult.browserError = undefined;
+                actualResult.error = undefined;
+            }
             this.logger?.logWarn('Page load timeout was detected.');
         }
 

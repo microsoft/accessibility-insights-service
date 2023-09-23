@@ -7,7 +7,15 @@ import { ScanGroupType } from './website-scan-result';
 import { PrivacyScan } from './on-demand-page-scan-batch-request';
 import { ReportScanRunResult } from './report-generator-request';
 
-export declare type OnDemandPageScanRunState = 'pending' | 'accepted' | 'queued' | 'running' | 'report' | 'completed' | 'failed';
+export declare type OnDemandPageScanRunState =
+    | 'pending'
+    | 'accepted'
+    | 'queued'
+    | 'running'
+    | 'report'
+    | 'completed'
+    | 'failed'
+    | 'unscannable';
 export declare type ScanState = 'pending' | 'pass' | 'fail';
 export declare type NotificationState = 'pending' | 'queued' | 'queueFailed' | 'sending' | 'sent' | 'sendFailed';
 export declare type NotificationErrorTypes = 'InternalError' | 'HttpErrorCode';
