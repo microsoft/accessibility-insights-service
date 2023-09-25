@@ -62,9 +62,11 @@ Azure region - The deployment location.
 
 onExit-install() {
     local exitCode=$?
+    local line="$BASH_LINENO"
+    local command="$BASH_COMMAND"
 
     if [[ ${exitCode} != 0 ]]; then
-        echo "Installation failed with exit code ${exitCode}"
+        echo "Installation failed with exit code ${exitCode}. Failed at $line: $command"
         killDescendantProcesses $$
         echo "WARN: Deployments that already were triggered could still be running. To kill them, you may need to goto the Azure portal and cancel corresponding deployment."
     else
