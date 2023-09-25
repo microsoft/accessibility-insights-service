@@ -6,10 +6,16 @@ import * as Puppeteer from 'puppeteer';
 import { AuthenticationMethod } from './authentication-method';
 
 export class AzureActiveDirectoryAuthentication implements AuthenticationMethod {
+    private readonly authUrl = 'https://portal.azure.com';
+
+    private readonly loadedAuthUrl = 'https://ms.portal.azure.com';
+
     constructor(private readonly accountName: string, private readonly accountPassword: string) {}
 
     public async authenticate(page: Puppeteer.Page): Promise<void> {
-        await page.goto('https://portal.azure.com');
+        // Support cross-origin requests
+        await page.setExtraHTTPHeaders({ ['Origin']: this.authUrl });
+        await page.goto(this.authUrl);
 
         if (this.authenticationSucceeded(page)) {
             return;
@@ -46,7 +52,7 @@ export class AzureActiveDirectoryAuthentication implements AuthenticationMethod 
 
     private authenticationSucceeded(page: Puppeteer.Page): boolean {
         const currentUrl = page.url();
-        if (!currentUrl.match('^https://ms.portal.azure.com')) {
+        if (!currentUrl.match(`^${this.loadedAuthUrl}`)) {
             return false;
         }
         console.info('Authentication succeeded.');
