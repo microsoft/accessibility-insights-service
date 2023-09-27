@@ -35,8 +35,8 @@ export class SiteCrawlerEngine implements CrawlerEngine {
         this.crawlerConfiguration.setMemoryMBytes(crawlerRunOptions.memoryMBytes);
         this.crawlerConfiguration.setSilentMode(crawlerRunOptions.silentMode);
 
-        const userProfileLocation = `${__dirname}/chromeUserData`;
-        fs.rmSync(userProfileLocation, { recursive: true, force: true });
+        const userDataDirectory = `${__dirname}/ChromeData`;
+        fs.rmSync(userDataDirectory, { recursive: true, force: true });
 
         const puppeteerOptions = crawlerRunOptions.browserOptions ? crawlerRunOptions.browserOptions.map((o) => `--${o}`) : [];
         const puppeteerDefaultOptions = [
@@ -44,7 +44,7 @@ export class SiteCrawlerEngine implements CrawlerEngine {
             '--no-sandbox',
             '--disable-setuid-sandbox',
             '--js-flags=--max-old-space-size=8192',
-            `--user-data-dir=${userProfileLocation}`,
+            `--user-data-dir=${userDataDirectory}`,
         ];
 
         const pageProcessor = this.pageProcessorFactory();

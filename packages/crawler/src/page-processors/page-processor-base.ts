@@ -74,12 +74,22 @@ export abstract class PageProcessorBase implements PageProcessor {
             await this.pushScanData({ succeeded: false, id: context.request.id as string, url: context.request.url });
             await this.logPageError(context.request, err as Error);
             await this.saveRunError(context.request, err);
+            this.logger.logError(`Navigation to URL has failed. ${System.serializeError(err)}`, {
+                url: context.request.url,
+            });
 
             // Throw the error so Apify puts it back into the request queue to retry
             throw err;
         } finally {
             if (response?.browserError) {
                 await this.saveBrowserError(context.request, response.browserError, context.session);
+                this.logger.logError(`Navigation to URL has failed.`, {
+                    url: context.request.url,
+                    message: response.browserError.message,
+                    statusCode: response.browserError.statusCode ? `${response.browserError.statusCode}` : undefined,
+                    statusText: response.browserError.statusText,
+                    errorType: response.browserError.errorType,
+                });
             } else {
                 await this.saveScanMetadata(context.request.url, context.page);
             }
