@@ -15,24 +15,24 @@ import { createDiscoveryPattern } from '../crawler/discovery-pattern-factory';
 import { PageScanProcessor } from './page-scan-processor';
 import { DeepScanner } from './deep-scanner';
 
+let loggerMock: IMock<GlobalLogger>;
+let pageMock: IMock<Page>;
+let axeScannerMock: IMock<AxeScanner>;
+let deepScannerMock: IMock<DeepScanner>;
+let puppeteerPageMock: IMock<Puppeteer.Page>;
+let discoveryPatternFactoryMock: IMock<typeof createDiscoveryPattern>;
+let testSubject: PageScanProcessor;
+let axeScanResults: AxeScanResults;
+let pageScanResult: OnDemandPageScanResult;
+let websiteScanResult: WebsiteScanResult;
+let pageAnalysisResult: PageAnalysisResult;
+
+const url = 'http://localhost';
+const pageScreenshot = 'page screenshot';
+const pageSnapshot = 'page snapshot';
+const generatedDiscoveryPattern = `^http(s?)://localhost(.*)`;
+
 describe(PageScanProcessor, () => {
-    let loggerMock: IMock<GlobalLogger>;
-    let pageMock: IMock<Page>;
-    let axeScannerMock: IMock<AxeScanner>;
-    let deepScannerMock: IMock<DeepScanner>;
-    let puppeteerPageMock: IMock<Puppeteer.Page>;
-    let discoveryPatternFactoryMock: IMock<typeof createDiscoveryPattern>;
-    let testSubject: PageScanProcessor;
-    let axeScanResults: AxeScanResults;
-    let pageScanResult: OnDemandPageScanResult;
-    let websiteScanResult: WebsiteScanResult;
-    let pageAnalysisResult: PageAnalysisResult;
-
-    const url = 'http://localhost';
-    const pageScreenshot = 'page screenshot';
-    const pageSnapshot = 'page snapshot';
-    const generatedDiscoveryPattern = `^http(s?)://localhost(.*)`;
-
     beforeEach(() => {
         loggerMock = Mock.ofType<GlobalLogger>();
         pageMock = Mock.ofType<Page>();
@@ -44,22 +44,7 @@ describe(PageScanProcessor, () => {
         pageScanResult = { id: 'id' } as OnDemandPageScanResult;
         pageAnalysisResult = { redirection: false } as PageAnalysisResult;
 
-        pageMock
-            .setup((o) => o.getPageScreenshot())
-            .returns(() => Promise.resolve(pageScreenshot))
-            .verifiable();
-        pageMock
-            .setup((o) => o.getPageSnapshot())
-            .returns(() => Promise.resolve(pageSnapshot))
-            .verifiable();
-        pageMock
-            .setup((o) => o.analyze(url))
-            .returns(() => Promise.resolve())
-            .verifiable();
-        pageMock
-            .setup((o) => o.pageAnalysisResult)
-            .returns(() => pageAnalysisResult)
-            .verifiable();
+        pageMock.setup((o) => o.pageAnalysisResult).returns(() => pageAnalysisResult);
         websiteScanResult = {} as WebsiteScanResult;
         discoveryPatternFactoryMock.setup((o) => o(url)).returns(() => generatedDiscoveryPattern);
 
@@ -81,6 +66,71 @@ describe(PageScanProcessor, () => {
         discoveryPatternFactoryMock.verifyAll();
     });
 
+    it('detect redirect to foreign location with discovery pattern', async () => {
+        const loadedUrl = 'http://example.org';
+        websiteScanResult = { discoveryPatterns: [generatedDiscoveryPattern] } as WebsiteScanResult;
+        const scanMetadata = {
+            url,
+            id: 'id',
+            deepScan: true,
+        };
+        axeScanResults = {
+            unscannable: true,
+            error: `The scan URL was redirected to foreign location ${loadedUrl}`,
+        };
+        pageAnalysisResult = { redirection: true, loadedUrl } as PageAnalysisResult;
+        discoveryPatternFactoryMock.reset();
+        discoveryPatternFactoryMock.setup((o) => o(url)).returns(() => generatedDiscoveryPattern);
+        setupClosePage();
+
+        const results = await testSubject.scan(scanMetadata, pageScanResult, websiteScanResult);
+
+        expect(results).toEqual(axeScanResults);
+    });
+
+    it('detect redirect to foreign location with base URL', async () => {
+        const loadedUrl = 'http://example.org';
+        websiteScanResult = { baseUrl: url } as WebsiteScanResult;
+        const scanMetadata = {
+            url,
+            id: 'id',
+            deepScan: true,
+        };
+        axeScanResults = {
+            unscannable: true,
+            error: `The scan URL was redirected to foreign location ${loadedUrl}`,
+        };
+        pageAnalysisResult = { redirection: true, loadedUrl } as PageAnalysisResult;
+        discoveryPatternFactoryMock.reset();
+        discoveryPatternFactoryMock.setup((o) => o(url)).returns(() => generatedDiscoveryPattern);
+        setupClosePage();
+
+        const results = await testSubject.scan(scanMetadata, pageScanResult, websiteScanResult);
+
+        expect(results).toEqual(axeScanResults);
+    });
+
+    it('detect redirect to foreign location without base URL', async () => {
+        const loadedUrl = 'http://example.org';
+        const scanMetadata = {
+            url,
+            id: 'id',
+            deepScan: true,
+        };
+        axeScanResults = {
+            unscannable: true,
+            error: `The scan URL was redirected to foreign location ${loadedUrl}`,
+        };
+        pageAnalysisResult = { redirection: true, loadedUrl } as PageAnalysisResult;
+        discoveryPatternFactoryMock.reset();
+        discoveryPatternFactoryMock.setup((o) => o(url)).returns(() => generatedDiscoveryPattern);
+        setupClosePage();
+
+        const results = await testSubject.scan(scanMetadata, pageScanResult, websiteScanResult);
+
+        expect(results).toEqual(axeScanResults);
+    });
+
     it('scan with authentication enabled', async () => {
         const scanMetadata = {
             url: url,
@@ -88,7 +138,8 @@ describe(PageScanProcessor, () => {
         };
         axeScanResults = { ...axeScanResults, pageScreenshot, pageSnapshot };
 
-        setupOpenPage(true);
+        setupNavigatePage(url, true);
+        setupGetPageState();
         setupClosePage();
         axeScannerMock
             .setup((s) => s.scan(pageMock.object))
@@ -131,7 +182,8 @@ describe(PageScanProcessor, () => {
         };
         axeScanResults = { ...axeScanResults, pageScreenshot, pageSnapshot };
 
-        setupOpenPage();
+        setupNavigatePage();
+        setupGetPageState();
         setupClosePage();
         axeScannerMock
             .setup((s) => s.scan(pageMock.object))
@@ -151,7 +203,8 @@ describe(PageScanProcessor, () => {
         };
         const error = new Error('test error');
 
-        setupOpenPage();
+        setupNavigatePage();
+        setupGetPageState();
         setupClosePage();
         axeScannerMock.setup((s) => s.scan(pageMock.object)).throws(error);
         deepScannerMock.setup((o) => o.runDeepScan(It.isAny(), It.isAny(), websiteScanResult, It.isAny())).verifiable(Times.never());
@@ -170,7 +223,7 @@ describe(PageScanProcessor, () => {
         } as BrowserError;
 
         pageMock.reset();
-        setupOpenPage();
+        setupNavigatePage();
         setupClosePage();
         pageMock
             .setup((o) => o.browserError)
@@ -194,7 +247,8 @@ describe(PageScanProcessor, () => {
         };
         const error = new Error('test error');
 
-        setupOpenPage();
+        setupNavigatePage();
+        setupGetPageState();
         setupClosePage();
         axeScannerMock
             .setup((s) => s.scan(pageMock.object))
@@ -204,12 +258,27 @@ describe(PageScanProcessor, () => {
 
         await expect(testSubject.scan(scanMetadata, pageScanResult, websiteScanResult)).rejects.toThrowError('test error');
     });
-
-    function setupOpenPage(enableAuthentication: boolean = false): void {
-        pageMock.setup((p) => p.navigate(url, { enableAuthentication })).verifiable();
-    }
-
-    function setupClosePage(): void {
-        pageMock.setup((p) => p.close()).verifiable();
-    }
 });
+
+function setupNavigatePage(urlParam: string = url, enableAuthentication: boolean = false): void {
+    pageMock
+        .setup((o) => o.analyze(urlParam))
+        .returns(() => Promise.resolve())
+        .verifiable();
+    pageMock.setup((p) => p.navigate(urlParam, { enableAuthentication })).verifiable();
+}
+
+function setupClosePage(): void {
+    pageMock.setup((p) => p.close()).verifiable();
+}
+
+function setupGetPageState(): void {
+    pageMock
+        .setup((o) => o.getPageScreenshot())
+        .returns(() => Promise.resolve(pageScreenshot))
+        .verifiable();
+    pageMock
+        .setup((o) => o.getPageSnapshot())
+        .returns(() => Promise.resolve(pageSnapshot))
+        .verifiable();
+}
