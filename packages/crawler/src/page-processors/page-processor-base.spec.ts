@@ -15,6 +15,7 @@ import { ScanData } from '../types/scan-data';
 import { getPromisableDynamicMock } from '../test-utilities/promisable-mock';
 import { NavigationResponse, PageNavigator } from '../page-handler/page-navigator';
 import { Logger } from '../logger/logger';
+import { CrawlerRunOptions } from '../types/crawler-run-options';
 import { PageProcessorBase } from './page-processor-base';
 
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/consistent-type-assertions */
@@ -80,6 +81,11 @@ describe(PageProcessorBase, () => {
             .setup((o) => o.snapshot())
             .returns(() => false)
             .verifiable();
+        crawlerConfigurationMock
+            .setup((o) => o.crawlerRunOptions)
+            .returns(() => {
+                return {} as CrawlerRunOptions;
+            });
         requestStub = {
             id: testId,
             url: testUrl,

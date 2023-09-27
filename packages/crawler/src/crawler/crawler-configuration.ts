@@ -17,7 +17,7 @@ export class CrawlerConfiguration {
         private readonly createDiscoveryPattern: DiscoveryPatternFactory = getDiscoveryPatternForUrl,
     ) {}
 
-    private get crawlerRunOptions(): CrawlerRunOptions {
+    public get crawlerRunOptions(): CrawlerRunOptions {
         if (!this._crawlerRunOptions) {
             throw new Error('crawlerRunOptions has not been set for CrawlerConfiguration');
         }
