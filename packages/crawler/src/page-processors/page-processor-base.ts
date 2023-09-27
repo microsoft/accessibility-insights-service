@@ -173,7 +173,7 @@ export abstract class PageProcessorBase implements PageProcessor {
             });
         } catch (error) {
             if ((error as Error).message?.includes('pQuerySelectorAll is not a function')) {
-                this.logger.logWarn(
+                this.logger.logError(
                     `Puppeteer has failed to inject an automation script due to page security settings. Try to use disable-web-security browser option to scan a page.`,
                     {
                         url: context.page.url(),
