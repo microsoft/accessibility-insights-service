@@ -61,10 +61,7 @@ describe(PageScanProcessor, () => {
             .returns(() => pageAnalysisResult)
             .verifiable();
         websiteScanResult = {} as WebsiteScanResult;
-        discoveryPatternFactoryMock
-            .setup((o) => o(url))
-            .returns(() => generatedDiscoveryPattern)
-            .verifiable();
+        discoveryPatternFactoryMock.setup((o) => o(url)).returns(() => generatedDiscoveryPattern);
 
         testSubject = new PageScanProcessor(
             pageMock.object,

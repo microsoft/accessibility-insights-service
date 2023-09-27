@@ -6,6 +6,7 @@ import { GlobalLogger } from 'logger';
 import { AxeScanResults, Page } from 'scanner-global-library';
 import { OnDemandPageScanResult, WebsiteScanResult } from 'storage-documents';
 import { RunnerScanMetadata } from 'service-library';
+import { isEmpty } from 'lodash';
 import { AxeScanner } from '../scanner/axe-scanner';
 import { createDiscoveryPattern } from '../crawler/discovery-pattern-factory';
 import { DeepScanner } from './deep-scanner';
@@ -41,7 +42,7 @@ export class PageScanProcessor {
                 this.setAuthenticationResult(pageScanResult);
             }
 
-            if (this.page.browserError !== undefined) {
+            if (!isEmpty(this.page.browserError)) {
                 return { error: this.page.browserError, pageResponseCode: this.page.browserError.statusCode };
             }
 
