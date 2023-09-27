@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+import urlLib from 'url';
 import { inject, injectable } from 'inversify';
 import * as Puppeteer from 'puppeteer';
 import { System } from 'common';
@@ -62,6 +63,7 @@ export abstract class PageProcessorBase implements PageProcessor {
                 return;
             }
 
+            await this.setOrigin(context.request.url, context.page);
             response = await this.pageNavigator.navigate(context.request.url, context.page);
             if (response.browserError) {
                 return;
@@ -72,12 +74,22 @@ export abstract class PageProcessorBase implements PageProcessor {
             await this.pushScanData({ succeeded: false, id: context.request.id as string, url: context.request.url });
             await this.logPageError(context.request, err as Error);
             await this.saveRunError(context.request, err);
+            this.logger.logError(`Navigation to URL has failed. ${System.serializeError(err)}`, {
+                url: context.request.url,
+            });
 
             // Throw the error so Apify puts it back into the request queue to retry
             throw err;
         } finally {
             if (response?.browserError) {
                 await this.saveBrowserError(context.request, response.browserError, context.session);
+                this.logger.logError(`Navigation to URL has failed.`, {
+                    url: context.request.url,
+                    message: response.browserError.message,
+                    statusCode: response.browserError.statusCode ? `${response.browserError.statusCode}` : undefined,
+                    statusText: response.browserError.statusText,
+                    errorType: response.browserError.errorType,
+                });
             } else {
                 await this.saveScanMetadata(context.request.url, context.page);
             }
@@ -119,6 +131,14 @@ export abstract class PageProcessorBase implements PageProcessor {
         this.discoveryPatterns = this.crawlerConfiguration.discoveryPatterns();
     }
 
+    protected async setOrigin(url: string, page: Puppeteer.Page): Promise<void> {
+        if (this.crawlerConfiguration.crawlerRunOptions.authType) {
+            const urlObj = urlLib.parse(url);
+            const originUrl = `${urlObj.protocol}//${urlObj.host}`;
+            await page.setExtraHTTPHeaders({ ['Origin']: originUrl });
+        }
+    }
+
     /**
      * This function is called to extract data from a single web page.
      */
@@ -143,27 +163,26 @@ export abstract class PageProcessorBase implements PageProcessor {
         // converting relative href link to absolute link.
         context.request.loadedUrl = context.page.url();
 
-        let enqueued;
         try {
-            enqueued = await context.enqueueLinks({
+            const enqueued = await context.enqueueLinks({
                 // eslint-disable-next-line security/detect-non-literal-regexp
                 regexps: this.discoveryPatterns?.length > 0 ? this.discoveryPatterns.map((p) => new RegExp(p)) : undefined,
             });
+            this.logger.logInfo(`Enqueued ${enqueued.processedRequests.length} new links.`, {
+                url: context.page.url(),
+            });
         } catch (error) {
             if ((error as Error).message?.includes('pQuerySelectorAll is not a function')) {
-                throw new Error(
-                    `Puppeteer has failed to inject an automation script due to page security settings. Try to use disable-web-security browser option to scan page. ${System.serializeError(
-                        error,
-                    )}`,
+                this.logger.logError(
+                    `Puppeteer has failed to inject an automation script due to page security settings. Try to use disable-web-security browser option to scan a page.`,
+                    {
+                        url: context.page.url(),
+                    },
                 );
+            } else {
+                throw error;
             }
-
-            throw error;
         }
-
-        this.logger.logInfo(`Enqueued ${enqueued.processedRequests.length} new links.`, {
-            url: context.page.url(),
-        });
     }
 
     protected async pushScanData(scanData: PartialScanData): Promise<void> {

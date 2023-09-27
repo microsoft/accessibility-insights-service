@@ -16,6 +16,7 @@ import { BlobStore, DataStore } from '../storage/store-types';
 import { getPromisableDynamicMock } from '../test-utilities/promisable-mock';
 import { PageNavigator } from '../page-handler/page-navigator';
 import { Logger } from '../logger/logger';
+import { CrawlerRunOptions } from '../types/crawler-run-options';
 import { SimulatorPageProcessor } from './simulator-page-processor';
 
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/consistent-type-assertions,  */
@@ -67,6 +68,11 @@ describe(SimulatorPageProcessor, () => {
             .setup((o) => o.crawl())
             .returns(() => true)
             .verifiable();
+        crawlerConfigurationMock
+            .setup((o) => o.crawlerRunOptions)
+            .returns(() => {
+                return {} as CrawlerRunOptions;
+            });
         axeResults = {
             url: 'url',
             passes: [],
