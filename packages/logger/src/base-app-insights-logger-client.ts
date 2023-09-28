@@ -127,7 +127,7 @@ export abstract class BaseAppInsightsLoggerClient implements LoggerClient {
         const maxValueLength = 8192;
         const loggerProperties = {} as LoggerProperties;
 
-        if (value.length > maxValueLength) {
+        if (value?.length > maxValueLength) {
             const count = Math.ceil(value.length / maxValueLength);
             for (let i = 0, index = 0; i < count; ++i, index += maxValueLength) {
                 const part = value.substring(index, index + maxValueLength);
