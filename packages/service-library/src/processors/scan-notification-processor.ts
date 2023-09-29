@@ -56,6 +56,7 @@ export class ScanNotificationProcessor {
             if (
                 // completed scan
                 pageScanResult.run.state === 'completed' ||
+                pageScanResult.run.state === 'unscannable' ||
                 // failed scan with no retry attempt
                 (pageScanResult.run.state === 'failed' && pageScanResult.run.retryCount >= scanConfig.maxFailedScanRetryCount)
             ) {

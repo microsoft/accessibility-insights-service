@@ -22,6 +22,7 @@ import {
     WebsiteScanRef,
     OnDemandPageScanRunResult,
     ReportGeneratorRequest,
+    OnDemandPageScanRunState,
 } from 'storage-documents';
 import { AxeScanResults } from 'scanner-global-library';
 import { System, ServiceConfiguration, ScanRunTimeConfig, GuidGenerator } from 'common';
@@ -324,7 +325,8 @@ function setupUpdateScanResult(): void {
 
     if (pageScanResult.websiteScanRef) {
         const runState =
-            pageScanResult.run.state === 'completed' || pageScanResult.run.retryCount >= maxFailedScanRetryCount
+            (['completed', 'unscannable'] as OnDemandPageScanRunState[]).includes(pageScanResult.run.state) ||
+            pageScanResult.run.retryCount >= maxFailedScanRetryCount
                 ? pageScanResult.run.state
                 : undefined;
 

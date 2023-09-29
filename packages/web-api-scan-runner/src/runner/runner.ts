@@ -128,7 +128,8 @@ export class Runner {
         if (pageScanResult.websiteScanRef) {
             const scanConfig = await this.getScanConfig();
             const runState =
-                pageScanResult.run.state === 'completed' || pageScanResult.run.retryCount >= scanConfig.maxFailedScanRetryCount
+                (['completed', 'unscannable'] as OnDemandPageScanRunState[]).includes(pageScanResult.run.state) ||
+                pageScanResult.run.retryCount >= scanConfig.maxFailedScanRetryCount
                     ? pageScanResult.run.state
                     : undefined;
 
