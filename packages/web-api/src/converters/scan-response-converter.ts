@@ -85,8 +85,8 @@ export class ScanResponseConverter {
             url: pageScanResult.url,
             scanType: pageScanResult.privacyScan ? 'privacy' : 'accessibility',
             scanResult: {
-                state: pageScanResult.scanResult.state,
-                issueCount: pageScanResult.scanResult.issueCount,
+                state: pageScanResult.scanResult?.state,
+                issueCount: pageScanResult.scanResult?.issueCount,
             },
             ...(pageScanResult.authentication !== undefined
                 ? {
