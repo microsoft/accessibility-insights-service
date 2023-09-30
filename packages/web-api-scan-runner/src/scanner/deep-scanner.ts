@@ -24,12 +24,16 @@ export class DeepScanner {
         private readonly createDiscoveryPatternFn: typeof createDiscoveryPattern = createDiscoveryPattern,
     ) {}
 
-    public async runDeepScan(runnerScanMetadata: RunnerScanMetadata, pageScanResult: OnDemandPageScanResult, page: Page): Promise<void> {
-        if (pageScanResult.websiteScanRef === undefined || pageScanResult.websiteScanRef.scanGroupType === 'single-scan') {
+    public async runDeepScan(
+        runnerScanMetadata: RunnerScanMetadata,
+        pageScanResult: OnDemandPageScanResult,
+        websiteScanResult: WebsiteScanResult,
+        page: Page,
+    ): Promise<void> {
+        if (websiteScanResult === undefined || pageScanResult.websiteScanRef?.scanGroupType === 'single-scan') {
             return;
         }
 
-        let websiteScanResult = await this.websiteScanResultProvider.read(pageScanResult.websiteScanRef.id, false);
         this.logger.setCommonProperties({
             websiteScanId: websiteScanResult.id,
             deepScanId: websiteScanResult.deepScanId,
@@ -46,9 +50,6 @@ export class DeepScanner {
             return;
         }
 
-        // fetch websiteScanResult.knownPages from a storage
-        websiteScanResult = await this.websiteScanResultProvider.read(pageScanResult.websiteScanRef.id, true);
-
         // crawling a page if deep scan was enabled
         let discoveredUrls: string[] = [];
         const discoveryPatterns = websiteScanResult.discoveryPatterns ?? [this.createDiscoveryPatternFn(websiteScanResult.baseUrl)];
@@ -56,7 +57,9 @@ export class DeepScanner {
             discoveredUrls = await this.crawlRunner.run(runnerScanMetadata.url, discoveryPatterns, page.puppeteerPage);
         }
 
-        const processedUrls = this.processUrls(discoveredUrls, deepScanDiscoveryLimit, websiteScanResult.knownPages);
+        // fetch websiteScanResult.knownPages from a storage
+        const websiteScanResultExpanded = await this.websiteScanResultProvider.read(websiteScanResult.id, true);
+        const processedUrls = this.processUrls(discoveredUrls, deepScanDiscoveryLimit, websiteScanResultExpanded.knownPages);
         const websiteScanResultUpdated = await this.updateWebsiteScanResult(
             runnerScanMetadata.id,
             websiteScanResult,

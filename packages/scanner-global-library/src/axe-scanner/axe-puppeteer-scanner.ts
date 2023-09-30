@@ -78,10 +78,6 @@ export class AxePuppeteerScanner {
             return { error: page.browserError, pageResponseCode: page.browserError.statusCode };
         }
 
-        if (page.isOpen() !== true) {
-            throw new Error('Page is not ready. Invoke Page.create() and Page.navigate() before scan.');
-        }
-
         return action();
     }
 }

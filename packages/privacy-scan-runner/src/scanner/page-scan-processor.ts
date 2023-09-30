@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { System } from 'common';
 import { inject, injectable } from 'inversify';
 import { GlobalLogger } from 'logger';
 import { Page, PrivacyScanResult } from 'scanner-global-library';
@@ -23,7 +22,7 @@ export class PageScanProcessor {
     public async scan(scanMetadata: PrivacyScanMetadata, pageScanResult: OnDemandPageScanResult): Promise<PrivacyScanResult> {
         let privacyScanResults: PrivacyScanResult;
         try {
-            await this.openPage(scanMetadata.url);
+            await this.page.navigate(scanMetadata.url);
             if (!isEmpty(this.page.browserError)) {
                 return { error: this.page.browserError, pageResponseCode: this.page.browserError.statusCode };
             }
@@ -34,7 +33,7 @@ export class PageScanProcessor {
 
             await this.pageScanScheduler.schedulePageScan(pageScanResult);
         } finally {
-            await this.closePage();
+            await this.page.close();
         }
 
         return privacyScanResults;
@@ -55,18 +54,5 @@ export class PageScanProcessor {
         this.logger.logInfo('The privacy scan of a webpage is completed.');
 
         return privacyScanResult;
-    }
-
-    private async openPage(url: string): Promise<void> {
-        await this.page.create();
-        await this.page.navigate(url);
-    }
-
-    private async closePage(): Promise<void> {
-        try {
-            await this.page.close();
-        } catch (error) {
-            this.logger.logError('An error occurred while closing web browser page.', { error: System.serializeError(error) });
-        }
     }
 }

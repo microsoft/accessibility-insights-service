@@ -6,7 +6,7 @@ import { GuidGenerator, System } from 'common';
 import { inject, injectable, optional } from 'inversify';
 import { GlobalLogger } from 'logger';
 import * as Puppeteer from 'puppeteer';
-import { isNil, isNumber, isEmpty } from 'lodash';
+import { isNumber, isEmpty } from 'lodash';
 import { WebDriver } from './web-driver';
 import { PageNavigator, NavigationResponse } from './page-navigator';
 import { BrowserError } from './browser-error';
@@ -106,16 +106,22 @@ export class Page {
         }
     }
 
+    public async analyze(url: string, options?: PageOptions): Promise<void> {
+        if (this.page === undefined) {
+            await this.create();
+        }
+
+        await this.setInitialState(url, options);
+        await this.analyzeImpl();
+    }
+
     public async navigate(url: string, options?: PageOptions): Promise<void> {
-        this.logger?.setCommonProperties({ pageNavigationId: this.guidGenerator.createGuid() });
+        if (this.page === undefined) {
+            await this.create();
+        }
 
-        this.requestUrl = url;
-        this.pageOptions = options;
-        this.resetLastNavigationState();
-
-        await this.setExtraHTTPHeaders();
+        await this.setInitialState(url, options);
         await this.navigateImpl(options);
-
         if (
             this.navigationResponse?.ok() === false /* Trace error response */ ||
             (this.pageAnalysisResult.authentication === true /* Trace authentication response */ &&
@@ -135,7 +141,6 @@ export class Page {
      */
     public async reload(options?: { hardReload?: boolean }): Promise<void> {
         this.logger?.setCommonProperties({ pageNavigationId: this.guidGenerator.createGuid() });
-
         this.requestUrl = this.url;
         this.resetLastNavigationState();
 
@@ -144,16 +149,6 @@ export class Page {
         } else {
             await this.softReload();
         }
-    }
-
-    public async close(): Promise<void> {
-        if (this.webDriver !== undefined) {
-            await this.webDriver.close();
-        }
-    }
-
-    public isOpen(): boolean {
-        return !isNil(this.page) && !this.page.isClosed() && isNil(this.browserError) && !isNil(this.navigationResponse);
     }
 
     public async getPageScreenshot(): Promise<string> {
@@ -217,8 +212,26 @@ export class Page {
         return { width: windowSize.width, height: windowSize.height, deviceScaleFactor: windowSize.deviceScaleFactor };
     }
 
+    public async close(): Promise<void> {
+        if (this.webDriver !== undefined) {
+            await this.webDriver.close();
+        }
+    }
+
+    private async analyzeImpl(): Promise<void> {
+        // Do not run analysis on reloads
+        if (this.pageAnalysisResult !== undefined) {
+            return;
+        }
+
+        this.pageAnalysisResult = await this.pageAnalyzer.analyze(this.requestUrl, this.page);
+        if (this.pageAnalysisResult.navigationResponse?.browserError !== undefined) {
+            this.setLastNavigationState('analysis', this.pageAnalysisResult.navigationResponse);
+        }
+    }
+
     private async navigateImpl(options?: PageOptions): Promise<void> {
-        await this.analyze();
+        await this.analyzeImpl();
         if (this.browserError !== undefined) {
             return;
         }
@@ -230,18 +243,6 @@ export class Page {
 
         const response = await this.pageNavigator.navigate(this.requestUrl, this.page);
         this.setLastNavigationState('load', response);
-    }
-
-    private async analyze(): Promise<void> {
-        // Invoke on initial page navigation only
-        if (this.pageAnalysisResult !== undefined) {
-            return;
-        }
-
-        this.pageAnalysisResult = await this.pageAnalyzer.analyze(this.requestUrl, this.page);
-        if (this.pageAnalysisResult.navigationResponse.browserError !== undefined) {
-            this.setLastNavigationState('analysis', this.pageAnalysisResult.navigationResponse);
-        }
     }
 
     private async authenticate(options?: PageOptions): Promise<void> {
@@ -336,6 +337,19 @@ export class Page {
                 total: totalNavigationElapsed.toString(),
                 ...timing,
             });
+        }
+    }
+
+    private async setInitialState(url: string, options?: PageOptions): Promise<void> {
+        this.logger?.setCommonProperties({ pageNavigationId: this.guidGenerator.createGuid() });
+        this.requestUrl = url;
+        this.pageOptions = options;
+        this.resetLastNavigationState();
+        await this.setExtraHTTPHeaders();
+
+        // Do not run analysis on reloads
+        if (this.pageAnalysisResult && this.pageAnalysisResult.url !== url) {
+            this.pageAnalysisResult = undefined;
         }
     }
 

@@ -4,13 +4,12 @@
 import { Contracts, TelemetryClient } from 'applicationinsights';
 import { injectable } from 'inversify';
 import { merge } from 'lodash';
-import { AvailabilityTelemetry } from './availability-telemetry';
-import { BaseTelemetryProperties } from './base-telemetry-properties';
 import { LogLevel } from './logger';
-import { LoggerClient } from './logger-client';
+import { AvailabilityTelemetry, BaseTelemetryProperties, LoggerClient, LoggerProperties } from './logger-client';
 import { LoggerEvent } from './logger-event';
 import { TelemetryMeasurements } from './logger-event-measurements';
-import { LoggerProperties } from './logger-properties';
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 @injectable()
 export abstract class BaseAppInsightsLoggerClient implements LoggerClient {
@@ -32,17 +31,17 @@ export abstract class BaseAppInsightsLoggerClient implements LoggerClient {
         });
     }
 
-    public trackEvent(name: LoggerEvent, properties?: { [name: string]: string }, measurements?: TelemetryMeasurements[LoggerEvent]): void {
+    public trackEvent(name: LoggerEvent, properties?: LoggerProperties, measurements?: TelemetryMeasurements[LoggerEvent]): void {
         this.telemetryClient.trackEvent({ name: name, properties: merge(this.getCommonProperties(), properties), measurements });
     }
 
-    public log(message: string, logLevel: LogLevel, properties?: { [name: string]: string }): void {
+    public log(message: string, logLevel: LogLevel, properties?: LoggerProperties): void {
         const severity = this.getAppInsightsSeverityLevel(logLevel);
 
         this.telemetryClient.trackTrace({
             message: this.setMessageSource(message),
             severity: severity,
-            properties: merge(this.getCommonProperties(), properties),
+            properties: merge(this.getCommonProperties(), this.expandProperties(properties)),
         });
     }
 
@@ -109,5 +108,35 @@ export abstract class BaseAppInsightsLoggerClient implements LoggerClient {
             default:
                 throw new Error(`Unknown log level '${logLevel}'`);
         }
+    }
+
+    private expandProperties(properties: LoggerProperties): LoggerProperties {
+        if (properties === undefined) {
+            return properties;
+        }
+
+        let loggerProperties = {} as LoggerProperties;
+        Object.keys(properties).map((name) => {
+            loggerProperties = merge(this.expandProperty(name, properties[name]), loggerProperties);
+        });
+
+        return loggerProperties;
+    }
+
+    private expandProperty(name: string, value: string): LoggerProperties {
+        const maxValueLength = 8192;
+        const loggerProperties = {} as LoggerProperties;
+
+        if (value?.length > maxValueLength) {
+            const count = Math.ceil(value.length / maxValueLength);
+            for (let i = 0, index = 0; i < count; ++i, index += maxValueLength) {
+                const part = value.substring(index, index + maxValueLength);
+                loggerProperties[`${name}${i}`] = part;
+            }
+        } else {
+            loggerProperties[`${name}`] = value;
+        }
+
+        return loggerProperties;
     }
 }

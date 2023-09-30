@@ -17,13 +17,13 @@ export class ScanNotificationErrorCodes {
     public static InternalError: ScanNotificationErrorCode = {
         code: 'InternalError',
         codeId: 9013,
-        message: 'The notification sender encountered an internal error.',
+        message: 'The scan notification sender encountered an internal error.',
     };
 
     public static HttpErrorCode: ScanNotificationErrorCode = {
         code: 'HttpErrorCode',
         codeId: 9014,
-        message: 'The scan notification url returned an error http code.',
+        message: 'The scan notification request failed with HTTP error code.',
     };
 }
 

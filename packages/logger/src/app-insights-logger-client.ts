@@ -6,6 +6,7 @@ import { inject, injectable } from 'inversify';
 import { isNil, omitBy } from 'lodash';
 import { BaseAppInsightsLoggerClient } from './base-app-insights-logger-client';
 import { loggerTypes } from './logger-types';
+import { LoggerProperties } from './logger-client';
 
 @injectable()
 export class AppInsightsLoggerClient extends BaseAppInsightsLoggerClient {
@@ -16,7 +17,7 @@ export class AppInsightsLoggerClient extends BaseAppInsightsLoggerClient {
         super();
     }
 
-    public async setup(baseProperties?: { [property: string]: string }): Promise<void> {
+    public async setup(baseProperties?: LoggerProperties): Promise<void> {
         this.appInsightsObject
             .setup()
             .setAutoCollectConsole(true)
@@ -39,7 +40,7 @@ export class AppInsightsLoggerClient extends BaseAppInsightsLoggerClient {
         this.initialized = true;
     }
 
-    private getBatchProperties(): { [key: string]: string } {
+    private getBatchProperties(): LoggerProperties {
         const batchProperties = {
             batchAccountName: this.currentProcess.env.AZ_BATCH_ACCOUNT_NAME,
             batchPoolId: this.currentProcess.env.AZ_BATCH_POOL_ID,

@@ -40,6 +40,7 @@ export class ScanResponseConverter {
             case 'failed':
                 return this.createFailedScanResponse(pageScanResult, effectiveRunState);
             case 'completed':
+            case 'unscannable':
                 return this.createCompletedScanResponse(baseUrl, apiVersion, pageScanResult, websiteScanResult, effectiveRunState);
         }
     }
@@ -84,8 +85,8 @@ export class ScanResponseConverter {
             url: pageScanResult.url,
             scanType: pageScanResult.privacyScan ? 'privacy' : 'accessibility',
             scanResult: {
-                state: pageScanResult.scanResult.state,
-                issueCount: pageScanResult.scanResult.issueCount,
+                state: pageScanResult.scanResult?.state,
+                issueCount: pageScanResult.scanResult?.issueCount,
             },
             ...(pageScanResult.authentication !== undefined
                 ? {
@@ -114,8 +115,8 @@ export class ScanResponseConverter {
             if (scanResultResponse.deepScanResult.every((scanResult) => scanResult.scanRunState === 'failed')) {
                 scanResultResponse.run.state = 'failed';
             } else if (
-                scanResultResponse.deepScanResult.every(
-                    (scanResult) => scanResult.scanRunState === 'completed' || scanResult.scanRunState === 'failed',
+                scanResultResponse.deepScanResult.every((scanResult) =>
+                    (['completed', 'unscannable', 'failed'] as RunState[]).includes(scanResult.scanRunState),
                 )
             ) {
                 scanResultResponse.run.state = 'completed';

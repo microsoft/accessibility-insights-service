@@ -41,7 +41,7 @@ describe(PageAnalyzer, () => {
 
         interceptedRequests = [];
         System.getElapsedTime = () => 100;
-        puppeteerGotoResponse = {} as Puppeteer.HTTPResponse;
+        puppeteerGotoResponse = { puppeteerResponse: 'goto', url: () => url } as unknown as Puppeteer.HTTPResponse;
         pageOperationResult = { response: puppeteerGotoResponse, navigationTiming: { goto: 100 } as PageNavigationTiming };
         puppeteerPageMock
             .setup((o) => o.goto(url, { waitUntil: 'networkidle2', timeout: puppeteerTimeoutConfig.navigationTimeoutMsec }))
@@ -64,7 +64,7 @@ describe(PageAnalyzer, () => {
         loginPageDetectorMock.verifyAll();
     });
 
-    it('page load timeout', async () => {
+    it('detect page load timeout', async () => {
         const error = new Error('Navigation timeout');
         interceptedRequests = [
             {
@@ -98,19 +98,21 @@ describe(PageAnalyzer, () => {
         const actualResult = await pageAnalyzer.analyze(url, puppeteerPageMock.object);
 
         const expectedResult = {
+            url: 'https://localhost/',
             redirection: false,
+            loadedUrl: url,
             authentication: false,
             loadTimeout: true,
             navigationResponse: {
                 response: interceptedRequests[0].response,
-                navigationTiming: { goto: puppeteerTimeoutConfig.navigationTimeoutMsec, gotoTimeout: true } as PageNavigationTiming,
+                navigationTiming: { goto: 100 },
             },
         };
 
         expect(actualResult).toEqual(expectedResult);
     });
 
-    it('no redirection', async () => {
+    it('detect no page redirection', async () => {
         let pageOperation: any;
         pageRequestInterceptorMock
             .setup((o) => o.intercept(It.isAny(), puppeteerPageMock.object, puppeteerTimeoutConfig.redirectTimeoutMsec))
@@ -122,7 +124,9 @@ describe(PageAnalyzer, () => {
         const actualResult = await pageAnalyzer.analyze(url, puppeteerPageMock.object);
 
         const expectedResult = {
+            url: 'https://localhost/',
             redirection: false,
+            loadedUrl: url,
             authentication: false,
             loadTimeout: false,
             navigationResponse: pageOperationResult,
@@ -131,8 +135,14 @@ describe(PageAnalyzer, () => {
         expect(actualResult).toEqual(expectedResult);
     });
 
-    it('indirect redirection to authentication page', async () => {
+    it('detect client redirection to authentication page', async () => {
         interceptedRequests = [
+            {
+                url,
+                request: {
+                    url: () => url,
+                } as Puppeteer.HTTPRequest,
+            },
             {
                 url: authUrl,
                 request: {
@@ -141,12 +151,15 @@ describe(PageAnalyzer, () => {
             },
         ];
 
+        puppeteerGotoResponse.url = () => authUrl;
+
         let pageOperation: any;
         pageRequestInterceptorMock
             .setup((o) => o.intercept(It.isAny(), puppeteerPageMock.object, puppeteerTimeoutConfig.redirectTimeoutMsec))
             .callback(async (fn) => (pageOperation = fn))
             .returns(async () => pageOperation(url, puppeteerPageMock.object))
             .verifiable();
+        pageRequestInterceptorMock.setup((o) => o.interceptedRequests).returns(() => interceptedRequests);
         puppeteerPageMock
             .setup((o) => o.url())
             .returns(() => authUrl)
@@ -155,12 +168,14 @@ describe(PageAnalyzer, () => {
             .setup((o) => o.getLoginPageType(authUrl))
             .returns(() => 'MicrosoftAzure')
             .verifiable(Times.atLeastOnce());
-        pageRequestInterceptorMock.setup((o) => o.interceptedRequests).returns(() => interceptedRequests);
 
         const actualResult = await pageAnalyzer.analyze(url, puppeteerPageMock.object);
 
         const expectedResult = {
+            url: 'https://localhost/',
             redirection: true,
+            redirectionType: 'client',
+            loadedUrl: authUrl,
             authentication: true,
             loadTimeout: false,
             navigationResponse: pageOperationResult,
@@ -169,31 +184,29 @@ describe(PageAnalyzer, () => {
         expect(actualResult).toEqual(expectedResult);
     });
 
-    it('ignore server redirection', async () => {
+    it('detect server side redirection', async () => {
         interceptedRequests = [
             {
-                url: 'https://localhost/1',
+                url,
                 request: {
-                    url: () => 'https://localhost/1',
+                    url: () => url,
                 } as Puppeteer.HTTPRequest,
                 response: {
-                    url: () => 'https://localhost/1',
+                    url: () => url,
                     status: () => 302,
-                    headers: () => ({ location: 'https://localhost/2' }),
+                    headers: () => ({ location: authUrl }),
                 } as unknown as Puppeteer.HTTPResponse,
             },
             {
-                url: 'https://localhost/2',
+                url: authUrl,
                 request: {
-                    url: () => 'https://localhost/2',
+                    url: () => authUrl,
                 } as Puppeteer.HTTPRequest,
-                response: {
-                    url: () => 'https://localhost/2',
-                    status: () => 302,
-                    headers: () => ({ location: 'https://localhost/1' }),
-                } as unknown as Puppeteer.HTTPResponse,
             },
         ];
+
+        puppeteerGotoResponse.url = () => authUrl;
+
         let pageOperation: any;
         const pageOnResponseHandler = (pageAnalyzer as any).getPageOnResponseHandler(url);
         pageRequestInterceptorMock
@@ -213,7 +226,10 @@ describe(PageAnalyzer, () => {
         const actualResult = await pageAnalyzer.analyze(url, puppeteerPageMock.object);
 
         const expectedResult = {
-            redirection: false,
+            url: 'https://localhost/',
+            redirection: true,
+            redirectionType: 'server',
+            loadedUrl: authUrl,
             authentication: false,
             loadTimeout: false,
             navigationResponse: pageOperationResult,

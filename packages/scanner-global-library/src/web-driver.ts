@@ -76,10 +76,18 @@ export class WebDriver {
 
     public async close(): Promise<void> {
         if (this.browser !== undefined) {
-            await this.promiseUtils.waitFor(this.browser.close(), this.browserCloseTimeoutMsecs, async () => {
+            const closeBrowser = async () => {
+                try {
+                    await this.browser.close();
+                } catch (error) {
+                    this.logger.logError('An error occurred while closing Chromium browser.', { error: System.serializeError(error) });
+                }
+            };
+
+            await this.promiseUtils.waitFor(closeBrowser(), this.browserCloseTimeoutMsecs, async () => {
                 this.logger?.logError(`Chromium browser did not close after ${this.browserCloseTimeoutMsecs} ms.`);
                 if (this.browser.process()) {
-                    this.logger?.logInfo('Sending kill signal to browser process.');
+                    this.logger?.logInfo('Sending kill signal to Chromium browser process.');
                     this.browser.process().kill('SIGINT');
                 }
             });

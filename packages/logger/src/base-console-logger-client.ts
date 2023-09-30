@@ -6,13 +6,10 @@ import { ServiceConfiguration, System } from 'common';
 import { inject, injectable } from 'inversify';
 import moment from 'moment';
 import { isEmpty } from 'lodash';
-import { AvailabilityTelemetry } from './availability-telemetry';
-import { BaseTelemetryProperties } from './base-telemetry-properties';
 import { LogLevel } from './logger';
-import { LoggerClient } from './logger-client';
+import { AvailabilityTelemetry, BaseTelemetryProperties, LoggerClient, LoggerProperties } from './logger-client';
 import { LoggerEvent } from './logger-event';
 import { BaseTelemetryMeasurements, TelemetryMeasurements } from './logger-event-measurements';
-import { LoggerProperties } from './logger-properties';
 import { loggerTypes } from './logger-types';
 
 @injectable()
@@ -40,7 +37,7 @@ export abstract class BaseConsoleLoggerClient implements LoggerClient {
         });
     }
 
-    public trackEvent(name: LoggerEvent, properties?: { [name: string]: string }, measurements?: TelemetryMeasurements[LoggerEvent]): void {
+    public trackEvent(name: LoggerEvent, properties?: LoggerProperties, measurements?: TelemetryMeasurements[LoggerEvent]): void {
         this.executeInDebugMode(() => {
             this.logInConsole(
                 `[Event][${name}]`,
@@ -53,7 +50,7 @@ export abstract class BaseConsoleLoggerClient implements LoggerClient {
     // eslint-disable-next-line no-empty,@typescript-eslint/no-empty-function
     public trackAvailability(name: string, telemetry: AvailabilityTelemetry): void {}
 
-    public log(message: string, logLevel: LogLevel, properties?: { [name: string]: string }): void {
+    public log(message: string, logLevel: LogLevel, properties?: LoggerProperties): void {
         this.executeInDebugMode(() => {
             this.logInConsole(`[Trace][${LogLevel[logLevel]}]`, message, this.getPrintablePropertiesString(properties));
         });
@@ -72,13 +69,13 @@ export abstract class BaseConsoleLoggerClient implements LoggerClient {
         this.baseProperties = { ...this.baseProperties, ...properties };
     }
 
-    public getCommonProperties(): { [name: string]: string } {
+    public getCommonProperties(): LoggerProperties {
         return this.baseProperties;
     }
 
-    protected abstract getPropertiesToAddToEvent(): { [name: string]: string };
+    protected abstract getPropertiesToAddToEvent(): LoggerProperties;
 
-    private getPrintablePropertiesString(properties?: { [name: string]: string }): string {
+    private getPrintablePropertiesString(properties?: LoggerProperties): string {
         const allProperties = { ...this.baseProperties, ...this.getPropertiesToAddToEvent(), ...properties };
 
         return isEmpty(allProperties) ? '' : `${this.getPrintableString(allProperties)}`;

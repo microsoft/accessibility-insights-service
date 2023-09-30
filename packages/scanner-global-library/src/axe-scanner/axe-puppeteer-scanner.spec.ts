@@ -179,18 +179,6 @@ describe(AxePuppeteerScanner, () => {
 
         expect(axeScanResults).toEqual(expectedAxeScanResults);
     });
-
-    it('throw error if page is not open', async () => {
-        pageMock
-            .setup((o) => o.browserError)
-            .returns(() => undefined)
-            .verifiable();
-        pageMock
-            .setup((o) => o.isOpen())
-            .returns(() => false)
-            .verifiable();
-        await expect(axePuppeteerScanner.scan(pageMock.object)).rejects.toThrow();
-    });
 });
 
 function setupAxePuppeteerFactoryMock(axeCoreError?: Error): void {
@@ -239,10 +227,6 @@ function setupPageNavigation(response: Puppeteer.HTTPResponse, browserError?: Br
     puppeteerPageMock
         .setup(async (o) => o.title())
         .returns(() => Promise.resolve(scanResults.pageTitle))
-        .verifiable();
-    pageMock
-        .setup((o) => o.isOpen())
-        .returns(() => true)
         .verifiable();
     puppeteerResponseMock
         .setup((o) => o.status())

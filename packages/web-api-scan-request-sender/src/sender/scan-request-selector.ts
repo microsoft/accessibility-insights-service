@@ -86,7 +86,7 @@ export class ScanRequestSelector {
                 }
 
                 // completed scan
-                if (scanResult.run.state === 'completed') {
+                if ((['completed', 'unscannable'] as OnDemandPageScanRunState[]).includes(scanResult.run.state)) {
                     filteredScanRequests.requestsToDelete.push({ request: scanRequest, result: scanResult, condition: 'completed' });
 
                     return;

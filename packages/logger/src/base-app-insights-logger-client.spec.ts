@@ -5,10 +5,9 @@ import 'reflect-metadata';
 
 import * as appInsights from 'applicationinsights';
 import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
-import { AvailabilityTelemetry } from './availability-telemetry';
 import { BaseAppInsightsLoggerClient } from './base-app-insights-logger-client';
-import { BaseTelemetryProperties } from './base-telemetry-properties';
 import { LogLevel } from './logger';
+import { AvailabilityTelemetry, BaseTelemetryProperties } from './logger-client';
 
 /* eslint-disable
    @typescript-eslint/consistent-type-assertions,
@@ -96,6 +95,25 @@ describe(BaseAppInsightsLoggerClient, () => {
         testSubject = new TestableBaseAppInsightsLoggerClient();
 
         await testSubject.setup();
+    });
+
+    describe('expand large log property', () => {
+        it('expand log property', async () => {
+            await testSubject.setup({ source: 'log source' });
+            const largeProperty = new Array(8192 * 2 + 11).join('a');
+            let loggerProperties: any;
+            testSubject.telemetryClientMock
+                .setup((o) => o.trackTrace(It.isAny()))
+                .callback((m) => (loggerProperties = m))
+                .verifiable();
+
+            testSubject.log('log message', LogLevel.Info, { p: largeProperty });
+            expect(8192).toEqual(loggerProperties.properties.p0.length);
+            expect(8192).toEqual(loggerProperties.properties.p1.length);
+            expect(10).toEqual(loggerProperties.properties.p2.length);
+
+            verifyMocks();
+        });
     });
 
     describe('setup', () => {

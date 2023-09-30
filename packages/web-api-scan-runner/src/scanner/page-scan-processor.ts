@@ -1,14 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { System } from 'common';
 import { inject, injectable } from 'inversify';
 import { GlobalLogger } from 'logger';
 import { AxeScanResults, Page } from 'scanner-global-library';
-import { OnDemandPageScanResult } from 'storage-documents';
+import { OnDemandPageScanResult, WebsiteScanResult } from 'storage-documents';
 import { RunnerScanMetadata } from 'service-library';
 import { isEmpty } from 'lodash';
 import { AxeScanner } from '../scanner/axe-scanner';
+import { createDiscoveryPattern } from '../crawler/discovery-pattern-factory';
 import { DeepScanner } from './deep-scanner';
 
 @injectable()
@@ -18,13 +18,26 @@ export class PageScanProcessor {
         @inject(AxeScanner) private readonly axeScanner: AxeScanner,
         @inject(DeepScanner) private readonly deepScanner: DeepScanner,
         @inject(GlobalLogger) private readonly logger: GlobalLogger,
+        private readonly createDiscoveryPatternFn: typeof createDiscoveryPattern = createDiscoveryPattern,
     ) {}
 
-    public async scan(runnerScanMetadata: RunnerScanMetadata, pageScanResult: OnDemandPageScanResult): Promise<AxeScanResults> {
+    public async scan(
+        runnerScanMetadata: RunnerScanMetadata,
+        pageScanResult: OnDemandPageScanResult,
+        websiteScanResult: WebsiteScanResult,
+    ): Promise<AxeScanResults> {
         let axeScanResults: AxeScanResults;
         try {
+            const scannable = await this.canScanLoadedUrl(runnerScanMetadata.url, websiteScanResult);
+            if (scannable === false) {
+                return {
+                    unscannable: true,
+                    error: `The scan URL was redirected to foreign location ${this.page.pageAnalysisResult.loadedUrl}`,
+                };
+            }
+
             const enableAuthentication = pageScanResult.authentication?.hint !== undefined;
-            await this.openPage(runnerScanMetadata.url, enableAuthentication);
+            await this.page.navigate(runnerScanMetadata.url, { enableAuthentication });
             if (enableAuthentication === true) {
                 this.setAuthenticationResult(pageScanResult);
             }
@@ -37,12 +50,32 @@ export class PageScanProcessor {
             axeScanResults = await this.axeScanner.scan(this.page);
             axeScanResults = { ...axeScanResults, ...pageState };
 
-            await this.deepScanner.runDeepScan(runnerScanMetadata, pageScanResult, this.page);
+            await this.deepScanner.runDeepScan(runnerScanMetadata, pageScanResult, websiteScanResult, this.page);
         } finally {
-            await this.closePage();
+            await this.page.close();
         }
 
         return axeScanResults;
+    }
+
+    private async canScanLoadedUrl(url: string, websiteScanResult: WebsiteScanResult): Promise<boolean> {
+        await this.page.analyze(url);
+        if (this.page.pageAnalysisResult?.redirection === true) {
+            const discoveryPatterns = websiteScanResult?.discoveryPatterns ?? [
+                this.createDiscoveryPatternFn(websiteScanResult?.baseUrl ?? url),
+            ];
+            // eslint-disable-next-line security/detect-non-literal-regexp
+            const match = discoveryPatterns.filter((r) => new RegExp(r, 'i').test(this.page.pageAnalysisResult.loadedUrl)).length > 0;
+            if (match === false) {
+                this.logger.logWarn(`The scan URL was redirected to foreign location and will not be processed future.`, {
+                    loadedUrl: this.page.pageAnalysisResult.loadedUrl,
+                });
+            }
+
+            return match;
+        }
+
+        return true;
     }
 
     private async capturePageState(): Promise<AxeScanResults> {
@@ -53,19 +86,6 @@ export class PageScanProcessor {
             pageSnapshot,
             pageScreenshot,
         };
-    }
-
-    private async openPage(url: string, enableAuthentication: boolean): Promise<void> {
-        await this.page.create();
-        await this.page.navigate(url, { enableAuthentication });
-    }
-
-    private async closePage(): Promise<void> {
-        try {
-            await this.page.close();
-        } catch (error) {
-            this.logger.logError('An error occurred while closing web browser.', { error: System.serializeError(error) });
-        }
     }
 
     private setAuthenticationResult(pageScanResult: OnDemandPageScanResult): void {

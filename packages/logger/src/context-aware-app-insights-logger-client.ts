@@ -6,7 +6,7 @@ import { inject, injectable } from 'inversify';
 import { merge } from 'lodash';
 import { AppInsightsLoggerClient } from './app-insights-logger-client';
 import { BaseAppInsightsLoggerClient } from './base-app-insights-logger-client';
-import { LoggerProperties } from './logger-properties';
+import { LoggerProperties } from './logger-client';
 
 @injectable()
 export class ContextAwareAppInsightsLoggerClient extends BaseAppInsightsLoggerClient {
@@ -14,7 +14,7 @@ export class ContextAwareAppInsightsLoggerClient extends BaseAppInsightsLoggerCl
         super();
     }
 
-    public async setup(baseProperties?: { [property: string]: string }): Promise<void> {
+    public async setup(baseProperties?: LoggerProperties): Promise<void> {
         this.telemetryClient = new TelemetryClient();
         this.telemetryClient.commonProperties = {
             ...baseProperties,

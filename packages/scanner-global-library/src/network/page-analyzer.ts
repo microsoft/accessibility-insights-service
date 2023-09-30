@@ -5,6 +5,7 @@ import * as Puppeteer from 'puppeteer';
 import { injectable, inject, optional } from 'inversify';
 import { System, Url } from 'common';
 import { GlobalLogger } from 'logger';
+import { isNil } from 'lodash';
 import { LoginPageDetector } from '../authenticator/login-page-detector';
 import { NavigationResponse, PageOperationResult } from '../page-navigator';
 import { PageResponseProcessor } from '../page-response-processor';
@@ -12,17 +13,27 @@ import { puppeteerTimeoutConfig, PageNavigationTiming } from '../page-timeout-co
 import { PageRequestInterceptor } from './page-request-interceptor';
 import { InterceptedRequest, PageEventHandler } from './page-event-handler';
 
+export declare type RedirectionType = 'client' | 'server';
+
 export interface PageAnalysisResult {
-    authentication: boolean;
-    redirection: boolean;
-    loadTimeout: boolean;
+    url: string;
     navigationResponse: NavigationResponse;
+    authentication?: boolean;
+    redirection?: boolean;
+    redirectionType?: RedirectionType;
+    loadedUrl?: string;
+    loadTimeout?: boolean;
 }
 
 interface RedirectResult {
     redirection: boolean;
-    navigationResult: PageOperationResult;
-    lastHttpResponse?: Puppeteer.HTTPResponse;
+    redirectionType?: RedirectionType;
+    loadedUrl: string;
+}
+
+interface LoadResult {
+    loadTimeout: boolean;
+    operationResult: PageOperationResult;
 }
 
 @injectable()
@@ -35,24 +46,102 @@ export class PageAnalyzer {
     ) {}
 
     public async analyze(url: string, page: Puppeteer.Page): Promise<PageAnalysisResult> {
-        const redirectResult = await this.detectRedirection(url, page);
+        const operationResult = await this.navigate(url, page);
+        if (operationResult.error && operationResult.browserError?.errorType !== 'UrlNavigationTimeout') {
+            return {
+                url,
+                navigationResponse: operationResult,
+            };
+        }
+
+        const actualResponse = this.getActualResponse(operationResult);
+        const redirectResult = await this.detectRedirection(url, actualResponse.operationResult);
         const authResult = this.detectAuth(page);
-        const loadTimeoutResult = this.detectLoadTimeout(redirectResult);
         const result = {
+            url,
             redirection: redirectResult.redirection,
+            redirectionType: redirectResult.redirectionType,
+            loadedUrl: redirectResult.loadedUrl,
             authentication: authResult,
-            loadTimeout: loadTimeoutResult.loadTimeout,
-            navigationResponse: loadTimeoutResult.operationResult,
+            loadTimeout: actualResponse.loadTimeout,
+            navigationResponse: actualResponse.operationResult,
         };
 
         this.logger?.logInfo('Page analysis result.', {
+            url,
+            redirection: `${result.redirection}`,
+            redirectionType: `${result.redirectionType}`,
+            loadedUrl: result.loadedUrl,
             authentication: `${result.authentication}`,
             loadTimeout: `${result.loadTimeout}`,
-            redirection: `${result.redirection}`,
-            loadTime: `${redirectResult.navigationResult?.navigationTiming?.goto}`,
+            loadTime: `${actualResponse.operationResult?.navigationTiming?.goto}`,
         });
 
         return result;
+    }
+
+    private getActualResponse(operationResult: PageOperationResult): LoadResult {
+        let actualResult: PageOperationResult;
+        if (isNil(operationResult.response)) {
+            // Puppeteer may fail to wait for all page's resources to complete however main frame request may succeeded.
+            // Use last in chain main frame response to substitute page load result.
+            let response;
+            for (const interceptedRequest of this.pageRequestInterceptor.interceptedRequests) {
+                if (interceptedRequest.response) {
+                    response = interceptedRequest.response;
+                }
+            }
+
+            actualResult = {
+                ...operationResult,
+                response,
+            };
+        } else {
+            actualResult = operationResult;
+        }
+
+        const loadTimeout = operationResult.browserError?.errorType === 'UrlNavigationTimeout' && actualResult.response?.ok();
+        if (loadTimeout === true) {
+            // Reset timeout error if network response was received
+            if (!isNil(actualResult.response)) {
+                actualResult.browserError = undefined;
+                actualResult.error = undefined;
+            }
+            this.logger?.logWarn('Page load timeout was detected.');
+        }
+
+        return {
+            loadTimeout,
+            operationResult: actualResult,
+        };
+    }
+
+    private async detectRedirection(url: string, operationResult: PageOperationResult): Promise<RedirectResult> {
+        let redirection = false;
+        let redirectionType: RedirectionType;
+
+        // Should compare encoded Urls
+        const loadedUrl = encodeURI(operationResult.response.url());
+        if (loadedUrl && encodeURI(url) !== loadedUrl) {
+            redirection = true;
+        }
+
+        if (redirection) {
+            const indirectRedirects = this.getIndirectRequests(url);
+            redirectionType = indirectRedirects.length > 0 ? 'client' : 'server';
+
+            this.logger?.logWarn('Page redirection was detected.', {
+                redirectChain: JSON.stringify(this.pageRequestInterceptor.interceptedRequests.map((r) => r.url)),
+                redirectionType,
+                loadedUrl,
+            });
+        }
+
+        return {
+            redirection,
+            redirectionType,
+            loadedUrl,
+        };
     }
 
     private detectAuth(page: Puppeteer.Page): boolean {
@@ -60,6 +149,7 @@ export class PageAnalyzer {
         const loginPageType = this.loginPageDetector.getLoginPageType(page.url());
         if (loginPageType !== undefined) {
             authDetected = true;
+
             this.logger?.logWarn('Page authentication was detected.', {
                 loginPageType,
             });
@@ -68,54 +158,29 @@ export class PageAnalyzer {
         return authDetected;
     }
 
-    private detectLoadTimeout(redirectResult: RedirectResult): { loadTimeout: boolean; operationResult: PageOperationResult } {
-        // Puppeteer has failed waiting for all page's resources to complete however main frame request succeeded.
-        // Use main frame response as successful page load result substitution.
-        const loadTimeout =
-            redirectResult.navigationResult.browserError?.errorType === 'UrlNavigationTimeout' && redirectResult.lastHttpResponse?.ok();
-        const operationResult =
-            loadTimeout === true
-                ? {
-                      response: redirectResult.lastHttpResponse,
-                      navigationTiming: { goto: puppeteerTimeoutConfig.navigationTimeoutMsec, gotoTimeout: true } as PageNavigationTiming,
-                  }
-                : redirectResult.navigationResult;
+    private getIndirectRequests(originalUrl: string): InterceptedRequest[] {
+        // Select server originated redirect
+        const serverRedirects = this.pageRequestInterceptor.interceptedRequests
+            .filter((r) => [301, 302, 303, 307, 308].includes(r.data?.status) && r.data?.location)
+            .map((r) => r.data.location);
+        // Exclude original URL
+        serverRedirects.push(originalUrl);
 
-        if (loadTimeout === true) {
-            this.logger?.logWarn('Page load timeout was detected.');
-        }
-
-        return { loadTimeout, operationResult };
+        // Exclude server originated redirect
+        return this.pageRequestInterceptor.interceptedRequests.filter((r) => !serverRedirects.includes(r.url));
     }
 
-    private async detectRedirection(url: string, page: Puppeteer.Page): Promise<RedirectResult> {
-        const operationResult = await this.traceRedirect(url, page);
-
-        const indirectRedirect = this.getIndirectRequests(url);
-        if (indirectRedirect.length > 0) {
-            this.logger?.logWarn('Page indirect redirection was detected.', {
-                redirect: JSON.stringify(indirectRedirect.map((r) => r.url)),
-            });
-        }
-
-        return {
-            redirection: indirectRedirect.length > 0,
-            navigationResult: operationResult,
-            lastHttpResponse: this.pageRequestInterceptor.interceptedRequests.at(-1)?.response,
-        };
-    }
-
-    private async traceRedirect(url: string, page: Puppeteer.Page): Promise<PageOperationResult> {
+    private async navigate(url: string, page: Puppeteer.Page): Promise<PageOperationResult> {
         this.pageRequestInterceptor.pageOnResponse = this.getPageOnResponseHandler(url);
 
         return this.pageRequestInterceptor.intercept(
-            async () => this.navigate(url, page),
+            async () => this.navigatePage(url, page),
             page,
             puppeteerTimeoutConfig.redirectTimeoutMsec,
         );
     }
 
-    private async navigate(url: string, page: Puppeteer.Page): Promise<PageOperationResult> {
+    private async navigatePage(url: string, page: Puppeteer.Page): Promise<PageOperationResult> {
         const timestamp = System.getTimestamp();
         try {
             this.logger?.logInfo('Navigate page to URL for analysis.');
@@ -136,18 +201,6 @@ export class PageAnalyzer {
                 error,
             };
         }
-    }
-
-    private getIndirectRequests(url: string): InterceptedRequest[] {
-        // Select server originated redirect
-        const serverRedirects = this.pageRequestInterceptor.interceptedRequests
-            .filter((r) => [301, 302, 303, 307, 308].includes(r.data?.status) && r.data?.location)
-            .map((r) => r.data.location);
-        // Exclude original URL
-        serverRedirects.push(url);
-
-        // Exclude server originated redirect
-        return this.pageRequestInterceptor.interceptedRequests.filter((r) => !serverRedirects.includes(r.url));
     }
 
     private getPageOnResponseHandler(url: string): PageEventHandler {

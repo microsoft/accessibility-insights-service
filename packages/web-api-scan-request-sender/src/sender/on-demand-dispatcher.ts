@@ -175,8 +175,8 @@ export class OnDemandDispatcher {
             websiteScanResult = await this.websiteScanResultProvider.read(pageScanResult.websiteScanRef.id, false, pageScanResult.id);
             const pageScan = websiteScanResult.pageScans?.find((s) => s.scanId === pageScanResult.id);
             if (
-                !(['completed', 'failed'] as OnDemandPageScanRunState[]).includes(pageScan?.runState) ||
-                runStateUpdated /* read websiteScanResult on pageScanResult update to trigger scan notification */
+                !(['completed', 'unscannable', 'failed'] as OnDemandPageScanRunState[]).includes(pageScan?.runState) ||
+                runStateUpdated /* update websiteScanResult to trigger scan notification */
             ) {
                 runStateUpdated = true;
                 const updatedWebsiteScanResult: Partial<WebsiteScanResult> = {
@@ -186,7 +186,9 @@ export class OnDemandDispatcher {
                             scanId: pageScanResult.id,
                             url: pageScanResult.url,
                             scanState: pageScanResult.scanResult?.state,
-                            runState: pageScanResult.run.state === 'completed' ? 'completed' : 'failed',
+                            runState: (['completed', 'unscannable'] as OnDemandPageScanRunState[]).includes(pageScanResult.run.state)
+                                ? 'completed'
+                                : 'failed',
                             timestamp: new Date().toJSON(),
                         },
                     ],

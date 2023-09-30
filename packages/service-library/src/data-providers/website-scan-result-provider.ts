@@ -31,7 +31,7 @@ export type OnMergeCallbackFn = (storageDocument: WebsiteScanResultBase) => Webs
 
 export const getOnMergeCallbackToUpdateRunResult = (runState: OnDemandPageScanRunState): OnMergeCallbackFn => {
     let onMergeCallbackFn: OnMergeCallbackFn;
-    if (runState === 'completed') {
+    if ((['completed', 'unscannable'] as OnDemandPageScanRunState[]).includes(runState)) {
         onMergeCallbackFn = (dbDocument) => {
             if (isEmpty(dbDocument.runResult)) {
                 dbDocument.runResult = { completedScans: 1, failedScans: 0 };

@@ -7,7 +7,16 @@ import { WebApiError } from '../web-api-error-codes';
 
 export declare type LinkType = 'self';
 export declare type ScanState = 'pending' | 'pass' | 'fail';
-export declare type RunState = 'pending' | 'accepted' | 'queued' | 'running' | 'retrying' | 'report' | 'completed' | 'failed';
+export declare type RunState =
+    | 'pending'
+    | 'accepted'
+    | 'queued'
+    | 'running'
+    | 'retrying'
+    | 'report'
+    | 'completed'
+    | 'failed'
+    | 'unscannable';
 export declare type NotificationState = 'pending' | 'queued' | 'queueFailed' | 'sending' | 'sent' | 'sendFailed';
 export declare type NotificationErrorTypes = 'InternalError' | 'HttpErrorCode';
 export declare type ScanType = 'accessibility' | 'privacy';

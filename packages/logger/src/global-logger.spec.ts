@@ -5,12 +5,10 @@ import 'reflect-metadata';
 
 import { System } from 'common';
 import { IMock, Mock, Times, It, MockBehavior } from 'typemoq';
-import { AvailabilityTelemetry } from './availability-telemetry';
-import { BaseTelemetryProperties } from './base-telemetry-properties';
 import { ConsoleLoggerClient } from './console-logger-client';
 import { GlobalLogger } from './global-logger';
 import { LogLevel } from './logger';
-import { LoggerClient } from './logger-client';
+import { AvailabilityTelemetry, BaseTelemetryProperties, LoggerClient } from './logger-client';
 
 /* eslint-disable @typescript-eslint/consistent-type-assertions, @typescript-eslint/no-explicit-any, no-void */
 
