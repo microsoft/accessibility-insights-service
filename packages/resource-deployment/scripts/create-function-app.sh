@@ -64,29 +64,31 @@ copyConfigFileToScriptFolder() {
 }
 
 installAzureFunctionsCoreToolsOnLinux() {
-    # Refer to https://docs.microsoft.com/en-us/azure/azure-functions/functions-run-local#v2
-
     echo "Installing Azure Functions Core Tools..."
     # Install the Microsoft package repository GPG key, to validate package integrity
     curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor >microsoft.gpg
     sudo mv microsoft.gpg /etc/apt/trusted.gpg.d/microsoft.gpg
 
-    # Verify your Ubuntu server is running one of the appropriate versions from the table below. To add the apt source, run
+    # Verify your Ubuntu server is running one of the appropriate versions from the table below
     sudo sh -c 'echo "deb [arch=amd64] https://packages.microsoft.com/repos/microsoft-ubuntu-$(lsb_release -cs)-prod $(lsb_release -cs) main" > /etc/apt/sources.list.d/dotnetdev.list'
     sudo apt-get update -y
 
-    # Install the Core Tools package
+    # Install Azure Functions Core Tools package
     sudo apt-get install azure-functions-core-tools-4 -y
     echo "Azure Functions Core Tools installed successfully"
 }
 
 installAzureFunctionsCoreTools() {
-    local kernelName=$(uname -s 2>/dev/null) || true
-    echo "OS kernel name: $kernelName"
-    case "${kernelName}" in
-    Linux*) installAzureFunctionsCoreToolsOnLinux ;;
-    *) echo "Azure Functions Core Tools is expected to be installed on development computer. Refer to https://docs.microsoft.com/en-us/azure/azure-functions/functions-run-local#v2 if tools is not installed." ;;
-    esac
+    local funcVersion=$(func version 2>/dev/null) || true
+    if [[ -z $funcVersion ]]; then
+        local kernelName=$(uname -s 2>/dev/null) || true
+        if [[ ${kernelName} == "Linux" ]]; then
+            installAzureFunctionsCoreToolsOnLinux
+        else
+            echo "Azure Functions Core Tools is expected to be installed on a machine. How to install tool, see https://learn.microsoft.com/en-us/azure/azure-functions/functions-run-local"
+            exit 1
+        fi
+    fi
 }
 
 publishFunctionAppScripts() {
