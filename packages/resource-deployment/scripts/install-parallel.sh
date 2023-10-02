@@ -136,6 +136,16 @@ function validateJqTool() {
     echo "jq tool version $jqVersion"
 }
 
+function validateDotnetSdk() {
+    dotnetSdk=$(dotnet --list-sdks 2>/dev/null) || true
+    if [[ -z $dotnetSdk ]]; then
+        echo "Expected .Net SDK to be installed on a machine. How to install .Net SDK, see https://dotnet.microsoft.com/en-us/download"
+        exit 1
+    fi
+
+    printf ".Net SDK\n$dotnetSdk"
+}
+
 function install() {
     # Login to Azure if required
     if ! az account show 1>/dev/null; then
@@ -188,5 +198,6 @@ function install() {
 
 validateAzCliVersion
 validateJqTool
+validateDotnetSdk
 install
 echo "Installation completed"
