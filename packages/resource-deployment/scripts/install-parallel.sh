@@ -143,7 +143,7 @@ function validateDotnetSdk() {
         exit 1
     fi
 
-    printf ".Net SDK\n$dotnetSdk\n"
+    printf ".Net SDK version\n$dotnetSdk\n"
 }
 
 function validateAzureFunctionsCoreTools() {
