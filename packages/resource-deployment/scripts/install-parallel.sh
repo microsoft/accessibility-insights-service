@@ -109,14 +109,14 @@ function versionToNumber() {
 }
 
 function validateAzCliVersion() {
-    azVersionMinimum="2.52.0"
+    local azVersionMinimum="2.52.0"
 
-    azVersionCurrent=$(az version --query '"azure-cli"' -o tsv)
+    local azVersionCurrent=$(az version --query '"azure-cli"' -o tsv)
     versionToNumber $azVersionCurrent
-    azVersionCurrentNum=$versionNum
+    local azVersionCurrentNum=$versionNum
 
     versionToNumber $azVersionMinimum
-    azVersionMinimumNum=$versionNum
+    local azVersionMinimumNum=$versionNum
 
     if [ "$azVersionCurrentNum" -lt "$azVersionMinimumNum" ]; then
         echo "Expected Azure CLI version $azVersionMinimum or newer. Current Azure CLI version is $azVersionCurrent. How to update the Azure CLI, see https://learn.microsoft.com/en-us/cli/azure/update-azure-cli"
@@ -127,7 +127,7 @@ function validateAzCliVersion() {
 }
 
 function validateJqTool() {
-    jqVersion=$(jq --version 2>/dev/null) || true
+    local jqVersion=$(jq --version 2>/dev/null) || true
     if [[ -z $jqVersion ]]; then
         echo "Expected jq tool to be installed on a machine. How to install jq tool, see https://jqlang.github.io/jq/download/"
         exit 1
@@ -137,13 +137,28 @@ function validateJqTool() {
 }
 
 function validateDotnetSdk() {
-    dotnetSdk=$(dotnet --list-sdks 2>/dev/null) || true
+    local dotnetSdk=$(dotnet --list-sdks 2>/dev/null) || true
     if [[ -z $dotnetSdk ]]; then
         echo "Expected .Net SDK to be installed on a machine. How to install .Net SDK, see https://dotnet.microsoft.com/en-us/download"
         exit 1
     fi
 
-    printf ".Net SDK\n$dotnetSdk"
+    printf ".Net SDK\n$dotnetSdk\n"
+}
+
+function validateAzureFunctionsCoreTools() {
+    local funcVersion=$(func version 2>/dev/null) || true
+    if [[ -z $funcVersion ]]; then
+        local kernelName=$(uname -s 2>/dev/null) || true
+        if [[ ${kernelName} == "Linux" ]]; then
+            echo "Azure Functions Core Tools is not detected on a machine and will be installed by the deployment script."
+        else
+            echo "Azure Functions Core Tools is expected to be installed on a machine. How to install tool, see https://learn.microsoft.com/en-us/azure/azure-functions/functions-run-local"
+            exit 1
+        fi
+    else
+        echo "Azure Functions Core Tools version $funcVersion"
+    fi
 }
 
 function install() {
@@ -199,5 +214,6 @@ function install() {
 validateAzCliVersion
 validateJqTool
 validateDotnetSdk
+validateAzureFunctionsCoreTools
 install
 echo "Installation completed"
