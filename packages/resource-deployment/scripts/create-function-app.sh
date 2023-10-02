@@ -64,8 +64,6 @@ copyConfigFileToScriptFolder() {
 }
 
 installAzureFunctionsCoreToolsOnLinux() {
-    # Refer to https://docs.microsoft.com/en-us/azure/azure-functions/functions-run-local#v2
-
     echo "Installing Azure Functions Core Tools..."
     # Install the Microsoft package repository GPG key, to validate package integrity
     curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor >microsoft.gpg
