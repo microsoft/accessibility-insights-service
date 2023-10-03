@@ -5,11 +5,10 @@ import 'reflect-metadata';
 
 import { IMock, It, Mock, Times } from 'typemoq';
 import { GlobalLogger } from 'logger';
-import { AxeScanResults, Page, BrowserError, ResourceAuthenticationResult } from 'scanner-global-library';
+import { AxeScanResults, Page, BrowserError, ResourceAuthenticationResult, PageAnalysisResult } from 'scanner-global-library';
 import { OnDemandPageScanResult, WebsiteScanResult } from 'storage-documents';
 import * as Puppeteer from 'puppeteer';
 import { cloneDeep } from 'lodash';
-import { PageAnalysisResult } from 'scanner-global-library/dist/network/page-analyzer';
 import { AxeScanner } from '../scanner/axe-scanner';
 import { createDiscoveryPattern } from '../crawler/discovery-pattern-factory';
 import { PageScanProcessor } from './page-scan-processor';

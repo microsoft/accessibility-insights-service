@@ -7,7 +7,6 @@ import { AxeResults } from 'axe-core';
 import { PromiseUtils, ScanRunTimeConfig, ServiceConfiguration, System } from 'common';
 import { AxeScanResults, BrowserError, Page, AxePuppeteerScanner } from 'scanner-global-library';
 import { IMock, It, Mock, Times } from 'typemoq';
-import { AxePuppeteerFactory } from 'axe-core-scanner';
 import { MockableLogger } from '../test-utilities/mockable-logger';
 import { AxeScanner } from './axe-scanner';
 
@@ -16,7 +15,6 @@ import { AxeScanner } from './axe-scanner';
 describe(AxeScanner, () => {
     let pageMock: IMock<Page>;
     let axeScanner: AxeScanner;
-    let axeBrowserFactoryMock: IMock<AxePuppeteerFactory>;
     let loggerMock: IMock<MockableLogger>;
     let serviceConfigMock: IMock<ServiceConfiguration>;
     let promiseUtilsMock: IMock<PromiseUtils>;
@@ -24,8 +22,7 @@ describe(AxeScanner, () => {
     let scanConfig: ScanRunTimeConfig;
 
     beforeEach(() => {
-        axeBrowserFactoryMock = Mock.ofType();
-        pageMock = Mock.ofType2<Page>(Page, [axeBrowserFactoryMock.object]);
+        pageMock = Mock.ofType(Page);
         loggerMock = Mock.ofType(MockableLogger);
         serviceConfigMock = Mock.ofType(ServiceConfiguration);
         promiseUtilsMock = Mock.ofType(PromiseUtils);

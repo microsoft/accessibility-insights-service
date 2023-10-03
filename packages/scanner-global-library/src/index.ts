@@ -20,3 +20,4 @@ export * from './user-agent-plugin';
 export { BrowserCache } from './browser-cache';
 export * from './stealth-plugin-type';
 export * from './authenticator/login-page-detector';
+export * from './network/page-analyzer';

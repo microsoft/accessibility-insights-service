@@ -7,10 +7,10 @@ import { Page } from 'scanner-global-library';
 import { WebsiteScanResultProvider, RunnerScanMetadata } from 'service-library';
 import { OnDemandPageScanResult, WebsiteScanResult } from 'storage-documents';
 import { ServiceConfiguration } from 'common';
-import { processDiscoveredUrls } from '../crawl-runner/discovered-url-processor';
-import { CrawlRunner } from '../crawl-runner/crawl-runner';
-import { ScanFeedGenerator } from '../crawl-runner/scan-feed-generator';
 import { createDiscoveryPattern } from '../crawler/discovery-pattern-factory';
+import { CrawlRunner } from '../crawler/crawl-runner';
+import { ScanFeedGenerator } from '../crawler/scan-feed-generator';
+import { processDiscoveredUrls } from '../crawler/discovered-url-processor';
 
 @injectable()
 export class DeepScanner {
