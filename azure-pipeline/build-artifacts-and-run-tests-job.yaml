@@ -57,9 +57,9 @@ steps:
       displayName: 'Copy files to staging directory'
 
     - task: ManifestGeneratorTask@0
-      displayName: 'SBOM Generation Task'
       inputs:
           BuildDropPath: '$(Build.ArtifactStagingDirectory)'
+      displayName: 'SBOM Generation Task'
 
     - task: PublishBuildArtifacts@1
       inputs:
@@ -68,7 +68,15 @@ steps:
       displayName: 'Publish build artifacts'
 
     - task: ms.vss-governance-buildtask.governance-build-task-component-detection.ComponentGovernanceComponentDetection@0
-      displayName: 'Component Detection'
       inputs:
           failOnAlert: true
       condition: in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI')
+      displayName: 'Component Detection'
+
+    - task: Bash@3
+      inputs:
+          targetType: 'inline'
+          script: |
+              queuedBy="queued-by-$(Build.QueuedBy)"
+              echo "##vso[build.addbuildtag]$queuedBy"
+      displayName: 'Apply build tag'
