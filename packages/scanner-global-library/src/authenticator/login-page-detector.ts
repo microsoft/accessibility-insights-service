@@ -6,7 +6,7 @@ import { Url } from 'common';
 
 export declare type LoginPageType = 'MicrosoftAzure';
 
-export const loginPageDomain = {
+const loginPageDomain = {
     MicrosoftAzure: 'login.microsoftonline.com',
     MicrosoftLive: 'login.live.com',
 };

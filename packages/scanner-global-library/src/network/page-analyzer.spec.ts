@@ -176,6 +176,7 @@ describe(PageAnalyzer, () => {
             redirection: true,
             redirectionType: 'client',
             loadedUrl: authUrl,
+            loginPageType: 'MicrosoftAzure',
             authentication: true,
             loadTimeout: false,
             navigationResponse: pageOperationResult,

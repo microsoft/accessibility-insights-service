@@ -6,7 +6,7 @@ import { injectable, inject, optional } from 'inversify';
 import { System, Url } from 'common';
 import { GlobalLogger } from 'logger';
 import { isNil } from 'lodash';
-import { LoginPageDetector } from '../authenticator/login-page-detector';
+import { LoginPageDetector, LoginPageType } from '../authenticator/login-page-detector';
 import { NavigationResponse, PageOperationResult } from '../page-navigator';
 import { PageResponseProcessor } from '../page-response-processor';
 import { puppeteerTimeoutConfig, PageNavigationTiming } from '../page-timeout-config';
@@ -19,6 +19,7 @@ export interface PageAnalysisResult {
     url: string;
     navigationResponse: NavigationResponse;
     authentication?: boolean;
+    loginPageType?: LoginPageType;
     redirection?: boolean;
     redirectionType?: RedirectionType;
     loadedUrl?: string;
@@ -56,13 +57,14 @@ export class PageAnalyzer {
 
         const actualResponse = this.getActualResponse(operationResult);
         const redirectResult = await this.detectRedirection(url, actualResponse.operationResult);
-        const authResult = this.detectAuth(page);
+        const loginPageType = this.detectAuth(page);
         const result = {
             url,
             redirection: redirectResult.redirection,
             redirectionType: redirectResult.redirectionType,
             loadedUrl: redirectResult.loadedUrl,
-            authentication: authResult,
+            authentication: loginPageType !== undefined,
+            loginPageType,
             loadTimeout: actualResponse.loadTimeout,
             navigationResponse: actualResponse.operationResult,
         };
@@ -144,18 +146,15 @@ export class PageAnalyzer {
         };
     }
 
-    private detectAuth(page: Puppeteer.Page): boolean {
-        let authDetected = false;
+    private detectAuth(page: Puppeteer.Page): LoginPageType {
         const loginPageType = this.loginPageDetector.getLoginPageType(page.url());
         if (loginPageType !== undefined) {
-            authDetected = true;
-
             this.logger?.logWarn('Page authentication was detected.', {
                 loginPageType,
             });
         }
 
-        return authDetected;
+        return loginPageType;
     }
 
     private getIndirectRequests(originalUrl: string): InterceptedRequest[] {
