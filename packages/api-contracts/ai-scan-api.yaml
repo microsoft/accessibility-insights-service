@@ -359,6 +359,7 @@ components:
                 code:
                     type: string
                     enum:
+                        - InternalError
                         - UrlNavigationTimeout
                         - SslError
                         - ResourceLoadFailure
