@@ -17,7 +17,7 @@ export interface LoginPageClient {
  */
 @injectable()
 export class AzureLoginPageClient implements LoginPageClient {
-    public readonly authenticationType = 'azure-ad';
+    public readonly authenticationType = 'entraId';
 
     private readonly selectorTimeoutMsec = 10000;
 

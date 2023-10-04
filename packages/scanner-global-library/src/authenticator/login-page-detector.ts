@@ -3,28 +3,44 @@
 
 import { injectable } from 'inversify';
 import { Url } from 'common';
+import { AuthenticationType } from 'storage-documents';
 
-export declare type LoginPageType = 'MicrosoftAzure';
-
-const loginPageDomain = {
-    MicrosoftAzure: 'login.microsoftonline.com',
-    MicrosoftLive: 'login.live.com',
-};
+const entraLoginDomains = ['login.microsoftonline.com', 'login.live.com'];
+const urlLoginHints = ['auth', 'onmicrosoft', 'sso', 'signin', 'login', 'openid', 'token'];
 
 @injectable()
 export class LoginPageDetector {
-    public getLoginPageType(url: string): LoginPageType {
+    public getAuthenticationType(url: string): AuthenticationType {
         const urlObj = Url.tryParseUrlString(url);
         if (urlObj === undefined) {
             return undefined;
         }
 
-        switch (urlObj.hostname) {
-            case loginPageDomain.MicrosoftAzure:
-            case loginPageDomain.MicrosoftLive:
-                return 'MicrosoftAzure';
-            default:
-                return undefined;
+        let authType = this.detectLoginDomain(urlObj.hostname);
+        if (authType !== undefined) {
+            return authType;
         }
+
+        authType = this.detectLoginHint(urlObj.href);
+
+        return authType;
+    }
+
+    private detectLoginDomain(hostname: string): AuthenticationType {
+        if (entraLoginDomains.includes(hostname.toLowerCase())) {
+            return 'entraId';
+        }
+
+        return undefined;
+    }
+
+    private detectLoginHint(url: string): AuthenticationType {
+        const encodedUrl = encodeURI(url);
+        const hints = urlLoginHints.find((hint) => encodedUrl.includes(hint));
+        if (hints !== undefined) {
+            return 'unknown';
+        }
+
+        return undefined;
     }
 }

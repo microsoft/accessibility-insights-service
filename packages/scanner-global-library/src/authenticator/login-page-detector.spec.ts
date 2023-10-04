@@ -12,22 +12,27 @@ describe(LoginPageDetector, () => {
         loginPageDetector = new LoginPageDetector();
     });
 
-    it('should return MicrosoftAzure client type for Microsoft Azure login', () => {
-        const url = 'https://login.MicrosoftOnline.com/12345-67890/oauth2/authorize?client_id=1';
-        expect(loginPageDetector.getLoginPageType(url)).toEqual('MicrosoftAzure');
+    it('should return login hint', () => {
+        const url = 'https://example.com/12345-67890/oauth2/authorize?client_id=1';
+        expect(loginPageDetector.getAuthenticationType(url)).toEqual('unknown');
     });
 
-    it('should return MicrosoftAzure client type for Microsoft Live login', () => {
+    it('should return client type for Azure login', () => {
+        const url = 'https://login.MicrosoftOnline.com/12345-67890/oauth2/authorize?client_id=1';
+        expect(loginPageDetector.getAuthenticationType(url)).toEqual('entraId');
+    });
+
+    it('should return client type for Live login', () => {
         const url = 'https://login.live.com/login.srf?wa=wsignin1.0&rpsnv=13';
-        expect(loginPageDetector.getLoginPageType(url)).toEqual('MicrosoftAzure');
+        expect(loginPageDetector.getAuthenticationType(url)).toEqual('entraId');
     });
 
     it('should skip for unknown URL', () => {
         const url = 'https://localhost/';
-        expect(loginPageDetector.getLoginPageType(url)).toBeUndefined();
+        expect(loginPageDetector.getAuthenticationType(url)).toBeUndefined();
     });
 
     it('should skip for empty URL', () => {
-        expect(loginPageDetector.getLoginPageType(undefined)).toBeUndefined();
+        expect(loginPageDetector.getAuthenticationType(undefined)).toBeUndefined();
     });
 });

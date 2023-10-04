@@ -37,8 +37,9 @@ export class PageScanProcessor {
 
             const enableAuthentication = pageScanResult.authentication?.hint !== undefined;
             await this.page.navigate(runnerScanMetadata.url, { enableAuthentication });
-            if (enableAuthentication === true) {
-                this.setAuthenticationResult(pageScanResult);
+
+            if (pageMetadata.authentication === true) {
+                this.setAuthenticationResult(pageMetadata, pageScanResult);
             }
 
             if (!isEmpty(this.page.browserError)) {
@@ -85,12 +86,18 @@ export class PageScanProcessor {
         };
     }
 
-    private setAuthenticationResult(pageScanResult: OnDemandPageScanResult): void {
+    private setAuthenticationResult(pageMetadata: PageMetadata, pageScanResult: OnDemandPageScanResult): void {
         const authenticationResult = this.page.authenticationResult;
-        if (authenticationResult === undefined) {
+        if (pageMetadata.authenticationType === 'unknown') {
             pageScanResult.authentication = {
                 ...pageScanResult.authentication,
-                state: 'notDetected',
+                detected: pageMetadata.authenticationType,
+                state: 'unauthenticated',
+            };
+        } else if (authenticationResult === undefined) {
+            pageScanResult.authentication = {
+                ...pageScanResult.authentication,
+                state: 'unauthenticated',
             };
         } else {
             pageScanResult.authentication = {

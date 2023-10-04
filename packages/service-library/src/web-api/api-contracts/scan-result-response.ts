@@ -21,8 +21,8 @@ export declare type NotificationState = 'pending' | 'queued' | 'queueFailed' | '
 export declare type NotificationErrorTypes = 'InternalError' | 'HttpErrorCode';
 export declare type ScanType = 'accessibility' | 'privacy';
 export declare type ScanResultResponse = ScanRunResultResponse | ScanRunErrorResponse;
-export declare type AuthenticationState = 'succeeded' | 'failed' | 'notDetected';
-export declare type AuthenticationType = 'azure-ad';
+export declare type AuthenticationState = 'succeeded' | 'failed' | 'unauthenticated';
+export declare type AuthenticationType = 'unknown' | 'entraId';
 
 export declare type ReportFormat =
     | 'axe'

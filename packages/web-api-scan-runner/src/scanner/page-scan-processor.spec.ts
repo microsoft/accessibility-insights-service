@@ -101,6 +101,17 @@ describe(PageScanProcessor, () => {
         };
         axeScanResults = { ...axeScanResults, pageScreenshot, pageSnapshot };
 
+        pageMetadata = {
+            foreignLocation: true,
+            authentication: true,
+            authenticationType: 'entraId',
+        } as PageMetadata;
+        pageMetadataGeneratorMock.reset();
+        pageMetadataGeneratorMock
+            .setup((o) => o.getMetadata(url, websiteScanResult))
+            .returns(() => Promise.resolve(pageMetadata))
+            .verifiable();
+
         setupNavigatePage(url, true);
         setupGetPageState();
         setupClosePage();
@@ -111,11 +122,11 @@ describe(PageScanProcessor, () => {
         deepScannerMock.setup((o) => o.runDeepScan(It.isAny(), It.isAny(), websiteScanResult, It.isAny())).verifiable();
         pageScanResult = {
             ...pageScanResult,
-            authentication: { hint: 'azure-ad' },
+            authentication: { hint: 'entraId' },
         };
 
         const authenticationResult = {
-            authenticationType: 'azure-ad',
+            authenticationType: 'entraId',
             authenticated: true,
         } as ResourceAuthenticationResult;
         pageMock
@@ -128,9 +139,53 @@ describe(PageScanProcessor, () => {
         const expectedPageScanResult = cloneDeep({
             ...pageScanResult,
             authentication: {
-                hint: 'azure-ad',
-                detected: 'azure-ad',
+                hint: 'entraId',
+                detected: 'entraId',
                 state: 'succeeded',
+            },
+        });
+        expect(pageScanResult).toEqual(expectedPageScanResult);
+        expect(results).toEqual(axeScanResults);
+    });
+
+    it('scan with unknown authentication detected', async () => {
+        const scanMetadata = {
+            url: url,
+            id: 'id',
+        };
+        axeScanResults = { ...axeScanResults, pageScreenshot, pageSnapshot };
+
+        pageMetadata = {
+            foreignLocation: true,
+            authentication: true,
+            authenticationType: 'unknown',
+        } as PageMetadata;
+        pageMetadataGeneratorMock.reset();
+        pageMetadataGeneratorMock
+            .setup((o) => o.getMetadata(url, websiteScanResult))
+            .returns(() => Promise.resolve(pageMetadata))
+            .verifiable();
+
+        setupNavigatePage(url);
+        setupGetPageState();
+        setupClosePage();
+        axeScannerMock
+            .setup((s) => s.scan(pageMock.object))
+            .returns(() => Promise.resolve(axeScanResults))
+            .verifiable();
+        deepScannerMock.setup((o) => o.runDeepScan(It.isAny(), It.isAny(), websiteScanResult, It.isAny())).verifiable();
+        pageMock
+            .setup((p) => p.authenticationResult)
+            .returns(() => undefined)
+            .verifiable();
+
+        const results = await testSubject.scan(scanMetadata, pageScanResult, websiteScanResult);
+
+        const expectedPageScanResult = cloneDeep({
+            ...pageScanResult,
+            authentication: {
+                detected: 'unknown',
+                state: 'unauthenticated',
             },
         });
         expect(pageScanResult).toEqual(expectedPageScanResult);

@@ -29,7 +29,7 @@ describe(UserAgentPlugin, () => {
         puppeteerPageMock = Mock.ofType<Puppeteer.Page>();
         loginPageDetectorMock = Mock.ofType<LoginPageDetector>();
         loginPageDetectorMock
-            .setup((o) => o.getLoginPageType(url))
+            .setup((o) => o.getAuthenticationType(url))
             .returns(() => undefined)
             .verifiable();
         puppeteerBrowserStub = {
@@ -79,8 +79,8 @@ describe(UserAgentPlugin, () => {
     it('set user agent platform to Linux for auth workflow', async () => {
         loginPageDetectorMock.reset();
         loginPageDetectorMock
-            .setup((o) => o.getLoginPageType(url))
-            .returns(() => 'MicrosoftAzure')
+            .setup((o) => o.getAuthenticationType(url))
+            .returns(() => 'entraId')
             .verifiable();
         puppeteerPageMock
             .setup((o) => o.setUserAgent(expectedLinuxUserAgent, userAgentMetadata))

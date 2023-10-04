@@ -322,7 +322,7 @@ describe(ScanRequestController, () => {
             guidGeneratorMock.verifyAll();
         });
 
-        it.each(['azure-ad', undefined])('accepts request with authenticationType = %s', async (authenticationType: AuthenticationType) => {
+        it.each(['entraId', undefined])('accepts request with authenticationType = %s', async (authenticationType: AuthenticationType) => {
             const guid1 = '1e9cefa6-538a-6df0-aaaa-ffffffffffff';
             const guid2 = '1e9cefa6-538a-6df0-bbbb-ffffffffffff';
             guidGeneratorMock.setup((g) => g.createGuid()).returns(() => guid1);

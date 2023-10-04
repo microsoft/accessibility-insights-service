@@ -2,8 +2,8 @@
 // Licensed under the MIT License.
 
 import { inject, injectable } from 'inversify';
-import { Page, LoginPageType } from 'scanner-global-library';
-import { WebsiteScanResult } from 'storage-documents';
+import { Page } from 'scanner-global-library';
+import { AuthenticationType, WebsiteScanResult } from 'storage-documents';
 import { createDiscoveryPattern } from '../crawler/discovery-pattern-factory';
 
 export interface PageMetadata {
@@ -11,7 +11,7 @@ export interface PageMetadata {
     loadedUrl?: string;
     redirection?: boolean;
     authentication?: boolean;
-    loginPageType?: LoginPageType;
+    authenticationType?: AuthenticationType;
     foreignLocation?: boolean;
 }
 
@@ -31,7 +31,7 @@ export class PageMetadataGenerator {
             loadedUrl: this.page.pageAnalysisResult?.loadedUrl,
             redirection: this.page.pageAnalysisResult?.redirection,
             authentication: this.page.pageAnalysisResult?.authentication,
-            loginPageType: this.page.pageAnalysisResult?.loginPageType,
+            authenticationType: this.page.pageAnalysisResult?.authenticationType,
             foreignLocation,
         };
     }

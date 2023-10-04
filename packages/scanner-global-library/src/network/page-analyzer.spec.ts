@@ -165,8 +165,8 @@ describe(PageAnalyzer, () => {
             .returns(() => authUrl)
             .verifiable(Times.atLeastOnce());
         loginPageDetectorMock
-            .setup((o) => o.getLoginPageType(authUrl))
-            .returns(() => 'MicrosoftAzure')
+            .setup((o) => o.getAuthenticationType(authUrl))
+            .returns(() => 'entraId')
             .verifiable(Times.atLeastOnce());
 
         const actualResult = await pageAnalyzer.analyze(url, puppeteerPageMock.object);
@@ -176,8 +176,8 @@ describe(PageAnalyzer, () => {
             redirection: true,
             redirectionType: 'client',
             loadedUrl: authUrl,
-            loginPageType: 'MicrosoftAzure',
             authentication: true,
+            authenticationType: 'entraId',
             loadTimeout: false,
             navigationResponse: pageOperationResult,
         };

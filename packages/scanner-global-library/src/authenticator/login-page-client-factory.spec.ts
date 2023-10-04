@@ -4,9 +4,9 @@
 import 'reflect-metadata';
 
 import { IMock, Mock } from 'typemoq';
+import { AuthenticationType } from 'storage-documents';
 import { LoginPageClientFactory } from './login-page-client-factory';
 import { AzureLoginPageClient } from './azure-login-page-client';
-import { LoginPageType } from './login-page-detector';
 
 let azureLoginPageClientMock: IMock<AzureLoginPageClient>;
 let loginPageClientFactory: LoginPageClientFactory;
@@ -17,13 +17,15 @@ describe(LoginPageClientFactory, () => {
         loginPageClientFactory = new LoginPageClientFactory(azureLoginPageClientMock.object);
     });
 
-    it('should return AzureLoginPageClient instance', () => {
-        expect(loginPageClientFactory.getPageClient('MicrosoftAzure')).toEqual(azureLoginPageClientMock.object);
+    it('should return client instance', () => {
+        expect(loginPageClientFactory.getPageClient('entraId')).toEqual(azureLoginPageClientMock.object);
     });
 
-    it('should throw if client not found', () => {
-        expect(() => loginPageClientFactory.getPageClient('OtherType' as LoginPageType)).toThrowError(
-            `Login page type OtherType is not supported.`,
-        );
+    it('should return undefined', () => {
+        expect(loginPageClientFactory.getPageClient('unknown')).toBeUndefined();
+    });
+
+    it('should return undefined', () => {
+        expect(loginPageClientFactory.getPageClient('other' as AuthenticationType)).toBeUndefined();
     });
 });

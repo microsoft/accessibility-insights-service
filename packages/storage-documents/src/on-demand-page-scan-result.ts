@@ -19,9 +19,9 @@ export declare type OnDemandPageScanRunState =
 export declare type ScanState = 'pending' | 'pass' | 'fail';
 export declare type NotificationState = 'pending' | 'queued' | 'queueFailed' | 'sending' | 'sent' | 'sendFailed';
 export declare type NotificationErrorTypes = 'InternalError' | 'HttpErrorCode';
-export declare type AuthenticationState = 'succeeded' | 'failed' | 'notDetected';
+export declare type AuthenticationState = 'succeeded' | 'failed' | 'unauthenticated';
 export declare type CookieBannerType = 'standard';
-export declare type AuthenticationType = 'azure-ad';
+export declare type AuthenticationType = 'unknown' | 'entraId';
 
 export declare type ReportFormat =
     | 'axe'

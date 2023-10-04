@@ -40,7 +40,7 @@ describe(PageMetadataGenerator, () => {
         websiteScanResult = { discoveryPatterns: [generatedDiscoveryPattern] } as WebsiteScanResult;
         pageAnalysisResult = {
             authentication: true,
-            loginPageType: 'MicrosoftAzure',
+            authenticationType: 'entraId',
             redirection: false,
             loadedUrl: url,
             url,
@@ -51,7 +51,7 @@ describe(PageMetadataGenerator, () => {
             .verifiable();
         const expectedPageMetadata = {
             authentication: true,
-            loginPageType: 'MicrosoftAzure',
+            authenticationType: 'entraId',
             foreignLocation: false,
             loadedUrl: url,
             redirection: false,

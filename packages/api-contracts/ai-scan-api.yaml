@@ -257,6 +257,7 @@ components:
                         SARIF format specification
                         https://www.oasis-open.org/committees/sarif/charter.php
                     enum:
+                        - axe
                         - sarif
                         - html
                         - consolidated.html
@@ -416,10 +417,11 @@ components:
                 detected:
                     type: string
                     enum:
-                        - azure-ad
+                        - unknown
+                        - entraId
                 state:
                     type: string
                     enum:
                         - succeeded
                         - failed
-                        - notDetected
+                        - unauthenticated
