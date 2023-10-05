@@ -158,7 +158,7 @@ describe(PageScanProcessor, () => {
         pageMetadata = {
             foreignLocation: true,
             authentication: true,
-            authenticationType: 'unknown',
+            authenticationType: 'undetermined',
         } as PageMetadata;
         pageMetadataGeneratorMock.reset();
         pageMetadataGeneratorMock
@@ -184,7 +184,7 @@ describe(PageScanProcessor, () => {
         const expectedPageScanResult = cloneDeep({
             ...pageScanResult,
             authentication: {
-                detected: 'unknown',
+                detected: 'undetermined',
                 state: 'unauthenticated',
             },
         });

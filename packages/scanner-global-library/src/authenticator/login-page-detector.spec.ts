@@ -14,7 +14,7 @@ describe(LoginPageDetector, () => {
 
     it('should return login hint', () => {
         const url = 'https://example.com/12345-67890/oauth2/authorize?client_id=1';
-        expect(loginPageDetector.getAuthenticationType(url)).toEqual('unknown');
+        expect(loginPageDetector.getAuthenticationType(url)).toEqual('undetermined');
     });
 
     it('should return client type for Azure login', () => {

@@ -88,7 +88,7 @@ export class PageScanProcessor {
 
     private setAuthenticationResult(pageMetadata: PageMetadata, pageScanResult: OnDemandPageScanResult): void {
         const authenticationResult = this.page.authenticationResult;
-        if (pageMetadata.authenticationType === 'unknown') {
+        if (pageMetadata.authenticationType === 'undetermined') {
             pageScanResult.authentication = {
                 ...pageScanResult.authentication,
                 detected: pageMetadata.authenticationType,

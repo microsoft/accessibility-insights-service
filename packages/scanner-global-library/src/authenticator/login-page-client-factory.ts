@@ -13,7 +13,7 @@ export class LoginPageClientFactory {
         switch (authenticationType) {
             case 'entraId':
                 return this.azureLoginPageClient;
-            case 'unknown':
+            case 'undetermined':
             default:
                 return undefined;
         }

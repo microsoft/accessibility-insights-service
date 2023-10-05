@@ -21,7 +21,7 @@ export declare type NotificationState = 'pending' | 'queued' | 'queueFailed' | '
 export declare type NotificationErrorTypes = 'InternalError' | 'HttpErrorCode';
 export declare type AuthenticationState = 'succeeded' | 'failed' | 'unauthenticated';
 export declare type CookieBannerType = 'standard';
-export declare type AuthenticationType = 'unknown' | 'entraId';
+export declare type AuthenticationType = 'undetermined' | 'entraId';
 
 export declare type ReportFormat =
     | 'axe'

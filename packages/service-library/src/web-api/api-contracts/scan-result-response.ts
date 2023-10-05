@@ -22,7 +22,7 @@ export declare type NotificationErrorTypes = 'InternalError' | 'HttpErrorCode';
 export declare type ScanType = 'accessibility' | 'privacy';
 export declare type ScanResultResponse = ScanRunResultResponse | ScanRunErrorResponse;
 export declare type AuthenticationState = 'succeeded' | 'failed' | 'unauthenticated';
-export declare type AuthenticationType = 'unknown' | 'entraId';
+export declare type AuthenticationType = 'undetermined' | 'entraId';
 
 export declare type ReportFormat =
     | 'axe'

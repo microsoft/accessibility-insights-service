@@ -82,10 +82,10 @@ describe(ResourceAuthenticator, () => {
         expect(response).toBeUndefined();
     });
 
-    it('should skip if unknown authentication detected', async () => {
+    it('should skip if undetermined authentication detected', async () => {
         loginPageDetectorMock
             .setup((o) => o.getAuthenticationType(url))
-            .returns(() => 'unknown')
+            .returns(() => 'undetermined')
             .verifiable();
 
         const response = await resourceAuthenticator.authenticate(puppeteerPageMock.object);

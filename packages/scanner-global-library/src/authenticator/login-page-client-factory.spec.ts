@@ -22,7 +22,7 @@ describe(LoginPageClientFactory, () => {
     });
 
     it('should return undefined', () => {
-        expect(loginPageClientFactory.getPageClient('unknown')).toBeUndefined();
+        expect(loginPageClientFactory.getPageClient('undetermined')).toBeUndefined();
     });
 
     it('should return undefined', () => {

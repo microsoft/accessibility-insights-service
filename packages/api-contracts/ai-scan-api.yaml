@@ -417,7 +417,7 @@ components:
                 detected:
                     type: string
                     enum:
-                        - unknown
+                        - undetermined
                         - entraId
                 state:
                     type: string

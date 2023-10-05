@@ -246,7 +246,7 @@ export class Page {
     }
 
     private async authenticate(options?: PageOptions): Promise<void> {
-        if (this.pageAnalysisResult.authentication !== true || this.pageAnalysisResult.authenticationType === 'unknown') {
+        if (this.pageAnalysisResult.authentication !== true || this.pageAnalysisResult.authenticationType === 'undetermined') {
             return;
         }
 
