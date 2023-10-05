@@ -8,7 +8,7 @@ import { OnDemandPageScanResult, WebsiteScanResult } from 'storage-documents';
 import { RunnerScanMetadata } from 'service-library';
 import { isEmpty } from 'lodash';
 import { AxeScanner } from '../scanner/axe-scanner';
-import { createDiscoveryPattern } from '../crawler/discovery-pattern-factory';
+import { PageMetadata, PageMetadataGenerator } from '../website-builder/page-metadata-generator';
 import { DeepScanner } from './deep-scanner';
 
 @injectable()
@@ -17,8 +17,8 @@ export class PageScanProcessor {
         @inject(Page) private readonly page: Page,
         @inject(AxeScanner) private readonly axeScanner: AxeScanner,
         @inject(DeepScanner) private readonly deepScanner: DeepScanner,
+        @inject(PageMetadataGenerator) private readonly pageMetadataGenerator: PageMetadataGenerator,
         @inject(GlobalLogger) private readonly logger: GlobalLogger,
-        private readonly createDiscoveryPatternFn: typeof createDiscoveryPattern = createDiscoveryPattern,
     ) {}
 
     public async scan(
@@ -28,18 +28,18 @@ export class PageScanProcessor {
     ): Promise<AxeScanResults> {
         let axeScanResults: AxeScanResults;
         try {
-            const scannable = await this.canScanLoadedUrl(runnerScanMetadata.url, websiteScanResult);
-            if (scannable === false) {
-                return {
-                    unscannable: true,
-                    error: `The scan URL was redirected to foreign location ${this.page.pageAnalysisResult.loadedUrl}`,
-                };
+            const pageMetadata = await this.pageMetadataGenerator.getMetadata(runnerScanMetadata.url, websiteScanResult);
+
+            const state = this.getScannableState(pageMetadata);
+            if (state.unscannable === true) {
+                return state;
             }
 
             const enableAuthentication = pageScanResult.authentication?.hint !== undefined;
             await this.page.navigate(runnerScanMetadata.url, { enableAuthentication });
-            if (enableAuthentication === true) {
-                this.setAuthenticationResult(pageScanResult);
+
+            if (pageMetadata.authentication === true) {
+                this.setAuthenticationResult(pageMetadata, pageScanResult);
             }
 
             if (!isEmpty(this.page.browserError)) {
@@ -58,24 +58,22 @@ export class PageScanProcessor {
         return axeScanResults;
     }
 
-    private async canScanLoadedUrl(url: string, websiteScanResult: WebsiteScanResult): Promise<boolean> {
-        await this.page.analyze(url);
-        if (this.page.pageAnalysisResult?.redirection === true) {
-            const discoveryPatterns = websiteScanResult?.discoveryPatterns ?? [
-                this.createDiscoveryPatternFn(websiteScanResult?.baseUrl ?? url),
-            ];
-            // eslint-disable-next-line security/detect-non-literal-regexp
-            const match = discoveryPatterns.filter((r) => new RegExp(r, 'i').test(this.page.pageAnalysisResult.loadedUrl)).length > 0;
-            if (match === false) {
-                this.logger.logWarn(`The scan URL was redirected to foreign location and will not be processed future.`, {
-                    loadedUrl: this.page.pageAnalysisResult.loadedUrl,
-                });
-            }
+    private getScannableState(pageMetadata: PageMetadata): AxeScanResults {
+        // Redirected to foreign no authentication location
+        if (pageMetadata.foreignLocation === true && pageMetadata.authentication !== true) {
+            this.logger.logWarn(`The scan URL was redirected to foreign location and will not be processed future.`, {
+                loadedUrl: pageMetadata.loadedUrl,
+            });
 
-            return match;
+            return {
+                unscannable: true,
+                error: `The scan URL was redirected to foreign location ${pageMetadata.loadedUrl}`,
+            };
         }
 
-        return true;
+        return {
+            unscannable: false,
+        };
     }
 
     private async capturePageState(): Promise<AxeScanResults> {
@@ -88,12 +86,18 @@ export class PageScanProcessor {
         };
     }
 
-    private setAuthenticationResult(pageScanResult: OnDemandPageScanResult): void {
+    private setAuthenticationResult(pageMetadata: PageMetadata, pageScanResult: OnDemandPageScanResult): void {
         const authenticationResult = this.page.authenticationResult;
-        if (authenticationResult === undefined) {
+        if (pageMetadata.authenticationType === 'undetermined') {
             pageScanResult.authentication = {
                 ...pageScanResult.authentication,
-                state: 'notDetected',
+                detected: pageMetadata.authenticationType,
+                state: 'unauthenticated',
+            };
+        } else if (authenticationResult === undefined) {
+            pageScanResult.authentication = {
+                ...pageScanResult.authentication,
+                state: 'unauthenticated',
             };
         } else {
             pageScanResult.authentication = {

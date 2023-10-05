@@ -165,7 +165,7 @@ describe(ScanFeedGenerator, () => {
         {
             priority: 7,
             notification: { scanNotifyUrl: 'url' },
-            authentication: { hint: 'azure-ad' },
+            authentication: { hint: 'entraId' },
         } as OnDemandPageScanResult,
     ])('propagates page scan result properties %s to scan run batch requests', async (pageScanResultOverride: OnDemandPageScanResult) => {
         pageScanResult = {

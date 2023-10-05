@@ -6,6 +6,7 @@ import { injectable, inject, optional } from 'inversify';
 import { System, Url } from 'common';
 import { GlobalLogger } from 'logger';
 import { isNil } from 'lodash';
+import { AuthenticationType } from 'storage-documents';
 import { LoginPageDetector } from '../authenticator/login-page-detector';
 import { NavigationResponse, PageOperationResult } from '../page-navigator';
 import { PageResponseProcessor } from '../page-response-processor';
@@ -19,6 +20,7 @@ export interface PageAnalysisResult {
     url: string;
     navigationResponse: NavigationResponse;
     authentication?: boolean;
+    authenticationType?: AuthenticationType;
     redirection?: boolean;
     redirectionType?: RedirectionType;
     loadedUrl?: string;
@@ -56,13 +58,14 @@ export class PageAnalyzer {
 
         const actualResponse = this.getActualResponse(operationResult);
         const redirectResult = await this.detectRedirection(url, actualResponse.operationResult);
-        const authResult = this.detectAuth(page);
+        const authenticationType = this.detectAuth(page);
         const result = {
             url,
             redirection: redirectResult.redirection,
             redirectionType: redirectResult.redirectionType,
             loadedUrl: redirectResult.loadedUrl,
-            authentication: authResult,
+            authentication: authenticationType !== undefined,
+            authenticationType: authenticationType,
             loadTimeout: actualResponse.loadTimeout,
             navigationResponse: actualResponse.operationResult,
         };
@@ -70,9 +73,10 @@ export class PageAnalyzer {
         this.logger?.logInfo('Page analysis result.', {
             url,
             redirection: `${result.redirection}`,
-            redirectionType: `${result.redirectionType}`,
+            redirectionType: result.redirectionType,
             loadedUrl: result.loadedUrl,
             authentication: `${result.authentication}`,
+            authenticationType: result.authenticationType,
             loadTimeout: `${result.loadTimeout}`,
             loadTime: `${actualResponse.operationResult?.navigationTiming?.goto}`,
         });
@@ -144,18 +148,15 @@ export class PageAnalyzer {
         };
     }
 
-    private detectAuth(page: Puppeteer.Page): boolean {
-        let authDetected = false;
-        const loginPageType = this.loginPageDetector.getLoginPageType(page.url());
-        if (loginPageType !== undefined) {
-            authDetected = true;
-
+    private detectAuth(page: Puppeteer.Page): AuthenticationType {
+        const authenticationType = this.loginPageDetector.getAuthenticationType(page.url());
+        if (authenticationType !== undefined) {
             this.logger?.logWarn('Page authentication was detected.', {
-                loginPageType,
+                authenticationType,
             });
         }
 
-        return authDetected;
+        return authenticationType;
     }
 
     private getIndirectRequests(originalUrl: string): InterceptedRequest[] {

@@ -246,15 +246,18 @@ export class Page {
     }
 
     private async authenticate(options?: PageOptions): Promise<void> {
-        if (this.pageAnalysisResult.authentication !== true) {
+        if (this.pageAnalysisResult.authentication !== true || this.pageAnalysisResult.authenticationType === 'undetermined') {
             return;
         }
 
+        // Fail if authentication is disabled
         if (options?.enableAuthentication !== true && this.enableAuthenticationGlobalFlag !== true) {
-            this.logger?.logError('Page authentication is required.');
+            this.logger?.logError('Page authentication is required.', {
+                authenticationType: this.pageAnalysisResult.authenticationType,
+            });
             this.browserError = {
                 errorType: 'AuthenticationError',
-                message: 'Page authentication is required.',
+                message: `Page authentication is required. Authentication type ${this.pageAnalysisResult.authenticationType}`,
                 stack: new Error().stack,
             };
 

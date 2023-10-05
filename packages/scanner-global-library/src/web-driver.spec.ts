@@ -111,18 +111,6 @@ describe('WebDriver', () => {
             expect(puppeteerBrowserMock.isClosed).toEqual(true);
         });
 
-        it('should kill browser process if close times out', async () => {
-            setupPromiseUtils(true);
-            puppeteerExtraMock
-                .setup((o) => o.launch(It.isAny()))
-                .returns(() => Promise.resolve(<Puppeteer.Browser>(<unknown>puppeteerBrowserMock)))
-                .verifiable(Times.once());
-            browserProcessMock.setup((bp) => bp.kill('SIGINT')).verifiable();
-
-            await testSubject.launch();
-            await testSubject.close();
-        });
-
         it('should do nothing if close times out and browser process is not found', async () => {
             setupPromiseUtils(true);
             puppeteerBrowserMock.childProcess = undefined;

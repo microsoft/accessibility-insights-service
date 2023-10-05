@@ -84,10 +84,14 @@ export class ScanResponseConverter {
             scanId: pageScanResult.id,
             url: pageScanResult.url,
             scanType: pageScanResult.privacyScan ? 'privacy' : 'accessibility',
-            scanResult: {
-                state: pageScanResult.scanResult?.state,
-                issueCount: pageScanResult.scanResult?.issueCount,
-            },
+            ...(pageScanResult.scanResult !== undefined
+                ? {
+                      scanResult: {
+                          state: pageScanResult.scanResult.state,
+                          issueCount: pageScanResult.scanResult.issueCount,
+                      },
+                  }
+                : {}),
             ...(pageScanResult.authentication !== undefined
                 ? {
                       authentication: {

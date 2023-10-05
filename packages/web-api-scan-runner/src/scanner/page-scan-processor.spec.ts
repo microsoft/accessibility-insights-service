@@ -7,11 +7,9 @@ import { IMock, It, Mock, Times } from 'typemoq';
 import { GlobalLogger } from 'logger';
 import { AxeScanResults, Page, BrowserError, ResourceAuthenticationResult } from 'scanner-global-library';
 import { OnDemandPageScanResult, WebsiteScanResult } from 'storage-documents';
-import * as Puppeteer from 'puppeteer';
 import { cloneDeep } from 'lodash';
-import { PageAnalysisResult } from 'scanner-global-library/dist/network/page-analyzer';
 import { AxeScanner } from '../scanner/axe-scanner';
-import { createDiscoveryPattern } from '../crawler/discovery-pattern-factory';
+import { PageMetadata, PageMetadataGenerator } from '../website-builder/page-metadata-generator';
 import { PageScanProcessor } from './page-scan-processor';
 import { DeepScanner } from './deep-scanner';
 
@@ -19,13 +17,12 @@ let loggerMock: IMock<GlobalLogger>;
 let pageMock: IMock<Page>;
 let axeScannerMock: IMock<AxeScanner>;
 let deepScannerMock: IMock<DeepScanner>;
-let puppeteerPageMock: IMock<Puppeteer.Page>;
-let discoveryPatternFactoryMock: IMock<typeof createDiscoveryPattern>;
+let pageMetadataGeneratorMock: IMock<PageMetadataGenerator>;
 let testSubject: PageScanProcessor;
 let axeScanResults: AxeScanResults;
 let pageScanResult: OnDemandPageScanResult;
 let websiteScanResult: WebsiteScanResult;
-let pageAnalysisResult: PageAnalysisResult;
+let pageMetadata: PageMetadata;
 
 const url = 'http://localhost';
 const pageScreenshot = 'page screenshot';
@@ -38,22 +35,25 @@ describe(PageScanProcessor, () => {
         pageMock = Mock.ofType<Page>();
         axeScannerMock = Mock.ofType<AxeScanner>();
         deepScannerMock = Mock.ofType<DeepScanner>();
-        puppeteerPageMock = Mock.ofType<Puppeteer.Page>();
-        discoveryPatternFactoryMock = Mock.ofType<typeof createDiscoveryPattern>();
+        pageMetadataGeneratorMock = Mock.ofType<PageMetadataGenerator>();
         axeScanResults = { scannedUrl: url } as AxeScanResults;
         pageScanResult = { id: 'id' } as OnDemandPageScanResult;
-        pageAnalysisResult = { redirection: false } as PageAnalysisResult;
-
-        pageMock.setup((o) => o.pageAnalysisResult).returns(() => pageAnalysisResult);
         websiteScanResult = {} as WebsiteScanResult;
-        discoveryPatternFactoryMock.setup((o) => o(url)).returns(() => generatedDiscoveryPattern);
+        pageMetadata = {
+            redirection: false,
+            authentication: false,
+        } as PageMetadata;
+        pageMetadataGeneratorMock
+            .setup((o) => o.getMetadata(url, websiteScanResult))
+            .returns(() => Promise.resolve(pageMetadata))
+            .verifiable();
 
         testSubject = new PageScanProcessor(
             pageMock.object,
             axeScannerMock.object,
             deepScannerMock.object,
+            pageMetadataGeneratorMock.object,
             loggerMock.object,
-            discoveryPatternFactoryMock.object,
         );
     });
 
@@ -62,12 +62,16 @@ describe(PageScanProcessor, () => {
         pageMock.verifyAll();
         axeScannerMock.verifyAll();
         deepScannerMock.verifyAll();
-        puppeteerPageMock.verifyAll();
-        discoveryPatternFactoryMock.verifyAll();
+        pageMetadataGeneratorMock.verifyAll();
     });
 
-    it('detect redirect to foreign location with discovery pattern', async () => {
+    it('skip page scan for unscannable location', async () => {
         const loadedUrl = 'http://example.org';
+        pageMetadata = {
+            foreignLocation: true,
+            authentication: false,
+            loadedUrl,
+        } as PageMetadata;
         websiteScanResult = { discoveryPatterns: [generatedDiscoveryPattern] } as WebsiteScanResult;
         const scanMetadata = {
             url,
@@ -78,52 +82,11 @@ describe(PageScanProcessor, () => {
             unscannable: true,
             error: `The scan URL was redirected to foreign location ${loadedUrl}`,
         };
-        pageAnalysisResult = { redirection: true, loadedUrl } as PageAnalysisResult;
-        discoveryPatternFactoryMock.reset();
-        discoveryPatternFactoryMock.setup((o) => o(url)).returns(() => generatedDiscoveryPattern);
-        setupClosePage();
-
-        const results = await testSubject.scan(scanMetadata, pageScanResult, websiteScanResult);
-
-        expect(results).toEqual(axeScanResults);
-    });
-
-    it('detect redirect to foreign location with base URL', async () => {
-        const loadedUrl = 'http://example.org';
-        websiteScanResult = { baseUrl: url } as WebsiteScanResult;
-        const scanMetadata = {
-            url,
-            id: 'id',
-            deepScan: true,
-        };
-        axeScanResults = {
-            unscannable: true,
-            error: `The scan URL was redirected to foreign location ${loadedUrl}`,
-        };
-        pageAnalysisResult = { redirection: true, loadedUrl } as PageAnalysisResult;
-        discoveryPatternFactoryMock.reset();
-        discoveryPatternFactoryMock.setup((o) => o(url)).returns(() => generatedDiscoveryPattern);
-        setupClosePage();
-
-        const results = await testSubject.scan(scanMetadata, pageScanResult, websiteScanResult);
-
-        expect(results).toEqual(axeScanResults);
-    });
-
-    it('detect redirect to foreign location without base URL', async () => {
-        const loadedUrl = 'http://example.org';
-        const scanMetadata = {
-            url,
-            id: 'id',
-            deepScan: true,
-        };
-        axeScanResults = {
-            unscannable: true,
-            error: `The scan URL was redirected to foreign location ${loadedUrl}`,
-        };
-        pageAnalysisResult = { redirection: true, loadedUrl } as PageAnalysisResult;
-        discoveryPatternFactoryMock.reset();
-        discoveryPatternFactoryMock.setup((o) => o(url)).returns(() => generatedDiscoveryPattern);
+        pageMetadataGeneratorMock.reset();
+        pageMetadataGeneratorMock
+            .setup((o) => o.getMetadata(url, websiteScanResult))
+            .returns(() => Promise.resolve(pageMetadata))
+            .verifiable();
         setupClosePage();
 
         const results = await testSubject.scan(scanMetadata, pageScanResult, websiteScanResult);
@@ -138,6 +101,17 @@ describe(PageScanProcessor, () => {
         };
         axeScanResults = { ...axeScanResults, pageScreenshot, pageSnapshot };
 
+        pageMetadata = {
+            foreignLocation: true,
+            authentication: true,
+            authenticationType: 'entraId',
+        } as PageMetadata;
+        pageMetadataGeneratorMock.reset();
+        pageMetadataGeneratorMock
+            .setup((o) => o.getMetadata(url, websiteScanResult))
+            .returns(() => Promise.resolve(pageMetadata))
+            .verifiable();
+
         setupNavigatePage(url, true);
         setupGetPageState();
         setupClosePage();
@@ -148,11 +122,11 @@ describe(PageScanProcessor, () => {
         deepScannerMock.setup((o) => o.runDeepScan(It.isAny(), It.isAny(), websiteScanResult, It.isAny())).verifiable();
         pageScanResult = {
             ...pageScanResult,
-            authentication: { hint: 'azure-ad' },
+            authentication: { hint: 'entraId' },
         };
 
         const authenticationResult = {
-            authenticationType: 'azure-ad',
+            authenticationType: 'entraId',
             authenticated: true,
         } as ResourceAuthenticationResult;
         pageMock
@@ -165,9 +139,53 @@ describe(PageScanProcessor, () => {
         const expectedPageScanResult = cloneDeep({
             ...pageScanResult,
             authentication: {
-                hint: 'azure-ad',
-                detected: 'azure-ad',
+                hint: 'entraId',
+                detected: 'entraId',
                 state: 'succeeded',
+            },
+        });
+        expect(pageScanResult).toEqual(expectedPageScanResult);
+        expect(results).toEqual(axeScanResults);
+    });
+
+    it('scan with unknown authentication detected', async () => {
+        const scanMetadata = {
+            url: url,
+            id: 'id',
+        };
+        axeScanResults = { ...axeScanResults, pageScreenshot, pageSnapshot };
+
+        pageMetadata = {
+            foreignLocation: true,
+            authentication: true,
+            authenticationType: 'undetermined',
+        } as PageMetadata;
+        pageMetadataGeneratorMock.reset();
+        pageMetadataGeneratorMock
+            .setup((o) => o.getMetadata(url, websiteScanResult))
+            .returns(() => Promise.resolve(pageMetadata))
+            .verifiable();
+
+        setupNavigatePage(url);
+        setupGetPageState();
+        setupClosePage();
+        axeScannerMock
+            .setup((s) => s.scan(pageMock.object))
+            .returns(() => Promise.resolve(axeScanResults))
+            .verifiable();
+        deepScannerMock.setup((o) => o.runDeepScan(It.isAny(), It.isAny(), websiteScanResult, It.isAny())).verifiable();
+        pageMock
+            .setup((p) => p.authenticationResult)
+            .returns(() => undefined)
+            .verifiable();
+
+        const results = await testSubject.scan(scanMetadata, pageScanResult, websiteScanResult);
+
+        const expectedPageScanResult = cloneDeep({
+            ...pageScanResult,
+            authentication: {
+                detected: 'undetermined',
+                state: 'unauthenticated',
             },
         });
         expect(pageScanResult).toEqual(expectedPageScanResult);
@@ -261,10 +279,6 @@ describe(PageScanProcessor, () => {
 });
 
 function setupNavigatePage(urlParam: string = url, enableAuthentication: boolean = false): void {
-    pageMock
-        .setup((o) => o.analyze(urlParam))
-        .returns(() => Promise.resolve())
-        .verifiable();
     pageMock.setup((p) => p.navigate(urlParam, { enableAuthentication })).verifiable();
 }
 

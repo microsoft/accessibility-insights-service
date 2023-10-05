@@ -7,7 +7,7 @@ import { GlobalLogger } from 'logger';
 import { Page } from 'puppeteer';
 import { IMock, It, Mock } from 'typemoq';
 import { BatchConfig } from 'azure-services';
-import { CrawlerOptions, PageCrawlerEngine } from '../crawler/page-crawler-engine';
+import { CrawlerOptions, PageCrawlerEngine } from './page-crawler-engine';
 import { CrawlRunner } from './crawl-runner';
 
 let pageCrawlerEngineMock: IMock<PageCrawlerEngine>;

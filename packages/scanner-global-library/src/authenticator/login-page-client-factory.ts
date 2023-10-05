@@ -2,19 +2,20 @@
 // Licensed under the MIT License.
 
 import { injectable, inject } from 'inversify';
-import { LoginPageType } from './login-page-detector';
+import { AuthenticationType } from 'storage-documents';
 import { AzureLoginPageClient, LoginPageClient } from './azure-login-page-client';
 
 @injectable()
 export class LoginPageClientFactory {
     constructor(@inject(AzureLoginPageClient) private readonly azureLoginPageClient: AzureLoginPageClient) {}
 
-    public getPageClient(loginPageType: LoginPageType): LoginPageClient {
-        switch (loginPageType) {
-            case 'MicrosoftAzure':
+    public getPageClient(authenticationType: AuthenticationType): LoginPageClient {
+        switch (authenticationType) {
+            case 'entraId':
                 return this.azureLoginPageClient;
+            case 'undetermined':
             default:
-                throw new Error(`Login page type ${loginPageType} is not supported.`);
+                return undefined;
         }
     }
 }

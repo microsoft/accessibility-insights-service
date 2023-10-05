@@ -113,7 +113,7 @@ describe(ScanBatchRequestFeedController, () => {
 
     it.each([
         {},
-        { scanNotifyUrl: 'url', privacyScan: { cookieBannerType: 'standard' }, authenticationType: 'azure-ad' } as ScanRunBatchRequest,
+        { scanNotifyUrl: 'url', privacyScan: { cookieBannerType: 'standard' }, authenticationType: 'entraId' } as ScanRunBatchRequest,
     ])(
         'propagates batch request properties %s to scan request and scan result documents',
         async (scanRunBatchRequestOverride: ScanRunBatchRequest) => {

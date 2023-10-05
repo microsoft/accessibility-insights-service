@@ -3,7 +3,7 @@
 openapi: 3.0.0
 info:
     version: 1.0.0
-    title: Accessibility Insight Service – Scan API
+    title: Accessibility Insight Service REST API
 paths:
     /scans:
         post:
@@ -179,7 +179,7 @@ components:
                     description: If present, the type of authentication to be used to authenticate web pages.
                     type: string
                     enum:
-                        - azure-ad
+                        - entraId
                 privacyScan:
                     type: object
                     description: If present, the url will be scanned for cookies instead of accessibility issues. In this case, the deepScan and scanNotifyUrl fields will be ignored.
@@ -257,11 +257,14 @@ components:
                         SARIF format specification
                         https://www.oasis-open.org/committees/sarif/charter.php
                     enum:
+                        - axe
                         - sarif
                         - html
                         - consolidated.html
                         - json
                         - consolidated.json
+                        - page.png
+                        - page.mhtml
                 links:
                     $ref: '#/components/schemas/Links'
         DeepScanResultItem:
@@ -332,6 +335,14 @@ components:
                         - UnsupportedContentType
                         - UnsupportedApiVersion
                         - OutOfRangePriority
+                        - MalformedBody
+                        - MissingReleaseVersion
+                        - InvalidScanNotifyUrl
+                        - InvalidReportGroup
+                        - MissingRequiredDeepScanProperties
+                        - TooManyKnownPages
+                        - InvalidKnownPageURL
+                        - DuplicateKnownPage
                 codeId:
                     type: integer
                     format: int32
@@ -351,15 +362,17 @@ components:
                     enum:
                         - InternalError
                         - UrlNavigationTimeout
-                        - HttpErrorCode
                         - SslError
                         - ResourceLoadFailure
                         - InvalidUrl
                         - EmptyPage
+                        - HttpErrorCode
                         - NavigationError
                         - InvalidContentType
                         - UrlNotResolved
                         - ScanTimeout
+                        - BannerXPathNotDetected
+                        - AuthenticationError
                 codeId:
                     type: integer
                     format: int32
@@ -394,6 +407,7 @@ components:
                 - running
                 - completed
                 - failed
+                - unscannable
         AuthenticationResult:
             type: object
             required:
@@ -403,10 +417,11 @@ components:
                 detected:
                     type: string
                     enum:
-                        - azure-ad
+                        - undetermined
+                        - entraId
                 state:
                     type: string
                     enum:
                         - succeeded
                         - failed
-                        - notDetected
+                        - unauthenticated

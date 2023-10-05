@@ -52,24 +52,19 @@ describe(ResourceAuthenticator, () => {
     it('should authenticate resource', async () => {
         const authenticationResult = {
             navigationResponse: { httpResponse: { url: () => 'url' } } as NavigationResponse,
-            loginPageType: 'MicrosoftAzure',
-            authenticationType: 'azure-ad',
+            authenticationType: 'entraId',
             authenticated: true,
         };
         loginPageDetectorMock
-            .setup((o) => o.getLoginPageType(url))
-            .returns(() => 'MicrosoftAzure')
+            .setup((o) => o.getAuthenticationType(url))
+            .returns(() => 'entraId')
             .verifiable();
         loginPageClientMock
             .setup((o) => o.login(puppeteerPageMock.object))
             .returns(() => Promise.resolve(authenticationResult.navigationResponse))
             .verifiable();
-        loginPageClientMock
-            .setup((o) => o.authenticationType)
-            .returns(() => 'azure-ad')
-            .verifiable();
         loginPageClientFactoryMock
-            .setup((o) => o.getPageClient('MicrosoftAzure'))
+            .setup((o) => o.getPageClient('entraId'))
             .returns(() => loginPageClientMock.object)
             .verifiable();
 
@@ -79,8 +74,18 @@ describe(ResourceAuthenticator, () => {
 
     it('should skip if no login page detected', async () => {
         loginPageDetectorMock
-            .setup((o) => o.getLoginPageType(url))
+            .setup((o) => o.getAuthenticationType(url))
             .returns(() => undefined)
+            .verifiable();
+
+        const response = await resourceAuthenticator.authenticate(puppeteerPageMock.object);
+        expect(response).toBeUndefined();
+    });
+
+    it('should skip if undetermined authentication detected', async () => {
+        loginPageDetectorMock
+            .setup((o) => o.getAuthenticationType(url))
+            .returns(() => 'undetermined')
             .verifiable();
 
         const response = await resourceAuthenticator.authenticate(puppeteerPageMock.object);

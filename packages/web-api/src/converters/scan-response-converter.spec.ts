@@ -263,8 +263,8 @@ function getPageScanResult(
         ...(isAuthenticationEnabled
             ? {
                   authentication: {
-                      hint: 'azure-ad',
-                      detected: 'azure-ad',
+                      hint: 'entraId',
+                      detected: 'entraId',
                       state: 'succeeded',
                   },
               }
@@ -319,7 +319,7 @@ function getScanResultClientResponseFull(
         ...(isAuthenticationEnabled
             ? {
                   authentication: {
-                      detected: 'azure-ad',
+                      detected: 'entraId',
                       state: 'succeeded',
                   },
               }
