@@ -93,6 +93,7 @@ export class WebDriver {
             });
 
             // https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/taskkill
+            let terminated = false;
             exec(`taskkill /im ${processName} /f /t`, (error, stdout) => {
                 if (error && !error.message.includes('not found')) {
                     this.logger?.logError('An error occurred while terminating browser process.', {
@@ -103,8 +104,16 @@ export class WebDriver {
                 if (!isEmpty(stdout) && !stdout.includes('not found')) {
                     this.logger?.logInfo(`End ${processName} process.\n${stdout}`);
                 }
+
+                terminated = true;
             });
 
+            await System.waitLoop(
+                async () => terminated,
+                async (completed) => completed === true,
+            );
+
+            this.browser = undefined;
             this.logger?.logInfo('Browser instance was closed.');
         }
     }
