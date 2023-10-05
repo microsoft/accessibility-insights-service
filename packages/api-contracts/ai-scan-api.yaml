@@ -179,7 +179,7 @@ components:
                     description: If present, the type of authentication to be used to authenticate web pages.
                     type: string
                     enum:
-                        - azure-ad
+                        - entraId
                 privacyScan:
                     type: object
                     description: If present, the url will be scanned for cookies instead of accessibility issues. In this case, the deepScan and scanNotifyUrl fields will be ignored.
