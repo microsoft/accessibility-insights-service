@@ -33,7 +33,7 @@ let puppeteerGotoResponse: Puppeteer.HTTPResponse;
 
 describe(PageAnalyzer, () => {
     beforeEach(() => {
-        puppeteerPageMock = Mock.ofType(Puppeteer.Page);
+        puppeteerPageMock = Mock.ofType<Puppeteer.Page>();
         loggerMock = Mock.ofType(GlobalLogger);
         pageResponseProcessorMock = Mock.ofType(PageResponseProcessor);
         pageRequestInterceptorMock = Mock.ofType<PageRequestInterceptor>();

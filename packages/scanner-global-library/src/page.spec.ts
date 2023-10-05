@@ -389,7 +389,7 @@ describe(Page, () => {
             } as Puppeteer.ScreenshotOptions;
             puppeteerPageMock
                 .setup((o) => o.screenshot(options))
-                .returns(() => Promise.resolve('data'))
+                .returns(() => Promise.resolve('data' as any))
                 .verifiable();
             const data = await page.getPageScreenshot();
             expect(data).toEqual('data');

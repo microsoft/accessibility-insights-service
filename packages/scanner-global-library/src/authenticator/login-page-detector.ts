@@ -35,8 +35,8 @@ export class LoginPageDetector {
     }
 
     private detectLoginHint(url: string): AuthenticationType {
-        const encodedUrl = encodeURI(url);
-        const hints = urlLoginHints.find((hint) => encodedUrl.includes(hint));
+        const decodedURI = decodeURI(url);
+        const hints = urlLoginHints.find((hint) => decodedURI.includes(hint));
         if (hints !== undefined) {
             return 'undetermined';
         }
