@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+import { exec } from 'child_process';
 import { PromiseUtils, System } from 'common';
 import { inject, injectable, optional } from 'inversify';
 import { GlobalLogger, Logger } from 'logger';
@@ -9,6 +10,7 @@ import * as Puppeteer from 'puppeteer';
 import PuppeteerExtra from 'puppeteer-extra';
 // eslint-disable-next-line @typescript-eslint/tslint/config
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
+import { isEmpty } from 'lodash';
 import { StealthPluginType } from './stealth-plugin-type';
 import { defaultBrowserOptions, defaultLaunchOptions } from './puppeteer-options';
 import { ExtensionLoader } from './browser-extensions/extension-loader';
@@ -75,24 +77,35 @@ export class WebDriver {
     }
 
     public async close(): Promise<void> {
+        const processName = 'chrome.exe';
+
         if (this.browser !== undefined) {
             const closeBrowser = async () => {
                 try {
                     await this.browser.close();
                 } catch (error) {
-                    this.logger.logError('An error occurred while closing Chromium browser.', { error: System.serializeError(error) });
+                    this.logger?.logError('An error occurred while closing browser.', { error: System.serializeError(error) });
                 }
             };
 
             await this.promiseUtils.waitFor(closeBrowser(), this.browserCloseTimeoutMsecs, async () => {
-                this.logger?.logError(`Chromium browser did not close after ${this.browserCloseTimeoutMsecs} ms.`);
-                if (this.browser.process()) {
-                    this.logger?.logInfo('Sending kill signal to Chromium browser process.');
-                    this.browser.process().kill('SIGINT');
+                this.logger?.logError(`Browser did not close after ${this.browserCloseTimeoutMsecs} msec.`);
+            });
+
+            // https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/taskkill
+            exec(`taskkill /im ${processName} /f /t`, (error, stdout) => {
+                if (error && !error.message.includes('not found')) {
+                    this.logger?.logError('An error occurred while terminating browser process.', {
+                        error: System.serializeError(error),
+                    });
+                }
+
+                if (!isEmpty(stdout) && !stdout.includes('not found')) {
+                    this.logger?.logInfo(`End ${processName} process.\n${stdout}`);
                 }
             });
 
-            this.logger?.logInfo('Chromium browser instance stopped.');
+            this.logger?.logInfo('Browser instance was closed.');
         }
     }
 
