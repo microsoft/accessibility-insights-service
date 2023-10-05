@@ -58,7 +58,7 @@
         "levelup": "^5.1.1",
         "lodash": "^4.17.21",
         "moment": "^2.29.4",
-        "puppeteer": "^21.0.0",
+        "puppeteer": "^21.3.7",
         "reflect-metadata": "^0.1.13",
         "sha.js": "^2.4.11",
         "yargs": "^17.6.2"
