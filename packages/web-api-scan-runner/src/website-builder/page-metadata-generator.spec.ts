@@ -28,7 +28,7 @@ describe(PageMetadataGenerator, () => {
         websiteScanResult = {} as WebsiteScanResult;
         discoveryPatternFactoryMock.setup((o) => o(url)).returns(() => generatedDiscoveryPattern);
 
-        pageMetadataGenerator = new PageMetadataGenerator(pageMock.object);
+        pageMetadataGenerator = new PageMetadataGenerator();
     });
 
     afterEach(() => {
@@ -58,7 +58,7 @@ describe(PageMetadataGenerator, () => {
             url,
         };
 
-        const results = await pageMetadataGenerator.getMetadata(url, websiteScanResult);
+        const results = await pageMetadataGenerator.getMetadata(url, pageMock.object, websiteScanResult);
 
         expect(results).toEqual(expectedPageMetadata);
     });
@@ -78,7 +78,7 @@ describe(PageMetadataGenerator, () => {
             url,
         };
 
-        const results = await pageMetadataGenerator.getMetadata(url, websiteScanResult);
+        const results = await pageMetadataGenerator.getMetadata(url, pageMock.object, websiteScanResult);
 
         expect(results).toEqual(expectedPageMetadata);
     });
@@ -98,7 +98,7 @@ describe(PageMetadataGenerator, () => {
             url,
         };
 
-        const results = await pageMetadataGenerator.getMetadata(url, websiteScanResult);
+        const results = await pageMetadataGenerator.getMetadata(url, pageMock.object, websiteScanResult);
 
         expect(results).toEqual(expectedPageMetadata);
     });
@@ -117,7 +117,7 @@ describe(PageMetadataGenerator, () => {
             url,
         };
 
-        const results = await pageMetadataGenerator.getMetadata(url, websiteScanResult);
+        const results = await pageMetadataGenerator.getMetadata(url, pageMock.object, websiteScanResult);
 
         expect(results).toEqual(expectedPageMetadata);
     });

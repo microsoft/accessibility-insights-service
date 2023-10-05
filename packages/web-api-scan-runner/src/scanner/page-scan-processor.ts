@@ -28,7 +28,7 @@ export class PageScanProcessor {
     ): Promise<AxeScanResults> {
         let axeScanResults: AxeScanResults;
         try {
-            const pageMetadata = await this.pageMetadataGenerator.getMetadata(runnerScanMetadata.url, websiteScanResult);
+            const pageMetadata = await this.pageMetadataGenerator.getMetadata(runnerScanMetadata.url, this.page, websiteScanResult);
 
             const state = this.getScannableState(pageMetadata);
             if (state.unscannable === true) {

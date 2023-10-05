@@ -44,7 +44,7 @@ describe(PageScanProcessor, () => {
             authentication: false,
         } as PageMetadata;
         pageMetadataGeneratorMock
-            .setup((o) => o.getMetadata(url, websiteScanResult))
+            .setup((o) => o.getMetadata(url, pageMock.object, websiteScanResult))
             .returns(() => Promise.resolve(pageMetadata))
             .verifiable();
 
@@ -84,7 +84,7 @@ describe(PageScanProcessor, () => {
         };
         pageMetadataGeneratorMock.reset();
         pageMetadataGeneratorMock
-            .setup((o) => o.getMetadata(url, websiteScanResult))
+            .setup((o) => o.getMetadata(url, pageMock.object, websiteScanResult))
             .returns(() => Promise.resolve(pageMetadata))
             .verifiable();
         setupClosePage();
@@ -108,7 +108,7 @@ describe(PageScanProcessor, () => {
         } as PageMetadata;
         pageMetadataGeneratorMock.reset();
         pageMetadataGeneratorMock
-            .setup((o) => o.getMetadata(url, websiteScanResult))
+            .setup((o) => o.getMetadata(url, pageMock.object, websiteScanResult))
             .returns(() => Promise.resolve(pageMetadata))
             .verifiable();
 
@@ -162,7 +162,7 @@ describe(PageScanProcessor, () => {
         } as PageMetadata;
         pageMetadataGeneratorMock.reset();
         pageMetadataGeneratorMock
-            .setup((o) => o.getMetadata(url, websiteScanResult))
+            .setup((o) => o.getMetadata(url, pageMock.object, websiteScanResult))
             .returns(() => Promise.resolve(pageMetadata))
             .verifiable();
 
