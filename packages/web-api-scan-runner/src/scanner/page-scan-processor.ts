@@ -59,7 +59,19 @@ export class PageScanProcessor {
     }
 
     private getScannableState(pageMetadata: PageMetadata): AxeScanResults {
-        // Redirected to foreign no authentication location
+        // Not allowed location
+        if (pageMetadata.allowed === false) {
+            this.logger.logWarn(`The scan URL location is not allowed.`, {
+                loadedUrl: pageMetadata.loadedUrl,
+            });
+
+            return {
+                unscannable: true,
+                error: `The scan URL location is not allowed ${pageMetadata.loadedUrl}`,
+            };
+        }
+
+        // Redirected to foreign unauthenticated location
         if (pageMetadata.foreignLocation === true && pageMetadata.authentication !== true) {
             this.logger.logWarn(`The scan URL was redirected to foreign location and will not be processed future.`, {
                 loadedUrl: pageMetadata.loadedUrl,
