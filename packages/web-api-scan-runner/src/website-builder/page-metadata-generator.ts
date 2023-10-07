@@ -5,9 +5,11 @@ import { inject, injectable } from 'inversify';
 import { Page } from 'scanner-global-library';
 import { AuthenticationType, WebsiteScanResult } from 'storage-documents';
 import { createDiscoveryPattern } from '../crawler/discovery-pattern-factory';
+import { UrlLocationValidator } from './url-location-validator';
 
 export interface PageMetadata {
     url: string;
+    allowed: boolean;
     loadedUrl?: string;
     redirection?: boolean;
     authentication?: boolean;
@@ -18,31 +20,39 @@ export interface PageMetadata {
 @injectable()
 export class PageMetadataGenerator {
     public constructor(
-        @inject(Page) private readonly page: Page,
+        @inject(UrlLocationValidator) private readonly urlLocationValidator: UrlLocationValidator,
         private readonly createDiscoveryPatternFn: typeof createDiscoveryPattern = createDiscoveryPattern,
     ) {}
 
-    public async getMetadata(url: string, websiteScanResult: WebsiteScanResult): Promise<PageMetadata> {
-        await this.page.analyze(url);
-        const foreignLocation = await this.hasForeignLocation(websiteScanResult);
+    public async getMetadata(url: string, page: Page, websiteScanResult: WebsiteScanResult): Promise<PageMetadata> {
+        let foreignLocation = false;
+
+        const urlAllowed = this.urlLocationValidator.allowed(url);
+        if (urlAllowed === true) {
+            await page.analyze(url);
+            foreignLocation = await this.hasForeignLocation(page, websiteScanResult);
+        }
 
         return {
             url,
-            loadedUrl: this.page.pageAnalysisResult?.loadedUrl,
-            redirection: this.page.pageAnalysisResult?.redirection,
-            authentication: this.page.pageAnalysisResult?.authentication,
-            authenticationType: this.page.pageAnalysisResult?.authenticationType,
+            allowed:
+                urlAllowed &&
+                (page.pageAnalysisResult?.loadedUrl === undefined || this.urlLocationValidator.allowed(page.pageAnalysisResult.loadedUrl)),
+            loadedUrl: page.pageAnalysisResult?.loadedUrl,
+            redirection: page.pageAnalysisResult?.redirection,
+            authentication: page.pageAnalysisResult?.authentication,
+            authenticationType: page.pageAnalysisResult?.authenticationType,
             foreignLocation,
         };
     }
 
-    private async hasForeignLocation(websiteScanResult: WebsiteScanResult): Promise<boolean> {
-        if (this.page.pageAnalysisResult?.redirection === true) {
+    private async hasForeignLocation(page: Page, websiteScanResult: WebsiteScanResult): Promise<boolean> {
+        if (page.pageAnalysisResult?.redirection === true) {
             const discoveryPatterns = websiteScanResult?.discoveryPatterns ?? [
-                this.createDiscoveryPatternFn(websiteScanResult?.baseUrl ?? this.page.pageAnalysisResult.url),
+                this.createDiscoveryPatternFn(websiteScanResult?.baseUrl ?? page.pageAnalysisResult.url),
             ];
             // eslint-disable-next-line security/detect-non-literal-regexp
-            const match = discoveryPatterns.filter((r) => new RegExp(r, 'i').test(this.page.pageAnalysisResult.loadedUrl)).length > 0;
+            const match = discoveryPatterns.filter((r) => new RegExp(r, 'i').test(page.pageAnalysisResult.loadedUrl)).length > 0;
 
             return !match;
         }

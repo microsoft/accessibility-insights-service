@@ -227,6 +227,8 @@ export class Page {
         this.pageAnalysisResult = await this.pageAnalyzer.analyze(this.requestUrl, this.page);
         if (this.pageAnalysisResult.navigationResponse?.browserError !== undefined) {
             this.setLastNavigationState('analysis', this.pageAnalysisResult.navigationResponse);
+        } else {
+            await this.reopenBrowser();
         }
     }
 

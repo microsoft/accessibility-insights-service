@@ -3,14 +3,16 @@
 
 import 'reflect-metadata';
 
-import { IMock, Mock } from 'typemoq';
+import { IMock, It, Mock } from 'typemoq';
 import { Page, PageAnalysisResult } from 'scanner-global-library';
 import { WebsiteScanResult } from 'storage-documents';
 import { createDiscoveryPattern } from '../crawler/discovery-pattern-factory';
 import { PageMetadataGenerator } from './page-metadata-generator';
+import { UrlLocationValidator } from './url-location-validator';
 
 let pageMock: IMock<Page>;
 let discoveryPatternFactoryMock: IMock<typeof createDiscoveryPattern>;
+let urlLocationValidatorMock: IMock<UrlLocationValidator>;
 let websiteScanResult: WebsiteScanResult;
 let pageAnalysisResult: PageAnalysisResult;
 let pageMetadataGenerator: PageMetadataGenerator;
@@ -22,13 +24,15 @@ describe(PageMetadataGenerator, () => {
     beforeEach(() => {
         pageMock = Mock.ofType<Page>();
         discoveryPatternFactoryMock = Mock.ofType<typeof createDiscoveryPattern>();
+        urlLocationValidatorMock = Mock.ofType<UrlLocationValidator>();
 
         pageAnalysisResult = { redirection: false } as PageAnalysisResult;
         pageMock.setup((o) => o.pageAnalysisResult).returns(() => pageAnalysisResult);
         websiteScanResult = {} as WebsiteScanResult;
         discoveryPatternFactoryMock.setup((o) => o(url)).returns(() => generatedDiscoveryPattern);
+        urlLocationValidatorMock.setup((o) => o.allowed(It.isAny())).returns(() => true);
 
-        pageMetadataGenerator = new PageMetadataGenerator(pageMock.object);
+        pageMetadataGenerator = new PageMetadataGenerator(urlLocationValidatorMock.object);
     });
 
     afterEach(() => {
@@ -36,29 +40,64 @@ describe(PageMetadataGenerator, () => {
         discoveryPatternFactoryMock.verifyAll();
     });
 
+    it('return page metadata for disallowed loaded URL', async () => {
+        const loadedUrl = 'http://example.org';
+
+        urlLocationValidatorMock.reset();
+        urlLocationValidatorMock
+            .setup((o) => o.allowed(url))
+            .returns(() => true)
+            .verifiable();
+        urlLocationValidatorMock
+            .setup((o) => o.allowed(loadedUrl))
+            .returns(() => false)
+            .verifiable();
+        pageAnalysisResult = {
+            url,
+            authentication: true,
+            authenticationType: 'entraId',
+            redirection: false,
+            loadedUrl,
+        } as PageAnalysisResult;
+        const expectedPageMetadata = {
+            url,
+            allowed: false,
+            authentication: true,
+            authenticationType: 'entraId',
+            foreignLocation: false,
+            loadedUrl,
+            redirection: false,
+        };
+
+        const results = await pageMetadataGenerator.getMetadata(url, pageMock.object, websiteScanResult);
+
+        expect(results).toEqual(expectedPageMetadata);
+    });
+
     it('return page metadata', async () => {
         websiteScanResult = { discoveryPatterns: [generatedDiscoveryPattern] } as WebsiteScanResult;
         pageAnalysisResult = {
+            url,
             authentication: true,
             authenticationType: 'entraId',
             redirection: false,
             loadedUrl: url,
-            url,
         } as PageAnalysisResult;
         pageMock
             .setup((o) => o.analyze(url))
             .returns(() => Promise.resolve())
             .verifiable();
         const expectedPageMetadata = {
+            url,
+            allowed: true,
             authentication: true,
             authenticationType: 'entraId',
             foreignLocation: false,
             loadedUrl: url,
             redirection: false,
-            url,
         };
 
-        const results = await pageMetadataGenerator.getMetadata(url, websiteScanResult);
+        const results = await pageMetadataGenerator.getMetadata(url, pageMock.object, websiteScanResult);
 
         expect(results).toEqual(expectedPageMetadata);
     });
@@ -72,13 +111,14 @@ describe(PageMetadataGenerator, () => {
             .returns(() => Promise.resolve())
             .verifiable();
         const expectedPageMetadata = {
+            url,
+            allowed: true,
             foreignLocation: true,
             loadedUrl,
             redirection: true,
-            url,
         };
 
-        const results = await pageMetadataGenerator.getMetadata(url, websiteScanResult);
+        const results = await pageMetadataGenerator.getMetadata(url, pageMock.object, websiteScanResult);
 
         expect(results).toEqual(expectedPageMetadata);
     });
@@ -92,13 +132,14 @@ describe(PageMetadataGenerator, () => {
             .returns(() => Promise.resolve())
             .verifiable();
         const expectedPageMetadata = {
+            url,
+            allowed: true,
             foreignLocation: true,
             loadedUrl,
             redirection: true,
-            url,
         };
 
-        const results = await pageMetadataGenerator.getMetadata(url, websiteScanResult);
+        const results = await pageMetadataGenerator.getMetadata(url, pageMock.object, websiteScanResult);
 
         expect(results).toEqual(expectedPageMetadata);
     });
@@ -111,13 +152,14 @@ describe(PageMetadataGenerator, () => {
             .returns(() => Promise.resolve())
             .verifiable();
         const expectedPageMetadata = {
+            url,
+            allowed: true,
             foreignLocation: true,
             loadedUrl,
             redirection: true,
-            url,
         };
 
-        const results = await pageMetadataGenerator.getMetadata(url, websiteScanResult);
+        const results = await pageMetadataGenerator.getMetadata(url, pageMock.object, websiteScanResult);
 
         expect(results).toEqual(expectedPageMetadata);
     });

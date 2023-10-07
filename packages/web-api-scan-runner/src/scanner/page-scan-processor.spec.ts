@@ -44,7 +44,7 @@ describe(PageScanProcessor, () => {
             authentication: false,
         } as PageMetadata;
         pageMetadataGeneratorMock
-            .setup((o) => o.getMetadata(url, websiteScanResult))
+            .setup((o) => o.getMetadata(url, pageMock.object, websiteScanResult))
             .returns(() => Promise.resolve(pageMetadata))
             .verifiable();
 
@@ -65,7 +65,37 @@ describe(PageScanProcessor, () => {
         pageMetadataGeneratorMock.verifyAll();
     });
 
-    it('skip page scan for unscannable location', async () => {
+    it('skip page scan for not allowed location', async () => {
+        const loadedUrl = 'http://example.org';
+        pageMetadata = {
+            allowed: false,
+            foreignLocation: true,
+            authentication: false,
+            loadedUrl,
+        } as PageMetadata;
+        websiteScanResult = { discoveryPatterns: [generatedDiscoveryPattern] } as WebsiteScanResult;
+        const scanMetadata = {
+            url,
+            id: 'id',
+            deepScan: true,
+        };
+        axeScanResults = {
+            unscannable: true,
+            error: `The scan URL location is not allowed ${loadedUrl}`,
+        };
+        pageMetadataGeneratorMock.reset();
+        pageMetadataGeneratorMock
+            .setup((o) => o.getMetadata(url, pageMock.object, websiteScanResult))
+            .returns(() => Promise.resolve(pageMetadata))
+            .verifiable();
+        setupClosePage();
+
+        const results = await testSubject.scan(scanMetadata, pageScanResult, websiteScanResult);
+
+        expect(results).toEqual(axeScanResults);
+    });
+
+    it('skip page scan for foreign location', async () => {
         const loadedUrl = 'http://example.org';
         pageMetadata = {
             foreignLocation: true,
@@ -84,7 +114,7 @@ describe(PageScanProcessor, () => {
         };
         pageMetadataGeneratorMock.reset();
         pageMetadataGeneratorMock
-            .setup((o) => o.getMetadata(url, websiteScanResult))
+            .setup((o) => o.getMetadata(url, pageMock.object, websiteScanResult))
             .returns(() => Promise.resolve(pageMetadata))
             .verifiable();
         setupClosePage();
@@ -108,7 +138,7 @@ describe(PageScanProcessor, () => {
         } as PageMetadata;
         pageMetadataGeneratorMock.reset();
         pageMetadataGeneratorMock
-            .setup((o) => o.getMetadata(url, websiteScanResult))
+            .setup((o) => o.getMetadata(url, pageMock.object, websiteScanResult))
             .returns(() => Promise.resolve(pageMetadata))
             .verifiable();
 
@@ -162,7 +192,7 @@ describe(PageScanProcessor, () => {
         } as PageMetadata;
         pageMetadataGeneratorMock.reset();
         pageMetadataGeneratorMock
-            .setup((o) => o.getMetadata(url, websiteScanResult))
+            .setup((o) => o.getMetadata(url, pageMock.object, websiteScanResult))
             .returns(() => Promise.resolve(pageMetadata))
             .verifiable();
 
