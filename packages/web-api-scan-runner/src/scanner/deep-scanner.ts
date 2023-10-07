@@ -10,7 +10,7 @@ import { ServiceConfiguration } from 'common';
 import { createDiscoveryPattern } from '../crawler/discovery-pattern-factory';
 import { CrawlRunner } from '../crawler/crawl-runner';
 import { ScanFeedGenerator } from '../crawler/scan-feed-generator';
-import { processDiscoveredUrls } from '../crawler/discovered-url-processor';
+import { DiscoveredUrlProcessor } from '../crawler/discovered-url-processor';
 
 @injectable()
 export class DeepScanner {
@@ -20,7 +20,7 @@ export class DeepScanner {
         @inject(WebsiteScanResultProvider) private readonly websiteScanResultProvider: WebsiteScanResultProvider,
         @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
         @inject(GlobalLogger) private readonly logger: GlobalLogger,
-        private readonly processUrls: typeof processDiscoveredUrls = processDiscoveredUrls,
+        @inject(DiscoveredUrlProcessor) private readonly discoveredUrlProcessor: DiscoveredUrlProcessor,
         private readonly createDiscoveryPatternFn: typeof createDiscoveryPattern = createDiscoveryPattern,
     ) {}
 
@@ -59,7 +59,11 @@ export class DeepScanner {
 
         // fetch websiteScanResult.knownPages from a storage
         const websiteScanResultExpanded = await this.websiteScanResultProvider.read(websiteScanResult.id, true);
-        const processedUrls = this.processUrls(discoveredUrls, deepScanDiscoveryLimit, websiteScanResultExpanded.knownPages);
+        const processedUrls = this.discoveredUrlProcessor.process(
+            discoveredUrls,
+            deepScanDiscoveryLimit,
+            websiteScanResultExpanded.knownPages,
+        );
         const websiteScanResultUpdated = await this.updateWebsiteScanResult(
             runnerScanMetadata.id,
             websiteScanResult,

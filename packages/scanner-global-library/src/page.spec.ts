@@ -130,6 +130,7 @@ describe(Page, () => {
         });
 
         it('navigates to page and saves response', async () => {
+            setupPageCreate();
             pageNavigatorMock
                 .setup(async (o) => o.navigate(url, puppeteerPageMock.object))
                 .returns(() => Promise.resolve(navigationResponse))
@@ -147,6 +148,7 @@ describe(Page, () => {
         });
 
         it('navigates to page with authentication', async () => {
+            setupPageCreate();
             const authenticationResult = {
                 navigationResponse: { httpResponse: { url: () => 'localhost/1' } },
                 authenticated: true,
@@ -177,27 +179,12 @@ describe(Page, () => {
         });
 
         it('handles browser error on navigate', async () => {
+            setupPageCreate();
             const browserError = { errorType: 'SslError', statusCode: 500 } as BrowserError;
             navigationResponse = { browserError, httpResponse: { ok: () => false } as Puppeteer.HTTPResponse };
             pageNetworkTracerMock
                 .setup(async (o) => o.trace(url, puppeteerPageMock.object))
                 .returns(() => Promise.resolve())
-                .verifiable();
-            browserMock
-                .setup((o) => o.userAgent())
-                .returns(() => Promise.resolve(userAgent))
-                .verifiable();
-            browserMock
-                .setup(async (o) => o.newPage())
-                .returns(() => Promise.resolve(puppeteerPageMock.object))
-                .verifiable();
-            webDriverMock
-                .setup(async (o) => o.launch(It.isAny()))
-                .returns(() => Promise.resolve(browserMock.object))
-                .verifiable();
-            webDriverMock
-                .setup(async (o) => o.waitForPageCreation())
-                .returns(() => Promise.resolve(true))
                 .verifiable();
 
             await page.navigate(url);
@@ -206,6 +193,7 @@ describe(Page, () => {
         });
 
         it('set extra HTTP headers on navigate', async () => {
+            setupPageCreate();
             process.env.X_FORWARDED_FOR_HTTP_HEADER = '1.1.1.1';
             pageNavigatorMock
                 .setup(async (o) => o.navigate(url, puppeteerPageMock.object))
@@ -300,22 +288,7 @@ describe(Page, () => {
 
     describe('Miscellaneous', () => {
         it('create()', async () => {
-            browserMock
-                .setup((o) => o.userAgent())
-                .returns(() => Promise.resolve(userAgent))
-                .verifiable();
-            browserMock
-                .setup(async (o) => o.newPage())
-                .returns(() => Promise.resolve(puppeteerPageMock.object))
-                .verifiable();
-            webDriverMock
-                .setup(async (o) => o.launch(It.isAny()))
-                .returns(() => Promise.resolve(browserMock.object))
-                .verifiable();
-            webDriverMock
-                .setup(async (o) => o.waitForPageCreation())
-                .returns(() => Promise.resolve(true))
-                .verifiable();
+            setupPageCreate();
             page.browser = undefined;
             (page as any).page = undefined;
 
@@ -422,6 +395,25 @@ describe(Page, () => {
         });
     });
 });
+
+function setupPageCreate(): void {
+    browserMock
+        .setup((o) => o.userAgent())
+        .returns(() => Promise.resolve(userAgent))
+        .verifiable();
+    browserMock
+        .setup(async (o) => o.newPage())
+        .returns(() => Promise.resolve(puppeteerPageMock.object))
+        .verifiable();
+    webDriverMock
+        .setup(async (o) => o.launch(It.isAny()))
+        .returns(() => Promise.resolve(browserMock.object))
+        .verifiable();
+    webDriverMock
+        .setup(async (o) => o.waitForPageCreation())
+        .returns(() => Promise.resolve(true))
+        .verifiable();
+}
 
 function simulatePageLaunch(): void {
     page.browser = browserMock.object;

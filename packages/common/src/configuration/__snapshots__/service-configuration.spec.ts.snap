@@ -158,7 +158,7 @@ exports[`ServiceConfiguration verifies custom config 1`] = `
   },
   "privacyScanConfig": {
     "bannerDetectionTimeout": {
-      "default": 10000,
+      "default": 20000,
       "doc": "The maximum time in milliseconds to wait for the banner XPath after the initial page load has completed",
       "format": "int",
     },
@@ -402,7 +402,7 @@ exports[`ServiceConfiguration verifies dev config 1`] = `
   },
   "privacyScanConfig": {
     "bannerDetectionTimeout": {
-      "default": 10000,
+      "default": 20000,
       "doc": "The maximum time in milliseconds to wait for the banner XPath after the initial page load has completed",
       "format": "int",
     },

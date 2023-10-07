@@ -129,7 +129,9 @@ export class PageNavigator {
             return pageOperationResult;
         }
 
-        this.logger?.logWarn('Reload page on HTTP 304 web server response.');
+        this.logger?.logWarn('Reload page on HTTP 304 web server response.', {
+            loadedUrl: page.url(),
+        });
 
         let count = 0;
         let opResult;
@@ -139,6 +141,7 @@ export class PageNavigator {
                 // Navigation did not solve the cache error. Clear browser cache and reload page.
                 this.logger?.logWarn('Reload page on HTTP 304 web server response has failed. Reload page without browser cache.', {
                     retryCount: `${count}`,
+                    loadedUrl: page.url(),
                 });
                 await page.goto(`file:///${__dirname}/blank-page.html`);
                 await this.browserCache.clear(page);
@@ -149,6 +152,8 @@ export class PageNavigator {
                 await System.wait(500);
             }
 
+            // Navigation using page.goto() will not resolve HTTP 304 response
+            // Use of page.goBack() is required with back/forward cache disabled, option --disable-features=BackForwardCache
             const pageOperation = async () => page.goBack(this.waitForOptions);
             opResult = await this.pageOperationHandler.invoke(pageOperation, page);
         } while (
@@ -170,9 +175,7 @@ export class PageNavigator {
                 return await page.waitForNavigation({ waitUntil: 'networkidle0', timeout: puppeteerTimeoutConfig.networkIdleTimeoutMsec });
             } catch (error) {
                 this.logger?.logWarn(
-                    `Page still has network activity or stale requests after waiting for ${
-                        puppeteerTimeoutConfig.networkIdleTimeoutMsec / 1000
-                    } secs.`,
+                    `Page still has network activity or stale requests after ${puppeteerTimeoutConfig.networkIdleTimeoutMsec / 1000} secs.`,
                     {
                         timeout: `${puppeteerTimeoutConfig.networkIdleTimeoutMsec}`,
                         error: System.serializeError(error),

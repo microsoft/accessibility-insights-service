@@ -1,13 +1,15 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { injectable } from 'inversify';
+import { inject, injectable } from 'inversify';
 import { Page } from 'scanner-global-library';
 import { AuthenticationType, WebsiteScanResult } from 'storage-documents';
 import { createDiscoveryPattern } from '../crawler/discovery-pattern-factory';
+import { UrlLocationValidator } from './url-location-validator';
 
 export interface PageMetadata {
     url: string;
+    allowed: boolean;
     loadedUrl?: string;
     redirection?: boolean;
     authentication?: boolean;
@@ -17,14 +19,25 @@ export interface PageMetadata {
 
 @injectable()
 export class PageMetadataGenerator {
-    public constructor(private readonly createDiscoveryPatternFn: typeof createDiscoveryPattern = createDiscoveryPattern) {}
+    public constructor(
+        @inject(UrlLocationValidator) private readonly urlLocationValidator: UrlLocationValidator,
+        private readonly createDiscoveryPatternFn: typeof createDiscoveryPattern = createDiscoveryPattern,
+    ) {}
 
     public async getMetadata(url: string, page: Page, websiteScanResult: WebsiteScanResult): Promise<PageMetadata> {
-        await page.analyze(url);
-        const foreignLocation = await this.hasForeignLocation(page, websiteScanResult);
+        let foreignLocation = false;
+
+        const urlAllowed = this.urlLocationValidator.allowed(url);
+        if (urlAllowed === true) {
+            await page.analyze(url);
+            foreignLocation = await this.hasForeignLocation(page, websiteScanResult);
+        }
 
         return {
             url,
+            allowed:
+                urlAllowed &&
+                (page.pageAnalysisResult?.loadedUrl === undefined || this.urlLocationValidator.allowed(page.pageAnalysisResult.loadedUrl)),
             loadedUrl: page.pageAnalysisResult?.loadedUrl,
             redirection: page.pageAnalysisResult?.redirection,
             authentication: page.pageAnalysisResult?.authentication,

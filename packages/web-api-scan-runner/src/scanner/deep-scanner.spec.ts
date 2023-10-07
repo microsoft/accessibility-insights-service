@@ -12,8 +12,8 @@ import * as Puppeteer from 'puppeteer';
 import { ServiceConfiguration, CrawlConfig } from 'common';
 import { createDiscoveryPattern } from '../crawler/discovery-pattern-factory';
 import { CrawlRunner } from '../crawler/crawl-runner';
-import { processDiscoveredUrls } from '../crawler/discovered-url-processor';
 import { ScanFeedGenerator } from '../crawler/scan-feed-generator';
+import { DiscoveredUrlProcessor } from '../crawler/discovered-url-processor';
 import { DeepScanner } from './deep-scanner';
 
 const url = 'test url';
@@ -31,7 +31,7 @@ let loggerMock: IMock<GlobalLogger>;
 let crawlRunnerMock: IMock<CrawlRunner>;
 let websiteScanResultProviderMock: IMock<WebsiteScanResultProvider>;
 let serviceConfigMock: IMock<ServiceConfiguration>;
-let urlProcessorMock: IMock<typeof processDiscoveredUrls>;
+let discoveredUrlProcessorMock: IMock<DiscoveredUrlProcessor>;
 let discoveryPatternFactoryMock: IMock<typeof createDiscoveryPattern>;
 let pageMock: IMock<Page>;
 let scanFeedGeneratorMock: IMock<ScanFeedGenerator>;
@@ -48,7 +48,7 @@ describe(DeepScanner, () => {
         crawlRunnerMock = Mock.ofType<CrawlRunner>();
         websiteScanResultProviderMock = Mock.ofType<WebsiteScanResultProvider>();
         serviceConfigMock = Mock.ofType<ServiceConfiguration>();
-        urlProcessorMock = Mock.ofType<typeof processDiscoveredUrls>();
+        discoveredUrlProcessorMock = Mock.ofType<DiscoveredUrlProcessor>();
         discoveryPatternFactoryMock = Mock.ofType<typeof createDiscoveryPattern>();
         pageMock = Mock.ofType<Page>();
         scanFeedGeneratorMock = Mock.ofType<ScanFeedGenerator>();
@@ -93,7 +93,7 @@ describe(DeepScanner, () => {
             websiteScanResultProviderMock.object,
             serviceConfigMock.object,
             loggerMock.object,
-            urlProcessorMock.object,
+            discoveredUrlProcessorMock.object,
             discoveryPatternFactoryMock.object,
         );
     });
@@ -102,7 +102,7 @@ describe(DeepScanner, () => {
         loggerMock.verifyAll();
         crawlRunnerMock.verifyAll();
         websiteScanResultProviderMock.verifyAll();
-        urlProcessorMock.verifyAll();
+        discoveredUrlProcessorMock.verifyAll();
         discoveryPatternFactoryMock.verifyAll();
         scanFeedGeneratorMock.verifyAll();
     });
@@ -226,8 +226,8 @@ function setupCrawl(crawlDiscoveryPatterns: string[]): void {
 }
 
 function setupProcessUrls(deepScanLimit: number = deepScanDiscoveryLimit): void {
-    urlProcessorMock
-        .setup((u) => u(discoveredUrls, deepScanLimit, knownPages))
+    discoveredUrlProcessorMock
+        .setup((o) => o.process(discoveredUrls, deepScanLimit, knownPages))
         .returns(() => processedUrls)
         .verifiable();
 }
