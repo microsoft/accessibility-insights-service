@@ -71,7 +71,7 @@ export class PageScanProcessor {
             };
         }
 
-        // Redirected to foreign unauthenticated location
+        // Redirected to foreign location or foreign unknown authentication location
         if (
             pageMetadata.foreignLocation === true &&
             (pageMetadata.authentication !== true || pageMetadata.authenticationType === 'undetermined')
