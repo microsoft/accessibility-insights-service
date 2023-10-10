@@ -6,8 +6,9 @@ import * as Puppeteer from 'puppeteer';
 import { GlobalLogger } from 'logger';
 import { AuthenticationType } from 'storage-documents';
 import { System } from 'common';
-import { NavigationResponse } from '../page-navigator';
-import { LoginPageDetector } from './login-page-detector';
+import { NavigationResponse, PageOperationResult } from '../page-navigator';
+import { PageNavigationTiming, puppeteerTimeoutConfig } from '../page-timeout-config';
+import { PageResponseProcessor } from '../page-response-processor';
 import { LoginPageClientFactory } from './login-page-client-factory';
 
 export interface ResourceAuthenticationResult {
@@ -19,15 +20,27 @@ export interface ResourceAuthenticationResult {
 @injectable()
 export class ResourceAuthenticator {
     constructor(
-        @inject(LoginPageDetector) private readonly loginPageDetector: LoginPageDetector,
         @inject(LoginPageClientFactory) private readonly loginPageClientFactory: LoginPageClientFactory,
+        @inject(PageResponseProcessor) public readonly pageResponseProcessor: PageResponseProcessor,
         @inject(GlobalLogger) @optional() private readonly logger: GlobalLogger,
     ) {}
 
-    public async authenticate(page: Puppeteer.Page): Promise<ResourceAuthenticationResult> {
-        const authenticationType = this.loginPageDetector.getAuthenticationType(page.url());
-        if (authenticationType === undefined || authenticationType === 'undetermined') {
-            return undefined;
+    public async authenticate(
+        url: string,
+        authenticationType: AuthenticationType,
+        page: Puppeteer.Page,
+    ): Promise<ResourceAuthenticationResult> {
+        const operationResult = await this.navigatePage(url, page);
+        if (operationResult.browserError) {
+            return {
+                navigationResponse: {
+                    httpResponse: operationResult.response,
+                    pageNavigationTiming: operationResult.navigationTiming,
+                    browserError: operationResult.browserError,
+                },
+                authenticationType,
+                authenticated: false,
+            };
         }
 
         const loginPageClient = this.loginPageClientFactory.getPageClient(authenticationType);
@@ -52,5 +65,28 @@ export class ResourceAuthenticator {
             authenticationType,
             authenticated,
         };
+    }
+
+    private async navigatePage(url: string, page: Puppeteer.Page): Promise<PageOperationResult> {
+        const timestamp = System.getTimestamp();
+        try {
+            this.logger?.logInfo('Navigate page to URL for authentication.');
+            const response = await page.goto(url, { waitUntil: 'networkidle2', timeout: puppeteerTimeoutConfig.navigationTimeoutMsec });
+
+            return { response, navigationTiming: { goto: System.getElapsedTime(timestamp) } as PageNavigationTiming };
+        } catch (error) {
+            const browserError = this.pageResponseProcessor.getNavigationError(error as Error);
+            this.logger?.logError(`Page authenticator navigation error.`, {
+                error: System.serializeError(error),
+                browserError: System.serializeError(browserError),
+            });
+
+            return {
+                response: undefined,
+                navigationTiming: { goto: System.getElapsedTime(timestamp) } as PageNavigationTiming,
+                browserError,
+                error,
+            };
+        }
     }
 }
