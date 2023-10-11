@@ -15,7 +15,7 @@ describe('package.json dependencies', () => {
     const monorepoDevDependencies = Object.keys(packageJson.devDependencies).filter(isMonorepoPackage);
     const monorepoNonDevDependencies = Object.keys(packageJson.dependencies).filter(isMonorepoPackage);
 
-    // We do allow to have any dependencies on service monorepo packages
+    // We do NOT allow to have any dependencies on service monorepo packages
     // since cli package is a purely stand-alone package.
     it('does not include any dependencies on service monorepo packages', () => {
         expect(monorepoDevDependencies).toEqual(acceptedMonorepoDependencies);
