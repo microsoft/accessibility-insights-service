@@ -29,7 +29,6 @@
     "standAlonePackage": "This is a stand-alone package. Do NOT add dependencies to any service packages.",
     "devDependencies": {
         "@types/escape-html": "^1.0.2",
-        "@types/fingerprint-generator": "1.0.0",
         "@types/jest": "^29.5.0",
         "@types/lodash": "^4.14.182",
         "@types/node": "^16.18.11",

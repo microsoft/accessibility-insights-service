@@ -2,15 +2,24 @@
 // Licensed under the MIT License.
 
 import 'reflect-metadata';
+
 import { listMonorepoPackageNames } from 'common';
 import _ from 'lodash';
 import * as packageJson from '../package.json';
+
+const acceptedMonorepoDependencies = ['accessibility-insights-crawler', 'axe-result-converter', 'common'];
 
 describe('package.json dependencies', () => {
     const monorepoPackageNames = listMonorepoPackageNames();
     const isMonorepoPackage = (packageName: string) => monorepoPackageNames.includes(packageName);
     const monorepoDevDependencies = Object.keys(packageJson.devDependencies).filter(isMonorepoPackage);
     const monorepoNonDevDependencies = Object.keys(packageJson.dependencies).filter(isMonorepoPackage);
+
+    // We do allow to have any dependencies on service monorepo packages
+    // since cli package is a purely stand-alone package.
+    it('does not include any dependencies on service monorepo packages', () => {
+        expect(monorepoDevDependencies).toEqual(acceptedMonorepoDependencies);
+    });
 
     // We don't publish other monorepo packages (eg, "common") to npm, so it's important
     // that we only depend on them as devDependencies, not dependencies, to avoid consumers
