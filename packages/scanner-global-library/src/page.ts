@@ -64,6 +64,8 @@ export class Page {
 
     private readonly enableAuthenticationGlobalFlag: boolean;
 
+    private readonly browserWSEndpoint: string;
+
     constructor(
         @inject(WebDriver) private readonly webDriver: WebDriver,
         @inject(PageNavigator) private readonly pageNavigator: PageNavigator,
@@ -76,6 +78,7 @@ export class Page {
         private readonly scrollToPageTop: typeof scrollToTop = scrollToTop,
     ) {
         this.enableAuthenticationGlobalFlag = process.env.PAGE_AUTH === 'true' ? true : false;
+        this.browserWSEndpoint = process.env.BROWSER_ENDPOINT;
     }
 
     public get puppeteerPage(): Puppeteer.Page {
@@ -88,8 +91,8 @@ export class Page {
 
     public async create(options: BrowserStartOptions = { clearBrowserCache: true }): Promise<void> {
         this.browserStartOptions = options;
-        if (options?.browserWSEndpoint !== undefined) {
-            this.browser = await this.webDriver.connect(options?.browserWSEndpoint);
+        if (!isEmpty(options?.browserWSEndpoint) || !isEmpty(this.browserWSEndpoint)) {
+            this.browser = await this.webDriver.connect(options?.browserWSEndpoint ?? this.browserWSEndpoint);
         } else {
             this.browser = await this.webDriver.launch({
                 browserExecutablePath: options?.browserExecutablePath,
@@ -213,6 +216,10 @@ export class Page {
     }
 
     public async close(): Promise<void> {
+        if (this.browserStartOptions.browserWSEndpoint || this.browserWSEndpoint) {
+            return;
+        }
+
         if (this.webDriver !== undefined) {
             await this.webDriver.close();
         }
@@ -267,7 +274,12 @@ export class Page {
         }
 
         // Invoke authentication client
-        this.authenticationResult = await this.resourceAuthenticator.authenticate(this.page);
+        this.authenticationResult = await this.resourceAuthenticator.authenticate(
+            this.requestUrl,
+            this.pageAnalysisResult.authenticationType,
+            this.page,
+        );
+
         if (this.authenticationResult?.navigationResponse?.browserError !== undefined) {
             this.setLastNavigationState('auth', this.authenticationResult.navigationResponse);
         }
@@ -297,6 +309,10 @@ export class Page {
     }
 
     private async reopenBrowser(): Promise<void> {
+        if (this.browserStartOptions.browserWSEndpoint || this.browserWSEndpoint) {
+            return;
+        }
+
         await this.close();
         await this.create({ ...this.browserStartOptions, clearBrowserCache: false });
         // wait for browser to start

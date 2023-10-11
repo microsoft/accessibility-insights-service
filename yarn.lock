@@ -4867,7 +4867,6 @@ __metadata:
     "@opentelemetry/semantic-conventions": ^1.15.0
     "@sindresorhus/fnv1a": ^2.0.1
     "@types/escape-html": ^1.0.2
-    "@types/fingerprint-generator": 1.0.0
     "@types/jest": ^29.5.0
     "@types/lodash": ^4.14.182
     "@types/node": ^16.18.11
@@ -5491,6 +5490,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "axe-result-converter@workspace:packages/axe-result-converter"
   dependencies:
+    "@types/fingerprint-generator": 1.0.0
     "@types/jest": ^29.5.0
     "@types/lodash": ^4.14.182
     "@types/node": ^16.18.11

@@ -1,6 +1,6 @@
 {
     "name": "accessibility-insights-scan",
-    "version": "2.4.3",
+    "version": "2.4.4",
     "description": "This project welcomes contributions and suggestions.  Most contributions require you to agree to a Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us the rights to use your contribution. For details, visit https://cla.microsoft.com.",
     "scripts": {
         "build": "webpack --config ./webpack.config.js \"$@\"",
@@ -29,7 +29,6 @@
     "standAlonePackage": "This is a stand-alone package. Do NOT add dependencies to any service packages.",
     "devDependencies": {
         "@types/escape-html": "^1.0.2",
-        "@types/fingerprint-generator": "1.0.0",
         "@types/jest": "^29.5.0",
         "@types/lodash": "^4.14.182",
         "@types/node": "^16.18.11",

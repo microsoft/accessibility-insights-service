@@ -110,7 +110,7 @@ export class PageScanProcessor {
         if (authenticationResult !== undefined) {
             pageScanResult.authentication = {
                 ...pageScanResult.authentication,
-                detected: authenticationResult.authenticationType,
+                detected: pageMetadata.authenticationType,
                 state: authenticationResult.authenticated === true ? 'succeeded' : 'failed',
             };
         } else {

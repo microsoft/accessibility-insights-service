@@ -65,57 +65,61 @@ export class PageNavigator {
 
     public async waitForNavigation(page: Puppeteer.Page): Promise<NavigationResponse> {
         const pageOperation = this.createPageOperation('wait', page);
-        const opResult = await this.pageOperationHandler.invoke(pageOperation, page);
-        if (opResult.error) {
-            return this.getOperationErrorResult(opResult);
+        const operationResult = await this.pageOperationHandler.invoke(pageOperation, page);
+        if (operationResult.error) {
+            return this.getOperationErrorResult(operationResult);
         }
 
         return {
-            httpResponse: opResult.response,
-            pageNavigationTiming: opResult.navigationTiming,
-            browserError: opResult.browserError,
+            httpResponse: operationResult.response,
+            pageNavigationTiming: operationResult.navigationTiming,
+            browserError: operationResult.browserError,
         };
     }
 
     private async navigatePage(pageOperation: PageOperation, page: Puppeteer.Page): Promise<NavigationResponse> {
-        const opResult = await this.navigatePageImpl(pageOperation, page);
+        const operationResult = await this.navigatePageImpl(pageOperation, page);
 
-        if (opResult.browserError) {
+        if (operationResult.browserError) {
             return {
                 httpResponse: undefined,
-                pageNavigationTiming: opResult.navigationTiming,
-                browserError: opResult.browserError,
+                pageNavigationTiming: operationResult.navigationTiming,
+                browserError: operationResult.browserError,
             };
         }
 
-        const postNavigationPageTiming = await this.pageNavigationHooks.postNavigation(page, opResult.response, async (browserError) => {
-            opResult.browserError = browserError;
-        });
+        const postNavigationPageTiming = await this.pageNavigationHooks.postNavigation(
+            page,
+            operationResult.response,
+            async (browserError) => {
+                operationResult.browserError = browserError;
+            },
+        );
 
         return {
-            httpResponse: opResult.response,
+            httpResponse: operationResult.response,
             pageNavigationTiming: {
-                ...opResult.navigationTiming,
+                ...operationResult.navigationTiming,
                 ...postNavigationPageTiming,
             } as PageNavigationTiming,
-            browserError: opResult.browserError,
+            browserError: operationResult.browserError,
         };
     }
 
     private async navigatePageImpl(pageOperation: PageOperation, page: Puppeteer.Page): Promise<PageOperationResult> {
-        let opResult = await this.pageOperationHandler.invoke(pageOperation, page);
-        if (opResult.error) {
-            return this.getOperationErrorResult(opResult);
+        let operationResult = await this.pageOperationHandler.invoke(pageOperation, page);
+        if (operationResult.error) {
+            return this.getOperationErrorResult(operationResult);
         }
 
-        opResult = await this.handleCachedResponse(opResult, page);
-        if (opResult.error) {
-            return this.getOperationErrorResult(opResult);
+        operationResult = await this.handleCachedResponse(operationResult, page);
+        if (operationResult.error) {
+            return this.getOperationErrorResult(operationResult);
         }
 
         await this.resetPageSessionHistory(page);
 
-        return opResult;
+        return operationResult;
     }
 
     /**
@@ -134,7 +138,7 @@ export class PageNavigator {
         });
 
         let count = 0;
-        let opResult;
+        let operationResult;
         do {
             count++;
             if (count > maxRetryCount - 1) {
@@ -155,13 +159,15 @@ export class PageNavigator {
             // Navigation using page.goto() will not resolve HTTP 304 response
             // Use of page.goBack() is required with back/forward cache disabled, option --disable-features=BackForwardCache
             const pageOperation = async () => page.goBack(this.waitForOptions);
-            opResult = await this.pageOperationHandler.invoke(pageOperation, page);
+            operationResult = await this.pageOperationHandler.invoke(pageOperation, page);
         } while (
             count < maxRetryCount &&
-            (opResult.error !== undefined || opResult.response?.status() === undefined || opResult.response?.status() === 304)
+            (operationResult.error !== undefined ||
+                operationResult.response?.status() === undefined ||
+                operationResult.response?.status() === 304)
         );
 
-        return opResult;
+        return operationResult;
     }
 
     private createPageOperation(operation: 'goto' | 'reload' | 'wait', page: Puppeteer.Page, url?: string): PageOperation {

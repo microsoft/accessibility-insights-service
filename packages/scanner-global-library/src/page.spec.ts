@@ -10,7 +10,7 @@ import { GuidGenerator, System } from 'common';
 import { GlobalLogger } from 'logger';
 import { AxeScanResults } from './axe-scanner/axe-scan-results';
 import { BrowserError } from './browser-error';
-import { Page } from './page';
+import { BrowserStartOptions, Page } from './page';
 import { getPromisableDynamicMock } from './test-utilities/promisable-mock';
 import { WebDriver } from './web-driver';
 import { PageNavigator, NavigationResponse } from './page-navigator';
@@ -54,6 +54,7 @@ let resourceAuthenticatorMock: IMock<ResourceAuthenticator>;
 let pageAnalyzerMock: IMock<PageAnalyzer>;
 let guidGeneratorMock: IMock<GuidGenerator>;
 let devToolsSessionMock: IMock<DevToolsSession>;
+let browserStartOptions: BrowserStartOptions;
 
 describe(Page, () => {
     beforeEach(() => {
@@ -78,6 +79,7 @@ describe(Page, () => {
         pageAnalyzerMock = Mock.ofType<PageAnalyzer>();
         guidGeneratorMock = Mock.ofType<GuidGenerator>();
         devToolsSessionMock = Mock.ofType<DevToolsSession>();
+        browserStartOptions = {} as BrowserStartOptions;
 
         scrollToTopMock = jest.fn().mockImplementation(() => Promise.resolve());
         puppeteerResponseMock.setup((o) => o.ok()).returns(() => true);
@@ -141,6 +143,7 @@ describe(Page, () => {
                 timing[key] = `${navigationResponse.pageNavigationTiming[key]}`;
             });
             loggerMock.setup((o) => o.logInfo('Total page load time 8, msec', { status: 200, ...timing })).verifiable();
+            page.browserStartOptions = browserStartOptions;
 
             await page.navigate(url);
 
@@ -161,16 +164,19 @@ describe(Page, () => {
             pageAnalyzerMock.reset();
             pageAnalyzerMock
                 .setup((o) => o.analyze(url, puppeteerPageMock.object))
-                .returns(() => Promise.resolve({ navigationResponse, authentication: true } as PageAnalysisResult))
+                .returns(() =>
+                    Promise.resolve({ navigationResponse, authentication: true, authenticationType: 'entraId' } as PageAnalysisResult),
+                )
                 .verifiable();
             resourceAuthenticatorMock
-                .setup((o) => o.authenticate(puppeteerPageMock.object))
+                .setup((o) => o.authenticate(url, 'entraId', puppeteerPageMock.object))
                 .returns(() => Promise.resolve(authenticationResult))
                 .verifiable();
             pageNavigatorMock
                 .setup(async (o) => o.navigate('localhost/2', puppeteerPageMock.object))
                 .returns(() => Promise.resolve(reloadNavigationResponse))
                 .verifiable();
+            page.browserStartOptions = browserStartOptions;
 
             await page.navigate(url, { enableAuthentication: true });
 
@@ -186,6 +192,7 @@ describe(Page, () => {
                 .setup(async (o) => o.trace(url, puppeteerPageMock.object))
                 .returns(() => Promise.resolve())
                 .verifiable();
+            page.browserStartOptions = browserStartOptions;
 
             await page.navigate(url);
 
@@ -203,6 +210,7 @@ describe(Page, () => {
                 .setup((o) => o.setExtraHTTPHeaders({ X_FORWARDED_FOR: '1.1.1.1' }))
                 .returns(() => Promise.resolve())
                 .verifiable();
+            page.browserStartOptions = browserStartOptions;
 
             await page.navigate(url);
         });
@@ -350,6 +358,7 @@ describe(Page, () => {
                 .setup(async (o) => o.close())
                 .returns(() => Promise.resolve())
                 .verifiable();
+            page.browserStartOptions = browserStartOptions;
 
             await page.close();
         });
