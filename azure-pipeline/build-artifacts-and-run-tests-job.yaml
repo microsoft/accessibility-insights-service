@@ -79,4 +79,8 @@ steps:
           script: |
               queuedBy="queued-by-$(Build.QueuedBy)"
               echo "##vso[build.addbuildtag]$queuedBy"
-      displayName: 'Apply build tag'
+              pipeline="pipeline-$(Build.DefinitionName)"
+              echo "##vso[build.addbuildtag]$pipeline"
+              reason="reason-$(Build.Reason)"
+              echo "##vso[build.addbuildtag]$reason"
+      displayName: 'Apply build tags'
