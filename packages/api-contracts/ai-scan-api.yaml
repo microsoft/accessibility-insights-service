@@ -300,6 +300,8 @@ components:
                     type: string
                 url:
                     type: string
+                deepScanId:
+                    type: string
                 scanResult:
                     $ref: '#/components/schemas/ScanResult'
                 deepScanResult:
