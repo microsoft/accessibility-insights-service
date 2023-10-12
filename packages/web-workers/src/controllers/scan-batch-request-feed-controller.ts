@@ -110,7 +110,7 @@ export class ScanBatchRequestFeedController extends WebController {
                 priority: request.priority,
                 itemType: ItemType.onDemandPageScanRunResult,
                 batchRequestId: batchRequestId,
-                // We use scan id from the original scan request. The original scan id is propagated to descendant requests.
+                // Deep scan id is the original scan request id. The deep scan id is propagated to descendant requests in scan request.
                 deepScanId: request.deepScanId ?? request.scanId,
                 partitionKey: this.partitionKeyFactory.createPartitionKeyForDocument(ItemType.onDemandPageScanRunResult, request.scanId),
                 websiteScanRef,
@@ -189,7 +189,7 @@ export class ScanBatchRequestFeedController extends WebController {
                 url: request.url,
                 priority: request.priority,
                 deepScan: request.deepScan,
-                // We use scan id from the original scan request. The original scan id is propagated to descendant requests.
+                // Deep scan id is the original scan request id. The deep scan id is propagated to descendant requests in scan request.
                 deepScanId: request.deepScanId ?? request.scanId,
                 itemType: ItemType.onDemandPageScanRequest,
                 partitionKey: PartitionKey.pageScanRequestDocuments,

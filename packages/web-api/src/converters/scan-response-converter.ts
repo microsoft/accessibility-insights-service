@@ -50,6 +50,7 @@ export class ScanResponseConverter {
             scanId: pageScanResult.id,
             url: pageScanResult.url,
             scanType: pageScanResult.privacyScan ? 'privacy' : 'accessibility',
+            deepScanId: pageScanResult.deepScanId,
             run: {
                 state: effectiveRunState,
             },
@@ -62,6 +63,7 @@ export class ScanResponseConverter {
             scanId: pageScanResult.id,
             url: pageScanResult.url,
             scanType: pageScanResult.privacyScan ? 'privacy' : 'accessibility',
+            deepScanId: pageScanResult.deepScanId,
             run: {
                 state: effectiveRunState,
                 timestamp: pageScanResult.run?.timestamp,
@@ -84,6 +86,7 @@ export class ScanResponseConverter {
             scanId: pageScanResult.id,
             url: pageScanResult.url,
             scanType: pageScanResult.privacyScan ? 'privacy' : 'accessibility',
+            deepScanId: pageScanResult.deepScanId,
             ...(pageScanResult.scanResult !== undefined
                 ? {
                       scanResult: {
