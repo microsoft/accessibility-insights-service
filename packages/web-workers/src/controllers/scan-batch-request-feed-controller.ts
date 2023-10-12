@@ -109,12 +109,16 @@ export class ScanBatchRequestFeedController extends WebController {
                 url: request.url,
                 priority: request.priority,
                 itemType: ItemType.onDemandPageScanRunResult,
+                batchRequestId: batchRequestId,
+                // We use scan id from the original scan request. The original scan id is propagated to descendant requests.
+                deepScanId: request.deepScanId ?? request.scanId,
                 partitionKey: this.partitionKeyFactory.createPartitionKeyForDocument(ItemType.onDemandPageScanRunResult, request.scanId),
+                websiteScanRef,
+                ...(request.authenticationType === undefined ? {} : { authentication: { hint: request.authenticationType } }),
                 run: {
                     state: 'accepted',
                     timestamp: new Date().toJSON(),
                 },
-                batchRequestId: batchRequestId,
                 ...(isEmpty(request.scanNotifyUrl)
                     ? {}
                     : {
@@ -123,9 +127,7 @@ export class ScanBatchRequestFeedController extends WebController {
                               scanNotifyUrl: request.scanNotifyUrl,
                           },
                       }),
-                websiteScanRef,
                 ...(request.privacyScan === undefined ? {} : { privacyScan: request.privacyScan }),
-                ...(request.authenticationType === undefined ? {} : { authentication: { hint: request.authenticationType } }),
             };
         });
 
@@ -156,7 +158,7 @@ export class ScanBatchRequestFeedController extends WebController {
             baseUrl: request.site?.baseUrl,
             scanGroupId: consolidatedGroup?.consolidatedId ?? this.guidGenerator.createGuid(),
             scanGroupType,
-            // `deepScanId` value is set only when db document is created
+            // This value is immutable and set on new db document creation.
             deepScanId: request.scanId,
             pageScans: [
                 {
@@ -187,13 +189,15 @@ export class ScanBatchRequestFeedController extends WebController {
                 url: request.url,
                 priority: request.priority,
                 deepScan: request.deepScan,
+                // We use scan id from the original scan request. The original scan id is propagated to descendant requests.
+                deepScanId: request.deepScanId ?? request.scanId,
                 itemType: ItemType.onDemandPageScanRequest,
                 partitionKey: PartitionKey.pageScanRequestDocuments,
-                ...scanNotifyUrl,
-                ...(isEmpty(request.site) ? {} : { site: request.site }),
                 ...(isEmpty(request.reportGroups) ? {} : { reportGroups: request.reportGroups }),
                 ...(request.privacyScan === undefined ? {} : { privacyScan: request.privacyScan }),
                 ...(request.authenticationType === undefined ? {} : { authenticationType: request.authenticationType }),
+                ...scanNotifyUrl,
+                ...(isEmpty(request.site) ? {} : { site: request.site }),
             };
         });
 
@@ -203,7 +207,7 @@ export class ScanBatchRequestFeedController extends WebController {
 
     private validateRequestData(documents: OnDemandPageScanBatchRequest[]): boolean {
         if (documents === undefined || documents.length === 0 || !documents.some((d) => d.itemType === ItemType.scanRunBatchRequest)) {
-            this.logger.logInfo(`The scan batch documents were malformed.`, { documents: JSON.stringify(documents) });
+            this.logger.logWarn(`The scan batch documents were malformed.`, { documents: JSON.stringify(documents) });
 
             return false;
         }

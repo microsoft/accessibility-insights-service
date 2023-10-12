@@ -48,11 +48,11 @@ export class ScanResultController extends BaseScanResultController {
                     status: 200,
                     body: this.getTooSoonRequestResponse(scanId),
                 };
-                this.logger.logInfo('Scan result is not ready in a storage.');
+                this.logger.logWarn('Scan result is not ready in a storage.');
             } else {
                 // return scan not found response
                 this.context.res = HttpResponse.getErrorResponse(WebApiErrorCodes.resourceNotFound);
-                this.logger.logInfo('Scan result not found in a storage.');
+                this.logger.logError('Scan result not found in a storage.');
             }
         } else {
             const websiteScanResult = await this.getWebsiteScanResult(pageScanResult);

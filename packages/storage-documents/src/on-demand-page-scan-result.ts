@@ -58,15 +58,16 @@ export interface ScanError {
  */
 export interface OnDemandPageScanResult extends StorageDocument {
     itemType: ItemType.onDemandPageScanRunResult;
-    batchRequestId?: string;
     url: string;
-    websiteScanRef?: WebsiteScanRef;
     priority: number;
+    batchRequestId?: string;
+    deepScanId?: string;
+    websiteScanRef?: WebsiteScanRef;
     scannedUrl?: string;
-    scanResult?: OnDemandScanResult;
-    reports?: OnDemandPageScanReport[];
     run: OnDemandPageScanRunResult;
     subRuns?: WorkflowRunResults;
+    scanResult?: OnDemandScanResult;
+    reports?: OnDemandPageScanReport[];
     notification?: ScanCompletedNotification;
     privacyScan?: PrivacyScan;
     authentication?: AuthenticationResult;

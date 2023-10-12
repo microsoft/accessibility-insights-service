@@ -107,11 +107,11 @@ export class ScanRequestController extends ApiController {
         const isV2 = this.context.req.query['api-version'] === '2.0';
         let payload: ScanRunRequest[];
         if (isV2) {
-            const singularReq: ScanRunRequest = this.tryGetPayload<ScanRunRequest>();
-            if (Array.isArray(singularReq)) {
-                throw new Error('Malformed request body');
+            const singularRequest: ScanRunRequest = this.tryGetPayload<ScanRunRequest>();
+            if (Array.isArray(singularRequest)) {
+                throw new Error('Malformed HTTP request body.');
             }
-            payload = [singularReq];
+            payload = [singularRequest];
         } else {
             payload = this.tryGetPayload<ScanRunRequest[]>();
         }
@@ -130,14 +130,14 @@ export class ScanRequestController extends ApiController {
                 const scanId = this.guidGenerator.createGuidFromBaseGuid(batchId);
                 scanRequestsToBeStoredInDb.push({
                     scanId: scanId,
-                    priority: isNil(scanRunRequest.priority) ? 0 : scanRunRequest.priority,
                     url: scanRunRequest.url,
-                    ...(scanRunRequest.authenticationType === undefined ? {} : { authenticationType: scanRunRequest.authenticationType }),
+                    priority: isNil(scanRunRequest.priority) ? 0 : scanRunRequest.priority,
                     ...(scanRunRequest.deepScan === undefined ? {} : { deepScan: scanRunRequest.deepScan }),
-                    ...(isEmpty(scanRunRequest.scanNotifyUrl) ? {} : { scanNotifyUrl: scanRunRequest.scanNotifyUrl }),
-                    ...(isEmpty(scanRunRequest.site) ? {} : { site: scanRunRequest.site }),
-                    ...(isEmpty(scanRunRequest.reportGroups) ? {} : { reportGroups: scanRunRequest.reportGroups }),
+                    ...(scanRunRequest.authenticationType === undefined ? {} : { authenticationType: scanRunRequest.authenticationType }),
                     ...(scanRunRequest.privacyScan === undefined ? {} : { privacyScan: scanRunRequest.privacyScan }),
+                    ...(isEmpty(scanRunRequest.reportGroups) ? {} : { reportGroups: scanRunRequest.reportGroups }),
+                    ...(isEmpty(scanRunRequest.site) ? {} : { site: scanRunRequest.site }),
+                    ...(isEmpty(scanRunRequest.scanNotifyUrl) ? {} : { scanNotifyUrl: scanRunRequest.scanNotifyUrl }),
                 });
 
                 scanResponses.push({

@@ -107,16 +107,18 @@ export class ScanFeedGenerator {
                 url,
                 priority: isNil(pageScanResult.priority) ? 0 : pageScanResult.priority,
                 deepScan: pageScanResult.websiteScanRef.scanGroupType === 'deep-scan',
-                scanNotifyUrl: pageScanResult.notification?.scanNotifyUrl ?? undefined,
-                site: {
-                    baseUrl: websiteScanResult.baseUrl,
-                },
+                // Propagate the original scan id to descendant requests.
+                deepScanId: websiteScanResult.deepScanId,
+                authenticationType: pageScanResult.authentication?.hint ?? undefined,
                 reportGroups: [
                     {
                         consolidatedId: websiteScanResult.scanGroupId,
                     },
                 ],
-                authenticationType: pageScanResult.authentication?.hint ?? undefined,
+                site: {
+                    baseUrl: websiteScanResult.baseUrl,
+                },
+                scanNotifyUrl: pageScanResult.notification?.scanNotifyUrl ?? undefined,
             };
         });
     }

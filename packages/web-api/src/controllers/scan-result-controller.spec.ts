@@ -112,6 +112,9 @@ describe(ScanResultController, () => {
         scanResponseConverterMock = Mock.ofType<ScanResponseConverter>();
         websiteScanResultProviderMock = Mock.ofType<WebsiteScanResultProvider>();
         websiteScanResultProviderMock
+            .setup((o) => o.read(dbResponse.websiteScanRef.id, false))
+            .returns(() => Promise.resolve({ deepScanId: scanId } as WebsiteScanResult));
+        websiteScanResultProviderMock
             .setup((o) => o.read(dbResponse.websiteScanRef.id, true))
             .returns(() => Promise.resolve(websiteScanResult));
     });

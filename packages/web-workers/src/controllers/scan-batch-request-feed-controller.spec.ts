@@ -326,6 +326,7 @@ function setupOnDemandPageScanRunResultProviderMock(
                         timestamp: dateNow.toJSON(),
                     },
                     batchRequestId: document.id,
+                    deepScanId: request.deepScanId ?? request.scanId,
                     ...(isEmpty(request.scanNotifyUrl)
                         ? {}
                         : {
@@ -357,6 +358,7 @@ function setupPageScanRequestProviderMock(documents: OnDemandPageScanBatchReques
                     itemType: ItemType.onDemandPageScanRequest,
                     partitionKey: PartitionKey.pageScanRequestDocuments,
                     deepScan: scanRequest.deepScan,
+                    deepScanId: scanRequest.deepScanId ?? scanRequest.scanId,
                     ...(scanRequest.authenticationType === undefined ? {} : { authenticationType: scanRequest.authenticationType }),
                 };
 
