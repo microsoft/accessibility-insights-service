@@ -41,13 +41,14 @@ export interface ScanRunResultResponse {
     scanId: string;
     url: string;
     scanType: ScanType;
+    deepScanId?: string;
+    run: ScanRun;
+    authentication?: AuthenticationResult;
     scannedUrl?: string;
     scanResult?: ScanResult;
     deepScanResult?: DeepScanResultItem[];
     reports?: ScanReport[];
-    run: ScanRun;
     notification?: ScanCompletedNotification;
-    authentication?: AuthenticationResult;
 }
 
 export interface ScanRunErrorResponse {

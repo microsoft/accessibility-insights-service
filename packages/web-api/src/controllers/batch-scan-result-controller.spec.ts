@@ -105,6 +105,9 @@ describe(BatchScanResultController, () => {
 
         websiteScanResultProviderMock = Mock.ofType<WebsiteScanResultProvider>();
         websiteScanResultProviderMock
+            .setup((o) => o.read(scanFetchedResponse.websiteScanRef.id, false))
+            .returns(() => Promise.resolve({ deepScanId: validScanId } as WebsiteScanResult));
+        websiteScanResultProviderMock
             .setup((o) => o.read(scanFetchedResponse.websiteScanRef.id, true))
             .returns(() => Promise.resolve(websiteScanResult));
     });

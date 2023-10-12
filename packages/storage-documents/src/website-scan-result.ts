@@ -30,6 +30,7 @@ export interface WebsiteScanResultBase extends StorageDocument {
     baseUrl: string;
     scanGroupId: string;
     scanGroupType: ScanGroupType;
+    // This value is immutable and set on new db document creation.
     deepScanId?: string;
     discoveryPatterns?: string[];
     reports?: WebsiteScanReport[];

@@ -168,6 +168,7 @@ function createScanRequests(urls: string[]): ScanRunBatchRequest[] {
             privacyScan: {
                 cookieBannerType: pageScanResult.privacyScan.cookieBannerType,
             },
+            deepScanId: websiteScanResult.deepScanId,
         } as ScanRunBatchRequest;
     });
 }

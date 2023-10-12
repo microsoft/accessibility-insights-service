@@ -30,11 +30,12 @@ export interface PrivacyScan {
 export interface ScanRunBatchRequest {
     scanId: string;
     url: string;
-    site?: WebsiteRequest;
     priority: number;
-    reportGroups?: ReportGroupRequest[];
-    scanNotifyUrl?: string;
     deepScan?: boolean;
+    deepScanId?: string;
+    scanNotifyUrl?: string;
+    site?: WebsiteRequest;
+    reportGroups?: ReportGroupRequest[];
     privacyScan?: PrivacyScan;
     authenticationType?: AuthenticationType;
 }

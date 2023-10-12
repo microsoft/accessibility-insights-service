@@ -50,6 +50,7 @@ export class ScanResponseConverter {
             scanId: pageScanResult.id,
             url: pageScanResult.url,
             scanType: pageScanResult.privacyScan ? 'privacy' : 'accessibility',
+            deepScanId: pageScanResult.deepScanId,
             run: {
                 state: effectiveRunState,
             },
@@ -62,6 +63,7 @@ export class ScanResponseConverter {
             scanId: pageScanResult.id,
             url: pageScanResult.url,
             scanType: pageScanResult.privacyScan ? 'privacy' : 'accessibility',
+            deepScanId: pageScanResult.deepScanId,
             run: {
                 state: effectiveRunState,
                 timestamp: pageScanResult.run?.timestamp,
@@ -84,19 +86,12 @@ export class ScanResponseConverter {
             scanId: pageScanResult.id,
             url: pageScanResult.url,
             scanType: pageScanResult.privacyScan ? 'privacy' : 'accessibility',
+            deepScanId: pageScanResult.deepScanId,
             ...(pageScanResult.scanResult !== undefined
                 ? {
                       scanResult: {
                           state: pageScanResult.scanResult.state,
                           issueCount: pageScanResult.scanResult.issueCount,
-                      },
-                  }
-                : {}),
-            ...(pageScanResult.authentication !== undefined
-                ? {
-                      authentication: {
-                          detected: pageScanResult.authentication.detected,
-                          state: pageScanResult.authentication.state,
                       },
                   }
                 : {}),
@@ -107,8 +102,19 @@ export class ScanResponseConverter {
                 pageTitle: pageScanResult.run.pageTitle,
             },
             ...this.getRunCompleteNotificationResponse(pageScanResult.notification),
+            ...(pageScanResult.authentication !== undefined
+                ? {
+                      authentication: {
+                          detected: pageScanResult.authentication.detected,
+                          state: pageScanResult.authentication.state,
+                      },
+                  }
+                : {}),
             reports: this.getScanReports(baseUrl, apiVersion, pageScanResult),
-            ...this.getDeepScanResult(websiteScanResult),
+            // Expand scan result for original scan only. Result for descendant scans do not include deep scan result collection.
+            // TODO replace with commented line below after 11/15/23. This is temporary solution to support backward compatibility.
+            ...(pageScanResult.id === websiteScanResult?.deepScanId ? this.getDeepScanResult(websiteScanResult) : {}),
+            // ...(pageScanResult.id === pageScanResult.deepScanId ? this.getDeepScanResult(websiteScanResult) : {}),
         };
 
         if (pageScanResult.scannedUrl !== undefined) {

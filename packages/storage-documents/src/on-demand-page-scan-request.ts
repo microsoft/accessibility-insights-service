@@ -9,11 +9,12 @@ import { AuthenticationType } from './on-demand-page-scan-result';
 export interface OnDemandPageScanRequest extends StorageDocument {
     itemType: ItemType.onDemandPageScanRequest;
     url: string;
-    site?: WebsiteRequest;
     priority: number;
-    reportGroups?: ReportGroupRequest[];
-    scanNotifyUrl?: string;
     deepScan?: boolean;
+    deepScanId?: string;
+    scanNotifyUrl?: string;
+    site?: WebsiteRequest;
+    reportGroups?: ReportGroupRequest[];
     privacyScan?: PrivacyScan;
     authenticationType?: AuthenticationType;
 }

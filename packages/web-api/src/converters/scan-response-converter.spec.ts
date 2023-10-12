@@ -191,6 +191,7 @@ function getDeepScanResult(deepScanOverallState: RunState = 'pending'): DeepScan
 
 function getWebsiteScanResult(deepScanOverallState: RunState = 'pending'): WebsiteScanResult {
     const result = {
+        deepScanId: 'id',
         pageScans: [
             {
                 scanId: 'scanId1',

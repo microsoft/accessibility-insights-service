@@ -216,6 +216,7 @@ function createScanRequests(urls: string[], deepScan: boolean = true): ScanRunBa
             url,
             priority: pageScanResult.priority,
             deepScan,
+            deepScanId: websiteScanResult.deepScanId,
             scanNotifyUrl: pageScanResult.notification.scanNotifyUrl,
             site: {
                 baseUrl: websiteScanResult.baseUrl,

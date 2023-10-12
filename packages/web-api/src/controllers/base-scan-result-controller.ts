@@ -33,7 +33,21 @@ export abstract class BaseScanResultController extends ApiController {
 
     protected async getWebsiteScanResult(pageScanResult: OnDemandPageScanResult): Promise<WebsiteScanResult> {
         if (pageScanResult.websiteScanRef) {
-            return this.websiteScanResultProvider.read(pageScanResult.websiteScanRef.id, true);
+            // TODO remove after 11/15/23. This is temporary solution to support backward compatibility.
+            // start - to remove
+            if (pageScanResult.deepScanId === undefined) {
+                const websiteScanResult = await this.websiteScanResultProvider.read(pageScanResult.websiteScanRef.id, false);
+                if (pageScanResult.id === websiteScanResult.deepScanId) {
+                    return this.websiteScanResultProvider.read(pageScanResult.websiteScanRef.id, true);
+                }
+            } else {
+                // end - to remove
+
+                // Expand scan result for original scan only. Result for descendant scans do not include deep scan result collection.
+                const expandResult = pageScanResult.id === pageScanResult.deepScanId;
+
+                return this.websiteScanResultProvider.read(pageScanResult.websiteScanRef.id, expandResult);
+            }
         }
 
         return undefined;
