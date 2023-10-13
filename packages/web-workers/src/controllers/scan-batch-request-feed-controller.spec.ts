@@ -264,7 +264,7 @@ function setupWebsiteScanResultProviderMock(documents: OnDemandPageScanBatchRequ
                     const websiteScanResult = {
                         baseUrl: request.site?.baseUrl,
                         scanGroupId: reportGroup.consolidatedId ?? guid,
-                        deepScanId: request.scanId,
+                        deepScanId: scanGroupType !== 'single-scan' ? request.scanId : undefined,
                         scanGroupType,
                         pageScans: [
                             {
@@ -326,7 +326,7 @@ function setupOnDemandPageScanRunResultProviderMock(
                         timestamp: dateNow.toJSON(),
                     },
                     batchRequestId: document.id,
-                    deepScanId: request.deepScanId ?? request.scanId,
+                    deepScanId: websiteScanRef.scanGroupType !== 'single-scan' ? request.deepScanId ?? request.scanId : undefined,
                     ...(isEmpty(request.scanNotifyUrl)
                         ? {}
                         : {
@@ -351,6 +351,7 @@ function setupPageScanRequestProviderMock(documents: OnDemandPageScanBatchReques
         const dbDocuments = document.scanRunBatchRequest
             .filter((batchRequest) => batchRequest.scanId !== undefined)
             .map<OnDemandPageScanRequest>((scanRequest) => {
+                const scanGroupType = getScanGroupType(scanRequest);
                 const request: OnDemandPageScanRequest = {
                     id: scanRequest.scanId,
                     url: scanRequest.url,
@@ -358,7 +359,7 @@ function setupPageScanRequestProviderMock(documents: OnDemandPageScanBatchReques
                     itemType: ItemType.onDemandPageScanRequest,
                     partitionKey: PartitionKey.pageScanRequestDocuments,
                     deepScan: scanRequest.deepScan,
-                    deepScanId: scanRequest.deepScanId ?? scanRequest.scanId,
+                    deepScanId: scanGroupType !== 'single-scan' ? scanRequest.deepScanId ?? scanRequest.scanId : undefined,
                     ...(scanRequest.authenticationType === undefined ? {} : { authenticationType: scanRequest.authenticationType }),
                 };
 
@@ -383,6 +384,21 @@ function setupPageScanRequestProviderMock(documents: OnDemandPageScanBatchReques
         pageScanRequestProviderMock.setup(async (o) => o.insertRequests(dbDocuments)).verifiable(Times.once());
         scanDataProviderMock.setup(async (o) => o.deleteBatchRequest(document)).verifiable(Times.once());
     });
+}
+
+function getScanGroupType(request: ScanRunBatchRequest): ScanGroupType {
+    let consolidatedGroup;
+    if (request.reportGroups !== undefined) {
+        consolidatedGroup = request.reportGroups.find((g) => g.consolidatedId !== undefined);
+    }
+
+    if (request.deepScan === true) {
+        return 'deep-scan';
+    } else if (consolidatedGroup?.consolidatedId || request.site?.knownPages?.length > 0) {
+        return 'consolidated-scan';
+    } else {
+        return 'single-scan';
+    }
 }
 
 function setupPartitionKeyFactoryMock(documents: OnDemandPageScanBatchRequest[]): void {

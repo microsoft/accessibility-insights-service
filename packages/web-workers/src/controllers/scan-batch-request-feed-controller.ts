@@ -19,6 +19,7 @@ import {
     OnDemandPageScanRequest,
     OnDemandPageScanResult,
     PartitionKey,
+    ReportGroupRequest,
     ScanGroupType,
     ScanRunBatchRequest,
     WebsiteScanResult,
@@ -111,7 +112,7 @@ export class ScanBatchRequestFeedController extends WebController {
                 itemType: ItemType.onDemandPageScanRunResult,
                 batchRequestId: batchRequestId,
                 // Deep scan id is the original scan request id. The deep scan id is propagated to descendant requests in scan request.
-                deepScanId: request.deepScanId ?? request.scanId,
+                deepScanId: websiteScanRef.scanGroupType !== 'single-scan' ? request.deepScanId ?? request.scanId : undefined,
                 partitionKey: this.partitionKeyFactory.createPartitionKeyForDocument(ItemType.onDemandPageScanRunResult, request.scanId),
                 websiteScanRef,
                 ...(request.authenticationType === undefined ? {} : { authentication: { hint: request.authenticationType } }),
@@ -140,26 +141,14 @@ export class ScanBatchRequestFeedController extends WebController {
     }
 
     private createWebsiteScanResult(request: ScanRunBatchRequest): WebsiteScanResult {
-        let consolidatedGroup;
-        if (request.reportGroups !== undefined) {
-            consolidatedGroup = request.reportGroups.find((g) => g.consolidatedId !== undefined);
-        }
-
-        let scanGroupType: ScanGroupType;
-        if (request.deepScan === true) {
-            scanGroupType = 'deep-scan';
-        } else if (consolidatedGroup?.consolidatedId || request.site?.knownPages?.length > 0) {
-            scanGroupType = 'consolidated-scan';
-        } else {
-            scanGroupType = 'single-scan';
-        }
-
+        const consolidatedGroup = this.getReportGroupRequest(request);
+        const scanGroupType = this.getScanGroupType(request);
         const websiteScanRequest: Partial<WebsiteScanResult> = {
             baseUrl: request.site?.baseUrl,
             scanGroupId: consolidatedGroup?.consolidatedId ?? this.guidGenerator.createGuid(),
             scanGroupType,
             // This value is immutable and set on new db document creation.
-            deepScanId: request.scanId,
+            deepScanId: scanGroupType !== 'single-scan' ? request.scanId : undefined,
             pageScans: [
                 {
                     scanId: request.scanId,
@@ -179,6 +168,8 @@ export class ScanBatchRequestFeedController extends WebController {
     private async writeRequestsToQueueContainer(requests: ScanRunBatchRequest[], batchRequestId: string): Promise<void> {
         const requestDocuments = requests.map<OnDemandPageScanRequest>((request) => {
             const scanNotifyUrl = isEmpty(request.scanNotifyUrl) ? {} : { scanNotifyUrl: request.scanNotifyUrl };
+            const scanGroupType = this.getScanGroupType(request);
+
             this.logger.logInfo('Created new scan request document in queue storage container.', {
                 batchRequestId,
                 scanId: request.scanId,
@@ -190,7 +181,7 @@ export class ScanBatchRequestFeedController extends WebController {
                 priority: request.priority,
                 deepScan: request.deepScan,
                 // Deep scan id is the original scan request id. The deep scan id is propagated to descendant requests in scan request.
-                deepScanId: request.deepScanId ?? request.scanId,
+                deepScanId: scanGroupType !== 'single-scan' ? request.deepScanId ?? request.scanId : undefined,
                 itemType: ItemType.onDemandPageScanRequest,
                 partitionKey: PartitionKey.pageScanRequestDocuments,
                 ...(isEmpty(request.reportGroups) ? {} : { reportGroups: request.reportGroups }),
@@ -203,6 +194,25 @@ export class ScanBatchRequestFeedController extends WebController {
 
         await this.pageScanRequestProvider.insertRequests(requestDocuments);
         this.logger.logInfo(`Completed adding scan requests to scan queue storage container.`);
+    }
+
+    private getScanGroupType(request: ScanRunBatchRequest): ScanGroupType {
+        const consolidatedGroup = this.getReportGroupRequest(request);
+        if (request.deepScan === true) {
+            return 'deep-scan';
+        } else if (consolidatedGroup?.consolidatedId || request.site?.knownPages?.length > 0) {
+            return 'consolidated-scan';
+        } else {
+            return 'single-scan';
+        }
+    }
+
+    private getReportGroupRequest(request: ScanRunBatchRequest): ReportGroupRequest {
+        if (request.reportGroups !== undefined) {
+            return request.reportGroups.find((g) => g.consolidatedId !== undefined);
+        }
+
+        return undefined;
     }
 
     private validateRequestData(documents: OnDemandPageScanBatchRequest[]): boolean {
