@@ -3,75 +3,73 @@
 
 import 'reflect-metadata';
 
-import { AuthenticationContext, TokenResponse } from 'adal-node';
-import { RetryHelper, System } from 'common';
+import { RetryHelper } from 'common';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { Got } from 'got';
+import * as msal from '@azure/msal-node';
 import { A11yServiceCredential } from './a11y-service-credential';
 import { MockableLogger } from './test-utilities/mockable-logger';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-describe(A11yServiceCredential, () => {
-    let authenticationContextMock: IMock<AuthenticationContext>;
-    let testSubject: A11yServiceCredential;
-    let gotMock: IMock<Got>;
-    const clientId = 'client-id';
-    const clientMockSec = 'random-string';
-    const authorityUrl = 'authorityUrl';
-    const resource = 'resource-id';
-    const tokenResponse: TokenResponse = {
-        tokenType: 'type',
-        accessToken: 'at',
-    } as any;
-    const numTokenAttempts = 5;
-    let loggerMock: IMock<MockableLogger>;
-    let retryHelperMock: IMock<RetryHelper<TokenResponse>>;
-    let error: Error;
+let clientApplicationMock: IMock<msal.ConfidentialClientApplication>;
+let testSubject: A11yServiceCredential;
+let gotMock: IMock<Got>;
+let loggerMock: IMock<MockableLogger>;
+let retryHelperMock: IMock<RetryHelper<msal.AuthenticationResult>>;
+let error: Error;
 
+const clientId = 'client-id';
+const clientSecret = 'random-string';
+const authorityUrl = 'authorityUrl';
+const scope = 'scope';
+const authenticationResult: msal.AuthenticationResult = {
+    tokenType: 'type',
+    accessToken: 'at',
+} as any;
+const numTokenAttempts = 5;
+
+describe(A11yServiceCredential, () => {
     beforeEach(() => {
-        error = null;
         gotMock = Mock.ofType<Got>(null);
-        authenticationContextMock = Mock.ofType<AuthenticationContext>();
+        clientApplicationMock = Mock.ofType<msal.ConfidentialClientApplication>();
         loggerMock = Mock.ofType<MockableLogger>();
-        retryHelperMock = Mock.ofType<RetryHelper<TokenResponse>>();
+        retryHelperMock = Mock.ofType<RetryHelper<msal.AuthenticationResult>>();
+        clientApplicationMock
+            .setup((o) => o.acquireTokenByClientCredential(It.isAny()))
+            .returns(() => Promise.resolve(authenticationResult))
+            .verifiable();
 
         testSubject = new A11yServiceCredential(
             clientId,
-            clientMockSec,
-            resource,
+            clientSecret,
+            scope,
             authorityUrl,
             loggerMock.object,
-            authenticationContextMock.object,
             numTokenAttempts,
             0,
             retryHelperMock.object,
+            clientApplicationMock.object,
         );
-
-        authenticationContextMock
-            .setup((am) => am.acquireTokenWithClientCredentials(resource, clientId, clientMockSec, It.isAny()))
-            .callback((resourceUrl, cid, sec, callback) => {
-                callback(error, tokenResponse);
-            });
     });
 
     afterEach(() => {
-        authenticationContextMock.verifyAll();
+        clientApplicationMock.verifyAll();
         loggerMock.verifyAll();
         retryHelperMock.verifyAll();
     });
 
     it('getToken', async () => {
-        setupRetryHelperMock(false);
+        setupRetryHelperMock();
         const token = await testSubject.getToken();
-        expect(token).toEqual(tokenResponse);
+        expect(token).toEqual(authenticationResult);
     });
 
     it('signRequest', async () => {
-        setupRetryHelperMock(false);
+        setupRetryHelperMock();
         const expectedHeaders = {
             headers: {
-                authorization: `${tokenResponse.tokenType} ${tokenResponse.accessToken}`,
+                authorization: `${authenticationResult.tokenType} ${authenticationResult.accessToken}`,
             },
         };
 
@@ -80,28 +78,23 @@ describe(A11yServiceCredential, () => {
         gotMock.verify((rm) => rm.extend(It.isValue(expectedHeaders)), Times.once());
     });
 
-    it('should reject when acquireTokenWithClientCredentials fails', async () => {
-        error = new Error('err');
-        setupRetryHelperMock(true);
-        loggerMock.setup((l) => l.logError(`Error while acquiring Azure AD client token. ${System.serializeError(error)}`)).verifiable();
+    it('should reject when acquire credentials fails', async () => {
+        error = new Error('Token error');
+        clientApplicationMock.reset();
+        clientApplicationMock
+            .setup((o) => o.acquireTokenByClientCredential(It.isAny()))
+            .returns(() => Promise.reject(error))
+            .verifiable();
+        setupRetryHelperMock();
 
-        let caughtError: Error;
-        await testSubject.getToken().catch((reason) => {
-            caughtError = reason;
-        });
-        expect(caughtError).not.toBeUndefined();
+        await expect(testSubject.getToken()).rejects.toThrowError('Error while acquiring Azure AD client token.');
     });
 
-    function setupRetryHelperMock(shouldFail: boolean): void {
+    function setupRetryHelperMock(): void {
         retryHelperMock
-            .setup((r) => r.executeWithRetries(It.isAny(), It.isAny(), numTokenAttempts, 0))
-            .returns(async (action: () => Promise<TokenResponse>, errorHandler: (err: Error) => Promise<void>, maxAttempts: number) => {
-                if (shouldFail) {
-                    await errorHandler(error);
-                    throw error;
-                } else {
-                    return action();
-                }
+            .setup((o) => o.executeWithRetries(It.isAny(), It.isAny(), numTokenAttempts, 0))
+            .returns(async (action: () => Promise<msal.AuthenticationResult>) => {
+                return action();
             })
             .verifiable();
     }
