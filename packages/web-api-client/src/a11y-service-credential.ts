@@ -1,34 +1,47 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { isNil } from 'lodash';
-import { AuthenticationContext, TokenResponse } from 'adal-node';
 import { RetryHelper, System } from 'common';
-import { Logger } from 'logger';
+import { LogLevel, Logger } from 'logger';
 import { ExtendOptions, Got } from 'got';
+import * as msal from '@azure/msal-node';
 
 export class A11yServiceCredential {
-    private readonly authContext: AuthenticationContext;
-
     constructor(
         private readonly clientId: string,
         private readonly clientSecret: string,
-        private readonly resourceId: string,
-        authorityUrl: string,
+        private readonly scope: string,
+        private readonly authority: string,
         private readonly logger: Logger,
-        context?: AuthenticationContext,
         private readonly maxTokenAttempts: number = 5,
         private readonly msecBetweenRetries: number = 1000,
-        private readonly retryHelper: RetryHelper<TokenResponse> = new RetryHelper(),
+        private readonly retryHelper: RetryHelper<msal.AuthenticationResult> = new RetryHelper(),
+        private readonly clientApplication?: msal.ConfidentialClientApplication,
     ) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any, , @typescript-eslint/strict-boolean-expressions
-        this.authContext = context || new (<any>AuthenticationContext)(authorityUrl, undefined, undefined, '');
+        this.clientApplication =
+            this.clientApplication ??
+            new msal.ConfidentialClientApplication({
+                auth: {
+                    authority: this.authority,
+                    clientId: this.clientId,
+                    clientSecret: this.clientSecret,
+                },
+                system: {
+                    loggerOptions: {
+                        loggerCallback: (level: msal.LogLevel, message: string) => {
+                            const logLevel = level === msal.LogLevel.Error ? LogLevel.Error : LogLevel.Warn;
+                            this.logger.log(message, logLevel);
+                        },
+                        logLevel: msal.LogLevel.Warning,
+                    },
+                },
+            });
     }
 
-    public async getToken(): Promise<TokenResponse> {
+    public async getToken(): Promise<msal.AuthenticationResult> {
         try {
             return await this.retryHelper.executeWithRetries(
-                () => this.tryGetToken(),
+                () => this.clientApplication.acquireTokenByClientCredential({ scopes: [`${this.scope}/.default`] }),
                 (err: Error) => this.handleGetTokenError(err),
                 this.maxTokenAttempts,
                 this.msecBetweenRetries,
@@ -53,18 +66,6 @@ export class A11yServiceCredential {
         };
 
         return gotRequest.extend(authOptions);
-    }
-
-    private async tryGetToken(): Promise<TokenResponse> {
-        return new Promise((resolve, reject) => {
-            this.authContext.acquireTokenWithClientCredentials(this.resourceId, this.clientId, this.clientSecret, (err, tokenResponse) => {
-                if (!isNil(err)) {
-                    reject(err);
-                } else {
-                    resolve(tokenResponse as TokenResponse);
-                }
-            });
-        });
     }
 
     private async handleGetTokenError(err: Error): Promise<void> {
