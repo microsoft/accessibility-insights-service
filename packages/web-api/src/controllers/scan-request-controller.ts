@@ -3,7 +3,7 @@
 
 import { GuidGenerator, RestApiConfig, ServiceConfiguration, Url, CrawlConfig } from 'common';
 import { inject, injectable } from 'inversify';
-import { isEmpty, isNil, groupBy, filter } from 'lodash';
+import { isEmpty, isNil, groupBy, filter, isArray } from 'lodash';
 import { ContextAwareLogger, ScanRequestReceivedMeasurements } from 'logger';
 import {
     ApiController,
@@ -123,6 +123,23 @@ export class ScanRequestController extends ApiController {
         const scanRequestsToBeStoredInDb: ScanRunBatchRequest[] = [];
         const scanResponses: ScanRunResponse[] = [];
 
+        const batchRequestValidationResult = this.validateBatchRequest(scanRunRequests);
+        if (batchRequestValidationResult.valid !== true) {
+            scanResponses.push({
+                url: undefined,
+                error: batchRequestValidationResult.error,
+            });
+            this.logger.logInfo('The scan batch request is rejected as malformed.', {
+                batchId,
+                jsonRequest: JSON.stringify(scanRunRequests),
+            });
+
+            return {
+                scanRequestsToBeStoredInDb: [],
+                scanResponses,
+            };
+        }
+
         scanRunRequests.forEach((scanRunRequest) => {
             const runRequestValidationResult = this.validateRunRequest(scanRunRequest);
             if (runRequestValidationResult.valid) {
@@ -145,7 +162,7 @@ export class ScanRequestController extends ApiController {
                     url: scanRunRequest.url,
                 });
 
-                this.logger.logInfo('Generated new scan id for the scan request URL.', {
+                this.logger.logInfo('Generated new scan id for the scan request.', {
                     batchId,
                     scanId,
                     url: scanRunRequest.url,
@@ -156,7 +173,7 @@ export class ScanRequestController extends ApiController {
                     url: scanRunRequest.url,
                     error: runRequestValidationResult.error,
                 });
-                this.logger.logInfo('The posted scan request URL is rejected as malformed.', {
+                this.logger.logInfo('The scan request is rejected as malformed.', {
                     batchId,
                     url: scanRunRequest.url,
                     jsonRequest: JSON.stringify(scanRunRequest),
@@ -165,9 +182,17 @@ export class ScanRequestController extends ApiController {
         });
 
         return {
-            scanRequestsToBeStoredInDb: scanRequestsToBeStoredInDb,
-            scanResponses: scanResponses,
+            scanRequestsToBeStoredInDb,
+            scanResponses,
         };
+    }
+
+    private validateBatchRequest(scanRunRequests: ScanRunRequest[]): RunRequestValidationResult {
+        if (isEmpty(scanRunRequests) || !isArray(scanRunRequests) || scanRunRequests.length === 0) {
+            return { valid: false, error: WebApiErrorCodes.malformedRequest.error };
+        }
+
+        return { valid: true };
     }
 
     private validateRunRequest(scanRunRequest: ScanRunRequest): RunRequestValidationResult {

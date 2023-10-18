@@ -11,7 +11,7 @@ import { PageMetadataGenerator } from './page-metadata-generator';
 import { UrlLocationValidator } from './url-location-validator';
 
 let pageMock: IMock<Page>;
-let discoveryPatternFactoryMock: IMock<typeof createDiscoveryPattern>;
+let createDiscoveryPatternMock: IMock<typeof createDiscoveryPattern>;
 let urlLocationValidatorMock: IMock<UrlLocationValidator>;
 let websiteScanResult: WebsiteScanResult;
 let pageAnalysisResult: PageAnalysisResult;
@@ -23,21 +23,22 @@ const generatedDiscoveryPattern = `^http(s?)://localhost(.*)`;
 describe(PageMetadataGenerator, () => {
     beforeEach(() => {
         pageMock = Mock.ofType<Page>();
-        discoveryPatternFactoryMock = Mock.ofType<typeof createDiscoveryPattern>();
+        createDiscoveryPatternMock = Mock.ofType<typeof createDiscoveryPattern>();
         urlLocationValidatorMock = Mock.ofType<UrlLocationValidator>();
 
         pageAnalysisResult = { redirection: false } as PageAnalysisResult;
         pageMock.setup((o) => o.pageAnalysisResult).returns(() => pageAnalysisResult);
         websiteScanResult = {} as WebsiteScanResult;
-        discoveryPatternFactoryMock.setup((o) => o(url)).returns(() => generatedDiscoveryPattern);
+        createDiscoveryPatternMock.setup((o) => o(url, It.isAny())).returns(() => generatedDiscoveryPattern);
         urlLocationValidatorMock.setup((o) => o.allowed(It.isAny())).returns(() => true);
 
-        pageMetadataGenerator = new PageMetadataGenerator(urlLocationValidatorMock.object);
+        pageMetadataGenerator = new PageMetadataGenerator(urlLocationValidatorMock.object, createDiscoveryPatternMock.object);
     });
 
     afterEach(() => {
         pageMock.verifyAll();
-        discoveryPatternFactoryMock.verifyAll();
+        urlLocationValidatorMock.verifyAll();
+        createDiscoveryPatternMock.verifyAll();
     });
 
     it('return page metadata for disallowed loaded URL', async () => {
