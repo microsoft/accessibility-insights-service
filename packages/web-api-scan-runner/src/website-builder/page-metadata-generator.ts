@@ -30,7 +30,7 @@ export class PageMetadataGenerator {
         const urlAllowed = this.urlLocationValidator.allowed(url);
         if (urlAllowed === true) {
             await page.analyze(url);
-            foreignLocation = await this.hasForeignLocation(page, websiteScanResult);
+            foreignLocation = await this.hasForeignLocation(url, page, websiteScanResult);
         }
 
         return {
@@ -46,11 +46,18 @@ export class PageMetadataGenerator {
         };
     }
 
-    private async hasForeignLocation(page: Page, websiteScanResult: WebsiteScanResult): Promise<boolean> {
+    private async hasForeignLocation(url: string, page: Page, websiteScanResult: WebsiteScanResult): Promise<boolean> {
         if (page.pageAnalysisResult?.redirection === true) {
             const discoveryPatterns = websiteScanResult?.discoveryPatterns ?? [
-                this.createDiscoveryPatternFn(websiteScanResult?.baseUrl ?? page.pageAnalysisResult.url),
+                this.createDiscoveryPatternFn(websiteScanResult?.baseUrl ?? url),
             ];
+
+            // Discovery pattern can be sent in the scan request or created from the base URL that is sent
+            // in the scan request as well. Both discovery patterns may not match to the scan request
+            // URL due to misconfiguration. To enable processing the scan request URL we always adding
+            // pattern created from the scan request URL.
+            discoveryPatterns.push(this.createDiscoveryPatternFn(url, false));
+
             // eslint-disable-next-line security/detect-non-literal-regexp
             const match = discoveryPatterns.filter((r) => new RegExp(r, 'i').test(page.pageAnalysisResult.loadedUrl)).length > 0;
 

@@ -21,6 +21,12 @@ describe(createDiscoveryPattern, () => {
         expect(actualPattern).toEqual(expectedPattern);
     });
 
+    it('creates discovery pattern without path', () => {
+        const expectedPattern = `^http(s?)://${host}(.*)`;
+        const actualPattern = createDiscoveryPattern(url, false);
+        expect(actualPattern).toEqual(expectedPattern);
+    });
+
     it('ignore empty base url', () => {
         const actualPattern = createDiscoveryPattern('');
         expect(actualPattern).toBeUndefined();
