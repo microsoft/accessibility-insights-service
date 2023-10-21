@@ -27,7 +27,8 @@ if [[ -z ${browserPath} ]]; then
 fi
 
 if [[ -z ${profilePath} ]]; then
-    profilePath="${0%/*}/chrome-user-data"
+    absolutePath="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    profilePath="${absolutePath}/chrome-user-data"
 fi
 
 result=$(
