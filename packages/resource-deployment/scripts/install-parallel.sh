@@ -62,11 +62,18 @@ Azure region - The deployment location.
 
 onExit-install() {
     local exitCode=$?
-    local line="$BASH_LINENO"
     local command="$BASH_COMMAND"
 
     if [[ ${exitCode} != 0 ]]; then
-        echo "Installation failed with exit code ${exitCode}. Failed at $line: $command"
+        echo "Installation failed with exit code ${exitCode}."
+        echo "$command"
+        echo "${FUNCNAME[0]}@${BASH_SOURCE[0]}:$LINENO"
+
+        local i
+        for ((i = 1; i < ${#FUNCNAME[*]}; i++)); do
+            echo "${FUNCNAME[$i]}@${BASH_SOURCE[$i]}:${BASH_LINENO[$i - 1]}"
+        done
+
         killDescendantProcesses $$
         echo "WARN: Deployments that already were triggered could still be running. To kill them, you may need to goto the Azure portal and cancel corresponding deployment."
     else
@@ -183,7 +190,7 @@ function install() {
     parallelProcesses=(
         "${0%/*}/upload-files.sh"
         "${0%/*}/create-queues.sh"
-        "${0%/*}/setup-cosmos-db.sh"
+        "${0%/*}/create-cosmos-db.sh"
         "${0%/*}/create-vnet.sh"
         "${0%/*}/app-insights-create.sh"
         "${0%/*}/create-container-registry.sh"
@@ -193,7 +200,7 @@ function install() {
     # The following scripts all depend on the result from the above scripts.
     # Additionally, these should run sequentially because of interdependence.
 
-    . "${0%/*}/setup-key-vault.sh"
+    . "${0%/*}/create-key-vault.sh"
     . "${0%/*}/push-image-to-container-registry.sh"
     . "${0%/*}/create-batch-account.sh"
     . "${0%/*}/create-job-schedule.sh"
