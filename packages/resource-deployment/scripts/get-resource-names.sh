@@ -4,7 +4,7 @@
 # Licensed under the MIT License.
 
 if [[ -z "$resourceGroupName" ]]; then
-    echo "Resource group name not set."
+    echo "Resource group name is not defined."
     exit 1
 fi
 
@@ -19,6 +19,9 @@ if [[ -z $storageAccountName ]]; then
     echo "Unable to get storage account for resource group $resourceGroupName"
     return
 fi
+
+id=$(az group show --name "$resourceGroupName" --query "id" -o tsv)
+subscription=${id:15:36}
 
 resourceGroupSuffix=${storageAccountName:11}
 

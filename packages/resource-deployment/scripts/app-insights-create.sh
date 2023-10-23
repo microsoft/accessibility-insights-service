@@ -12,7 +12,7 @@ export appInsightsKey
 
 exitWithUsageInfo() {
     echo "
-Usage: ${BASH_SOURCE} -r <resource group> -s <subscription name or id>
+Usage: ${BASH_SOURCE} -r <resource group> [-s <subscription name or id>]
 "
     exit 1
 }
@@ -26,9 +26,12 @@ while getopts ":r:s:" option; do
     esac
 done
 
-if [[ -z $resourceGroupName ]] || [[ -z $subscription ]]; then
+if [[ -z $resourceGroupName ]]; then
     exitWithUsageInfo
-    exit 1
+fi
+
+if [[ -z $subscription ]]; then
+    . "${0%/*}/get-resource-names.sh"
 fi
 
 echo "Installing microsoft.insights extension for azure-cli"

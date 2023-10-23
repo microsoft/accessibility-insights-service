@@ -215,11 +215,6 @@ if [[ -z $resourceGroupName ]] || [[ -z $parameterFilePath ]]; then
     exitWithUsageInfo
 fi
 
-# Login to Azure account if required
-if ! az account show 1>/dev/null; then
-    az login
-fi
-
 . "${0%/*}/get-resource-names.sh"
 
 batchAccountExists=$(az resource list --name $batchAccountName -o tsv)

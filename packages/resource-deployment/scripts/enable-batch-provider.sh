@@ -28,8 +28,9 @@ if [[ -z $azureBatchObjectId ]] || [[ -z $environment ]]; then
     exitWithUsageInfo
 fi
 
-# Get the default subscription
-subscription=$(az account show --query "id" -o tsv)
+if [[ -z $subscription ]]; then
+    . "${0%/*}/get-resource-names.sh"
+fi
 
 echo "Validating Microsoft.Batch provider registration on '$subscription' Azure subscription"
 batchProviderRegistrationState=$(az provider show --namespace Microsoft.Batch --query "registrationState" -o tsv)

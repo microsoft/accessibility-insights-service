@@ -84,11 +84,6 @@ if [[ -z $resourceGroupName ]] || [[ -z $batchTemplateFile ]] || [[ -z $environm
     exitWithUsageInfo
 fi
 
-# Login to Azure account if required
-if ! az account show 1>/dev/null; then
-    az login
-fi
-
 . "${0%/*}/get-resource-names.sh"
 
 echo "Setting up batch account ${batchAccountName}"

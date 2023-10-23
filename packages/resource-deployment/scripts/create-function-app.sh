@@ -182,7 +182,7 @@ function deployE2EWebApisFunction() {
 function enableStorageAccess() {
     role="Storage Blob Data Contributor"
     scope="--scope /subscriptions/$subscription/resourceGroups/$resourceGroupName/providers/Microsoft.Storage/storageAccounts/$storageAccountName"
-    . "${0%/*}/create-role-assign.sh"
+    . "${0%/*}/create-role-assignment.sh"
 }
 
 function enableCosmosAccess() {
@@ -190,7 +190,7 @@ function enableCosmosAccess() {
     scope="--scope $cosmosAccountId"
 
     role="DocumentDB Account Contributor"
-    . "${0%/*}/create-role-assign.sh"
+    . "${0%/*}/create-role-assignment.sh"
 
     # Create and assign custom RBAC role
     customRoleName="CosmosDocumentRW"
@@ -282,7 +282,7 @@ if [[ -z $resourceGroupName ]] || [[ -z $environment ]] || [[ -z $releaseVersion
     exitWithUsageInfo
 fi
 
-echo "Setting up function apps with arguments passed:
+echo "Setting up function apps with arguments:
     resourceGroupName: $resourceGroupName
     webApiAdClientId: $webApiAdClientId
     environment: $environment
@@ -292,14 +292,6 @@ echo "Setting up function apps with arguments passed:
 
 . "${0%/*}/process-utilities.sh"
 . "${0%/*}/get-resource-names.sh"
-
-# Login to Azure if required
-if ! az account show 1>/dev/null; then
-    az login
-fi
-
-# Get the default subscription
-subscription=$(az account show --query "id" -o tsv)
 
 addAadAcl
 setupAzureFunctions

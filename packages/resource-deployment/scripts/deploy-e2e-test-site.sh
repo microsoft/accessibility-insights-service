@@ -11,7 +11,7 @@ defaultConfigFileFolder="${0%/*}/../runtime-config"
 
 exitWithUsageInfo() {
     echo "
-Usage: ${BASH_SOURCE} -r <resource group> -s <subscription> [-c <site content directory, default $defaultSiteContentFolder> -f <service config files directory, default $defaultConfigFileFolder >]
+Usage: ${BASH_SOURCE} -r <resource group> [-s <subscription>] [-c <site content directory, default $defaultSiteContentFolder>] [-f <service config files directory, default $defaultConfigFileFolder >]
 "
     exit 1
 }
@@ -30,9 +30,8 @@ if [[ -z $resourceGroupName ]]; then
     exitWithUsageInfo
 fi
 
-if [[ ! -z $subscription ]]; then
-    echo "Logging into subscription $subscription"
-    az account set --subscription "$subscription"
+if [[ -z $subscription ]]; then
+    . "${0%/*}/get-resource-names.sh"
 fi
 
 if [[ -z $siteContentFolder ]]; then

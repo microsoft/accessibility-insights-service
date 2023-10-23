@@ -90,12 +90,6 @@ function setupKeyVaultResources() {
         "
 }
 
-function enableServiceAccess() {
-    role="Key Vault Reader"
-    scope="--scope /subscriptions/$subscription/resourceGroups/$resourceGroupName"
-    . "${0%/*}/create-role-assign.sh"}
-}
-
 # Read script arguments
 while getopts ":r:c:p:b:e:" option; do
     case $option in
@@ -117,16 +111,11 @@ if [[ -z $environment ]]; then
     environment="dev"
 fi
 
-# Login to Azure account if required
-if ! az account show 1>/dev/null; then
-    az login
-fi
-
 . "${0%/*}/get-resource-names.sh"
+
 createOrRecoverKeyvault
 setupKeyVaultResources
 setAccessPolicies
 . "${0%/*}/push-secrets-to-key-vault.sh"
-enableServiceAccess
 
 echo "The '$keyVault' Azure Key Vault successfully deployed."
