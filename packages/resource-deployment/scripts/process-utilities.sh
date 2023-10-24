@@ -71,9 +71,19 @@ function killWithDescendantsIfProcessExists() {
 function killDescendantProcesses() {
     local processId=$1
     local children
+    local os=$(uname -s 2>/dev/null) || true
 
-    children=$(pgrep -P "${processId}")
-    for childPid in ${children}; do
-        killWithDescendantsIfProcessExists "${childPid}"
+    if [[ $os == "Linux" ]] || [[ $os == "Darwin" ]]; then
+        # Linux or macOS
+        children=$(pgrep -P "${processId}")
+    else
+        # Windows
+        children=$(wmic process where \(ParentProcessId="${processId}"\) get ProcessId | more +1)
+    fi
+
+    for child in ${children}; do
+        local childId="${child//[$'\t\r\n ']/}"
+
+        killWithDescendantsIfProcessExists "${childId}"
     done
 }

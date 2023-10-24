@@ -63,9 +63,7 @@ function deployBatch() {
             -o tsv
     )
 
-    echo "Deployed Batch account:
-        resources: ${resources}
-    "
+    echo "Deployed Batch account $batchAccountName"
 }
 
 # Read script arguments

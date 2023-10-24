@@ -10,7 +10,7 @@ export batchAccountName
 export keyVault
 export pools
 
-kernelName=$(uname -s 2>/dev/null) || true
+os=$(uname -s 2>/dev/null) || true
 areVmssOld=false
 recycleVmssIntervalDays=5
 
@@ -36,7 +36,7 @@ function checkIfVmssAreOld() {
     for createdDate in $createdDates; do
         hasCreatedDateTags=true
 
-        if [[ $kernelName == "Darwin" ]]; then
+        if [[ $os == "Darwin" ]]; then
             local recycleDate=$(date -j -v +"$recycleVmssIntervalDays"d -f "%Y/%m/%d" "$createdDate" "+%Y/%m/%d")
             local currentDate=$(date "+%Y/%m/%d")
         else
@@ -108,7 +108,7 @@ function checkPoolConfigs() {
 
         echo "Validating pool $poolId configuration..."
 
-        if [[ $kernelName == "Darwin" ]]; then
+        if [[ $os == "Darwin" ]]; then
             local words=(${poolId//-/ })
             for word in "${words[@]}"; do
                 local lowercase=$(echo ${word} | tr [:upper:] [:lower:])
