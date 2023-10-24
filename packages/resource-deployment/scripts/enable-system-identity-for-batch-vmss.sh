@@ -5,11 +5,14 @@
 
 set -eo pipefail
 
+# The script will enable system-assigned managed identity on Batch pool VMSS
+
 export principalId
 export role
 export scope
 
-# The script will enable system-assigned managed identity on Batch pool VMSS
+# Disable POSIX to Windows path conversion
+export MSYS_NO_PATHCONV=1
 
 exitWithUsageInfo() {
     echo "

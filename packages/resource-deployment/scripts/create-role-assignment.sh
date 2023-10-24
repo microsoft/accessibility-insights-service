@@ -7,6 +7,9 @@ set -eo pipefail
 
 # The script will create a new role assignment for a service principal
 
+# Disable POSIX to Windows path conversion
+export MSYS_NO_PATHCONV=1
+
 exitWithUsageInfo() {
     echo "
 Usage: ${BASH_SOURCE} -r <resource group> -p <service principal id> -g <Azure role name or id> -s <scope at which the role assignment applies to>

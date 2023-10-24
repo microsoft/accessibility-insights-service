@@ -7,6 +7,9 @@ set -eo pipefail
 
 # This script will grant permissions to the service principal to access a key vault
 
+# Disable POSIX to Windows path conversion
+export MSYS_NO_PATHCONV=1
+
 exitWithUsageInfo() {
     echo "
 Usage: ${BASH_SOURCE} -r <resource group> -k <key vault> -p <service principal id> [-s <subscription name or id>]

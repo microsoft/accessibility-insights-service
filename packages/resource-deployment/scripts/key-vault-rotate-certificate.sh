@@ -7,6 +7,9 @@ set -eo pipefail
 
 certificateName="azSecPackCert"
 
+# Disable POSIX to Windows path conversion
+export MSYS_NO_PATHCONV=1
+
 exitWithUsageInfo() {
     echo "
 Usage: ${BASH_SOURCE} -r <resource group> [-k <key vault>] [-n <key vault certificate name>] [-s <subscription name or id>] [-e <environment: dev, ci, ppe, prod or selftest>]
@@ -37,7 +40,7 @@ onExit-key-vault-rotate-certificate() {
     az role assignment delete \
         --role "Key Vault Certificates Officer" \
         --assignee "$principalName" \
-        --scope "/subscriptions/$subscription/resourcegroups/$resourceGroupName/providers/Microsoft.KeyVault/vaults/$keyVault" 1>/dev/null
+        --scope "/subscriptions/$subscription/resourcegroups/$resourceGroupName/providers/Microsoft.KeyVault/vaults/$keyVault" >/dev/null 2>&1
 }
 
 createNewCertificateVersion() {

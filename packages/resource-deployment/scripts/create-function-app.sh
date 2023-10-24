@@ -13,6 +13,9 @@ export environment
 export keyVault
 export principalId
 
+# Disable POSIX to Windows path conversion
+export MSYS_NO_PATHCONV=1
+
 templatesFolder="${0%/*}/../templates/"
 webApiFuncTemplateFilePath=$templatesFolder/function-web-api-app-template.json
 webWorkersFuncTemplateFilePath=$templatesFolder/function-web-workers-app-template.json
