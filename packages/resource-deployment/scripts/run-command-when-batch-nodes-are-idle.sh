@@ -38,12 +38,13 @@ echo "Run command when all pools are idle:
 
 function setJobScheduleStatus() {
     local status=$1
-
     local query="[?contains('$pools', jobSpecification.poolInfo.poolId)].id"
     local schedules=$(az batch job-schedule list --query "$query" -o tsv)
+
     for schedule in $schedules; do
-        echo "Setting job schedule $schedule status to $status"
-        az batch job-schedule $status --job-schedule-id "$schedule" 1>/dev/null
+        scheduleId="${schedule//[$'\t\r\n ']/}"
+        echo "Setting job schedule $scheduleId status to $status"
+        az batch job-schedule "$status" --job-schedule-id "$scheduleId" 1>/dev/null
     done
 }
 
