@@ -52,9 +52,7 @@ function createKeyvaultIfNotExists() {
                 -o tsv
         )
 
-        echo "Created key vault:
-            resource: $resources
-        "
+        echo "Created key vault $keyVault"
     else
         echo "Key vault already exists. Skipping key vault creation using ARM template."
     fi
