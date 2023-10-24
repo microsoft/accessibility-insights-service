@@ -65,7 +65,6 @@ onExit-install() {
     local command="$BASH_COMMAND"
 
     if [[ ${exitCode} != 0 ]]; then
-        echo "Installation failed with exit code $exitCode"
         echo "Script: $command"
         echo "Call stack:"
         echo "  at ${FUNCNAME[0]} (${BASH_SOURCE[0]}:$LINENO)"
@@ -76,7 +75,9 @@ onExit-install() {
         done
 
         killDescendantProcesses $$
-        echo "WARN: Deployments that already were triggered could still be running. To kill them, you may need to goto the Azure portal and cancel corresponding deployment."
+
+        echo "Installation failed with exit code $exitCode"
+        echo "Deployments that already were triggered could still be running. To kill them, you may need to goto the Azure portal and cancel corresponding deployment."
     else
         echo "Installation completed with exit code $exitCode"
     fi
