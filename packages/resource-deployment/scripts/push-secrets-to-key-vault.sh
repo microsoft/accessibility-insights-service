@@ -15,6 +15,9 @@ export containerRegistryName
 export principalName
 export tenantId
 
+# Disable POSIX to Windows path conversion
+export MSYS_NO_PATHCONV=1
+
 exitWithUsageInfo() {
     echo "
 Usage: ${BASH_SOURCE} -r <resource group> -c <web API Azure AD client Id> -p <web API Azure AD client secret>
@@ -49,7 +52,7 @@ onExit-push-secrets-to-key-vault() {
     az role assignment delete \
         --role "Key Vault Secrets Officer" \
         --assignee "$principalName" \
-        --scope "/subscriptions/$subscription/resourcegroups/$resourceGroupName/providers/Microsoft.KeyVault/vaults/$keyVault" 1>/dev/null
+        --scope "/subscriptions/$subscription/resourcegroups/$resourceGroupName/providers/Microsoft.KeyVault/vaults/$keyVault" >/dev/null 2>&1
 }
 
 pushSecretToKeyVault() {
