@@ -23,6 +23,7 @@ function rebootNodes() {
 
         for node in $nodes; do
             local nodeId="${node//[$'\t\r\n ']/}"
+
             echo "Restarting node $nodeId under pool $poolId"
             az batch node reboot --node-id "$nodeId" --pool-id "$poolId" --account-name "$batchAccountName" --node-reboot-option terminate 1>/dev/null
         done

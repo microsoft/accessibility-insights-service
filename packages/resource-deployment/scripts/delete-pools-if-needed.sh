@@ -103,21 +103,23 @@ function checkIfPoolConfigOutdated() {
 
 function checkPoolConfigs() {
     for pool in $pools; do
-        echo "Validating pool $pool configuration..."
+        local camelCase=""
+        local poolId="${pool//[$'\t\r\n ']/}"
 
-        camelCase=""
+        echo "Validating pool $poolId configuration..."
+
         if [[ $kernelName == "Darwin" ]]; then
-            local words=(${pool//-/ })
+            local words=(${poolId//-/ })
             for word in "${words[@]}"; do
                 local lowercase=$(echo ${word} | tr [:upper:] [:lower:])
                 local camelCase=$camelCase$(echo ${lowercase:0:1} | tr [:lower:] [:upper:])${lowercase:1}
             done
             local camelCasePoolId=$(echo ${camelCase:0:1} | tr [:upper:] [:lower:])${camelCase:1}
         else
-            local camelCasePoolId=$(echo "$pool" | sed -r 's/(-)([a-z])/\U\2/g')
+            local camelCasePoolId=$(echo "$poolId" | sed -r 's/(-)([a-z])/\U\2/g')
         fi
 
-        checkIfPoolConfigOutdated "$pool" "$camelCasePoolId"
+        checkIfPoolConfigOutdated "$poolId" "$camelCasePoolId"
         if [[ $poolConfigOutdated == "true" ]]; then
             return
         fi
@@ -126,13 +128,17 @@ function checkPoolConfigs() {
 
 deletePools() {
     for pool in $pools; do
-        echo "Deleting Batch pool $pool"
-        az batch pool delete --account-name $batchAccountName --pool-id $pool --yes
+        local poolId="${pool//[$'\t\r\n ']/}"
+
+        echo "Deleting Batch pool $poolId"
+        az batch pool delete --account-name "$batchAccountName" --pool-id "$poolId" --yes
     done
 
     for pool in $pools; do
-        waitForDelete $pool
-        echo "Finished deleting Batch pool $pool"
+        local poolId="${pool//[$'\t\r\n ']/}"
+
+        waitForDelete $poolId
+        echo "Finished deleting Batch pool $poolId"
     done
 }
 

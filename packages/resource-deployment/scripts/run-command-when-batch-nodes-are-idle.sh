@@ -43,6 +43,7 @@ function setJobScheduleStatus() {
 
     for schedule in $schedules; do
         scheduleId="${schedule//[$'\t\r\n ']/}"
+
         echo "Setting job schedule $scheduleId status to $status"
         az batch job-schedule "$status" --job-schedule-id "$scheduleId" 1>/dev/null
     done

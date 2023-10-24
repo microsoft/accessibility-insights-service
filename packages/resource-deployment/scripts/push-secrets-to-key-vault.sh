@@ -59,7 +59,7 @@ pushSecretToKeyVault() {
     local secretName=$1
     local secretValue=$2
 
-    echo "Adding secret for $secretName in key vault"
+    echo "Adding $secretName key vault secret"
     az keyvault secret set --vault-name "$keyVault" --name "$secretName" --value "$secretValue" 1>/dev/null
 }
 

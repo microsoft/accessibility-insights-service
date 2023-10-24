@@ -39,4 +39,4 @@ if [[ -z $storageAccountName ]]; then
     exit 1
 fi
 
-echo "Created storage account '$storageAccountName'"
+echo "Created storage account $storageAccountName"
