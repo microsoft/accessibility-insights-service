@@ -105,8 +105,10 @@ waitForNodesToGoIdleByNodeType() {
 
 function waitForPoolsToBeIdle() {
     for pool in $pools; do
-        waitForNodesToGoIdleByNodeType "$pool" "dedicated"
-        waitForNodesToGoIdleByNodeType "$pool" "lowPriority"
+        local poolId="${pool//[$'\t\r\n ']/}"
+
+        waitForNodesToGoIdleByNodeType "$poolId" "dedicated"
+        waitForNodesToGoIdleByNodeType "$poolId" "lowPriority"
     done
 }
 

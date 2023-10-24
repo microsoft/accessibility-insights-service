@@ -34,8 +34,9 @@ adjustJob() {
     local allJobsScheduleList=$3
     local foundJobSchedule=false
 
-    for currentSchedule in $allJobsScheduleList; do
-        if [[ $currentSchedule == "$jobName" ]]; then
+    for schedule in $allJobsScheduleList; do
+        local scheduleId="${schedule//[$'\t\r\n ']/}"
+        if [[ $scheduleId == "$jobName" ]]; then
             foundJobSchedule=true
             break
         fi

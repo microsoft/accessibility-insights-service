@@ -18,12 +18,13 @@ function rebootNodes() {
     local pools=$(az batch pool list --account-name "$batchAccountName" --query "[*].id" -o tsv)
 
     for pool in $pools; do
-        local nodes
-        nodes=$(az batch node list --account-name "$batchAccountName" --pool-id "$pool" --query "[*].id" -o tsv)
+        local poolId="${pool//[$'\t\r\n ']/}"
+        local nodes=$(az batch node list --account-name "$batchAccountName" --pool-id "$poolId" --query "[*].id" -o tsv)
 
         for node in $nodes; do
-            echo "Restarting node $node under pool $pool"
-            az batch node reboot --node-id $node --pool-id $pool --account-name $batchAccountName --node-reboot-option terminate 1>/dev/null
+            local nodeId="${node//[$'\t\r\n ']/}"
+            echo "Restarting node $nodeId under pool $poolId"
+            az batch node reboot --node-id "$nodeId" --pool-id "$poolId" --account-name "$batchAccountName" --node-reboot-option terminate 1>/dev/null
         done
     done
 }
@@ -70,9 +71,12 @@ function waitForStablePoolNodes() {
 
 function waitForStablePools() {
     local pools=$(az batch pool list --account-name "$batchAccountName" --query "[*].id" -o tsv)
+
     for pool in $pools; do
-        waitForStablePoolNodes "$pool" "dedicated"
-        waitForStablePoolNodes "$pool" "lowPriority"
+        local poolId="${pool//[$'\t\r\n ']/}"
+
+        waitForStablePoolNodes "$poolId" "dedicated"
+        waitForStablePoolNodes "$poolId" "lowPriority"
     done
 }
 
