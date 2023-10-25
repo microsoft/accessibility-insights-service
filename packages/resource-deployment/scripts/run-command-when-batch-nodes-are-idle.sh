@@ -83,7 +83,7 @@ waitForNodesToGoIdleByNodeType() {
 
         local stableCount=$(($idleCount + $offlineCount + $preemptedCount + $startTaskFailedCount + $unusableCount + $unknownCount))
         if [[ $stableCount == $totalCount ]]; then
-            echo "The '$nodeType' nodes under $pool pool are idle."
+            echo "The $nodeType nodes under $pool pool are idle."
             isIdle=true
             break
         else
@@ -115,7 +115,7 @@ function waitForPoolsToBeIdle() {
 
 function runCommand() {
     # Login into Azure Batch account
-    echo "Logging into '$batchAccountName' Azure Batch account"
+    echo "Logging into $batchAccountName Azure Batch account"
     az batch account login --name "$batchAccountName" --resource-group "$resourceGroupName"
 
     if [[ -z "$pools" ]]; then

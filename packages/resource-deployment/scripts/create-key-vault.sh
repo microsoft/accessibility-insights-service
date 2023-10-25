@@ -113,4 +113,4 @@ setupKeyVaultResources
 setAccessPolicies
 . "${0%/*}/push-secrets-to-key-vault.sh"
 
-echo "The '$keyVault' Azure Key Vault successfully deployed."
+echo "The $keyVault Azure Key Vault successfully deployed."

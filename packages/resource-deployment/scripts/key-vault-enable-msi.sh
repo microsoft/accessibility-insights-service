@@ -37,7 +37,7 @@ if [[ -z $subscription ]]; then
 fi
 
 # Grant permissions to the managed identity
-echo "Granting '$principalId' service principal permissions to '$keyVault' key vault"
+echo "Granting $principalId service principal permissions to $keyVault key vault"
 az role assignment create \
     --role "Key Vault Reader" \
     --assignee "$principalId" \

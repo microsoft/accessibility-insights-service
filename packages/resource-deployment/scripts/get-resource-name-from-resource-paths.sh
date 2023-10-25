@@ -38,4 +38,4 @@ for resourcePath in $resourcePaths; do
     fi
 done
 
-echo "Unable to find $providerPath in resource paths '$resourcePaths'"
+echo "Unable to find $providerPath in resource paths $resourcePaths"

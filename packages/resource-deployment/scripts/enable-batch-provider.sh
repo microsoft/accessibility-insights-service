@@ -32,12 +32,12 @@ if [[ -z $subscription ]]; then
     . "${0%/*}/get-resource-names.sh"
 fi
 
-echo "Validating Microsoft.Batch provider registration on '$subscription' Azure subscription"
+echo "Validating Microsoft.Batch provider registration on $subscription Azure subscription"
 batchProviderRegistrationState=$(az provider show --namespace Microsoft.Batch --query "registrationState" -o tsv)
 
 # Register Microsoft.Batch provider on Azure subscription
 if [[ $batchProviderRegistrationState != "Registered" ]]; then
-    echo "Registering Microsoft.Batch provider on '$subscription' Azure subscription"
+    echo "Registering Microsoft.Batch provider on $subscription Azure subscription"
     az provider register --namespace Microsoft.Batch
 
     # Wait for the registration to complete
@@ -55,12 +55,12 @@ if [[ $batchProviderRegistrationState != "Registered" ]]; then
 fi
 
 if [[ $batchProviderRegistrationState != "Registered" ]]; then
-    echo "ERROR: Unable to register Microsoft.Batch provider on '$subscription' Azure subscription. Check Azure subscription resource providers state."
+    echo "ERROR: Unable to register Microsoft.Batch provider on $subscription Azure subscription. Check Azure subscription resource providers state."
 fi
 
 # Allow Azure Batch service to access the subscription
 roleDefinitionName=$(az role assignment list --query "[?principalId=='$azureBatchObjectId'].roleDefinitionName" -o tsv)
 if [[ $roleDefinitionName != "Contributor" ]]; then
-    echo "Granting Azure Batch service access to the '$subscription' Azure subscription"
+    echo "Granting Azure Batch service access to the $subscription Azure subscription"
     az role assignment create --assignee ddbf3205-c6bd-46ae-8127-60eb93363864 --role contributor 1>/dev/null
 fi

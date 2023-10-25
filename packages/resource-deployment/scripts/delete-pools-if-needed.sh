@@ -74,13 +74,13 @@ function compareParameterFileToDeployedConfig() {
     local actualValue=$(az batch pool list --account-name "$batchAccountName" --query "$query" -o tsv)
 
     if [[ -z $expectedValue ]] || [[ $expectedValue == "null" ]]; then
-        echo "No '$templateFileParameterName' parameter value found in template file $parameterFilePath"
+        echo "No $templateFileParameterName parameter value found in template file $parameterFilePath"
     elif [[ $expectedValue != $actualValue ]]; then
-        echo "The '$batchConfigPropertyName' value for $poolId must be updated from '$actualValue' to '$expectedValue'"
+        echo "The $batchConfigPropertyName value for $poolId must be updated from $actualValue to $expectedValue"
         echo "Pool must be deleted to perform update."
         poolConfigOutdated=true
     else
-        echo "The template '$batchConfigPropertyName' value for $poolId has no changes."
+        echo "The template $batchConfigPropertyName value for $poolId has no changes."
     fi
 }
 

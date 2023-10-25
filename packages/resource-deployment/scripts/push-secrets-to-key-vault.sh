@@ -102,7 +102,7 @@ createAppInsightsApiKey() {
     fi
 
     appInsightsApiKey=$(az monitor app-insights api-key create $apiKeyParams --read-properties ReadTelemetry --query "apiKey" -o tsv)
-    echo "App Insights API key was created '$appInsightsApiKey'"
+    echo "App Insights API key was created $appInsightsApiKey"
 }
 
 # function runs in a subshell to isolate trap handler

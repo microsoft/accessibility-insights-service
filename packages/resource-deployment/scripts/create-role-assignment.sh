@@ -34,7 +34,7 @@ fi
 
 grantRoleToResource() {
     local end=$((SECONDS + 300))
-    echo "Create '$role' role assignment for service principal $principalId in $scope"
+    echo "Create $role role assignment for service principal $principalId in $scope"
     printf " - Running .."
     while [ $SECONDS -le $end ]; do
         local status="ok"
@@ -50,11 +50,11 @@ grantRoleToResource() {
     echo "  ended"
 
     if [[ $status == "failed" ]]; then
-        echo "Unable to create '$role' role assignment for service principal $principalId in $scope"
+        echo "Unable to create $role role assignment for service principal $principalId in $scope"
         exit 1
     fi
 
-    echo "Successfully granted '$role' role for service principal $principalId in $scope"
+    echo "Successfully granted $role role for service principal $principalId in $scope"
 }
 
 grantRoleToResource

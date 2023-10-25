@@ -63,21 +63,21 @@ tenant=$(az ad sp list --display-name "$displayName" --query "[].appOwnerOrganiz
 clientId=$(az ad sp list --display-name "$displayName" --query "[].appId" -o tsv)
 
 # Set key vault access policy
-echo "Granting service principal permissions to the '$keyVault' Key Vault"
+echo "Granting service principal permissions to the $keyVault Key Vault"
 az role assignment create \
     --role "Key Vault Reader" \
     --assignee "$clientId" \
     --scope "/subscriptions/$subscription/resourcegroups/$resourceGroupName/providers/Microsoft.KeyVault/vaults/$keyVault" 1>/dev/null
 
 # Granting access to storage blob
-echo "Granting service principal permissions to the '$storageAccountName' Blob storage"
+echo "Granting service principal permissions to the $storageAccountName Blob storage"
 az role assignment create \
     --role "Storage Blob Data Contributor" \
     --assignee "$clientId" \
     --scope "/subscriptions/$subscription/resourceGroups/$resourceGroupName/providers/Microsoft.Storage/storageAccounts/$storageAccountName" 1>/dev/null
 
 # Granting access to storage queue
-echo "Granting service principal permissions to the '$storageAccountName' Queue storage"
+echo "Granting service principal permissions to the $storageAccountName Queue storage"
 az role assignment create \
     --role "Storage Queue Data Contributor" \
     --assignee "$clientId" \

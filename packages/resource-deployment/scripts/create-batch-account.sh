@@ -102,4 +102,4 @@ deployBatch
 
 . "${0%/*}/setup-batch-pools.sh"
 
-echo "The '${batchAccountName}' Azure Batch account successfully deployed"
+echo "The $batchAccountName Azure Batch account successfully deployed."

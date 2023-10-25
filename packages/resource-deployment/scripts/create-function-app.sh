@@ -31,7 +31,7 @@ Usage: ${BASH_SOURCE} \
 -r <resource group> \
 -c <Azure AD application client ID> \
 -e <environment> \
--d <path to drop folder. Will use '$dropFolder' folder relative to current working directory> \
+-d <path to drop folder. Will use $dropFolder folder relative to current working directory> \
 -v <release version>
 "
     exit 1
@@ -57,11 +57,11 @@ addAadAcl() {
 copyConfigFileToScriptFolder() {
     local packageName=$1
 
-    echo "Copying config file to '$packageName' script folder..."
+    echo "Copying config file to $packageName script folder..."
     for folderName in $dropFolder/$packageName/dist/*-func; do
         if [[ -d $folderName ]]; then
             cp "$dropFolder/resource-deployment/dist/runtime-config/runtime-config.$environment.json" "$folderName/runtime-config.json"
-            echo "  Successfully copied '$environment' config file to $folderName"
+            echo "  Successfully copied $environment config file to $folderName"
         fi
     done
 }
@@ -106,7 +106,7 @@ publishFunctionAppScripts() {
     cd "${0%/*}/../../../$packageName/dist"
 
     # Publish the function scripts to the function app
-    echo "Publishing '$packageName' scripts to '$functionAppName' Function App..."
+    echo "Publishing $packageName scripts to $functionAppName Function App..."
 
     # Run function tool with retries due to app service warm up time delay
     local isPublished=false
@@ -126,11 +126,11 @@ publishFunctionAppScripts() {
     done
 
     if [ "$isPublished" = false ]; then
-        echo "Publishing '$packageName' scripts to '$functionAppName' Function App was unsuccessful."
+        echo "Publishing $packageName scripts to $functionAppName Function App was unsuccessful."
         exit 1
     fi
 
-    echo "Successfully published '$packageName' scripts to '$functionAppName' Function App."
+    echo "Successfully published $packageName scripts to $functionAppName Function App."
     cd "$currentDir"
 }
 
@@ -167,7 +167,7 @@ deployFunctionApp() {
     local myFunctionAppName="$resourceName"
 
     waitForFunctionAppServiceDeploymentCompletion $myFunctionAppName
-    echo "Successfully deployed Azure Function App '$myFunctionAppName'"
+    echo "Successfully deployed Azure Function App $myFunctionAppName"
 }
 
 function deployWebApiFunction() {

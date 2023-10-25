@@ -27,7 +27,7 @@ fi
 
 templateFile="${0%/*}/../templates/blob-storage.template.json"
 
-echo "Creating storage account under resource group '$resourceGroupName' using ARM template $templateFile"
+echo "Creating storage account under resource group $resourceGroupName using ARM template $templateFile"
 resources=$(az deployment group create --resource-group "$resourceGroupName" --template-file "$templateFile" --query "properties.outputResources[].id" -o tsv)
 
 export resourceName

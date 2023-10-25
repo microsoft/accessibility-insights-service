@@ -45,7 +45,7 @@ fi
 templateFile="${0%/*}/../templates/e2e-site-storage.template.json"
 
 deployStorageAccount() {
-    echo "Deploying storage account under resource group '$resourceGroupName' using ARM template $templateFile"
+    echo "Deploying storage account under resource group $resourceGroupName using ARM template $templateFile"
     resources=$(az deployment group create --resource-group "$resourceGroupName" --template-file "$templateFile" --query "properties.outputResources[].id" -o tsv)
 
     export resourceName

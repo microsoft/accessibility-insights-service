@@ -36,10 +36,10 @@ function setupPools() {
     echo "Setup tags for VMSS"
     parallelProcesses=()
     for pool in ${pools}; do
-        local poolId="${pool//[$'\t\r\n ']/}"
+        pool="${pool//[$'\t\r\n ']/}"
 
         command=". \"${0%/*}/add-tags-for-batch-vmss.sh\""
-        commandName="Setup tags for pool ${poolId}"
+        commandName="Setup tags for pool $pool"
         . "${0%/*}/run-command-on-all-vmss-for-pool.sh" &
         parallelProcesses+=("$!")
     done
@@ -48,10 +48,10 @@ function setupPools() {
     echo "Enable VMSS automatic OS image upgrades"
     parallelProcesses=()
     for pool in ${pools}; do
-        local poolId="${pool//[$'\t\r\n ']/}"
+        pool="${pool//[$'\t\r\n ']/}"
 
         command=". \"${0%/*}/enable-os-image-upgrade.sh\""
-        commandName="Enable VMSS automatic OS image upgrades for pool ${poolId}"
+        commandName="Enable VMSS automatic OS image upgrades for pool $pool"
         . "${0%/*}/run-command-on-all-vmss-for-pool.sh" &
         parallelProcesses+=("$!")
     done
@@ -60,10 +60,10 @@ function setupPools() {
     echo "Enable system identity for VMSS"
     # Runs pools update script sequentially
     for pool in ${pools}; do
-        local poolId="${pool//[$'\t\r\n ']/}"
+        pool="${pool//[$'\t\r\n ']/}"
 
         command=". ${0%/*}/enable-system-identity-for-batch-vmss.sh"
-        commandName="Enable system identity for pool ${poolId}"
+        commandName="Enable system identity for pool $pool"
         . "${0%/*}/run-command-on-all-vmss-for-pool.sh"
     done
 }
@@ -84,10 +84,10 @@ fi
 . "${0%/*}/get-resource-names.sh"
 
 # Login into Azure Batch account
-echo "Logging into '${batchAccountName}' Azure Batch account"
-az batch account login --name "${batchAccountName}" --resource-group "${resourceGroupName}"
+echo "Logging into $batchAccountName Azure Batch account"
+az batch account login --name "$batchAccountName" --resource-group "$resourceGroupName"
 
 waitForVmssToCompleteSetup
 setupPools
 
-echo "Successfully setup all pools for batch account ${batchAccountName}"
+echo "Successfully setup all pools for batch account $batchAccountName"
