@@ -36,36 +36,15 @@ function runCommandsWithoutSecretsInParallel {
     waitForProcesses parallelizableProcesses
 }
 
-function sendSignalToProcessIfExists {
-    local currentPid=$1
-    local signal=$2
+function killProcess() {
+    local processId=$1
 
-    if [[ -z ${currentPid} ]]; then
+    if [[ -z $processId ]]; then
         return
     fi
 
-    if kill -0 "${currentPid}" >/dev/null 2>&1; then
-        kill "${signal}" "${currentPid}"
-    fi
-}
-
-function killWithDescendantsIfProcessExists() {
-    local currentPid=$1
-
-    if [[ -z ${currentPid} ]]; then
-        return
-    fi
-
-    if kill -0 "${currentPid}" >/dev/null 2>&1; then
-        echo "Stopping process ${currentPid}"
-        sendSignalToProcessIfExists "${currentPid}" -SIGSTOP
-
-        killDescendantProcesses "${currentPid}"
-        echo "Killed descendant processes of ${currentPid}"
-
-        sendSignalToProcessIfExists "${currentPid}" -SIGKILL
-        echo "Killed process ${currentPid}"
-    fi
+    killDescendantProcesses "$processId"
+    kill -SIGKILL "$processId"
 }
 
 function killDescendantProcesses() {
@@ -75,17 +54,25 @@ function killDescendantProcesses() {
 
     if [[ $os == "Linux" ]] || [[ $os == "Darwin" ]]; then
         # Linux or macOS
-        children=$(pgrep -P "${processId}")
+        children=$(pgrep -P "$processId")
+
+        for child in ${children}; do
+            local childId="${child//[$'\t\r\n ']/}"
+
+            killProcess "$childId"
+        done
     else
         # Windows
-        children=$(wmic process where "ParentProcessId=${processId}" get ProcessId)
+        children=$(wmic process where "Description='bash.exe'" get ProcessId)
         children="${children//[$'ProcessId']/}"
-        children="${children/[$'\n']/}"
+
+        for child in ${children}; do
+            local childId="${child//[$'\t\r\n ']/}"
+
+            if [[ -n $childId ]]; then
+                echo "Killing process $childId"
+                kill -SIGKILL "$childId" >/dev/null 2>&1 || true
+            fi
+        done
     fi
-
-    for child in ${children}; do
-        local childId="${child//[$'\t\r\n ']/}"
-
-        killWithDescendantsIfProcessExists "${childId}"
-    done
 }
