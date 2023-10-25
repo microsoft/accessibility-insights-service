@@ -60,14 +60,12 @@ if [[ $batchProviderRegistrationState != "Registered" ]]; then
     echo "ERROR: Unable to register Microsoft.Batch provider on $subscription Azure subscription. Check Azure subscription resource providers state."
 fi
 
-# Grant subscription permission to Azure Batch service
 roleDefinitionName=$(az role assignment list --query "[?principalId=='$azureBatchObjectId'].roleDefinitionName" -o tsv)
 if [[ $roleDefinitionName != "Contributor" ]]; then
     echo "Granting Azure Batch service permissions to the $subscription Azure subscription"
     az role assignment create --assignee ddbf3205-c6bd-46ae-8127-60eb93363864 --role contributor 1>/dev/null
 fi
 
-# Grant Key Vault permission to Azure Batch service
 echo "Granting Azure Batch service permissions to the $keyVault key vault"
 az role assignment create \
     --role "Key Vault Secrets Officer" \
