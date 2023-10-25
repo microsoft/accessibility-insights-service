@@ -25,7 +25,7 @@ Usage: ${BASH_SOURCE} -r <resource group> -c <web API Azure AD client Id> -p <we
     exit 1
 }
 
-getLoggedInUserDetails() {
+getCurrentUserDetails() {
     echo "Getting logged in user name"
     principalName=$(az account show --query "user.name" -o tsv)
 
@@ -109,7 +109,7 @@ createAppInsightsApiKey() {
 pushSecretsToKeyVault() (
     echo "Pushing secrets to keyvault $keyVault in resourceGroup $resourceGroupName"
 
-    getLoggedInUserDetails
+    getCurrentUserDetails
 
     trap 'onExit-push-secrets-to-key-vault' EXIT
     grantWritePermissionToKeyVault
