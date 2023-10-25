@@ -9,26 +9,28 @@ set -eo pipefail
 
 exitWithUsageInfo() {
     echo "
-Usage: ${BASH_SOURCE} -e <environment>
+Usage: ${BASH_SOURCE} -r <resource group> -b <Azure Batch object ID> [-k <key vault>] [-s <subscription name or id>]
 "
     exit 1
 }
 
 # Read script arguments
-while getopts ":b:e:" option; do
+while getopts ":s:r:k:b:" option; do
     case $option in
+    s) subscription=${OPTARG} ;;
+    r) resourceGroupName=${OPTARG} ;;
+    k) keyVault=${OPTARG} ;;
     b) azureBatchObjectId=${OPTARG} ;;
-    e) environment=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
 
 # Print script usage help
-if [[ -z $azureBatchObjectId ]] || [[ -z $environment ]]; then
+if [[ -z $resourceGroupName ]] || [[ -z $azureBatchObjectId ]]; then
     exitWithUsageInfo
 fi
 
-if [[ -z $subscription ]]; then
+if [[ -z $subscription ]] || [[ -z $keyVault ]]; then
     . "${0%/*}/get-resource-names.sh"
 fi
 
@@ -58,9 +60,16 @@ if [[ $batchProviderRegistrationState != "Registered" ]]; then
     echo "ERROR: Unable to register Microsoft.Batch provider on $subscription Azure subscription. Check Azure subscription resource providers state."
 fi
 
-# Allow Azure Batch service to access the subscription
+# Grant subscription permission to Azure Batch service
 roleDefinitionName=$(az role assignment list --query "[?principalId=='$azureBatchObjectId'].roleDefinitionName" -o tsv)
 if [[ $roleDefinitionName != "Contributor" ]]; then
-    echo "Granting Azure Batch service access to the $subscription Azure subscription"
+    echo "Granting Azure Batch service permissions to the $subscription Azure subscription"
     az role assignment create --assignee ddbf3205-c6bd-46ae-8127-60eb93363864 --role contributor 1>/dev/null
 fi
+
+# Grant Key Vault permission to Azure Batch service
+echo "Granting Azure Batch service permissions to the $keyVault key vault"
+az role assignment create \
+    --role "Key Vault Secrets Officer" \
+    --assignee "$azureBatchObjectId" \
+    --scope "/subscriptions/$subscription/resourcegroups/$resourceGroupName/providers/Microsoft.KeyVault/vaults/$keyVault" 1>/dev/null
