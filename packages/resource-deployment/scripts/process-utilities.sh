@@ -78,7 +78,9 @@ function killDescendantProcesses() {
         children=$(pgrep -P "${processId}")
     else
         # Windows
-        children=$(wmic process where \(ParentProcessId="${processId}"\) get ProcessId | more +1)
+        children=$(wmic process where "ParentProcessId=${processId}" get ProcessId)
+        children="${children//[$'ProcessId']/}"
+        children="${children/[$'\n']/}"
     fi
 
     for child in ${children}; do
