@@ -5,6 +5,9 @@
 
 set -eo pipefail
 
+# Disable POSIX to Windows path conversion
+export MSYS_NO_PATHCONV=1
+
 exitWithUsageInfo() {
     echo "
 Usage: ${BASH_SOURCE} -p <provider path> -r <ARM line-separated resource strings>

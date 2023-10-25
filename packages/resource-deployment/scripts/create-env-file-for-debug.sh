@@ -7,6 +7,9 @@ set -eo pipefail
 
 # The script will create set of environment variables to use for service local debugging
 
+# Disable POSIX to Windows path conversion
+export MSYS_NO_PATHCONV=1
+
 exitWithUsageInfo() {
     echo "
 Usage: ${BASH_SOURCE} -r <resource group> [-s <subscription name or id>]

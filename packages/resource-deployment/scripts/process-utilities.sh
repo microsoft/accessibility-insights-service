@@ -73,7 +73,7 @@ function killDescendantProcesses() {
 
             if [[ -n $childId ]]; then
                 echo "Killing process $childId"
-                kill -SIGKILL "$childId" >/dev/null 2>&1 || true
+                taskkill /pid "$childId" /f /t >/dev/null 2>&1 || true
             fi
         done
     fi

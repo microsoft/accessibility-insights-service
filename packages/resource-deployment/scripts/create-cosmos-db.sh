@@ -10,6 +10,9 @@ set -eo pipefail
 export cosmosAccountName
 export resourceGroupName
 
+# Disable POSIX to Windows path conversion
+export MSYS_NO_PATHCONV=1
+
 createCosmosAccount() {
     echo "Creating Cosmos DB account..."
     resources=$(az deployment group create --resource-group "$resourceGroupName" --template-file "${0%/*}/../templates/cosmos-db.template.json" --parameters "${0%/*}/../templates/cosmos-db.parameters.json" --query "properties.outputResources[].id" -o tsv)

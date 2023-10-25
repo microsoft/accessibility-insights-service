@@ -14,6 +14,9 @@ export resourceGroupName
 export cosmosAccountName
 export storageAccountName
 
+# Disable POSIX to Windows path conversion
+export MSYS_NO_PATHCONV=1
+
 exitWithUsageInfo() {
     echo "
 Usage: ${BASH_SOURCE} -r <resource group>
