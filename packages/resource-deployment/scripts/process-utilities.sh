@@ -44,6 +44,8 @@ function killProcess() {
     fi
 
     killDescendantProcesses "$processId"
+
+    echo "Killing process $processId"
     kill -SIGKILL "$processId"
 }
 
@@ -54,7 +56,7 @@ function killDescendantProcesses() {
 
     if [[ $os == "Linux" ]] || [[ $os == "Darwin" ]]; then
         # Linux or macOS
-        children=$(pgrep -P "$processId")
+        children=$(pgrep -P "$processId" 2>/dev/null) || true
 
         for child in ${children}; do
             local childId="${child//[$'\t\r\n ']/}"
