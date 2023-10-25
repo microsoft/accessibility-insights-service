@@ -20,8 +20,6 @@ Usage: ${BASH_SOURCE} -r <resource group> -k <enable soft delete for Azure Key V
     exit 1
 }
 
-. "${0%/*}/process-utilities.sh"
-
 function recoverIfSoftDeleted() {
     softDeleted=$(az keyvault list-deleted --resource-type vault --query "[?name=='$keyVault'].id" -o tsv)
     if [[ -n "$softDeleted" ]]; then
@@ -30,7 +28,7 @@ function recoverIfSoftDeleted() {
 
         az keyvault recover --name "$keyVault" 1>/dev/null
 
-        echo "Key vault $keyVault was successfully recovered"
+        echo "Key vault $keyVault was successfully recovered."
         keyvaultRecovered=true
     fi
 }
@@ -41,8 +39,9 @@ function createKeyvaultIfNotExists() {
             --query "[?name=='$keyVault'].id|[0]" \
             -o tsv
     )
+
     if [[ -z $existingResourceId ]]; then
-        echo "Key vault does not exist. Creating using ARM template."
+        echo "Creating new key vault $keyVault"
         resources=$(
             az deployment group create \
                 --resource-group "$resourceGroupName" \
@@ -54,7 +53,7 @@ function createKeyvaultIfNotExists() {
 
         echo "Created key vault $keyVault"
     else
-        echo "Key vault already exists. Skipping key vault creation using ARM template."
+        echo "Key vault $keyVault already exists."
     fi
 }
 
@@ -66,6 +65,7 @@ function createOrRecoverKeyvault() {
 }
 
 function setAccessPolicies() {
+    echo "Setup key vault policies."
     az keyvault update --name $keyVault --resource-group $resourceGroupName \
         --enabled-for-disk-encryption "true" \
         --enabled-for-deployment "true" \
@@ -74,7 +74,7 @@ function setAccessPolicies() {
 }
 
 function setupKeyVaultResources() {
-    echo "Creating key vault using ARM template."
+    echo "Setup key vault resources."
     resources=$(
         az deployment group create \
             --resource-group "$resourceGroupName" \
@@ -82,10 +82,6 @@ function setupKeyVaultResources() {
             --query "properties.outputResources[].id" \
             -o tsv
     )
-
-    echo "Successfully created key vault.
-            resource: $resources
-        "
 }
 
 # Read script arguments
@@ -110,6 +106,7 @@ if [[ -z $environment ]]; then
 fi
 
 . "${0%/*}/get-resource-names.sh"
+. "${0%/*}/process-utilities.sh"
 
 createOrRecoverKeyvault
 setupKeyVaultResources
