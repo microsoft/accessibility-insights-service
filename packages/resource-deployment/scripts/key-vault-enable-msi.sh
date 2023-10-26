@@ -39,7 +39,7 @@ fi
 # Grant permissions to the managed identity
 echo "Granting $principalId service principal permissions to $keyVault key vault"
 az role assignment create \
-    --role "Key Vault Reader" \
+    --role "Key Vault Secrets User" \
     --assignee "$principalId" \
     --scope "/subscriptions/$subscription/resourcegroups/$resourceGroupName/providers/Microsoft.KeyVault/vaults/$keyVault" 1>/dev/null
 

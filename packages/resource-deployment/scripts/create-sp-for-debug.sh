@@ -65,7 +65,7 @@ clientId=$(az ad sp list --display-name "$displayName" --query "[].appId" -o tsv
 # Set key vault access policy
 echo "Granting service principal permissions to the $keyVault Key Vault"
 az role assignment create \
-    --role "Key Vault Reader" \
+    --role "Key Vault Secrets User" \
     --assignee "$clientId" \
     --scope "/subscriptions/$subscription/resourcegroups/$resourceGroupName/providers/Microsoft.KeyVault/vaults/$keyVault" 1>/dev/null
 
