@@ -47,10 +47,12 @@ addAadAcl() {
     fi
 
     if [[ -f $aclFilePath ]]; then
-        echo "Updating Azure Functions AAD ACL for $webApiFuncTemplateFilePath template..."
+        echo "Updating Azure Functions ACL for $webApiFuncTemplateFilePath template..."
         acl=$(<$aclFilePath)
         tempFilePath="${0%/*}/temp-$(date +%s)$RANDOM.json"
         jq "if .resources[].properties.siteConfig.appSettings | map(.name == \"WEBSITE_AUTH_AAD_ACL\") | any then . else .resources[].properties.siteConfig.appSettings += [$acl] end" $webApiFuncTemplateFilePath >$tempFilePath && mv $tempFilePath $webApiFuncTemplateFilePath
+    else
+        echo "Azure Functions ACL configuration file not found. Expected configuration file $aclFilePath"
     fi
 }
 
@@ -100,7 +102,7 @@ publishFunctionAppScripts() {
 
     currentDir=$(pwd)
     # Copy config file to function app deployment folder
-    copyConfigFileToScriptFolder $packageName
+    copyConfigFileToScriptFolder "$packageName"
 
     # Change directory to the function app scripts folder
     cd "${0%/*}/../../../$packageName/dist"
@@ -114,7 +116,7 @@ publishFunctionAppScripts() {
     while [ $SECONDS -le $end ] && [ "$isPublished" = false ]; do
         {
             isPublished=true
-            func azure functionapp publish $functionAppName --node
+            func azure functionapp publish "$functionAppName" --node
         } || {
             echo "Failed to publish, retrying..."
             isPublished=false
@@ -134,10 +136,11 @@ publishFunctionAppScripts() {
     cd "$currentDir"
 }
 
-waitForFunctionAppServiceDeploymentCompletion() {
+waitForDeploymentCompletion() {
     local functionAppName=$1
 
-    az functionapp start --resource-group $resourceGroupName --name $functionAppName
+    az functionapp start --resource-group "$resourceGroupName" --name "$functionAppName"
+
     functionAppRunningQuery="az functionapp list -g $resourceGroupName --query \"[?name=='$functionAppName' && state=='Running'].name\" -o tsv"
     . "${0%/*}/wait-for-deployment.sh" -n "$functionAppName" -t "300" -q "$functionAppRunningQuery"
 }
@@ -163,11 +166,8 @@ deployFunctionApp() {
         --query "properties.outputResources[].id" \
         -o tsv)
 
-    . "${0%/*}/get-resource-name-from-resource-paths.sh" -p "Microsoft.Web/sites" -r "$resources"
-    local myFunctionAppName="$resourceName"
-
-    waitForFunctionAppServiceDeploymentCompletion $myFunctionAppName
-    echo "Successfully deployed Azure Function App $myFunctionAppName"
+    waitForDeploymentCompletion "$functionAppName"
+    echo "Successfully deployed Azure Function App $functionAppName"
 }
 
 function deployWebApiFunction() {
@@ -209,42 +209,42 @@ function enableCosmosAccess() {
             --id "${RBACRoleId}" \
             --exists 1>/dev/null
     fi
-    az cosmosdb sql role assignment create --account-name $cosmosAccountName \
-        --resource-group $resourceGroupName \
+    az cosmosdb sql role assignment create --account-name "$cosmosAccountName" \
+        --resource-group "$resourceGroupName" \
         --scope "/" \
-        --principal-id $principalId \
-        --role-definition-id $RBACRoleId 1>/dev/null
+        --principal-id "$principalId" \
+        --role-definition-id "$RBACRoleId" 1>/dev/null
 }
 
 function enableManagedIdentityOnFunctions() {
     echo "Granting access to $webApiFuncAppName function service principal..."
-    getFunctionAppPrincipalId $webApiFuncAppName
+    getFunctionAppPrincipalId "$webApiFuncAppName"
     . "${0%/*}/key-vault-enable-msi.sh"
     enableStorageAccess
     enableCosmosAccess
 
     echo "Granting access to $webWorkersFuncAppName function service principal..."
-    getFunctionAppPrincipalId $webWorkersFuncAppName
+    getFunctionAppPrincipalId "$webWorkersFuncAppName"
     . "${0%/*}/key-vault-enable-msi.sh"
     enableStorageAccess
     enableCosmosAccess
 
     echo "Granting access to $e2eWebApisFuncAppName function service principal..."
-    getFunctionAppPrincipalId $e2eWebApisFuncAppName
+    getFunctionAppPrincipalId "$e2eWebApisFuncAppName"
     . "${0%/*}/key-vault-enable-msi.sh"
     enableStorageAccess
 }
 
 function publishWebApiScripts() {
-    publishFunctionAppScripts "web-api" $webApiFuncAppName
+    publishFunctionAppScripts "web-api" "$webApiFuncAppName"
 }
 
 function publishWebWorkerScripts() {
-    publishFunctionAppScripts "web-workers" $webWorkersFuncAppName
+    publishFunctionAppScripts "web-workers" "$webWorkersFuncAppName"
 }
 
 function publishE2EWebApisScripts() {
-    publishFunctionAppScripts "e2e-web-apis" $e2eWebApisFuncAppName
+    publishFunctionAppScripts "e2e-web-apis" "$e2eWebApisFuncAppName"
 }
 
 function setupAzureFunctions() {
@@ -286,11 +286,11 @@ if [[ -z $resourceGroupName ]] || [[ -z $environment ]] || [[ -z $releaseVersion
 fi
 
 echo "Setting up function apps with arguments:
-    resourceGroupName: $resourceGroupName
-    webApiAdClientId: $webApiAdClientId
-    environment: $environment
-    dropFolder: $dropFolder
-    releaseVersion: $releaseVersion
+  resourceGroupName: $resourceGroupName
+  webApiAdClientId: $webApiAdClientId
+  environment: $environment
+  dropFolder: $dropFolder
+  releaseVersion: $releaseVersion
 "
 
 . "${0%/*}/process-utilities.sh"

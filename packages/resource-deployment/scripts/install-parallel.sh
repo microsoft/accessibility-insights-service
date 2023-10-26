@@ -67,7 +67,6 @@ onExit-install() {
     if [[ ${exitCode} != 0 ]]; then
         echo "Script: $command"
         echo "Call stack:"
-        echo "  at ${FUNCNAME[0]} (${BASH_SOURCE[0]}:$LINENO)"
 
         local i
         for ((i = 1; i < ${#FUNCNAME[*]}; i++)); do

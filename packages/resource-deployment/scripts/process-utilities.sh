@@ -29,7 +29,7 @@ function runCommandsWithoutSecretsInParallel {
     local list="${commands}[@]"
     for command in "${!list}"; do
         eval "${command}" &
-        echo "Created process with pid $! for command - ${command}"
+        echo "Created process with pid $! for command ${command}"
         parallelizableProcesses+=("$!")
     done
 
@@ -46,17 +46,17 @@ function killProcess() {
     killDescendantProcesses "$processId"
 
     echo "Killing process $processId"
-    kill -SIGKILL "$processId"
+    kill -SIGKILL "$processId" 2>/dev/null
 }
 
 function killDescendantProcesses() {
-    local processId=$1
+    local parentProcessId=$1
     local children
     local os=$(uname -s 2>/dev/null) || true
 
     if [[ $os == "Linux" ]] || [[ $os == "Darwin" ]]; then
         # Linux or macOS
-        children=$(pgrep -P "$processId" 2>/dev/null) || true
+        children=$(pgrep -P "$parentProcessId" 2>/dev/null) || true
 
         for child in ${children}; do
             local childId="${child//[$'\t\r\n ']/}"
@@ -65,15 +65,20 @@ function killDescendantProcesses() {
         done
     else
         # Windows
-        children=$(wmic process where "Description='bash.exe'" get ProcessId)
+        children=$(wmic process where "Description='bash.exe'" get ProcessId 2>/dev/null)
         children="${children//[$'ProcessId']/}"
 
         for child in ${children}; do
             local childId="${child//[$'\t\r\n ']/}"
 
             if [[ -n $childId ]]; then
-                echo "Killing process $childId"
-                taskkill /pid "$childId" /f /t >/dev/null 2>&1 || true
+                commandline=$(wmic process where "ProcessId='$childId'" get Commandline 2>/dev/null)
+
+                # Keep main terminal process
+                if [[ "$commandline" != *--login* ]]; then
+                    echo "Killing process $childId"
+                    taskkill /pid "$childId" /f >/dev/null 2>&1 || true
+                fi
             fi
         done
     fi
