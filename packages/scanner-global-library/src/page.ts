@@ -86,7 +86,7 @@ export class Page {
     }
 
     /**
-     * The browser page loaded URL.
+     * The page loaded URL.
      */
     public get url(): string {
         return this.page.url();
