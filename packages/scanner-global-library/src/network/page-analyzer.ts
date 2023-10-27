@@ -57,6 +57,21 @@ export class PageAnalyzer {
         }
 
         const actualResponse = this.getActualResponse(operationResult);
+        if (actualResponse.operationResult === undefined) {
+            if (operationResult.browserError === undefined) {
+                operationResult.browserError = {
+                    errorType: 'NavigationError',
+                    message: 'Page main frame request returned no response.',
+                    stack: new Error().stack,
+                };
+            }
+
+            return {
+                url,
+                navigationResponse: operationResult,
+            };
+        }
+
         const redirectResult = await this.detectRedirection(url, actualResponse.operationResult);
         const authenticationType = this.detectAuth(page);
         const result = {
