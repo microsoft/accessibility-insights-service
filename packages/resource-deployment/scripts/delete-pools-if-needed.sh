@@ -10,7 +10,7 @@ export batchAccountName
 export keyVault
 export pools
 
-kernelName=$(uname -s 2>/dev/null) || true
+os=$(uname -s 2>/dev/null) || true
 areVmssOld=false
 recycleVmssIntervalDays=5
 
@@ -36,7 +36,7 @@ function checkIfVmssAreOld() {
     for createdDate in $createdDates; do
         hasCreatedDateTags=true
 
-        if [[ $kernelName == "Darwin" ]]; then
+        if [[ $os == "Darwin" ]]; then
             local recycleDate=$(date -j -v +"$recycleVmssIntervalDays"d -f "%Y/%m/%d" "$createdDate" "+%Y/%m/%d")
             local currentDate=$(date "+%Y/%m/%d")
         else
@@ -74,13 +74,13 @@ function compareParameterFileToDeployedConfig() {
     local actualValue=$(az batch pool list --account-name "$batchAccountName" --query "$query" -o tsv)
 
     if [[ -z $expectedValue ]] || [[ $expectedValue == "null" ]]; then
-        echo "No '$templateFileParameterName' parameter value found in template file $parameterFilePath"
+        echo "No $templateFileParameterName parameter value found in template file $parameterFilePath"
     elif [[ $expectedValue != $actualValue ]]; then
-        echo "The '$batchConfigPropertyName' value for $poolId must be updated from '$actualValue' to '$expectedValue'"
+        echo "The $batchConfigPropertyName value for $poolId must be updated from $actualValue to $expectedValue"
         echo "Pool must be deleted to perform update."
         poolConfigOutdated=true
     else
-        echo "The template '$batchConfigPropertyName' value for $poolId has no changes."
+        echo "The template $batchConfigPropertyName value for $poolId has no changes."
     fi
 }
 
@@ -103,21 +103,23 @@ function checkIfPoolConfigOutdated() {
 
 function checkPoolConfigs() {
     for pool in $pools; do
-        echo "Validating pool $pool configuration..."
+        local camelCase=""
+        local poolId="${pool//[$'\t\r\n ']/}"
 
-        camelCase=""
-        if [[ $kernelName == "Darwin" ]]; then
-            local words=(${pool//-/ })
+        echo "Validating pool $poolId configuration..."
+
+        if [[ $os == "Darwin" ]]; then
+            local words=(${poolId//-/ })
             for word in "${words[@]}"; do
                 local lowercase=$(echo ${word} | tr [:upper:] [:lower:])
                 local camelCase=$camelCase$(echo ${lowercase:0:1} | tr [:lower:] [:upper:])${lowercase:1}
             done
             local camelCasePoolId=$(echo ${camelCase:0:1} | tr [:upper:] [:lower:])${camelCase:1}
         else
-            local camelCasePoolId=$(echo "$pool" | sed -r 's/(-)([a-z])/\U\2/g')
+            local camelCasePoolId=$(echo "$poolId" | sed -r 's/(-)([a-z])/\U\2/g')
         fi
 
-        checkIfPoolConfigOutdated "$pool" "$camelCasePoolId"
+        checkIfPoolConfigOutdated "$poolId" "$camelCasePoolId"
         if [[ $poolConfigOutdated == "true" ]]; then
             return
         fi
@@ -126,13 +128,17 @@ function checkPoolConfigs() {
 
 deletePools() {
     for pool in $pools; do
-        echo "Deleting Batch pool $pool"
-        az batch pool delete --account-name $batchAccountName --pool-id $pool --yes
+        local poolId="${pool//[$'\t\r\n ']/}"
+
+        echo "Deleting Batch pool $poolId"
+        az batch pool delete --account-name "$batchAccountName" --pool-id "$poolId" --yes
     done
 
     for pool in $pools; do
-        waitForDelete $pool
-        echo "Finished deleting Batch pool $pool"
+        local poolId="${pool//[$'\t\r\n ']/}"
+
+        waitForDelete $poolId
+        echo "Finished deleting Batch pool $poolId"
     done
 }
 
@@ -213,11 +219,6 @@ done
 # Print script usage help
 if [[ -z $resourceGroupName ]] || [[ -z $parameterFilePath ]]; then
     exitWithUsageInfo
-fi
-
-# Login to Azure account if required
-if ! az account show 1>/dev/null; then
-    az login
 fi
 
 . "${0%/*}/get-resource-names.sh"

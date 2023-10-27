@@ -63,9 +63,7 @@ function deployBatch() {
             -o tsv
     )
 
-    echo "Deployed Batch account:
-        resources: ${resources}
-    "
+    echo "Deployed Batch account $batchAccountName"
 }
 
 # Read script arguments
@@ -82,11 +80,6 @@ done
 # Print script usage help
 if [[ -z $resourceGroupName ]] || [[ -z $batchTemplateFile ]] || [[ -z $environment ]]; then
     exitWithUsageInfo
-fi
-
-# Login to Azure account if required
-if ! az account show 1>/dev/null; then
-    az login
 fi
 
 . "${0%/*}/get-resource-names.sh"
@@ -109,4 +102,4 @@ deployBatch
 
 . "${0%/*}/setup-batch-pools.sh"
 
-echo "The '${batchAccountName}' Azure Batch account successfully deployed"
+echo "The $batchAccountName Azure Batch account successfully deployed."

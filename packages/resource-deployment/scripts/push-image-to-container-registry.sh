@@ -64,7 +64,7 @@ setImageBuildSource() {
 }
 
 prepareImageBuildSource() {
-    echo "Copy '${environment}' runtime configuration to the docker image build source."
+    echo "Copy $environment runtime configuration to the docker image build source."
     cp "${0%/*}/../runtime-config/runtime-config.$environment.json" "${batchScanRunnerDist}runtime-config.json"
     cp "${0%/*}/../runtime-config/runtime-config.$environment.json" "${batchScanManagerDist}runtime-config.json"
     cp "${0%/*}/../runtime-config/runtime-config.$environment.json" "${batchScanRequestSenderDist}runtime-config.json"

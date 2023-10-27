@@ -7,27 +7,40 @@ set -eo pipefail
 
 # This script will grant permissions to the service principal to access a key vault
 
+# Disable POSIX to Windows path conversion
+export MSYS_NO_PATHCONV=1
+
 exitWithUsageInfo() {
     echo "
-Usage: ${BASH_SOURCE} -k <key vault> -p <service principal id>
+Usage: ${BASH_SOURCE} -r <resource group> -k <key vault> -p <service principal id> [-s <subscription name or id>]
 "
     exit 1
 }
 
 # Read script arguments
-while getopts ":k:p:" option; do
+while getopts ":s:r:k:p:" option; do
     case $option in
+    s) subscription=${OPTARG} ;;
+    r) resourceGroupName=${OPTARG} ;;
     k) keyVault=${OPTARG} ;;
     p) principalId=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
 
-if [[ -z $keyVault ]] || [[ -z $principalId ]]; then
+if [[ -z $resourceGroupName ]] || [[ -z $keyVault ]] || [[ -z $principalId ]]; then
     exitWithUsageInfo
 fi
 
+if [[ -z $subscription ]]; then
+    . "${0%/*}/get-resource-names.sh"
+fi
+
 # Grant permissions to the managed identity
-echo "Granting '$principalId' service principal permissions to '$keyVault' key vault"
-az keyvault set-policy --name "$keyVault" --object-id "$principalId" --secret-permissions get list --certificate-permissions get list 1>/dev/null
+echo "Granting $principalId service principal permissions to $keyVault key vault"
+az role assignment create \
+    --role "Key Vault Secrets User" \
+    --assignee "$principalId" \
+    --scope "/subscriptions/$subscription/resourcegroups/$resourceGroupName/providers/Microsoft.KeyVault/vaults/$keyVault" 1>/dev/null
+
 echo "  Permission successfully granted."

@@ -7,6 +7,9 @@ set -eo pipefail
 
 # The script will create set of environment variables to use for service local debugging
 
+# Disable POSIX to Windows path conversion
+export MSYS_NO_PATHCONV=1
+
 exitWithUsageInfo() {
     echo "
 Usage: ${BASH_SOURCE} -r <resource group> [-s <subscription name or id>]
@@ -33,11 +36,20 @@ getCosmosDbAccessKey() {
 }
 
 getStorageConnectionString() {
-    storageConnectionString=$(az storage account show-connection-string --name "$storageAccountName" --resource-group "$resourceGroupName" --subscription "$subscription" --query connectionString --out tsv)
+    storageConnectionString=$(az storage account show-connection-string \
+        --name "$storageAccountName" \
+        --resource-group "$resourceGroupName" \
+        --subscription "$subscription" \
+        --query connectionString --out tsv)
 }
 
 getCosmosDbConnectionString() {
-    cosmosDbConnectionString=$(az cosmosdb keys list --type connection-strings --name "$cosmosAccountName" --resource-group "$resourceGroupName" --subscription "$subscription" --query connectionStrings[0].connectionString --out tsv)
+    cosmosDbConnectionString=$(az cosmosdb keys list \
+        --type connection-strings \
+        --name "$cosmosAccountName" \
+        --resource-group "$resourceGroupName" \
+        --subscription "$subscription" \
+        --query connectionStrings[0].connectionString --out tsv)
 }
 
 getAppInsightKey() {
@@ -50,9 +62,6 @@ getBatchAccountEndpoint() {
     batchAccountEndpoint=$(az batch account show --query accountEndpoint --out tsv)
 }
 
-# Get the default subscription
-subscription=$(az account show --query "id" -o tsv)
-
 # Read script arguments
 while getopts ":s:r:" option; do
     case $option in
@@ -62,7 +71,7 @@ while getopts ":s:r:" option; do
     esac
 done
 
-if [[ -z $subscription ]] || [[ -z $resourceGroupName ]]; then
+if [[ -z $resourceGroupName ]]; then
     exitWithUsageInfo
 fi
 

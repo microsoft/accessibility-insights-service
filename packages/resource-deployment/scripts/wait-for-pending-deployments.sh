@@ -28,11 +28,6 @@ if [[ -z $resourceGroupName ]]; then
     exitWithUsageInfo
 fi
 
-# Login to Azure account if required
-if ! az account show 1>/dev/null; then
-    az login
-fi
-
 function waitForDeployments {
     local pendingDeploymentsQuery="az deployment group list \
                                 --resource-group "$resourceGroupName" \

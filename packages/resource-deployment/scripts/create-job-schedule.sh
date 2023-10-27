@@ -34,25 +34,27 @@ adjustJob() {
     local allJobsScheduleList=$3
     local foundJobSchedule=false
 
-    for currentSchedule in $allJobsScheduleList; do
-        if [[ $currentSchedule == "$jobName" ]]; then
+    for schedule in $allJobsScheduleList; do
+        local scheduleId="${schedule//[$'\t\r\n ']/}"
+
+        if [[ $scheduleId == "$jobName" ]]; then
             foundJobSchedule=true
             break
         fi
     done
 
     if [[ $foundJobSchedule == true ]]; then
-        echo "The '$jobName' job schedule exists. Resetting job schedule."
+        echo "The $jobName job schedule exists. Resetting job schedule."
         az batch job-schedule reset --job-schedule-id "$jobName" --json-file "$jobTemplate" 1>/dev/null
     else
-        echo "The '$jobName' job schedule doesn't exist. Creating job schedule."
+        echo "The $jobName job schedule doesn't exist. Creating job schedule."
         az batch job-schedule create --json-file "$jobTemplate" 1>/dev/null
     fi
 }
 
 exitWithUsageInfo() {
     echo "
-        Usage: ${BASH_SOURCE} -b <batch account name> -r <resource group name> [-k <key vault url>] [-t <path to template folder (optional), defaults to '$templatesFolder' folder relative to the current working directory>]
+        Usage: ${BASH_SOURCE} -b <batch account name> -r <resource group name> [-k <key vault url>] [-t <path to template folder (optional), defaults to $templatesFolder folder relative to the current working directory>]
     "
     exit 1
 }
@@ -87,7 +89,7 @@ sed -e "s@%APP_INSIGHTS_TOKEN%@$appInsightsKey@" -e "s@%KEY_VAULT_TOKEN%@$keyVau
 sed -e "s@%APP_INSIGHTS_TOKEN%@$appInsightsKey@" -e "s@%KEY_VAULT_TOKEN%@$keyVaultUrl@" -e "s@%CONTAINER_REGISTRY_TOKEN%@$containerRegistryName@" "$templatesFolder/privacy-scan-schedule.template.json" >"$parsedPrivacyScanScheduleFileName"
 sed -e "s@%APP_INSIGHTS_TOKEN%@$appInsightsKey@" -e "s@%KEY_VAULT_TOKEN%@$keyVaultUrl@" -e "s@%CONTAINER_REGISTRY_TOKEN%@$containerRegistryName@" "$templatesFolder/report-generator-schedule.template.json" >"$parsedReportGeneratorScheduleFileName"
 
-echo "Logging into batch account '$batchAccountName' in resource group '$resourceGroupName'..."
+echo "Logging into batch account $batchAccountName in resource group $resourceGroupName..."
 az batch account login --name "$batchAccountName" --resource-group "$resourceGroupName"
 
 echo "Fetching existing job schedule list..."

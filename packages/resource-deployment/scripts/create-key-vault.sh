@@ -20,17 +20,15 @@ Usage: ${BASH_SOURCE} -r <resource group> -k <enable soft delete for Azure Key V
     exit 1
 }
 
-. "${0%/*}/process-utilities.sh"
-
 function recoverIfSoftDeleted() {
     softDeleted=$(az keyvault list-deleted --resource-type vault --query "[?name=='$keyVault'].id" -o tsv)
     if [[ -n "$softDeleted" ]]; then
-        echo "Keyvault $keyVault is in soft-deleted state and will be recovered."
-        echo "To recreate $keyVault without recovery, delete and purge the keyvault before running this script."
+        echo "Key vault $keyVault is in soft-deleted state and will be recovered."
+        echo "To recreate $keyVault without recovery, delete and purge the key vault before running this script."
 
         az keyvault recover --name "$keyVault" 1>/dev/null
 
-        echo "Keyvault $keyVault was successfully recovered"
+        echo "Key vault $keyVault was successfully recovered."
         keyvaultRecovered=true
     fi
 }
@@ -41,8 +39,9 @@ function createKeyvaultIfNotExists() {
             --query "[?name=='$keyVault'].id|[0]" \
             -o tsv
     )
+
     if [[ -z $existingResourceId ]]; then
-        echo "Key vault does not exist. Creating using ARM template."
+        echo "Creating new key vault $keyVault"
         resources=$(
             az deployment group create \
                 --resource-group "$resourceGroupName" \
@@ -52,11 +51,9 @@ function createKeyvaultIfNotExists() {
                 -o tsv
         )
 
-        echo "Created Key vault:
-            resource: $resources
-        "
+        echo "Created key vault $keyVault"
     else
-        echo "Key vault already exists. Skipping Key vault creation using ARM template"
+        echo "Key vault $keyVault already exists."
     fi
 }
 
@@ -68,13 +65,16 @@ function createOrRecoverKeyvault() {
 }
 
 function setAccessPolicies() {
-    az keyvault update --name $keyVault --resource-group $resourceGroupName --enabled-for-disk-encryption "true" 1>/dev/null
-    az keyvault update --name $keyVault --resource-group $resourceGroupName --enabled-for-deployment "true" 1>/dev/null
-    az keyvault update --name $keyVault --resource-group $resourceGroupName --enabled-for-template-deployment "true" 1>/dev/null
+    echo "Setup key vault policies."
+    az keyvault update --name $keyVault --resource-group $resourceGroupName \
+        --enabled-for-disk-encryption "true" \
+        --enabled-for-deployment "true" \
+        --enabled-for-template-deployment "true" \
+        --enable-rbac-authorization "true" 1>/dev/null
 }
 
 function setupKeyVaultResources() {
-    echo "Setting up key vault resources using ARM template."
+    echo "Setup key vault resources."
     resources=$(
         az deployment group create \
             --resource-group "$resourceGroupName" \
@@ -82,10 +82,6 @@ function setupKeyVaultResources() {
             --query "properties.outputResources[].id" \
             -o tsv
     )
-
-    echo "Successfully setup Key vault resources:
-            resource: $resources
-        "
 }
 
 # Read script arguments
@@ -109,19 +105,12 @@ if [[ -z $environment ]]; then
     environment="dev"
 fi
 
-# Login to Azure account if required
-if ! az account show 1>/dev/null; then
-    az login
-fi
-
 . "${0%/*}/get-resource-names.sh"
+. "${0%/*}/process-utilities.sh"
 
 createOrRecoverKeyvault
-
 setupKeyVaultResources
-
 setAccessPolicies
-
 . "${0%/*}/push-secrets-to-key-vault.sh"
 
-echo "The '$keyVault' Azure Key Vault account successfully deployed"
+echo "The $keyVault Azure Key Vault successfully deployed."

@@ -7,6 +7,9 @@ set -eo pipefail
 
 certificateName="azSecPackCert"
 
+# Disable POSIX to Windows path conversion
+export MSYS_NO_PATHCONV=1
+
 exitWithUsageInfo() {
     echo "
 Usage: ${BASH_SOURCE} -r <resource group> [-k <key vault>] [-n <key vault certificate name>] [-s <subscription name or id>] [-e <environment: dev, ci, ppe, prod or selftest>]
@@ -14,42 +17,30 @@ Usage: ${BASH_SOURCE} -r <resource group> [-k <key vault>] [-n <key vault certif
     exit 1
 }
 
-loginToAzure() {
-    # Login to Azure if required
-    if ! az account show 1>/dev/null; then
-        az login
-    fi
-}
-
 getCurrentUserDetails() {
-    userType=$(az account show --query "user.type" -o tsv) || true
-    principalName=$(az account show --query "user.name" -o tsv) || true
+    echo "Getting logged in user name"
+    principalName=$(az account show --query "user.name" -o tsv)
 
-    if [[ $userType == "user" ]]; then
-        echo "Running script using current user credentials"
-    else
-        echo "Running script using service principal identity"
+    if [[ -z $principalName ]]; then
+        echo "Unable to get logged in user name"
+        exit 1
     fi
 }
 
 grantUserAccessToKeyVault() {
-    if [[ $userType == "user" ]]; then
-        echo "Granting access to key vault for current user account"
-        az keyvault set-policy --name "$keyVault" --upn "$principalName" --certificate-permissions get list create 1>/dev/null
-    else
-        echo "Granting access to key vault for service principal account"
-        az keyvault set-policy --name "$keyVault" --spn "$principalName" --certificate-permissions get list create 1>/dev/null
-    fi
+    echo "Adding key vault role assignment for logged in user"
+    az role assignment create \
+        --role "Key Vault Certificates Officer" \
+        --assignee "$principalName" \
+        --scope "/subscriptions/$subscription/resourcegroups/$resourceGroupName/providers/Microsoft.KeyVault/vaults/$keyVault" 1>/dev/null
 }
 
 onExit-key-vault-rotate-certificate() {
-    if [[ $userType == "user" ]]; then
-        echo "Revoking access to key vault for current user account"
-        az keyvault delete-policy --name "$keyVault" --upn "$principalName" 1>/dev/null || true
-    else
-        echo "Revoking access to key vault for service principal account"
-        az keyvault delete-policy --name "$keyVault" --spn "$principalName" 1>/dev/null || true
-    fi
+    echo "Revoking key vault role assignment for logged in user"
+    az role assignment delete \
+        --role "Key Vault Certificates Officer" \
+        --assignee "$principalName" \
+        --scope "/subscriptions/$subscription/resourcegroups/$resourceGroupName/providers/Microsoft.KeyVault/vaults/$keyVault" >/dev/null 2>&1
 }
 
 createNewCertificateVersion() {
@@ -82,21 +73,19 @@ if [[ -z $resourceGroupName ]] || [[ -z $certificateName ]]; then
     exitWithUsageInfo
 fi
 
-if [[ ! -z $subscription ]]; then
-    az account set --subscription "$subscription"
-fi
-
-if [[ -z $keyVault ]]; then
-    . "${0%/*}/get-resource-names.sh"
-fi
-
 if [[ -z $environment ]]; then
     environment="dev"
 fi
 
+# Login to Azure if required
+if ! az account show 1>/dev/null; then
+    az login
+fi
+
+. "${0%/*}/get-resource-names.sh"
+
 getCurrentUserDetails
 trap 'onExit-key-vault-rotate-certificate' EXIT
 
-loginToAzure
 grantUserAccessToKeyVault
 createNewCertificateVersion

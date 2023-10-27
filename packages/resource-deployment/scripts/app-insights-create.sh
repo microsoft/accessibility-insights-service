@@ -12,7 +12,7 @@ export appInsightsKey
 
 exitWithUsageInfo() {
     echo "
-Usage: ${BASH_SOURCE} -r <resource group> -s <subscription name or id>
+Usage: ${BASH_SOURCE} -r <resource group> [-s <subscription name or id>]
 "
     exit 1
 }
@@ -26,9 +26,12 @@ while getopts ":r:s:" option; do
     esac
 done
 
-if [[ -z $resourceGroupName ]] || [[ -z $subscription ]]; then
+if [[ -z $resourceGroupName ]]; then
     exitWithUsageInfo
-    exit 1
+fi
+
+if [[ -z $subscription ]]; then
+    . "${0%/*}/get-resource-names.sh"
 fi
 
 echo "Installing microsoft.insights extension for azure-cli"
@@ -45,7 +48,7 @@ resources=$(az deployment group create \
 
 . "${0%/*}/get-resource-name-from-resource-paths.sh" -p "Microsoft.insights/components" -r "$resources"
 appInsightsName=$resourceName
-echo "Successfully created Application Insights '$appInsightsName'"
+echo "Successfully created Application Insights $appInsightsName"
 
 appInsightsKey=$(az monitor app-insights component show --app "$appInsightsName" --resource-group "$resourceGroupName" --query "instrumentationKey" -o tsv)
-echo "App Insights key fetched '$appInsightsKey'"
+echo "App Insights key fetched $appInsightsKey"

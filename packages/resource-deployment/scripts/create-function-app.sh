@@ -13,6 +13,9 @@ export environment
 export keyVault
 export principalId
 
+# Disable POSIX to Windows path conversion
+export MSYS_NO_PATHCONV=1
+
 templatesFolder="${0%/*}/../templates/"
 webApiFuncTemplateFilePath=$templatesFolder/function-web-api-app-template.json
 webWorkersFuncTemplateFilePath=$templatesFolder/function-web-workers-app-template.json
@@ -28,7 +31,7 @@ Usage: ${BASH_SOURCE} \
 -r <resource group> \
 -c <Azure AD application client ID> \
 -e <environment> \
--d <path to drop folder. Will use '$dropFolder' folder relative to current working directory> \
+-d <path to drop folder. Will use $dropFolder folder relative to current working directory> \
 -v <release version>
 "
     exit 1
@@ -44,21 +47,23 @@ addAadAcl() {
     fi
 
     if [[ -f $aclFilePath ]]; then
-        echo "Updating Azure Functions AAD ACL for $webApiFuncTemplateFilePath template..."
+        echo "Updating Azure Functions ACL for $webApiFuncTemplateFilePath template..."
         acl=$(<$aclFilePath)
         tempFilePath="${0%/*}/temp-$(date +%s)$RANDOM.json"
         jq "if .resources[].properties.siteConfig.appSettings | map(.name == \"WEBSITE_AUTH_AAD_ACL\") | any then . else .resources[].properties.siteConfig.appSettings += [$acl] end" $webApiFuncTemplateFilePath >$tempFilePath && mv $tempFilePath $webApiFuncTemplateFilePath
+    else
+        echo "Azure Functions ACL configuration file not found. Expected configuration file $aclFilePath"
     fi
 }
 
 copyConfigFileToScriptFolder() {
     local packageName=$1
 
-    echo "Copying config file to '$packageName' script folder..."
+    echo "Copying config file to $packageName script folder..."
     for folderName in $dropFolder/$packageName/dist/*-func; do
         if [[ -d $folderName ]]; then
             cp "$dropFolder/resource-deployment/dist/runtime-config/runtime-config.$environment.json" "$folderName/runtime-config.json"
-            echo "  Successfully copied '$environment' config file to $folderName"
+            echo "  Successfully copied $environment config file to $folderName"
         fi
     done
 }
@@ -97,13 +102,13 @@ publishFunctionAppScripts() {
 
     currentDir=$(pwd)
     # Copy config file to function app deployment folder
-    copyConfigFileToScriptFolder $packageName
+    copyConfigFileToScriptFolder "$packageName"
 
     # Change directory to the function app scripts folder
     cd "${0%/*}/../../../$packageName/dist"
 
     # Publish the function scripts to the function app
-    echo "Publishing '$packageName' scripts to '$functionAppName' Function App..."
+    echo "Publishing $packageName scripts to $functionAppName Function App..."
 
     # Run function tool with retries due to app service warm up time delay
     local isPublished=false
@@ -111,7 +116,7 @@ publishFunctionAppScripts() {
     while [ $SECONDS -le $end ] && [ "$isPublished" = false ]; do
         {
             isPublished=true
-            func azure functionapp publish $functionAppName --node
+            func azure functionapp publish "$functionAppName" --node
         } || {
             echo "Failed to publish, retrying..."
             isPublished=false
@@ -123,18 +128,19 @@ publishFunctionAppScripts() {
     done
 
     if [ "$isPublished" = false ]; then
-        echo "Publishing '$packageName' scripts to '$functionAppName' Function App was unsuccessful."
+        echo "Publishing $packageName scripts to $functionAppName Function App was unsuccessful."
         exit 1
     fi
 
-    echo "Successfully published '$packageName' scripts to '$functionAppName' Function App."
+    echo "Successfully published $packageName scripts to $functionAppName Function App."
     cd "$currentDir"
 }
 
-waitForFunctionAppServiceDeploymentCompletion() {
+waitForDeploymentCompletion() {
     local functionAppName=$1
 
-    az functionapp start --resource-group $resourceGroupName --name $functionAppName
+    az functionapp start --resource-group "$resourceGroupName" --name "$functionAppName"
+
     functionAppRunningQuery="az functionapp list -g $resourceGroupName --query \"[?name=='$functionAppName' && state=='Running'].name\" -o tsv"
     . "${0%/*}/wait-for-deployment.sh" -n "$functionAppName" -t "300" -q "$functionAppRunningQuery"
 }
@@ -160,11 +166,8 @@ deployFunctionApp() {
         --query "properties.outputResources[].id" \
         -o tsv)
 
-    . "${0%/*}/get-resource-name-from-resource-paths.sh" -p "Microsoft.Web/sites" -r "$resources"
-    local myFunctionAppName="$resourceName"
-
-    waitForFunctionAppServiceDeploymentCompletion $myFunctionAppName
-    echo "Successfully deployed Azure Function App '$myFunctionAppName'"
+    waitForDeploymentCompletion "$functionAppName"
+    echo "Successfully deployed Azure Function App $functionAppName"
 }
 
 function deployWebApiFunction() {
@@ -182,7 +185,7 @@ function deployE2EWebApisFunction() {
 function enableStorageAccess() {
     role="Storage Blob Data Contributor"
     scope="--scope /subscriptions/$subscription/resourceGroups/$resourceGroupName/providers/Microsoft.Storage/storageAccounts/$storageAccountName"
-    . "${0%/*}/create-role-assign.sh"
+    . "${0%/*}/create-role-assignment.sh"
 }
 
 function enableCosmosAccess() {
@@ -190,7 +193,7 @@ function enableCosmosAccess() {
     scope="--scope $cosmosAccountId"
 
     role="DocumentDB Account Contributor"
-    . "${0%/*}/create-role-assign.sh"
+    . "${0%/*}/create-role-assignment.sh"
 
     # Create and assign custom RBAC role
     customRoleName="CosmosDocumentRW"
@@ -206,42 +209,42 @@ function enableCosmosAccess() {
             --id "${RBACRoleId}" \
             --exists 1>/dev/null
     fi
-    az cosmosdb sql role assignment create --account-name $cosmosAccountName \
-        --resource-group $resourceGroupName \
+    az cosmosdb sql role assignment create --account-name "$cosmosAccountName" \
+        --resource-group "$resourceGroupName" \
         --scope "/" \
-        --principal-id $principalId \
-        --role-definition-id $RBACRoleId 1>/dev/null
+        --principal-id "$principalId" \
+        --role-definition-id "$RBACRoleId" 1>/dev/null
 }
 
 function enableManagedIdentityOnFunctions() {
     echo "Granting access to $webApiFuncAppName function service principal..."
-    getFunctionAppPrincipalId $webApiFuncAppName
+    getFunctionAppPrincipalId "$webApiFuncAppName"
     . "${0%/*}/key-vault-enable-msi.sh"
     enableStorageAccess
     enableCosmosAccess
 
     echo "Granting access to $webWorkersFuncAppName function service principal..."
-    getFunctionAppPrincipalId $webWorkersFuncAppName
+    getFunctionAppPrincipalId "$webWorkersFuncAppName"
     . "${0%/*}/key-vault-enable-msi.sh"
     enableStorageAccess
     enableCosmosAccess
 
     echo "Granting access to $e2eWebApisFuncAppName function service principal..."
-    getFunctionAppPrincipalId $e2eWebApisFuncAppName
+    getFunctionAppPrincipalId "$e2eWebApisFuncAppName"
     . "${0%/*}/key-vault-enable-msi.sh"
     enableStorageAccess
 }
 
 function publishWebApiScripts() {
-    publishFunctionAppScripts "web-api" $webApiFuncAppName
+    publishFunctionAppScripts "web-api" "$webApiFuncAppName"
 }
 
 function publishWebWorkerScripts() {
-    publishFunctionAppScripts "web-workers" $webWorkersFuncAppName
+    publishFunctionAppScripts "web-workers" "$webWorkersFuncAppName"
 }
 
 function publishE2EWebApisScripts() {
-    publishFunctionAppScripts "e2e-web-apis" $e2eWebApisFuncAppName
+    publishFunctionAppScripts "e2e-web-apis" "$e2eWebApisFuncAppName"
 }
 
 function setupAzureFunctions() {
@@ -282,24 +285,16 @@ if [[ -z $resourceGroupName ]] || [[ -z $environment ]] || [[ -z $releaseVersion
     exitWithUsageInfo
 fi
 
-echo "Setting up function apps with arguments passed:
-    resourceGroupName: $resourceGroupName
-    webApiAdClientId: $webApiAdClientId
-    environment: $environment
-    dropFolder: $dropFolder
-    releaseVersion: $releaseVersion
+echo "Setting up function apps with arguments:
+  resourceGroupName: $resourceGroupName
+  webApiAdClientId: $webApiAdClientId
+  environment: $environment
+  dropFolder: $dropFolder
+  releaseVersion: $releaseVersion
 "
 
 . "${0%/*}/process-utilities.sh"
 . "${0%/*}/get-resource-names.sh"
-
-# Login to Azure if required
-if ! az account show 1>/dev/null; then
-    az login
-fi
-
-# Get the default subscription
-subscription=$(az account show --query "id" -o tsv)
 
 addAadAcl
 setupAzureFunctions

@@ -5,11 +5,14 @@
 
 set -eo pipefail
 
+# The script will enable system-assigned managed identity on Batch pool VMSS
+
 export principalId
 export role
 export scope
 
-# The script will enable system-assigned managed identity on Batch pool VMSS
+# Disable POSIX to Windows path conversion
+export MSYS_NO_PATHCONV=1
 
 exitWithUsageInfo() {
     echo "
@@ -21,17 +24,17 @@ Usage: ${BASH_SOURCE} -v <vmss name> -r <vmss resource group> -p <batch pool>
 enableResourceGroupAccess() {
     role="Contributor"
     scope="--resource-group $resourceGroupName"
-    . "${0%/*}/create-role-assign.sh"
+    . "${0%/*}/create-role-assignment.sh"
 }
 
 enableStorageAccess() {
     scope="--scope /subscriptions/${subscription}/resourceGroups/${resourceGroupName}/providers/Microsoft.Storage/storageAccounts/${storageAccountName}"
 
     role="Storage Blob Data Contributor"
-    . "${0%/*}/create-role-assign.sh"
+    . "${0%/*}/create-role-assignment.sh"
 
     role="Storage Queue Data Contributor"
-    . "${0%/*}/create-role-assign.sh"
+    . "${0%/*}/create-role-assignment.sh"
 }
 
 enableCosmosAccess() {
@@ -39,7 +42,7 @@ enableCosmosAccess() {
     scope="--scope ${cosmosAccountId}"
 
     role="DocumentDB Account Contributor"
-    . "${0%/*}/create-role-assign.sh"
+    . "${0%/*}/create-role-assignment.sh"
 
     # Create and assign custom RBAC role
     customRoleName="CosmosDocumentRW"
@@ -128,9 +131,6 @@ if [[ -z ${vmssName} ]] || [[ -z ${vmssResourceGroup} ]] || [[ -z ${pool} ]]; th
 fi
 
 . "${0%/*}/get-resource-names.sh"
-
-# Get the default subscription
-subscription=$(az account show --query "id" -o tsv)
 
 assignSystemIdentity
 . "${0%/*}/key-vault-enable-msi.sh"

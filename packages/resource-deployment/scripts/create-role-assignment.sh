@@ -7,6 +7,9 @@ set -eo pipefail
 
 # The script will create a new role assignment for a service principal
 
+# Disable POSIX to Windows path conversion
+export MSYS_NO_PATHCONV=1
+
 exitWithUsageInfo() {
     echo "
 Usage: ${BASH_SOURCE} -r <resource group> -p <service principal id> -g <Azure role name or id> -s <scope at which the role assignment applies to>
@@ -31,7 +34,7 @@ fi
 
 grantRoleToResource() {
     local end=$((SECONDS + 300))
-    echo "Create '$role' role assignment for service principal $principalId in $scope"
+    echo "Create $role role assignment for service principal $principalId in $scope"
     printf " - Running .."
     while [ $SECONDS -le $end ]; do
         local status="ok"
@@ -47,11 +50,11 @@ grantRoleToResource() {
     echo "  ended"
 
     if [[ $status == "failed" ]]; then
-        echo "Unable to create '$role' role assignment for service principal $principalId in $scope"
+        echo "Unable to create $role role assignment for service principal $principalId in $scope"
         exit 1
     fi
 
-    echo "Successfully granted '$role' role for service principal $principalId in $scope"
+    echo "Successfully granted $role role for service principal $principalId in $scope"
 }
 
 grantRoleToResource

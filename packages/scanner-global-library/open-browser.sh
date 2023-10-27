@@ -27,7 +27,8 @@ if [[ -z ${browserPath} ]]; then
 fi
 
 if [[ -z ${profilePath} ]]; then
-    profilePath="${0%/*}/chrome-user-data"
+    absolutePath="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    profilePath="${absolutePath}/chrome-user-data"
 fi
 
 result=$(
@@ -72,5 +73,6 @@ result=$(
         --disable-features=BackForwardCache \
         --js-flags=--max-old-space-size=8192 \
         --window-size=1920,1080 \
+        --auto-open-devtools-for-tabs \
         about:blank
 )

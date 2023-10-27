@@ -41,9 +41,6 @@ createBastion() {
     az network bastion create --name "$bastionName" --public-ip-address "$bastionIpName" --resource-group "$resourceGroupName" --vnet-name "$vnetName" 1>/dev/null
 }
 
-# Get the default subscription
-subscription=$(az account show --query "id" -o tsv)
-
 # Read script arguments
 while getopts ":s:r:" option; do
     case $option in
@@ -53,7 +50,7 @@ while getopts ":s:r:" option; do
     esac
 done
 
-if [[ -z $subscription ]] || [[ -z $resourceGroupName ]]; then
+if [[ -z $resourceGroupName ]]; then
     exitWithUsageInfo
 fi
 

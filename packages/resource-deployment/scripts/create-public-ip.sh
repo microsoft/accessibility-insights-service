@@ -32,7 +32,7 @@ fi
 # The DNS name cannot start with digit
 if [[ $dnsName =~ ^[[:digit:]] ]]; then
     dnsName="a$dnsName"
-    echo "DNS name is updated to '$dnsName' to conform to name convention."
+    echo "DNS name is updated to $dnsName to conform to name convention."
 fi
 
 ipAddress=$(az network public-ip list --resource-group "${resourceGroupName}" --query "[?name=='${publicIpAddressName}'].ipAddress" -o tsv)

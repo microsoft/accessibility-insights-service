@@ -16,9 +16,12 @@ export clientId
 export tenant
 export password
 
+# Disable POSIX to Windows path conversion
+export MSYS_NO_PATHCONV=1
+
 exitWithUsageInfo() {
     echo "
-Usage: ${BASH_SOURCE} -r <resource group> -s <subscription name or id> -k <key vault>
+Usage: ${BASH_SOURCE} -r <resource group> [-s <subscription name or id>] [-k <key vault>]
 "
     exit 1
 }
@@ -33,7 +36,7 @@ while getopts ":s:r:k:" option; do
     esac
 done
 
-if [[ -z $subscription ]] || [[ -z $resourceGroupName ]] || [[ -z $keyVault ]]; then
+if [[ -z $resourceGroupName ]] || [[ -z $keyVault ]]; then
     exitWithUsageInfo
 fi
 
@@ -42,8 +45,9 @@ if ! az account show 1>/dev/null; then
     az login
 fi
 
-# Set default subscription scope
-az account set --subscription "$subscription"
+if [[ -z $subscription ]]; then
+    . "${0%/*}/get-resource-names.sh"
+fi
 
 # Generate service principal name
 user=$(az ad signed-in-user show --query "userPrincipalName" -o tsv)
@@ -57,16 +61,24 @@ password=$(az ad sp create-for-rbac --role contributor --scopes "/subscriptions/
 # Retrieve service principal object properties
 tenant=$(az ad sp list --display-name "$displayName" --query "[].appOwnerOrganizationId" -o tsv)
 clientId=$(az ad sp list --display-name "$displayName" --query "[].appId" -o tsv)
-objectId=$(az ad app show --id $clientId --query "id" -o tsv)
 
 # Set key vault access policy
-echo "Granting service principal permissions to the '$keyVault' Key vault"
-az keyvault set-policy --name "$keyVault" --object-id "$objectId" --secret-permissions get list 1>/dev/null
+echo "Granting service principal permissions to the $keyVault Key Vault"
+az role assignment create \
+    --role "Key Vault Secrets User" \
+    --assignee "$clientId" \
+    --scope "/subscriptions/$subscription/resourcegroups/$resourceGroupName/providers/Microsoft.KeyVault/vaults/$keyVault" 1>/dev/null
 
 # Granting access to storage blob
-echo "Granting service principal permissions to the '$storageAccountName' Blob storage"
-az role assignment create --role "Storage Blob Data Contributor" --assignee "$clientId" --scope "/subscriptions/$subscription/resourceGroups/$resourceGroupName/providers/Microsoft.Storage/storageAccounts/$storageAccountName" 1>/dev/null
+echo "Granting service principal permissions to the $storageAccountName Blob storage"
+az role assignment create \
+    --role "Storage Blob Data Contributor" \
+    --assignee "$clientId" \
+    --scope "/subscriptions/$subscription/resourceGroups/$resourceGroupName/providers/Microsoft.Storage/storageAccounts/$storageAccountName" 1>/dev/null
 
 # Granting access to storage queue
-echo "Granting service principal permissions to the '$storageAccountName' Queue storage"
-az role assignment create --role "Storage Queue Data Contributor" --assignee "$clientId" --scope "/subscriptions/$subscription/resourceGroups/$resourceGroupName/providers/Microsoft.Storage/storageAccounts/$storageAccountName" 1>/dev/null
+echo "Granting service principal permissions to the $storageAccountName Queue storage"
+az role assignment create \
+    --role "Storage Queue Data Contributor" \
+    --assignee "$clientId" \
+    --scope "/subscriptions/$subscription/resourceGroups/$resourceGroupName/providers/Microsoft.Storage/storageAccounts/$storageAccountName" 1>/dev/null

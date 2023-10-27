@@ -22,7 +22,7 @@
             "minValue": 0,
             "maxValue": 365,
             "metadata": {
-                "description": "Specifies the number of days that logs are gonna be kept. If you do not want to apply any retention policy and retain data forever, set value to 0."
+                "description": "Specifies the number of days to keep log history. If you do not want to apply any retention policy and retain data forever, set value to 0."
             }
         },
         "storageAccountName": {
