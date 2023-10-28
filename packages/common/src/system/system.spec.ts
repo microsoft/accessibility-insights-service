@@ -159,67 +159,67 @@ describe('getElapsedTime()', () => {
         const elapsed = System.getTimestamp();
         expect(elapsed).toEqual(10000);
     });
+});
 
-    describe('waitLoop', () => {
-        it('loop without timeout', async () => {
-            let count = 0;
-            const expectedResult = await System.waitLoop(
-                async () => count++,
-                async (r) => r === 3,
-            );
-            expect(expectedResult).toEqual(3);
-        });
-
-        it('loop with timeout', async () => {
-            let count = 0;
-            const expectedResult = await System.waitLoop(
-                async () => count++,
-                async (r) => r === 10000,
-                1,
-            );
-            expect(expectedResult).toEqual(0);
-        });
+describe('waitLoop', () => {
+    it('loop without timeout', async () => {
+        let count = 0;
+        const expectedResult = await System.waitLoop(
+            async () => count++,
+            async (r) => r === 3,
+        );
+        expect(expectedResult).toEqual(3);
     });
 
-    describe('isDebugEnabled', () => {
-        beforeEach(() => {
-            delete process.env.VSCODE_INSPECTOR_OPTIONS;
-            delete process.env.NODE_OPTIONS;
-        });
+    it('loop with timeout', async () => {
+        let count = 0;
+        const expectedResult = await System.waitLoop(
+            async () => count++,
+            async (r) => r === 10000,
+            1,
+        );
+        expect(expectedResult).toEqual(0);
+    });
+});
 
-        it('debug enabled by vs code', () => {
-            process.env.VSCODE_INSPECTOR_OPTIONS = 'options inspectorIpc options';
-            expect(System.isDebugEnabled()).toEqual(true);
-        });
-
-        it('debug enabled by node', () => {
-            process.env.NODE_OPTIONS = 'options --inspect-publish-uid options';
-            expect(System.isDebugEnabled()).toEqual(true);
-        });
-
-        it('debug is not enabled', () => {
-            expect(System.isDebugEnabled()).toEqual(false);
-        });
+describe('isDebugEnabled', () => {
+    beforeEach(() => {
+        delete process.env.VSCODE_INSPECTOR_OPTIONS;
+        delete process.env.NODE_OPTIONS;
     });
 
-    describe('isUnitTest', () => {
-        beforeEach(() => {
-            process.argv[1] = '';
-            delete process.env.JEST_WORKER_ID;
-        });
+    it('debug enabled by vs code', () => {
+        process.env.VSCODE_INSPECTOR_OPTIONS = 'options inspectorIpc options';
+        expect(System.isDebugEnabled()).toEqual(true);
+    });
 
-        it('unit test enabled in env var', () => {
-            process.env.JEST_WORKER_ID = '1';
-            expect(System.isUnitTest()).toEqual(true);
-        });
+    it('debug enabled by node', () => {
+        process.env.NODE_OPTIONS = 'options --inspect-publish-uid options';
+        expect(System.isDebugEnabled()).toEqual(true);
+    });
 
-        it('unit test enabled in command', () => {
-            process.argv[1] = '/node_modules/jest/bin/jest system.spec.ts';
-            expect(System.isUnitTest()).toEqual(true);
-        });
+    it('debug is not enabled', () => {
+        expect(System.isDebugEnabled()).toEqual(false);
+    });
+});
 
-        it('unit test is not enabled', () => {
-            expect(System.isUnitTest()).toEqual(false);
-        });
+describe('isUnitTest', () => {
+    beforeEach(() => {
+        process.argv[1] = '';
+        delete process.env.JEST_WORKER_ID;
+    });
+
+    it('unit test enabled in env var', () => {
+        process.env.JEST_WORKER_ID = '1';
+        expect(System.isUnitTest()).toEqual(true);
+    });
+
+    it('unit test enabled in command', () => {
+        process.argv[1] = '/node_modules/jest/bin/jest system.spec.ts';
+        expect(System.isUnitTest()).toEqual(true);
+    });
+
+    it('unit test is not enabled', () => {
+        expect(System.isUnitTest()).toEqual(false);
     });
 });

@@ -3,9 +3,9 @@
 
 import { inject, injectable } from 'inversify';
 import * as Crawlee from '@crawlee/puppeteer';
-import { Url } from 'common';
 import { ActiveElementsFinder } from '../active-elements-finder';
 import { Logger } from '../logger/logger';
+import { Url } from '../common/url';
 import { Operation } from './operation';
 
 @injectable()

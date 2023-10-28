@@ -5,8 +5,8 @@ import 'reflect-metadata';
 
 import { Page } from 'puppeteer';
 import { IMock, It, Mock } from 'typemoq';
-import { System } from 'common';
 import { Logger } from '../logger/logger';
+import { System } from '../common/system';
 import { PageHandler } from './page-handler';
 import { scrollToBottom } from './page-client-lib';
 

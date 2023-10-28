@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { System } from 'common';
 import * as Puppeteer from 'puppeteer';
+import { System } from '../common/system';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 

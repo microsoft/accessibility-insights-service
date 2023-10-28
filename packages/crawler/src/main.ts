@@ -3,12 +3,12 @@
 
 import 'reflect-metadata';
 
-import { System } from 'common';
 import * as dotenv from 'dotenv';
 import * as yargs from 'yargs';
 import * as inversify from 'inversify';
 import { Crawler } from './crawler';
 import { setupCrawlerContainer } from './setup-crawler-container';
+import { System } from './common/system';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
