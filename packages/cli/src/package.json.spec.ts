@@ -3,11 +3,11 @@
 
 import 'reflect-metadata';
 
-import { listMonorepoPackageNames } from 'common';
 import _ from 'lodash';
+import { listMonorepoPackageNames } from 'accessibility-insights-crawler';
 import * as packageJson from '../package.json';
 
-const acceptedMonorepoDependencies = ['accessibility-insights-crawler', 'axe-result-converter', 'common'];
+const acceptedMonorepoDependencies = ['accessibility-insights-crawler', 'axe-result-converter'];
 
 describe('package.json dependencies', () => {
     const monorepoPackageNames = listMonorepoPackageNames();

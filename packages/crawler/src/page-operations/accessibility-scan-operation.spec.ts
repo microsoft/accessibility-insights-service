@@ -6,12 +6,12 @@ import 'reflect-metadata';
 import { Page } from 'puppeteer';
 import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
 import { AxeResults } from 'axe-core';
-import { PromiseUtils } from 'common';
 import { AxePuppeteerFactory } from 'axe-core-scanner';
 import { PageScanner } from '../page-scanners/page-scanner';
 import { BlobStore } from '../storage/store-types';
 import { ReportGenerator } from '../reports/report-generator';
 import { Logger } from '../logger/logger';
+import { PromiseUtils } from '../common/promise-utils';
 import { AccessibilityScanOperation } from './accessibility-scan-operation';
 
 /* eslint-disable @typescript-eslint/no-explicit-any, no-empty, @typescript-eslint/no-empty-function */

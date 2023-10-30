@@ -5,7 +5,6 @@ import 'reflect-metadata';
 
 import { Page, Browser } from 'puppeteer';
 import { IMock, Mock, Times } from 'typemoq';
-import { System } from 'common';
 import * as Crawlee from '@crawlee/puppeteer';
 import { CrawlerConfiguration } from '../crawler/crawler-configuration';
 import { DataBase } from '../level-storage/data-base';
@@ -16,6 +15,7 @@ import { getPromisableDynamicMock } from '../test-utilities/promisable-mock';
 import { NavigationResponse, PageNavigator } from '../page-handler/page-navigator';
 import { Logger } from '../logger/logger';
 import { CrawlerRunOptions } from '../types/crawler-run-options';
+import { System } from '../common/system';
 import { PageProcessorBase } from './page-processor-base';
 
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/consistent-type-assertions */

@@ -3,8 +3,8 @@
 
 import { inject, injectable, optional } from 'inversify';
 import * as Puppeteer from 'puppeteer';
-import { System } from 'common';
 import { Logger } from '../logger/logger';
+import { System } from '../common/system';
 import { puppeteerTimeoutConfig } from './page-timeout-config';
 import { scrollToBottom } from './page-client-lib';
 

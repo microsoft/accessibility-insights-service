@@ -7,7 +7,7 @@ const webpack = require('webpack');
 const nodeExternals = require('webpack-node-externals');
 const forkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 const copyFilesPlugin = require('copy-webpack-plugin');
-const { listMonorepoPackageNames } = require('common/dist/build-utilities/monorepo-packages');
+const { listMonorepoPackageNames } = require('accessibility-insights-crawler/dist/build-utilities/monorepo-packages');
 
 // We set external node_modules as "externals" (ie, we don't bundle them), but we bundle other
 // monorepo packages. From a library consumer's perspective, that means that they never see

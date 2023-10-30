@@ -4,7 +4,6 @@
 import urlLib from 'url';
 import { inject, injectable } from 'inversify';
 import * as Puppeteer from 'puppeteer';
-import { System } from 'common';
 import { isArray } from 'lodash';
 import * as Crawlee from '@crawlee/puppeteer';
 import { CrawlerConfiguration } from '../crawler/crawler-configuration';
@@ -17,6 +16,7 @@ import { ScanData } from '../types/scan-data';
 import { BrowserError } from '../page-handler/browser-error';
 import { PageNavigator } from '../page-handler/page-navigator';
 import { Logger } from '../logger/logger';
+import { System } from '../common/system';
 
 /* eslint-disable no-invalid-this, @typescript-eslint/no-explicit-any */
 

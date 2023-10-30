@@ -4856,11 +4856,11 @@ __metadata:
     "@types/leveldown": ^4.0.2
     "@types/levelup": ^5.1.1
     "@types/node": ^16.18.11
+    "@types/normalize-path": ^3.0.0
     "@types/puppeteer": ^7.0.4
     accessibility-insights-report: ^4.7.0
     axe-core: ^4.7.2
     axe-core-scanner: "workspace:*"
-    common: "workspace:*"
     dotenv: ^16.0.1
     encoding-down: ^7.1.0
     inversify: ^6.0.1
@@ -4870,11 +4870,14 @@ __metadata:
     levelup: ^5.1.1
     lodash: ^4.17.21
     moment: ^2.29.4
+    normalize-path: ^3.0.0
+    normalize-url: 6.1.0
     npm-run-all: ^4.1.5
     puppeteer: ^21.3.7
     reflect-metadata: ^0.1.13
     rimraf: ^4.1.2
     rollup: ^3.13.0
+    serialize-error: ^8.1.0
     sha.js: ^2.4.11
     ts-jest: ^29.1.0
     typemoq: ^2.1.0
@@ -4928,7 +4931,6 @@ __metadata:
     applicationinsights: ^2.3.1
     axe-core: ^4.7.2
     axe-result-converter: "workspace:*"
-    common: "workspace:*"
     convict: ^6.2.4
     copy-webpack-plugin: ^11.0.0
     dotenv: ^16.0.1
