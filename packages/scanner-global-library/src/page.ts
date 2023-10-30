@@ -85,6 +85,9 @@ export class Page {
         return this.page;
     }
 
+    /**
+     * The page loaded URL.
+     */
     public get url(): string {
         return this.page.url();
     }
@@ -369,7 +372,7 @@ export class Page {
         await this.setExtraHTTPHeaders();
 
         // Do not run analysis on reloads
-        if (this.pageAnalysisResult && this.pageAnalysisResult.url !== url) {
+        if (this.pageAnalysisResult && this.pageAnalysisResult.loadedUrl !== url) {
             this.pageAnalysisResult = undefined;
         }
     }

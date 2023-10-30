@@ -43,4 +43,9 @@ az role assignment create \
     --assignee "$principalId" \
     --scope "/subscriptions/$subscription/resourcegroups/$resourceGroupName/providers/Microsoft.KeyVault/vaults/$keyVault" 1>/dev/null
 
+az role assignment create \
+    --role "Key Vault Certificates Officer" \
+    --assignee "$principalId" \
+    --scope "/subscriptions/$subscription/resourcegroups/$resourceGroupName/providers/Microsoft.KeyVault/vaults/$keyVault" 1>/dev/null
+
 echo "  Permission successfully granted."
