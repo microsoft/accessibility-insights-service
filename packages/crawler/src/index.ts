@@ -12,3 +12,5 @@ export * from './common/system';
 export * from './common/url';
 export { ensureDirectory } from './common/ensure-directory';
 export { listMonorepoPackageNames } from './build-utilities/monorepo-packages';
+export { HashGenerator } from './common/hash-generator';
+export { HashSet } from './common/hash-set';

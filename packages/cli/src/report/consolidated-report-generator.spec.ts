@@ -5,11 +5,13 @@ import 'reflect-metadata';
 
 import { IMock, Mock } from 'typemoq';
 import { ScanResult, ScanMetadata } from 'accessibility-insights-crawler';
-import { CombinedReportDataConverter, AxeCoreResults, ScanResultData, UrlCount, AxeResultsList } from 'axe-result-converter';
 import { ReporterFactory, CombinedReportParameters, Reporter, Report } from 'accessibility-insights-report';
 import { AxeInfo } from '../axe/axe-info';
 import { serviceName } from '../service-name';
 import { CombinedScanResult } from '../crawler/ai-crawler';
+import { CombinedReportDataConverter } from '../converter/combined-report-data-converter';
+import { AxeCoreResults, AxeResultsList } from '../converter/axe-result-types';
+import { ScanResultData, UrlCount } from '../converter/scan-result-data';
 import { ConsolidatedReportGenerator } from './consolidated-report-generator';
 
 const axeCoreVersion = 'axe core version';

@@ -4,7 +4,8 @@
 import 'reflect-metadata';
 
 import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
-import { AxeCoreResults, AxeResult, AxeResultsList, FingerprintGenerator, FingerprintParameters } from 'axe-result-converter';
+import { FingerprintGenerator, FingerprintParameters } from '../converter/fingerprint-generator';
+import { AxeCoreResults, AxeResult, AxeResultsList } from '../converter/axe-result-types';
 import { BaselineFileContent, BaselineOptions, UrlNormalizer } from './baseline-types';
 import { BaselineEngine } from './baseline-engine';
 import { BaselineGenerator } from './baseline-generator';

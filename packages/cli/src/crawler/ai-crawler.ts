@@ -3,11 +3,13 @@
 
 import { inject, injectable } from 'inversify';
 import { DbScanResultReader, CrawlerRunOptions, Crawler, ScanMetadata } from 'accessibility-insights-crawler';
-import { AxeResultsReducer, UrlCount, AxeCoreResults, AxeResultsList } from 'axe-result-converter';
 import { isEmpty } from 'lodash';
 import { ScanResultReader } from '../scan-result-providers/scan-result-reader';
 import { BaselineEvaluation, BaselineOptions } from '../baseline/baseline-types';
 import { BaselineEngine } from '../baseline/baseline-engine';
+import { UrlCount } from '../converter/scan-result-data';
+import { AxeCoreResults, AxeResultsList } from '../converter/axe-result-types';
+import { AxeResultsReducer } from '../converter/axe-results-reducer';
 
 export interface ScanError {
     url: string;

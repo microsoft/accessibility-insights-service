@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { AxeResult, AxeResultsList } from 'axe-result-converter';
 import { injectable } from 'inversify';
 import { identity, sortBy } from 'lodash';
+import { AxeResult, AxeResultsList } from '../converter/axe-result-types';
 import { BaselineFileContent, BaselineResult, UrlNormalizer } from './baseline-types';
 
 @injectable()

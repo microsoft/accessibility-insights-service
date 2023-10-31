@@ -3,7 +3,7 @@
 
 import { Container } from 'inversify';
 import { isEmpty } from 'lodash';
-import { System } from 'common';
+import { System } from 'accessibility-insights-crawler';
 import { ReportNameGenerator } from './report/report-name-generator';
 import { CrawlerCommandRunner } from './runner/crawler-command-runner';
 import { ScanArguments } from './scan-arguments';

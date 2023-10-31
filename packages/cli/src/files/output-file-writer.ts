@@ -6,7 +6,7 @@ import path from 'path';
 import filenamifyCombined from 'filenamify';
 import { injectable } from 'inversify';
 import normalizePath from 'normalize-path';
-import { ensureDirectory } from 'common';
+import { ensureDirectory } from 'accessibility-insights-crawler';
 
 /* eslint-disable @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires */
 const filenamifyUrl = require('filenamify-url');
