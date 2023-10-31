@@ -4,7 +4,7 @@
 import 'reflect-metadata';
 
 import { IMock, Mock, It, Times } from 'typemoq';
-import { HashGenerator } from 'accessibility-insights-crawler';
+import { HashGenerator } from 'common';
 import { FingerprintGenerator, FingerprintParameters } from './fingerprint-generator';
 
 let hashGeneratorMock: IMock<HashGenerator>;

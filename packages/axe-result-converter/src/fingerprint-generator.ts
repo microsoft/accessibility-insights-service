@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { HashGenerator } from 'accessibility-insights-crawler';
+import { HashGenerator } from 'common';
 import { injectable, inject } from 'inversify';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
