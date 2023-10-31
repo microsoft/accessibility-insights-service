@@ -5,7 +5,7 @@ import 'reflect-metadata';
 
 import { HTTPResponse } from 'puppeteer';
 import { IMock, Mock, Times } from 'typemoq';
-import { BrowserErrorTypes } from './browser-error';
+import { ScanErrorTypes } from 'storage-documents';
 import { PageResponseProcessor } from './page-response-processor';
 
 /* eslint-disable @typescript-eslint/consistent-type-assertions */
@@ -92,13 +92,13 @@ describe(PageResponseProcessor, () => {
 });
 
 describe('handles navigation errors', () => {
-    const stubPatterns: Partial<Record<BrowserErrorTypes, string[]>> = {
+    const stubPatterns: Partial<Record<ScanErrorTypes, string[]>> = {
         SslError: ['SSL_ERROR_UNKNOWN'],
         UrlNavigationTimeout: ['Navigation timeout'],
     };
     interface NavigationErrorTestCase {
         message: string;
-        expectedErrorType: BrowserErrorTypes;
+        expectedErrorType: ScanErrorTypes;
     }
 
     const testCaseMappings: NavigationErrorTestCase[] = [

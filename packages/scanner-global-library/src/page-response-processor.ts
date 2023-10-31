@@ -3,12 +3,13 @@
 
 import { injectable } from 'inversify';
 import * as Puppeteer from 'puppeteer';
-import { BrowserError, BrowserErrorTypes } from './browser-error';
+import { ScanErrorTypes } from 'storage-documents';
+import { BrowserError } from './browser-error';
 import { pageNavigationErrorPatterns } from './page-navigation-error-patterns';
 
 @injectable()
 export class PageResponseProcessor {
-    constructor(private readonly navigationErrorPatterns: Partial<Record<BrowserErrorTypes, string[]>> = pageNavigationErrorPatterns) {}
+    constructor(private readonly navigationErrorPatterns: Partial<Record<ScanErrorTypes, string[]>> = pageNavigationErrorPatterns) {}
 
     public getResponseError(response: Puppeteer.HTTPResponse, error: Error = new Error()): BrowserError {
         if (!response.ok()) {
@@ -36,7 +37,7 @@ export class PageResponseProcessor {
 
     public getNavigationError(error: Error): BrowserError {
         const matchingErrorType = Object.keys(this.navigationErrorPatterns)
-            .map((k) => k as BrowserErrorTypes)
+            .map((k) => k as ScanErrorTypes)
             .find((errorType) => this.navigationErrorPatterns[errorType].some((errorPattern) => error.message.includes(errorPattern)));
 
         return {

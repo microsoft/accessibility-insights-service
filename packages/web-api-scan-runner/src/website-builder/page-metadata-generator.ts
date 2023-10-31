@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 import { inject, injectable } from 'inversify';
-import { Page } from 'scanner-global-library';
+import { BrowserError, Page } from 'scanner-global-library';
 import { AuthenticationType, WebsiteScanResult } from 'storage-documents';
 import { createDiscoveryPattern } from '../crawler/discovery-pattern-factory';
 import { UrlLocationValidator } from './url-location-validator';
@@ -15,6 +15,7 @@ export interface PageMetadata {
     authentication?: boolean;
     authenticationType?: AuthenticationType;
     foreignLocation?: boolean;
+    browserError?: BrowserError;
 }
 
 @injectable()
@@ -33,11 +34,13 @@ export class PageMetadataGenerator {
             foreignLocation = await this.hasForeignLocation(url, page, websiteScanResult);
         }
 
+        const allowed =
+            urlAllowed &&
+            (page.pageAnalysisResult?.loadedUrl === undefined || this.urlLocationValidator.allowed(page.pageAnalysisResult.loadedUrl));
+
         return {
             url,
-            allowed:
-                urlAllowed &&
-                (page.pageAnalysisResult?.loadedUrl === undefined || this.urlLocationValidator.allowed(page.pageAnalysisResult.loadedUrl)),
+            allowed,
             loadedUrl: page.pageAnalysisResult?.loadedUrl,
             redirection: page.pageAnalysisResult?.redirection,
             authentication: page.pageAnalysisResult?.authentication,
