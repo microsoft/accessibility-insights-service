@@ -3,6 +3,5 @@
 
 export * from './axe-result-types';
 export * from './scan-result-data';
-export * from './fingerprint-generator';
 export { AxeResultsReducer } from './axe-results-reducer';
 export { CombinedReportDataConverter } from './combined-report-data-converter';

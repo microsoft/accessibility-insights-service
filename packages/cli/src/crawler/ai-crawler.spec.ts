@@ -5,10 +5,11 @@ import 'reflect-metadata';
 
 import { IMock, Mock, It, MockBehavior } from 'typemoq';
 import { DbScanResultReader, Crawler, CrawlerRunOptions, ScanMetadata, ScanResult } from 'accessibility-insights-crawler';
-import { AxeResultsReducer, AxeCoreResults } from 'axe-result-converter';
 import { AxeResults } from 'axe-core';
 import { BaselineEngine } from '../baseline/baseline-engine';
 import { BaselineEvaluation, BaselineFileContent, BaselineOptions } from '../baseline/baseline-types';
+import { AxeResultsReducer } from '../converter/axe-results-reducer';
+import { AxeCoreResults } from '../converter/axe-result-types';
 import { AICrawler } from './ai-crawler';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */

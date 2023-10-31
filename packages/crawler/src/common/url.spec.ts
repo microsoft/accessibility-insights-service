@@ -18,4 +18,12 @@ describe('tryParseUrlString()', () => {
         url = Url.normalizeUrl('https://example.com?b=two&a=one&c=three');
         expect(url).toEqual('https://example.com/?a=one&b=two&c=three');
     });
+
+    it('hasQueryParameters', async () => {
+        const url1 = 'www.bla.com?p=v';
+        const url2 = 'www.bla.com';
+
+        expect(Url.hasQueryParameters(url1)).toStrictEqual(true);
+        expect(Url.hasQueryParameters(url2)).toStrictEqual(false);
+    });
 });

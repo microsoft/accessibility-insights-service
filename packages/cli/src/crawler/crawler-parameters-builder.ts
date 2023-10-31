@@ -3,8 +3,7 @@
 
 import * as fs from 'fs';
 import { injectable } from 'inversify';
-import { Url } from 'common';
-import { CrawlerRunOptions } from 'accessibility-insights-crawler';
+import { CrawlerRunOptions, Url } from 'accessibility-insights-crawler';
 import { ScanArguments } from '../scan-arguments';
 
 @injectable()

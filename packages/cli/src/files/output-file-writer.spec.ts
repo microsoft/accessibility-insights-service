@@ -6,7 +6,7 @@ import 'reflect-metadata';
 import fs from 'fs';
 import path from 'path';
 import { IMock, Mock, MockBehavior, Times } from 'typemoq';
-import { ensureDirectory } from 'common';
+import { ensureDirectory } from 'accessibility-insights-crawler';
 import { OutputFileWriter } from './output-file-writer';
 
 /* eslint-disable @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires */

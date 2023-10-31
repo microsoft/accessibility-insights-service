@@ -2,12 +2,13 @@
 // Licensed under the MIT License.
 
 import { inject, injectable } from 'inversify';
-import { CombinedReportDataConverter, ScanResultData } from 'axe-result-converter';
 import { ReporterFactory } from 'accessibility-insights-report';
 import { AxeInfo } from '../axe/axe-info';
 import { iocTypes } from '../ioc-types';
 import { serviceName } from '../service-name';
 import { CombinedScanResult } from '../crawler/ai-crawler';
+import { CombinedReportDataConverter } from '../converter/combined-report-data-converter';
+import { ScanResultData } from '../converter/scan-result-data';
 
 @injectable()
 export class ConsolidatedReportGenerator {

@@ -5,7 +5,7 @@
 import 'reflect-metadata';
 
 import yargs from 'yargs';
-import { System } from 'common';
+import { System } from 'accessibility-insights-crawler';
 import { CliEntryPoint } from './cli-entry-point';
 import { ScanArguments } from './scan-arguments';
 import { setupCliContainer } from './setup-cli-container';

@@ -5,7 +5,7 @@ import 'reflect-metadata';
 
 import fs from 'fs';
 import { IMock, Mock } from 'typemoq';
-import { Url } from 'common';
+import { Url } from 'accessibility-insights-crawler';
 import { ScanArguments } from '../scan-arguments';
 import { CrawlerParametersBuilder } from './crawler-parameters-builder';
 

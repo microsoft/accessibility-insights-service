@@ -2,8 +2,10 @@
 // Licensed under the MIT License.
 
 import { inject, injectable } from 'inversify';
-import { CombinedReportDataConverter, ScanResultData, AxeCoreResults } from 'axe-result-converter';
 import { CombinedReportParameters } from 'accessibility-insights-report';
+import { CombinedReportDataConverter } from './combined-report-data-converter';
+import { AxeCoreResults } from './axe-result-types';
+import { ScanResultData } from './scan-result-data';
 
 @injectable()
 export class AICombinedReportDataConverter {

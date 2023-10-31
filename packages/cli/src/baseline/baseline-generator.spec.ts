@@ -4,7 +4,7 @@
 import 'reflect-metadata';
 
 import { slice } from 'lodash';
-import { AxeResult, AxeResultsList } from 'axe-result-converter';
+import { AxeResult, AxeResultsList } from '../converter/axe-result-types';
 import { BaselineResult, UrlNormalizer } from './baseline-types';
 import { BaselineGenerator } from './baseline-generator';
 
