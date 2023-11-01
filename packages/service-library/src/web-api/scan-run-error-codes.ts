@@ -4,19 +4,21 @@
 /* eslint-disable @typescript-eslint/no-extraneous-class, @typescript-eslint/naming-convention,no-underscore-dangle,id-match */
 
 export declare type ScanRunErrorCodeName =
-    | 'InternalError'
-    | 'UrlNavigationTimeout'
-    | 'HttpErrorCode'
-    | 'SslError'
-    | 'ResourceLoadFailure'
-    | 'InvalidUrl'
-    | 'EmptyPage'
-    | 'NavigationError'
-    | 'InvalidContentType'
-    | 'UrlNotResolved'
-    | 'ScanTimeout'
+    | 'AuthenticationError'
     | 'BannerXPathNotDetected'
-    | 'AuthenticationError';
+    | 'EmptyPage'
+    | 'ForeignResourceRedirection'
+    | 'HttpErrorCode'
+    | 'InternalError'
+    | 'InvalidContentType'
+    | 'InvalidUrl'
+    | 'NavigationError'
+    | 'ResourceLoadFailure'
+    | 'ScanTimeout'
+    | 'SslError'
+    | 'UnsupportedResource'
+    | 'UrlNavigationTimeout'
+    | 'UrlNotResolved';
 
 export interface ScanRunErrorCode {
     // This type is part of the REST API client response.
@@ -103,22 +105,36 @@ export class ScanRunErrorCodes {
     public static authenticationError: ScanRunErrorCode = {
         code: 'AuthenticationError',
         codeId: 9013,
-        message: 'Resource authentication error',
+        message: 'The resource was redirected to an unsupported authentication provider',
+    };
+
+    public static foreignResourceRedirection: ScanRunErrorCode = {
+        code: 'ForeignResourceRedirection',
+        codeId: 9014,
+        message: 'The resource was redirected to a foreign location',
+    };
+
+    public static unsupportedResource: ScanRunErrorCode = {
+        code: 'UnsupportedResource',
+        codeId: 9015,
+        message: 'The resource is not supported',
     };
 }
 
 export const scanErrorNameToErrorMap: { [key in ScanRunErrorCodeName]: ScanRunErrorCode } = {
-    InternalError: ScanRunErrorCodes.internalError,
-    UrlNavigationTimeout: ScanRunErrorCodes.urlNavigationTimeout,
-    SslError: ScanRunErrorCodes.sslError,
-    HttpErrorCode: ScanRunErrorCodes.httpErrorCode,
-    ResourceLoadFailure: ScanRunErrorCodes.resourceLoadFailure,
-    InvalidUrl: ScanRunErrorCodes.invalidUrl,
-    EmptyPage: ScanRunErrorCodes.emptyPage,
-    NavigationError: ScanRunErrorCodes.navigationError,
-    InvalidContentType: ScanRunErrorCodes.invalidContentType,
-    UrlNotResolved: ScanRunErrorCodes.urlNotResolved,
-    ScanTimeout: ScanRunErrorCodes.scanTimedOut,
-    BannerXPathNotDetected: ScanRunErrorCodes.bannerXPathNotDetected,
     AuthenticationError: ScanRunErrorCodes.authenticationError,
+    BannerXPathNotDetected: ScanRunErrorCodes.bannerXPathNotDetected,
+    EmptyPage: ScanRunErrorCodes.emptyPage,
+    ForeignResourceRedirection: ScanRunErrorCodes.foreignResourceRedirection,
+    HttpErrorCode: ScanRunErrorCodes.httpErrorCode,
+    InternalError: ScanRunErrorCodes.internalError,
+    InvalidContentType: ScanRunErrorCodes.invalidContentType,
+    InvalidUrl: ScanRunErrorCodes.invalidUrl,
+    NavigationError: ScanRunErrorCodes.navigationError,
+    ResourceLoadFailure: ScanRunErrorCodes.resourceLoadFailure,
+    ScanTimeout: ScanRunErrorCodes.scanTimedOut,
+    SslError: ScanRunErrorCodes.sslError,
+    UnsupportedResource: ScanRunErrorCodes.unsupportedResource,
+    UrlNavigationTimeout: ScanRunErrorCodes.urlNavigationTimeout,
+    UrlNotResolved: ScanRunErrorCodes.urlNotResolved,
 };

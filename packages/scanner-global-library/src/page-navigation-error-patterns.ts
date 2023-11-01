@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { BrowserErrorTypes } from './browser-error';
+import { ScanErrorTypes } from 'storage-documents';
 
-export const pageNavigationErrorPatterns: Partial<Record<BrowserErrorTypes, string[]>> = {
+export const pageNavigationErrorPatterns: Partial<Record<ScanErrorTypes, string[]>> = {
     UrlNavigationTimeout: ['Navigation timeout', 'net::ERR_CONNECTION_TIMED_OUT', 'Timeout exceeded'],
     SslError: [
         'net::ERR_CERT_AUTHORITY_INVALID',

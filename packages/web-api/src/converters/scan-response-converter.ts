@@ -85,8 +85,17 @@ export class ScanResponseConverter {
         const scanResultResponse: ScanResultResponse = {
             scanId: pageScanResult.id,
             url: pageScanResult.url,
+            scannedUrl: pageScanResult.scannedUrl,
             scanType: pageScanResult.privacyScan ? 'privacy' : 'accessibility',
             deepScanId: pageScanResult.deepScanId,
+            ...(pageScanResult.authentication !== undefined
+                ? {
+                      authentication: {
+                          detected: pageScanResult.authentication.detected,
+                          state: pageScanResult.authentication.state,
+                      },
+                  }
+                : {}),
             ...(pageScanResult.scanResult !== undefined
                 ? {
                       scanResult: {
@@ -98,28 +107,17 @@ export class ScanResponseConverter {
             run: {
                 state: effectiveRunState,
                 timestamp: pageScanResult.run.timestamp,
+                error: this.scanErrorConverter.getScanRunErrorCode(pageScanResult.run?.error),
                 pageResponseCode: pageScanResult.run.pageResponseCode,
                 pageTitle: pageScanResult.run.pageTitle,
             },
             ...this.getRunCompleteNotificationResponse(pageScanResult.notification),
-            ...(pageScanResult.authentication !== undefined
-                ? {
-                      authentication: {
-                          detected: pageScanResult.authentication.detected,
-                          state: pageScanResult.authentication.state,
-                      },
-                  }
-                : {}),
             reports: this.getScanReports(baseUrl, apiVersion, pageScanResult),
             // Expand scan result for original scan only. Result for descendant scans do not include deep scan result collection.
             // TODO replace with commented line below after 11/15/23. This is temporary solution to support backward compatibility.
             ...(pageScanResult.id === websiteScanResult?.deepScanId ? this.getDeepScanResult(websiteScanResult) : {}),
             // ...(pageScanResult.id === pageScanResult.deepScanId ? this.getDeepScanResult(websiteScanResult) : {}),
         };
-
-        if (pageScanResult.scannedUrl !== undefined) {
-            scanResultResponse.scannedUrl = pageScanResult.scannedUrl;
-        }
 
         if (scanResultResponse.deepScanResult !== undefined) {
             if (scanResultResponse.deepScanResult.every((scanResult) => scanResult.scanRunState === 'failed')) {
@@ -162,15 +160,13 @@ export class ScanResponseConverter {
         if (isNil(notification)) {
             return {};
         }
+
         const notificationResponse: NotificationResponse = {
             scanNotifyUrl: notification.scanNotifyUrl,
             state: notification.state,
             responseCode: notification.responseCode,
+            error: this.scanErrorConverter.getScanNotificationErrorCode(notification.error),
         };
-
-        if (!isNil(notification.error)) {
-            notificationResponse.error = this.scanErrorConverter.getScanNotificationErrorCode(notification.error);
-        }
 
         return { notification: notificationResponse };
     }

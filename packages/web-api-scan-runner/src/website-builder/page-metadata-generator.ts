@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 import { inject, injectable } from 'inversify';
-import { Page } from 'scanner-global-library';
+import { BrowserError, Page } from 'scanner-global-library';
 import { AuthenticationType, WebsiteScanResult } from 'storage-documents';
 import { createDiscoveryPattern } from '../crawler/discovery-pattern-factory';
 import { UrlLocationValidator } from './url-location-validator';
@@ -15,6 +15,7 @@ export interface PageMetadata {
     authentication?: boolean;
     authenticationType?: AuthenticationType;
     foreignLocation?: boolean;
+    browserError?: BrowserError;
 }
 
 @injectable()
@@ -33,16 +34,25 @@ export class PageMetadataGenerator {
             foreignLocation = await this.hasForeignLocation(url, page, websiteScanResult);
         }
 
-        return {
+        const allowed =
+            urlAllowed &&
+            (page.pageAnalysisResult?.loadedUrl === undefined || this.urlLocationValidator.allowed(page.pageAnalysisResult.loadedUrl));
+
+        const pageMetadata = {
             url,
-            allowed:
-                urlAllowed &&
-                (page.pageAnalysisResult?.loadedUrl === undefined || this.urlLocationValidator.allowed(page.pageAnalysisResult.loadedUrl)),
+            allowed,
             loadedUrl: page.pageAnalysisResult?.loadedUrl,
             redirection: page.pageAnalysisResult?.redirection,
             authentication: page.pageAnalysisResult?.authentication,
             authenticationType: page.pageAnalysisResult?.authenticationType,
             foreignLocation,
+        };
+
+        const browserError = this.getBrowserError(pageMetadata);
+
+        return {
+            ...pageMetadata,
+            browserError,
         };
     }
 
@@ -65,5 +75,33 @@ export class PageMetadataGenerator {
         }
 
         return false;
+    }
+
+    private getBrowserError(pageMetadata: PageMetadata): BrowserError {
+        // Unsupported resource
+        if (pageMetadata.allowed === false) {
+            return {
+                errorType: 'UnsupportedResource',
+                message: `The resource is not supported.`,
+            };
+        }
+
+        // Redirected to an unsupported authentication location
+        if (pageMetadata.foreignLocation === true && pageMetadata.authenticationType === 'undetermined') {
+            return {
+                errorType: 'AuthenticationError',
+                message: `The resource was redirected to an unsupported authentication provider.`,
+            };
+        }
+
+        // Redirected to a foreign location
+        if (pageMetadata.foreignLocation === true && pageMetadata.authentication !== true) {
+            return {
+                errorType: 'ForeignResourceRedirection',
+                message: `The resource was redirected to a foreign location.`,
+            };
+        }
+
+        return undefined;
     }
 }

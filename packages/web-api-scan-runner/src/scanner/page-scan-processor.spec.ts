@@ -65,11 +65,16 @@ describe(PageScanProcessor, () => {
         pageMetadataGeneratorMock.verifyAll();
     });
 
-    it('skip page scan for not allowed location', async () => {
+    it('skip page scan for forbidden location', async () => {
         const loadedUrl = 'http://example.org';
+        const browserError = {
+            errorType: 'UnsupportedResource',
+            message: 'error message',
+        };
         pageMetadata = {
             allowed: false,
             loadedUrl,
+            browserError,
         } as PageMetadata;
         websiteScanResult = { discoveryPatterns: [generatedDiscoveryPattern] } as WebsiteScanResult;
         const scanMetadata = {
@@ -79,7 +84,8 @@ describe(PageScanProcessor, () => {
         };
         axeScanResults = {
             unscannable: true,
-            error: `The scan URL location is not allowed and will not be processed further. URL ${loadedUrl}`,
+            scannedUrl: loadedUrl,
+            error: pageMetadata.browserError,
         };
         pageMetadataGeneratorMock.reset();
         pageMetadataGeneratorMock
@@ -90,76 +96,6 @@ describe(PageScanProcessor, () => {
 
         const results = await testSubject.scan(scanMetadata, pageScanResult, websiteScanResult);
 
-        expect(results).toEqual(axeScanResults);
-    });
-
-    it('skip page scan for foreign location', async () => {
-        const loadedUrl = 'http://example.org';
-        pageMetadata = {
-            foreignLocation: true,
-            loadedUrl,
-        } as PageMetadata;
-        websiteScanResult = { discoveryPatterns: [generatedDiscoveryPattern] } as WebsiteScanResult;
-        const scanMetadata = {
-            url,
-            id: 'id',
-            deepScan: true,
-        };
-        axeScanResults = {
-            unscannable: true,
-            error: `The scan URL was redirected to foreign location and will not be processed further. URL ${loadedUrl}`,
-        };
-        pageMetadataGeneratorMock.reset();
-        pageMetadataGeneratorMock
-            .setup((o) => o.getMetadata(url, pageMock.object, websiteScanResult))
-            .returns(() => Promise.resolve(pageMetadata))
-            .verifiable();
-        setupClosePage();
-
-        const results = await testSubject.scan(scanMetadata, pageScanResult, websiteScanResult);
-
-        expect(results).toEqual(axeScanResults);
-    });
-
-    it('skip page scan for foreign authentication location', async () => {
-        const loadedUrl = 'http://example.org';
-        pageMetadata = {
-            foreignLocation: true,
-            authentication: true,
-            authenticationType: 'undetermined',
-            loadedUrl,
-        } as PageMetadata;
-        websiteScanResult = { discoveryPatterns: [generatedDiscoveryPattern] } as WebsiteScanResult;
-        const scanMetadata = {
-            url,
-            id: 'id',
-            deepScan: true,
-        };
-        axeScanResults = {
-            unscannable: true,
-            error: `The scan URL was redirected to foreign location and will not be processed further. URL ${loadedUrl}`,
-        };
-        pageMetadataGeneratorMock.reset();
-        pageMetadataGeneratorMock
-            .setup((o) => o.getMetadata(url, pageMock.object, websiteScanResult))
-            .returns(() => Promise.resolve(pageMetadata))
-            .verifiable();
-        setupClosePage();
-        pageMock
-            .setup((p) => p.authenticationResult)
-            .returns(() => undefined)
-            .verifiable();
-        const expectedPageScanResult = cloneDeep({
-            ...pageScanResult,
-            authentication: {
-                detected: 'undetermined',
-                state: 'unauthenticated',
-            },
-        });
-
-        const results = await testSubject.scan(scanMetadata, pageScanResult, websiteScanResult);
-
-        expect(pageScanResult).toEqual(expectedPageScanResult);
         expect(results).toEqual(axeScanResults);
     });
 

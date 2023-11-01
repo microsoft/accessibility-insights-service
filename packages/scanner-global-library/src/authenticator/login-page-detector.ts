@@ -6,7 +6,7 @@ import { Url } from 'common';
 import { AuthenticationType } from 'storage-documents';
 
 const entraLoginDomains = ['login.microsoftonline.com', 'login.live.com'];
-const urlLoginHints = ['auth', 'onmicrosoft', 'sso', 'signin', 'login', 'openid', 'token'];
+const urlLoginHints = ['auth', 'onmicrosoft', 'sso', 'login', 'openid', 'token'];
 
 @injectable()
 export class LoginPageDetector {

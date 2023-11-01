@@ -60,16 +60,17 @@ export class Runner {
         }
 
         this.telemetryManager.trackScanStarted(runnerScanMetadata.id);
+        let axeScanResults: AxeScanResults;
         try {
             let websiteScanResult;
             if (pageScanResult.websiteScanRef !== undefined) {
                 websiteScanResult = await this.websiteScanResultProvider.read(pageScanResult.websiteScanRef.id, false);
             }
 
-            const axeScanResults = await this.pageScanProcessor.scan(runnerScanMetadata, pageScanResult, websiteScanResult);
+            axeScanResults = await this.pageScanProcessor.scan(runnerScanMetadata, pageScanResult, websiteScanResult);
             if (axeScanResults?.unscannable === true) {
                 // unsupported URL location
-                this.setRunResult(pageScanResult, 'unscannable', axeScanResults.error);
+                this.setRunResult(pageScanResult, 'unscannable', axeScanResults.scannedUrl, axeScanResults.error);
             } else if (axeScanResults.error === undefined) {
                 // axe scan completed successfully
                 await this.onCompletedScan(axeScanResults, pageScanResult);
@@ -82,7 +83,7 @@ export class Runner {
             pageScanResult.run.pageResponseCode = axeScanResults.pageResponseCode;
         } catch (error) {
             const errorMessage = System.serializeError(error);
-            this.setRunResult(pageScanResult, 'failed', errorMessage);
+            this.setRunResult(pageScanResult, 'failed', axeScanResults?.scannedUrl, errorMessage);
 
             this.logger.logError(`The scanner failed to scan a page.`, { error: errorMessage });
             this.telemetryManager.trackScanTaskFailed();
@@ -100,21 +101,18 @@ export class Runner {
 
     private async onCompletedScan(axeScanResults: AxeScanResults, pageScanResult: OnDemandPageScanResult): Promise<void> {
         pageScanResult.scanResult = this.getScanStatus(axeScanResults);
-        if (axeScanResults.scannedUrl !== undefined) {
-            pageScanResult.scannedUrl = axeScanResults.scannedUrl;
-        }
         pageScanResult.reports = await this.generateScanReports(axeScanResults);
 
         if (this.isScanWorkflowCompleted(pageScanResult)) {
-            this.setRunResult(pageScanResult, 'completed');
+            this.setRunResult(pageScanResult, 'completed', axeScanResults.scannedUrl);
         } else {
             await this.sendGenerateConsolidatedReportRequest(pageScanResult);
-            this.setRunResult(pageScanResult, 'report');
+            this.setRunResult(pageScanResult, 'report', axeScanResults.scannedUrl);
         }
     }
 
     private async onFailedScan(axeScanResults: AxeScanResults, pageScanResult: OnDemandPageScanResult): Promise<void> {
-        this.setRunResult(pageScanResult, 'failed', axeScanResults.error);
+        this.setRunResult(pageScanResult, 'failed', axeScanResults.scannedUrl, axeScanResults.error);
         this.logger.logError('Browser has failed to scan a page.', { error: JSON.stringify(axeScanResults.error) });
         this.telemetryManager.trackBrowserScanFailed();
     }
@@ -185,7 +183,13 @@ export class Runner {
         return this.reportWriter.writeBatch(availableReports);
     }
 
-    private setRunResult(pageScanResult: OnDemandPageScanResult, state: OnDemandPageScanRunState, error?: string | ScanError): void {
+    private setRunResult(
+        pageScanResult: OnDemandPageScanResult,
+        state: OnDemandPageScanRunState,
+        scannedUrl: string,
+        error?: string | ScanError,
+    ): void {
+        pageScanResult.scannedUrl = scannedUrl;
         pageScanResult.run = {
             ...pageScanResult.run,
             state,

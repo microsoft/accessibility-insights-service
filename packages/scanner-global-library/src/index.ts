@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 export { setupScannerContainer } from './setup-scanner-container';
-export { BrowserError, BrowserErrorTypes } from './browser-error';
+export { BrowserError } from './browser-error';
 export { PageConfigurator } from './page-configurator';
 export { PageHandler } from './page-handler';
 export { PageResponseProcessor } from './page-response-processor';

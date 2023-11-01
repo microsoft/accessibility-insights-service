@@ -34,19 +34,21 @@ export declare type ReportFormat =
     | 'page.png';
 
 export declare type ScanErrorTypes =
-    | 'UrlNavigationTimeout'
-    | 'SslError'
-    | 'ResourceLoadFailure'
-    | 'InvalidUrl'
-    | 'EmptyPage'
-    | 'HttpErrorCode'
-    | 'NavigationError'
-    | 'InvalidContentType'
-    | 'UrlNotResolved'
-    | 'ScanTimeout'
-    | 'InternalError'
+    | 'AuthenticationError'
     | 'BannerXPathNotDetected'
-    | 'AuthenticationError';
+    | 'EmptyPage'
+    | 'ForeignResourceRedirection'
+    | 'HttpErrorCode'
+    | 'InternalError'
+    | 'InvalidContentType'
+    | 'InvalidUrl'
+    | 'NavigationError'
+    | 'ResourceLoadFailure'
+    | 'ScanTimeout'
+    | 'SslError'
+    | 'UnsupportedResource'
+    | 'UrlNavigationTimeout'
+    | 'UrlNotResolved';
 
 export interface ScanError {
     errorType: ScanErrorTypes;

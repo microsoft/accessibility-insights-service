@@ -6,27 +6,31 @@ import 'reflect-metadata';
 import { ScanNotificationErrorCodes, ScanRunErrorCodes } from 'service-library';
 import { ScanErrorConverter } from './scan-error-converter';
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
+let testSubject: ScanErrorConverter;
 
 describe(ScanErrorConverter, () => {
-    let testSubject: ScanErrorConverter;
     beforeEach(() => {
         testSubject = new ScanErrorConverter();
     });
 
     describe('getScanRunErrorCode', () => {
-        it('should return internal error for null or undefined', () => {
-            let errorCode = testSubject.getScanRunErrorCode(null);
+        it('should return internal error for string error', () => {
+            const errorCode = testSubject.getScanRunErrorCode('error message');
             expect(errorCode).toEqual(ScanRunErrorCodes.internalError);
+        });
 
-            errorCode = testSubject.getScanRunErrorCode(undefined);
-            expect(errorCode).toEqual(ScanRunErrorCodes.internalError);
+        it('should return undefined for undefined or null error', () => {
+            let errorCode = testSubject.getScanRunErrorCode(undefined);
+            expect(errorCode).toBeUndefined();
+
+            errorCode = testSubject.getScanRunErrorCode(null);
+            expect(errorCode).toBeUndefined();
         });
 
         it('should resolve scanError to scanErrorCode', () => {
             const errorCode = testSubject.getScanRunErrorCode({
                 errorType: 'InvalidContentType',
-                message: 'some message',
+                message: 'error message',
             });
 
             expect(errorCode).toEqual(ScanRunErrorCodes.invalidContentType);
@@ -34,15 +38,18 @@ describe(ScanErrorConverter, () => {
     });
 
     describe('getScanNotificationErrorCode', () => {
-        it('should return internal error for string input', () => {
-            const errorCode = testSubject.getScanNotificationErrorCode('hello');
-            expect(errorCode).toEqual(ScanNotificationErrorCodes.InternalError);
+        it('should return undefined for undefined or null error', () => {
+            let errorCode = testSubject.getScanNotificationErrorCode(undefined);
+            expect(errorCode).toBeUndefined();
+
+            errorCode = testSubject.getScanNotificationErrorCode(null);
+            expect(errorCode).toBeUndefined();
         });
 
         it('should resolve scanError to scanErrorCode', () => {
             const errorCode = testSubject.getScanNotificationErrorCode({
                 errorType: 'InternalError',
-                message: 'some message',
+                message: 'error message',
             });
 
             expect(errorCode).toEqual(ScanNotificationErrorCodes.InternalError);
