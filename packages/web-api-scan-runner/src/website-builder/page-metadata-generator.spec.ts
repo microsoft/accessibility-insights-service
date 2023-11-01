@@ -67,6 +67,10 @@ describe(PageMetadataGenerator, () => {
             foreignLocation: false,
             loadedUrl,
             redirection: false,
+            browserError: {
+                errorType: 'UnsupportedResource',
+                message: 'The resource is not supported.',
+            },
         };
 
         const results = await pageMetadataGenerator.getMetadata(url, pageMock.object, websiteScanResult);
@@ -140,6 +144,10 @@ describe(PageMetadataGenerator, () => {
             foreignLocation: true,
             loadedUrl,
             redirection: true,
+            browserError: {
+                errorType: 'ForeignResourceRedirection',
+                message: 'The resource was redirected to a foreign location.',
+            },
         };
 
         const results = await pageMetadataGenerator.getMetadata(url, pageMock.object, websiteScanResult);
@@ -162,6 +170,10 @@ describe(PageMetadataGenerator, () => {
             foreignLocation: true,
             loadedUrl,
             redirection: true,
+            browserError: {
+                errorType: 'ForeignResourceRedirection',
+                message: 'The resource was redirected to a foreign location.',
+            },
         };
 
         const results = await pageMetadataGenerator.getMetadata(url, pageMock.object, websiteScanResult);
@@ -183,6 +195,10 @@ describe(PageMetadataGenerator, () => {
             foreignLocation: true,
             loadedUrl,
             redirection: true,
+            browserError: {
+                errorType: 'ForeignResourceRedirection',
+                message: 'The resource was redirected to a foreign location.',
+            },
         };
 
         const results = await pageMetadataGenerator.getMetadata(url, pageMock.object, websiteScanResult);

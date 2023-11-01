@@ -362,19 +362,21 @@ components:
                 code:
                     type: string
                     enum:
-                        - InternalError
-                        - UrlNavigationTimeout
-                        - SslError
-                        - ResourceLoadFailure
-                        - InvalidUrl
-                        - EmptyPage
-                        - HttpErrorCode
-                        - NavigationError
-                        - InvalidContentType
-                        - UrlNotResolved
-                        - ScanTimeout
-                        - BannerXPathNotDetected
                         - AuthenticationError
+                        - BannerXPathNotDetected
+                        - EmptyPage
+                        - ForeignResourceRedirection
+                        - HttpErrorCode
+                        - InternalError
+                        - InvalidContentType
+                        - InvalidUrl
+                        - NavigationError
+                        - ResourceLoadFailure
+                        - ScanTimeout
+                        - SslError
+                        - UnsupportedResource
+                        - UrlNavigationTimeout
+                        - UrlNotResolved
                 codeId:
                     type: integer
                     format: int32

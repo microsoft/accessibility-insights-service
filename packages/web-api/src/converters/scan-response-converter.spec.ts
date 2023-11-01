@@ -18,15 +18,26 @@ import {
     ItemType,
     OnDemandPageScanResult,
     OnDemandPageScanRunState as RunStateDb,
-    ScanCompletedNotification as Notification,
+    ScanCompletedNotification as NotificationDb,
     WebsiteScanResult,
     OnDemandPageScanRunState,
+    NotificationError,
 } from 'storage-documents';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { ScanErrorConverter } from './scan-error-converter';
 import { ScanResponseConverter } from './scan-response-converter';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
+
+interface options {
+    dbState?: RunStateDb;
+    restApiState?: RunStateRestApi;
+    isNotificationEnabled?: boolean;
+    isDeepScanEnabled?: boolean;
+    isAuthenticationEnabled?: boolean;
+    isPrivacyScan?: boolean;
+    isError?: boolean;
+}
 
 const apiVersion = '1.0';
 const baseUrl = 'https://localhost/api/';
@@ -37,7 +48,7 @@ const pageResponseCode = 101;
 let scanResponseConverter: ScanResponseConverter;
 let scanErrorConverterMock: IMock<ScanErrorConverter>;
 let runStateClientProviderMock: IMock<RunStateClientProvider>;
-let notificationDb: Notification;
+let notificationDb: NotificationDb;
 let notificationResponse: ScanCompletedNotification;
 let deepScanResult: DeepScanResultItem[];
 let websiteScanResult: WebsiteScanResult;
@@ -50,7 +61,7 @@ beforeEach(() => {
         .returns(() => ScanRunErrorCodes.internalError)
         .verifiable(Times.once());
     scanErrorConverterMock
-        .setup((o) => o.getScanNotificationErrorCode(It.isAny()))
+        .setup((o) => o.getScanNotificationErrorCode({ errorType: 'InternalError' } as NotificationError))
         .returns(() => ScanNotificationErrorCodes.InternalError)
         .verifiable();
 
@@ -65,16 +76,11 @@ beforeEach(() => {
     notificationResponse = {
         scanNotifyUrl: 'reply-url',
         state: 'queued',
-        error: ScanNotificationErrorCodes.InternalError,
         responseCode: 200,
     };
     notificationDb = {
         scanNotifyUrl: 'reply-url',
         state: 'queued',
-        error: {
-            errorType: 'InternalError',
-            message: 'Failed to send notification.',
-        },
         responseCode: 200,
     };
     deepScanResult = getDeepScanResult();
@@ -82,39 +88,46 @@ beforeEach(() => {
 });
 
 describe(ScanResponseConverter, () => {
-    test.each([true, false])('return not completed result, when notification enabled = %s', async (notificationEnabled) => {
-        await validateConverterShortResult('pending', 'pending', notificationEnabled);
-        await validateConverterShortResult('accepted', 'accepted', notificationEnabled);
-        await validateConverterShortResult('queued', 'queued', notificationEnabled);
-        await validateConverterShortResult('running', 'running', notificationEnabled);
-        await validateConverterShortResult('report', 'report', notificationEnabled);
-        await validateConverterShortResult('failed', 'failed', notificationEnabled);
+    test.each([true, false])('return not completed result, when notification enabled = %s', async (isNotificationEnabled) => {
+        await validateConverterShortResult({ dbState: 'pending', restApiState: 'pending', isNotificationEnabled });
+        await validateConverterShortResult({ dbState: 'accepted', restApiState: 'accepted', isNotificationEnabled });
+        await validateConverterShortResult({ dbState: 'queued', restApiState: 'queued', isNotificationEnabled });
+        await validateConverterShortResult({ dbState: 'running', restApiState: 'running', isNotificationEnabled });
+        await validateConverterShortResult({ dbState: 'report', restApiState: 'report', isNotificationEnabled });
+        await validateConverterShortResult({ dbState: 'failed', restApiState: 'failed', isNotificationEnabled, isError: true });
     });
 
-    test.each([true, false])('return completed scan run result, when notification enabled = %s', async (notificationEnabled) => {
-        const pageScanDbResult = getPageScanResult('completed', notificationEnabled);
-        const responseExpected = getScanResultClientResponseFull('completed', notificationEnabled);
+    test.each([true, false])('return completed scan run result, when notification enabled = %s', async (isNotificationEnabled) => {
+        const pageScanDbResult = getPageScanResult({ dbState: 'completed', isNotificationEnabled });
+        const responseExpected = getScanResultClientResponseFull({ restApiState: 'completed', isNotificationEnabled });
+        const response = await scanResponseConverter.getScanResultResponse(baseUrl, apiVersion, pageScanDbResult, websiteScanResult);
+        expect(response).toEqual(responseExpected);
+    });
+
+    it('return completed scan result with error', async () => {
+        const pageScanDbResult = getPageScanResult({ dbState: 'completed', isError: true });
+        const responseExpected = getScanResultClientResponseFull({ restApiState: 'completed', isError: true });
         const response = await scanResponseConverter.getScanResultResponse(baseUrl, apiVersion, pageScanDbResult, websiteScanResult);
         expect(response).toEqual(responseExpected);
     });
 
     it('return completed scan result, when deepScan is disabled', async () => {
-        const pageScanDbResult = getPageScanResult('completed');
-        const responseExpected = getScanResultClientResponseFull('completed');
+        const pageScanDbResult = getPageScanResult({ dbState: 'completed' });
+        const responseExpected = getScanResultClientResponseFull({ restApiState: 'completed' });
         const response = await scanResponseConverter.getScanResultResponse(baseUrl, apiVersion, pageScanDbResult, websiteScanResult);
         expect(response).toEqual(responseExpected);
     });
 
     it('return completed scan result with authentication result', async () => {
-        const pageScanDbResult = getPageScanResult('completed', false, false, true);
-        const responseExpected = getScanResultClientResponseFull('completed', false, false, false, true);
+        const pageScanDbResult = getPageScanResult({ dbState: 'completed', isAuthenticationEnabled: true });
+        const responseExpected = getScanResultClientResponseFull({ restApiState: 'completed', isAuthenticationEnabled: true });
         const response = await scanResponseConverter.getScanResultResponse(baseUrl, apiVersion, pageScanDbResult, websiteScanResult);
         expect(response).toEqual(responseExpected);
     });
 
     it('return completed privacy scan result', async () => {
-        const pageScanDbResult = getPageScanResult('completed');
-        const responseExpected = getScanResultClientResponseFull('completed');
+        const pageScanDbResult = getPageScanResult({ dbState: 'completed' });
+        const responseExpected = getScanResultClientResponseFull({ restApiState: 'completed' });
         const response = await scanResponseConverter.getScanResultResponse(baseUrl, apiVersion, pageScanDbResult, websiteScanResult);
         expect(response).toEqual(responseExpected);
     });
@@ -123,8 +136,8 @@ describe(ScanResponseConverter, () => {
         'return completed result, when deepScan is enabled and overall deep scan state = %s',
         async (deepScanOverallState: RunState) => {
             deepScanResult = getDeepScanResult(deepScanOverallState);
-            const pageScanDbResult = getPageScanResult('completed', false, true);
-            const responseExpected = getScanResultClientResponseFull(deepScanOverallState, false, true);
+            const pageScanDbResult = getPageScanResult({ dbState: 'completed', isDeepScanEnabled: true });
+            const responseExpected = getScanResultClientResponseFull({ restApiState: deepScanOverallState, isDeepScanEnabled: true });
             const response = await scanResponseConverter.getScanResultResponse(
                 baseUrl,
                 apiVersion,
@@ -136,24 +149,29 @@ describe(ScanResponseConverter, () => {
     );
 
     it('adds error to notification if db has error info', async () => {
-        const pageScanDbResult = getPageScanResult('completed', true);
-        const responseExpected: ScanRunResultResponse = getScanResultClientResponseFull('completed', true) as ScanRunResultResponse;
+        const pageScanDbResult = getPageScanResult({ dbState: 'completed', isNotificationEnabled: true });
+        notificationDb.error = { errorType: 'InternalError' } as NotificationError;
+        notificationResponse.error = ScanNotificationErrorCodes.InternalError;
+        const responseExpected: ScanRunResultResponse = getScanResultClientResponseFull({
+            restApiState: 'completed',
+            isNotificationEnabled: true,
+        }) as ScanRunResultResponse;
         const response = await scanResponseConverter.getScanResultResponse(baseUrl, apiVersion, pageScanDbResult, websiteScanResult);
         expect(response).toEqual(responseExpected);
     });
 
-    it('does not add error to notification if db doc has no error', async () => {
-        const pageScanDbResult = getPageScanResult('completed', true);
-        const responseExpected: ScanRunResultResponse = getScanResultClientResponseFull('completed', true) as ScanRunResultResponse;
-        pageScanDbResult.notification.error = null;
-        const expectedNotificationResponse = responseExpected.notification;
-        delete expectedNotificationResponse.error;
+    it('does not add error to notification if db document has no error', async () => {
+        const pageScanDbResult = getPageScanResult({ dbState: 'completed', isNotificationEnabled: true });
+        const responseExpected: ScanRunResultResponse = getScanResultClientResponseFull({
+            restApiState: 'completed',
+            isNotificationEnabled: true,
+        }) as ScanRunResultResponse;
         const response = await scanResponseConverter.getScanResultResponse(baseUrl, apiVersion, pageScanDbResult, websiteScanResult);
         expect(response).toEqual(responseExpected);
     });
 
     it('create full canonical REST Get Report URL', async () => {
-        const pageScanDbResult = getPageScanResult('completed');
+        const pageScanDbResult = getPageScanResult({ dbState: 'completed' });
         const response = await scanResponseConverter.getScanResultResponse(baseUrl, apiVersion, pageScanDbResult, websiteScanResult);
         expect((<any>response).reports[0].links.href).toEqual('https://localhost/api/scans/id/reports/reportIdSarif?api-version=1.0');
     });
@@ -178,7 +196,6 @@ function getDeepScanResult(deepScanOverallState: RunState = 'pending'): DeepScan
             scanResultState: 'pass',
         },
     ] as DeepScanResultItem[];
-
     if (deepScanOverallState === 'failed') {
         result.map((scan) => (scan.scanRunState = 'failed'));
     } else if (deepScanOverallState === 'completed') {
@@ -210,7 +227,6 @@ function getWebsiteScanResult(deepScanOverallState: RunState = 'pending'): Websi
             },
         ],
     } as WebsiteScanResult;
-
     if (deepScanOverallState === 'failed') {
         result.pageScans.map((scan) => (scan.runState = 'failed'));
     } else if (deepScanOverallState === 'completed') {
@@ -221,13 +237,8 @@ function getWebsiteScanResult(deepScanOverallState: RunState = 'pending'): Websi
     return result;
 }
 
-function getPageScanResult(
-    state: RunStateDb,
-    isNotificationEnabled = false,
-    isDeepScanEnabled = false,
-    isAuthenticationEnabled = false,
-): OnDemandPageScanResult {
-    if (!isDeepScanEnabled) {
+function getPageScanResult(options: options): OnDemandPageScanResult {
+    if (!options.isDeepScanEnabled === true) {
         websiteScanResult = undefined;
     }
 
@@ -254,14 +265,14 @@ function getPageScanResult(
             },
         ],
         run: {
-            state: state,
-            error: 'internal-error',
+            state: options.dbState,
             pageTitle: pageTitle,
             pageResponseCode: pageResponseCode,
+            error: options.isError === true ? 'internal-error' : undefined,
         },
         batchRequestId: 'batch-id',
-        ...(isNotificationEnabled ? { notification: notificationDb } : {}),
-        ...(isAuthenticationEnabled
+        ...(options.isNotificationEnabled === true ? { notification: notificationDb } : {}),
+        ...(options.isAuthenticationEnabled === true
             ? {
                   authentication: {
                       hint: 'entraId',
@@ -273,21 +284,15 @@ function getPageScanResult(
     };
 }
 
-function getScanResultClientResponseFull(
-    state: RunStateRestApi,
-    isNotificationEnabled = false,
-    isDeepScanEnabled = false,
-    isPrivacyScan = false,
-    isAuthenticationEnabled = false,
-): ScanResultResponse {
-    if (!isDeepScanEnabled) {
+function getScanResultClientResponseFull(options: options): ScanResultResponse {
+    if (!options.isDeepScanEnabled === true) {
         websiteScanResult = undefined;
     }
 
     return {
         scanId: 'id',
         url: 'url',
-        scanType: isPrivacyScan ? 'privacy' : 'accessibility',
+        scanType: options.isPrivacyScan === true ? 'privacy' : 'accessibility',
         scanResult: {
             state: 'fail',
             issueCount: 1,
@@ -311,13 +316,14 @@ function getScanResultClientResponseFull(
             },
         ],
         run: {
-            state: state,
+            state: options.restApiState,
             pageResponseCode: pageResponseCode,
             pageTitle: pageTitle,
+            error: options.isError === true ? ScanRunErrorCodes.internalError : undefined,
         },
-        ...(isNotificationEnabled ? { notification: notificationResponse } : {}),
-        ...(isDeepScanEnabled ? { deepScanResult: deepScanResult } : {}),
-        ...(isAuthenticationEnabled
+        ...(options.isNotificationEnabled === true ? { notification: notificationResponse } : {}),
+        ...(options.isDeepScanEnabled === true ? { deepScanResult: deepScanResult } : {}),
+        ...(options.isAuthenticationEnabled === true
             ? {
                   authentication: {
                       detected: 'entraId',
@@ -328,19 +334,18 @@ function getScanResultClientResponseFull(
     };
 }
 
-function getScanResultClientResponseShort(state: RunStateRestApi, isNotificationEnabled = false): ScanResultResponse {
+function getScanResultClientResponseShort(options: options): ScanResultResponse {
     const response: ScanRunResultResponse = {
         scanId: 'id',
         url: 'url',
         scanType: 'accessibility',
         run: {
-            state: state,
-            error: state === 'failed' || state === 'retrying' ? ScanRunErrorCodes.internalError : undefined,
+            state: options.restApiState,
+            error: options.isError === true ? ScanRunErrorCodes.internalError : undefined,
         },
-        ...(isNotificationEnabled ? { notification: notificationResponse } : {}),
+        ...(options.isNotificationEnabled === true ? { notification: notificationResponse } : {}),
     };
-
-    if (state === 'completed' || state === 'failed' || state === 'retrying') {
+    if (options.restApiState === 'completed' || options.restApiState === 'failed' || options.restApiState === 'retrying') {
         response.run.pageResponseCode = pageResponseCode;
         response.run.pageTitle = pageTitle;
     }
@@ -348,13 +353,9 @@ function getScanResultClientResponseShort(state: RunStateRestApi, isNotification
     return response;
 }
 
-async function validateConverterShortResult(
-    dbState: RunStateDb,
-    clientState: RunStateRestApi,
-    isNotificationEnabled = false,
-): Promise<void> {
-    const pageScanDbResult = getPageScanResult(dbState, isNotificationEnabled);
-    const responseExpected = getScanResultClientResponseShort(clientState, isNotificationEnabled);
+async function validateConverterShortResult(options: options): Promise<void> {
+    const pageScanDbResult = getPageScanResult(options);
+    const responseExpected = getScanResultClientResponseShort(options);
     const response = await scanResponseConverter.getScanResultResponse(baseUrl, apiVersion, pageScanDbResult, websiteScanResult);
     expect(response).toEqual(responseExpected);
 }

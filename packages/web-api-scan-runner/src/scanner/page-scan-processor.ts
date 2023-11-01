@@ -59,35 +59,21 @@ export class PageScanProcessor {
     }
 
     private getScannableState(pageMetadata: PageMetadata): AxeScanResults {
-        // Not allowed location
-        if (pageMetadata.allowed === false) {
-            this.logger.logWarn(`The scan URL location is not allowed and will not be processed further.`, {
+        if (pageMetadata.browserError !== undefined) {
+            this.logger.logWarn(pageMetadata.browserError.message, {
                 loadedUrl: pageMetadata.loadedUrl,
             });
 
             return {
                 unscannable: true,
-                error: `The scan URL location is not allowed and will not be processed further. URL ${pageMetadata.loadedUrl}`,
-            };
-        }
-
-        // Redirected to foreign location or foreign unknown authentication location
-        if (
-            pageMetadata.foreignLocation === true &&
-            (pageMetadata.authentication !== true || pageMetadata.authenticationType === 'undetermined')
-        ) {
-            this.logger.logWarn(`The scan URL was redirected to foreign location and will not be processed further.`, {
-                loadedUrl: pageMetadata.loadedUrl,
-            });
-
-            return {
-                unscannable: true,
-                error: `The scan URL was redirected to foreign location and will not be processed further. URL ${pageMetadata.loadedUrl}`,
+                scannedUrl: pageMetadata.loadedUrl,
+                error: pageMetadata.browserError,
             };
         }
 
         return {
             unscannable: false,
+            scannedUrl: pageMetadata.loadedUrl,
         };
     }
 

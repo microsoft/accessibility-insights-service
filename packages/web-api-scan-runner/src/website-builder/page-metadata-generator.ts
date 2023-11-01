@@ -38,7 +38,7 @@ export class PageMetadataGenerator {
             urlAllowed &&
             (page.pageAnalysisResult?.loadedUrl === undefined || this.urlLocationValidator.allowed(page.pageAnalysisResult.loadedUrl));
 
-        return {
+        const pageMetadata = {
             url,
             allowed,
             loadedUrl: page.pageAnalysisResult?.loadedUrl,
@@ -46,6 +46,13 @@ export class PageMetadataGenerator {
             authentication: page.pageAnalysisResult?.authentication,
             authenticationType: page.pageAnalysisResult?.authenticationType,
             foreignLocation,
+        };
+
+        const browserError = this.getBrowserError(pageMetadata);
+
+        return {
+            ...pageMetadata,
+            browserError,
         };
     }
 
@@ -68,5 +75,33 @@ export class PageMetadataGenerator {
         }
 
         return false;
+    }
+
+    private getBrowserError(pageMetadata: PageMetadata): BrowserError {
+        // Unsupported resource
+        if (pageMetadata.allowed === false) {
+            return {
+                errorType: 'UnsupportedResource',
+                message: `The resource is not supported.`,
+            };
+        }
+
+        // Redirected to an unsupported authentication location
+        if (pageMetadata.foreignLocation === true && pageMetadata.authenticationType === 'undetermined') {
+            return {
+                errorType: 'AuthenticationError',
+                message: `The resource was redirected to an unsupported authentication provider.`,
+            };
+        }
+
+        // Redirected to a foreign location
+        if (pageMetadata.foreignLocation === true && pageMetadata.authentication !== true) {
+            return {
+                errorType: 'ForeignResourceRedirection',
+                message: `The resource was redirected to a foreign location.`,
+            };
+        }
+
+        return undefined;
     }
 }

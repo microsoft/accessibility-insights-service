@@ -92,6 +92,7 @@ describe(Runner, () => {
                 id: 'websiteScanId',
                 scanGroupType: 'consolidated-scan',
             },
+            scannedUrl: 'scannedUrl',
         } as OnDemandPageScanResult;
         pageScanResult = {} as OnDemandPageScanResult;
         axeScanResults = {
@@ -169,6 +170,7 @@ describe(Runner, () => {
     it.each([true, false])(
         'execute runner with page scanner exception with useReportGeneratorWorkflow=%s',
         async (useReportGeneratorWorkflow) => {
+            pageScanResultDbDocument.scannedUrl = undefined;
             pageScanResultDbDocument.websiteScanRef.scanGroupId = useReportGeneratorWorkflow ? 'scanGroupId' : undefined;
             const error = new Error('page scan processor error');
             const errorMessage = System.serializeError(error);
