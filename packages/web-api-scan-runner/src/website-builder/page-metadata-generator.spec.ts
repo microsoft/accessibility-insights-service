@@ -205,4 +205,36 @@ describe(PageMetadataGenerator, () => {
 
         expect(results).toEqual(expectedPageMetadata);
     });
+
+    it('detect redirect to an unsupported authentication provider', async () => {
+        const loadedUrl = 'http://example.org';
+        pageAnalysisResult = {
+            redirection: true,
+            loadedUrl,
+            authentication: true,
+            authenticationType: 'undetermined',
+        } as PageAnalysisResult;
+        pageMock.setup((o) => o.pageAnalysisResult).returns(() => pageAnalysisResult);
+        pageMock
+            .setup((o) => o.analyze(url))
+            .returns(() => Promise.resolve())
+            .verifiable();
+        const expectedPageMetadata = {
+            url,
+            allowed: true,
+            authentication: true,
+            authenticationType: 'undetermined',
+            foreignLocation: true,
+            loadedUrl,
+            redirection: true,
+            browserError: {
+                errorType: 'AuthenticationError',
+                message: 'The resource was redirected to an unsupported authentication provider.',
+            },
+        };
+
+        const results = await pageMetadataGenerator.getMetadata(url, pageMock.object, websiteScanResult);
+
+        expect(results).toEqual(expectedPageMetadata);
+    });
 });
