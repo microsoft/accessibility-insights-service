@@ -23,7 +23,7 @@ Usage: ${BASH_SOURCE} -v <vmss name> -r <vmss resource group> -p <batch pool>
 
 enableResourceGroupAccess() {
     role="Contributor"
-    scope="--resource-group $resourceGroupName"
+    scope="--scope /subscriptions/${subscription}/resourceGroups/${resourceGroupName}"
     . "${0%/*}/create-role-assignment.sh"
 }
 
