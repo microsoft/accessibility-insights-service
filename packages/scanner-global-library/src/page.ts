@@ -372,7 +372,7 @@ export class Page {
         await this.setExtraHTTPHeaders();
 
         // Do not run analysis on reloads
-        if (this.pageAnalysisResult && this.pageAnalysisResult.loadedUrl !== url) {
+        if (this.pageAnalysisResult && this.pageAnalysisResult.loadedUrl !== url && this.pageAnalysisResult.url !== url) {
             this.pageAnalysisResult = undefined;
         }
     }
