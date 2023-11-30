@@ -85,10 +85,6 @@ export class DeepScanner {
             discoveryPatterns: discoveryPatterns,
         };
 
-        this.logger.logInfo(`The website scan result document was updated.`, {
-            websiteScanResultUpdate: JSON.stringify(websiteScanResultUpdate),
-        });
-
         return this.websiteScanResultProvider.mergeOrCreate(scanId, websiteScanResultUpdate, undefined, true);
     }
 

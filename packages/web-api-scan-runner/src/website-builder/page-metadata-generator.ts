@@ -4,6 +4,7 @@
 import { inject, injectable } from 'inversify';
 import { BrowserError, Page } from 'scanner-global-library';
 import { AuthenticationType, WebsiteScanResult } from 'storage-documents';
+import { cloneDeep } from 'lodash';
 import { createDiscoveryPattern } from '../crawler/discovery-pattern-factory';
 import { UrlLocationValidator } from './url-location-validator';
 
@@ -58,7 +59,7 @@ export class PageMetadataGenerator {
 
     private async hasForeignLocation(url: string, page: Page, websiteScanResult: WebsiteScanResult): Promise<boolean> {
         if (page.pageAnalysisResult?.redirection === true) {
-            const discoveryPatterns = websiteScanResult?.discoveryPatterns ?? [
+            const discoveryPatterns = cloneDeep(websiteScanResult?.discoveryPatterns) ?? [
                 this.createDiscoveryPatternFn(websiteScanResult?.baseUrl ?? url),
             ];
 
