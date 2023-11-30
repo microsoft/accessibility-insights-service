@@ -14,7 +14,7 @@
         "maxFailedScanRetryCount": 1
     },
     "crawlConfig": {
-        "deepScanDiscoveryLimit": 100,
+        "deepScanDiscoveryLimit": 10,
         "deepScanUpperLimit": 3000
     },
     "taskConfig": {

@@ -9,7 +9,7 @@
         "environmentDefinition": "canary"
     },
     "crawlConfig": {
-        "deepScanDiscoveryLimit": 100,
+        "deepScanDiscoveryLimit": 10,
         "deepScanUpperLimit": 3000
     }
 }
