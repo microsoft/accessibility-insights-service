@@ -417,11 +417,11 @@ function setupPageCreate(): void {
     webDriverMock
         .setup(async (o) => o.launch(It.isAny()))
         .returns(() => Promise.resolve(browserMock.object))
-        .verifiable();
+        .verifiable(Times.atLeastOnce());
     webDriverMock
         .setup(async (o) => o.waitForPageCreation())
         .returns(() => Promise.resolve(true))
-        .verifiable();
+        .verifiable(Times.atLeastOnce());
 }
 
 function simulatePageLaunch(): void {
