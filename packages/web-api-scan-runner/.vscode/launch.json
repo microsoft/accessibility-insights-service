@@ -16,6 +16,15 @@
             "internalConsoleOptions": "neverOpen",
             "smartStep": true,
             "resolveSourceMapLocations": ["${workspaceFolder}/dist/**/*.js", "${workspaceFolder}/../**/dist/**/*.js"]
+        },
+        {
+            "name": "Docker: Attach to web-api-scan-runner",
+            "type": "node",
+            "request": "attach",
+            "port": 9229,
+            "address": "localhost",
+            "localRoot": "${workspaceFolder}",
+            "remoteRoot": "/app"
         }
     ]
 }

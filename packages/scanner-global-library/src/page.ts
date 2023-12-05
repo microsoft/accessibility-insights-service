@@ -289,6 +289,7 @@ export class Page {
 
         if (this.authenticationResult?.authenticated === true) {
             this.requestUrl = this.url;
+            await this.reopenBrowser();
         }
     }
 

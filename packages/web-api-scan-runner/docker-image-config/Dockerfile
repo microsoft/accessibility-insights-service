@@ -21,4 +21,4 @@ COPY . .
 # Install app dependencies
 RUN npm install
 
-ENTRYPOINT ["powershell.exe", "./web-api-scan-runner.ps1"]
+CMD ["powershell.exe", "./web-api-scan-runner.ps1"]
