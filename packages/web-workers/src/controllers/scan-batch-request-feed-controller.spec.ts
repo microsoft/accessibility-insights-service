@@ -25,6 +25,7 @@ import {
     ScanRunBatchRequest,
     ReportGroupRequest,
     ScanGroupType,
+    ScanType,
 } from 'storage-documents';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { MockableLogger } from '../test-utilities/mockable-logger';
@@ -113,7 +114,12 @@ describe(ScanBatchRequestFeedController, () => {
 
     it.each([
         {},
-        { scanNotifyUrl: 'url', privacyScan: { cookieBannerType: 'standard' }, authenticationType: 'entraId' } as ScanRunBatchRequest,
+        {
+            scanNotifyUrl: 'url',
+            scanType: 'privacy',
+            privacyScan: { cookieBannerType: 'standard' },
+            authenticationType: 'entraId',
+        } as ScanRunBatchRequest,
     ])(
         'propagates batch request properties %s to scan request and scan result documents',
         async (scanRunBatchRequestOverride: ScanRunBatchRequest) => {
@@ -127,6 +133,7 @@ describe(ScanBatchRequestFeedController, () => {
                             scanId: 'scan-1',
                             url: 'url-1',
                             priority: 1,
+                            scanType: 'accessibility',
                             site: {
                                 baseUrl: 'base-url-1',
                             },
@@ -156,6 +163,7 @@ describe(ScanBatchRequestFeedController, () => {
                         scanId: 'scan-1',
                         url: 'url-1',
                         priority: 1,
+                        scanType: 'accessibility',
                         scanNotifyUrl: 'reply-url-1',
                         site: {
                             baseUrl: 'base-url-1',
@@ -196,6 +204,7 @@ describe(ScanBatchRequestFeedController, () => {
                         scanId: 'scan-5',
                         url: 'url-5',
                         priority: 0,
+                        scanType: 'privacy',
                         privacyScan: { cookieBannerType: 'standard' },
                     },
                     {
@@ -320,6 +329,7 @@ function setupOnDemandPageScanRunResultProviderMock(
                     url: request.url,
                     priority: request.priority,
                     itemType: ItemType.onDemandPageScanRunResult,
+                    scanType: getScanType(request),
                     partitionKey: `pk-${request.scanId}`,
                     run: {
                         state: 'accepted',
@@ -356,6 +366,7 @@ function setupPageScanRequestProviderMock(documents: OnDemandPageScanBatchReques
                     id: scanRequest.scanId,
                     url: scanRequest.url,
                     priority: scanRequest.priority,
+                    scanType: getScanType(scanRequest),
                     itemType: ItemType.onDemandPageScanRequest,
                     partitionKey: PartitionKey.pageScanRequestDocuments,
                     deepScan: scanRequest.deepScan,
@@ -419,4 +430,8 @@ function setupMocksWithTimesNever(): void {
     pageScanRequestProviderMock.setup(async (o) => o.insertRequests(It.isAny())).verifiable(Times.never());
     scanDataProviderMock.setup(async (o) => o.deleteBatchRequest(It.isAny())).verifiable(Times.never());
     partitionKeyFactoryMock.setup((o) => o.createPartitionKeyForDocument(It.isAny(), It.isAny())).verifiable(Times.never());
+}
+
+function getScanType(request: ScanRunBatchRequest): ScanType {
+    return request.scanType ?? (request.privacyScan ? 'privacy' : 'accessibility');
 }
