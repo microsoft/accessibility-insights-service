@@ -3,7 +3,7 @@
 
 import { CosmosContainerClient, cosmosContainerClientTypes, CosmosOperationResponse } from 'azure-services';
 import { inject, injectable } from 'inversify';
-import { ItemType, OnDemandPageScanRequest, PartitionKey } from 'storage-documents';
+import { ItemType, OnDemandPageScanRequest, PartitionKey, ScanType } from 'storage-documents';
 import pLimit from 'p-limit';
 
 @injectable()
@@ -15,9 +15,9 @@ export class PageScanRequestProvider {
         private readonly cosmosContainerClient: CosmosContainerClient,
     ) {}
 
-    public async getRequests(continuationToken?: string): Promise<CosmosOperationResponse<OnDemandPageScanRequest[]>> {
+    public async getRequests(scanType: ScanType, continuationToken?: string): Promise<CosmosOperationResponse<OnDemandPageScanRequest[]>> {
         const query = {
-            query: 'SELECT * FROM c WHERE c.partitionKey = @partitionKey and c.itemType = @itemType ORDER BY c.priority DESC',
+            query: 'SELECT * FROM c WHERE c.partitionKey = @partitionKey and c.itemType = @itemType and c.scanType = @scanType ORDER BY c.priority DESC',
             parameters: [
                 {
                     name: '@partitionKey',
@@ -26,6 +26,10 @@ export class PageScanRequestProvider {
                 {
                     name: '@itemType',
                     value: ItemType.onDemandPageScanRequest,
+                },
+                {
+                    name: '@scanType',
+                    value: scanType,
                 },
             ],
         };
