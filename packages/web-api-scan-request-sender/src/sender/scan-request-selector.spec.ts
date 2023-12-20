@@ -7,7 +7,7 @@ import { IMock, Mock, Times } from 'typemoq';
 import { PageScanRequestProvider, OnDemandPageScanRunResultProvider } from 'service-library';
 import { ServiceConfiguration, ScanRunTimeConfig } from 'common';
 import { CosmosOperationResponse } from 'azure-services';
-import { OnDemandPageScanRequest, OnDemandPageScanResult, PrivacyScan } from 'storage-documents';
+import { OnDemandPageScanRequest, OnDemandPageScanResult } from 'storage-documents';
 import * as MockDate from 'mockdate';
 import { cloneDeep, merge } from 'lodash';
 import moment from 'moment';
@@ -21,9 +21,8 @@ let serviceConfigMock: IMock<ServiceConfiguration>;
 let scanRequestSelector: ScanRequestSelector;
 let scanRequests: OnDemandPageScanRequest[];
 let scanResults: OnDemandPageScanResult[];
-let maxAccessibilityRequestsToQueue: number;
-let maxPrivacyRequestsToQueue: number;
-let maxRequestsToDelete: number;
+let targetQueueRequests: number;
+let targetDeleteRequests: number;
 let filteredScanRequests: ScanRequests;
 let dateNow: Date;
 
@@ -36,15 +35,13 @@ describe(ScanRequestSelector, () => {
         onDemandPageScanRunResultProviderMock = Mock.ofType<OnDemandPageScanRunResultProvider>();
         serviceConfigMock = Mock.ofType<ServiceConfiguration>();
 
-        maxAccessibilityRequestsToQueue = 10;
-        maxPrivacyRequestsToQueue = 10;
-        maxRequestsToDelete = 10;
+        targetQueueRequests = 10;
+        targetDeleteRequests = 10;
         scanRequests = [];
         scanResults = [];
         filteredScanRequests = {
-            accessibilityRequestsToQueue: [],
-            privacyRequestsToQueue: [],
-            requestsToDelete: [],
+            queueRequests: [],
+            deleteRequests: [],
         };
 
         scanRequestSelector = new ScanRequestSelector(
@@ -67,17 +64,13 @@ describe(ScanRequestSelector, () => {
     it('no op', async () => {
         setupPageScanRequestProvider();
 
-        const result = await scanRequestSelector.getRequests(
-            maxAccessibilityRequestsToQueue,
-            maxPrivacyRequestsToQueue,
-            maxRequestsToDelete,
-        );
+        const result = await scanRequestSelector.getRequests('accessibility', targetQueueRequests, targetDeleteRequests);
 
         expect(result).toEqual(filteredScanRequests);
     });
 
     it('queue accepted scan requests with fixed requested count', async () => {
-        maxAccessibilityRequestsToQueue = 3;
+        targetQueueRequests = 3;
         createScanResults([{}, {}, {}, {}, {}]);
         createScanRequests();
         setupPageScanRequestProvider();
@@ -87,44 +80,11 @@ describe(ScanRequestSelector, () => {
             scanRequests.map((scanRequest) => scanRequest.id),
         );
         const expectedResult = cloneDeep(filteredScanRequests);
-        expectedResult.accessibilityRequestsToQueue = expectedResult.accessibilityRequestsToQueue.slice(0, 3);
+        expectedResult.queueRequests = expectedResult.queueRequests.slice(0, 3);
 
-        const result = await scanRequestSelector.getRequests(
-            maxAccessibilityRequestsToQueue,
-            maxPrivacyRequestsToQueue,
-            maxRequestsToDelete,
-        );
+        const result = await scanRequestSelector.getRequests('accessibility', targetQueueRequests, targetDeleteRequests);
 
         expect(result).toEqual(expectedResult);
-    });
-
-    it('queue with privacy scan requests', async () => {
-        createScanResults([
-            {},
-            {
-                privacyScan: {} as PrivacyScan,
-            },
-            {
-                privacyScan: {} as PrivacyScan,
-            },
-        ]);
-        maxAccessibilityRequestsToQueue = 1;
-        maxPrivacyRequestsToQueue = 2;
-        createScanRequests();
-        setupPageScanRequestProvider();
-        setupOnDemandPageScanRunResultProvider();
-        createFilteredScanRequests(
-            'accepted',
-            scanRequests.map((scanRequest) => scanRequest.id),
-        );
-
-        const result = await scanRequestSelector.getRequests(
-            maxAccessibilityRequestsToQueue,
-            maxPrivacyRequestsToQueue,
-            maxRequestsToDelete,
-        );
-
-        expect(result).toEqual(filteredScanRequests);
     });
 
     it('queue failed with retry scan requests', async () => {
@@ -139,7 +99,7 @@ describe(ScanRequestSelector, () => {
                 run: { state: 'failed' },
             },
         ]);
-        maxAccessibilityRequestsToQueue = scanResults.length;
+        targetQueueRequests = scanResults.length;
         createScanRequests();
         setupPageScanRequestProvider();
         setupOnDemandPageScanRunResultProvider();
@@ -148,11 +108,7 @@ describe(ScanRequestSelector, () => {
             scanRequests.map((scanRequest) => scanRequest.id),
         );
 
-        const result = await scanRequestSelector.getRequests(
-            maxAccessibilityRequestsToQueue,
-            maxPrivacyRequestsToQueue,
-            maxRequestsToDelete,
-        );
+        const result = await scanRequestSelector.getRequests('accessibility', targetQueueRequests, targetDeleteRequests);
 
         expect(result).toEqual(filteredScanRequests);
     });
@@ -163,7 +119,7 @@ describe(ScanRequestSelector, () => {
                 run: { state: 'completed' },
             },
         ]);
-        maxAccessibilityRequestsToQueue = scanResults.length;
+        targetQueueRequests = scanResults.length;
         createScanRequests();
         setupPageScanRequestProvider();
         setupOnDemandPageScanRunResultProvider();
@@ -173,11 +129,7 @@ describe(ScanRequestSelector, () => {
             scanRequests.map((scanRequest) => scanRequest.id),
         );
 
-        const result = await scanRequestSelector.getRequests(
-            maxAccessibilityRequestsToQueue,
-            maxPrivacyRequestsToQueue,
-            maxRequestsToDelete,
-        );
+        const result = await scanRequestSelector.getRequests('accessibility', targetQueueRequests, targetDeleteRequests);
 
         expect(result).toEqual(filteredScanRequests);
     });
@@ -201,7 +153,7 @@ describe(ScanRequestSelector, () => {
                 },
             },
         ]);
-        maxAccessibilityRequestsToQueue = scanResults.length;
+        targetQueueRequests = scanResults.length;
         createScanRequests();
         scanRequests = [scanRequests[0]];
 
@@ -213,11 +165,7 @@ describe(ScanRequestSelector, () => {
             scanRequests.map((scanRequest) => scanRequest.id),
         );
 
-        const result = await scanRequestSelector.getRequests(
-            maxAccessibilityRequestsToQueue,
-            maxPrivacyRequestsToQueue,
-            maxRequestsToDelete,
-        );
+        const result = await scanRequestSelector.getRequests('accessibility', targetQueueRequests, targetDeleteRequests);
 
         expect(result).toEqual(filteredScanRequests);
     });
@@ -232,7 +180,7 @@ describe(ScanRequestSelector, () => {
                 },
             },
         ]);
-        maxAccessibilityRequestsToQueue = scanResults.length;
+        targetQueueRequests = scanResults.length;
         createScanRequests();
         setupPageScanRequestProvider();
         setupOnDemandPageScanRunResultProvider();
@@ -242,11 +190,7 @@ describe(ScanRequestSelector, () => {
             scanRequests.map((scanRequest) => scanRequest.id),
         );
 
-        const result = await scanRequestSelector.getRequests(
-            maxAccessibilityRequestsToQueue,
-            maxPrivacyRequestsToQueue,
-            maxRequestsToDelete,
-        );
+        const result = await scanRequestSelector.getRequests('accessibility', targetQueueRequests, targetDeleteRequests);
 
         expect(result).toEqual(filteredScanRequests);
     });
@@ -268,7 +212,7 @@ describe(ScanRequestSelector, () => {
                 },
             },
         ]);
-        maxAccessibilityRequestsToQueue = scanResults.length;
+        targetQueueRequests = scanResults.length;
         createScanRequests();
         setupPageScanRequestProvider();
         setupOnDemandPageScanRunResultProvider();
@@ -278,11 +222,7 @@ describe(ScanRequestSelector, () => {
             scanRequests.map((scanRequest) => scanRequest.id),
         );
 
-        const result = await scanRequestSelector.getRequests(
-            maxAccessibilityRequestsToQueue,
-            maxPrivacyRequestsToQueue,
-            maxRequestsToDelete,
-        );
+        const result = await scanRequestSelector.getRequests('accessibility', targetQueueRequests, targetDeleteRequests);
 
         expect(result).toEqual(filteredScanRequests);
     });
@@ -315,7 +255,7 @@ describe(ScanRequestSelector, () => {
                 _ts,
             },
         ]);
-        maxAccessibilityRequestsToQueue = scanResults.length;
+        targetQueueRequests = scanResults.length;
         createScanRequests();
         setupPageScanRequestProvider();
         setupOnDemandPageScanRunResultProvider();
@@ -325,11 +265,7 @@ describe(ScanRequestSelector, () => {
             scanRequests.map((scanRequest) => scanRequest.id),
         );
 
-        const result = await scanRequestSelector.getRequests(
-            maxAccessibilityRequestsToQueue,
-            maxPrivacyRequestsToQueue,
-            maxRequestsToDelete,
-        );
+        const result = await scanRequestSelector.getRequests('accessibility', targetQueueRequests, targetDeleteRequests);
 
         expect(result).toEqual(filteredScanRequests);
     });
@@ -338,21 +274,13 @@ describe(ScanRequestSelector, () => {
 function createFilteredScanRequests(condition: DispatchCondition, toQueueIds: string[], toDeleteIds: string[] = []): void {
     scanRequests.map((scanRequest) => {
         if (toQueueIds.includes(scanRequest.id)) {
-            if (scanRequest.privacyScan) {
-                filteredScanRequests.privacyRequestsToQueue.push({
-                    request: scanRequest,
-                    result: scanResults.find((scanResult) => scanResult.id === scanRequest.id),
-                    condition,
-                });
-            } else {
-                filteredScanRequests.accessibilityRequestsToQueue.push({
-                    request: scanRequest,
-                    result: scanResults.find((scanResult) => scanResult.id === scanRequest.id),
-                    condition,
-                });
-            }
+            filteredScanRequests.queueRequests.push({
+                request: scanRequest,
+                result: scanResults.find((scanResult) => scanResult.id === scanRequest.id),
+                condition,
+            });
         } else if (toDeleteIds.includes(scanRequest.id)) {
-            filteredScanRequests.requestsToDelete.push({
+            filteredScanRequests.deleteRequests.push({
                 request: scanRequest,
                 result: scanResults.find((scanResult) => scanResult.id === scanRequest.id),
                 condition,
@@ -361,12 +289,11 @@ function createFilteredScanRequests(condition: DispatchCondition, toQueueIds: st
     });
 }
 
-// creates off scanResults array
+// creates scanRequests array from scanResults array
 function createScanRequests(requests: OnDemandPageScanRequest[] = []): void {
     scanRequests = scanResults.map((scanResult) => {
         return {
             id: scanResult.id,
-            privacyScan: scanResult.privacyScan,
         } as OnDemandPageScanRequest;
     });
 
@@ -391,7 +318,7 @@ function createScanResults(scans: Partial<OnDemandPageScanResult>[]): void {
 }
 
 function setupOnDemandPageScanRunResultProvider(): void {
-    scanRequests.slice(0, maxAccessibilityRequestsToQueue + maxPrivacyRequestsToQueue).map((scanRequest) => {
+    scanRequests.slice(0, targetQueueRequests).map((scanRequest) => {
         onDemandPageScanRunResultProviderMock
             .setup((o) => o.readScanRun(scanRequest.id))
             .returns(() => Promise.resolve(scanResults.find((scanResult) => scanResult.id === scanRequest.id)))
@@ -401,21 +328,19 @@ function setupOnDemandPageScanRunResultProvider(): void {
 
 function setupPageScanRequestProvider(): void {
     pageScanRequestProviderMock
-        .setup((o) => o.getRequests(undefined))
+        .setup((o) => o.getRequests('accessibility', undefined))
         .returns(() =>
             Promise.resolve({
-                item: scanRequests.slice(0, maxAccessibilityRequestsToQueue + maxPrivacyRequestsToQueue),
+                item: scanRequests.slice(0, targetQueueRequests),
                 continuationToken,
                 statusCode: 200,
             } as CosmosOperationResponse<OnDemandPageScanRequest[]>),
         )
         .verifiable();
 
-    if (maxAccessibilityRequestsToQueue + maxPrivacyRequestsToQueue >= scanRequests.length) {
-        pageScanRequestProviderMock
-            .setup((o) => o.getRequests(continuationToken))
-            .returns(() => Promise.resolve({ item: [], statusCode: 200 } as CosmosOperationResponse<OnDemandPageScanRequest[]>));
-    }
+    pageScanRequestProviderMock
+        .setup((o) => o.getRequests('accessibility', continuationToken))
+        .returns(() => Promise.resolve({ item: [], statusCode: 200 } as CosmosOperationResponse<OnDemandPageScanRequest[]>));
 }
 
 function setupServiceConfiguration(): void {

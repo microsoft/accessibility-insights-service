@@ -143,6 +143,12 @@ components:
                         value is 0.
                     default: 0
                     type: integer
+                scanType:
+                    description: The targeted type of the scan
+                    type: string
+                    enum:
+                        - accessibility
+                        - privacy
                 scanNotifyUrl:
                     type: string
                 deepScan:

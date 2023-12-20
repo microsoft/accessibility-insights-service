@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 import { inject, injectable } from 'inversify';
-import { OnDemandPageScanRequest, OnDemandPageScanResult, OnDemandPageScanRunState } from 'storage-documents';
+import { OnDemandPageScanRequest, OnDemandPageScanResult, OnDemandPageScanRunState, ScanType } from 'storage-documents';
 import { PageScanRequestProvider, OnDemandPageScanRunResultProvider } from 'service-library';
 import { ServiceConfiguration } from 'common';
 import { client, CosmosOperationResponse } from 'azure-services';
@@ -17,9 +17,8 @@ export interface ScanRequest {
 }
 
 export interface ScanRequests {
-    accessibilityRequestsToQueue: ScanRequest[];
-    privacyRequestsToQueue: ScanRequest[];
-    requestsToDelete: ScanRequest[];
+    queueRequests: ScanRequest[];
+    deleteRequests: ScanRequest[];
 }
 
 @injectable()
@@ -36,22 +35,18 @@ export class ScanRequestSelector {
         @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
     ) {}
 
-    public async getRequests(
-        maxAccessibilityRequestsToQueue: number,
-        maxPrivacyRequestsToQueue: number,
-        maxRequestsToDelete: number,
-    ): Promise<ScanRequests> {
+    public async getRequests(scanType: ScanType, targetQueueRequests: number, targetDeleteRequests: number): Promise<ScanRequests> {
         await this.init();
 
         const scanRequests: ScanRequests = {
-            accessibilityRequestsToQueue: [],
-            privacyRequestsToQueue: [],
-            requestsToDelete: [],
+            queueRequests: [],
+            deleteRequests: [],
         };
 
         let continuationToken: string;
         do {
             const response: CosmosOperationResponse<OnDemandPageScanRequest[]> = await this.pageScanRequestProvider.getRequests(
+                scanType,
                 continuationToken,
             );
             client.ensureSuccessStatusCode(response);
@@ -61,15 +56,12 @@ export class ScanRequestSelector {
                 await this.filterRequests(scanRequests, response.item);
             }
         } while (
-            scanRequests.accessibilityRequestsToQueue.length < maxAccessibilityRequestsToQueue &&
-            scanRequests.privacyRequestsToQueue.length < maxPrivacyRequestsToQueue &&
-            scanRequests.requestsToDelete.length < maxRequestsToDelete &&
+            (scanRequests.queueRequests.length < targetQueueRequests || scanRequests.deleteRequests.length < targetDeleteRequests) &&
             continuationToken !== undefined
         );
 
-        scanRequests.accessibilityRequestsToQueue = scanRequests.accessibilityRequestsToQueue.slice(0, maxAccessibilityRequestsToQueue);
-        scanRequests.privacyRequestsToQueue = scanRequests.privacyRequestsToQueue.slice(0, maxPrivacyRequestsToQueue);
-        scanRequests.requestsToDelete = scanRequests.requestsToDelete.slice(0, maxRequestsToDelete);
+        scanRequests.queueRequests = scanRequests.queueRequests.slice(0, targetQueueRequests);
+        scanRequests.deleteRequests = scanRequests.deleteRequests.slice(0, targetDeleteRequests);
 
         return scanRequests;
     }
@@ -80,14 +72,14 @@ export class ScanRequestSelector {
                 const scanResult = await this.onDemandPageScanRunResultProvider.readScanRun(scanRequest.id);
 
                 if (scanResult === undefined) {
-                    filteredScanRequests.requestsToDelete.push({ request: scanRequest, condition: 'notFound' });
+                    filteredScanRequests.deleteRequests.push({ request: scanRequest, condition: 'notFound' });
 
                     return;
                 }
 
                 // completed scan
                 if ((['completed', 'unscannable'] as OnDemandPageScanRunState[]).includes(scanResult.run.state)) {
-                    filteredScanRequests.requestsToDelete.push({ request: scanRequest, result: scanResult, condition: 'completed' });
+                    filteredScanRequests.deleteRequests.push({ request: scanRequest, result: scanResult, condition: 'completed' });
 
                     return;
                 }
@@ -98,7 +90,7 @@ export class ScanRequestSelector {
                     scanResult.run.retryCount >= this.maxFailedScanRetryCount &&
                     moment.utc(scanResult.run.timestamp).add(this.failedScanRetryIntervalInMinutes, 'minutes') <= moment.utc()
                 ) {
-                    filteredScanRequests.requestsToDelete.push({ request: scanRequest, result: scanResult, condition: 'noRetry' });
+                    filteredScanRequests.deleteRequests.push({ request: scanRequest, result: scanResult, condition: 'noRetry' });
 
                     return;
                 }
@@ -110,7 +102,7 @@ export class ScanRequestSelector {
                     scanResult.run.retryCount >= this.maxFailedScanRetryCount &&
                     moment.utc(scanResult.run.timestamp).add(this.failedScanRetryIntervalInMinutes, 'minutes') <= moment.utc()
                 ) {
-                    filteredScanRequests.requestsToDelete.push({ request: scanRequest, result: scanResult, condition: 'stale' });
+                    filteredScanRequests.deleteRequests.push({ request: scanRequest, result: scanResult, condition: 'stale' });
 
                     return;
                 }
@@ -120,14 +112,14 @@ export class ScanRequestSelector {
                     (['accepted', 'queued', 'running', 'report'] as OnDemandPageScanRunState[]).includes(scanResult.run.state) &&
                     moment.unix(scanResult._ts).add(this.maxScanStaleTimeoutInMinutes, 'minutes') <= moment.utc()
                 ) {
-                    filteredScanRequests.requestsToDelete.push({ request: scanRequest, result: scanResult, condition: 'abandoned' });
+                    filteredScanRequests.deleteRequests.push({ request: scanRequest, result: scanResult, condition: 'abandoned' });
 
                     return;
                 }
 
                 // accepted scan
                 if (scanResult.run.state === 'accepted') {
-                    this.addRequestToScanQueue(filteredScanRequests, { request: scanRequest, result: scanResult, condition: 'accepted' });
+                    filteredScanRequests.queueRequests.push({ request: scanRequest, result: scanResult, condition: 'accepted' });
 
                     return;
                 }
@@ -141,20 +133,12 @@ export class ScanRequestSelector {
                     // retry delay has passed
                     moment.utc(scanResult.run.timestamp).add(this.failedScanRetryIntervalInMinutes, 'minutes') <= moment.utc()
                 ) {
-                    this.addRequestToScanQueue(filteredScanRequests, { request: scanRequest, result: scanResult, condition: 'retry' });
+                    filteredScanRequests.queueRequests.push({ request: scanRequest, result: scanResult, condition: 'retry' });
 
                     return;
                 }
             }),
         );
-    }
-
-    private addRequestToScanQueue(queue: ScanRequests, scanRequest: ScanRequest): void {
-        if (scanRequest.request.privacyScan) {
-            queue.privacyRequestsToQueue.push(scanRequest);
-        } else {
-            queue.accessibilityRequestsToQueue.push(scanRequest);
-        }
     }
 
     private async init(): Promise<void> {
