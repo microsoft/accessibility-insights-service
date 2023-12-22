@@ -5,6 +5,7 @@ import { inject, injectable } from 'inversify';
 import { isEmpty } from 'lodash';
 import * as Crawlee from '@crawlee/puppeteer';
 import * as Puppeteer from 'puppeteer';
+import normalizeUrl from 'normalize-url';
 import { CrawlerConfiguration } from './crawler-configuration';
 import { ApifyRequestQueueFactory } from './apify-request-queue-factory';
 
@@ -45,10 +46,25 @@ export class PageCrawlerEngine {
         do {
             nextRequest = await requestQueue.fetchNextRequest();
             if (!isEmpty(nextRequest)) {
-                urls.push(nextRequest.url);
+                const url = this.normalizeUrl(nextRequest.url);
+                urls.push(url);
             }
         } while (!isEmpty(nextRequest));
 
         return urls;
+    }
+
+    /**
+     * [Normalizes](https://en.wikipedia.org/wiki/URL_normalization) crawled URL.
+     */
+    private normalizeUrl(url: string): string {
+        const options: normalizeUrl.Options = {
+            normalizeProtocol: false,
+            stripHash: true,
+            stripTextFragment: true,
+            stripWWW: false,
+        };
+
+        return normalizeUrl(url, options);
     }
 }

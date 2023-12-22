@@ -23,7 +23,8 @@ let cursor = 0;
 
 const baseUrl = 'base url';
 const discoveryPattern = 'discoveryPattern';
-const crawlResults = ['url1', 'url2'];
+const crawlResults = ['http://url1/path#main' /* remove fragment */, 'http://url2/path/?b=1&a=2' /* sort search parameters */];
+const engineResults = ['http://url1/path', 'http://url2/path?a=2&b=1'];
 const workingDirectory = 'workingDirectory';
 const enqueued = {
     processedRequests: [{}],
@@ -77,7 +78,7 @@ describe(PageCrawlerEngine, () => {
         };
 
         const actualResult = await pageCrawlerEngine.start(crawlerOptions);
-        expect(actualResult).toEqual(crawlResults);
+        expect(actualResult).toEqual(engineResults);
         expect(browserCrawlerEnqueueLinksFn).toBeCalledWith(enqueueLinksOptions);
     });
 });
