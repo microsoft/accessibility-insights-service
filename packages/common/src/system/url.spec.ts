@@ -42,16 +42,25 @@ describe('tryParseUrlString()', () => {
     });
 
     it('normalizeUrl', () => {
-        let url = Url.normalizeUrl('https://example.com/home/');
-        expect(url).toEqual('https://example.com/home');
+        // keep single slash
+        let url = Url.normalizeUrl('https://example.com/');
+        expect(url).toEqual('https://example.com/');
+
+        // keep trailing slash
+        url = Url.normalizeUrl('https://example.com/home/');
+        expect(url).toEqual('https://example.com/home/');
 
         // remove hash
-        url = Url.normalizeUrl('https://example.com/#top');
-        expect(url).toEqual('https://example.com');
+        url = Url.normalizeUrl('https://example.com/home#top');
+        expect(url).toEqual('https://example.com/home');
 
-        // keep and sort query parameters
+        // sort query parameters
         url = Url.normalizeUrl('https://example.com?b=two&a=one&c=three');
         expect(url).toEqual('https://example.com/?a=one&b=two&c=three');
+
+        // keep www
+        url = Url.normalizeUrl('https://www.example.com/');
+        expect(url).toEqual('https://www.example.com/');
     });
 
     it('getParameterValue', () => {

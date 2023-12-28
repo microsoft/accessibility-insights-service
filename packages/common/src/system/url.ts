@@ -37,6 +37,8 @@ export namespace Url {
     export function normalizeUrl(url: string): string {
         const options: normalizeUrlExt.Options = {
             normalizeProtocol: false,
+            removeSingleSlash: false,
+            removeTrailingSlash: false,
             stripHash: true,
             stripTextFragment: true,
             stripWWW: false,

@@ -87,10 +87,10 @@ export const E2EScanFactories: E2EScanScenarioDefinitionFactory[] = [
                 scanUrl: availabilityConfig.urlToScan,
                 expectedCrawledUrls: [
                     baseUrl,
-                    `${baseUrl}linked1`,
-                    `${baseUrl}linked2`,
+                    `${baseUrl}linked1/`,
+                    `${baseUrl}linked2/`,
                     `${baseUrl}linked1/inner-page.html`,
-                    `${baseUrl}unlinked`,
+                    `${baseUrl}unlinked/`,
                     `${baseUrl}unlinked/other.html`,
                 ],
             },
