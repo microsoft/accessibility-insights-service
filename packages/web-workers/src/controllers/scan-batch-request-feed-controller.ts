@@ -50,13 +50,13 @@ export class ScanBatchRequestFeedController extends WebController {
 
         const batchDocuments = <OnDemandPageScanBatchRequest[]>args[0];
         await Promise.all(
-            batchDocuments.map(async (document) => {
-                const addedRequests = await this.processDocument(document);
+            batchDocuments.map(async (batchDocument) => {
+                const addedRequests = await this.processDocument(batchDocument);
                 const scanRequestAcceptedMeasurements: ScanRequestAcceptedMeasurements = {
                     acceptedScanRequests: addedRequests,
                 };
-                this.logger.trackEvent('ScanRequestAccepted', { batchRequestId: document.id }, scanRequestAcceptedMeasurements);
-                this.logger.logInfo(`The batch request document processed successfully.`);
+                this.logger.trackEvent('ScanRequestAccepted', { batchRequestId: batchDocument.id }, scanRequestAcceptedMeasurements);
+                this.logger.logInfo(`The batch request document processed successfully.`, { batchRequestId: batchDocument.id });
             }),
         );
 
@@ -72,12 +72,12 @@ export class ScanBatchRequestFeedController extends WebController {
     private async processDocument(batchDocument: OnDemandPageScanBatchRequest): Promise<number> {
         const requests = batchDocument.scanRunBatchRequest.filter((request) => request.scanId !== undefined);
         if (requests.length > 0) {
-            requests.forEach((request) => this.normalizeRequest(request));
+            requests.forEach((request) => this.normalizeRequest(request, batchDocument.id));
             await this.writeRequestsToPermanentContainer(requests, batchDocument.id);
             await this.writeRequestsToQueueContainer(requests, batchDocument.id);
 
             await this.scanDataProvider.deleteBatchRequest(batchDocument);
-            this.logger.logInfo(`Completed deleting batch requests from inbound storage container.`);
+            this.logger.logInfo(`Completed deleting batch requests from inbound storage container.`, { batchRequestId: batchDocument.id });
         }
 
         return requests.length;
@@ -138,7 +138,7 @@ export class ScanBatchRequestFeedController extends WebController {
         }
 
         await this.onDemandPageScanRunResultProvider.writeScanRuns(requestDocuments);
-        this.logger.logInfo(`Completed adding scan requests to permanent scan result storage container.`);
+        this.logger.logInfo(`Completed adding scan requests to permanent scan result storage container.`, { batchRequestId });
     }
 
     private createWebsiteScanResult(request: ScanRunBatchRequest): WebsiteScanResult {
@@ -194,7 +194,7 @@ export class ScanBatchRequestFeedController extends WebController {
         });
 
         await this.pageScanRequestProvider.insertRequests(requestDocuments);
-        this.logger.logInfo(`Completed adding scan requests to scan queue storage container.`);
+        this.logger.logInfo(`Completed adding scan requests to scan queue storage container.`, { batchRequestId });
     }
 
     private getScanGroupType(request: ScanRunBatchRequest): ScanGroupType {
@@ -226,7 +226,7 @@ export class ScanBatchRequestFeedController extends WebController {
         return true;
     }
 
-    private normalizeRequest(request: ScanRunBatchRequest): void {
+    private normalizeRequest(request: ScanRunBatchRequest, batchRequestId: string): void {
         // Normalize request URL
         request.url = Url.normalizeUrl(request.url);
 
@@ -246,6 +246,8 @@ export class ScanBatchRequestFeedController extends WebController {
             if (duplicates.length > 0) {
                 request.site.knownPages = uniq(request.site.knownPages);
                 this.logger.logWarn('Removed duplicate URLs from a client request.', {
+                    batchRequestId,
+                    scanId: request.scanId,
                     duplicates: JSON.stringify(duplicates),
                 });
             }
