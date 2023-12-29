@@ -173,7 +173,7 @@ describe(Page, () => {
                 .returns(() => Promise.resolve(authenticationResult))
                 .verifiable();
             pageNavigatorMock
-                .setup(async (o) => o.navigate('localhost/2', puppeteerPageMock.object))
+                .setup(async (o) => o.navigate(url, puppeteerPageMock.object))
                 .returns(() => Promise.resolve(reloadNavigationResponse))
                 .verifiable();
             page.browserStartOptions = browserStartOptions;
@@ -220,6 +220,7 @@ describe(Page, () => {
         beforeEach(() => {
             simulatePageLaunch();
             page.navigationResponse = { _url: 'url' } as unknown as Puppeteer.HTTPResponse;
+            page.requestUrl = url;
         });
 
         it('reload page and saves response', async () => {
