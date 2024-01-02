@@ -4,8 +4,8 @@
 import 'reflect-metadata';
 
 import { Context } from '@azure/functions';
-import { GuidGenerator, ServiceConfiguration } from 'common';
-import { isEmpty, isNil } from 'lodash';
+import { GuidGenerator, ServiceConfiguration, Url } from 'common';
+import { cloneDeep, isEmpty, isNil, uniq } from 'lodash';
 import * as MockDate from 'mockdate';
 import {
     OnDemandPageScanRunResultProvider,
@@ -131,7 +131,7 @@ describe(ScanBatchRequestFeedController, () => {
                     scanRunBatchRequest: [
                         {
                             scanId: 'scan-1',
-                            url: 'url-1',
+                            url: 'http://url-1',
                             priority: 1,
                             scanType: 'accessibility',
                             site: {
@@ -161,7 +161,7 @@ describe(ScanBatchRequestFeedController, () => {
                 scanRunBatchRequest: [
                     {
                         scanId: 'scan-1',
-                        url: 'url-1',
+                        url: 'http://url-1',
                         priority: 1,
                         scanType: 'accessibility',
                         scanNotifyUrl: 'reply-url-1',
@@ -172,11 +172,11 @@ describe(ScanBatchRequestFeedController, () => {
                     },
                     {
                         scanId: 'scan-2',
-                        url: 'url-2',
+                        url: 'http://url-2',
                         priority: 0,
                     },
                     {
-                        url: 'url-3',
+                        url: 'http://url-3',
                         error: 'error-3',
                         priority: -3,
                     },
@@ -189,12 +189,12 @@ describe(ScanBatchRequestFeedController, () => {
                 scanRunBatchRequest: [
                     {
                         scanId: 'scan-4',
-                        url: 'url-4',
+                        url: 'http://url-4/info#details' /** should normalize URL */,
                         priority: 1,
                         scanNotifyUrl: 'reply-url-4',
                         site: {
                             baseUrl: 'base-url-4',
-                            knownPages: ['page1', 'page2'],
+                            knownPages: ['http://page1', 'http://page2', 'http://page2'] /** should remove duplicate URLs */,
                             discoveryPatterns: ['pattern1'],
                         },
                         reportGroups: [{ consolidatedId: 'consolidated-id-2' }],
@@ -202,13 +202,13 @@ describe(ScanBatchRequestFeedController, () => {
                     },
                     {
                         scanId: 'scan-5',
-                        url: 'url-5',
+                        url: 'http://url-5',
                         priority: 0,
                         scanType: 'privacy',
                         privacyScan: { cookieBannerType: 'standard' },
                     },
                     {
-                        url: 'url-6',
+                        url: 'http://url-6',
                         error: 'error-6',
                         priority: -3,
                     },
@@ -221,12 +221,12 @@ describe(ScanBatchRequestFeedController, () => {
                 scanRunBatchRequest: [
                     {
                         scanId: 'scan-7',
-                        url: 'url-7',
+                        url: 'http://url-7',
                         priority: 0,
                     },
                     {
                         scanId: 'scan-8',
-                        url: 'url-8',
+                        url: 'http://url-8',
                         priority: 2,
                     },
                 ],
@@ -278,11 +278,11 @@ function setupWebsiteScanResultProviderMock(documents: OnDemandPageScanBatchRequ
                         pageScans: [
                             {
                                 scanId: request.scanId,
-                                url: request.url,
+                                url: Url.normalizeUrl(request.url),
                                 timestamp: dateNow.toJSON(),
                             },
                         ],
-                        knownPages: request.site?.knownPages,
+                        knownPages: request.site?.knownPages ? uniq(request.site?.knownPages) : undefined,
                         discoveryPatterns: request.site?.discoveryPatterns,
                         created: dateNow.toJSON(),
                     } as WebsiteScanResult;
@@ -326,7 +326,7 @@ function setupOnDemandPageScanRunResultProviderMock(
                     })[0];
                 const result: OnDemandPageScanResult = {
                     id: request.scanId,
-                    url: request.url,
+                    url: Url.normalizeUrl(request.url),
                     priority: request.priority,
                     itemType: ItemType.onDemandPageScanRunResult,
                     scanType: getScanType(request),
@@ -364,7 +364,7 @@ function setupPageScanRequestProviderMock(documents: OnDemandPageScanBatchReques
                 const scanGroupType = getScanGroupType(scanRequest);
                 const request: OnDemandPageScanRequest = {
                     id: scanRequest.scanId,
-                    url: scanRequest.url,
+                    url: Url.normalizeUrl(scanRequest.url),
                     priority: scanRequest.priority,
                     scanType: getScanType(scanRequest),
                     itemType: ItemType.onDemandPageScanRequest,
@@ -379,7 +379,10 @@ function setupPageScanRequestProviderMock(documents: OnDemandPageScanBatchReques
                 }
 
                 if (!isNil(scanRequest.site)) {
-                    request.site = scanRequest.site;
+                    request.site = cloneDeep(scanRequest.site);
+                    if (scanRequest.site.knownPages) {
+                        request.site.knownPages = uniq(scanRequest.site.knownPages);
+                    }
                 }
 
                 if (!isEmpty(scanRequest.reportGroups)) {
@@ -392,8 +395,14 @@ function setupPageScanRequestProviderMock(documents: OnDemandPageScanBatchReques
 
                 return request;
             });
-        pageScanRequestProviderMock.setup(async (o) => o.insertRequests(dbDocuments)).verifiable(Times.once());
-        scanDataProviderMock.setup(async (o) => o.deleteBatchRequest(document)).verifiable(Times.once());
+        pageScanRequestProviderMock.setup(async (o) => o.insertRequests(It.isValue(dbDocuments))).verifiable(Times.once());
+        scanDataProviderMock
+            .setup(async (o) =>
+                o.deleteBatchRequest(
+                    It.isObjectWith({ id: document.id, partitionKey: document.partitionKey } as OnDemandPageScanBatchRequest),
+                ),
+            )
+            .verifiable(Times.once());
     });
 }
 

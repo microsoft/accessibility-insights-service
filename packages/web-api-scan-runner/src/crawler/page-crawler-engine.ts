@@ -5,6 +5,7 @@ import { inject, injectable } from 'inversify';
 import { isEmpty } from 'lodash';
 import * as Crawlee from '@crawlee/puppeteer';
 import * as Puppeteer from 'puppeteer';
+import { Url } from 'common';
 import { CrawlerConfiguration } from './crawler-configuration';
 import { ApifyRequestQueueFactory } from './apify-request-queue-factory';
 
@@ -45,7 +46,8 @@ export class PageCrawlerEngine {
         do {
             nextRequest = await requestQueue.fetchNextRequest();
             if (!isEmpty(nextRequest)) {
-                urls.push(nextRequest.url);
+                const url = Url.normalizeUrl(nextRequest.url);
+                urls.push(url);
             }
         } while (!isEmpty(nextRequest));
 
