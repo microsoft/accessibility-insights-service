@@ -32,7 +32,7 @@ export namespace Url {
     }
 
     /**
-     * [Normalizes](https://en.wikipedia.org/wiki/URL_normalization) crawled URL.
+     * [Normalizes](https://en.wikipedia.org/wiki/URL_normalization) URL.
      */
     export function normalizeUrl(url: string): string {
         const options: normalizeUrlExt.Options = {
