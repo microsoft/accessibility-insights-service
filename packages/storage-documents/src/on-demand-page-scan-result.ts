@@ -22,6 +22,7 @@ export declare type NotificationErrorTypes = 'InternalError' | 'HttpErrorCode';
 export declare type AuthenticationState = 'succeeded' | 'failed' | 'unauthenticated';
 export declare type CookieBannerType = 'standard';
 export declare type AuthenticationType = 'undetermined' | 'entraId';
+export declare type ScanType = 'accessibility' | 'privacy';
 
 export declare type ReportFormat =
     | 'axe'
@@ -62,6 +63,7 @@ export interface OnDemandPageScanResult extends StorageDocument {
     itemType: ItemType.onDemandPageScanRunResult;
     url: string;
     priority: number;
+    scanType?: ScanType;
     batchRequestId?: string;
     deepScanId?: string;
     websiteScanRef?: WebsiteScanRef;

@@ -14,7 +14,7 @@ import {
 } from 'service-library';
 import { ServiceConfiguration, QueueRuntimeConfig } from 'common';
 import { Queue, StorageConfig } from 'azure-services';
-import { OnDemandPageScanResult, ScanError, WebsiteScanResult } from 'storage-documents';
+import { OnDemandPageScanResult, ScanError, ScanType, WebsiteScanResult } from 'storage-documents';
 import * as MockDate from 'mockdate';
 import { cloneDeep } from 'lodash';
 import { OnDemandDispatcher } from './on-demand-dispatcher';
@@ -23,7 +23,7 @@ import { ScanRequestSelector, ScanRequests } from './scan-request-selector';
 /* eslint-disable @typescript-eslint/no-explicit-any */
 const accessabilityScanQueueName = 'accessabilityScanQueueName';
 const privacyScanQueueName = 'privacyScanQueueName';
-const maxRequestsToDelete = 100;
+const targetDeleteRequests = 100;
 
 let queueMock: IMock<Queue>;
 let pageScanRequestProviderMock: IMock<PageScanRequestProvider>;
@@ -35,9 +35,9 @@ let serviceConfigurationMock: IMock<ServiceConfiguration>;
 let loggerMock: IMock<Logger>;
 let websiteScanResultProviderMock: IMock<WebsiteScanResultProvider>;
 let onDemandDispatcher: OnDemandDispatcher;
-let maxQueueSize: number;
-let accessibilityMessageCount: number;
-let privacyMessageCount: number;
+let targetQueueSize: number;
+let accessibilityQueueMessageCount: number;
+let privacyQueueMessageCount: number;
 let dateNow: Date;
 
 describe(OnDemandDispatcher, () => {
@@ -55,9 +55,9 @@ describe(OnDemandDispatcher, () => {
         loggerMock = Mock.ofType<Logger>();
         websiteScanResultProviderMock = Mock.ofType<WebsiteScanResultProvider>();
 
-        maxQueueSize = 10;
-        accessibilityMessageCount = 0;
-        privacyMessageCount = 0;
+        targetQueueSize = 10;
+        accessibilityQueueMessageCount = 0;
+        privacyQueueMessageCount = 0;
         storageConfigMock
             .setup((o) => o.scanQueue)
             .returns(() => accessabilityScanQueueName)
@@ -93,22 +93,26 @@ describe(OnDemandDispatcher, () => {
     });
 
     it('skip dispatcher run when all queues are full', async () => {
-        accessibilityMessageCount = maxQueueSize;
-        privacyMessageCount = maxQueueSize;
+        const scanRequests: ScanRequests = {
+            queueRequests: [],
+            deleteRequests: [],
+        };
+
+        accessibilityQueueMessageCount = targetQueueSize;
+        privacyQueueMessageCount = targetQueueSize;
         setupServiceConfiguration();
         setupQueue();
-        loggerMock
-            .setup((o) => o.logInfo('Skip adding new scan requests as all scan queues already reached maximum capacity.'))
-            .verifiable();
+        setupScanRequestSelector(scanRequests);
+        loggerMock.setup((o) => o.logInfo(`The accessibility scan queue has reached the target capacity.`)).verifiable();
+        loggerMock.setup((o) => o.logInfo(`The privacy scan queue has reached the target capacity.`)).verifiable();
 
         await onDemandDispatcher.dispatchScanRequests();
     });
 
     it('delete scan requests', async () => {
         const scanRequests = {
-            accessibilityRequestsToQueue: [],
-            privacyRequestsToQueue: [],
-            requestsToDelete: [
+            queueRequests: [],
+            deleteRequests: [
                 {
                     request: { id: 'id1' },
                     condition: 'completed',
@@ -141,9 +145,8 @@ describe(OnDemandDispatcher, () => {
 
     it('update scan run state on delete', async () => {
         const scanRequests = {
-            accessibilityRequestsToQueue: [],
-            privacyRequestsToQueue: [],
-            requestsToDelete: [
+            queueRequests: [],
+            deleteRequests: [
                 {
                     request: { id: 'id2' },
                     result: {
@@ -174,10 +177,10 @@ describe(OnDemandDispatcher, () => {
         setupScanRequestSelector(scanRequests);
         setupPageScanRequestProvider(scanRequests);
 
-        const pageScanResult = cloneDeep(scanRequests.requestsToDelete[0].result);
+        const pageScanResult = cloneDeep(scanRequests.deleteRequests[0].result);
         pageScanResult.run.state = 'failed';
         pageScanResult.run.error = `The scan request was abandon in a service pipeline. State: ${JSON.stringify(
-            scanRequests.requestsToDelete[0].result.run,
+            scanRequests.deleteRequests[0].result.run,
         )}`;
 
         onDemandPageScanRunResultProviderMock
@@ -192,9 +195,8 @@ describe(OnDemandDispatcher, () => {
         'update website`s page scan metadata on delete when pageScans is [%s]',
         async (pageScanPart) => {
             const scanRequests = {
-                accessibilityRequestsToQueue: [],
-                privacyRequestsToQueue: [],
-                requestsToDelete: [
+                queueRequests: [],
+                deleteRequests: [
                     {
                         request: { id: 'id2' },
                         result: {
@@ -223,12 +225,12 @@ describe(OnDemandDispatcher, () => {
             setupScanRequestSelector(scanRequests);
             setupPageScanRequestProvider(scanRequests);
 
-            const pageScanResult = scanRequests.requestsToDelete[0].result;
+            const pageScanResult = scanRequests.deleteRequests[0].result;
             const websiteScanResult = { pageScans: pageScanPart ? [pageScanPart] : undefined } as WebsiteScanResult;
             websiteScanResultProviderMock
                 .setup((o) => o.read(pageScanResult.websiteScanRef.id, false, pageScanResult.id))
                 .returns(() => Promise.resolve(websiteScanResult))
-                .verifiable();
+                .verifiable(Times.atLeastOnce());
             const updatedWebsiteScanResult: Partial<WebsiteScanResult> = {
                 id: pageScanResult.websiteScanRef.id,
                 pageScans: [
@@ -250,7 +252,7 @@ describe(OnDemandDispatcher, () => {
             websiteScanResultProviderMock
                 .setup((o) => o.mergeOrCreate(pageScanResult.id, It.isValue(updatedWebsiteScanResult), It.isAny()))
                 .returns(() => Promise.resolve(updatedWebsiteScanResultDb))
-                .verifiable();
+                .verifiable(Times.atLeastOnce());
 
             scanNotificationProcessorMock
                 .setup((o) =>
@@ -260,7 +262,7 @@ describe(OnDemandDispatcher, () => {
                     ),
                 )
                 .returns(() => Promise.resolve())
-                .verifiable();
+                .verifiable(Times.exactly(2));
 
             await onDemandDispatcher.dispatchScanRequests();
         },
@@ -271,13 +273,9 @@ describe(OnDemandDispatcher, () => {
             errorType: 'InternalError',
             message: `Failed to add a scan request message to the ${accessabilityScanQueueName} scan queue.`,
         };
-        const privacyError: ScanError = {
-            errorType: 'InternalError',
-            message: `Failed to add a scan request message to the ${privacyScanQueueName} scan queue.`,
-        };
         const scanRequests = {
-            requestsToDelete: [],
-            accessibilityRequestsToQueue: [
+            deleteRequests: [],
+            queueRequests: [
                 {
                     request: { id: 'id1', url: 'url1', deepScan: true, created: true },
                     result: { run: { retryCount: 1 } },
@@ -294,45 +292,27 @@ describe(OnDemandDispatcher, () => {
                     condition: 'noRetry',
                 },
             ],
-            privacyRequestsToQueue: [
-                {
-                    request: { id: 'id4', url: 'url4', deepScan: true, created: true, privacyScan: {} },
-                    result: { run: { retryCount: 1 } },
-                    condition: 'accepted',
-                },
-                {
-                    request: { id: 'id5', url: 'url5', deepScan: false, created: true, privacyScan: {} },
-                    result: {},
-                    condition: 'accepted',
-                },
-                {
-                    request: { id: 'id6', url: 'url6', deepScan: false, created: false, privacyScan: {}, error: privacyError },
-                    result: {},
-                    condition: 'noRetry',
-                },
-            ],
         } as any;
 
-        const accessibilityRequestsQueued = scanRequests.accessibilityRequestsToQueue.filter((r: any) => r.request.created).length;
-        const privacyRequestsQueued = scanRequests.privacyRequestsToQueue.filter((r: any) => r.request.created).length;
+        const requestsQueued = scanRequests.queueRequests.filter((r: any) => r.request.created).length;
         loggerMock
             .setup((o) =>
                 o.trackEvent('ScanRequestQueued', null, {
-                    queuedScanRequests: accessibilityRequestsQueued,
-                }),
-            )
-            .verifiable(Times.atLeastOnce());
-        loggerMock
-            .setup((o) =>
-                o.trackEvent('ScanRequestQueued', null, {
-                    queuedScanRequests: privacyRequestsQueued,
+                    queuedScanRequests: requestsQueued,
                 }),
             )
             .verifiable(Times.atLeastOnce());
 
         setupServiceConfiguration();
-        setupQueue(scanRequests);
-        setupScanRequestSelector(scanRequests);
+        setupQueue('accessibility', scanRequests);
+        setupScanRequestSelector(scanRequests, 'accessibility');
+        setupScanRequestSelector(
+            {
+                queueRequests: [],
+                deleteRequests: [],
+            },
+            'privacy',
+        );
         setupPageScanRequestProvider(scanRequests);
         setupOnDemandPageScanRunResultProvider(scanRequests);
 
@@ -356,42 +336,41 @@ function setupOnDemandPageScanRunResultProvider(scanRequests: ScanRequests): voi
             .verifiable(Times.atLeastOnce());
     };
 
-    scanRequests.accessibilityRequestsToQueue.map(setupFunc);
-    scanRequests.privacyRequestsToQueue.map(setupFunc);
+    scanRequests.queueRequests.map(setupFunc);
 }
 
 function setupPageScanRequestProvider(scanRequests: ScanRequests): void {
-    scanRequests.requestsToDelete.map((scanRequest) => {
-        pageScanRequestProviderMock.setup((o) => o.deleteRequests([scanRequest.request.id])).verifiable();
+    scanRequests.deleteRequests.map((scanRequest) => {
+        pageScanRequestProviderMock.setup((o) => o.deleteRequests([scanRequest.request.id])).verifiable(Times.exactly(2));
     });
 }
 
-function setupScanRequestSelector(scanRequests: ScanRequests): void {
+function setupScanRequestSelector(scanRequests: ScanRequests, scanType: ScanType = undefined): void {
     scanRequestSelectorMock
-        .setup((o) => o.getRequests(maxQueueSize - accessibilityMessageCount, maxQueueSize - privacyMessageCount, maxRequestsToDelete))
+        .setup((o) => o.getRequests(scanType ?? It.isAny(), It.isAny(), targetDeleteRequests))
         .returns(() => Promise.resolve(scanRequests))
-        .verifiable();
+        .verifiable(Times.atLeastOnce());
 }
 
 function setupServiceConfiguration(): void {
     serviceConfigurationMock
         .setup((o) => o.getConfigValue('queueConfig'))
-        .returns(() => Promise.resolve({ maxQueueSize } as QueueRuntimeConfig))
+        .returns(() => Promise.resolve({ maxQueueSize: targetQueueSize } as QueueRuntimeConfig))
         .verifiable();
 }
 
-function setupQueue(scanRequests: ScanRequests = undefined): void {
+function setupQueue(scanType: ScanType = undefined, scanRequests: ScanRequests = undefined): void {
     queueMock
         .setup((o) => o.getMessageCount(accessabilityScanQueueName))
-        .returns(() => Promise.resolve(accessibilityMessageCount))
+        .returns(() => Promise.resolve(accessibilityQueueMessageCount))
         .verifiable();
     queueMock
         .setup((o) => o.getMessageCount(privacyScanQueueName))
-        .returns(() => Promise.resolve(privacyMessageCount))
+        .returns(() => Promise.resolve(privacyQueueMessageCount))
         .verifiable();
 
-    if (scanRequests?.accessibilityRequestsToQueue) {
-        scanRequests.accessibilityRequestsToQueue.map((scanRequest: any) => {
+    if (scanRequests?.queueRequests && scanType === 'accessibility') {
+        scanRequests.queueRequests.map((scanRequest: any) => {
             const message = {
                 id: scanRequest.request.id,
                 url: scanRequest.request.url,
@@ -404,8 +383,8 @@ function setupQueue(scanRequests: ScanRequests = undefined): void {
         });
     }
 
-    if (scanRequests?.privacyRequestsToQueue) {
-        scanRequests.privacyRequestsToQueue.map((scanRequest: any) => {
+    if (scanRequests?.queueRequests && scanType === 'privacy') {
+        scanRequests.queueRequests.map((scanRequest: any) => {
             const message = {
                 id: scanRequest.request.id,
                 url: scanRequest.request.url,

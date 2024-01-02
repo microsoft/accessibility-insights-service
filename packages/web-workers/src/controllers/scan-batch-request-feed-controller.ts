@@ -22,6 +22,7 @@ import {
     ReportGroupRequest,
     ScanGroupType,
     ScanRunBatchRequest,
+    ScanType,
     WebsiteScanResult,
 } from 'storage-documents';
 
@@ -110,6 +111,7 @@ export class ScanBatchRequestFeedController extends WebController {
                 id: request.scanId,
                 url: request.url,
                 priority: request.priority,
+                scanType: this.getScanType(request),
                 itemType: ItemType.onDemandPageScanRunResult,
                 batchRequestId: batchRequestId,
                 // Deep scan id is the original scan request id. The deep scan id is propagated to descendant requests in scan request.
@@ -180,6 +182,7 @@ export class ScanBatchRequestFeedController extends WebController {
                 id: request.scanId,
                 url: request.url,
                 priority: request.priority,
+                scanType: this.getScanType(request),
                 deepScan: request.deepScan,
                 // Deep scan id is the original scan request id. The deep scan id is propagated to descendant requests in scan request.
                 deepScanId: scanGroupType !== 'single-scan' ? request.deepScanId ?? request.scanId : undefined,
@@ -252,5 +255,9 @@ export class ScanBatchRequestFeedController extends WebController {
                 });
             }
         }
+    }
+
+    private getScanType(request: ScanRunBatchRequest): ScanType {
+        return request.scanType ?? (request.privacyScan ? 'privacy' : 'accessibility');
     }
 }
