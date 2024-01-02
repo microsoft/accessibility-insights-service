@@ -12,17 +12,17 @@ import {
     getOnMergeCallbackToUpdateRunResult,
     ScanNotificationProcessor,
 } from 'service-library';
-import { OnDemandPageScanRunState, ScanError, OnDemandPageScanResult, WebsiteScanResult } from 'storage-documents';
+import { OnDemandPageScanRunState, ScanError, OnDemandPageScanResult, WebsiteScanResult, ScanType } from 'storage-documents';
 import { isEmpty } from 'lodash';
 import { ScanRequestSelector, ScanRequest, DispatchCondition } from './scan-request-selector';
 
 /* eslint-disable max-len */
 
-export type ScheduledScan = 'accessibility' | 'privacy';
-
 @injectable()
 export class OnDemandDispatcher {
-    private readonly maxRequestsToDelete = 100;
+    private readonly targetDeleteRequests = 100;
+
+    private targetQueueSize: number;
 
     constructor(
         @inject(Queue) private readonly queue: Queue,
@@ -37,37 +37,31 @@ export class OnDemandDispatcher {
     ) {}
 
     public async dispatchScanRequests(): Promise<void> {
-        const configQueueSize = (await this.serviceConfig.getConfigValue('queueConfig')).maxQueueSize;
-        this.logger.logInfo(`Maximum target scan queue size: ${configQueueSize}.`);
+        this.targetQueueSize = (await this.serviceConfig.getConfigValue('queueConfig')).maxQueueSize;
+        this.logger.logInfo(`Target scan queue size ${this.targetQueueSize}.`);
 
-        const accessibilityCurrentQueueSize = await this.queue.getMessageCount(this.storageConfig.scanQueue);
-        const privacyCurrentQueueSize = await this.queue.getMessageCount(this.storageConfig.privacyScanQueue);
-        this.logger.logInfo(
-            `Current accessibility scan queue size: ${accessibilityCurrentQueueSize}. Current privacy scan queue size: ${privacyCurrentQueueSize}.`,
-        );
-
-        if (accessibilityCurrentQueueSize >= configQueueSize && privacyCurrentQueueSize >= configQueueSize) {
-            this.logger.logInfo('Skip adding new scan requests as all scan queues already reached maximum capacity.');
-
-            return;
-        }
-
-        const scanRequests = await this.scanRequestSelector.getRequests(
-            configQueueSize - accessibilityCurrentQueueSize,
-            configQueueSize - privacyCurrentQueueSize,
-            this.maxRequestsToDelete,
-        );
-        await this.addScanRequests(scanRequests.accessibilityRequestsToQueue, this.storageConfig.scanQueue, 'accessibility');
-        await this.addScanRequests(scanRequests.privacyRequestsToQueue, this.storageConfig.privacyScanQueue, 'privacy');
-        await this.deleteScanRequests(scanRequests.requestsToDelete);
-
-        this.logger.logInfo(`Adding scan requests to the scan queue completed.`);
+        await this.dispatchRequests('accessibility', this.storageConfig.scanQueue);
+        await this.dispatchRequests('privacy', this.storageConfig.privacyScanQueue);
     }
 
-    private async addScanRequests(scanRequests: ScanRequest[], scanQueue: string, scheduledScan: ScheduledScan): Promise<void> {
-        if (scanRequests.length === 0) {
-            this.logger.logInfo(`No pending scan requests available for a ${scanQueue} scan queue.`);
+    private async dispatchRequests(scanType: ScanType, queueName: string): Promise<void> {
+        const currentQueueSize = await this.queue.getMessageCount(queueName);
+        this.logger.logInfo(`Current ${scanType} queue size ${currentQueueSize}.`);
 
+        if (currentQueueSize >= this.targetQueueSize) {
+            this.logger.logInfo(`The ${scanType} scan queue has reached the target capacity.`);
+        }
+
+        const queueCapacity = this.targetQueueSize - currentQueueSize >= 0 ? this.targetQueueSize - currentQueueSize : 0;
+        const scanRequests = await this.scanRequestSelector.getRequests(scanType, queueCapacity, this.targetDeleteRequests);
+        await this.addScanRequests(scanType, queueName, scanRequests.queueRequests);
+        await this.deleteScanRequests(scanRequests.deleteRequests);
+
+        this.logger.logInfo(`Queued ${scanRequests.queueRequests.length} new ${scanType} scan requests.`);
+    }
+
+    private async addScanRequests(scanType: ScanType, scanQueue: string, scanRequests: ScanRequest[]): Promise<void> {
+        if (scanRequests.length === 0) {
             return;
         }
 
@@ -95,7 +89,7 @@ export class OnDemandDispatcher {
                         {
                             scanId: scanRequest.request.id,
                             url: scanRequest.request.url,
-                            scheduledScan,
+                            scanType,
                         },
                         {
                             scheduledScanRequests: 1,
@@ -116,7 +110,7 @@ export class OnDemandDispatcher {
                         {
                             scanId: scanRequest.request.id,
                             url: scanRequest.request.url,
-                            scheduledScan,
+                            scanType,
                         },
                         {
                             failedScheduleScanRequests: 1,

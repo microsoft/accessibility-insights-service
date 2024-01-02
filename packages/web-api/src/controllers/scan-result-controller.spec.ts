@@ -42,6 +42,7 @@ describe(ScanResultController, () => {
     };
     const dbResponse: OnDemandPageScanResult = {
         id: scanId,
+        deepScanId: scanId,
         partitionKey: 'partition-key',
         url: 'url',
         run: {

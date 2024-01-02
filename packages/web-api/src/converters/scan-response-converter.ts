@@ -10,6 +10,7 @@ import {
     ScanResultResponse,
     RunStateClientProvider,
     RunState,
+    ScanType,
 } from 'service-library';
 import { OnDemandPageScanResult, ScanCompletedNotification as NotificationDb, WebsiteScanResult } from 'storage-documents';
 import { ScanErrorConverter } from './scan-error-converter';
@@ -49,7 +50,7 @@ export class ScanResponseConverter {
         return {
             scanId: pageScanResult.id,
             url: pageScanResult.url,
-            scanType: pageScanResult.privacyScan ? 'privacy' : 'accessibility',
+            scanType: this.getScanType(pageScanResult),
             deepScanId: pageScanResult.deepScanId,
             run: {
                 state: effectiveRunState,
@@ -62,7 +63,7 @@ export class ScanResponseConverter {
         return {
             scanId: pageScanResult.id,
             url: pageScanResult.url,
-            scanType: pageScanResult.privacyScan ? 'privacy' : 'accessibility',
+            scanType: this.getScanType(pageScanResult),
             deepScanId: pageScanResult.deepScanId,
             run: {
                 state: effectiveRunState,
@@ -86,7 +87,7 @@ export class ScanResponseConverter {
             scanId: pageScanResult.id,
             url: pageScanResult.url,
             scannedUrl: pageScanResult.scannedUrl,
-            scanType: pageScanResult.privacyScan ? 'privacy' : 'accessibility',
+            scanType: this.getScanType(pageScanResult),
             deepScanId: pageScanResult.deepScanId,
             ...(pageScanResult.authentication !== undefined
                 ? {
@@ -114,9 +115,7 @@ export class ScanResponseConverter {
             ...this.getRunCompleteNotificationResponse(pageScanResult.notification),
             reports: this.getScanReports(baseUrl, apiVersion, pageScanResult),
             // Expand scan result for original scan only. Result for descendant scans do not include deep scan result collection.
-            // TODO replace with commented line below after 11/15/23. This is temporary solution to support backward compatibility.
-            ...(pageScanResult.id === websiteScanResult?.deepScanId ? this.getDeepScanResult(websiteScanResult) : {}),
-            // ...(pageScanResult.id === pageScanResult.deepScanId ? this.getDeepScanResult(websiteScanResult) : {}),
+            ...(pageScanResult.id === pageScanResult.deepScanId ? this.getDeepScanResult(websiteScanResult) : {}),
         };
 
         if (scanResultResponse.deepScanResult !== undefined) {
@@ -186,5 +185,9 @@ export class ScanResponseConverter {
         });
 
         return { deepScanResult };
+    }
+
+    private getScanType(pageScanResult: OnDemandPageScanResult): ScanType {
+        return pageScanResult.scanType ?? (pageScanResult.privacyScan ? 'privacy' : 'accessibility');
     }
 }
