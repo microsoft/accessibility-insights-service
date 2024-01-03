@@ -101,6 +101,7 @@ export class Page {
             this.browser = await this.webDriver.launch({
                 browserExecutablePath: options?.browserExecutablePath,
                 clearDiskCache: options?.clearBrowserCache,
+                keepUserData: options?.preserveUserProfile,
             });
         }
 
