@@ -23,6 +23,7 @@ export interface BrowserStartOptions {
     browserExecutablePath?: string;
     browserWSEndpoint?: string;
     clearBrowserCache?: boolean;
+    preserveUserProfile?: boolean;
 }
 
 export interface Viewport {
@@ -305,7 +306,7 @@ export class Page {
      * Hard reload (close and reopen browser) will delete all browser's data but preserve html/image/script/css/etc. cached files.
      */
     private async hardReload(): Promise<void> {
-        await this.reopenBrowser();
+        await this.reopenBrowser({ hardReload: true });
         await this.navigate(this.requestUrl, this.pageOptions);
     }
 
@@ -314,13 +315,19 @@ export class Page {
         this.setLastNavigationState('reload', response);
     }
 
-    private async reopenBrowser(): Promise<void> {
+    private async reopenBrowser(options?: { hardReload?: boolean }): Promise<void> {
         if (this.browserStartOptions.browserWSEndpoint || this.browserWSEndpoint) {
             return;
         }
 
+        // Preserve user profile to reuse authentication cookies
+        const preserveUserProfile =
+            options?.hardReload !== true &&
+            this.pageAnalysisResult.authentication === true &&
+            this.pageAnalysisResult.authenticationType !== 'undetermined';
+
         await this.close();
-        await this.create({ ...this.browserStartOptions, clearBrowserCache: false });
+        await this.create({ ...this.browserStartOptions, clearBrowserCache: false, preserveUserProfile });
         // wait for browser to start
         await System.wait(3000);
     }
