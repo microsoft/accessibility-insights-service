@@ -243,7 +243,7 @@ export class Page {
         if (this.pageAnalysisResult.navigationResponse?.browserError !== undefined) {
             this.setLastNavigationState('analysis', this.pageAnalysisResult.navigationResponse);
         } else {
-            await this.reopenBrowser();
+            await this.reopenBrowser({ hardReload: true });
         }
     }
 
