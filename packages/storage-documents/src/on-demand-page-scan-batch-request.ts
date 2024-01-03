@@ -3,7 +3,7 @@
 
 import { StorageDocument } from './storage-document';
 import { ItemType } from './item-type';
-import { CookieBannerType, AuthenticationType } from './on-demand-page-scan-result';
+import { CookieBannerType, AuthenticationType, ScanType } from './on-demand-page-scan-result';
 
 /**
  * The client page scan run batch request document.
@@ -31,6 +31,7 @@ export interface ScanRunBatchRequest {
     scanId: string;
     url: string;
     priority: number;
+    scanType?: ScanType;
     deepScan?: boolean;
     deepScanId?: string;
     scanNotifyUrl?: string;

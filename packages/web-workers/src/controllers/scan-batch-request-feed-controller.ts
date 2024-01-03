@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { GuidGenerator, ServiceConfiguration } from 'common';
+import { GuidGenerator, ServiceConfiguration, Url } from 'common';
 import { inject, injectable } from 'inversify';
-import { isEmpty } from 'lodash';
+import { filter, groupBy, isEmpty, uniq } from 'lodash';
 import { ContextAwareLogger, ScanRequestAcceptedMeasurements } from 'logger';
 import {
     OnDemandPageScanRunResultProvider,
@@ -22,6 +22,7 @@ import {
     ReportGroupRequest,
     ScanGroupType,
     ScanRunBatchRequest,
+    ScanType,
     WebsiteScanResult,
 } from 'storage-documents';
 
@@ -50,13 +51,13 @@ export class ScanBatchRequestFeedController extends WebController {
 
         const batchDocuments = <OnDemandPageScanBatchRequest[]>args[0];
         await Promise.all(
-            batchDocuments.map(async (document) => {
-                const addedRequests = await this.processDocument(document);
+            batchDocuments.map(async (batchDocument) => {
+                const addedRequests = await this.processDocument(batchDocument);
                 const scanRequestAcceptedMeasurements: ScanRequestAcceptedMeasurements = {
                     acceptedScanRequests: addedRequests,
                 };
-                this.logger.trackEvent('ScanRequestAccepted', { batchRequestId: document.id }, scanRequestAcceptedMeasurements);
-                this.logger.logInfo(`The batch request document processed successfully.`);
+                this.logger.trackEvent('ScanRequestAccepted', { batchRequestId: batchDocument.id }, scanRequestAcceptedMeasurements);
+                this.logger.logInfo(`The batch request document processed successfully.`, { batchRequestId: batchDocument.id });
             }),
         );
 
@@ -72,11 +73,12 @@ export class ScanBatchRequestFeedController extends WebController {
     private async processDocument(batchDocument: OnDemandPageScanBatchRequest): Promise<number> {
         const requests = batchDocument.scanRunBatchRequest.filter((request) => request.scanId !== undefined);
         if (requests.length > 0) {
+            requests.forEach((request) => this.normalizeRequest(request, batchDocument.id));
             await this.writeRequestsToPermanentContainer(requests, batchDocument.id);
             await this.writeRequestsToQueueContainer(requests, batchDocument.id);
 
             await this.scanDataProvider.deleteBatchRequest(batchDocument);
-            this.logger.logInfo(`Completed deleting batch requests from inbound storage container.`);
+            this.logger.logInfo(`Completed deleting batch requests from inbound storage container.`, { batchRequestId: batchDocument.id });
         }
 
         return requests.length;
@@ -109,6 +111,7 @@ export class ScanBatchRequestFeedController extends WebController {
                 id: request.scanId,
                 url: request.url,
                 priority: request.priority,
+                scanType: this.getScanType(request),
                 itemType: ItemType.onDemandPageScanRunResult,
                 batchRequestId: batchRequestId,
                 // Deep scan id is the original scan request id. The deep scan id is propagated to descendant requests in scan request.
@@ -137,7 +140,7 @@ export class ScanBatchRequestFeedController extends WebController {
         }
 
         await this.onDemandPageScanRunResultProvider.writeScanRuns(requestDocuments);
-        this.logger.logInfo(`Completed adding scan requests to permanent scan result storage container.`);
+        this.logger.logInfo(`Completed adding scan requests to permanent scan result storage container.`, { batchRequestId });
     }
 
     private createWebsiteScanResult(request: ScanRunBatchRequest): WebsiteScanResult {
@@ -179,6 +182,7 @@ export class ScanBatchRequestFeedController extends WebController {
                 id: request.scanId,
                 url: request.url,
                 priority: request.priority,
+                scanType: this.getScanType(request),
                 deepScan: request.deepScan,
                 // Deep scan id is the original scan request id. The deep scan id is propagated to descendant requests in scan request.
                 deepScanId: scanGroupType !== 'single-scan' ? request.deepScanId ?? request.scanId : undefined,
@@ -193,7 +197,7 @@ export class ScanBatchRequestFeedController extends WebController {
         });
 
         await this.pageScanRequestProvider.insertRequests(requestDocuments);
-        this.logger.logInfo(`Completed adding scan requests to scan queue storage container.`);
+        this.logger.logInfo(`Completed adding scan requests to scan queue storage container.`, { batchRequestId });
     }
 
     private getScanGroupType(request: ScanRunBatchRequest): ScanGroupType {
@@ -223,5 +227,37 @@ export class ScanBatchRequestFeedController extends WebController {
         }
 
         return true;
+    }
+
+    private normalizeRequest(request: ScanRunBatchRequest, batchRequestId: string): void {
+        // Normalize request URL
+        request.url = Url.normalizeUrl(request.url);
+
+        // Normalize known pages
+        if (request.site?.knownPages?.length > 0) {
+            // Normalize URLs to a standard form
+            request.site.knownPages = request.site?.knownPages.map((url) => Url.normalizeUrl(url));
+
+            // Check for duplicate URLs in a client request
+            const pages = [...request.site.knownPages, request.url];
+            const duplicates = filter(
+                groupBy(pages, (url) => url),
+                (group) => group.length > 1,
+            ).map((value) => value[0]);
+
+            // Remove duplicate URLs from a client request
+            if (duplicates.length > 0) {
+                request.site.knownPages = uniq(request.site.knownPages);
+                this.logger.logWarn('Removed duplicate URLs from a client request.', {
+                    batchRequestId,
+                    scanId: request.scanId,
+                    duplicates: JSON.stringify(duplicates),
+                });
+            }
+        }
+    }
+
+    private getScanType(request: ScanRunBatchRequest): ScanType {
+        return request.scanType ?? (request.privacyScan ? 'privacy' : 'accessibility');
     }
 }

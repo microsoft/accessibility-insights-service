@@ -238,10 +238,11 @@ export class ScanRequestController extends ApiController {
             const pages = [...scanRunRequest.site.knownPages, scanRunRequest.url];
             const duplicates = filter(
                 groupBy(pages, (url) => Url.normalizeUrl(url)),
-                (g) => g.length > 1,
-            );
+                (group) => group.length > 1,
+            ).map((value) => value[0]);
+
             if (duplicates.length > 0) {
-                this.logger.logWarn('Found duplicated URL(s) in a client request.', { duplicatedUrls: JSON.stringify(duplicates.flat()) });
+                this.logger.logWarn('Found duplicate URLs in a client request.', { duplicates: JSON.stringify(duplicates) });
 
                 // return { valid: false, error: WebApiErrorCodes.duplicateKnownPage.error };
             }

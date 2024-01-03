@@ -31,8 +31,20 @@ export namespace Url {
         return url.indexOf('?') !== -1;
     }
 
+    /**
+     * [Normalizes](https://en.wikipedia.org/wiki/URL_normalization) URL.
+     */
     export function normalizeUrl(url: string): string {
-        return normalizeUrlExt.default(url, { stripHash: true, removeQueryParameters: false });
+        const options: normalizeUrlExt.Options = {
+            normalizeProtocol: false,
+            removeSingleSlash: false,
+            removeTrailingSlash: false,
+            stripHash: true,
+            stripTextFragment: true,
+            stripWWW: false,
+        };
+
+        return normalizeUrlExt.default(url, options);
     }
 
     export function getParameterValue(name: string, url: string): string {

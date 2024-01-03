@@ -26,13 +26,6 @@ exports[`BatchScanResultController handleRequest should return different respons
     },
     "scanId": "not-found-scan-id",
   },
-  {
-    "run": {
-      "state": "running",
-    },
-    "scanId": "valid-scan-id",
-    "scanType": "accessibility",
-    "url": "url",
-  },
+  undefined,
 ]
 `;

@@ -60,7 +60,7 @@ export class OTelConfigProvider {
             `OTel metrics collection is ${
                 config.otelSupported === true
                     ? 'enabled.'
-                    : 'disabled. All metricsConfig properties should be defined and OTel listener is available on a host.'
+                    : 'disabled. All metricsConfig properties should be defined and OTel listener be available on a host.'
             }`,
             config,
         );

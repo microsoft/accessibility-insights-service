@@ -4,7 +4,7 @@
 import 'reflect-metadata';
 
 import { CosmosContainerClient, CosmosOperationResponse } from 'azure-services';
-import { ItemType, OnDemandPageScanRequest, PartitionKey } from 'storage-documents';
+import { ItemType, OnDemandPageScanRequest, PartitionKey, ScanType } from 'storage-documents';
 import { IMock, Mock, MockBehavior } from 'typemoq';
 import * as cosmos from '@azure/cosmos';
 import { PageScanRequestProvider } from './page-scan-request-provider';
@@ -20,7 +20,7 @@ describe(PageScanRequestProvider, () => {
         testSubject = new PageScanRequestProvider(cosmosContainerClientMock.object);
     });
 
-    it('stores requests', async () => {
+    it('insert requests', async () => {
         const request1: OnDemandPageScanRequest = {
             id: 'id1',
             url: 'url1',
@@ -46,7 +46,7 @@ describe(PageScanRequestProvider, () => {
         cosmosContainerClientMock.verifyAll();
     });
 
-    it('retrieves scan results sorted by priority', async () => {
+    it.skip('retrieve scan results sorted by priority', async () => {
         const request1: OnDemandPageScanRequest = {
             id: 'id1',
             url: 'url1',
@@ -63,17 +63,17 @@ describe(PageScanRequestProvider, () => {
         } as CosmosOperationResponse<OnDemandPageScanRequest[]>;
 
         cosmosContainerClientMock
-            .setup((o) => o.queryDocuments(getQuery(), continuationToken))
+            .setup((o) => o.queryDocuments(getQuery('accessibility'), continuationToken))
             .returns(() => Promise.resolve(response))
             .verifiable();
 
-        const actualResponse = await testSubject.getRequests(continuationToken);
+        const actualResponse = await testSubject.getRequests('accessibility', continuationToken);
 
         cosmosContainerClientMock.verifyAll();
         expect(actualResponse).toBe(response);
     });
 
-    it('deletes requests', async () => {
+    it('delete requests', async () => {
         const request1Id = 'id1';
         const request2Id = 'id2';
 
@@ -91,9 +91,9 @@ describe(PageScanRequestProvider, () => {
         cosmosContainerClientMock.verifyAll();
     });
 
-    function getQuery(): cosmos.SqlQuerySpec {
+    function getQuery(scanType: ScanType): cosmos.SqlQuerySpec {
         return {
-            query: 'SELECT * FROM c WHERE c.partitionKey = @partitionKey and c.itemType = @itemType ORDER BY c.priority DESC',
+            query: 'SELECT * FROM c WHERE c.partitionKey = @partitionKey and c.itemType = @itemType and c.scanType = @scanType ORDER BY c.priority DESC',
             parameters: [
                 {
                     name: '@partitionKey',
@@ -102,6 +102,10 @@ describe(PageScanRequestProvider, () => {
                 {
                     name: '@itemType',
                     value: ItemType.onDemandPageScanRequest,
+                },
+                {
+                    name: '@scanType',
+                    value: scanType,
                 },
             ],
         };

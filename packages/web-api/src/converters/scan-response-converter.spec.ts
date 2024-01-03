@@ -22,6 +22,7 @@ import {
     WebsiteScanResult,
     OnDemandPageScanRunState,
     NotificationError,
+    ScanType,
 } from 'storage-documents';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { ScanErrorConverter } from './scan-error-converter';
@@ -37,6 +38,7 @@ interface options {
     isAuthenticationEnabled?: boolean;
     isPrivacyScan?: boolean;
     isError?: boolean;
+    scanType?: ScanType;
 }
 
 const apiVersion = '1.0';
@@ -126,8 +128,8 @@ describe(ScanResponseConverter, () => {
     });
 
     it('return completed privacy scan result', async () => {
-        const pageScanDbResult = getPageScanResult({ dbState: 'completed' });
-        const responseExpected = getScanResultClientResponseFull({ restApiState: 'completed' });
+        const pageScanDbResult = getPageScanResult({ dbState: 'completed', scanType: 'privacy' });
+        const responseExpected = getScanResultClientResponseFull({ restApiState: 'completed', scanType: 'privacy' });
         const response = await scanResponseConverter.getScanResultResponse(baseUrl, apiVersion, pageScanDbResult, websiteScanResult);
         expect(response).toEqual(responseExpected);
     });
@@ -244,10 +246,12 @@ function getPageScanResult(options: options): OnDemandPageScanResult {
 
     return {
         id: 'id',
+        deepScanId: options.isDeepScanEnabled ? 'id' : undefined,
         itemType: ItemType.onDemandPageScanRunResult,
         partitionKey: 'partitionKey',
         url: 'url',
         priority: 10,
+        scanType: options.scanType ?? 'accessibility',
         scanResult: {
             state: 'fail',
             issueCount: 1,
@@ -291,8 +295,9 @@ function getScanResultClientResponseFull(options: options): ScanResultResponse {
 
     return {
         scanId: 'id',
+        deepScanId: options.isDeepScanEnabled ? 'id' : undefined,
         url: 'url',
-        scanType: options.isPrivacyScan === true ? 'privacy' : 'accessibility',
+        scanType: options.scanType ?? 'accessibility',
         scanResult: {
             state: 'fail',
             issueCount: 1,
