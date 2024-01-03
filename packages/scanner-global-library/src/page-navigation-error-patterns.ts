@@ -4,16 +4,17 @@
 import { ScanErrorTypes } from 'storage-documents';
 
 export const pageNavigationErrorPatterns: Partial<Record<ScanErrorTypes, string[]>> = {
-    UrlNavigationTimeout: ['Navigation timeout', 'net::ERR_CONNECTION_TIMED_OUT', 'Timeout exceeded'],
+    UrlNavigationTimeout: ['Navigation timeout', 'ERR_CONNECTION_TIMED_OUT', 'Timeout exceeded'],
     SslError: [
-        'net::ERR_CERT_AUTHORITY_INVALID',
-        'net::ERR_CERT_DATE_INVALID',
-        'net::ERR_HTTP2_INADEQUATE_TRANSPORT_SECURITY',
-        'net::ERR_CERT_COMMON_NAME_INVALID',
+        'ERR_CERT_AUTHORITY_INVALID',
+        'ERR_CERT_DATE_INVALID',
+        'ERR_HTTP2_INADEQUATE_TRANSPORT_SECURITY',
+        'ERR_CERT_COMMON_NAME_INVALID',
         'SSL_ERROR_UNKNOWN',
+        'ERR_SSL_VERSION_OR_CIPHER_MISMATCH',
     ],
-    ResourceLoadFailure: ['net::ERR_CONNECTION_REFUSED', 'NS_ERROR_CONNECTION_REFUSED'],
+    ResourceLoadFailure: ['ERR_CONNECTION_REFUSED', 'NS_ERROR_CONNECTION_REFUSED', 'ERR_CONNECTION_RESET'],
     InvalidUrl: ['Cannot navigate to invalid URL', 'Invalid url'],
-    EmptyPage: ['net::ERR_ABORTED', 'NS_BINDING_ABORTED'],
-    UrlNotResolved: ['net::ERR_NAME_NOT_RESOLVED'],
+    EmptyPage: ['ERR_ABORTED', 'NS_BINDING_ABORTED'],
+    UrlNotResolved: ['ERR_NAME_NOT_RESOLVED'],
 };

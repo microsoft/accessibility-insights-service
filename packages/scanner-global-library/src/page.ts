@@ -146,8 +146,11 @@ export class Page {
      * `options.hardReload === true` will restart browser instance and delete browser storage, settings, etc. but use browser disk cache.
      */
     public async reload(options?: { hardReload?: boolean }): Promise<void> {
+        if (this.requestUrl === undefined) {
+            throw new Error('Request URL is undefined. Navigate to URL first before reloading page.');
+        }
+
         this.logger?.setCommonProperties({ pageNavigationId: this.guidGenerator.createGuid() });
-        this.requestUrl = this.url;
         this.resetLastNavigationState();
 
         if (options?.hardReload === true) {
@@ -288,7 +291,6 @@ export class Page {
         }
 
         if (this.authenticationResult?.authenticated === true) {
-            this.requestUrl = this.url;
             await this.reopenBrowser();
         }
     }
