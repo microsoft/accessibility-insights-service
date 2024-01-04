@@ -20,7 +20,7 @@ export class DevToolsSession {
     // Default puppeteer CDP protocol timeout is 180 secs. Increasing protocolTimeout beyond
     // default value will require to increase the 'protocolTimeout' setting in browser
     // launch/connect calls.
-    public protocolTimeout = 30000;
+    public protocolTimeout = 90000;
 
     public async send<T extends keyof Puppeteer.ProtocolMapping.Commands>(
         page: Puppeteer.Page,

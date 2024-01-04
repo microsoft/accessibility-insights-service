@@ -26,6 +26,6 @@ export const defaultLaunchOptions: Puppeteer.PuppeteerNodeLaunchOptions = {
         '--js-flags=--max-old-space-size=8192',
         `--window-size=${windowSize.width},${windowSize.height}`,
     ],
-    protocolTimeout: 30000,
+    protocolTimeout: 90000,
     ...defaultBrowserOptions,
 };
