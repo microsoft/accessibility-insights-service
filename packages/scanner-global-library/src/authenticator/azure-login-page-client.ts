@@ -45,14 +45,14 @@ export class AzureLoginPageClient implements LoginPageClient {
             };
         }
 
-        // Click Next button
+        // Submit account form
         let responses = await Promise.all([this.pageNavigator.waitForNavigation(page), page.keyboard.press('Enter')]);
         let navigationResponse = responses[0];
         if (navigationResponse.browserError !== undefined) {
             return this.getErrorResponse(navigationResponse, page, '#usernameError');
         }
 
-        // Select Password authentication option
+        // Select 'Password' authentication option
         try {
             await page.waitForSelector('#FormsAuthentication', { timeout: this.selectorTimeoutMsec });
             await page.click('#FormsAuthentication');
@@ -80,14 +80,10 @@ export class AzureLoginPageClient implements LoginPageClient {
             };
         }
 
-        // Submit account credentials for authentication
-        responses = await Promise.all([this.pageNavigator.waitForNavigation(page), page.keyboard.press('Enter')]);
-        navigationResponse = responses[0];
-        if (navigationResponse.browserError !== undefined) {
-            return this.getErrorResponse(navigationResponse, page, '#errorTextOption');
-        }
+        // Submit password form
+        await page.keyboard.press('Enter');
 
-        // Validate multi-factor authentication prompt
+        // Validate for  multi-factor authentication prompt
         const smartcardPrompt = await this.getElementContent('#CertificateAuthentication', page);
         const phonePrompt = await this.getElementContent('#WindowsAzureMultiFactorAuthentication', page);
         if (smartcardPrompt !== undefined || phonePrompt !== undefined) {
@@ -102,24 +98,21 @@ export class AzureLoginPageClient implements LoginPageClient {
             };
         }
 
-        // Enable Keep Me Signed In (KMSI) if prompted
+        // Enable Keep Me Signed In (KMSI)
         // eslint-disable-next-line max-len
         // https://learn.microsoft.com/en-us/azure/active-directory/fundamentals/active-directory-users-profile-azure-portal#learn-about-the-stay-signed-in-prompt
         try {
-            const acceptPrompt = await this.getElementContent('#idSIButton9', page);
-            if (acceptPrompt !== undefined) {
-                await Promise.all([this.pageNavigator.waitForNavigation(page), page.keyboard.press('Enter')]);
-            }
+            await page.waitForSelector('#idSIButton9', { timeout: this.selectorTimeoutMsec });
+            responses = await Promise.all([this.pageNavigator.waitForNavigation(page), page.keyboard.press('Enter')]);
+            navigationResponse = responses[0];
         } catch (error) {
-            if (error.name !== 'TimeoutError') {
-                return {
-                    browserError: {
-                        errorType: 'AuthenticationError',
-                        message: error.message,
-                        stack: error.stack,
-                    },
-                };
-            }
+            return {
+                browserError: {
+                    errorType: 'AuthenticationError',
+                    message: error.name === 'TimeoutError' ? 'Failed to detect KMSI prompt on a login page.' : error.message,
+                    stack: error.stack,
+                },
+            };
         }
 
         return navigationResponse;

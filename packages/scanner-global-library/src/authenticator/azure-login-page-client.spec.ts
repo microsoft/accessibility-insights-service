@@ -60,7 +60,7 @@ describe(AzureLoginPageClient, () => {
 });
 
 function setupKMSIPrompt(): void {
-    setupGetElementContent('#idSIButton9', '');
+    setupPageWaitForSelector('#idSIButton9');
     puppeteerKeyboardMock
         .setup((o) => o.press('Enter'))
         .returns(() => Promise.resolve())

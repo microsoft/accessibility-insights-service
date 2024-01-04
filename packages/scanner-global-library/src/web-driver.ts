@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 import { exec } from 'child_process';
+import * as fs from 'fs';
 import { PromiseUtils, System } from 'common';
 import { inject, injectable, optional } from 'inversify';
 import { GlobalLogger, Logger } from 'logger';
@@ -20,10 +21,13 @@ import { BrowserCache } from './browser-cache';
 export interface WebDriverConfigurationOptions {
     browserExecutablePath?: string;
     clearDiskCache?: boolean;
+    keepUserData?: boolean;
 }
 
 @injectable()
 export class WebDriver {
+    public userDataDirectory = `${__dirname}/browser-data`;
+
     public browser: Puppeteer.Browser;
 
     private readonly browserCloseTimeoutMsecs = 10000;
@@ -58,17 +62,25 @@ export class WebDriver {
         return this.browser;
     }
 
-    public async launch(options: WebDriverConfigurationOptions = { clearDiskCache: true }): Promise<Puppeteer.Browser> {
+    /**
+     * The method launches a browser instance with given arguments.
+     * @default options = { clearDiskCache: true, keepUserData: false }
+     */
+    public async launch(options?: WebDriverConfigurationOptions): Promise<Puppeteer.Browser> {
         this.setupPuppeteerPlugins();
 
-        if (options.clearDiskCache === true) {
+        if (options?.keepUserData !== true) {
+            fs.rmSync(this.userDataDirectory, { recursive: true, force: true });
+        }
+
+        if (options?.clearDiskCache !== false) {
             this.browserCache.clearStorage();
         }
 
         const launchOptions = this.createLaunchOptions();
         this.browser = await this.puppeteerExtra.launch({
             ...launchOptions,
-            executablePath: options.browserExecutablePath ?? Puppeteer.executablePath(),
+            executablePath: options?.browserExecutablePath ?? Puppeteer.executablePath(),
         });
 
         this.logger?.logInfo('Chromium browser instance started.');
@@ -125,6 +137,9 @@ export class WebDriver {
             headless: process.env.HEADLESS === 'false' ? false : 'new',
             devtools: process.env.DEV_TOOLS === 'true' ? true : false,
         };
+
+        // Define user profile location to be able reuse it if requested.
+        options.args.push(`--user-data-dir=${this.userDataDirectory}`);
 
         // Define browser cache location to allow reuse it after browser relaunch.
         // Browser profile (storage, settings, etc.) is not part of the cache and will be deleted after browser relaunch.

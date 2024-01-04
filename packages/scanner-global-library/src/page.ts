@@ -23,6 +23,7 @@ export interface BrowserStartOptions {
     browserExecutablePath?: string;
     browserWSEndpoint?: string;
     clearBrowserCache?: boolean;
+    preserveUserProfile?: boolean;
 }
 
 export interface Viewport {
@@ -100,6 +101,7 @@ export class Page {
             this.browser = await this.webDriver.launch({
                 browserExecutablePath: options?.browserExecutablePath,
                 clearDiskCache: options?.clearBrowserCache,
+                keepUserData: options?.preserveUserProfile,
             });
         }
 
@@ -241,7 +243,7 @@ export class Page {
         if (this.pageAnalysisResult.navigationResponse?.browserError !== undefined) {
             this.setLastNavigationState('analysis', this.pageAnalysisResult.navigationResponse);
         } else {
-            await this.reopenBrowser();
+            await this.reopenBrowser({ hardReload: true });
         }
     }
 
@@ -305,7 +307,7 @@ export class Page {
      * Hard reload (close and reopen browser) will delete all browser's data but preserve html/image/script/css/etc. cached files.
      */
     private async hardReload(): Promise<void> {
-        await this.reopenBrowser();
+        await this.reopenBrowser({ hardReload: true });
         await this.navigate(this.requestUrl, this.pageOptions);
     }
 
@@ -314,14 +316,20 @@ export class Page {
         this.setLastNavigationState('reload', response);
     }
 
-    private async reopenBrowser(): Promise<void> {
+    private async reopenBrowser(options?: { hardReload?: boolean }): Promise<void> {
         if (this.browserStartOptions.browserWSEndpoint || this.browserWSEndpoint) {
             return;
         }
 
+        // Preserve user profile to reuse authentication cookies
+        const preserveUserProfile =
+            options?.hardReload !== true &&
+            this.pageAnalysisResult.authentication === true &&
+            this.pageAnalysisResult.authenticationType !== 'undetermined';
+
         await this.close();
-        await this.create({ ...this.browserStartOptions, clearBrowserCache: false });
-        // wait for browser to start
+        await this.create({ ...this.browserStartOptions, clearBrowserCache: false, preserveUserProfile });
+        // Wait for browser to start
         await System.wait(3000);
     }
 

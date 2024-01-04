@@ -4,6 +4,7 @@
 import 'reflect-metadata';
 
 import { ChildProcess } from 'child_process';
+import * as fs from 'fs';
 import * as Puppeteer from 'puppeteer';
 import { IMock, It, Mock, Times, MockBehavior } from 'typemoq';
 import { PromiseUtils } from 'common';
@@ -52,6 +53,11 @@ let promiseUtilsMock: IMock<PromiseUtils>;
 let puppeteerExtraMock: IMock<typeof PuppeteerExtra>;
 let userAgentPluginMock: IMock<UserAgentPlugin>;
 let browserCacheMock: IMock<BrowserCache>;
+
+jest.mock('fs', () => ({
+    ...jest.requireActual('fs'),
+    rmSync: jest.fn(),
+}));
 
 beforeEach(() => {
     puppeteerBrowserMock = new PuppeteerBrowserMock();
@@ -143,6 +149,42 @@ describe('WebDriver', () => {
         const browser = await testSubject.launch();
 
         expect(browser).toEqual(puppeteerBrowserMock);
+    });
+
+    it('should clean browser data', async () => {
+        puppeteerExtraMock
+            .setup((o) => o.use(It.isAny()))
+            .returns(() => puppeteerExtraMock.object)
+            .verifiable();
+        puppeteerExtraMock
+            .setup((o) => o.launch(It.isAny()))
+            .returns(() => Promise.resolve(<Puppeteer.Browser>(<unknown>puppeteerBrowserMock)))
+            .verifiable(Times.once());
+        browserCacheMock.setup((o) => o.clearStorage()).verifiable();
+
+        const rmSyncMock = jest.spyOn(fs, 'rmSync');
+        const browser = await testSubject.launch();
+
+        expect(browser).toEqual(puppeteerBrowserMock);
+        expect(rmSyncMock).toHaveBeenCalledWith(testSubject.userDataDirectory, { recursive: true, force: true });
+    });
+
+    it('should keep browser data', async () => {
+        puppeteerExtraMock
+            .setup((o) => o.use(It.isAny()))
+            .returns(() => puppeteerExtraMock.object)
+            .verifiable();
+        puppeteerExtraMock
+            .setup((o) => o.launch(It.isAny()))
+            .returns(() => Promise.resolve(<Puppeteer.Browser>(<unknown>puppeteerBrowserMock)))
+            .verifiable(Times.once());
+        browserCacheMock.setup((o) => o.clearStorage()).verifiable();
+
+        const rmSyncMock = jest.spyOn(fs, 'rmSync');
+        const browser = await testSubject.launch({ keepUserData: true });
+
+        expect(browser).toEqual(puppeteerBrowserMock);
+        expect(rmSyncMock).not.toBeCalled();
     });
 
     it('should clean browser cache', async () => {

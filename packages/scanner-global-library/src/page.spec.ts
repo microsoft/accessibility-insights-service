@@ -258,7 +258,7 @@ describe(Page, () => {
                 .returns(() => Promise.resolve(puppeteerPageMock.object))
                 .verifiable();
             webDriverMock
-                .setup(async (m) => m.launch({ browserExecutablePath: 'path', clearDiskCache: false }))
+                .setup(async (o) => o.launch({ browserExecutablePath: 'path', clearDiskCache: false, keepUserData: false }))
                 .returns(() => Promise.resolve(browserMock.object))
                 .verifiable();
             webDriverMock
@@ -313,7 +313,9 @@ describe(Page, () => {
                 .returns(() => Promise.resolve(puppeteerPageMock.object))
                 .verifiable();
             webDriverMock
-                .setup(async (m) => m.launch(It.isValue({ browserExecutablePath: 'path', clearDiskCache: undefined })))
+                .setup(async (m) =>
+                    m.launch(It.isValue({ browserExecutablePath: 'path', clearDiskCache: undefined, keepUserData: undefined })),
+                )
                 .returns(() => Promise.resolve(browserMock.object))
                 .verifiable();
             webDriverMock
