@@ -62,6 +62,10 @@ export class WebDriver {
         return this.browser;
     }
 
+    /**
+     * The method launches a browser instance with given arguments.
+     * @default options = { clearDiskCache: true, keepUserData: false }
+     */
     public async launch(options?: WebDriverConfigurationOptions): Promise<Puppeteer.Browser> {
         this.setupPuppeteerPlugins();
 
@@ -69,7 +73,7 @@ export class WebDriver {
             fs.rmSync(this.userDataDirectory, { recursive: true, force: true });
         }
 
-        if (options?.clearDiskCache === undefined || options.clearDiskCache === true) {
+        if (options?.clearDiskCache !== false) {
             this.browserCache.clearStorage();
         }
 

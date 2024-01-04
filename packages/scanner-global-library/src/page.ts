@@ -329,7 +329,7 @@ export class Page {
 
         await this.close();
         await this.create({ ...this.browserStartOptions, clearBrowserCache: false, preserveUserProfile });
-        // wait for browser to start
+        // Wait for browser to start
         await System.wait(3000);
     }
 
