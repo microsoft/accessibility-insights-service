@@ -46,7 +46,7 @@ describe(PageScanRequestProvider, () => {
         cosmosContainerClientMock.verifyAll();
     });
 
-    it.skip('retrieve scan results sorted by priority', async () => {
+    it('retrieve scan results sorted by priority', async () => {
         const request1: OnDemandPageScanRequest = {
             id: 'id1',
             url: 'url1',

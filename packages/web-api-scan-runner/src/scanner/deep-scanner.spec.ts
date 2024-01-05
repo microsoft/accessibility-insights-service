@@ -5,16 +5,20 @@ import 'reflect-metadata';
 
 import { GlobalLogger } from 'logger';
 import { Page } from 'scanner-global-library';
-import { WebsiteScanResultProvider, RunnerScanMetadata } from 'service-library';
+import {
+    WebsiteScanResultProvider,
+    RunnerScanMetadata,
+    CrawlRunner,
+    DiscoveredUrlProcessor,
+    createDiscoveryPattern,
+} from 'service-library';
 import { OnDemandPageScanResult, WebsiteScanResult } from 'storage-documents';
 import { IMock, It, Mock } from 'typemoq';
 import * as Puppeteer from 'puppeteer';
 import { ServiceConfiguration, CrawlConfig } from 'common';
-import { createDiscoveryPattern } from '../crawler/discovery-pattern-factory';
-import { CrawlRunner } from '../crawler/crawl-runner';
-import { ScanFeedGenerator } from '../crawler/scan-feed-generator';
-import { DiscoveredUrlProcessor } from '../crawler/discovered-url-processor';
+
 import { DeepScanner } from './deep-scanner';
+import { ScanFeedGenerator } from './scan-feed-generator';
 
 const url = 'test url';
 const puppeteerPageStub = {} as Puppeteer.Page;

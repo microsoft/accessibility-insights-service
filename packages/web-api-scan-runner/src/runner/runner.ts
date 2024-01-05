@@ -69,7 +69,7 @@ export class Runner {
 
             axeScanResults = await this.pageScanProcessor.scan(runnerScanMetadata, pageScanResult, websiteScanResult);
             if (axeScanResults?.unscannable === true) {
-                // unsupported URL location
+                // unscannable URL
                 this.setRunResult(pageScanResult, 'unscannable', axeScanResults.scannedUrl, axeScanResults.error);
             } else if (axeScanResults.error === undefined) {
                 // axe scan completed successfully

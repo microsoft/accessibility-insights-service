@@ -35,3 +35,7 @@ export { ScanNotificationProcessor } from './processors/scan-notification-proces
 export { RunnerScanMetadata } from './types/runner-scan-metadata';
 export { CombinedScanResultProcessor } from './combined-report-provider/combined-scan-result-processor';
 export { RunStateClientProvider } from './web-api/run-state-client-provider';
+export * from './website-builder/page-metadata-generator';
+export { createDiscoveryPattern } from './crawler/discovery-pattern-factory';
+export { CrawlRunner } from './crawler/crawl-runner';
+export { DiscoveredUrlProcessor } from './crawler/discovered-url-processor';

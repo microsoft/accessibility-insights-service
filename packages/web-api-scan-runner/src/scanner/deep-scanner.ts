@@ -4,13 +4,16 @@
 import { inject, injectable } from 'inversify';
 import { GlobalLogger } from 'logger';
 import { Page } from 'scanner-global-library';
-import { WebsiteScanResultProvider, RunnerScanMetadata } from 'service-library';
+import {
+    WebsiteScanResultProvider,
+    RunnerScanMetadata,
+    CrawlRunner,
+    DiscoveredUrlProcessor,
+    createDiscoveryPattern,
+} from 'service-library';
 import { OnDemandPageScanResult, WebsiteScanResult } from 'storage-documents';
 import { ServiceConfiguration } from 'common';
-import { createDiscoveryPattern } from '../crawler/discovery-pattern-factory';
-import { CrawlRunner } from '../crawler/crawl-runner';
-import { ScanFeedGenerator } from '../crawler/scan-feed-generator';
-import { DiscoveredUrlProcessor } from '../crawler/discovered-url-processor';
+import { ScanFeedGenerator } from './scan-feed-generator';
 
 @injectable()
 export class DeepScanner {

@@ -8,8 +8,8 @@ import { GlobalLogger } from 'logger';
 import { AxeScanResults, Page, BrowserError, ResourceAuthenticationResult } from 'scanner-global-library';
 import { OnDemandPageScanResult, WebsiteScanResult } from 'storage-documents';
 import { cloneDeep } from 'lodash';
+import { PageMetadata, PageMetadataGenerator } from 'service-library';
 import { AxeScanner } from '../scanner/axe-scanner';
-import { PageMetadata, PageMetadataGenerator } from '../website-builder/page-metadata-generator';
 import { PageScanProcessor } from './page-scan-processor';
 import { DeepScanner } from './deep-scanner';
 

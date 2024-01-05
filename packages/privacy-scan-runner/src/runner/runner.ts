@@ -7,7 +7,7 @@ import { PrivacyScanResult, BrowserError } from 'scanner-global-library';
 import { OnDemandPageScanRunResultProvider, WebsiteScanResultProvider, ReportWriter, GeneratedReport } from 'service-library';
 import { OnDemandPageScanReport, OnDemandPageScanResult, OnDemandPageScanRunState, ScanError, WebsiteScanResult } from 'storage-documents';
 import { System, ServiceConfiguration, GuidGenerator, ScanRunTimeConfig } from 'common';
-import { isString, isEmpty } from 'lodash';
+import { isEmpty } from 'lodash';
 import { ScanMetadataConfig } from '../scan-metadata-config';
 import { ScanRunnerTelemetryManager } from '../scan-runner-telemetry-manager';
 import { PageScanProcessor } from '../scanner/page-scan-processor';
@@ -48,13 +48,16 @@ export class Runner {
 
         this.telemetryManager.trackScanStarted(scanMetadata.id);
         try {
-            const privacyScanResults = await this.pageScanProcessor.scan(scanMetadata, pageScanResult);
+            let websiteScanResult;
+            if (pageScanResult.websiteScanRef !== undefined) {
+                websiteScanResult = await this.websiteScanResultProvider.read(pageScanResult.websiteScanRef.id, false);
+            }
+
+            const privacyScanResults = await this.pageScanProcessor.scan(scanMetadata, pageScanResult, websiteScanResult);
             await this.processScanResult(privacyScanResults, pageScanResult);
         } catch (error) {
-            const errorMessage = System.serializeError(error);
-            this.setRunResult(pageScanResult, 'failed', errorMessage);
-
-            this.logger.logError(`The privacy scan processor failed to scan a webpage.`, { error: errorMessage });
+            this.setRunResult(pageScanResult, 'failed', error instanceof Error ? error : new Error(System.serializeError(error)));
+            this.logger.logError(`The privacy scan processor failed to scan a webpage.`, { error: System.serializeError(error) });
             this.telemetryManager.trackScanTaskFailed();
         } finally {
             this.telemetryManager.trackScanCompleted();
@@ -90,7 +93,9 @@ export class Runner {
     }
 
     private async processScanResult(privacyScanResult: PrivacyScanResult, pageScanResult: OnDemandPageScanResult): Promise<void> {
-        if (isEmpty(privacyScanResult.error)) {
+        if (privacyScanResult?.unscannable === true) {
+            this.setRunResult(pageScanResult, 'unscannable', privacyScanResult.error);
+        } else if (isEmpty(privacyScanResult.error)) {
             this.onCompletedScan(pageScanResult);
         } else {
             await this.onFailedScan(privacyScanResult, pageScanResult);
@@ -132,7 +137,7 @@ export class Runner {
             state: 'fail',
         };
 
-        this.setRunResult(pageScanResult, runState, this.convertToScanError(privacyScanResult.error));
+        this.setRunResult(pageScanResult, runState, privacyScanResult.error);
     }
 
     private async updateScanResult(scanMetadata: PrivacyScanMetadata, pageScanResult: Partial<OnDemandPageScanResult>): Promise<void> {
@@ -191,21 +196,13 @@ export class Runner {
         return !isEmpty(reports) ? this.reportWriter.writeBatch(reports) : undefined;
     }
 
-    private convertToScanError(error: Error | BrowserError): ScanError {
-        const scanError: ScanError = {
-            errorType: 'InternalError',
-            ...error,
-        };
-
-        return scanError;
-    }
-
-    private setRunResult(pageScanResult: OnDemandPageScanResult, state: OnDemandPageScanRunState, error?: string | ScanError): void {
+    private setRunResult(pageScanResult: OnDemandPageScanResult, state: OnDemandPageScanRunState, error?: Error | ScanError): void {
         pageScanResult.run = {
             ...pageScanResult.run,
             state,
             timestamp: new Date().toJSON(),
-            error: isString(error) ? error.substring(0, 2048) : error,
+            // Should return InternalError type in case of generic exception
+            error: error instanceof Error ? ({ errorType: 'InternalError', ...error } as ScanError) : error,
         };
     }
 

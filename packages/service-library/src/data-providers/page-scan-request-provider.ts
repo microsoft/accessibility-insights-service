@@ -15,45 +15,7 @@ export class PageScanRequestProvider {
         private readonly cosmosContainerClient: CosmosContainerClient,
     ) {}
 
-    /**
-     * TODO
-     * Replace after next deployment with getRequestsNew()
-     * Enable 'retrieve scan results sorted by priority' test
-     *
-     * This is temporary query for backward compatibility
-     */
     public async getRequests(scanType: ScanType, continuationToken?: string): Promise<CosmosOperationResponse<OnDemandPageScanRequest[]>> {
-        const query = {
-            query: 'SELECT * FROM c WHERE c.partitionKey = @partitionKey and c.itemType = @itemType ORDER BY c.priority DESC',
-            parameters: [
-                {
-                    name: '@partitionKey',
-                    value: PartitionKey.pageScanRequestDocuments,
-                },
-                {
-                    name: '@itemType',
-                    value: ItemType.onDemandPageScanRequest,
-                },
-            ],
-        };
-
-        const result = await this.cosmosContainerClient.queryDocuments<OnDemandPageScanRequest>(query, continuationToken);
-
-        if (result.item?.length > 0) {
-            if (scanType === 'privacy') {
-                result.item = result.item.filter((i) => i.privacyScan !== undefined);
-            } else {
-                result.item = result.item.filter((i) => i.privacyScan === undefined);
-            }
-        }
-
-        return result;
-    }
-
-    public async getRequestsNew(
-        scanType: ScanType,
-        continuationToken?: string,
-    ): Promise<CosmosOperationResponse<OnDemandPageScanRequest[]>> {
         const query = {
             query: 'SELECT * FROM c WHERE c.partitionKey = @partitionKey and c.itemType = @itemType and c.scanType = @scanType ORDER BY c.priority DESC',
             parameters: [

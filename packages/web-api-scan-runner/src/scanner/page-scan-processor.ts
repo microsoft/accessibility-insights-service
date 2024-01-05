@@ -5,10 +5,9 @@ import { inject, injectable } from 'inversify';
 import { GlobalLogger } from 'logger';
 import { AxeScanResults, Page } from 'scanner-global-library';
 import { OnDemandPageScanResult, WebsiteScanResult } from 'storage-documents';
-import { RunnerScanMetadata } from 'service-library';
+import { PageMetadata, PageMetadataGenerator, RunnerScanMetadata } from 'service-library';
 import { isEmpty } from 'lodash';
 import { AxeScanner } from '../scanner/axe-scanner';
-import { PageMetadata, PageMetadataGenerator } from '../website-builder/page-metadata-generator';
 import { DeepScanner } from './deep-scanner';
 
 @injectable()
@@ -29,7 +28,6 @@ export class PageScanProcessor {
         let axeScanResults: AxeScanResults;
         try {
             const pageMetadata = await this.pageMetadataGenerator.getMetadata(runnerScanMetadata.url, this.page, websiteScanResult);
-
             const state = this.getScannableState(pageMetadata);
             if (state.unscannable === true) {
                 this.setAuthenticationResult(pageMetadata, pageScanResult);
@@ -60,7 +58,7 @@ export class PageScanProcessor {
 
     private getScannableState(pageMetadata: PageMetadata): AxeScanResults {
         if (pageMetadata.browserError !== undefined) {
-            this.logger.logWarn(pageMetadata.browserError.message, {
+            this.logger.logError(pageMetadata.browserError.message, {
                 loadedUrl: pageMetadata.loadedUrl,
             });
 
