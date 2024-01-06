@@ -245,7 +245,7 @@ describe(Page, () => {
                 browserExecutablePath: 'path',
                 clearBrowserCache: true,
             };
-            (page as any).pageAnalysisResult = { loadedUrl: url };
+            (page as any).pageAnalysisResult = { url };
             puppeteerPageMock.setup((p) => p.url()).returns(() => url);
             // close browser
             webDriverMock

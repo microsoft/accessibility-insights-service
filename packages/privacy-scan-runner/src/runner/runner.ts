@@ -201,8 +201,14 @@ export class Runner {
             ...pageScanResult.run,
             state,
             timestamp: new Date().toJSON(),
-            // Should return InternalError type in case of generic exception
-            error: error instanceof Error ? ({ errorType: 'InternalError', ...error } as ScanError) : error,
+            // Should return InternalError in case of generic exception
+            error:
+                error instanceof Error
+                    ? ({
+                          errorType: 'InternalError',
+                          message: `${error.message}\n${error.stack}`.substring(0.2048),
+                      } as ScanError)
+                    : error,
         };
     }
 

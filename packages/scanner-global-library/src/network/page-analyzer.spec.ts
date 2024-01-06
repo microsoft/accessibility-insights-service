@@ -41,7 +41,7 @@ describe(PageAnalyzer, () => {
 
         interceptedRequests = [];
         System.getElapsedTime = () => 100;
-        puppeteerGotoResponse = { puppeteerResponse: 'goto', url: () => url } as unknown as Puppeteer.HTTPResponse;
+        puppeteerGotoResponse = { puppeteerResponse: 'goto', url: () => url, status: () => 200 } as unknown as Puppeteer.HTTPResponse;
         pageOperationResult = { response: puppeteerGotoResponse, navigationTiming: { goto: 100 } as PageNavigationTiming };
         puppeteerPageMock
             .setup((o) => o.goto(url, { waitUntil: 'networkidle2', timeout: puppeteerTimeoutConfig.navigationTimeoutMsec }))
@@ -75,6 +75,7 @@ describe(PageAnalyzer, () => {
                 response: {
                     url: () => url,
                     ok: () => true,
+                    status: () => 200,
                 } as unknown as Puppeteer.HTTPResponse,
             },
         ];

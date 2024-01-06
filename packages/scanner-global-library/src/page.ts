@@ -130,12 +130,7 @@ export class Page {
 
         await this.setInitialState(url, options);
         await this.navigateImpl(options);
-        if (
-            this.navigationResponse?.ok() === false /* Trace error response */ ||
-            (this.pageAnalysisResult.authentication === true /* Trace authentication response */ &&
-                options?.enableAuthentication !== true &&
-                this.enableAuthenticationGlobalFlag !== true)
-        ) {
+        if (this.navigationResponse?.ok() === false /* Trace error response */) {
             this.logger?.logWarn('Reload page with network trace on web server error.');
             await this.navigateWithNetworkTrace(url);
         }

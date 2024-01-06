@@ -87,6 +87,7 @@ export class PageAnalyzer {
 
         this.logger?.logInfo('Page analysis result.', {
             url,
+            status: `${actualResponse.operationResult?.response?.status()}`,
             redirection: `${result.redirection}`,
             redirectionType: result.redirectionType,
             loadedUrl: result.loadedUrl,
