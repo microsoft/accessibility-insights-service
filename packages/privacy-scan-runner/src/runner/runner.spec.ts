@@ -340,7 +340,7 @@ function setupPageScanProcessor(succeeded: boolean = true, error: Error = undefi
     }
 
     pageScanProcessorMock
-        .setup((o) => o.scan(scanMetadata, pageScanResultDbDocument, It.isValue(websiteScanResult)))
+        .setup((o) => o.scan(It.isValue(scanMetadata), It.isValue(pageScanResultDbDocument), It.isValue(websiteScanResult)))
         .returns(() => {
             if (error) {
                 return Promise.reject(error);
