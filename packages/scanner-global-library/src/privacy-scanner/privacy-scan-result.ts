@@ -14,4 +14,5 @@ export interface PrivacyScanResult {
     scannedUrl?: string;
     pageSnapshot?: string;
     pageScreenshot?: string;
+    unscannable?: boolean;
 }
