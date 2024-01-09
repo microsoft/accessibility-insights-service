@@ -62,7 +62,7 @@ enableStaticSiteHosting() {
     echo "Enabling static website hosting on storage account $storageAccountName"
     az storage blob service-properties update --account-name $storageAccountName --static-website true --index-document index.html --auth-mode login 1>/dev/null
 
-    siteUrl=$(az storage account show --name $storageAccountName --resource-group $resourceGroupName --auth-mode login --query "primaryEndpoints.web" --output tsv)
+    siteUrl=$(az storage account show --name $storageAccountName --resource-group $resourceGroupName --query "primaryEndpoints.web" --output tsv)
     echo "Site hosting enabled at $siteUrl"
 }
 
