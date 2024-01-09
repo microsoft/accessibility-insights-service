@@ -11,8 +11,8 @@ fi
 storageAccountName=$(
     az storage account list \
         --resource-group "$resourceGroupName" \
-        --query "[?starts_with(name,'allystorage')].name|[0]" \
-        -o tsv
+        --auth-mode login \
+        --query "[?starts_with(name,'allystorage')].name|[0]" -o tsv
 )
 
 if [[ -z $storageAccountName ]]; then

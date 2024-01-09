@@ -73,7 +73,7 @@ getCosmosDbUrl() {
 }
 
 getStorageAccessKey() {
-    storageAccountKey=$(az storage account keys list --account-name "$storageAccountName" --query "[0].value" -o tsv)
+    storageAccountKey=$(az storage account keys list --account-name "$storageAccountName" --auth-mode login --query "[0].value" -o tsv)
 
     if [[ -z $storageAccountKey ]]; then
         echo "Unable to get access key for storage account $storageAccountName"
