@@ -89,6 +89,7 @@
             },
             "properties": {
                 "accessTier": "Hot",
+                "allowSharedKeyAccess": false,
                 "networkAcls": {
                     "bypass": "AzureServices",
                     "virtualNetworkRules": [],

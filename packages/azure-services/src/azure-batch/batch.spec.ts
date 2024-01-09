@@ -16,7 +16,6 @@ import {
     PoolGetResponse,
     JobListResponse,
 } from '@azure/batch/types/src/models';
-import { StorageContainerSASUrlProvider } from '../azure-blob/storage-container-sas-url-provider';
 import { Message } from '../azure-queue/message';
 import { BatchServiceClientProvider } from '../ioc-types';
 import { MockableLogger } from '../test-utilities/mockable-logger';
@@ -51,7 +50,6 @@ export class TaskListStub {
 
 describe(Batch, () => {
     const jobId1 = 'job-1';
-    const containerSASUrl = 'https://testcontainer.blob.core.windiows.net/batch-logs/?sv=blah$se=blah';
 
     let batch: Batch;
     let batchConfigStub: BatchConfig;
@@ -59,7 +57,6 @@ describe(Batch, () => {
     let jobMock: IMock<Job>;
     let taskMock: IMock<Task>;
     let poolMock: IMock<Pool>;
-    let storageContainerSASUrlProviderMock: IMock<StorageContainerSASUrlProvider>;
     let batchServiceClientProviderStub: BatchServiceClientProvider;
     let loggerMock: IMock<MockableLogger>;
     let serviceConfigMock: IMock<ServiceConfiguration>;
@@ -94,20 +91,8 @@ describe(Batch, () => {
         } as unknown as BatchServiceClient;
         loggerMock = Mock.ofType(MockableLogger);
         batchServiceClientProviderStub = async () => batchClientStub;
-        storageContainerSASUrlProviderMock = Mock.ofType(StorageContainerSASUrlProvider);
-        storageContainerSASUrlProviderMock
-            .setup(async (c) => c.generateSASUrl(It.isAny()))
-            .returns(async () => {
-                return containerSASUrl;
-            });
-        batch = new Batch(
-            batchServiceClientProviderStub,
-            batchTaskConfigGenerator.object,
-            storageContainerSASUrlProviderMock.object,
-            batchConfigStub,
-            loggerMock.object,
-            maxTasks,
-        );
+
+        batch = new Batch(batchServiceClientProviderStub, batchTaskConfigGenerator.object, batchConfigStub, loggerMock.object, maxTasks);
     });
 
     describe('getSucceededTasks()', () => {
