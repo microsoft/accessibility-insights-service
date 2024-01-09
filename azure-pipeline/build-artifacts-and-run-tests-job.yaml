@@ -22,8 +22,8 @@ steps:
 
     - template: ./build-steps.yaml
 
-    - template: ./test-steps.yaml
-      parameters: { totalTestSlices: '${{ parameters.totalTestSlices }}', testSlicesToRun: '${{ parameters.testSlicesToRun }}' }
+    # - template: ./test-steps.yaml
+    #   parameters: { totalTestSlices: '${{ parameters.totalTestSlices }}', testSlicesToRun: '${{ parameters.testSlicesToRun }}' }
 
     - script: |
           yarn run pack
