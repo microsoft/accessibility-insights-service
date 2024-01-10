@@ -1,5 +1,5 @@
 {
-    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
         "appInsightsName": {
@@ -20,7 +20,7 @@
     "resources": [
         {
             "type": "microsoft.insights/components",
-            "apiVersion": "2015-05-01",
+            "apiVersion": "2020-02-02",
             "name": "[parameters('appInsightsName')]",
             "location": "[parameters('location')]",
             "kind": "Node.JS",

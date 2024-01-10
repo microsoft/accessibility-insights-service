@@ -1,5 +1,5 @@
 {
-    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
         "apimServiceName": {
@@ -26,7 +26,7 @@
             },
             "name": "[concat(parameters('apimServiceName'), '/unlimited')]",
             "type": "Microsoft.ApiManagement/service/products",
-            "apiVersion": "2019-01-01",
+            "apiVersion": "2022-08-01",
             "dependsOn": []
         },
         {
@@ -41,12 +41,12 @@
             },
             "name": "[concat(parameters('apimServiceName'), '/', parameters('functionName'))]",
             "type": "Microsoft.ApiManagement/service/backends",
-            "apiVersion": "2019-01-01",
+            "apiVersion": "2022-08-01",
             "dependsOn": []
         },
         {
             "type": "Microsoft.ApiManagement/service/backends",
-            "apiVersion": "2019-01-01",
+            "apiVersion": "2022-08-01",
             "name": "[concat(parameters('apimServiceName'), '/', parameters('e2eFunctionName'))]",
             "dependsOn": [],
             "properties": {
@@ -76,7 +76,7 @@
             },
             "name": "[concat(parameters('apimServiceName'), '/accessibility-insight-service-scan-api')]",
             "type": "Microsoft.ApiManagement/service/apis",
-            "apiVersion": "2019-01-01",
+            "apiVersion": "2022-08-01",
             "dependsOn": [
                 "[resourceId('Microsoft.ApiManagement/service/backends', parameters('apimServiceName'), parameters('functionName'))]",
                 "[resourceId('Microsoft.ApiManagement/service/products', parameters('apimServiceName'), 'unlimited')]"
@@ -91,7 +91,7 @@
             },
             "name": "[concat(parameters('apimServiceName'), '/accessibility-insight-service-scan-api/5d704a4ef518fc0430710495')]",
             "type": "Microsoft.ApiManagement/service/apis/schemas",
-            "apiVersion": "2019-01-01",
+            "apiVersion": "2022-08-01",
             "dependsOn": [
                 "[resourceId('Microsoft.ApiManagement/service/apis', parameters('apimServiceName'), 'accessibility-insight-service-scan-api')]"
             ]
@@ -139,7 +139,7 @@
             },
             "name": "[concat(parameters('apimServiceName'), '/accessibility-insight-service-scan-api/createScans')]",
             "type": "Microsoft.ApiManagement/service/apis/operations",
-            "apiVersion": "2019-01-01",
+            "apiVersion": "2022-08-01",
             "dependsOn": [
                 "[resourceId('Microsoft.ApiManagement/service/apis', parameters('apimServiceName'), 'accessibility-insight-service-scan-api')]",
                 "[resourceId('Microsoft.ApiManagement/service/apis/schemas', parameters('apimServiceName'), 'accessibility-insight-service-scan-api', '5d704a4ef518fc0430710495')]"
@@ -152,7 +152,7 @@
             },
             "name": "[concat(parameters('apimServiceName'), '/accessibility-insight-service-scan-api/createScans/policy')]",
             "type": "Microsoft.ApiManagement/service/apis/operations/policies",
-            "apiVersion": "2019-01-01",
+            "apiVersion": "2022-08-01",
             "dependsOn": [
                 "[resourceId('Microsoft.ApiManagement/service/apis/operations', parameters('apimServiceName'), 'accessibility-insight-service-scan-api','createScans')]"
             ]
@@ -207,7 +207,7 @@
             },
             "name": "[concat(parameters('apimServiceName'), '/accessibility-insight-service-scan-api/getReport')]",
             "type": "Microsoft.ApiManagement/service/apis/operations",
-            "apiVersion": "2019-01-01",
+            "apiVersion": "2022-08-01",
             "dependsOn": [
                 "[resourceId('Microsoft.ApiManagement/service/apis', parameters('apimServiceName'), 'accessibility-insight-service-scan-api')]"
             ]
@@ -219,7 +219,7 @@
             },
             "name": "[concat(parameters('apimServiceName'), '/accessibility-insight-service-scan-api/getReport/policy')]",
             "type": "Microsoft.ApiManagement/service/apis/operations/policies",
-            "apiVersion": "2019-01-01",
+            "apiVersion": "2022-08-01",
             "dependsOn": [
                 "[resourceId('Microsoft.ApiManagement/service/apis/operations', parameters('apimServiceName'), 'accessibility-insight-service-scan-api','getReport')]"
             ]
@@ -268,7 +268,7 @@
             },
             "name": "[concat(parameters('apimServiceName'), '/accessibility-insight-service-scan-api/getScan')]",
             "type": "Microsoft.ApiManagement/service/apis/operations",
-            "apiVersion": "2019-01-01",
+            "apiVersion": "2022-08-01",
             "dependsOn": [
                 "[resourceId('Microsoft.ApiManagement/service/apis', parameters('apimServiceName'), 'accessibility-insight-service-scan-api')]",
                 "[resourceId('Microsoft.ApiManagement/service/apis/schemas', parameters('apimServiceName'), 'accessibility-insight-service-scan-api', '5d704a4ef518fc0430710495')]"
@@ -281,7 +281,7 @@
             },
             "name": "[concat(parameters('apimServiceName'), '/accessibility-insight-service-scan-api/getScan/policy')]",
             "type": "Microsoft.ApiManagement/service/apis/operations/policies",
-            "apiVersion": "2019-01-01",
+            "apiVersion": "2022-08-01",
             "dependsOn": [
                 "[resourceId('Microsoft.ApiManagement/service/apis/operations', parameters('apimServiceName'), 'accessibility-insight-service-scan-api','getScan')]"
             ]
@@ -329,7 +329,7 @@
             },
             "name": "[concat(parameters('apimServiceName'), '/accessibility-insight-service-scan-api/getScanBatch')]",
             "type": "Microsoft.ApiManagement/service/apis/operations",
-            "apiVersion": "2019-01-01",
+            "apiVersion": "2022-08-01",
             "dependsOn": [
                 "[resourceId('Microsoft.ApiManagement/service/apis', parameters('apimServiceName'), 'accessibility-insight-service-scan-api')]",
                 "[resourceId('Microsoft.ApiManagement/service/apis/schemas', parameters('apimServiceName'), 'accessibility-insight-service-scan-api', '5d704a4ef518fc0430710495')]"
@@ -342,7 +342,7 @@
             },
             "name": "[concat(parameters('apimServiceName'), '/accessibility-insight-service-scan-api/getScanBatch/policy')]",
             "type": "Microsoft.ApiManagement/service/apis/operations/policies",
-            "apiVersion": "2019-01-01",
+            "apiVersion": "2022-08-01",
             "dependsOn": [
                 "[resourceId('Microsoft.ApiManagement/service/apis/operations', parameters('apimServiceName'), 'accessibility-insight-service-scan-api','getScanBatch')]"
             ]
@@ -351,14 +351,14 @@
             "properties": {},
             "name": "[concat(parameters('apimServiceName'), '/unlimited/accessibility-insight-service-scan-api')]",
             "type": "Microsoft.ApiManagement/service/products/apis",
-            "apiVersion": "2019-01-01",
+            "apiVersion": "2022-08-01",
             "dependsOn": [
                 "[resourceId('Microsoft.ApiManagement/service/apis', parameters('apimServiceName'), 'accessibility-insight-service-scan-api')]"
             ]
         },
         {
             "type": "Microsoft.ApiManagement/service/apis/operations",
-            "apiVersion": "2019-01-01",
+            "apiVersion": "2022-08-01",
             "name": "[concat(parameters('apimServiceName'), '/accessibility-insight-service-scan-api/getTargetedTestResults')]",
             "dependsOn": [
                 "[resourceId('Microsoft.ApiManagement/service/apis', parameters('apimServiceName'), 'accessibility-insight-service-scan-api')]",
@@ -389,7 +389,7 @@
         },
         {
             "type": "Microsoft.ApiManagement/service/apis/operations/policies",
-            "apiVersion": "2019-01-01",
+            "apiVersion": "2022-08-01",
             "name": "[concat(parameters('apimServiceName'), '/accessibility-insight-service-scan-api/getTargetedTestResults/policy')]",
             "dependsOn": [
                 "[resourceId('Microsoft.ApiManagement/service/apis/operations', parameters('apimServiceName'), 'accessibility-insight-service-scan-api','getTargetedTestResults')]"
@@ -401,7 +401,7 @@
         },
         {
             "type": "Microsoft.ApiManagement/service/apis/operations",
-            "apiVersion": "2019-01-01",
+            "apiVersion": "2022-08-01",
             "name": "[concat(parameters('apimServiceName'), '/accessibility-insight-service-scan-api/getTestResults')]",
             "dependsOn": [
                 "[resourceId('Microsoft.ApiManagement/service/apis', parameters('apimServiceName'), 'accessibility-insight-service-scan-api')]",
@@ -425,7 +425,7 @@
         },
         {
             "type": "Microsoft.ApiManagement/service/apis/operations/policies",
-            "apiVersion": "2019-01-01",
+            "apiVersion": "2022-08-01",
             "name": "[concat(parameters('apimServiceName'), '/accessibility-insight-service-scan-api/getTestResults/policy')]",
             "dependsOn": [
                 "[resourceId('Microsoft.ApiManagement/service/apis/operations', parameters('apimServiceName'), 'accessibility-insight-service-scan-api','getTestResults')]"
@@ -458,14 +458,14 @@
             },
             "name": "[concat(parameters('apimServiceName'), '/accessibility-insight-service-scan-api/health')]",
             "type": "Microsoft.ApiManagement/service/apis/operations",
-            "apiVersion": "2019-01-01",
+            "apiVersion": "2022-08-01",
             "dependsOn": [
                 "[resourceId('Microsoft.ApiManagement/service/apis', parameters('apimServiceName'), 'accessibility-insight-service-scan-api')]"
             ]
         },
         {
             "type": "Microsoft.ApiManagement/service/apis/operations",
-            "apiVersion": "2019-01-01",
+            "apiVersion": "2022-08-01",
             "name": "[concat(parameters('apimServiceName'), '/accessibility-insight-service-scan-api/ping-scan-notification-url')]",
             "dependsOn": [
                 "[resourceId('Microsoft.ApiManagement/service/apis', parameters('apimServiceName'), 'accessibility-insight-service-scan-api')]"
@@ -481,7 +481,7 @@
         },
         {
             "type": "Microsoft.ApiManagement/service/apis/operations",
-            "apiVersion": "2019-01-01",
+            "apiVersion": "2022-08-01",
             "name": "[concat(parameters('apimServiceName'), '/accessibility-insight-service-scan-api/ping-scan-notification-url-fail')]",
             "dependsOn": [
                 "[resourceId('Microsoft.ApiManagement/service/apis', parameters('apimServiceName'), 'accessibility-insight-service-scan-api')]"
@@ -502,14 +502,14 @@
             },
             "name": "[concat(parameters('apimServiceName'), '/accessibility-insight-service-scan-api/health/policy')]",
             "type": "Microsoft.ApiManagement/service/apis/operations/policies",
-            "apiVersion": "2019-01-01",
+            "apiVersion": "2022-08-01",
             "dependsOn": [
                 "[resourceId('Microsoft.ApiManagement/service/apis/operations', parameters('apimServiceName'), 'accessibility-insight-service-scan-api','health')]"
             ]
         },
         {
             "type": "Microsoft.ApiManagement/service/apis/operations/policies",
-            "apiVersion": "2019-01-01",
+            "apiVersion": "2022-08-01",
             "name": "[concat(parameters('apimServiceName'), '/accessibility-insight-service-scan-api/ping-scan-notification-url/policy')]",
             "dependsOn": [
                 "[resourceId('Microsoft.ApiManagement/service/apis/operations', parameters('apimServiceName'), 'accessibility-insight-service-scan-api','ping-scan-notification-url')]"
@@ -521,7 +521,7 @@
         },
         {
             "type": "Microsoft.ApiManagement/service/apis/operations/policies",
-            "apiVersion": "2019-01-01",
+            "apiVersion": "2022-08-01",
             "name": "[concat(parameters('apimServiceName'), '/accessibility-insight-service-scan-api/ping-scan-notification-url-fail/policy')]",
             "dependsOn": [
                 "[resourceId('Microsoft.ApiManagement/service/apis/operations', parameters('apimServiceName'), 'accessibility-insight-service-scan-api','ping-scan-notification-url-fail')]"
