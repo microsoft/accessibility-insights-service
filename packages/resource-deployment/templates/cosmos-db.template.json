@@ -35,7 +35,6 @@
             },
             "kind": "GlobalDocumentDB",
             "properties": {
-                "disableLocalAuth": true,
                 "consistencyPolicy": {
                     "defaultConsistencyLevel": "Session",
                     "maxIntervalInSeconds": 5,
