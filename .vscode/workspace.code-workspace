@@ -205,7 +205,8 @@
             "ms-azuretools.vscode-azurefunctions",
             "christian-kohler.npm-intellisense",
             "ms-vscode.powershell",
-            "ms-azuretools.vscode-docker"
+            "ms-azuretools.vscode-docker",
+            "msazurermtools.azurerm-vscode-tools"
         ]
     },
 }
