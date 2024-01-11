@@ -13,7 +13,7 @@
         "cbuild": "yarn packages --topological-dev run cbuild",
         "dbuild": "yarn install && npm-run-all --serial syncpack:fix build",
         "pack": "yarn packages --topological-dev run pack",
-        "test": "npx jest --maxWorkers=5",
+        "test": "npx jest --maxWorkers=3 --runInBand --watch",
         "test:nc": "npx jest --collectCoverage=false --maxWorkers=5",
         "test:e2e": "npx jest functional-tests.local.spec.ts",
         "publish-code-coverage": "./upload-to-codecov.sh",
