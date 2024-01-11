@@ -6,11 +6,7 @@ module.exports = {
     clearMocks: true,
     verbose: true,
     testEnvironment: 'node',
-    globals: {
-        'ts-jest': {
-            isolatedModules: true,
-        },
-    },
+
     collectCoverage: true,
     coverageDirectory: '<rootDir>/test-results/unit/coverage',
     coverageReporters: ['text', 'lcov', 'cobertura'],
@@ -38,6 +34,7 @@ module.exports = {
             'ts-jest',
             {
                 tsconfig: '<rootDir>/tsconfig.json',
+                isolatedModules: true,
             },
         ],
     },
