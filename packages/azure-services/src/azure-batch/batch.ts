@@ -6,10 +6,8 @@ import * as crypto from 'crypto';
 import { BatchServiceModels } from '@azure/batch';
 import { System } from 'common';
 import { inject, injectable, optional } from 'inversify';
-import * as _ from 'lodash';
 import { GlobalLogger } from 'logger';
-import { CloudTask, TaskListOptions, JobListOptions, CloudJob, OutputFile } from '@azure/batch/types/src/models';
-import { StorageContainerSASUrlProvider } from '../azure-blob/storage-container-sas-url-provider';
+import { CloudTask, TaskListOptions, JobListOptions, CloudJob } from '@azure/batch/types/src/models';
 import { Message } from '../azure-queue/message';
 import { BatchServiceClientProvider, iocTypeNames } from '../ioc-types';
 import { BatchConfig } from './batch-config';
@@ -26,7 +24,6 @@ export class Batch {
         @optional()
         @inject(BatchTaskConfigGenerator)
         private readonly batchTaskConfigGenerator: BatchTaskConfigGenerator,
-        @inject(StorageContainerSASUrlProvider) private readonly containerSASUrlProvider: StorageContainerSASUrlProvider,
         @inject(BatchConfig) private readonly config: BatchConfig,
         @inject(GlobalLogger) private readonly logger: GlobalLogger,
         // Azure Batch supports the maximum 100 tasks to be added in a single addTaskCollection() API call
@@ -254,28 +251,19 @@ export class Batch {
 
         const jobTasks: Map<string, JobTask> = new Map();
         const taskAddParameters: BatchServiceModels.TaskAddParameter[] = [];
-        let sasUrl: string;
-
-        try {
-            sasUrl = await this.containerSASUrlProvider.generateSASUrl(Batch.batchLogContainerName);
-        } catch (error) {
-            this.logger.logError(`Encountered the error while generating Blob Storage SAS URL`, {
-                error: System.serializeError(error),
-                blobContainerName: Batch.batchLogContainerName,
-            });
-        }
 
         await Promise.all(
             messages.map(async (message) => {
                 const jobTask = new JobTask(message.messageId);
                 jobTasks.set(jobTask.id, jobTask);
-                const taskAddParameter = await this.getTaskAddParameter(jobId, jobTask.id, message.messageText, sasUrl);
+                const taskAddParameter = await this.getTaskAddParameter(jobTask.id, message.messageText);
                 taskAddParameters.push(taskAddParameter);
             }),
         );
 
         const client = await this.batchClientProvider();
         const taskAddCollectionResult = await client.task.addCollection(jobId, taskAddParameters);
+
         taskAddCollectionResult.value.forEach((taskAddResult) => {
             if (/success/i.test(taskAddResult.status)) {
                 jobTasks.get(taskAddResult.taskId).state = JobTaskState.queued;
@@ -294,40 +282,13 @@ export class Batch {
         return Array.from(jobTasks.values());
     }
 
-    private async getTaskAddParameter(
-        jobId: string,
-        taskId: string,
-        messageText: string,
-        sasUrl: string,
-    ): Promise<BatchServiceModels.TaskAddParameter> {
+    private async getTaskAddParameter(taskId: string, messageText: string): Promise<BatchServiceModels.TaskAddParameter> {
         const taskParameter = await this.batchTaskConfigGenerator.getTaskConfigWithImageSupport(
             this.config.accountName,
             taskId,
             messageText,
         );
-        if (taskParameter === undefined) {
-            return taskParameter;
-        }
-
-        if (!_.isNil(sasUrl)) {
-            taskParameter.outputFiles = this.getOutFilesConfiguration(jobId, taskId, sasUrl);
-        }
 
         return taskParameter;
-    }
-
-    private getOutFilesConfiguration(jobId: string, taskId: string, sasUrl: string): OutputFile[] {
-        return [
-            {
-                filePattern: `../std*.txt`,
-                destination: {
-                    container: {
-                        path: `${jobId}/${taskId}`,
-                        containerUrl: sasUrl,
-                    },
-                },
-                uploadOptions: { uploadCondition: 'taskcompletion' },
-            },
-        ];
     }
 }

@@ -29,7 +29,7 @@ dbName="onDemandScanner"
 function clearRequestQueues() {
     local queueName=$1
 
-    az storage message clear --account-name "$storageAccountName" --queue-name "$queueName" 1>/dev/null
+    az storage message clear --account-name "$storageAccountName" --queue-name "$queueName" --auth-mode login 1>/dev/null
     echo "Queue $queueName was successfully cleared."
 }
 

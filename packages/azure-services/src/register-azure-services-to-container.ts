@@ -14,7 +14,6 @@ import { isEmpty } from 'lodash';
 import { TokenCredential } from '@azure/identity';
 import { Batch } from './azure-batch/batch';
 import { BatchConfig } from './azure-batch/batch-config';
-import { StorageContainerSASUrlProvider } from './azure-blob/storage-container-sas-url-provider';
 import { CosmosClientWrapper } from './azure-cosmos/cosmos-client-wrapper';
 import { Queue } from './azure-queue/queue';
 import { StorageConfig } from './azure-queue/storage-config';
@@ -86,7 +85,6 @@ export function registerAzureServicesToContainer(
     container.bind(iocTypeNames.CredentialType).toConstantValue(credentialType);
 
     setupBlobServiceClientProvider(container);
-    container.bind(StorageContainerSASUrlProvider).toSelf().inSingletonScope();
     container.bind(Queue).toSelf();
 
     setupAzureBatchServiceClientProvider(container);

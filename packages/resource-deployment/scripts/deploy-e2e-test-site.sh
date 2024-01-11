@@ -60,7 +60,7 @@ deployStorageAccount() {
 
 enableStaticSiteHosting() {
     echo "Enabling static website hosting on storage account $storageAccountName"
-    az storage blob service-properties update --account-name $storageAccountName --static-website true --index-document index.html 1>/dev/null
+    az storage blob service-properties update --account-name $storageAccountName --static-website true --index-document index.html --auth-mode login 1>/dev/null
 
     siteUrl=$(az storage account show --name $storageAccountName --resource-group $resourceGroupName --query "primaryEndpoints.web" --output tsv)
     echo "Site hosting enabled at $siteUrl"
@@ -68,7 +68,7 @@ enableStaticSiteHosting() {
 
 uploadSiteContents() {
     echo "Uploading site contents from source folder $siteContentFolder in storage account"
-    az storage blob upload-batch --account-name $storageAccountName --destination "\$web" --source "$siteContentFolder" --overwrite=true 1>/dev/null
+    az storage blob upload-batch --account-name $storageAccountName --destination "\$web" --source "$siteContentFolder" --overwrite=true --auth-mode login 1>/dev/null
 }
 
 updateConfigFiles() {

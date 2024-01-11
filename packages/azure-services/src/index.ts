@@ -22,7 +22,6 @@ export {
     BlobSaveCondition,
 } from './azure-blob/blob-storage-client';
 export { iocTypeNames as AzureServicesIocTypes } from './ioc-types';
-export { StorageContainerSASUrlProvider } from './azure-blob/storage-container-sas-url-provider';
 export { BatchTaskConfigGenerator, BatchTaskPropertyProvider, UserAccessLevels } from './azure-batch/batch-task-config-generator';
 export { Batch } from './azure-batch/batch';
 export { BatchConfig } from './azure-batch/batch-config';

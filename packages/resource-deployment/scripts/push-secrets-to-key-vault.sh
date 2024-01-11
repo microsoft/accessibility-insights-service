@@ -72,15 +72,6 @@ getCosmosDbUrl() {
     fi
 }
 
-getStorageAccessKey() {
-    storageAccountKey=$(az storage account keys list --account-name "$storageAccountName" --query "[0].value" -o tsv)
-
-    if [[ -z $storageAccountKey ]]; then
-        echo "Unable to get access key for storage account $storageAccountName"
-        exit 1
-    fi
-}
-
 getContainerRegistryLogin() {
     containerRegistryUsername=$(az acr credential show --name "$containerRegistryName" --query "username" -o tsv)
     containerRegistryPassword=$(az acr credential show --name "$containerRegistryName" --query "passwords[0].value" -o tsv)
@@ -118,9 +109,6 @@ pushSecretsToKeyVault() (
     pushSecretToKeyVault "cosmosDbUrl" "$cosmosDbUrl"
 
     pushSecretToKeyVault "storageAccountName" "$storageAccountName"
-
-    getStorageAccessKey
-    pushSecretToKeyVault "storageAccountKey" "$storageAccountKey"
 
     pushSecretToKeyVault "restApiSpAppId" "$webApiAdClientId"
     pushSecretToKeyVault "restApiSpSecret" "$webApiAdClientSecret"

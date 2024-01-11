@@ -11,12 +11,12 @@ createQueue() {
     local queue=$1
 
     echo "[create-queues] Checking if queue $queue exists in storage account $storageAccountName"
-    queueExists=$(az storage queue exists --name "$queue" --account-name "$storageAccountName" --query "exists")
+    queueExists=$(az storage queue exists --name "$queue" --account-name "$storageAccountName" --auth-mode login --query "exists")
 
     if [ "$queueExists" = true ]; then
         echo "[create-queues] Queue $queue already exists"
     else
-        az storage queue create --name "$queue" --account-name "$storageAccountName" 1>/dev/null
+        az storage queue create --name "$queue" --account-name "$storageAccountName" --auth-mode login 1>/dev/null
         echo "[create-queues] Successfully created queue $queue"
     fi
 }
