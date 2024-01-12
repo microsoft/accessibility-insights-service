@@ -5,7 +5,7 @@ import 'reflect-metadata';
 
 import { Context } from '@azure/functions';
 import { GuidGenerator, ServiceConfiguration, Url } from 'common';
-import { cloneDeep, isEmpty, isNil, uniq } from 'lodash';
+import { cloneDeep, isEmpty, isNil, uniqBy } from 'lodash';
 import * as MockDate from 'mockdate';
 import {
     OnDemandPageScanRunResultProvider,
@@ -189,12 +189,18 @@ describe(ScanBatchRequestFeedController, () => {
                 scanRunBatchRequest: [
                     {
                         scanId: 'scan-4',
-                        url: 'http://url-4/info#details' /** should normalize URL */,
+                        url: 'http://url-4',
                         priority: 1,
                         scanNotifyUrl: 'reply-url-4',
                         site: {
                             baseUrl: 'base-url-4',
-                            knownPages: ['http://page1', 'http://page2', 'http://page2'] /** should remove duplicate URLs */,
+                            knownPages: [
+                                'http://page1',
+                                'http://page2',
+                                'http://page2',
+                                'http://page3?b=1&a=1',
+                                'http://page3?a=1&b=1',
+                            ] /** should remove duplicate URLs */,
                             discoveryPatterns: ['pattern1'],
                         },
                         reportGroups: [{ consolidatedId: 'consolidated-id-2' }],
@@ -282,7 +288,7 @@ function setupWebsiteScanResultProviderMock(documents: OnDemandPageScanBatchRequ
                                 timestamp: dateNow.toJSON(),
                             },
                         ],
-                        knownPages: request.site?.knownPages ? uniq(request.site?.knownPages) : undefined,
+                        knownPages: request.site?.knownPages ? uniqBy(request.site.knownPages, Url.normalizeUrl) : undefined,
                         discoveryPatterns: request.site?.discoveryPatterns,
                         created: dateNow.toJSON(),
                     } as WebsiteScanResult;
@@ -326,7 +332,7 @@ function setupOnDemandPageScanRunResultProviderMock(
                     })[0];
                 const result: OnDemandPageScanResult = {
                     id: request.scanId,
-                    url: Url.normalizeUrl(request.url),
+                    url: request.url,
                     priority: request.priority,
                     itemType: ItemType.onDemandPageScanRunResult,
                     scanType: getScanType(request),
@@ -364,7 +370,7 @@ function setupPageScanRequestProviderMock(documents: OnDemandPageScanBatchReques
                 const scanGroupType = getScanGroupType(scanRequest);
                 const request: OnDemandPageScanRequest = {
                     id: scanRequest.scanId,
-                    url: Url.normalizeUrl(scanRequest.url),
+                    url: scanRequest.url,
                     priority: scanRequest.priority,
                     scanType: getScanType(scanRequest),
                     itemType: ItemType.onDemandPageScanRequest,
@@ -381,7 +387,7 @@ function setupPageScanRequestProviderMock(documents: OnDemandPageScanBatchReques
                 if (!isNil(scanRequest.site)) {
                     request.site = cloneDeep(scanRequest.site);
                     if (scanRequest.site.knownPages) {
-                        request.site.knownPages = uniq(scanRequest.site.knownPages);
+                        request.site.knownPages = uniqBy(scanRequest.site.knownPages, Url.normalizeUrl);
                     }
                 }
 

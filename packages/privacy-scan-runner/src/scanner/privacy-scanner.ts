@@ -37,7 +37,7 @@ export class PrivacyScanner {
         try {
             this.logger.logInfo(`Starting privacy scan of a webpage.`);
             const scanResult = await this.privacyScannerCore.scan(url, page);
-            this.logger.logInfo(`Privacy scanning of a webpage successfully completed.`);
+            this.logger.logInfo(`Privacy scanning of a webpage is completed.`);
 
             return scanResult;
         } catch (error) {

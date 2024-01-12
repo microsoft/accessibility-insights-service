@@ -40,8 +40,7 @@ getStorageConnectionString() {
         --name "$storageAccountName" \
         --resource-group "$resourceGroupName" \
         --subscription "$subscription" \
-        --query connectionString \
-        --auth-mode login --out tsv)
+        --query connectionString --out tsv)
 }
 
 getCosmosDbConnectionString() {

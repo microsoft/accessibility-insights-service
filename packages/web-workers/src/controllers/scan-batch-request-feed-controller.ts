@@ -3,7 +3,7 @@
 
 import { GuidGenerator, ServiceConfiguration, Url } from 'common';
 import { inject, injectable } from 'inversify';
-import { filter, groupBy, isEmpty, uniq } from 'lodash';
+import { filter, groupBy, isEmpty, uniqBy } from 'lodash';
 import { ContextAwareLogger, ScanRequestAcceptedMeasurements } from 'logger';
 import {
     OnDemandPageScanRunResultProvider,
@@ -230,24 +230,18 @@ export class ScanBatchRequestFeedController extends WebController {
     }
 
     private normalizeRequest(request: ScanRunBatchRequest, batchRequestId: string): void {
-        // Normalize request URL
-        request.url = Url.normalizeUrl(request.url);
-
         // Normalize known pages
         if (request.site?.knownPages?.length > 0) {
-            // Normalize URLs to a standard form
-            request.site.knownPages = request.site?.knownPages.map((url) => Url.normalizeUrl(url));
-
             // Check for duplicate URLs in a client request
             const pages = [...request.site.knownPages, request.url];
             const duplicates = filter(
-                groupBy(pages, (url) => url),
+                groupBy(pages, (url) => Url.normalizeUrl(url)),
                 (group) => group.length > 1,
             ).map((value) => value[0]);
 
             // Remove duplicate URLs from a client request
             if (duplicates.length > 0) {
-                request.site.knownPages = uniq(request.site.knownPages);
+                request.site.knownPages = uniqBy(request.site.knownPages, Url.normalizeUrl);
                 this.logger.logWarn('Removed duplicate URLs from a client request.', {
                     batchRequestId,
                     scanId: request.scanId,
