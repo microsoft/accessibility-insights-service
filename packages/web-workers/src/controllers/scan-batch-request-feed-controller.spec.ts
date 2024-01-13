@@ -5,7 +5,7 @@ import 'reflect-metadata';
 
 import { Context } from '@azure/functions';
 import { GuidGenerator, ServiceConfiguration, Url } from 'common';
-import { cloneDeep, isEmpty, isNil, uniqBy } from 'lodash';
+import { cloneDeep, isEmpty, isNil, pullAllBy, uniqBy } from 'lodash';
 import * as MockDate from 'mockdate';
 import {
     OnDemandPageScanRunResultProvider,
@@ -167,6 +167,7 @@ describe(ScanBatchRequestFeedController, () => {
                         scanNotifyUrl: 'reply-url-1',
                         site: {
                             baseUrl: 'base-url-1',
+                            knownPages: ['http://page1', 'http://page2'],
                         },
                         reportGroups: [{ consolidatedId: 'consolidated-id-1' }],
                     },
@@ -195,6 +196,7 @@ describe(ScanBatchRequestFeedController, () => {
                         site: {
                             baseUrl: 'base-url-4',
                             knownPages: [
+                                'http://url-4' /** should remove request URL */,
                                 'http://page1',
                                 'http://page2',
                                 'http://page2',
@@ -284,11 +286,13 @@ function setupWebsiteScanResultProviderMock(documents: OnDemandPageScanBatchRequ
                         pageScans: [
                             {
                                 scanId: request.scanId,
-                                url: Url.normalizeUrl(request.url),
+                                url: request.url,
                                 timestamp: dateNow.toJSON(),
                             },
                         ],
-                        knownPages: request.site?.knownPages ? uniqBy(request.site.knownPages, Url.normalizeUrl) : undefined,
+                        knownPages: request.site?.knownPages
+                            ? pullAllBy(uniqBy(request.site.knownPages, Url.normalizeUrl), [request.url], Url.normalizeUrl)
+                            : undefined,
                         discoveryPatterns: request.site?.discoveryPatterns,
                         created: dateNow.toJSON(),
                     } as WebsiteScanResult;
@@ -387,7 +391,11 @@ function setupPageScanRequestProviderMock(documents: OnDemandPageScanBatchReques
                 if (!isNil(scanRequest.site)) {
                     request.site = cloneDeep(scanRequest.site);
                     if (scanRequest.site.knownPages) {
-                        request.site.knownPages = uniqBy(scanRequest.site.knownPages, Url.normalizeUrl);
+                        request.site.knownPages = pullAllBy(
+                            uniqBy(scanRequest.site.knownPages, Url.normalizeUrl),
+                            [scanRequest.url],
+                            Url.normalizeUrl,
+                        );
                     }
                 }
 

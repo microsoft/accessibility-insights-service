@@ -3,7 +3,7 @@
 
 import { GuidGenerator, ServiceConfiguration, Url } from 'common';
 import { inject, injectable } from 'inversify';
-import { filter, groupBy, isEmpty, uniqBy } from 'lodash';
+import { filter, groupBy, isEmpty, pullAllBy, uniqBy } from 'lodash';
 import { ContextAwareLogger, ScanRequestAcceptedMeasurements } from 'logger';
 import {
     OnDemandPageScanRunResultProvider,
@@ -241,7 +241,7 @@ export class ScanBatchRequestFeedController extends WebController {
 
             // Remove duplicate URLs from a client request
             if (duplicates.length > 0) {
-                request.site.knownPages = uniqBy(request.site.knownPages, Url.normalizeUrl);
+                request.site.knownPages = pullAllBy(uniqBy(request.site.knownPages, Url.normalizeUrl), [request.url], Url.normalizeUrl);
                 this.logger.logWarn('Removed duplicate URLs from a client request.', {
                     batchRequestId,
                     scanId: request.scanId,
