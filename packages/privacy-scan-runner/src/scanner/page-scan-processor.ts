@@ -63,7 +63,6 @@ export class PageScanProcessor {
 
     private async runPrivacyScan(url: string): Promise<PrivacyScanResult> {
         const privacyScanResult = await this.privacyScanner.scan(url, this.page);
-        this.logger.logInfo('The privacy scan of a webpage is completed.');
 
         return privacyScanResult;
     }

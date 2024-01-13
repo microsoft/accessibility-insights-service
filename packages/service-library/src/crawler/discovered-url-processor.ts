@@ -1,8 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { isNil, pullAll, take } from 'lodash';
+import { isNil, pullAllBy, take } from 'lodash';
 import { inject, injectable } from 'inversify';
+import { Url } from 'common';
 import { UrlLocationValidator } from '../website-builder/url-location-validator';
 
 @injectable()
@@ -23,7 +24,7 @@ export class DiscoveredUrlProcessor {
     }
 
     private removeUrlsFromList(urlList: string[], removeUrls: string[]): string[] {
-        return pullAll(urlList, removeUrls);
+        return pullAllBy(urlList, removeUrls, Url.normalizeUrl);
     }
 
     private limitUrlCount(urlList: string[], numUrls: number): string[] {
