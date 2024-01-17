@@ -19,7 +19,7 @@ function deleteShare() {
 
 function createShare() {
     Add-Type -AssemblyName System.Web
-    $env:BUILD_KEY = [System.Web.Security.Membership]::GeneratePassword(14, 1)
+    $env:BUILD_KEY = [System.Web.Security.Membership]::GeneratePassword(14, 1).Replace('/', '#')
 
     net user $userName "${env:BUILD_KEY}" /ADD | Out-Null
     net share $shareName=$sharePath /grant:"$($userName),READ" | Out-Null
