@@ -23,6 +23,7 @@ describe('CosmosClientWrapper', () => {
     let itemMock: IMock<cosmos.Item>;
     let queryIteratorMock: IMock<cosmos.QueryIterator<any>>;
     let loggerMock: IMock<MockableLogger>;
+
     const partitionKey = 'partitionKey';
     const dbName = 'stub db';
     const collectionName = 'stub collection';
@@ -34,6 +35,60 @@ describe('CosmosClientWrapper', () => {
         setupVerifiableGetCollectionCall();
         loggerMock = Mock.ofType(MockableLogger);
         testSubject = new CosmosClientWrapper(cosmosClientProviderStub, loggerMock.object);
+    });
+
+    describe('patchItem', () => {
+        it('patch item', async () => {
+            const id = 'id';
+            const operations = [{ op: 'add', path: 'path', value: 'value' }] as cosmos.PatchRequestBody;
+            const itemResponse = { resource: { id }, statusCode: 200 } as cosmos.ItemResponse<any>;
+            itemMock
+                .setup((o) => o.patch(operations))
+                .returns(() => Promise.resolve(itemResponse))
+                .verifiable();
+            collectionMock
+                .setup((o) => o.item(id, partitionKey))
+                .returns(() => itemMock.object)
+                .verifiable();
+            const expectedResult = {
+                item: itemResponse.resource,
+                statusCode: itemResponse.statusCode,
+            };
+
+            const actualResult = await testSubject.patchItem(id, operations, dbName, collectionName, partitionKey, false);
+            expect(actualResult).toEqual(expectedResult);
+            verifyMocks();
+        });
+
+        it('handles error response', async () => {
+            const id = 'id';
+            const operations = [{ op: 'add', path: 'path', value: 'value' }] as cosmos.PatchRequestBody;
+            const responseError: cosmos.ErrorResponse = {
+                message: 'NotFound',
+                name: 'NotFound',
+                code: 404,
+            };
+            itemMock
+                .setup((o) => o.patch(operations))
+                .returns(() => Promise.reject(responseError))
+                .verifiable();
+            collectionMock
+                .setup((o) => o.item(id, partitionKey))
+                .returns(() => itemMock.object)
+                .verifiable();
+            const expectedResult = {
+                response: 'NotFound',
+                statusCode: 404,
+            };
+
+            const actualResult = await testSubject.patchItem(id, operations, dbName, collectionName, partitionKey, false);
+            expect(actualResult).toEqual(expectedResult);
+            verifyMocks();
+
+            await expect(testSubject.patchItem(id, operations, dbName, collectionName, partitionKey)).rejects.toThrowError(
+                `The Cosmos DB 'patch' operation failed. Document Id: id Response status code: 404 Response: NotFound`,
+            );
+        });
     });
 
     describe('readAllItem()', () => {

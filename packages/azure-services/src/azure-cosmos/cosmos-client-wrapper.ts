@@ -13,7 +13,8 @@ import { CosmosOperationResponse } from './cosmos-operation-response';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-export declare type CosmosOperation = 'upsertItem' | 'upsertItems' | 'readAllItems' | 'queryItems' | 'readItem' | 'deleteItem';
+export declare type CosmosOperation = 'upsertItem' | 'upsertItems' | 'readAllItems' | 'queryItems' | 'readItem' | 'deleteItem' | 'patch';
+export declare type PatchRequest = cosmos.PatchRequestBody;
 
 @injectable()
 export class CosmosClientWrapper {
@@ -64,6 +65,39 @@ export class CosmosClientWrapper {
         }
 
         return responses;
+    }
+
+    /**
+     * See https://learn.microsoft.com/en-us/azure/cosmos-db/partial-document-update
+     */
+    public async patchItem<T extends CosmosDocument>(
+        id: string,
+        operations: PatchRequest,
+        dbName: string,
+        collectionName: string,
+        partitionKey: string,
+        throwIfNotSuccess: boolean = true,
+    ): Promise<CosmosOperationResponse<T>> {
+        const container = await this.getContainer(dbName, collectionName);
+        try {
+            const response = await container.item(id, partitionKey).patch(operations);
+            const itemT = <T>(<unknown>response.resource);
+
+            return {
+                item: itemT,
+                statusCode: response.statusCode,
+            };
+        } catch (error) {
+            this.logFailedResponse('patch', error, {
+                itemId: id,
+                operations: JSON.stringify(operations),
+                db: dbName,
+                collection: collectionName,
+                partitionKey: partitionKey,
+            });
+
+            return this.handleFailedOperationResponse('patch', error, throwIfNotSuccess, id);
+        }
     }
 
     public async upsertItem<T extends CosmosDocument>(
