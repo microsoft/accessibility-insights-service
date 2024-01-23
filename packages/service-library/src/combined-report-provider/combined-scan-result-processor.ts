@@ -18,7 +18,7 @@ export class CombinedScanResultProcessor {
 
     private readonly msecBetweenRetries: number = 1000;
 
-    private readonly maxCombinedResultsBlobSize = 50 * 1024 * 1024;
+    private readonly maxCombinedResultsBlobSize = 10 * 1024 * 1024;
 
     constructor(
         @inject(CombinedAxeResultBuilder) protected readonly combinedAxeResultBuilder: CombinedAxeResultBuilder,

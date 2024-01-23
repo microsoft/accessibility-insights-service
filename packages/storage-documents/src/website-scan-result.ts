@@ -6,7 +6,53 @@ import { StorageDocument } from './storage-document';
 import { ItemType } from './item-type';
 import { ReportFormat, OnDemandPageScanRunState, ScanState } from './on-demand-page-scan-result';
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 export declare type ScanGroupType = 'single-scan' | 'consolidated-scan' | 'deep-scan';
+
+/**
+ * Represents website scan result data.
+ * Composite DB document key properties: `baseUrl`, `scanGroupId`.
+ */
+export interface WebsiteScanData extends StorageDocument {
+    itemType: ItemType.websiteScanData;
+    baseUrl: string;
+    scanGroupId: string;
+    scanGroupType: ScanGroupType;
+    // This value is immutable and is set on new db document creation.
+    deepScanId?: string;
+    deepScanLimit?: number;
+    discoveryPatterns?: string[];
+    created: string;
+    reports?: WebsiteScanReport[];
+    /** The unique URLs list. Supports JSON Patch Cosmos DB operation:
+     * `path: '/knownPages/url', value: {}`
+     * The document must have `knownPages` property to support patch operation.
+     */
+    knownPages: KnownPages;
+}
+
+/**
+ * Represents website page partial scan result data.
+ * Composite DB document key properties: `websiteId`, `scanId`.
+ * Partition key is inherited from corresponding `WebsiteScanData` document.
+ */
+export interface WebsiteScanPageData extends StorageDocument {
+    itemType: ItemType.websiteScanPageData;
+    websiteId: string;
+    scanId: string;
+    url: string;
+    scanState?: ScanState;
+    runState?: OnDemandPageScanRunState;
+    timestamp: string;
+}
+
+/**
+ * Represents website URL.
+ */
+export interface KnownPages {
+    [key: string]: any;
+}
 
 /**
  * Represents website scan result composite document.
