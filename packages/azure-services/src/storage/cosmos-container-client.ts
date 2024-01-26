@@ -4,7 +4,7 @@
 import * as cosmos from '@azure/cosmos';
 import pLimit from 'p-limit';
 import { isPlainObject, mapValues, mergeWith } from 'lodash';
-import { CosmosClientWrapper, PatchRequest } from '../azure-cosmos/cosmos-client-wrapper';
+import { CosmosClientWrapper } from '../azure-cosmos/cosmos-client-wrapper';
 import { CosmosDocument } from '../azure-cosmos/cosmos-document';
 import { CosmosOperationResponse } from '../azure-cosmos/cosmos-operation-response';
 import { client } from './client';
@@ -45,7 +45,7 @@ export class CosmosContainerClient {
      */
     public async patchDocument<T extends CosmosDocument>(
         id: string,
-        operations: PatchRequest,
+        operations: cosmos.PatchRequestBody,
         partitionKey: string,
         throwIfNotSuccess: boolean = true,
     ): Promise<CosmosOperationResponse<T>> {

@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 export { CosmosContainerClient } from './storage/cosmos-container-client';
-export { CosmosClientWrapper, PatchRequest } from './azure-cosmos/cosmos-client-wrapper';
+export { CosmosClientWrapper } from './azure-cosmos/cosmos-client-wrapper';
 export { CosmosOperationResponse } from './azure-cosmos/cosmos-operation-response';
 export { Message } from './azure-queue/message';
 export { Queue } from './azure-queue/queue';

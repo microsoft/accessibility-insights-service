@@ -12,6 +12,16 @@ const shaJS = require('sha.js');
 export class HashGenerator {
     public constructor(private readonly shaObj = shaJS) {}
 
+    public getWebsiteScanDataDocumentId(baseUrl: string, scanGroupId: string): string {
+        // Preserve parameters order below for the hash generation compatibility
+        return this.generateBase64Hash(baseUrl, scanGroupId);
+    }
+
+    public getWebsiteScanPageDataDocumentId(websiteId: string, scanId: string): string {
+        // Preserve parameters order below for the hash generation compatibility
+        return this.generateBase64Hash(websiteId, scanId);
+    }
+
     public getWebsiteScanResultDocumentId(baseUrl: string, scanGroupId: string): string {
         // Preserve parameters order below for the hash generation compatibility
         return this.generateBase64Hash(baseUrl, scanGroupId);

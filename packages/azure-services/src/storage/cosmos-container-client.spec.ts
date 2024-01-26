@@ -5,7 +5,8 @@ import 'reflect-metadata';
 
 import * as MockDate from 'mockdate';
 import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
-import { CosmosClientWrapper, PatchRequest } from '../azure-cosmos/cosmos-client-wrapper';
+import { PatchRequestBody } from '@azure/cosmos';
+import { CosmosClientWrapper } from '../azure-cosmos/cosmos-client-wrapper';
 import { CosmosDocument } from '../azure-cosmos/cosmos-document';
 import { CosmosOperationResponse } from '../azure-cosmos/cosmos-operation-response';
 import { CosmosContainerClient } from './cosmos-container-client';
@@ -170,7 +171,7 @@ describe('mergeOrWriteDocument()', () => {
 describe('Cosmos container client generic operations', () => {
     it('patchDocument()', async () => {
         const id = 'id';
-        const operations = [{ op: 'add', path: 'path' }] as PatchRequest;
+        const operations = [{ op: 'add', path: 'path' }] as PatchRequestBody;
         const expectedResult = { statusCode: 200, item: {} };
         cosmosClientWrapperMock
             .setup(async (o) => o.patchItem(id, operations, dbName, collectionName, partitionKey, true))

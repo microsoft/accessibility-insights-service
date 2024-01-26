@@ -29,7 +29,8 @@ export interface WebsiteScanData extends StorageDocument {
      * `path: '/knownPages/url', value: {}`
      * The document must have `knownPages` property to support patch operation.
      */
-    knownPages: KnownPages;
+    knownPages?: KnownPages;
+    pages?: WebsiteScanPageData[];
 }
 
 /**
@@ -48,10 +49,14 @@ export interface WebsiteScanPageData extends StorageDocument {
 }
 
 /**
- * Represents website URL.
+ * Represents known website URLs.
+ * The object key property is a hash of the URL string. The Cosmos DB document patch operation will update the same property
+ * hence URL with the same hash will not be duplicated.
+ *
+ * The estimated maximum URLs count is about 13K for the current 2 MB Cosmos DB document size limit.
  */
 export interface KnownPages {
-    [key: string]: any;
+    [key: string]: { url: string };
 }
 
 /**

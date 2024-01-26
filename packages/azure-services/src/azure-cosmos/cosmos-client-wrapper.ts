@@ -14,7 +14,6 @@ import { CosmosOperationResponse } from './cosmos-operation-response';
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 export declare type CosmosOperation = 'upsertItem' | 'upsertItems' | 'readAllItems' | 'queryItems' | 'readItem' | 'deleteItem' | 'patch';
-export declare type PatchRequest = cosmos.PatchRequestBody;
 
 @injectable()
 export class CosmosClientWrapper {
@@ -72,7 +71,7 @@ export class CosmosClientWrapper {
      */
     public async patchItem<T extends CosmosDocument>(
         id: string,
-        operations: PatchRequest,
+        operations: cosmos.PatchRequestBody,
         dbName: string,
         collectionName: string,
         partitionKey: string,

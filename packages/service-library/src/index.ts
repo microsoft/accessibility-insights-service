@@ -39,3 +39,4 @@ export * from './website-builder/page-metadata-generator';
 export { createDiscoveryPattern } from './crawler/discovery-pattern-factory';
 export { CrawlRunner } from './crawler/crawl-runner';
 export { DiscoveredUrlProcessor } from './crawler/discovered-url-processor';
+export { WebsiteScanDataProvider } from './data-providers/website-scan-data-provider';
