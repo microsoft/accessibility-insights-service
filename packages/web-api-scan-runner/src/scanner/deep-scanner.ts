@@ -64,7 +64,8 @@ export class DeepScanner {
         const websiteScanResultExpanded = await this.websiteScanResultProvider.read(websiteScanResult.id, true);
         const processedUrls = this.discoveredUrlProcessor.process(discoveredUrls, deepScanDiscoveryLimit, [
             ...websiteScanResultExpanded.knownPages,
-            runnerScanMetadata.url, // exclude the current page in case a link with hash fragments was discovered (has is removed from URL)
+            // exclude the current page in case a link with hash fragments was discovered (hash is removed from a link)
+            runnerScanMetadata.url,
         ]);
         const websiteScanResultUpdated = await this.updateWebsiteScanResult(
             runnerScanMetadata.id,
