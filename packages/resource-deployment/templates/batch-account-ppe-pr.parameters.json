@@ -21,7 +21,7 @@
             "value": "4"
         },
         "privacyScanPoolNodes": {
-            "value": "2"
+            "value": "4"
         },
         "privacyScanPoolVmSize": {
             "value": "standard_e4d_v5"

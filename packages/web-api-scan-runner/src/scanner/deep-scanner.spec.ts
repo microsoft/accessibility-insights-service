@@ -231,7 +231,7 @@ function setupCrawl(crawlDiscoveryPatterns: string[]): void {
 
 function setupProcessUrls(deepScanLimit: number = deepScanDiscoveryLimit): void {
     discoveredUrlProcessorMock
-        .setup((o) => o.process(discoveredUrls, deepScanLimit, knownPages))
+        .setup((o) => o.process(discoveredUrls, deepScanLimit, [...knownPages, url]))
         .returns(() => processedUrls)
         .verifiable();
 }
