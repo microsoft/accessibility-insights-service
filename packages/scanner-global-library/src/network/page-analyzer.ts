@@ -57,7 +57,7 @@ export class PageAnalyzer {
         }
 
         const actualResponse = this.getActualResponse(operationResult);
-        if (actualResponse.operationResult === undefined) {
+        if (actualResponse.operationResult.response === undefined) {
             if (operationResult.browserError === undefined) {
                 operationResult.browserError = {
                     errorType: 'NavigationError',
