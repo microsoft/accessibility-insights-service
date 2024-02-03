@@ -20,8 +20,6 @@ export const defaultLaunchOptions: Puppeteer.PuppeteerNodeLaunchOptions = {
         '--no-sandbox',
         '--disable-setuid-sandbox',
         '--disable-gpu',
-        '--disable-webgl',
-        '--disable-webgl2',
         '--disable-features=BackForwardCache',
         '--js-flags=--max-old-space-size=8192',
         `--window-size=${windowSize.width},${windowSize.height}`,
