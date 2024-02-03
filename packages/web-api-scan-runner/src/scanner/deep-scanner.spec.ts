@@ -196,7 +196,7 @@ describe(DeepScanner, () => {
         await testSubject.runDeepScan(runnerScanMetadata, pageScanResult, websiteScanResult, pageMock.object);
     });
 
-    it('crawls and updates results when knownPages undefined', async () => {
+    it('crawls and updates results when knownPages is undefined', async () => {
         knownPages = undefined;
         setupReadWebsiteScanResult();
         setupLoggerProperties();
