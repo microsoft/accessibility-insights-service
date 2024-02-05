@@ -62,11 +62,11 @@ export class DeepScanner {
 
         // fetch websiteScanResult.knownPages from a storage
         const websiteScanResultExpanded = await this.websiteScanResultProvider.read(websiteScanResult.id, true);
-        const processedUrls = this.discoveredUrlProcessor.process(
-            discoveredUrls,
-            deepScanDiscoveryLimit,
-            websiteScanResultExpanded.knownPages,
-        );
+        const processedUrls = this.discoveredUrlProcessor.process(discoveredUrls, deepScanDiscoveryLimit, [
+            ...(websiteScanResultExpanded.knownPages ?? []),
+            // exclude the current page in case a link with hash fragment was discovered (hash is removed from a link)
+            runnerScanMetadata.url,
+        ]);
         const websiteScanResultUpdated = await this.updateWebsiteScanResult(
             runnerScanMetadata.id,
             websiteScanResult,

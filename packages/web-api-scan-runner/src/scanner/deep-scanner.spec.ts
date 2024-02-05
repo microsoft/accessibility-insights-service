@@ -27,8 +27,8 @@ const processedUrls = ['processedUrl1', 'processedUrl2'];
 const discoveryPatterns = ['discovery pattern'];
 const crawlBaseUrl = 'base url';
 const deepScanId = 'deepScanId';
-const knownPages = ['page1', 'page2'];
 
+let knownPages: string[];
 let discoveredUrls = ['discoveredUrl1', 'discoveredUrl2'];
 let deepScanDiscoveryLimit: number;
 let loggerMock: IMock<GlobalLogger>;
@@ -57,6 +57,7 @@ describe(DeepScanner, () => {
         pageMock = Mock.ofType<Page>();
         scanFeedGeneratorMock = Mock.ofType<ScanFeedGenerator>();
 
+        knownPages = ['page1', 'page2'];
         deepScanDiscoveryLimit = 5;
         serviceConfigMock
             .setup((sc) => sc.getConfigValue('crawlConfig'))
@@ -195,6 +196,18 @@ describe(DeepScanner, () => {
         await testSubject.runDeepScan(runnerScanMetadata, pageScanResult, websiteScanResult, pageMock.object);
     });
 
+    it('crawls and updates results when knownPages is undefined', async () => {
+        knownPages = undefined;
+        setupReadWebsiteScanResult();
+        setupLoggerProperties();
+        setupCrawl(discoveryPatterns);
+        setupProcessUrls();
+        setupUpdateWebsiteScanResult(discoveryPatterns);
+        setupScanFeedGeneratorMock();
+
+        await testSubject.runDeepScan(runnerScanMetadata, pageScanResult, websiteScanResult, pageMock.object);
+    });
+
     it('skip crawl if deep scan was not requested', async () => {
         discoveredUrls = [];
         runnerScanMetadata.deepScan = false;
@@ -231,7 +244,7 @@ function setupCrawl(crawlDiscoveryPatterns: string[]): void {
 
 function setupProcessUrls(deepScanLimit: number = deepScanDiscoveryLimit): void {
     discoveredUrlProcessorMock
-        .setup((o) => o.process(discoveredUrls, deepScanLimit, knownPages))
+        .setup((o) => o.process(discoveredUrls, deepScanLimit, [...(knownPages ?? []), url]))
         .returns(() => processedUrls)
         .verifiable();
 }

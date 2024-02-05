@@ -51,8 +51,12 @@ describe('tryParseUrlString()', () => {
         expect(url).toEqual('https://example.com/home/');
 
         // remove hash
-        url = Url.normalizeUrl('https://example.com/home#top');
-        expect(url).toEqual('https://example.com/home');
+        url = Url.normalizeUrl('https://example.com/main#top');
+        expect(url).toEqual('https://example.com/main/');
+
+        // remove hash and keep single slash
+        url = Url.normalizeUrl('https://example.com/#top');
+        expect(url).toEqual('https://example.com/');
 
         // sort query parameters
         url = Url.normalizeUrl('https://example.com?b=two&a=one&c=three');
