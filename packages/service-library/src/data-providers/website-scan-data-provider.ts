@@ -34,6 +34,16 @@ export class WebsiteScanDataProvider {
         private readonly retryOptions: ExponentialRetryOptions = providerRetryOptions,
     ) {}
 
+    public async read(websiteScanId: string): Promise<WebsiteScanData> {
+        const websiteDbDocument = this.normalizeWebsiteToDbDocument({ id: websiteScanId });
+        const operationResponse = await this.cosmosContainerClient.readDocument<WebsiteScanData>(
+            websiteScanId,
+            websiteDbDocument.partitionKey,
+        );
+
+        return operationResponse.item;
+    }
+
     /**
      * Writes document to a storage if document does not exist; otherwise, merges the document with the current storage document.
      *

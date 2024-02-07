@@ -56,7 +56,13 @@ export interface WebsiteScanPageData extends StorageDocument {
  * The estimated maximum URLs count is about 13K for the current 2 MB Cosmos DB document size limit.
  */
 export interface KnownPages {
-    [key: string]: { url: string };
+    [key: string]: KnownPage;
+}
+
+export interface KnownPage {
+    url: string;
+    scanId?: string;
+    runState?: OnDemandPageScanRunState;
 }
 
 /**
