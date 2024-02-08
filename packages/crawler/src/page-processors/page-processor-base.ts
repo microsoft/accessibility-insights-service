@@ -164,7 +164,6 @@ export abstract class PageProcessorBase implements PageProcessor {
         context.request.loadedUrl = context.page.url();
 
         try {
-            console.log(context.request.userData)
             const userData = context.request.userData;
             const keepUrlFragment = userData?.keepUrlFragment ?? false
             const enqueued = await context.enqueueLinks({

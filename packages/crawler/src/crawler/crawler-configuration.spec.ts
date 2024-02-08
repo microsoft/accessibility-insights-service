@@ -75,10 +75,7 @@ describe(CrawlerConfiguration, () => {
                 keepUrlFragment: false,
             };
     
-            crawlerRunOptionsMock.setup((o) => o.restartCrawl).returns(() => restartCrawl);
-            crawlerRunOptionsMock.setup((o) => o.inputUrls).returns(() => inputUrls);
-            crawlerRunOptionsMock.setup((o) => o.baseCrawlPage).returns(() => baseCrawlPage);
-            crawlerRunOptionsMock.setup((o) => o.discoveryPatterns).returns(() => discoveryPatterns);
+            setupMockRequestQueueOptions();
             crawlerRunOptionsMock.setup((o) => o.keepUrlFragment).returns(() => undefined);
 
             expect(crawlerConfiguration.requestQueueOptions()).toEqual(expectedOptions);
@@ -91,10 +88,7 @@ describe(CrawlerConfiguration, () => {
                 keepUrlFragment: false,
             };
     
-            crawlerRunOptionsMock.setup((o) => o.restartCrawl).returns(() => restartCrawl);
-            crawlerRunOptionsMock.setup((o) => o.inputUrls).returns(() => inputUrls);
-            crawlerRunOptionsMock.setup((o) => o.baseCrawlPage).returns(() => baseCrawlPage);
-            crawlerRunOptionsMock.setup((o) => o.discoveryPatterns).returns(() => discoveryPatterns);
+            setupMockRequestQueueOptions();
             crawlerRunOptionsMock.setup((o) => o.keepUrlFragment).returns(() => false);
 
             expect(crawlerConfiguration.requestQueueOptions()).toEqual(expectedOptions);
@@ -107,15 +101,18 @@ describe(CrawlerConfiguration, () => {
                 keepUrlFragment: true,
             };
     
-            crawlerRunOptionsMock.setup((o) => o.restartCrawl).returns(() => restartCrawl);
-            crawlerRunOptionsMock.setup((o) => o.inputUrls).returns(() => inputUrls);
-            crawlerRunOptionsMock.setup((o) => o.baseCrawlPage).returns(() => baseCrawlPage);
-            crawlerRunOptionsMock.setup((o) => o.discoveryPatterns).returns(() => discoveryPatterns);
+            setupMockRequestQueueOptions();
             crawlerRunOptionsMock.setup((o) => o.keepUrlFragment).returns(() => true);
             
             expect(crawlerConfiguration.requestQueueOptions()).toEqual(expectedOptions);
         });
 
+        function setupMockRequestQueueOptions() : void {
+            crawlerRunOptionsMock.setup((o) => o.restartCrawl).returns(() => restartCrawl);
+            crawlerRunOptionsMock.setup((o) => o.inputUrls).returns(() => inputUrls);
+            crawlerRunOptionsMock.setup((o) => o.baseCrawlPage).returns(() => baseCrawlPage);
+            crawlerRunOptionsMock.setup((o) => o.discoveryPatterns).returns(() => discoveryPatterns);
+        }
     });
 
     describe('getDiscoveryPattern', () => {
