@@ -15,11 +15,11 @@ describe('tryParseUrlString()', () => {
         expect(url).toEqual('https://example.com');
 
         // remove hash
-        url = Url.normalizeUrl('https://example.com/#top',false);
+        url = Url.normalizeUrl('https://example.com/#top', false);
         expect(url).toEqual('https://example.com');
 
         // do not remove hash
-        url = Url.normalizeUrl('https://example.com/#top',true);
+        url = Url.normalizeUrl('https://example.com/#top', true);
         expect(url).toEqual('https://example.com/#top');
 
         // keep and sort query parameters

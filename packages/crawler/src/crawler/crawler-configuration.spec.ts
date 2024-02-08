@@ -74,7 +74,7 @@ describe(CrawlerConfiguration, () => {
                 inputUrls: inputUrls,
                 keepUrlFragment: false,
             };
-    
+
             setupMockRequestQueueOptions();
             crawlerRunOptionsMock.setup((o) => o.keepUrlFragment).returns(() => undefined);
 
@@ -87,7 +87,7 @@ describe(CrawlerConfiguration, () => {
                 inputUrls: inputUrls,
                 keepUrlFragment: false,
             };
-    
+
             setupMockRequestQueueOptions();
             crawlerRunOptionsMock.setup((o) => o.keepUrlFragment).returns(() => false);
 
@@ -100,14 +100,14 @@ describe(CrawlerConfiguration, () => {
                 inputUrls: inputUrls,
                 keepUrlFragment: true,
             };
-    
+
             setupMockRequestQueueOptions();
             crawlerRunOptionsMock.setup((o) => o.keepUrlFragment).returns(() => true);
-            
+
             expect(crawlerConfiguration.requestQueueOptions()).toEqual(expectedOptions);
         });
 
-        function setupMockRequestQueueOptions() : void {
+        function setupMockRequestQueueOptions(): void {
             crawlerRunOptionsMock.setup((o) => o.restartCrawl).returns(() => restartCrawl);
             crawlerRunOptionsMock.setup((o) => o.inputUrls).returns(() => inputUrls);
             crawlerRunOptionsMock.setup((o) => o.baseCrawlPage).returns(() => baseCrawlPage);

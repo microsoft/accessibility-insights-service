@@ -21,7 +21,7 @@ export class EnqueueActiveElementsOperation {
         const elements = await this.activeElementFinder.getActiveElements(context.page, selectors);
         await Promise.all(
             elements.map(async (e) => {
-                const uniqueKey = `${Url.normalizeUrl(url,keepUrlFragment)}#${e.hash}`;
+                const uniqueKey = `${Url.normalizeUrl(url, keepUrlFragment)}#${e.hash}`;
                 const userData: Operation = {
                     operationType: 'click',
                     data: e,

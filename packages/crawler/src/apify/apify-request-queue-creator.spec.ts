@@ -19,7 +19,7 @@ describe(ApifyRequestQueueCreator, () => {
     const baseUrl = 'url';
     const requestQueueName = 'scanRequests';
     const userData = {
-        keepUrlFragment : false
+        keepUrlFragment: false,
     };
 
     beforeEach(() => {
@@ -95,7 +95,11 @@ describe(ApifyRequestQueueCreator, () => {
                 .returns(() => Promise.resolve(undefined))
                 .verifiable();
 
-            const queue = await apifyResourceCreator.createRequestQueue(baseUrl, { clear: false, inputUrls: inputUrls, keepUrlFragment: true });
+            const queue = await apifyResourceCreator.createRequestQueue(baseUrl, {
+                clear: false,
+                inputUrls: inputUrls,
+                keepUrlFragment: true,
+            });
             expect(queue).toBe(queueMock.object);
         });
     });
@@ -111,10 +115,10 @@ describe(ApifyRequestQueueCreator, () => {
         fileSystemMock.setup((o) => o.rmSync(localStorageDir, { recursive: true })).verifiable(dirExists ? Times.once() : Times.never());
     }
 
-    function setupBaseUrlAddRequestQueue(userData: any) : void {
+    function setupBaseUrlAddRequestQueue(userData: any): void {
         queueMock
-        .setup((o) => o.addRequest({ url: baseUrl, skipNavigation: true, keepUrlFragment: userData.keepUrlFragment, userData }))
-        .returns(() => Promise.resolve(undefined))
-        .verifiable();
+            .setup((o) => o.addRequest({ url: baseUrl, skipNavigation: true, keepUrlFragment: userData.keepUrlFragment, userData }))
+            .returns(() => Promise.resolve(undefined))
+            .verifiable();
     }
 });

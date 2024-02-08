@@ -165,21 +165,18 @@ export abstract class PageProcessorBase implements PageProcessor {
 
         try {
             const userData = context.request.userData;
-            const keepUrlFragment = userData?.keepUrlFragment ?? false
+            const keepUrlFragment = userData?.keepUrlFragment ?? false;
             const enqueued = await context.enqueueLinks({
                 // eslint-disable-next-line security/detect-non-literal-regexp
                 regexps: this.discoveryPatterns?.length > 0 ? this.discoveryPatterns.map((p) => new RegExp(p)) : undefined,
                 transformRequestFunction: (request) => {
                     request.keepUrlFragment = keepUrlFragment;
-                    if(request.userData)
-                    {
-                        request.userData.keepUrlFragment = keepUrlFragment
-                    }
-                    else
-                    {
+                    if (request.userData) {
+                        request.userData.keepUrlFragment = keepUrlFragment;
+                    } else {
                         request.userData = {
-                            keepUrlFragment : keepUrlFragment
-                        }
+                            keepUrlFragment: keepUrlFragment,
+                        };
                     }
                     return request;
                 },

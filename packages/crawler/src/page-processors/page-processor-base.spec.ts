@@ -244,15 +244,18 @@ describe(PageProcessorBase, () => {
             },
         } as Crawlee.PuppeteerCrawlingContext;
         context.request.userData = {
-            keepUrlFragment : undefined
-        }
+            keepUrlFragment: undefined,
+        };
         context.enqueueLinks = jest.fn().mockImplementation(() => Promise.resolve({ processedRequests: [{}] }));
         (pageProcessorBase as any).discoverLinks = true;
 
         const discoveryPatternsRegEx = discoveryPatterns.map((p) => new RegExp(p));
         await pageProcessorBase.enqueueLinks(context);
-        expect(context.enqueueLinks).toHaveBeenCalledWith({ regexps: discoveryPatternsRegEx, transformRequestFunction: expect.any(Function) });
-        const enqueueLinksArgs = (context.enqueueLinks as any).mock?.calls[0][0]
+        expect(context.enqueueLinks).toHaveBeenCalledWith({
+            regexps: discoveryPatternsRegEx,
+            transformRequestFunction: expect.any(Function),
+        });
+        const enqueueLinksArgs = (context.enqueueLinks as any).mock?.calls[0][0];
         // Assert the value of request.keepUrlFragment
         expect(enqueueLinksArgs.transformRequestFunction({}).keepUrlFragment).toBe(false);
         expect(context.request.loadedUrl).toEqual('url');
@@ -268,16 +271,19 @@ describe(PageProcessorBase, () => {
             },
         } as Crawlee.PuppeteerCrawlingContext;
         context.request.userData = {
-            keepUrlFragment : true
-        }
+            keepUrlFragment: true,
+        };
         context.enqueueLinks = jest.fn().mockImplementation(() => Promise.resolve({ processedRequests: [{}] }));
         (pageProcessorBase as any).discoverLinks = true;
 
         const discoveryPatternsRegEx = discoveryPatterns.map((p) => new RegExp(p));
         await pageProcessorBase.enqueueLinks(context);
-        expect(context.enqueueLinks).toHaveBeenCalledWith({ regexps: discoveryPatternsRegEx, transformRequestFunction: expect.any(Function) });
+        expect(context.enqueueLinks).toHaveBeenCalledWith({
+            regexps: discoveryPatternsRegEx,
+            transformRequestFunction: expect.any(Function),
+        });
 
-        const enqueueLinksArgs = (context.enqueueLinks as any).mock?.calls[0][0]
+        const enqueueLinksArgs = (context.enqueueLinks as any).mock?.calls[0][0];
 
         // Assert the value of request.keepUrlFragment
         expect(enqueueLinksArgs.transformRequestFunction({}).keepUrlFragment).toBe(true);
