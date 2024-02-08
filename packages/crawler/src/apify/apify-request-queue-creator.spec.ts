@@ -15,12 +15,10 @@ describe(ApifyRequestQueueCreator, () => {
     let fileSystemMock: IMock<typeof fs>;
     let queueMock: IMock<Crawlee.RequestQueue>;
     let apifyResourceCreator: ApifyRequestQueueCreator;
+    let userData: Crawlee.Dictionary;
 
     const baseUrl = 'url';
     const requestQueueName = 'scanRequests';
-    const userData = {
-        keepUrlFragment: false,
-    };
 
     beforeEach(() => {
         settingsHandlerMock = Mock.ofType<ApifySettingsHandler>();
@@ -30,6 +28,10 @@ describe(ApifyRequestQueueCreator, () => {
         Crawlee.RequestQueue.open = jest.fn().mockImplementation(() => Promise.resolve(queueMock.object));
 
         apifyResourceCreator = new ApifyRequestQueueCreator(settingsHandlerMock.object, fileSystemMock.object);
+
+        userData = {
+            keepUrlFragment: false,
+        };
     });
 
     afterEach(() => {
@@ -42,7 +44,7 @@ describe(ApifyRequestQueueCreator, () => {
     describe('createRequestQueue', () => {
         it('create queue', async () => {
             fileSystemMock.setup((o) => o.rmSync(It.isAny(), It.isAny())).verifiable(Times.never());
-            setupBaseUrlAddRequestQueue(userData);
+            setupBaseUrlAddRequestQueue();
 
             const queue = await apifyResourceCreator.createRequestQueue(baseUrl);
             expect(queue).toBe(queueMock.object);
@@ -50,7 +52,7 @@ describe(ApifyRequestQueueCreator, () => {
 
         it('delete local queue storage', async () => {
             setupClearRequestQueue(true);
-            setupBaseUrlAddRequestQueue(userData);
+            setupBaseUrlAddRequestQueue();
 
             const queue = await apifyResourceCreator.createRequestQueue(baseUrl, { clear: true });
             expect(queue).toBe(queueMock.object);
@@ -58,7 +60,7 @@ describe(ApifyRequestQueueCreator, () => {
 
         it('skip delete local queue storage', async () => {
             setupClearRequestQueue(false);
-            setupBaseUrlAddRequestQueue(userData);
+            setupBaseUrlAddRequestQueue();
 
             const queue = await apifyResourceCreator.createRequestQueue(baseUrl, { clear: true });
             expect(queue).toBe(queueMock.object);
@@ -67,7 +69,7 @@ describe(ApifyRequestQueueCreator, () => {
         it('create queue with input urls"', async () => {
             const inputUrls = ['url1', 'url2'];
 
-            setupBaseUrlAddRequestQueue(userData);
+            setupBaseUrlAddRequestQueue();
             queueMock
                 .setup((o) => o.addRequest({ url: 'url1', skipNavigation: true, keepUrlFragment: false, userData }, { forefront: true }))
                 .returns(() => Promise.resolve(undefined))
@@ -85,7 +87,7 @@ describe(ApifyRequestQueueCreator, () => {
             const inputUrls = ['url1', 'url2'];
             userData.keepUrlFragment = true;
 
-            setupBaseUrlAddRequestQueue(userData);
+            setupBaseUrlAddRequestQueue();
             queueMock
                 .setup((o) => o.addRequest({ url: 'url1', skipNavigation: true, keepUrlFragment: true, userData }, { forefront: true }))
                 .returns(() => Promise.resolve(undefined))
@@ -115,7 +117,7 @@ describe(ApifyRequestQueueCreator, () => {
         fileSystemMock.setup((o) => o.rmSync(localStorageDir, { recursive: true })).verifiable(dirExists ? Times.once() : Times.never());
     }
 
-    function setupBaseUrlAddRequestQueue(userData: any): void {
+    function setupBaseUrlAddRequestQueue(): void {
         queueMock
             .setup((o) => o.addRequest({ url: baseUrl, skipNavigation: true, keepUrlFragment: userData.keepUrlFragment, userData }))
             .returns(() => Promise.resolve(undefined))

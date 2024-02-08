@@ -178,6 +178,7 @@ export abstract class PageProcessorBase implements PageProcessor {
                             keepUrlFragment: keepUrlFragment,
                         };
                     }
+
                     return request;
                 },
             });

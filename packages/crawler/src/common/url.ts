@@ -6,6 +6,7 @@ import * as normalizeUrlExt from 'normalize-url';
 export namespace Url {
     export function normalizeUrl(url: string, keepUrlFragment?: boolean): string {
         const stripHash = keepUrlFragment !== null && keepUrlFragment !== undefined ? !keepUrlFragment : true;
+
         return normalizeUrlExt.default(url, { stripHash: stripHash, removeQueryParameters: false });
     }
 

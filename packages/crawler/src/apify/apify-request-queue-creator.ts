@@ -38,7 +38,7 @@ export class ApifyRequestQueueCreator implements ResourceCreator {
         const keepUrlFragment = this.getKeepUrlFragment(options?.keepUrlFragment);
         const userData = {
             keepUrlFragment: keepUrlFragment,
-        };
+        } as Crawlee.Dictionary;
         if (baseUrl) {
             await requestQueue.addRequest({ url: baseUrl.trim(), skipNavigation: true, keepUrlFragment: keepUrlFragment, userData });
         }
@@ -47,7 +47,7 @@ export class ApifyRequestQueueCreator implements ResourceCreator {
         return requestQueue;
     }
 
-    private async addUrlsFromList(requestQueue: Crawlee.RequestQueue, userData: any, inputUrls?: string[]): Promise<void> {
+    private async addUrlsFromList(requestQueue: Crawlee.RequestQueue, userData: Crawlee.Dictionary, inputUrls?: string[]): Promise<void> {
         if (inputUrls === undefined) {
             return;
         }
