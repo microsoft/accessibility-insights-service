@@ -4,6 +4,7 @@
 FROM prescanner
 
 ARG BUILD_KEY=
+ARG INSTALLATION_TYPE=
 
 COPY install-font-packages.ps1 .
 COPY add-font-resources.ps1 .

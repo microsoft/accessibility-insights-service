@@ -5,6 +5,8 @@ echo off
 
 rem The script builds and runs the docker image
 
+SET DOCKER_CLI_HINTS=false
+
 copy ..\resource-deployment\runtime-config\runtime-config.dev.json .\dist\runtime-config.json &&^
 copy /y .\docker-image-config\Dockerfile.debug .\dist\Dockerfile.debug &&^
 yarn build &&^

@@ -3,4 +3,4 @@
 
 # Replace this file to execute custom script on pool startup.
 
-Write-Output "Executing custom pool starttup placeholder script."
+Write-Host "Executing custom pool starttup placeholder script."
