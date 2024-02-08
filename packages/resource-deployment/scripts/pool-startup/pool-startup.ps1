@@ -32,7 +32,7 @@ function checkSystemVolume() {
     if ($($drive.FreeSpace / $drive.Size) -le 0.1 ) {
         # System volume check will reclaim hidden drive space
         Write-Host "System volume has low free space. Scheduling system volume check on the next system restart..."
-        Write-Host Y | chkdsk $env:SystemDrive /R /F | Out-Null
+        Write-Output Y | chkdsk $env:SystemDrive /R /F | Out-Null
     }
 }
 
