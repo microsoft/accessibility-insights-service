@@ -66,7 +66,7 @@
             }
         },
         "onDemandUrlScanPoolVmSize": {
-            "defaultValue": "standard_e4d_v5",
+            "defaultValue": "standard_nv4as_v4",
             "type": "string",
             "metadata": {
                 "description": "VM size for on-demand-url-scan-pool pool"
@@ -87,7 +87,7 @@
             }
         },
         "privacyScanPoolVmSize": {
-            "defaultValue": "standard_e4d_v5",
+            "defaultValue": "standard_nv4as_v4",
             "type": "string",
             "metadata": {
                 "description": "VM size for privacy-scan-pool pool"
