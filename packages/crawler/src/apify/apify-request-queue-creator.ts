@@ -11,6 +11,7 @@ import { ApifySettingsHandler, apifySettingsHandler } from './apify-settings';
 export type RequestQueueOptions = {
     clear?: boolean;
     inputUrls?: string[];
+    keepUrlFragment?: boolean;
 };
 
 export type ApifyRequestQueueFactory = () => Promise<Crawlee.RequestQueue>;
@@ -34,21 +35,25 @@ export class ApifyRequestQueueCreator implements ResourceCreator {
         }
 
         const requestQueue = await Crawlee.RequestQueue.open(this.requestQueueName);
+        const keepUrlFragment = this.getKeepUrlFragment(options?.keepUrlFragment);
+        const userData = {
+            keepUrlFragment : keepUrlFragment
+        };
         if (baseUrl) {
-            await requestQueue.addRequest({ url: baseUrl.trim(), skipNavigation: true });
+            await requestQueue.addRequest({ url: baseUrl.trim(), skipNavigation: true, keepUrlFragment: keepUrlFragment, userData  });
         }
-        await this.addUrlsFromList(requestQueue, options?.inputUrls);
+        await this.addUrlsFromList(requestQueue,userData, options?.inputUrls);
 
         return requestQueue;
     }
 
-    private async addUrlsFromList(requestQueue: Crawlee.RequestQueue, inputUrls?: string[]): Promise<void> {
+    private async addUrlsFromList(requestQueue: Crawlee.RequestQueue,userData: any, inputUrls?: string[]): Promise<void> {
         if (inputUrls === undefined) {
             return;
         }
 
         for (const url of inputUrls) {
-            await requestQueue.addRequest({ url: url.trim(), skipNavigation: true }, { forefront: true });
+            await requestQueue.addRequest({ url: url.trim(), skipNavigation: true, keepUrlFragment: userData.keepUrlFragment, userData }, { forefront: true });
         }
     }
 
@@ -57,5 +62,9 @@ export class ApifyRequestQueueCreator implements ResourceCreator {
         if (this.fileSystem.existsSync(outputDir)) {
             this.fileSystem.rmSync(outputDir, { recursive: true });
         }
+    }
+
+    private getKeepUrlFragment(keepUrlFragment?: boolean) : boolean {
+        return keepUrlFragment?? false;
     }
 }

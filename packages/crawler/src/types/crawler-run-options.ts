@@ -27,4 +27,5 @@ export interface CrawlerRunOptions {
     httpHeaders?: Record<string, string>;
     adhereFilesystemPattern?: boolean;
     browserOptions?: string[];
+    keepUrlFragment?: boolean;
 }

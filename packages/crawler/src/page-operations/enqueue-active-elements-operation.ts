@@ -17,10 +17,11 @@ export class EnqueueActiveElementsOperation {
 
     public async enqueue(context: Crawlee.PuppeteerCrawlingContext, selectors: string[]): Promise<void> {
         const url = context.page.url();
+        const keepUrlFragment = context.request?.userData?.keepUrlFragment ?? false;
         const elements = await this.activeElementFinder.getActiveElements(context.page, selectors);
         await Promise.all(
             elements.map(async (e) => {
-                const uniqueKey = `${Url.normalizeUrl(url)}#${e.hash}`;
+                const uniqueKey = `${Url.normalizeUrl(url,keepUrlFragment)}#${e.hash}`;
                 const userData: Operation = {
                     operationType: 'click',
                     data: e,
@@ -31,6 +32,8 @@ export class EnqueueActiveElementsOperation {
                     userData,
                     transformRequestFunction: (request) => {
                         request.uniqueKey = uniqueKey;
+                        request.keepUrlFragment = keepUrlFragment;
+                        request.userData.keepUrlFragment = keepUrlFragment;
 
                         return request;
                     },

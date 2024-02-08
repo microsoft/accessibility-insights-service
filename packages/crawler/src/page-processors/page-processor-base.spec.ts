@@ -243,12 +243,44 @@ describe(PageProcessorBase, () => {
                 loadedUrl: undefined,
             },
         } as Crawlee.PuppeteerCrawlingContext;
+        context.request.userData = {
+            keepUrlFragment : undefined
+        }
         context.enqueueLinks = jest.fn().mockImplementation(() => Promise.resolve({ processedRequests: [{}] }));
         (pageProcessorBase as any).discoverLinks = true;
 
         const discoveryPatternsRegEx = discoveryPatterns.map((p) => new RegExp(p));
         await pageProcessorBase.enqueueLinks(context);
-        expect(context.enqueueLinks).toHaveBeenCalledWith({ regexps: discoveryPatternsRegEx });
+        expect(context.enqueueLinks).toHaveBeenCalledWith({ regexps: discoveryPatternsRegEx, transformRequestFunction: expect.any(Function) });
+        const enqueueLinksArgs = (context.enqueueLinks as any).mock?.calls[0][0]
+        // Assert the value of request.keepUrlFragment
+        expect(enqueueLinksArgs.transformRequestFunction({}).keepUrlFragment).toBe(false);
+        expect(context.request.loadedUrl).toEqual('url');
+    });
+
+    it('enqueueLinks to keep hash fragments', async () => {
+        const context = {
+            page: {
+                url: () => 'url',
+            },
+            request: {
+                loadedUrl: undefined,
+            },
+        } as Crawlee.PuppeteerCrawlingContext;
+        context.request.userData = {
+            keepUrlFragment : true
+        }
+        context.enqueueLinks = jest.fn().mockImplementation(() => Promise.resolve({ processedRequests: [{}] }));
+        (pageProcessorBase as any).discoverLinks = true;
+
+        const discoveryPatternsRegEx = discoveryPatterns.map((p) => new RegExp(p));
+        await pageProcessorBase.enqueueLinks(context);
+        expect(context.enqueueLinks).toHaveBeenCalledWith({ regexps: discoveryPatternsRegEx, transformRequestFunction: expect.any(Function) });
+
+        const enqueueLinksArgs = (context.enqueueLinks as any).mock?.calls[0][0]
+
+        // Assert the value of request.keepUrlFragment
+        expect(enqueueLinksArgs.transformRequestFunction({}).keepUrlFragment).toBe(true);
         expect(context.request.loadedUrl).toEqual('url');
     });
 
