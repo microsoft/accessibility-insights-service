@@ -278,7 +278,7 @@ describe(PageProcessorBase, () => {
 
         const discoveryPatternsRegEx = discoveryPatterns.map((p) => new RegExp(p));
         await pageProcessorBase.enqueueLinks(context);
-        
+
         expect(context.enqueueLinks).toHaveBeenCalledWith({
             regexps: discoveryPatternsRegEx,
             transformRequestFunction: expect.any(Function),

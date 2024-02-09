@@ -67,7 +67,7 @@ describe(CrawlerConfiguration, () => {
         const inputUrls = ['input url'];
         const baseCrawlPage = {} as Puppeteer.Page;
         const discoveryPatterns = ['discoveryPattern'];
-        
+
         it('keepUrlFragment = undefined', () => {
             const expectedOptions: RequestQueueOptions = {
                 clear: restartCrawl,

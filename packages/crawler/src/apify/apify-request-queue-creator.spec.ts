@@ -70,10 +70,12 @@ describe(ApifyRequestQueueCreator, () => {
             const inputUrls = ['url1', 'url2'];
 
             setupBaseUrlAddRequestQueue();
-            queueMock
-                .setup((o) => o.addRequest({ url: 'url1', skipNavigation: true, keepUrlFragment: false, userData }, { forefront: true }))
-            queueMock
-                .setup((o) => o.addRequest({ url: 'url2', skipNavigation: true, keepUrlFragment: false, userData }, { forefront: true }))
+            queueMock.setup((o) =>
+                o.addRequest({ url: 'url1', skipNavigation: true, keepUrlFragment: false, userData }, { forefront: true }),
+            );
+            queueMock.setup((o) =>
+                o.addRequest({ url: 'url2', skipNavigation: true, keepUrlFragment: false, userData }, { forefront: true }),
+            );
 
             const queue = await apifyResourceCreator.createRequestQueue(baseUrl, { clear: false, inputUrls: inputUrls });
             expect(queue).toBe(queueMock.object);
