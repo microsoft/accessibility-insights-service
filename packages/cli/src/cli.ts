@@ -165,7 +165,7 @@ function getScanArguments(): ScanArguments {
             },
             keepUrlFragment: {
                 type: 'boolean',
-                describe: `To keep the hash fragment in the URLs. If set to false, it will remove hash fragment from URL. For example, http://www.example.com/#foo will be considered as http://www.example.com.`,
+                describe: `To keep the hash fragment in the URLs. If set to false, it will remove the hash fragment from URL. For example, http://www.example.com/#foo will be considered as http://www.example.com.`,
                 default: false,
                 alias: 'keepurlfragment',
             },
