@@ -23,8 +23,8 @@ export const defaultLaunchOptions: Puppeteer.PuppeteerNodeLaunchOptions = {
         '--disable-setuid-sandbox',
         '--disable-features=BackForwardCache',
         '--js-flags=--max-old-space-size=8192',
-        '--use-gl=angle',
-        '--in-process-gpu',
+        '--use-gl=angle', // enable WebGL
+        '--in-process-gpu', // enable WebGL
         `--window-size=${windowSize.width},${windowSize.height}`,
     ],
     protocolTimeout: 90000,

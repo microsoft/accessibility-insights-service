@@ -41,6 +41,7 @@ function createShare() {
 
 function buildImage() {
     $images = docker images --no-trunc --format "{{json .}}"
+    # Remove non-JSON string prefix
     $json = $images -match ".*(?<json>{.*)"
     $baseImages = $json | ConvertFrom-Json | Where-Object { $_.Tag -eq "prescanner" }
 
