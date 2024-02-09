@@ -15,13 +15,14 @@ export const defaultBrowserOptions: Puppeteer.BrowserConnectOptions = {
 export const defaultLaunchOptions: Puppeteer.PuppeteerNodeLaunchOptions = {
     // The new headless mode https://developer.chrome.com/articles/new-headless
     headless: 'new',
+    // To enable WebGL in docker container use --use-gl=angle and --in-process-gpu options
+    // and without --use-angle=swiftshader and --disable-gpu
     args: [
         '--disable-dev-shm-usage',
         '--no-sandbox',
         '--disable-setuid-sandbox',
         '--disable-features=BackForwardCache',
         '--js-flags=--max-old-space-size=8192',
-        '--use-angle=swiftshader',
         '--use-gl=angle',
         '--in-process-gpu',
         `--window-size=${windowSize.width},${windowSize.height}`,
