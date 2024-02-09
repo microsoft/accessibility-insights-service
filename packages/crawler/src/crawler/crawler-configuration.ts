@@ -69,6 +69,7 @@ export class CrawlerConfiguration {
         return {
             clear: this.crawlerRunOptions.restartCrawl,
             inputUrls: this.crawlerRunOptions.inputUrls,
+            keepUrlFragment: this.crawlerRunOptions.keepUrlFragment ?? false,
         };
     }
 

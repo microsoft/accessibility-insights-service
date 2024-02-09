@@ -4,8 +4,10 @@
 import * as normalizeUrlExt from 'normalize-url';
 
 export namespace Url {
-    export function normalizeUrl(url: string): string {
-        return normalizeUrlExt.default(url, { stripHash: true, removeQueryParameters: false });
+    export function normalizeUrl(url: string, keepUrlFragment?: boolean): string {
+        const stripHash = keepUrlFragment !== null && keepUrlFragment !== undefined ? !keepUrlFragment : true;
+
+        return normalizeUrlExt.default(url, { stripHash: stripHash, removeQueryParameters: false });
     }
 
     export function hasQueryParameters(url: string): boolean {

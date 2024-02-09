@@ -62,6 +62,7 @@ export class CrawlerParametersBuilder {
             httpHeaders: headers,
             adhereFilesystemPattern: scanArguments.adhereFilesystemPattern,
             browserOptions: scanArguments.browserOptions,
+            keepUrlFragment: scanArguments.keepUrlFragment ?? false,
         };
     }
 

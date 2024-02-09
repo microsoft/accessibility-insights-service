@@ -290,3 +290,10 @@ The URL folder is a resource location equal to base URL up-to the last forward s
 type: array
 describe: List of Chrome command line options to pass on browser start. Can be used to disable CORS to scan protected page: --browserOptions disable-web-security
 ```
+
+-   keepUrlFragment: --keepUrlFragment
+
+```sh
+type: boolean
+describe: To keep the hash fragment in the URLs. If set to false, it will remove the hash fragment from URL. For example, http://www.example.com/#foo will be considered as http://www.example.com. Default value is false.
+```
