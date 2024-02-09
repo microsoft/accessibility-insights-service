@@ -10,12 +10,12 @@ $global:installationType = ""
 function deleteShare() {
     $user = Get-LocalUser -Name $userName -ErrorAction SilentlyContinue
     if ($user) {
-        net user $userName /delete | Out-Null
+        net user $userName /delete /y | Out-Null
     }
 
     $share = Get-WmiObject -Class Win32_Share | Where-Object { $_.Name -eq $shareName }
     if ($share) {
-        net share $shareName /delete | Out-Null
+        net share $shareName /delete /y | Out-Null
     }
 }
 
@@ -51,9 +51,6 @@ function buildImage() {
             $baseImageTag = "$($baseImage.Repository):$($baseImage.Tag)"
             docker tag $baseImageTag "prescanner"
             docker build --file Dockerfile.scanner --tag $baseImage.Repository --build-arg BUILD_KEY="$env:BUILD_KEY" --build-arg INSTALLATION_TYPE="$global:installationType" .
-
-            Add-Type -AssemblyName System.Windows.Forms
-            [System.Windows.Forms.SendKeys]::SendWait('{ENTER}')
         }
     }
 }
