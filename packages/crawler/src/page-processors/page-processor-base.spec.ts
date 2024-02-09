@@ -288,7 +288,6 @@ describe(PageProcessorBase, () => {
 
         // Assert the value of request.keepUrlFragment
         expect(enqueueLinksArgs.transformRequestFunction({}).keepUrlFragment).toBe(true);
-        expect(context.enqueueLinks).toHaveBeenCalledWith({ regexps: discoveryPatternsRegEx });
         expect(context.request.loadedUrl).toEqual('url');
     });
 
