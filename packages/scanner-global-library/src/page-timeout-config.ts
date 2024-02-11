@@ -22,20 +22,17 @@ export const puppeteerTimeoutConfig = {
      *
      * Puppeteer may render some webpage properly but timeout on page navigation when running in
      * headless mode. The {@link PageOperationHandler} will override puppeteer timeout error on
-     * successful webserver response to mitigate this issue. Hence do not increase navigation timeout
-     * value as it will not mitigate puppeteer navigation timeout error.
+     * successful webserver response to mitigate this issue.
+     * WebGL requires a lot of resources and processing power from the machine, it may trigger
+     * a navigation timeout error and stop the loading process. Need to adjust the navigation timeout
+     * to allow more time for WebGL webpages to load.
      */
-    navigationTimeoutMsec: 30000,
-
-    /**
-     * Maximum wait time, in milliseconds, to wait when network is idle.
-     */
-    networkIdleTimeoutMsec: 25000,
+    navigationTimeoutMsec: 180000,
 
     /**
      * Maximum wait time, in milliseconds, to complete async page rendering.
      */
-    pageRenderingTimeoutMsec: 15000,
+    pageRenderingTimeoutMsec: 20000,
 
     /**
      * The minimum time the HTML DOM should be stable to accept page rendering.

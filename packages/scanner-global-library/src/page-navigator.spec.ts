@@ -261,29 +261,6 @@ describe(PageNavigator, () => {
         });
     });
 
-    describe('waitForNetworkIdle', () => {
-        it('navigate with network timeout', async () => {
-            const timeoutError = new Error('Navigation timeout');
-            response = {
-                status: () => 200,
-            } as Puppeteer.HTTPResponse;
-            puppeteerPageMock
-                .setup((o) => o.goto(url, { waitUntil: 'networkidle2', timeout: puppeteerTimeoutConfig.navigationTimeoutMsec }))
-                .returns(() => Promise.resolve(response))
-                .verifiable();
-            puppeteerPageMock
-                .setup((o) => o.waitForNavigation({ waitUntil: 'networkidle0', timeout: puppeteerTimeoutConfig.networkIdleTimeoutMsec }))
-                .returns(() => Promise.reject(timeoutError))
-                .verifiable();
-
-            pageOperation = (pageNavigator as any).createPageOperation('goto', puppeteerPageMock.object, url);
-
-            const actualResponse = await pageOperation();
-
-            expect(actualResponse).toEqual(response);
-        });
-    });
-
     describe('handleCachedResponse', () => {
         it('skip handler if status code is not HTTP 304', async () => {
             pageOperationResult.response = {
@@ -306,7 +283,7 @@ describe(PageNavigator, () => {
                 .returns(() => Promise.resolve(response))
                 .verifiable();
             puppeteerPageMock
-                .setup((o) => o.goBack({ waitUntil: 'networkidle2', timeout: puppeteerTimeoutConfig.navigationTimeoutMsec }))
+                .setup((o) => o.goBack({ waitUntil: 'networkidle0', timeout: puppeteerTimeoutConfig.navigationTimeoutMsec }))
                 .returns(() => Promise.resolve(okResponse))
                 .verifiable();
 
@@ -338,7 +315,7 @@ describe(PageNavigator, () => {
                 .returns(() => Promise.resolve(response))
                 .verifiable(Times.atLeast(max304RetryCount - 1));
             puppeteerPageMock
-                .setup((o) => o.goBack({ waitUntil: 'networkidle2', timeout: puppeteerTimeoutConfig.navigationTimeoutMsec }))
+                .setup((o) => o.goBack({ waitUntil: 'networkidle0', timeout: puppeteerTimeoutConfig.navigationTimeoutMsec }))
                 .returns(() => Promise.resolve(cachedResponse))
                 .verifiable(Times.atLeast(max304RetryCount));
             browserCacheMock
