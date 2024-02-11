@@ -129,7 +129,7 @@
             "type": "Microsoft.Batch/batchAccounts/pools",
             "apiVersion": "2023-05-01",
             "name": "[concat(parameters('batchAccount'), '/', variables('onDemandUrlScanPoolName'))]",
-            "dependsOn": [ "[resourceId('Microsoft.Batch/batchAccounts', parameters('batchAccount'))]" ],
+            "dependsOn": ["[resourceId('Microsoft.Batch/batchAccounts', parameters('batchAccount'))]"],
             "properties": {
                 "vmSize": "[parameters('onDemandUrlScanPoolVmSize')]",
                 "interNodeCommunication": "Disabled",
@@ -147,7 +147,7 @@
                         },
                         "nodeAgentSkuId": "batch.node.windows amd64",
                         "diskEncryptionConfiguration": {
-                            "targets": [ "TemporaryDisk", "OsDisk" ]
+                            "targets": ["TemporaryDisk", "OsDisk"]
                         }
                     }
                 },
@@ -195,7 +195,7 @@
             "type": "Microsoft.Batch/batchAccounts/pools",
             "apiVersion": "2023-05-01",
             "name": "[concat(parameters('batchAccount'), '/', variables('onDemandScanRequestPoolName'))]",
-            "dependsOn": [ "[resourceId('Microsoft.Batch/batchAccounts', parameters('batchAccount'))]" ],
+            "dependsOn": ["[resourceId('Microsoft.Batch/batchAccounts', parameters('batchAccount'))]"],
             "properties": {
                 "vmSize": "[parameters('onDemandScanRequestPoolVmSize')]",
                 "interNodeCommunication": "Disabled",
@@ -213,7 +213,7 @@
                         },
                         "nodeAgentSkuId": "batch.node.windows amd64",
                         "diskEncryptionConfiguration": {
-                            "targets": [ "TemporaryDisk", "OsDisk" ]
+                            "targets": ["TemporaryDisk", "OsDisk"]
                         }
                     }
                 },
@@ -261,7 +261,7 @@
             "type": "Microsoft.Batch/batchAccounts/pools",
             "apiVersion": "2023-05-01",
             "name": "[concat(parameters('batchAccount'), '/', variables('privacyScanPoolName'))]",
-            "dependsOn": [ "[resourceId('Microsoft.Batch/batchAccounts', parameters('batchAccount'))]" ],
+            "dependsOn": ["[resourceId('Microsoft.Batch/batchAccounts', parameters('batchAccount'))]"],
             "properties": {
                 "vmSize": "[parameters('privacyScanPoolVmSize')]",
                 "interNodeCommunication": "Disabled",
@@ -279,7 +279,7 @@
                         },
                         "nodeAgentSkuId": "batch.node.windows amd64",
                         "diskEncryptionConfiguration": {
-                            "targets": [ "TemporaryDisk", "OsDisk" ]
+                            "targets": ["TemporaryDisk", "OsDisk"]
                         }
                     }
                 },
