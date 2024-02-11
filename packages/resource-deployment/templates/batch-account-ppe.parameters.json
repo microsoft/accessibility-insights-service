@@ -15,7 +15,7 @@
             "value": "4"
         },
         "onDemandUrlScanPoolVmSize": {
-            "value": "standard_f4s_v2"
+            "value": "standard_e4d_v5"
         },
         "onDemandUrlScanPoolTaskSlotsPerNode": {
             "value": "4"
@@ -24,7 +24,7 @@
             "value": "2"
         },
         "privacyScanPoolVmSize": {
-            "value": "standard_f4s_v2"
+            "value": "standard_e4d_v5"
         },
         "privacyScanPoolTaskSlotsPerNode": {
             "value": "4"
