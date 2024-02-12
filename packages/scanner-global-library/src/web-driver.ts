@@ -13,15 +13,20 @@ import PuppeteerExtra from 'puppeteer-extra';
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 import { isEmpty } from 'lodash';
 import { StealthPluginType } from './stealth-plugin-type';
-import { defaultBrowserOptions, defaultLaunchOptions } from './puppeteer-options';
+import { defaultBrowserOptions, launchOptions } from './puppeteer-options';
 import { ExtensionLoader } from './browser-extensions/extension-loader';
 import { UserAgentPlugin } from './user-agent-plugin';
 import { BrowserCache } from './browser-cache';
+
+export interface WebDriverCapabilities {
+    webgl?: boolean;
+}
 
 export interface WebDriverConfigurationOptions {
     browserExecutablePath?: string;
     clearDiskCache?: boolean;
     keepUserData?: boolean;
+    capabilities?: WebDriverCapabilities;
 }
 
 @injectable()
@@ -57,14 +62,14 @@ export class WebDriver {
             browserWSEndpoint: wsEndpoint,
             ...defaultBrowserOptions,
         });
-        this.logger?.logInfo('Chromium browser instance connected.');
+        this.logger?.logInfo('Browser instance is connected.', { wsEndpoint });
 
         return this.browser;
     }
 
     /**
      * The method launches a browser instance with given arguments.
-     * @default options = { clearDiskCache: true, keepUserData: false }
+     * @default options = { clearDiskCache: true, keepUserData: false, capabilities: { webgl: false } }
      */
     public async launch(options?: WebDriverConfigurationOptions): Promise<Puppeteer.Browser> {
         this.setupPuppeteerPlugins();
@@ -77,13 +82,13 @@ export class WebDriver {
             this.browserCache.clearStorage();
         }
 
-        const launchOptions = this.createLaunchOptions();
+        const browserLaunchOptions = this.createLaunchOptions(options);
         this.browser = await this.puppeteerExtra.launch({
-            ...launchOptions,
+            ...browserLaunchOptions,
             executablePath: options?.browserExecutablePath ?? Puppeteer.executablePath(),
         });
 
-        this.logger?.logInfo('Chromium browser instance started.');
+        this.logger?.logInfo('Browser instance is started.', { options: JSON.stringify(options) });
 
         return this.browser;
     }
@@ -130,9 +135,11 @@ export class WebDriver {
         }
     }
 
-    private createLaunchOptions(): Puppeteer.LaunchOptions & Puppeteer.BrowserLaunchArgumentOptions {
+    private createLaunchOptions(
+        configurationOptions: WebDriverConfigurationOptions,
+    ): Puppeteer.LaunchOptions & Puppeteer.BrowserLaunchArgumentOptions {
         const options = {
-            ...defaultLaunchOptions,
+            ...launchOptions({ ...configurationOptions?.capabilities }),
             // The new headless mode https://developer.chrome.com/articles/new-headless
             headless: process.env.HEADLESS === 'false' ? false : 'new',
             devtools: process.env.DEV_TOOLS === 'true' ? true : false,

@@ -33,7 +33,7 @@ export interface PageOperationResult {
 @injectable()
 export class PageNavigator {
     private readonly waitForOptions: Puppeteer.WaitForOptions = {
-        // usage of networkidle2 will break websites scanning
+        // The networkidle2 option will break page load with WebGL capability enabled
         waitUntil: 'networkidle0',
         timeout: puppeteerTimeoutConfig.navigationTimeoutMsec,
     };

@@ -130,7 +130,7 @@ describe('WebDriver', () => {
         });
     });
 
-    it('should launch puppeteer browser', async () => {
+    it('should launch browser with default configuration', async () => {
         const userAgentPlugin = { name: 'user-agent-plugin' } as unknown as PuppeteerExtraPlugin;
         const stealthAgentPlugin = { name: 'stealth' } as unknown as PuppeteerExtraPlugin;
         puppeteerExtraMock
@@ -142,7 +142,7 @@ describe('WebDriver', () => {
             .returns(() => puppeteerExtraMock.object)
             .verifiable();
         puppeteerExtraMock
-            .setup((o) => o.launch(It.isAny()))
+            .setup((o) => o.launch(It.is((l) => l.args.includes('--disable-webgl'))))
             .returns(() => Promise.resolve(<Puppeteer.Browser>(<unknown>puppeteerBrowserMock)))
             .verifiable(Times.once());
 
@@ -199,6 +199,21 @@ describe('WebDriver', () => {
         browserCacheMock.setup((o) => o.clearStorage()).verifiable();
 
         const browser = await testSubject.launch({ clearDiskCache: true });
+
+        expect(browser).toEqual(puppeteerBrowserMock);
+    });
+
+    it('should enable webgl', async () => {
+        puppeteerExtraMock
+            .setup((o) => o.use(It.isAny()))
+            .returns(() => puppeteerExtraMock.object)
+            .verifiable();
+        puppeteerExtraMock
+            .setup((o) => o.launch(It.is((l) => l.args.includes('--use-angle=swiftshader'))))
+            .returns(() => Promise.resolve(<Puppeteer.Browser>(<unknown>puppeteerBrowserMock)))
+            .verifiable(Times.once());
+
+        const browser = await testSubject.launch({ capabilities: { webgl: true } });
 
         expect(browser).toEqual(puppeteerBrowserMock);
     });
