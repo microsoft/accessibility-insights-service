@@ -62,7 +62,7 @@ export class WebDriver {
             browserWSEndpoint: wsEndpoint,
             ...defaultBrowserOptions,
         });
-        this.logger?.logInfo('Browser instance is connected.', { wsEndpoint });
+        this.logger?.logInfo('Browser instance connected.', { wsEndpoint });
 
         return this.browser;
     }
@@ -88,7 +88,7 @@ export class WebDriver {
             executablePath: options?.browserExecutablePath ?? Puppeteer.executablePath(),
         });
 
-        this.logger?.logInfo('Browser instance is started.', { options: JSON.stringify(options) });
+        this.logger?.logInfo('Browser instance started.', { options: JSON.stringify(options) });
 
         return this.browser;
     }
@@ -131,7 +131,7 @@ export class WebDriver {
             );
 
             this.browser = undefined;
-            this.logger?.logInfo('Browser instance was closed.');
+            this.logger?.logInfo('Browser instance closed.');
         }
     }
 
