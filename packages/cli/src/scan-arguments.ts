@@ -30,4 +30,5 @@ export interface ScanArguments {
     httpHeaders?: string;
     adhereFilesystemPattern?: boolean;
     browserOptions?: string[];
+    keepUrlFragment?: boolean;
 }
