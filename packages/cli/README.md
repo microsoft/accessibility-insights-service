@@ -85,6 +85,13 @@ describe: Output directory. If not set, default is ./ai_scan_cli_output, if you 
 default: './ai_scan_cli_output'
 ```
 
+-   keepUrlFragment: --keepUrlFragment
+
+```sh
+type: boolean
+describe: To keep the hash fragment in the URLs. If set to false, it will remove the hash fragment from URL. For example, http://www.example.com/#foo will be considered as http://www.example.com. Default value is false.
+```
+
 </br></br>
 
 ## Scan & Crawl
