@@ -35,6 +35,8 @@ export class PageScanProcessor {
                 return state;
             }
 
+            // Enable WebGL to render all page elements to get comprehensive accessibility scan result
+            await this.page.reopenBrowser({ capabilities: { webgl: true } });
             const enableAuthentication = pageScanResult.authentication?.hint !== undefined;
             await this.page.navigate(runnerScanMetadata.url, { enableAuthentication });
 
@@ -45,6 +47,7 @@ export class PageScanProcessor {
             }
 
             const pageState = await this.capturePageState();
+
             axeScanResults = await this.axeScanner.scan(this.page);
             axeScanResults = { ...axeScanResults, ...pageState };
 

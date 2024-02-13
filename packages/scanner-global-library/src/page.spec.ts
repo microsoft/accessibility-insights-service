@@ -258,7 +258,7 @@ describe(Page, () => {
                 .returns(() => Promise.resolve(puppeteerPageMock.object))
                 .verifiable();
             webDriverMock
-                .setup(async (o) => o.launch({ browserExecutablePath: 'path', clearDiskCache: false, keepUserData: false }))
+                .setup(async (o) => o.launch(It.isObjectWith({ clearDiskCache: false })))
                 .returns(() => Promise.resolve(browserMock.object))
                 .verifiable();
             webDriverMock
@@ -307,15 +307,13 @@ describe(Page, () => {
             browserMock.verify(async (o) => o.newPage(), Times.once());
         });
 
-        it('create() with browser url', async () => {
+        it('create() with browser executable path', async () => {
             browserMock
                 .setup(async (o) => o.newPage())
                 .returns(() => Promise.resolve(puppeteerPageMock.object))
                 .verifiable();
             webDriverMock
-                .setup(async (m) =>
-                    m.launch(It.isValue({ browserExecutablePath: 'path', clearDiskCache: undefined, keepUserData: undefined })),
-                )
+                .setup(async (m) => m.launch(It.isObjectWith({ browserExecutablePath: 'path' })))
                 .returns(() => Promise.resolve(browserMock.object))
                 .verifiable();
             webDriverMock
@@ -327,6 +325,29 @@ describe(Page, () => {
 
             await page.create({
                 browserExecutablePath: 'path',
+            });
+
+            browserMock.verify(async (o) => o.newPage(), Times.once());
+        });
+
+        it('create() with webgl support', async () => {
+            browserMock
+                .setup(async (o) => o.newPage())
+                .returns(() => Promise.resolve(puppeteerPageMock.object))
+                .verifiable();
+            webDriverMock
+                .setup(async (m) => m.launch(It.isObjectWith({ capabilities: { webgl: true } })))
+                .returns(() => Promise.resolve(browserMock.object))
+                .verifiable();
+            webDriverMock
+                .setup(async (o) => o.waitForPageCreation())
+                .returns(() => Promise.resolve(true))
+                .verifiable();
+            page.browser = undefined;
+            (page as any).page = undefined;
+
+            await page.create({
+                capabilities: { webgl: true },
             });
 
             browserMock.verify(async (o) => o.newPage(), Times.once());

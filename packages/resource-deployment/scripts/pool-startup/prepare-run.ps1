@@ -22,7 +22,7 @@ function createEnvironmentFile() {
         Set-Content $dotenvTaskPath -Value $dotenv -Force
     }
 
-    Write-Output "Created environment variables file."
+    Write-Host "Created environment variables file."
 }
 
 createEnvironmentFile

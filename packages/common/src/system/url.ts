@@ -45,7 +45,7 @@ export namespace Url {
         };
 
         // Reset single slash since the library will remove single slash if URL has hash fragment
-        if (url && url.includes('#')) {
+        if (url && url.includes('/#')) {
             let temp = normalizeUrlExt.default(url, options);
             temp = `${temp}/`;
 

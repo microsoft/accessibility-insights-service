@@ -26,7 +26,7 @@ function startTranscript() {
 
 function rebootIfRequired() {
     if ($global:rebootRequired -eq $true) {
-        Write-Output "Rebooting machine to complete installation..."
+        Write-Host "Rebooting machine to complete installation..."
         Start-Sleep -Seconds 10
         Stop-Transcript
 
@@ -95,15 +95,15 @@ function setDockerConfig() {
     # Trace updated config
     $config | ConvertTo-Json | Set-Content $configPath -Force
     if ($global:rebootRequired -eq $true) {
-        Write-Output "Docker config file was successfully updated."
-        Write-Output $config | ConvertTo-Json
+        Write-Host "Docker config file was successfully updated."
+        Write-Host $config | ConvertTo-Json
     }
 }
 
 function installHyperV() {
     $feature = Get-WindowsFeature "*hyper-v*"
     if (($feature | Where-Object { $_.Name -eq "Hyper-V" }).InstallState -ne "Installed" -or ($feature | Where-Object { $_.Name -eq "Hyper-V-PowerShell" }).InstallState -ne "Installed") {
-        Write-Output "Installing Hyper-V..."
+        Write-Host "Installing Hyper-V..."
         $install = Install-WindowsFeature -Name Hyper-V, Hyper-V-PowerShell
         if ($install.RestartNeeded -eq "Yes") {
             Start-Sleep -Seconds 10
@@ -113,14 +113,14 @@ function installHyperV() {
         }
     }
     else {
-        Write-Output "Hyper-V is installed."
+        Write-Host "Hyper-V is installed."
     }
 
     Set-VMHost -VirtualMachinePath "D:\Hyper-V" -VirtualHardDiskPath "D:\Hyper-V"
 
     $switch = Get-VMSwitch | Where-Object { $_.Name -eq "vEthernet" }
     if ($switch -eq $null) {
-        Write-Output "Creating Hyper-V external virtual switch..."
+        Write-Host "Creating Hyper-V external virtual switch..."
         New-VMSwitch -Name "vEthernet" -NetAdapterName Ethernet -AllowManagementOS:$true
     }
 }
@@ -132,7 +132,7 @@ function installHyperV() {
 # task and will run script with machine restart disabled. The second script run, and machine
 # restart is managed by this script instead.
 function installDockerEngine() {
-    Write-Output "Installing Docker Engine..."
+    Write-Host "Installing Docker Engine..."
 
     $scriptName = "$env:TEMP\install-docker-ce.ps1"
     Invoke-WebRequest "https://raw.githubusercontent.com/microsoft/Windows-Containers/Main/helpful_tools/Install-DockerCE/install-docker-ce.ps1" -OutFile $scriptName
@@ -144,7 +144,7 @@ function installDockerEngine() {
 function validateDockerEngine () {
     Get-Process "dockerd" -ErrorAction SilentlyContinue
     if ($? -eq "True") {
-        Write-Output "Docker is running."
+        Write-Host "Docker is running."
         docker info
     }
     else {
