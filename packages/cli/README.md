@@ -89,7 +89,8 @@ default: './ai_scan_cli_output'
 
 ```sh
 type: boolean
-describe: To keep the hash fragment in the URLs. If set to false, it will remove the hash fragment from URL. For example, http://www.example.com/#foo will be considered as http://www.example.com. Default value is false.
+describe: To keep the hash fragment in the URLs. If set to false, it will remove the hash fragment from URL. For example, http://www.example.com/#foo will be considered as http://www.example.com.
+default: false
 ```
 
 </br></br>
@@ -302,5 +303,6 @@ describe: List of Chrome command line options to pass on browser start. Can be u
 
 ```sh
 type: boolean
-describe: To keep the hash fragment in the URLs. If set to false, it will remove the hash fragment from URL. For example, http://www.example.com/#foo will be considered as http://www.example.com. Default value is false.
+describe: To keep the hash fragment in the URLs. If set to false, it will remove the hash fragment from URL. For example, http://www.example.com/#foo will be considered as http://www.example.com.
+default: 'false
 ```
