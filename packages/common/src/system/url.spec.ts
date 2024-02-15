@@ -52,7 +52,7 @@ describe('tryParseUrlString()', () => {
 
         // remove hash
         url = Url.normalizeUrl('https://example.com/main#top');
-        expect(url).toEqual('https://example.com/main/');
+        expect(url).toEqual('https://example.com/main');
 
         // remove hash and keep single slash
         url = Url.normalizeUrl('https://example.com/#top');

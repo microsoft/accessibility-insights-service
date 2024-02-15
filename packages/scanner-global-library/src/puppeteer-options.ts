@@ -2,27 +2,41 @@
 // Licensed under the MIT License.
 
 import * as Puppeteer from 'puppeteer';
+import { WebDriverCapabilities } from './web-driver';
+
+export const defaultBrowserOptions: Puppeteer.BrowserConnectOptions = {
+    defaultViewport: null,
+};
 
 export const windowSize = {
     width: 1920,
     height: 1080,
 };
 
-export const defaultBrowserOptions: Puppeteer.BrowserConnectOptions = {
-    defaultViewport: null,
-};
+const defaultArgs = [
+    '--no-sandbox',
+    '--disable-dev-shm-usage',
+    '--disable-setuid-sandbox',
+    '--disable-features=BackForwardCache',
+    '--js-flags=--max-old-space-size=8192',
+    `--window-size=${windowSize.width},${windowSize.height}`,
+];
 
-export const defaultLaunchOptions: Puppeteer.PuppeteerNodeLaunchOptions = {
+const webglArgs = ['--use-gl=angle', '--use-angle=swiftshader', '--in-process-gpu'];
+
+const noWebglArgs = ['--disable-webgl', '--disable-webgl2'];
+
+const defaultLaunchOptions: Puppeteer.PuppeteerNodeLaunchOptions = {
     // The new headless mode https://developer.chrome.com/articles/new-headless
     headless: 'new',
-    args: [
-        '--disable-dev-shm-usage',
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-features=BackForwardCache',
-        '--js-flags=--max-old-space-size=8192',
-        `--window-size=${windowSize.width},${windowSize.height}`,
-    ],
     protocolTimeout: 90000,
     ...defaultBrowserOptions,
 };
+
+export function launchOptions(capabilities?: WebDriverCapabilities): Puppeteer.PuppeteerNodeLaunchOptions {
+    if (capabilities?.webgl === true) {
+        return { ...defaultLaunchOptions, args: [...defaultArgs, ...webglArgs] };
+    }
+
+    return { ...defaultLaunchOptions, args: [...defaultArgs, ...noWebglArgs] };
+}
