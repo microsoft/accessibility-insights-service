@@ -40,7 +40,8 @@ export class PageNavigationHooks {
             });
         }
 
-        // Validate HTTP response, hashUrls will have null response from page.goto navigation as crawler treats it same page load
+        // Validate HTTP response
+        // hashUrls will have null response as crawlee's page.goto treats it as same page load
         const responseError = isHashUrl && response === null ? undefined : this.pageResponseProcessor.getResponseError(response);
         if (responseError !== undefined) {
             await onNavigationError(responseError);
