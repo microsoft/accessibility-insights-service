@@ -30,7 +30,9 @@ export class PageNavigationHooks {
         response: Puppeteer.HTTPResponse,
         onNavigationError: (browserError: BrowserError) => Promise<void> = () => Promise.resolve(),
     ): Promise<Partial<void>> {
-        if (isNil(response)) {
+        const pageUrl = page.url();
+        const isHashUrl = !isNil(pageUrl) && pageUrl.includes('#');
+        if (response === undefined || (!isHashUrl && response === null)) {
             await onNavigationError({
                 errorType: 'NavigationError',
                 message: 'Unable to get a page response from the browser.',
@@ -38,8 +40,8 @@ export class PageNavigationHooks {
             });
         }
 
-        // Validate HTTP response
-        const responseError = this.pageResponseProcessor.getResponseError(response);
+        // Validate HTTP response, hashUrls will have null response as crawler treats it same page load
+        const responseError = isHashUrl && response === null ? undefined : this.pageResponseProcessor.getResponseError(response);
         if (responseError !== undefined) {
             await onNavigationError(responseError);
         }
