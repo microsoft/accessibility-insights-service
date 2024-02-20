@@ -62,22 +62,57 @@ describe(CrawlerConfiguration, () => {
         expect(crawlerConfiguration.simulate()).toEqual(simulate === true);
     });
 
-    it('requestQueueOptions', () => {
+    describe('requestQueueOptions', () => {
         const restartCrawl = true;
         const inputUrls = ['input url'];
         const baseCrawlPage = {} as Puppeteer.Page;
         const discoveryPatterns = ['discoveryPattern'];
-        const expectedOptions: RequestQueueOptions = {
-            clear: restartCrawl,
-            inputUrls: inputUrls,
-        };
 
-        crawlerRunOptionsMock.setup((o) => o.restartCrawl).returns(() => restartCrawl);
-        crawlerRunOptionsMock.setup((o) => o.inputUrls).returns(() => inputUrls);
-        crawlerRunOptionsMock.setup((o) => o.baseCrawlPage).returns(() => baseCrawlPage);
-        crawlerRunOptionsMock.setup((o) => o.discoveryPatterns).returns(() => discoveryPatterns);
+        it('keepUrlFragment = undefined', () => {
+            const expectedOptions: RequestQueueOptions = {
+                clear: restartCrawl,
+                inputUrls: inputUrls,
+                keepUrlFragment: false,
+            };
 
-        expect(crawlerConfiguration.requestQueueOptions()).toEqual(expectedOptions);
+            setupMockRequestQueueOptions();
+            crawlerRunOptionsMock.setup((o) => o.keepUrlFragment).returns(() => undefined);
+
+            expect(crawlerConfiguration.requestQueueOptions()).toEqual(expectedOptions);
+        });
+
+        it('keepUrlFragment = false', () => {
+            const expectedOptions: RequestQueueOptions = {
+                clear: restartCrawl,
+                inputUrls: inputUrls,
+                keepUrlFragment: false,
+            };
+
+            setupMockRequestQueueOptions();
+            crawlerRunOptionsMock.setup((o) => o.keepUrlFragment).returns(() => false);
+
+            expect(crawlerConfiguration.requestQueueOptions()).toEqual(expectedOptions);
+        });
+
+        it('keepUrlFragment = true', () => {
+            const expectedOptions: RequestQueueOptions = {
+                clear: restartCrawl,
+                inputUrls: inputUrls,
+                keepUrlFragment: true,
+            };
+
+            setupMockRequestQueueOptions();
+            crawlerRunOptionsMock.setup((o) => o.keepUrlFragment).returns(() => true);
+
+            expect(crawlerConfiguration.requestQueueOptions()).toEqual(expectedOptions);
+        });
+
+        function setupMockRequestQueueOptions(): void {
+            crawlerRunOptionsMock.setup((o) => o.restartCrawl).returns(() => restartCrawl);
+            crawlerRunOptionsMock.setup((o) => o.inputUrls).returns(() => inputUrls);
+            crawlerRunOptionsMock.setup((o) => o.baseCrawlPage).returns(() => baseCrawlPage);
+            crawlerRunOptionsMock.setup((o) => o.discoveryPatterns).returns(() => discoveryPatterns);
+        }
     });
 
     describe('getDiscoveryPattern', () => {

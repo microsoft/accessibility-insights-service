@@ -14,7 +14,7 @@ $global:azurecr = ""
 $global:keyvault = $keyvault
 
 function exitWithUsageInfo {
-    Write-Output "Usage: pull-image-from-registry.ps1 -k <key vault name>"
+    Write-Host "Usage: pull-image-from-registry.ps1 -k <key vault name>"
     exit 1
 }
 
@@ -39,23 +39,23 @@ function getCurrentUserDetails() {
     }
     
     if ( $global:userType -eq "user" ) {
-        Write-Output "Running script using current user credentials"
+        Write-Host "Running script using current user credentials"
     }
     else {
-        Write-Output "Running script using system managed identity"
+        Write-Host "Running script using system managed identity"
     }
 }
 
 function grantUserAccessToKeyVault() {
     if ( $global:userType -eq "user" ) {
-        Write-Output "Granting access to key vault for current user account"
+        Write-Host "Granting access to key vault for current user account"
         az keyvault set-policy --name $global:keyVault --upn $global:principalName --secret-permissions get list
     }
 }
 
 function revokeUserAccessToKeyVault() {
     if ( $global:userType -eq "user" ) {
-        Write-Output "Revoking access to key vault for current user account"
+        Write-Host "Revoking access to key vault for current user account"
         try {
             az keyvault delete-policy --name "$global:keyVault" --upn "$global:principalName"
         }
@@ -68,7 +68,7 @@ function getSecretValue($key) {
     $secretValue = $(az keyvault secret show --name "$key" --vault-name "$keyVault" --query "value" -o tsv)
 
     if ([string]::IsNullOrEmpty($secretValue )) {
-        Write-Output "Unable to get secret for the $key"
+        Write-Host "Unable to get secret for the $key"
         exit 1
     }
 
@@ -80,13 +80,13 @@ function loginToContainerRegistry() {
     $containerRegistryPassword = getSecretValue "containerRegistryPassword"
     $global:azurecr = "$containerRegistryUsername.azurecr.io"
 
-    Write-Output "Login to the container registry $azurecr..."
+    Write-Host "Login to the container registry $azurecr..."
     Write-Output "$containerRegistryPassword" | docker login -u "$containerRegistryUsername" --password-stdin "$azurecr"
 }
 
 function pullImages() {
     $pool = $env:AZ_BATCH_POOL_ID;
-    Write-Output "Pulling container images from a registry for the $pool pool..."
+    Write-Host "Pulling container images from a registry for the $pool pool..."
     if ( $pool -eq "on-demand-url-scan-pool" ) {
         docker pull "$azurecr/batch-scan-manager:latest"
         docker pull "$azurecr/batch-scan-runner:prescanner"
@@ -103,7 +103,7 @@ function pullImages() {
         docker pull "$azurecr/batch-scan-request-sender:latest"
     }
     else {
-        Write-Output "Unable to pull container images. Environment variable AZ_BATCH_POOL_ID is not defined or $pool pool is not supported."
+        Write-Host "Unable to pull container images. Environment variable AZ_BATCH_POOL_ID is not defined or $pool pool is not supported."
         exit 1
     }
 }

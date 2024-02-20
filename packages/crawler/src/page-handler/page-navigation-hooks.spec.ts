@@ -84,8 +84,55 @@ describe(PageNavigationHooks, () => {
             .setup(async (o) => o.waitForPageToCompleteRendering(pageMock.object, scrollTimeoutMsec, pageRenderingTimeoutMsec))
             .returns(() => Promise.resolve())
             .verifiable();
+        pageMock
+            .setup((p) => p.url())
+            .returns(() => {
+                return 'http://www.example.com/';
+            })
+            .verifiable();
 
         await navigationHooks.postNavigation(pageMock.object, {} as HTTPResponse);
+    });
+
+    it('postNavigation with null response for hash Urls', async () => {
+        pageMock
+            .setup((p) => p.url())
+            .returns(() => {
+                return 'http://www.example.com/#foo';
+            })
+            .verifiable();
+        pageHandlerMock
+            .setup(async (o) => o.waitForPageToCompleteRendering(pageMock.object, scrollTimeoutMsec, pageRenderingTimeoutMsec))
+            .returns(() => Promise.resolve())
+            .verifiable();
+
+        await navigationHooks.postNavigation(pageMock.object, null);
+    });
+
+    it('postNavigation with null response without hash Urls', async () => {
+        pageMock
+            .setup((p) => p.url())
+            .returns(() => {
+                return 'http://www.example.com/';
+            })
+            .verifiable();
+        const expectedError: Partial<BrowserError> = {
+            errorType: 'NavigationError',
+            message: 'Unable to get a page response from the browser.',
+        };
+
+        let navigationError: BrowserError;
+        const onNavigationErrorStub = async (browserError: BrowserError) => {
+            navigationError = browserError;
+        };
+        pageMock
+            .setup((p) => p.url())
+            .returns(() => {
+                return 'http://www.example.com/';
+            })
+            .verifiable();
+        await navigationHooks.postNavigation(pageMock.object, null, onNavigationErrorStub);
+        expect(navigationError).toMatchObject(expectedError);
     });
 
     it('postNavigation with undefined response', async () => {
@@ -98,7 +145,12 @@ describe(PageNavigationHooks, () => {
         const onNavigationErrorStub = async (browserError: BrowserError) => {
             navigationError = browserError;
         };
-
+        pageMock
+            .setup((p) => p.url())
+            .returns(() => {
+                return 'http://www.example.com/';
+            })
+            .verifiable();
         await navigationHooks.postNavigation(pageMock.object, undefined, onNavigationErrorStub);
         expect(navigationError).toMatchObject(expectedError);
     });
@@ -116,7 +168,12 @@ describe(PageNavigationHooks, () => {
             .verifiable();
         const onNavigationErrorMock = jest.fn();
         onNavigationErrorMock.mockImplementation(() => Promise.resolve());
-
+        pageMock
+            .setup((p) => p.url())
+            .returns(() => {
+                return undefined;
+            })
+            .verifiable();
         await navigationHooks.postNavigation(pageMock.object, response, onNavigationErrorMock);
         expect(onNavigationErrorMock).toHaveBeenCalledWith(browserError);
     });

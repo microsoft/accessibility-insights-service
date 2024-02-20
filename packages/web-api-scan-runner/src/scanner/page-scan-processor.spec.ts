@@ -117,6 +117,7 @@ describe(PageScanProcessor, () => {
             .returns(() => Promise.resolve(pageMetadata))
             .verifiable();
 
+        setupReopenBrowser();
         setupNavigatePage(url, true);
         setupGetPageState();
         setupClosePage();
@@ -161,6 +162,7 @@ describe(PageScanProcessor, () => {
         };
         axeScanResults = { ...axeScanResults, pageScreenshot, pageSnapshot };
 
+        setupReopenBrowser();
         setupNavigatePage();
         setupGetPageState();
         setupClosePage();
@@ -238,6 +240,10 @@ describe(PageScanProcessor, () => {
         await expect(testSubject.scan(scanMetadata, pageScanResult, websiteScanResult)).rejects.toThrowError('test error');
     });
 });
+
+function setupReopenBrowser(): void {
+    pageMock.setup((p) => p.reopenBrowser({ capabilities: { webgl: true } })).verifiable();
+}
 
 function setupNavigatePage(urlParam: string = url, enableAuthentication: boolean = false): void {
     pageMock.setup((p) => p.navigate(urlParam, { enableAuthentication })).verifiable();

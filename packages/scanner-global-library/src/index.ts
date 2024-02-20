@@ -8,7 +8,7 @@ export { PageHandler } from './page-handler';
 export { PageResponseProcessor } from './page-response-processor';
 export * from './page';
 export { AxeScanResults } from './axe-scanner/axe-scan-results';
-export { WebDriver, WebDriverConfigurationOptions } from './web-driver';
+export { WebDriver, WebDriverConfigurationOptions, WebDriverCapabilities } from './web-driver';
 export { PageNavigationHooks } from './page-navigation-hooks';
 export * from './page-navigator';
 export { PrivacyScanResult } from './privacy-scanner/privacy-scan-result';

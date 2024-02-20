@@ -70,6 +70,7 @@ describe(CrawlerParametersBuilder, () => {
             chromePath: 'chrome path',
             axeSourcePath: 'axe path',
             singleWorker: false,
+            keepUrlFragment: false,
         };
         const actualCrawlOptions = crawlerParametersBuilder.build(scanArguments);
         expect(actualCrawlOptions).toEqual(expectedCrawlOptions);
@@ -112,7 +113,7 @@ describe(CrawlerParametersBuilder, () => {
             .returns(() => fileContent)
             .verifiable();
         const actualCrawlOptions = crawlerParametersBuilder.build(scanArguments);
-        expect(actualCrawlOptions).toEqual({ inputUrls: [urls[0], urls[2]] });
+        expect(actualCrawlOptions).toEqual({ inputUrls: [urls[0], urls[2]], keepUrlFragment: false });
     });
 
     it('validate input file exists', () => {

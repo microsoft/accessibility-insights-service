@@ -9,7 +9,7 @@ import * as Puppeteer from 'puppeteer';
 /**
  * The Chrome DevTools Protocol (CDP) session wrapper.
  *
- * The CDP session may timeout when chromium is not responding. The puppeteer API will
+ * The CDP session may timeout when browser is not responding. The puppeteer API will
  * reject promise from setTimeout() callback on connection timeout. The promise reject will
  * throw uncaught exception from within calling context. The workaround to handle
  * connection timeout uncaught exception is to resolve connection promise before puppeteer

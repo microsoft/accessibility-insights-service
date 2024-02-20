@@ -7,7 +7,7 @@ import { inject, injectable, optional } from 'inversify';
 import { GlobalLogger } from 'logger';
 import * as Puppeteer from 'puppeteer';
 import { isNumber, isEmpty } from 'lodash';
-import { WebDriver } from './web-driver';
+import { WebDriver, WebDriverCapabilities } from './web-driver';
 import { PageNavigator, NavigationResponse } from './page-navigator';
 import { BrowserError } from './browser-error';
 import { PageNavigationTiming } from './page-timeout-config';
@@ -24,6 +24,7 @@ export interface BrowserStartOptions {
     browserWSEndpoint?: string;
     clearBrowserCache?: boolean;
     preserveUserProfile?: boolean;
+    capabilities?: WebDriverCapabilities;
 }
 
 export interface Viewport {
@@ -93,15 +94,16 @@ export class Page {
         return this.page.url();
     }
 
-    public async create(options: BrowserStartOptions = { clearBrowserCache: true }): Promise<void> {
+    public async create(options?: BrowserStartOptions): Promise<void> {
         this.browserStartOptions = options;
         if (!isEmpty(options?.browserWSEndpoint) || !isEmpty(this.browserWSEndpoint)) {
             this.browser = await this.webDriver.connect(options?.browserWSEndpoint ?? this.browserWSEndpoint);
         } else {
             this.browser = await this.webDriver.launch({
                 browserExecutablePath: options?.browserExecutablePath,
-                clearDiskCache: options?.clearBrowserCache,
+                clearDiskCache: options?.clearBrowserCache ?? true,
                 keepUserData: options?.preserveUserProfile,
+                capabilities: options?.capabilities,
             });
         }
 
@@ -110,7 +112,7 @@ export class Page {
 
         const pageCreated = await this.webDriver.waitForPageCreation();
         if (pageCreated !== true) {
-            this.logger?.logWarn('Browser plugins did not complete load on page create event.');
+            this.logger?.logWarn('Browser plugins did not complete load on page startup.');
         }
     }
 
@@ -218,8 +220,16 @@ export class Page {
         return { width: windowSize.width, height: windowSize.height, deviceScaleFactor: windowSize.deviceScaleFactor };
     }
 
+    public async reopenBrowser(options?: BrowserStartOptions): Promise<void> {
+        this.browserStartOptions = {
+            ...this.browserStartOptions,
+            ...options,
+        };
+        await this.reopenBrowserImpl();
+    }
+
     public async close(): Promise<void> {
-        if (this.browserStartOptions.browserWSEndpoint || this.browserWSEndpoint) {
+        if (this.browserStartOptions?.browserWSEndpoint || this.browserWSEndpoint) {
             return;
         }
 
@@ -238,7 +248,7 @@ export class Page {
         if (this.pageAnalysisResult.navigationResponse?.browserError !== undefined) {
             this.setLastNavigationState('analysis', this.pageAnalysisResult.navigationResponse);
         } else {
-            await this.reopenBrowser({ hardReload: true });
+            await this.reopenBrowserImpl({ hardReload: true });
         }
     }
 
@@ -288,12 +298,12 @@ export class Page {
         }
 
         if (this.authenticationResult?.authenticated === true) {
-            await this.reopenBrowser();
+            await this.reopenBrowserImpl();
         }
     }
 
     private async navigateWithNetworkTrace(url: string): Promise<void> {
-        await this.reopenBrowser();
+        await this.reopenBrowserImpl();
         await this.setExtraHTTPHeaders();
         await this.pageNetworkTracer.trace(url, this.page);
     }
@@ -302,7 +312,7 @@ export class Page {
      * Hard reload (close and reopen browser) will delete all browser's data but preserve html/image/script/css/etc. cached files.
      */
     private async hardReload(): Promise<void> {
-        await this.reopenBrowser({ hardReload: true });
+        await this.reopenBrowserImpl({ hardReload: true });
         await this.navigate(this.requestUrl, this.pageOptions);
     }
 
@@ -311,8 +321,8 @@ export class Page {
         this.setLastNavigationState('reload', response);
     }
 
-    private async reopenBrowser(options?: { hardReload?: boolean }): Promise<void> {
-        if (this.browserStartOptions.browserWSEndpoint || this.browserWSEndpoint) {
+    private async reopenBrowserImpl(options?: { hardReload?: boolean }): Promise<void> {
+        if (this.browserStartOptions?.browserWSEndpoint || this.browserWSEndpoint) {
             return;
         }
 

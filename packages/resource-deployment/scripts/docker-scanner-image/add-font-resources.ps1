@@ -29,7 +29,7 @@ namespace FontResource
 '@
  
 Add-Type $fontCSharpCode
-Write-Output "Adding font resources..."
+Write-Host "Adding font resources..."
 foreach ($font in $(Get-ChildItem ${env:windir}\Fonts)) {
     [FontResource.AddRemoveFonts]::AddFont($font.FullName) | Out-Null
 }
