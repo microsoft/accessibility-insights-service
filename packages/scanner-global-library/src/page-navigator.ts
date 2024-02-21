@@ -12,6 +12,7 @@ import { puppeteerTimeoutConfig, PageNavigationTiming } from './page-timeout-con
 import { BrowserCache } from './browser-cache';
 import { PageOperation, PageOperationHandler } from './network/page-operation-handler';
 import { resetSessionHistory } from './page-client-lib';
+import { WebDriverCapabilities } from './web-driver';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -32,8 +33,13 @@ export interface PageOperationResult {
 
 @injectable()
 export class PageNavigator {
-    private readonly waitForOptions: Puppeteer.WaitForOptions = {
-        // The networkidle2 option will break page load with WebGL capability enabled
+    private readonly waitForDefaultOptions: Puppeteer.WaitForOptions = {
+        waitUntil: 'networkidle2',
+        timeout: puppeteerTimeoutConfig.navigationTimeoutMsec,
+    };
+
+    private readonly waitForCompleteOptions: Puppeteer.WaitForOptions = {
+        // The networkidle0 option is required to load page with WebGL enabled
         waitUntil: 'networkidle0',
         timeout: puppeteerTimeoutConfig.navigationTimeoutMsec,
     };
@@ -50,21 +56,21 @@ export class PageNavigator {
         return this.pageNavigationHooks.pageConfigurator;
     }
 
-    public async navigate(url: string, page: Puppeteer.Page): Promise<NavigationResponse> {
+    public async navigate(url: string, page: Puppeteer.Page, capabilities?: WebDriverCapabilities): Promise<NavigationResponse> {
         await this.pageNavigationHooks.preNavigation(page);
-        const pageOperation = this.createPageOperation('goto', page, url);
+        const pageOperation = this.createPageOperation('goto', page, url, capabilities);
 
         return this.navigatePage(pageOperation, page);
     }
 
-    public async reload(page: Puppeteer.Page): Promise<NavigationResponse> {
-        const pageOperation = this.createPageOperation('reload', page);
+    public async reload(page: Puppeteer.Page, capabilities?: WebDriverCapabilities): Promise<NavigationResponse> {
+        const pageOperation = this.createPageOperation('reload', page, undefined, capabilities);
 
         return this.navigatePage(pageOperation, page);
     }
 
-    public async waitForNavigation(page: Puppeteer.Page): Promise<NavigationResponse> {
-        const pageOperation = this.createPageOperation('wait', page);
+    public async waitForNavigation(page: Puppeteer.Page, capabilities?: WebDriverCapabilities): Promise<NavigationResponse> {
+        const pageOperation = this.createPageOperation('wait', page, undefined, capabilities);
         const operationResult = await this.pageOperationHandler.invoke(pageOperation, page);
         if (operationResult.error) {
             return this.getOperationErrorResult(operationResult);
@@ -158,7 +164,7 @@ export class PageNavigator {
 
             // Navigation using page.goto() will not resolve HTTP 304 response
             // Use of page.goBack() is required with back/forward cache disabled, option --disable-features=BackForwardCache
-            const pageOperation = async () => page.goBack(this.waitForOptions);
+            const pageOperation = async () => page.goBack(this.waitForDefaultOptions);
             operationResult = await this.pageOperationHandler.invoke(pageOperation, page);
         } while (
             count < maxRetryCount &&
@@ -170,25 +176,31 @@ export class PageNavigator {
         return operationResult;
     }
 
-    private createPageOperation(operation: 'goto' | 'reload' | 'wait', page: Puppeteer.Page, url?: string): PageOperation {
+    private createPageOperation(
+        operation: 'goto' | 'reload' | 'wait',
+        page: Puppeteer.Page,
+        url?: string,
+        capabilities?: WebDriverCapabilities,
+    ): PageOperation {
+        const waitForOptions = capabilities?.webgl === true ? this.waitForCompleteOptions : this.waitForDefaultOptions;
         switch (operation) {
             case 'goto':
                 return async () => {
                     this.logger?.logInfo('Navigate page to URL.');
 
-                    return page.goto(url, this.waitForOptions);
+                    return page.goto(url, waitForOptions);
                 };
             case 'reload':
                 return async () => {
                     this.logger?.logInfo('Wait for the page to reload URL.');
 
-                    return page.reload(this.waitForOptions);
+                    return page.reload(waitForOptions);
                 };
             case 'wait':
                 return async () => {
                     this.logger?.logInfo('Wait for the page to navigate to URL.');
 
-                    return page.waitForNavigation(this.waitForOptions);
+                    return page.waitForNavigation(waitForOptions);
                 };
             default:
                 return undefined;
