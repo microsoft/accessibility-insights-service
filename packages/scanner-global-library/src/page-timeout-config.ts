@@ -27,7 +27,7 @@ export const puppeteerTimeoutConfig = {
      * a navigation timeout error and stop the loading process. Need to adjust the navigation timeout
      * to allow more time for WebGL webpages to load.
      */
-    navigationTimeoutMsec: 180000,
+    navigationTimeoutMsec: 150000,
 
     /**
      * Maximum wait time, in milliseconds, to complete async page rendering.

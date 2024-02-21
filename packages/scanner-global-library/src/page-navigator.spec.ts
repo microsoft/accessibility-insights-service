@@ -13,6 +13,7 @@ import { BrowserError } from './browser-error';
 import { BrowserCache } from './browser-cache';
 import { PageOperation, PageOperationHandler } from './network/page-operation-handler';
 import { resetSessionHistory } from './page-client-lib';
+import { WebDriverCapabilities } from './web-driver';
 
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/consistent-type-assertions */
 
@@ -30,6 +31,7 @@ let pageOperationResult: PageOperationResult;
 let response: Puppeteer.HTTPResponse;
 let pageOperation: PageOperation;
 let resetSessionHistoryMock: typeof resetSessionHistory;
+let capabilities: WebDriverCapabilities;
 
 describe(PageNavigator, () => {
     beforeEach(() => {
@@ -39,6 +41,7 @@ describe(PageNavigator, () => {
         pageOperationHandlerMock = Mock.ofType<PageOperationHandler>();
         loggerMock = Mock.ofType(MockableLogger);
         pageOperationResult = {} as PageOperationResult;
+        capabilities = {} as WebDriverCapabilities;
 
         resetSessionHistoryMock = jest.fn().mockImplementation(() => Promise.resolve());
         jest.spyOn(global, 'setTimeout').mockImplementation((callback) => {
@@ -77,6 +80,9 @@ describe(PageNavigator, () => {
 
     describe('navigate', () => {
         it('navigate to url', async () => {
+            capabilities = {
+                webgl: true,
+            };
             pageOperationResult.response = {
                 status: () => 200,
             } as Puppeteer.HTTPResponse;
@@ -112,10 +118,10 @@ describe(PageNavigator, () => {
                 },
             } as NavigationResponse;
 
-            const actualResponse = await pageNavigator.navigate(url, puppeteerPageMock.object);
+            const actualResponse = await pageNavigator.navigate(url, puppeteerPageMock.object, capabilities);
 
             expect(actualResponse).toEqual(expectedResponse);
-            expect(createPageOperationFn).toBeCalledWith('goto', puppeteerPageMock.object, url);
+            expect(createPageOperationFn).toBeCalledWith('goto', puppeteerPageMock.object, url, capabilities);
             expect(handleCachedResponseFn).toBeCalledWith(pageOperationResult, puppeteerPageMock.object);
             expect(resetSessionHistoryMock).toBeCalledWith(puppeteerPageMock.object);
         });
@@ -143,7 +149,7 @@ describe(PageNavigator, () => {
             const actualResponse = await pageNavigator.navigate(url, puppeteerPageMock.object);
 
             expect(actualResponse).toEqual(expectedResponse);
-            expect(createPageOperationFn).toBeCalledWith('goto', puppeteerPageMock.object, url);
+            expect(createPageOperationFn).toBeCalledWith('goto', puppeteerPageMock.object, url, undefined);
         });
 
         it('navigate to url with server response error', async () => {
@@ -180,7 +186,7 @@ describe(PageNavigator, () => {
             const actualResponse = await pageNavigator.navigate(url, puppeteerPageMock.object);
 
             expect(actualResponse).toEqual(expectedResponse);
-            expect(createPageOperationFn).toBeCalledWith('goto', puppeteerPageMock.object, url);
+            expect(createPageOperationFn).toBeCalledWith('goto', puppeteerPageMock.object, url, undefined);
         });
     });
 
@@ -221,7 +227,7 @@ describe(PageNavigator, () => {
             const actualResponse = await pageNavigator.reload(puppeteerPageMock.object);
 
             expect(actualResponse).toEqual(expectedResponse);
-            expect(createPageOperationFn).toBeCalledWith('reload', puppeteerPageMock.object);
+            expect(createPageOperationFn).toBeCalledWith('reload', puppeteerPageMock.object, undefined, undefined);
             expect(handleCachedResponseFn).toBeCalledWith(pageOperationResult, puppeteerPageMock.object);
             expect(resetSessionHistoryMock).toBeCalledWith(puppeteerPageMock.object);
         });
@@ -257,7 +263,7 @@ describe(PageNavigator, () => {
             const actualResponse = await pageNavigator.waitForNavigation(puppeteerPageMock.object);
 
             expect(actualResponse).toEqual(expectedResponse);
-            expect(createPageOperationFn).toBeCalledWith('wait', puppeteerPageMock.object);
+            expect(createPageOperationFn).toBeCalledWith('wait', puppeteerPageMock.object, undefined, undefined);
         });
     });
 
@@ -283,7 +289,7 @@ describe(PageNavigator, () => {
                 .returns(() => Promise.resolve(response))
                 .verifiable();
             puppeteerPageMock
-                .setup((o) => o.goBack({ waitUntil: 'networkidle0', timeout: puppeteerTimeoutConfig.navigationTimeoutMsec }))
+                .setup((o) => o.goBack({ waitUntil: 'networkidle2', timeout: puppeteerTimeoutConfig.navigationTimeoutMsec }))
                 .returns(() => Promise.resolve(okResponse))
                 .verifiable();
 
@@ -315,7 +321,7 @@ describe(PageNavigator, () => {
                 .returns(() => Promise.resolve(response))
                 .verifiable(Times.atLeast(max304RetryCount - 1));
             puppeteerPageMock
-                .setup((o) => o.goBack({ waitUntil: 'networkidle0', timeout: puppeteerTimeoutConfig.navigationTimeoutMsec }))
+                .setup((o) => o.goBack({ waitUntil: 'networkidle2', timeout: puppeteerTimeoutConfig.navigationTimeoutMsec }))
                 .returns(() => Promise.resolve(cachedResponse))
                 .verifiable(Times.atLeast(max304RetryCount));
             browserCacheMock
