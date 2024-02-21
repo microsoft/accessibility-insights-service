@@ -51,4 +51,12 @@ export class HashGenerator {
 
         return this.shaObj('sha256').update(hashSeed).digest('hex');
     }
+
+    public generateBase64Hash128(...values: string[]): string {
+        const hashSeed: string = values.join('|').toLowerCase();
+        const hash = this.shaObj('sha256').update(hashSeed);
+        const buffer = hash.digest().subarray(0, 16);
+
+        return buffer.toString('hex');
+    }
 }
