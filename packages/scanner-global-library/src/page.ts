@@ -263,7 +263,7 @@ export class Page {
             return;
         }
 
-        const response = await this.pageNavigator.navigate(this.requestUrl, this.page);
+        const response = await this.pageNavigator.navigate(this.requestUrl, this.page, this.browserStartOptions?.capabilities);
         this.setLastNavigationState('load', response);
     }
 
@@ -317,7 +317,7 @@ export class Page {
     }
 
     private async softReload(): Promise<void> {
-        const response = await this.pageNavigator.reload(this.page);
+        const response = await this.pageNavigator.reload(this.page, this.browserStartOptions?.capabilities);
         this.setLastNavigationState('reload', response);
     }
 
