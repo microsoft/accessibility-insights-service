@@ -30,39 +30,26 @@ export interface WebsiteScanData extends StorageDocument {
      * The document must have `knownPages` property to support patch operation.
      */
     knownPages?: KnownPages;
-    pages?: WebsiteScanPageData[];
 }
 
 /**
- * Represents website page partial scan result data.
- * Composite DB document key properties: `websiteId`, `scanId`.
- * Partition key is inherited from corresponding `WebsiteScanData` document.
- */
-export interface WebsiteScanPageData extends StorageDocument {
-    itemType: ItemType.websiteScanPageData;
-    websiteId: string;
-    scanId: string;
-    url: string;
-    scanState?: ScanState;
-    runState?: OnDemandPageScanRunState;
-    timestamp: string;
-}
-
-/**
- * Represents known website URLs.
- * The object key property is a hash of the URL string. The Cosmos DB document patch operation will update the same property
- * hence URL with the same hash will not be duplicated.
+ * Stores website URLs. The URL string is hashed and used as the object key property.
+ * The document PATCH operation in Cosmos DB will change that same property, so there will
+ * be no repeated URLs with the same hash.
  *
- * The estimated maximum URLs count is about 13K for the current 2 MB Cosmos DB document size limit.
+ * The current 2 MB Cosmos DB document size limit allows for roughly 10K URLs in one document.
+ *
+ * The value is a string that compacts JSON object {@link KnownPage} in format `url|scanId|runState|scanState`
  */
 export interface KnownPages {
-    [key: string]: KnownPage;
+    [key: string]: string;
 }
 
 export interface KnownPage {
     url: string;
     scanId?: string;
     runState?: OnDemandPageScanRunState;
+    scanState?: ScanState;
 }
 
 /**

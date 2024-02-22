@@ -4,7 +4,7 @@
 import { inject, injectable } from 'inversify';
 import { cosmosContainerClientTypes, CosmosContainerClient } from 'azure-services';
 import { executeWithExponentialRetry, ExponentialRetryOptions, HashGenerator, ServiceConfiguration, System } from 'common';
-import { ItemType, WebsiteScanData, WebsiteScanPageData } from 'storage-documents';
+import { ItemType, KnownPage, WebsiteScanData } from 'storage-documents';
 import { GlobalLogger } from 'logger';
 import { isEmpty, maxBy } from 'lodash';
 import { PatchOperation } from '@azure/cosmos';
@@ -81,7 +81,7 @@ export class WebsiteScanDataProvider {
      * ```
      * The `hash` is sha256 base64 hash string value of the URL. The knownPages list will have only uniques URLs inserted.
      */
-    public async updateKnownPages(websiteScanData: Partial<WebsiteScanData>, knownPages: string[]): Promise<WebsiteScanData> {
+    public async updateKnownPages(websiteScanData: Partial<WebsiteScanData>, knownPages: KnownPage[]): Promise<WebsiteScanData> {
         const dbDocument = this.normalizeWebsiteToDbDocument(websiteScanData);
         if (isEmpty(knownPages)) {
             return dbDocument;
@@ -129,36 +129,6 @@ export class WebsiteScanDataProvider {
         return maxBy(operationResponseList, (r) => r.item?._ts).item;
     }
 
-    /**
-     * Writes document to a storage if document does not exist; otherwise, merges the document with the current storage document.
-     *
-     * Source document properties that resolve to undefined are skipped if a destination document value exists.
-     * Will remove all falsey (false, null, 0, "", undefined, and NaN) values from document's array type properties
-     */
-    public async mergeOrCreatePage(
-        websiteScanData: Partial<WebsiteScanData>,
-        websiteScanPageData: Partial<WebsiteScanPageData>,
-    ): Promise<WebsiteScanPageData> {
-        const websiteDbDocument = this.normalizeWebsiteToDbDocument(websiteScanData);
-        const pageDbDocument = this.normalizePageToDbDocument(websiteDbDocument, websiteScanPageData);
-
-        return executeWithExponentialRetry(async () => {
-            try {
-                const operationResponse = await this.cosmosContainerClient.mergeOrWriteDocument(pageDbDocument);
-
-                return operationResponse.item;
-            } catch (error) {
-                this.logger.logError(`Failed to update WebsiteScanPageData Cosmos DB document. Retrying on error.`, {
-                    websiteId: pageDbDocument?.id,
-                    document: JSON.stringify(pageDbDocument),
-                    error: System.serializeError(error),
-                });
-
-                throw error;
-            }
-        }, this.retryOptions);
-    }
-
     private normalizeWebsiteToDbDocument(websiteScanData: Partial<WebsiteScanData>): WebsiteScanData {
         const documentId = this.getWebsiteDbDocumentId(websiteScanData);
         const partitionKey =
@@ -169,37 +139,6 @@ export class WebsiteScanDataProvider {
         websiteScanData.partitionKey = partitionKey;
 
         return websiteScanData as WebsiteScanData;
-    }
-
-    private normalizePageToDbDocument(
-        websiteDbDocument: WebsiteScanData,
-        websiteScanPageData: Partial<WebsiteScanPageData>,
-    ): WebsiteScanPageData {
-        const documentId = this.getPageDbDocumentId(websiteDbDocument, websiteScanPageData);
-
-        websiteScanPageData.itemType = ItemType.websiteScanPageData;
-        websiteScanPageData.id = documentId;
-        // Use the parent website DB document partition key to facilitate query operations
-        websiteScanPageData.partitionKey = websiteDbDocument.partitionKey;
-        websiteScanPageData.websiteId = websiteDbDocument.id;
-
-        return websiteScanPageData as WebsiteScanPageData;
-    }
-
-    private getPageDbDocumentId(websiteDbDocument: WebsiteScanData, websiteScanPageData: Partial<WebsiteScanPageData>): string {
-        if (websiteScanPageData.id !== undefined) {
-            return websiteScanPageData.id;
-        }
-
-        if (websiteScanPageData.scanId === undefined) {
-            throw new Error(
-                `The websiteScanPageData.id or websiteScanPageData.scanId properties should be defined. ${JSON.stringify(
-                    websiteScanPageData,
-                )}`,
-            );
-        }
-
-        return this.hashGenerator.getWebsiteScanDataDocumentId(websiteDbDocument.id, websiteScanPageData.scanId);
     }
 
     private getWebsiteDbDocumentId(websiteScanData: Partial<WebsiteScanData>): string {
