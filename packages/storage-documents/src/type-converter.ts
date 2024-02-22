@@ -13,13 +13,8 @@ export function convertKnownPageToString(knownPage: KnownPage): string {
         return '';
     }
 
-    const properties = [];
-    properties.push(knownPage.url);
-    properties.push(knownPage.scanId);
-    properties.push(knownPage.runState);
-    properties.push(knownPage.scanState);
-
-    const value = properties.join('|'); //`${knownPage.url}|${knownPage.scanId}|${knownPage.runState}|${knownPage.scanState}`;
+    const properties = [knownPage.url, knownPage.scanId, knownPage.runState, knownPage.scanState];
+    const value = properties.join('|');
 
     return value.replace(/(\|)+$/g, '');
 }

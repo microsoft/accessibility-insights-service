@@ -40,6 +40,7 @@ export interface WebsiteScanData extends StorageDocument {
  * The current 2 MB Cosmos DB document size limit allows for roughly 10K URLs in one document.
  *
  * The value is a string that compacts JSON object {@link KnownPage} in format `url|scanId|runState|scanState`
+ * Use {@link convertKnownPageToString} and {@link convertStringToKnownPage} functions to convert data.
  */
 export interface KnownPages {
     [key: string]: string;

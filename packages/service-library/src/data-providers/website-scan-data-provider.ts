@@ -4,7 +4,7 @@
 import { inject, injectable } from 'inversify';
 import { cosmosContainerClientTypes, CosmosContainerClient } from 'azure-services';
 import { executeWithExponentialRetry, ExponentialRetryOptions, HashGenerator, ServiceConfiguration, System } from 'common';
-import { ItemType, KnownPage, WebsiteScanData } from 'storage-documents';
+import { ItemType, KnownPage, WebsiteScanData, convertKnownPageToString } from 'storage-documents';
 import { GlobalLogger } from 'logger';
 import { isEmpty, maxBy } from 'lodash';
 import { PatchOperation } from '@azure/cosmos';
@@ -71,15 +71,16 @@ export class WebsiteScanDataProvider {
     }
 
     /**
-     * Updates the knows pages collection of the website DB document.
+     * Updates the `knownPages` list of the website DB document.
      *
      * The website DB document knownPages object will have the following structure:
      * ```
      * knownPages {
-     *  "hash": "url"
+     *  "hash": "data"
      * }
      * ```
-     * The `hash` is sha256 base64 hash string value of the URL. The knownPages list will have only uniques URLs inserted.
+     * The `hash` is the base64 encoded string of first 128 bits from the URL's sha256 hash.
+     * The `knownPages` list will only contain distinct URLs.
      */
     public async updateKnownPages(websiteScanData: Partial<WebsiteScanData>, knownPages: KnownPage[]): Promise<WebsiteScanData> {
         const dbDocument = this.normalizeWebsiteToDbDocument(websiteScanData);
@@ -91,9 +92,10 @@ export class WebsiteScanDataProvider {
         const knownPageChunks = System.chunkArray(knownPages, 10);
         const operationsList = knownPageChunks.map((knownPageChunk) => {
             return knownPageChunk.map((knownPage) => {
-                const hash = this.hashGenerator.generateBase64Hash(knownPage);
+                const hash = this.hashGenerator.generateBase64Hash128(knownPage.url);
+                const data = convertKnownPageToString(knownPage);
 
-                return { op: 'add', path: `/knownPages/${hash}`, value: knownPage } as PatchOperation;
+                return { op: 'add', path: `/knownPages/${hash}`, value: data } as PatchOperation;
             });
         });
 
