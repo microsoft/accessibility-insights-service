@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 import { isEmpty } from 'lodash';
-import { KnownPage } from './website-scan-result';
+import { KnownPage, KnownPages } from './website-scan-result';
 import { OnDemandPageScanRunState, ScanState } from './on-demand-page-scan-result';
 
 /**
@@ -55,4 +55,12 @@ export function convertStringToKnownPage(value: string): KnownPage {
     }
 
     return knownPage;
+}
+
+export function convertObjectToKnownPages(knownPages: KnownPages): KnownPage[] {
+    if (isEmpty(knownPages)) {
+        return [];
+    }
+
+    return Object.keys(knownPages).map((hash) => convertStringToKnownPage((knownPages as KnownPages)[hash]));
 }

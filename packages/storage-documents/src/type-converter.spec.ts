@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { convertKnownPageToString, convertStringToKnownPage } from './type-converter';
+import { convertKnownPageToString, convertObjectToKnownPages, convertStringToKnownPage } from './type-converter';
 import { KnownPage } from './website-scan-result';
 
 describe('KnownPage type converter', () => {
@@ -41,5 +41,26 @@ describe('KnownPage type converter', () => {
         knownPage = convertStringToKnownPage(value);
         expected = { url: 'url2', scanState: 'pass' } as KnownPage;
         expect(knownPage).toEqual(expected);
+    });
+
+    test('convert to list', () => {
+        let knownPagesObj = {};
+        let knownPages = convertObjectToKnownPages(knownPagesObj);
+        expect(knownPages).toEqual([]);
+
+        knownPagesObj = {
+            hash1: 'url1',
+            hash2: 'url2',
+        };
+        const expected = [
+            {
+                url: 'url1',
+            },
+            {
+                url: 'url2',
+            },
+        ];
+        knownPages = convertObjectToKnownPages(knownPagesObj);
+        expect(knownPages).toEqual(expected);
     });
 });

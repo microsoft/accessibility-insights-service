@@ -29,7 +29,7 @@ export interface WebsiteScanData extends StorageDocument {
      * `path: '/knownPages/url', value: {}`
      * The document must have `knownPages` property to support patch operation.
      */
-    knownPages?: KnownPages;
+    knownPages?: KnownPages | KnownPage[];
 }
 
 /**

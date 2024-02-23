@@ -4,7 +4,7 @@
 import { inject, injectable } from 'inversify';
 import { cosmosContainerClientTypes, CosmosContainerClient } from 'azure-services';
 import { executeWithExponentialRetry, ExponentialRetryOptions, HashGenerator, ServiceConfiguration, System } from 'common';
-import { ItemType, KnownPage, WebsiteScanData, convertKnownPageToString } from 'storage-documents';
+import { ItemType, KnownPage, KnownPages, WebsiteScanData, convertKnownPageToString, convertObjectToKnownPages } from 'storage-documents';
 import { GlobalLogger } from 'logger';
 import { isEmpty, maxBy } from 'lodash';
 import { PatchOperation } from '@azure/cosmos';
@@ -41,7 +41,10 @@ export class WebsiteScanDataProvider {
             websiteDbDocument.partitionKey,
         );
 
-        return operationResponse.item;
+        const websiteScanData = operationResponse.item;
+        websiteScanData.knownPages = convertObjectToKnownPages(websiteScanData.knownPages as KnownPages);
+
+        return websiteScanData;
     }
 
     /**
@@ -56,8 +59,10 @@ export class WebsiteScanDataProvider {
         return executeWithExponentialRetry(async () => {
             try {
                 const operationResponse = await this.cosmosContainerClient.mergeOrWriteDocument(dbDocument);
+                const websiteScanDataItem = operationResponse.item;
+                websiteScanDataItem.knownPages = convertObjectToKnownPages(websiteScanDataItem.knownPages as KnownPages);
 
-                return operationResponse.item;
+                return websiteScanDataItem;
             } catch (error) {
                 this.logger.logError(`Failed to update WebsiteScanData Cosmos DB document. Retrying on error.`, {
                     websiteId: dbDocument?.id,
@@ -128,7 +133,10 @@ export class WebsiteScanDataProvider {
         );
 
         // Returns the latest updated document version
-        return maxBy(operationResponseList, (r) => r.item?._ts).item;
+        const websiteScanDataItem = maxBy(operationResponseList, (r) => r.item?._ts).item;
+        websiteScanDataItem.knownPages = convertObjectToKnownPages(websiteScanDataItem.knownPages as KnownPages);
+
+        return websiteScanDataItem;
     }
 
     private normalizeWebsiteToDbDocument(websiteScanData: Partial<WebsiteScanData>): WebsiteScanData {
