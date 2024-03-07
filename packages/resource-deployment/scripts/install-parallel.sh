@@ -204,7 +204,7 @@ function install() {
     . "${0%/*}/create-key-vault.sh"
     . "${0%/*}/push-image-to-container-registry.sh"
     # Refresh Azure access token after lengthy operation
-    az login
+    az account get-access-token 1>/dev/null
     . "${0%/*}/create-batch-account.sh"
     . "${0%/*}/create-job-schedule.sh"
     . "${0%/*}/create-function-app.sh"
