@@ -16,6 +16,7 @@ export function convertKnownPageToString(knownPage: KnownPage): string {
     const properties = [knownPage.url, knownPage.scanId, knownPage.runState, knownPage.scanState];
     const value = properties.join('|');
 
+    // Remove separator chars at the end
     return value.replace(/(\|)+$/g, '');
 }
 
