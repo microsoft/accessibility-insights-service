@@ -3,7 +3,6 @@
 
 export * from './item-type';
 export * from './on-demand-page-scan-result';
-export * from './states';
 export * from './report-generator-request';
 export * from './storage-document';
 export * from './on-demand-page-scan-batch-request';

@@ -7,6 +7,8 @@ import { ScanGroupType } from './website-scan-result';
 import { PrivacyScan } from './on-demand-page-scan-batch-request';
 import { ReportScanRunResult } from './report-generator-request';
 
+export const currentSchemaVersion = '2';
+
 export declare type OnDemandPageScanRunState =
     | 'pending'
     | 'accepted'
@@ -61,6 +63,7 @@ export interface ScanError {
  */
 export interface OnDemandPageScanResult extends StorageDocument {
     itemType: ItemType.onDemandPageScanRunResult;
+    schemaVersion?: string;
     url: string;
     priority: number;
     scanType?: ScanType;

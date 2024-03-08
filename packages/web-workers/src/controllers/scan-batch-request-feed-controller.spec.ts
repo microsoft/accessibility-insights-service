@@ -26,6 +26,7 @@ import {
     ReportGroupRequest,
     ScanGroupType,
     ScanType,
+    currentSchemaVersion,
 } from 'storage-documents';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { MockableLogger } from '../test-utilities/mockable-logger';
@@ -130,6 +131,7 @@ describe(ScanBatchRequestFeedController, () => {
                     itemType: ItemType.scanRunBatchRequest,
                     scanRunBatchRequest: [
                         {
+                            schemaVersion: currentSchemaVersion,
                             scanId: 'scan-1',
                             url: 'http://url-1',
                             priority: 1,
@@ -335,6 +337,7 @@ function setupOnDemandPageScanRunResultProviderMock(
                         } as WebsiteScanRef;
                     })[0];
                 const result: OnDemandPageScanResult = {
+                    schemaVersion: request.schemaVersion,
                     id: request.scanId,
                     url: request.url,
                     priority: request.priority,
@@ -373,6 +376,7 @@ function setupPageScanRequestProviderMock(documents: OnDemandPageScanBatchReques
             .map<OnDemandPageScanRequest>((scanRequest) => {
                 const scanGroupType = getScanGroupType(scanRequest);
                 const request: OnDemandPageScanRequest = {
+                    schemaVersion: scanRequest.schemaVersion,
                     id: scanRequest.scanId,
                     url: scanRequest.url,
                     priority: scanRequest.priority,

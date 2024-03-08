@@ -108,6 +108,7 @@ export class ScanBatchRequestFeedController extends WebController {
             });
 
             return {
+                schemaVersion: request.schemaVersion,
                 id: request.scanId,
                 url: request.url,
                 priority: request.priority,
@@ -179,6 +180,7 @@ export class ScanBatchRequestFeedController extends WebController {
             });
 
             return {
+                schemaVersion: request.schemaVersion,
                 id: request.scanId,
                 url: request.url,
                 priority: request.priority,
