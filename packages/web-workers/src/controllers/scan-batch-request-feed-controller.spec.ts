@@ -162,6 +162,7 @@ describe(ScanBatchRequestFeedController, () => {
                 itemType: ItemType.scanRunBatchRequest,
                 scanRunBatchRequest: [
                     {
+                        schemaVersion: currentSchemaVersion,
                         scanId: 'scan-1',
                         url: 'http://url-1',
                         priority: 1,
@@ -174,6 +175,7 @@ describe(ScanBatchRequestFeedController, () => {
                         reportGroups: [{ consolidatedId: 'consolidated-id-1' }],
                     },
                     {
+                        schemaVersion: currentSchemaVersion,
                         scanId: 'scan-2',
                         url: 'http://url-2',
                         priority: 0,
@@ -191,6 +193,7 @@ describe(ScanBatchRequestFeedController, () => {
                 itemType: ItemType.scanRunBatchRequest,
                 scanRunBatchRequest: [
                     {
+                        schemaVersion: currentSchemaVersion,
                         scanId: 'scan-4',
                         url: 'http://url-4',
                         priority: 1,
@@ -211,6 +214,7 @@ describe(ScanBatchRequestFeedController, () => {
                         deepScan: true,
                     },
                     {
+                        schemaVersion: currentSchemaVersion,
                         scanId: 'scan-5',
                         url: 'http://url-5',
                         priority: 0,
@@ -230,11 +234,13 @@ describe(ScanBatchRequestFeedController, () => {
                 itemType: ItemType.scanRunBatchRequest,
                 scanRunBatchRequest: [
                     {
+                        schemaVersion: currentSchemaVersion,
                         scanId: 'scan-7',
                         url: 'http://url-7',
                         priority: 0,
                     },
                     {
+                        schemaVersion: currentSchemaVersion,
                         scanId: 'scan-8',
                         url: 'http://url-8',
                         priority: 2,

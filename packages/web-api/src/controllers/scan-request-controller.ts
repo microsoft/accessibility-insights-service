@@ -14,7 +14,7 @@ import {
     WebApiError,
     WebApiErrorCodes,
 } from 'service-library';
-import { ScanRunBatchRequest, currentSchemaVersion } from 'storage-documents';
+import { ScanRunBatchRequest } from 'storage-documents';
 
 interface ProcessedBatchRequestData {
     scanRequestsToBeStoredInDb: ScanRunBatchRequest[];
@@ -147,7 +147,6 @@ export class ScanRequestController extends ApiController {
                 // preserve GUID origin for a single batch scope
                 const scanId = this.guidGenerator.createGuidFromBaseGuid(batchId);
                 scanRequestsToBeStoredInDb.push({
-                    schemaVersion: currentSchemaVersion,
                     scanId: scanId,
                     url: scanRunRequest.url,
                     priority: isNil(scanRunRequest.priority) ? 0 : scanRunRequest.priority,

@@ -84,8 +84,7 @@ export class WebsiteScanDataProvider {
      *  "hash": "data"
      * }
      * ```
-     * The `hash` is the base64 encoded string of first 128 bits from the URL's sha256 hash.
-     * The `knownPages` list will only contain distinct URLs.
+     * The `knownPages` persisted list of website DB document will not have any duplicate URLs.
      */
     public async updateKnownPages(websiteScanData: Partial<WebsiteScanData>, knownPages: KnownPage[]): Promise<WebsiteScanData> {
         const dbDocument = this.normalizeWebsiteToDbDocument(websiteScanData);

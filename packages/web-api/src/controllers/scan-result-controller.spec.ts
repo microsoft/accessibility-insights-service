@@ -14,7 +14,7 @@ import {
     WebApiErrorCodes,
     WebsiteScanResultProvider,
 } from 'service-library';
-import { ItemType, OnDemandPageScanResult, WebsiteScanResult, currentSchemaVersion } from 'storage-documents';
+import { ItemType, OnDemandPageScanResult, WebsiteScanResult } from 'storage-documents';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { ScanResponseConverter } from '../converters/scan-response-converter';
 import { ScanResultController } from './scan-result-controller';
@@ -41,7 +41,6 @@ describe(ScanResultController, () => {
         },
     };
     const dbResponse: OnDemandPageScanResult = {
-        schemaVersion: currentSchemaVersion,
         id: scanId,
         deepScanId: scanId,
         partitionKey: 'partition-key',
