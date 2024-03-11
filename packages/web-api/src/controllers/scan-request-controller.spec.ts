@@ -7,7 +7,7 @@ import { Context } from '@azure/functions';
 import { GuidGenerator, RestApiConfig, ServiceConfiguration, CrawlConfig } from 'common';
 import { ScanRequestReceivedMeasurements } from 'logger';
 import { HttpResponse, ScanDataProvider, ScanRunResponse, WebApiErrorCodes } from 'service-library';
-import { ScanRunBatchRequest, PrivacyScan, AuthenticationType, currentSchemaVersion } from 'storage-documents';
+import { ScanRunBatchRequest, PrivacyScan, AuthenticationType } from 'storage-documents';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { MockableLogger } from '../test-utilities/mockable-logger';
 
@@ -293,7 +293,6 @@ describe(ScanRequestController, () => {
             ];
             const expectedSavedRequest: ScanRunBatchRequest[] = [
                 {
-                    schemaVersion: currentSchemaVersion,
                     scanId: guid2,
                     url: 'https://abs/path/',
                     priority: 1,
@@ -333,8 +332,8 @@ describe(ScanRequestController, () => {
             context.req.rawBody = JSON.stringify([{ url: 'https://abs/path/', priority: priority, authenticationType }]);
             const expectedResponse = [{ scanId: guid2, url: 'https://abs/path/' }];
             const expectedSavedRequest: ScanRunBatchRequest[] = authenticationType
-                ? [{ schemaVersion: currentSchemaVersion, scanId: guid2, url: 'https://abs/path/', priority: priority, authenticationType }]
-                : [{ schemaVersion: currentSchemaVersion, scanId: guid2, url: 'https://abs/path/', priority: priority }];
+                ? [{ scanId: guid2, url: 'https://abs/path/', priority: priority, authenticationType }]
+                : [{ scanId: guid2, url: 'https://abs/path/', priority: priority }];
             scanDataProviderMock.setup(async (o) => o.writeScanRunBatchRequest(guid1, expectedSavedRequest)).verifiable(Times.once());
 
             scanRequestController = createScanRequestController(context);
@@ -356,9 +355,7 @@ describe(ScanRequestController, () => {
 
             context.req.rawBody = JSON.stringify([{ url: 'https://abs/path/', priority: priority }]);
             const expectedResponse = [{ scanId: guid2, url: 'https://abs/path/' }];
-            const expectedSavedRequest: ScanRunBatchRequest[] = [
-                { schemaVersion: currentSchemaVersion, scanId: guid2, url: 'https://abs/path/', priority: priority },
-            ];
+            const expectedSavedRequest: ScanRunBatchRequest[] = [{ scanId: guid2, url: 'https://abs/path/', priority: priority }];
             scanDataProviderMock.setup(async (o) => o.writeScanRunBatchRequest(guid1, expectedSavedRequest)).verifiable(Times.once());
 
             scanRequestController = createScanRequestController(context);
@@ -380,8 +377,8 @@ describe(ScanRequestController, () => {
             context.req.rawBody = JSON.stringify([{ url: 'https://abs/path/', privacyScan }]);
             const expectedResponse = [{ scanId: guid2, url: 'https://abs/path/' }];
             const expectedSavedRequest: ScanRunBatchRequest[] = privacyScan
-                ? [{ schemaVersion: currentSchemaVersion, scanId: guid2, url: 'https://abs/path/', priority: 0, privacyScan }]
-                : [{ schemaVersion: currentSchemaVersion, scanId: guid2, url: 'https://abs/path/', priority: 0 }];
+                ? [{ scanId: guid2, url: 'https://abs/path/', priority: 0, privacyScan }]
+                : [{ scanId: guid2, url: 'https://abs/path/', priority: 0 }];
             scanDataProviderMock.setup(async (o) => o.writeScanRunBatchRequest(guid1, expectedSavedRequest)).verifiable(Times.once());
 
             scanRequestController = createScanRequestController(context);
@@ -441,8 +438,8 @@ describe(ScanRequestController, () => {
             ];
 
             const expectedSaveRequest: ScanRunBatchRequest[] = [
-                { schemaVersion: currentSchemaVersion, scanId: guid2, url: 'https://abs/path/', priority: priority },
-                { schemaVersion: currentSchemaVersion, scanId: guid3, url: 'https://bing.com/path/', priority: priority },
+                { scanId: guid2, url: 'https://abs/path/', priority: priority },
+                { scanId: guid3, url: 'https://bing.com/path/', priority: priority },
             ];
             scanDataProviderMock.setup(async (o) => o.writeScanRunBatchRequest(guid1, expectedSaveRequest)).verifiable(Times.once());
 
@@ -470,9 +467,7 @@ describe(ScanRequestController, () => {
             context.req.rawBody = JSON.stringify({ url: 'https://abs/path/', priority: priority });
             const expectedResponse = { scanId: guid2, url: 'https://abs/path/' };
 
-            const expectedSaveRequest: ScanRunBatchRequest[] = [
-                { schemaVersion: currentSchemaVersion, scanId: guid2, url: 'https://abs/path/', priority: priority },
-            ];
+            const expectedSaveRequest: ScanRunBatchRequest[] = [{ scanId: guid2, url: 'https://abs/path/', priority: priority }];
             scanDataProviderMock.setup(async (o) => o.writeScanRunBatchRequest(guid1, expectedSaveRequest)).verifiable(Times.once());
 
             scanRequestController = createScanRequestController(context);
