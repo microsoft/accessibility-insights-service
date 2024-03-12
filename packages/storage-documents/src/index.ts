@@ -15,4 +15,4 @@ export * from './website-scan-result';
 export * from './combined-scan-results';
 export * from './privacy-scan-types/privacy-page-scan-report';
 export * from './privacy-scan-types/privacy-scan-combined-report';
-export * from './type-converter';
+export * from './known-page-type-converter';

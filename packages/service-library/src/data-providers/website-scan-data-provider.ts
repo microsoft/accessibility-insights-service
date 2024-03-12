@@ -4,9 +4,9 @@
 import { inject, injectable } from 'inversify';
 import { cosmosContainerClientTypes, CosmosContainerClient } from 'azure-services';
 import { executeWithExponentialRetry, ExponentialRetryOptions, HashGenerator, ServiceConfiguration, System } from 'common';
-import { ItemType, KnownPage, KnownPages, WebsiteScanData, convertKnownPageToString, convertObjectToKnownPages } from 'storage-documents';
+import { ItemType, KnownPage, KnownPages, WebsiteScanData, KnownPageTypeConverter } from 'storage-documents';
 import { GlobalLogger } from 'logger';
-import { isEmpty, maxBy } from 'lodash';
+import { cloneDeep, isEmpty, maxBy } from 'lodash';
 import { PatchOperation } from '@azure/cosmos';
 import pLimit from 'p-limit';
 import { PartitionKeyFactory } from '../factories/partition-key-factory';
@@ -29,6 +29,7 @@ export class WebsiteScanDataProvider {
         private readonly cosmosContainerClient: CosmosContainerClient,
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
         @inject(PartitionKeyFactory) private readonly partitionKeyFactory: PartitionKeyFactory,
+        @inject(KnownPageTypeConverter) private readonly knownPageTypeConverter: KnownPageTypeConverter,
         @inject(HashGenerator) private readonly hashGenerator: HashGenerator,
         @inject(GlobalLogger) private readonly logger: GlobalLogger,
         private readonly retryOptions: ExponentialRetryOptions = providerRetryOptions,
@@ -42,7 +43,7 @@ export class WebsiteScanDataProvider {
         );
 
         const websiteScanData = operationResponse.item;
-        websiteScanData.knownPages = convertObjectToKnownPages(websiteScanData.knownPages as KnownPages);
+        websiteScanData.knownPages = this.knownPageTypeConverter.convertObjectToKnownPages(websiteScanData.knownPages as KnownPages);
 
         return websiteScanData;
     }
@@ -55,12 +56,20 @@ export class WebsiteScanDataProvider {
      */
     public async mergeOrCreate(websiteScanData: Partial<WebsiteScanData>): Promise<WebsiteScanData> {
         const dbDocument = this.normalizeWebsiteToDbDocument(websiteScanData);
+        const knownPagesObj = this.knownPageTypeConverter.convertKnownPagesToObject(websiteScanData.knownPages as KnownPage[]);
+
+        // If knownPages list is empty, do not change value of knownPages DB document
+        if (!isEmpty(knownPagesObj)) {
+            dbDocument.knownPages = knownPagesObj;
+        }
 
         return executeWithExponentialRetry(async () => {
             try {
                 const operationResponse = await this.cosmosContainerClient.mergeOrWriteDocument(dbDocument);
                 const websiteScanDataItem = operationResponse.item;
-                websiteScanDataItem.knownPages = convertObjectToKnownPages(websiteScanDataItem.knownPages as KnownPages);
+                websiteScanDataItem.knownPages = this.knownPageTypeConverter.convertObjectToKnownPages(
+                    websiteScanDataItem.knownPages as KnownPages,
+                );
 
                 return websiteScanDataItem;
             } catch (error) {
@@ -73,6 +82,21 @@ export class WebsiteScanDataProvider {
                 throw error;
             }
         }, this.retryOptions);
+    }
+
+    /**
+     * Writes documents to a storage if documents do not exist; otherwise, merges documents with corresponding storage documents.
+     *
+     * Source document properties that resolve to undefined are skipped if a destination document value exists.
+     * Will remove all falsey (false, null, 0, "", undefined, and NaN) values from document's array type properties
+     */
+    public async mergeOrCreateBatch(websiteScanData: Partial<WebsiteScanData>[]): Promise<void> {
+        const limit = pLimit(this.maxConcurrencyLimit);
+        await Promise.all(
+            websiteScanData.map((data) => {
+                return limit(async () => this.mergeOrCreate(data));
+            }),
+        );
     }
 
     /**
@@ -96,8 +120,8 @@ export class WebsiteScanDataProvider {
         const knownPageChunks = System.chunkArray(knownPages, 10);
         const operationsList = knownPageChunks.map((knownPageChunk) => {
             return knownPageChunk.map((knownPage) => {
-                const hash = this.hashGenerator.generateBase64Hash128(knownPage.url);
-                const data = convertKnownPageToString(knownPage);
+                const hash = this.knownPageTypeConverter.getUrlHash(knownPage.url);
+                const data = this.knownPageTypeConverter.convertKnownPageToString(knownPage);
 
                 return { op: 'add', path: `/knownPages/${hash}`, value: data } as PatchOperation;
             });
@@ -133,7 +157,9 @@ export class WebsiteScanDataProvider {
 
         // Returns the latest updated document version
         const websiteScanDataItem = maxBy(operationResponseList, (r) => r.item?._ts).item;
-        websiteScanDataItem.knownPages = convertObjectToKnownPages(websiteScanDataItem.knownPages as KnownPages);
+        websiteScanDataItem.knownPages = this.knownPageTypeConverter.convertObjectToKnownPages(
+            websiteScanDataItem.knownPages as KnownPages,
+        );
 
         return websiteScanDataItem;
     }
@@ -143,11 +169,12 @@ export class WebsiteScanDataProvider {
         const partitionKey =
             websiteScanData.partitionKey ?? this.partitionKeyFactory.createPartitionKeyForDocument(ItemType.websiteScanData, documentId);
 
-        websiteScanData.itemType = ItemType.websiteScanData;
-        websiteScanData.id = documentId;
-        websiteScanData.partitionKey = partitionKey;
+        const dbDocument = cloneDeep(websiteScanData);
+        dbDocument.itemType = ItemType.websiteScanData;
+        dbDocument.id = documentId;
+        dbDocument.partitionKey = partitionKey;
 
-        return websiteScanData as WebsiteScanData;
+        return dbDocument as WebsiteScanData;
     }
 
     private getWebsiteDbDocumentId(websiteScanData: Partial<WebsiteScanData>): string {
