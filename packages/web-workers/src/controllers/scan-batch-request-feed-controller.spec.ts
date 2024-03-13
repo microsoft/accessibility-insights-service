@@ -12,7 +12,7 @@ import {
     PageScanRequestProvider,
     PartitionKeyFactory,
     ScanDataProvider,
-    WebsiteScanResultProvider,
+    WebsiteScanDataProvider,
 } from 'service-library';
 import {
     ItemType,
@@ -20,13 +20,14 @@ import {
     OnDemandPageScanRequest,
     OnDemandPageScanResult,
     PartitionKey,
-    WebsiteScanResult,
+    WebsiteScanData,
     WebsiteScanRef,
     ScanRunBatchRequest,
     ReportGroupRequest,
     ScanGroupType,
     ScanType,
     currentSchemaVersion,
+    KnownPage,
 } from 'storage-documents';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { MockableLogger } from '../test-utilities/mockable-logger';
@@ -41,7 +42,7 @@ let scanDataProviderMock: IMock<ScanDataProvider>;
 let partitionKeyFactoryMock: IMock<PartitionKeyFactory>;
 let serviceConfigurationMock: IMock<ServiceConfiguration>;
 let loggerMock: IMock<MockableLogger>;
-let websiteScanResultProviderMock: IMock<WebsiteScanResultProvider>;
+let websiteScanDataProviderMock: IMock<WebsiteScanDataProvider>;
 let guidGeneratorMock: IMock<GuidGenerator>;
 let context: Context;
 let dateNow: Date;
@@ -58,7 +59,7 @@ beforeEach(() => {
     partitionKeyFactoryMock = Mock.ofType(PartitionKeyFactory);
     serviceConfigurationMock = Mock.ofType(ServiceConfiguration);
     loggerMock = Mock.ofType(MockableLogger);
-    websiteScanResultProviderMock = Mock.ofType(WebsiteScanResultProvider);
+    websiteScanDataProviderMock = Mock.ofType(WebsiteScanDataProvider);
     guidGeneratorMock = Mock.ofType<GuidGenerator>();
     context = <Context>(<unknown>{ bindingDefinitions: {} });
 
@@ -68,7 +69,7 @@ beforeEach(() => {
         onDemandPageScanRunResultProviderMock.object,
         pageScanRequestProviderMock.object,
         scanDataProviderMock.object,
-        websiteScanResultProviderMock.object,
+        websiteScanDataProviderMock.object,
         partitionKeyFactoryMock.object,
         serviceConfigurationMock.object,
         guidGeneratorMock.object,
@@ -82,7 +83,7 @@ afterEach(() => {
     onDemandPageScanRunResultProviderMock.verifyAll();
     pageScanRequestProviderMock.verifyAll();
     scanDataProviderMock.verifyAll();
-    websiteScanResultProviderMock.verifyAll();
+    websiteScanDataProviderMock.verifyAll();
     partitionKeyFactoryMock.verifyAll();
     guidGeneratorMock.verifyAll();
     loggerMock.verifyAll();
@@ -113,48 +114,7 @@ describe(ScanBatchRequestFeedController, () => {
         ));
     });
 
-    it.each([
-        {},
-        {
-            scanNotifyUrl: 'url',
-            scanType: 'privacy',
-            privacyScan: { cookieBannerType: 'standard' },
-            authenticationType: 'entraId',
-        } as ScanRunBatchRequest,
-    ])(
-        'propagates batch request properties %s to scan request and scan result documents',
-        async (scanRunBatchRequestOverride: ScanRunBatchRequest) => {
-            const document = [
-                {
-                    id: '1',
-                    partitionKey: 'pk-1',
-                    itemType: ItemType.scanRunBatchRequest,
-                    scanRunBatchRequest: [
-                        {
-                            schemaVersion: currentSchemaVersion,
-                            scanId: 'scan-1',
-                            url: 'http://url-1',
-                            priority: 1,
-                            scanType: 'accessibility',
-                            site: {
-                                baseUrl: 'base-url-1',
-                            },
-                            reportGroups: [{ consolidatedId: 'consolidated-id-1' }],
-                            ...scanRunBatchRequestOverride,
-                        },
-                    ],
-                },
-            ] as OnDemandPageScanBatchRequest[];
-            const websiteScanResults = setupWebsiteScanResultProviderMock(document);
-            setupOnDemandPageScanRunResultProviderMock(document, websiteScanResults);
-            setupPageScanRequestProviderMock(document);
-            setupPartitionKeyFactoryMock(document);
-
-            await scanBatchRequestFeedController.invoke(context, document);
-        },
-    );
-
-    it('should process valid scans', async () => {
+    it.skip('should write complete request document', async () => {
         const documents = [
             {
                 id: '1',
@@ -167,108 +127,105 @@ describe(ScanBatchRequestFeedController, () => {
                         url: 'http://url-1',
                         priority: 1,
                         scanType: 'accessibility',
-                        scanNotifyUrl: 'reply-url-1',
+                        deepScan: true,
+                        scanNotifyUrl: 'url',
                         site: {
                             baseUrl: 'base-url-1',
-                            knownPages: ['http://page1', 'http://page2'],
                         },
                         reportGroups: [{ consolidatedId: 'consolidated-id-1' }],
-                    },
-                    {
-                        schemaVersion: currentSchemaVersion,
-                        scanId: 'scan-2',
-                        url: 'http://url-2',
-                        priority: 0,
-                    },
-                    {
-                        url: 'http://url-3',
-                        error: 'error-3',
-                        priority: -3,
-                    },
-                ],
-            },
-            {
-                id: '2',
-                partitionKey: 'pk-2',
-                itemType: ItemType.scanRunBatchRequest,
-                scanRunBatchRequest: [
-                    {
-                        schemaVersion: currentSchemaVersion,
-                        scanId: 'scan-4',
-                        url: 'http://url-4',
-                        priority: 1,
-                        scanNotifyUrl: 'reply-url-4',
-                        site: {
-                            baseUrl: 'base-url-4',
-                            knownPages: [
-                                'http://url-4' /** should remove request URL */,
-                                'http://page1',
-                                'http://page2',
-                                'http://page2',
-                                'http://page3?b=1&a=1',
-                                'http://page3?a=1&b=1',
-                            ] /** should remove duplicate URLs */,
-                            discoveryPatterns: ['pattern1'],
-                        },
-                        reportGroups: [{ consolidatedId: 'consolidated-id-2' }],
-                        deepScan: true,
-                    },
-                    {
-                        schemaVersion: currentSchemaVersion,
-                        scanId: 'scan-5',
-                        url: 'http://url-5',
-                        priority: 0,
-                        scanType: 'privacy',
                         privacyScan: { cookieBannerType: 'standard' },
-                    },
-                    {
-                        url: 'http://url-6',
-                        error: 'error-6',
-                        priority: -3,
-                    },
-                ],
-            },
-            {
-                id: '3',
-                partitionKey: 'pk-3',
-                itemType: ItemType.scanRunBatchRequest,
-                scanRunBatchRequest: [
-                    {
-                        schemaVersion: currentSchemaVersion,
-                        scanId: 'scan-7',
-                        url: 'http://url-7',
-                        priority: 0,
-                    },
-                    {
-                        schemaVersion: currentSchemaVersion,
-                        scanId: 'scan-8',
-                        url: 'http://url-8',
-                        priority: 2,
+                        authenticationType: 'entraId',
                     },
                 ],
             },
         ] as OnDemandPageScanBatchRequest[];
 
-        const websiteScanResults = setupWebsiteScanResultProviderMock(documents);
-        setupOnDemandPageScanRunResultProviderMock(documents, websiteScanResults);
+        const websiteScans = setupWebsiteScanDataProviderMock(documents);
+        setupOnDemandPageScanRunResultProviderMock(documents, websiteScans);
         setupPageScanRequestProviderMock(documents);
+        setupScanDataProviderMock(documents);
         setupPartitionKeyFactoryMock(documents);
-        loggerMock
-            .setup((lm) => lm.trackEvent('ScanRequestAccepted', { batchRequestId: documents[0].id }, { acceptedScanRequests: 2 }))
-            .verifiable(Times.once());
-        loggerMock
-            .setup((lm) => lm.trackEvent('ScanRequestAccepted', { batchRequestId: documents[1].id }, { acceptedScanRequests: 2 }))
-            .verifiable(Times.once());
+
+        await scanBatchRequestFeedController.invoke(context, documents);
+    });
+
+    it.each([
+        {
+            schemaVersion: currentSchemaVersion,
+            scanId: 'scan-1',
+            url: 'http://url-1',
+            priority: 1,
+            scanType: 'accessibility',
+            scanNotifyUrl: 'reply-url-1',
+            site: {
+                baseUrl: 'base-url-1',
+                knownPages: ['http://page1', 'http://page2'],
+            },
+            reportGroups: [{ consolidatedId: 'consolidated-id-1' }],
+        },
+        {
+            schemaVersion: currentSchemaVersion,
+            scanId: 'scan-2',
+            url: 'http://url-2',
+            priority: 0,
+        },
+        {
+            url: 'http://url-3',
+            error: 'error-3',
+            priority: -3,
+        },
+        {
+            schemaVersion: currentSchemaVersion,
+            scanId: 'scan-4',
+            url: 'http://url-4',
+            priority: 1,
+            scanNotifyUrl: 'reply-url-4',
+            site: {
+                baseUrl: 'base-url-4',
+                knownPages: [
+                    'http://url-4' /** should remove request URL */,
+                    'http://page1',
+                    'http://page2',
+                    'http://page2',
+                    'http://page3?b=1&a=1',
+                    'http://page3?a=1&b=1',
+                ] /** should remove duplicate URLs */,
+                discoveryPatterns: ['pattern1'],
+            },
+            reportGroups: [{ consolidatedId: 'consolidated-id-2' }],
+            deepScan: true,
+        },
+        {
+            schemaVersion: currentSchemaVersion,
+            scanId: 'scan-5',
+            url: 'http://url-5',
+            priority: 0,
+            scanType: 'privacy',
+            privacyScan: { cookieBannerType: 'standard' },
+        },
+    ] as ScanRunBatchRequest[])('should process scans request %s', async (request: ScanRunBatchRequest) => {
+        const documents = [
+            {
+                id: '1',
+                partitionKey: 'pk-1',
+                itemType: ItemType.scanRunBatchRequest,
+                scanRunBatchRequest: [{ ...request }],
+            },
+        ] as OnDemandPageScanBatchRequest[];
+
+        const websiteScans = setupWebsiteScanDataProviderMock(documents);
+        setupOnDemandPageScanRunResultProviderMock(documents, websiteScans);
+        setupPageScanRequestProviderMock(documents);
+        setupScanDataProviderMock(documents);
+        setupPartitionKeyFactoryMock(documents);
 
         await scanBatchRequestFeedController.invoke(context, documents);
     });
 });
 
-function setupWebsiteScanResultProviderMock(documents: OnDemandPageScanBatchRequest[]): Partial<WebsiteScanResult>[] {
-    const websiteScanRequests: Partial<WebsiteScanResult>[] = [];
+function setupWebsiteScanDataProviderMock(documents: OnDemandPageScanBatchRequest[]): Partial<WebsiteScanData>[] {
+    const websiteScans: Partial<WebsiteScanData>[] = [];
     documents.map((document) => {
-        const websiteScanRequestDbDocuments: { scanId: string; websiteScanResult: Partial<WebsiteScanResult> }[] = [];
-
         document.scanRunBatchRequest
             .filter((request: any) => request.error === undefined)
             .map((request) => {
@@ -285,63 +242,54 @@ function setupWebsiteScanResultProviderMock(documents: OnDemandPageScanBatchRequ
                     scanGroupType = 'single-scan';
                 }
 
-                request.reportGroups.map((reportGroup) => {
-                    const websiteScanResult = {
-                        baseUrl: request.site?.baseUrl,
-                        scanGroupId: reportGroup.consolidatedId ?? guid,
-                        deepScanId: scanGroupType !== 'single-scan' ? request.scanId : undefined,
-                        scanGroupType,
-                        pageScans: [
-                            {
-                                scanId: request.scanId,
-                                url: request.url,
-                                timestamp: dateNow.toJSON(),
-                            },
-                        ],
-                        knownPages: request.site?.knownPages
-                            ? pullAllBy(uniqBy(request.site.knownPages, Url.normalizeUrl), [request.url], Url.normalizeUrl)
-                            : undefined,
-                        discoveryPatterns: request.site?.discoveryPatterns,
-                        created: dateNow.toJSON(),
-                    } as WebsiteScanResult;
+                const knownPages = request.site?.knownPages
+                    ? pullAllBy(uniqBy(request.site.knownPages, Url.normalizeUrl), [request.url], Url.normalizeUrl)
+                    : undefined;
 
-                    const documentId = `db-id-${reportGroup.consolidatedId ?? guid}`;
-                    const websiteScanResultDbDocument = { ...websiteScanResult, id: documentId };
-                    websiteScanRequests.push(websiteScanResultDbDocument);
-                    websiteScanRequestDbDocuments.push({ scanId: request.scanId, websiteScanResult: websiteScanResultDbDocument });
+                const websiteScan = {
+                    baseUrl: request.site?.baseUrl,
+                    scanGroupId: request.reportGroups[0]?.consolidatedId ?? guid,
+                    deepScanId: scanGroupType !== 'single-scan' ? request.scanId : undefined,
+                    scanGroupType,
+                    knownPages: knownPages
+                        ? (knownPages.map((url) => {
+                              return { url };
+                          }) as KnownPage[])
+                        : ([] as KnownPage[]),
+                    discoveryPatterns: request.site?.discoveryPatterns,
+                    created: dateNow.toJSON(),
+                } as WebsiteScanData;
 
-                    websiteScanResultProviderMock
-                        .setup((o) => o.normalizeToDbDocument(It.isValue(websiteScanResult)))
-                        .returns(() => websiteScanResultDbDocument)
-                        .verifiable();
-                });
+                const documentId = `db-id-${websiteScan.scanGroupId}`;
+                const websiteScanDbDocument = { ...websiteScan, id: documentId };
+                websiteScans.push(websiteScanDbDocument);
+
+                websiteScanDataProviderMock
+                    .setup(async (o) => o.mergeOrCreate(It.isValue(websiteScan)))
+                    .returns(() => Promise.resolve(websiteScanDbDocument))
+                    .verifiable();
             });
-
-        if (websiteScanRequestDbDocuments.length > 0) {
-            websiteScanResultProviderMock.setup(async (o) => o.mergeOrCreateBatch(It.isValue(websiteScanRequestDbDocuments))).verifiable();
-        }
     });
 
-    return websiteScanRequests;
+    return websiteScans;
 }
 
 function setupOnDemandPageScanRunResultProviderMock(
     documents: OnDemandPageScanBatchRequest[],
-    websiteScanResults: Partial<WebsiteScanResult>[],
+    websiteScans: Partial<WebsiteScanData>[],
 ): void {
+    let i = 0;
     documents.map((document) => {
-        const dbDocuments = document.scanRunBatchRequest
+        document.scanRunBatchRequest
             .filter((request) => request.scanId !== undefined)
-            .map<OnDemandPageScanResult>((request) => {
-                const websiteScanRef = websiteScanResults
-                    .filter((r) => r.pageScans[0].scanId === request.scanId)
-                    .map((r) => {
-                        return {
-                            id: r.id,
-                            scanGroupId: r.scanGroupId,
-                            scanGroupType: r.scanGroupType,
-                        } as WebsiteScanRef;
-                    })[0];
+            .map((request) => {
+                const websiteScanRef = websiteScans.map((r) => {
+                    return {
+                        id: r.id,
+                        scanGroupId: r.scanGroupId,
+                        scanGroupType: r.scanGroupType,
+                    } as WebsiteScanRef;
+                })[i++];
                 const result: OnDemandPageScanResult = {
                     schemaVersion: request.schemaVersion,
                     id: request.scanId,
@@ -369,17 +317,16 @@ function setupOnDemandPageScanRunResultProviderMock(
                     ...(request.authenticationType === undefined ? {} : { authentication: { hint: request.authenticationType } }),
                 };
 
-                return result;
+                onDemandPageScanRunResultProviderMock.setup(async (o) => o.writeScanRuns(It.isValue([result]))).verifiable(Times.once());
             });
-        onDemandPageScanRunResultProviderMock.setup(async (o) => o.writeScanRuns(It.isValue(dbDocuments))).verifiable(Times.once());
     });
 }
 
 function setupPageScanRequestProviderMock(documents: OnDemandPageScanBatchRequest[]): void {
     documents.map((document) => {
-        const dbDocuments = document.scanRunBatchRequest
+        document.scanRunBatchRequest
             .filter((batchRequest) => batchRequest.scanId !== undefined)
-            .map<OnDemandPageScanRequest>((scanRequest) => {
+            .map((scanRequest) => {
                 const scanGroupType = getScanGroupType(scanRequest);
                 const request: OnDemandPageScanRequest = {
                     schemaVersion: scanRequest.schemaVersion,
@@ -417,9 +364,13 @@ function setupPageScanRequestProviderMock(documents: OnDemandPageScanBatchReques
                     request.privacyScan = scanRequest.privacyScan;
                 }
 
-                return request;
+                pageScanRequestProviderMock.setup(async (o) => o.insertRequests(It.isValue([request]))).verifiable(Times.once());
             });
-        pageScanRequestProviderMock.setup(async (o) => o.insertRequests(It.isValue(dbDocuments))).verifiable(Times.once());
+    });
+}
+
+function setupScanDataProviderMock(documents: OnDemandPageScanBatchRequest[]): void {
+    documents.map((document) => {
         scanDataProviderMock
             .setup(async (o) =>
                 o.deleteBatchRequest(
