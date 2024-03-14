@@ -16,10 +16,8 @@ export class ScanNotificationProcessor {
         @inject(GlobalLogger) private readonly logger: GlobalLogger,
     ) {}
 
-    public async sendScanCompletionNotification(
-        pageScanResult: OnDemandPageScanResult,
-        websiteScanResult: WebsiteScanResult,
-    ): Promise<void> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    public async sendScanCompletionNotification(pageScanResult: OnDemandPageScanResult, websiteScanResult: any): Promise<void> {
         if ((await this.canSendNotification(pageScanResult, websiteScanResult)) !== true) {
             return;
         }
