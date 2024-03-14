@@ -92,11 +92,11 @@ export class ScanBatchRequestFeedController extends WebController {
         await Promise.all(
             requests.map(async (request) =>
                 limit(async () => {
-                    const websiteScan = await this.createWebsiteScanData(request, batchRequestId);
+                    const websiteScanData = await this.createWebsiteScanData(request, batchRequestId);
                     const websiteScanRef = {
-                        id: websiteScan.id,
-                        scanGroupId: websiteScan.scanGroupId,
-                        scanGroupType: websiteScan.scanGroupType,
+                        id: websiteScanData.id,
+                        scanGroupId: websiteScanData.scanGroupId,
+                        scanGroupType: websiteScanData.scanGroupType,
                     };
 
                     const dbDocument: OnDemandPageScanResult = {
@@ -145,7 +145,7 @@ export class ScanBatchRequestFeedController extends WebController {
     private async createWebsiteScanData(request: ScanRunBatchRequest, batchRequestId: string): Promise<WebsiteScanData> {
         const consolidatedGroup = this.getReportGroupRequest(request);
         const scanGroupType = this.getScanGroupType(request);
-        const websiteScan: Partial<WebsiteScanData> = {
+        const websiteScanData: Partial<WebsiteScanData> = {
             baseUrl: request.site?.baseUrl,
             scanGroupId: consolidatedGroup?.consolidatedId ?? this.guidGenerator.createGuid(),
             scanGroupType,
@@ -161,7 +161,7 @@ export class ScanBatchRequestFeedController extends WebController {
             created: new Date().toJSON(),
         };
 
-        const dbDocument = await this.websiteScanDataProvider.mergeOrCreate(websiteScan);
+        const dbDocument = await this.websiteScanDataProvider.mergeOrCreate(websiteScanData);
 
         this.logger.logInfo(`Created website document for batch request.`, {
             batchRequestId,

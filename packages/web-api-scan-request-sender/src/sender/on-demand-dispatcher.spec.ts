@@ -227,10 +227,10 @@ describe(OnDemandDispatcher, () => {
             setupPageScanRequestProvider(scanRequests);
 
             const pageScanResult = scanRequests.deleteRequests[0].result;
-            const websiteScan = { knownPages: pageState ? [pageState] : undefined } as WebsiteScanData;
+            const websiteScanData = { knownPages: pageState ? [pageState] : undefined } as WebsiteScanData;
             websiteScanDataProviderMock
                 .setup((o) => o.read(pageScanResult.websiteScanRef.id))
-                .returns(() => Promise.resolve(websiteScan))
+                .returns(() => Promise.resolve(websiteScanData))
                 .verifiable(Times.atLeastOnce());
             const knownPage = {
                 scanId: pageScanResult.id,
@@ -242,7 +242,7 @@ describe(OnDemandDispatcher, () => {
                 knownPages: [knownPage],
             } as WebsiteScanData;
             websiteScanDataProviderMock
-                .setup((o) => o.updateKnownPages(websiteScan, [knownPage]))
+                .setup((o) => o.updateKnownPages(websiteScanData, [knownPage]))
                 .returns(() => Promise.resolve(updatedWebsiteScanResultDb))
                 .verifiable(Times.atLeastOnce());
 

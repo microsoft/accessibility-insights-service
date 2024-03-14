@@ -161,8 +161,8 @@ export class OnDemandDispatcher {
         }
 
         // Ensure that website scan reflects the last state of scanned page
-        let websiteScan = await this.websiteScanDataProvider.read(pageScanResult.websiteScanRef.id);
-        const pageState = (websiteScan?.knownPages as KnownPage[])?.find((p) => p.scanId === pageScanResult.id);
+        let websiteScanData = await this.websiteScanDataProvider.read(pageScanResult.websiteScanRef.id);
+        const pageState = (websiteScanData?.knownPages as KnownPage[])?.find((p) => p.scanId === pageScanResult.id);
         if (!(['completed', 'unscannable', 'failed'] as OnDemandPageScanRunState[]).includes(pageState?.runState) || runStateUpdated) {
             runStateUpdated = true;
 
@@ -175,21 +175,21 @@ export class OnDemandDispatcher {
                     : 'failed',
             };
 
-            websiteScan = await this.websiteScanDataProvider.updateKnownPages(websiteScan, [knownPage]);
+            websiteScanData = await this.websiteScanDataProvider.updateKnownPages(websiteScanData, [knownPage]);
 
             this.logger.logWarn(`Updated website page scan state for abandon run.`, {
                 scanId: pageScanResult.id,
-                deepScanId: websiteScan?.deepScanId,
+                deepScanId: websiteScanData?.deepScanId,
             });
         }
 
         if (runStateUpdated) {
             this.logger.logInfo('Triggering scan result notification.', {
                 scanId: scanRequest.request.id,
-                deepScanId: websiteScan?.deepScanId,
+                deepScanId: websiteScanData?.deepScanId,
             });
 
-            await this.scanNotificationProcessor.sendScanCompletionNotification(pageScanResult, websiteScan);
+            await this.scanNotificationProcessor.sendScanCompletionNotification(pageScanResult, websiteScanData);
         }
     }
 

@@ -246,7 +246,7 @@ function setupWebsiteScanDataProviderMock(documents: OnDemandPageScanBatchReques
                     ? pullAllBy(uniqBy(request.site.knownPages, Url.normalizeUrl), [request.url], Url.normalizeUrl)
                     : undefined;
 
-                const websiteScan = {
+                const websiteScanData = {
                     baseUrl: request.site?.baseUrl,
                     scanGroupId: request.reportGroups[0]?.consolidatedId ?? guid,
                     deepScanId: scanGroupType !== 'single-scan' ? request.scanId : undefined,
@@ -260,12 +260,12 @@ function setupWebsiteScanDataProviderMock(documents: OnDemandPageScanBatchReques
                     created: dateNow.toJSON(),
                 } as WebsiteScanData;
 
-                const documentId = `db-id-${websiteScan.scanGroupId}`;
-                const websiteScanDbDocument = { ...websiteScan, id: documentId };
+                const documentId = `db-id-${websiteScanData.scanGroupId}`;
+                const websiteScanDbDocument = { ...websiteScanData, id: documentId };
                 websiteScans.push(websiteScanDbDocument);
 
                 websiteScanDataProviderMock
-                    .setup(async (o) => o.mergeOrCreate(It.isValue(websiteScan)))
+                    .setup(async (o) => o.mergeOrCreate(It.isValue(websiteScanData)))
                     .returns(() => Promise.resolve(websiteScanDbDocument))
                     .verifiable();
             });

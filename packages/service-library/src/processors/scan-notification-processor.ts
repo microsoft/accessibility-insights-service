@@ -2,7 +2,13 @@
 // Licensed under the MIT License.
 
 import { inject, injectable } from 'inversify';
-import { OnDemandPageScanResult, OnDemandNotificationRequestMessage, WebsiteScanResult } from 'storage-documents';
+import {
+    OnDemandPageScanResult,
+    OnDemandNotificationRequestMessage,
+    WebsiteScanData,
+    KnownPage,
+    OnDemandPageScanRunState,
+} from 'storage-documents';
 import { ServiceConfiguration } from 'common';
 import { isEmpty } from 'lodash';
 import { GlobalLogger } from 'logger';
@@ -16,9 +22,8 @@ export class ScanNotificationProcessor {
         @inject(GlobalLogger) private readonly logger: GlobalLogger,
     ) {}
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    public async sendScanCompletionNotification(pageScanResult: OnDemandPageScanResult, websiteScanResult: any): Promise<void> {
-        if ((await this.canSendNotification(pageScanResult, websiteScanResult)) !== true) {
+    public async sendScanCompletionNotification(pageScanResult: OnDemandPageScanResult, websiteScanData: WebsiteScanData): Promise<void> {
+        if ((await this.canSendNotification(pageScanResult, websiteScanData)) !== true) {
             return;
         }
 
@@ -27,13 +32,13 @@ export class ScanNotificationProcessor {
             scanNotifyUrl: pageScanResult.notification.scanNotifyUrl,
             runStatus: pageScanResult.run.state,
             scanStatus: pageScanResult.scanResult?.state,
-            deepScanId: websiteScanResult?.deepScanId,
+            deepScanId: websiteScanData?.deepScanId,
         };
 
         await this.scanNotificationDispatcher.sendNotificationMessage(notificationRequestMessage);
     }
 
-    private async canSendNotification(pageScanResult: OnDemandPageScanResult, websiteScanResult: WebsiteScanResult): Promise<boolean> {
+    private async canSendNotification(pageScanResult: OnDemandPageScanResult, websiteScanData: WebsiteScanData): Promise<boolean> {
         const featureFlags = await this.serviceConfig.getConfigValue('featureFlags');
         if (featureFlags.sendNotification !== true) {
             this.logger.logInfo(`The scan result notification is disabled.`, {
@@ -49,7 +54,7 @@ export class ScanNotificationProcessor {
             return false;
         }
 
-        if (websiteScanResult === undefined || pageScanResult.websiteScanRef?.scanGroupType === 'single-scan') {
+        if (websiteScanData === undefined || pageScanResult.websiteScanRef?.scanGroupType === 'single-scan') {
             const scanConfig = await this.serviceConfig.getConfigValue('scanConfig');
             if (
                 // completed scan
@@ -58,7 +63,7 @@ export class ScanNotificationProcessor {
                 // failed scan with no retry attempt
                 (pageScanResult.run.state === 'failed' && pageScanResult.run.retryCount >= scanConfig.maxFailedScanRetryCount)
             ) {
-                this.logger.logInfo(`Sending scan result notification message.`, {
+                this.logger.logInfo(`Sending scan notification message.`, {
                     scanNotifyUrl: pageScanResult.notification.scanNotifyUrl,
                 });
 
@@ -67,16 +72,15 @@ export class ScanNotificationProcessor {
         }
 
         const deepScanCompleted =
-            websiteScanResult.runResult &&
-            (websiteScanResult.runResult.completedScans ?? 0) + (websiteScanResult.runResult.failedScans ?? 0) >=
-                websiteScanResult.pageCount;
+            !isEmpty(websiteScanData.knownPages) &&
+            (websiteScanData.knownPages as KnownPage[]).every((p) =>
+                (['completed', 'failed', 'unscannable'] as OnDemandPageScanRunState[]).includes(p.runState),
+            );
 
         if (deepScanCompleted === true) {
-            this.logger.logInfo('Sending scan result notification message.', {
-                deepScanId: websiteScanResult.deepScanId,
-                completedScans: `${websiteScanResult.runResult?.completedScans}`,
-                failedScans: `${websiteScanResult.runResult?.failedScans}`,
-                pageCount: `${websiteScanResult.pageCount}`,
+            this.logger.logInfo('Sending scan notification message.', {
+                deepScanId: websiteScanData.deepScanId,
+                pageCount: `${(websiteScanData.knownPages as KnownPage[])?.length}`,
                 scanNotifyUrl: pageScanResult.notification.scanNotifyUrl,
             });
         }
