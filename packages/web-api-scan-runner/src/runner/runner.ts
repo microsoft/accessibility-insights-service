@@ -6,12 +6,11 @@ import { GlobalLogger } from 'logger';
 import { AxeScanResults } from 'scanner-global-library';
 import {
     OnDemandPageScanRunResultProvider,
-    WebsiteScanResultProvider,
+    WebsiteScanDataProvider,
     ReportWriter,
     ReportGeneratorRequestProvider,
     ScanNotificationProcessor,
     RunnerScanMetadata,
-    getOnMergeCallbackToUpdateRunResult,
 } from 'service-library';
 import {
     OnDemandPageScanReport,
@@ -19,8 +18,9 @@ import {
     OnDemandPageScanRunState,
     OnDemandScanResult,
     ScanError,
-    WebsiteScanResult,
     ReportGeneratorRequest,
+    KnownPage,
+    WebsiteScanData,
 } from 'storage-documents';
 import { System, ServiceConfiguration, GuidGenerator, ScanRunTimeConfig } from 'common';
 import { isEmpty, isString } from 'lodash';
@@ -34,7 +34,7 @@ export class Runner {
     constructor(
         @inject(RunnerScanMetadataConfig) private readonly runnerScanMetadataConfig: RunnerScanMetadataConfig,
         @inject(OnDemandPageScanRunResultProvider) private readonly onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider,
-        @inject(WebsiteScanResultProvider) protected readonly websiteScanResultProvider: WebsiteScanResultProvider,
+        @inject(WebsiteScanDataProvider) protected readonly websiteScanDataProvider: WebsiteScanDataProvider,
         @inject(ReportGeneratorRequestProvider) private readonly reportGeneratorRequestProvider: ReportGeneratorRequestProvider,
         @inject(PageScanProcessor) private readonly pageScanProcessor: PageScanProcessor,
         @inject(ReportWriter) protected readonly reportWriter: ReportWriter,
@@ -56,18 +56,17 @@ export class Runner {
 
         const pageScanResult = await this.updateScanRunStateToRunning(runnerScanMetadata.id);
         if (pageScanResult === undefined) {
+            this.logger.logWarn('Page scan result document not found in storage.');
+
             return;
         }
+
+        const websiteScanData = await this.websiteScanDataProvider.read(pageScanResult.websiteScanRef.id);
 
         this.telemetryManager.trackScanStarted(runnerScanMetadata.id);
         let axeScanResults: AxeScanResults;
         try {
-            let websiteScanResult;
-            if (pageScanResult.websiteScanRef !== undefined) {
-                websiteScanResult = await this.websiteScanResultProvider.read(pageScanResult.websiteScanRef.id, false);
-            }
-
-            axeScanResults = await this.pageScanProcessor.scan(runnerScanMetadata, pageScanResult, websiteScanResult);
+            axeScanResults = await this.pageScanProcessor.scan(runnerScanMetadata, pageScanResult, websiteScanData);
             if (axeScanResults?.unscannable === true) {
                 // unscannable URL
                 this.setRunResult(pageScanResult, 'unscannable', axeScanResults.scannedUrl, axeScanResults.error);
@@ -91,7 +90,7 @@ export class Runner {
             this.telemetryManager.trackScanCompleted();
         }
 
-        const websiteScanResult = await this.updateScanResult(runnerScanMetadata, pageScanResult);
+        const websiteScanResult = await this.updateScanResult(runnerScanMetadata, pageScanResult, websiteScanData);
         if (this.isScanWorkflowCompleted(pageScanResult) || (await this.isPageScanFailed(pageScanResult))) {
             await this.scanNotificationProcessor.sendScanCompletionNotification(pageScanResult, websiteScanResult);
         }
@@ -120,35 +119,24 @@ export class Runner {
     private async updateScanResult(
         runnerScanMetadata: RunnerScanMetadata,
         pageScanResult: Partial<OnDemandPageScanResult>,
-    ): Promise<WebsiteScanResult> {
+        websiteScanData: WebsiteScanData,
+    ): Promise<WebsiteScanData> {
         await this.onDemandPageScanRunResultProvider.updateScanRun(pageScanResult);
 
-        if (pageScanResult.websiteScanRef) {
-            const scanConfig = await this.getScanConfig();
-            const runState =
-                (['completed', 'unscannable'] as OnDemandPageScanRunState[]).includes(pageScanResult.run.state) ||
-                pageScanResult.run.retryCount >= scanConfig.maxFailedScanRetryCount
-                    ? pageScanResult.run.state
-                    : undefined;
+        const scanConfig = await this.getScanConfig();
+        const runState =
+            (['completed', 'unscannable'] as OnDemandPageScanRunState[]).includes(pageScanResult.run.state) ||
+            pageScanResult.run.retryCount >= scanConfig.maxFailedScanRetryCount
+                ? pageScanResult.run.state
+                : undefined;
+        const pageState: KnownPage = {
+            scanId: runnerScanMetadata.id,
+            url: runnerScanMetadata.url,
+            scanState: pageScanResult.scanResult?.state,
+            runState,
+        };
 
-            const updatedWebsiteScanResult: Partial<WebsiteScanResult> = {
-                id: pageScanResult.websiteScanRef.id,
-                pageScans: [
-                    {
-                        scanId: runnerScanMetadata.id,
-                        url: runnerScanMetadata.url,
-                        scanState: pageScanResult.scanResult?.state,
-                        runState,
-                        timestamp: new Date().toJSON(),
-                    },
-                ],
-            };
-            const onMergeCallbackFn = getOnMergeCallbackToUpdateRunResult(runState);
-
-            return this.websiteScanResultProvider.mergeOrCreate(runnerScanMetadata.id, updatedWebsiteScanResult, onMergeCallbackFn);
-        }
-
-        return undefined;
+        return this.websiteScanDataProvider.updateKnownPages(websiteScanData, [pageState]);
     }
 
     private async updateScanRunStateToRunning(scanId: string): Promise<OnDemandPageScanResult> {
@@ -222,7 +210,7 @@ export class Runner {
     }
 
     private async sendGenerateConsolidatedReportRequest(pageScanResult: OnDemandPageScanResult): Promise<void> {
-        if (pageScanResult.websiteScanRef) {
+        if (pageScanResult.websiteScanRef.scanGroupType !== 'single-scan') {
             const reportGeneratorRequest: Partial<ReportGeneratorRequest> = {
                 id: this.guidGenerator.createGuidFromBaseGuid(pageScanResult.id),
                 scanId: pageScanResult.id,
@@ -242,11 +230,7 @@ export class Runner {
     // The scan workflow is completed when there is no combined report to generate
     // or loaded URL location is not supported
     private isScanWorkflowCompleted(pageScanResult: OnDemandPageScanResult): boolean {
-        return (
-            pageScanResult.run?.state === 'unscannable' ||
-            pageScanResult.websiteScanRef === undefined ||
-            pageScanResult.websiteScanRef.scanGroupType === 'single-scan'
-        );
+        return pageScanResult.run?.state === 'unscannable' || pageScanResult.websiteScanRef.scanGroupType === 'single-scan';
     }
 
     private async isPageScanFailed(pageScanResult: OnDemandPageScanResult): Promise<boolean> {

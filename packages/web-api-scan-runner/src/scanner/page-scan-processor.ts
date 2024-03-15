@@ -4,7 +4,7 @@
 import { inject, injectable } from 'inversify';
 import { GlobalLogger } from 'logger';
 import { AxeScanResults, Page } from 'scanner-global-library';
-import { OnDemandPageScanResult, WebsiteScanResult } from 'storage-documents';
+import { OnDemandPageScanResult } from 'storage-documents';
 import { PageMetadata, PageMetadataGenerator, RunnerScanMetadata } from 'service-library';
 import { isEmpty } from 'lodash';
 import { AxeScanner } from '../scanner/axe-scanner';
@@ -23,7 +23,7 @@ export class PageScanProcessor {
     public async scan(
         runnerScanMetadata: RunnerScanMetadata,
         pageScanResult: OnDemandPageScanResult,
-        websiteScanResult: WebsiteScanResult,
+        websiteScanResult: any,
     ): Promise<AxeScanResults> {
         let axeScanResults: AxeScanResults;
         try {
