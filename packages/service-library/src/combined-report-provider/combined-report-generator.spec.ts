@@ -4,7 +4,7 @@
 import 'reflect-metadata';
 
 import { AxeScanResults } from 'scanner-global-library';
-import { CombinedScanResults, WebsiteScanResult } from 'storage-documents';
+import { CombinedScanResults, WebsiteScanData } from 'storage-documents';
 import { IMock, Mock } from 'typemoq';
 import { GeneratedReport } from '../data-providers/report-writer';
 import { CombinedReportGenerator } from './combined-report-generator';
@@ -13,7 +13,7 @@ import { AxeResultToConsolidatedHtmlConverter } from './axe-result-to-consolidat
 describe(CombinedReportGenerator, () => {
     let axeResultToConsolidatedHtmlConverterMock: IMock<AxeResultToConsolidatedHtmlConverter>;
     let scanStarted: Date;
-    let websiteScanResult: WebsiteScanResult;
+    let websiteScanData: WebsiteScanData;
     let combinedScanResults: CombinedScanResults;
     let generatedReportStub: GeneratedReport;
     let testSubject: CombinedReportGenerator;
@@ -31,11 +31,11 @@ describe(CombinedReportGenerator, () => {
         scanStarted = new Date(2020, 11, 12);
         axeResultToConsolidatedHtmlConverterMock = Mock.ofType<AxeResultToConsolidatedHtmlConverter>();
 
-        websiteScanResult = {
+        websiteScanData = {
             baseUrl,
             created: scanStarted.toISOString(),
             _etag: 'etag',
-        } as WebsiteScanResult;
+        } as WebsiteScanData;
 
         combinedScanResults = {
             urlCount: {
@@ -59,7 +59,7 @@ describe(CombinedReportGenerator, () => {
     });
 
     it('generate combined scan report', () => {
-        websiteScanResult.reports = [
+        websiteScanData.reports = [
             {
                 reportId,
                 href: hrefStub,
@@ -72,7 +72,7 @@ describe(CombinedReportGenerator, () => {
         const actualResult = testSubject.generate(
             reportId,
             combinedScanResults,
-            websiteScanResult,
+            websiteScanData,
             passedAxeScanResults.userAgent,
             passedAxeScanResults.browserResolution,
         );

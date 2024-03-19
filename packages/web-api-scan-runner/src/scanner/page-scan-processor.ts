@@ -4,7 +4,7 @@
 import { inject, injectable } from 'inversify';
 import { GlobalLogger } from 'logger';
 import { AxeScanResults, Page } from 'scanner-global-library';
-import { OnDemandPageScanResult } from 'storage-documents';
+import { OnDemandPageScanResult, WebsiteScanData } from 'storage-documents';
 import { PageMetadata, PageMetadataGenerator, RunnerScanMetadata } from 'service-library';
 import { isEmpty } from 'lodash';
 import { AxeScanner } from '../scanner/axe-scanner';
@@ -23,11 +23,11 @@ export class PageScanProcessor {
     public async scan(
         runnerScanMetadata: RunnerScanMetadata,
         pageScanResult: OnDemandPageScanResult,
-        websiteScanResult: any,
+        websiteScanData: WebsiteScanData,
     ): Promise<AxeScanResults> {
         let axeScanResults: AxeScanResults;
         try {
-            const pageMetadata = await this.pageMetadataGenerator.getMetadata(runnerScanMetadata.url, this.page, websiteScanResult);
+            const pageMetadata = await this.pageMetadataGenerator.getMetadata(runnerScanMetadata.url, this.page, websiteScanData);
             const state = this.getScannableState(pageMetadata);
             if (state.unscannable === true) {
                 this.setAuthenticationResult(pageMetadata, pageScanResult);
@@ -51,7 +51,7 @@ export class PageScanProcessor {
             axeScanResults = await this.axeScanner.scan(this.page);
             axeScanResults = { ...axeScanResults, ...pageState };
 
-            await this.deepScanner.runDeepScan(runnerScanMetadata, pageScanResult, websiteScanResult, this.page);
+            await this.deepScanner.runDeepScan(runnerScanMetadata, pageScanResult, websiteScanData, this.page);
         } finally {
             await this.page.close();
         }

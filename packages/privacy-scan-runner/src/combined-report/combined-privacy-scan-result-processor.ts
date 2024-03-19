@@ -4,9 +4,9 @@
 import { inject, injectable } from 'inversify';
 import { GlobalLogger } from 'logger';
 import { GuidGenerator, RetryHelper, System } from 'common';
-import { PrivacyReportReadResponse, PrivacyScanCombinedReportProvider, WebsiteScanResultProvider } from 'service-library';
+import { PrivacyReportReadResponse, PrivacyScanCombinedReportProvider, WebsiteScanDataProvider } from 'service-library';
 import { PrivacyScanResult } from 'scanner-global-library';
-import { OnDemandPageScanResult, WebsiteScanResult, PrivacyScanCombinedReport, OnDemandPageScanReport } from 'storage-documents';
+import { OnDemandPageScanResult, PrivacyScanCombinedReport, OnDemandPageScanReport, WebsiteScanData } from 'storage-documents';
 import { PrivacyReportReducer } from './privacy-report-reducer';
 
 @injectable()
@@ -18,7 +18,7 @@ export class CombinedPrivacyScanResultProcessor {
     constructor(
         @inject(PrivacyScanCombinedReportProvider) protected readonly combinedReportProvider: PrivacyScanCombinedReportProvider,
         @inject(PrivacyReportReducer) protected readonly privacyReportReducer: PrivacyReportReducer,
-        @inject(WebsiteScanResultProvider) protected readonly websiteScanResultProvider: WebsiteScanResultProvider,
+        @inject(WebsiteScanDataProvider) protected readonly websiteScanDataProvider: WebsiteScanDataProvider,
         @inject(RetryHelper) private readonly retryHelper: RetryHelper<void>,
         @inject(GlobalLogger) private readonly logger: GlobalLogger,
         @inject(GuidGenerator) private readonly guidGenerator: GuidGenerator,
@@ -41,12 +41,8 @@ export class CombinedPrivacyScanResultProcessor {
         privacyScanResults: PrivacyScanResult,
         pageScanResult: OnDemandPageScanResult,
     ): Promise<void> {
-        if (!pageScanResult.websiteScanRef) {
-            return;
-        }
-
-        const websiteScanResult = await this.websiteScanResultProvider.read(pageScanResult.websiteScanRef.id);
-        let combinedReportId = websiteScanResult.reports?.find((report) => report.format === 'consolidated.json')?.reportId;
+        const websiteScanData = await this.websiteScanDataProvider.read(pageScanResult.websiteScanRef.id);
+        let combinedReportId = websiteScanData.reports?.find((report) => report.format === 'consolidated.json')?.reportId;
         const combinedReportReadResponse = await this.getCombinedReport(combinedReportId);
 
         combinedReportId = combinedReportId || this.guidGenerator.createGuid();
@@ -57,16 +53,16 @@ export class CombinedPrivacyScanResultProcessor {
 
         const combinedReport = this.privacyReportReducer.reduceResults(privacyScanResults, combinedReportReadResponse?.results, {
             scanId: pageScanResult.id,
-            websiteScanId: websiteScanResult.id,
+            websiteScanId: websiteScanData.id,
             url: pageScanResult.url,
         });
         const report = await this.writeCombinedReport(combinedReportId, combinedReport, combinedReportReadResponse?.etag);
 
-        const updatedWebsiteScanResults = {
-            id: websiteScanResult.id,
+        const websiteScanDataUpdate = {
+            id: websiteScanData.id,
             reports: [report],
-        } as Partial<WebsiteScanResult>;
-        await this.websiteScanResultProvider.mergeOrCreate(pageScanResult.id, updatedWebsiteScanResults);
+        } as Partial<WebsiteScanData>;
+        await this.websiteScanDataProvider.mergeOrCreate(websiteScanDataUpdate);
 
         if (report) {
             if (pageScanResult.reports) {

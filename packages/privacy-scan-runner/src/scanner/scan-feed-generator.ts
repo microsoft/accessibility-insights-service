@@ -3,72 +3,50 @@
 
 import { injectable, inject } from 'inversify';
 import { GlobalLogger } from 'logger';
-import { ScanDataProvider, WebsiteScanResultProvider, OnMergeCallbackFn } from 'service-library';
-import { OnDemandPageScanResult, WebsiteScanResult, ScanRunBatchRequest } from 'storage-documents';
-import { isNil, pullAll } from 'lodash';
-import { GuidGenerator, RetryHelper, System } from 'common';
-import pLimit from 'p-limit';
+import { ScanDataProvider, WebsiteScanDataProvider } from 'service-library';
+import { OnDemandPageScanResult, WebsiteScanData, ScanRunBatchRequest, KnownPage } from 'storage-documents';
+import { isElement, isEmpty } from 'lodash';
+import { GuidGenerator, System } from 'common';
 
 @injectable()
 export class ScanFeedGenerator {
-    public maxBatchSize = 20;
-
-    private readonly maxRetryCount = 5;
-
-    private readonly maxConcurrencyLimit = 5;
+    public maxBatchSize = 10;
 
     constructor(
         @inject(ScanDataProvider) private readonly scanDataProvider: ScanDataProvider,
-        @inject(WebsiteScanResultProvider) protected readonly websiteScanResultProvider: WebsiteScanResultProvider,
-        @inject(RetryHelper) private readonly retryHelper: RetryHelper<void>,
+        @inject(WebsiteScanDataProvider) protected readonly websiteScanDataProvider: WebsiteScanDataProvider,
         @inject(GuidGenerator) private readonly guidGenerator: GuidGenerator,
         @inject(GlobalLogger) private readonly logger: GlobalLogger,
     ) {}
 
-    public async queuePrivacyPages(websiteScanResult: WebsiteScanResult, pageScanResult: OnDemandPageScanResult): Promise<void> {
-        return this.retryHelper.executeWithRetries(
-            () => this.queuePrivacyPagesImpl(websiteScanResult, pageScanResult),
-            async (error: Error) => {
-                this.logger.logError(`Failure to queue privacy pages to scan. Retrying on error.`, {
-                    error: System.serializeError(error),
-                });
-            },
-            this.maxRetryCount,
-            1000,
-        );
-    }
-
-    private async queuePrivacyPagesImpl(websiteScanResult: WebsiteScanResult, pageScanResult: OnDemandPageScanResult): Promise<void> {
-        const urlsToScan = this.getUrlsToScan(websiteScanResult);
+    public async queueDiscoveredPages(websiteScanData: WebsiteScanData, pageScanResult: OnDemandPageScanResult): Promise<void> {
+        const urlsToScan = this.getPagesToQueue(websiteScanData);
         if (urlsToScan.length > 0) {
-            this.logger.logInfo(`Found ${urlsToScan.length} privacy pages to scan.`, {
-                privacyUrls: JSON.stringify(urlsToScan),
+            this.logger.logInfo(`Found ${urlsToScan.length} discovered pages that need to be scanned.`, {
+                discoveredUrls: JSON.stringify(urlsToScan),
             });
         } else {
-            this.logger.logInfo(`Found no known pages to scan.`);
+            this.logger.logInfo(`Did not find any discovered pages that require scanning.`);
 
             return;
         }
 
-        const scanRequests = await this.createBatchRequests(urlsToScan, websiteScanResult, pageScanResult);
-        await this.updateWebsiteScanResult(scanRequests, websiteScanResult, pageScanResult);
-        this.logger.logInfo(`Privacy pages has been queued for scanning.`);
+        const scanRequests = await this.createBatchRequests(urlsToScan, websiteScanData, pageScanResult);
+        await this.updateWebsiteScanData(scanRequests, websiteScanData);
+        this.logger.logInfo(`Discovered pages has been queued for scanning.`);
     }
 
     private async createBatchRequests(
         urlsToScan: string[],
-        websiteScanResult: WebsiteScanResult,
+        websiteScanData: WebsiteScanData,
         pageScanResult: OnDemandPageScanResult,
     ): Promise<ScanRunBatchRequest[]> {
         const scanRequests: ScanRunBatchRequest[] = [];
         const chunks = System.chunkArray(urlsToScan, this.maxBatchSize);
-        const limit = pLimit(this.maxConcurrencyLimit);
         await Promise.all(
             chunks.map(async (urls) => {
-                return limit(async () => {
-                    const requests = await this.createBatchRequest(urls, websiteScanResult, pageScanResult);
-                    scanRequests.push(...requests);
-                });
+                const requests = await this.createBatchRequest(urls, websiteScanData, pageScanResult);
+                scanRequests.push(...requests);
             }),
         );
 
@@ -77,11 +55,11 @@ export class ScanFeedGenerator {
 
     private async createBatchRequest(
         urls: string[],
-        websiteScanResult: WebsiteScanResult,
+        websiteScanData: WebsiteScanData,
         pageScanResult: OnDemandPageScanResult,
     ): Promise<ScanRunBatchRequest[]> {
         const batchId = this.guidGenerator.createGuid();
-        const scanRequests = this.createScanRequests(batchId, urls, pageScanResult, websiteScanResult);
+        const scanRequests = this.createScanRequests(batchId, urls, pageScanResult, websiteScanData);
         await this.scanDataProvider.writeScanRunBatchRequest(batchId, scanRequests);
 
         return scanRequests;
@@ -91,65 +69,48 @@ export class ScanFeedGenerator {
         batchId: string,
         urls: string[],
         pageScanResult: OnDemandPageScanResult,
-        websiteScanResult: WebsiteScanResult,
+        websiteScanData: WebsiteScanData,
     ): ScanRunBatchRequest[] {
         return urls.map((url) => {
-            // preserve GUID origin for a single batch scope
+            // Preserve GUID origin for a single batch scope
             const scanId = this.guidGenerator.createGuidFromBaseGuid(batchId);
-            this.logger.logInfo('Generated new scan id for the privacy page.', {
+            this.logger.logInfo('Generated scan id for the discovered page.', {
                 batchId,
-                privacyScanId: scanId,
-                privacyUrl: url,
+                discoveredScanId: scanId,
+                discoveredUrl: url,
             });
 
             return {
                 scanId,
                 url,
-                priority: isNil(pageScanResult.priority) ? 0 : pageScanResult.priority,
+                priority: isElement(pageScanResult.priority) ? 0 : pageScanResult.priority,
                 // Propagate the original scan id to descendant requests.
-                deepScanId: websiteScanResult.deepScanId,
+                deepScanId: websiteScanData.deepScanId,
                 privacyScan: {
                     cookieBannerType: pageScanResult.privacyScan.cookieBannerType,
                 },
                 reportGroups: [
                     {
-                        consolidatedId: websiteScanResult.scanGroupId,
+                        consolidatedId: websiteScanData.scanGroupId,
                     },
                 ],
                 site: {
-                    baseUrl: websiteScanResult.baseUrl,
+                    baseUrl: websiteScanData.baseUrl,
                 },
                 scanNotifyUrl: pageScanResult.notification?.scanNotifyUrl ?? undefined,
             };
         });
     }
 
-    private async updateWebsiteScanResult(
-        scanRequests: ScanRunBatchRequest[],
-        websiteScanResult: WebsiteScanResult,
-        pageScanResult: OnDemandPageScanResult,
-    ): Promise<void> {
-        const pageScans = scanRequests.map((scanRequest) => {
-            return { scanId: scanRequest.scanId, url: scanRequest.url, timestamp: new Date().toJSON() };
-        });
-        const updatedWebsiteScanResult: Partial<WebsiteScanResult> = {
-            id: websiteScanResult.id,
-            pageScans,
-        };
-        const onMergeCallbackFn: OnMergeCallbackFn = (dbDocument) => {
-            dbDocument.pageCount = dbDocument.pageCount
-                ? dbDocument.pageCount + scanRequests.length
-                : scanRequests.length + 1; /** count base page */
+    private async updateWebsiteScanData(scanRequests: ScanRunBatchRequest[], websiteScanData: WebsiteScanData): Promise<void> {
+        const knownPages = scanRequests.map((scanRequest) => {
+            return { url: scanRequest.url, scanId: scanRequest.scanId, runState: 'accepted' };
+        }) as KnownPage[];
 
-            return dbDocument;
-        };
-
-        await this.websiteScanResultProvider.mergeOrCreate(pageScanResult.id, updatedWebsiteScanResult, onMergeCallbackFn);
+        await this.websiteScanDataProvider.updateKnownPages(websiteScanData, knownPages);
     }
 
-    private getUrlsToScan(websiteScanResult: WebsiteScanResult): string[] {
-        const queuedUrls = websiteScanResult.pageScans.map((pageScan) => pageScan.url);
-
-        return pullAll([...(websiteScanResult?.knownPages ?? [])], queuedUrls);
+    private getPagesToQueue(websiteScanData: WebsiteScanData): string[] {
+        return (websiteScanData.knownPages as KnownPage[]).filter((page) => isEmpty(page.scanId)).map((page) => page.url);
     }
 }

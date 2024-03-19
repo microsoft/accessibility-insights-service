@@ -15,6 +15,7 @@ import {
 } from 'service-library';
 import {
     ItemType,
+    KnownPage,
     OnDemandPageScanBatchRequest,
     OnDemandPageScanRequest,
     OnDemandPageScanResult,
@@ -160,6 +161,7 @@ export class ScanBatchRequestFeedController extends WebController {
             // This value is assigned when a new DB document is created
             created: new Date().toJSON(),
         };
+        websiteScanData.deepScanLimit = await this.getDeepScanLimit(websiteScanData);
 
         const dbDocument = await this.websiteScanDataProvider.mergeOrCreate(websiteScanData);
 
@@ -268,5 +270,16 @@ export class ScanBatchRequestFeedController extends WebController {
 
     private getScanType(request: ScanRunBatchRequest): ScanType {
         return request.scanType ?? (request.privacyScan ? 'privacy' : 'accessibility');
+    }
+
+    // Gets deep scan limit based on request's know pages size
+    private async getDeepScanLimit(websiteScanData: Partial<WebsiteScanData>): Promise<number> {
+        const crawlConfig = await this.serviceConfig.getConfigValue('crawlConfig');
+        const knownPagesLength = (websiteScanData.knownPages as KnownPage[]).length;
+        if (knownPagesLength >= crawlConfig.deepScanDiscoveryLimit) {
+            return knownPagesLength + 1 > crawlConfig.deepScanUpperLimit ? crawlConfig.deepScanUpperLimit : knownPagesLength + 1;
+        } else {
+            return crawlConfig.deepScanDiscoveryLimit;
+        }
     }
 }

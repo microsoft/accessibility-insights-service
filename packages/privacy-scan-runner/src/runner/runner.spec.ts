@@ -6,7 +6,7 @@ import 'reflect-metadata';
 import { IMock, Mock, It } from 'typemoq';
 import {
     OnDemandPageScanRunResultProvider,
-    WebsiteScanResultProvider,
+    WebsiteScanDataProvider,
     OperationResult,
     ReportWriter,
     GeneratedReport,
@@ -16,14 +16,16 @@ import * as MockDate from 'mockdate';
 import {
     OnDemandPageScanResult,
     OnDemandPageScanReport,
-    WebsiteScanResult,
     PrivacyPageScanReport,
     OnDemandPageScanRunState,
     OnDemandPageScanRunResult,
     ScanError,
+    WebsiteScanData,
+    KnownPage,
 } from 'storage-documents';
 import { PrivacyScanResult, BrowserError } from 'scanner-global-library';
 import { System, ServiceConfiguration, ScanRunTimeConfig, GuidGenerator } from 'common';
+import { cloneDeep } from 'lodash';
 import { ScanMetadataConfig } from '../scan-metadata-config';
 import { PageScanProcessor } from '../scanner/page-scan-processor';
 import { ScanRunnerTelemetryManager } from '../scan-runner-telemetry-manager';
@@ -37,7 +39,7 @@ const pageSnapshot = 'page snapshot';
 
 let scanMetadataConfigMock: IMock<ScanMetadataConfig>;
 let onDemandPageScanRunResultProviderMock: IMock<OnDemandPageScanRunResultProvider>;
-let websiteScanResultProviderMock: IMock<WebsiteScanResultProvider>;
+let websiteScanDataProviderMock: IMock<WebsiteScanDataProvider>;
 let pageScanProcessorMock: IMock<PageScanProcessor>;
 let reportWriterMock: IMock<ReportWriter>;
 let scanRunnerTelemetryManagerMock: IMock<ScanRunnerTelemetryManager>;
@@ -53,13 +55,14 @@ let pageScanResultDbDocument: OnDemandPageScanResult;
 let pageScanResult: OnDemandPageScanResult;
 let privacyScanResults: PrivacyScanResult;
 let reports: OnDemandPageScanReport[];
-let websiteScanResult: WebsiteScanResult;
+let websiteScanDataDbDocumentUpdated: WebsiteScanData;
+let websiteScanDataDbDocument: WebsiteScanData;
 
 describe(Runner, () => {
     beforeEach(() => {
         scanMetadataConfigMock = Mock.ofType<ScanMetadataConfig>();
         onDemandPageScanRunResultProviderMock = Mock.ofType<OnDemandPageScanRunResultProvider>();
-        websiteScanResultProviderMock = Mock.ofType<WebsiteScanResultProvider>();
+        websiteScanDataProviderMock = Mock.ofType<WebsiteScanDataProvider>();
         pageScanProcessorMock = Mock.ofType<PageScanProcessor>();
         reportWriterMock = Mock.ofType<ReportWriter>();
         scanRunnerTelemetryManagerMock = Mock.ofType<ScanRunnerTelemetryManager>();
@@ -87,9 +90,6 @@ describe(Runner, () => {
         pageScanResultDbDocument = {
             ...pageScanResult,
         } as OnDemandPageScanResult;
-        websiteScanResult = {
-            id: 'websiteScanResultId',
-        } as WebsiteScanResult;
         privacyScanResults = {
             scannedUrl: 'scannedUrl',
             pageResponseCode: 200,
@@ -106,11 +106,16 @@ describe(Runner, () => {
                 return { maxFailedScanRetryCount } as ScanRunTimeConfig;
             })
             .verifiable();
+        websiteScanDataDbDocument = { id: 'websiteScanId' } as WebsiteScanData;
+        websiteScanDataDbDocumentUpdated = cloneDeep(websiteScanDataDbDocument);
+        websiteScanDataProviderMock
+            .setup((o) => o.read(pageScanResultDbDocument.websiteScanRef.id))
+            .returns(() => Promise.resolve(websiteScanDataDbDocumentUpdated));
 
         runner = new Runner(
             scanMetadataConfigMock.object,
             onDemandPageScanRunResultProviderMock.object,
-            websiteScanResultProviderMock.object,
+            websiteScanDataProviderMock.object,
             pageScanProcessorMock.object,
             reportWriterMock.object,
             scanRunnerTelemetryManagerMock.object,
@@ -125,7 +130,7 @@ describe(Runner, () => {
         MockDate.reset();
         scanMetadataConfigMock.verifyAll();
         onDemandPageScanRunResultProviderMock.verifyAll();
-        websiteScanResultProviderMock.verifyAll();
+        websiteScanDataProviderMock.verifyAll();
         pageScanProcessorMock.verifyAll();
         reportWriterMock.verifyAll();
         scanRunnerTelemetryManagerMock.verifyAll();
@@ -141,7 +146,6 @@ describe(Runner, () => {
 
     it('execute runner with success', async () => {
         setupScanMetadataConfig();
-        setupGetWebsiteScanResult();
         setupUpdateScanRunStateToRunning();
         setupScanRunnerTelemetryManager();
         setupPageScanProcessor();
@@ -166,7 +170,6 @@ describe(Runner, () => {
                 .verifiable();
 
             setupScanMetadataConfig();
-            setupGetWebsiteScanResult();
             setupUpdateScanRunStateToRunning();
             setupScanRunnerTelemetryManager(false);
             setupPageScanProcessor(true, error);
@@ -179,7 +182,6 @@ describe(Runner, () => {
         privacyScanResults.error = { errorType: 'InternalError', message: 'scan error' };
 
         setupScanMetadataConfig();
-        setupGetWebsiteScanResult();
         setupUpdateScanRunStateToRunning();
         setupScanRunnerTelemetryManager(true, false);
         setupPageScanProcessor();
@@ -194,7 +196,6 @@ describe(Runner, () => {
         } as BrowserError;
 
         setupScanMetadataConfig();
-        setupGetWebsiteScanResult();
         setupUpdateScanRunStateToRunning();
         setupScanRunnerTelemetryManager(true, true);
         setupPageScanProcessor();
@@ -210,7 +211,6 @@ describe(Runner, () => {
         pageScanResultDbDocument.run = { retryCount: maxFailedScanRetryCount } as OnDemandPageScanRunResult;
 
         setupScanMetadataConfig();
-        setupGetWebsiteScanResult();
         setupUpdateScanRunStateToRunning();
         setupScanRunnerTelemetryManager(true, true);
         setupPageScanProcessor();
@@ -222,40 +222,23 @@ describe(Runner, () => {
     });
 });
 
-function setupGetWebsiteScanResult(): void {
-    if (pageScanResult.websiteScanRef) {
-        websiteScanResultProviderMock
-            .setup((o) => o.read(pageScanResult.websiteScanRef.id, false))
-            .returns(() => Promise.resolve(websiteScanResult))
-            .verifiable();
-    }
-}
-
 function setupUpdateScanResult(): void {
     onDemandPageScanRunResultProviderMock.setup((o) => o.updateScanRun(It.isValue(pageScanResult))).verifiable();
 
-    if (pageScanResult.websiteScanRef) {
-        const updatedWebsiteScanResult: Partial<WebsiteScanResult> = {
-            id: pageScanResult.websiteScanRef.id,
-            pageScans: [
-                {
-                    scanId: scanMetadata.id,
-                    url: scanMetadata.url,
-                    scanState: pageScanResult.scanResult?.state,
-                    runState:
-                        pageScanResult.run.state === 'failed' &&
-                        (pageScanResult.run.retryCount === undefined || pageScanResult.run.retryCount < maxFailedScanRetryCount)
-                            ? undefined
-                            : pageScanResult.run.state,
-                    timestamp: dateNow.toJSON(),
-                },
-            ],
-        };
-        websiteScanResultProviderMock
-            .setup((o) => o.mergeOrCreate(scanMetadata.id, It.isValue(updatedWebsiteScanResult)))
-            .returns(() => Promise.resolve(websiteScanResult))
-            .verifiable();
-    }
+    const pageState: KnownPage = {
+        scanId: scanMetadata.id,
+        url: scanMetadata.url,
+        scanState: pageScanResult.scanResult?.state,
+        runState:
+            pageScanResult.run.state === 'failed' &&
+            (pageScanResult.run.retryCount === undefined || pageScanResult.run.retryCount < maxFailedScanRetryCount)
+                ? undefined
+                : pageScanResult.run.state,
+    };
+    websiteScanDataProviderMock
+        .setup((o) => o.updateKnownPages(It.isValue(websiteScanDataDbDocument), [pageState]))
+        .returns(() => Promise.resolve(undefined))
+        .verifiable();
 }
 
 function setupProcessScanResult(): void {
@@ -340,7 +323,7 @@ function setupPageScanProcessor(succeeded: boolean = true, error: Error = undefi
     }
 
     pageScanProcessorMock
-        .setup((o) => o.scan(It.isValue(scanMetadata), It.isValue(pageScanResultDbDocument), It.isValue(websiteScanResult)))
+        .setup((o) => o.scan(It.isValue(scanMetadata), It.isValue(pageScanResultDbDocument), It.isValue(websiteScanDataDbDocument)))
         .returns(() => {
             if (error) {
                 return Promise.reject(error);

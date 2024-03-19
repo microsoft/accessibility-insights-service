@@ -4,7 +4,7 @@
 import { inject, injectable } from 'inversify';
 import { GlobalLogger } from 'logger';
 import { Page, PrivacyScanResult } from 'scanner-global-library';
-import { OnDemandPageScanResult, WebsiteScanResult } from 'storage-documents';
+import { OnDemandPageScanResult, WebsiteScanData } from 'storage-documents';
 import { isEmpty } from 'lodash';
 import { PageMetadata, PageMetadataGenerator } from 'service-library';
 import { PrivacyScanMetadata } from '../types/privacy-scan-metadata';
@@ -24,11 +24,11 @@ export class PageScanProcessor {
     public async scan(
         scanMetadata: PrivacyScanMetadata,
         pageScanResult: OnDemandPageScanResult,
-        websiteScanResult: WebsiteScanResult,
+        websiteScanData: WebsiteScanData,
     ): Promise<PrivacyScanResult> {
         let privacyScanResults: PrivacyScanResult;
         try {
-            const pageMetadata = await this.pageMetadataGenerator.getMetadata(scanMetadata.url, this.page, websiteScanResult);
+            const pageMetadata = await this.pageMetadataGenerator.getMetadata(scanMetadata.url, this.page, websiteScanData);
             const state = this.getScannableState(pageMetadata);
             if (state.unscannable === true) {
                 return state;

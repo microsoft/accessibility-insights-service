@@ -3,39 +3,36 @@
 
 import { inject, injectable } from 'inversify';
 import { GlobalLogger } from 'logger';
-import { WebsiteScanResultProvider } from 'service-library';
-import { OnDemandPageScanResult } from 'storage-documents';
+import { WebsiteScanDataProvider } from 'service-library';
+import { KnownPage, OnDemandPageScanResult } from 'storage-documents';
+import { isEmpty } from 'lodash';
 import { ScanFeedGenerator } from './scan-feed-generator';
 
 @injectable()
 export class PageScanScheduler {
     constructor(
         @inject(ScanFeedGenerator) private readonly scanFeedGenerator: ScanFeedGenerator,
-        @inject(WebsiteScanResultProvider) private readonly websiteScanResultProvider: WebsiteScanResultProvider,
+        @inject(WebsiteScanDataProvider) protected readonly websiteScanDataProvider: WebsiteScanDataProvider,
         @inject(GlobalLogger) private readonly logger: GlobalLogger,
     ) {}
 
     public async schedulePageScan(pageScanResult: OnDemandPageScanResult): Promise<void> {
-        if (pageScanResult.websiteScanRef === undefined || pageScanResult.websiteScanRef.scanGroupType === 'single-scan') {
+        if (pageScanResult.websiteScanRef?.scanGroupType === 'single-scan') {
             return;
         }
 
-        let websiteScanResult = await this.websiteScanResultProvider.read(pageScanResult.websiteScanRef.id, false);
+        const websiteScanData = await this.websiteScanDataProvider.read(pageScanResult.websiteScanRef.id);
         this.logger.setCommonProperties({
-            websiteScanId: websiteScanResult.id,
-            deepScanId: websiteScanResult.deepScanId,
+            websiteScanId: websiteScanData.id,
+            deepScanId: websiteScanData.deepScanId,
         });
 
-        if (websiteScanResult.pageCount > 1) {
-            this.logger.logInfo(`Skip known privacy pages scan scheduling since scan was already scheduled.`, {
-                privacyUrls: `${websiteScanResult.pageCount}`,
-            });
+        if (!(websiteScanData.knownPages as KnownPage[]).some((p) => isEmpty(p.scanId))) {
+            this.logger.logInfo(`Did not find any known pages that require scanning.`);
 
             return;
         }
 
-        // fetch websiteScanResult.knownPages from a storage
-        websiteScanResult = await this.websiteScanResultProvider.read(pageScanResult.websiteScanRef.id, true);
-        await this.scanFeedGenerator.queuePrivacyPages(websiteScanResult, pageScanResult);
+        await this.scanFeedGenerator.queueDiscoveredPages(websiteScanData, pageScanResult);
     }
 }

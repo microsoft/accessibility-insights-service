@@ -37,7 +37,7 @@ describe(ScanNotificationProcessor, () => {
             .verifiable();
         serviceConfigMock.setup(async (s) => s.getConfigValue('scanConfig')).returns(async () => scanConfig);
         websiteScanData = {
-            id: 'websiteScanResultId',
+            id: 'websiteScanDataId',
             deepScanId: 'deepScanId',
         } as WebsiteScanData;
         pageScanResult = {

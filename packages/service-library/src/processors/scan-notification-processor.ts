@@ -71,16 +71,14 @@ export class ScanNotificationProcessor {
             }
         }
 
-        const deepScanCompleted =
-            !isEmpty(websiteScanData.knownPages) &&
-            (websiteScanData.knownPages as KnownPage[]).every((p) =>
-                (['completed', 'failed', 'unscannable'] as OnDemandPageScanRunState[]).includes(p.runState),
-            );
+        const deepScanCompleted = (websiteScanData.knownPages as KnownPage[]).every((p) =>
+            (['completed', 'failed', 'unscannable'] as OnDemandPageScanRunState[]).includes(p.runState),
+        );
 
         if (deepScanCompleted === true) {
             this.logger.logInfo('Sending scan notification message.', {
                 deepScanId: websiteScanData.deepScanId,
-                pageCount: `${(websiteScanData.knownPages as KnownPage[])?.length}`,
+                pageCount: `${(websiteScanData.knownPages as KnownPage[]).length}`,
                 scanNotifyUrl: pageScanResult.notification.scanNotifyUrl,
             });
         }

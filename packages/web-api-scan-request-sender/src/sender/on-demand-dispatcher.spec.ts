@@ -238,19 +238,19 @@ describe(OnDemandDispatcher, () => {
                 scanState: pageScanResult.scanResult?.state,
                 runState: 'failed',
             } as KnownPage;
-            const updatedWebsiteScanResultDb = {
+            const updatedWebsiteScanDataDb = {
                 knownPages: [knownPage],
             } as WebsiteScanData;
             websiteScanDataProviderMock
                 .setup((o) => o.updateKnownPages(websiteScanData, [knownPage]))
-                .returns(() => Promise.resolve(updatedWebsiteScanResultDb))
+                .returns(() => Promise.resolve(updatedWebsiteScanDataDb))
                 .verifiable(Times.atLeastOnce());
 
             scanNotificationProcessorMock
                 .setup((o) =>
                     o.sendScanCompletionNotification(
                         It.isObjectWith({ id: pageScanResult.id } as OnDemandPageScanResult),
-                        updatedWebsiteScanResultDb,
+                        updatedWebsiteScanDataDb,
                     ),
                 )
                 .returns(() => Promise.resolve())

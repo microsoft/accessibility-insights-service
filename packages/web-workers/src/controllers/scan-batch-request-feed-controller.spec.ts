@@ -4,7 +4,7 @@
 import 'reflect-metadata';
 
 import { Context } from '@azure/functions';
-import { GuidGenerator, ServiceConfiguration, Url } from 'common';
+import { CrawlConfig, GuidGenerator, ServiceConfiguration, Url } from 'common';
 import { cloneDeep, isEmpty, isNil, pullAllBy, uniqBy } from 'lodash';
 import * as MockDate from 'mockdate';
 import {
@@ -48,6 +48,8 @@ let context: Context;
 let dateNow: Date;
 
 const guid = 'guid-1';
+const deepScanDiscoveryLimit = 3;
+const deepScanUpperLimit = 10;
 
 beforeEach(() => {
     dateNow = new Date();
@@ -63,6 +65,9 @@ beforeEach(() => {
     guidGeneratorMock = Mock.ofType<GuidGenerator>();
     context = <Context>(<unknown>{ bindingDefinitions: {} });
 
+    serviceConfigurationMock
+        .setup((o) => o.getConfigValue('crawlConfig'))
+        .returns(() => Promise.resolve({ deepScanDiscoveryLimit, deepScanUpperLimit } as CrawlConfig));
     guidGeneratorMock.setup((o) => o.createGuid()).returns(() => guid);
 
     scanBatchRequestFeedController = new ScanBatchRequestFeedController(
@@ -114,7 +119,7 @@ describe(ScanBatchRequestFeedController, () => {
         ));
     });
 
-    it.skip('should write complete request document', async () => {
+    it('should write complete request document', async () => {
         const documents = [
             {
                 id: '1',
@@ -250,6 +255,7 @@ function setupWebsiteScanDataProviderMock(documents: OnDemandPageScanBatchReques
                     baseUrl: request.site?.baseUrl,
                     scanGroupId: request.reportGroups[0]?.consolidatedId ?? guid,
                     deepScanId: scanGroupType !== 'single-scan' ? request.scanId : undefined,
+
                     scanGroupType,
                     knownPages: knownPages
                         ? (knownPages.map((url) => {
@@ -259,6 +265,7 @@ function setupWebsiteScanDataProviderMock(documents: OnDemandPageScanBatchReques
                     discoveryPatterns: request.site?.discoveryPatterns,
                     created: dateNow.toJSON(),
                 } as WebsiteScanData;
+                websiteScanData.deepScanLimit = getDeepScanLimit(websiteScanData);
 
                 const documentId = `db-id-${websiteScanData.scanGroupId}`;
                 const websiteScanDbDocument = { ...websiteScanData, id: documentId };
@@ -418,4 +425,13 @@ function setupMocksWithTimesNever(): void {
 
 function getScanType(request: ScanRunBatchRequest): ScanType {
     return request.scanType ?? (request.privacyScan ? 'privacy' : 'accessibility');
+}
+
+function getDeepScanLimit(websiteScanData: Partial<WebsiteScanData>): number {
+    const knownPagesLength = (websiteScanData.knownPages as KnownPage[]).length;
+    if (knownPagesLength >= deepScanDiscoveryLimit) {
+        return knownPagesLength + 1 > deepScanUpperLimit ? deepScanUpperLimit : knownPagesLength + 1;
+    } else {
+        return deepScanDiscoveryLimit;
+    }
 }

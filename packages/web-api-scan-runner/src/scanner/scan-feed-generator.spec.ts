@@ -3,34 +3,26 @@
 
 import 'reflect-metadata';
 
-import { IMock, Mock, It, Times } from 'typemoq';
-import { ScanDataProvider, WebsiteScanResultProvider } from 'service-library';
-import { RetryHelper, GuidGenerator, System } from 'common';
+import { IMock, Mock, Times } from 'typemoq';
+import { ScanDataProvider, WebsiteScanDataProvider } from 'service-library';
+import { GuidGenerator, System } from 'common';
 import { GlobalLogger } from 'logger';
-import { WebsiteScanResult, OnDemandPageScanResult, ScanRunBatchRequest, PageScan } from 'storage-documents';
-import * as MockDate from 'mockdate';
-import moment from 'moment';
+import { WebsiteScanData, OnDemandPageScanResult, ScanRunBatchRequest, KnownPage } from 'storage-documents';
 import { ScanFeedGenerator } from './scan-feed-generator';
 
 let scanFeedGenerator: ScanFeedGenerator;
 let scanDataProviderMock: IMock<ScanDataProvider>;
-let websiteScanResultProviderMock: IMock<WebsiteScanResultProvider>;
-let retryHelperMock: IMock<RetryHelper<void>>;
+let websiteScanDataProviderMock: IMock<WebsiteScanDataProvider>;
 let guidGeneratorMock: IMock<GuidGenerator>;
 let loggerMock: IMock<GlobalLogger>;
-let websiteScanResult: WebsiteScanResult;
+let websiteScanData: WebsiteScanData;
 let pageScanResult: OnDemandPageScanResult;
-let dateNow: Date;
 let maxBatchSize: number;
 
 describe(ScanFeedGenerator, () => {
     beforeEach(() => {
-        dateNow = new Date();
-        MockDate.set(dateNow);
-
         scanDataProviderMock = Mock.ofType<ScanDataProvider>();
-        websiteScanResultProviderMock = Mock.ofType<WebsiteScanResultProvider>();
-        retryHelperMock = Mock.ofType<RetryHelper<void>>();
+        websiteScanDataProviderMock = Mock.ofType<WebsiteScanDataProvider>();
         guidGeneratorMock = Mock.ofType<GuidGenerator>();
         loggerMock = Mock.ofType<GlobalLogger>();
 
@@ -46,118 +38,92 @@ describe(ScanFeedGenerator, () => {
                 scanNotifyUrl: 'scanNotifyUrl',
             },
         } as OnDemandPageScanResult;
-        websiteScanResult = {
-            id: 'websiteScanResultId',
+        websiteScanData = {
+            id: 'websiteScanDataId',
             baseUrl: 'baseUrl',
             scanGroupId: 'scanGroupId',
-            knownPages: ['page1', 'page2'],
-            pageScans: [
-                {
-                    scanId: 'scanId1',
-                    url: 'page1',
-                    timestamp: 'ts1',
-                },
-                {
-                    scanId: 'scanId2',
-                    url: 'page2',
-                    timestamp: 'ts2',
-                },
-            ],
-        } as WebsiteScanResult;
+            knownPages: [
+                { url: 'page1', scanId: 'scanId1', runState: 'accepted' },
+                { url: 'page2', scanId: 'scanId2', runState: 'accepted' },
+            ] as KnownPage[],
+        } as WebsiteScanData;
 
-        setupRetryHelperMock();
         scanFeedGenerator = new ScanFeedGenerator(
             scanDataProviderMock.object,
-            websiteScanResultProviderMock.object,
-            retryHelperMock.object,
+            websiteScanDataProviderMock.object,
             guidGeneratorMock.object,
             loggerMock.object,
         );
     });
 
     afterEach(() => {
-        MockDate.reset();
         scanDataProviderMock.verifyAll();
-        websiteScanResultProviderMock.verifyAll();
-        retryHelperMock.verifyAll();
+        websiteScanDataProviderMock.verifyAll();
         guidGeneratorMock.verifyAll();
         loggerMock.verifyAll();
     });
 
     it('do not queue scan requests if no discovered pages', async () => {
-        loggerMock.setup((o) => o.logInfo(`Found no new pages to scan.`)).verifiable();
-        await scanFeedGenerator.queueDiscoveredPages(websiteScanResult, pageScanResult);
+        loggerMock.setup((o) => o.logInfo(`Did not find any discovered pages that require scanning.`)).verifiable();
+        await scanFeedGenerator.queueDiscoveredPages(websiteScanData, pageScanResult);
     });
 
     it('queue scan requests for new discovered pages', async () => {
-        const newPages = ['page3', 'page4'];
-        const scanRequests = createScanRequests(newPages);
-        const pageScans = createPageScans(newPages);
-        const updatedWebsiteScanResult: Partial<WebsiteScanResult> = {
-            id: websiteScanResult.id,
-            pageScans,
-        };
-        websiteScanResult.knownPages.push(...newPages);
-        websiteScanResult.pageCount = 1;
+        const newPages = [
+            { url: 'page3', runState: 'pending' },
+            { url: 'page4', runState: 'pending' },
+        ] as KnownPage[];
         setupGuidGeneratorMock(newPages);
-
-        websiteScanResultProviderMock
-            .setup((o) => o.mergeOrCreate(pageScanResult.id, updatedWebsiteScanResult, It.isAny()))
-            .callback((id, result, callback) => callback(websiteScanResult))
+        (websiteScanData.knownPages as KnownPage[]).push(...newPages);
+        const scanRequests = createScanRequests(newPages);
+        const queuedKnownPages = createKnowPages(scanRequests);
+        websiteScanDataProviderMock
+            .setup((o) => o.updateKnownPages(websiteScanData, queuedKnownPages))
+            .returns(() => Promise.resolve(undefined))
             .verifiable();
         setupScanDataProviderMock(scanRequests);
-        loggerMock.setup((o) => o.logInfo(`New pages has been queued for scanning.`)).verifiable();
 
-        await scanFeedGenerator.queueDiscoveredPages(websiteScanResult, pageScanResult);
-        expect(websiteScanResult.pageCount).toEqual(newPages.length + 1);
+        await scanFeedGenerator.queueDiscoveredPages(websiteScanData, pageScanResult);
     });
 
     it('queue scan requests with deep scan disabled', async () => {
         pageScanResult.websiteScanRef.scanGroupType = 'consolidated-scan';
-        const newPages = ['page3', 'page4'];
-        const scanRequests = createScanRequests(newPages, false);
-        const pageScans = createPageScans(newPages);
-        const updatedWebsiteScanResult: Partial<WebsiteScanResult> = {
-            id: websiteScanResult.id,
-            pageScans,
-        };
-        websiteScanResult.knownPages.push(...newPages);
-        websiteScanResult.pageCount = 1;
+        const newPages = [
+            { url: 'page3', runState: 'pending' },
+            { url: 'page4', runState: 'pending' },
+        ] as KnownPage[];
         setupGuidGeneratorMock(newPages);
-
-        websiteScanResultProviderMock
-            .setup((o) => o.mergeOrCreate(pageScanResult.id, updatedWebsiteScanResult, It.isAny()))
-            .callback((id, result, callback) => callback(websiteScanResult))
+        (websiteScanData.knownPages as KnownPage[]).push(...newPages);
+        const scanRequests = createScanRequests(newPages, false);
+        const queuedKnownPages = createKnowPages(scanRequests);
+        websiteScanDataProviderMock
+            .setup((o) => o.updateKnownPages(websiteScanData, queuedKnownPages))
+            .returns(() => Promise.resolve(undefined))
             .verifiable();
         setupScanDataProviderMock(scanRequests);
-        loggerMock.setup((o) => o.logInfo(`New pages has been queued for scanning.`)).verifiable();
 
-        await scanFeedGenerator.queueDiscoveredPages(websiteScanResult, pageScanResult);
-        expect(websiteScanResult.pageCount).toEqual(newPages.length + 1);
+        await scanFeedGenerator.queueDiscoveredPages(websiteScanData, pageScanResult);
     });
 
     it('queue scan requests in batches', async () => {
         maxBatchSize = 2;
         scanFeedGenerator.maxBatchSize = maxBatchSize;
-        const newPages = ['page3', 'page4', 'page5'];
-        const scanRequests = createScanRequests(newPages);
-        const pageScans = createPageScans(newPages);
-        const updatedWebsiteScanResult: Partial<WebsiteScanResult> = {
-            id: websiteScanResult.id,
-            pageScans,
-        };
-        websiteScanResult.knownPages.push(...newPages);
+        const newPages = [
+            { url: 'page3', runState: 'pending' },
+            { url: 'page4', runState: 'pending' },
+            { url: 'page5', runState: 'pending' },
+        ] as KnownPage[];
         setupGuidGeneratorMock(newPages);
-
-        websiteScanResultProviderMock
-            .setup((o) => o.mergeOrCreate(pageScanResult.id, updatedWebsiteScanResult, It.isAny()))
-            .callback((id, result, callback) => callback(websiteScanResult))
+        (websiteScanData.knownPages as KnownPage[]).push(...newPages);
+        const scanRequests = createScanRequests(newPages);
+        const queuedKnownPages = createKnowPages(scanRequests);
+        websiteScanDataProviderMock
+            .setup((o) => o.updateKnownPages(websiteScanData, queuedKnownPages))
+            .returns(() => Promise.resolve(undefined))
             .verifiable();
         setupScanDataProviderMock(scanRequests);
-        loggerMock.setup((o) => o.logInfo(`New pages has been queued for scanning.`)).verifiable();
 
-        await scanFeedGenerator.queueDiscoveredPages(websiteScanResult, pageScanResult);
-        expect(websiteScanResult.pageCount).toEqual(newPages.length + 1);
+        await scanFeedGenerator.queueDiscoveredPages(websiteScanData, pageScanResult);
     });
 
     it.each([
@@ -173,24 +139,26 @@ describe(ScanFeedGenerator, () => {
             ...pageScanResultOverride,
         };
 
-        const newPages = ['page7'];
-        const scanRequests = createScanRequests(newPages);
-        const pageScans = createPageScans(newPages);
-        const updatedWebsiteScanResult: Partial<WebsiteScanResult> = {
-            id: websiteScanResult.id,
-            pageScans,
-        };
-        websiteScanResult.knownPages.push(...newPages);
+        const newPages = [{ url: 'page7', runState: 'pending' }] as KnownPage[];
         setupGuidGeneratorMock(newPages);
-        websiteScanResultProviderMock
-            .setup((o) => o.mergeOrCreate(pageScanResult.id, updatedWebsiteScanResult, It.isAny()))
-            .callback((id, result, callback) => callback(websiteScanResult))
+        (websiteScanData.knownPages as KnownPage[]).push(...newPages);
+        const scanRequests = createScanRequests(newPages);
+        const queuedKnownPages = createKnowPages(scanRequests);
+        websiteScanDataProviderMock
+            .setup((o) => o.updateKnownPages(websiteScanData, queuedKnownPages))
+            .returns(() => Promise.resolve(undefined))
             .verifiable();
         setupScanDataProviderMock(scanRequests);
 
-        await scanFeedGenerator.queueDiscoveredPages(websiteScanResult, pageScanResult);
+        await scanFeedGenerator.queueDiscoveredPages(websiteScanData, pageScanResult);
     });
 });
+
+function createKnowPages(scanRequests: ScanRunBatchRequest[]): KnownPage[] {
+    return scanRequests.map((scanRequest) => {
+        return { url: scanRequest.url, scanId: scanRequest.scanId, runState: 'accepted' };
+    }) as KnownPage[];
+}
 
 function setupScanDataProviderMock(scanRequests: ScanRunBatchRequest[]): void {
     const chunks = System.chunkArray(scanRequests, maxBatchSize);
@@ -199,31 +167,23 @@ function setupScanDataProviderMock(scanRequests: ScanRunBatchRequest[]): void {
     }
 }
 
-function createPageScans(urls: string[]): PageScan[] {
-    return urls.map((url) => {
-        return {
-            scanId: `${url} id`,
-            url,
-            timestamp: moment(dateNow).toJSON(),
-        };
-    });
-}
+function createScanRequests(knownPages: KnownPage[], deepScan: boolean = true): ScanRunBatchRequest[] {
+    const urls = knownPages.map((p) => p.url);
 
-function createScanRequests(urls: string[], deepScan: boolean = true): ScanRunBatchRequest[] {
     return urls.map((url) => {
         return {
             scanId: `${url} id`,
             url,
             priority: pageScanResult.priority,
             deepScan,
-            deepScanId: websiteScanResult.deepScanId,
+            deepScanId: websiteScanData.deepScanId,
             scanNotifyUrl: pageScanResult.notification.scanNotifyUrl,
             site: {
-                baseUrl: websiteScanResult.baseUrl,
+                baseUrl: websiteScanData.baseUrl,
             },
             reportGroups: [
                 {
-                    consolidatedId: websiteScanResult.scanGroupId,
+                    consolidatedId: websiteScanData.scanGroupId,
                 },
             ],
             authenticationType: pageScanResult.authentication?.hint ?? undefined,
@@ -231,16 +191,9 @@ function createScanRequests(urls: string[], deepScan: boolean = true): ScanRunBa
     });
 }
 
-function setupRetryHelperMock(times: number = 1): void {
-    retryHelperMock
-        .setup(async (o) => o.executeWithRetries(It.isAny(), It.isAny(), 5, 1000))
-        .returns(async (action: () => Promise<void>, errorHandler: (err: Error) => Promise<void>, maxRetries: number) => {
-            return action();
-        })
-        .verifiable(Times.exactly(times));
-}
+function setupGuidGeneratorMock(knownPages: KnownPage[]): void {
+    const urls = knownPages.map((p) => p.url);
 
-function setupGuidGeneratorMock(urls: string[]): void {
     const chunks = System.chunkArray(urls, maxBatchSize);
     for (let i = 1; i <= chunks.length; i++) {
         const batchId = `batchId-${i}`;

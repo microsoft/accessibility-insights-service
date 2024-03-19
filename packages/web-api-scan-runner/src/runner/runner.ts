@@ -48,11 +48,11 @@ export class Runner {
 
     public async run(): Promise<void> {
         const runnerScanMetadata = this.runnerScanMetadataConfig.getConfig();
-        // decode URL back from docker parameter encoding
+        // Decode URL back from docker parameter encoding
         runnerScanMetadata.url = decodeURIComponent(runnerScanMetadata.url);
 
         this.logger.setCommonProperties({ scanId: runnerScanMetadata.id, url: runnerScanMetadata.url });
-        this.logger.logInfo('Starting page scan task.');
+        this.logger.logInfo('Starting accessibility page scan task.');
 
         const pageScanResult = await this.updateScanRunStateToRunning(runnerScanMetadata.id);
         if (pageScanResult === undefined) {
@@ -61,7 +61,7 @@ export class Runner {
             return;
         }
 
-        const websiteScanData = await this.websiteScanDataProvider.read(pageScanResult.websiteScanRef.id);
+        let websiteScanData = await this.websiteScanDataProvider.read(pageScanResult.websiteScanRef.id);
 
         this.telemetryManager.trackScanStarted(runnerScanMetadata.id);
         let axeScanResults: AxeScanResults;
@@ -90,12 +90,12 @@ export class Runner {
             this.telemetryManager.trackScanCompleted();
         }
 
-        const websiteScanResult = await this.updateScanResult(runnerScanMetadata, pageScanResult, websiteScanData);
+        websiteScanData = await this.updateScanResult(runnerScanMetadata, pageScanResult, websiteScanData);
         if (this.isScanWorkflowCompleted(pageScanResult) || (await this.isPageScanFailed(pageScanResult))) {
-            await this.scanNotificationProcessor.sendScanCompletionNotification(pageScanResult, websiteScanResult);
+            await this.scanNotificationProcessor.sendScanCompletionNotification(pageScanResult, websiteScanData);
         }
 
-        this.logger.logInfo('Page scan task completed.');
+        this.logger.logInfo('Accessibility page scan task completed.');
     }
 
     private async onCompletedScan(axeScanResults: AxeScanResults, pageScanResult: OnDemandPageScanResult): Promise<void> {
@@ -210,21 +210,23 @@ export class Runner {
     }
 
     private async sendGenerateConsolidatedReportRequest(pageScanResult: OnDemandPageScanResult): Promise<void> {
-        if (pageScanResult.websiteScanRef.scanGroupType !== 'single-scan') {
-            const reportGeneratorRequest: Partial<ReportGeneratorRequest> = {
-                id: this.guidGenerator.createGuidFromBaseGuid(pageScanResult.id),
-                scanId: pageScanResult.id,
-                scanGroupId: pageScanResult.websiteScanRef.scanGroupId,
-                targetReport: 'accessibility',
-                priority: pageScanResult.priority,
-            };
-            await this.reportGeneratorRequestProvider.writeRequest(reportGeneratorRequest);
-
-            this.logger.logInfo('Send request to generate consolidated report.', {
-                id: reportGeneratorRequest.id,
-                scanGroupId: pageScanResult.websiteScanRef.scanGroupId,
-            });
+        if (pageScanResult.websiteScanRef.scanGroupType === 'single-scan') {
+            return;
         }
+
+        const reportGeneratorRequest: Partial<ReportGeneratorRequest> = {
+            id: this.guidGenerator.createGuidFromBaseGuid(pageScanResult.id),
+            scanId: pageScanResult.id,
+            scanGroupId: pageScanResult.websiteScanRef.scanGroupId,
+            targetReport: 'accessibility',
+            priority: pageScanResult.priority,
+        };
+        await this.reportGeneratorRequestProvider.writeRequest(reportGeneratorRequest);
+
+        this.logger.logInfo('Submitted request to generate consolidated report.', {
+            id: reportGeneratorRequest.id,
+            scanGroupId: pageScanResult.websiteScanRef.scanGroupId,
+        });
     }
 
     // The scan workflow is completed when there is no combined report to generate
@@ -236,7 +238,7 @@ export class Runner {
     private async isPageScanFailed(pageScanResult: OnDemandPageScanResult): Promise<boolean> {
         const scanConfig = await this.getScanConfig();
 
-        // retry count is set by request sender
+        // Retry count is set by request sender
         return pageScanResult.run.state === 'failed' && pageScanResult.run.retryCount >= scanConfig.maxFailedScanRetryCount;
     }
 

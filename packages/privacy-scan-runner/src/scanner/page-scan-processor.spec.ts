@@ -7,7 +7,7 @@ import { IMock, Mock, Times } from 'typemoq';
 import { GlobalLogger } from 'logger';
 import { PrivacyScanResult, Page, BrowserError } from 'scanner-global-library';
 import * as Puppeteer from 'puppeteer';
-import { OnDemandPageScanResult, WebsiteScanResult } from 'storage-documents';
+import { OnDemandPageScanResult, WebsiteScanData } from 'storage-documents';
 import { PageMetadata, PageMetadataGenerator } from 'service-library';
 import { PrivacyScanMetadata } from '../types/privacy-scan-metadata';
 import { PrivacyScanner } from './privacy-scanner';
@@ -25,7 +25,7 @@ describe(PageScanProcessor, () => {
     let pageScanResult: OnDemandPageScanResult;
     let scanMetadata: PrivacyScanMetadata;
     let privacyScanResult: PrivacyScanResult;
-    let websiteScanResult: WebsiteScanResult;
+    let websiteScanData: WebsiteScanData;
     let pageMetadata: PageMetadata;
 
     const url = 'url';
@@ -54,13 +54,13 @@ describe(PageScanProcessor, () => {
             .returns(() => Promise.resolve(pageSnapshot))
             .verifiable();
         privacyScanResult = { scannedUrl: url } as PrivacyScanResult;
-        websiteScanResult = { id: 'websiteScanResultId' } as WebsiteScanResult;
+        websiteScanData = { id: 'websiteScanDataId' } as WebsiteScanData;
         pageMetadata = {
             redirection: false,
             authentication: false,
         } as PageMetadata;
         pageMetadataGeneratorMock
-            .setup((o) => o.getMetadata(url, pageMock.object, websiteScanResult))
+            .setup((o) => o.getMetadata(url, pageMock.object, websiteScanData))
             .returns(() => Promise.resolve(pageMetadata))
             .verifiable();
 
@@ -91,7 +91,7 @@ describe(PageScanProcessor, () => {
             .verifiable();
         privacyScanResult = { ...privacyScanResult, pageScreenshot, pageSnapshot };
 
-        const results = await testSubject.scan(scanMetadata, pageScanResult, websiteScanResult);
+        const results = await testSubject.scan(scanMetadata, pageScanResult, websiteScanData);
 
         expect(results).toEqual(privacyScanResult);
     });
@@ -109,7 +109,7 @@ describe(PageScanProcessor, () => {
             .verifiable();
         privacyScanResult = { ...privacyScanResult, pageScreenshot, pageSnapshot };
 
-        const results = await testSubject.scan(scanMetadata, pageScanResult, websiteScanResult);
+        const results = await testSubject.scan(scanMetadata, pageScanResult, websiteScanData);
 
         expect(results).toEqual(privacyScanResult);
     });
@@ -132,7 +132,7 @@ describe(PageScanProcessor, () => {
             pageResponseCode: browserError.statusCode,
         };
 
-        const results = await testSubject.scan(scanMetadata, pageScanResult, websiteScanResult);
+        const results = await testSubject.scan(scanMetadata, pageScanResult, websiteScanData);
 
         expect(results).toEqual(privacyScanResult);
     });
@@ -143,7 +143,7 @@ describe(PageScanProcessor, () => {
         setupClosePage();
         privacyScannerMock.setup((s) => s.scan(url, pageMock.object)).throws(error);
 
-        await expect(testSubject.scan(scanMetadata, pageScanResult, websiteScanResult)).rejects.toThrowError('test error');
+        await expect(testSubject.scan(scanMetadata, pageScanResult, websiteScanData)).rejects.toThrowError('test error');
     });
 
     it('returns error when URL is unscannable', async () => {
@@ -157,7 +157,7 @@ describe(PageScanProcessor, () => {
             },
         } as PageMetadata;
         pageMetadataGeneratorMock
-            .setup((o) => o.getMetadata(url, pageMock.object, websiteScanResult))
+            .setup((o) => o.getMetadata(url, pageMock.object, websiteScanData))
             .returns(() => Promise.resolve(pageMetadata))
             .verifiable();
         pageMock.reset();
@@ -168,7 +168,7 @@ describe(PageScanProcessor, () => {
             error: pageMetadata.browserError,
         };
 
-        const results = await testSubject.scan(scanMetadata, pageScanResult, websiteScanResult);
+        const results = await testSubject.scan(scanMetadata, pageScanResult, websiteScanData);
 
         expect(results).toEqual(privacyScanResult);
     });

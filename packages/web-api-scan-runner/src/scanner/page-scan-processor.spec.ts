@@ -6,7 +6,7 @@ import 'reflect-metadata';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { GlobalLogger } from 'logger';
 import { AxeScanResults, Page, BrowserError, ResourceAuthenticationResult } from 'scanner-global-library';
-import { OnDemandPageScanResult, WebsiteScanResult } from 'storage-documents';
+import { OnDemandPageScanResult, WebsiteScanData } from 'storage-documents';
 import { cloneDeep } from 'lodash';
 import { PageMetadata, PageMetadataGenerator } from 'service-library';
 import { AxeScanner } from '../scanner/axe-scanner';
@@ -21,7 +21,7 @@ let pageMetadataGeneratorMock: IMock<PageMetadataGenerator>;
 let testSubject: PageScanProcessor;
 let axeScanResults: AxeScanResults;
 let pageScanResult: OnDemandPageScanResult;
-let websiteScanResult: WebsiteScanResult;
+let websiteScanData: WebsiteScanData;
 let pageMetadata: PageMetadata;
 
 const url = 'http://localhost';
@@ -38,13 +38,13 @@ describe(PageScanProcessor, () => {
         pageMetadataGeneratorMock = Mock.ofType<PageMetadataGenerator>();
         axeScanResults = { scannedUrl: url } as AxeScanResults;
         pageScanResult = { id: 'id' } as OnDemandPageScanResult;
-        websiteScanResult = {} as WebsiteScanResult;
+        websiteScanData = {} as WebsiteScanData;
         pageMetadata = {
             redirection: false,
             authentication: false,
         } as PageMetadata;
         pageMetadataGeneratorMock
-            .setup((o) => o.getMetadata(url, pageMock.object, websiteScanResult))
+            .setup((o) => o.getMetadata(url, pageMock.object, websiteScanData))
             .returns(() => Promise.resolve(pageMetadata))
             .verifiable();
 
@@ -76,7 +76,7 @@ describe(PageScanProcessor, () => {
             loadedUrl,
             browserError,
         } as PageMetadata;
-        websiteScanResult = { discoveryPatterns: [generatedDiscoveryPattern] } as WebsiteScanResult;
+        websiteScanData = { discoveryPatterns: [generatedDiscoveryPattern] } as WebsiteScanData;
         const scanMetadata = {
             url,
             id: 'id',
@@ -89,12 +89,12 @@ describe(PageScanProcessor, () => {
         };
         pageMetadataGeneratorMock.reset();
         pageMetadataGeneratorMock
-            .setup((o) => o.getMetadata(url, pageMock.object, websiteScanResult))
+            .setup((o) => o.getMetadata(url, pageMock.object, websiteScanData))
             .returns(() => Promise.resolve(pageMetadata))
             .verifiable();
         setupClosePage();
 
-        const results = await testSubject.scan(scanMetadata, pageScanResult, websiteScanResult);
+        const results = await testSubject.scan(scanMetadata, pageScanResult, websiteScanData);
 
         expect(results).toEqual(axeScanResults);
     });
@@ -113,7 +113,7 @@ describe(PageScanProcessor, () => {
         } as PageMetadata;
         pageMetadataGeneratorMock.reset();
         pageMetadataGeneratorMock
-            .setup((o) => o.getMetadata(url, pageMock.object, websiteScanResult))
+            .setup((o) => o.getMetadata(url, pageMock.object, websiteScanData))
             .returns(() => Promise.resolve(pageMetadata))
             .verifiable();
 
@@ -125,7 +125,7 @@ describe(PageScanProcessor, () => {
             .setup((s) => s.scan(pageMock.object))
             .returns(() => Promise.resolve(axeScanResults))
             .verifiable();
-        deepScannerMock.setup((o) => o.runDeepScan(It.isAny(), It.isAny(), websiteScanResult, It.isAny())).verifiable();
+        deepScannerMock.setup((o) => o.runDeepScan(It.isAny(), It.isAny(), websiteScanData, It.isAny())).verifiable();
         pageScanResult = {
             ...pageScanResult,
             authentication: { hint: 'entraId' },
@@ -148,7 +148,7 @@ describe(PageScanProcessor, () => {
             },
         });
 
-        const results = await testSubject.scan(scanMetadata, pageScanResult, websiteScanResult);
+        const results = await testSubject.scan(scanMetadata, pageScanResult, websiteScanData);
 
         expect(pageScanResult).toEqual(expectedPageScanResult);
         expect(results).toEqual(axeScanResults);
@@ -170,9 +170,9 @@ describe(PageScanProcessor, () => {
             .setup((s) => s.scan(pageMock.object))
             .returns(() => Promise.resolve(axeScanResults))
             .verifiable();
-        deepScannerMock.setup((o) => o.runDeepScan(It.isAny(), It.isAny(), websiteScanResult, It.isAny())).verifiable();
+        deepScannerMock.setup((o) => o.runDeepScan(It.isAny(), It.isAny(), websiteScanData, It.isAny())).verifiable();
 
-        const results = await testSubject.scan(scanMetadata, pageScanResult, websiteScanResult);
+        const results = await testSubject.scan(scanMetadata, pageScanResult, websiteScanData);
 
         expect(results).toEqual(axeScanResults);
     });
@@ -188,9 +188,9 @@ describe(PageScanProcessor, () => {
         setupGetPageState();
         setupClosePage();
         axeScannerMock.setup((s) => s.scan(pageMock.object)).throws(error);
-        deepScannerMock.setup((o) => o.runDeepScan(It.isAny(), It.isAny(), websiteScanResult, It.isAny())).verifiable(Times.never());
+        deepScannerMock.setup((o) => o.runDeepScan(It.isAny(), It.isAny(), websiteScanData, It.isAny())).verifiable(Times.never());
 
-        await expect(testSubject.scan(scanMetadata, pageScanResult, websiteScanResult)).rejects.toThrowError('test error');
+        await expect(testSubject.scan(scanMetadata, pageScanResult, websiteScanData)).rejects.toThrowError('test error');
     });
 
     it('returns error if page failed to load.', async () => {
@@ -215,7 +215,7 @@ describe(PageScanProcessor, () => {
             error: browserError,
             pageResponseCode: browserError.statusCode,
         };
-        const results = await testSubject.scan(scanMetadata, pageScanResult, websiteScanResult);
+        const results = await testSubject.scan(scanMetadata, pageScanResult, websiteScanData);
 
         expect(results).toEqual(expectedResult);
     });
@@ -235,9 +235,9 @@ describe(PageScanProcessor, () => {
             .setup((s) => s.scan(pageMock.object))
             .returns(() => Promise.resolve(axeScanResults))
             .verifiable();
-        deepScannerMock.setup((o) => o.runDeepScan(scanMetadata, pageScanResult, websiteScanResult, pageMock.object)).throws(error);
+        deepScannerMock.setup((o) => o.runDeepScan(scanMetadata, pageScanResult, websiteScanData, pageMock.object)).throws(error);
 
-        await expect(testSubject.scan(scanMetadata, pageScanResult, websiteScanResult)).rejects.toThrowError('test error');
+        await expect(testSubject.scan(scanMetadata, pageScanResult, websiteScanData)).rejects.toThrowError('test error');
     });
 });
 

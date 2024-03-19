@@ -7,15 +7,9 @@ import { IMock, Mock, It, Times } from 'typemoq';
 import { RetryHelper } from 'common';
 import { AxeScanResults } from 'scanner-global-library';
 import { AxeResults } from 'axe-core';
-import {
-    OnDemandPageScanResult,
-    WebsiteScanResult,
-    CombinedScanResults,
-    OnDemandPageScanReport,
-    WebsiteScanReport,
-} from 'storage-documents';
+import { OnDemandPageScanResult, WebsiteScanData, CombinedScanResults, OnDemandPageScanReport, WebsiteScanReport } from 'storage-documents';
 import { MockableLogger } from '../test-utilities/mockable-logger';
-import { WebsiteScanResultProvider } from '../data-providers/website-scan-result-provider';
+import { WebsiteScanDataProvider } from '../data-providers/website-scan-data-provider';
 import { GeneratedReport, ReportWriter } from '../data-providers/report-writer';
 import { CombinedScanResultProcessor } from './combined-scan-result-processor';
 import { CombinedAxeResultBuilder } from './combined-axe-result-builder';
@@ -27,15 +21,15 @@ import { CombinedResultsBlobProvider, CombinedResultsBlob } from './combined-res
 let combinedAxeResultBuilderMock: IMock<CombinedAxeResultBuilder>;
 let combinedReportGeneratorMock: IMock<CombinedReportGenerator>;
 let combinedResultsBlobProviderMock: IMock<CombinedResultsBlobProvider>;
-let websiteScanResultProviderMock: IMock<WebsiteScanResultProvider>;
+let websiteScanDataProviderMock: IMock<WebsiteScanDataProvider>;
 let reportWriterMock: IMock<ReportWriter>;
 let retryHelperMock: IMock<RetryHelper<void>>;
 let loggerMock: IMock<MockableLogger>;
 let combinedScanResultProcessor: CombinedScanResultProcessor;
 let axeScanResults: AxeScanResults;
 let pageScanResult: OnDemandPageScanResult;
-let websiteScanResult: WebsiteScanResult;
-let updatedWebsiteScanResults: Partial<WebsiteScanResult>;
+let websiteScanData: WebsiteScanData;
+let websiteScanDataUpdate: Partial<WebsiteScanData>;
 let combinedResultsBlob: CombinedResultsBlob;
 let combinedAxeResults: CombinedScanResults;
 let generatedReport: GeneratedReport;
@@ -50,7 +44,7 @@ describe(CombinedScanResultProcessor, () => {
         combinedAxeResultBuilderMock = Mock.ofType(CombinedAxeResultBuilder);
         combinedReportGeneratorMock = Mock.ofType(CombinedReportGenerator);
         combinedResultsBlobProviderMock = Mock.ofType(CombinedResultsBlobProvider);
-        websiteScanResultProviderMock = Mock.ofType(WebsiteScanResultProvider);
+        websiteScanDataProviderMock = Mock.ofType(WebsiteScanDataProvider);
         reportWriterMock = Mock.ofType(ReportWriter);
         retryHelperMock = Mock.ofType<RetryHelper<void>>();
         loggerMock = Mock.ofType(MockableLogger);
@@ -89,7 +83,7 @@ describe(CombinedScanResultProcessor, () => {
             combinedAxeResultBuilderMock.object,
             combinedReportGeneratorMock.object,
             combinedResultsBlobProviderMock.object,
-            websiteScanResultProviderMock.object,
+            websiteScanDataProviderMock.object,
             reportWriterMock.object,
             retryHelperMock.object,
             loggerMock.object,
@@ -100,7 +94,7 @@ describe(CombinedScanResultProcessor, () => {
         combinedAxeResultBuilderMock.verifyAll();
         combinedReportGeneratorMock.verifyAll();
         combinedResultsBlobProviderMock.verifyAll();
-        websiteScanResultProviderMock.verifyAll();
+        websiteScanDataProviderMock.verifyAll();
         reportWriterMock.verifyAll();
         retryHelperMock.verifyAll();
         loggerMock.verifyAll();
@@ -119,12 +113,12 @@ describe(CombinedScanResultProcessor, () => {
         setupFullPass();
         combinedAxeResultBuilderMock.reset();
         combinedReportGeneratorMock.reset();
-        websiteScanResultProviderMock.reset();
+        websiteScanDataProviderMock.reset();
         reportWriterMock.reset();
 
-        websiteScanResultProviderMock
+        websiteScanDataProviderMock
             .setup((o) => o.read(websiteScanId))
-            .returns(() => Promise.resolve(websiteScanResult))
+            .returns(() => Promise.resolve(websiteScanData))
             .verifiable();
 
         await combinedScanResultProcessor.generateCombinedScanResults(axeScanResults, pageScanResult);
@@ -186,12 +180,12 @@ describe(CombinedScanResultProcessor, () => {
 });
 
 function setupFullPass(): void {
-    websiteScanResult = {
-        id: 'websiteScanResultId',
+    websiteScanData = {
+        id: 'websiteScanDataId',
         reports: [consolidatedReport],
-    } as WebsiteScanResult;
-    updatedWebsiteScanResults = {
-        ...websiteScanResult,
+    } as WebsiteScanData;
+    websiteScanDataUpdate = {
+        ...websiteScanData,
         reports: [pageScanReport],
     };
 
@@ -208,7 +202,7 @@ function setupFullPass(): void {
             o.generate(
                 combinedResultsBlobId,
                 combinedAxeResults,
-                websiteScanResult,
+                websiteScanData,
                 axeScanResults.userAgent,
                 axeScanResults.browserResolution,
             ),
@@ -219,15 +213,15 @@ function setupFullPass(): void {
         .setup((o) => o.write(generatedReport))
         .returns(() => Promise.resolve(pageScanReport))
         .verifiable();
-    setupWebsiteScanResultProviderMock();
+    setupWebsiteScanDataProviderMock();
 }
 
-function setupWebsiteScanResultProviderMock(): void {
-    websiteScanResultProviderMock
+function setupWebsiteScanDataProviderMock(): void {
+    websiteScanDataProviderMock
         .setup((o) => o.read(websiteScanId))
-        .returns(() => Promise.resolve(websiteScanResult))
+        .returns(() => Promise.resolve(websiteScanData))
         .verifiable();
-    websiteScanResultProviderMock.setup((o) => o.mergeOrCreate(pageScanResult.id, It.isValue(updatedWebsiteScanResults))).verifiable();
+    websiteScanDataProviderMock.setup((o) => o.mergeOrCreate(It.isValue(websiteScanDataUpdate))).verifiable();
 }
 
 function setupRetryHelperMock(times: number = 1): void {

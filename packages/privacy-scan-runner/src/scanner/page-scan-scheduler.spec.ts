@@ -5,75 +5,80 @@ import 'reflect-metadata';
 
 import { IMock, Mock } from 'typemoq';
 import { GlobalLogger } from 'logger';
-import { OnDemandPageScanResult, WebsiteScanResult } from 'storage-documents';
-import { WebsiteScanResultProvider } from 'service-library';
+import { OnDemandPageScanResult, WebsiteScanData } from 'storage-documents';
+import { WebsiteScanDataProvider } from 'service-library';
 import { PageScanScheduler } from './page-scan-scheduler';
 import { ScanFeedGenerator } from './scan-feed-generator';
 
-const websiteScanResultId = 'websiteScanResultId';
+const websiteScanDataId = 'websiteScanDataId';
 
 let pageScanScheduler: PageScanScheduler;
 let scanFeedGeneratorMock: IMock<ScanFeedGenerator>;
-let websiteScanResultProviderMock: IMock<WebsiteScanResultProvider>;
+let websiteScanDataProviderMock: IMock<WebsiteScanDataProvider>;
 let loggerMock: IMock<GlobalLogger>;
 let pageScanResult: OnDemandPageScanResult;
-let websiteScanResult: WebsiteScanResult;
+let websiteScanData: WebsiteScanData;
 
 describe(PageScanScheduler, () => {
     beforeEach(() => {
         scanFeedGeneratorMock = Mock.ofType<ScanFeedGenerator>();
-        websiteScanResultProviderMock = Mock.ofType<WebsiteScanResultProvider>();
+        websiteScanDataProviderMock = Mock.ofType<WebsiteScanDataProvider>();
         loggerMock = Mock.ofType<GlobalLogger>();
 
         pageScanResult = {
             url: 'url',
             websiteScanRef: {
-                id: websiteScanResultId,
+                id: websiteScanDataId,
                 scanGroupType: 'consolidated-scan',
             },
         } as OnDemandPageScanResult;
-        websiteScanResult = {
-            id: websiteScanResultId,
+        websiteScanData = {
+            id: websiteScanDataId,
             deepScanId: 'deepScanId',
-        } as WebsiteScanResult;
+            knownPages: [],
+        } as WebsiteScanData;
 
-        pageScanScheduler = new PageScanScheduler(scanFeedGeneratorMock.object, websiteScanResultProviderMock.object, loggerMock.object);
+        pageScanScheduler = new PageScanScheduler(scanFeedGeneratorMock.object, websiteScanDataProviderMock.object, loggerMock.object);
     });
 
     afterEach(() => {
         scanFeedGeneratorMock.verifyAll();
-        websiteScanResultProviderMock.verifyAll();
+        websiteScanDataProviderMock.verifyAll();
         loggerMock.verifyAll();
     });
 
     it('skip scan scheduling when it was already scheduled', async () => {
-        websiteScanResult.pageCount = 3;
-        websiteScanResultProviderMock
-            .setup((o) => o.read(websiteScanResultId, false))
-            .returns(() => Promise.resolve(websiteScanResult))
+        websiteScanData.knownPages = [
+            {
+                url: 'url1',
+                scanId: 'scanId1',
+            },
+        ];
+        websiteScanDataProviderMock
+            .setup((o) => o.read(websiteScanDataId))
+            .returns(() => Promise.resolve(websiteScanData))
             .verifiable();
-        loggerMock
-            .setup((o) =>
-                o.logInfo('Skip known privacy pages scan scheduling since scan was already scheduled.', {
-                    privacyUrls: `${websiteScanResult.pageCount}`,
-                }),
-            )
-            .verifiable();
+        loggerMock.setup((o) => o.logInfo('Did not find any known pages that require scanning.')).verifiable();
 
         await pageScanScheduler.schedulePageScan(pageScanResult);
     });
 
     it('schedule scans when processing request a first time', async () => {
-        websiteScanResultProviderMock
-            .setup((o) => o.read(websiteScanResultId, false))
-            .returns(() => Promise.resolve(websiteScanResult))
-            .verifiable();
-        websiteScanResultProviderMock
-            .setup((o) => o.read(websiteScanResultId, true))
-            .returns(() => Promise.resolve(websiteScanResult))
+        websiteScanData.knownPages = [
+            {
+                url: 'url1',
+                scanId: 'scanId1',
+            },
+            {
+                url: 'url2',
+            },
+        ];
+        websiteScanDataProviderMock
+            .setup((o) => o.read(websiteScanDataId))
+            .returns(() => Promise.resolve(websiteScanData))
             .verifiable();
         scanFeedGeneratorMock
-            .setup((o) => o.queuePrivacyPages(websiteScanResult, pageScanResult))
+            .setup((o) => o.queueDiscoveredPages(websiteScanData, pageScanResult))
             .returns(() => Promise.resolve())
             .verifiable();
 

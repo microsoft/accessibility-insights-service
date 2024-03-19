@@ -5,7 +5,7 @@ import 'reflect-metadata';
 
 import { IMock, It, Mock } from 'typemoq';
 import { Page, PageAnalysisResult } from 'scanner-global-library';
-import { WebsiteScanResult } from 'storage-documents';
+import { WebsiteScanData } from 'storage-documents';
 import { createDiscoveryPattern } from '../crawler/discovery-pattern-factory';
 import { PageMetadataGenerator } from './page-metadata-generator';
 import { UrlLocationValidator } from './url-location-validator';
@@ -13,7 +13,7 @@ import { UrlLocationValidator } from './url-location-validator';
 let pageMock: IMock<Page>;
 let createDiscoveryPatternMock: IMock<typeof createDiscoveryPattern>;
 let urlLocationValidatorMock: IMock<UrlLocationValidator>;
-let websiteScanResult: WebsiteScanResult;
+let websiteScanData: WebsiteScanData;
 let pageAnalysisResult: PageAnalysisResult;
 let pageMetadataGenerator: PageMetadataGenerator;
 
@@ -26,7 +26,7 @@ describe(PageMetadataGenerator, () => {
         pageMock = Mock.ofType<Page>();
         createDiscoveryPatternMock = Mock.ofType<typeof createDiscoveryPattern>();
         urlLocationValidatorMock = Mock.ofType<UrlLocationValidator>();
-        websiteScanResult = {} as WebsiteScanResult;
+        websiteScanData = {} as WebsiteScanData;
         createDiscoveryPatternMock.setup((o) => o(url)).returns(() => discoveryPatternWithPath);
         createDiscoveryPatternMock.setup((o) => o(url, false)).returns(() => discoveryPatternWithoutPath);
         urlLocationValidatorMock.setup((o) => o.allowed(It.isAny())).returns(() => true);
@@ -73,13 +73,13 @@ describe(PageMetadataGenerator, () => {
             },
         };
 
-        const results = await pageMetadataGenerator.getMetadata(url, pageMock.object, websiteScanResult);
+        const results = await pageMetadataGenerator.getMetadata(url, pageMock.object, websiteScanData);
 
         expect(results).toEqual(expectedPageMetadata);
     });
 
     it('return page metadata', async () => {
-        websiteScanResult = { discoveryPatterns: [discoveryPatternWithPath] } as WebsiteScanResult;
+        websiteScanData = { discoveryPatterns: [discoveryPatternWithPath] } as WebsiteScanData;
         pageAnalysisResult = {
             url,
             authentication: true,
@@ -102,14 +102,14 @@ describe(PageMetadataGenerator, () => {
             redirection: false,
         };
 
-        const results = await pageMetadataGenerator.getMetadata(url, pageMock.object, websiteScanResult);
+        const results = await pageMetadataGenerator.getMetadata(url, pageMock.object, websiteScanData);
 
         expect(results).toEqual(expectedPageMetadata);
     });
 
     it('allow scan for the same domain redirection', async () => {
         const loadedUrl = 'http://localhost/other-path/';
-        websiteScanResult = { discoveryPatterns: [discoveryPatternWithPath] } as WebsiteScanResult;
+        websiteScanData = { discoveryPatterns: [discoveryPatternWithPath] } as WebsiteScanData;
         pageAnalysisResult = { redirection: true, loadedUrl } as PageAnalysisResult;
         pageMock.setup((o) => o.pageAnalysisResult).returns(() => pageAnalysisResult);
         pageMock
@@ -124,14 +124,14 @@ describe(PageMetadataGenerator, () => {
             redirection: true,
         };
 
-        const results = await pageMetadataGenerator.getMetadata(url, pageMock.object, websiteScanResult);
+        const results = await pageMetadataGenerator.getMetadata(url, pageMock.object, websiteScanData);
 
         expect(results).toEqual(expectedPageMetadata);
     });
 
     it('detect redirect to foreign location with discovery pattern', async () => {
         const loadedUrl = 'http://example.org';
-        websiteScanResult = { discoveryPatterns: [discoveryPatternWithPath] } as WebsiteScanResult;
+        websiteScanData = { discoveryPatterns: [discoveryPatternWithPath] } as WebsiteScanData;
         pageAnalysisResult = { redirection: true, loadedUrl } as PageAnalysisResult;
         pageMock.setup((o) => o.pageAnalysisResult).returns(() => pageAnalysisResult);
         pageMock
@@ -150,14 +150,14 @@ describe(PageMetadataGenerator, () => {
             },
         };
 
-        const results = await pageMetadataGenerator.getMetadata(url, pageMock.object, websiteScanResult);
+        const results = await pageMetadataGenerator.getMetadata(url, pageMock.object, websiteScanData);
 
         expect(results).toEqual(expectedPageMetadata);
     });
 
     it('detect redirect to foreign location with base URL', async () => {
         const loadedUrl = 'http://example.org';
-        websiteScanResult = { baseUrl: url } as WebsiteScanResult;
+        websiteScanData = { baseUrl: url } as WebsiteScanData;
         pageAnalysisResult = { redirection: true, loadedUrl } as PageAnalysisResult;
         pageMock.setup((o) => o.pageAnalysisResult).returns(() => pageAnalysisResult);
         pageMock
@@ -176,7 +176,7 @@ describe(PageMetadataGenerator, () => {
             },
         };
 
-        const results = await pageMetadataGenerator.getMetadata(url, pageMock.object, websiteScanResult);
+        const results = await pageMetadataGenerator.getMetadata(url, pageMock.object, websiteScanData);
 
         expect(results).toEqual(expectedPageMetadata);
     });
@@ -201,7 +201,7 @@ describe(PageMetadataGenerator, () => {
             },
         };
 
-        const results = await pageMetadataGenerator.getMetadata(url, pageMock.object, websiteScanResult);
+        const results = await pageMetadataGenerator.getMetadata(url, pageMock.object, websiteScanData);
 
         expect(results).toEqual(expectedPageMetadata);
     });
@@ -233,7 +233,7 @@ describe(PageMetadataGenerator, () => {
             },
         };
 
-        const results = await pageMetadataGenerator.getMetadata(url, pageMock.object, websiteScanResult);
+        const results = await pageMetadataGenerator.getMetadata(url, pageMock.object, websiteScanData);
 
         expect(results).toEqual(expectedPageMetadata);
     });

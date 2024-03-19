@@ -8,11 +8,11 @@ import {
     ReportGeneratorRequestProvider,
     OnDemandPageScanRunResultProvider,
     OperationResult,
-    WebsiteScanResultProvider,
+    WebsiteScanDataProvider,
     ScanNotificationProcessor,
 } from 'service-library';
 import { GlobalLogger } from 'logger';
-import { ReportGeneratorRequest, OnDemandPageScanResult, ReportScanRunState, WebsiteScanResult } from 'storage-documents';
+import { ReportGeneratorRequest, OnDemandPageScanResult, ReportScanRunState, WebsiteScanData, KnownPage } from 'storage-documents';
 import * as MockDate from 'mockdate';
 import { isEmpty, cloneDeep } from 'lodash';
 import { RunMetadataConfig } from '../run-metadata-config';
@@ -36,7 +36,7 @@ let onDemandPageScanRunResultProviderMock: IMock<OnDemandPageScanRunResultProvid
 let requestSelectorMock: IMock<RequestSelector>;
 let reportProcessorMock: IMock<ReportProcessor>;
 let reportGeneratorRunnerTelemetryManagerMock: IMock<ReportGeneratorRunnerTelemetryManager>;
-let websiteScanResultProviderMock: IMock<WebsiteScanResultProvider>;
+let websiteScanDataProviderMock: IMock<WebsiteScanDataProvider>;
 let scanNotificationProcessorMock: IMock<ScanNotificationProcessor>;
 let loggerMock: IMock<GlobalLogger>;
 let runner: Runner;
@@ -83,7 +83,7 @@ describe(Runner, () => {
         requestSelectorMock = Mock.ofType<RequestSelector>();
         reportProcessorMock = Mock.ofType<ReportProcessor>();
         reportGeneratorRunnerTelemetryManagerMock = Mock.ofType<ReportGeneratorRunnerTelemetryManager>();
-        websiteScanResultProviderMock = Mock.ofType<WebsiteScanResultProvider>();
+        websiteScanDataProviderMock = Mock.ofType<WebsiteScanDataProvider>();
         scanNotificationProcessorMock = Mock.ofType<ScanNotificationProcessor>();
         loggerMock = Mock.ofType<GlobalLogger>();
 
@@ -110,7 +110,7 @@ describe(Runner, () => {
             runMetadataConfigMock.object,
             reportGeneratorRequestProviderMock.object,
             onDemandPageScanRunResultProviderMock.object,
-            websiteScanResultProviderMock.object,
+            websiteScanDataProviderMock.object,
             requestSelectorMock.object,
             reportProcessorMock.object,
             reportGeneratorRunnerTelemetryManagerMock.object,
@@ -128,7 +128,7 @@ describe(Runner, () => {
         requestSelectorMock.verifyAll();
         reportProcessorMock.verifyAll();
         reportGeneratorRunnerTelemetryManagerMock.verifyAll();
-        websiteScanResultProviderMock.verifyAll();
+        websiteScanDataProviderMock.verifyAll();
         loggerMock.verifyAll();
     });
 
@@ -360,30 +360,23 @@ function setupSetScanRunStatesOnCompletion(queuedRequests: ReportGeneratorReques
             .returns(() => Promise.resolve(pageScanResultUpdated))
             .verifiable();
 
-        const updatedWebsiteScanResult: Partial<WebsiteScanResult> = {
+        const updatedWebsiteScanData = {
             id: websiteScanRefId,
-            pageScans: [
-                {
-                    scanId: pageScanResultUpdated.result.id,
-                    url: pageScanResultUpdated.result.url,
-                    scanState: pageScanResultUpdated.result.scanResult?.state,
-                    runState: pageScanResultUpdated.result.run.state,
-                    timestamp: dateNow.toJSON(),
-                },
-            ],
+            knownPages: [],
+        } as WebsiteScanData;
+        const pageState: KnownPage = {
+            scanId: pageScanResultUpdated.result.id,
+            url: pageScanResultUpdated.result.url,
+            scanState: pageScanResultUpdated.result.scanResult?.state,
+            runState: pageScanResultUpdated.result.run.state,
         };
-        websiteScanResultProviderMock
-            .setup((o) => o.mergeOrCreate(pageScanResultUpdated.result.id, updatedWebsiteScanResult, It.isAny()))
-            .returns(() => Promise.resolve(updatedWebsiteScanResult as WebsiteScanResult))
+        websiteScanDataProviderMock
+            .setup((o) => o.updateKnownPages({ id: websiteScanRefId }, [pageState]))
+            .returns(() => Promise.resolve(updatedWebsiteScanData))
             .verifiable();
 
         scanNotificationProcessorMock
-            .setup((o) =>
-                o.sendScanCompletionNotification(
-                    It.isValue(pageScanResultUpdated.result),
-                    It.isValue(updatedWebsiteScanResult as WebsiteScanResult),
-                ),
-            )
+            .setup((o) => o.sendScanCompletionNotification(It.isValue(pageScanResultUpdated.result), It.isValue(updatedWebsiteScanData)))
             .returns(() => Promise.resolve())
             .verifiable();
     });
