@@ -155,7 +155,6 @@ export class OnDemandDispatcher {
 
             this.logger.logWarn('Updated page scan run state for abandon run.', {
                 scanId: pageScanResult.id,
-                scanGroupId: pageScanResult.websiteScanRef?.scanGroupId,
                 runState: JSON.stringify(pageScanResult.run.state),
             });
         }

@@ -6,7 +6,13 @@ import 'reflect-metadata';
 import { Context } from '@azure/functions';
 import { GuidGenerator, RestApiConfig, ServiceConfiguration } from 'common';
 import moment from 'moment';
-import { OnDemandPageScanRunResultProvider, ScanBatchRequest, ScanResultResponse, WebsiteScanResultProvider } from 'service-library';
+import {
+    OnDemandPageScanRunResultProvider,
+    ScanBatchRequest,
+    ScanResultResponse,
+    WebsiteScanDataProvider,
+    WebsiteScanResultProvider,
+} from 'service-library';
 import { ItemType, OnDemandPageScanResult, WebsiteScanResult } from 'storage-documents';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { ScanResponseConverter } from '../converters/scan-response-converter';
@@ -22,6 +28,7 @@ describe(BatchScanResultController, () => {
     let guidGeneratorMock: IMock<GuidGenerator>;
     let scanResponseConverterMock: IMock<ScanResponseConverter>;
     let websiteScanResultProviderMock: IMock<WebsiteScanResultProvider>;
+    let websiteScanDataProviderMock: IMock<WebsiteScanDataProvider>;
 
     const apiVersion = '1.0';
     const baseUrl = 'https://localhost/api/';
@@ -74,6 +81,7 @@ describe(BatchScanResultController, () => {
         context.req.query['api-version'] = apiVersion;
         context.req.headers['content-type'] = 'application/json';
         onDemandPageScanRunResultProviderMock = Mock.ofType<OnDemandPageScanRunResultProvider>();
+        websiteScanDataProviderMock = Mock.ofType<WebsiteScanDataProvider>();
         onDemandPageScanRunResultProviderMock
             .setup(async (o) => o.readScanRuns(It.isAny()))
             .returns(async () => Promise.resolve([scanFetchedResponse]));
@@ -116,6 +124,7 @@ describe(BatchScanResultController, () => {
         const controller = new BatchScanResultController(
             onDemandPageScanRunResultProviderMock.object,
             websiteScanResultProviderMock.object,
+            websiteScanDataProviderMock.object,
             scanResponseConverterMock.object,
             guidGeneratorMock.object,
             serviceConfigurationMock.object,

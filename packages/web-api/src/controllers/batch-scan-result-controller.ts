@@ -10,6 +10,7 @@ import {
     ScanBatchRequest,
     ScanResultResponse,
     WebApiErrorCodes,
+    WebsiteScanDataProvider,
     WebsiteScanResultProvider,
 } from 'service-library';
 import { OnDemandPageScanResult } from 'storage-documents';
@@ -25,6 +26,7 @@ export class BatchScanResultController extends BaseScanResultController {
     public constructor(
         @inject(OnDemandPageScanRunResultProvider) protected readonly onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider,
         @inject(WebsiteScanResultProvider) protected readonly websiteScanResultProvider: WebsiteScanResultProvider,
+        @inject(WebsiteScanDataProvider) protected readonly websiteScanDataProvider: WebsiteScanDataProvider,
         @inject(ScanResponseConverter) protected readonly scanResponseConverter: ScanResponseConverter,
         @inject(GuidGenerator) protected readonly guidGenerator: GuidGenerator,
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,

@@ -27,7 +27,7 @@ export class DeepScanner {
         websiteScanData: WebsiteScanData,
         page: Page,
     ): Promise<void> {
-        if (websiteScanData === undefined || pageScanResult.websiteScanRef?.scanGroupType === 'single-scan') {
+        if (pageScanResult.websiteScanRef.scanGroupType === 'single-scan') {
             return;
         }
 

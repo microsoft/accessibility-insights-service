@@ -17,7 +17,7 @@ export class PageScanScheduler {
     ) {}
 
     public async schedulePageScan(pageScanResult: OnDemandPageScanResult): Promise<void> {
-        if (pageScanResult.websiteScanRef?.scanGroupType === 'single-scan') {
+        if (pageScanResult.websiteScanRef.scanGroupType === 'single-scan') {
             return;
         }
 

@@ -108,6 +108,9 @@ describe(ScanNotificationProcessor, () => {
     });
 
     it('skip notification if combined scan is not completed', async () => {
+        pageScanResult.websiteScanRef = {
+            scanGroupType: 'deep-scan',
+        } as WebsiteScanRef;
         websiteScanData.knownPages = [
             {
                 url: 'url1',
@@ -125,6 +128,9 @@ describe(ScanNotificationProcessor, () => {
     });
 
     it('send scan notification for combined scan', async () => {
+        pageScanResult.websiteScanRef = {
+            scanGroupType: 'deep-scan',
+        } as WebsiteScanRef;
         websiteScanData.knownPages = [
             {
                 url: 'url1',

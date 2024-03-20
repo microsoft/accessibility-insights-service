@@ -54,7 +54,7 @@ export class ScanNotificationProcessor {
             return false;
         }
 
-        if (websiteScanData === undefined || pageScanResult.websiteScanRef?.scanGroupType === 'single-scan') {
+        if (pageScanResult.websiteScanRef.scanGroupType === 'single-scan') {
             const scanConfig = await this.serviceConfig.getConfigValue('scanConfig');
             if (
                 // completed scan

@@ -26,7 +26,6 @@ import {
     ReportGroupRequest,
     ScanGroupType,
     ScanType,
-    currentSchemaVersion,
     KnownPage,
 } from 'storage-documents';
 import { IMock, It, Mock, Times } from 'typemoq';
@@ -127,7 +126,7 @@ describe(ScanBatchRequestFeedController, () => {
                 itemType: ItemType.scanRunBatchRequest,
                 scanRunBatchRequest: [
                     {
-                        schemaVersion: currentSchemaVersion,
+                        schemaVersion: '2',
                         scanId: 'scan-1',
                         url: 'http://url-1',
                         priority: 1,
@@ -156,7 +155,7 @@ describe(ScanBatchRequestFeedController, () => {
 
     it.each([
         {
-            schemaVersion: currentSchemaVersion,
+            schemaVersion: '2',
             scanId: 'scan-1',
             url: 'http://url-1',
             priority: 1,
@@ -169,7 +168,7 @@ describe(ScanBatchRequestFeedController, () => {
             reportGroups: [{ consolidatedId: 'consolidated-id-1' }],
         },
         {
-            schemaVersion: currentSchemaVersion,
+            schemaVersion: '2',
             scanId: 'scan-2',
             url: 'http://url-2',
             priority: 0,
@@ -180,7 +179,7 @@ describe(ScanBatchRequestFeedController, () => {
             priority: -3,
         },
         {
-            schemaVersion: currentSchemaVersion,
+            schemaVersion: '2',
             scanId: 'scan-4',
             url: 'http://url-4',
             priority: 1,
@@ -201,7 +200,7 @@ describe(ScanBatchRequestFeedController, () => {
             deepScan: true,
         },
         {
-            schemaVersion: currentSchemaVersion,
+            schemaVersion: '2',
             scanId: 'scan-5',
             url: 'http://url-5',
             priority: 0,

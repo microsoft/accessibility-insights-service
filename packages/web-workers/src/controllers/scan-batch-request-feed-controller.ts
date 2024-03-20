@@ -25,7 +25,6 @@ import {
     ScanRunBatchRequest,
     ScanType,
     WebsiteScanData,
-    currentSchemaVersion,
 } from 'storage-documents';
 import pLimit from 'p-limit';
 
@@ -101,7 +100,7 @@ export class ScanBatchRequestFeedController extends WebController {
                     };
 
                     const dbDocument: OnDemandPageScanResult = {
-                        schemaVersion: currentSchemaVersion,
+                        schemaVersion: '2',
                         id: request.scanId,
                         url: request.url,
                         priority: request.priority,
@@ -183,7 +182,7 @@ export class ScanBatchRequestFeedController extends WebController {
                     const scanGroupType = this.getScanGroupType(request);
 
                     const dbDocument: OnDemandPageScanRequest = {
-                        schemaVersion: currentSchemaVersion,
+                        schemaVersion: '2',
                         id: request.scanId,
                         url: request.url,
                         priority: request.priority,
