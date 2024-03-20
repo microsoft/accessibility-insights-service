@@ -56,12 +56,7 @@ export class WebsiteScanDataProvider {
      */
     public async mergeOrCreate(websiteScanData: Partial<WebsiteScanData>): Promise<WebsiteScanData> {
         const dbDocument = this.normalizeWebsiteToDbDocument(websiteScanData);
-        const knownPagesObj = this.knownPageTypeConverter.convertKnownPagesToObject(websiteScanData.knownPages as KnownPage[]);
-
-        // If knownPages list is empty, do not change value of knownPages DB document
-        if (!isEmpty(knownPagesObj)) {
-            dbDocument.knownPages = knownPagesObj;
-        }
+        dbDocument.knownPages = this.knownPageTypeConverter.convertKnownPagesToObject(websiteScanData.knownPages as KnownPage[]);
 
         return executeWithExponentialRetry(async () => {
             try {

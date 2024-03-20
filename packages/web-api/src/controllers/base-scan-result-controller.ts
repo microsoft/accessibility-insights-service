@@ -14,7 +14,8 @@ import {
 import { OnDemandPageScanResult, WebsiteScanData, WebsiteScanResult } from 'storage-documents';
 import { ScanResponseConverter } from '../converters/scan-response-converter';
 
-// TODO Remove WebsiteScanResultProvider
+// TODO Remove WebsiteScanResultProvider 30 days after deployment
+
 export abstract class BaseScanResultController extends ApiController {
     protected abstract readonly onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider;
 

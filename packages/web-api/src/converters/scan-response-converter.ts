@@ -21,7 +21,8 @@ import {
 } from 'storage-documents';
 import { ScanErrorConverter } from './scan-error-converter';
 
-// TODO Remove WebsiteScanResult
+// TODO Remove WebsiteScanResult 30 days after deployment
+
 @injectable()
 export class ScanResponseConverter {
     constructor(
@@ -205,6 +206,7 @@ export class ScanResponseConverter {
                     scanRunState: pageScan.runState ?? 'pending',
                 };
 
+                // Remove undefined fields from an object
                 return pickBy(result, (v) => v !== undefined) as unknown as DeepScanResultItem;
             });
 

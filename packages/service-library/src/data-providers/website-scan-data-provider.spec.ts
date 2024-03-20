@@ -123,23 +123,6 @@ describe(WebsiteScanDataProvider, () => {
         expect(actualDbDocument).toEqual(expectedDocument);
     });
 
-    it('mergeOrCreate with empty knownPages property', async () => {
-        setupHashGeneratorMock();
-        setupPartitionKeyFactoryMock();
-        websiteScanDataDbDocumentExisting.knownPages = {};
-        cosmosContainerClientMock
-            .setup(async (o) => o.mergeOrWriteDocument(websiteScanDataDbDocumentNormalized))
-            .returns(() =>
-                Promise.resolve({ item: cloneDeep(websiteScanDataDbDocumentExisting) } as CosmosOperationResponse<WebsiteScanData>),
-            )
-            .verifiable();
-        const expectedDocument = cloneDeep(websiteScanDataDbDocumentExisting);
-        expectedDocument.knownPages = [];
-
-        const actualDbDocument = await websiteScanDataProvider.mergeOrCreate(websiteScanData);
-        expect(actualDbDocument).toEqual(expectedDocument);
-    });
-
     it('updateKnownPages', async () => {
         setupHashGeneratorMock();
         setupPartitionKeyFactoryMock();
