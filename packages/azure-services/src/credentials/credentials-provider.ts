@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { TokenCredential, EnvironmentCredential } from '@azure/identity';
+import { TokenCredential, AzureCliCredential } from '@azure/identity';
 import { inject, injectable } from 'inversify';
 import { iocTypeNames } from '../ioc-types';
 import { Credentials, MSICredentialsProvider, AuthenticationMethod } from './msi-credential-provider';
@@ -23,7 +23,7 @@ export class CredentialsProvider {
 
     public getAzureCredential(): TokenCredential {
         if (this.authenticationMethod === AuthenticationMethod.servicePrincipal) {
-            return new EnvironmentCredential();
+            return new AzureCliCredential();
         } else {
             // must be object instance to reuse an internal cache
             return this.managedIdentityCredentialCache;

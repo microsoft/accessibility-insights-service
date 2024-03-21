@@ -62,7 +62,7 @@ export class CombinedPrivacyScanResultProcessor {
             id: websiteScanData.id,
             reports: [report],
         } as Partial<WebsiteScanData>;
-        await this.websiteScanDataProvider.mergeOrCreate(websiteScanDataUpdate);
+        await this.websiteScanDataProvider.merge(websiteScanDataUpdate);
 
         if (report) {
             if (pageScanResult.reports) {

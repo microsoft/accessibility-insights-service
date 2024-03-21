@@ -8,10 +8,9 @@ import { GlobalLogger } from 'logger';
 import { AxeScanResults, Page, BrowserError, ResourceAuthenticationResult } from 'scanner-global-library';
 import { OnDemandPageScanResult, WebsiteScanData } from 'storage-documents';
 import { cloneDeep } from 'lodash';
-import { PageMetadata, PageMetadataGenerator } from 'service-library';
+import { DeepScanner, PageMetadata, PageMetadataGenerator } from 'service-library';
 import { AxeScanner } from '../scanner/axe-scanner';
 import { PageScanProcessor } from './page-scan-processor';
-import { DeepScanner } from './deep-scanner';
 
 let loggerMock: IMock<GlobalLogger>;
 let pageMock: IMock<Page>;

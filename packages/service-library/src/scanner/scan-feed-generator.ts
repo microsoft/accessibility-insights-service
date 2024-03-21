@@ -3,10 +3,11 @@
 
 import { injectable, inject } from 'inversify';
 import { GlobalLogger } from 'logger';
-import { ScanDataProvider, WebsiteScanDataProvider } from 'service-library';
 import { OnDemandPageScanResult, WebsiteScanData, ScanRunBatchRequest, KnownPage } from 'storage-documents';
 import { isElement, isEmpty } from 'lodash';
 import { GuidGenerator, System } from 'common';
+import { ScanDataProvider } from '../data-providers/scan-data-provider';
+import { WebsiteScanDataProvider } from '../data-providers/website-scan-data-provider';
 
 @injectable()
 export class ScanFeedGenerator {
@@ -84,19 +85,21 @@ export class ScanFeedGenerator {
                 scanId,
                 url,
                 priority: isElement(pageScanResult.priority) ? 0 : pageScanResult.priority,
+                // Allow later deep scan for specific deep scan type request
                 deepScan: pageScanResult.websiteScanRef.scanGroupType === 'deep-scan',
-                // Propagate the original scan id to descendant requests.
+                // Propagate the deep scan id to subsequent requests
                 deepScanId: websiteScanData.deepScanId,
                 authenticationType: pageScanResult.authentication?.hint ?? undefined,
+                site: {
+                    baseUrl: websiteScanData.baseUrl,
+                },
+                ...(pageScanResult.privacyScan === undefined ? {} : { privacyScan: pageScanResult.privacyScan }),
+                scanNotifyUrl: pageScanResult.notification?.scanNotifyUrl ?? undefined,
                 reportGroups: [
                     {
                         consolidatedId: websiteScanData.scanGroupId,
                     },
                 ],
-                site: {
-                    baseUrl: websiteScanData.baseUrl,
-                },
-                scanNotifyUrl: pageScanResult.notification?.scanNotifyUrl ?? undefined,
             };
         });
     }

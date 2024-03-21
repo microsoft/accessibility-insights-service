@@ -6,9 +6,8 @@ import { cosmosContainerClientTypes, CosmosContainerClient } from 'azure-service
 import { executeWithExponentialRetry, ExponentialRetryOptions, HashGenerator, ServiceConfiguration, System } from 'common';
 import { ItemType, KnownPage, KnownPages, WebsiteScanData, KnownPageTypeConverter } from 'storage-documents';
 import { GlobalLogger } from 'logger';
-import { cloneDeep, isEmpty, maxBy } from 'lodash';
+import { cloneDeep, isEmpty } from 'lodash';
 import { PatchOperation } from '@azure/cosmos';
-import pLimit from 'p-limit';
 import { PartitionKeyFactory } from '../factories/partition-key-factory';
 
 const providerRetryOptions: ExponentialRetryOptions = {
@@ -19,6 +18,8 @@ const providerRetryOptions: ExponentialRetryOptions = {
     startingDelay: 500,
     retry: () => true,
 };
+
+// TODO Remove trace
 
 @injectable()
 export class WebsiteScanDataProvider {
@@ -49,18 +50,22 @@ export class WebsiteScanDataProvider {
     }
 
     /**
-     * Writes document to a storage if document does not exist; otherwise, merges the document with the current storage document.
-     *
-     * Source document properties that resolve to undefined are skipped if a destination document value exists.
-     * Will remove all falsey (false, null, 0, "", undefined, and NaN) values from document's array type properties
+     * Creates a new document if there is no document with the same id; or returns a document that already exists.
      */
-    public async mergeOrCreate(websiteScanData: Partial<WebsiteScanData>): Promise<WebsiteScanData> {
+    public async create(websiteScanData: Partial<WebsiteScanData>): Promise<WebsiteScanData> {
         const dbDocument = this.normalizeWebsiteToDbDocument(websiteScanData);
         dbDocument.knownPages = this.knownPageTypeConverter.convertKnownPagesToObject(websiteScanData.knownPages as KnownPage[]);
 
+        this.logger.logWarn(`Trace create for document id ${dbDocument.id}`, {
+            id: dbDocument.id,
+            websiteScanData: JSON.stringify(websiteScanData),
+            dbDocument: JSON.stringify(dbDocument),
+            stack: new Error().stack,
+        });
+
         return executeWithExponentialRetry(async () => {
             try {
-                const operationResponse = await this.cosmosContainerClient.mergeOrWriteDocument(dbDocument);
+                const operationResponse = await this.cosmosContainerClient.createDocumentIfNotExist(dbDocument);
                 const websiteScanDataItem = operationResponse.item;
                 websiteScanDataItem.knownPages = this.knownPageTypeConverter.convertObjectToKnownPages(
                     websiteScanDataItem.knownPages as KnownPages,
@@ -68,7 +73,7 @@ export class WebsiteScanDataProvider {
 
                 return websiteScanDataItem;
             } catch (error) {
-                this.logger.logError(`Failed to update WebsiteScanData Cosmos DB document. Retrying on error.`, {
+                this.logger.logError(`Failed to create WebsiteScanData Cosmos DB document. Retrying on error.`, {
                     websiteId: dbDocument?.id,
                     document: JSON.stringify(dbDocument),
                     error: System.serializeError(error),
@@ -80,18 +85,41 @@ export class WebsiteScanDataProvider {
     }
 
     /**
-     * Writes documents to a storage if documents do not exist; otherwise, merges documents with corresponding storage documents.
+     * Merges the document with the current storage document.
      *
      * Source document properties that resolve to undefined are skipped if a destination document value exists.
      * Will remove all falsey (false, null, 0, "", undefined, and NaN) values from document's array type properties
      */
-    public async mergeOrCreateBatch(websiteScanData: Partial<WebsiteScanData>[]): Promise<void> {
-        const limit = pLimit(this.maxConcurrencyLimit);
-        await Promise.all(
-            websiteScanData.map((data) => {
-                return limit(async () => this.mergeOrCreate(data));
-            }),
-        );
+    public async merge(websiteScanData: Partial<WebsiteScanData>): Promise<WebsiteScanData> {
+        const dbDocument = this.normalizeWebsiteToDbDocument(websiteScanData);
+        dbDocument.knownPages = this.knownPageTypeConverter.convertKnownPagesToObject(websiteScanData.knownPages as KnownPage[]);
+
+        this.logger.logWarn(`Trace merge for document id ${dbDocument.id}`, {
+            id: dbDocument.id,
+            websiteScanData: JSON.stringify(websiteScanData),
+            dbDocument: JSON.stringify(dbDocument),
+            stack: new Error().stack,
+        });
+
+        return executeWithExponentialRetry(async () => {
+            try {
+                const operationResponse = await this.cosmosContainerClient.mergeOrWriteDocument(dbDocument);
+                const websiteScanDataItem = operationResponse.item;
+                websiteScanDataItem.knownPages = this.knownPageTypeConverter.convertObjectToKnownPages(
+                    websiteScanDataItem.knownPages as KnownPages,
+                );
+
+                return websiteScanDataItem;
+            } catch (error) {
+                this.logger.logError(`Failed to merge WebsiteScanData Cosmos DB document. Retrying on error.`, {
+                    websiteId: dbDocument?.id,
+                    document: JSON.stringify(dbDocument),
+                    error: System.serializeError(error),
+                });
+
+                throw error;
+            }
+        }, this.retryOptions);
     }
 
     /**
@@ -103,7 +131,8 @@ export class WebsiteScanDataProvider {
      *  "hash": "data"
      * }
      * ```
-     * The `knownPages` persisted list of website DB document will not have any duplicate URLs.
+     * The hash value is the result of hashing the URL, so the `knownPages` list that is stored in
+     * the website DB document will not contain any repeated URLs.
      */
     public async updateKnownPages(websiteScanData: Partial<WebsiteScanData>, knownPages: KnownPage[]): Promise<WebsiteScanData> {
         const dbDocument = this.normalizeWebsiteToDbDocument(websiteScanData);
@@ -122,39 +151,43 @@ export class WebsiteScanDataProvider {
             });
         });
 
-        const limit = pLimit(this.maxConcurrencyLimit);
-        const operationResponseList = await Promise.all(
-            operationsList.map(async (operations) =>
-                limit(async () => {
-                    return executeWithExponentialRetry(async () => {
-                        try {
-                            return this.cosmosContainerClient.patchDocument<WebsiteScanData>(
-                                dbDocument.id,
-                                operations,
-                                dbDocument.partitionKey,
-                            );
-                        } catch (error) {
-                            this.logger.logError(
-                                `Failed to patch knownPages property of WebsiteScanData Cosmos DB document. Retrying on error.`,
-                                {
-                                    websiteId: dbDocument?.id,
-                                    operations: JSON.stringify(operations),
-                                    error: System.serializeError(error),
-                                },
-                            );
+        this.logger.logWarn(`Trace updateKnownPages for document id ${dbDocument.id}`, {
+            id: dbDocument.id,
+            websiteScanData: JSON.stringify(websiteScanData),
+            dbDocument: JSON.stringify(dbDocument),
+            knownPages: JSON.stringify(knownPages),
+            stack: new Error().stack,
+        });
 
-                            throw error;
-                        }
-                    }, this.retryOptions);
-                }),
-            ),
-        );
+        // Keeps the latest updated document version
+        let operationResponse;
+        // Run operations sequentially as we are modifying a single document
+        for (const operations of operationsList) {
+            operationResponse = await executeWithExponentialRetry(async () => {
+                try {
+                    return this.cosmosContainerClient.patchDocument<WebsiteScanData>(dbDocument.id, operations, dbDocument.partitionKey);
+                } catch (error) {
+                    this.logger.logError(`Failed to patch knownPages property of WebsiteScanData Cosmos DB document. Retrying on error.`, {
+                        websiteId: dbDocument?.id,
+                        operations: JSON.stringify(operations),
+                        error: System.serializeError(error),
+                    });
 
-        // Returns the latest updated document version
-        const websiteScanDataItem = maxBy(operationResponseList, (r) => r.item?._ts).item;
+                    throw error;
+                }
+            }, this.retryOptions);
+        }
+
+        const websiteScanDataItem = operationResponse.item;
         websiteScanDataItem.knownPages = this.knownPageTypeConverter.convertObjectToKnownPages(
             websiteScanDataItem.knownPages as KnownPages,
         );
+
+        this.logger.logWarn(`Trace updateKnownPages after update for document id ${dbDocument.id}`, {
+            id: dbDocument.id,
+            websiteScanDataItem: JSON.stringify(websiteScanDataItem),
+            stack: new Error().stack,
+        });
 
         return websiteScanDataItem;
     }

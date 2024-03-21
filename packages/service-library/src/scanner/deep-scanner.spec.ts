@@ -5,13 +5,17 @@ import 'reflect-metadata';
 
 import { GlobalLogger } from 'logger';
 import { Page } from 'scanner-global-library';
-import { WebsiteScanDataProvider, RunnerScanMetadata, CrawlRunner, DiscoveredUrlProcessor, createDiscoveryPattern } from 'service-library';
 import { KnownPage, OnDemandPageScanResult, WebsiteScanData } from 'storage-documents';
 import { IMock, It, Mock } from 'typemoq';
 import * as Puppeteer from 'puppeteer';
 import { ServiceConfiguration, CrawlConfig } from 'common';
-import { DeepScanner } from './deep-scanner';
+import { CrawlRunner } from '../crawler/crawl-runner';
+import { DiscoveredUrlProcessor } from '../crawler/discovered-url-processor';
+import { createDiscoveryPattern } from '../crawler/discovery-pattern-factory';
+import { WebsiteScanDataProvider } from '../data-providers/website-scan-data-provider';
+import { RunnerScanMetadata } from '../types/runner-scan-metadata';
 import { ScanFeedGenerator } from './scan-feed-generator';
+import { DeepScanner } from './deep-scanner';
 
 const url = 'test url';
 const puppeteerPageStub = {} as Puppeteer.Page;
@@ -243,7 +247,7 @@ function setupUpdateWebsiteScanData(crawlDiscoveryPatterns: string[]): void {
 
     websiteScanDataUpdate.discoveryPatterns = crawlDiscoveryPatterns;
     websiteScanDataProviderMock
-        .setup((o) => o.mergeOrCreate(It.isValue(websiteScanDataUpdate)))
+        .setup((o) => o.merge(It.isValue(websiteScanDataUpdate)))
         .returns(() => Promise.resolve(websiteScanDataDbDocument))
         .verifiable();
 }

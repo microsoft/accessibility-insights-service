@@ -4,7 +4,7 @@
 import 'reflect-metadata';
 
 import { IMock, Mock, Times } from 'typemoq';
-import { EnvironmentCredential } from '@azure/identity';
+import { AzureCliCredential } from '@azure/identity';
 import { CredentialsProvider } from './credentials-provider';
 import { MSICredentialsProvider, AuthenticationMethod } from './msi-credential-provider';
 import { ManagedIdentityCredentialCache } from './managed-identity-credential-cache';
@@ -47,13 +47,13 @@ describe(CredentialsProvider, () => {
         expect(credential).toBe(managedIdentityCredentialCacheMock.object);
     });
 
-    it('getAzureCredential creates EnvironmentCredential instance', () => {
+    it('getAzureCredential creates AzureCliCredential instance', () => {
         testSubject = new CredentialsProvider(
             msiCredProviderMock.object,
             managedIdentityCredentialCacheMock.object,
             AuthenticationMethod.servicePrincipal,
         );
         const credential = testSubject.getAzureCredential();
-        expect(credential).toBeInstanceOf(EnvironmentCredential);
+        expect(credential).toBeInstanceOf(AzureCliCredential);
     });
 });

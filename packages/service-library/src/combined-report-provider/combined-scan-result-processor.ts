@@ -80,7 +80,7 @@ export class CombinedScanResultProcessor {
             id: websiteScanData.id,
             reports: [pageScanReport],
         } as Partial<WebsiteScanData>;
-        await this.websiteScanDataProvider.mergeOrCreate(websiteScanDataUpdate);
+        await this.websiteScanDataProvider.merge(websiteScanDataUpdate);
 
         if (pageScanReport) {
             if (pageScanResult.reports) {

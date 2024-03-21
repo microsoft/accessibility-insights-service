@@ -4,9 +4,13 @@
 import { inject, injectable } from 'inversify';
 import { GlobalLogger } from 'logger';
 import { Page } from 'scanner-global-library';
-import { WebsiteScanDataProvider, RunnerScanMetadata, CrawlRunner, DiscoveredUrlProcessor, createDiscoveryPattern } from 'service-library';
 import { KnownPage, OnDemandPageScanResult, WebsiteScanData } from 'storage-documents';
 import { ServiceConfiguration } from 'common';
+import { CrawlRunner } from '../crawler/crawl-runner';
+import { DiscoveredUrlProcessor } from '../crawler/discovered-url-processor';
+import { createDiscoveryPattern } from '../crawler/discovery-pattern-factory';
+import { WebsiteScanDataProvider } from '../data-providers/website-scan-data-provider';
+import { RunnerScanMetadata } from '../types/runner-scan-metadata';
 import { ScanFeedGenerator } from './scan-feed-generator';
 
 @injectable()
@@ -82,7 +86,7 @@ export class DeepScanner {
             state: 'running',
         };
 
-        return this.websiteScanDataProvider.mergeOrCreate(websiteScanDataUpdate);
+        return this.websiteScanDataProvider.merge(websiteScanDataUpdate);
     }
 
     private async canDeepScan(websiteScanData: WebsiteScanData): Promise<boolean> {
@@ -93,7 +97,7 @@ export class DeepScanner {
             return true;
         }
 
-        // Enable deep scan when the number of URLs found is under the discover limit
+        // Enable deep scan when the number of URLs is under the discover limit
         if ((websiteScanData.knownPages as KnownPage[]).length < discoveryLimit) {
             return true;
         }

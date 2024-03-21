@@ -107,9 +107,7 @@ export class ScanBatchRequestFeedController extends WebController {
                         scanType: this.getScanType(request),
                         itemType: ItemType.onDemandPageScanRunResult,
                         batchRequestId: batchRequestId,
-                        // Deep scan id refers to the initial scan request id.
-                        // The deep scan id is passed on to child requests in scan request.
-                        deepScanId: websiteScanRef.scanGroupType !== 'single-scan' ? request.deepScanId ?? request.scanId : undefined,
+                        deepScanId: this.getDeepScanId(request),
                         partitionKey: this.partitionKeyFactory.createPartitionKeyForDocument(
                             ItemType.onDemandPageScanRunResult,
                             request.scanId,
@@ -133,7 +131,7 @@ export class ScanBatchRequestFeedController extends WebController {
 
                     await this.onDemandPageScanRunResultProvider.writeScanRuns([dbDocument]);
 
-                    this.logger.logInfo('Created scan result documents for batch request.', {
+                    this.logger.logInfo('Created scan result documents for request.', {
                         batchRequestId,
                         scanId: request.scanId,
                     });
@@ -149,22 +147,21 @@ export class ScanBatchRequestFeedController extends WebController {
             baseUrl: request.site?.baseUrl,
             scanGroupId: consolidatedGroup?.consolidatedId ?? this.guidGenerator.createGuid(),
             scanGroupType,
-            // This value is immutable and is assigned when a new DB document is created
-            deepScanId: scanGroupType !== 'single-scan' ? request.scanId : undefined,
+            deepScanId: this.getDeepScanId(request),
             knownPages: request.site?.knownPages
                 ? request.site.knownPages.map((url) => {
                       return { url };
                   })
                 : [],
             discoveryPatterns: request.site?.discoveryPatterns?.length > 0 ? request.site.discoveryPatterns : undefined,
-            // This value is assigned when a new DB document is created
             created: new Date().toJSON(),
         };
         websiteScanData.deepScanLimit = await this.getDeepScanLimit(websiteScanData);
 
-        const dbDocument = await this.websiteScanDataProvider.mergeOrCreate(websiteScanData);
+        // The website document is created only once for each scan request
+        const dbDocument = await this.websiteScanDataProvider.create(websiteScanData);
 
-        this.logger.logInfo(`Created website document for batch request.`, {
+        this.logger.logInfo(`Created website document for request.`, {
             batchRequestId,
             scanId: request.scanId,
             websiteScanId: dbDocument.id,
@@ -179,8 +176,6 @@ export class ScanBatchRequestFeedController extends WebController {
             requests.map(async (request) =>
                 limit(async () => {
                     const scanNotifyUrl = isEmpty(request.scanNotifyUrl) ? {} : { scanNotifyUrl: request.scanNotifyUrl };
-                    const scanGroupType = this.getScanGroupType(request);
-
                     const dbDocument: OnDemandPageScanRequest = {
                         schemaVersion: '2',
                         id: request.scanId,
@@ -188,9 +183,7 @@ export class ScanBatchRequestFeedController extends WebController {
                         priority: request.priority,
                         scanType: this.getScanType(request),
                         deepScan: request.deepScan,
-                        // Deep scan id refers to the initial scan request id.
-                        // The deep scan id is passed on to child requests in scan request.
-                        deepScanId: scanGroupType !== 'single-scan' ? request.deepScanId ?? request.scanId : undefined,
+                        deepScanId: this.getDeepScanId(request),
                         itemType: ItemType.onDemandPageScanRequest,
                         partitionKey: PartitionKey.pageScanRequestDocuments,
                         ...(isEmpty(request.reportGroups) ? {} : { reportGroups: request.reportGroups }),
@@ -265,6 +258,11 @@ export class ScanBatchRequestFeedController extends WebController {
                 });
             }
         }
+    }
+
+    private getDeepScanId(request: ScanRunBatchRequest): string {
+        // The initial scan request id is deep scan id. The deep scan id is passed on to subsequent scan requests.
+        return request.deepScanId ?? request.scanId;
     }
 
     private getScanType(request: ScanRunBatchRequest): ScanType {

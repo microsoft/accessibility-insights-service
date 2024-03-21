@@ -8,6 +8,8 @@ import { HashGenerator } from 'common';
 import { KnownPageTypeConverter } from './known-page-type-converter';
 import { KnownPage } from './website-scan-result';
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 let hashGeneratorMock: IMock<HashGenerator>;
 let knownPageTypeConverter: KnownPageTypeConverter;
 
@@ -66,6 +68,9 @@ describe(KnownPageTypeConverter, () => {
         let knownPages = knownPageTypeConverter.convertObjectToKnownPages(knownPagesObj);
         expect(knownPages).toEqual([]);
 
+        knownPages = knownPageTypeConverter.convertObjectToKnownPages(undefined);
+        expect(knownPages).toEqual([]);
+
         knownPagesObj = {
             hash1: 'url1',
             hash2: 'url2',
@@ -99,6 +104,9 @@ describe(KnownPageTypeConverter, () => {
         expect(knownPagesObj).toEqual(expected);
 
         knownPagesObj = knownPageTypeConverter.convertKnownPagesToObject([]);
+        expect(knownPagesObj).toEqual({});
+
+        knownPagesObj = knownPageTypeConverter.convertKnownPagesToObject(undefined);
         expect(knownPagesObj).toEqual({});
     });
 });

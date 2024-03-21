@@ -4,10 +4,11 @@
 import 'reflect-metadata';
 
 import { IMock, Mock, Times } from 'typemoq';
-import { ScanDataProvider, WebsiteScanDataProvider } from 'service-library';
 import { GuidGenerator, System } from 'common';
 import { GlobalLogger } from 'logger';
 import { WebsiteScanData, OnDemandPageScanResult, ScanRunBatchRequest, KnownPage } from 'storage-documents';
+import { ScanDataProvider } from '../data-providers/scan-data-provider';
+import { WebsiteScanDataProvider } from '../data-providers/website-scan-data-provider';
 import { ScanFeedGenerator } from './scan-feed-generator';
 
 let scanFeedGenerator: ScanFeedGenerator;
@@ -132,6 +133,7 @@ describe(ScanFeedGenerator, () => {
             priority: 7,
             notification: { scanNotifyUrl: 'url' },
             authentication: { hint: 'entraId' },
+            privacyScan: { cookieBannerType: 'standard' },
         } as OnDemandPageScanResult,
     ])('propagates page scan result properties %s to scan run batch requests', async (pageScanResultOverride: OnDemandPageScanResult) => {
         pageScanResult = {
@@ -178,6 +180,7 @@ function createScanRequests(knownPages: KnownPage[], deepScan: boolean = true): 
             deepScan,
             deepScanId: websiteScanData.deepScanId,
             scanNotifyUrl: pageScanResult.notification.scanNotifyUrl,
+            ...(pageScanResult.privacyScan === undefined ? {} : { privacyScan: pageScanResult.privacyScan }),
             site: {
                 baseUrl: websiteScanData.baseUrl,
             },

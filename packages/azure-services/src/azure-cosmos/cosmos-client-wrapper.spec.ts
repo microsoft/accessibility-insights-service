@@ -396,6 +396,34 @@ describe('CosmosClientWrapper', () => {
         });
     });
 
+    describe('createItem()', () => {
+        it('create item', async () => {
+            const item = {
+                id: 'id-1',
+                propA: 'propA',
+                partitionKey,
+            };
+            const responseItem = {
+                id: 'id-1',
+                propA: 'propA',
+                _etag: 'etag-1',
+                _ts: 123456789,
+            };
+            const expectedResult = {
+                item: responseItem,
+                statusCode: 200,
+            };
+            itemsMock
+                .setup(async (i) => i.create<DbItemMock>(item, undefined))
+                .returns(async () => Promise.resolve({ resource: responseItem as any, item: undefined, statusCode: 200 } as any));
+
+            const result = await testSubject.createItem<DbItemMock>(item, dbName, collectionName, partitionKey);
+
+            expect(result).toEqual(expectedResult);
+            verifyMocks();
+        });
+    });
+
     describe('upsertItem()', () => {
         it('upsert item with failed response', async () => {
             const item = {

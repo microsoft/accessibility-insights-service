@@ -105,7 +105,25 @@ describe(WebsiteScanDataProvider, () => {
         expect(actualDbDocument).toEqual(expectedDocument);
     });
 
-    it('mergeOrCreate', async () => {
+    it('create', async () => {
+        setupHashGeneratorMock();
+        setupPartitionKeyFactoryMock();
+        websiteScanData.knownPages = knownPages;
+        websiteScanDataDbDocumentNormalized.knownPages = knownPagesObj;
+        cosmosContainerClientMock
+            .setup(async (o) => o.createDocumentIfNotExist(websiteScanDataDbDocumentNormalized))
+            .returns(() =>
+                Promise.resolve({ item: cloneDeep(websiteScanDataDbDocumentExisting) } as CosmosOperationResponse<WebsiteScanData>),
+            )
+            .verifiable();
+        const expectedDocument = cloneDeep(websiteScanDataDbDocumentExisting);
+        expectedDocument.knownPages = knownPages;
+
+        const actualDbDocument = await websiteScanDataProvider.create(websiteScanData);
+        expect(actualDbDocument).toEqual(expectedDocument);
+    });
+
+    it('merge', async () => {
         setupHashGeneratorMock();
         setupPartitionKeyFactoryMock();
         websiteScanData.knownPages = knownPages;
@@ -119,7 +137,7 @@ describe(WebsiteScanDataProvider, () => {
         const expectedDocument = cloneDeep(websiteScanDataDbDocumentExisting);
         expectedDocument.knownPages = knownPages;
 
-        const actualDbDocument = await websiteScanDataProvider.mergeOrCreate(websiteScanData);
+        const actualDbDocument = await websiteScanDataProvider.merge(websiteScanData);
         expect(actualDbDocument).toEqual(expectedDocument);
     });
 

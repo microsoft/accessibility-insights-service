@@ -40,3 +40,5 @@ export { createDiscoveryPattern } from './crawler/discovery-pattern-factory';
 export { CrawlRunner } from './crawler/crawl-runner';
 export { DiscoveredUrlProcessor } from './crawler/discovered-url-processor';
 export { WebsiteScanDataProvider } from './data-providers/website-scan-data-provider';
+export { ScanFeedGenerator } from './scanner/scan-feed-generator';
+export { DeepScanner } from './scanner/deep-scanner';

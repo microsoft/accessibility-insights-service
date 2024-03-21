@@ -29,6 +29,48 @@ afterEach(() => {
     MockDate.reset();
 });
 
+describe('createDocumentIfNotExist()', () => {
+    it('create document if does not exist', async () => {
+        const item = {
+            id: '123',
+            partitionKey: 'item-partitionKey',
+            value: 'value',
+        };
+
+        cosmosClientWrapperMock
+            .setup(async (o) => o.createItem(item, dbName, collectionName, item.partitionKey, false))
+            .returns(async () => Promise.resolve({ statusCode: 202, item }))
+            .verifiable(Times.once());
+
+        const response = await cosmosContainerClient.createDocumentIfNotExist(item);
+
+        expect(response.item).toEqual(item);
+        cosmosClientWrapperMock.verifyAll();
+    });
+
+    it('read document if exists', async () => {
+        const item = {
+            id: '123',
+            partitionKey: 'item-partitionKey',
+            value: 'value',
+        };
+
+        cosmosClientWrapperMock
+            .setup(async (o) => o.createItem(item, dbName, collectionName, item.partitionKey, false))
+            .returns(async () => Promise.resolve({ statusCode: 409 }))
+            .verifiable(Times.once());
+        cosmosClientWrapperMock
+            .setup(async (o) => o.readItem(item.id, dbName, collectionName, item.partitionKey, true))
+            .returns(async () => Promise.resolve({ statusCode: 200, item }))
+            .verifiable(Times.once());
+
+        const response = await cosmosContainerClient.createDocumentIfNotExist(item);
+
+        expect(response.item).toEqual(item);
+        cosmosClientWrapperMock.verifyAll();
+    });
+});
+
 describe('mergeOrWriteDocument()', () => {
     it('validate document id value', async () => {
         const item = {

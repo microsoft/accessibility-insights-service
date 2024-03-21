@@ -53,6 +53,38 @@ export class CosmosContainerClient {
     }
 
     /**
+     * Creates a new document if there is no document with the same id; or returns a document that already exists.
+     */
+    public async createDocumentIfNotExist<T extends CosmosDocument>(
+        document: T,
+        partitionKey?: string,
+        throwIfNotSuccess: boolean = true,
+    ): Promise<CosmosOperationResponse<T>> {
+        const effectivePartitionKey = this.getEffectivePartitionKey(document, partitionKey);
+        let response = await this.cosmosClientWrapper.createItem<T>(
+            document,
+            this.dbName,
+            this.collectionName,
+            effectivePartitionKey,
+            false,
+        );
+
+        if (response.statusCode === 409) {
+            response = await this.cosmosClientWrapper.readItem<T>(
+                document.id,
+                this.dbName,
+                this.collectionName,
+                effectivePartitionKey,
+                throwIfNotSuccess,
+            );
+        } else {
+            this.cosmosClientWrapper.throwOperationError('createItem', response, document.id);
+        }
+
+        return response;
+    }
+
+    /**
      * Upsert document to a storage without merging.
      *
      * Use document partitionKey property if defined; otherwise, the partitionKey parameter.
@@ -105,6 +137,7 @@ export class CosmosContainerClient {
             effectivePartitionKey,
             false,
         );
+
         if (response.statusCode === 404) {
             return this.cosmosClientWrapper.upsertItem<T>(
                 document,
@@ -113,6 +146,8 @@ export class CosmosContainerClient {
                 effectivePartitionKey,
                 throwIfNotSuccess,
             );
+        } else {
+            this.cosmosClientWrapper.throwOperationError('readItem', response, document.id);
         }
 
         const mergedDocument = response.item;

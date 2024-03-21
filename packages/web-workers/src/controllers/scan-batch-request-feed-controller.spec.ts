@@ -253,7 +253,7 @@ function setupWebsiteScanDataProviderMock(documents: OnDemandPageScanBatchReques
                 const websiteScanData = {
                     baseUrl: request.site?.baseUrl,
                     scanGroupId: request.reportGroups[0]?.consolidatedId ?? guid,
-                    deepScanId: scanGroupType !== 'single-scan' ? request.scanId : undefined,
+                    deepScanId: request.deepScanId ?? request.scanId,
 
                     scanGroupType,
                     knownPages: knownPages
@@ -271,7 +271,7 @@ function setupWebsiteScanDataProviderMock(documents: OnDemandPageScanBatchReques
                 websiteScans.push(websiteScanDbDocument);
 
                 websiteScanDataProviderMock
-                    .setup(async (o) => o.mergeOrCreate(It.isValue(websiteScanData)))
+                    .setup(async (o) => o.create(It.isValue(websiteScanData)))
                     .returns(() => Promise.resolve(websiteScanDbDocument))
                     .verifiable();
             });
@@ -309,7 +309,7 @@ function setupOnDemandPageScanRunResultProviderMock(
                         timestamp: dateNow.toJSON(),
                     },
                     batchRequestId: document.id,
-                    deepScanId: websiteScanRef.scanGroupType !== 'single-scan' ? request.deepScanId ?? request.scanId : undefined,
+                    deepScanId: request.deepScanId ?? request.scanId,
                     ...(isEmpty(request.scanNotifyUrl)
                         ? {}
                         : {
@@ -333,7 +333,6 @@ function setupPageScanRequestProviderMock(documents: OnDemandPageScanBatchReques
         document.scanRunBatchRequest
             .filter((batchRequest) => batchRequest.scanId !== undefined)
             .map((scanRequest) => {
-                const scanGroupType = getScanGroupType(scanRequest);
                 const request: OnDemandPageScanRequest = {
                     schemaVersion: scanRequest.schemaVersion,
                     id: scanRequest.scanId,
@@ -343,7 +342,7 @@ function setupPageScanRequestProviderMock(documents: OnDemandPageScanBatchReques
                     itemType: ItemType.onDemandPageScanRequest,
                     partitionKey: PartitionKey.pageScanRequestDocuments,
                     deepScan: scanRequest.deepScan,
-                    deepScanId: scanGroupType !== 'single-scan' ? scanRequest.deepScanId ?? scanRequest.scanId : undefined,
+                    deepScanId: scanRequest.deepScanId ?? scanRequest.scanId,
                     ...(scanRequest.authenticationType === undefined ? {} : { authenticationType: scanRequest.authenticationType }),
                 };
 
@@ -385,21 +384,6 @@ function setupScanDataProviderMock(documents: OnDemandPageScanBatchRequest[]): v
             )
             .verifiable(Times.once());
     });
-}
-
-function getScanGroupType(request: ScanRunBatchRequest): ScanGroupType {
-    let consolidatedGroup;
-    if (request.reportGroups !== undefined) {
-        consolidatedGroup = request.reportGroups.find((g) => g.consolidatedId !== undefined);
-    }
-
-    if (request.deepScan === true) {
-        return 'deep-scan';
-    } else if (consolidatedGroup?.consolidatedId || request.site?.knownPages?.length > 0) {
-        return 'consolidated-scan';
-    } else {
-        return 'single-scan';
-    }
 }
 
 function setupPartitionKeyFactoryMock(documents: OnDemandPageScanBatchRequest[]): void {

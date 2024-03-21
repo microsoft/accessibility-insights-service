@@ -221,7 +221,7 @@ function setupWebsiteScanDataProviderMock(): void {
         .setup((o) => o.read(websiteScanId))
         .returns(() => Promise.resolve(websiteScanData))
         .verifiable();
-    websiteScanDataProviderMock.setup((o) => o.mergeOrCreate(It.isValue(websiteScanDataUpdate))).verifiable();
+    websiteScanDataProviderMock.setup((o) => o.merge(It.isValue(websiteScanDataUpdate))).verifiable();
 }
 
 function setupRetryHelperMock(times: number = 1): void {

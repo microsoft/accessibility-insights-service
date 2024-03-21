@@ -5,10 +5,9 @@ import { inject, injectable } from 'inversify';
 import { GlobalLogger } from 'logger';
 import { AxeScanResults, Page } from 'scanner-global-library';
 import { OnDemandPageScanResult, WebsiteScanData } from 'storage-documents';
-import { PageMetadata, PageMetadataGenerator, RunnerScanMetadata } from 'service-library';
+import { DeepScanner, PageMetadata, PageMetadataGenerator, RunnerScanMetadata } from 'service-library';
 import { isEmpty } from 'lodash';
 import { AxeScanner } from '../scanner/axe-scanner';
-import { DeepScanner } from './deep-scanner';
 
 @injectable()
 export class PageScanProcessor {
@@ -35,7 +34,7 @@ export class PageScanProcessor {
                 return state;
             }
 
-            // Enable WebGL to render all page elements to get comprehensive accessibility scan result
+            // Turn on WebGL to show all page elements and get a complete accessibility scan result
             await this.page.reopenBrowser({ capabilities: { webgl: true } });
             const enableAuthentication = pageScanResult.authentication?.hint !== undefined;
             await this.page.navigate(runnerScanMetadata.url, { enableAuthentication });

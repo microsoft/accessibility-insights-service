@@ -178,7 +178,7 @@ describe(CombinedPrivacyScanResultProcessor, () => {
             .setup((c) => c.writeCombinedReport(It.isAny(), It.isAny()))
             .returns(async () => errorWriteResponse)
             .verifiable();
-        websiteScanDataProviderMock.setup((w) => w.mergeOrCreate(It.isAny())).verifiable(Times.never());
+        websiteScanDataProviderMock.setup((w) => w.merge(It.isAny())).verifiable(Times.never());
 
         await expect(async () => testSubject.generateCombinedScanResults(privacyResults, pageScanResult)).rejects.toThrow();
     });
@@ -244,8 +244,6 @@ describe(CombinedPrivacyScanResultProcessor, () => {
     }
 
     function setupUpdateWebsiteScanData(): void {
-        websiteScanDataProviderMock
-            .setup((w) => w.mergeOrCreate({ id: websiteScanData.id, reports: [onDemandPageScanReport] }))
-            .verifiable();
+        websiteScanDataProviderMock.setup((w) => w.merge({ id: websiteScanData.id, reports: [onDemandPageScanReport] })).verifiable();
     }
 });
