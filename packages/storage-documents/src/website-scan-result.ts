@@ -8,7 +8,7 @@ import { ReportFormat, OnDemandPageScanRunState, ScanState } from './on-demand-p
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-export declare type ScanGroupType = 'single-scan' | 'consolidated-scan' | 'deep-scan';
+export declare type ScanGroupType = 'single-scan' | 'group-scan' | 'deep-scan';
 
 /**
  * Represents website scan result data.

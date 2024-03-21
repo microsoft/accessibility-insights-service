@@ -210,11 +210,10 @@ export class ScanBatchRequestFeedController extends WebController {
     }
 
     private getScanGroupType(request: ScanRunBatchRequest): ScanGroupType {
-        const consolidatedGroup = this.getReportGroupRequest(request);
         if (request.deepScan === true) {
             return 'deep-scan';
-        } else if (consolidatedGroup?.consolidatedId || request.site?.knownPages?.length > 0) {
-            return 'consolidated-scan';
+        } else if (request.site?.knownPages?.length > 0) {
+            return 'group-scan';
         } else {
             return 'single-scan';
         }

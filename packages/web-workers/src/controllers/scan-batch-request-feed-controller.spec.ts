@@ -240,8 +240,8 @@ function setupWebsiteScanDataProviderMock(documents: OnDemandPageScanBatchReques
                 let scanGroupType: ScanGroupType;
                 if (request.deepScan === true) {
                     scanGroupType = 'deep-scan';
-                } else if (request.reportGroups[0]?.consolidatedId || request.site?.knownPages?.length > 0) {
-                    scanGroupType = 'consolidated-scan';
+                } else if (request.site?.knownPages?.length > 0) {
+                    scanGroupType = 'group-scan';
                 } else {
                     scanGroupType = 'single-scan';
                 }

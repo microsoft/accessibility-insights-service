@@ -27,7 +27,7 @@ import { PrivacyScanResult, BrowserError } from 'scanner-global-library';
 import { System, ServiceConfiguration, ScanRunTimeConfig, GuidGenerator } from 'common';
 import { cloneDeep } from 'lodash';
 import { ScanMetadataConfig } from '../scan-metadata-config';
-import { PageScanProcessor } from '../scanner/page-scan-processor';
+import { PageScanProcessor } from '../processor/page-scan-processor';
 import { ScanRunnerTelemetryManager } from '../scan-runner-telemetry-manager';
 import { PrivacyScanMetadata } from '../types/privacy-scan-metadata';
 import { CombinedPrivacyScanResultProcessor } from '../combined-report/combined-privacy-scan-result-processor';

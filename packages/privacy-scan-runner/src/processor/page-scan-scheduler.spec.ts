@@ -29,7 +29,6 @@ describe(PageScanScheduler, () => {
             url: 'url',
             websiteScanRef: {
                 id: websiteScanDataId,
-                scanGroupType: 'consolidated-scan',
             },
         } as OnDemandPageScanResult;
         websiteScanData = {

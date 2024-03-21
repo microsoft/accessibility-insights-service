@@ -87,25 +87,6 @@ describe(ScanFeedGenerator, () => {
         await scanFeedGenerator.queueDiscoveredPages(websiteScanData, pageScanResult);
     });
 
-    it('queue scan requests with deep scan disabled', async () => {
-        pageScanResult.websiteScanRef.scanGroupType = 'consolidated-scan';
-        const newPages = [
-            { url: 'page3', runState: 'pending' },
-            { url: 'page4', runState: 'pending' },
-        ] as KnownPage[];
-        setupGuidGeneratorMock(newPages);
-        (websiteScanData.knownPages as KnownPage[]).push(...newPages);
-        const scanRequests = createScanRequests(newPages, false);
-        const queuedKnownPages = createKnowPages(scanRequests);
-        websiteScanDataProviderMock
-            .setup((o) => o.updateKnownPages(websiteScanData, queuedKnownPages))
-            .returns(() => Promise.resolve(undefined))
-            .verifiable();
-        setupScanDataProviderMock(scanRequests);
-
-        await scanFeedGenerator.queueDiscoveredPages(websiteScanData, pageScanResult);
-    });
-
     it('queue scan requests in batches', async () => {
         maxBatchSize = 2;
         scanFeedGenerator.maxBatchSize = maxBatchSize;

@@ -9,7 +9,7 @@ import { AxeScanResults, Page, BrowserError, ResourceAuthenticationResult } from
 import { OnDemandPageScanResult, WebsiteScanData } from 'storage-documents';
 import { cloneDeep } from 'lodash';
 import { DeepScanner, PageMetadata, PageMetadataGenerator } from 'service-library';
-import { AxeScanner } from '../scanner/axe-scanner';
+import { AxeScanner } from './axe-scanner';
 import { PageScanProcessor } from './page-scan-processor';
 
 let loggerMock: IMock<GlobalLogger>;
@@ -124,7 +124,7 @@ describe(PageScanProcessor, () => {
             .setup((s) => s.scan(pageMock.object))
             .returns(() => Promise.resolve(axeScanResults))
             .verifiable();
-        deepScannerMock.setup((o) => o.runDeepScan(It.isAny(), It.isAny(), websiteScanData, It.isAny())).verifiable();
+        deepScannerMock.setup((o) => o.runDeepScan(It.isAny(), websiteScanData, It.isAny())).verifiable();
         pageScanResult = {
             ...pageScanResult,
             authentication: { hint: 'entraId' },
@@ -169,7 +169,7 @@ describe(PageScanProcessor, () => {
             .setup((s) => s.scan(pageMock.object))
             .returns(() => Promise.resolve(axeScanResults))
             .verifiable();
-        deepScannerMock.setup((o) => o.runDeepScan(It.isAny(), It.isAny(), websiteScanData, It.isAny())).verifiable();
+        deepScannerMock.setup((o) => o.runDeepScan(It.isAny(), websiteScanData, It.isAny())).verifiable();
 
         const results = await testSubject.scan(scanMetadata, pageScanResult, websiteScanData);
 
@@ -187,7 +187,7 @@ describe(PageScanProcessor, () => {
         setupGetPageState();
         setupClosePage();
         axeScannerMock.setup((s) => s.scan(pageMock.object)).throws(error);
-        deepScannerMock.setup((o) => o.runDeepScan(It.isAny(), It.isAny(), websiteScanData, It.isAny())).verifiable(Times.never());
+        deepScannerMock.setup((o) => o.runDeepScan(It.isAny(), websiteScanData, It.isAny())).verifiable(Times.never());
 
         await expect(testSubject.scan(scanMetadata, pageScanResult, websiteScanData)).rejects.toThrowError('test error');
     });
@@ -234,7 +234,7 @@ describe(PageScanProcessor, () => {
             .setup((s) => s.scan(pageMock.object))
             .returns(() => Promise.resolve(axeScanResults))
             .verifiable();
-        deepScannerMock.setup((o) => o.runDeepScan(scanMetadata, pageScanResult, websiteScanData, pageMock.object)).throws(error);
+        deepScannerMock.setup((o) => o.runDeepScan(pageScanResult, websiteScanData, pageMock.object)).throws(error);
 
         await expect(testSubject.scan(scanMetadata, pageScanResult, websiteScanData)).rejects.toThrowError('test error');
     });

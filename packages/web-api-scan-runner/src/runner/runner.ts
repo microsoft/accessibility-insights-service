@@ -27,7 +27,7 @@ import { isEmpty, isString } from 'lodash';
 import { ReportGenerator } from '../report-generator/report-generator';
 import { RunnerScanMetadataConfig } from '../runner-scan-metadata-config';
 import { ScanRunnerTelemetryManager } from '../scan-runner-telemetry-manager';
-import { PageScanProcessor } from '../scanner/page-scan-processor';
+import { PageScanProcessor } from '../processor/page-scan-processor';
 
 @injectable()
 export class Runner {

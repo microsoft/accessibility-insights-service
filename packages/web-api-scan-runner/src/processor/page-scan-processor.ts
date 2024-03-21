@@ -7,7 +7,7 @@ import { AxeScanResults, Page } from 'scanner-global-library';
 import { OnDemandPageScanResult, WebsiteScanData } from 'storage-documents';
 import { DeepScanner, PageMetadata, PageMetadataGenerator, RunnerScanMetadata } from 'service-library';
 import { isEmpty } from 'lodash';
-import { AxeScanner } from '../scanner/axe-scanner';
+import { AxeScanner } from './axe-scanner';
 
 @injectable()
 export class PageScanProcessor {
@@ -50,7 +50,7 @@ export class PageScanProcessor {
             axeScanResults = await this.axeScanner.scan(this.page);
             axeScanResults = { ...axeScanResults, ...pageState };
 
-            await this.deepScanner.runDeepScan(runnerScanMetadata, pageScanResult, websiteScanData, this.page);
+            await this.deepScanner.runDeepScan(pageScanResult, websiteScanData, this.page);
         } finally {
             await this.page.close();
         }

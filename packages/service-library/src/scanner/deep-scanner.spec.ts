@@ -13,16 +13,15 @@ import { CrawlRunner } from '../crawler/crawl-runner';
 import { DiscoveredUrlProcessor } from '../crawler/discovered-url-processor';
 import { createDiscoveryPattern } from '../crawler/discovery-pattern-factory';
 import { WebsiteScanDataProvider } from '../data-providers/website-scan-data-provider';
-import { RunnerScanMetadata } from '../types/runner-scan-metadata';
 import { ScanFeedGenerator } from './scan-feed-generator';
 import { DeepScanner } from './deep-scanner';
 
-const url = 'test url';
+const url = 'scanUrl';
 const puppeteerPageStub = {} as Puppeteer.Page;
-const websiteScanDataId = 'websiteScanData id';
+const websiteScanDataId = 'websiteScanDataId';
 const processedUrls = ['processedUrl1', 'processedUrl2'];
 const discoveryPatterns = ['discovery pattern'];
-const crawlBaseUrl = 'base url';
+const crawlBaseUrl = 'baseUrl';
 const deepScanId = 'deepScanId';
 
 let knownPages: KnownPage[];
@@ -36,7 +35,6 @@ let discoveredUrlProcessorMock: IMock<DiscoveredUrlProcessor>;
 let discoveryPatternFactoryMock: IMock<typeof createDiscoveryPattern>;
 let pageMock: IMock<Page>;
 let scanFeedGeneratorMock: IMock<ScanFeedGenerator>;
-let runnerScanMetadata: RunnerScanMetadata;
 let pageScanResult: OnDemandPageScanResult;
 let websiteScanData: WebsiteScanData;
 let websiteScanDataDbDocument: WebsiteScanData;
@@ -54,31 +52,19 @@ describe(DeepScanner, () => {
         pageMock = Mock.ofType<Page>();
         scanFeedGeneratorMock = Mock.ofType<ScanFeedGenerator>();
 
-        knownPages = [{ url: 'page1' }, { url: 'page2' }];
         deepScanDiscoveryLimit = 5;
-        serviceConfigMock
-            .setup((sc) => sc.getConfigValue('crawlConfig'))
-            .returns(() => Promise.resolve({ deepScanDiscoveryLimit } as CrawlConfig));
-        pageMock.setup((p) => p.puppeteerPage).returns(() => puppeteerPageStub);
-        runnerScanMetadata = {
-            url,
-            deepScan: true,
-            id: 'scan id',
-        };
+        knownPages = [{ url: 'page1' }, { url: 'page2' }];
         pageScanResult = {
+            id: deepScanId,
             url,
-            websiteScanRef: {
-                id: websiteScanDataId,
-                scanGroupType: 'consolidated-scan',
-            },
         } as OnDemandPageScanResult;
         websiteScanDataUpdate = {
             id: websiteScanDataId,
             discoveryPatterns,
-            state: 'running',
         };
         websiteScanData = {
             id: websiteScanDataId,
+            scanGroupType: 'deep-scan',
             discoveryPatterns,
             baseUrl: crawlBaseUrl,
             deepScanId,
@@ -89,6 +75,11 @@ describe(DeepScanner, () => {
             ...websiteScanData,
             _etag: 'etag',
         };
+
+        serviceConfigMock
+            .setup((sc) => sc.getConfigValue('crawlConfig'))
+            .returns(() => Promise.resolve({ deepScanDiscoveryLimit } as CrawlConfig));
+        pageMock.setup((p) => p.puppeteerPage).returns(() => puppeteerPageStub);
 
         deepScanner = new DeepScanner(
             crawlRunnerMock.object,
@@ -110,59 +101,51 @@ describe(DeepScanner, () => {
         scanFeedGeneratorMock.verifyAll();
     });
 
-    it('start deep scan when known pages below deepScanDiscoveryLimit', async () => {
-        websiteScanData.deepScanLimit = deepScanDiscoveryLimit;
-        setupLoggerProperties();
-        setupCrawl(discoveryPatterns);
-        setupProcessUrls(websiteScanData.deepScanLimit);
-        setupUpdateWebsiteScanData(discoveryPatterns);
-        setupScanFeedGeneratorMock();
+    it('skip deep scan for unsupported scanGroupType', async () => {
+        websiteScanData.scanGroupType = 'single-scan';
 
-        await deepScanner.runDeepScan(runnerScanMetadata, pageScanResult, websiteScanData, pageMock.object);
+        await deepScanner.runDeepScan(pageScanResult, websiteScanData, pageMock.object);
     });
 
-    it('start deep scan when known pages above deepScanDiscoveryLimit', async () => {
-        websiteScanData.deepScanLimit = deepScanDiscoveryLimit + 4;
+    it('skip deep scan for group-scan and non-deep scan scan request', async () => {
+        websiteScanData.scanGroupType = 'group-scan';
+        pageScanResult.id = 'otherId';
+        setupLoggerProperties();
+        loggerMock
+            .setup((o) =>
+                o.logInfo('The website deep scan finished because it reached the maximum number of pages to scan.', {
+                    discoveredUrls: `${(websiteScanData.knownPages as KnownPage[]).length}`,
+                    discoveryLimit: `${websiteScanData.deepScanLimit}`,
+                }),
+            )
+            .verifiable();
+
+        await deepScanner.runDeepScan(pageScanResult, websiteScanData, pageMock.object);
+    });
+
+    it('start deep scan when known pages below deepScanDiscoveryLimit', async () => {
         setupLoggerProperties();
         setupCrawl(discoveryPatterns);
         setupProcessUrls(websiteScanData.deepScanLimit);
         setupUpdateWebsiteScanData(discoveryPatterns);
         setupScanFeedGeneratorMock();
 
-        await deepScanner.runDeepScan(runnerScanMetadata, pageScanResult, websiteScanData, pageMock.object);
+        await deepScanner.runDeepScan(pageScanResult, websiteScanData, pageMock.object);
     });
 
     it('skip deep scan if maximum discovered pages limit was reached', async () => {
-        websiteScanData.deepScanLimit = deepScanDiscoveryLimit;
         createKnownPages(websiteScanData, deepScanDiscoveryLimit + 2);
         setupLoggerProperties();
         loggerMock
             .setup((o) =>
-                o.logInfo('The website deep scan finished because it reached the maximum number of pages.', {
+                o.logInfo('The website deep scan finished because it reached the maximum number of pages to scan.', {
                     discoveredUrls: `${(websiteScanData.knownPages as KnownPage[]).length}`,
                     discoveryLimit: `${websiteScanData.deepScanLimit}`,
                 }),
             )
             .verifiable();
 
-        await deepScanner.runDeepScan(runnerScanMetadata, pageScanResult, websiteScanData, pageMock.object);
-    });
-
-    it('skip deep scan when know pages over limit and base page was scanned', async () => {
-        websiteScanData.state = 'running';
-        websiteScanData.deepScanLimit = deepScanDiscoveryLimit + 4;
-        createKnownPages(websiteScanData, deepScanDiscoveryLimit + 2);
-        setupLoggerProperties();
-        loggerMock
-            .setup((o) =>
-                o.logInfo('The website deep scan finished because it reached the maximum number of pages.', {
-                    discoveredUrls: `${(websiteScanData.knownPages as KnownPage[]).length}`,
-                    discoveryLimit: `${websiteScanData.deepScanLimit}`,
-                }),
-            )
-            .verifiable();
-
-        await deepScanner.runDeepScan(runnerScanMetadata, pageScanResult, websiteScanData, pageMock.object);
+        await deepScanner.runDeepScan(pageScanResult, websiteScanData, pageMock.object);
     });
 
     it('crawls and updates results with generated discovery pattern', async () => {
@@ -178,7 +161,7 @@ describe(DeepScanner, () => {
         setupUpdateWebsiteScanData([generatedDiscoveryPattern]);
         setupScanFeedGeneratorMock();
 
-        await deepScanner.runDeepScan(runnerScanMetadata, pageScanResult, websiteScanData, pageMock.object);
+        await deepScanner.runDeepScan(pageScanResult, websiteScanData, pageMock.object);
     });
 
     it('crawls and updates results with previously existing discovery pattern', async () => {
@@ -188,7 +171,7 @@ describe(DeepScanner, () => {
         setupUpdateWebsiteScanData(discoveryPatterns);
         setupScanFeedGeneratorMock();
 
-        await deepScanner.runDeepScan(runnerScanMetadata, pageScanResult, websiteScanData, pageMock.object);
+        await deepScanner.runDeepScan(pageScanResult, websiteScanData, pageMock.object);
     });
 
     it('crawls and updates results when knownPages is undefined', async () => {
@@ -199,19 +182,19 @@ describe(DeepScanner, () => {
         setupUpdateWebsiteScanData(discoveryPatterns);
         setupScanFeedGeneratorMock();
 
-        await deepScanner.runDeepScan(runnerScanMetadata, pageScanResult, websiteScanData, pageMock.object);
+        await deepScanner.runDeepScan(pageScanResult, websiteScanData, pageMock.object);
     });
 
-    it('skip crawl if deep scan was not requested', async () => {
+    it('skip crawl for group-scan scan type', async () => {
         discoveredUrls = [];
-        runnerScanMetadata.deepScan = false;
+        websiteScanData.scanGroupType = 'group-scan';
 
         setupLoggerProperties();
         setupProcessUrls();
         setupUpdateWebsiteScanData(discoveryPatterns);
         setupScanFeedGeneratorMock();
 
-        await deepScanner.runDeepScan(runnerScanMetadata, pageScanResult, websiteScanData, pageMock.object);
+        await deepScanner.runDeepScan(pageScanResult, websiteScanData, pageMock.object);
     });
 });
 
@@ -223,7 +206,7 @@ function setupScanFeedGeneratorMock(): void {
 
 function setupCrawl(crawlDiscoveryPatterns: string[]): void {
     crawlRunnerMock
-        .setup((o) => o.run(url, It.isValue(crawlDiscoveryPatterns), puppeteerPageStub))
+        .setup((o) => o.run(pageScanResult.url, It.isValue(crawlDiscoveryPatterns), puppeteerPageStub))
         .returns(() => Promise.resolve(discoveredUrls))
         .verifiable();
 }

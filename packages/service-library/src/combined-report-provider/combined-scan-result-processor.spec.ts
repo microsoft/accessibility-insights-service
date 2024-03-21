@@ -106,7 +106,6 @@ describe(CombinedScanResultProcessor, () => {
             id: 'id',
             websiteScanRef: {
                 id: websiteScanId,
-                scanGroupType: 'consolidated-scan',
             },
         } as OnDemandPageScanResult;
 
@@ -131,7 +130,6 @@ describe(CombinedScanResultProcessor, () => {
             id: 'id',
             websiteScanRef: {
                 id: websiteScanId,
-                scanGroupType: 'consolidated-scan',
             },
         } as OnDemandPageScanResult;
         setupFullPass();

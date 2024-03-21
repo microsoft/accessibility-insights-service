@@ -17,7 +17,7 @@ import { System, ServiceConfiguration, GuidGenerator, ScanRunTimeConfig } from '
 import { isEmpty } from 'lodash';
 import { ScanMetadataConfig } from '../scan-metadata-config';
 import { ScanRunnerTelemetryManager } from '../scan-runner-telemetry-manager';
-import { PageScanProcessor } from '../scanner/page-scan-processor';
+import { PageScanProcessor } from '../processor/page-scan-processor';
 import { PrivacyScanMetadata } from '../types/privacy-scan-metadata';
 import { CombinedPrivacyScanResultProcessor } from '../combined-report/combined-privacy-scan-result-processor';
 

@@ -29,7 +29,7 @@ import { System, ServiceConfiguration, ScanRunTimeConfig, GuidGenerator } from '
 import { AxeResults } from 'axe-core';
 import { cloneDeep } from 'lodash';
 import { RunnerScanMetadataConfig } from '../runner-scan-metadata-config';
-import { PageScanProcessor } from '../scanner/page-scan-processor';
+import { PageScanProcessor } from '../processor/page-scan-processor';
 import { ReportGenerator, GeneratedReport } from '../report-generator/report-generator';
 import { ScanRunnerTelemetryManager } from '../scan-runner-telemetry-manager';
 import { Runner } from './runner';
@@ -91,7 +91,7 @@ describe(Runner, () => {
             id: runnerScanMetadata.id,
             websiteScanRef: {
                 id: 'websiteScanId',
-                scanGroupType: 'consolidated-scan',
+                scanGroupType: 'group-scan',
             },
             scannedUrl: 'scannedUrl',
         } as OnDemandPageScanResult;

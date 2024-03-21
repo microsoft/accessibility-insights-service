@@ -70,9 +70,7 @@ describe(CombinedPrivacyScanResultProcessor, () => {
             id: 'page scan id',
             websiteScanRef: {
                 id: websiteScanData.id,
-                scanGroupType: 'consolidated-scan',
             },
-
             url: 'scan url',
             reports: [
                 {

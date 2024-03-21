@@ -19,8 +19,6 @@ const providerRetryOptions: ExponentialRetryOptions = {
     retry: () => true,
 };
 
-// TODO Remove trace
-
 @injectable()
 export class WebsiteScanDataProvider {
     public maxConcurrencyLimit = 5;
@@ -56,13 +54,6 @@ export class WebsiteScanDataProvider {
         const dbDocument = this.normalizeWebsiteToDbDocument(websiteScanData);
         dbDocument.knownPages = this.knownPageTypeConverter.convertKnownPagesToObject(websiteScanData.knownPages as KnownPage[]);
 
-        this.logger.logWarn(`Trace create for document id ${dbDocument.id}`, {
-            id: dbDocument.id,
-            websiteScanData: JSON.stringify(websiteScanData),
-            dbDocument: JSON.stringify(dbDocument),
-            stack: new Error().stack,
-        });
-
         return executeWithExponentialRetry(async () => {
             try {
                 const operationResponse = await this.cosmosContainerClient.createDocumentIfNotExist(dbDocument);
@@ -93,13 +84,6 @@ export class WebsiteScanDataProvider {
     public async merge(websiteScanData: Partial<WebsiteScanData>): Promise<WebsiteScanData> {
         const dbDocument = this.normalizeWebsiteToDbDocument(websiteScanData);
         dbDocument.knownPages = this.knownPageTypeConverter.convertKnownPagesToObject(websiteScanData.knownPages as KnownPage[]);
-
-        this.logger.logWarn(`Trace merge for document id ${dbDocument.id}`, {
-            id: dbDocument.id,
-            websiteScanData: JSON.stringify(websiteScanData),
-            dbDocument: JSON.stringify(dbDocument),
-            stack: new Error().stack,
-        });
 
         return executeWithExponentialRetry(async () => {
             try {
@@ -151,14 +135,6 @@ export class WebsiteScanDataProvider {
             });
         });
 
-        this.logger.logWarn(`Trace updateKnownPages for document id ${dbDocument.id}`, {
-            id: dbDocument.id,
-            websiteScanData: JSON.stringify(websiteScanData),
-            dbDocument: JSON.stringify(dbDocument),
-            knownPages: JSON.stringify(knownPages),
-            stack: new Error().stack,
-        });
-
         // Keeps the latest updated document version
         let operationResponse;
         // Run operations sequentially as we are modifying a single document
@@ -182,12 +158,6 @@ export class WebsiteScanDataProvider {
         websiteScanDataItem.knownPages = this.knownPageTypeConverter.convertObjectToKnownPages(
             websiteScanDataItem.knownPages as KnownPages,
         );
-
-        this.logger.logWarn(`Trace updateKnownPages after update for document id ${dbDocument.id}`, {
-            id: dbDocument.id,
-            websiteScanDataItem: JSON.stringify(websiteScanDataItem),
-            stack: new Error().stack,
-        });
 
         return websiteScanDataItem;
     }

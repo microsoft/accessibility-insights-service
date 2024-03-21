@@ -4,13 +4,12 @@
 import { inject, injectable } from 'inversify';
 import { GlobalLogger } from 'logger';
 import { Page } from 'scanner-global-library';
-import { KnownPage, OnDemandPageScanResult, WebsiteScanData } from 'storage-documents';
+import { KnownPage, OnDemandPageScanResult, ScanGroupType, WebsiteScanData } from 'storage-documents';
 import { ServiceConfiguration } from 'common';
 import { CrawlRunner } from '../crawler/crawl-runner';
 import { DiscoveredUrlProcessor } from '../crawler/discovered-url-processor';
 import { createDiscoveryPattern } from '../crawler/discovery-pattern-factory';
 import { WebsiteScanDataProvider } from '../data-providers/website-scan-data-provider';
-import { RunnerScanMetadata } from '../types/runner-scan-metadata';
 import { ScanFeedGenerator } from './scan-feed-generator';
 
 @injectable()
@@ -25,13 +24,8 @@ export class DeepScanner {
         private readonly createDiscoveryPatternFn: typeof createDiscoveryPattern = createDiscoveryPattern,
     ) {}
 
-    public async runDeepScan(
-        runnerScanMetadata: RunnerScanMetadata,
-        pageScanResult: OnDemandPageScanResult,
-        websiteScanData: WebsiteScanData,
-        page: Page,
-    ): Promise<void> {
-        if (pageScanResult.websiteScanRef.scanGroupType === 'single-scan') {
+    public async runDeepScan(pageScanResult: OnDemandPageScanResult, websiteScanData: WebsiteScanData, page: Page): Promise<void> {
+        if (!(['deep-scan', 'group-scan'] as ScanGroupType[]).includes(websiteScanData.scanGroupType)) {
             return;
         }
 
@@ -40,12 +34,11 @@ export class DeepScanner {
             deepScanId: websiteScanData.deepScanId,
         });
 
-        const deepScanDiscoveryLimit = websiteScanData.deepScanLimit;
-        const canDeepScan = await this.canDeepScan(websiteScanData);
-        if (canDeepScan === false) {
-            this.logger.logInfo(`The website deep scan finished because it reached the maximum number of pages.`, {
+        const performDeepScan = await this.performDeepScan(pageScanResult, websiteScanData);
+        if (performDeepScan === false) {
+            this.logger.logInfo(`The website deep scan finished because it reached the maximum number of pages to scan.`, {
                 discoveredUrls: `${(websiteScanData.knownPages as KnownPage[]).length}`,
-                discoveryLimit: `${deepScanDiscoveryLimit}`,
+                discoveryLimit: `${websiteScanData.deepScanLimit}`,
             });
 
             return;
@@ -54,15 +47,15 @@ export class DeepScanner {
         // Crawling a page if deep scan was enabled
         let discoveredUrls: string[] = [];
         const discoveryPatterns = websiteScanData.discoveryPatterns ?? [this.createDiscoveryPatternFn(websiteScanData.baseUrl)];
-        if (runnerScanMetadata.deepScan === true) {
-            discoveredUrls = await this.crawlRunner.run(runnerScanMetadata.url, discoveryPatterns, page.puppeteerPage);
+        if (websiteScanData.scanGroupType === 'deep-scan') {
+            discoveredUrls = await this.crawlRunner.run(pageScanResult.url, discoveryPatterns, page.puppeteerPage);
         }
 
         const knownUrls = (websiteScanData.knownPages as KnownPage[]).map((p) => p.url);
-        const processedUrls = this.discoveredUrlProcessor.process(discoveredUrls, deepScanDiscoveryLimit, [
+        const processedUrls = this.discoveredUrlProcessor.process(discoveredUrls, websiteScanData.deepScanLimit, [
             ...knownUrls,
             // Exclude the current page in case a link with hash fragment was discovered (because the hash is removed from a link)
-            runnerScanMetadata.url,
+            pageScanResult.url,
         ]);
         const websiteScanDataUpdated = await this.updateWebsiteScanData(websiteScanData, discoveryPatterns, processedUrls);
         await this.scanFeedGenerator.queueDiscoveredPages(websiteScanDataUpdated, pageScanResult);
@@ -83,21 +76,19 @@ export class DeepScanner {
         const websiteScanDataUpdate: Partial<WebsiteScanData> = {
             id: websiteScanData.id,
             discoveryPatterns: discoveryPatterns,
-            state: 'running',
         };
 
         return this.websiteScanDataProvider.merge(websiteScanDataUpdate);
     }
 
-    private async canDeepScan(websiteScanData: WebsiteScanData): Promise<boolean> {
-        const discoveryLimit = (await this.serviceConfig.getConfigValue('crawlConfig')).deepScanDiscoveryLimit;
-
-        // Enable deep scan if the number of URLs exceeds the discovery limit to handle the provided list of known pages
-        if (websiteScanData.deepScanLimit > discoveryLimit && websiteScanData.state !== 'running') {
-            return true;
+    private async performDeepScan(pageScanResult: OnDemandPageScanResult, websiteScanData: WebsiteScanData): Promise<boolean> {
+        // Enable deep scan to handle the provided list of known pages
+        if (websiteScanData.scanGroupType === 'group-scan') {
+            return websiteScanData.deepScanId === pageScanResult.id;
         }
 
         // Enable deep scan when the number of URLs is under the discover limit
+        const discoveryLimit = (await this.serviceConfig.getConfigValue('crawlConfig')).deepScanDiscoveryLimit;
         if ((websiteScanData.knownPages as KnownPage[]).length < discoveryLimit) {
             return true;
         }
