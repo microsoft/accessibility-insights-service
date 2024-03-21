@@ -3,23 +3,22 @@
 
 import 'reflect-metadata';
 
-import { IMock, Mock, Times } from 'typemoq';
+import { IMock, It, Mock, Times } from 'typemoq';
 import { GlobalLogger } from 'logger';
 import { PrivacyScanResult, Page, BrowserError } from 'scanner-global-library';
 import * as Puppeteer from 'puppeteer';
 import { OnDemandPageScanResult, WebsiteScanData } from 'storage-documents';
-import { PageMetadata, PageMetadataGenerator } from 'service-library';
+import { DeepScanner, PageMetadata, PageMetadataGenerator } from 'service-library';
 import { PrivacyScanMetadata } from '../types/privacy-scan-metadata';
 import { PrivacyScanner } from './privacy-scanner';
 import { PageScanProcessor } from './page-scan-processor';
-import { PageScanScheduler } from './page-scan-scheduler';
 
 describe(PageScanProcessor, () => {
     let loggerMock: IMock<GlobalLogger>;
     let pageMock: IMock<Page>;
     let privacyScannerMock: IMock<PrivacyScanner>;
     let browserPageMock: IMock<Puppeteer.Page>;
-    let pageScanSchedulerMock: IMock<PageScanScheduler>;
+    let deepScannerMock: IMock<DeepScanner>;
     let pageMetadataGeneratorMock: IMock<PageMetadataGenerator>;
     let testSubject: PageScanProcessor;
     let pageScanResult: OnDemandPageScanResult;
@@ -37,7 +36,7 @@ describe(PageScanProcessor, () => {
         pageMock = Mock.ofType<Page>();
         privacyScannerMock = Mock.ofType<PrivacyScanner>();
         browserPageMock = Mock.ofType<Puppeteer.Page>();
-        pageScanSchedulerMock = Mock.ofType<PageScanScheduler>();
+        deepScannerMock = Mock.ofType<DeepScanner>();
         pageMetadataGeneratorMock = Mock.ofType<PageMetadataGenerator>();
         pageScanResult = {} as OnDemandPageScanResult;
         scanMetadata = {
@@ -67,7 +66,7 @@ describe(PageScanProcessor, () => {
         testSubject = new PageScanProcessor(
             pageMock.object,
             privacyScannerMock.object,
-            pageScanSchedulerMock.object,
+            deepScannerMock.object,
             pageMetadataGeneratorMock.object,
             loggerMock.object,
         );
@@ -78,7 +77,7 @@ describe(PageScanProcessor, () => {
         pageMock.verifyAll();
         privacyScannerMock.verifyAll();
         browserPageMock.verifyAll();
-        pageScanSchedulerMock.verifyAll();
+        deepScannerMock.verifyAll();
         pageMetadataGeneratorMock.verifyAll();
     });
 
@@ -90,7 +89,6 @@ describe(PageScanProcessor, () => {
             .returns(() => Promise.resolve(privacyScanResult))
             .verifiable();
         privacyScanResult = { ...privacyScanResult, pageScreenshot, pageSnapshot };
-
         const results = await testSubject.scan(scanMetadata, pageScanResult, websiteScanData);
 
         expect(results).toEqual(privacyScanResult);
@@ -103,10 +101,8 @@ describe(PageScanProcessor, () => {
             .setup((s) => s.scan(url, pageMock.object))
             .returns(() => Promise.resolve(privacyScanResult))
             .verifiable();
-        pageScanSchedulerMock
-            .setup((o) => o.schedulePageScan(pageScanResult))
-            .returns(() => Promise.resolve())
-            .verifiable();
+        deepScannerMock.setup((o) => o.runDeepScan(It.isAny(), websiteScanData, It.isAny())).verifiable();
+
         privacyScanResult = { ...privacyScanResult, pageScreenshot, pageSnapshot };
 
         const results = await testSubject.scan(scanMetadata, pageScanResult, websiteScanData);

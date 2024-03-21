@@ -20,7 +20,6 @@ export interface WebsiteScanData extends StorageDocument {
     scanGroupId: string;
     scanGroupType: ScanGroupType;
     created: string;
-    state?: OnDemandPageScanRunState;
     // This value is immutable and is set on new db document creation.
     deepScanId?: string;
     deepScanLimit?: number;

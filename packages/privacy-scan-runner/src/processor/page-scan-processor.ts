@@ -6,17 +6,16 @@ import { GlobalLogger } from 'logger';
 import { Page, PrivacyScanResult } from 'scanner-global-library';
 import { OnDemandPageScanResult, WebsiteScanData } from 'storage-documents';
 import { isEmpty } from 'lodash';
-import { PageMetadata, PageMetadataGenerator } from 'service-library';
+import { DeepScanner, PageMetadata, PageMetadataGenerator } from 'service-library';
 import { PrivacyScanMetadata } from '../types/privacy-scan-metadata';
 import { PrivacyScanner } from './privacy-scanner';
-import { PageScanScheduler } from './page-scan-scheduler';
 
 @injectable()
 export class PageScanProcessor {
     public constructor(
         @inject(Page) private readonly page: Page,
         @inject(PrivacyScanner) private readonly privacyScanner: PrivacyScanner,
-        @inject(PageScanScheduler) private readonly pageScanScheduler: PageScanScheduler,
+        @inject(DeepScanner) private readonly deepScanner: DeepScanner,
         @inject(PageMetadataGenerator) private readonly pageMetadataGenerator: PageMetadataGenerator,
         @inject(GlobalLogger) private readonly logger: GlobalLogger,
     ) {}
@@ -40,10 +39,11 @@ export class PageScanProcessor {
             }
 
             const pageState = await this.capturePageState();
+
             privacyScanResults = await this.runPrivacyScan(scanMetadata.url);
             privacyScanResults = { ...privacyScanResults, ...pageState };
 
-            await this.pageScanScheduler.schedulePageScan(pageScanResult);
+            await this.deepScanner.runDeepScan(pageScanResult, websiteScanData, this.page);
         } finally {
             await this.page.close();
         }
