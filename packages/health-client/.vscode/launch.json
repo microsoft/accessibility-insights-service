@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Debug health client",
+            "name": "Debug health-client",
             "type": "node",
             "request": "launch",
             "outFiles": ["${workspaceFolder}/dist/**/*.js"],

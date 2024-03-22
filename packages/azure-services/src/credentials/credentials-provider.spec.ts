@@ -51,7 +51,7 @@ describe(CredentialsProvider, () => {
         testSubject = new CredentialsProvider(
             msiCredProviderMock.object,
             managedIdentityCredentialCacheMock.object,
-            AuthenticationMethod.servicePrincipal,
+            AuthenticationMethod.azureCliCredentials,
         );
         const credential = testSubject.getAzureCredential();
         expect(credential).toBeInstanceOf(AzureCliCredential);

@@ -222,7 +222,7 @@ function setupAuthenticationMethod(container: Container): void {
         .bind(iocTypeNames.AuthenticationMethod)
         .toConstantValue(
             System.isDebugEnabled() === true || process.env.LOCAL_AUTH === 'true'
-                ? AuthenticationMethod.servicePrincipal
+                ? AuthenticationMethod.azureCliCredentials
                 : AuthenticationMethod.managedIdentity,
         );
 }

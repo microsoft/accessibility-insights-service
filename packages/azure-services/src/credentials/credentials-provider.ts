@@ -16,13 +16,11 @@ export class CredentialsProvider {
     ) {}
 
     public async getCredentialsForBatch(): Promise<Credentials> {
-        // eslint-disable-next-line max-len
-        // ref https://docs.microsoft.com/en-us/rest/api/batchservice/authenticate-requests-to-the-azure-batch-service#authentication-via-azure-ad
         return this.getCredentialsForResource('https://batch.core.windows.net/');
     }
 
     public getAzureCredential(): TokenCredential {
-        if (this.authenticationMethod === AuthenticationMethod.servicePrincipal) {
+        if (this.authenticationMethod === AuthenticationMethod.azureCliCredentials) {
             return new AzureCliCredential();
         } else {
             // must be object instance to reuse an internal cache
