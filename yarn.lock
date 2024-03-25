@@ -129,14 +129,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@axe-core/puppeteer@npm:^4.7.3":
-  version: 4.7.3
-  resolution: "@axe-core/puppeteer@npm:4.7.3"
+"@axe-core/puppeteer@npm:^4.8.0":
+  version: 4.8.5
+  resolution: "@axe-core/puppeteer@npm:4.8.5"
   dependencies:
-    axe-core: ^4.7.0
+    axe-core: ~4.8.4
   peerDependencies:
     puppeteer: ">=1.10.0"
-  checksum: 38141bf016216f7ac829d294b09ba59d76727eb4f42273186abcadc966936545d0fce9b95b1be79fbf7a1e3a39b1d578deae14024336efb5e24bf39a07079e0d
+  checksum: 293fd105329a12dd94279f1bc40684ad7867b88905150ad9746221a606195f663f059fecd4a2bc9f1584bafc018bdc593179f715c164d30e1aca3f3156836512
   languageName: node
   linkType: hard
 
@@ -4846,7 +4846,7 @@ __metadata:
   resolution: "accessibility-insights-crawler@workspace:packages/crawler"
   dependencies:
     "@apify/log": 2.2.18
-    "@axe-core/puppeteer": ^4.7.3
+    "@axe-core/puppeteer": ^4.8.0
     "@crawlee/browser-pool": ^3.5.0
     "@crawlee/puppeteer": ^3.5.0
     "@medv/finder": ^2.1.0
@@ -4910,7 +4910,7 @@ __metadata:
   resolution: "accessibility-insights-scan@workspace:packages/cli"
   dependencies:
     "@apify/log": 2.2.18
-    "@axe-core/puppeteer": ^4.7.3
+    "@axe-core/puppeteer": ^4.8.0
     "@crawlee/browser-pool": ^3.5.0
     "@crawlee/puppeteer": ^3.5.0
     "@medv/finder": ^2.1.0
@@ -5510,7 +5510,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "axe-core-scanner@workspace:packages/axe-core-scanner"
   dependencies:
-    "@axe-core/puppeteer": ^4.7.3
+    "@axe-core/puppeteer": ^4.8.0
     "@types/jest": ^29.5.0
     "@types/lodash": ^4.14.182
     "@types/node": ^16.18.11
@@ -14205,7 +14205,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "scanner-global-library@workspace:packages/scanner-global-library"
   dependencies:
-    "@axe-core/puppeteer": ^4.7.3
+    "@axe-core/puppeteer": ^4.8.0
     "@types/jest": ^29.5.0
     "@types/lodash": ^4.14.182
     "@types/node": ^16.18.11
@@ -16183,7 +16183,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "web-api-scan-runner@workspace:packages/web-api-scan-runner"
   dependencies:
-    "@axe-core/puppeteer": ^4.7.3
+    "@axe-core/puppeteer": ^4.8.0
     "@azure/cosmos": ^4.0.0
     "@types/dotenv": ^8.2.0
     "@types/jest": ^29.5.0
