@@ -11,10 +11,11 @@ import {
     PartitionKeyFactory,
     ScanDataProvider,
     WebController,
-    WebsiteScanResultProvider,
+    WebsiteScanDataProvider,
 } from 'service-library';
 import {
     ItemType,
+    KnownPage,
     OnDemandPageScanBatchRequest,
     OnDemandPageScanRequest,
     OnDemandPageScanResult,
@@ -23,8 +24,9 @@ import {
     ScanGroupType,
     ScanRunBatchRequest,
     ScanType,
-    WebsiteScanResult,
+    WebsiteScanData,
 } from 'storage-documents';
+import pLimit from 'p-limit';
 
 @injectable()
 export class ScanBatchRequestFeedController extends WebController {
@@ -32,11 +34,13 @@ export class ScanBatchRequestFeedController extends WebController {
 
     public readonly apiName = 'scan-batch-request-feed';
 
+    private readonly maxConcurrencyLimit = 3;
+
     public constructor(
         @inject(OnDemandPageScanRunResultProvider) private readonly onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider,
         @inject(PageScanRequestProvider) private readonly pageScanRequestProvider: PageScanRequestProvider,
         @inject(ScanDataProvider) private readonly scanDataProvider: ScanDataProvider,
-        @inject(WebsiteScanResultProvider) private readonly websiteScanResultProvider: WebsiteScanResultProvider,
+        @inject(WebsiteScanDataProvider) private readonly websiteScanDataProvider: WebsiteScanDataProvider,
         @inject(PartitionKeyFactory) private readonly partitionKeyFactory: PartitionKeyFactory,
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
         @inject(GuidGenerator) private readonly guidGenerator: GuidGenerator,
@@ -47,21 +51,21 @@ export class ScanBatchRequestFeedController extends WebController {
 
     public async handleRequest(...args: unknown[]): Promise<void> {
         this.logger.setCommonProperties({ source: 'scanBatchCosmosFeedTriggerFunc' });
-        this.logger.logInfo('Processing the scan batch documents.');
+        const limit = pLimit(this.maxConcurrencyLimit);
 
         const batchDocuments = <OnDemandPageScanBatchRequest[]>args[0];
         await Promise.all(
-            batchDocuments.map(async (batchDocument) => {
-                const addedRequests = await this.processDocument(batchDocument);
-                const scanRequestAcceptedMeasurements: ScanRequestAcceptedMeasurements = {
-                    acceptedScanRequests: addedRequests,
-                };
-                this.logger.trackEvent('ScanRequestAccepted', { batchRequestId: batchDocument.id }, scanRequestAcceptedMeasurements);
-                this.logger.logInfo(`The batch request document processed successfully.`, { batchRequestId: batchDocument.id });
-            }),
+            batchDocuments.map(async (batchDocument) =>
+                limit(async () => {
+                    const addedRequests = await this.processDocument(batchDocument);
+                    const scanRequestAcceptedMeasurements: ScanRequestAcceptedMeasurements = {
+                        acceptedScanRequests: addedRequests,
+                    };
+                    this.logger.trackEvent('ScanRequestAccepted', { batchRequestId: batchDocument.id }, scanRequestAcceptedMeasurements);
+                    this.logger.logInfo(`The batch request DB document processed successfully.`, { batchRequestId: batchDocument.id });
+                }),
+            ),
         );
-
-        this.logger.logInfo('The scan batch documents processed successfully.');
     }
 
     protected validateRequest(...args: unknown[]): boolean {
@@ -76,136 +80,140 @@ export class ScanBatchRequestFeedController extends WebController {
             requests.forEach((request) => this.normalizeRequest(request, batchDocument.id));
             await this.writeRequestsToPermanentContainer(requests, batchDocument.id);
             await this.writeRequestsToQueueContainer(requests, batchDocument.id);
-
-            await this.scanDataProvider.deleteBatchRequest(batchDocument);
-            this.logger.logInfo(`Completed deleting batch requests from inbound storage container.`, { batchRequestId: batchDocument.id });
         }
+
+        await this.deleteBatchRequest(batchDocument);
 
         return requests.length;
     }
 
     private async writeRequestsToPermanentContainer(requests: ScanRunBatchRequest[], batchRequestId: string): Promise<void> {
-        const websiteScanResults: { scanId: string; websiteScanResult: WebsiteScanResult }[] = [];
-        const requestDocuments = requests.map<OnDemandPageScanResult>((request) => {
-            this.logger.logInfo('Created new scan result document in scan result storage container.', {
-                batchRequestId,
-                scanId: request.scanId,
-            });
+        const limit = pLimit(this.maxConcurrencyLimit);
+        await Promise.all(
+            requests.map(async (request) =>
+                limit(async () => {
+                    const websiteScanData = await this.createWebsiteScanData(request, batchRequestId);
+                    const websiteScanRef = {
+                        id: websiteScanData.id,
+                        scanGroupId: websiteScanData.scanGroupId,
+                        scanGroupType: websiteScanData.scanGroupType,
+                    };
 
-            const websiteScanResult = this.createWebsiteScanResult(request);
-            const websiteScanRef = {
-                id: websiteScanResult.id,
-                scanGroupId: websiteScanResult.scanGroupId,
-                scanGroupType: websiteScanResult.scanGroupType,
-            };
-            websiteScanResults.push({ scanId: request.scanId, websiteScanResult });
-            this.logger.logInfo('Referenced website scan result document to the new scan result document.', {
-                batchRequestId,
-                scanId: request.scanId,
-                websiteScanId: websiteScanResult.id,
-                scanGroupId: websiteScanResult.scanGroupId,
-                scanGroupType: websiteScanResult.scanGroupType,
-            });
+                    const dbDocument: OnDemandPageScanResult = {
+                        schemaVersion: '2',
+                        id: request.scanId,
+                        url: request.url,
+                        priority: request.priority,
+                        scanType: this.getScanType(request),
+                        itemType: ItemType.onDemandPageScanRunResult,
+                        batchRequestId: batchRequestId,
+                        deepScanId: this.getDeepScanId(request),
+                        partitionKey: this.partitionKeyFactory.createPartitionKeyForDocument(
+                            ItemType.onDemandPageScanRunResult,
+                            request.scanId,
+                        ),
+                        websiteScanRef,
+                        ...(request.authenticationType === undefined ? {} : { authentication: { hint: request.authenticationType } }),
+                        run: {
+                            state: 'accepted',
+                            timestamp: new Date().toJSON(),
+                        },
+                        ...(isEmpty(request.scanNotifyUrl)
+                            ? {}
+                            : {
+                                  notification: {
+                                      state: 'pending',
+                                      scanNotifyUrl: request.scanNotifyUrl,
+                                  },
+                              }),
+                        ...(request.privacyScan === undefined ? {} : { privacyScan: request.privacyScan }),
+                    };
 
-            return {
-                id: request.scanId,
-                url: request.url,
-                priority: request.priority,
-                scanType: this.getScanType(request),
-                itemType: ItemType.onDemandPageScanRunResult,
-                batchRequestId: batchRequestId,
-                // Deep scan id is the original scan request id. The deep scan id is propagated to descendant requests in scan request.
-                deepScanId: websiteScanRef.scanGroupType !== 'single-scan' ? request.deepScanId ?? request.scanId : undefined,
-                partitionKey: this.partitionKeyFactory.createPartitionKeyForDocument(ItemType.onDemandPageScanRunResult, request.scanId),
-                websiteScanRef,
-                ...(request.authenticationType === undefined ? {} : { authentication: { hint: request.authenticationType } }),
-                run: {
-                    state: 'accepted',
-                    timestamp: new Date().toJSON(),
-                },
-                ...(isEmpty(request.scanNotifyUrl)
-                    ? {}
-                    : {
-                          notification: {
-                              state: 'pending',
-                              scanNotifyUrl: request.scanNotifyUrl,
-                          },
-                      }),
-                ...(request.privacyScan === undefined ? {} : { privacyScan: request.privacyScan }),
-            };
-        });
+                    await this.onDemandPageScanRunResultProvider.writeScanRuns([dbDocument]);
 
-        if (websiteScanResults.length > 0) {
-            await this.websiteScanResultProvider.mergeOrCreateBatch(websiteScanResults);
-        }
-
-        await this.onDemandPageScanRunResultProvider.writeScanRuns(requestDocuments);
-        this.logger.logInfo(`Completed adding scan requests to permanent scan result storage container.`, { batchRequestId });
+                    this.logger.logInfo('Created scan result documents for request.', {
+                        batchRequestId,
+                        scanId: request.scanId,
+                    });
+                }),
+            ),
+        );
     }
 
-    private createWebsiteScanResult(request: ScanRunBatchRequest): WebsiteScanResult {
+    private async createWebsiteScanData(request: ScanRunBatchRequest, batchRequestId: string): Promise<WebsiteScanData> {
         const consolidatedGroup = this.getReportGroupRequest(request);
         const scanGroupType = this.getScanGroupType(request);
-        const websiteScanRequest: Partial<WebsiteScanResult> = {
+        const websiteScanData: Partial<WebsiteScanData> = {
             baseUrl: request.site?.baseUrl,
             scanGroupId: consolidatedGroup?.consolidatedId ?? this.guidGenerator.createGuid(),
             scanGroupType,
-            // This value is immutable and set on new db document creation.
-            deepScanId: scanGroupType !== 'single-scan' ? request.scanId : undefined,
-            pageScans: [
-                {
-                    scanId: request.scanId,
-                    url: request.url,
-                    timestamp: new Date().toJSON(),
-                },
-            ],
-            knownPages: request.site?.knownPages,
+            deepScanId: this.getDeepScanId(request),
+            knownPages: request.site?.knownPages
+                ? request.site.knownPages.map((url) => {
+                      return { url };
+                  })
+                : [],
             discoveryPatterns: request.site?.discoveryPatterns?.length > 0 ? request.site.discoveryPatterns : undefined,
-            // `created` value is set only when db document is created
             created: new Date().toJSON(),
         };
+        websiteScanData.deepScanLimit = await this.getDeepScanLimit(websiteScanData);
 
-        return this.websiteScanResultProvider.normalizeToDbDocument(websiteScanRequest);
+        // The website document is created only once for each scan request
+        const dbDocument = await this.websiteScanDataProvider.create(websiteScanData);
+
+        this.logger.logInfo(`Created website document for request.`, {
+            batchRequestId,
+            scanId: request.scanId,
+            websiteScanId: dbDocument.id,
+        });
+
+        return dbDocument;
     }
 
     private async writeRequestsToQueueContainer(requests: ScanRunBatchRequest[], batchRequestId: string): Promise<void> {
-        const requestDocuments = requests.map<OnDemandPageScanRequest>((request) => {
-            const scanNotifyUrl = isEmpty(request.scanNotifyUrl) ? {} : { scanNotifyUrl: request.scanNotifyUrl };
-            const scanGroupType = this.getScanGroupType(request);
+        const limit = pLimit(this.maxConcurrencyLimit);
+        await Promise.all(
+            requests.map(async (request) =>
+                limit(async () => {
+                    const scanNotifyUrl = isEmpty(request.scanNotifyUrl) ? {} : { scanNotifyUrl: request.scanNotifyUrl };
+                    const dbDocument: OnDemandPageScanRequest = {
+                        schemaVersion: '2',
+                        id: request.scanId,
+                        url: request.url,
+                        priority: request.priority,
+                        scanType: this.getScanType(request),
+                        deepScan: request.deepScan,
+                        deepScanId: this.getDeepScanId(request),
+                        itemType: ItemType.onDemandPageScanRequest,
+                        partitionKey: PartitionKey.pageScanRequestDocuments,
+                        ...(isEmpty(request.reportGroups) ? {} : { reportGroups: request.reportGroups }),
+                        ...(request.privacyScan === undefined ? {} : { privacyScan: request.privacyScan }),
+                        ...(request.authenticationType === undefined ? {} : { authenticationType: request.authenticationType }),
+                        ...scanNotifyUrl,
+                        ...(isEmpty(request.site) ? {} : { site: request.site }),
+                    };
 
-            this.logger.logInfo('Created new scan request document in queue storage container.', {
-                batchRequestId,
-                scanId: request.scanId,
-            });
+                    await this.pageScanRequestProvider.insertRequests([dbDocument]);
 
-            return {
-                id: request.scanId,
-                url: request.url,
-                priority: request.priority,
-                scanType: this.getScanType(request),
-                deepScan: request.deepScan,
-                // Deep scan id is the original scan request id. The deep scan id is propagated to descendant requests in scan request.
-                deepScanId: scanGroupType !== 'single-scan' ? request.deepScanId ?? request.scanId : undefined,
-                itemType: ItemType.onDemandPageScanRequest,
-                partitionKey: PartitionKey.pageScanRequestDocuments,
-                ...(isEmpty(request.reportGroups) ? {} : { reportGroups: request.reportGroups }),
-                ...(request.privacyScan === undefined ? {} : { privacyScan: request.privacyScan }),
-                ...(request.authenticationType === undefined ? {} : { authenticationType: request.authenticationType }),
-                ...scanNotifyUrl,
-                ...(isEmpty(request.site) ? {} : { site: request.site }),
-            };
-        });
+                    this.logger.logInfo(`Created scan request document in queue storage container.`, {
+                        batchRequestId,
+                        scanId: request.scanId,
+                    });
+                }),
+            ),
+        );
+    }
 
-        await this.pageScanRequestProvider.insertRequests(requestDocuments);
-        this.logger.logInfo(`Completed adding scan requests to scan queue storage container.`, { batchRequestId });
+    private async deleteBatchRequest(batchDocument: OnDemandPageScanBatchRequest): Promise<void> {
+        await this.scanDataProvider.deleteBatchRequest(batchDocument);
+        this.logger.logInfo(`Finished deleting batch request DB documents.`, { batchRequestId: batchDocument.id });
     }
 
     private getScanGroupType(request: ScanRunBatchRequest): ScanGroupType {
-        const consolidatedGroup = this.getReportGroupRequest(request);
         if (request.deepScan === true) {
             return 'deep-scan';
-        } else if (consolidatedGroup?.consolidatedId || request.site?.knownPages?.length > 0) {
-            return 'consolidated-scan';
+        } else if (request.site?.knownPages?.length > 0) {
+            return 'group-scan';
         } else {
             return 'single-scan';
         }
@@ -221,7 +229,7 @@ export class ScanBatchRequestFeedController extends WebController {
 
     private validateRequestData(documents: OnDemandPageScanBatchRequest[]): boolean {
         if (documents === undefined || documents.length === 0 || !documents.some((d) => d.itemType === ItemType.scanRunBatchRequest)) {
-            this.logger.logWarn(`The scan batch documents were malformed.`, { documents: JSON.stringify(documents) });
+            this.logger.logWarn(`The batch request documents were not formatted correctly.`, { documents: JSON.stringify(documents) });
 
             return false;
         }
@@ -232,17 +240,17 @@ export class ScanBatchRequestFeedController extends WebController {
     private normalizeRequest(request: ScanRunBatchRequest, batchRequestId: string): void {
         // Normalize known pages
         if (request.site?.knownPages?.length > 0) {
-            // Check for duplicate URLs in a client request
+            // Check for duplicate URLs
             const pages = [...request.site.knownPages, request.url];
             const duplicates = filter(
                 groupBy(pages, (url) => Url.normalizeUrl(url)),
                 (group) => group.length > 1,
             ).map((value) => value[0]);
 
-            // Remove duplicate URLs from a client request
+            // Remove duplicate URLs
             if (duplicates.length > 0) {
                 request.site.knownPages = pullAllBy(uniqBy(request.site.knownPages, Url.normalizeUrl), [request.url], Url.normalizeUrl);
-                this.logger.logWarn('Removed duplicate URLs from a client request.', {
+                this.logger.logWarn('Removed duplicate URLs from the scan request.', {
                     batchRequestId,
                     scanId: request.scanId,
                     duplicates: JSON.stringify(duplicates),
@@ -251,7 +259,23 @@ export class ScanBatchRequestFeedController extends WebController {
         }
     }
 
+    private getDeepScanId(request: ScanRunBatchRequest): string {
+        // The initial scan request id is deep scan id. The deep scan id is passed on to subsequent scan requests.
+        return request.deepScanId ?? request.scanId;
+    }
+
     private getScanType(request: ScanRunBatchRequest): ScanType {
         return request.scanType ?? (request.privacyScan ? 'privacy' : 'accessibility');
+    }
+
+    // Gets deep scan limit based on request's know pages size
+    private async getDeepScanLimit(websiteScanData: Partial<WebsiteScanData>): Promise<number> {
+        const crawlConfig = await this.serviceConfig.getConfigValue('crawlConfig');
+        const knownPagesLength = (websiteScanData.knownPages as KnownPage[]).length;
+        if (knownPagesLength >= crawlConfig.deepScanDiscoveryLimit) {
+            return knownPagesLength + 1 > crawlConfig.deepScanUpperLimit ? crawlConfig.deepScanUpperLimit : knownPagesLength + 1;
+        } else {
+            return crawlConfig.deepScanDiscoveryLimit;
+        }
     }
 }

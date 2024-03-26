@@ -4,19 +4,18 @@
 import { inject, injectable } from 'inversify';
 import { GlobalLogger } from 'logger';
 import { Page, PrivacyScanResult } from 'scanner-global-library';
-import { OnDemandPageScanResult, WebsiteScanResult } from 'storage-documents';
+import { OnDemandPageScanResult, WebsiteScanData } from 'storage-documents';
 import { isEmpty } from 'lodash';
-import { PageMetadata, PageMetadataGenerator } from 'service-library';
+import { DeepScanner, PageMetadata, PageMetadataGenerator } from 'service-library';
 import { PrivacyScanMetadata } from '../types/privacy-scan-metadata';
 import { PrivacyScanner } from './privacy-scanner';
-import { PageScanScheduler } from './page-scan-scheduler';
 
 @injectable()
 export class PageScanProcessor {
     public constructor(
         @inject(Page) private readonly page: Page,
         @inject(PrivacyScanner) private readonly privacyScanner: PrivacyScanner,
-        @inject(PageScanScheduler) private readonly pageScanScheduler: PageScanScheduler,
+        @inject(DeepScanner) private readonly deepScanner: DeepScanner,
         @inject(PageMetadataGenerator) private readonly pageMetadataGenerator: PageMetadataGenerator,
         @inject(GlobalLogger) private readonly logger: GlobalLogger,
     ) {}
@@ -24,11 +23,11 @@ export class PageScanProcessor {
     public async scan(
         scanMetadata: PrivacyScanMetadata,
         pageScanResult: OnDemandPageScanResult,
-        websiteScanResult: WebsiteScanResult,
+        websiteScanData: WebsiteScanData,
     ): Promise<PrivacyScanResult> {
         let privacyScanResults: PrivacyScanResult;
         try {
-            const pageMetadata = await this.pageMetadataGenerator.getMetadata(scanMetadata.url, this.page, websiteScanResult);
+            const pageMetadata = await this.pageMetadataGenerator.getMetadata(scanMetadata.url, this.page, websiteScanData);
             const state = this.getScannableState(pageMetadata);
             if (state.unscannable === true) {
                 return state;
@@ -40,10 +39,11 @@ export class PageScanProcessor {
             }
 
             const pageState = await this.capturePageState();
+
             privacyScanResults = await this.runPrivacyScan(scanMetadata.url);
             privacyScanResults = { ...privacyScanResults, ...pageState };
 
-            await this.pageScanScheduler.schedulePageScan(pageScanResult);
+            await this.deepScanner.runDeepScan(pageScanResult, websiteScanData, this.page);
         } finally {
             await this.page.close();
         }

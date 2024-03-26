@@ -8,15 +8,12 @@ import { ContextAwareLogger } from 'logger';
 import {
     PageScanRequestProvider,
     OnDemandPageScanRunResultProvider,
-    WebsiteScanResultProvider,
-    getOnMergeCallbackToUpdateRunResult,
     ScanNotificationProcessor,
+    WebsiteScanDataProvider,
 } from 'service-library';
-import { OnDemandPageScanRunState, ScanError, OnDemandPageScanResult, WebsiteScanResult, ScanType } from 'storage-documents';
+import { OnDemandPageScanRunState, ScanError, OnDemandPageScanResult, ScanType, KnownPage } from 'storage-documents';
 import { isEmpty } from 'lodash';
 import { ScanRequestSelector, ScanRequest, DispatchCondition } from './scan-request-selector';
-
-/* eslint-disable max-len */
 
 @injectable()
 export class OnDemandDispatcher {
@@ -29,7 +26,7 @@ export class OnDemandDispatcher {
         @inject(PageScanRequestProvider) private readonly pageScanRequestProvider: PageScanRequestProvider,
         @inject(ScanRequestSelector) private readonly scanRequestSelector: ScanRequestSelector,
         @inject(OnDemandPageScanRunResultProvider) private readonly onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider,
-        @inject(WebsiteScanResultProvider) protected readonly websiteScanResultProvider: WebsiteScanResultProvider,
+        @inject(WebsiteScanDataProvider) private readonly websiteScanDataProvider: WebsiteScanDataProvider,
         @inject(ScanNotificationProcessor) protected readonly scanNotificationProcessor: ScanNotificationProcessor,
         @inject(StorageConfig) private readonly storageConfig: StorageConfig,
         @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
@@ -143,7 +140,7 @@ export class OnDemandDispatcher {
             return;
         }
 
-        // set scan run state to failed when scan is stale
+        // Force scan run state to `failed` when scan is stale to trigger scan notification
         let runStateUpdated = false;
         if ((['stale', 'abandoned'] as DispatchCondition[]).includes(scanRequest.condition)) {
             runStateUpdated = true;
@@ -158,58 +155,40 @@ export class OnDemandDispatcher {
 
             this.logger.logWarn('Updated page scan run state for abandon run.', {
                 scanId: pageScanResult.id,
-                scanGroupId: pageScanResult.websiteScanRef?.scanGroupId,
                 runState: JSON.stringify(pageScanResult.run.state),
             });
         }
 
-        // ensure that website scan result has final state of a page scan to generate up-to-date website scan status result
-        let websiteScanResult;
-        if (pageScanResult.websiteScanRef !== undefined) {
-            websiteScanResult = await this.websiteScanResultProvider.read(pageScanResult.websiteScanRef.id, false, pageScanResult.id);
-            const pageScan = websiteScanResult.pageScans?.find((s) => s.scanId === pageScanResult.id);
-            if (
-                !(['completed', 'unscannable', 'failed'] as OnDemandPageScanRunState[]).includes(pageScan?.runState) ||
-                runStateUpdated /* update websiteScanResult to trigger scan notification */
-            ) {
-                runStateUpdated = true;
-                const updatedWebsiteScanResult: Partial<WebsiteScanResult> = {
-                    id: pageScanResult.websiteScanRef.id,
-                    pageScans: [
-                        {
-                            scanId: pageScanResult.id,
-                            url: pageScanResult.url,
-                            scanState: pageScanResult.scanResult?.state,
-                            runState: (['completed', 'unscannable'] as OnDemandPageScanRunState[]).includes(pageScanResult.run.state)
-                                ? 'completed'
-                                : 'failed',
-                            timestamp: new Date().toJSON(),
-                        },
-                    ],
-                };
+        // Ensure that website scan reflects the last state of scanned page
+        let websiteScanData = await this.websiteScanDataProvider.read(pageScanResult.websiteScanRef.id);
+        const pageState = (websiteScanData?.knownPages as KnownPage[])?.find((p) => p.scanId === pageScanResult.id);
+        if (!(['completed', 'unscannable', 'failed'] as OnDemandPageScanRunState[]).includes(pageState?.runState) || runStateUpdated) {
+            runStateUpdated = true;
 
-                const onMergeCallbackFn = getOnMergeCallbackToUpdateRunResult(pageScanResult.run.state);
-                websiteScanResult = await this.websiteScanResultProvider.mergeOrCreate(
-                    pageScanResult.id,
-                    updatedWebsiteScanResult,
-                    onMergeCallbackFn,
-                );
+            const knownPage: KnownPage = {
+                url: pageScanResult.url,
+                scanId: pageScanResult.id,
+                scanState: pageScanResult.scanResult?.state,
+                runState: (['completed', 'unscannable'] as OnDemandPageScanRunState[]).includes(pageScanResult.run.state)
+                    ? 'completed'
+                    : 'failed',
+            };
 
-                this.logger.logWarn(`Updated website page scan run state for abandon run.`, {
-                    scanId: pageScanResult.id,
-                    deepScanId: websiteScanResult.deepScanId,
-                    scanGroupId: websiteScanResult.scanGroupId,
-                });
-            }
+            websiteScanData = await this.websiteScanDataProvider.updateKnownPages(websiteScanData, [knownPage]);
+
+            this.logger.logWarn(`Updated website page scan state for abandon run.`, {
+                scanId: pageScanResult.id,
+                deepScanId: websiteScanData?.deepScanId,
+            });
         }
 
         if (runStateUpdated) {
-            this.logger.logInfo('Sending scan result notification message.', {
+            this.logger.logInfo('Triggering scan result notification.', {
                 scanId: scanRequest.request.id,
-                deepScanId: websiteScanResult?.deepScanId,
+                deepScanId: websiteScanData?.deepScanId,
             });
 
-            await this.scanNotificationProcessor.sendScanCompletionNotification(pageScanResult, websiteScanResult);
+            await this.scanNotificationProcessor.sendScanCompletionNotification(pageScanResult, websiteScanData);
         }
     }
 
@@ -221,9 +200,9 @@ export class OnDemandDispatcher {
         scanResult.run = {
             state,
             timestamp: new Date().toJSON(),
-            // reset error document property if no error
+            // Reset error document property if no error
             error: error ?? null,
-            // undefined value indicates first scan request processing (not a retry attempt)
+            // Undefined value indicates first scan request processing (not a retry attempt)
             retryCount: scanResult.run?.retryCount !== undefined ? scanResult.run.retryCount + 1 : 0,
         };
 

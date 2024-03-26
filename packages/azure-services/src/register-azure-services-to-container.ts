@@ -8,7 +8,6 @@ import { BlobServiceClient } from '@azure/storage-blob';
 import { QueueServiceClient } from '@azure/storage-queue';
 import { IoC, System } from 'common';
 import { Container, interfaces } from 'inversify';
-import { ContextAwareLogger } from 'logger';
 import { SecretClient } from '@azure/keyvault-secrets';
 import { isEmpty } from 'lodash';
 import { TokenCredential } from '@azure/identity';
@@ -102,11 +101,11 @@ function setupAzureBatchServiceClientProvider(container: Container): void {
 }
 
 function createCosmosContainerClient(container: interfaces.Container, dbName: string, collectionName: string): CosmosContainerClient {
-    return new CosmosContainerClient(container.get(CosmosClientWrapper), dbName, collectionName, container.get(ContextAwareLogger));
+    return new CosmosContainerClient(container.get(CosmosClientWrapper), dbName, collectionName);
 }
 
 function setupAzureKeyVaultClientProvider(container: Container): void {
-    IoC.setupSingletonProvider<SecretClient>(iocTypeNames.AzureKeyVaultClientProvider, container, async (context) => {
+    IoC.setupSingletonProvider<SecretClient>(iocTypeNames.AzureKeyVaultClientProvider, container, async () => {
         const credentialProvider = container.get(CredentialsProvider);
         const credentials = credentialProvider.getAzureCredential();
 
@@ -223,7 +222,7 @@ function setupAuthenticationMethod(container: Container): void {
         .bind(iocTypeNames.AuthenticationMethod)
         .toConstantValue(
             System.isDebugEnabled() === true || process.env.LOCAL_AUTH === 'true'
-                ? AuthenticationMethod.servicePrincipal
+                ? AuthenticationMethod.azureCliCredentials
                 : AuthenticationMethod.managedIdentity,
         );
 }

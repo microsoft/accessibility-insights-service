@@ -12,6 +12,7 @@ import {
     OnDemandPageScanRunResultProvider,
     ScanResultResponse,
     WebApiErrorCodes,
+    WebsiteScanDataProvider,
     WebsiteScanResultProvider,
 } from 'service-library';
 import { ItemType, OnDemandPageScanResult, WebsiteScanResult } from 'storage-documents';
@@ -28,6 +29,7 @@ describe(ScanResultController, () => {
     let guidGeneratorMock: IMock<GuidGenerator>;
     let scanResponseConverterMock: IMock<ScanResponseConverter>;
     let websiteScanResultProviderMock: IMock<WebsiteScanResultProvider>;
+    let websiteScanDataProviderMock: IMock<WebsiteScanDataProvider>;
 
     const apiVersion = '1.0';
     const baseUrl = 'https://localhost/api/';
@@ -91,6 +93,7 @@ describe(ScanResultController, () => {
         context.req.headers['content-type'] = 'application/json';
 
         onDemandPageScanRunResultProviderMock = Mock.ofType<OnDemandPageScanRunResultProvider>();
+        websiteScanDataProviderMock = Mock.ofType<WebsiteScanDataProvider>();
         onDemandPageScanRunResultProviderMock.setup(async (o) => o.readScanRuns(It.isAny()));
 
         guidGeneratorMock = Mock.ofType(GuidGenerator);
@@ -124,6 +127,7 @@ describe(ScanResultController, () => {
         const controller = new ScanResultController(
             onDemandPageScanRunResultProviderMock.object,
             websiteScanResultProviderMock.object,
+            websiteScanDataProviderMock.object,
             scanResponseConverterMock.object,
             guidGeneratorMock.object,
             serviceConfigurationMock.object,

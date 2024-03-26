@@ -108,10 +108,6 @@ AZURE_STORAGE_NAME=$storageAccountName
 COSMOS_DB_URL=$cosmosDbUrl
 COSMOS_DB_KEY=$cosmosDbAccessKey
 
-AZURE_TENANT_ID=$tenant
-AZURE_CLIENT_ID=$clientId
-AZURE_CLIENT_SECRET=$password
-
 AZ_BATCH_POOL_ID=
 AZ_BATCH_JOB_ID=1-dev-test-job
 AZ_BATCH_TASK_ID=dev-test-task

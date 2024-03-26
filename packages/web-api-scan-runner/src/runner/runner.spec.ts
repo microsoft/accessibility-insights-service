@@ -6,7 +6,7 @@ import 'reflect-metadata';
 import { IMock, Mock, It } from 'typemoq';
 import {
     OnDemandPageScanRunResultProvider,
-    WebsiteScanResultProvider,
+    WebsiteScanDataProvider,
     OperationResult,
     ReportWriter,
     ReportGeneratorRequestProvider,
@@ -18,18 +18,18 @@ import * as MockDate from 'mockdate';
 import {
     OnDemandPageScanResult,
     OnDemandPageScanReport,
-    WebsiteScanResult,
-    WebsiteScanRef,
+    WebsiteScanData,
     OnDemandPageScanRunResult,
     ReportGeneratorRequest,
     OnDemandPageScanRunState,
+    KnownPage,
 } from 'storage-documents';
 import { AxeScanResults } from 'scanner-global-library';
 import { System, ServiceConfiguration, ScanRunTimeConfig, GuidGenerator } from 'common';
 import { AxeResults } from 'axe-core';
 import { cloneDeep } from 'lodash';
 import { RunnerScanMetadataConfig } from '../runner-scan-metadata-config';
-import { PageScanProcessor } from '../scanner/page-scan-processor';
+import { PageScanProcessor } from '../processor/page-scan-processor';
 import { ReportGenerator, GeneratedReport } from '../report-generator/report-generator';
 import { ScanRunnerTelemetryManager } from '../scan-runner-telemetry-manager';
 import { Runner } from './runner';
@@ -38,7 +38,7 @@ const maxFailedScanRetryCount = 1;
 
 let scanMetadataConfigMock: IMock<RunnerScanMetadataConfig>;
 let onDemandPageScanRunResultProviderMock: IMock<OnDemandPageScanRunResultProvider>;
-let websiteScanResultProviderMock: IMock<WebsiteScanResultProvider>;
+let websiteScanDataProviderMock: IMock<WebsiteScanDataProvider>;
 let pageScanProcessorMock: IMock<PageScanProcessor>;
 let reportWriterMock: IMock<ReportWriter>;
 let reportGeneratorMock: IMock<ReportGenerator>;
@@ -56,13 +56,14 @@ let pageScanResultDbDocument: OnDemandPageScanResult;
 let pageScanResult: OnDemandPageScanResult;
 let axeScanResults: AxeScanResults;
 let reports: OnDemandPageScanReport[];
-let websiteScanResult: WebsiteScanResult;
+let websiteScanDataDbDocument: WebsiteScanData;
+let websiteScanDataDbDocumentUpdated: WebsiteScanData;
 
 describe(Runner, () => {
     beforeEach(() => {
         scanMetadataConfigMock = Mock.ofType<RunnerScanMetadataConfig>();
         onDemandPageScanRunResultProviderMock = Mock.ofType<OnDemandPageScanRunResultProvider>();
-        websiteScanResultProviderMock = Mock.ofType<WebsiteScanResultProvider>();
+        websiteScanDataProviderMock = Mock.ofType<WebsiteScanDataProvider>();
         pageScanProcessorMock = Mock.ofType<PageScanProcessor>();
         reportWriterMock = Mock.ofType<ReportWriter>();
         reportGeneratorMock = Mock.ofType<ReportGenerator>();
@@ -90,7 +91,7 @@ describe(Runner, () => {
             id: runnerScanMetadata.id,
             websiteScanRef: {
                 id: 'websiteScanId',
-                scanGroupType: 'consolidated-scan',
+                scanGroupType: 'group-scan',
             },
             scannedUrl: 'scannedUrl',
         } as OnDemandPageScanResult;
@@ -107,11 +108,16 @@ describe(Runner, () => {
                 return { maxFailedScanRetryCount } as ScanRunTimeConfig;
             })
             .verifiable();
+        websiteScanDataDbDocument = { id: 'websiteScanId' } as WebsiteScanData;
+        websiteScanDataDbDocumentUpdated = cloneDeep(websiteScanDataDbDocument);
+        websiteScanDataProviderMock
+            .setup((o) => o.read(pageScanResultDbDocument.websiteScanRef.id))
+            .returns(() => Promise.resolve(websiteScanDataDbDocument));
 
         runner = new Runner(
             scanMetadataConfigMock.object,
             onDemandPageScanRunResultProviderMock.object,
-            websiteScanResultProviderMock.object,
+            websiteScanDataProviderMock.object,
             reportGeneratorRequestProviderMock.object,
             pageScanProcessorMock.object,
             reportWriterMock.object,
@@ -128,7 +134,7 @@ describe(Runner, () => {
         MockDate.reset();
         scanMetadataConfigMock.verifyAll();
         onDemandPageScanRunResultProviderMock.verifyAll();
-        websiteScanResultProviderMock.verifyAll();
+        websiteScanDataProviderMock.verifyAll();
         reportGeneratorRequestProviderMock.verifyAll();
         pageScanProcessorMock.verifyAll();
         reportWriterMock.verifyAll();
@@ -230,23 +236,16 @@ describe(Runner, () => {
     it('handle unscannable result', async () => {
         axeScanResults.unscannable = true;
         axeScanResults.error = 'Unscannable URL location';
-        const websiteScanResultObj = { id: 'websiteScanId' } as WebsiteScanResult;
-        websiteScanResultProviderMock
-            .setup((o) => o.read(pageScanResultDbDocument.websiteScanRef.id, false))
-            .returns(() => Promise.resolve(websiteScanResultObj))
-            .verifiable();
-
         setupScanMetadataConfig();
         setupUpdateScanRunStateToRunning();
         setupScanRunnerTelemetryManager();
-        setupPageScanProcessor(true, undefined, websiteScanResultObj);
+        setupPageScanProcessor(true, undefined);
         setupProcessScanResult();
         setupUpdateScanResult();
         await runner.run();
     });
 
     it('update website scan result if deep scan is enabled', async () => {
-        setupPageScanResultDbDocumentForDeepScan();
         setupScanMetadataConfig();
         setupUpdateScanRunStateToRunning();
         setupScanRunnerTelemetryManager();
@@ -258,7 +257,6 @@ describe(Runner, () => {
 
     it('update website scan result if deep scan is enabled and scan fail with retry available', async () => {
         axeScanResults.error = 'browser navigation error';
-        setupPageScanResultDbDocumentForDeepScan();
         setupScanMetadataConfig();
         setupUpdateScanRunStateToRunning();
         setupScanRunnerTelemetryManager(true, false);
@@ -274,7 +272,6 @@ describe(Runner, () => {
             retryCount: maxFailedScanRetryCount,
         } as OnDemandPageScanRunResult;
 
-        setupPageScanResultDbDocumentForDeepScan();
         setupScanMetadataConfig();
         setupUpdateScanRunStateToRunning();
         setupScanRunnerTelemetryManager(true, false);
@@ -284,9 +281,8 @@ describe(Runner, () => {
         pageScanResult.run.retryCount = maxFailedScanRetryCount;
         setupUpdateScanResult();
 
-        const websiteScanResultUpdated = cloneDeep(websiteScanResult);
-        websiteScanResultUpdated.runResult = { completedScans: 0, failedScans: 1 };
-        setupScanNotificationProcessor(websiteScanResultUpdated);
+        websiteScanDataDbDocumentUpdated.knownPages = [{ url: 'url1', runState: 'completed' }];
+        setupScanNotificationProcessor();
 
         await runner.run();
     });
@@ -307,18 +303,9 @@ function setupReportGeneratorRequestProvider(): void {
     reportGeneratorRequestProviderMock.setup((o) => o.writeRequest(It.isValue(reportGeneratorRequest))).verifiable();
 }
 
-function setupPageScanResultDbDocumentForDeepScan(): void {
-    pageScanResultDbDocument.websiteScanRef = {
-        id: 'websiteScanRefId',
-        scanGroupType: 'deep-scan',
-    } as WebsiteScanRef;
-}
-
-function setupScanNotificationProcessor(websiteScanResultUpdated: WebsiteScanResult = undefined): void {
+function setupScanNotificationProcessor(): void {
     scanNotificationProcessorMock
-        .setup((o) =>
-            o.sendScanCompletionNotification(It.isValue(pageScanResult), It.isValue(websiteScanResultUpdated ?? websiteScanResult)),
-        )
+        .setup((o) => o.sendScanCompletionNotification(It.isValue(pageScanResult), It.isValue(websiteScanDataDbDocumentUpdated)))
         .verifiable();
 }
 
@@ -331,30 +318,16 @@ function setupUpdateScanResult(): void {
             pageScanResult.run.retryCount >= maxFailedScanRetryCount
                 ? pageScanResult.run.state
                 : undefined;
-
-        const updatedWebsiteScanResult: Partial<WebsiteScanResult> = {
-            id: pageScanResult.websiteScanRef.id,
-            pageScans: [
-                {
-                    scanId: runnerScanMetadata.id,
-                    url: runnerScanMetadata.url,
-                    scanState: pageScanResult.scanResult?.state,
-                    runState,
-                    timestamp: dateNow.toJSON(),
-                },
-            ],
+        const pageState: KnownPage = {
+            scanId: runnerScanMetadata.id,
+            url: runnerScanMetadata.url,
+            scanState: pageScanResult.scanResult?.state,
+            runState,
         };
-        websiteScanResult = {
-            id: 'websiteScanResultId',
-        } as WebsiteScanResult;
-        websiteScanResultProviderMock
-            .setup((o) => o.mergeOrCreate(runnerScanMetadata.id, It.isValue(updatedWebsiteScanResult), It.isAny()))
-            .callback((id, result, callback) => {
-                if (callback) {
-                    callback(websiteScanResult);
-                }
-            })
-            .returns(() => Promise.resolve(websiteScanResult))
+
+        websiteScanDataProviderMock
+            .setup((o) => o.updateKnownPages(websiteScanDataDbDocument, It.isValue([pageState])))
+            .returns(() => Promise.resolve(websiteScanDataDbDocumentUpdated))
             .verifiable();
     }
 }
@@ -419,17 +392,13 @@ function setupProcessScanResult(): void {
     pageScanResult.run.pageResponseCode = axeScanResults.pageResponseCode;
 }
 
-function setupPageScanProcessor(
-    succeeded: boolean = true,
-    error: Error = undefined,
-    websiteScanResultObj: WebsiteScanResult = undefined,
-): void {
+function setupPageScanProcessor(succeeded: boolean = true, error: Error = undefined): void {
     if (!succeeded) {
         axeScanResults.error = 'axe scan result error';
     }
 
     pageScanProcessorMock
-        .setup((o) => o.scan(runnerScanMetadata, pageScanResultDbDocument, websiteScanResultObj))
+        .setup((o) => o.scan(runnerScanMetadata, pageScanResultDbDocument, websiteScanDataDbDocument))
         .returns(() => {
             if (error) {
                 return Promise.reject(error);

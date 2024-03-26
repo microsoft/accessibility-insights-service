@@ -4,13 +4,20 @@
 import { inject, injectable } from 'inversify';
 import { GlobalLogger } from 'logger';
 import { PrivacyScanResult, BrowserError } from 'scanner-global-library';
-import { OnDemandPageScanRunResultProvider, WebsiteScanResultProvider, ReportWriter, GeneratedReport } from 'service-library';
-import { OnDemandPageScanReport, OnDemandPageScanResult, OnDemandPageScanRunState, ScanError, WebsiteScanResult } from 'storage-documents';
+import { OnDemandPageScanRunResultProvider, WebsiteScanDataProvider, ReportWriter, GeneratedReport } from 'service-library';
+import {
+    KnownPage,
+    OnDemandPageScanReport,
+    OnDemandPageScanResult,
+    OnDemandPageScanRunState,
+    ScanError,
+    WebsiteScanData,
+} from 'storage-documents';
 import { System, ServiceConfiguration, GuidGenerator, ScanRunTimeConfig } from 'common';
 import { isEmpty } from 'lodash';
 import { ScanMetadataConfig } from '../scan-metadata-config';
 import { ScanRunnerTelemetryManager } from '../scan-runner-telemetry-manager';
-import { PageScanProcessor } from '../scanner/page-scan-processor';
+import { PageScanProcessor } from '../processor/page-scan-processor';
 import { PrivacyScanMetadata } from '../types/privacy-scan-metadata';
 import { CombinedPrivacyScanResultProcessor } from '../combined-report/combined-privacy-scan-result-processor';
 
@@ -21,7 +28,7 @@ export class Runner {
     constructor(
         @inject(ScanMetadataConfig) private readonly scanMetadataConfig: ScanMetadataConfig,
         @inject(OnDemandPageScanRunResultProvider) private readonly onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider,
-        @inject(WebsiteScanResultProvider) protected readonly websiteScanResultProvider: WebsiteScanResultProvider,
+        @inject(WebsiteScanDataProvider) protected readonly websiteScanDataProvider: WebsiteScanDataProvider,
         @inject(PageScanProcessor) private readonly pageScanProcessor: PageScanProcessor,
         @inject(ReportWriter) protected readonly reportWriter: ReportWriter,
         @inject(ScanRunnerTelemetryManager) private readonly telemetryManager: ScanRunnerTelemetryManager,
@@ -35,25 +42,24 @@ export class Runner {
         await this.init();
 
         const scanMetadata = this.scanMetadataConfig.getConfig();
-        // decode URL back from docker parameter encoding
+        // Decode URL back from docker parameter encoding
         scanMetadata.url = decodeURIComponent(scanMetadata.url);
 
         this.logger.setCommonProperties({ scanId: scanMetadata.id, url: scanMetadata.url });
-        this.logger.logInfo('Start privacy scan runner.');
+        this.logger.logInfo('Starting privacy page scan task.');
 
         const pageScanResult = await this.updateScanRunStateToRunning(scanMetadata.id);
         if (pageScanResult === undefined) {
+            this.logger.logWarn('Page scan result document not found in storage.');
+
             return;
         }
 
+        const websiteScanData = await this.websiteScanDataProvider.read(pageScanResult.websiteScanRef.id);
+
         this.telemetryManager.trackScanStarted(scanMetadata.id);
         try {
-            let websiteScanResult;
-            if (pageScanResult.websiteScanRef !== undefined) {
-                websiteScanResult = await this.websiteScanResultProvider.read(pageScanResult.websiteScanRef.id, false);
-            }
-
-            const privacyScanResults = await this.pageScanProcessor.scan(scanMetadata, pageScanResult, websiteScanResult);
+            const privacyScanResults = await this.pageScanProcessor.scan(scanMetadata, pageScanResult, websiteScanData);
             await this.processScanResult(privacyScanResults, pageScanResult);
         } catch (error) {
             this.setRunResult(pageScanResult, 'failed', error instanceof Error ? error : new Error(System.serializeError(error)));
@@ -63,7 +69,7 @@ export class Runner {
             this.telemetryManager.trackScanCompleted();
         }
 
-        await this.updateScanResult(scanMetadata, pageScanResult);
+        await this.updateScanResult(scanMetadata, pageScanResult, websiteScanData);
 
         this.logger.logInfo('Stop privacy scan runner.');
     }
@@ -140,30 +146,26 @@ export class Runner {
         this.setRunResult(pageScanResult, runState, privacyScanResult.error);
     }
 
-    private async updateScanResult(scanMetadata: PrivacyScanMetadata, pageScanResult: Partial<OnDemandPageScanResult>): Promise<void> {
+    private async updateScanResult(
+        scanMetadata: PrivacyScanMetadata,
+        pageScanResult: Partial<OnDemandPageScanResult>,
+        websiteScanData: WebsiteScanData,
+    ): Promise<void> {
         await this.onDemandPageScanRunResultProvider.updateScanRun(pageScanResult);
 
-        if (pageScanResult.websiteScanRef) {
-            const runState =
-                pageScanResult.run.state === 'completed' || pageScanResult.run.retryCount >= this.maxFailedScanRetryCount
-                    ? pageScanResult.run.state
-                    : undefined;
+        const runState =
+            (['completed', 'unscannable'] as OnDemandPageScanRunState[]).includes(pageScanResult.run.state) ||
+            pageScanResult.run.retryCount >= this.maxFailedScanRetryCount
+                ? pageScanResult.run.state
+                : undefined;
+        const pageState: KnownPage = {
+            scanId: scanMetadata.id,
+            url: scanMetadata.url,
+            scanState: pageScanResult.scanResult?.state,
+            runState,
+        };
 
-            const updatedWebsiteScanResult: Partial<WebsiteScanResult> = {
-                id: pageScanResult.websiteScanRef.id,
-                pageScans: [
-                    {
-                        scanId: scanMetadata.id,
-                        url: scanMetadata.url,
-                        scanState: pageScanResult.scanResult?.state,
-                        runState,
-                        timestamp: new Date().toJSON(),
-                    },
-                ],
-            };
-
-            await this.websiteScanResultProvider.mergeOrCreate(scanMetadata.id, updatedWebsiteScanResult);
-        }
+        await this.websiteScanDataProvider.updateKnownPages(websiteScanData, [pageState]);
     }
 
     private async generateScanReports(privacyScanResult: PrivacyScanResult): Promise<OnDemandPageScanReport[]> {

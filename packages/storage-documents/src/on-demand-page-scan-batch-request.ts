@@ -3,7 +3,8 @@
 
 import { StorageDocument } from './storage-document';
 import { ItemType } from './item-type';
-import { CookieBannerType, AuthenticationType, ScanType } from './on-demand-page-scan-result';
+import { CookieBannerType } from './on-demand-page-scan-result';
+import { PageScanRequest } from './on-demand-page-scan-request';
 
 /**
  * The client page scan run batch request document.
@@ -27,16 +28,6 @@ export interface PrivacyScan {
     cookieBannerType: CookieBannerType;
 }
 
-export interface ScanRunBatchRequest {
+export interface ScanRunBatchRequest extends PageScanRequest {
     scanId: string;
-    url: string;
-    priority: number;
-    scanType?: ScanType;
-    deepScan?: boolean;
-    deepScanId?: string;
-    scanNotifyUrl?: string;
-    site?: WebsiteRequest;
-    reportGroups?: ReportGroupRequest[];
-    privacyScan?: PrivacyScan;
-    authenticationType?: AuthenticationType;
 }

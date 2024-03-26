@@ -28,11 +28,16 @@ export const E2EScanFactories: E2EScanScenarioDefinitionFactory[] = [
     },
     // Consolidated scan with failed notification
     (availabilityConfig: AvailabilityTestConfig, webApiConfig: WebApiConfig): E2EScanScenarioDefinition => {
+        const baseUrl = availabilityConfig.urlToScan;
+
         return {
             readableName: 'ConsolidatedScan',
             scanOptions: {
                 scanNotificationUrl: `${webApiConfig.baseUrl}${availabilityConfig.scanNotifyFailApiEndpoint}`,
                 consolidatedId: `${availabilityConfig.consolidatedIdBase}-${webApiConfig.releaseId}-consolidated-${Date.now()}`,
+                deepScanOptions: {
+                    knownPages: [`${baseUrl}unlinked/`],
+                },
             },
             initialTestContextData: {
                 scanUrl: availabilityConfig.urlToScan,

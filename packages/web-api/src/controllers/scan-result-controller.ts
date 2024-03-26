@@ -5,7 +5,13 @@ import { GuidGenerator, ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
 import { isEmpty } from 'lodash';
 import { ContextAwareLogger } from 'logger';
-import { HttpResponse, OnDemandPageScanRunResultProvider, WebApiErrorCodes, WebsiteScanResultProvider } from 'service-library';
+import {
+    HttpResponse,
+    OnDemandPageScanRunResultProvider,
+    WebApiErrorCodes,
+    WebsiteScanDataProvider,
+    WebsiteScanResultProvider,
+} from 'service-library';
 import { ScanResponseConverter } from '../converters/scan-response-converter';
 import { BaseScanResultController } from './base-scan-result-controller';
 
@@ -18,6 +24,7 @@ export class ScanResultController extends BaseScanResultController {
     public constructor(
         @inject(OnDemandPageScanRunResultProvider) protected readonly onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider,
         @inject(WebsiteScanResultProvider) protected readonly websiteScanResultProvider: WebsiteScanResultProvider,
+        @inject(WebsiteScanDataProvider) protected readonly websiteScanDataProvider: WebsiteScanDataProvider,
         @inject(ScanResponseConverter) protected readonly scanResponseConverter: ScanResponseConverter,
         @inject(GuidGenerator) protected readonly guidGenerator: GuidGenerator,
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,

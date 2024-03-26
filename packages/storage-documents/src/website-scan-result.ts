@@ -6,7 +6,52 @@ import { StorageDocument } from './storage-document';
 import { ItemType } from './item-type';
 import { ReportFormat, OnDemandPageScanRunState, ScanState } from './on-demand-page-scan-result';
 
-export declare type ScanGroupType = 'single-scan' | 'consolidated-scan' | 'deep-scan';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+export declare type ScanGroupType = 'single-scan' | 'group-scan' | 'deep-scan';
+
+/**
+ * Represents website scan result data.
+ * Composite DB document key properties: `baseUrl`, `scanGroupId`.
+ */
+export interface WebsiteScanData extends StorageDocument {
+    itemType: ItemType.websiteScanData;
+    baseUrl: string;
+    scanGroupId: string;
+    scanGroupType: ScanGroupType;
+    created: string;
+    // This value is immutable and is set on new db document creation.
+    deepScanId?: string;
+    deepScanLimit?: number;
+    discoveryPatterns?: string[];
+    reports?: WebsiteScanReport[];
+    /** The unique URLs list. Supports JSON Patch Cosmos DB operation:
+     * `path: '/knownPages/url', value: {}`
+     * The document must have `knownPages` property to support patch operation.
+     */
+    knownPages?: KnownPages | KnownPage[];
+}
+
+/**
+ * Stores website URLs. The URL string is hashed and used as the object key property.
+ * The document PATCH operation in Cosmos DB will change that same property, so there will
+ * be no repeated URLs with the same hash.
+ *
+ * The current 2 MB Cosmos DB document size limit allows for roughly 10K URLs in one document.
+ *
+ * The value is a string that compacts JSON object {@link KnownPage} in format `url|scanId|runState|scanState`
+ * Use `convertKnownPageToString`, `convertStringToKnownPage`, and `convertObjectToKnownPages` functions to convert data.
+ */
+export interface KnownPages {
+    [key: string]: string;
+}
+
+export interface KnownPage {
+    url: string;
+    scanId?: string;
+    runState?: OnDemandPageScanRunState;
+    scanState?: ScanState;
+}
 
 /**
  * Represents website scan result composite document.

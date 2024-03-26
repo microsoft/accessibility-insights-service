@@ -14,6 +14,7 @@ describe(MSICredentialsProvider, () => {
     let testSubject: MSICredentialsProvider;
     let mockMsRestNodeAuth: IMock<typeof msRestNodeAuth>;
     let retryHelperMock: IMock<RetryHelper<Credentials>>;
+
     const maxAttempts = 3;
     const msBetweenRetries = 0;
     const expectedCredentials: any = 'test credentials';
@@ -82,33 +83,20 @@ describe(MSICredentialsProvider, () => {
         expect(creds).toBe(expectedCredentials);
     });
 
-    it('creates credentials with service principal', async () => {
-        process.env.AZURE_TENANT_ID = 'tenant';
-        process.env.AZURE_CLIENT_ID = 'appId';
-        process.env.AZURE_CLIENT_SECRET = 'password';
-
+    it('creates credentials using Azure CLI credentials', async () => {
         testSubject = new MSICredentialsProvider(
             mockMsRestNodeAuth.object,
-            AuthenticationMethod.servicePrincipal,
+            AuthenticationMethod.azureCliCredentials,
             CredentialType.AppService,
             retryHelperMock.object,
             maxAttempts,
             msBetweenRetries,
         );
 
-        mockMsRestNodeAuth
-            .setup(async (m) =>
-                m.loginWithServicePrincipalSecret(
-                    process.env.AZURE_CLIENT_ID,
-                    process.env.AZURE_CLIENT_SECRET,
-                    process.env.AZURE_TENANT_ID,
-                    {
-                        tokenAudience: 'r1',
-                    },
-                ),
-            )
-            .returns(async () => Promise.resolve(expectedCredentials))
-            .verifiable(Times.once());
+        const azureCliCredentials = {
+            create: async () => Promise.resolve(expectedCredentials),
+        } as typeof msRestNodeAuth.AzureCliCredentials;
+        mockMsRestNodeAuth.object.AzureCliCredentials = azureCliCredentials;
 
         const creds = await testSubject.getCredentials('r1');
 

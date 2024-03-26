@@ -15,7 +15,7 @@
     },
     "crawlConfig": {
         "deepScanDiscoveryLimit": 10,
-        "deepScanUpperLimit": 3000
+        "deepScanUpperLimit": 5000
     },
     "taskConfig": {
         "taskTimeoutInMinutes": 10

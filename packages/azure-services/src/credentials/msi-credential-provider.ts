@@ -2,11 +2,12 @@
 // Licensed under the MIT License.
 
 import * as msRestNodeAuth from '@azure/ms-rest-nodeauth';
+import * as msRest from '@azure/ms-rest-js';
 import { RetryHelper, System } from 'common';
 import { inject, injectable } from 'inversify';
 import { iocTypeNames } from '../ioc-types';
 
-export type Credentials = msRestNodeAuth.MSITokenCredentials | msRestNodeAuth.ApplicationTokenCredentials;
+export type Credentials = msRestNodeAuth.MSITokenCredentials | msRestNodeAuth.ApplicationTokenCredentials | msRest.ServiceClientCredentials;
 
 export enum CredentialType {
     VM,
@@ -15,7 +16,7 @@ export enum CredentialType {
 
 export enum AuthenticationMethod {
     managedIdentity = 'managedIdentity',
-    servicePrincipal = 'servicePrincipal',
+    azureCliCredentials = 'azureCliCredentials',
 }
 
 @injectable()
@@ -32,13 +33,8 @@ export class MSICredentialsProvider {
     public async getCredentials(resource: string): Promise<Credentials> {
         let getCredentialsFunction: () => Promise<Credentials>;
 
-        if (this.authenticationMethod === AuthenticationMethod.servicePrincipal) {
-            const tenant = process.env.AZURE_TENANT_ID;
-            const clientId = process.env.AZURE_CLIENT_ID;
-            const secret = process.env.AZURE_CLIENT_SECRET;
-
-            getCredentialsFunction = async () =>
-                this.msrestAzureObj.loginWithServicePrincipalSecret(clientId, secret, tenant, { tokenAudience: resource });
+        if (this.authenticationMethod === AuthenticationMethod.azureCliCredentials) {
+            getCredentialsFunction = async () => this.msrestAzureObj.AzureCliCredentials.create({ resource });
         } else if (this.credentialType === CredentialType.VM) {
             getCredentialsFunction = async () => this.msrestAzureObj.loginWithVmMSI({ resource });
         } else {

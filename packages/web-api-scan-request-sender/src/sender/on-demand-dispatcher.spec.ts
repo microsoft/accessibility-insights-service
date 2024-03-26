@@ -9,18 +9,19 @@ import {
     PageScanRequestProvider,
     OnDemandPageScanRunResultProvider,
     OperationResult,
-    WebsiteScanResultProvider,
+    WebsiteScanDataProvider,
     ScanNotificationProcessor,
 } from 'service-library';
 import { ServiceConfiguration, QueueRuntimeConfig } from 'common';
 import { Queue, StorageConfig } from 'azure-services';
-import { OnDemandPageScanResult, ScanError, ScanType, WebsiteScanResult } from 'storage-documents';
+import { KnownPage, OnDemandPageScanResult, ScanError, ScanType, WebsiteScanData, WebsiteScanRef } from 'storage-documents';
 import * as MockDate from 'mockdate';
 import { cloneDeep } from 'lodash';
 import { OnDemandDispatcher } from './on-demand-dispatcher';
 import { ScanRequestSelector, ScanRequests } from './scan-request-selector';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
+
 const accessabilityScanQueueName = 'accessabilityScanQueueName';
 const privacyScanQueueName = 'privacyScanQueueName';
 const targetDeleteRequests = 100;
@@ -33,7 +34,7 @@ let scanNotificationProcessorMock: IMock<ScanNotificationProcessor>;
 let storageConfigMock: IMock<StorageConfig>;
 let serviceConfigurationMock: IMock<ServiceConfiguration>;
 let loggerMock: IMock<Logger>;
-let websiteScanResultProviderMock: IMock<WebsiteScanResultProvider>;
+let websiteScanDataProviderMock: IMock<WebsiteScanDataProvider>;
 let onDemandDispatcher: OnDemandDispatcher;
 let targetQueueSize: number;
 let accessibilityQueueMessageCount: number;
@@ -53,7 +54,7 @@ describe(OnDemandDispatcher, () => {
         storageConfigMock = Mock.ofType<StorageConfig>();
         serviceConfigurationMock = Mock.ofType<ServiceConfiguration>();
         loggerMock = Mock.ofType<Logger>();
-        websiteScanResultProviderMock = Mock.ofType<WebsiteScanResultProvider>();
+        websiteScanDataProviderMock = Mock.ofType<WebsiteScanDataProvider>();
 
         targetQueueSize = 10;
         accessibilityQueueMessageCount = 0;
@@ -72,7 +73,7 @@ describe(OnDemandDispatcher, () => {
             pageScanRequestProviderMock.object,
             scanRequestSelectorMock.object,
             onDemandPageScanRunResultProviderMock.object,
-            websiteScanResultProviderMock.object,
+            websiteScanDataProviderMock.object,
             scanNotificationProcessorMock.object,
             storageConfigMock.object,
             serviceConfigurationMock.object,
@@ -89,7 +90,7 @@ describe(OnDemandDispatcher, () => {
         storageConfigMock.verifyAll();
         serviceConfigurationMock.verifyAll();
         loggerMock.verifyAll();
-        websiteScanResultProviderMock.verifyAll();
+        websiteScanDataProviderMock.verifyAll();
     });
 
     it('skip dispatcher run when all queues are full', async () => {
@@ -193,7 +194,7 @@ describe(OnDemandDispatcher, () => {
 
     it.each([undefined, {}, { scanId: 'scanId' }, { scanId: 'otherId' }])(
         'update website`s page scan metadata on delete when pageScans is [%s]',
-        async (pageScanPart) => {
+        async (pageState) => {
             const scanRequests = {
                 queueRequests: [],
                 deleteRequests: [
@@ -226,39 +227,30 @@ describe(OnDemandDispatcher, () => {
             setupPageScanRequestProvider(scanRequests);
 
             const pageScanResult = scanRequests.deleteRequests[0].result;
-            const websiteScanResult = { pageScans: pageScanPart ? [pageScanPart] : undefined } as WebsiteScanResult;
-            websiteScanResultProviderMock
-                .setup((o) => o.read(pageScanResult.websiteScanRef.id, false, pageScanResult.id))
-                .returns(() => Promise.resolve(websiteScanResult))
+            const websiteScanData = { knownPages: pageState ? [pageState] : undefined } as WebsiteScanData;
+            websiteScanDataProviderMock
+                .setup((o) => o.read(pageScanResult.websiteScanRef.id))
+                .returns(() => Promise.resolve(websiteScanData))
                 .verifiable(Times.atLeastOnce());
-            const updatedWebsiteScanResult: Partial<WebsiteScanResult> = {
-                id: pageScanResult.websiteScanRef.id,
-                pageScans: [
-                    {
-                        scanId: pageScanResult.id,
-                        url: pageScanResult.url,
-                        scanState: pageScanResult.scanResult?.state,
-                        runState: 'failed',
-                        timestamp: new Date().toJSON(),
-                    },
-                ],
-            };
-            const updatedWebsiteScanResultDb = {
-                ...updatedWebsiteScanResult,
-                runResult: {
-                    completedScans: 1,
-                },
-            } as WebsiteScanResult;
-            websiteScanResultProviderMock
-                .setup((o) => o.mergeOrCreate(pageScanResult.id, It.isValue(updatedWebsiteScanResult), It.isAny()))
-                .returns(() => Promise.resolve(updatedWebsiteScanResultDb))
+            const knownPage = {
+                scanId: pageScanResult.id,
+                url: pageScanResult.url,
+                scanState: pageScanResult.scanResult?.state,
+                runState: 'failed',
+            } as KnownPage;
+            const updatedWebsiteScanDataDb = {
+                knownPages: [knownPage],
+            } as WebsiteScanData;
+            websiteScanDataProviderMock
+                .setup((o) => o.updateKnownPages(websiteScanData, [knownPage]))
+                .returns(() => Promise.resolve(updatedWebsiteScanDataDb))
                 .verifiable(Times.atLeastOnce());
 
             scanNotificationProcessorMock
                 .setup((o) =>
                     o.sendScanCompletionNotification(
                         It.isObjectWith({ id: pageScanResult.id } as OnDemandPageScanResult),
-                        updatedWebsiteScanResultDb,
+                        updatedWebsiteScanDataDb,
                     ),
                 )
                 .returns(() => Promise.resolve())
@@ -341,6 +333,9 @@ function setupOnDemandPageScanRunResultProvider(scanRequests: ScanRequests): voi
 
 function setupPageScanRequestProvider(scanRequests: ScanRequests): void {
     scanRequests.deleteRequests.map((scanRequest) => {
+        if (scanRequest.result) {
+            scanRequest.result.websiteScanRef = scanRequest.result.websiteScanRef ?? ({ id: 'websiteScanRefId' } as WebsiteScanRef);
+        }
         pageScanRequestProviderMock.setup((o) => o.deleteRequests([scanRequest.request.id])).verifiable(Times.exactly(2));
     });
 }

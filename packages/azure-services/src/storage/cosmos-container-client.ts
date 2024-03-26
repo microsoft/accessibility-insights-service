@@ -1,17 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import * as util from 'util';
 import * as cosmos from '@azure/cosmos';
-import { System } from 'common';
-import _ from 'lodash';
-import { Logger } from 'logger';
 import pLimit from 'p-limit';
+import { isPlainObject, mapValues, mergeWith } from 'lodash';
 import { CosmosClientWrapper } from '../azure-cosmos/cosmos-client-wrapper';
 import { CosmosDocument } from '../azure-cosmos/cosmos-document';
 import { CosmosOperationResponse } from '../azure-cosmos/cosmos-operation-response';
 import { client } from './client';
-import { RetryOptions } from './retry-options';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -22,8 +18,6 @@ export class CosmosContainerClient {
         private readonly cosmosClientWrapper: CosmosClientWrapper,
         private readonly dbName: string,
         private readonly collectionName: string,
-        private readonly logger: Logger,
-        private readonly systemUtils: typeof System = System,
     ) {}
 
     public async readDocument<T>(
@@ -44,6 +38,50 @@ export class CosmosContainerClient {
 
     public async deleteDocument(id: string, partitionKey: string): Promise<void> {
         await this.cosmosClientWrapper.deleteItem(id, this.dbName, this.collectionName, partitionKey);
+    }
+
+    /**
+     * See https://learn.microsoft.com/en-us/azure/cosmos-db/partial-document-update
+     */
+    public async patchDocument<T extends CosmosDocument>(
+        id: string,
+        operations: cosmos.PatchRequestBody,
+        partitionKey: string,
+        throwIfNotSuccess: boolean = true,
+    ): Promise<CosmosOperationResponse<T>> {
+        return this.cosmosClientWrapper.patchItem<T>(id, operations, this.dbName, this.collectionName, partitionKey, throwIfNotSuccess);
+    }
+
+    /**
+     * Creates a new document if there is no document with the same id; or returns a document that already exists.
+     */
+    public async createDocumentIfNotExist<T extends CosmosDocument>(
+        document: T,
+        partitionKey?: string,
+        throwIfNotSuccess: boolean = true,
+    ): Promise<CosmosOperationResponse<T>> {
+        const effectivePartitionKey = this.getEffectivePartitionKey(document, partitionKey);
+        let response = await this.cosmosClientWrapper.createItem<T>(
+            document,
+            this.dbName,
+            this.collectionName,
+            effectivePartitionKey,
+            false,
+        );
+
+        if (response.statusCode === 409) {
+            response = await this.cosmosClientWrapper.readItem<T>(
+                document.id,
+                this.dbName,
+                this.collectionName,
+                effectivePartitionKey,
+                throwIfNotSuccess,
+            );
+        } else {
+            this.cosmosClientWrapper.throwOperationError('createItem', response, document.id);
+        }
+
+        return response;
     }
 
     /**
@@ -99,6 +137,7 @@ export class CosmosContainerClient {
             effectivePartitionKey,
             false,
         );
+
         if (response.statusCode === 404) {
             return this.cosmosClientWrapper.upsertItem<T>(
                 document,
@@ -107,10 +146,12 @@ export class CosmosContainerClient {
                 effectivePartitionKey,
                 throwIfNotSuccess,
             );
+        } else {
+            this.cosmosClientWrapper.throwOperationError('readItem', response, document.id);
         }
 
         const mergedDocument = response.item;
-        _.mergeWith(mergedDocument, document, (target: T, source: T, key) => {
+        mergeWith(mergedDocument, document, (target: T, source: T, key) => {
             // preserve the storage document _etag value
             if (key === '_etag') {
                 return target;
@@ -172,53 +213,6 @@ export class CosmosContainerClient {
         );
     }
 
-    public async tryExecuteOperation<T>(
-        operation: (...args: any[]) => Promise<CosmosOperationResponse<T>>,
-        retryOptions: RetryOptions = {
-            timeoutMilliseconds: 15000,
-            intervalMilliseconds: 500,
-            retryingOnStatusCodes: [412 /* PreconditionFailed */],
-        },
-        ...args: any[]
-    ): Promise<CosmosOperationResponse<T>> {
-        const transientStatusCodes = [
-            429 /* TooManyRequests */,
-            449 /* RetryWith */,
-            500 /* InternalServerError */,
-            503 /* ServiceUnavailable */,
-            ...retryOptions.retryingOnStatusCodes,
-        ];
-        const timeoutTimestamp = Date.now() + retryOptions.timeoutMilliseconds;
-        // eslint-disable-next-line no-constant-condition
-        while (true) {
-            try {
-                const operationResponse = await operation(...args);
-
-                if (operationResponse.statusCode <= 399 || transientStatusCodes.indexOf(operationResponse.statusCode) < 0) {
-                    this.logger.logInfo(`Cosmos storage operation completed. Response status code ${operationResponse.statusCode}.`);
-
-                    return operationResponse;
-                } else if (Date.now() > timeoutTimestamp) {
-                    this.logger.logWarn(`Cosmos storage operation has timed out after ${retryOptions.timeoutMilliseconds} ms.`);
-
-                    return Promise.reject(operationResponse);
-                } else {
-                    this.logger.logInfo(
-                        `Retrying Cosmos storage operation in ${retryOptions.intervalMilliseconds} ms... Response status code ${operationResponse.statusCode}.`,
-                    );
-                }
-            } catch (error) {
-                const customErrorMessage = 'An error occurred while executing storage operation';
-                const customError =
-                    error instanceof Error ? new Error(`${customErrorMessage} ${System.serializeError(error)}`) : `${util.inspect(error)}`;
-
-                return Promise.reject(customError);
-            }
-
-            await this.systemUtils.wait(retryOptions.intervalMilliseconds);
-        }
-    }
-
     public async executeQueryWithContinuationToken<T>(execute: (token?: string) => Promise<CosmosOperationResponse<T[]>>): Promise<T[]> {
         let token: string;
         const result = [];
@@ -234,8 +228,8 @@ export class CosmosContainerClient {
     }
 
     private getNormalizeMergedDocument(document: any): any {
-        return _.mapValues(document, (value) => {
-            if (_.isPlainObject(value)) {
+        return mapValues(document, (value) => {
+            if (isPlainObject(value)) {
                 return this.getNormalizeMergedDocument(value);
             }
 

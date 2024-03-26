@@ -7,11 +7,10 @@ import {
     OnDemandPageScanRunResultProvider,
     ReportGeneratorRequestProvider,
     OperationResult,
-    getOnMergeCallbackToUpdateRunResult,
-    WebsiteScanResultProvider,
+    WebsiteScanDataProvider,
     ScanNotificationProcessor,
 } from 'service-library';
-import { OnDemandPageScanResult, ReportGeneratorRequest, OnDemandPageScanRunState, WebsiteScanResult } from 'storage-documents';
+import { OnDemandPageScanResult, ReportGeneratorRequest, OnDemandPageScanRunState, WebsiteScanData, KnownPage } from 'storage-documents';
 import { System } from 'common';
 import { isEmpty } from 'lodash';
 import { RunMetadataConfig } from '../run-metadata-config';
@@ -41,7 +40,7 @@ export class Runner {
         @inject(RunMetadataConfig) private readonly runMetadataConfig: RunMetadataConfig,
         @inject(ReportGeneratorRequestProvider) private readonly reportGeneratorRequestProvider: ReportGeneratorRequestProvider,
         @inject(OnDemandPageScanRunResultProvider) private readonly onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider,
-        @inject(WebsiteScanResultProvider) protected readonly websiteScanResultProvider: WebsiteScanResultProvider,
+        @inject(WebsiteScanDataProvider) protected readonly websiteScanDataProvider: WebsiteScanDataProvider,
         @inject(RequestSelector) protected readonly requestSelector: RequestSelector,
         @inject(ReportProcessor) protected readonly reportProcessor: ReportProcessor,
         @inject(ReportGeneratorRunnerTelemetryManager) private readonly telemetryManager: ReportGeneratorRunnerTelemetryManager,
@@ -200,31 +199,20 @@ export class Runner {
             } as Partial<OnDemandPageScanResult>;
 
             const pageScanResult = await this.onDemandPageScanRunResultProvider.tryUpdateScanRun(scanResult);
-            const websiteScanResult = await this.updateWebsiteScanResult(pageScanResult.result);
-            await this.scanNotificationProcessor.sendScanCompletionNotification(pageScanResult.result, websiteScanResult);
+            const websiteScanData = await this.updateWebsiteScanData(pageScanResult.result);
+            await this.scanNotificationProcessor.sendScanCompletionNotification(pageScanResult.result, websiteScanData);
         }
     }
 
-    private async updateWebsiteScanResult(pageScanResult: Partial<OnDemandPageScanResult>): Promise<WebsiteScanResult> {
-        if (pageScanResult.websiteScanRef) {
-            const updatedWebsiteScanResult: Partial<WebsiteScanResult> = {
-                id: pageScanResult.websiteScanRef.id,
-                pageScans: [
-                    {
-                        scanId: pageScanResult.id,
-                        url: pageScanResult.url,
-                        scanState: pageScanResult.scanResult?.state,
-                        runState: pageScanResult.run.state,
-                        timestamp: new Date().toJSON(),
-                    },
-                ],
-            };
-            const onMergeCallbackFn = getOnMergeCallbackToUpdateRunResult(pageScanResult.run.state);
+    private async updateWebsiteScanData(pageScanResult: Partial<OnDemandPageScanResult>): Promise<WebsiteScanData> {
+        const pageState: KnownPage = {
+            scanId: pageScanResult.id,
+            url: pageScanResult.url,
+            scanState: pageScanResult.scanResult?.state,
+            runState: pageScanResult.run.state,
+        };
 
-            return this.websiteScanResultProvider.mergeOrCreate(pageScanResult.id, updatedWebsiteScanResult, onMergeCallbackFn);
-        }
-
-        return undefined;
+        return this.websiteScanDataProvider.updateKnownPages({ id: pageScanResult.websiteScanRef.id }, [pageState]);
     }
 
     private async deleteRequests(queuedRequests: QueuedRequest[]): Promise<void> {

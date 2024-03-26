@@ -4,11 +4,10 @@
 import { inject, injectable } from 'inversify';
 import { GlobalLogger } from 'logger';
 import { AxeScanResults, Page } from 'scanner-global-library';
-import { OnDemandPageScanResult, WebsiteScanResult } from 'storage-documents';
-import { PageMetadata, PageMetadataGenerator, RunnerScanMetadata } from 'service-library';
+import { OnDemandPageScanResult, WebsiteScanData } from 'storage-documents';
+import { DeepScanner, PageMetadata, PageMetadataGenerator, RunnerScanMetadata } from 'service-library';
 import { isEmpty } from 'lodash';
-import { AxeScanner } from '../scanner/axe-scanner';
-import { DeepScanner } from './deep-scanner';
+import { AxeScanner } from './axe-scanner';
 
 @injectable()
 export class PageScanProcessor {
@@ -23,11 +22,11 @@ export class PageScanProcessor {
     public async scan(
         runnerScanMetadata: RunnerScanMetadata,
         pageScanResult: OnDemandPageScanResult,
-        websiteScanResult: WebsiteScanResult,
+        websiteScanData: WebsiteScanData,
     ): Promise<AxeScanResults> {
         let axeScanResults: AxeScanResults;
         try {
-            const pageMetadata = await this.pageMetadataGenerator.getMetadata(runnerScanMetadata.url, this.page, websiteScanResult);
+            const pageMetadata = await this.pageMetadataGenerator.getMetadata(runnerScanMetadata.url, this.page, websiteScanData);
             const state = this.getScannableState(pageMetadata);
             if (state.unscannable === true) {
                 this.setAuthenticationResult(pageMetadata, pageScanResult);
@@ -35,7 +34,7 @@ export class PageScanProcessor {
                 return state;
             }
 
-            // Enable WebGL to render all page elements to get comprehensive accessibility scan result
+            // Turn on WebGL to show all page elements and get a complete accessibility scan result
             await this.page.reopenBrowser({ capabilities: { webgl: true } });
             const enableAuthentication = pageScanResult.authentication?.hint !== undefined;
             await this.page.navigate(runnerScanMetadata.url, { enableAuthentication });
@@ -51,7 +50,7 @@ export class PageScanProcessor {
             axeScanResults = await this.axeScanner.scan(this.page);
             axeScanResults = { ...axeScanResults, ...pageState };
 
-            await this.deepScanner.runDeepScan(runnerScanMetadata, pageScanResult, websiteScanResult, this.page);
+            await this.deepScanner.runDeepScan(pageScanResult, websiteScanData, this.page);
         } finally {
             await this.page.close();
         }
