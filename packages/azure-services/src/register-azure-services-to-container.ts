@@ -105,7 +105,7 @@ function createCosmosContainerClient(container: interfaces.Container, dbName: st
 }
 
 function setupAzureKeyVaultClientProvider(container: Container): void {
-    IoC.setupSingletonProvider<SecretClient>(iocTypeNames.AzureKeyVaultClientProvider, container, async (context) => {
+    IoC.setupSingletonProvider<SecretClient>(iocTypeNames.AzureKeyVaultClientProvider, container, async () => {
         const credentialProvider = container.get(CredentialsProvider);
         const credentials = credentialProvider.getAzureCredential();
 
