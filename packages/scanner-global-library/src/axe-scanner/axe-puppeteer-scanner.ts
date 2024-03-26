@@ -47,7 +47,7 @@ export class AxePuppeteerScanner {
 
         if (
             page.navigationResponse.request()?.redirectChain()?.length > 0 ||
-            // Should compare encoded Urls
+            // Should compare encoded URLs
             (page.requestUrl !== undefined && encodeURI(page.requestUrl) !== axeRunResult.axeResults.url)
         ) {
             this.logger?.logWarn(`Scan performed on redirected page.`, { redirectUrl: axeRunResult.axeResults.url });
