@@ -79,7 +79,7 @@ updateConfigFiles() {
     done
 }
 
-uodateOpenApiSpec() {
+updateOpenApiSpec() {
     echo "Updating OpenAPI specification"
     openApiFilePath="$siteContentFolder/openapi.json"
     tempFilePath="${0%/*}/temp-$(date +%s)$RANDOM.json"
@@ -89,7 +89,7 @@ uodateOpenApiSpec() {
 
 . "${0%/*}/get-resource-names.sh"
 
-uodateOpenApiSpec
+updateOpenApiSpec
 deployStorageAccount
 enableStaticSiteHosting
 uploadSiteContents
