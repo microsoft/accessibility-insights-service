@@ -2,13 +2,13 @@
     "openapi": "3.0.0",
     "info": {
         "version": "1.0.0",
-        "title": "Accessibility Insight Service REST API"
+        "title": "Web Insights Service REST API"
     },
     "servers": [],
     "paths": {
         "/scans": {
             "post": {
-                "summary": "Create accessibility scan requests",
+                "summary": "Create scan requests",
                 "operationId": "createScans",
                 "parameters": [
                     {
@@ -51,18 +51,19 @@
                 }
             }
         },
-        "/scans/{scanid}": {
+        "/scans/{scanId}": {
             "get": {
-                "summary": "Get accessibility scan result",
+                "summary": "Get scan result",
                 "operationId": "getScan",
                 "parameters": [
                     {
-                        "name": "scanid",
+                        "name": "scanId",
                         "in": "path",
                         "required": true,
                         "description": "The scan request ID",
                         "schema": {
-                            "type": "string"
+                            "type": "string",
+                            "example": "8868acf5-7fee-486b-a985-71b03e4ccb3f"
                         }
                     },
                     {
@@ -102,7 +103,7 @@
         },
         "/scans/$batch": {
             "post": {
-                "summary": "Get accessibility scan results",
+                "summary": "Get scan results",
                 "operationId": "getScanBatch",
                 "parameters": [
                     {
@@ -152,27 +153,29 @@
                 }
             }
         },
-        "/scans/{scanid}/reports/{reportid}": {
+        "/scans/{scanId}/reports/{reportId}": {
             "get": {
-                "summary": "Get accessibility scan report",
+                "summary": "Get scan report",
                 "operationId": "getReport",
                 "parameters": [
                     {
-                        "name": "scanid",
+                        "name": "scanId",
                         "in": "path",
                         "required": true,
                         "description": "The scan request ID",
                         "schema": {
-                            "type": "string"
+                            "type": "string",
+                            "example": "8868acf5-7fee-486b-a985-71b03e4ccb3f"
                         }
                     },
                     {
-                        "name": "reportid",
+                        "name": "reportId",
                         "in": "path",
                         "required": true,
                         "description": "The report ID",
                         "schema": {
-                            "type": "string"
+                            "type": "string",
+                            "example": "de5e45a1-acf2-4af1-ac3e-9cdd6ee2720a"
                         }
                     },
                     {
@@ -208,46 +211,54 @@
                 "required": ["url"],
                 "properties": {
                     "url": {
-                        "type": "string"
+                        "type": "string",
+                        "example": "https://accessibilityinsights.io/"
                     },
                     "priority": {
                         "description": "Priority values can range from -1000 to 1000, with -1000 being the lowest priority and 1000 being the highest priority. The default value is 0.",
                         "default": 0,
-                        "type": "integer"
+                        "type": "integer",
+                        "example": 100
                     },
                     "scanType": {
                         "description": "The targeted type of the scan",
                         "type": "string",
-                        "enum": ["accessibility", "privacy"]
+                        "enum": ["accessibility", "privacy"],
+                        "example": "accessibility"
                     },
                     "scanNotifyUrl": {
-                        "type": "string"
+                        "type": "string",
+                        "example": "https://www.example.com/api/notification"
                     },
                     "deepScan": {
                         "type": "boolean",
-                        "description": "Enable crawling and scanning of website's pages under baseURL provided"
+                        "description": "Enable crawling and scanning of website's pages under baseURL provided",
+                        "example": true
                     },
                     "site": {
                         "type": "object",
                         "required": ["baseUrl"],
                         "properties": {
                             "baseUrl": {
-                                "description": "The web site root URL to be displayed in 'Scan Details' report section",
-                                "type": "string"
+                                "description": "The web site root URL",
+                                "type": "string",
+                                "example": "https://accessibilityinsights.io/"
                             },
                             "knownPages": {
                                 "type": "array",
                                 "items": {
                                     "type": "string",
-                                    "description": "known website page to include in a deep scan run in addition to pages discovered by crawling"
-                                }
+                                    "description": "Web page that is already known and should be included in a scan along with pages found by crawling"
+                                },
+                                "example": ["https://accessibilityinsights.io/docs/web/overview/"]
                             },
                             "discoveryPatterns": {
                                 "type": "array",
                                 "items": {
                                     "type": "string",
                                     "description": "RegEx pattern used by web crawler to specify which URLs should website include"
-                                }
+                                },
+                                "example": ["^http(s?)://accessibilityinsights.io/(.*)"]
                             }
                         }
                     },
@@ -258,7 +269,8 @@
                             "properties": {
                                 "consolidatedId": {
                                     "description": "The unique report ID for the given reporting period",
-                                    "type": "string"
+                                    "type": "string",
+                                    "example": "0a196327-146e-4866-b72a-fce1bfabb0fa"
                                 }
                             }
                         }
@@ -266,17 +278,19 @@
                     "authenticationType": {
                         "description": "If present, the type of authentication to be used to authenticate web pages.",
                         "type": "string",
-                        "enum": ["entraId"]
+                        "enum": ["entraId"],
+                        "example": "entraId"
                     },
                     "privacyScan": {
                         "type": "object",
-                        "description": "If present, the url will be scanned for cookies instead of accessibility issues. In this case, the deepScan and scanNotifyUrl fields will be ignored.",
+                        "description": "If present, the url will be scanned for cookies instead of accessibility issues.",
                         "required": ["cookieBannerType"],
                         "properties": {
                             "cookieBannerType": {
                                 "description": "The type of consent banner in the target page",
                                 "type": "string",
-                                "enum": ["standard"]
+                                "enum": ["standard"],
+                                "example": "standard"
                             }
                         }
                     }
@@ -287,10 +301,12 @@
                 "required": ["url"],
                 "properties": {
                     "scanId": {
-                        "type": "string"
+                        "type": "string",
+                        "example": "8868acf5-7fee-486b-a985-71b03e4ccb3f"
                     },
                     "url": {
-                        "type": "string"
+                        "type": "string",
+                        "example": "https://accessibilityinsights.io/"
                     },
                     "error": {
                         "$ref": "#/components/schemas/WebApiError"
@@ -307,7 +323,27 @@
                     "issueCount": {
                         "type": "integer",
                         "format": "int32",
-                        "minimum": 0
+                        "minimum": 0,
+                        "example": 10
+                    }
+                }
+            },
+            "NotificationResult": {
+                "type": "object",
+                "required": ["state"],
+                "properties": {
+                    "state": {
+                        "type": "string",
+                        "enum": ["pending", "queued", "queueFailed", "sending", "sent", "sendFailed"],
+                        "example": "sent"
+                    },
+                    "pageResponseCode": {
+                        "type": "integer",
+                        "example": 200
+                    },
+                    "scanNotifyUrl": {
+                        "type": "string",
+                        "example": "https://www.example.com/api/notification"
                     }
                 }
             },
@@ -318,10 +354,12 @@
                     "rel": {
                         "type": "string",
                         "default": "self",
-                        "enum": ["self"]
+                        "enum": ["self"],
+                        "example": "self"
                     },
                     "href": {
-                        "type": "string"
+                        "type": "string",
+                        "example": "https://example.azure-api.net/scans/8868acf5-7fee-486b-a985-71b03e4ccb3f/reports/de5e45a1-acf2-4af1-ac3e-9cdd6ee2720a?api-version=1.0"
                     }
                 }
             },
@@ -331,7 +369,8 @@
                 "properties": {
                     "timestamp": {
                         "description": "Full date and time string format as defined by ISO 8601",
-                        "type": "string"
+                        "type": "string",
+                        "example": "2024-04-02T00:25:32.508Z"
                     },
                     "error": {
                         "$ref": "#/components/schemas/ScanRunError"
@@ -340,10 +379,12 @@
                         "$ref": "#/components/schemas/RunState"
                     },
                     "pageResponseCode": {
-                        "type": "integer"
+                        "type": "integer",
+                        "example": 200
                     },
                     "pageTitle": {
-                        "type": "string"
+                        "type": "string",
+                        "example": "Accessibility Insights"
                     }
                 }
             },
@@ -352,7 +393,8 @@
                 "required": ["reportId", "format", "links"],
                 "properties": {
                     "reportId": {
-                        "type": "string"
+                        "type": "string",
+                        "example": "de5e45a1-acf2-4af1-ac3e-9cdd6ee2720a"
                     },
                     "format": {
                         "type": "string",
@@ -369,10 +411,12 @@
                 "required": ["scanId", "url", "scanRunState"],
                 "properties": {
                     "scanId": {
-                        "type": "string"
+                        "type": "string",
+                        "example": "d6cdd091-a985-4dfd-a046-57c7f4d23bfc"
                     },
                     "url": {
-                        "type": "string"
+                        "type": "string",
+                        "example": "https://accessibilityinsights.io/docs/web/overview/"
                     },
                     "scanRunState": {
                         "$ref": "#/components/schemas/RunState"
@@ -387,7 +431,8 @@
                 "required": ["scanId"],
                 "properties": {
                     "scanId": {
-                        "type": "string"
+                        "type": "string",
+                        "example": "8868acf5-7fee-486b-a985-71b03e4ccb3f"
                     }
                 }
             },
@@ -396,13 +441,16 @@
                 "required": ["scanId", "url", "run"],
                 "properties": {
                     "scanId": {
-                        "type": "string"
+                        "type": "string",
+                        "example": "8868acf5-7fee-486b-a985-71b03e4ccb3f"
                     },
                     "url": {
-                        "type": "string"
+                        "type": "string",
+                        "example": "https://accessibilityinsights.io/"
                     },
                     "deepScanId": {
-                        "type": "string"
+                        "type": "string",
+                        "example": "d6cdd091-a985-4dfd-a046-57c7f4d23bfc"
                     },
                     "scanResult": {
                         "$ref": "#/components/schemas/ScanResult"
@@ -421,6 +469,9 @@
                     },
                     "run": {
                         "$ref": "#/components/schemas/ScanRun"
+                    },
+                    "notification": {
+                        "$ref": "#/components/schemas/NotificationResult"
                     },
                     "authentication": {
                         "$ref": "#/components/schemas/AuthenticationResult"
@@ -451,18 +502,20 @@
                             "InvalidReportGroup",
                             "MissingRequiredDeepScanProperties",
                             "TooManyKnownPages",
-                            "InvalidKnownPageURL",
-                            "DuplicateKnownPage"
-                        ]
+                            "InvalidKnownPageURL"
+                        ],
+                        "example": "ResourceNotFound"
                     },
                     "codeId": {
                         "type": "integer",
                         "format": "int32",
                         "minimum": 4001,
-                        "maximum": 5999
+                        "maximum": 5999,
+                        "example": 4001
                     },
                     "message": {
-                        "type": "string"
+                        "type": "string",
+                        "example": "The specified resource does not exist."
                     }
                 }
             },
@@ -488,16 +541,19 @@
                             "UnsupportedResource",
                             "UrlNavigationTimeout",
                             "UrlNotResolved"
-                        ]
+                        ],
+                        "example": "InvalidContentType"
                     },
                     "codeId": {
                         "type": "integer",
                         "format": "int32",
                         "minimum": 9001,
-                        "maximum": 9999
+                        "maximum": 9999,
+                        "example": 9009
                     },
                     "message": {
-                        "type": "string"
+                        "type": "string",
+                        "example": "Only html content type pages are supported for scanning"
                     }
                 }
             },
@@ -506,7 +562,8 @@
                 "required": ["scanId", "error"],
                 "properties": {
                     "scanId": {
-                        "type": "string"
+                        "type": "string",
+                        "example": "8868acf5-7fee-486b-a985-71b03e4ccb3f"
                     },
                     "error": {
                         "$ref": "#/components/schemas/WebApiError"
@@ -516,12 +573,14 @@
             "ScanState": {
                 "type": "string",
                 "default": "pending",
-                "enum": ["pending", "pass", "fail"]
+                "enum": ["pending", "pass", "fail"],
+                "example": "fail"
             },
             "RunState": {
                 "type": "string",
                 "default": "pending",
-                "enum": ["pending", "accepted", "queued", "running", "completed", "failed", "unscannable"]
+                "enum": ["pending", "accepted", "queued", "running", "report", "completed", "failed", "unscannable"],
+                "example": "completed"
             },
             "AuthenticationResult": {
                 "type": "object",
@@ -529,11 +588,13 @@
                 "properties": {
                     "detected": {
                         "type": "string",
-                        "enum": ["undetermined", "entraId"]
+                        "enum": ["undetermined", "entraId"],
+                        "example": "entraId"
                     },
                     "state": {
                         "type": "string",
-                        "enum": ["succeeded", "failed", "unauthenticated"]
+                        "enum": ["succeeded", "failed", "unauthenticated"],
+                        "example": "succeeded"
                     }
                 }
             }
