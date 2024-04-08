@@ -25,9 +25,11 @@
             "location": "[parameters('location')]",
             "kind": "Node.JS",
             "properties": {
+                "ApplicationId": "[parameters('appInsightsName')]",
                 "Application_Type": "Node.JS",
                 "Flow_Type": "Redfield",
-                "Request_Source": "IbizaAIExtension"
+                "Request_Source": "IbizaAIExtension",
+                "WorkspaceResourceId": "[concat(resourceGroup().id, '/providers/microsoft.operationalinsights/workspaces/workspace', toLower(uniqueString(resourceGroup().id)))]"
             }
         }
     ]
