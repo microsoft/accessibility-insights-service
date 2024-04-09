@@ -25,5 +25,10 @@ extends:
             - stage: Stage
               jobs:
                   - job: 'BuildArtifactsAndRunUnitTests'
+                    templateContext:
+                        outputs:
+                            - output: buildArtifacts
+                              PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+                              ArtifactName: drop
                     steps:
                         - template: ./azure-pipeline/build-artifacts-and-run-tests-job.yaml
