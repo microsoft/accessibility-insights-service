@@ -15,6 +15,11 @@ resources:
 extends:
     template: v1/1ES.Unofficial.PipelineTemplate.yml@1esPipelines
     parameters:
+        sdl:
+            sourceAnalysisPool:
+                name: AccessibilityInsights-ubuntu-20.04
+                image: Win-2022
+                os: windows
         # Update the pool with your team's 1ES hosted pool.
         pool:
             os: linux
@@ -31,4 +36,4 @@ extends:
                               PathtoPublish: '$(Build.ArtifactStagingDirectory)'
                               ArtifactName: drop
                     steps:
-                        - template: ./azure-pipeline/build-artifacts-and-run-tests-job.yaml
+                        - template: ./azure-pipeline/build-artifacts-and-run-tests-job.yaml@self
