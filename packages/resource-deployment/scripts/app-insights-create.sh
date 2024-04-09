@@ -34,6 +34,9 @@ if [[ -z $subscription ]]; then
     . "${0%/*}/get-resource-names.sh"
 fi
 
+echo "Installing microsoft.insights Azure CLI extension"
+az extension add -n application-insights 1>/dev/null
+
 echo "Creating Log Analytics workspace"
 az monitor log-analytics workspace create --resource-group "$resourceGroupName" --workspace-name "$workspaceName" 1>/dev/null
 
