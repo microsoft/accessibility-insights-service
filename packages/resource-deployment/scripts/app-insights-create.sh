@@ -30,9 +30,7 @@ if [[ -z $resourceGroupName ]]; then
     exitWithUsageInfo
 fi
 
-if [[ -z $subscription ]]; then
-    . "${0%/*}/get-resource-names.sh"
-fi
+. "${0%/*}/get-resource-names.sh"
 
 echo "Installing microsoft.insights Azure CLI extension"
 az extension add -n application-insights 1>/dev/null
