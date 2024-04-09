@@ -61,7 +61,7 @@ steps:
       inputs:
           BuildDropPath: '$(Build.ArtifactStagingDirectory)'
       displayName: 'SBOM Generation Task'
-# Moved this Task to the Main file as OutPut as per 1ES PT Guidelines
+    # Moved this Task to the Main file as OutPut as per 1ES PT Guidelines
     #- task: PublishBuildArtifacts@1
     #  inputs:
     #      pathtoPublish: '$(Build.ArtifactStagingDirectory)'
