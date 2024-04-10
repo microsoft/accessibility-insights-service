@@ -12,22 +12,42 @@ export interface PageNavigationTiming {
     renderTimeout: boolean;
 }
 
+export type PuppeteerTimeoutConfig = {
+    readonly defaultNavigationTimeoutMsec: number;
+    readonly webglNavigationTimeoutMsec: number;
+    navigationTimeoutMsec: number;
+    readonly pageRenderingTimeoutMsec: number;
+    readonly pageDomStableTimeMsec: number;
+    readonly scrollTimeoutMsec: number;
+    readonly redirectTimeoutMsec: number;
+};
+
+export const defaultNavigationTimeoutMsec = 60000;
+
+export const webglNavigationTimeoutMsec = 180000;
+
 /**
  * The total page navigation timeout should correlate with Batch scan task 'max wall-clock time' constrain.
  * Refer to service configuration TaskRuntimeConfig.taskTimeoutInMinutes property.
  */
-export const puppeteerTimeoutConfig = {
+export const puppeteerTimeoutConfig: PuppeteerTimeoutConfig = {
+    defaultNavigationTimeoutMsec,
+
+    /**
+     * WebGL requires a lot of resources and processing power from the machine, it may trigger
+     * a navigation timeout error and stop the loading process. Need to adjust the navigation timeout
+     * to allow more time for WebGL webpages to load.
+     */
+    webglNavigationTimeoutMsec,
+
     /**
      * Maximum wait time, in milliseconds, to complete page navigation.
      *
      * Puppeteer may render some webpage properly but timeout on page navigation when running in
      * headless mode. The {@link PageOperationHandler} will override puppeteer timeout error on
      * successful webserver response to mitigate this issue.
-     * WebGL requires a lot of resources and processing power from the machine, it may trigger
-     * a navigation timeout error and stop the loading process. Need to adjust the navigation timeout
-     * to allow more time for WebGL webpages to load.
      */
-    navigationTimeoutMsec: 150000,
+    navigationTimeoutMsec: defaultNavigationTimeoutMsec,
 
     /**
      * Maximum wait time, in milliseconds, to complete async page rendering.
