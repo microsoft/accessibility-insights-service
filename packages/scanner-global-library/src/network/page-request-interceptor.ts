@@ -76,7 +76,7 @@ export class PageRequestInterceptor {
         this.pageOnRequestEventHandler = async (request: Puppeteer.HTTPRequest) => {
             try {
                 if (networkTraceEnabled === true || (request.isNavigationRequest() && request.frame() === page.mainFrame())) {
-                    const interceptedRequest = { url: request.url(), request };
+                    const interceptedRequest = { url: request.url(), interceptionId: (request as any)._interceptionId, request };
                     this.interceptedRequests.push(interceptedRequest);
 
                     if (networkTraceEnabled === true) {
@@ -99,7 +99,7 @@ export class PageRequestInterceptor {
 
         this.pageOnResponseEventHandler = async (response: Puppeteer.HTTPResponse) => {
             try {
-                const interceptedRequest = this.interceptedRequests.find((r) => r.url === response.url());
+                const interceptedRequest = this.getInterceptedRequestByResponse(response);
                 if (interceptedRequest !== undefined) {
                     interceptedRequest.response = response;
 
@@ -119,7 +119,7 @@ export class PageRequestInterceptor {
 
         this.pageOnRequestFailedEventHandler = async (request: Puppeteer.HTTPRequest) => {
             try {
-                const interceptedRequest = this.interceptedRequests.find((r) => r.url === request.url());
+                const interceptedRequest = this.getInterceptedRequestByRequest(request);
                 if (interceptedRequest !== undefined) {
                     interceptedRequest.error = request.failure()?.errorText ?? 'unknown';
 
@@ -161,5 +161,27 @@ export class PageRequestInterceptor {
         const message = `Error handling '${eventName}' page event`;
         this.errors.push({ message, error });
         this.logger?.logError(message, { error: System.serializeError(error) });
+    }
+
+    private getInterceptedRequestByResponse(response: Puppeteer.HTTPResponse): InterceptedRequest {
+        if (response === undefined) {
+            return undefined;
+        }
+
+        return this.interceptedRequests.find(
+            (r) =>
+                r.url === response.url() &&
+                (r.interceptionId === undefined || r.interceptionId === (response.request() as any)._interceptionId),
+        );
+    }
+
+    private getInterceptedRequestByRequest(request: Puppeteer.HTTPRequest): InterceptedRequest {
+        if (request === undefined) {
+            return undefined;
+        }
+
+        return this.interceptedRequests.find(
+            (r) => r.url === request.url() && (r.interceptionId === undefined || r.interceptionId === (request as any)._interceptionId),
+        );
     }
 }
