@@ -3,6 +3,7 @@
 
 import * as Puppeteer from 'puppeteer';
 import { WebDriverCapabilities } from './web-driver';
+import { puppeteerTimeoutConfig } from './page-timeout-config';
 
 export const defaultBrowserOptions: Puppeteer.BrowserConnectOptions = {
     defaultViewport: null,
@@ -35,8 +36,12 @@ const defaultLaunchOptions: Puppeteer.PuppeteerNodeLaunchOptions = {
 
 export function launchOptions(capabilities?: WebDriverCapabilities): Puppeteer.PuppeteerNodeLaunchOptions {
     if (capabilities?.webgl === true) {
+        puppeteerTimeoutConfig.navigationTimeoutMsec = puppeteerTimeoutConfig.webglNavigationTimeoutMsec;
+
         return { ...defaultLaunchOptions, args: [...defaultArgs, ...webglArgs] };
     }
+
+    puppeteerTimeoutConfig.navigationTimeoutMsec = puppeteerTimeoutConfig.defaultNavigationTimeoutMsec;
 
     return { ...defaultLaunchOptions, args: [...defaultArgs, ...noWebglArgs] };
 }

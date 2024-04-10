@@ -41,6 +41,7 @@ describe(PageRequestInterceptor, () => {
             frame: () => mainFrame,
             continue: () => Promise.resolve(),
             isInterceptResolutionHandled: () => false,
+            _interceptionId: 'interceptionId-1',
         };
         puppeteerPageMock
             .setup((o) => o.mainFrame())
@@ -52,8 +53,8 @@ describe(PageRequestInterceptor, () => {
         await pageRequestInterceptor.enableInterception(puppeteerPageMock.object);
         await (pageRequestInterceptor as any).pageOnRequestEventHandler(request);
 
-        expect(pageOnRequest).toBeCalledWith({ url: 'url', request });
-        expect(pageRequestInterceptor.interceptedRequests).toEqual([{ url: 'url', request }]);
+        expect(pageOnRequest).toBeCalledWith({ url: 'url', interceptionId: 'interceptionId-1', request });
+        expect(pageRequestInterceptor.interceptedRequests).toEqual([{ url: 'url', interceptionId: 'interceptionId-1', request }]);
         expect(pageRequestInterceptor.errors).toEqual([]);
     });
 
@@ -87,11 +88,15 @@ describe(PageRequestInterceptor, () => {
             frame: () => mainFrame,
             continue: () => Promise.resolve(),
             isInterceptResolutionHandled: () => false,
-        };
+            _interceptionId: 'interceptionId-1',
+        } as unknown as Puppeteer.HTTPRequest;
         const response = {
             url: () => 'url',
+            request: () => {
+                return { _interceptionId: 'interceptionId-1' };
+            },
         };
-        const interceptedRequest = { url: request.url(), request } as InterceptedRequest;
+        const interceptedRequest = { url: request.url(), interceptionId: 'interceptionId-1', request } as InterceptedRequest;
 
         const pageOnResponse = jest.fn().mockImplementation(async () => Promise.resolve());
         pageRequestInterceptor.pageOnResponse = pageOnResponse;
@@ -101,7 +106,7 @@ describe(PageRequestInterceptor, () => {
         await (pageRequestInterceptor as any).pageOnResponseEventHandler(response);
 
         expect(pageOnResponse).toBeCalledWith(pageRequestInterceptor.interceptedRequests[0]);
-        expect(pageRequestInterceptor.interceptedRequests).toEqual([{ url: 'url', request, response }]);
+        expect(pageRequestInterceptor.interceptedRequests).toEqual([{ url: 'url', interceptionId: 'interceptionId-1', request, response }]);
         expect(pageRequestInterceptor.errors).toEqual([]);
     });
 
@@ -144,8 +149,9 @@ describe(PageRequestInterceptor, () => {
             failure: () => ({
                 errorText: 'errorText',
             }),
-        };
-        const interceptedRequest = { url: request.url(), request } as InterceptedRequest;
+            _interceptionId: 'interceptionId-1',
+        } as unknown as Puppeteer.HTTPRequest;
+        const interceptedRequest = { url: request.url(), interceptionId: 'interceptionId-1', request } as InterceptedRequest;
 
         const pageOnRequestFailed = jest.fn().mockImplementation(async () => Promise.resolve());
         pageRequestInterceptor.pageOnRequestFailed = pageOnRequestFailed;
@@ -155,7 +161,9 @@ describe(PageRequestInterceptor, () => {
         await (pageRequestInterceptor as any).pageOnRequestFailedEventHandler(request);
 
         expect(pageOnRequestFailed).toBeCalledWith(pageRequestInterceptor.interceptedRequests[0]);
-        expect(pageRequestInterceptor.interceptedRequests).toEqual([{ url: 'url', error: 'errorText', request }]);
+        expect(pageRequestInterceptor.interceptedRequests).toEqual([
+            { url: 'url', interceptionId: 'interceptionId-1', error: 'errorText', request },
+        ]);
         expect(pageRequestInterceptor.errors).toEqual([]);
     });
 
