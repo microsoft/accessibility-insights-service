@@ -13,9 +13,9 @@ export interface PageNavigationTiming {
 }
 
 export type PuppeteerTimeoutConfig = {
+    navigationTimeoutMsec: number;
     readonly defaultNavigationTimeoutMsec: number;
     readonly webglNavigationTimeoutMsec: number;
-    navigationTimeoutMsec: number;
     readonly pageRenderingTimeoutMsec: number;
     readonly pageDomStableTimeMsec: number;
     readonly scrollTimeoutMsec: number;
