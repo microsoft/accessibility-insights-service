@@ -11,6 +11,7 @@ export interface InterceptedRequest {
     url: string;
     request: Puppeteer.HTTPRequest;
     response?: Puppeteer.HTTPResponse;
+    interceptionId?: string;
     error?: string;
     data?: any;
 }
