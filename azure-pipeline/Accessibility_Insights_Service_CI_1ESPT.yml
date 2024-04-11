@@ -16,6 +16,10 @@ extends:
     template: v1/1ES.Unofficial.PipelineTemplate.yml@1esPipelines
     parameters:
         sdl:
+            baseline:
+                baselineFile: $(Build.SourcesDirectory)\azure-pipeline\guardian\SDL\.gdnbaselines
+            suppression:
+                suppressionFile: $(Build.SourcesDirectory)\azure-pipeline\guardian\SDL\.gdnsuppress
             sourceAnalysisPool:
                 name: AccessibilityInsights-ubuntu-20.04
                 image: Win-2022
