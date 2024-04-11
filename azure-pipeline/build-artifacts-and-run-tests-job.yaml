@@ -62,12 +62,6 @@ steps:
           BuildDropPath: '$(Build.ArtifactStagingDirectory)'
       displayName: 'SBOM Generation Task'
 
-    - task: PublishBuildArtifacts@1
-      inputs:
-          pathtoPublish: '$(Build.ArtifactStagingDirectory)'
-          artifactName: drop
-      displayName: 'Publish build artifacts'
-
     - task: ms.vss-governance-buildtask.governance-build-task-component-detection.ComponentGovernanceComponentDetection@0
       inputs:
           failOnAlert: true

@@ -37,3 +37,4 @@ copyright-header.txt
 **/*.cmd
 .yarn/
 **/*.patch
+**/.gdnsuppress
