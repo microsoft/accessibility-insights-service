@@ -17,7 +17,7 @@ extends:
     parameters:
         sdl:
             suppression:
-                suppressionFile: $(Build.SourcesDirectory)\azure-pipeline\guardian\SDL\.gdnsuppress
+                suppressionFile: $(Build.SourcesDirectory)/azure-pipeline/guardian/SDL/.gdnsuppress
             sourceAnalysisPool:
                 name: AccessibilityInsights-ubuntu-20.04
                 image: Win-2022
