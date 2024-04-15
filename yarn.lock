@@ -472,6 +472,22 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@azure/ms-rest-js@npm:^2.7.0":
+  version: 2.7.0
+  resolution: "@azure/ms-rest-js@npm:2.7.0"
+  dependencies:
+    "@azure/core-auth": ^1.1.4
+    abort-controller: ^3.0.0
+    form-data: ^2.5.0
+    node-fetch: ^2.6.7
+    tslib: ^1.10.0
+    tunnel: 0.0.6
+    uuid: ^8.3.2
+    xml2js: ^0.5.0
+  checksum: 38434010f3fc54a625f637a7758358d7ce0ad3e55ce9a6c7490bf05bbec8ea75ae95fe80041d2376beb3ef78ee6e55858bd0541477d7a88703246e368cfd59c1
+  languageName: node
+  linkType: hard
+
 "@azure/ms-rest-nodeauth@npm:^3.1.1":
   version: 3.1.1
   resolution: "@azure/ms-rest-nodeauth@npm:3.1.1"
@@ -5596,6 +5612,7 @@ __metadata:
     "@azure/cosmos": ^4.0.0
     "@azure/identity": ^3.1.3
     "@azure/keyvault-secrets": ^4.6.0
+    "@azure/ms-rest-js": ^2.7.0
     "@azure/ms-rest-nodeauth": ^3.1.1
     "@azure/storage-blob": ^12.12.0
     "@azure/storage-queue": ^12.11.0
@@ -16669,7 +16686,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"xml2js@npm:^0.4.19":
+"xml2js@npm:^0.4.19, xml2js@npm:^0.5.0":
   version: 0.5.0
   resolution: "xml2js@npm:0.5.0"
   dependencies:
