@@ -106,7 +106,7 @@ function createCosmosContainerClient(container: interfaces.Container, dbName: st
 }
 
 function setupAzureKeyVaultClientProvider(container: Container): void {
-    IoC.setupSingletonProvider<SecretClient>(iocTypeNames.AzureKeyVaultClientProvider, container, async (context) => {
+    IoC.setupSingletonProvider<SecretClient>(iocTypeNames.AzureKeyVaultClientProvider, container, async () => {
         const credentialProvider = container.get(CredentialsProvider);
         const credentials = credentialProvider.getAzureCredential();
 
@@ -223,7 +223,7 @@ function setupAuthenticationMethod(container: Container): void {
         .bind(iocTypeNames.AuthenticationMethod)
         .toConstantValue(
             System.isDebugEnabled() === true || process.env.LOCAL_AUTH === 'true'
-                ? AuthenticationMethod.servicePrincipal
+                ? AuthenticationMethod.azureCliCredentials
                 : AuthenticationMethod.managedIdentity,
         );
 }
