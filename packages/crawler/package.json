@@ -61,7 +61,7 @@
         "moment": "^2.29.4",
         "normalize-path": "^3.0.0",
         "normalize-url": "6.1.0",
-        "puppeteer": "^21.3.7",
+        "puppeteer": "^22.6.5",
         "reflect-metadata": "^0.1.13",
         "serialize-error": "^8.1.0",
         "sha.js": "^2.4.11",
