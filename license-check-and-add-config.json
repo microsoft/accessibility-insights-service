@@ -24,7 +24,8 @@
         "**/.DS_Store",
         ".yarn/",
         ".yarnrc.yml",
-        "**/*.patch"
+        "**/*.patch",
+        "**/.gdnsuppress"
     ],
     "license": "./copyright-header.txt",
     "licenseFormats": {
