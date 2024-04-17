@@ -17,13 +17,20 @@ export MSYS_NO_PATHCONV=1
 
 exitWithUsageInfo() {
     echo "
-Usage: ${BASH_SOURCE} -r <resource group> [-s <subscription name or id>] [-k <key vault>]
+Usage: ${BASH_SOURCE} -r <resource group> [-c <system assigned managed identity object (principal) id>] [-s <subscription name or id>] [-k <key vault>]
 "
     exit 1
 }
 
 grantAccess() {
     local assignee=$1
+
+    # Granting access to resource group
+    echo "Granting access to the $resourceGroupName resource group"
+    az role assignment create \
+        --role "Contributor" \
+        --assignee "$assignee" \
+        --scope "/subscriptions/$subscription/resourcegroups/$resourceGroupName" 1>/dev/null
 
     # Set key vault access policy
     echo "Granting access to the $keyVault Key Vault"
@@ -48,16 +55,17 @@ grantAccess() {
 }
 
 # Read script arguments
-while getopts ":s:r:k:" option; do
+while getopts ":s:r:k:c:" option; do
     case $option in
     s) subscription=${OPTARG} ;;
     r) resourceGroupName=${OPTARG} ;;
     k) keyVault=${OPTARG} ;;
+    c) clientId=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
 
-if [[ -z $resourceGroupName ]] || [[ -z $keyVault ]]; then
+if [[ -z $resourceGroupName ]]; then
     exitWithUsageInfo
 fi
 
@@ -66,13 +74,12 @@ if ! az account show 1>/dev/null; then
     az login
 fi
 
-if [[ -z $subscription ]]; then
-    . "${0%/*}/get-resource-names.sh"
+. "${0%/*}/get-resource-names.sh"
+
+if [[ -z $clientId ]]; then
+    user=$(az ad signed-in-user show --query "userPrincipalName" -o tsv)
+    clientId=$(az ad signed-in-user show --query "id" -o tsv)
+    echo "Granting permissions to signed in $user user..."
 fi
-
-user=$(az ad signed-in-user show --query "userPrincipalName" -o tsv)
-echo "Granting permissions to $user user..."
-
-clientId=$(az ad signed-in-user show --query "id" -o tsv)
 
 grantAccess $clientId
