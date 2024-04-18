@@ -1,7 +1,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
 
-param([Parameter(Mandatory = $false)][switch]$HostFonts = $false) 
+param([Parameter(Mandatory = $false)][switch]$InstallHostFonts = $false) 
 
 $shareName = "WinSxS"
 $sharePathServer = "${env:windir}\WinSxS"
@@ -25,7 +25,7 @@ function createShare() {
     Add-Type -AssemblyName System.Web
     $env:BUILD_KEY = [System.Web.Security.Membership]::GeneratePassword(14, 1).Replace('/', '#')
 
-    if (!$HostFonts) {
+    if (!$InstallHostFonts) {
         $global:installationType = (Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion").InstallationType
     }
     else {

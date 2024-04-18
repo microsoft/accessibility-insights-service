@@ -14,6 +14,6 @@ cd .\dist &&^
 docker build --tag web-api-scan-runner:prescanner . &&^
 docker build --tag web-api-scan-runner:prescanner -f Dockerfile.debug . &&^
 cd ..\..\resource-deployment\scripts\docker-scanner-image &&^
-powershell .\build-scanner-image.ps1 -HostFonts &&^
+powershell .\build-scanner-image.ps1 -InstallHostFonts &&^
 cd ..\..\..\web-api-scan-runner &&^
 docker run --init --shm-size=2gb --ipc=host -p 9229:9229 --env-file .env web-api-scan-runner
