@@ -44,7 +44,7 @@ export class PrivacyScenarioRunner {
 
     private async detectBanner(url: string, page: Page, privacyScanConfig: PrivacyScanConfig): Promise<boolean> {
         try {
-            await page.puppeteerPage.waitForXPath(privacyScanConfig.bannerXPath, {
+            await page.puppeteerPage.waitForSelector(`xpath/${privacyScanConfig.bannerXPath}`, {
                 timeout: privacyScanConfig.bannerDetectionTimeout,
             });
 

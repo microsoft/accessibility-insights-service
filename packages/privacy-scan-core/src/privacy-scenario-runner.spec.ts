@@ -90,7 +90,7 @@ describe(PrivacyScenarioRunner, () => {
     it('run scenarios with banner detected', async () => {
         puppeteerPageMock
             .setup((o) =>
-                o.waitForXPath(privacyScanConfig.bannerXPath, {
+                o.waitForSelector(`xpath/${privacyScanConfig.bannerXPath}`, {
                     timeout: privacyScanConfig.bannerDetectionTimeout,
                 }),
             )
@@ -122,7 +122,7 @@ describe(PrivacyScenarioRunner, () => {
     it('run scenarios with banner not detected', async () => {
         puppeteerPageMock
             .setup((o) =>
-                o.waitForXPath(privacyScanConfig.bannerXPath, {
+                o.waitForSelector(`xpath/${privacyScanConfig.bannerXPath}`, {
                     timeout: privacyScanConfig.bannerDetectionTimeout,
                 }),
             )

@@ -67,9 +67,9 @@ result=$(
         --disable-dev-shm-usage \
         --no-sandbox \
         --disable-setuid-sandbox \
-        --disable-gpu \
-        --disable-webgl \
-        --disable-webgl2 \
+        --use-gl=angle \
+        --use-angle=swiftshader \
+        --in-process-gpu \
         --disable-features=BackForwardCache \
         --js-flags=--max-old-space-size=8192 \
         --window-size=1920,1080 \
