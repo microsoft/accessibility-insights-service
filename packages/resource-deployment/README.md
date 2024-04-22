@@ -101,6 +101,13 @@ The service health can be monitored via deployed Azure Shared dashboard.
 
 Documentation for the Azure dashboard can be found [here](https://github.com/microsoft/accessibility-insights-service/blob/main/packages/resource-deployment/templates/dashboard.md)
 
+## Configure release pipeline with federated access token
+
+To use federated identity credential for service deployment in Azure DevOps release pipeline, follow these steps when setting up the release pipeline.
+
+-   Enable System.AccessToken environmental variable according to the [documentation](https://learn.microsoft.com/en-us/azure/devops/pipelines/build/variables?view=azure-devops&tabs=yaml#systemaccesstoken). Navigate to the 'Agent Job' under 'Tasks' tab. Under 'Additional' options, check the ‘Allow scripts to access the OAuth token’ box.
+-   Select your script deployment task. Under 'Advanced' options, check the ‘Access service principal details in script’ box.
+
 # Contributing
 
 This project welcomes contributions and suggestions. Most contributions require you to agree to a
