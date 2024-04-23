@@ -3,29 +3,28 @@
 
 import 'reflect-metadata';
 
-import { IMock, Mock, Times } from 'typemoq';
+import { IMock, It, Mock, Times } from 'typemoq';
 import { GlobalLogger } from 'logger';
 import { PrivacyScanResult, Page, BrowserError } from 'scanner-global-library';
 import * as Puppeteer from 'puppeteer';
-import { OnDemandPageScanResult, WebsiteScanResult } from 'storage-documents';
-import { PageMetadata, PageMetadataGenerator } from 'service-library';
+import { OnDemandPageScanResult, WebsiteScanData } from 'storage-documents';
+import { DeepScanner, PageMetadata, PageMetadataGenerator } from 'service-library';
 import { PrivacyScanMetadata } from '../types/privacy-scan-metadata';
 import { PrivacyScanner } from './privacy-scanner';
 import { PageScanProcessor } from './page-scan-processor';
-import { PageScanScheduler } from './page-scan-scheduler';
 
 describe(PageScanProcessor, () => {
     let loggerMock: IMock<GlobalLogger>;
     let pageMock: IMock<Page>;
     let privacyScannerMock: IMock<PrivacyScanner>;
     let browserPageMock: IMock<Puppeteer.Page>;
-    let pageScanSchedulerMock: IMock<PageScanScheduler>;
+    let deepScannerMock: IMock<DeepScanner>;
     let pageMetadataGeneratorMock: IMock<PageMetadataGenerator>;
     let testSubject: PageScanProcessor;
     let pageScanResult: OnDemandPageScanResult;
     let scanMetadata: PrivacyScanMetadata;
     let privacyScanResult: PrivacyScanResult;
-    let websiteScanResult: WebsiteScanResult;
+    let websiteScanData: WebsiteScanData;
     let pageMetadata: PageMetadata;
 
     const url = 'url';
@@ -37,7 +36,7 @@ describe(PageScanProcessor, () => {
         pageMock = Mock.ofType<Page>();
         privacyScannerMock = Mock.ofType<PrivacyScanner>();
         browserPageMock = Mock.ofType<Puppeteer.Page>();
-        pageScanSchedulerMock = Mock.ofType<PageScanScheduler>();
+        deepScannerMock = Mock.ofType<DeepScanner>();
         pageMetadataGeneratorMock = Mock.ofType<PageMetadataGenerator>();
         pageScanResult = {} as OnDemandPageScanResult;
         scanMetadata = {
@@ -54,20 +53,20 @@ describe(PageScanProcessor, () => {
             .returns(() => Promise.resolve(pageSnapshot))
             .verifiable();
         privacyScanResult = { scannedUrl: url } as PrivacyScanResult;
-        websiteScanResult = { id: 'websiteScanResultId' } as WebsiteScanResult;
+        websiteScanData = { id: 'websiteScanDataId' } as WebsiteScanData;
         pageMetadata = {
             redirection: false,
             authentication: false,
         } as PageMetadata;
         pageMetadataGeneratorMock
-            .setup((o) => o.getMetadata(url, pageMock.object, websiteScanResult))
+            .setup((o) => o.getMetadata(url, pageMock.object, websiteScanData))
             .returns(() => Promise.resolve(pageMetadata))
             .verifiable();
 
         testSubject = new PageScanProcessor(
             pageMock.object,
             privacyScannerMock.object,
-            pageScanSchedulerMock.object,
+            deepScannerMock.object,
             pageMetadataGeneratorMock.object,
             loggerMock.object,
         );
@@ -78,7 +77,7 @@ describe(PageScanProcessor, () => {
         pageMock.verifyAll();
         privacyScannerMock.verifyAll();
         browserPageMock.verifyAll();
-        pageScanSchedulerMock.verifyAll();
+        deepScannerMock.verifyAll();
         pageMetadataGeneratorMock.verifyAll();
     });
 
@@ -90,8 +89,7 @@ describe(PageScanProcessor, () => {
             .returns(() => Promise.resolve(privacyScanResult))
             .verifiable();
         privacyScanResult = { ...privacyScanResult, pageScreenshot, pageSnapshot };
-
-        const results = await testSubject.scan(scanMetadata, pageScanResult, websiteScanResult);
+        const results = await testSubject.scan(scanMetadata, pageScanResult, websiteScanData);
 
         expect(results).toEqual(privacyScanResult);
     });
@@ -103,13 +101,11 @@ describe(PageScanProcessor, () => {
             .setup((s) => s.scan(url, pageMock.object))
             .returns(() => Promise.resolve(privacyScanResult))
             .verifiable();
-        pageScanSchedulerMock
-            .setup((o) => o.schedulePageScan(pageScanResult))
-            .returns(() => Promise.resolve())
-            .verifiable();
+        deepScannerMock.setup((o) => o.runDeepScan(It.isAny(), websiteScanData, It.isAny())).verifiable();
+
         privacyScanResult = { ...privacyScanResult, pageScreenshot, pageSnapshot };
 
-        const results = await testSubject.scan(scanMetadata, pageScanResult, websiteScanResult);
+        const results = await testSubject.scan(scanMetadata, pageScanResult, websiteScanData);
 
         expect(results).toEqual(privacyScanResult);
     });
@@ -132,7 +128,7 @@ describe(PageScanProcessor, () => {
             pageResponseCode: browserError.statusCode,
         };
 
-        const results = await testSubject.scan(scanMetadata, pageScanResult, websiteScanResult);
+        const results = await testSubject.scan(scanMetadata, pageScanResult, websiteScanData);
 
         expect(results).toEqual(privacyScanResult);
     });
@@ -143,7 +139,7 @@ describe(PageScanProcessor, () => {
         setupClosePage();
         privacyScannerMock.setup((s) => s.scan(url, pageMock.object)).throws(error);
 
-        await expect(testSubject.scan(scanMetadata, pageScanResult, websiteScanResult)).rejects.toThrowError('test error');
+        await expect(testSubject.scan(scanMetadata, pageScanResult, websiteScanData)).rejects.toThrowError('test error');
     });
 
     it('returns error when URL is unscannable', async () => {
@@ -157,7 +153,7 @@ describe(PageScanProcessor, () => {
             },
         } as PageMetadata;
         pageMetadataGeneratorMock
-            .setup((o) => o.getMetadata(url, pageMock.object, websiteScanResult))
+            .setup((o) => o.getMetadata(url, pageMock.object, websiteScanData))
             .returns(() => Promise.resolve(pageMetadata))
             .verifiable();
         pageMock.reset();
@@ -168,7 +164,7 @@ describe(PageScanProcessor, () => {
             error: pageMetadata.browserError,
         };
 
-        const results = await testSubject.scan(scanMetadata, pageScanResult, websiteScanResult);
+        const results = await testSubject.scan(scanMetadata, pageScanResult, websiteScanData);
 
         expect(results).toEqual(privacyScanResult);
     });

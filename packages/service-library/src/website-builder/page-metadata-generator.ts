@@ -3,7 +3,7 @@
 
 import { inject, injectable } from 'inversify';
 import { BrowserError, Page } from 'scanner-global-library';
-import { AuthenticationType, WebsiteScanResult } from 'storage-documents';
+import { AuthenticationType, WebsiteScanData } from 'storage-documents';
 import { cloneDeep } from 'lodash';
 import { createDiscoveryPattern } from '../crawler/discovery-pattern-factory';
 import { UrlLocationValidator } from './url-location-validator';
@@ -26,13 +26,13 @@ export class PageMetadataGenerator {
         private readonly createDiscoveryPatternFn: typeof createDiscoveryPattern = createDiscoveryPattern,
     ) {}
 
-    public async getMetadata(url: string, page: Page, websiteScanResult: WebsiteScanResult): Promise<PageMetadata> {
+    public async getMetadata(url: string, page: Page, websiteScanData: WebsiteScanData): Promise<PageMetadata> {
         let foreignLocation = false;
 
         const urlAllowed = this.urlLocationValidator.allowed(url);
         if (urlAllowed === true) {
             await page.analyze(url);
-            foreignLocation = await this.hasForeignLocation(url, page, websiteScanResult);
+            foreignLocation = await this.hasForeignLocation(url, page, websiteScanData);
         }
 
         const allowed =
@@ -57,16 +57,17 @@ export class PageMetadataGenerator {
         };
     }
 
-    private async hasForeignLocation(url: string, page: Page, websiteScanResult: WebsiteScanResult): Promise<boolean> {
+    private async hasForeignLocation(url: string, page: Page, websiteScanData: WebsiteScanData): Promise<boolean> {
         if (page.pageAnalysisResult?.redirection === true) {
-            const discoveryPatterns = cloneDeep(websiteScanResult?.discoveryPatterns) ?? [
-                this.createDiscoveryPatternFn(websiteScanResult?.baseUrl ?? url),
+            const discoveryPatterns = cloneDeep(websiteScanData?.discoveryPatterns) ?? [
+                this.createDiscoveryPatternFn(websiteScanData?.baseUrl ?? url),
             ];
 
-            // Discovery pattern can be sent in the scan request or created from the base URL that is sent
-            // in the scan request as well. Both discovery patterns may not match to the scan request
-            // URL due to misconfiguration. To enable processing the scan request URL we always adding
-            // pattern created from the scan request URL.
+            // There are two ways to send a discovery pattern with the scan request: either include it with
+            // the request or generate it from the base URL that is sent with the request. However, both
+            // discovery patterns might not match with the scan request URL because of a wrong
+            // configuration. To make sure that we can process the scan request URL, we always add the
+            // pattern that is based on the scan request URL.
             discoveryPatterns.push(this.createDiscoveryPatternFn(url, false));
 
             // eslint-disable-next-line security/detect-non-literal-regexp

@@ -11,52 +11,52 @@ import {
     PrivacyReportReadResponse,
     PrivacyReportWriteResponse,
     PrivacyScanCombinedReportProvider,
-    WebsiteScanResultProvider,
+    WebsiteScanDataProvider,
 } from 'service-library';
 import {
     OnDemandPageScanReport,
     OnDemandPageScanResult,
     PrivacyPageScanReport,
     PrivacyScanCombinedReport,
-    WebsiteScanResult,
+    WebsiteScanData,
 } from 'storage-documents';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { CombinedPrivacyScanResultProcessor } from './combined-privacy-scan-result-processor';
 import { PrivacyReportReducer } from './privacy-report-reducer';
 
+const reportId = 'report id';
+const pageScanReport = { httpStatusCode: 200 } as PrivacyPageScanReport;
+const combinedReport = { status: 'Completed' } as PrivacyScanCombinedReport;
+const privacyResults: PrivacyScanResult = {
+    results: pageScanReport,
+};
+const onDemandPageScanReport: OnDemandPageScanReport = {
+    reportId,
+    format: 'consolidated.json',
+    href: 'report href',
+};
+
+let websiteScanData: WebsiteScanData;
+let pageScanResult: OnDemandPageScanResult;
+let combinedReportProviderMock: IMock<PrivacyScanCombinedReportProvider>;
+let privacyReportReducerMock: IMock<PrivacyReportReducer>;
+let websiteScanDataProviderMock: IMock<WebsiteScanDataProvider>;
+let retryHelperMock: IMock<RetryHelper<void>>;
+let loggerMock: IMock<GlobalLogger>;
+let guidGeneratorMock: IMock<GuidGenerator>;
+
+let testSubject: CombinedPrivacyScanResultProcessor;
+
 describe(CombinedPrivacyScanResultProcessor, () => {
-    const reportId = 'report id';
-    const pageScanReport = { httpStatusCode: 200 } as PrivacyPageScanReport;
-    const combinedReport = { status: 'Completed' } as PrivacyScanCombinedReport;
-    const privacyResults: PrivacyScanResult = {
-        results: pageScanReport,
-    };
-    const onDemandPageScanReport: OnDemandPageScanReport = {
-        reportId,
-        format: 'consolidated.json',
-        href: 'report href',
-    };
-    let websiteScanResult: WebsiteScanResult;
-    let pageScanResult: OnDemandPageScanResult;
-
-    let combinedReportProviderMock: IMock<PrivacyScanCombinedReportProvider>;
-    let privacyReportReducerMock: IMock<PrivacyReportReducer>;
-    let websiteScanResultProviderMock: IMock<WebsiteScanResultProvider>;
-    let retryHelperMock: IMock<RetryHelper<void>>;
-    let loggerMock: IMock<GlobalLogger>;
-    let guidGeneratorMock: IMock<GuidGenerator>;
-
-    let testSubject: CombinedPrivacyScanResultProcessor;
-
     beforeEach(() => {
         combinedReportProviderMock = Mock.ofType<PrivacyScanCombinedReportProvider>();
         privacyReportReducerMock = Mock.ofType<PrivacyReportReducer>();
-        websiteScanResultProviderMock = Mock.ofType<WebsiteScanResultProvider>();
+        websiteScanDataProviderMock = Mock.ofType<WebsiteScanDataProvider>();
         retryHelperMock = Mock.ofType<RetryHelper<void>>();
         loggerMock = Mock.ofType<GlobalLogger>();
         guidGeneratorMock = Mock.ofType<GuidGenerator>();
 
-        websiteScanResult = {
+        websiteScanData = {
             id: 'website scan result id',
             reports: [
                 {
@@ -65,14 +65,12 @@ describe(CombinedPrivacyScanResultProcessor, () => {
                     href: 'report href',
                 },
             ],
-        } as WebsiteScanResult;
+        } as WebsiteScanData;
         pageScanResult = {
             id: 'page scan id',
             websiteScanRef: {
-                id: websiteScanResult.id,
-                scanGroupType: 'consolidated-scan',
+                id: websiteScanData.id,
             },
-
             url: 'scan url',
             reports: [
                 {
@@ -88,7 +86,7 @@ describe(CombinedPrivacyScanResultProcessor, () => {
         testSubject = new CombinedPrivacyScanResultProcessor(
             combinedReportProviderMock.object,
             privacyReportReducerMock.object,
-            websiteScanResultProviderMock.object,
+            websiteScanDataProviderMock.object,
             retryHelperMock.object,
             loggerMock.object,
             guidGeneratorMock.object,
@@ -98,17 +96,9 @@ describe(CombinedPrivacyScanResultProcessor, () => {
     afterEach(() => {
         combinedReportProviderMock.verifyAll();
         privacyReportReducerMock.verifyAll();
-        websiteScanResultProviderMock.verifyAll();
+        websiteScanDataProviderMock.verifyAll();
         retryHelperMock.verifyAll();
         guidGeneratorMock.verifyAll();
-    });
-
-    it('Does nothing if websiteScanRefs is undefined', async () => {
-        pageScanResult.websiteScanRef = undefined;
-
-        websiteScanResultProviderMock.setup((w) => w.read(It.isAny())).verifiable(Times.never());
-
-        await testSubject.generateCombinedScanResults(privacyResults, pageScanResult);
     });
 
     it('Throws if blob read fails', async () => {
@@ -117,7 +107,7 @@ describe(CombinedPrivacyScanResultProcessor, () => {
                 errorCode: 'jsonParseError',
             },
         };
-        websiteScanResultProviderMock.setup((w) => w.read(websiteScanResult.id)).returns(async () => websiteScanResult);
+        websiteScanDataProviderMock.setup((w) => w.read(websiteScanData.id)).returns(async () => websiteScanData);
         combinedReportProviderMock
             .setup((c) => c.readCombinedReport(reportId))
             .returns(async () => errorReadResponse)
@@ -127,16 +117,16 @@ describe(CombinedPrivacyScanResultProcessor, () => {
     });
 
     it('Creates a new report if none exists', async () => {
-        websiteScanResult.reports = undefined;
+        websiteScanData.reports = undefined;
         guidGeneratorMock
             .setup((gg) => gg.createGuid())
             .returns(() => reportId)
             .verifiable();
-        websiteScanResultProviderMock.setup((w) => w.read(websiteScanResult.id)).returns(async () => websiteScanResult);
+        websiteScanDataProviderMock.setup((w) => w.read(websiteScanData.id)).returns(async () => websiteScanData);
         combinedReportProviderMock.setup((c) => c.readCombinedReport(It.isAny())).verifiable(Times.never());
         setupCombineReports(undefined);
         setupWriteReport();
-        setupUpdateWebsiteScanResult();
+        setupUpdateWebsiteScanData();
 
         await testSubject.generateCombinedScanResults(privacyResults, pageScanResult);
 
@@ -149,11 +139,11 @@ describe(CombinedPrivacyScanResultProcessor, () => {
                 errorCode: 'blobNotFound',
             },
         };
-        websiteScanResultProviderMock.setup((w) => w.read(websiteScanResult.id)).returns(async () => websiteScanResult);
+        websiteScanDataProviderMock.setup((w) => w.read(websiteScanData.id)).returns(async () => websiteScanData);
         combinedReportProviderMock.setup((c) => c.readCombinedReport(reportId)).returns(async () => blobNotFoundResponse);
         setupCombineReports(undefined);
         setupWriteReport();
-        setupUpdateWebsiteScanResult();
+        setupUpdateWebsiteScanData();
 
         await testSubject.generateCombinedScanResults(privacyResults, pageScanResult);
 
@@ -162,11 +152,11 @@ describe(CombinedPrivacyScanResultProcessor, () => {
 
     it('Combines with existing combined report if it exists', async () => {
         const etag = 'etag';
-        websiteScanResultProviderMock.setup((w) => w.read(websiteScanResult.id)).returns(async () => websiteScanResult);
+        websiteScanDataProviderMock.setup((w) => w.read(websiteScanData.id)).returns(async () => websiteScanData);
         setupReadReport(etag);
         setupCombineReports(combinedReport);
         setupWriteReport(etag);
-        setupUpdateWebsiteScanResult();
+        setupUpdateWebsiteScanData();
 
         await testSubject.generateCombinedScanResults(privacyResults, pageScanResult);
 
@@ -179,14 +169,14 @@ describe(CombinedPrivacyScanResultProcessor, () => {
                 errorCode: 'etagMismatch',
             },
         };
-        websiteScanResultProviderMock.setup((w) => w.read(websiteScanResult.id)).returns(async () => websiteScanResult);
+        websiteScanDataProviderMock.setup((w) => w.read(websiteScanData.id)).returns(async () => websiteScanData);
         setupReadReport('etag');
         setupCombineReports(combinedReport);
         combinedReportProviderMock
             .setup((c) => c.writeCombinedReport(It.isAny(), It.isAny()))
             .returns(async () => errorWriteResponse)
             .verifiable();
-        websiteScanResultProviderMock.setup((w) => w.mergeOrCreate(It.isAny(), It.isAny())).verifiable(Times.never());
+        websiteScanDataProviderMock.setup((w) => w.merge(It.isAny())).verifiable(Times.never());
 
         await expect(async () => testSubject.generateCombinedScanResults(privacyResults, pageScanResult)).rejects.toThrow();
     });
@@ -194,11 +184,11 @@ describe(CombinedPrivacyScanResultProcessor, () => {
     it('Handles pageScanResult with undefined report array', async () => {
         pageScanResult.reports = undefined;
         const etag = 'etag';
-        websiteScanResultProviderMock.setup((w) => w.read(websiteScanResult.id)).returns(async () => websiteScanResult);
+        websiteScanDataProviderMock.setup((w) => w.read(websiteScanData.id)).returns(async () => websiteScanData);
         setupReadReport(etag);
         setupCombineReports(combinedReport);
         setupWriteReport(etag);
-        setupUpdateWebsiteScanResult();
+        setupUpdateWebsiteScanData();
 
         await testSubject.generateCombinedScanResults(privacyResults, pageScanResult);
 
@@ -219,7 +209,7 @@ describe(CombinedPrivacyScanResultProcessor, () => {
                 r.reduceResults(privacyResults, existingCombinedReport, {
                     url: pageScanResult.url,
                     scanId: pageScanResult.id,
-                    websiteScanId: websiteScanResult.id,
+                    websiteScanId: websiteScanData.id,
                 }),
             )
             .returns(() => combinedReport);
@@ -251,9 +241,7 @@ describe(CombinedPrivacyScanResultProcessor, () => {
             .verifiable();
     }
 
-    function setupUpdateWebsiteScanResult(): void {
-        websiteScanResultProviderMock
-            .setup((w) => w.mergeOrCreate(pageScanResult.id, { id: websiteScanResult.id, reports: [onDemandPageScanReport] }))
-            .verifiable();
+    function setupUpdateWebsiteScanData(): void {
+        websiteScanDataProviderMock.setup((w) => w.merge({ id: websiteScanData.id, reports: [onDemandPageScanReport] })).verifiable();
     }
 });

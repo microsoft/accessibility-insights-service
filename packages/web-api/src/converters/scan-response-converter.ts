@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 import { inject, injectable } from 'inversify';
-import { isEmpty, isNil } from 'lodash';
+import { isEmpty, pickBy } from 'lodash';
 import {
     DeepScanResultItem,
     ScanCompletedNotification as NotificationResponse,
@@ -10,10 +10,18 @@ import {
     ScanResultResponse,
     RunStateClientProvider,
     RunState,
-    ScanType,
 } from 'service-library';
-import { OnDemandPageScanResult, ScanCompletedNotification as NotificationDb, WebsiteScanResult } from 'storage-documents';
+import {
+    OnDemandPageScanResult,
+    ScanCompletedNotification as NotificationDb,
+    WebsiteScanResult,
+    WebsiteScanData,
+    ItemType,
+    KnownPage,
+} from 'storage-documents';
 import { ScanErrorConverter } from './scan-error-converter';
+
+// TODO Remove WebsiteScanResult 30 days after deployment
 
 @injectable()
 export class ScanResponseConverter {
@@ -26,7 +34,7 @@ export class ScanResponseConverter {
         baseUrl: string,
         apiVersion: string,
         pageScanResult: OnDemandPageScanResult,
-        websiteScanResult: WebsiteScanResult,
+        websiteScanData: WebsiteScanResult | WebsiteScanData,
     ): Promise<ScanResultResponse> {
         const effectiveRunState = await this.runStateClientProvider.getEffectiveRunState(pageScanResult);
         switch (effectiveRunState) {
@@ -42,7 +50,7 @@ export class ScanResponseConverter {
                 return this.createFailedScanResponse(pageScanResult, effectiveRunState);
             case 'completed':
             case 'unscannable':
-                return this.createCompletedScanResponse(baseUrl, apiVersion, pageScanResult, websiteScanResult, effectiveRunState);
+                return this.createCompletedScanResponse(baseUrl, apiVersion, pageScanResult, websiteScanData, effectiveRunState);
         }
     }
 
@@ -50,7 +58,7 @@ export class ScanResponseConverter {
         return {
             scanId: pageScanResult.id,
             url: pageScanResult.url,
-            scanType: this.getScanType(pageScanResult),
+            scanType: pageScanResult.scanType,
             deepScanId: pageScanResult.deepScanId,
             run: {
                 state: effectiveRunState,
@@ -63,7 +71,7 @@ export class ScanResponseConverter {
         return {
             scanId: pageScanResult.id,
             url: pageScanResult.url,
-            scanType: this.getScanType(pageScanResult),
+            scanType: pageScanResult.scanType,
             deepScanId: pageScanResult.deepScanId,
             run: {
                 state: effectiveRunState,
@@ -80,14 +88,14 @@ export class ScanResponseConverter {
         baseUrl: string,
         apiVersion: string,
         pageScanResult: OnDemandPageScanResult,
-        websiteScanResult: WebsiteScanResult,
+        websiteScanData: WebsiteScanResult | WebsiteScanData,
         effectiveRunState: RunState,
     ): ScanResultResponse {
         const scanResultResponse: ScanResultResponse = {
             scanId: pageScanResult.id,
             url: pageScanResult.url,
             scannedUrl: pageScanResult.scannedUrl,
-            scanType: this.getScanType(pageScanResult),
+            scanType: pageScanResult.scanType,
             deepScanId: pageScanResult.deepScanId,
             ...(pageScanResult.authentication !== undefined
                 ? {
@@ -115,7 +123,7 @@ export class ScanResponseConverter {
             ...this.getRunCompleteNotificationResponse(pageScanResult.notification),
             reports: this.getScanReports(baseUrl, apiVersion, pageScanResult),
             // Expand scan result for original scan only. Result for descendant scans do not include deep scan result collection.
-            ...(pageScanResult.id === pageScanResult.deepScanId ? this.getDeepScanResult(websiteScanResult) : {}),
+            ...(pageScanResult.id === pageScanResult.deepScanId ? this.getDeepScanResult(websiteScanData) : {}),
         };
 
         if (scanResultResponse.deepScanResult !== undefined) {
@@ -156,7 +164,7 @@ export class ScanResponseConverter {
 
     // eslint-disable-next-line @typescript-eslint/ban-types
     private getRunCompleteNotificationResponse(notification: NotificationDb): { [notification: string]: NotificationResponse } | {} {
-        if (isNil(notification)) {
+        if (isEmpty(notification)) {
             return {};
         }
 
@@ -170,24 +178,39 @@ export class ScanResponseConverter {
         return { notification: notificationResponse };
     }
 
-    private getDeepScanResult(websiteScanResult: WebsiteScanResult): { [deepScanResult: string]: DeepScanResultItem[] } {
-        if (websiteScanResult === undefined || websiteScanResult.scanGroupType === 'single-scan') {
+    private getDeepScanResult(websiteScanData: WebsiteScanResult | WebsiteScanData): { [deepScanResult: string]: DeepScanResultItem[] } {
+        if (websiteScanData.scanGroupType === 'single-scan') {
             return {};
         }
 
-        const deepScanResult: DeepScanResultItem[] = websiteScanResult.pageScans.map((pageScan) => {
-            return {
-                scanId: pageScan.scanId,
-                url: pageScan.url,
-                scanResultState: pageScan.scanState,
-                scanRunState: pageScan.runState ?? 'pending',
-            };
-        });
+        if (websiteScanData.itemType === ItemType.websiteScanData) {
+            const deepScanResult: DeepScanResultItem[] = (websiteScanData.knownPages as KnownPage[]).map((knownPage) => {
+                const result = {
+                    scanId: knownPage.scanId,
+                    url: knownPage.url,
+                    scanResultState: knownPage.scanState,
+                    scanRunState: knownPage.runState ?? 'pending',
+                };
 
-        return { deepScanResult };
-    }
+                // Remove undefined fields from an object
+                return pickBy(result, (v) => v !== undefined) as unknown as DeepScanResultItem;
+            });
 
-    private getScanType(pageScanResult: OnDemandPageScanResult): ScanType {
-        return pageScanResult.scanType ?? (pageScanResult.privacyScan ? 'privacy' : 'accessibility');
+            return { deepScanResult };
+        } else {
+            const deepScanResult: DeepScanResultItem[] = websiteScanData.pageScans.map((pageScan) => {
+                const result = {
+                    scanId: pageScan.scanId,
+                    url: pageScan.url,
+                    scanResultState: pageScan.scanState,
+                    scanRunState: pageScan.runState ?? 'pending',
+                };
+
+                // Remove undefined fields from an object
+                return pickBy(result, (v) => v !== undefined) as unknown as DeepScanResultItem;
+            });
+
+            return { deepScanResult };
+        }
     }
 }

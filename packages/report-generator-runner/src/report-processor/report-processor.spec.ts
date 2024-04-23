@@ -7,7 +7,7 @@ import { IMock, Mock, It } from 'typemoq';
 import { OnDemandPageScanRunResultProvider } from 'service-library';
 import * as MockDate from 'mockdate';
 import { GlobalLogger } from 'logger';
-import { TargetReport, OnDemandPageScanResult, WebsiteScanResult } from 'storage-documents';
+import { TargetReport, OnDemandPageScanResult, WebsiteScanData } from 'storage-documents';
 import { QueuedRequest } from '../runner/request-selector';
 import { ReportProcessor } from './report-processor';
 import { AccessibilityReportProcessor } from './accessibility-report-processor';
@@ -19,8 +19,8 @@ let dateNow: Date;
 let reportProcessor: ReportProcessor;
 let queuedRequests: QueuedRequest[];
 let pageScanResults: OnDemandPageScanResult[];
-let websiteScanResults: WebsiteScanResult[];
-let websiteScanResultsUpdated: WebsiteScanResult[];
+let websiteScanDataList: WebsiteScanData[];
+let websiteScanDataUpdatedList: WebsiteScanData[];
 
 const targetReport: TargetReport = 'accessibility';
 const maxFailedScanRetryCount = 1;
@@ -59,8 +59,8 @@ describe(ReportProcessor, () => {
     function generateSeedData(): void {
         queuedRequests = [];
         pageScanResults = [];
-        websiteScanResults = [];
-        websiteScanResultsUpdated = [];
+        websiteScanDataList = [];
+        websiteScanDataUpdatedList = [];
 
         for (let i = 0; i < 3; i++) {
             const pageScanResult = {
@@ -89,23 +89,14 @@ describe(ReportProcessor, () => {
                 },
             } as QueuedRequest);
 
-            const websiteScanResult = {
+            const websiteScanData = {
                 id: pageScanResult.websiteScanRef.id,
-                pageScans: [
-                    {
-                        scanId: pageScanResult.id,
-                        url: pageScanResult.url,
-                        scanState: pageScanResult.scanResult?.state,
-                        runState: pageScanResult.run.state,
-                        timestamp: dateNow.toJSON(),
-                    },
-                ],
-            } as WebsiteScanResult;
-            websiteScanResults.push(websiteScanResult);
+            } as WebsiteScanData;
+            websiteScanDataList.push(websiteScanData);
 
-            websiteScanResultsUpdated.push({
-                ...websiteScanResult,
-                deepScanId: `deepScanId-${websiteScanResult.id}`,
+            websiteScanDataUpdatedList.push({
+                ...websiteScanData,
+                deepScanId: `deepScanId-${websiteScanData.id}`,
             });
         }
     }

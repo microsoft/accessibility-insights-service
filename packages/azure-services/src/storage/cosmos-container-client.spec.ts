@@ -3,58 +3,72 @@
 
 import 'reflect-metadata';
 
-import { System } from 'common';
 import * as MockDate from 'mockdate';
 import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
+import { PatchRequestBody } from '@azure/cosmos';
 import { CosmosClientWrapper } from '../azure-cosmos/cosmos-client-wrapper';
 import { CosmosDocument } from '../azure-cosmos/cosmos-document';
 import { CosmosOperationResponse } from '../azure-cosmos/cosmos-operation-response';
-import { MockableLogger } from '../test-utilities/mockable-logger';
 import { CosmosContainerClient } from './cosmos-container-client';
 
 /* eslint-disable import/no-unassigned-import, @typescript-eslint/no-explicit-any */
 
-type OperationCallback = (...args: any[]) => Promise<CosmosOperationResponse<any>>;
-
 const dbName = 'dbName';
 const collectionName = 'collectionName';
 const partitionKey = 'default-partitionKey';
-const startTime = new Date(2019, 2, 3);
 
 let cosmosClientWrapperMock: IMock<CosmosClientWrapper>;
 let cosmosContainerClient: CosmosContainerClient;
-let operationCallbackMock: IMock<OperationCallback>;
-let loggerMock: IMock<MockableLogger>;
-let systemUtilsMock: IMock<typeof System>;
-
-const retryOptions = {
-    timeoutMilliseconds: 1000,
-    intervalMilliseconds: 200,
-    retryingOnStatusCodes: [412 /* PreconditionFailed */],
-};
 
 beforeEach(() => {
     cosmosClientWrapperMock = Mock.ofType<CosmosClientWrapper>();
-    operationCallbackMock = Mock.ofType<OperationCallback>();
-    loggerMock = Mock.ofType(MockableLogger);
-    systemUtilsMock = Mock.ofType<typeof System>();
-    cosmosContainerClient = new CosmosContainerClient(
-        cosmosClientWrapperMock.object,
-        dbName,
-        collectionName,
-        loggerMock.object,
-        systemUtilsMock.object,
-    );
-    MockDate.set(startTime);
-    systemUtilsMock
-        .setup((s) => s.wait(retryOptions.intervalMilliseconds))
-        .callback((millis: number) => {
-            MockDate.set(Date.now() + millis);
-        });
+    cosmosContainerClient = new CosmosContainerClient(cosmosClientWrapperMock.object, dbName, collectionName);
 });
 
 afterEach(() => {
     MockDate.reset();
+});
+
+describe('createDocumentIfNotExist()', () => {
+    it('create document if does not exist', async () => {
+        const item = {
+            id: '123',
+            partitionKey: 'item-partitionKey',
+            value: 'value',
+        };
+
+        cosmosClientWrapperMock
+            .setup(async (o) => o.createItem(item, dbName, collectionName, item.partitionKey, false))
+            .returns(async () => Promise.resolve({ statusCode: 202, item }))
+            .verifiable(Times.once());
+
+        const response = await cosmosContainerClient.createDocumentIfNotExist(item);
+
+        expect(response.item).toEqual(item);
+        cosmosClientWrapperMock.verifyAll();
+    });
+
+    it('read document if exists', async () => {
+        const item = {
+            id: '123',
+            partitionKey: 'item-partitionKey',
+            value: 'value',
+        };
+
+        cosmosClientWrapperMock
+            .setup(async (o) => o.createItem(item, dbName, collectionName, item.partitionKey, false))
+            .returns(async () => Promise.resolve({ statusCode: 409 }))
+            .verifiable(Times.once());
+        cosmosClientWrapperMock
+            .setup(async (o) => o.readItem(item.id, dbName, collectionName, item.partitionKey, true))
+            .returns(async () => Promise.resolve({ statusCode: 200, item }))
+            .verifiable(Times.once());
+
+        const response = await cosmosContainerClient.createDocumentIfNotExist(item);
+
+        expect(response.item).toEqual(item);
+        cosmosClientWrapperMock.verifyAll();
+    });
 });
 
 describe('mergeOrWriteDocument()', () => {
@@ -196,89 +210,20 @@ describe('mergeOrWriteDocument()', () => {
     });
 });
 
-describe('CosmosContainerClient.tryExecuteOperation()', () => {
-    it('invoke operation callback with timeout', async () => {
-        const item = {
-            value: 'value',
-        };
-        const expectedResult = {
-            item: item,
-            statusCode: 500,
-        };
-        operationCallbackMock
-            .setup(async (o) => o('arg1', 'arg2'))
-            .returns(async () =>
-                Promise.resolve({
-                    statusCode: 500,
-                    item: item,
-                }),
-            )
-            .verifiable(Times.atLeast(5));
+describe('Cosmos container client generic operations', () => {
+    it('patchDocument()', async () => {
+        const id = 'id';
+        const operations = [{ op: 'add', path: 'path' }] as PatchRequestBody;
+        const expectedResult = { statusCode: 200, item: {} };
+        cosmosClientWrapperMock
+            .setup(async (o) => o.patchItem(id, operations, dbName, collectionName, partitionKey, true))
+            .returns(async () => Promise.resolve(expectedResult))
+            .verifiable();
 
-        const resultPromise = cosmosContainerClient.tryExecuteOperation(operationCallbackMock.object, retryOptions, 'arg1', 'arg2');
-
-        await expect(resultPromise).rejects.toEqual(expectedResult);
-        operationCallbackMock.verifyAll();
+        const actualResult = await cosmosContainerClient.patchDocument(id, operations, partitionKey);
+        expect(actualResult).toEqual(expectedResult);
     });
 
-    it('invoke operation callback with retry', async () => {
-        const item = {
-            value: 'value',
-        };
-        const expectedResult = {
-            item: item,
-            statusCode: 200,
-        };
-
-        let retryCount = 0;
-        let statusCode = 200;
-        operationCallbackMock
-            .setup(async (o) => o('arg1', 'arg2'))
-            .callback((...args: any[]) => {
-                if (retryCount === 0) {
-                    statusCode = 412;
-                } else if (retryCount === 1) {
-                    statusCode = 500;
-                } else {
-                    statusCode = 200;
-                }
-                retryCount = retryCount + 1;
-            })
-            .returns(async () =>
-                Promise.resolve({
-                    statusCode: statusCode,
-                    item: item,
-                }),
-            )
-            .verifiable(Times.exactly(3));
-
-        const result = await cosmosContainerClient.tryExecuteOperation(operationCallbackMock.object, retryOptions, 'arg1', 'arg2');
-
-        expect(result).toEqual(expectedResult);
-        operationCallbackMock.verifyAll();
-    });
-
-    it('invoke operation callback', async () => {
-        const item = {
-            value: 'value',
-        };
-        const expectedResult = {
-            item: item,
-            statusCode: 200,
-        };
-        operationCallbackMock
-            .setup(async (o) => o('arg1', 'arg2'))
-            .returns(async () => Promise.resolve({ statusCode: 200, item: item }))
-            .verifiable(Times.once());
-
-        const result = await cosmosContainerClient.tryExecuteOperation(operationCallbackMock.object, retryOptions, 'arg1', 'arg2');
-
-        expect(result).toEqual(expectedResult);
-        operationCallbackMock.verifyAll();
-    });
-});
-
-describe('CosmosContainerClient', () => {
     it('writeDocuments()', async () => {
         const items = [
             {
@@ -445,7 +390,7 @@ describe('executeQueryWithContinuationToken', () => {
         executeMock.setup(async (e) => e(undefined)).returns(async () => Promise.resolve(response1));
 
         await expect(cosmosContainerClient.executeQueryWithContinuationToken(executeMock.object)).rejects.toThrowError(
-            /Failed request response/,
+            /The request has failed/,
         );
         executeMock.verifyAll();
     });

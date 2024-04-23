@@ -4,14 +4,24 @@
 import { GuidGenerator } from 'common';
 import { Dictionary, keyBy } from 'lodash';
 import moment from 'moment';
-import { ApiController, OnDemandPageScanRunResultProvider, ScanResultResponse, WebsiteScanResultProvider } from 'service-library';
-import { OnDemandPageScanResult, WebsiteScanResult } from 'storage-documents';
+import {
+    ApiController,
+    OnDemandPageScanRunResultProvider,
+    ScanResultResponse,
+    WebsiteScanDataProvider,
+    WebsiteScanResultProvider,
+} from 'service-library';
+import { OnDemandPageScanResult, WebsiteScanData, WebsiteScanResult } from 'storage-documents';
 import { ScanResponseConverter } from '../converters/scan-response-converter';
+
+// TODO Remove WebsiteScanResultProvider 30 days after deployment
 
 export abstract class BaseScanResultController extends ApiController {
     protected abstract readonly onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider;
 
     protected abstract readonly websiteScanResultProvider: WebsiteScanResultProvider;
+
+    protected abstract readonly websiteScanDataProvider: WebsiteScanDataProvider;
 
     protected abstract readonly guidGenerator: GuidGenerator;
 
@@ -31,15 +41,15 @@ export abstract class BaseScanResultController extends ApiController {
         return keyBy(scanResultItems, (item) => item.id);
     }
 
-    protected async getWebsiteScanResult(pageScanResult: OnDemandPageScanResult): Promise<WebsiteScanResult> {
-        if (pageScanResult.websiteScanRef) {
+    protected async getWebsiteScanResult(pageScanResult: OnDemandPageScanResult): Promise<WebsiteScanResult | WebsiteScanData> {
+        if (pageScanResult.schemaVersion === '2') {
+            return this.websiteScanDataProvider.read(pageScanResult.websiteScanRef.id);
+        } else {
             // Expand scan result for original scan only. Result for descendant scans do not include deep scan result collection.
             const expandResult = pageScanResult.id === pageScanResult.deepScanId;
 
             return this.websiteScanResultProvider.read(pageScanResult.websiteScanRef.id, expandResult);
         }
-
-        return undefined;
     }
 
     protected getTooSoonRequestResponse(scanId: string): ScanResultResponse {
@@ -63,11 +73,11 @@ export abstract class BaseScanResultController extends ApiController {
 
     protected async getScanResultResponse(
         pageScanResult: OnDemandPageScanResult,
-        websiteScanResult: WebsiteScanResult,
+        websiteScanData: WebsiteScanResult | WebsiteScanData,
     ): Promise<ScanResultResponse> {
         const segment = '/api/';
         const baseUrl = this.context.req.url.substring(0, this.context.req.url.indexOf(segment) + segment.length);
 
-        return this.scanResponseConverter.getScanResultResponse(baseUrl, this.apiVersion, pageScanResult, websiteScanResult);
+        return this.scanResponseConverter.getScanResultResponse(baseUrl, this.apiVersion, pageScanResult, websiteScanData);
     }
 }

@@ -35,6 +35,20 @@ describe('HashGenerator', () => {
         expect(bucket).toEqual('bucket-425');
     });
 
+    it('generate getWebsiteScanDataDocumentId', () => {
+        hashGenerator = new HashGenerator(SHA);
+        const id = hashGenerator.getWebsiteScanDataDocumentId('baseUrl', 'scanGroupId');
+        const expectedId = hashGenerator.generateBase64Hash('baseUrl', 'scanGroupId');
+        expect(id).toEqual(expectedId);
+    });
+
+    it('generate getWebsiteScanPageDataDocumentId', () => {
+        hashGenerator = new HashGenerator(SHA);
+        const id = hashGenerator.getWebsiteScanPageDataDocumentId('websiteId', 'scanId');
+        const expectedId = hashGenerator.generateBase64Hash('websiteId', 'scanId');
+        expect(id).toEqual(expectedId);
+    });
+
     it('generate WebsiteScanResultDocumentId', () => {
         hashGenerator = new HashGenerator(SHA);
         const id = hashGenerator.getWebsiteScanResultDocumentId('baseUrl', 'scanGroupId');
@@ -62,6 +76,18 @@ describe('HashGenerator', () => {
         const hash1 = hashGenerator.generateBase64Hash('u1', 'f1', 's1', 'r1');
         const hash2 = hashGenerator.generateBase64Hash('u1', 'f1', 's2', 'r1');
 
+        expect(64).toEqual(hash1.length);
+        expect(64).toEqual(hash2.length);
+        expect(hash1).not.toEqual(hash2);
+    });
+
+    it('should generate 128 bits hash', () => {
+        hashGenerator = new HashGenerator(SHA);
+        const hash1 = hashGenerator.generateBase64Hash128('u1', 'f1', 's1', 'r1');
+        const hash2 = hashGenerator.generateBase64Hash128('u1', 'f1', 's2', 'r1');
+
+        expect(32).toEqual(hash1.length);
+        expect(32).toEqual(hash2.length);
         expect(hash1).not.toEqual(hash2);
     });
 

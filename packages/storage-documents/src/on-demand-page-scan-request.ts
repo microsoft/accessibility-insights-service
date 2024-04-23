@@ -4,10 +4,10 @@
 import { ItemType } from './item-type';
 import { StorageDocument } from './storage-document';
 import { WebsiteRequest, ReportGroupRequest, PrivacyScan } from './on-demand-page-scan-batch-request';
-import { AuthenticationType, ScanType } from './on-demand-page-scan-result';
+import { AuthenticationType, SchemaVersion, ScanType } from './on-demand-page-scan-result';
 
-export interface OnDemandPageScanRequest extends StorageDocument {
-    itemType: ItemType.onDemandPageScanRequest;
+export interface PageScanRequest {
+    schemaVersion?: SchemaVersion;
     url: string;
     priority: number;
     scanType?: ScanType;
@@ -18,4 +18,8 @@ export interface OnDemandPageScanRequest extends StorageDocument {
     reportGroups?: ReportGroupRequest[];
     privacyScan?: PrivacyScan;
     authenticationType?: AuthenticationType;
+}
+
+export interface OnDemandPageScanRequest extends StorageDocument, PageScanRequest {
+    itemType: ItemType.onDemandPageScanRequest;
 }

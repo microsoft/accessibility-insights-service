@@ -11,7 +11,7 @@ import { FunctionalTestGroup } from './functional-test-group';
 
 export class FailedScanNotificationTestGroup extends FunctionalTestGroup {
     @test(TestEnvironment.all)
-    public async testScanNotificatioFail(): Promise<void> {
+    public async testScanNotificationFail(): Promise<void> {
         const response = await this.a11yServiceClient.getScanStatus(this.testContextData.scanId);
         const notification = (<ScanRunResultResponse>response.body).notification;
 

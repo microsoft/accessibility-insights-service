@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 import { inject, injectable } from 'inversify';
-import { CombinedScanResults, WebsiteScanResult } from 'storage-documents';
+import { CombinedScanResults, WebsiteScanData } from 'storage-documents';
 import { GeneratedReport } from '../data-providers/report-writer';
 import { AxeResultToConsolidatedHtmlConverter, ReportMetadata } from './axe-result-to-consolidated-html-converter';
 
@@ -16,16 +16,16 @@ export class CombinedReportGenerator {
     public generate(
         reportId: string,
         combinedAxeResults: CombinedScanResults,
-        websiteScanResult: WebsiteScanResult,
+        websiteScanData: WebsiteScanData,
         userAgent: string,
         browserResolution: string,
     ): GeneratedReport {
         const options: ReportMetadata = {
             serviceName: 'Accessibility Insights Service',
-            baseUrl: websiteScanResult.baseUrl,
+            baseUrl: websiteScanData.baseUrl,
             userAgent,
             browserResolution,
-            scanStarted: new Date(websiteScanResult.created),
+            scanStarted: new Date(websiteScanData.created),
         };
         const report = {
             content: this.axeResultToConsolidatedHtmlConverter.convert(combinedAxeResults, options),

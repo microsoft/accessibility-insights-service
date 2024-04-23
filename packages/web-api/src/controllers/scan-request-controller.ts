@@ -62,6 +62,7 @@ export class ScanRequestController extends ApiController {
 
             return;
         }
+
         const batchId = this.guidGenerator.createGuid();
         this.logger.setCommonProperties({ batchRequestId: batchId });
 

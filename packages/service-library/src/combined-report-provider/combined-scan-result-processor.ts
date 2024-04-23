@@ -5,9 +5,9 @@ import { inject, injectable } from 'inversify';
 import { GlobalLogger } from 'logger';
 import { RetryHelper, System } from 'common';
 import { AxeScanResults } from 'scanner-global-library';
-import { OnDemandPageScanResult, WebsiteScanResult } from 'storage-documents';
-import { WebsiteScanResultProvider } from '../data-providers/website-scan-result-provider';
+import { OnDemandPageScanResult, WebsiteScanData } from 'storage-documents';
 import { ReportWriter } from '../data-providers/report-writer';
+import { WebsiteScanDataProvider } from '../data-providers/website-scan-data-provider';
 import { CombinedAxeResultBuilder } from './combined-axe-result-builder';
 import { CombinedReportGenerator } from './combined-report-generator';
 import { CombinedResultsBlobProvider } from './combined-results-blob-provider';
@@ -18,13 +18,13 @@ export class CombinedScanResultProcessor {
 
     private readonly msecBetweenRetries: number = 1000;
 
-    private readonly maxCombinedResultsBlobSize = 50 * 1024 * 1024;
+    private readonly maxCombinedResultsBlobSize = 10 * 1024 * 1024;
 
     constructor(
         @inject(CombinedAxeResultBuilder) protected readonly combinedAxeResultBuilder: CombinedAxeResultBuilder,
         @inject(CombinedReportGenerator) protected readonly combinedReportGenerator: CombinedReportGenerator,
         @inject(CombinedResultsBlobProvider) protected readonly combinedResultsBlobProvider: CombinedResultsBlobProvider,
-        @inject(WebsiteScanResultProvider) protected readonly websiteScanResultProvider: WebsiteScanResultProvider,
+        @inject(WebsiteScanDataProvider) protected readonly websiteScanDataProvider: WebsiteScanDataProvider,
         @inject(ReportWriter) protected readonly reportWriter: ReportWriter,
         @inject(RetryHelper) private readonly retryHelper: RetryHelper<void>,
         @inject(GlobalLogger) private readonly logger: GlobalLogger,
@@ -44,9 +44,9 @@ export class CombinedScanResultProcessor {
     }
 
     private async generateCombinedScanResultsImpl(axeScanResults: AxeScanResults, pageScanResult: OnDemandPageScanResult): Promise<void> {
-        const websiteScanResult = await this.websiteScanResultProvider.read(pageScanResult.websiteScanRef.id);
+        const websiteScanData = await this.websiteScanDataProvider.read(pageScanResult.websiteScanRef.id);
 
-        let combinedResultsBlobId = websiteScanResult.reports?.find((report) => report.format === 'consolidated.html')?.reportId;
+        let combinedResultsBlobId = websiteScanData.reports?.find((report) => report.format === 'consolidated.html')?.reportId;
         const combinedResultsBlob = await this.combinedResultsBlobProvider.getBlob(combinedResultsBlobId);
         combinedResultsBlobId = combinedResultsBlobId || combinedResultsBlob.blobId;
 
@@ -70,17 +70,17 @@ export class CombinedScanResultProcessor {
         const generatedReport = this.combinedReportGenerator.generate(
             combinedResultsBlobId,
             combinedAxeResults,
-            websiteScanResult,
+            websiteScanData,
             axeScanResults.userAgent,
             axeScanResults.browserResolution,
         );
         const pageScanReport = await this.reportWriter.write(generatedReport);
 
-        const updatedWebsiteScanResults = {
-            id: websiteScanResult.id,
+        const websiteScanDataUpdate = {
+            id: websiteScanData.id,
             reports: [pageScanReport],
-        } as Partial<WebsiteScanResult>;
-        await this.websiteScanResultProvider.mergeOrCreate(pageScanResult.id, updatedWebsiteScanResults);
+        } as Partial<WebsiteScanData>;
+        await this.websiteScanDataProvider.merge(websiteScanDataUpdate);
 
         if (pageScanReport) {
             if (pageScanResult.reports) {

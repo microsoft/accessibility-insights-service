@@ -7,7 +7,7 @@ import { CosmosClient, CosmosClientOptions } from '@azure/cosmos';
 import * as msRestNodeAuth from '@azure/ms-rest-nodeauth';
 import { BlobServiceClient } from '@azure/storage-blob';
 import { Container, interfaces } from 'inversify';
-import { ContextAwareLogger, registerLoggerToContainer } from 'logger';
+import { registerLoggerToContainer } from 'logger';
 import { IMock, Mock, Times } from 'typemoq';
 import { SecretClient } from '@azure/keyvault-secrets';
 import { QueueServiceClient } from '@azure/storage-queue';
@@ -80,7 +80,7 @@ describe('BatchServiceClient', () => {
     });
 });
 
-describe(registerAzureServicesToContainer, () => {
+describe('RegisterAzureServicesToContainer', () => {
     let container: Container;
 
     beforeEach(() => {
@@ -355,7 +355,6 @@ function verifyCosmosContainerClient(container: Container, cosmosContainerType: 
     const cosmosContainerClient = container.get<CosmosContainerClient>(cosmosContainerType);
     expect((cosmosContainerClient as any).dbName).toBe(dbName);
     expect((cosmosContainerClient as any).collectionName).toBe(collectionName);
-    expect((cosmosContainerClient as any).logger).toBe(container.get(ContextAwareLogger));
 }
 
 function runCosmosClientTest(container: Container, secretProviderMock: IMock<SecretProvider>): void {

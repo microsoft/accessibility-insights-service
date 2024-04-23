@@ -13,7 +13,15 @@ import { CosmosOperationResponse } from './cosmos-operation-response';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-export declare type CosmosOperation = 'upsertItem' | 'upsertItems' | 'readAllItems' | 'queryItems' | 'readItem' | 'deleteItem';
+export declare type CosmosOperation =
+    | 'upsertItem'
+    | 'upsertItems'
+    | 'readAllItems'
+    | 'queryItems'
+    | 'readItem'
+    | 'deleteItem'
+    | 'patch'
+    | 'createItem';
 
 @injectable()
 export class CosmosClientWrapper {
@@ -49,7 +57,7 @@ export class CosmosClientWrapper {
                             statusCode: response.statusCode,
                         });
                     } catch (error) {
-                        this.logFailedResponse('upsertItems', error, {
+                        this.logFailedResponse('upsertItems', error, throwIfNotSuccess, {
                             db: dbName,
                             collection: collectionName,
                             itemId: item.id,
@@ -64,6 +72,69 @@ export class CosmosClientWrapper {
         }
 
         return responses;
+    }
+
+    /**
+     * See https://learn.microsoft.com/en-us/azure/cosmos-db/partial-document-update
+     */
+    public async patchItem<T extends CosmosDocument>(
+        id: string,
+        operations: cosmos.PatchRequestBody,
+        dbName: string,
+        collectionName: string,
+        partitionKey: string,
+        throwIfNotSuccess: boolean = true,
+    ): Promise<CosmosOperationResponse<T>> {
+        const container = await this.getContainer(dbName, collectionName);
+        try {
+            const response = await container.item(id, partitionKey).patch(operations);
+            const itemT = <T>(<unknown>response.resource);
+
+            return {
+                item: itemT,
+                statusCode: response.statusCode,
+            };
+        } catch (error) {
+            this.logFailedResponse('patch', error, throwIfNotSuccess, {
+                itemId: id,
+                operations: JSON.stringify(operations),
+                db: dbName,
+                collection: collectionName,
+                partitionKey: partitionKey,
+            });
+
+            return this.handleFailedOperationResponse('patch', error, throwIfNotSuccess, id);
+        }
+    }
+
+    public async createItem<T extends CosmosDocument>(
+        item: T,
+        dbName: string,
+        collectionName: string,
+        partitionKey: string,
+        throwIfNotSuccess: boolean = true,
+    ): Promise<CosmosOperationResponse<T>> {
+        const container = await this.getContainer(dbName, collectionName);
+        try {
+            this.assignPartitionKey(item, partitionKey);
+            const response = await container.items.create(item, this.getOptions(item));
+            const itemT = <T>(<unknown>response.resource);
+
+            return {
+                item: itemT,
+                statusCode: response.statusCode,
+            };
+        } catch (error) {
+            this.logFailedResponse('createItem', error, throwIfNotSuccess, {
+                db: dbName,
+                collection: collectionName,
+                itemId: item.id,
+                partitionKey: partitionKey,
+                item: JSON.stringify(item),
+            });
+
+            return this.handleFailedOperationResponse('createItem', error, throwIfNotSuccess, item.id);
+        }
     }
 
     public async upsertItem<T extends CosmosDocument>(
@@ -84,7 +155,7 @@ export class CosmosClientWrapper {
                 statusCode: response.statusCode,
             };
         } catch (error) {
-            this.logFailedResponse('upsertItem', error, {
+            this.logFailedResponse('upsertItem', error, throwIfNotSuccess, {
                 db: dbName,
                 collection: collectionName,
                 itemId: item.id,
@@ -116,7 +187,7 @@ export class CosmosClientWrapper {
                 statusCode: 200,
             };
         } catch (error) {
-            this.logFailedResponse('readAllItems', error, { db: dbName, collection: collectionName });
+            this.logFailedResponse('readAllItems', error, throwIfNotSuccess, { db: dbName, collection: collectionName });
 
             return this.handleFailedOperationResponse('readAllItems', error, throwIfNotSuccess);
         }
@@ -168,7 +239,11 @@ export class CosmosClientWrapper {
                 continuationToken: continuationTokenResponse,
             };
         } catch (error) {
-            this.logFailedResponse('queryItems', error, { db: dbName, collection: collectionName, query: JSON.stringify(query) });
+            this.logFailedResponse('queryItems', error, throwIfNotSuccess, {
+                db: dbName,
+                collection: collectionName,
+                query: JSON.stringify(query),
+            });
 
             return this.handleFailedOperationResponse('queryItems', error, throwIfNotSuccess);
         }
@@ -192,7 +267,7 @@ export class CosmosClientWrapper {
                 statusCode: response.statusCode,
             };
         } catch (error) {
-            this.logFailedResponse('readItem', error, {
+            this.logFailedResponse('readItem', error, throwIfNotSuccess, {
                 db: dbName,
                 collection: collectionName,
                 itemId: id,
@@ -220,7 +295,7 @@ export class CosmosClientWrapper {
                 statusCode: response.statusCode,
             };
         } catch (error) {
-            this.logFailedResponse('deleteItem', error, {
+            this.logFailedResponse('deleteItem', error, throwIfNotSuccess, {
                 db: dbName,
                 collection: collectionName,
                 itemId: id,
@@ -228,6 +303,20 @@ export class CosmosClientWrapper {
             });
 
             return this.handleFailedOperationResponse('deleteItem', error, throwIfNotSuccess, id);
+        }
+    }
+
+    public throwOperationError(operation: CosmosOperation, operationResponse: CosmosOperationResponse<unknown>, id?: string): void {
+        if (!client.isSuccessStatusCode(operationResponse)) {
+            if (id === undefined) {
+                throw new Error(
+                    `The Cosmos DB '${operation}' operation failed. Response status code: ${operationResponse.statusCode} Response: ${operationResponse.response}`,
+                );
+            } else {
+                throw new Error(
+                    `The Cosmos DB '${operation}' operation failed. Document Id: ${id} Response status code: ${operationResponse.statusCode} Response: ${operationResponse.response}`,
+                );
+            }
         }
     }
 
@@ -269,8 +358,8 @@ export class CosmosClientWrapper {
     ): CosmosOperationResponse<T> {
         const errorResponse = client.getErrorResponse(error);
         if (errorResponse !== undefined) {
-            if (throwIfNotSuccess) {
-                this.throwIfNotSuccess(operation, errorResponse, id);
+            if (throwIfNotSuccess === true) {
+                this.throwOperationError(operation, errorResponse, id);
             }
 
             return errorResponse;
@@ -279,27 +368,19 @@ export class CosmosClientWrapper {
         }
     }
 
-    private throwIfNotSuccess(operation: CosmosOperation, operationResponse: CosmosOperationResponse<unknown>, id?: string): void {
-        if (!client.isSuccessStatusCode(operationResponse)) {
-            if (id === undefined) {
-                throw new Error(
-                    `The Cosmos DB '${operation}' operation failed. Response status code: ${operationResponse.statusCode} Response: ${operationResponse.response}`,
-                );
-            } else {
-                throw new Error(
-                    `The Cosmos DB '${operation}' operation failed. Document Id: ${id} Response status code: ${operationResponse.statusCode} Response: ${operationResponse.response}`,
-                );
-            }
-        }
-    }
-
     private logFailedResponse(
         operation: CosmosOperation,
         error: any,
+        logIfNotSuccess: boolean,
         properties?: {
             [name: string]: string;
         },
     ): void {
+        // Skip error logging for handled cases
+        if (logIfNotSuccess !== true) {
+            return;
+        }
+
         const errorResponse = client.getErrorResponse(error);
         if (errorResponse !== undefined) {
             this.logger.logError(`The Cosmos DB '${operation}' operation failed.`, {
