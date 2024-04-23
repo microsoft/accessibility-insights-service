@@ -203,7 +203,7 @@ function setupProcessUrls(deepScanLimit: number = deepScanDiscoveryLimit): void 
 
 function setupUpdateWebsiteScanData(crawlDiscoveryPatterns: string[]): void {
     const knownPageList = processedUrls.map((u) => {
-        return { url: u, runState: 'pending' };
+        return { url: u };
     }) as KnownPage[];
 
     websiteScanDataProviderMock

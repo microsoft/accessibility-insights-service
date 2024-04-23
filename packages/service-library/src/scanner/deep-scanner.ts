@@ -64,9 +64,7 @@ export class DeepScanner {
         discoveredUrls: string[],
     ): Promise<WebsiteScanData> {
         // Update known pages
-        const knownPages: KnownPage[] = discoveredUrls.map((url) => {
-            return { url, runState: 'pending' };
-        });
+        const knownPages: KnownPage[] = discoveredUrls.map((url) => ({ url }));
         await this.websiteScanDataProvider.updateKnownPages(websiteScanData, knownPages);
 
         // Update discovery patterns
