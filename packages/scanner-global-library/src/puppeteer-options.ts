@@ -29,7 +29,7 @@ const noWebglArgs = ['--disable-webgl', '--disable-webgl2'];
 
 const defaultLaunchOptions: Puppeteer.PuppeteerNodeLaunchOptions = {
     // The new headless mode https://developer.chrome.com/articles/new-headless
-    headless: 'new',
+    headless: true,
     protocolTimeout: 90000,
     ...defaultBrowserOptions,
 };
