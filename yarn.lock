@@ -129,14 +129,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@axe-core/puppeteer@npm:4.7.3":
-  version: 4.7.3
-  resolution: "@axe-core/puppeteer@npm:4.7.3"
+"@axe-core/puppeteer@npm:4.8.4":
+  version: 4.8.4
+  resolution: "@axe-core/puppeteer@npm:4.8.4"
   dependencies:
-    axe-core: ^4.7.0
+    axe-core: ~4.8.3
   peerDependencies:
     puppeteer: ">=1.10.0"
-  checksum: 38141bf016216f7ac829d294b09ba59d76727eb4f42273186abcadc966936545d0fce9b95b1be79fbf7a1e3a39b1d578deae14024336efb5e24bf39a07079e0d
+  checksum: 2e5423b6f539d8f684297ce0af5d1d0086377efe6b9a1ef3f79ed54220e2c9350242aeddffb9c0bd840fde8fe145169c981c02cb00461346edb70b09d950f030
   languageName: node
   linkType: hard
 
@@ -3663,20 +3663,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@puppeteer/browsers@npm:^1.5.0":
-  version: 1.7.0
-  resolution: "@puppeteer/browsers@npm:1.7.0"
+"@puppeteer/browsers@npm:^2.1.0":
+  version: 2.2.3
+  resolution: "@puppeteer/browsers@npm:2.2.3"
   dependencies:
     debug: 4.3.4
     extract-zip: 2.0.1
     progress: 2.0.3
-    proxy-agent: 6.3.0
-    tar-fs: 3.0.4
+    proxy-agent: 6.4.0
+    semver: 7.6.0
+    tar-fs: 3.0.5
     unbzip2-stream: 1.4.3
-    yargs: 17.7.1
+    yargs: 17.7.2
   bin:
     browsers: lib/cjs/main-cli.js
-  checksum: 0a2aecc72fb94a8d94246188f94cfaad730d1d372b34df94ca51ff8a94596bf475a0fee162c317a768fa4b2a707bfa8afd582d594958f49e1019effadfe744b6
+  checksum: 44d496e2c4d717e472b40473fd916b1aa3b1a6024b9e4f571ca1521172ae38d090b5f331ccc6694593f41eb0b667865d72e4c9bc29d6a705a369ade53dacbd5c
   languageName: node
   linkType: hard
 
@@ -4303,10 +4304,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/sarif@npm:>=2.1.1 <=2.1.4":
-  version: 2.1.3
-  resolution: "@types/sarif@npm:2.1.3"
-  checksum: f8109e74a92619c16a4a3e8c910350943d6849326e2d286f8fd2c7d9eaf6b117744b2f4df817e4e94d0ae065ca3f2008a72a221c8888654ea33acd1e4ab97ca0
+"@types/sarif@npm:>=2.1.1 <=2.1.8":
+  version: 2.1.7
+  resolution: "@types/sarif@npm:2.1.7"
+  checksum: ee5d30f5a2678091502343fba7905e85d25dbb545f920de9fc8a7c6693509b491a043168970a16325730cc0c88de54d2b6b3de0c2caa31645c8ebf558c5553af
   languageName: node
   linkType: hard
 
@@ -4863,7 +4864,7 @@ __metadata:
   resolution: "accessibility-insights-crawler@workspace:packages/crawler"
   dependencies:
     "@apify/log": 2.2.18
-    "@axe-core/puppeteer": 4.7.3
+    "@axe-core/puppeteer": 4.8.4
     "@crawlee/browser-pool": ^3.5.0
     "@crawlee/puppeteer": ^3.5.0
     "@medv/finder": ^2.1.0
@@ -4877,8 +4878,8 @@ __metadata:
     "@types/node": ^16.18.11
     "@types/normalize-path": ^3.0.0
     "@types/puppeteer": ^7.0.4
-    accessibility-insights-report: ^4.7.0
-    axe-core: 4.7.2
+    accessibility-insights-report: ^4.7.3
+    axe-core: 4.8.4
     axe-core-scanner: "workspace:*"
     dotenv: ^16.0.1
     encoding-down: ^7.1.0
@@ -4905,20 +4906,20 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"accessibility-insights-report@npm:^4.7.0":
-  version: 4.7.0
-  resolution: "accessibility-insights-report@npm:4.7.0"
+"accessibility-insights-report@npm:^4.7.3":
+  version: 4.7.3
+  resolution: "accessibility-insights-report@npm:4.7.3"
   dependencies:
     "@fluentui/react": ^8.96.1
     axe-core: 4.7.2
     classnames: ^2.3.2
     lodash: ^4.17.21
-    luxon: ^3.3.0
+    luxon: ^3.4.4
     react: ^16.14.0
     react-dom: ^16.14.0
     react-helmet: ^6.1.0
-    uuid: ^9.0.0
-  checksum: ae49ce196e7aaff01352326956a9719cff232af46313f8faa0730f0dcb6829e8e2c5a2295f774c8c12c5a9a05e3c080447fc5225ed16ee69dec49dcb21ca70b8
+    uuid: ^9.0.1
+  checksum: ce2a911baafefa7f5fd6f87f003fc1d863eb1bec7d57d5c0d4d2704da693c1222a776a21588096a4e6ffb244bbabb1db39b28daccaa2ceeaec6556e172db7bda
   languageName: node
   linkType: hard
 
@@ -4927,7 +4928,7 @@ __metadata:
   resolution: "accessibility-insights-scan@workspace:packages/cli"
   dependencies:
     "@apify/log": 2.2.18
-    "@axe-core/puppeteer": 4.7.3
+    "@axe-core/puppeteer": 4.8.4
     "@crawlee/browser-pool": ^3.5.0
     "@crawlee/puppeteer": ^3.5.0
     "@medv/finder": ^2.1.0
@@ -4945,10 +4946,10 @@ __metadata:
     "@types/puppeteer": ^7.0.4
     "@types/table": ^6.3.2
     accessibility-insights-crawler: "workspace:*"
-    accessibility-insights-report: ^4.7.0
+    accessibility-insights-report: ^4.7.3
     ajv: ^8.12.0
     applicationinsights: ^2.3.1
-    axe-core: 4.7.2
+    axe-core: 4.8.4
     convict: ^6.2.4
     copy-webpack-plugin: ^11.0.0
     dotenv: ^16.0.1
@@ -4999,7 +5000,7 @@ __metadata:
     "@typescript-eslint/eslint-plugin": ^5.50.0
     "@typescript-eslint/eslint-plugin-tslint": ^5.50.0
     "@typescript-eslint/parser": ^5.50.0
-    accessibility-insights-report: ^4.7.0
+    accessibility-insights-report: ^4.7.3
     combine-dependabot-prs: ^1.0.5
     commander: ^10.0.0
     eslint: ^7.32.0
@@ -5115,7 +5116,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"agent-base@npm:^7.0.1, agent-base@npm:^7.0.2, agent-base@npm:^7.1.0":
+"agent-base@npm:^7.0.2, agent-base@npm:^7.1.0":
   version: 7.1.0
   resolution: "agent-base@npm:7.1.0"
   dependencies:
@@ -5527,12 +5528,12 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "axe-core-scanner@workspace:packages/axe-core-scanner"
   dependencies:
-    "@axe-core/puppeteer": 4.7.3
+    "@axe-core/puppeteer": 4.8.4
     "@types/jest": ^29.5.0
     "@types/lodash": ^4.14.182
     "@types/node": ^16.18.11
     "@types/puppeteer": ^7.0.4
-    axe-core: 4.7.2
+    axe-core: 4.8.4
     cpy-cli: ^4.1.0
     inversify: ^6.0.1
     jest: ^29.5.0
@@ -5548,10 +5549,10 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"axe-core@npm:4.7.2":
-  version: 4.7.2
-  resolution: "axe-core@npm:4.7.2"
-  checksum: 5d86fa0f45213b0e54cbb5d713ce885c4a8fe3a72b92dd915a47aa396d6fd149c4a87fec53aa978511f6d941402256cfeb26f2db35129e370f25a453c688655a
+"axe-core@npm:4.8.4":
+  version: 4.8.4
+  resolution: "axe-core@npm:4.8.4"
+  checksum: 644da2fec17bcf6f834edaab1baa5a75a9a3ee370c323215c73da6d7e45fac11d01470d92d0a3d5f26695e15c1d9b781733dfbe1fe09d505076c58f09ed74e02
   languageName: node
   linkType: hard
 
@@ -5563,8 +5564,8 @@ __metadata:
     "@types/jest": ^29.5.0
     "@types/lodash": ^4.14.182
     "@types/node": ^16.18.11
-    accessibility-insights-report: ^4.7.0
-    axe-core: 4.7.2
+    accessibility-insights-report: ^4.7.3
+    axe-core: 4.8.4
     common: "workspace:*"
     inversify: ^6.0.1
     jest: ^29.5.0
@@ -5579,17 +5580,17 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"axe-sarif-converter@npm:^2.11.0":
-  version: 2.11.0
-  resolution: "axe-sarif-converter@npm:2.11.0"
+"axe-sarif-converter@npm:^2.11.1":
+  version: 2.11.1
+  resolution: "axe-sarif-converter@npm:2.11.1"
   dependencies:
-    "@puppeteer/browsers": ^1.5.0
-    "@types/sarif": ">=2.1.1 <=2.1.4"
+    "@puppeteer/browsers": ^2.1.0
+    "@types/sarif": ">=2.1.1 <=2.1.8"
     axe-core: ^3.2.2 || ^4.0.0
     yargs: ^17.0.0
   bin:
     axe-sarif-converter: dist/cli.js
-  checksum: 3e59ed698c939f3df338abb79b3606218e8153a91f0a4a6761370214bcc8d5c932ff15d959f4958e54725c5b4a789439c7162979cd5523ab1c6bf9b0708a19ac
+  checksum: ea89ae726b2988f89cc48c2576a68cf11f1e99e3c4a39b89d000e61b7cdd03161204d62e6bbc9df56bda05ad826ad37a2a1c2ca0831c412f8b842bf960fb3ea7
   languageName: node
   linkType: hard
 
@@ -9496,16 +9497,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"https-proxy-agent@npm:^7.0.0":
-  version: 7.0.1
-  resolution: "https-proxy-agent@npm:7.0.1"
-  dependencies:
-    agent-base: ^7.0.2
-    debug: 4
-  checksum: 2d765c31865071373771f53abdd72912567b76015a4eff61094f586194192950cd89257d50f0e621807a16c083bc8cad5852e3885c6ba154d2ce721a18fac248
-  languageName: node
-  linkType: hard
-
 "https-proxy-agent@npm:^7.0.2":
   version: 7.0.2
   resolution: "https-proxy-agent@npm:7.0.2"
@@ -11509,10 +11500,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"luxon@npm:^3.3.0":
-  version: 3.4.2
-  resolution: "luxon@npm:3.4.2"
-  checksum: efefdfaea90f4c8e502db8eb255385e6dac6733b6a9e1372eaf1a866cc1118363e235a3f6df505b837abc8bbcdfd8f0718a8de387b80cef9ee624d8791ca0844
+"luxon@npm:^3.4.4":
+  version: 3.4.4
+  resolution: "luxon@npm:3.4.4"
+  checksum: 36c1f99c4796ee4bfddf7dc94fa87815add43ebc44c8934c924946260a58512f0fd2743a629302885df7f35ccbd2d13f178c15df046d0e3b6eb71db178f1c60c
   languageName: node
   linkType: hard
 
@@ -12620,22 +12611,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pac-proxy-agent@npm:^7.0.0":
-  version: 7.0.0
-  resolution: "pac-proxy-agent@npm:7.0.0"
-  dependencies:
-    "@tootallnate/quickjs-emscripten": ^0.23.0
-    agent-base: ^7.0.2
-    debug: ^4.3.4
-    get-uri: ^6.0.1
-    http-proxy-agent: ^7.0.0
-    https-proxy-agent: ^7.0.0
-    pac-resolver: ^7.0.0
-    socks-proxy-agent: ^8.0.1
-  checksum: 45fe10ae58b1700d5419a9e5b525fb261b866ed6a65c1382fe45c3d5af9f81d9a58250d407941a363b1955e0315f3d97e02a2f20e4c7e2ba793bd46585db7ec8
-  languageName: node
-  linkType: hard
-
 "pac-proxy-agent@npm:^7.0.1":
   version: 7.0.1
   resolution: "pac-proxy-agent@npm:7.0.1"
@@ -13222,22 +13197,6 @@ __metadata:
     "@types/node": ">=13.7.0"
     long: ^5.0.0
   checksum: 3c62e48f7d50017ac3b0dcd2a58e617cf858f9fba56a488bd48b9aa3482893a75540052dbcb3c12dfbaab42b1d04964611175faf06bdadcd33a4ebac982a511e
-  languageName: node
-  linkType: hard
-
-"proxy-agent@npm:6.3.0":
-  version: 6.3.0
-  resolution: "proxy-agent@npm:6.3.0"
-  dependencies:
-    agent-base: ^7.0.2
-    debug: ^4.3.4
-    http-proxy-agent: ^7.0.0
-    https-proxy-agent: ^7.0.0
-    lru-cache: ^7.14.1
-    pac-proxy-agent: ^7.0.0
-    proxy-from-env: ^1.1.0
-    socks-proxy-agent: ^8.0.1
-  checksum: e3fb0633d665e352ed4efe23ae5616b8301423dfa4ff1c5975d093da8a636181a97391f7a91c6a7ffae17c1a305df855e95507f73bcdafda8876198c64b88f5b
   languageName: node
   linkType: hard
 
@@ -14285,12 +14244,12 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "scanner-global-library@workspace:packages/scanner-global-library"
   dependencies:
-    "@axe-core/puppeteer": 4.7.3
+    "@axe-core/puppeteer": 4.8.4
     "@types/jest": ^29.5.0
     "@types/lodash": ^4.14.182
     "@types/node": ^16.18.11
     "@types/puppeteer": ^7.0.4
-    axe-core: 4.7.2
+    axe-core: 4.8.4
     axe-core-scanner: "workspace:*"
     common: "workspace:*"
     cpy-cli: ^4.1.0
@@ -14434,9 +14393,9 @@ __metadata:
     "@types/puppeteer": ^7.0.4
     "@types/sha.js": ^2.4.0
     "@types/yargs": ^17.0.22
-    accessibility-insights-report: ^4.7.0
+    accessibility-insights-report: ^4.7.3
     async-mutex: ^0.3.2
-    axe-core: 4.7.2
+    axe-core: 4.8.4
     axe-result-converter: "workspace:*"
     azure-services: "workspace:*"
     common: "workspace:*"
@@ -14685,17 +14644,6 @@ __metadata:
     debug: ^4.3.3
     socks: ^2.6.2
   checksum: 720554370154cbc979e2e9ce6a6ec6ced205d02757d8f5d93fe95adae454fc187a5cbfc6b022afab850a5ce9b4c7d73e0f98e381879cf45f66317a4895953846
-  languageName: node
-  linkType: hard
-
-"socks-proxy-agent@npm:^8.0.1":
-  version: 8.0.1
-  resolution: "socks-proxy-agent@npm:8.0.1"
-  dependencies:
-    agent-base: ^7.0.1
-    debug: ^4.3.4
-    socks: ^2.7.1
-  checksum: f6538fd16cb545094d20b9a1ae97bb2c4ddd150622ad7cc6b64c89c889d8847b7bac179757838ce5487cbac49a499537e3991c975fe13b152b76b10027470dfb
   languageName: node
   linkType: hard
 
@@ -15265,17 +15213,6 @@ __metadata:
     pump: ^3.0.0
     tar-stream: ^2.1.4
   checksum: f5b9a70059f5b2969e65f037b4e4da2daf0fa762d3d232ffd96e819e3f94665dbbbe62f76f084f1acb4dbdcce16c6e4dac08d12ffc6d24b8d76720f4d9cf032d
-  languageName: node
-  linkType: hard
-
-"tar-fs@npm:3.0.4":
-  version: 3.0.4
-  resolution: "tar-fs@npm:3.0.4"
-  dependencies:
-    mkdirp-classic: ^0.5.2
-    pump: ^3.0.0
-    tar-stream: ^3.1.5
-  checksum: dcf4054f9e92ca0efe61c2b3f612914fb259a47900aa908a63106513a6d006c899b426ada53eb88d9dbbf089b5724c8e90b96a2c4ca6171845fa14203d734e30
   languageName: node
   linkType: hard
 
@@ -16091,12 +16028,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"uuid@npm:^9.0.0":
-  version: 9.0.0
-  resolution: "uuid@npm:9.0.0"
+"uuid@npm:^9.0.1":
+  version: 9.0.1
+  resolution: "uuid@npm:9.0.1"
   bin:
     uuid: dist/bin/uuid
-  checksum: 8dd2c83c43ddc7e1c71e36b60aea40030a6505139af6bee0f382ebcd1a56f6cd3028f7f06ffb07f8cf6ced320b76aea275284b224b002b289f89fe89c389b028
+  checksum: 39931f6da74e307f51c0fb463dc2462807531dc80760a9bff1e35af4316131b4fc3203d16da60ae33f07fdca5b56f3f1dd662da0c99fea9aaeab2004780cc5f4
   languageName: node
   linkType: hard
 
@@ -16295,7 +16232,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "web-api-scan-runner@workspace:packages/web-api-scan-runner"
   dependencies:
-    "@axe-core/puppeteer": 4.7.3
+    "@axe-core/puppeteer": 4.8.4
     "@azure/cosmos": ^4.0.0
     "@types/dotenv": ^8.2.0
     "@types/jest": ^29.5.0
@@ -16304,11 +16241,11 @@ __metadata:
     "@types/puppeteer": ^7.0.4
     "@types/sha.js": ^2.4.0
     "@types/yargs": ^17.0.22
-    accessibility-insights-report: ^4.7.0
+    accessibility-insights-report: ^4.7.3
     applicationinsights: ^2.3.1
-    axe-core: 4.7.2
+    axe-core: 4.8.4
     axe-result-converter: "workspace:*"
-    axe-sarif-converter: ^2.11.0
+    axe-sarif-converter: ^2.11.1
     azure-services: "workspace:*"
     common: "workspace:*"
     copy-webpack-plugin: ^11.0.0
