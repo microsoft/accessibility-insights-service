@@ -15,7 +15,7 @@ setupKeyVaultResourcesTemplateFile="${0%/*}/../templates/key-vault-setup-resourc
 
 exitWithUsageInfo() {
     echo "
-Usage: ${BASH_SOURCE} -r <resource group> -k <enable soft delete for Azure Key Vault> -c <webApiAdClientId> -p <webApiAdClientSecret> [-e <environment>]
+Usage: ${BASH_SOURCE} -r <resource group> -c <web API client ID> [-e <environment>]
 "
     exit 1
 }
@@ -33,7 +33,7 @@ function recoverIfSoftDeleted() {
     fi
 }
 
-function createKeyvaultIfNotExists() {
+function createKeyVaultIfNotExists() {
     local existingResourceId=$(
         az keyvault list \
             --query "[?name=='$keyVault'].id|[0]" \
@@ -60,7 +60,7 @@ function createKeyvaultIfNotExists() {
 function createOrRecoverKeyvault() {
     # recoverIfSoftDeleted
     if [[ -z "$keyvaultRecovered" ]]; then
-        createKeyvaultIfNotExists
+        createKeyVaultIfNotExists
     fi
 }
 
@@ -85,11 +85,10 @@ function setupKeyVaultResources() {
 }
 
 # Read script arguments
-while getopts ":r:c:p:b:e:" option; do
+while getopts ":r:c:b:e:" option; do
     case $option in
     r) resourceGroupName=${OPTARG} ;;
     c) webApiAdClientId=${OPTARG} ;;
-    p) webApiAdClientSecret=${OPTARG} ;;
     b) azureBatchObjectId=${OPTARG} ;;
     e) environment=${OPTARG} ;;
     *) exitWithUsageInfo ;;
@@ -97,7 +96,7 @@ while getopts ":r:c:p:b:e:" option; do
 done
 
 # Print script usage help
-if [[ -z $resourceGroupName ]] || [[ -z $webApiAdClientId ]] || [[ -z $webApiAdClientSecret ]] || [[ -z $azureBatchObjectId ]]; then
+if [[ -z $resourceGroupName ]] || [[ -z $webApiAdClientId ]] || [[ -z $azureBatchObjectId ]]; then
     exitWithUsageInfo
 fi
 

@@ -11,7 +11,6 @@ export storageAccountName
 export cosmosAccountName
 export cosmosDbUrl
 export containerRegistryName
-
 export principalName
 export tenantId
 
@@ -20,7 +19,7 @@ export MSYS_NO_PATHCONV=1
 
 exitWithUsageInfo() {
     echo "
-Usage: ${BASH_SOURCE} -r <resource group> -c <web API Azure AD client Id> -p <web API Azure AD client secret>
+Usage: ${BASH_SOURCE} -r <resource group> -c <web API client ID>
 "
     exit 1
 }
@@ -96,10 +95,9 @@ createAppInsightsApiKey() {
     echo "App Insights API key was created $appInsightsApiKey"
 }
 
-# function runs in a subshell to isolate trap handler
+# Function runs in a separate shell to keep trap handler apart
 pushSecretsToKeyVault() (
     echo "Pushing secrets to keyvault $keyVault in resourceGroup $resourceGroupName"
-
     getCurrentUserDetails
 
     trap 'onExit-push-secrets-to-key-vault' EXIT
@@ -111,7 +109,7 @@ pushSecretsToKeyVault() (
     pushSecretToKeyVault "storageAccountName" "$storageAccountName"
 
     pushSecretToKeyVault "restApiSpAppId" "$webApiAdClientId"
-    pushSecretToKeyVault "restApiSpSecret" "$webApiAdClientSecret"
+
     getTenantId
     pushSecretToKeyVault "authorityUrl" "https://login.microsoftonline.com/${tenantId}"
 
@@ -121,21 +119,19 @@ pushSecretsToKeyVault() (
     getContainerRegistryLogin
     pushSecretToKeyVault "containerRegistryUsername" "$containerRegistryUsername"
     pushSecretToKeyVault "containerRegistryPassword" "$containerRegistryPassword"
-
 )
 
 # Read script arguments
-while getopts ":r:c:p:" option; do
+while getopts ":r:c:" option; do
     case $option in
     r) resourceGroupName=${OPTARG} ;;
     c) webApiAdClientId=${OPTARG} ;;
-    p) webApiAdClientSecret=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
 
 # Print script usage help
-if [[ -z $resourceGroupName ]] || [[ -z $webApiAdClientId ]] || [[ -z $webApiAdClientSecret ]]; then
+if [[ -z $resourceGroupName ]] || [[ -z $webApiAdClientId ]]; then
     exitWithUsageInfo
 fi
 

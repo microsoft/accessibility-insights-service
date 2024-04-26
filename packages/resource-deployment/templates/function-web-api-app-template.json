@@ -140,11 +140,6 @@
                                 },
                                 "login": {
                                     "disableWWWAuthenticate": true
-                                },
-                                "validation": {
-                                    "defaultAuthorizationPolicy": {
-                                        "allowedApplications": [ "[parameters('clientId')]" ]
-                                    }
                                 }
                             }
                         },

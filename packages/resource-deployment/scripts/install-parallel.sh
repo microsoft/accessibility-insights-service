@@ -6,6 +6,7 @@
 # shellcheck disable=SC1090
 set -eo pipefail
 
+# Еxport variables to all child processes
 export apiManagementName
 export batchAccountName
 export cosmosAccountName
@@ -18,7 +19,6 @@ export resourceGroupName
 export subscription
 export storageAccountName
 export webApiAdClientId
-export webApiAdClientSecret
 export azureBatchObjectId
 export releaseVersion
 export templatesFolder="${0%/*}/../templates/"
@@ -35,8 +35,6 @@ Usage: ${BASH_SOURCE}
 -p <publisher email>
 -r <resource group>
 -s <subscription name or ID>
--c <client ID>
--t <client secret>
 -v <release version>
 -b <Azure Batch object ID>
 [-d <pass \"true\" to force VM pools to drop>]
@@ -49,8 +47,6 @@ Subscription - The Azure subscription name or ID.
 Environment - The deployment environment. Supported values dev, prod.
 Organization name - The name of organization.
 Publisher email - The notification email.
-Client ID - The REST API OAuth2 client ID.
-Client Secret - The REST API OAuth2 client secret.
 Azure Batch object ID - The Azure AD object ID for Microsoft Azure Batch enterprise application, application ID ddbf3205-c6bd-46ae-8127-60eb93363864
 Release Version - The deployment release version.
 Azure region - The deployment location.
@@ -87,7 +83,7 @@ onExit-install() {
 trap 'onExit-install' EXIT
 
 # Read script arguments
-while getopts ":r:s:l:e:o:p:c:t:b:v:d:w:" option; do
+while getopts ":r:s:l:e:o:p:b:v:d:w:" option; do
     case $option in
     r) resourceGroupName=${OPTARG} ;;
     s) subscription=${OPTARG} ;;
@@ -95,8 +91,6 @@ while getopts ":r:s:l:e:o:p:c:t:b:v:d:w:" option; do
     e) environment=${OPTARG} ;;
     o) orgName=${OPTARG} ;;
     p) publisherEmail=${OPTARG} ;;
-    c) webApiAdClientId=${OPTARG} ;;
-    t) webApiAdClientSecret=${OPTARG} ;;
     b) azureBatchObjectId=${OPTARG} ;;
     v) releaseVersion=${OPTARG} ;;
     d) dropPools=${OPTARG} ;;
@@ -105,7 +99,7 @@ while getopts ":r:s:l:e:o:p:c:t:b:v:d:w:" option; do
     esac
 done
 
-if [[ -z $resourceGroupName ]] || [[ -z $subscription ]] || [[ -z $location ]] || [[ -z $environment ]] || [[ -z $orgName ]] || [[ -z $publisherEmail ]] || [[ -z $webApiAdClientId ]] || [[ -z $webApiAdClientSecret ]] || [[ -z $azureBatchObjectId ]] || [[ -z $releaseVersion ]]; then
+if [[ -z $resourceGroupName ]] || [[ -z $subscription ]] || [[ -z $location ]] || [[ -z $environment ]] || [[ -z $orgName ]] || [[ -z $publisherEmail ]] || [[ -z $azureBatchObjectId ]] || [[ -z $releaseVersion ]]; then
     exitWithUsageInfo
 fi
 
@@ -180,7 +174,7 @@ function install() {
     . "${0%/*}/create-resource-group.sh"
     . "${0%/*}/wait-for-pending-deployments.sh"
     . "${0%/*}/create-storage-account.sh"
-    . "${0%/*}/get-resource-names.sh"
+    . "${0%/*}/create-managed-identity.sh"
     . "${0%/*}/deploy-e2e-test-site.sh"
 
     echo "Starting parallel processes..."
