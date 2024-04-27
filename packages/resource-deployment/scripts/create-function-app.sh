@@ -8,7 +8,7 @@ set -eo pipefail
 
 export resourceGroupName
 export resourceName
-export webApiAdClientId
+export webApiIdentityClientId
 export environment
 export keyVault
 export principalId
@@ -37,22 +37,25 @@ Usage: ${BASH_SOURCE} \
     exit 1
 }
 
-addAadAcl() {
+getAllowedApplications() {
     if [[ $environment == "prod" ]] || [[ $environment == "prod-pr" ]]; then
-        aclFilePath="${0%/*}/../templates/web-api-aad-acl-prod.json"
+        aclFilePath="${0%/*}/../templates/web-api-aad-acl-prod.txt"
     elif [[ $environment == "ppe" ]] || [[ $environment == "ppe-pr" ]]; then
-        aclFilePath="${0%/*}/../templates/web-api-aad-acl-ppe.json"
+        aclFilePath="${0%/*}/../templates/web-api-aad-acl-ppe.txt"
     else
-        aclFilePath="${0%/*}/../templates/web-api-aad-acl-dev.json"
+        aclFilePath="${0%/*}/../templates/web-api-aad-acl-dev.txt"
     fi
 
     if [[ -f $aclFilePath ]]; then
-        echo "Updating Azure Functions ACL for $webApiFuncTemplateFilePath template..."
-        acl=$(<$aclFilePath)
-        tempFilePath="${0%/*}/temp-$(date +%s)$RANDOM.json"
-        jq "if .resources[].properties.siteConfig.appSettings | map(.name == \"WEBSITE_AUTH_AAD_ACL\") | any then . else .resources[].properties.siteConfig.appSettings += [$acl] end" $webApiFuncTemplateFilePath >$tempFilePath && mv $tempFilePath $webApiFuncTemplateFilePath
+        allowedApplications=$(<$aclFilePath)
     else
         echo "Azure Functions ACL configuration file not found. Expected configuration file $aclFilePath"
+    fi
+
+    if [[ -z $allowedApplications ]]; then
+        allowedApplications="$webApiIdentityClientId"
+    else
+        allowedApplications="$allowedApplications,$webApiIdentityClientId"
     fi
 }
 
@@ -171,7 +174,7 @@ deployFunctionApp() {
 }
 
 function deployWebApiFunction() {
-    deployFunctionApp "web-api-allyfuncapp" "$webApiFuncTemplateFilePath" "$webApiFuncAppName" "clientId=$webApiAdClientId"
+    deployFunctionApp "web-api-allyfuncapp" "$webApiFuncTemplateFilePath" "$webApiFuncAppName" "clientId=$webApiIdentityClientId allowedApplications=$allowedApplications"
 }
 
 function deployWebWorkersFunction() {
@@ -273,7 +276,7 @@ function setupAzureFunctions() {
 while getopts ":r:c:e:d:v:" option; do
     case $option in
     r) resourceGroupName=${OPTARG} ;;
-    c) webApiAdClientId=${OPTARG} ;;
+    c) webApiIdentityClientId=${OPTARG} ;;
     e) environment=${OPTARG} ;;
     d) dropFolder=${OPTARG} ;;
     v) releaseVersion=${OPTARG} ;;
@@ -281,13 +284,13 @@ while getopts ":r:c:e:d:v:" option; do
     esac
 done
 
-if [[ -z $resourceGroupName ]] || [[ -z $environment ]] || [[ -z $releaseVersion ]] || [[ -z $webApiAdClientId ]]; then
+if [[ -z $resourceGroupName ]] || [[ -z $environment ]] || [[ -z $releaseVersion ]] || [[ -z $webApiIdentityClientId ]]; then
     exitWithUsageInfo
 fi
 
 echo "Setting up function apps with arguments:
   resourceGroupName: $resourceGroupName
-  webApiAdClientId: $webApiAdClientId
+  webApiIdentityClientId: $webApiIdentityClientId
   environment: $environment
   dropFolder: $dropFolder
   releaseVersion: $releaseVersion
@@ -296,5 +299,5 @@ echo "Setting up function apps with arguments:
 . "${0%/*}/process-utilities.sh"
 . "${0%/*}/get-resource-names.sh"
 
-addAadAcl
+getAllowedApplications
 setupAzureFunctions

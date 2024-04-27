@@ -108,7 +108,8 @@ pushSecretsToKeyVault() (
 
     pushSecretToKeyVault "storageAccountName" "$storageAccountName"
 
-    pushSecretToKeyVault "restApiSpAppId" "$webApiAdClientId"
+    pushSecretToKeyVault "webApiIdentityClientId" "$webApiIdentityClientId"
+    pushSecretToKeyVault "webApiIdentityObjectId" "$webApiIdentityObjectId"
 
     getTenantId
     pushSecretToKeyVault "authorityUrl" "https://login.microsoftonline.com/${tenantId}"
@@ -125,13 +126,13 @@ pushSecretsToKeyVault() (
 while getopts ":r:c:" option; do
     case $option in
     r) resourceGroupName=${OPTARG} ;;
-    c) webApiAdClientId=${OPTARG} ;;
+    c) webApiIdentityClientId=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
 
 # Print script usage help
-if [[ -z $resourceGroupName ]] || [[ -z $webApiAdClientId ]]; then
+if [[ -z $resourceGroupName ]] || [[ -z $webApiIdentityClientId ]]; then
     exitWithUsageInfo
 fi
 

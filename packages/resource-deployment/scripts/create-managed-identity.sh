@@ -28,7 +28,8 @@ fi
 
 . "${0%/*}/get-resource-names.sh"
 
-# The webApiAdClientId is a global variable
-webApiAdClientId=$(az identity create --resource-group "${resourceGroupName}" --name "${webApiManagedIdentityName}" --query "clientId" -o tsv)
+# The webApiIdentityClientId and webApiIdentityObjectId are global variables
+webApiIdentityClientId=$(az identity create --resource-group "${resourceGroupName}" --name "${webApiManagedIdentityName}" --query "clientId" -o tsv)
+webApiIdentityObjectId=$(az identity show --resource-group "${resourceGroupName}" --name "${webApiManagedIdentityName}" --query "principalId" -o tsv)
 
-echo "Created ${webApiManagedIdentityName} managed identity, client ID ${webApiAdClientId}"
+echo "Created ${webApiManagedIdentityName} managed identity, client ID ${webApiIdentityClientId}"

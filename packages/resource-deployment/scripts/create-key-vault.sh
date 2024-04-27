@@ -88,7 +88,7 @@ function setupKeyVaultResources() {
 while getopts ":r:c:b:e:" option; do
     case $option in
     r) resourceGroupName=${OPTARG} ;;
-    c) webApiAdClientId=${OPTARG} ;;
+    c) webApiIdentityClientId=${OPTARG} ;;
     b) azureBatchObjectId=${OPTARG} ;;
     e) environment=${OPTARG} ;;
     *) exitWithUsageInfo ;;
@@ -96,7 +96,7 @@ while getopts ":r:c:b:e:" option; do
 done
 
 # Print script usage help
-if [[ -z $resourceGroupName ]] || [[ -z $webApiAdClientId ]] || [[ -z $azureBatchObjectId ]]; then
+if [[ -z $resourceGroupName ]] || [[ -z $webApiIdentityClientId ]] || [[ -z $azureBatchObjectId ]]; then
     exitWithUsageInfo
 fi
 

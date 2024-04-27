@@ -34,7 +34,7 @@ describe(getProcessLifeCycleContainer, () => {
 
     it('verifies A11yServiceClient registration', async () => {
         secretProviderMock
-            .setup(async (s) => s.getSecret('restApiSpAppId'))
+            .setup(async (s) => s.getSecret('webApiIdentityClientId'))
             .returns(async () => Promise.resolve('sp app id'))
             .verifiable();
         secretProviderMock
