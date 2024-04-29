@@ -90,7 +90,7 @@
         "semver": ">=7.5.2"
     },
     "dependencies": {
-        "accessibility-insights-report": "^4.8.0"
+        "accessibility-insights-report": "4.8.0"
     },
     "packageManager": "yarn@3.2.2"
 }

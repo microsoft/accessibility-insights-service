@@ -49,7 +49,7 @@
         "@crawlee/puppeteer": "^3.5.0",
         "@medv/finder": "^2.1.0",
         "@sindresorhus/fnv1a": "^2.0.1",
-        "accessibility-insights-report": "^4.8.0",
+        "accessibility-insights-report": "4.8.0",
         "axe-core": "4.8.4",
         "axe-core-scanner": "workspace:*",
         "dotenv": "^16.0.1",
