@@ -6,10 +6,11 @@ import { backOff, IBackOffOptions } from 'exponential-backoff';
 export declare type ExponentialRetryOptions = Partial<IBackOffOptions>;
 
 export const exponentialRetryOptions: ExponentialRetryOptions = {
+    jitter: 'full',
     delayFirstAttempt: false,
     numOfAttempts: 5,
     maxDelay: 6000,
-    startingDelay: 0,
+    startingDelay: 200,
     retry: () => true,
 };
 

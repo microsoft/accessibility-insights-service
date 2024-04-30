@@ -8,7 +8,7 @@ import { ManagedIdentityCredential, TokenCredential, GetTokenOptions } from '@az
 import NodeCache from 'node-cache';
 import { Mutex } from 'async-mutex';
 import moment from 'moment';
-import { executeWithExponentialRetry, ExponentialRetryOptions, System } from 'common';
+import { executeWithExponentialRetry, System } from 'common';
 
 // Get a token using HTTP
 // https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/how-to-use-vm-token#get-a-token-using-http
@@ -24,20 +24,10 @@ export class ManagedIdentityCredentialCache implements TokenCredential {
 
     private static readonly tokenValidForSec = 10 * 60;
 
-    private static readonly msiRetryOptions: ExponentialRetryOptions = {
-        jitter: 'full',
-        delayFirstAttempt: false,
-        numOfAttempts: 5,
-        maxDelay: 6000,
-        startingDelay: 200,
-        retry: () => true,
-    };
-
     constructor(
         private readonly managedIdentityCredential: ManagedIdentityCredential = new ManagedIdentityCredential(),
         private readonly tokenCache: NodeCache = new NodeCache({ checkperiod: ManagedIdentityCredentialCache.cacheCheckPeriodInSeconds }),
         private readonly mutex: Mutex = new Mutex(),
-        private readonly retryOptions: ExponentialRetryOptions = ManagedIdentityCredentialCache.msiRetryOptions,
     ) {}
 
     public async getToken(scopes: string | string[], options?: GetTokenOptions): Promise<AccessToken> {
@@ -80,7 +70,7 @@ export class ManagedIdentityCredentialCache implements TokenCredential {
             }
 
             return token;
-        }, this.retryOptions);
+        });
     }
 
     private getResourceUrl(scopes: string | string[]): string {

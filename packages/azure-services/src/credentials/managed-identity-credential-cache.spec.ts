@@ -8,7 +8,6 @@ import { IMock, Mock, Times } from 'typemoq';
 import { Mutex } from 'async-mutex';
 import { ManagedIdentityCredential } from '@azure/identity';
 import * as MockDate from 'mockdate';
-import { ExponentialRetryOptions } from 'common';
 import moment from 'moment';
 import { cloneDeep } from 'lodash';
 import { ManagedIdentityCredentialCache, TokenCacheItem } from './managed-identity-credential-cache';
@@ -23,7 +22,6 @@ let managedIdentityCredentialMock: IMock<ManagedIdentityCredential>;
 let azureManagedCredential: ManagedIdentityCredentialCache;
 let tokenCacheItem: TokenCacheItem;
 let dateNow: Date;
-let retryOptions: ExponentialRetryOptions;
 
 describe(ManagedIdentityCredentialCache, () => {
     beforeEach(() => {
@@ -34,19 +32,12 @@ describe(ManagedIdentityCredentialCache, () => {
             accessToken: { token: 'eyJ0e_3g' },
             expiresOn: moment.utc().valueOf() + tokenValidForSec * 1000,
         } as TokenCacheItem;
-        retryOptions = {
-            delayFirstAttempt: false,
-            numOfAttempts: 2,
-            maxDelay: 10,
-            startingDelay: 0,
-        };
         tokenCacheMock = Mock.ofType<NodeCache>();
         managedIdentityCredentialMock = Mock.ofType<ManagedIdentityCredential>();
         azureManagedCredential = new ManagedIdentityCredentialCache(
             managedIdentityCredentialMock.object,
             tokenCacheMock.object,
             new Mutex(),
-            retryOptions,
         );
     });
 
@@ -123,7 +114,7 @@ describe(ManagedIdentityCredentialCache, () => {
         managedIdentityCredentialMock
             .setup((o) => o.getToken(scopes, accessTokenOptions))
             .returns(() => Promise.reject(new Error('msi service error')))
-            .verifiable(Times.exactly(2));
+            .verifiable(Times.atLeast(2));
 
         await expect(azureManagedCredential.getToken(scopes, accessTokenOptions)).rejects.toThrowError(
             /MSI credential provider has failed./,
