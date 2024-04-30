@@ -38,27 +38,17 @@ export class PageScanProcessor {
                 return { error: this.page.browserError, pageResponseCode: this.page.browserError.statusCode };
             }
 
-            const pageState = await this.capturePageState();
-
             privacyScanResults = await this.runPrivacyScan(scanMetadata.url);
-            privacyScanResults = { ...privacyScanResults, ...pageState };
-
             await this.deepScanner.runDeepScan(pageScanResult, websiteScanData, this.page);
+
+            // Taking a screenshot of the page might break the page layout. Run at the end of the workflow.
+            const pageState = await this.page.capturePageState();
+            privacyScanResults = { ...privacyScanResults, ...pageState };
         } finally {
             await this.page.close();
         }
 
         return privacyScanResults;
-    }
-
-    private async capturePageState(): Promise<PrivacyScanResult> {
-        const pageSnapshot = await this.page.getPageSnapshot();
-        const pageScreenshot = await this.page.getPageScreenshot();
-
-        return {
-            pageSnapshot,
-            pageScreenshot,
-        };
     }
 
     private async runPrivacyScan(url: string): Promise<PrivacyScanResult> {
