@@ -38,6 +38,11 @@ export interface PageOptions {
     enableAuthentication?: boolean;
 }
 
+export interface PageState {
+    pageSnapshot?: string;
+    pageScreenshot?: string;
+}
+
 type Operation = 'load' | 'reload' | 'analysis' | 'auth';
 
 @injectable()
@@ -57,6 +62,8 @@ export class Page {
     public pageNavigationTiming: PageNavigationTiming;
 
     public pageAnalysisResult: PageAnalysisResult;
+
+    public pageState: PageState;
 
     public requestUrl: string;
 
@@ -116,13 +123,15 @@ export class Page {
         }
     }
 
-    public async analyze(url: string, options?: PageOptions): Promise<void> {
+    public async analyze(url: string, options?: PageOptions): Promise<PageAnalysisResult> {
         if (this.page === undefined) {
             await this.create();
         }
 
         await this.setInitialState(url, options);
         await this.analyzeImpl();
+
+        return this.pageAnalysisResult;
     }
 
     public async navigate(url: string, options?: PageOptions): Promise<void> {
@@ -159,6 +168,9 @@ export class Page {
         }
     }
 
+    /**
+     * Taking a screenshot of the page might break the page layout. Load the page again to fix the page layout.
+     */
     public async getPageScreenshot(): Promise<string> {
         // Scrolling to the top of the page to capture full page screenshot.
         await this.scrollToPageTop(this.page);
@@ -186,16 +198,30 @@ export class Page {
     }
 
     public async getPageSnapshot(): Promise<string> {
-        // Puppeteer may fail to generate mhtml snapshot.
+        // Puppeteer may fail to generate MSHTML snapshot.
         try {
             const { data } = await this.devToolsSession.send(this.page, 'Page.captureSnapshot', { format: 'mhtml' });
 
             return data;
         } catch (error) {
-            this.logger?.logError('Failed to generate page mhtml snapshot file', { error: System.serializeError(error) });
+            this.logger?.logError('Failed to generate page MSHTML snapshot file', { error: System.serializeError(error) });
 
             return '';
         }
+    }
+
+    /**
+     * Taking a screenshot of the page might break the page layout. Load the page again to fix the page layout.
+     */
+    public async capturePageState(): Promise<PageState> {
+        const pageSnapshot = await this.getPageSnapshot();
+        const pageScreenshot = await this.getPageScreenshot();
+        this.pageState = {
+            pageSnapshot,
+            pageScreenshot,
+        };
+
+        return this.pageState;
     }
 
     public async getAllCookies(): Promise<Puppeteer.Protocol.Network.Cookie[]> {

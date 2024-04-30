@@ -44,14 +44,6 @@ describe(PageScanProcessor, () => {
             id: 'id',
             deepScan: undefined,
         };
-        pageMock
-            .setup((o) => o.getPageScreenshot())
-            .returns(() => Promise.resolve(pageScreenshot))
-            .verifiable();
-        pageMock
-            .setup((o) => o.getPageSnapshot())
-            .returns(() => Promise.resolve(pageSnapshot))
-            .verifiable();
         privacyScanResult = { scannedUrl: url } as PrivacyScanResult;
         websiteScanData = { id: 'websiteScanDataId' } as WebsiteScanData;
         pageMetadata = {
@@ -82,6 +74,7 @@ describe(PageScanProcessor, () => {
     });
 
     it('run successful scan', async () => {
+        setupCapturePageState();
         setupOpenPage();
         setupClosePage();
         privacyScannerMock
@@ -95,6 +88,7 @@ describe(PageScanProcessor, () => {
     });
 
     it('run successful scan with known pages list', async () => {
+        setupCapturePageState();
         setupOpenPage();
         setupClosePage();
         privacyScannerMock
@@ -175,5 +169,12 @@ describe(PageScanProcessor, () => {
 
     function setupClosePage(): void {
         pageMock.setup((p) => p.close()).verifiable();
+    }
+
+    function setupCapturePageState(): void {
+        pageMock
+            .setup((o) => o.capturePageState())
+            .returns(() => Promise.resolve({ pageScreenshot, pageSnapshot }))
+            .verifiable();
     }
 });

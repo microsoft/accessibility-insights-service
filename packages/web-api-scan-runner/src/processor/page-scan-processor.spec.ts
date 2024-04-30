@@ -118,7 +118,7 @@ describe(PageScanProcessor, () => {
 
         setupReopenBrowser();
         setupNavigatePage(url, true);
-        setupGetPageState();
+        setupCapturePageState();
         setupClosePage();
         axeScannerMock
             .setup((s) => s.scan(pageMock.object))
@@ -163,7 +163,7 @@ describe(PageScanProcessor, () => {
 
         setupReopenBrowser();
         setupNavigatePage();
-        setupGetPageState();
+        setupCapturePageState();
         setupClosePage();
         axeScannerMock
             .setup((s) => s.scan(pageMock.object))
@@ -184,7 +184,6 @@ describe(PageScanProcessor, () => {
         const error = new Error('test error');
 
         setupNavigatePage();
-        setupGetPageState();
         setupClosePage();
         axeScannerMock.setup((s) => s.scan(pageMock.object)).throws(error);
         deepScannerMock.setup((o) => o.runDeepScan(It.isAny(), websiteScanData, It.isAny())).verifiable(Times.never());
@@ -228,7 +227,6 @@ describe(PageScanProcessor, () => {
         const error = new Error('test error');
 
         setupNavigatePage();
-        setupGetPageState();
         setupClosePage();
         axeScannerMock
             .setup((s) => s.scan(pageMock.object))
@@ -252,13 +250,9 @@ function setupClosePage(): void {
     pageMock.setup((p) => p.close()).verifiable();
 }
 
-function setupGetPageState(): void {
+function setupCapturePageState(): void {
     pageMock
-        .setup((o) => o.getPageScreenshot())
-        .returns(() => Promise.resolve(pageScreenshot))
-        .verifiable();
-    pageMock
-        .setup((o) => o.getPageSnapshot())
-        .returns(() => Promise.resolve(pageSnapshot))
+        .setup((o) => o.capturePageState())
+        .returns(() => Promise.resolve({ pageScreenshot, pageSnapshot }))
         .verifiable();
 }
