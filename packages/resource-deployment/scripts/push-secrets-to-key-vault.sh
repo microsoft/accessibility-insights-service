@@ -109,7 +109,6 @@ pushSecretsToKeyVault() (
     pushSecretToKeyVault "storageAccountName" "$storageAccountName"
 
     pushSecretToKeyVault "webApiIdentityClientId" "$webApiIdentityClientId"
-    pushSecretToKeyVault "webApiIdentityObjectId" "$webApiIdentityObjectId"
 
     getTenantId
     pushSecretToKeyVault "authorityUrl" "https://login.microsoftonline.com/${tenantId}"

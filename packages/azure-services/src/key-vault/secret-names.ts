@@ -5,7 +5,6 @@ export const secretNames = {
     cosmosDbUrl: 'cosmosDbUrl',
     storageAccountName: 'storageAccountName',
     webApiIdentityClientId: 'webApiIdentityClientId',
-    webApiIdentityObjectId: 'webApiIdentityObjectId',
     authorityUrl: 'authorityUrl',
     appInsightsApiKey: 'appInsightsApiKey',
     azureAuthClientName: 'azureAuthClientName',

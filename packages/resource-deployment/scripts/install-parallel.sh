@@ -19,7 +19,6 @@ export resourceGroupName
 export subscription
 export storageAccountName
 export webApiIdentityClientId
-export webApiIdentityObjectId
 export azureBatchObjectId
 export releaseVersion
 export templatesFolder="${0%/*}/../templates/"
