@@ -4,7 +4,7 @@
 import * as nodeUrl from 'url';
 import { injectable } from 'inversify';
 import { AccessToken } from '@azure/core-auth';
-import { ManagedIdentityCredential, TokenCredential, GetTokenOptions } from '@azure/identity';
+import { ManagedIdentityCredential, TokenCredential, GetTokenOptions, ManagedIdentityCredentialClientIdOptions } from '@azure/identity';
 import NodeCache from 'node-cache';
 import { Mutex } from 'async-mutex';
 import moment from 'moment';
@@ -30,17 +30,23 @@ export class ManagedIdentityCredentialCache implements TokenCredential {
         private readonly mutex: Mutex = new Mutex(),
     ) {}
 
-    public async getToken(scopes: string | string[], options?: GetTokenOptions): Promise<AccessToken> {
+    public async getToken(
+        scopes: string | string[],
+        options?: GetTokenOptions & ManagedIdentityCredentialClientIdOptions,
+    ): Promise<AccessToken> {
         // Prevent multiple async calls to IMDS to avoid request rejection
         // The subsequent calls for the same scope will use token from a cache
         return this.mutex.runExclusive(async () => this.getMsiToken(scopes, options));
     }
 
-    private async getMsiToken(scopes: string | string[], options?: GetTokenOptions): Promise<AccessToken> {
-        const resourceUrl = this.getResourceUrl(scopes);
+    private async getMsiToken(
+        scopes: string | string[],
+        options?: GetTokenOptions & ManagedIdentityCredentialClientIdOptions,
+    ): Promise<AccessToken> {
+        const cacheKey = this.getCacheKey(scopes, options);
 
         // Try get token from the cache
-        let tokenCacheItem = this.tokenCache.get<TokenCacheItem>(resourceUrl);
+        let tokenCacheItem = this.tokenCache.get<TokenCacheItem>(cacheKey);
         if (tokenCacheItem !== undefined && tokenCacheItem.expiresOn > moment.utc().valueOf()) {
             return tokenCacheItem.accessToken;
         }
@@ -51,7 +57,7 @@ export class ManagedIdentityCredentialCache implements TokenCredential {
             expiresOn: moment.utc().valueOf() + ManagedIdentityCredentialCache.tokenValidForSec * 1000,
         };
         this.tokenCache.set<TokenCacheItem>(
-            resourceUrl,
+            cacheKey,
             tokenCacheItem,
             // cache item TTL in seconds
             ManagedIdentityCredentialCache.tokenValidForSec,
@@ -60,17 +66,32 @@ export class ManagedIdentityCredentialCache implements TokenCredential {
         return accessToken;
     }
 
-    private async getAccessToken(scopes: string | string[], options?: GetTokenOptions): Promise<AccessToken> {
+    private async getAccessToken(
+        scopes: string | string[],
+        options?: GetTokenOptions & ManagedIdentityCredentialClientIdOptions,
+    ): Promise<AccessToken> {
         return executeWithExponentialRetry(async () => {
             let token;
             try {
-                token = await this.managedIdentityCredential.getToken(scopes, options);
+                if (options.clientId !== undefined) {
+                    const tokenCredential = new ManagedIdentityCredential({ clientId: options.clientId });
+                    token = await tokenCredential.getToken(scopes, options);
+                } else {
+                    token = await this.managedIdentityCredential.getToken(scopes, options);
+                }
             } catch (error) {
                 throw new Error(`MSI credential provider has failed. ${System.serializeError(error)}`);
             }
 
             return token;
         });
+    }
+
+    private getCacheKey(scopes: string | string[], options?: GetTokenOptions & ManagedIdentityCredentialClientIdOptions): string {
+        const resourceUrl = this.getResourceUrl(scopes);
+        const clientId = options.clientId;
+
+        return clientId !== undefined ? `${resourceUrl}:${clientId}` : resourceUrl;
     }
 
     private getResourceUrl(scopes: string | string[]): string {
@@ -80,8 +101,12 @@ export class ManagedIdentityCredentialCache implements TokenCredential {
         } else {
             scope = scopes[0];
         }
-        const scopeUrl = nodeUrl.parse(scope);
+        try {
+            const scopeUrl = nodeUrl.parse(scope);
 
-        return scopeUrl.hostname;
+            return scopeUrl.hostname ?? scope;
+        } catch (error) {
+            return scope;
+        }
     }
 }

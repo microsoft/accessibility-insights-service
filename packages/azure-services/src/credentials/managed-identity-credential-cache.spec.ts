@@ -6,7 +6,7 @@ import 'reflect-metadata';
 import NodeCache from 'node-cache';
 import { IMock, Mock, Times } from 'typemoq';
 import { Mutex } from 'async-mutex';
-import { ManagedIdentityCredential } from '@azure/identity';
+import { AccessToken, ManagedIdentityCredential } from '@azure/identity';
 import * as MockDate from 'mockdate';
 import moment from 'moment';
 import { cloneDeep } from 'lodash';
@@ -22,6 +22,16 @@ let managedIdentityCredentialMock: IMock<ManagedIdentityCredential>;
 let azureManagedCredential: ManagedIdentityCredentialCache;
 let tokenCacheItem: TokenCacheItem;
 let dateNow: Date;
+
+jest.mock('@azure/identity', () => {
+    return {
+        ['ManagedIdentityCredential']: class ManagedIdentityCredentialStub {
+            public async getToken(): Promise<AccessToken> {
+                return tokenCacheItem.accessToken;
+            }
+        },
+    };
+});
 
 describe(ManagedIdentityCredentialCache, () => {
     beforeEach(() => {
@@ -45,6 +55,22 @@ describe(ManagedIdentityCredentialCache, () => {
         MockDate.reset();
         managedIdentityCredentialMock.verifyAll();
         tokenCacheMock.verifyAll();
+    });
+
+    it('get token from a cache for a guid scope', async () => {
+        const cacheKey = 'resource-guid-1:clientId-1';
+        tokenCacheMock
+            .setup((o) => o.get(cacheKey))
+            .returns(() => tokenCacheItem)
+            .verifiable();
+        tokenCacheMock
+            .setup((o) => o.set(cacheKey, tokenCacheItem, tokenValidForSec))
+            .returns(() => true)
+            .verifiable(Times.never());
+
+        const actualAccessToken = await azureManagedCredential.getToken('resource-guid-1', { clientId: 'clientId-1' });
+
+        expect(actualAccessToken).toEqual(tokenCacheItem.accessToken);
     });
 
     it('get token from a service on cache miss', async () => {
