@@ -3,6 +3,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
 
+# shellcheck disable=SC1091
 set -eo pipefail
 
 exitWithUsageInfo() {
@@ -13,10 +14,9 @@ Usage: ${BASH_SOURCE} -r <resource group> [-n <name of the identity resource>]
 }
 
 # Read script arguments
-while getopts ":r:n:" option; do
-    case $option in
+while getopts ":r:" option; do
+    case ${option} in
     r) resourceGroupName=${OPTARG} ;;
-    n) managedIdentityName=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
@@ -28,7 +28,7 @@ fi
 
 . "${0%/*}/get-resource-names.sh"
 
-# The webApiIdentityClientId are global variables
-webApiIdentityClientId=$(az identity create --resource-group "${resourceGroupName}" --name "${webApiManagedIdentityName}" --query "clientId" -o tsv)
+identity=$(az identity create --resource-group "${resourceGroupName}" --name "${webApiManagedIdentityName}")
 
-echo "Created ${webApiManagedIdentityName} managed identity, client ID ${webApiIdentityClientId}"
+echo "Created ${webApiManagedIdentityName} user-managed identity."
+echo "${identity}"
