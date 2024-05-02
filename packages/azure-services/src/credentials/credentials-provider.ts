@@ -5,13 +5,13 @@ import { TokenCredential, AzureCliCredential } from '@azure/identity';
 import { inject, injectable } from 'inversify';
 import { iocTypeNames } from '../ioc-types';
 import { Credentials, MSICredentialsProvider, AuthenticationMethod } from './msi-credential-provider';
-import { ManagedIdentityCredentialCache } from './managed-identity-credential-cache';
+import { ManagedIdentityCredential } from './managed-identity-credential-cache';
 
 @injectable()
 export class CredentialsProvider {
     constructor(
         @inject(MSICredentialsProvider) private readonly msiCredentialProvider: MSICredentialsProvider,
-        @inject(ManagedIdentityCredentialCache) private readonly managedIdentityCredentialCache: ManagedIdentityCredentialCache,
+        @inject(ManagedIdentityCredential) private readonly managedIdentityCredential: ManagedIdentityCredential,
         @inject(iocTypeNames.AuthenticationMethod) private readonly authenticationMethod: AuthenticationMethod,
     ) {}
 
@@ -24,7 +24,7 @@ export class CredentialsProvider {
             return new AzureCliCredential();
         } else {
             // must be object instance to reuse an internal cache
-            return this.managedIdentityCredentialCache;
+            return this.managedIdentityCredential;
         }
     }
 

@@ -4,7 +4,12 @@
 import * as nodeUrl from 'url';
 import { injectable } from 'inversify';
 import { AccessToken } from '@azure/core-auth';
-import { ManagedIdentityCredential, TokenCredential, GetTokenOptions, ManagedIdentityCredentialClientIdOptions } from '@azure/identity';
+import {
+    ManagedIdentityCredential as IdentityCredentialProvider,
+    TokenCredential,
+    GetTokenOptions,
+    ManagedIdentityCredentialClientIdOptions,
+} from '@azure/identity';
 import NodeCache from 'node-cache';
 import { Mutex } from 'async-mutex';
 import moment from 'moment';
@@ -19,14 +24,14 @@ export interface TokenCacheItem {
 }
 
 @injectable()
-export class ManagedIdentityCredentialCache implements TokenCredential {
+export class ManagedIdentityCredential implements TokenCredential {
     private static readonly cacheCheckPeriodInSeconds = 60;
 
     private static readonly tokenValidForSec = 10 * 60;
 
     constructor(
-        private readonly managedIdentityCredential: ManagedIdentityCredential = new ManagedIdentityCredential(),
-        private readonly tokenCache: NodeCache = new NodeCache({ checkperiod: ManagedIdentityCredentialCache.cacheCheckPeriodInSeconds }),
+        private readonly identityCredentialProvider: IdentityCredentialProvider = new IdentityCredentialProvider(),
+        private readonly tokenCache: NodeCache = new NodeCache({ checkperiod: ManagedIdentityCredential.cacheCheckPeriodInSeconds }),
         private readonly mutex: Mutex = new Mutex(),
     ) {}
 
@@ -54,13 +59,13 @@ export class ManagedIdentityCredentialCache implements TokenCredential {
         const accessToken = await this.getAccessToken(scopes, options);
         tokenCacheItem = {
             accessToken,
-            expiresOn: moment.utc().valueOf() + ManagedIdentityCredentialCache.tokenValidForSec * 1000,
+            expiresOn: moment.utc().valueOf() + ManagedIdentityCredential.tokenValidForSec * 1000,
         };
         this.tokenCache.set<TokenCacheItem>(
             cacheKey,
             tokenCacheItem,
             // cache item TTL in seconds
-            ManagedIdentityCredentialCache.tokenValidForSec,
+            ManagedIdentityCredential.tokenValidForSec,
         );
 
         return accessToken;
@@ -74,10 +79,10 @@ export class ManagedIdentityCredentialCache implements TokenCredential {
             let token;
             try {
                 if (options.clientId !== undefined) {
-                    const tokenCredential = new ManagedIdentityCredential({ clientId: options.clientId });
+                    const tokenCredential = new IdentityCredentialProvider({ clientId: options.clientId });
                     token = await tokenCredential.getToken(scopes, options);
                 } else {
-                    token = await this.managedIdentityCredential.getToken(scopes, options);
+                    token = await this.identityCredentialProvider.getToken(scopes, options);
                 }
             } catch (error) {
                 throw new Error(`MSI credential provider has failed. ${System.serializeError(error)}`);

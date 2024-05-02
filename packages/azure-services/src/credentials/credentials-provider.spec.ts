@@ -7,7 +7,7 @@ import { IMock, Mock, Times } from 'typemoq';
 import { AzureCliCredential } from '@azure/identity';
 import { CredentialsProvider } from './credentials-provider';
 import { MSICredentialsProvider, AuthenticationMethod } from './msi-credential-provider';
-import { ManagedIdentityCredentialCache } from './managed-identity-credential-cache';
+import { ManagedIdentityCredential } from './managed-identity-credential-cache';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -16,14 +16,14 @@ const credentialsStub = 'test credentials' as any;
 describe(CredentialsProvider, () => {
     let testSubject: CredentialsProvider;
     let msiCredProviderMock: IMock<MSICredentialsProvider>;
-    let managedIdentityCredentialCacheMock: IMock<ManagedIdentityCredentialCache>;
+    let managedIdentityCredentialMock: IMock<ManagedIdentityCredential>;
 
     beforeEach(() => {
         msiCredProviderMock = Mock.ofType(MSICredentialsProvider);
-        managedIdentityCredentialCacheMock = Mock.ofType(ManagedIdentityCredentialCache);
+        managedIdentityCredentialMock = Mock.ofType(ManagedIdentityCredential);
         testSubject = new CredentialsProvider(
             msiCredProviderMock.object,
-            managedIdentityCredentialCacheMock.object,
+            managedIdentityCredentialMock.object,
             AuthenticationMethod.managedIdentity,
         );
     });
@@ -42,15 +42,15 @@ describe(CredentialsProvider, () => {
         expect(actualCredentials).toBe(credentialsStub);
     });
 
-    it('getAzureCredential creates ManagedIdentityCredentialCache instance', () => {
+    it('getAzureCredential creates ManagedIdentityCredential instance', () => {
         const credential = testSubject.getAzureCredential();
-        expect(credential).toBe(managedIdentityCredentialCacheMock.object);
+        expect(credential).toBe(managedIdentityCredentialMock.object);
     });
 
     it('getAzureCredential creates AzureCliCredential instance', () => {
         testSubject = new CredentialsProvider(
             msiCredProviderMock.object,
-            managedIdentityCredentialCacheMock.object,
+            managedIdentityCredentialMock.object,
             AuthenticationMethod.azureCliCredentials,
         );
         const credential = testSubject.getAzureCredential();

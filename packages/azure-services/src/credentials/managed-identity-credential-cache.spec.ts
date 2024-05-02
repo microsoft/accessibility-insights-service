@@ -6,11 +6,11 @@ import 'reflect-metadata';
 import NodeCache from 'node-cache';
 import { IMock, Mock, Times } from 'typemoq';
 import { Mutex } from 'async-mutex';
-import { AccessToken, ManagedIdentityCredential } from '@azure/identity';
+import { AccessToken, ManagedIdentityCredential as IdentityCredentialProvider } from '@azure/identity';
 import * as MockDate from 'mockdate';
 import moment from 'moment';
 import { cloneDeep } from 'lodash';
-import { ManagedIdentityCredentialCache, TokenCacheItem } from './managed-identity-credential-cache';
+import { ManagedIdentityCredential, TokenCacheItem } from './managed-identity-credential-cache';
 
 const scopes = 'https://vault.azure.net/default';
 const resourceUrl = 'vault.azure.net';
@@ -18,8 +18,8 @@ const accessTokenOptions = {};
 const tokenValidForSec = 10 * 60;
 
 let tokenCacheMock: IMock<NodeCache>;
-let managedIdentityCredentialMock: IMock<ManagedIdentityCredential>;
-let azureManagedCredential: ManagedIdentityCredentialCache;
+let identityCredentialProviderMock: IMock<IdentityCredentialProvider>;
+let azureManagedCredential: ManagedIdentityCredential;
 let tokenCacheItem: TokenCacheItem;
 let dateNow: Date;
 
@@ -33,7 +33,7 @@ jest.mock('@azure/identity', () => {
     };
 });
 
-describe(ManagedIdentityCredentialCache, () => {
+describe(ManagedIdentityCredential, () => {
     beforeEach(() => {
         dateNow = new Date();
         MockDate.set(dateNow);
@@ -43,17 +43,13 @@ describe(ManagedIdentityCredentialCache, () => {
             expiresOn: moment.utc().valueOf() + tokenValidForSec * 1000,
         } as TokenCacheItem;
         tokenCacheMock = Mock.ofType<NodeCache>();
-        managedIdentityCredentialMock = Mock.ofType<ManagedIdentityCredential>();
-        azureManagedCredential = new ManagedIdentityCredentialCache(
-            managedIdentityCredentialMock.object,
-            tokenCacheMock.object,
-            new Mutex(),
-        );
+        identityCredentialProviderMock = Mock.ofType<IdentityCredentialProvider>();
+        azureManagedCredential = new ManagedIdentityCredential(identityCredentialProviderMock.object, tokenCacheMock.object, new Mutex());
     });
 
     afterEach(() => {
         MockDate.reset();
-        managedIdentityCredentialMock.verifyAll();
+        identityCredentialProviderMock.verifyAll();
         tokenCacheMock.verifyAll();
     });
 
@@ -82,7 +78,7 @@ describe(ManagedIdentityCredentialCache, () => {
             .setup((o) => o.set(resourceUrl, tokenCacheItem, tokenValidForSec))
             .returns(() => true)
             .verifiable();
-        managedIdentityCredentialMock
+        identityCredentialProviderMock
             .setup((o) => o.getToken(scopes, accessTokenOptions))
             .returns(() => Promise.resolve(tokenCacheItem.accessToken))
             .verifiable();
@@ -103,7 +99,7 @@ describe(ManagedIdentityCredentialCache, () => {
             .setup((o) => o.set(resourceUrl, tokenCacheItem, tokenValidForSec))
             .returns(() => true)
             .verifiable();
-        managedIdentityCredentialMock
+        identityCredentialProviderMock
             .setup((o) => o.getToken(scopes, accessTokenOptions))
             .returns(() => Promise.resolve(tokenCacheItem.accessToken))
             .verifiable();
@@ -137,7 +133,7 @@ describe(ManagedIdentityCredentialCache, () => {
             .setup((o) => o.set(resourceUrl, tokenCacheItem, tokenValidForSec))
             .returns(() => true)
             .verifiable(Times.never());
-        managedIdentityCredentialMock
+        identityCredentialProviderMock
             .setup((o) => o.getToken(scopes, accessTokenOptions))
             .returns(() => Promise.reject(new Error('msi service error')))
             .verifiable(Times.atLeast(2));
