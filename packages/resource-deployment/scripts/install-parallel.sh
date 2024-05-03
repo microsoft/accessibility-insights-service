@@ -184,7 +184,8 @@ function install() {
 
     . "${0%/*}/create-api-management.sh" &
     apiManagmentProcessId="$!"
-    . "${0%/*}/wait-for-pending-deployments.sh"
+    echo "Waiting for API Management service deployment completion"
+    waitForProcesses apiManagmentProcessId
 
     . "${0%/*}/deploy-e2e-test-site.sh"
 
@@ -213,8 +214,6 @@ function install() {
     . "${0%/*}/create-dashboard.sh" &
     dashboardProcessId="$!"
 
-    echo "Waiting for API Management service deployment completion"
-    waitForProcesses apiManagmentProcessId
     echo "Deploying REST API configuration to API Management service"
     . "${0%/*}/deploy-rest-api.sh"
 
