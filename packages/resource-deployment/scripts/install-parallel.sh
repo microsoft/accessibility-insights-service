@@ -181,8 +181,11 @@ function install() {
     . "${0%/*}/wait-for-pending-deployments.sh"
     . "${0%/*}/create-storage-account.sh"
     . "${0%/*}/get-resource-names.sh"
+
     . "${0%/*}/create-api-management.sh" &
     apiManagmentProcessId="$!"
+    . "${0%/*}/wait-for-pending-deployments.sh"
+
     . "${0%/*}/deploy-e2e-test-site.sh"
 
     echo "Starting parallel processes..."
