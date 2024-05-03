@@ -10,7 +10,7 @@ import { AccessToken, ManagedIdentityCredential as IdentityCredentialProvider } 
 import * as MockDate from 'mockdate';
 import moment from 'moment';
 import { cloneDeep } from 'lodash';
-import { ManagedIdentityCredential, TokenCacheItem } from './managed-identity-credential-cache';
+import { ManagedIdentityCredential, TokenCacheItem } from './managed-identity-credential';
 
 const scopes = 'https://vault.azure.net/default';
 const resourceUrl = 'vault.azure.net';

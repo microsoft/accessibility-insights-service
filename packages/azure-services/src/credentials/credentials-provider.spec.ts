@@ -7,7 +7,7 @@ import { IMock, Mock, Times } from 'typemoq';
 import { AzureCliCredential } from '@azure/identity';
 import { CredentialsProvider } from './credentials-provider';
 import { MSICredentialsProvider, AuthenticationMethod } from './msi-credential-provider';
-import { ManagedIdentityCredential } from './managed-identity-credential-cache';
+import { ManagedIdentityCredential } from './managed-identity-credential';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 

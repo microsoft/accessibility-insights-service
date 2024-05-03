@@ -130,6 +130,7 @@ describe('functional tests', () => {
 
     function getContainer(): Container {
         const container = new Container({ autoBindInjectable: true });
+
         setupRuntimeConfigContainer(container);
         container.bind(GlobalLogger).toDynamicValue((_) => {
             return new GlobalLogger([new ConsoleLoggerClient(container.get(ServiceConfiguration), console)]);
@@ -137,15 +138,9 @@ describe('functional tests', () => {
         registerAzureServicesToContainer(container, CredentialType.AppService);
 
         container.bind(A11yServiceClient).toDynamicValue((_) => {
-            const cred = new A11yServiceCredential(
-                clientId,
-                clientSecret,
-                clientId,
-                `https://login.microsoftonline.com/${tenantId}`,
-                container.get(GlobalLogger),
-            );
+            const cred = new A11yServiceCredential(clientId, clientId);
 
-            return new A11yServiceClient(cred, `https://apim-${apimName}.azure-api.net`, logger);
+            return new A11yServiceClient(cred, `https://apim-${apimName}.azure-api.net`);
         });
 
         return container;

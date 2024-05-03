@@ -106,6 +106,7 @@ export class ManagedIdentityCredential implements TokenCredential {
         } else {
             scope = scopes[0];
         }
+
         try {
             const scopeUrl = nodeUrl.parse(scope);
 

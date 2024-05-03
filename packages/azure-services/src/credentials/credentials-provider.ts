@@ -5,7 +5,7 @@ import { TokenCredential, AzureCliCredential } from '@azure/identity';
 import { inject, injectable } from 'inversify';
 import { iocTypeNames } from '../ioc-types';
 import { Credentials, MSICredentialsProvider, AuthenticationMethod } from './msi-credential-provider';
-import { ManagedIdentityCredential } from './managed-identity-credential-cache';
+import { ManagedIdentityCredential } from './managed-identity-credential';
 
 @injectable()
 export class CredentialsProvider {

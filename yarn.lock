@@ -536,28 +536,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@azure/msal-common@npm:14.1.0":
-  version: 14.1.0
-  resolution: "@azure/msal-common@npm:14.1.0"
-  checksum: 4521867c8b8121dc000eb807b848bca601efe66a2f84dd9be182aae862c367f6301242305a2cf9b6e75800ceb2a7b8a24edd8bd36029e22d7fc81498597a7f8e
-  languageName: node
-  linkType: hard
-
 "@azure/msal-common@npm:14.9.0":
   version: 14.9.0
   resolution: "@azure/msal-common@npm:14.9.0"
   checksum: f5d071c5241aba68a6585eb53fcf049aa976719f31f211c0044c0d0107b7300d4827412ce0389f7e6d3ce7bc6444c20d2baba3e9a7c1a1116ccc1f1b3edd253b
-  languageName: node
-  linkType: hard
-
-"@azure/msal-node@npm:^2.2.0":
-  version: 2.2.0
-  resolution: "@azure/msal-node@npm:2.2.0"
-  dependencies:
-    "@azure/msal-common": 14.1.0
-    jsonwebtoken: ^9.0.0
-    uuid: ^8.3.0
-  checksum: 527cac7821d9abcd5fdcc11058ce0eaaa55cf92dc856c1ebf775e144c90ba651311caa881ff8e2898e48175f54e8694706cc86ee16c5361eac5094fe48f68152
   languageName: node
   linkType: hard
 
@@ -16229,11 +16211,11 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "web-api-client@workspace:packages/web-api-client"
   dependencies:
-    "@azure/msal-node": ^2.2.0
     "@types/got": ^9.6.11
     "@types/jest": ^29.5.0
     "@types/lodash": ^4.14.182
     "@types/node": ^16.18.11
+    azure-services: "workspace:*"
     common: "workspace:*"
     forever-agent: ^0.6.1
     got: ^11.8.5

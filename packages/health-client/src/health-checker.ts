@@ -13,9 +13,8 @@ import { DeploymentHealthChecker } from './deployment-health-checker';
 /* eslint-disable radix, @typescript-eslint/no-explicit-any, @typescript-eslint/strict-boolean-expressions */
 
 type Argv = {
+    scope: string;
     clientId: string;
-    clientSecret: string;
-    authorityUrl: string;
     waitTimeBeforeEvaluationInMinutes: string;
     evaluationIntervalInMinutes: string;
     releaseId: string;
@@ -27,11 +26,14 @@ const testTimeoutInMinutes = 75;
 const argv: Argv = yargs.argv as any;
 
 (async () => {
+    const help = await yargs.getHelp();
+    console.log(help);
+
     const logger = new GlobalLogger([new ConsoleLoggerClient(new ServiceConfiguration(), console)]);
     await logger.setup();
 
-    const serviceCredential = new A11yServiceCredential(argv.clientId, argv.clientSecret, argv.clientId, argv.authorityUrl, logger);
-    const client = new A11yServiceClient(serviceCredential, argv.baseUrl, logger);
+    const serviceCredential = new A11yServiceCredential(argv.scope, argv.clientId);
+    const client = new A11yServiceClient(serviceCredential, argv.baseUrl);
 
     const reportDownloader = new ScanReportDownloader(client, argv.reportDownloadLocation, logger);
 

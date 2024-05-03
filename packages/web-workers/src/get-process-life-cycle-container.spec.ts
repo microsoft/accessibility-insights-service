@@ -37,14 +37,6 @@ describe(getProcessLifeCycleContainer, () => {
             .setup(async (s) => s.getSecret('webApiIdentityClientId'))
             .returns(async () => Promise.resolve('sp app id'))
             .verifiable();
-        secretProviderMock
-            .setup(async (s) => s.getSecret('restApiSpSecret'))
-            .returns(async () => Promise.resolve('sp app secret'))
-            .verifiable();
-        secretProviderMock
-            .setup(async (s) => s.getSecret('authorityUrl'))
-            .returns(async () => Promise.resolve('https://login.microsoft.com/tenantid'))
-            .verifiable();
 
         const a11yServiceClientProvider1 = testSubject.get<A11yServiceClientProvider>(a11yServiceClientTypeNames.A11yServiceClientProvider);
         const a11yServiceClientProvider2 = testSubject.get<A11yServiceClientProvider>(a11yServiceClientTypeNames.A11yServiceClientProvider);
