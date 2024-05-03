@@ -15,15 +15,53 @@ import { DeploymentHealthChecker } from './deployment-health-checker';
 type Argv = {
     scope: string;
     clientId: string;
-    waitTimeBeforeEvaluationInMinutes: string;
-    evaluationIntervalInMinutes: string;
     releaseId: string;
     baseUrl: string;
     reportDownloadLocation: string;
+    waitTimeBeforeEvaluationInMinutes: number;
+    evaluationIntervalInMinutes: number;
+    testsEvaluationTimeoutInMinutes: number;
 };
 
-const testTimeoutInMinutes = 75;
-const argv: Argv = yargs.argv as any;
+const argv: Argv = yargs
+    .options({
+        scope: {
+            type: 'string',
+            describe: 'The App ID or URI of the target resource.',
+        },
+        clientId: {
+            type: 'string',
+            describe: 'The Client ID of the managed identity you would like the token for.',
+        },
+        releaseId: {
+            type: 'string',
+            describe: 'The release ID to evaluate E2E tests for.',
+        },
+        baseUrl: {
+            type: 'string',
+            describe: 'The service endpoint base URL.',
+        },
+        reportDownloadLocation: {
+            type: 'string',
+            describe: 'The report download location.',
+        },
+        waitTimeBeforeEvaluationInMinutes: {
+            type: 'number',
+            describe: 'The wait time before evaluation, minutes.',
+            default: 1,
+        },
+        evaluationIntervalInMinutes: {
+            type: 'number',
+            describe: 'The evaluation interval, minutes.',
+            default: 1,
+        },
+        testsEvaluationTimeoutInMinutes: {
+            type: 'number',
+            describe: 'The E2E tests evaluation timeout, minutes.',
+            default: 75,
+        },
+    })
+    .describe('help', 'Show help').argv as any;
 
 (async () => {
     const help = await yargs.getHelp();
@@ -37,12 +75,17 @@ const argv: Argv = yargs.argv as any;
 
     const reportDownloader = new ScanReportDownloader(client, argv.reportDownloadLocation, logger);
 
-    const waitTimeBeforeEvaluationInMinutes = parseInt(argv.waitTimeBeforeEvaluationInMinutes);
-    const evaluationIntervalInMinutes = parseInt(argv.evaluationIntervalInMinutes);
+    const waitTimeBeforeEvaluationInMinutes = argv.waitTimeBeforeEvaluationInMinutes;
+    const evaluationIntervalInMinutes = argv.evaluationIntervalInMinutes;
 
     const deploymentHealthChecker = new DeploymentHealthChecker(logger, client, reportDownloader);
 
-    await deploymentHealthChecker.run(testTimeoutInMinutes, waitTimeBeforeEvaluationInMinutes, evaluationIntervalInMinutes, argv.releaseId);
+    await deploymentHealthChecker.run(
+        argv.testsEvaluationTimeoutInMinutes,
+        waitTimeBeforeEvaluationInMinutes,
+        evaluationIntervalInMinutes,
+        argv.releaseId,
+    );
 })().catch((error) => {
     console.log(System.serializeError(error));
     process.exitCode = 1;
