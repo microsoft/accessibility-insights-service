@@ -1,34 +1,26 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { TokenCredential, AzureCliCredential } from '@azure/identity';
+import { TokenCredential } from '@azure/identity';
 import { inject, injectable } from 'inversify';
-import { iocTypeNames } from '../ioc-types';
-import { Credentials, MSICredentialsProvider, AuthenticationMethod } from './msi-credential-provider';
-import { ManagedIdentityCredential } from './managed-identity-credential';
+import * as msRest from '@azure/ms-rest-js';
+import { BatchCredentialProvider } from './batch-credential-provider';
+import { IdentityCredentialProvider } from './identity-credential-provider';
+
+export type Credentials = msRest.ServiceClientCredentials;
 
 @injectable()
 export class CredentialsProvider {
     constructor(
-        @inject(MSICredentialsProvider) private readonly msiCredentialProvider: MSICredentialsProvider,
-        @inject(ManagedIdentityCredential) private readonly managedIdentityCredential: ManagedIdentityCredential,
-        @inject(iocTypeNames.AuthenticationMethod) private readonly authenticationMethod: AuthenticationMethod,
+        @inject(BatchCredentialProvider) private readonly batchCredentialProvider: BatchCredentialProvider,
+        @inject(IdentityCredentialProvider) private readonly identityCredentialProvider: IdentityCredentialProvider,
     ) {}
 
-    public async getCredentialsForBatch(): Promise<Credentials> {
-        return this.getCredentialsForResource('https://batch.core.windows.net/');
+    public async getBatchCredential(): Promise<Credentials> {
+        return this.batchCredentialProvider.getCredential();
     }
 
     public getAzureCredential(): TokenCredential {
-        if (this.authenticationMethod === AuthenticationMethod.azureCliCredentials) {
-            return new AzureCliCredential();
-        } else {
-            // must be object instance to reuse an internal cache
-            return this.managedIdentityCredential;
-        }
-    }
-
-    private async getCredentialsForResource(resource: string): Promise<Credentials> {
-        return this.msiCredentialProvider.getCredentials(resource);
+        return this.identityCredentialProvider;
     }
 }

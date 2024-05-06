@@ -17,7 +17,6 @@ import { CosmosClientWrapper } from './azure-cosmos/cosmos-client-wrapper';
 import { Queue } from './azure-queue/queue';
 import { StorageConfig } from './azure-queue/storage-config';
 import { CredentialsProvider } from './credentials/credentials-provider';
-import { AuthenticationMethod, CredentialType, MSICredentialsProvider } from './credentials/msi-credential-provider';
 import { cosmosContainerClientTypes, iocTypeNames } from './ioc-types';
 import { secretNames } from './key-vault/secret-names';
 import { SecretProvider } from './key-vault/secret-provider';
@@ -39,29 +38,23 @@ export interface SecretVault {
 
 export function registerAzureServicesToContainer(
     container: Container,
-    credentialType: CredentialType = CredentialType.VM,
     cosmosClientFactory: (options: CosmosClientOptions) => CosmosClient = defaultCosmosClientFactory,
 ): void {
-    setupAuthenticationMethod(container);
-
     container.bind(iocTypeNames.msRestAzure).toConstantValue(msRestNodeAuth);
     container.bind(CredentialsProvider).toSelf().inSingletonScope();
 
     setupAzureKeyVaultClientProvider(container);
 
     container.bind(SecretProvider).toSelf().inSingletonScope();
-
     container.bind(StorageConfig).toSelf().inSingletonScope();
 
     setupCosmosCredentialProvider(container);
     setupStorageCredentialProvider(container);
     setupAzureAuthClientCredentialProvider(container);
     setupSecretVaultProvider(container);
-
     setupCosmosClientProvider(container, cosmosClientFactory);
 
     container.bind(CosmosClientWrapper).toSelf();
-    container.bind(MSICredentialsProvider).toSelf().inSingletonScope();
 
     setupQueueServiceClientProvider(container);
 
@@ -81,8 +74,6 @@ export function registerAzureServicesToContainer(
         return createCosmosContainerClient(context.container, 'onDemandScanner', 'systemData');
     });
 
-    container.bind(iocTypeNames.CredentialType).toConstantValue(credentialType);
-
     setupBlobServiceClientProvider(container);
     container.bind(Queue).toSelf();
 
@@ -96,7 +87,7 @@ function setupAzureBatchServiceClientProvider(container: Container): void {
         const batchConfig = context.container.get(BatchConfig);
         const credentialProvider = context.container.get(CredentialsProvider);
 
-        return new BatchServiceClient(await credentialProvider.getCredentialsForBatch(), batchConfig.accountUrl);
+        return new BatchServiceClient(await credentialProvider.getBatchCredential(), batchConfig.accountUrl);
     });
 }
 
@@ -215,14 +206,6 @@ function defaultCosmosClientFactory(cosmosClientOptions: CosmosClientOptions): C
     };
 
     return new CosmosClient(options);
-}
-
-function setupAuthenticationMethod(container: Container): void {
-    container
-        .bind(iocTypeNames.AuthenticationMethod)
-        .toConstantValue(
-            process.env.AZ_CLI_AUTH === 'true' ? AuthenticationMethod.azureCliCredentials : AuthenticationMethod.managedIdentity,
-        );
 }
 
 async function getStorageAccountName(context: interfaces.Context): Promise<string> {

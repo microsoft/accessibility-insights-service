@@ -2,17 +2,17 @@
 // Licensed under the MIT License.
 
 import { ExtendOptions, Got } from 'got';
-import { ManagedIdentityCredential } from 'azure-services';
+import { IdentityCredentialProvider } from 'azure-services';
 
 export class A11yServiceCredential {
     constructor(
         private readonly scope: string,
         private readonly clientId: string,
-        private readonly managedIdentityCredential: ManagedIdentityCredential = new ManagedIdentityCredential(),
+        private readonly identityCredentialProvider: IdentityCredentialProvider = new IdentityCredentialProvider(),
     ) {}
 
     public async signRequest(gotRequest: Got): Promise<Got> {
-        const accessToken = await this.managedIdentityCredential.getToken(this.scope, { clientId: this.clientId });
+        const accessToken = await this.identityCredentialProvider.getToken(this.scope, { clientId: this.clientId });
         const authOptions: ExtendOptions = {
             headers: {
                 authorization: `Bearer ${accessToken.token}`,

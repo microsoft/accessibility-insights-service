@@ -64,7 +64,7 @@ export async function executeBatchInChunkExclusive<T>(
 export async function executeWithExpRetry<T>(fn: () => Promise<T>): Promise<T> {
     return executeWithExponentialRetry(async () => {
         try {
-            return fn();
+            return await fn();
         } catch (error) {
             console.log('Error: ', System.serializeError(error));
             throw error;

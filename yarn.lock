@@ -207,7 +207,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@azure/core-auth@npm:^1.5.0, @azure/core-auth@npm:^1.7.2":
+"@azure/core-auth@npm:^1.5.0":
   version: 1.7.2
   resolution: "@azure/core-auth@npm:1.7.2"
   dependencies:
@@ -5619,7 +5619,6 @@ __metadata:
   resolution: "azure-services@workspace:packages/azure-services"
   dependencies:
     "@azure/batch": ^10.2.0
-    "@azure/core-auth": ^1.7.2
     "@azure/cosmos": ^4.0.0
     "@azure/identity": ^3.4.2
     "@azure/keyvault-secrets": ^4.6.0

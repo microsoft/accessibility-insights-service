@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { CredentialType, registerAzureServicesToContainer, SecretProvider } from 'azure-services';
+import { registerAzureServicesToContainer, SecretProvider } from 'azure-services';
 import { IoC, setupRuntimeConfigContainer } from 'common';
 import * as inversify from 'inversify';
 import { isNil } from 'lodash';
@@ -16,7 +16,7 @@ export function getProcessLifeCycleContainer(): inversify.Container {
 
         setupRuntimeConfigContainer(processLifeCycleContainer);
         registerLoggerToContainer(processLifeCycleContainer);
-        registerAzureServicesToContainer(processLifeCycleContainer, CredentialType.AppService);
+        registerAzureServicesToContainer(processLifeCycleContainer);
 
         IoC.setupSingletonProvider<A11yServiceClient>(
             a11yServiceClientTypeNames.A11yServiceClientProvider,
@@ -24,7 +24,7 @@ export function getProcessLifeCycleContainer(): inversify.Container {
             async (context) => {
                 const secretProvider = context.container.get(SecretProvider);
                 const webApiIdentityClientId = await secretProvider.getSecret('webApiIdentityClientId');
-                // Client Id is a user-managed identity that is set up with REST API app and web worker app
+                // Client Id is a user-managed identity that is set up with REST API and web worker apps
                 const a11yServiceCredential = new A11yServiceCredential(webApiIdentityClientId, webApiIdentityClientId);
 
                 // The worker function app has a custom environment variable WEB_API_BASE_URL

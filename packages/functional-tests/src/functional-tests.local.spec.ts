@@ -3,7 +3,7 @@
 
 import 'reflect-metadata';
 
-import { CredentialType, registerAzureServicesToContainer } from 'azure-services';
+import { registerAzureServicesToContainer } from 'azure-services';
 import { GuidGenerator, ServiceConfiguration, setupRuntimeConfigContainer, System } from 'common';
 import * as dotenv from 'dotenv';
 import { Container } from 'inversify';
@@ -135,7 +135,7 @@ describe('functional tests', () => {
         container.bind(GlobalLogger).toDynamicValue((_) => {
             return new GlobalLogger([new ConsoleLoggerClient(container.get(ServiceConfiguration), console)]);
         });
-        registerAzureServicesToContainer(container, CredentialType.AppService);
+        registerAzureServicesToContainer(container);
 
         container.bind(A11yServiceClient).toDynamicValue((_) => {
             const cred = new A11yServiceCredential(clientId, clientId);

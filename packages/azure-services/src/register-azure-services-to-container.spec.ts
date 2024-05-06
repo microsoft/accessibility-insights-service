@@ -16,7 +16,6 @@ import { CosmosClientWrapper } from './azure-cosmos/cosmos-client-wrapper';
 import { Queue } from './azure-queue/queue';
 import { StorageConfig } from './azure-queue/storage-config';
 import { CredentialsProvider } from './credentials/credentials-provider';
-import { CredentialType } from './credentials/msi-credential-provider';
 import {
     AzureKeyVaultClientProvider,
     BatchServiceClientProvider,
@@ -55,10 +54,10 @@ describe('BatchServiceClient', () => {
         secretProviderMock = Mock.ofType(SecretProvider);
 
         container = new Container({ autoBindInjectable: true });
-        registerAzureServicesToContainer(container, CredentialType.AppService);
+        registerAzureServicesToContainer(container);
         credentialsProviderMock = Mock.ofType(CredentialsProvider);
         credentialsStub = new msRestNodeAuth.ApplicationTokenCredentials('clientId', 'domain', 'secret');
-        credentialsProviderMock.setup(async (o) => o.getCredentialsForBatch()).returns(async () => Promise.resolve(credentialsStub));
+        credentialsProviderMock.setup(async (o) => o.getBatchCredential()).returns(async () => Promise.resolve(credentialsStub));
 
         stubBinding(container, SecretProvider, secretProviderMock.object);
         stubBinding(container, CredentialsProvider, credentialsProviderMock.object);
@@ -89,13 +88,11 @@ describe('RegisterAzureServicesToContainer', () => {
     });
 
     it('verify singleton resolution', async () => {
-        registerAzureServicesToContainer(container, CredentialType.AppService);
+        registerAzureServicesToContainer(container);
 
         verifySingletonDependencyResolution(container, StorageConfig);
         verifySingletonDependencyResolution(container, SecretProvider);
         verifySingletonDependencyResolution(container, CredentialsProvider);
-
-        expect(container.get(iocTypeNames.CredentialType)).toBe(CredentialType.AppService);
     });
 
     it('verify non-singleton resolution', () => {
@@ -358,6 +355,6 @@ function verifyCosmosContainerClient(container: Container, cosmosContainerType: 
 }
 
 function runCosmosClientTest(container: Container, secretProviderMock: IMock<SecretProvider>): void {
-    registerAzureServicesToContainer(container, CredentialType.VM, cosmosClientFactoryStub);
+    registerAzureServicesToContainer(container, cosmosClientFactoryStub);
     stubBinding(container, SecretProvider, secretProviderMock.object);
 }

@@ -15,8 +15,6 @@ export const iocTypeNames = {
     QueueServiceClientProvider: 'QueueServiceClientProvider',
     BatchServiceClientProvider: 'BatchServiceClientProvider',
     msRestAzure: 'msRestAzure',
-    AuthenticationMethod: 'AuthenticationMethod',
-    CredentialType: 'CredentialType',
     StorageCredential: 'StorageCredential',
     CosmosCredential: 'CosmosCredential',
     AzureAuthClientCredentialProvider: 'azureAuthClientCredentialProvider',

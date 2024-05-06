@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { ApplicationInsightsClient, CredentialType, registerAzureServicesToContainer, secretNames, SecretProvider } from 'azure-services';
+import { ApplicationInsightsClient, registerAzureServicesToContainer, secretNames, SecretProvider } from 'azure-services';
 import { IoC, setupRuntimeConfigContainer } from 'common';
 import * as inversify from 'inversify';
 import { isNil } from 'lodash';
@@ -15,7 +15,7 @@ export function getProcessLifeCycleContainer(): inversify.Container {
         processLifeCycleContainer = new inversify.Container({ autoBindInjectable: true });
         setupRuntimeConfigContainer(processLifeCycleContainer);
         registerLoggerToContainer(processLifeCycleContainer);
-        registerAzureServicesToContainer(processLifeCycleContainer, CredentialType.AppService);
+        registerAzureServicesToContainer(processLifeCycleContainer);
 
         IoC.setupSingletonProvider<ApplicationInsightsClient>(
             webApiTypeNames.ApplicationInsightsClientProvider,
