@@ -182,7 +182,6 @@ function install() {
     . "${0%/*}/create-storage-account.sh"
     . "${0%/*}/get-resource-names.sh"
 
-
     echo "Starting parallel processes..."
 
     . "${0%/*}/create-api-management.sh" &
