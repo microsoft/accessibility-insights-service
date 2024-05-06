@@ -214,6 +214,7 @@ function install() {
     waitForProcesses apiManagmentProcessId
 
     # deploy e2e test site is dependent on API Management service
+    echo "Deploying test website"
     . "${0%/*}/deploy-e2e-test-site.sh"
 
     echo "Deploying REST API configuration to API Management service"
