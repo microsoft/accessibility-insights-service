@@ -3,22 +3,35 @@
 
 import { ExtendOptions, Got } from 'got';
 import { IdentityCredentialProvider } from 'azure-services';
+import { isEmpty } from 'lodash';
 
 export class A11yServiceCredential {
     constructor(
         private readonly scope: string,
         private readonly clientId: string,
+        private readonly token?: string,
         private readonly identityCredentialProvider: IdentityCredentialProvider = new IdentityCredentialProvider(),
     ) {}
 
     public async signRequest(gotRequest: Got): Promise<Got> {
-        const accessToken = await this.identityCredentialProvider.getToken(this.scope, { clientId: this.clientId });
-        const authOptions: ExtendOptions = {
+        let bearerToken;
+        if (!isEmpty(this.token)) {
+            bearerToken = this.token;
+        } else {
+            const accessToken = await this.identityCredentialProvider.getToken(this.scope, { clientId: this.clientId });
+            bearerToken = accessToken.token;
+        }
+
+        const authHeader = this.createAuthHeader(bearerToken);
+
+        return gotRequest.extend(authHeader);
+    }
+
+    private createAuthHeader(bearerToken: string): ExtendOptions {
+        return {
             headers: {
-                authorization: `Bearer ${accessToken.token}`,
+                authorization: `Bearer ${bearerToken}`,
             },
         };
-
-        return gotRequest.extend(authOptions);
     }
 }

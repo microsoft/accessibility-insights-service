@@ -16,6 +16,7 @@ import { DeploymentHealthChecker } from './deployment-health-checker';
 type Argv = {
     scope: string;
     clientId: string;
+    token: string;
     releaseId: string;
     baseUrl: string;
     reportDownloadLocation: string;
@@ -33,6 +34,10 @@ const argv: Argv = yargs
         clientId: {
             type: 'string',
             describe: 'The Client ID of the managed identity you would like the token for.',
+        },
+        token: {
+            type: 'string',
+            describe: 'The existing access token to use instead.',
         },
         releaseId: {
             type: 'string',
@@ -73,7 +78,7 @@ const argv: Argv = yargs
     const logger = new GlobalLogger([new ConsoleLoggerClient(new ServiceConfiguration(), console)]);
     await logger.setup();
 
-    const serviceCredential = new A11yServiceCredential(argv.scope, argv.clientId);
+    const serviceCredential = new A11yServiceCredential(argv.scope, argv.clientId, argv.token);
     const client = new A11yServiceClient(serviceCredential, argv.baseUrl);
 
     const reportDownloader = new ScanReportDownloader(client, argv.reportDownloadLocation, logger);

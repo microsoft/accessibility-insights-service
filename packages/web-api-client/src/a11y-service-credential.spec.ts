@@ -12,25 +12,25 @@ import { A11yServiceCredential } from './a11y-service-credential';
 
 const clientId = 'client-id';
 const scope = 'scope';
-const accessToken = { token: 'token' } as any;
+const accessToken = { token: 'accessToken' } as any;
+const token = 'externalToken';
 
 let identityCredentialProviderMock: IMock<IdentityCredentialProvider>;
-let testSubject: A11yServiceCredential;
+let a11yServiceCredential: A11yServiceCredential;
 let gotMock: IMock<Got>;
 
 describe(A11yServiceCredential, () => {
     beforeEach(() => {
         gotMock = Mock.ofType<Got>(null);
         identityCredentialProviderMock = Mock.ofType<IdentityCredentialProvider>();
-
-        testSubject = new A11yServiceCredential(scope, clientId, identityCredentialProviderMock.object);
     });
 
     afterEach(() => {
         identityCredentialProviderMock.verifyAll();
     });
 
-    it('signRequest', async () => {
+    it('sign request using scope and clientId', async () => {
+        a11yServiceCredential = new A11yServiceCredential(scope, clientId, undefined, identityCredentialProviderMock.object);
         const expectedHeaders = {
             headers: {
                 authorization: `Bearer ${accessToken.token}`,
@@ -41,7 +41,20 @@ describe(A11yServiceCredential, () => {
             .returns(() => Promise.resolve(accessToken))
             .verifiable();
 
-        await testSubject.signRequest(gotMock.object);
+        await a11yServiceCredential.signRequest(gotMock.object);
+
+        gotMock.verify((o) => o.extend(It.isValue(expectedHeaders)), Times.once());
+    });
+
+    it('sign request using external token', async () => {
+        a11yServiceCredential = new A11yServiceCredential(undefined, undefined, token, identityCredentialProviderMock.object);
+        const expectedHeaders = {
+            headers: {
+                authorization: `Bearer ${token}`,
+            },
+        };
+
+        await a11yServiceCredential.signRequest(gotMock.object);
 
         gotMock.verify((o) => o.extend(It.isValue(expectedHeaders)), Times.once());
     });
