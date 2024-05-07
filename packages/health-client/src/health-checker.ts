@@ -7,6 +7,7 @@ import { ServiceConfiguration, System } from 'common';
 import { ConsoleLoggerClient, GlobalLogger } from 'logger';
 import { A11yServiceClient, A11yServiceCredential } from 'web-api-client';
 import * as yargs from 'yargs';
+import * as dotenv from 'dotenv';
 import { ScanReportDownloader } from './scan-report-downloader';
 import { DeploymentHealthChecker } from './deployment-health-checker';
 
@@ -64,6 +65,8 @@ const argv: Argv = yargs
     .describe('help', 'Show help').argv as any;
 
 (async () => {
+    dotenv.config();
+
     const help = await yargs.getHelp();
     console.log(help);
 

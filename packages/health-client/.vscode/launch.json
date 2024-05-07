@@ -26,9 +26,9 @@
                 "--releaseId",
                 "1",
                 "--waitTimeBeforeEvaluationInMinutes",
-                "1",
+                "0",
                 "--evaluationIntervalInMinutes",
-                "1",
+                "0.5",
                 "testsEvaluationTimeoutInMinutes",
                 "60"
             ]
