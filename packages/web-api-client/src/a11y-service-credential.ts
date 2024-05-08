@@ -14,6 +14,10 @@ export class A11yServiceCredential {
     ) {}
 
     public async signRequest(gotRequest: Got): Promise<Got> {
+        if (isEmpty(this.scope) && isEmpty(this.token)) {
+            throw new Error('Credential provider mismatch configuration. Provide either scope or token parameter.');
+        }
+
         let bearerToken;
         if (!isEmpty(this.token)) {
             bearerToken = this.token;

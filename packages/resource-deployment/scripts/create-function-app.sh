@@ -50,10 +50,17 @@ getAllowedApplications() {
         echo "Azure Functions ACL configuration file not found. Expected configuration file ${aclFilePath}"
     fi
 
+    # The webApiIdentityClientId is application (client) id of the user assigned managed identity used by the service
     if [[ -z ${allowedApplications} ]]; then
         allowedApplications="${webApiIdentityClientId}"
     else
         allowedApplications="${allowedApplications},${webApiIdentityClientId}"
+    fi
+
+    # The servicePrincipalId is Azure DevOps service connection application (client) id used by release pipeline.
+    # Set by Azure DevOps environment. Task option 'Access service principal details in script' should be enabled.
+    if [[ -n ${servicePrincipalId} ]]; then
+        allowedApplications="${allowedApplications},${servicePrincipalId}"
     fi
 }
 
