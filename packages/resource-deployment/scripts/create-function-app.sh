@@ -61,6 +61,7 @@ getAllowedApplications() {
     # Set by Azure DevOps environment. Task option 'Access service principal details in script' should be enabled.
     if [[ -n ${servicePrincipalId} ]]; then
         allowedApplications="${allowedApplications},${servicePrincipalId}"
+        echo "Added Azure DevOps service connection with application (client) ID ${servicePrincipalId} to REST API ACL"
     fi
 }
 
