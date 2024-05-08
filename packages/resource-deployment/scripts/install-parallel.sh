@@ -221,6 +221,8 @@ function install() {
     waitForProcesses dashboardProcessId
 }
 
+echo "SP1: ${servicePrincipalId}"
+
 validateAzCliVersion
 validateJqTool
 validateDotnetSdk
