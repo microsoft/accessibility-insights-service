@@ -78,5 +78,3 @@ if [ "$resourceGroupStatus" != "Succeeded" ]; then
     echo "Deployment of resourceGroup $resourceGroupame failed with status $resourceGroupStatus"
     exit 1
 fi
-
-echo "SP2: ${servicePrincipalId}"
