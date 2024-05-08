@@ -50,6 +50,10 @@ getAllowedApplications() {
         echo "Azure Functions ACL configuration file not found. Expected configuration file ${aclFilePath}"
     fi
 
+    echo "MSI1 ${webApiIdentityClientId}"
+    echo "IDS ${allowedApplications}"
+    echo "SP3: ${servicePrincipalId}"
+
     # The webApiIdentityClientId is application (client) id of the user assigned managed identity used by the service
     if [[ -z ${allowedApplications} ]]; then
         allowedApplications="${webApiIdentityClientId}"
