@@ -123,7 +123,10 @@ export class ScanResponseConverter {
             ...this.getRunCompleteNotificationResponse(pageScanResult.notification),
             reports: this.getScanReports(baseUrl, apiVersion, pageScanResult),
             // Expand scan result for original scan only. Result for descendant scans do not include deep scan result collection.
-            ...(pageScanResult.id === pageScanResult.deepScanId ? this.getDeepScanResult(websiteScanData) : {}),
+            // Don't show more details of deep scan result if base URL can't be scanned because it has no further scans available
+            ...(pageScanResult.id === pageScanResult.deepScanId && pageScanResult.run.state !== 'unscannable'
+                ? this.getDeepScanResult(websiteScanData)
+                : {}),
         };
 
         if (scanResultResponse.deepScanResult !== undefined) {

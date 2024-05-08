@@ -23,7 +23,10 @@ export class DeepScanner {
     ) {}
 
     public async runDeepScan(pageScanResult: OnDemandPageScanResult, websiteScanData: WebsiteScanData, page: Page): Promise<void> {
-        if (!(['deep-scan', 'group-scan'] as ScanGroupType[]).includes(websiteScanData.scanGroupType)) {
+        if (
+            !(['deep-scan', 'group-scan'] as ScanGroupType[]).includes(websiteScanData.scanGroupType) ||
+            process.env.DEEP_SCAN === 'false'
+        ) {
             return;
         }
 
