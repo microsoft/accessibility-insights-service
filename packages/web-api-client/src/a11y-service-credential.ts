@@ -8,7 +8,7 @@ import { isEmpty } from 'lodash';
 export class A11yServiceCredential {
     constructor(
         private readonly scope: string,
-        private readonly clientId: string,
+        private readonly clientId?: string,
         private readonly token?: string,
         private readonly identityCredentialProvider: IdentityCredentialProvider = new IdentityCredentialProvider(),
     ) {}
