@@ -23,6 +23,18 @@ export class AxePuppeteerScanner {
     }
 
     private async scanImpl(page: Page, contentSourcePath?: string): Promise<AxeScanResults> {
+        // The axe scanner breaks the communication of the puppeteer CDP protocol and makes
+        // any further puppeteer API calls fail to respond. So run the axe scanner only after
+        // we have collected all the browser metadata.
+        const browserResolution = await page.getBrowserResolution();
+        const scanResults: AxeScanResults = {
+            pageTitle: await page.puppeteerPage.title(),
+            browserSpec: await page.browser.version(),
+            pageResponseCode: page.navigationResponse.status(),
+            userAgent: page.userAgent,
+            browserResolution: `${browserResolution.width}x${browserResolution.height}`,
+        };
+
         let axePuppeteer = await this.axePuppeteerFactory.createAxePuppeteer(page.puppeteerPage, contentSourcePath);
         let axeRunResult = await this.runAxeAnalyze(page, axePuppeteer);
         if (axeRunResult.error !== undefined) {
@@ -35,16 +47,7 @@ export class AxePuppeteerScanner {
             return { error: `Axe core puppeteer scan error. ${System.serializeError(axeRunResult.error)}`, scannedUrl: page.url };
         }
 
-        const browserResolution = await page.getBrowserResolution();
-        const scanResults: AxeScanResults = {
-            results: axeRunResult.axeResults,
-            pageTitle: await page.puppeteerPage.title(),
-            browserSpec: await page.browser.version(),
-            pageResponseCode: page.navigationResponse.status(),
-            userAgent: page.userAgent,
-            browserResolution: `${browserResolution.width}x${browserResolution.height}`,
-        };
-
+        scanResults.results = axeRunResult.axeResults;
         if (
             page.navigationResponse.request()?.redirectChain()?.length > 0 ||
             // Should compare encoded Urls
