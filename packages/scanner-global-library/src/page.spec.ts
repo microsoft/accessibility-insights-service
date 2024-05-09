@@ -14,7 +14,7 @@ import { BrowserStartOptions, Page } from './page';
 import { getPromisableDynamicMock } from './test-utilities/promisable-mock';
 import { WebDriver } from './web-driver';
 import { PageNavigator, NavigationResponse } from './page-navigator';
-import { PageNavigationTiming } from './page-timeout-config';
+import { PageNavigationTiming, PuppeteerTimeoutConfig } from './page-timeout-config';
 import { scrollToTop } from './page-client-lib';
 import { PageNetworkTracer } from './network/page-network-tracer';
 import { ResourceAuthenticator, ResourceAuthenticationResult } from './authenticator/resource-authenticator';
@@ -54,6 +54,7 @@ let resourceAuthenticatorMock: IMock<ResourceAuthenticator>;
 let pageAnalyzerMock: IMock<PageAnalyzer>;
 let guidGeneratorMock: IMock<GuidGenerator>;
 let devToolsSessionMock: IMock<DevToolsSession>;
+let puppeteerTimeoutConfigMock: IMock<PuppeteerTimeoutConfig>;
 let browserStartOptions: BrowserStartOptions;
 
 describe(Page, () => {
@@ -67,7 +68,7 @@ describe(Page, () => {
         };
 
         webDriverMock = getPromisableDynamicMock(Mock.ofType<WebDriver>());
-        pageNavigatorMock = Mock.ofType(PageNavigator);
+        pageNavigatorMock = Mock.ofType<PageNavigator>();
         loggerMock = Mock.ofType<GlobalLogger>();
         browserMock = getPromisableDynamicMock(Mock.ofType<Puppeteer.Browser>());
         puppeteerPageMock = getPromisableDynamicMock(Mock.ofType<Puppeteer.Page>());
@@ -79,6 +80,7 @@ describe(Page, () => {
         pageAnalyzerMock = Mock.ofType<PageAnalyzer>();
         guidGeneratorMock = Mock.ofType<GuidGenerator>();
         devToolsSessionMock = Mock.ofType<DevToolsSession>();
+        puppeteerTimeoutConfigMock = Mock.ofType<PuppeteerTimeoutConfig>();
         browserStartOptions = {} as BrowserStartOptions;
 
         scrollToTopMock = jest.fn().mockImplementation(() => Promise.resolve());
@@ -104,6 +106,7 @@ describe(Page, () => {
             resourceAuthenticatorMock.object,
             pageAnalyzerMock.object,
             devToolsSessionMock.object,
+            puppeteerTimeoutConfigMock.object,
             guidGeneratorMock.object,
             loggerMock.object,
             scrollToTopMock,
@@ -120,6 +123,7 @@ describe(Page, () => {
         pageNetworkTracerMock.verifyAll();
         resourceAuthenticatorMock.verifyAll();
         pageAnalyzerMock.verifyAll();
+        puppeteerTimeoutConfigMock.verifyAll();
     });
 
     describe('navigate()', () => {

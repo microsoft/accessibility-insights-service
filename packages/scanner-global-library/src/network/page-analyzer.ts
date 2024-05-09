@@ -10,7 +10,7 @@ import { AuthenticationType } from 'storage-documents';
 import { LoginPageDetector } from '../authenticator/login-page-detector';
 import { NavigationResponse, PageOperationResult } from '../page-navigator';
 import { PageResponseProcessor } from '../page-response-processor';
-import { puppeteerTimeoutConfig, PageNavigationTiming } from '../page-timeout-config';
+import { PuppeteerTimeoutConfig, PageNavigationTiming } from '../page-timeout-config';
 import { PageRequestInterceptor } from './page-request-interceptor';
 import { InterceptedRequest, PageEventHandler } from './page-event-handler';
 
@@ -193,7 +193,7 @@ export class PageAnalyzer {
         return this.pageRequestInterceptor.intercept(
             async () => this.navigatePage(url, page),
             page,
-            puppeteerTimeoutConfig.redirectTimeoutMsec,
+            PuppeteerTimeoutConfig.redirectTimeoutMsec,
         );
     }
 
@@ -201,7 +201,10 @@ export class PageAnalyzer {
         const timestamp = System.getTimestamp();
         try {
             this.logger?.logInfo('Navigate page to URL for analysis.');
-            const response = await page.goto(url, { waitUntil: 'networkidle2', timeout: puppeteerTimeoutConfig.navigationTimeoutMsec });
+            const response = await page.goto(url, {
+                waitUntil: 'networkidle2',
+                timeout: PuppeteerTimeoutConfig.defaultNavigationTimeoutMsec,
+            });
 
             return { response, navigationTiming: { goto: System.getElapsedTime(timestamp) } as PageNavigationTiming };
         } catch (error) {

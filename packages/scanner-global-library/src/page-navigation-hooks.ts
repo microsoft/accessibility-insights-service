@@ -8,7 +8,7 @@ import { BrowserError } from './browser-error';
 import { PageConfigurator } from './page-configurator';
 import { PageHandler } from './page-handler';
 import { PageResponseProcessor } from './page-response-processor';
-import { puppeteerTimeoutConfig, PageNavigationTiming } from './page-timeout-config';
+import { PuppeteerTimeoutConfig, PageNavigationTiming } from './page-timeout-config';
 
 @injectable()
 export class PageNavigationHooks {
@@ -16,8 +16,8 @@ export class PageNavigationHooks {
         @inject(PageConfigurator) public readonly pageConfigurator: PageConfigurator,
         @inject(PageResponseProcessor) protected readonly pageResponseProcessor: PageResponseProcessor,
         @inject(PageHandler) protected readonly pageRenderingHandler: PageHandler,
-        private readonly scrollTimeoutMsec = puppeteerTimeoutConfig.scrollTimeoutMsec,
-        private readonly pageRenderingTimeoutMsec = puppeteerTimeoutConfig.pageRenderingTimeoutMsec,
+        private readonly scrollTimeoutMsec = PuppeteerTimeoutConfig.scrollTimeoutMsec,
+        private readonly pageRenderingTimeoutMsec = PuppeteerTimeoutConfig.pageRenderingTimeoutMsec,
     ) {}
 
     public async preNavigation(page: Puppeteer.Page): Promise<void> {

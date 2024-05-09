@@ -10,7 +10,7 @@ import { isNumber, isEmpty } from 'lodash';
 import { WebDriver, WebDriverCapabilities } from './web-driver';
 import { PageNavigator, NavigationResponse } from './page-navigator';
 import { BrowserError } from './browser-error';
-import { PageNavigationTiming } from './page-timeout-config';
+import { PageNavigationTiming, PuppeteerTimeoutConfig } from './page-timeout-config';
 import { scrollToTop } from './page-client-lib';
 import { PageNetworkTracer } from './network/page-network-tracer';
 import { ResourceAuthenticator, ResourceAuthenticationResult } from './authenticator/resource-authenticator';
@@ -82,6 +82,7 @@ export class Page {
         @inject(ResourceAuthenticator) private readonly resourceAuthenticator: ResourceAuthenticator,
         @inject(PageAnalyzer) private readonly pageAnalyzer: PageAnalyzer,
         @inject(DevToolsSession) private readonly devToolsSession: DevToolsSession,
+        @inject(PuppeteerTimeoutConfig) private readonly puppeteerTimeoutConfig: PuppeteerTimeoutConfig,
         @inject(GuidGenerator) private readonly guidGenerator: GuidGenerator,
         @inject(GlobalLogger) @optional() private readonly logger: GlobalLogger,
         private readonly scrollToPageTop: typeof scrollToTop = scrollToTop,
@@ -116,6 +117,7 @@ export class Page {
 
         this.userAgent = await this.browser.userAgent();
         this.page = await this.browser.newPage();
+        this.puppeteerTimeoutConfig.setOperationTimeout(options?.capabilities);
 
         const pageCreated = await this.webDriver.waitForPageCreation();
         if (pageCreated !== true) {

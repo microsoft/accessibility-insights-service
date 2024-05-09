@@ -7,7 +7,7 @@ import { GlobalLogger } from 'logger';
 import { System } from 'common';
 import { isNil } from 'lodash';
 import { PageOperationResult } from '../page-navigator';
-import { PageNavigationTiming, puppeteerTimeoutConfig } from '../page-timeout-config';
+import { PageNavigationTiming, PuppeteerTimeoutConfig } from '../page-timeout-config';
 import { PageResponseProcessor } from '../page-response-processor';
 import { PageRequestInterceptor } from './page-request-interceptor';
 
@@ -18,6 +18,7 @@ export class PageOperationHandler {
     constructor(
         @inject(PageRequestInterceptor) private readonly pageRequestInterceptor: PageRequestInterceptor,
         @inject(PageResponseProcessor) public readonly pageResponseProcessor: PageResponseProcessor,
+        @inject(PuppeteerTimeoutConfig) private readonly puppeteerTimeoutConfig: PuppeteerTimeoutConfig,
         @inject(GlobalLogger) @optional() private readonly logger: GlobalLogger,
     ) {}
 
@@ -30,7 +31,7 @@ export class PageOperationHandler {
         const opResult = await this.pageRequestInterceptor.intercept(
             async () => this.invokePageOperation(pageOperation),
             page,
-            puppeteerTimeoutConfig.navigationTimeoutMsec,
+            this.puppeteerTimeoutConfig.navigationTimeoutMsec,
         );
 
         // Handle indirect page redirection. Puppeteer will fail the initial URL navigation and

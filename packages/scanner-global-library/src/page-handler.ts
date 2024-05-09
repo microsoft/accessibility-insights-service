@@ -5,7 +5,7 @@ import { inject, injectable, optional } from 'inversify';
 import { GlobalLogger } from 'logger';
 import * as Puppeteer from 'puppeteer';
 import { System } from 'common';
-import { puppeteerTimeoutConfig, PageNavigationTiming } from './page-timeout-config';
+import { PuppeteerTimeoutConfig, PageNavigationTiming } from './page-timeout-config';
 import { scrollToBottom } from './page-client-lib';
 
 @injectable()
@@ -13,7 +13,7 @@ export class PageHandler {
     constructor(
         @inject(GlobalLogger) @optional() private readonly logger: GlobalLogger,
         private readonly checkIntervalMsecs: number = 200,
-        private readonly pageDomStableTimeMsec: number = puppeteerTimeoutConfig.pageDomStableTimeMsec,
+        private readonly pageDomStableTimeMsec: number = PuppeteerTimeoutConfig.pageDomStableTimeMsec,
         private readonly scrollToPageBottom: typeof scrollToBottom = scrollToBottom,
     ) {}
 

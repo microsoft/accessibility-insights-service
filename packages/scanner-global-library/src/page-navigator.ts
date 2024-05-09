@@ -8,7 +8,7 @@ import { GlobalLogger } from 'logger';
 import { BrowserError } from './browser-error';
 import { PageNavigationHooks } from './page-navigation-hooks';
 import { PageConfigurator } from './page-configurator';
-import { puppeteerTimeoutConfig, PageNavigationTiming } from './page-timeout-config';
+import { PuppeteerTimeoutConfig, PageNavigationTiming } from './page-timeout-config';
 import { BrowserCache } from './browser-cache';
 import { PageOperation, PageOperationHandler } from './network/page-operation-handler';
 import { resetSessionHistory } from './page-client-lib';
@@ -33,24 +33,29 @@ export interface PageOperationResult {
 
 @injectable()
 export class PageNavigator {
-    private readonly waitForDefaultOptions: Puppeteer.WaitForOptions = {
-        waitUntil: 'networkidle2',
-        timeout: puppeteerTimeoutConfig.navigationTimeoutMsec,
-    };
+    private readonly waitForDefaultOptions: Puppeteer.WaitForOptions;
 
-    private readonly waitForCompleteOptions: Puppeteer.WaitForOptions = {
-        // The networkidle0 option is required to load page with WebGL enabled
-        waitUntil: 'networkidle0',
-        timeout: puppeteerTimeoutConfig.navigationTimeoutMsec,
-    };
+    private readonly waitForCompleteOptions: Puppeteer.WaitForOptions;
 
     constructor(
         @inject(PageNavigationHooks) private readonly pageNavigationHooks: PageNavigationHooks,
         @inject(BrowserCache) private readonly browserCache: BrowserCache,
         @inject(PageOperationHandler) private readonly pageOperationHandler: PageOperationHandler,
+        @inject(PuppeteerTimeoutConfig) private readonly puppeteerTimeoutConfig: PuppeteerTimeoutConfig,
         @inject(GlobalLogger) @optional() public readonly logger: GlobalLogger,
         private readonly resetSessionHistoryFn: typeof resetSessionHistory = resetSessionHistory,
-    ) {}
+    ) {
+        this.waitForDefaultOptions = {
+            waitUntil: 'networkidle2',
+            timeout: this.puppeteerTimeoutConfig.navigationTimeoutMsec,
+        };
+
+        this.waitForCompleteOptions = {
+            // The networkidle0 option is required to load page with WebGL enabled
+            waitUntil: 'networkidle0',
+            timeout: this.puppeteerTimeoutConfig.navigationTimeoutMsec,
+        };
+    }
 
     public get pageConfigurator(): PageConfigurator {
         return this.pageNavigationHooks.pageConfigurator;
