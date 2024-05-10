@@ -9,7 +9,7 @@ import { GlobalLogger } from 'logger';
 import { System } from 'common';
 import { NavigationResponse } from '../page-navigator';
 import { PageResponseProcessor } from '../page-response-processor';
-import { puppeteerTimeoutConfig } from '../page-timeout-config';
+import { PuppeteerTimeoutConfig } from '../page-timeout-config';
 import { BrowserError } from '../browser-error';
 import { ResourceAuthenticator } from './resource-authenticator';
 import { LoginPageClientFactory } from './login-page-client-factory';
@@ -54,7 +54,7 @@ describe(ResourceAuthenticator, () => {
         const browserError = { statusCode: 404 } as BrowserError;
         const gotoError = new Error('404');
         puppeteerPageMock
-            .setup((o) => o.goto(url, { waitUntil: 'networkidle2', timeout: puppeteerTimeoutConfig.navigationTimeoutMsec }))
+            .setup((o) => o.goto(url, { waitUntil: 'networkidle2', timeout: PuppeteerTimeoutConfig.defaultNavigationTimeoutMsec }))
             .returns(() => Promise.reject(gotoError))
             .verifiable(Times.atLeastOnce());
         pageResponseProcessorMock
@@ -84,7 +84,7 @@ describe(ResourceAuthenticator, () => {
         };
         puppeteerGotoResponse = { puppeteerResponse: 'goto', url: () => url } as unknown as Puppeteer.HTTPResponse;
         puppeteerPageMock
-            .setup((o) => o.goto(url, { waitUntil: 'networkidle2', timeout: puppeteerTimeoutConfig.navigationTimeoutMsec }))
+            .setup((o) => o.goto(url, { waitUntil: 'networkidle2', timeout: PuppeteerTimeoutConfig.defaultNavigationTimeoutMsec }))
             .returns(() => Promise.resolve(puppeteerGotoResponse))
             .verifiable(Times.atLeastOnce());
         loginPageClientMock

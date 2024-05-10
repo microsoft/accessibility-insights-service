@@ -6,7 +6,7 @@ import 'reflect-metadata';
 import { IMock, It, Mock } from 'typemoq';
 import * as Puppeteer from 'puppeteer';
 import { MockableLogger } from '../test-utilities/mockable-logger';
-import { puppeteerTimeoutConfig } from '../page-timeout-config';
+import { PuppeteerTimeoutConfig } from '../page-timeout-config';
 import { PageRequestInterceptor } from './page-request-interceptor';
 import { InterceptedRequest } from './page-event-handler';
 import { PageNetworkTracer } from './page-network-tracer';
@@ -43,13 +43,13 @@ describe(PageNetworkTracer, () => {
     it('trace', async () => {
         let pageOperation: any;
         pageRequestInterceptorMock
-            .setup((o) => o.intercept(It.isAny(), puppeteerPageMock.object, puppeteerTimeoutConfig.navigationTimeoutMsec, true))
+            .setup((o) => o.intercept(It.isAny(), puppeteerPageMock.object, PuppeteerTimeoutConfig.defaultNavigationTimeoutMsec, true))
             .callback(async (fn) => (pageOperation = fn))
             .returns(async () => pageOperation(url, puppeteerPageMock.object))
             .verifiable();
         pageRequestInterceptorMock.setup((o) => o.interceptedRequests).returns(() => interceptedRequests);
         puppeteerPageMock
-            .setup((o) => o.goto(url, { waitUntil: 'networkidle2', timeout: puppeteerTimeoutConfig.navigationTimeoutMsec }))
+            .setup((o) => o.goto(url, { waitUntil: 'networkidle2', timeout: PuppeteerTimeoutConfig.defaultNavigationTimeoutMsec }))
             .returns(() => Promise.resolve(puppeteerGotoResponse))
             .verifiable();
 

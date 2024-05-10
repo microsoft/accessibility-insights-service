@@ -9,7 +9,7 @@ import { GlobalLogger } from 'logger';
 import { System } from 'common';
 import { PageResponseProcessor } from '../page-response-processor';
 import { BrowserError } from '../browser-error';
-import { PageNavigationTiming, puppeteerTimeoutConfig } from '../page-timeout-config';
+import { PageNavigationTiming, PuppeteerTimeoutConfig } from '../page-timeout-config';
 import { PageOperationHandler, PageOperation } from './page-operation-handler';
 import { PageRequestInterceptor } from './page-request-interceptor';
 import { InterceptedRequest } from './page-event-handler';
@@ -17,6 +17,7 @@ import { InterceptedRequest } from './page-event-handler';
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 const url = 'url';
+const navigationTimeoutMsec = 10;
 
 let pageOperationHandler: PageOperationHandler;
 let interceptedRequests: InterceptedRequest[];
@@ -24,6 +25,7 @@ let puppeteerPageMock: IMock<Puppeteer.Page>;
 let loggerMock: IMock<GlobalLogger>;
 let pageResponseProcessorMock: IMock<PageResponseProcessor>;
 let pageRequestInterceptorMock: IMock<PageRequestInterceptor>;
+let puppeteerTimeoutConfigMock: IMock<PuppeteerTimeoutConfig>;
 let pageOperation: PageOperation;
 let response: Puppeteer.HTTPResponse;
 
@@ -33,6 +35,12 @@ describe(PageOperationHandler, () => {
         loggerMock = Mock.ofType<GlobalLogger>();
         pageResponseProcessorMock = Mock.ofType<PageResponseProcessor>();
         pageRequestInterceptorMock = Mock.ofType<PageRequestInterceptor>();
+        puppeteerTimeoutConfigMock = Mock.ofType<PuppeteerTimeoutConfig>();
+
+        puppeteerTimeoutConfigMock
+            .setup((o) => o.navigationTimeoutMsec)
+            .returns(() => navigationTimeoutMsec)
+            .verifiable();
 
         interceptedRequests = [];
         System.getElapsedTime = () => 100;
@@ -47,7 +55,7 @@ describe(PageOperationHandler, () => {
 
         let callbackFn: any;
         pageRequestInterceptorMock
-            .setup((o) => o.intercept(It.isAny(), puppeteerPageMock.object, puppeteerTimeoutConfig.navigationTimeoutMsec))
+            .setup((o) => o.intercept(It.isAny(), puppeteerPageMock.object, navigationTimeoutMsec))
             .callback(async (fn) => (callbackFn = fn))
             .returns(async () => callbackFn(url, puppeteerPageMock.object))
             .verifiable();
@@ -55,6 +63,7 @@ describe(PageOperationHandler, () => {
         pageOperationHandler = new PageOperationHandler(
             pageRequestInterceptorMock.object,
             pageResponseProcessorMock.object,
+            puppeteerTimeoutConfigMock.object,
             loggerMock.object,
         );
     });
@@ -64,6 +73,7 @@ describe(PageOperationHandler, () => {
         loggerMock.verifyAll();
         pageResponseProcessorMock.verifyAll();
         pageRequestInterceptorMock.verifyAll();
+        puppeteerTimeoutConfigMock.verifyAll();
     });
 
     it('return when no request timeout error', async () => {

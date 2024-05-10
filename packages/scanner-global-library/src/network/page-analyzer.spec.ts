@@ -9,7 +9,7 @@ import { GlobalLogger } from 'logger';
 import { System } from 'common';
 import { PageResponseProcessor } from '../page-response-processor';
 import { LoginPageDetector } from '../authenticator/login-page-detector';
-import { PageNavigationTiming, puppeteerTimeoutConfig } from '../page-timeout-config';
+import { PageNavigationTiming, PuppeteerTimeoutConfig } from '../page-timeout-config';
 import { PageOperationResult } from '../page-navigator';
 import { BrowserError } from '../browser-error';
 import { PageAnalyzer } from './page-analyzer';
@@ -44,7 +44,7 @@ describe(PageAnalyzer, () => {
         puppeteerGotoResponse = { puppeteerResponse: 'goto', url: () => url, status: () => 200 } as unknown as Puppeteer.HTTPResponse;
         pageOperationResult = { response: puppeteerGotoResponse, navigationTiming: { goto: 100 } as PageNavigationTiming };
         puppeteerPageMock
-            .setup((o) => o.goto(url, { waitUntil: 'networkidle2', timeout: puppeteerTimeoutConfig.navigationTimeoutMsec }))
+            .setup((o) => o.goto(url, { waitUntil: 'networkidle2', timeout: PuppeteerTimeoutConfig.defaultNavigationTimeoutMsec }))
             .returns(() => Promise.resolve(puppeteerGotoResponse))
             .verifiable(Times.atLeastOnce());
 
@@ -84,14 +84,14 @@ describe(PageAnalyzer, () => {
             .returns(() => ({ errorType: 'UrlNavigationTimeout' } as BrowserError));
         puppeteerPageMock.reset();
         puppeteerPageMock
-            .setup((o) => o.goto(url, { waitUntil: 'networkidle2', timeout: puppeteerTimeoutConfig.navigationTimeoutMsec }))
+            .setup((o) => o.goto(url, { waitUntil: 'networkidle2', timeout: PuppeteerTimeoutConfig.defaultNavigationTimeoutMsec }))
             .returns(() => Promise.reject(error))
             .verifiable();
         pageRequestInterceptorMock.setup((o) => o.interceptedRequests).returns(() => interceptedRequests);
 
         let pageOperation: any;
         pageRequestInterceptorMock
-            .setup((o) => o.intercept(It.isAny(), puppeteerPageMock.object, puppeteerTimeoutConfig.redirectTimeoutMsec))
+            .setup((o) => o.intercept(It.isAny(), puppeteerPageMock.object, PuppeteerTimeoutConfig.redirectTimeoutMsec))
             .callback(async (fn) => (pageOperation = fn))
             .returns(async () => pageOperation(url, puppeteerPageMock.object))
             .verifiable();
@@ -116,7 +116,7 @@ describe(PageAnalyzer, () => {
     it('detect no page redirection', async () => {
         let pageOperation: any;
         pageRequestInterceptorMock
-            .setup((o) => o.intercept(It.isAny(), puppeteerPageMock.object, puppeteerTimeoutConfig.redirectTimeoutMsec))
+            .setup((o) => o.intercept(It.isAny(), puppeteerPageMock.object, PuppeteerTimeoutConfig.redirectTimeoutMsec))
             .callback(async (fn) => (pageOperation = fn))
             .returns(async () => pageOperation(url, puppeteerPageMock.object))
             .verifiable();
@@ -156,7 +156,7 @@ describe(PageAnalyzer, () => {
 
         let pageOperation: any;
         pageRequestInterceptorMock
-            .setup((o) => o.intercept(It.isAny(), puppeteerPageMock.object, puppeteerTimeoutConfig.redirectTimeoutMsec))
+            .setup((o) => o.intercept(It.isAny(), puppeteerPageMock.object, PuppeteerTimeoutConfig.redirectTimeoutMsec))
             .callback(async (fn) => (pageOperation = fn))
             .returns(async () => pageOperation(url, puppeteerPageMock.object))
             .verifiable();
@@ -212,7 +212,7 @@ describe(PageAnalyzer, () => {
         let pageOperation: any;
         const pageOnResponseHandler = (pageAnalyzer as any).getPageOnResponseHandler(url);
         pageRequestInterceptorMock
-            .setup((o) => o.intercept(It.isAny(), puppeteerPageMock.object, puppeteerTimeoutConfig.redirectTimeoutMsec))
+            .setup((o) => o.intercept(It.isAny(), puppeteerPageMock.object, PuppeteerTimeoutConfig.redirectTimeoutMsec))
             .callback(async (fn) => {
                 pageOperation = fn;
                 await Promise.all(
