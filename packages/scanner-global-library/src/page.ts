@@ -177,13 +177,28 @@ export class Page {
         // Scrolling to the top of the page to capture full page screenshot.
         await this.scrollToPageTop(this.page);
 
-        // Puppeteer fails to generate screenshot for a large page.
         try {
-            // Note: Changing page.screenshot() options will break page layout.
-            // The BrowserConnectOptions.defaultViewport should be equal to null to preserve page layout.
-            const data = await this.page.screenshot({
-                fullPage: true,
-                encoding: 'base64',
+            const scrollDimensions = await this.page.mainFrame().evaluate(() => {
+                const element = document.documentElement;
+
+                return {
+                    width: element.scrollWidth,
+                    height: element.scrollHeight,
+                };
+            });
+            await this.page.setViewport({
+                ...scrollDimensions,
+            });
+            // Do not set viewport to anything other than 0, as this will break page layout.
+            await this.page
+                .setViewport({
+                    width: 0,
+                    height: 0,
+                })
+                .catch();
+
+            const { data } = await this.devToolsSession.send(this.page, 'Page.captureScreenshot', {
+                captureBeyondViewport: true,
             });
 
             if (System.isDebugEnabled() === true && System.isUnitTest() !== true) {
@@ -200,7 +215,6 @@ export class Page {
     }
 
     public async getPageSnapshot(): Promise<string> {
-        // Puppeteer may fail to generate MSHTML snapshot.
         try {
             const { data } = await this.devToolsSession.send(this.page, 'Page.captureSnapshot', { format: 'mhtml' });
 

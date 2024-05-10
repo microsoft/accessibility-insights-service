@@ -392,15 +392,26 @@ describe(Page, () => {
         });
 
         it('getPageScreenshot()', async () => {
-            simulatePageLaunch();
-            const options = {
-                fullPage: true,
-                encoding: 'base64',
-            } as Puppeteer.ScreenshotOptions;
+            const scrollDimensions = { width: 10, height: 20 };
+            const frame = {
+                evaluate: () => scrollDimensions,
+            } as any;
             puppeteerPageMock
-                .setup((o) => o.screenshot(options))
-                .returns(() => Promise.resolve('data' as any))
+                .setup((o) => o.mainFrame())
+                .returns(() => frame)
                 .verifiable();
+            puppeteerPageMock
+                .setup((o) => o.setViewport(scrollDimensions))
+                .returns(() => Promise.resolve())
+                .verifiable();
+            puppeteerPageMock
+                .setup((o) => o.setViewport({ width: 0, height: 0 }))
+                .returns(() => Promise.resolve())
+                .verifiable();
+            setupCDPSessionForCaptureScreenshot('data');
+
+            simulatePageLaunch();
+
             const data = await page.getPageScreenshot();
             expect(data).toEqual('data');
             expect(scrollToTopMock).toBeCalled();
@@ -468,11 +479,19 @@ function simulatePageLaunch(): void {
     page.userAgent = userAgent;
 }
 
+function setupCDPSessionForCaptureScreenshot(data: string): void {
+    const result = { data };
+    devToolsSessionMock
+        .setup((o) => o.send(puppeteerPageMock.object, 'Page.captureScreenshot', { captureBeyondViewport: true }))
+        .returns(async () => result)
+        .verifiable();
+}
+
 function setupCDPSessionForCaptureSnapshot(data: string): void {
-    const snapshot = { data };
+    const result = { data };
     devToolsSessionMock
         .setup((o) => o.send(puppeteerPageMock.object, 'Page.captureSnapshot', { format: 'mhtml' }))
-        .returns(async () => snapshot)
+        .returns(async () => result)
         .verifiable();
 }
 
