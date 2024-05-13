@@ -64,12 +64,8 @@ function setupCDPSession(timeout: number = undefined): void {
         .setup((o) => o.detach())
         .returns(() => Promise.resolve())
         .verifiable();
-
-    const targetStub = {
-        createCDPSession: async () => cdpSessionMock.object,
-    } as Puppeteer.Target;
     puppeteerPageMock
-        .setup((o) => o.target())
-        .returns(() => targetStub)
+        .setup((o) => o.createCDPSession())
+        .returns(() => Promise.resolve(cdpSessionMock.object))
         .verifiable();
 }

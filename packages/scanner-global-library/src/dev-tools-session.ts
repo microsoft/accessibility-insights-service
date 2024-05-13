@@ -33,7 +33,7 @@ export class DevToolsSession {
         try {
             let timedOut;
 
-            client = await page.target().createCDPSession();
+            client = await page.createCDPSession();
             const wait = new Promise<void>((resolve) => {
                 timer = setTimeout(() => {
                     timedOut = true;
