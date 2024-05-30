@@ -48,13 +48,13 @@
         "webpack-ignore-dynamic-require": "^1.0.0"
     },
     "dependencies": {
-        "@axe-core/puppeteer": "4.7.3",
+        "@axe-core/puppeteer": "4.8.4",
         "@azure/cosmos": "^4.0.0",
-        "accessibility-insights-report": "^4.7.0",
+        "accessibility-insights-report": "4.8.0",
         "applicationinsights": "^2.3.1",
-        "axe-core": "4.7.2",
+        "axe-core": "4.8.4",
         "axe-result-converter": "workspace:*",
-        "axe-sarif-converter": "^2.11.0",
+        "axe-sarif-converter": "^2.11.1",
         "azure-services": "workspace:*",
         "common": "workspace:*",
         "dotenv": "^16.0.1",
@@ -77,8 +77,8 @@
         "yargs": "^17.6.2"
     },
     "resolutions": {
-        "axe-core": "4.7.2",
-        "@axe-core/puppeteer": "4.7.3"
+        "axe-core": "4.8.4",
+        "@axe-core/puppeteer": "4.8.4"
     },
     "overrides": {
         "@crawlee/puppeteer": {
