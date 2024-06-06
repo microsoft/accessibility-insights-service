@@ -232,6 +232,10 @@ function setupPageNavigation(response: Puppeteer.HTTPResponse, browserError?: Br
         .setup((o) => o.status())
         .returns(() => 200)
         .verifiable();
+    puppeteerPageMock
+        .setup((o) => o.evaluate(It.isAny()))
+        .returns(() => Promise.resolve())
+        .verifiable();
 }
 
 function setupPageLaunch(): void {
