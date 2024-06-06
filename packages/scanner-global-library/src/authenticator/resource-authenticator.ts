@@ -7,7 +7,7 @@ import { GlobalLogger } from 'logger';
 import { AuthenticationType } from 'storage-documents';
 import { System } from 'common';
 import { NavigationResponse, PageOperationResult } from '../page-navigator';
-import { PageNavigationTiming, puppeteerTimeoutConfig } from '../page-timeout-config';
+import { PageNavigationTiming, PuppeteerTimeoutConfig } from '../page-timeout-config';
 import { PageResponseProcessor } from '../page-response-processor';
 import { LoginPageClientFactory } from './login-page-client-factory';
 
@@ -71,7 +71,10 @@ export class ResourceAuthenticator {
         const timestamp = System.getTimestamp();
         try {
             this.logger?.logInfo('Navigate page to URL for authentication.');
-            const response = await page.goto(url, { waitUntil: 'networkidle2', timeout: puppeteerTimeoutConfig.navigationTimeoutMsec });
+            const response = await page.goto(url, {
+                waitUntil: 'networkidle2',
+                timeout: PuppeteerTimeoutConfig.defaultNavigationTimeoutMsec,
+            });
 
             return { response, navigationTiming: { goto: System.getElapsedTime(timestamp) } as PageNavigationTiming };
         } catch (error) {

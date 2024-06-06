@@ -8,7 +8,7 @@ import { GlobalLogger } from 'logger';
 import { BrowserError } from './browser-error';
 import { PageNavigationHooks } from './page-navigation-hooks';
 import { PageConfigurator } from './page-configurator';
-import { puppeteerTimeoutConfig, PageNavigationTiming } from './page-timeout-config';
+import { PuppeteerTimeoutConfig, PageNavigationTiming } from './page-timeout-config';
 import { BrowserCache } from './browser-cache';
 import { PageOperation, PageOperationHandler } from './network/page-operation-handler';
 import { resetSessionHistory } from './page-client-lib';
@@ -33,21 +33,11 @@ export interface PageOperationResult {
 
 @injectable()
 export class PageNavigator {
-    private readonly waitForDefaultOptions: Puppeteer.WaitForOptions = {
-        waitUntil: 'networkidle2',
-        timeout: puppeteerTimeoutConfig.navigationTimeoutMsec,
-    };
-
-    private readonly waitForCompleteOptions: Puppeteer.WaitForOptions = {
-        // The networkidle0 option is required to load page with WebGL enabled
-        waitUntil: 'networkidle0',
-        timeout: puppeteerTimeoutConfig.navigationTimeoutMsec,
-    };
-
     constructor(
         @inject(PageNavigationHooks) private readonly pageNavigationHooks: PageNavigationHooks,
         @inject(BrowserCache) private readonly browserCache: BrowserCache,
         @inject(PageOperationHandler) private readonly pageOperationHandler: PageOperationHandler,
+        @inject(PuppeteerTimeoutConfig) private readonly puppeteerTimeoutConfig: PuppeteerTimeoutConfig,
         @inject(GlobalLogger) @optional() public readonly logger: GlobalLogger,
         private readonly resetSessionHistoryFn: typeof resetSessionHistory = resetSessionHistory,
     ) {}
@@ -164,7 +154,7 @@ export class PageNavigator {
 
             // Navigation using page.goto() will not resolve HTTP 304 response
             // Use of page.goBack() is required with back/forward cache disabled, option --disable-features=BackForwardCache
-            const pageOperation = async () => page.goBack(this.waitForDefaultOptions);
+            const pageOperation = async () => page.goBack(this.getWaitForPageNavigationOptions());
             operationResult = await this.pageOperationHandler.invoke(pageOperation, page);
         } while (
             count < maxRetryCount &&
@@ -182,7 +172,7 @@ export class PageNavigator {
         url?: string,
         capabilities?: WebDriverCapabilities,
     ): PageOperation {
-        const waitForOptions = capabilities?.webgl === true ? this.waitForCompleteOptions : this.waitForDefaultOptions;
+        const waitForOptions = this.getWaitForPageNavigationOptions(capabilities);
         switch (operation) {
             case 'goto':
                 return async () => {
@@ -228,5 +218,20 @@ export class PageNavigator {
         } catch (error) {
             this.logger?.logWarn('Error while resetting page session history.', { error: System.serializeError(error) });
         }
+    }
+
+    private getWaitForPageNavigationOptions(capabilities?: WebDriverCapabilities): Puppeteer.WaitForOptions {
+        if (capabilities?.webgl === true) {
+            return {
+                // The networkidle0 option is required to load page with WebGL enabled
+                waitUntil: 'networkidle0',
+                timeout: this.puppeteerTimeoutConfig.navigationTimeoutMsec,
+            };
+        }
+
+        return {
+            waitUntil: 'networkidle2',
+            timeout: this.puppeteerTimeoutConfig.navigationTimeoutMsec,
+        };
     }
 }

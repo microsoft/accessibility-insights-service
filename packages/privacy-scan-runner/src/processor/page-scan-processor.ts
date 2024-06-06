@@ -38,33 +38,19 @@ export class PageScanProcessor {
                 return { error: this.page.browserError, pageResponseCode: this.page.browserError.statusCode };
             }
 
-            const pageState = await this.capturePageState();
-
-            privacyScanResults = await this.runPrivacyScan(scanMetadata.url);
-            privacyScanResults = { ...privacyScanResults, ...pageState };
-
+            privacyScanResults = await this.privacyScanner.scan(scanMetadata.url, this.page);
             await this.deepScanner.runDeepScan(pageScanResult, websiteScanData, this.page);
+
+            // Taking a screenshot of the page might break the page layout. Run at the end of the workflow.
+            // Perform hard page reload to show the page's state with the privacy banner displayed.
+            await this.page.reload({ hardReload: true });
+            const pageState = await this.page.capturePageState();
+            privacyScanResults = { ...privacyScanResults, ...pageState };
         } finally {
             await this.page.close();
         }
 
         return privacyScanResults;
-    }
-
-    private async capturePageState(): Promise<PrivacyScanResult> {
-        const pageSnapshot = await this.page.getPageSnapshot();
-        const pageScreenshot = await this.page.getPageScreenshot();
-
-        return {
-            pageSnapshot,
-            pageScreenshot,
-        };
-    }
-
-    private async runPrivacyScan(url: string): Promise<PrivacyScanResult> {
-        const privacyScanResult = await this.privacyScanner.scan(url, this.page);
-
-        return privacyScanResult;
     }
 
     private getScannableState(pageMetadata: PageMetadata): PrivacyScanResult {

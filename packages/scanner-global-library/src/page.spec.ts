@@ -14,7 +14,7 @@ import { BrowserStartOptions, Page } from './page';
 import { getPromisableDynamicMock } from './test-utilities/promisable-mock';
 import { WebDriver } from './web-driver';
 import { PageNavigator, NavigationResponse } from './page-navigator';
-import { PageNavigationTiming } from './page-timeout-config';
+import { PageNavigationTiming, PuppeteerTimeoutConfig } from './page-timeout-config';
 import { scrollToTop } from './page-client-lib';
 import { PageNetworkTracer } from './network/page-network-tracer';
 import { ResourceAuthenticator, ResourceAuthenticationResult } from './authenticator/resource-authenticator';
@@ -54,6 +54,7 @@ let resourceAuthenticatorMock: IMock<ResourceAuthenticator>;
 let pageAnalyzerMock: IMock<PageAnalyzer>;
 let guidGeneratorMock: IMock<GuidGenerator>;
 let devToolsSessionMock: IMock<DevToolsSession>;
+let puppeteerTimeoutConfigMock: IMock<PuppeteerTimeoutConfig>;
 let browserStartOptions: BrowserStartOptions;
 
 describe(Page, () => {
@@ -67,7 +68,7 @@ describe(Page, () => {
         };
 
         webDriverMock = getPromisableDynamicMock(Mock.ofType<WebDriver>());
-        pageNavigatorMock = Mock.ofType(PageNavigator);
+        pageNavigatorMock = Mock.ofType<PageNavigator>();
         loggerMock = Mock.ofType<GlobalLogger>();
         browserMock = getPromisableDynamicMock(Mock.ofType<Puppeteer.Browser>());
         puppeteerPageMock = getPromisableDynamicMock(Mock.ofType<Puppeteer.Page>());
@@ -79,6 +80,7 @@ describe(Page, () => {
         pageAnalyzerMock = Mock.ofType<PageAnalyzer>();
         guidGeneratorMock = Mock.ofType<GuidGenerator>();
         devToolsSessionMock = Mock.ofType<DevToolsSession>();
+        puppeteerTimeoutConfigMock = Mock.ofType<PuppeteerTimeoutConfig>();
         browserStartOptions = {} as BrowserStartOptions;
 
         scrollToTopMock = jest.fn().mockImplementation(() => Promise.resolve());
@@ -104,6 +106,7 @@ describe(Page, () => {
             resourceAuthenticatorMock.object,
             pageAnalyzerMock.object,
             devToolsSessionMock.object,
+            puppeteerTimeoutConfigMock.object,
             guidGeneratorMock.object,
             loggerMock.object,
             scrollToTopMock,
@@ -120,6 +123,7 @@ describe(Page, () => {
         pageNetworkTracerMock.verifyAll();
         resourceAuthenticatorMock.verifyAll();
         pageAnalyzerMock.verifyAll();
+        puppeteerTimeoutConfigMock.verifyAll();
     });
 
     describe('navigate()', () => {
@@ -388,15 +392,26 @@ describe(Page, () => {
         });
 
         it('getPageScreenshot()', async () => {
-            simulatePageLaunch();
-            const options = {
-                fullPage: true,
-                encoding: 'base64',
-            } as Puppeteer.ScreenshotOptions;
+            const scrollDimensions = { width: 10, height: 20 };
+            const frame = {
+                evaluate: () => scrollDimensions,
+            } as any;
             puppeteerPageMock
-                .setup((o) => o.screenshot(options))
-                .returns(() => Promise.resolve('data' as any))
+                .setup((o) => o.mainFrame())
+                .returns(() => frame)
                 .verifiable();
+            puppeteerPageMock
+                .setup((o) => o.setViewport(scrollDimensions))
+                .returns(() => Promise.resolve())
+                .verifiable();
+            puppeteerPageMock
+                .setup((o) => o.setViewport({ width: 0, height: 0 }))
+                .returns(() => Promise.resolve())
+                .verifiable();
+            setupCDPSessionForCaptureScreenshot('data');
+
+            simulatePageLaunch();
+
             const data = await page.getPageScreenshot();
             expect(data).toEqual('data');
             expect(scrollToTopMock).toBeCalled();
@@ -464,11 +479,19 @@ function simulatePageLaunch(): void {
     page.userAgent = userAgent;
 }
 
+function setupCDPSessionForCaptureScreenshot(data: string): void {
+    const result = { data };
+    devToolsSessionMock
+        .setup((o) => o.send(puppeteerPageMock.object, 'Page.captureScreenshot', { captureBeyondViewport: true }))
+        .returns(async () => result)
+        .verifiable();
+}
+
 function setupCDPSessionForCaptureSnapshot(data: string): void {
-    const snapshot = { data };
+    const result = { data };
     devToolsSessionMock
         .setup((o) => o.send(puppeteerPageMock.object, 'Page.captureSnapshot', { format: 'mhtml' }))
-        .returns(async () => snapshot)
+        .returns(async () => result)
         .verifiable();
 }
 

@@ -7,7 +7,7 @@ import { IMock, Mock, It, Times } from 'typemoq';
 import * as Puppeteer from 'puppeteer';
 import { PageNavigator, PageOperationResult, NavigationResponse } from './page-navigator';
 import { PageNavigationHooks } from './page-navigation-hooks';
-import { puppeteerTimeoutConfig, PageNavigationTiming } from './page-timeout-config';
+import { PuppeteerTimeoutConfig, PageNavigationTiming } from './page-timeout-config';
 import { MockableLogger } from './test-utilities/mockable-logger';
 import { BrowserError } from './browser-error';
 import { BrowserCache } from './browser-cache';
@@ -19,6 +19,7 @@ import { WebDriverCapabilities } from './web-driver';
 
 const url = 'url';
 const max304RetryCount = 2;
+const navigationTimeoutMsec = 10;
 
 let pageNavigator: PageNavigator;
 let pageNavigationHooksMock: IMock<PageNavigationHooks>;
@@ -26,6 +27,7 @@ let puppeteerPageMock: IMock<Puppeteer.Page>;
 let loggerMock: IMock<MockableLogger>;
 let browserCacheMock: IMock<BrowserCache>;
 let pageOperationHandlerMock: IMock<PageOperationHandler>;
+let puppeteerTimeoutConfigMock: IMock<PuppeteerTimeoutConfig>;
 let timingCount: number;
 let pageOperationResult: PageOperationResult;
 let response: Puppeteer.HTTPResponse;
@@ -39,6 +41,7 @@ describe(PageNavigator, () => {
         puppeteerPageMock = Mock.ofType<Puppeteer.Page>();
         browserCacheMock = Mock.ofType<BrowserCache>();
         pageOperationHandlerMock = Mock.ofType<PageOperationHandler>();
+        puppeteerTimeoutConfigMock = Mock.ofType<PuppeteerTimeoutConfig>();
         loggerMock = Mock.ofType(MockableLogger);
         pageOperationResult = {} as PageOperationResult;
         capabilities = {} as WebDriverCapabilities;
@@ -61,10 +64,13 @@ describe(PageNavigator, () => {
             },
         } as NodeJS.HRTime;
 
+        puppeteerTimeoutConfigMock.setup((o) => o.navigationTimeoutMsec).returns(() => navigationTimeoutMsec);
+
         pageNavigator = new PageNavigator(
             pageNavigationHooksMock.object,
             browserCacheMock.object,
             pageOperationHandlerMock.object,
+            puppeteerTimeoutConfigMock.object,
             loggerMock.object,
             resetSessionHistoryMock,
         );
@@ -75,6 +81,7 @@ describe(PageNavigator, () => {
         browserCacheMock.verifyAll();
         puppeteerPageMock.verifyAll();
         pageOperationHandlerMock.verifyAll();
+        puppeteerTimeoutConfigMock.verifyAll();
         loggerMock.verifyAll();
     });
 
@@ -289,7 +296,7 @@ describe(PageNavigator, () => {
                 .returns(() => Promise.resolve(response))
                 .verifiable();
             puppeteerPageMock
-                .setup((o) => o.goBack({ waitUntil: 'networkidle2', timeout: puppeteerTimeoutConfig.navigationTimeoutMsec }))
+                .setup((o) => o.goBack({ waitUntil: 'networkidle2', timeout: navigationTimeoutMsec }))
                 .returns(() => Promise.resolve(okResponse))
                 .verifiable();
 
@@ -321,7 +328,7 @@ describe(PageNavigator, () => {
                 .returns(() => Promise.resolve(response))
                 .verifiable(Times.atLeast(max304RetryCount - 1));
             puppeteerPageMock
-                .setup((o) => o.goBack({ waitUntil: 'networkidle2', timeout: puppeteerTimeoutConfig.navigationTimeoutMsec }))
+                .setup((o) => o.goBack({ waitUntil: 'networkidle2', timeout: navigationTimeoutMsec }))
                 .returns(() => Promise.resolve(cachedResponse))
                 .verifiable(Times.atLeast(max304RetryCount));
             browserCacheMock

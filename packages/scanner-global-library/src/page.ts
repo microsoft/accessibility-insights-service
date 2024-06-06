@@ -10,7 +10,7 @@ import { isNumber, isEmpty } from 'lodash';
 import { WebDriver, WebDriverCapabilities } from './web-driver';
 import { PageNavigator, NavigationResponse } from './page-navigator';
 import { BrowserError } from './browser-error';
-import { PageNavigationTiming } from './page-timeout-config';
+import { PageNavigationTiming, PuppeteerTimeoutConfig } from './page-timeout-config';
 import { scrollToTop } from './page-client-lib';
 import { PageNetworkTracer } from './network/page-network-tracer';
 import { ResourceAuthenticator, ResourceAuthenticationResult } from './authenticator/resource-authenticator';
@@ -38,6 +38,11 @@ export interface PageOptions {
     enableAuthentication?: boolean;
 }
 
+export interface PageState {
+    pageSnapshot?: string;
+    pageScreenshot?: string;
+}
+
 type Operation = 'load' | 'reload' | 'analysis' | 'auth';
 
 @injectable()
@@ -58,6 +63,8 @@ export class Page {
 
     public pageAnalysisResult: PageAnalysisResult;
 
+    public pageState: PageState;
+
     public requestUrl: string;
 
     public userAgent: string;
@@ -75,6 +82,7 @@ export class Page {
         @inject(ResourceAuthenticator) private readonly resourceAuthenticator: ResourceAuthenticator,
         @inject(PageAnalyzer) private readonly pageAnalyzer: PageAnalyzer,
         @inject(DevToolsSession) private readonly devToolsSession: DevToolsSession,
+        @inject(PuppeteerTimeoutConfig) private readonly puppeteerTimeoutConfig: PuppeteerTimeoutConfig,
         @inject(GuidGenerator) private readonly guidGenerator: GuidGenerator,
         @inject(GlobalLogger) @optional() private readonly logger: GlobalLogger,
         private readonly scrollToPageTop: typeof scrollToTop = scrollToTop,
@@ -109,6 +117,7 @@ export class Page {
 
         this.userAgent = await this.browser.userAgent();
         this.page = await this.browser.newPage();
+        this.puppeteerTimeoutConfig.setOperationTimeout(options?.capabilities);
 
         const pageCreated = await this.webDriver.waitForPageCreation();
         if (pageCreated !== true) {
@@ -116,13 +125,15 @@ export class Page {
         }
     }
 
-    public async analyze(url: string, options?: PageOptions): Promise<void> {
+    public async analyze(url: string, options?: PageOptions): Promise<PageAnalysisResult> {
         if (this.page === undefined) {
             await this.create();
         }
 
         await this.setInitialState(url, options);
         await this.analyzeImpl();
+
+        return this.pageAnalysisResult;
     }
 
     public async navigate(url: string, options?: PageOptions): Promise<void> {
@@ -159,17 +170,35 @@ export class Page {
         }
     }
 
+    /**
+     * Taking a screenshot of the page might break the page layout. Load the page again to fix the page layout.
+     */
     public async getPageScreenshot(): Promise<string> {
         // Scrolling to the top of the page to capture full page screenshot.
         await this.scrollToPageTop(this.page);
 
-        // Puppeteer fails to generate screenshot for a large page.
         try {
-            // Note: Changing page.screenshot() options will break page layout.
-            // The BrowserConnectOptions.defaultViewport should be equal to null to preserve page layout.
-            const data = await this.page.screenshot({
-                fullPage: true,
-                encoding: 'base64',
+            const scrollDimensions = await this.page.mainFrame().evaluate(() => {
+                const element = document.documentElement;
+
+                return {
+                    width: element.scrollWidth,
+                    height: element.scrollHeight,
+                };
+            });
+            await this.page.setViewport({
+                ...scrollDimensions,
+            });
+            // Do not set viewport to anything other than 0, as this will break page layout.
+            await this.page
+                .setViewport({
+                    width: 0,
+                    height: 0,
+                })
+                .catch();
+
+            const { data } = await this.devToolsSession.send(this.page, 'Page.captureScreenshot', {
+                captureBeyondViewport: true,
             });
 
             if (System.isDebugEnabled() === true && System.isUnitTest() !== true) {
@@ -186,16 +215,29 @@ export class Page {
     }
 
     public async getPageSnapshot(): Promise<string> {
-        // Puppeteer may fail to generate mhtml snapshot.
         try {
             const { data } = await this.devToolsSession.send(this.page, 'Page.captureSnapshot', { format: 'mhtml' });
 
             return data;
         } catch (error) {
-            this.logger?.logError('Failed to generate page mhtml snapshot file', { error: System.serializeError(error) });
+            this.logger?.logError('Failed to generate page MSHTML snapshot file', { error: System.serializeError(error) });
 
             return '';
         }
+    }
+
+    /**
+     * Taking a screenshot of the page might break the page layout. Load the page again to fix the page layout.
+     */
+    public async capturePageState(): Promise<PageState> {
+        const pageSnapshot = await this.getPageSnapshot();
+        const pageScreenshot = await this.getPageScreenshot();
+        this.pageState = {
+            pageSnapshot,
+            pageScreenshot,
+        };
+
+        return this.pageState;
     }
 
     public async getAllCookies(): Promise<Puppeteer.Protocol.Network.Cookie[]> {

@@ -38,19 +38,17 @@ export class PageScanProcessor {
             await this.page.reopenBrowser({ capabilities: { webgl: true } });
             const enableAuthentication = pageScanResult.authentication?.hint !== undefined;
             await this.page.navigate(runnerScanMetadata.url, { enableAuthentication });
-
             this.setAuthenticationResult(pageMetadata, pageScanResult);
-
             if (!isEmpty(this.page.browserError)) {
                 return { error: this.page.browserError, pageResponseCode: this.page.browserError.statusCode };
             }
 
-            const pageState = await this.capturePageState();
-
             axeScanResults = await this.axeScanner.scan(this.page);
-            axeScanResults = { ...axeScanResults, ...pageState };
-
             await this.deepScanner.runDeepScan(pageScanResult, websiteScanData, this.page);
+
+            // Taking a screenshot of the page might break the page layout. Run at the end of the workflow.
+            const pageState = await this.page.capturePageState();
+            axeScanResults = { ...axeScanResults, ...pageState };
         } finally {
             await this.page.close();
         }
@@ -74,16 +72,6 @@ export class PageScanProcessor {
         return {
             unscannable: false,
             scannedUrl: pageMetadata.loadedUrl,
-        };
-    }
-
-    private async capturePageState(): Promise<AxeScanResults> {
-        const pageScreenshot = await this.page.getPageScreenshot();
-        const pageSnapshot = await this.page.getPageSnapshot();
-
-        return {
-            pageSnapshot,
-            pageScreenshot,
         };
     }
 

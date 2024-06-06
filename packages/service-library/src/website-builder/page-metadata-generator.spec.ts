@@ -90,7 +90,7 @@ describe(PageMetadataGenerator, () => {
         pageMock.setup((o) => o.pageAnalysisResult).returns(() => pageAnalysisResult);
         pageMock
             .setup((o) => o.analyze(url))
-            .returns(() => Promise.resolve())
+            .returns(() => Promise.resolve(undefined))
             .verifiable();
         const expectedPageMetadata = {
             url,
@@ -114,7 +114,7 @@ describe(PageMetadataGenerator, () => {
         pageMock.setup((o) => o.pageAnalysisResult).returns(() => pageAnalysisResult);
         pageMock
             .setup((o) => o.analyze(url))
-            .returns(() => Promise.resolve())
+            .returns(() => Promise.resolve(undefined))
             .verifiable();
         const expectedPageMetadata = {
             url,
@@ -136,7 +136,7 @@ describe(PageMetadataGenerator, () => {
         pageMock.setup((o) => o.pageAnalysisResult).returns(() => pageAnalysisResult);
         pageMock
             .setup((o) => o.analyze(url))
-            .returns(() => Promise.resolve())
+            .returns(() => Promise.resolve(undefined))
             .verifiable();
         const expectedPageMetadata = {
             url,
@@ -162,7 +162,7 @@ describe(PageMetadataGenerator, () => {
         pageMock.setup((o) => o.pageAnalysisResult).returns(() => pageAnalysisResult);
         pageMock
             .setup((o) => o.analyze(url))
-            .returns(() => Promise.resolve())
+            .returns(() => Promise.resolve(undefined))
             .verifiable();
         const expectedPageMetadata = {
             url,
@@ -187,7 +187,7 @@ describe(PageMetadataGenerator, () => {
         pageMock.setup((o) => o.pageAnalysisResult).returns(() => pageAnalysisResult);
         pageMock
             .setup((o) => o.analyze(url))
-            .returns(() => Promise.resolve())
+            .returns(() => Promise.resolve(undefined))
             .verifiable();
         const expectedPageMetadata = {
             url,
@@ -217,7 +217,7 @@ describe(PageMetadataGenerator, () => {
         pageMock.setup((o) => o.pageAnalysisResult).returns(() => pageAnalysisResult);
         pageMock
             .setup((o) => o.analyze(url))
-            .returns(() => Promise.resolve())
+            .returns(() => Promise.resolve(undefined))
             .verifiable();
         const expectedPageMetadata = {
             url,
