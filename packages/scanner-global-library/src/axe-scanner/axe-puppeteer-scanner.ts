@@ -35,6 +35,17 @@ export class AxePuppeteerScanner {
             browserResolution: `${browserResolution.width}x${browserResolution.height}`,
         };
 
+        // Before running axe scanner, we check that page has loaded. Sometimes, browser does not
+        // mark ready state as complete when opening page in a docker container. Hence, we can
+        // override ready state to make axe scanner validation work.
+        await page.puppeteerPage.evaluate(() => {
+            Object.defineProperty(document, 'readyState', {
+                get(): DocumentReadyState {
+                    return 'complete';
+                },
+            });
+        });
+
         let axePuppeteer = await this.axePuppeteerFactory.createAxePuppeteer(page.puppeteerPage, contentSourcePath);
         let axeRunResult = await this.runAxeAnalyze(page, axePuppeteer);
         if (axeRunResult.error !== undefined) {
