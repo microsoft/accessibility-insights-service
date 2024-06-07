@@ -24,7 +24,7 @@ export function getProcessLifeCycleContainer(): inversify.Container {
             async (context) => {
                 const secretProvider = context.container.get(SecretProvider);
                 const webApiIdentityClientId = await secretProvider.getSecret('webApiIdentityClientId');
-                // Client Id is a user-managed identity that is set up with REST API and web worker apps
+                // Client Id is a user-managed identity for REST API function and web worker app
                 const a11yServiceCredential = new A11yServiceCredential(webApiIdentityClientId, webApiIdentityClientId);
 
                 // The worker function app has a custom environment variable WEB_API_BASE_URL
