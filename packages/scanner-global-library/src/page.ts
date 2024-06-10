@@ -215,8 +215,17 @@ export class Page {
     }
 
     public async getPageSnapshot(): Promise<string> {
+        const maxSnapshotSize = 10 * 1024 * 1024;
         try {
-            const { data } = await this.devToolsSession.send(this.page, 'Page.captureSnapshot', { format: 'mhtml' });
+            let { data } = await this.devToolsSession.send(this.page, 'Page.captureSnapshot', { format: 'mhtml' });
+            const length = Buffer.byteLength(JSON.stringify(data), 'utf8');
+            if (length > maxSnapshotSize) {
+                this.logger?.logWarn(`Page snapshot exceeded maximum supported size of ${maxSnapshotSize / (1024 * 1024)} MB`, {
+                    snapshotSize: length.toString(),
+                });
+
+                data = '';
+            }
 
             return data;
         } catch (error) {
