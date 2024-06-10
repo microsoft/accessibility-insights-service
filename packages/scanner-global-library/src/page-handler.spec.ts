@@ -9,12 +9,14 @@ import { System } from 'common';
 import { PageHandler } from './page-handler';
 import { MockableLogger } from './test-utilities/mockable-logger';
 import { scrollToBottom } from './page-client-lib';
+import { PageCpuUsage } from './network/page-cpu-usage';
 
 type Writeable<T> = { -readonly [P in keyof T]: Writeable<T[P]> };
 
 describe(PageHandler, () => {
     let windowStub: Partial<Writeable<Window & typeof globalThis>>;
     let pageHandler: PageHandler;
+    let pageCpuUsageMock: IMock<PageCpuUsage>;
     let loggerMock: IMock<MockableLogger>;
     let pageMock: IMock<Page>;
     let originalWindow: Window & typeof globalThis;
@@ -29,6 +31,7 @@ describe(PageHandler, () => {
 
     beforeEach(() => {
         loggerMock = Mock.ofType<MockableLogger>();
+        pageCpuUsageMock = Mock.ofType<PageCpuUsage>();
         pageMock = Mock.ofType<Page>();
         scrollToBottomMock = getScrollToPageBottomFunc();
         windowStub = {
@@ -47,11 +50,18 @@ describe(PageHandler, () => {
         pageMock.setup((o) => o.evaluate(It.isAny())).returns(async (action) => action());
         pageMock.setup((o) => o.isClosed()).returns(() => false);
 
-        pageHandler = new PageHandler(loggerMock.object, checkIntervalMsecs, pageDomStableTimeMsec, scrollToBottomMock);
+        pageHandler = new PageHandler(
+            pageCpuUsageMock.object,
+            loggerMock.object,
+            checkIntervalMsecs,
+            pageDomStableTimeMsec,
+            scrollToBottomMock,
+        );
     });
 
     afterEach(() => {
         global.window = originalWindow;
+        pageCpuUsageMock.verifyAll();
         pageMock.verifyAll();
         loggerMock.verifyAll();
     });

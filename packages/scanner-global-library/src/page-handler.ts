@@ -7,10 +7,12 @@ import * as Puppeteer from 'puppeteer';
 import { System } from 'common';
 import { PuppeteerTimeoutConfig, PageNavigationTiming } from './page-timeout-config';
 import { scrollToBottom } from './page-client-lib';
+import { PageCpuUsage } from './network/page-cpu-usage';
 
 @injectable()
 export class PageHandler {
     constructor(
+        @inject(PageCpuUsage) private readonly pageCpuUsage: PageCpuUsage,
         @inject(GlobalLogger) @optional() private readonly logger: GlobalLogger,
         private readonly checkIntervalMsecs: number = 200,
         private readonly pageDomStableTimeMsec: number = PuppeteerTimeoutConfig.pageDomStableTimeMsec,
@@ -25,6 +27,8 @@ export class PageHandler {
         // Scroll to the bottom of the page to resolve pending page operations and load lazily-rendered content
         const scroll = await this.scrollToBottom(page, scrollTimeoutMsec);
         const render = await this.waitForStableContent(page, renderTimeoutMsecs);
+
+        await this.pageCpuUsage.getCpuUsage(page, 5000);
 
         return { ...scroll, ...render };
     }
