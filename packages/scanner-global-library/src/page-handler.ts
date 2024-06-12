@@ -14,54 +14,82 @@ export class PageHandler {
     constructor(
         @inject(PageCpuUsage) private readonly pageCpuUsage: PageCpuUsage,
         @inject(GlobalLogger) @optional() private readonly logger: GlobalLogger,
-        private readonly checkIntervalMsecs: number = 200,
-        private readonly pageDomStableTimeMsec: number = PuppeteerTimeoutConfig.pageDomStableTimeMsec,
+        private readonly pageDomStableDurationMsec: number = PuppeteerTimeoutConfig.pageDomStableDurationMsec,
         private readonly scrollToPageBottom: typeof scrollToBottom = scrollToBottom,
     ) {}
 
     public async waitForPageToCompleteRendering(
         page: Puppeteer.Page,
         scrollTimeoutMsec: number,
+        contentTimeoutMsecs: number,
         renderTimeoutMsecs: number,
     ): Promise<Partial<PageNavigationTiming>> {
-        // Scroll to the bottom of the page to resolve pending page operations and load lazily-rendered content
         const scroll = await this.scrollToBottom(page, scrollTimeoutMsec);
-        const render = await this.waitForStableContent(page, renderTimeoutMsecs);
+        const content = await this.waitForHtmlContent(page, contentTimeoutMsecs);
+        const rendering = await this.waitForPageRendering(page, renderTimeoutMsecs);
 
-        await this.pageCpuUsage.getCpuUsage(page, 5000);
-
-        return { ...scroll, ...render };
+        return { ...scroll, ...content, ...rendering };
     }
 
-    private async scrollToBottom(page: Puppeteer.Page, timeoutMsecs: number): Promise<Partial<PageNavigationTiming>> {
-        let scrollingComplete = false;
+    /**
+     * Wait until the browser completes the WebGL graphic rendering. The in-process SwiftShader rendering engine
+     * will result a high CPU usage as it continues to render the graphical content of the page.
+     */
+    private async waitForPageRendering(page: Puppeteer.Page, timeoutMsecs: number): Promise<Partial<PageNavigationTiming>> {
+        const checkIntervalMsecs = 3000;
+        const lowCpuUsageThreshold = 10;
+        let renderingCompleted = false;
 
-        // Scroll incrementally so everything is inside the window at some point
         const timestamp = System.getTimestamp();
-        while (!scrollingComplete && System.getTimestamp() < timestamp + timeoutMsecs && !page.isClosed()) {
-            // Use try/catch because navigation issues may cause page.evaluate() to throw
-            try {
-                scrollingComplete = await this.scrollToPageBottom(page);
-            } catch (error) {
-                this.logger?.logError(`The page scrolling failed.`, { error: System.serializeError(error) });
-            }
+        while (!renderingCompleted && System.getTimestamp() < timestamp + timeoutMsecs && !page.isClosed()) {
+            const cpuUsageStats = await this.pageCpuUsage.getCpuUsage(page, checkIntervalMsecs);
 
-            await System.wait(this.checkIntervalMsecs);
+            renderingCompleted = cpuUsageStats.average / cpuUsageStats.cpus < lowCpuUsageThreshold;
         }
 
         const elapsed = System.getElapsedTime(timestamp);
-        if (!scrollingComplete) {
-            this.logger?.logWarn(`Did not scroll to the bottom of the page after ${timeoutMsecs / 1000} seconds.`, {
+        if (!renderingCompleted) {
+            this.logger?.logWarn(`Page did not complete graphic rendering after ${timeoutMsecs / 1000} seconds.`, {
                 timeout: `${timeoutMsecs}`,
             });
         }
 
-        return { scroll: elapsed, scrollTimeout: !scrollingComplete };
+        return { render: elapsed, renderTimeout: !renderingCompleted };
     }
 
-    private async waitForStableContent(page: Puppeteer.Page, timeoutMsecs: number): Promise<Partial<PageNavigationTiming>> {
-        const minCheckBreakCount = this.pageDomStableTimeMsec / this.checkIntervalMsecs;
+    /**
+     * Scroll to the bottom of the page to resolve pending page operations and load lazily-rendered content
+     */
+    private async scrollToBottom(page: Puppeteer.Page, timeoutMsecs: number): Promise<Partial<PageNavigationTiming>> {
+        const checkIntervalMsecs = 500;
+        let scrollingCompleted = false;
 
+        // Scroll incrementally so everything is inside the window at some point
+        const timestamp = System.getTimestamp();
+        while (!scrollingCompleted && System.getTimestamp() < timestamp + timeoutMsecs && !page.isClosed()) {
+            // Use try/catch because navigation issues may cause page.evaluate() to throw
+            try {
+                scrollingCompleted = await this.scrollToPageBottom(page);
+            } catch (error) {
+                this.logger?.logError(`The page scrolling failed.`, { error: System.serializeError(error) });
+            }
+
+            await System.wait(checkIntervalMsecs);
+        }
+
+        const elapsed = System.getElapsedTime(timestamp);
+        if (!scrollingCompleted) {
+            this.logger?.logWarn(`Unable to scroll to the bottom of the page after ${timeoutMsecs / 1000} seconds.`, {
+                timeout: `${timeoutMsecs}`,
+            });
+        }
+
+        return { scroll: elapsed, scrollTimeout: !scrollingCompleted };
+    }
+
+    private async waitForHtmlContent(page: Puppeteer.Page, timeoutMsecs: number): Promise<Partial<PageNavigationTiming>> {
+        const checkIntervalMsecs = 500;
+        const minCheckBreakCount = this.pageDomStableDurationMsec / checkIntervalMsecs;
         let continuousStableCheckCount = 0;
         let lastCheckPageHtmlContentSize = 0;
         let pageHasStableContent = false;
@@ -89,16 +117,16 @@ export class PageHandler {
                 break;
             }
 
-            await System.wait(this.checkIntervalMsecs);
+            await System.wait(checkIntervalMsecs);
         }
 
         const elapsed = System.getElapsedTime(timestamp);
         if (pageHasStableContent !== true) {
-            this.logger?.logWarn(`Page did not complete full rendering after ${timeoutMsecs / 1000} seconds.`, {
+            this.logger?.logWarn(`Page does not stable HTML content after ${timeoutMsecs / 1000} seconds.`, {
                 timeout: `${timeoutMsecs}`,
             });
         }
 
-        return { render: elapsed, renderTimeout: !pageHasStableContent };
+        return { htmlContent: elapsed, htmlContentTimeout: !pageHasStableContent };
     }
 }

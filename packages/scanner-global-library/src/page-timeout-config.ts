@@ -7,10 +7,10 @@ import { WebDriverCapabilities } from './web-driver';
 export interface PageNavigationTiming {
     goto: number;
     gotoTimeout: boolean;
-    networkIdle: number;
-    networkIdleTimeout: boolean;
     scroll: number;
     scrollTimeout: boolean;
+    htmlContent: number;
+    htmlContentTimeout: boolean;
     render: number;
     renderTimeout: boolean;
 }
@@ -22,14 +22,19 @@ export interface PageNavigationTiming {
 @injectable()
 export class PuppeteerTimeoutConfig {
     /**
-     * Maximum wait time, in milliseconds, to complete async page rendering.
+     * Maximum wait time, in milliseconds, to load dynamic HTML content.
      */
-    public static readonly pageRenderingTimeoutMsec: number = 20000;
+    public static readonly pageHtmlContentTimeoutMsec: number = 20000;
+
+    /**
+     * Maximum wait time, in milliseconds, to complete page graphical rendering.
+     */
+    public static readonly pageRenderingTimeoutMsec: number = 60000;
 
     /**
      * The minimum time the HTML DOM should be stable to accept page rendering.
      */
-    public static readonly pageDomStableTimeMsec: number = 1000;
+    public static readonly pageDomStableDurationMsec: number = 1000;
 
     /**
      * Maximum wait time, in milliseconds, to scroll to the bottom of the page.
