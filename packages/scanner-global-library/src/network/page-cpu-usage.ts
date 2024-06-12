@@ -46,8 +46,6 @@ export interface CpuUsageStats {
 export class PageCpuUsage {
     constructor(@inject(GlobalLogger) @optional() private readonly logger: GlobalLogger) {}
 
-    // to do CPU throttling
-
     public async getCpuUsage(page: Puppeteer.Page, intervalMsec: number, sampleIntervalMsec: number = 1000): Promise<CpuUsageStats> {
         const snapshots: CpuUsage[] = [];
         const pid = page.browser().process().pid;
