@@ -3,7 +3,6 @@
 
 import { injectable } from 'inversify';
 import * as Puppeteer from 'puppeteer';
-import type { ProtocolMapping } from 'devtools-protocol/types/protocol-mapping.js';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -23,11 +22,11 @@ export class DevToolsSession {
     // launch/connect calls.
     public protocolTimeout = 90000;
 
-    public async send<T extends keyof ProtocolMapping.Commands>(
+    public async send<T extends keyof Puppeteer.ProtocolMapping.Commands>(
         page: Puppeteer.Page,
         method: T,
-        ...paramArgs: ProtocolMapping.Commands[T]['paramsType']
-    ): Promise<ProtocolMapping.Commands[T]['returnType']> {
+        ...paramArgs: Puppeteer.ProtocolMapping.Commands[T]['paramsType']
+    ): Promise<Puppeteer.ProtocolMapping.Commands[T]['returnType']> {
         let timer;
         let client;
 
