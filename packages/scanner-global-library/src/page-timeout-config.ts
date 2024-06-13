@@ -29,10 +29,10 @@ export class PuppeteerTimeoutConfig {
     /**
      * Maximum wait time, in milliseconds, to complete page graphical rendering.
      */
-    public static readonly pageRenderingTimeoutMsec: number = 60000;
+    public static readonly pageRenderingTimeoutMsec: number = 90000;
 
     /**
-     * The minimum time the HTML DOM should be stable to accept page rendering.
+     * The minimum time the page HTML DOM should be stable.
      */
     public static readonly pageDomStableDurationMsec: number = 1000;
 
@@ -41,7 +41,7 @@ export class PuppeteerTimeoutConfig {
      *
      * Do not decrease scroll timeout as it will break accessibility scan for long pages.
      */
-    public static readonly scrollTimeoutMsec: number = 30000;
+    public static readonly scrollTimeoutMsec: number = 20000;
 
     /**
      * Maximum wait time, in milliseconds, to complete page redirection.

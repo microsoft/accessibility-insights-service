@@ -36,13 +36,12 @@ export class PageHandler {
      * will result a high CPU usage as it continues to render the graphical content of the page.
      */
     private async waitForPageRendering(page: Puppeteer.Page, timeoutMsecs: number): Promise<Partial<PageNavigationTiming>> {
-        const checkIntervalMsecs = 5000;
         const lowCpuUsageThreshold = 0.1;
         let renderingCompleted = false;
 
         const timestamp = System.getTimestamp();
         while (!renderingCompleted && System.getTimestamp() < timestamp + timeoutMsecs && !page.isClosed()) {
-            const cpuUsageStats = await this.pageCpuUsage.getCpuUsage(page, checkIntervalMsecs);
+            const cpuUsageStats = await this.pageCpuUsage.getCpuUsage(page);
 
             renderingCompleted = cpuUsageStats.average < lowCpuUsageThreshold * (100 * cpuUsageStats.cpus);
         }

@@ -46,12 +46,12 @@ export interface CpuUsageStats {
 export class PageCpuUsage {
     constructor(@inject(GlobalLogger) @optional() private readonly logger: GlobalLogger) {}
 
-    public async getCpuUsage(page: Puppeteer.Page, intervalMsec: number, sampleIntervalMsec: number = 1000): Promise<CpuUsageStats> {
+    public async getCpuUsage(page: Puppeteer.Page, samples: number = 3, sampleIntervalMsec: number = 1000): Promise<CpuUsageStats> {
         const snapshots: CpuUsage[] = [];
         const pid = page.browser().process().pid;
 
-        const timestamp = System.getTimestamp();
-        while (System.getTimestamp() < timestamp + intervalMsec) {
+        let count = 0;
+        while (count++ < samples) {
             const usage = await pidusage(pid);
             snapshots.push({
                 cpu: usage.cpu,
@@ -71,7 +71,7 @@ export class PageCpuUsage {
             snapshots,
         };
 
-        this.logger?.logInfo(`Browser process ID ${pid} usage statistics.`, {
+        this.logger?.logInfo(`Browser process usage statistics.`, {
             snapshots: JSON.stringify(stats),
         });
 

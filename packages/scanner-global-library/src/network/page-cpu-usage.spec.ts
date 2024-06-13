@@ -67,7 +67,7 @@ describe(PageCpuUsage, () => {
             ],
         };
 
-        const cpuUsage = await pageCpuUsage.getCpuUsage(puppeteerPageMock.object, 200, 100);
+        const cpuUsage = await pageCpuUsage.getCpuUsage(puppeteerPageMock.object, 2, 100);
 
         expect(cpuUsage).toEqual(expectedCpuUsage);
     });
