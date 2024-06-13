@@ -13,7 +13,6 @@ export cosmosAccountName
 export cosmosDbUrl
 export containerRegistryName
 export principalName
-export tenantId
 
 # Disable POSIX to Windows path conversion
 export MSYS_NO_PATHCONV=1
@@ -33,10 +32,6 @@ getCurrentUserDetails() {
         echo "Unable to get logged in user name"
         exit 1
     fi
-}
-
-getTenantId() {
-    tenantId=$(az account show --query "tenantId" -o tsv)
 }
 
 grantWritePermissionToKeyVault() {
@@ -111,9 +106,6 @@ pushSecretsToKeyVault() (
 
     webApiIdentityClientId=$(az identity show --name "${webApiManagedIdentityName}" --resource-group "${resourceGroupName}" --query clientId -o tsv)
     pushSecretToKeyVault "webApiIdentityClientId" "${webApiIdentityClientId}"
-
-    getTenantId
-    pushSecretToKeyVault "authorityUrl" "https://login.microsoftonline.com/${tenantId}"
 
     createAppInsightsApiKey
     pushSecretToKeyVault "appInsightsApiKey" "${appInsightsApiKey}"
