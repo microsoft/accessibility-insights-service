@@ -50,7 +50,6 @@ export class PageNavigationHooks {
         }
 
         await this.disableAnimation(page);
-        await this.unfreezePage(page);
 
         return this.pageRenderingHandler.waitForPageToCompleteRendering(
             page,
@@ -58,15 +57,6 @@ export class PageNavigationHooks {
             this.pageHtmlContentTimeoutMsec,
             this.pageRenderingTimeoutMsec,
         );
-    }
-
-    private async unfreezePage(page: Puppeteer.Page): Promise<void> {
-        // Unfreeze JavaScript execution in the background page
-        // Related to https://github.com/WICG/web-lifecycle/
-        const session = await page.createCDPSession();
-        await session.send('Page.enable');
-        await session.send('Page.setWebLifecycleState', { state: 'active' });
-        await session.detach();
     }
 
     private dismissAlertBox(page: Puppeteer.Page): void {

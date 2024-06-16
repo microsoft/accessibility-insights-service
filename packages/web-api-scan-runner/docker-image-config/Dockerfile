@@ -20,5 +20,6 @@ COPY . .
 
 # Install app dependencies
 RUN npm install
+RUN npx patch-package
 
 CMD ["powershell.exe", "./web-api-scan-runner.ps1"]
