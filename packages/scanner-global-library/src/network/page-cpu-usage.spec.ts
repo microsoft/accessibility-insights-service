@@ -5,7 +5,6 @@ import 'reflect-metadata';
 
 import os, { CpuInfo } from 'os';
 import { IMock, Mock } from 'typemoq';
-import { GlobalLogger } from 'logger';
 import * as Puppeteer from 'puppeteer';
 import { PageCpuUsage } from './page-cpu-usage';
 
@@ -25,24 +24,21 @@ jest.mock(
 
 const pid = '2204';
 
-let loggerMock: IMock<GlobalLogger>;
 let pageCpuUsage: PageCpuUsage;
 let puppeteerPageMock: IMock<Puppeteer.Page>;
 
 describe(PageCpuUsage, () => {
     beforeEach(() => {
         puppeteerPageMock = Mock.ofType<Puppeteer.Page>();
-        loggerMock = Mock.ofType(GlobalLogger);
 
         os.cpus = () => [{} as CpuInfo, {} as CpuInfo];
         setupBrowserPid();
 
-        pageCpuUsage = new PageCpuUsage(loggerMock.object);
+        pageCpuUsage = new PageCpuUsage();
     });
 
     afterEach(() => {
         puppeteerPageMock.verifyAll();
-        loggerMock.verifyAll();
     });
 
     test('Get browser CPU stats', async () => {
@@ -74,7 +70,7 @@ describe(PageCpuUsage, () => {
 });
 
 function setupBrowserPid(): void {
-    // page.browser().process().pid;
+    // mock page.browser().process().pid;
     const processStub = {
         pid,
     };

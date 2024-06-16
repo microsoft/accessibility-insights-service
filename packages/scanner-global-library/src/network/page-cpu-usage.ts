@@ -3,8 +3,7 @@
 
 import os from 'os';
 import { System } from 'common';
-import { injectable, inject, optional } from 'inversify';
-import { GlobalLogger } from 'logger';
+import { injectable } from 'inversify';
 import * as Puppeteer from 'puppeteer';
 import pidusage from 'pidusage';
 import { meanBy } from 'lodash';
@@ -44,9 +43,7 @@ export interface CpuUsageStats {
 
 @injectable()
 export class PageCpuUsage {
-    constructor(@inject(GlobalLogger) @optional() private readonly logger: GlobalLogger) {}
-
-    public async getCpuUsage(page: Puppeteer.Page, samples: number = 3, sampleIntervalMsec: number = 1000): Promise<CpuUsageStats> {
+    public async getCpuUsage(page: Puppeteer.Page, samples: number = 5, sampleIntervalMsec: number = 500): Promise<CpuUsageStats> {
         const snapshots: CpuUsage[] = [];
         const pid = page.browser().process().pid;
 
@@ -70,10 +67,6 @@ export class PageCpuUsage {
             average,
             snapshots,
         };
-
-        this.logger?.logInfo(`Browser process usage statistics.`, {
-            snapshots: JSON.stringify(stats),
-        });
 
         return stats;
     }

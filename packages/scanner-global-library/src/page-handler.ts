@@ -42,6 +42,9 @@ export class PageHandler {
         const timestamp = System.getTimestamp();
         while (!renderingCompleted && System.getTimestamp() < timestamp + timeoutMsecs && !page.isClosed()) {
             const cpuUsageStats = await this.pageCpuUsage.getCpuUsage(page);
+            this.logger?.logInfo(`Browser process usage statistics.`, {
+                snapshots: JSON.stringify(cpuUsageStats),
+            });
 
             renderingCompleted = cpuUsageStats.average < lowCpuUsageThreshold * (100 * cpuUsageStats.cpus);
         }
@@ -52,6 +55,13 @@ export class PageHandler {
                 timeout: `${timeoutMsecs}`,
             });
         }
+
+        // // Unfreeze JavaScript execution in the background page
+        // // Related to https://github.com/WICG/web-lifecycle/
+        // const session = await page.createCDPSession();
+        // await session.send('Page.enable');
+        // await session.send('Page.setWebLifecycleState', { state: 'active' });
+        // await session.detach();
 
         return { render: elapsed, renderTimeout: !renderingCompleted };
     }

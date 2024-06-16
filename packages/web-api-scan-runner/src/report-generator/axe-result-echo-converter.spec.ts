@@ -13,7 +13,7 @@ describe(AxeResultEchoConverter, () => {
     beforeEach(() => {
         axeResultEchoConverter = new AxeResultEchoConverter();
         axeScanResults = {
-            result: {
+            results: {
                 url: 'url',
             },
             pageTitle: 'pageTitle',
