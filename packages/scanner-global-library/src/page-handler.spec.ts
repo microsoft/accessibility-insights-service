@@ -6,12 +6,10 @@ import 'reflect-metadata';
 import { Page } from 'puppeteer';
 import { IMock, It, Mock } from 'typemoq';
 import { System } from 'common';
-import * as Puppeteer from 'puppeteer';
 import { PageHandler } from './page-handler';
 import { MockableLogger } from './test-utilities/mockable-logger';
 import { scrollToBottom } from './page-client-lib';
 import { CpuUsageStats, PageCpuUsage } from './network/page-cpu-usage';
-import { getPromisableDynamicMock } from './test-utilities/promisable-mock';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -22,7 +20,6 @@ let pageHandler: PageHandler;
 let pageCpuUsageMock: IMock<PageCpuUsage>;
 let loggerMock: IMock<MockableLogger>;
 let puppeteerPageMock: IMock<Page>;
-let cdpSessionMock: IMock<Puppeteer.CDPSession>;
 let originalWindow: Window & typeof globalThis;
 let scrollToBottomMock: typeof scrollToBottom;
 let timeoutScroll: boolean;
@@ -39,7 +36,6 @@ describe(PageHandler, () => {
         loggerMock = Mock.ofType<MockableLogger>();
         pageCpuUsageMock = Mock.ofType<PageCpuUsage>();
         puppeteerPageMock = Mock.ofType<Page>();
-        cdpSessionMock = getPromisableDynamicMock(Mock.ofType<Puppeteer.CDPSession>());
         scrollToBottomMock = getScrollToPageBottomFunc();
         windowStub = {
             innerHeight: windowHeight,
@@ -61,7 +57,6 @@ describe(PageHandler, () => {
             .returns(() => Promise.resolve(cpuUsageStats))
             .verifiable();
 
-        setupCDPSession();
         System.wait = async () => Promise.resolve();
 
         puppeteerPageMock.setup((o) => o.evaluate(It.isAny())).returns(async (action) => action());
@@ -103,7 +98,6 @@ describe(PageHandler, () => {
 
     it('terminate wait and warn if page has no stable HTML content', async () => {
         puppeteerPageMock.reset();
-        setupCDPSession();
         puppeteerPageMock
             .setup((p) => p.evaluate(It.isAny()))
             .returns(async (action) => {
@@ -160,19 +154,4 @@ function getScrollToPageBottomFunc(): (page: Page) => Promise<boolean> {
 
         return !timeoutScroll;
     };
-}
-
-function setupCDPSession(): void {
-    cdpSessionMock
-        .setup((o) => o.send(It.isAny(), It.isAny()))
-        .returns(async () => Promise.resolve())
-        .verifiable();
-    cdpSessionMock
-        .setup((o) => o.detach())
-        .returns(() => Promise.resolve())
-        .verifiable();
-    puppeteerPageMock
-        .setup((o) => o.createCDPSession())
-        .returns(() => Promise.resolve(cdpSessionMock.object))
-        .verifiable();
 }

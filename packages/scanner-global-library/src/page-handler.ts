@@ -56,13 +56,6 @@ export class PageHandler {
             });
         }
 
-        // // Unfreeze JavaScript execution in the background page
-        // // Related to https://github.com/WICG/web-lifecycle/
-        // const session = await page.createCDPSession();
-        // await session.send('Page.enable');
-        // await session.send('Page.setWebLifecycleState', { state: 'active' });
-        // await session.detach();
-
         return { render: elapsed, renderTimeout: !renderingCompleted };
     }
 
