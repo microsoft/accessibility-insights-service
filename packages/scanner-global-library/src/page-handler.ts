@@ -136,7 +136,7 @@ export class PageHandler {
 
         const elapsed = System.getElapsedTime(timestamp);
         if (pageHasStableContent !== true) {
-            this.logger?.logWarn(`Page does not stable HTML content after ${timeoutMsecs / 1000} seconds.`, {
+            this.logger?.logWarn(`The HTML content of the page was still changing after ${timeoutMsecs / 1000} seconds.`, {
                 timeout: `${timeoutMsecs}`,
             });
         }
