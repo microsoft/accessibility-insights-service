@@ -11,7 +11,6 @@ import { PageHandler } from './page-handler';
 import { BrowserError } from './browser-error';
 import { PageNavigationHooks } from './page-navigation-hooks';
 import { PageNavigationTiming } from './page-timeout-config';
-import { MockableLogger } from './test-utilities/mockable-logger';
 
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/consistent-type-assertions */
 
@@ -27,7 +26,6 @@ let pageConfiguratorMock: IMock<PageConfigurator>;
 let pageHandlerMock: IMock<PageHandler>;
 let pageResponseProcessorMock: IMock<PageResponseProcessor>;
 let puppeteerPageMock: IMock<Puppeteer.Page>;
-let loggerMock: IMock<MockableLogger>;
 let navigationHooks: PageNavigationHooks;
 
 describe(PageNavigationHooks, () => {
@@ -36,13 +34,11 @@ describe(PageNavigationHooks, () => {
         pageHandlerMock = Mock.ofType<PageHandler>();
         pageResponseProcessorMock = Mock.ofType<PageResponseProcessor>();
         puppeteerPageMock = Mock.ofType<Puppeteer.Page>();
-        loggerMock = Mock.ofType(MockableLogger);
 
         navigationHooks = new PageNavigationHooks(
             pageConfiguratorMock.object,
             pageResponseProcessorMock.object,
             pageHandlerMock.object,
-            loggerMock.object,
             scrollTimeoutMsec,
             pageHtmlContentTimeoutMsec,
             pageRenderingTimeoutMsec,
@@ -54,7 +50,6 @@ describe(PageNavigationHooks, () => {
         pageHandlerMock.verifyAll();
         pageResponseProcessorMock.verifyAll();
         pageConfiguratorMock.verifyAll();
-        loggerMock.verifyAll();
     });
 
     it('preNavigation', async () => {
