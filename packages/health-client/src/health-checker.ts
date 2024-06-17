@@ -33,15 +33,15 @@ const argv: Argv = yargs
         },
         clientId: {
             type: 'string',
-            describe: 'The Client ID of the managed identity you would like the token for.',
+            describe: 'The Client ID that identifies the managed identity to get the access token.',
         },
         token: {
             type: 'string',
-            describe: 'The existing access token to use instead.',
+            describe: 'The access token. The Client ID option is not used when the access token is given.',
         },
         releaseId: {
             type: 'string',
-            describe: 'The release ID to evaluate E2E tests for.',
+            describe: 'The release ID to evaluate E2E tests.',
         },
         baseUrl: {
             type: 'string',
@@ -54,12 +54,12 @@ const argv: Argv = yargs
         waitTimeBeforeEvaluationInMinutes: {
             type: 'number',
             describe: 'The wait time before evaluation, minutes.',
-            default: 1,
+            default: 0,
         },
         evaluationIntervalInMinutes: {
             type: 'number',
             describe: 'The evaluation interval, minutes.',
-            default: 1,
+            default: 2,
         },
         testsEvaluationTimeoutInMinutes: {
             type: 'number',
