@@ -13,6 +13,7 @@ import { PageNavigationHooks } from './page-navigation-hooks';
 import { PageNavigationTiming } from './page-timeout-config';
 import { MockableLogger } from './test-utilities/mockable-logger';
 import { getPromisableDynamicMock } from './test-utilities/promisable-mock';
+import { DevToolsSession } from './dev-tools-session';
 
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/consistent-type-assertions */
 
@@ -30,7 +31,7 @@ let pageResponseProcessorMock: IMock<PageResponseProcessor>;
 let puppeteerPageMock: IMock<Puppeteer.Page>;
 let loggerMock: IMock<MockableLogger>;
 let navigationHooks: PageNavigationHooks;
-let cdpSessionMock: IMock<Puppeteer.CDPSession>;
+let devToolsSessionMock: IMock<DevToolsSession>;
 
 describe(PageNavigationHooks, () => {
     beforeEach(() => {
@@ -39,12 +40,13 @@ describe(PageNavigationHooks, () => {
         pageResponseProcessorMock = Mock.ofType<PageResponseProcessor>();
         puppeteerPageMock = Mock.ofType<Puppeteer.Page>();
         loggerMock = Mock.ofType(MockableLogger);
-        cdpSessionMock = getPromisableDynamicMock(Mock.ofType<Puppeteer.CDPSession>());
+        devToolsSessionMock = getPromisableDynamicMock(Mock.ofType<DevToolsSession>());
 
         navigationHooks = new PageNavigationHooks(
             pageConfiguratorMock.object,
             pageResponseProcessorMock.object,
             pageHandlerMock.object,
+            devToolsSessionMock.object,
             loggerMock.object,
             scrollTimeoutMsec,
             pageHtmlContentTimeoutMsec,
@@ -89,7 +91,7 @@ describe(PageNavigationHooks, () => {
     });
 
     it('postNavigation with successful response', async () => {
-        setupCDPSession();
+        setupDevToolsSessionMock();
 
         const response = {} as Puppeteer.HTTPResponse;
         pageResponseProcessorMock
@@ -146,17 +148,9 @@ describe(PageNavigationHooks, () => {
     });
 });
 
-function setupCDPSession(): void {
-    cdpSessionMock
-        .setup((o) => o.send(It.isAny(), It.isAny()))
+function setupDevToolsSessionMock(): void {
+    devToolsSessionMock
+        .setup((o) => o.send(puppeteerPageMock.object, It.isAny(), It.isAny()))
         .returns(async () => Promise.resolve())
-        .verifiable();
-    cdpSessionMock
-        .setup((o) => o.detach())
-        .returns(() => Promise.resolve())
-        .verifiable();
-    puppeteerPageMock
-        .setup((o) => o.createCDPSession())
-        .returns(() => Promise.resolve(cdpSessionMock.object))
         .verifiable();
 }

@@ -58,6 +58,11 @@ export class PuppeteerTimeoutConfig {
     public static readonly defaultNavigationTimeoutMsec: number = 60000;
 
     /**
+     * Default puppeteer CDP protocol timeout is 180 secs.
+     */
+    public static readonly CdpProtocolTimeout: number = 240000;
+
+    /**
      * Maximum wait time, in milliseconds, to complete page navigation.
      *
      * Puppeteer may render some webpage properly but timeout on page navigation when running in
