@@ -10,12 +10,15 @@ import { LoggerProperties } from './logger-client';
 
 @injectable()
 export class ContextAwareAppInsightsLoggerClient extends BaseAppInsightsLoggerClient {
-    constructor(@inject(AppInsightsLoggerClient) private readonly globalLoggerClient: AppInsightsLoggerClient) {
+    constructor(
+        @inject(AppInsightsLoggerClient) private readonly globalLoggerClient: AppInsightsLoggerClient,
+        protected getTelemetryClient: () => TelemetryClient = () => new TelemetryClient(),
+    ) {
         super();
     }
 
     public async setup(baseProperties?: LoggerProperties): Promise<void> {
-        this.telemetryClient = new TelemetryClient();
+        this.telemetryClient = this.telemetryClient ?? this.getTelemetryClient();
         this.telemetryClient.commonProperties = {
             ...baseProperties,
         };
