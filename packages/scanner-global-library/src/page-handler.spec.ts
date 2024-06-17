@@ -4,12 +4,14 @@
 import 'reflect-metadata';
 
 import { Page } from 'puppeteer';
-import { IMock, It, Mock } from 'typemoq';
+import { IMock, It, Mock, Times } from 'typemoq';
 import { System } from 'common';
 import { PageHandler } from './page-handler';
 import { MockableLogger } from './test-utilities/mockable-logger';
 import { scrollToBottom } from './page-client-lib';
 import { CpuUsageStats, PageCpuUsage } from './network/page-cpu-usage';
+import { DevToolsSession } from './dev-tools-session';
+import { getPromisableDynamicMock } from './test-utilities/promisable-mock';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -20,6 +22,7 @@ let pageHandler: PageHandler;
 let pageCpuUsageMock: IMock<PageCpuUsage>;
 let loggerMock: IMock<MockableLogger>;
 let puppeteerPageMock: IMock<Page>;
+let devToolsSessionMock: IMock<DevToolsSession>;
 let originalWindow: Window & typeof globalThis;
 let scrollToBottomMock: typeof scrollToBottom;
 let timeoutScroll: boolean;
@@ -36,6 +39,8 @@ describe(PageHandler, () => {
         loggerMock = Mock.ofType<MockableLogger>();
         pageCpuUsageMock = Mock.ofType<PageCpuUsage>();
         puppeteerPageMock = Mock.ofType<Page>();
+        devToolsSessionMock = getPromisableDynamicMock(Mock.ofType<DevToolsSession>());
+
         scrollToBottomMock = getScrollToPageBottomFunc();
         windowStub = {
             innerHeight: windowHeight,
@@ -58,17 +63,25 @@ describe(PageHandler, () => {
             .verifiable();
 
         System.wait = async () => Promise.resolve();
+        setupDevToolsSessionMock();
 
         puppeteerPageMock.setup((o) => o.evaluate(It.isAny())).returns(async (action) => action());
         puppeteerPageMock.setup((o) => o.isClosed()).returns(() => false);
 
-        pageHandler = new PageHandler(pageCpuUsageMock.object, loggerMock.object, pageDomStableDurationMsec, scrollToBottomMock);
+        pageHandler = new PageHandler(
+            pageCpuUsageMock.object,
+            devToolsSessionMock.object,
+            loggerMock.object,
+            pageDomStableDurationMsec,
+            scrollToBottomMock,
+        );
     });
 
     afterEach(() => {
         global.window = originalWindow;
         pageCpuUsageMock.verifyAll();
         puppeteerPageMock.verifyAll();
+        devToolsSessionMock.verifyAll();
         loggerMock.verifyAll();
     });
 
@@ -132,7 +145,13 @@ describe(PageHandler, () => {
         } as any;
 
         loggerMock.setup((l) => l.logWarn(It.isAny(), { timeout: `${renderTimeoutMsecs}` })).verifiable();
-        pageHandler = new PageHandler(pageCpuUsageStub, loggerMock.object, pageDomStableDurationMsec, scrollToBottomMock);
+        pageHandler = new PageHandler(
+            pageCpuUsageStub,
+            devToolsSessionMock.object,
+            loggerMock.object,
+            pageDomStableDurationMsec,
+            scrollToBottomMock,
+        );
 
         const pageTiming = await pageHandler.waitForPageToCompleteRendering(
             puppeteerPageMock.object,
@@ -154,4 +173,11 @@ function getScrollToPageBottomFunc(): (page: Page) => Promise<boolean> {
 
         return !timeoutScroll;
     };
+}
+
+function setupDevToolsSessionMock(): void {
+    devToolsSessionMock
+        .setup((o) => o.send(puppeteerPageMock.object, It.isAny(), It.isAny()))
+        .returns(async () => Promise.resolve())
+        .verifiable(Times.atLeast(2));
 }

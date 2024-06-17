@@ -8,11 +8,13 @@ import { System } from 'common';
 import { PuppeteerTimeoutConfig, PageNavigationTiming } from './page-timeout-config';
 import { scrollToBottom } from './page-client-lib';
 import { PageCpuUsage } from './network/page-cpu-usage';
+import { DevToolsSession } from './dev-tools-session';
 
 @injectable()
 export class PageHandler {
     constructor(
         @inject(PageCpuUsage) private readonly pageCpuUsage: PageCpuUsage,
+        @inject(DevToolsSession) protected readonly devToolsSession: DevToolsSession,
         @inject(GlobalLogger) @optional() private readonly logger: GlobalLogger,
         private readonly pageDomStableDurationMsec: number = PuppeteerTimeoutConfig.pageDomStableDurationMsec,
         private readonly scrollToPageBottom: typeof scrollToBottom = scrollToBottom,
@@ -54,6 +56,16 @@ export class PageHandler {
             this.logger?.logWarn(`Page did not complete graphic rendering after ${timeoutMsecs / 1000} seconds.`, {
                 timeout: `${timeoutMsecs}`,
             });
+        }
+
+        // Unfreeze JavaScript execution in the background page.
+        // Related to https://github.com/WICG/web-lifecycle/
+        try {
+            await this.devToolsSession.send(page, 'Page.enable');
+            await this.devToolsSession.send(page, 'Page.setWebLifecycleState', { state: 'active' });
+            this.logger?.logInfo(`Page web lifecycle state set to active.`);
+        } catch (error) {
+            this.logger?.logError(`Failed to update the web lifecycle state of the page.`, { error: System.serializeError(error) });
         }
 
         return { render: elapsed, renderTimeout: !renderingCompleted };

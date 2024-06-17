@@ -5,13 +5,11 @@ import { inject, injectable, optional } from 'inversify';
 import { isNil } from 'lodash';
 import * as Puppeteer from 'puppeteer';
 import { GlobalLogger } from 'logger';
-import { System } from 'common';
 import { BrowserError } from './browser-error';
 import { PageConfigurator } from './page-configurator';
 import { PageHandler } from './page-handler';
 import { PageResponseProcessor } from './page-response-processor';
 import { PuppeteerTimeoutConfig, PageNavigationTiming } from './page-timeout-config';
-import { DevToolsSession } from './dev-tools-session';
 
 @injectable()
 export class PageNavigationHooks {
@@ -19,7 +17,6 @@ export class PageNavigationHooks {
         @inject(PageConfigurator) public readonly pageConfigurator: PageConfigurator,
         @inject(PageResponseProcessor) protected readonly pageResponseProcessor: PageResponseProcessor,
         @inject(PageHandler) protected readonly pageRenderingHandler: PageHandler,
-        @inject(DevToolsSession) protected readonly devToolsSession: DevToolsSession,
         @inject(GlobalLogger) @optional() private readonly logger: GlobalLogger,
         private readonly scrollTimeoutMsec = PuppeteerTimeoutConfig.scrollTimeoutMsec,
         private readonly pageHtmlContentTimeoutMsec = PuppeteerTimeoutConfig.pageHtmlContentTimeoutMsec,
@@ -63,20 +60,7 @@ export class PageNavigationHooks {
             this.pageRenderingTimeoutMsec,
         );
 
-        await this.unfreezePage(page);
-
         return pageNavigationTiming;
-    }
-
-    private async unfreezePage(page: Puppeteer.Page): Promise<void> {
-        // Unfreeze JavaScript execution in the background page.
-        // Related to https://github.com/WICG/web-lifecycle/
-        try {
-            await this.devToolsSession.send(page, 'Page.enable');
-            await this.devToolsSession.send(page, 'Page.setWebLifecycleState', { state: 'active' });
-        } catch (error) {
-            this.logger?.logError(`Failed to update the web lifecycle state of the page.`, { error: System.serializeError(error) });
-        }
     }
 
     private dismissAlertBox(page: Puppeteer.Page): void {

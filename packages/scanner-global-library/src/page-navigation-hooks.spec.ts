@@ -12,8 +12,6 @@ import { BrowserError } from './browser-error';
 import { PageNavigationHooks } from './page-navigation-hooks';
 import { PageNavigationTiming } from './page-timeout-config';
 import { MockableLogger } from './test-utilities/mockable-logger';
-import { getPromisableDynamicMock } from './test-utilities/promisable-mock';
-import { DevToolsSession } from './dev-tools-session';
 
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/consistent-type-assertions */
 
@@ -31,7 +29,6 @@ let pageResponseProcessorMock: IMock<PageResponseProcessor>;
 let puppeteerPageMock: IMock<Puppeteer.Page>;
 let loggerMock: IMock<MockableLogger>;
 let navigationHooks: PageNavigationHooks;
-let devToolsSessionMock: IMock<DevToolsSession>;
 
 describe(PageNavigationHooks, () => {
     beforeEach(() => {
@@ -40,13 +37,11 @@ describe(PageNavigationHooks, () => {
         pageResponseProcessorMock = Mock.ofType<PageResponseProcessor>();
         puppeteerPageMock = Mock.ofType<Puppeteer.Page>();
         loggerMock = Mock.ofType(MockableLogger);
-        devToolsSessionMock = getPromisableDynamicMock(Mock.ofType<DevToolsSession>());
 
         navigationHooks = new PageNavigationHooks(
             pageConfiguratorMock.object,
             pageResponseProcessorMock.object,
             pageHandlerMock.object,
-            devToolsSessionMock.object,
             loggerMock.object,
             scrollTimeoutMsec,
             pageHtmlContentTimeoutMsec,
@@ -91,8 +86,6 @@ describe(PageNavigationHooks, () => {
     });
 
     it('postNavigation with successful response', async () => {
-        setupDevToolsSessionMock();
-
         const response = {} as Puppeteer.HTTPResponse;
         pageResponseProcessorMock
             .setup((o) => o.getResponseError(response))
@@ -147,10 +140,3 @@ describe(PageNavigationHooks, () => {
         expect(onNavigationErrorMock).toHaveBeenCalledWith(browserError);
     });
 });
-
-function setupDevToolsSessionMock(): void {
-    devToolsSessionMock
-        .setup((o) => o.send(puppeteerPageMock.object, It.isAny(), It.isAny()))
-        .returns(async () => Promise.resolve())
-        .verifiable();
-}
