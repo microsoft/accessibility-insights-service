@@ -60,6 +60,7 @@ export class PageHandler {
 
         // Unfreeze JavaScript execution in the background page.
         // Related to https://github.com/WICG/web-lifecycle/
+        // Rendering WebGL might have caused the page to freeze. This will fix the page freeze.
         try {
             await this.devToolsSession.send(page, 'Page.enable');
             await this.devToolsSession.send(page, 'Page.setWebLifecycleState', { state: 'active' });
