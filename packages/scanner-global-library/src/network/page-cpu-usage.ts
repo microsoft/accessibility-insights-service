@@ -43,7 +43,10 @@ export interface CpuUsageStats {
 
 @injectable()
 export class PageCpuUsage {
-    public async getCpuUsage(page: Puppeteer.Page, samples: number = 3, sampleIntervalMsec: number = 1000): Promise<CpuUsageStats> {
+    /**
+     * The CPU usage we observed may not reflect the actual value, so we need to collect multiple data points.
+     */
+    public async getCpuUsage(page: Puppeteer.Page, samples: number = 5, sampleIntervalMsec: number = 1000): Promise<CpuUsageStats> {
         const snapshots: CpuUsage[] = [];
         const pid = page.browser().process().pid;
 
