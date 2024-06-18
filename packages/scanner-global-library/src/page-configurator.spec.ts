@@ -3,7 +3,7 @@
 
 import 'reflect-metadata';
 
-import { Page, CDPSession, Target, Protocol } from 'puppeteer';
+import { Page, CDPSession, Protocol } from 'puppeteer';
 import { IMock, Mock } from 'typemoq';
 import { PageConfigurator } from './page-configurator';
 import { getPromisableDynamicMock } from './test-utilities/promisable-mock';
@@ -13,11 +13,9 @@ describe(PageConfigurator, () => {
     let pageConfigurator: PageConfigurator;
     let pageMock: IMock<Page>;
     let cdpSessionMock: IMock<CDPSession>;
-    let targetMock: IMock<Target>;
 
     beforeEach(() => {
         pageMock = Mock.ofType<Page>();
-        targetMock = Mock.ofType<Target>();
         cdpSessionMock = getPromisableDynamicMock(Mock.ofType<CDPSession>());
 
         cdpSessionMock
@@ -37,16 +35,10 @@ describe(PageConfigurator, () => {
             .setup((o) => o.detach())
             .returns(() => Promise.resolve())
             .verifiable();
-
-        targetMock
-            .setup((o) => o.createCDPSession())
+        pageMock
+            .setup(async (o) => o.createCDPSession())
             .returns(() => Promise.resolve(cdpSessionMock.object))
             .verifiable();
-        pageMock
-            .setup((o) => o.target())
-            .returns(() => targetMock.object)
-            .verifiable();
-
         pageMock
             .setup(async (o) => o.setBypassCSP(true))
             .returns(() => Promise.resolve())
@@ -57,7 +49,6 @@ describe(PageConfigurator, () => {
 
     afterEach(() => {
         pageMock.verifyAll();
-        targetMock.verifyAll();
         cdpSessionMock.verifyAll();
     });
 

@@ -3,7 +3,7 @@
 
 FROM mcr.microsoft.com/windows/servercore:ltsc2022-amd64
 
-ENV NODE_VERSION 16.20.1
+ENV NODE_VERSION 18.20.3
 
 WORKDIR /app
 
@@ -20,5 +20,6 @@ COPY . .
 
 # Install app dependencies
 RUN npm install
+RUN npx patch-package
 
 CMD ["powershell.exe", "./web-api-scan-runner.ps1"]

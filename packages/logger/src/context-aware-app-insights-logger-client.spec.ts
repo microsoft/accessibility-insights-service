@@ -9,10 +9,12 @@ import { AppInsightsLoggerClient } from './app-insights-logger-client';
 import { ContextAwareAppInsightsLoggerClient } from './context-aware-app-insights-logger-client';
 
 export class TestableContextAwareAppInsightsLoggerClient extends ContextAwareAppInsightsLoggerClient {
-    public getTelemetryClient(): TelemetryClient {
+    public client(): TelemetryClient {
         return this.telemetryClient;
     }
 }
+
+let telemetryClientMock: IMock<TelemetryClient>;
 
 describe(ContextAwareAppInsightsLoggerClient, () => {
     let testSubject: TestableContextAwareAppInsightsLoggerClient;
@@ -20,16 +22,13 @@ describe(ContextAwareAppInsightsLoggerClient, () => {
 
     beforeEach(() => {
         globalLoggerClient = Mock.ofType(AppInsightsLoggerClient);
-        testSubject = new TestableContextAwareAppInsightsLoggerClient(globalLoggerClient.object);
-        process.env.APPINSIGHTS_INSTRUMENTATIONKEY = '00000000-0000-0000-0000-000000000000';
-    });
+        telemetryClientMock = Mock.ofType<TelemetryClient>();
 
-    afterEach(() => {
-        delete process.env.APPINSIGHTS_INSTRUMENTATIONKEY;
+        testSubject = new TestableContextAwareAppInsightsLoggerClient(globalLoggerClient.object, () => telemetryClientMock.object);
     });
 
     it('should not create telemetry client without calling setup', async () => {
-        expect(testSubject.getTelemetryClient()).toBeUndefined();
+        expect(testSubject.client()).toBeUndefined();
     });
 
     describe('setup', () => {
@@ -42,9 +41,12 @@ describe(ContextAwareAppInsightsLoggerClient, () => {
         });
 
         it('should create telemetry client with base properties', async () => {
+            const client = {
+                commonProperties: {},
+            } as TelemetryClient;
+            testSubject = new TestableContextAwareAppInsightsLoggerClient(globalLoggerClient.object, () => client);
             await testSubject.setup({ source: 'foo' });
-
-            expect(testSubject.getTelemetryClient().commonProperties).toEqual({ source: 'foo' });
+            expect(testSubject.client().commonProperties).toEqual({ source: 'foo' });
         });
 
         it('isInitialized returns correct values', async () => {
@@ -56,7 +58,10 @@ describe(ContextAwareAppInsightsLoggerClient, () => {
         });
 
         it('should only initialize rootLoggerClient once', async () => {
-            const siblingTestSubject = new TestableContextAwareAppInsightsLoggerClient(globalLoggerClient.object);
+            const siblingTestSubject = new TestableContextAwareAppInsightsLoggerClient(
+                globalLoggerClient.object,
+                () => telemetryClientMock.object,
+            );
 
             globalLoggerClient
                 .setup((r) => r.setup())
@@ -70,7 +75,10 @@ describe(ContextAwareAppInsightsLoggerClient, () => {
         });
 
         it('isInitialized works as expected with shared rootLoggerClient', async () => {
-            const siblingTestSubject = new TestableContextAwareAppInsightsLoggerClient(globalLoggerClient.object);
+            const siblingTestSubject = new TestableContextAwareAppInsightsLoggerClient(
+                globalLoggerClient.object,
+                () => telemetryClientMock.object,
+            );
 
             await testSubject.setup({});
 
@@ -95,6 +103,11 @@ describe(ContextAwareAppInsightsLoggerClient, () => {
                 apiName: 'globalPropValue',
             };
             globalLoggerClient.setup((r) => r.getCommonProperties()).returns(() => globalLoggerProps);
+
+            const client = {
+                commonProperties: {},
+            } as TelemetryClient;
+            testSubject = new TestableContextAwareAppInsightsLoggerClient(globalLoggerClient.object, () => client);
 
             const localLoggerProps = {
                 scanId: '123',

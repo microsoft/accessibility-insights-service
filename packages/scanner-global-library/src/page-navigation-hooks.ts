@@ -17,6 +17,7 @@ export class PageNavigationHooks {
         @inject(PageResponseProcessor) protected readonly pageResponseProcessor: PageResponseProcessor,
         @inject(PageHandler) protected readonly pageRenderingHandler: PageHandler,
         private readonly scrollTimeoutMsec = PuppeteerTimeoutConfig.scrollTimeoutMsec,
+        private readonly pageHtmlContentTimeoutMsec = PuppeteerTimeoutConfig.pageHtmlContentTimeoutMsec,
         private readonly pageRenderingTimeoutMsec = PuppeteerTimeoutConfig.pageRenderingTimeoutMsec,
     ) {}
 
@@ -50,7 +51,14 @@ export class PageNavigationHooks {
 
         await this.disableAnimation(page);
 
-        return this.pageRenderingHandler.waitForPageToCompleteRendering(page, this.scrollTimeoutMsec, this.pageRenderingTimeoutMsec);
+        const pageNavigationTiming = this.pageRenderingHandler.waitForPageToCompleteRendering(
+            page,
+            this.scrollTimeoutMsec,
+            this.pageHtmlContentTimeoutMsec,
+            this.pageRenderingTimeoutMsec,
+        );
+
+        return pageNavigationTiming;
     }
 
     private dismissAlertBox(page: Puppeteer.Page): void {

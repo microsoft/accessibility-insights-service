@@ -4,7 +4,7 @@
 import 'reflect-metadata';
 
 import { IMock, Mock, It, Times } from 'typemoq';
-import { Page, HTTPResponse } from 'puppeteer';
+import * as Puppeteer from 'puppeteer';
 import { PageResponseProcessor } from './page-response-processor';
 import { PageConfigurator } from './page-configurator';
 import { PageHandler } from './page-handler';
@@ -13,7 +13,9 @@ import { PageNavigationHooks } from './page-navigation-hooks';
 import { PageNavigationTiming } from './page-timeout-config';
 
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/consistent-type-assertions */
+
 const scrollTimeoutMsec = 15000;
+const pageHtmlContentTimeoutMsec = 1000;
 const pageRenderingTimeoutMsec = 1000;
 const pageNavigationTiming: Partial<PageNavigationTiming> = {
     scroll: 1,
@@ -23,8 +25,7 @@ const pageNavigationTiming: Partial<PageNavigationTiming> = {
 let pageConfiguratorMock: IMock<PageConfigurator>;
 let pageHandlerMock: IMock<PageHandler>;
 let pageResponseProcessorMock: IMock<PageResponseProcessor>;
-let pageMock: IMock<Page>;
-
+let puppeteerPageMock: IMock<Puppeteer.Page>;
 let navigationHooks: PageNavigationHooks;
 
 describe(PageNavigationHooks, () => {
@@ -32,64 +33,72 @@ describe(PageNavigationHooks, () => {
         pageConfiguratorMock = Mock.ofType<PageConfigurator>();
         pageHandlerMock = Mock.ofType<PageHandler>();
         pageResponseProcessorMock = Mock.ofType<PageResponseProcessor>();
-        pageMock = Mock.ofType<Page>();
+        puppeteerPageMock = Mock.ofType<Puppeteer.Page>();
 
         navigationHooks = new PageNavigationHooks(
             pageConfiguratorMock.object,
             pageResponseProcessorMock.object,
             pageHandlerMock.object,
             scrollTimeoutMsec,
+            pageHtmlContentTimeoutMsec,
             pageRenderingTimeoutMsec,
         );
     });
 
     afterEach(() => {
-        pageMock.verifyAll();
+        puppeteerPageMock.verifyAll();
         pageHandlerMock.verifyAll();
         pageResponseProcessorMock.verifyAll();
         pageConfiguratorMock.verifyAll();
     });
 
     it('preNavigation', async () => {
-        pageConfiguratorMock.setup((p) => p.configurePage(pageMock.object)).verifiable();
-        pageMock
+        pageConfiguratorMock.setup((p) => p.configurePage(puppeteerPageMock.object)).verifiable();
+        puppeteerPageMock
             .setup((o) => o.listenerCount('dialog'))
             .returns(() => 0)
             .verifiable();
-        pageMock
+        puppeteerPageMock
             .setup((o) => o.on('dialog', It.isAny()))
             .returns(() => undefined)
             .verifiable();
 
-        await navigationHooks.preNavigation(pageMock.object);
+        await navigationHooks.preNavigation(puppeteerPageMock.object);
     });
 
     it('preNavigation call on reenter', async () => {
-        pageConfiguratorMock.setup((p) => p.configurePage(pageMock.object)).verifiable();
-        pageMock
+        pageConfiguratorMock.setup((p) => p.configurePage(puppeteerPageMock.object)).verifiable();
+        puppeteerPageMock
             .setup((o) => o.listenerCount('dialog'))
             .returns(() => 1)
             .verifiable();
-        pageMock
+        puppeteerPageMock
             .setup((o) => o.on('dialog', It.isAny()))
             .returns(() => undefined)
             .verifiable(Times.never());
 
-        await navigationHooks.preNavigation(pageMock.object);
+        await navigationHooks.preNavigation(puppeteerPageMock.object);
     });
 
     it('postNavigation with successful response', async () => {
-        const response = {} as HTTPResponse;
+        const response = {} as Puppeteer.HTTPResponse;
         pageResponseProcessorMock
             .setup((o) => o.getResponseError(response))
             .returns(() => undefined)
             .verifiable();
         pageHandlerMock
-            .setup(async (o) => o.waitForPageToCompleteRendering(pageMock.object, scrollTimeoutMsec, pageRenderingTimeoutMsec))
+            .setup(async (o) =>
+                o.waitForPageToCompleteRendering(
+                    puppeteerPageMock.object,
+                    scrollTimeoutMsec,
+                    pageHtmlContentTimeoutMsec,
+                    pageRenderingTimeoutMsec,
+                ),
+            )
             .returns(() => Promise.resolve(pageNavigationTiming))
             .verifiable();
 
-        const timing = await navigationHooks.postNavigation(pageMock.object, {} as HTTPResponse);
+        const timing = await navigationHooks.postNavigation(puppeteerPageMock.object, {} as Puppeteer.HTTPResponse);
         expect(pageNavigationTiming).toEqual(timing);
     });
 
@@ -104,12 +113,12 @@ describe(PageNavigationHooks, () => {
             navigationError = browserError;
         };
 
-        await navigationHooks.postNavigation(pageMock.object, undefined, onNavigationErrorStub);
+        await navigationHooks.postNavigation(puppeteerPageMock.object, undefined, onNavigationErrorStub);
         expect(navigationError).toMatchObject(expectedError);
     });
 
     it('postNavigation with response error', async () => {
-        const response = {} as HTTPResponse;
+        const response = {} as Puppeteer.HTTPResponse;
         const browserError = {
             errorType: 'EmptyPage',
             message: 'message',
@@ -122,7 +131,7 @@ describe(PageNavigationHooks, () => {
         const onNavigationErrorMock = jest.fn();
         onNavigationErrorMock.mockImplementation(() => Promise.resolve());
 
-        await navigationHooks.postNavigation(pageMock.object, response, onNavigationErrorMock);
+        await navigationHooks.postNavigation(puppeteerPageMock.object, response, onNavigationErrorMock);
         expect(onNavigationErrorMock).toHaveBeenCalledWith(browserError);
     });
 });

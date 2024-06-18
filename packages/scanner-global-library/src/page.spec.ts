@@ -27,13 +27,13 @@ const url = 'url';
 const userAgent = 'user agent';
 const browserResolution = '1920x1080';
 const pageNavigationTiming: PageNavigationTiming = {
-    goto: 1,
+    goto: 7,
     gotoTimeout: false,
-    networkIdle: 0,
-    networkIdleTimeout: false,
-    scroll: 3,
+    scroll: 2,
     scrollTimeout: true,
-    render: 4,
+    htmlContent: 3,
+    htmlContentTimeout: false,
+    render: 5,
     renderTimeout: false,
 };
 
@@ -142,11 +142,11 @@ describe(Page, () => {
                 .returns(() => Promise.resolve(navigationResponse))
                 .verifiable();
 
-            const timing = { total: '8' } as any;
+            const timing = { total: '17' } as any;
             Object.keys(navigationResponse.pageNavigationTiming).forEach((key: keyof PageNavigationTiming) => {
                 timing[key] = `${navigationResponse.pageNavigationTiming[key]}`;
             });
-            loggerMock.setup((o) => o.logInfo('Total page load time 8, msec', { status: 200, ...timing })).verifiable();
+            loggerMock.setup((o) => o.logInfo('Total page load time 17, msec', { status: 200, ...timing })).verifiable();
             page.browserStartOptions = browserStartOptions;
 
             await page.navigate(url);
@@ -233,11 +233,11 @@ describe(Page, () => {
                 .returns(() => Promise.resolve(navigationResponse))
                 .verifiable();
 
-            const timing = { total: '8' } as any;
+            const timing = { total: '17' } as any;
             Object.keys(navigationResponse.pageNavigationTiming).forEach((key: keyof PageNavigationTiming) => {
                 timing[key] = `${navigationResponse.pageNavigationTiming[key]}`;
             });
-            loggerMock.setup((o) => o.logInfo('Total page reload time 8, msec', { status: 200, ...timing })).verifiable();
+            loggerMock.setup((o) => o.logInfo('Total page reload time 17, msec', { status: 200, ...timing })).verifiable();
 
             await page.reload();
 
