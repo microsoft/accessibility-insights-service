@@ -24,6 +24,7 @@ module.exports = (env) => {
             'puppeteer-extra',
             'puppeteer-extra-plugin',
             'puppeteer-extra-plugin-stealth',
+            'patch-package',
         ],
         entry: {
             ['web-api-scan-runner']: path.resolve('./src/index.ts'),
@@ -95,6 +96,11 @@ module.exports = (env) => {
                         context: '../../packages/scanner-global-library',
                         from: 'blank-page.html',
                         to: '',
+                    },
+                    {
+                        context: '../../patches',
+                        from: '@axe-core+puppeteer+*.patch',
+                        to: 'patches',
                     },
                 ],
             }),

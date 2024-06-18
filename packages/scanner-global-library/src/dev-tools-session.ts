@@ -3,6 +3,7 @@
 
 import { injectable } from 'inversify';
 import * as Puppeteer from 'puppeteer';
+import { PuppeteerTimeoutConfig } from './page-timeout-config';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -17,10 +18,9 @@ import * as Puppeteer from 'puppeteer';
  */
 @injectable()
 export class DevToolsSession {
-    // Default puppeteer CDP protocol timeout is 180 secs. Increasing protocolTimeout beyond
-    // default value will require to increase the 'protocolTimeout' setting in browser
-    // launch/connect calls.
-    public protocolTimeout = 90000;
+    // Lowering the timeout from the default puppeteer CDP protocol timeout to be able to catch
+    // the exception.
+    public cdpProtocolTimeout = PuppeteerTimeoutConfig.CdpProtocolTimeout - 5000;
 
     public async send<T extends keyof Puppeteer.ProtocolMapping.Commands>(
         page: Puppeteer.Page,
@@ -38,7 +38,7 @@ export class DevToolsSession {
                 timer = setTimeout(() => {
                     timedOut = true;
                     resolve();
-                }, this.protocolTimeout);
+                }, this.cdpProtocolTimeout);
 
                 return timer;
             });

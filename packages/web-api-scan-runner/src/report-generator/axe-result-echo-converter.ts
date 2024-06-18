@@ -11,6 +11,15 @@ export class AxeResultEchoConverter implements AxeResultConverter {
     public readonly targetReportFormat: ReportFormat = 'axe';
 
     public convert(axeScanResults: AxeScanResults): string {
-        return JSON.stringify(axeScanResults);
+        const report = {
+            results: axeScanResults.results,
+            scannedUrl: axeScanResults.scannedUrl,
+            pageTitle: axeScanResults.pageTitle,
+            browserSpec: axeScanResults.browserSpec,
+            userAgent: axeScanResults.userAgent,
+            browserResolution: axeScanResults.browserResolution,
+        };
+
+        return JSON.stringify(report);
     }
 }

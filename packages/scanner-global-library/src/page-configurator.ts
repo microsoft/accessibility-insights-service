@@ -16,7 +16,7 @@ export class PageConfigurator {
         // enable page resizing to match to browser viewport
         const headless = process.env.HEADLESS === 'false' ? false : true;
         if (headless) {
-            const session = await page.target().createCDPSession();
+            const session = await page.createCDPSession();
             const { windowId } = await session.send('Browser.getWindowForTarget');
             await session.send('Browser.setWindowBounds', { windowId, bounds: { width: windowSize.width, height: windowSize.height } });
             await session.detach();

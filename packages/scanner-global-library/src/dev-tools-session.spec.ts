@@ -40,7 +40,7 @@ describe(DevToolsSession, () => {
 
     it('get result with CDP timeout', async () => {
         setupCDPSession(1000);
-        devToolsSession.protocolTimeout = 100;
+        devToolsSession.cdpProtocolTimeout = 100;
         cdpSessionMock.setup((o) => (o as any)._onMessage({ id: 1 })).verifiable();
 
         const send = devToolsSession.send(puppeteerPageMock.object, cdpMethod, cdpParams);

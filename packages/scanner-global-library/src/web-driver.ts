@@ -106,7 +106,7 @@ export class WebDriver {
             };
 
             await this.promiseUtils.waitFor(closeBrowser(), this.browserCloseTimeoutMsecs, async () => {
-                this.logger?.logError(`Browser did not close after ${this.browserCloseTimeoutMsecs} msec.`);
+                this.logger?.logWarn(`Browser did not close after ${this.browserCloseTimeoutMsecs} msec.`);
             });
 
             // https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/taskkill

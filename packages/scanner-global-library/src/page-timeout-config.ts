@@ -7,10 +7,10 @@ import { WebDriverCapabilities } from './web-driver';
 export interface PageNavigationTiming {
     goto: number;
     gotoTimeout: boolean;
-    networkIdle: number;
-    networkIdleTimeout: boolean;
     scroll: number;
     scrollTimeout: boolean;
+    htmlContent: number;
+    htmlContentTimeout: boolean;
     render: number;
     renderTimeout: boolean;
 }
@@ -22,21 +22,26 @@ export interface PageNavigationTiming {
 @injectable()
 export class PuppeteerTimeoutConfig {
     /**
-     * Maximum wait time, in milliseconds, to complete async page rendering.
+     * Maximum wait time, in milliseconds, to load dynamic HTML content.
      */
-    public static readonly pageRenderingTimeoutMsec: number = 20000;
+    public static readonly pageHtmlContentTimeoutMsec: number = 20000;
 
     /**
-     * The minimum time the HTML DOM should be stable to accept page rendering.
+     * Maximum wait time, in milliseconds, to complete page graphical rendering.
      */
-    public static readonly pageDomStableTimeMsec: number = 1000;
+    public static readonly pageRenderingTimeoutMsec: number = 90000;
+
+    /**
+     * The minimum time the page HTML DOM should be stable.
+     */
+    public static readonly pageDomStableDurationMsec: number = 1000;
 
     /**
      * Maximum wait time, in milliseconds, to scroll to the bottom of the page.
      *
      * Do not decrease scroll timeout as it will break accessibility scan for long pages.
      */
-    public static readonly scrollTimeoutMsec: number = 30000;
+    public static readonly scrollTimeoutMsec: number = 20000;
 
     /**
      * Maximum wait time, in milliseconds, to complete page redirection.
@@ -51,6 +56,11 @@ export class PuppeteerTimeoutConfig {
     public static readonly webglNavigationTimeoutMsec: number = 180000;
 
     public static readonly defaultNavigationTimeoutMsec: number = 60000;
+
+    /**
+     * Default puppeteer CDP protocol timeout is 180 secs.
+     */
+    public static readonly CdpProtocolTimeout: number = 240000;
 
     /**
      * Maximum wait time, in milliseconds, to complete page navigation.

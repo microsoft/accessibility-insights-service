@@ -9,6 +9,9 @@ SET DOCKER_CLI_HINTS=false
 
 copy ..\resource-deployment\runtime-config\runtime-config.dev.json .\dist\runtime-config.json &&^
 copy /y .\docker-image-config\Dockerfile.debug .\dist\Dockerfile.debug &&^
+cd ..\scanner-global-library &&^
+yarn build &&^
+cd ..\web-api-scan-runner &&^
 yarn build &&^
 cd .\dist &&^
 docker build --tag web-api-scan-runner:prescanner . &&^

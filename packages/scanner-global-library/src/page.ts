@@ -215,7 +215,7 @@ export class Page {
     }
 
     public async getPageSnapshot(): Promise<string> {
-        const maxSnapshotSize = 10 * 1024 * 1024;
+        const maxSnapshotSize = 20 * 1024 * 1024;
         try {
             let { data } = await this.devToolsSession.send(this.page, 'Page.captureSnapshot', { format: 'mhtml' });
             const length = Buffer.byteLength(JSON.stringify(data), 'utf8');

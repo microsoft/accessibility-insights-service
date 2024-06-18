@@ -209,7 +209,7 @@ describe('WebDriver', () => {
             .returns(() => puppeteerExtraMock.object)
             .verifiable();
         puppeteerExtraMock
-            .setup((o) => o.launch(It.is((l) => l.args.includes('--use-angle=swiftshader'))))
+            .setup((o) => o.launch(It.is((l) => l.args.includes('--disable-gpu'))))
             .returns(() => Promise.resolve(<Puppeteer.Browser>(<unknown>puppeteerBrowserMock)))
             .verifiable(Times.once());
 
