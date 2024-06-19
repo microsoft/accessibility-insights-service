@@ -3,7 +3,7 @@
 
 import 'reflect-metadata';
 
-import { AzureServicesIocTypes, CredentialsProvider, CredentialType, SecretProvider } from 'azure-services';
+import { CredentialsProvider, SecretProvider } from 'azure-services';
 import { ServiceConfiguration } from 'common';
 import * as inversify from 'inversify';
 import { GlobalLogger } from 'logger';
@@ -12,42 +12,38 @@ import { A11yServiceClientProvider, a11yServiceClientTypeNames } from 'web-api-c
 import { getProcessLifeCycleContainer } from './get-process-life-cycle-container';
 
 describe(getProcessLifeCycleContainer, () => {
-    let testSubject: inversify.Container;
+    let iocContainer: inversify.Container;
     let secretProviderMock: IMock<SecretProvider>;
 
     beforeEach(() => {
-        testSubject = getProcessLifeCycleContainer();
+        iocContainer = getProcessLifeCycleContainer();
         secretProviderMock = Mock.ofType(SecretProvider);
 
-        testSubject.unbind(SecretProvider);
-        testSubject.bind(SecretProvider).toConstantValue(secretProviderMock.object);
+        iocContainer.unbind(SecretProvider);
+        iocContainer.bind(SecretProvider).toConstantValue(secretProviderMock.object);
     });
 
     it('verifies dependencies resolution', () => {
-        expect(testSubject.get(ServiceConfiguration)).toBeDefined();
-        expect(testSubject.get(GlobalLogger)).toBeDefined();
+        expect(iocContainer.get(ServiceConfiguration)).toBeDefined();
+        expect(iocContainer.get(GlobalLogger)).toBeDefined();
 
-        expect(testSubject.get(CredentialsProvider)).toBeDefined();
-        expect(testSubject.get(SecretProvider)).toBeDefined();
-        expect(testSubject.get(CredentialsProvider)).toBeDefined();
+        expect(iocContainer.get(CredentialsProvider)).toBeDefined();
+        expect(iocContainer.get(SecretProvider)).toBeDefined();
+        expect(iocContainer.get(CredentialsProvider)).toBeDefined();
     });
 
     it('verifies A11yServiceClient registration', async () => {
         secretProviderMock
-            .setup(async (s) => s.getSecret('restApiSpAppId'))
+            .setup(async (s) => s.getSecret('webApiIdentityClientId'))
             .returns(async () => Promise.resolve('sp app id'))
             .verifiable();
-        secretProviderMock
-            .setup(async (s) => s.getSecret('restApiSpSecret'))
-            .returns(async () => Promise.resolve('sp app secret'))
-            .verifiable();
-        secretProviderMock
-            .setup(async (s) => s.getSecret('authorityUrl'))
-            .returns(async () => Promise.resolve('https://login.microsoft.com/tenantid'))
-            .verifiable();
 
-        const a11yServiceClientProvider1 = testSubject.get<A11yServiceClientProvider>(a11yServiceClientTypeNames.A11yServiceClientProvider);
-        const a11yServiceClientProvider2 = testSubject.get<A11yServiceClientProvider>(a11yServiceClientTypeNames.A11yServiceClientProvider);
+        const a11yServiceClientProvider1 = iocContainer.get<A11yServiceClientProvider>(
+            a11yServiceClientTypeNames.A11yServiceClientProvider,
+        );
+        const a11yServiceClientProvider2 = iocContainer.get<A11yServiceClientProvider>(
+            a11yServiceClientTypeNames.A11yServiceClientProvider,
+        );
 
         await expect(a11yServiceClientProvider1()).resolves.toBeDefined();
         expect(await a11yServiceClientProvider1()).toBe(await a11yServiceClientProvider2());
@@ -55,10 +51,6 @@ describe(getProcessLifeCycleContainer, () => {
     });
 
     it('should not create more than one instance of container', () => {
-        expect(getProcessLifeCycleContainer()).toBe(testSubject);
-    });
-
-    it('verifies credential type to be app service', () => {
-        expect(testSubject.get(AzureServicesIocTypes.CredentialType)).toBe(CredentialType.AppService);
+        expect(getProcessLifeCycleContainer()).toBe(iocContainer);
     });
 });

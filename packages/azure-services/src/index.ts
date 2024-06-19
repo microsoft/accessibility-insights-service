@@ -12,7 +12,6 @@ export { StorageConfig } from './azure-queue/storage-config';
 export { secretNames } from './key-vault/secret-names';
 export { SecretProvider } from './key-vault/secret-provider';
 export { CredentialsProvider } from './credentials/credentials-provider';
-export { Credentials, CredentialType } from './credentials/msi-credential-provider';
 export { client } from './storage/client';
 export { cosmosContainerClientTypes } from './ioc-types';
 export {
@@ -31,3 +30,4 @@ export { BatchServiceClientProvider } from './ioc-types';
 export { ApplicationInsightsClient } from './app-insights-api-client/application-insights-client';
 export * from './app-insights-api-client/query-response';
 export { ServicePrincipalCredential } from './credentials/service-principal-credential';
+export * from './credentials/identity-credential-provider';

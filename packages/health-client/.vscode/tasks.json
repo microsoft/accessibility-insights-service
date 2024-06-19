@@ -8,10 +8,10 @@
             "label": "run",
             "dependsOn": "tsc",
             "windows": {
-                "command": "xcopy .env ./dist /y /c /q"
+                "command": "xcopy .env .\\dist /y"
             },
             "osx": {
-                "command": "cp .env ./dist 2>/dev/null || :"
+                "command": "cp .env ./dist"
             }
         },
         {

@@ -3,9 +3,10 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
 
-# shellcheck disable=SC1090
+# shellcheck disable=SC1091
 set -eo pipefail
 
+# Еxport variables to all child processes
 export apiManagementName
 export batchAccountName
 export cosmosAccountName
@@ -17,8 +18,6 @@ export location
 export resourceGroupName
 export subscription
 export storageAccountName
-export webApiAdClientId
-export webApiAdClientSecret
 export azureBatchObjectId
 export releaseVersion
 export templatesFolder="${0%/*}/../templates/"
@@ -35,8 +34,6 @@ Usage: ${BASH_SOURCE}
 -p <publisher email>
 -r <resource group>
 -s <subscription name or ID>
--c <client ID>
--t <client secret>
 -v <release version>
 -b <Azure Batch object ID>
 [-d <pass \"true\" to force VM pools to drop>]
@@ -49,8 +46,6 @@ Subscription - The Azure subscription name or ID.
 Environment - The deployment environment. Supported values dev, prod.
 Organization name - The name of organization.
 Publisher email - The notification email.
-Client ID - The REST API OAuth2 client ID.
-Client Secret - The REST API OAuth2 client secret.
 Azure Batch object ID - The Azure AD object ID for Microsoft Azure Batch enterprise application, application ID ddbf3205-c6bd-46ae-8127-60eb93363864
 Release Version - The deployment release version.
 Azure region - The deployment location.
@@ -62,23 +57,24 @@ Azure region - The deployment location.
 
 onExit-install() {
     local exitCode=$?
-    local command="$BASH_COMMAND"
+    local command
 
+    command="${BASH_COMMAND}"
     if [[ ${exitCode} != 0 ]]; then
-        echo "Script: $command"
+        echo "Script: ${command}"
         echo "Call stack:"
 
         local i
         for ((i = 1; i < ${#FUNCNAME[*]}; i++)); do
-            echo "  at ${FUNCNAME[$i]} (${BASH_SOURCE[$i]}:${BASH_LINENO[$i - 1]})"
+            echo "  at ${FUNCNAME[${i}]} (${BASH_SOURCE[${i}]}:${BASH_LINENO[${i} - 1]})"
         done
 
         killDescendantProcesses $$
 
-        echo "Installation failed with exit code $exitCode"
+        echo "Installation failed with exit code ${exitCode}"
         echo "Deployments that already were triggered could still be running. To kill them, you may need to goto the Azure portal and cancel corresponding deployment."
     else
-        echo "Installation completed with exit code $exitCode"
+        echo "Installation completed with exit code ${exitCode}"
     fi
 
     exit "${exitCode}"
@@ -87,16 +83,14 @@ onExit-install() {
 trap 'onExit-install' EXIT
 
 # Read script arguments
-while getopts ":r:s:l:e:o:p:c:t:b:v:d:w:" option; do
-    case $option in
+while getopts ":r:s:l:e:o:p:b:v:d:w:" option; do
+    case ${option} in
     r) resourceGroupName=${OPTARG} ;;
     s) subscription=${OPTARG} ;;
     l) location=${OPTARG} ;;
     e) environment=${OPTARG} ;;
     o) orgName=${OPTARG} ;;
     p) publisherEmail=${OPTARG} ;;
-    c) webApiAdClientId=${OPTARG} ;;
-    t) webApiAdClientSecret=${OPTARG} ;;
     b) azureBatchObjectId=${OPTARG} ;;
     v) releaseVersion=${OPTARG} ;;
     d) dropPools=${OPTARG} ;;
@@ -105,7 +99,7 @@ while getopts ":r:s:l:e:o:p:c:t:b:v:d:w:" option; do
     esac
 done
 
-if [[ -z $resourceGroupName ]] || [[ -z $subscription ]] || [[ -z $location ]] || [[ -z $environment ]] || [[ -z $orgName ]] || [[ -z $publisherEmail ]] || [[ -z $webApiAdClientId ]] || [[ -z $webApiAdClientSecret ]] || [[ -z $azureBatchObjectId ]] || [[ -z $releaseVersion ]]; then
+if [[ -z ${resourceGroupName} ]] || [[ -z ${subscription} ]] || [[ -z ${location} ]] || [[ -z ${environment} ]] || [[ -z ${orgName} ]] || [[ -z ${publisherEmail} ]] || [[ -z ${azureBatchObjectId} ]] || [[ -z ${releaseVersion} ]]; then
     exitWithUsageInfo
 fi
 
@@ -118,46 +112,54 @@ function versionToNumber() {
 
 function validateAzCliVersion() {
     local azVersionMinimum="2.52.0"
+    local azVersionCurrent
 
-    local azVersionCurrent=$(az version --query '"azure-cli"' -o tsv)
-    versionToNumber $azVersionCurrent
-    local azVersionCurrentNum=$versionNum
+    azVersionCurrent=$(az version --query '"azure-cli"' -o tsv)
+    versionToNumber "${azVersionCurrent}"
+    local azVersionCurrentNum=${versionNum}
 
-    versionToNumber $azVersionMinimum
-    local azVersionMinimumNum=$versionNum
+    versionToNumber "${azVersionMinimum}"
+    local azVersionMinimumNum=${versionNum}
 
-    if [ "$azVersionCurrentNum" -lt "$azVersionMinimumNum" ]; then
-        echo "Expected Azure CLI version $azVersionMinimum or newer. Current Azure CLI version is $azVersionCurrent. How to update the Azure CLI, see https://learn.microsoft.com/en-us/cli/azure/update-azure-cli"
+    if [ "${azVersionCurrentNum}" -lt "${azVersionMinimumNum}" ]; then
+        echo "Expected Azure CLI version ${azVersionMinimum} or newer. Current Azure CLI version is ${azVersionCurrent}. How to update the Azure CLI, see https://learn.microsoft.com/en-us/cli/azure/update-azure-cli"
         exit 1
     fi
 
-    echo "Azure CLI version $azVersionCurrent"
+    echo "Azure CLI version ${azVersionCurrent}"
 }
 
 function validateJqTool() {
-    local jqVersion=$(jq --version 2>/dev/null) || true
-    if [[ -z $jqVersion ]]; then
+    local jqVersion
+
+    jqVersion=$(jq --version 2>/dev/null) || true
+    if [[ -z ${jqVersion} ]]; then
         echo "Expected jq tool to be installed on a machine. How to install jq tool, see https://jqlang.github.io/jq/download/"
         exit 1
     fi
 
-    echo "jq tool version $jqVersion"
+    echo "jq tool version ${jqVersion}"
 }
 
 function validateDotnetSdk() {
-    local dotnetSdk=$(dotnet --list-sdks 2>/dev/null) || true
-    if [[ -z $dotnetSdk ]]; then
+    local dotnetSdk
+
+    dotnetSdk=$(dotnet --list-sdks 2>/dev/null) || true
+    if [[ -z ${dotnetSdk} ]]; then
         echo "Expected .Net SDK to be installed on a machine. How to install .Net SDK, see https://dotnet.microsoft.com/en-us/download"
         exit 1
     fi
 
-    printf ".Net SDK version\n$dotnetSdk\n"
+    printf ".Net SDK version\n${dotnetSdk}\n"
 }
 
 function validateAzureFunctionsCoreTools() {
-    local funcVersion=$(func version 2>/dev/null) || true
-    if [[ -z $funcVersion ]]; then
-        local kernelName=$(uname -s 2>/dev/null) || true
+    local funcVersion
+    local kernelName
+
+    funcVersion=$(func version 2>/dev/null) || true
+    if [[ -z ${funcVersion} ]]; then
+        kernelName=$(uname -s 2>/dev/null) || true
         if [[ ${kernelName} == "Linux" ]]; then
             echo "Azure Functions Core Tools is not detected on a machine and will be installed by the deployment script."
         else
@@ -165,7 +167,7 @@ function validateAzureFunctionsCoreTools() {
             exit 1
         fi
     else
-        echo "Azure Functions Core Tools version $funcVersion"
+        echo "Azure Functions Core Tools version ${funcVersion}"
     fi
 }
 
@@ -175,12 +177,12 @@ function install() {
         az login
     fi
 
-    az account set --subscription "$subscription"
+    az account set --subscription "${subscription}"
 
     . "${0%/*}/create-resource-group.sh"
     . "${0%/*}/wait-for-pending-deployments.sh"
     . "${0%/*}/create-storage-account.sh"
-    . "${0%/*}/get-resource-names.sh"
+    . "${0%/*}/create-managed-identity.sh"
     . "${0%/*}/deploy-e2e-test-site.sh"
 
     echo "Starting parallel processes..."
@@ -224,4 +226,5 @@ validateJqTool
 validateDotnetSdk
 validateAzureFunctionsCoreTools
 install
+
 echo "Installation completed"

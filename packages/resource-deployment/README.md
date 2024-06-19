@@ -32,7 +32,7 @@ When installing Azure CLI for [Windows Subsystem for Linux (WSL)](https://docs.m
 
 ### 2. Prepare deployment
 
--   Add Azure Active Directory Application (client) ID(s) (comma separated) to web-api-aad-acl-\*.json [template files](https://github.com/microsoft/accessibility-insights-service/tree/main/packages/resource-deployment/custom-scripts/resource-deployment/templates). This client(s) will be authorized to access service REST APIs.
+-   Add Azure Active Directory Application (client) ID(s) (comma separated, no double or single quotation marks, no white-spaces) to web-api-aad-acl-\*.txt [template files](https://github.com/microsoft/accessibility-insights-service/tree/main/packages/resource-deployment/custom-scripts/resource-deployment/templates). This client(s) will be authorized to access service REST APIs.
 -   Run [packages/resource-deployment/custom-scripts/prepare-deployment.sh](https://github.com/microsoft/accessibility-insights-service/tree/main/packages/resource-deployment/custom-scripts/prepare-deployment.sh) script to prepare deployment.
 
 ### 3. Login to Azure

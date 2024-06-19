@@ -17,20 +17,20 @@
             "smartStep": true,
             "resolveSourceMapLocations": ["${workspaceFolder}/dist/**/*.js", "${workspaceFolder}/../**/dist/**/*.js"],
             "args": [
+                "--scope",
+                "",
                 "--clientId",
                 "",
-                "--clientSecret",
-                "",
-                "--authorityUrl",
-                "",
-                "--waitTimeBeforeEvaluationInMinutes",
-                "1",
-                "--evaluationIntervalInMinutes",
-                "1",
-                "--releaseId",
-                "",
                 "--baseUrl",
-                ""
+                "",
+                "--releaseId",
+                "1",
+                "--waitTimeBeforeEvaluationInMinutes",
+                "0",
+                "--evaluationIntervalInMinutes",
+                "0.5",
+                "testsEvaluationTimeoutInMinutes",
+                "60"
             ]
         }
     ]

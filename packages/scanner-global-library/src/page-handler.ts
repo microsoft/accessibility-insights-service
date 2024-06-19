@@ -82,7 +82,6 @@ export class PageHandler {
         // Scroll incrementally so everything is inside the window at some point
         const timestamp = System.getTimestamp();
         while (!scrollingCompleted && System.getTimestamp() < timestamp + timeoutMsecs && !page.isClosed()) {
-            // Use try/catch because navigation issues may cause page.evaluate() to throw
             try {
                 scrollingCompleted = await this.scrollToPageBottom(page);
             } catch (error) {
@@ -104,6 +103,7 @@ export class PageHandler {
 
     private async waitForHtmlContent(page: Puppeteer.Page, timeoutMsecs: number): Promise<Partial<PageNavigationTiming>> {
         const checkIntervalMsecs = 500;
+        const scriptTimeoutMsecs = 1000;
         const minCheckBreakCount = this.pageDomStableDurationMsec / checkIntervalMsecs;
         let continuousStableCheckCount = 0;
         let lastCheckPageHtmlContentSize = 0;
@@ -113,8 +113,13 @@ export class PageHandler {
         const timestamp = System.getTimestamp();
         while (System.getTimestamp() < timestamp + timeoutMsecs && !page.isClosed()) {
             try {
-                // Use try/catch because navigation issues may cause page.evaluate to throw
-                pageHtmlContentSize = await page.evaluate(() => window.document.body.innerHTML.length);
+                const script = page.evaluate(() => window.document.body.innerHTML.length);
+                const timer = async () => {
+                    await System.wait(scriptTimeoutMsecs);
+
+                    return 0;
+                };
+                pageHtmlContentSize = await Promise.race([script, timer()]);
             } catch (error) {
                 pageHtmlContentSize = 0;
                 this.logger?.logError(`The evaluation in page's context failed.`, { error: System.serializeError(error) });

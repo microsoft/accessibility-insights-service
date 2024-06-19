@@ -158,6 +158,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@azure/abort-controller@npm:^2.0.0":
+  version: 2.1.2
+  resolution: "@azure/abort-controller@npm:2.1.2"
+  dependencies:
+    tslib: ^2.6.2
+  checksum: 22176c04ea01498311c6bbd336669f6e3faffad1cbb0c9ebc6ee9c1ff2cf958fd17ce73c7354b99d8bda9fcd311325ece7bee248875279174e3fc460e8b1a63d
+  languageName: node
+  linkType: hard
+
 "@azure/batch@npm:^10.2.0":
   version: 10.2.0
   resolution: "@azure/batch@npm:10.2.0"
@@ -178,7 +187,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@azure/core-auth@npm:^1.1.4, @azure/core-auth@npm:^1.3.0, @azure/core-auth@npm:^1.3.2":
+"@azure/core-auth@npm:^1.1.4, @azure/core-auth@npm:^1.3.0":
   version: 1.3.2
   resolution: "@azure/core-auth@npm:1.3.2"
   dependencies:
@@ -198,6 +207,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@azure/core-auth@npm:^1.5.0, @azure/core-auth@npm:^1.7.2":
+  version: 1.7.2
+  resolution: "@azure/core-auth@npm:1.7.2"
+  dependencies:
+    "@azure/abort-controller": ^2.0.0
+    "@azure/core-util": ^1.1.0
+    tslib: ^2.6.2
+  checksum: dcbba47f32e4cc929e078fd5d714af43185f3781ff5c19f01cba9e0d9078690e716be8172dd77a13aa3a81380d338a678b974bc5cbaa2e0d8629fb262ee3f0df
+  languageName: node
+  linkType: hard
+
 "@azure/core-client@npm:^1.3.0, @azure/core-client@npm:^1.5.0":
   version: 1.6.1
   resolution: "@azure/core-client@npm:1.6.1"
@@ -213,18 +233,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@azure/core-client@npm:^1.4.0":
-  version: 1.5.0
-  resolution: "@azure/core-client@npm:1.5.0"
+"@azure/core-client@npm:^1.9.2":
+  version: 1.9.2
+  resolution: "@azure/core-client@npm:1.9.2"
   dependencies:
-    "@azure/abort-controller": ^1.0.0
-    "@azure/core-asynciterator-polyfill": ^1.0.0
-    "@azure/core-auth": ^1.3.0
-    "@azure/core-rest-pipeline": ^1.5.0
-    "@azure/core-tracing": 1.0.0-preview.13
+    "@azure/abort-controller": ^2.0.0
+    "@azure/core-auth": ^1.4.0
+    "@azure/core-rest-pipeline": ^1.9.1
+    "@azure/core-tracing": ^1.0.0
+    "@azure/core-util": ^1.6.1
     "@azure/logger": ^1.0.0
-    tslib: ^2.2.0
-  checksum: dc51cdeae0788a14c57fed1b420e9d86d9b6cd29a1b7a3cecec5d8fad7664e4857415568cf4dd363fd3a845f0f4ee39904390d4f2e927206a8d50f87d66089a5
+    tslib: ^2.6.2
+  checksum: 961b829dfda4f734a763e9480a2ea622a7031ba2da4126d0add6e351a9f73ddc5782bf2b766735d976b61da3857014e0a90223d1f85d1c68468747a7a56851c3
   languageName: node
   linkType: hard
 
@@ -283,7 +303,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@azure/core-rest-pipeline@npm:^1.1.0, @azure/core-rest-pipeline@npm:^1.2.0, @azure/core-rest-pipeline@npm:^1.5.0":
+"@azure/core-rest-pipeline@npm:^1.1.0, @azure/core-rest-pipeline@npm:^1.2.0":
   version: 1.5.0
   resolution: "@azure/core-rest-pipeline@npm:1.5.0"
   dependencies:
@@ -346,6 +366,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@azure/core-util@npm:^1.1.0, @azure/core-util@npm:^1.3.0, @azure/core-util@npm:^1.6.1":
+  version: 1.9.0
+  resolution: "@azure/core-util@npm:1.9.0"
+  dependencies:
+    "@azure/abort-controller": ^2.0.0
+    tslib: ^2.6.2
+  checksum: 9246dc5bd246e7b94883ea8130fce04e2f22abd1e94afcff7a3e92a4c2da5e9b382dbf89a606b21d70bc8b01c7c89c84e803ca9da27f78d87f72bdff91ec7380
+  languageName: node
+  linkType: hard
+
 "@azure/cosmos@npm:^4.0.0":
   version: 4.0.0
   resolution: "@azure/cosmos@npm:4.0.0"
@@ -385,27 +415,25 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@azure/identity@npm:^3.1.3":
-  version: 3.1.3
-  resolution: "@azure/identity@npm:3.1.3"
+"@azure/identity@npm:^4.3.0":
+  version: 4.3.0
+  resolution: "@azure/identity@npm:4.3.0"
   dependencies:
     "@azure/abort-controller": ^1.0.0
-    "@azure/core-auth": ^1.3.0
-    "@azure/core-client": ^1.4.0
+    "@azure/core-auth": ^1.5.0
+    "@azure/core-client": ^1.9.2
     "@azure/core-rest-pipeline": ^1.1.0
     "@azure/core-tracing": ^1.0.0
-    "@azure/core-util": ^1.0.0
+    "@azure/core-util": ^1.3.0
     "@azure/logger": ^1.0.0
-    "@azure/msal-browser": ^2.32.2
-    "@azure/msal-common": ^9.0.2
-    "@azure/msal-node": ^1.14.6
+    "@azure/msal-browser": ^3.11.1
+    "@azure/msal-node": ^2.9.2
     events: ^3.0.0
     jws: ^4.0.0
     open: ^8.0.0
     stoppable: ^1.1.0
     tslib: ^2.2.0
-    uuid: ^8.3.0
-  checksum: af3ef31bfef3b0bb719bf05d37b446f9d143af9a16f523e7bc85efbc542d4a9873110f2330fc52e0bf545b2639d4c5ff3e5ac35e8a5b927f72672d7f21973d61
+  checksum: 7f4256b39c4e27bf072c33f02dd63bd50dcf54ad578e3e483dcf89283546a6086b1640adfe4c93a537cbe483dd2e3a29f6d7b837e51f333229f7bbbc448966b3
   languageName: node
   linkType: hard
 
@@ -499,48 +527,30 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@azure/msal-browser@npm:^2.32.2":
-  version: 2.32.2
-  resolution: "@azure/msal-browser@npm:2.32.2"
+"@azure/msal-browser@npm:^3.11.1":
+  version: 3.17.0
+  resolution: "@azure/msal-browser@npm:3.17.0"
   dependencies:
-    "@azure/msal-common": ^9.0.2
-  checksum: a88608160bc7ed27137fc7325f804d9b807d1fb0b1708a263c49f62ef4bb8bd6fa231b078a7bed4a38e3ebd815f8395c915253d77872934b4ea603aee42fe9ad
+    "@azure/msal-common": 14.12.0
+  checksum: 4b01ee3500e5bb1c8a71e92b81f61174d23109eb60101c17bf95ede248eeefd2ca5d68228d7d1cf147eeeade5bbe994a09f8ada96e14f3352da7822899c0c441
   languageName: node
   linkType: hard
 
-"@azure/msal-common@npm:14.1.0":
-  version: 14.1.0
-  resolution: "@azure/msal-common@npm:14.1.0"
-  checksum: 4521867c8b8121dc000eb807b848bca601efe66a2f84dd9be182aae862c367f6301242305a2cf9b6e75800ceb2a7b8a24edd8bd36029e22d7fc81498597a7f8e
+"@azure/msal-common@npm:14.12.0":
+  version: 14.12.0
+  resolution: "@azure/msal-common@npm:14.12.0"
+  checksum: 9a987b7b9b6453500481ec48224b4d9f728c62ac584f9a35ef519eff46016fc63c1a7dc159f725a5ec3748bf1ade352654fd7a7170ba42bc27ca263a01cf59db
   languageName: node
   linkType: hard
 
-"@azure/msal-common@npm:^9.0.2":
-  version: 9.1.1
-  resolution: "@azure/msal-common@npm:9.1.1"
-  checksum: d51d645ee485b699a0fbeab6d9bb01c91f4124704f756266e109c2d1d8ea0ca8d66a9ab81f62f9f76e7358906badcf7d2dd9911c18e20f57770ec9beb4fc4fcd
-  languageName: node
-  linkType: hard
-
-"@azure/msal-node@npm:^1.14.6":
-  version: 1.14.6
-  resolution: "@azure/msal-node@npm:1.14.6"
+"@azure/msal-node@npm:^2.9.2":
+  version: 2.9.2
+  resolution: "@azure/msal-node@npm:2.9.2"
   dependencies:
-    "@azure/msal-common": ^9.0.2
+    "@azure/msal-common": 14.12.0
     jsonwebtoken: ^9.0.0
     uuid: ^8.3.0
-  checksum: 7fb2085fe772474bb4c6c1e0a2467da6b2380dfa66f7c67f63d4a8774f591744dc64a6f3337d43c810ff433bc327be470ece59dcd0fa7aff4459e32beb4c738b
-  languageName: node
-  linkType: hard
-
-"@azure/msal-node@npm:^2.2.0":
-  version: 2.2.0
-  resolution: "@azure/msal-node@npm:2.2.0"
-  dependencies:
-    "@azure/msal-common": 14.1.0
-    jsonwebtoken: ^9.0.0
-    uuid: ^8.3.0
-  checksum: 527cac7821d9abcd5fdcc11058ce0eaaa55cf92dc856c1ebf775e144c90ba651311caa881ff8e2898e48175f54e8694706cc86ee16c5361eac5094fe48f68152
+  checksum: a2b51d4085d20cbac84752b9e68a5a22c7c9dbfdbc25a1713ee5e6918a504928f82e66c9317fc78db4f12053e7debd477b984cab578e0bea269aacc0862e7219
   languageName: node
   linkType: hard
 
@@ -5616,9 +5626,9 @@ __metadata:
   resolution: "azure-services@workspace:packages/azure-services"
   dependencies:
     "@azure/batch": ^10.2.0
-    "@azure/core-auth": ^1.3.2
+    "@azure/core-auth": ^1.7.2
     "@azure/cosmos": ^4.0.0
-    "@azure/identity": ^3.1.3
+    "@azure/identity": ^4.3.0
     "@azure/keyvault-secrets": ^4.6.0
     "@azure/ms-rest-js": ^2.7.0
     "@azure/ms-rest-nodeauth": ^3.1.1
@@ -9415,12 +9425,14 @@ __metadata:
   resolution: "health-client@workspace:packages/health-client"
   dependencies:
     "@types/chai": ^4.3.4
+    "@types/dotenv": ^8.2.0
     "@types/jest": ^29.5.0
     "@types/lodash": ^4.14.182
     "@types/node": ^16.18.11
     chai: ^4.3.7
     common: "workspace:*"
     copy-webpack-plugin: ^11.0.0
+    dotenv: ^16.0.1
     functional-tests: "workspace:*"
     inversify: ^6.0.1
     jest: ^29.5.0
@@ -14515,7 +14527,7 @@ __metadata:
   dependencies:
     "@azure/cosmos": ^4.0.0
     "@azure/functions": ^3.5.0
-    "@azure/identity": ^3.1.3
+    "@azure/identity": ^4.3.0
     "@azure/storage-blob": ^12.12.0
     "@crawlee/puppeteer": ^3.5.0
     "@types/jest": ^29.5.0
@@ -15706,6 +15718,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"tslib@npm:^2.6.2":
+  version: 2.6.2
+  resolution: "tslib@npm:2.6.2"
+  checksum: 329ea56123005922f39642318e3d1f0f8265d1e7fcb92c633e0809521da75eeaca28d2cf96d7248229deb40e5c19adf408259f4b9640afd20d13aecc1430f3ad
+  languageName: node
+  linkType: hard
+
 "tslib@npm:~2.1.0":
   version: 2.1.0
   resolution: "tslib@npm:2.1.0"
@@ -16276,11 +16295,11 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "web-api-client@workspace:packages/web-api-client"
   dependencies:
-    "@azure/msal-node": ^2.2.0
     "@types/got": ^9.6.11
     "@types/jest": ^29.5.0
     "@types/lodash": ^4.14.182
     "@types/node": ^16.18.11
+    azure-services: "workspace:*"
     common: "workspace:*"
     forever-agent: ^0.6.1
     got: ^11.8.5
@@ -16827,9 +16846,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ws@npm:8.13.0":
-  version: 8.13.0
-  resolution: "ws@npm:8.13.0"
+"ws@npm:8.13.0, ws@npm:8.16.0":
+  version: 8.17.1
+  resolution: "ws@npm:8.17.1"
   peerDependencies:
     bufferutil: ^4.0.1
     utf-8-validate: ">=5.0.2"
@@ -16838,22 +16857,7 @@ __metadata:
       optional: true
     utf-8-validate:
       optional: true
-  checksum: 53e991bbf928faf5dc6efac9b8eb9ab6497c69feeb94f963d648b7a3530a720b19ec2e0ec037344257e05a4f35bd9ad04d9de6f289615ffb133282031b18c61c
-  languageName: node
-  linkType: hard
-
-"ws@npm:8.16.0":
-  version: 8.16.0
-  resolution: "ws@npm:8.16.0"
-  peerDependencies:
-    bufferutil: ^4.0.1
-    utf-8-validate: ">=5.0.2"
-  peerDependenciesMeta:
-    bufferutil:
-      optional: true
-    utf-8-validate:
-      optional: true
-  checksum: feb3eecd2bae82fa8a8beef800290ce437d8b8063bdc69712725f21aef77c49cb2ff45c6e5e7fce622248f9c7abaee506bae0a9064067ffd6935460c7357321b
+  checksum: 442badcce1f1178ec87a0b5372ae2e9771e07c4929a3180321901f226127f252441e8689d765aa5cfba5f50ac60dd830954afc5aeae81609aefa11d3ddf5cecf
   languageName: node
   linkType: hard
 

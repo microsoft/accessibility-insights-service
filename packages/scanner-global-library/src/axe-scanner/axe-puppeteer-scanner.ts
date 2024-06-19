@@ -26,13 +26,12 @@ export class AxePuppeteerScanner {
         // The axe scanner breaks the communication of the puppeteer CDP protocol and makes
         // any further puppeteer API calls fail to respond. So run the axe scanner only after
         // we have collected all the browser metadata.
-        const browserResolution = await page.getBrowserResolution();
         const scanResults: AxeScanResults = {
             pageTitle: await page.puppeteerPage.title(),
             browserSpec: await page.browser.version(),
             pageResponseCode: page.navigationResponse.status(),
             userAgent: page.userAgent,
-            browserResolution: `${browserResolution.width}x${browserResolution.height}`,
+            browserResolution: `${page.browserResolution.width}x${page.browserResolution.height}`,
         };
 
         let axePuppeteer = await this.axePuppeteerFactory.createAxePuppeteer(page.puppeteerPage, contentSourcePath);

@@ -3,7 +3,7 @@
 
 import 'reflect-metadata';
 
-import { AzureServicesIocTypes, CredentialsProvider, CredentialType, SecretProvider } from 'azure-services';
+import { CredentialsProvider, SecretProvider } from 'azure-services';
 import { ServiceConfiguration } from 'common';
 import * as inversify from 'inversify';
 import { GlobalLogger } from 'logger';
@@ -39,10 +39,6 @@ describe(getProcessLifeCycleContainer, () => {
 
     it('should not create more than one instance of container', () => {
         expect(getProcessLifeCycleContainer()).toBe(testSubject);
-    });
-
-    it('verifies credential type to be app service', () => {
-        expect(testSubject.get(AzureServicesIocTypes.CredentialType)).toBe(CredentialType.AppService);
     });
 
     it('verifies A11yServiceClient registration', async () => {

@@ -6,54 +6,58 @@ import 'reflect-metadata';
 import NodeCache from 'node-cache';
 import { IMock, Mock, Times } from 'typemoq';
 import { Mutex } from 'async-mutex';
-import { ManagedIdentityCredential } from '@azure/identity';
+import { AccessToken } from '@azure/identity';
 import * as MockDate from 'mockdate';
-import { ExponentialRetryOptions } from 'common';
 import moment from 'moment';
 import { cloneDeep } from 'lodash';
-import { ManagedIdentityCredentialCache, TokenCacheItem } from './managed-identity-credential-cache';
+import { IdentityCredentialCache, TokenCacheItem } from './identity-credential-cache';
 
 const scopes = 'https://vault.azure.net/default';
 const resourceUrl = 'vault.azure.net';
-const accessTokenOptions = {};
 const tokenValidForSec = 10 * 60;
 
 let tokenCacheMock: IMock<NodeCache>;
-let managedIdentityCredentialMock: IMock<ManagedIdentityCredential>;
-let azureManagedCredential: ManagedIdentityCredentialCache;
 let tokenCacheItem: TokenCacheItem;
 let dateNow: Date;
-let retryOptions: ExponentialRetryOptions;
+let accessToken: AccessToken;
+let getAccessToken: () => Promise<AccessToken>;
+let identityCredentialCache: IdentityCredentialCache;
 
-describe(ManagedIdentityCredentialCache, () => {
+describe(IdentityCredentialCache, () => {
     beforeEach(() => {
         dateNow = new Date();
         MockDate.set(dateNow);
 
+        tokenCacheMock = Mock.ofType<NodeCache>();
+        accessToken = { token: 'eyJ0e_3g' } as AccessToken;
         tokenCacheItem = {
-            accessToken: { token: 'eyJ0e_3g' },
+            accessToken,
             expiresOn: moment.utc().valueOf() + tokenValidForSec * 1000,
         } as TokenCacheItem;
-        retryOptions = {
-            delayFirstAttempt: false,
-            numOfAttempts: 2,
-            maxDelay: 10,
-            startingDelay: 0,
-        };
-        tokenCacheMock = Mock.ofType<NodeCache>();
-        managedIdentityCredentialMock = Mock.ofType<ManagedIdentityCredential>();
-        azureManagedCredential = new ManagedIdentityCredentialCache(
-            managedIdentityCredentialMock.object,
-            tokenCacheMock.object,
-            new Mutex(),
-            retryOptions,
-        );
+        getAccessToken = async () => Promise.resolve(accessToken);
+
+        identityCredentialCache = new IdentityCredentialCache(tokenCacheMock.object, new Mutex());
     });
 
     afterEach(() => {
         MockDate.reset();
-        managedIdentityCredentialMock.verifyAll();
         tokenCacheMock.verifyAll();
+    });
+
+    it('get token from a cache for a guid scope', async () => {
+        const cacheKey = 'resource-guid-1:clientId-1';
+        tokenCacheMock
+            .setup((o) => o.get(cacheKey))
+            .returns(() => tokenCacheItem)
+            .verifiable();
+        tokenCacheMock
+            .setup((o) => o.set(cacheKey, tokenCacheItem, tokenValidForSec))
+            .returns(() => true)
+            .verifiable(Times.never());
+
+        const actualAccessToken = await identityCredentialCache.getToken('resource-guid-1', 'clientId-1', getAccessToken);
+
+        expect(actualAccessToken).toEqual(tokenCacheItem.accessToken);
     });
 
     it('get token from a service on cache miss', async () => {
@@ -65,12 +69,8 @@ describe(ManagedIdentityCredentialCache, () => {
             .setup((o) => o.set(resourceUrl, tokenCacheItem, tokenValidForSec))
             .returns(() => true)
             .verifiable();
-        managedIdentityCredentialMock
-            .setup((o) => o.getToken(scopes, accessTokenOptions))
-            .returns(() => Promise.resolve(tokenCacheItem.accessToken))
-            .verifiable();
 
-        const actualAccessToken = await azureManagedCredential.getToken(scopes, accessTokenOptions);
+        const actualAccessToken = await identityCredentialCache.getToken(scopes, undefined, getAccessToken);
 
         expect(actualAccessToken).toEqual(tokenCacheItem.accessToken);
     });
@@ -86,12 +86,8 @@ describe(ManagedIdentityCredentialCache, () => {
             .setup((o) => o.set(resourceUrl, tokenCacheItem, tokenValidForSec))
             .returns(() => true)
             .verifiable();
-        managedIdentityCredentialMock
-            .setup((o) => o.getToken(scopes, accessTokenOptions))
-            .returns(() => Promise.resolve(tokenCacheItem.accessToken))
-            .verifiable();
 
-        const actualAccessToken = await azureManagedCredential.getToken(scopes, accessTokenOptions);
+        const actualAccessToken = await identityCredentialCache.getToken(scopes, undefined, getAccessToken);
 
         expect(actualAccessToken).toEqual(tokenCacheItem.accessToken);
     });
@@ -106,7 +102,7 @@ describe(ManagedIdentityCredentialCache, () => {
             .returns(() => true)
             .verifiable(Times.never());
 
-        const actualAccessToken = await azureManagedCredential.getToken(scopes, accessTokenOptions);
+        const actualAccessToken = await identityCredentialCache.getToken(scopes, undefined, getAccessToken);
 
         expect(actualAccessToken).toEqual(tokenCacheItem.accessToken);
     });
@@ -120,13 +116,10 @@ describe(ManagedIdentityCredentialCache, () => {
             .setup((o) => o.set(resourceUrl, tokenCacheItem, tokenValidForSec))
             .returns(() => true)
             .verifiable(Times.never());
-        managedIdentityCredentialMock
-            .setup((o) => o.getToken(scopes, accessTokenOptions))
-            .returns(() => Promise.reject(new Error('msi service error')))
-            .verifiable(Times.exactly(2));
+        getAccessToken = async () => Promise.reject(new Error('msi service error'));
 
-        await expect(azureManagedCredential.getToken(scopes, accessTokenOptions)).rejects.toThrowError(
-            /MSI credential provider has failed./,
+        await expect(identityCredentialCache.getToken(scopes, undefined, getAccessToken)).rejects.toThrowError(
+            /Credential provider has failed./,
         );
     });
 });

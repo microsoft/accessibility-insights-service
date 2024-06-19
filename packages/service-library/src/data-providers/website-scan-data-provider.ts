@@ -141,7 +141,11 @@ export class WebsiteScanDataProvider {
         for (const operations of operationsList) {
             operationResponse = await executeWithExponentialRetry(async () => {
                 try {
-                    return this.cosmosContainerClient.patchDocument<WebsiteScanData>(dbDocument.id, operations, dbDocument.partitionKey);
+                    return await this.cosmosContainerClient.patchDocument<WebsiteScanData>(
+                        dbDocument.id,
+                        operations,
+                        dbDocument.partitionKey,
+                    );
                 } catch (error) {
                     this.logger.logError(`Failed to patch knownPages property of WebsiteScanData Cosmos DB document. Retrying on error.`, {
                         websiteId: dbDocument?.id,

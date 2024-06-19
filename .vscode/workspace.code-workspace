@@ -171,7 +171,6 @@
         },
         "cSpell.words": [
             "apify",
-            "backlink",
             "Configurator",
             "cout",
             "coutd",
@@ -186,7 +185,6 @@
             "Newable",
             "opentelemetry",
             "Promisable",
-            "Rescan",
             "SARIF",
             "serializable",
             "typemoq",
@@ -200,13 +198,13 @@
             "ms-dotnettools.csharp",
             "esbenp.prettier-vscode",
             "foxundermoon.shell-format",
+            "timonwong.shellcheck",
             "rogalmic.bash-debug",
             "streetsidesoftware.code-spell-checker",
             "ms-azuretools.vscode-azurefunctions",
             "christian-kohler.npm-intellisense",
             "ms-vscode.powershell",
-            "ms-azuretools.vscode-docker",
-            "msazurermtools.azurerm-vscode-tools"
+            "ms-azuretools.vscode-docker"
         ]
     },
 }
