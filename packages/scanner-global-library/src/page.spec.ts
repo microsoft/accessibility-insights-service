@@ -302,6 +302,7 @@ describe(Page, () => {
     describe('Miscellaneous', () => {
         it('create()', async () => {
             setupPageCreate();
+            simulatePageLaunch();
             page.browser = undefined;
             (page as any).page = undefined;
 
@@ -312,6 +313,7 @@ describe(Page, () => {
         });
 
         it('create() with browser executable path', async () => {
+            simulatePageLaunch();
             browserMock
                 .setup(async (o) => o.newPage())
                 .returns(() => Promise.resolve(puppeteerPageMock.object))
@@ -335,6 +337,7 @@ describe(Page, () => {
         });
 
         it('create() with webgl support', async () => {
+            simulatePageLaunch();
             browserMock
                 .setup(async (o) => o.newPage())
                 .returns(() => Promise.resolve(puppeteerPageMock.object))
@@ -358,6 +361,7 @@ describe(Page, () => {
         });
 
         it('create() prioritizes ws endpoint option if provided', async () => {
+            simulatePageLaunch();
             browserMock
                 .setup(async (o) => o.newPage())
                 .returns(() => Promise.resolve(puppeteerPageMock.object))

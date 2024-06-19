@@ -69,6 +69,8 @@ export class Page {
 
     public userAgent: string;
 
+    public browserResolution: Viewport;
+
     private page: Puppeteer.Page;
 
     private readonly enableAuthenticationGlobalFlag: boolean;
@@ -118,6 +120,7 @@ export class Page {
         this.userAgent = await this.browser.userAgent();
         this.page = await this.browser.newPage();
         this.puppeteerTimeoutConfig.setOperationTimeout(options?.capabilities);
+        this.browserResolution = await this.getBrowserResolution();
 
         const pageCreated = await this.webDriver.waitForPageCreation();
         if (pageCreated !== true) {
@@ -259,18 +262,6 @@ export class Page {
         await this.page.setCookie(...cookies);
     }
 
-    public async getBrowserResolution(): Promise<Viewport> {
-        const windowSize = await this.page.evaluate(() => {
-            return {
-                width: window.innerWidth,
-                height: window.innerHeight,
-                deviceScaleFactor: window.devicePixelRatio,
-            };
-        });
-
-        return { width: windowSize.width, height: windowSize.height, deviceScaleFactor: windowSize.deviceScaleFactor };
-    }
-
     public async reopenBrowser(options?: BrowserStartOptions): Promise<void> {
         this.browserStartOptions = {
             ...this.browserStartOptions,
@@ -287,6 +278,18 @@ export class Page {
         if (this.webDriver !== undefined) {
             await this.webDriver.close();
         }
+    }
+
+    private async getBrowserResolution(): Promise<Viewport> {
+        const windowSize = await this.page.evaluate(() => {
+            return {
+                width: window.innerWidth,
+                height: window.innerHeight,
+                deviceScaleFactor: window.devicePixelRatio,
+            };
+        });
+
+        return { width: windowSize.width, height: windowSize.height, deviceScaleFactor: windowSize.deviceScaleFactor };
     }
 
     private async analyzeImpl(): Promise<void> {

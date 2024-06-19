@@ -252,13 +252,13 @@ function setupPageLaunch(): void {
         .returns(() => puppeteerPageMock.object)
         .verifiable();
     pageMock
-        .setup((o) => o.getBrowserResolution())
-        .returns(() =>
-            Promise.resolve({
+        .setup((o) => o.browserResolution)
+        .returns(() => {
+            return {
                 width: 1920,
                 height: 1080,
                 deviceScaleFactor: 1,
-            }),
-        )
+            };
+        })
         .verifiable();
 }
