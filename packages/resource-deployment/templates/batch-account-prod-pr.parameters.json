@@ -18,10 +18,10 @@
             "value": "standard_e4d_v5"
         },
         "onDemandUrlScanPoolTaskSlotsPerNode": {
-            "value": "4"
+            "value": "2"
         },
         "privacyScanPoolNodes": {
-            "value": "18"
+            "value": "19"
         },
         "privacyScanPoolVmSize": {
             "value": "standard_e4d_v5"

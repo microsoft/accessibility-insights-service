@@ -73,7 +73,7 @@
             }
         },
         "onDemandUrlScanPoolTaskSlotsPerNode": {
-            "defaultValue": "4",
+            "defaultValue": "2",
             "type": "string",
             "metadata": {
                 "description": "Task slots per node for on-demand-url-scan-pool pool"

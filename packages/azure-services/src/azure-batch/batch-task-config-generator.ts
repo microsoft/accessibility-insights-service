@@ -39,11 +39,13 @@ export class BatchTaskConfigGenerator {
     private readonly appInsightKeyValueName = 'APPINSIGHTS_INSTRUMENTATIONKEY';
 
     // The --rm option removes the container after the task finishes
+    // The --cpus option limits container to use number of CPUs on host VM
     // The --workdir option defines task working directory
     // The --init option reaps zombie processes
     // The --shm-size option increases shared memory allocated to a container
     // The -v option mounts D: drive in container
-    private readonly containerRunOptions = '--init --rm --shm-size=2gb --workdir /app -v d: --env-file %AZ_BATCH_TASK_WORKING_DIR%\\.env';
+    private readonly containerRunOptions =
+        '--init --rm --cpus=2 --shm-size=2gb --workdir /app -v d: --env-file %AZ_BATCH_TASK_WORKING_DIR%\\.env';
 
     public constructor(
         @inject(BatchTaskPropertyProvider) protected readonly batchTaskPropertyProvider: BatchTaskPropertyProvider,

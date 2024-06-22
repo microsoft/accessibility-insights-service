@@ -12,13 +12,13 @@
             "value": "8"
         },
         "onDemandUrlScanPoolNodes": {
-            "value": "14"
+            "value": "15"
         },
         "onDemandUrlScanPoolVmSize": {
             "value": "standard_e4d_v5"
         },
         "onDemandUrlScanPoolTaskSlotsPerNode": {
-            "value": "4"
+            "value": "2"
         },
         "privacyScanPoolNodes": {
             "value": "2"
