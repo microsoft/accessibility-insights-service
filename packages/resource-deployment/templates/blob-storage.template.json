@@ -96,7 +96,6 @@
                     "defaultAction": "Allow"
                 },
                 "supportsHttpsTrafficOnly": true,
-                "allowSharedKeyAccess": false,
                 "encryption": {
                     "services": {
                         "file": {
