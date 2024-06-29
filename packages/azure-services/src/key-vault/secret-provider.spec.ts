@@ -22,7 +22,7 @@ describe(SecretProvider, () => {
     beforeEach(() => {
         environmentSettingsMock = Mock.ofType<EnvironmentSettings>();
         environmentSettingsMock
-            .setup((o) => o.getValue('AI_KEY_VAULT_URL'))
+            .setup((o) => o.getValue('KEY_VAULT_URL'))
             .returns(() => keyVaultUrl)
             .verifiable();
         azureKeyVaultClient = Mock.ofType<SecretClient>();
