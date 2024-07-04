@@ -41,7 +41,7 @@
             },
 
             {
-                "name": "AI_KEY_VAULT_URL",
+                "name": "KEY_VAULT_URL",
                 "value": "%KEY_VAULT_TOKEN%"
             }
         ],

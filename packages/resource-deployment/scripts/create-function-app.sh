@@ -77,37 +77,6 @@ copyConfigFileToScriptFolder() {
     done
 }
 
-installAzureFunctionsCoreToolsOnLinux() {
-    echo "Installing Azure Functions Core Tools..."
-    # Install the Microsoft package repository GPG key, to validate package integrity
-    curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor >microsoft.gpg
-    sudo mv microsoft.gpg /etc/apt/trusted.gpg.d/microsoft.gpg
-
-    # Verify your Ubuntu server is running one of the appropriate versions from the table below
-    sudo sh -c 'echo "deb [arch=amd64] https://packages.microsoft.com/repos/microsoft-ubuntu-$(lsb_release -cs)-prod $(lsb_release -cs) main" > /etc/apt/sources.list.d/dotnetdev.list'
-    sudo apt-get update -y
-
-    # Install Azure Functions Core Tools package
-    sudo apt-get install azure-functions-core-tools-4 -y
-    echo "Azure Functions Core Tools installed successfully"
-}
-
-installAzureFunctionsCoreTools() {
-    local funcVersion
-    local kernelName
-
-    funcVersion=$(func version 2>/dev/null) || true
-    if [[ -z ${funcVersion} ]]; then
-        kernelName=$(uname -s 2>/dev/null) || true
-        if [[ ${kernelName} == "Linux" ]]; then
-            installAzureFunctionsCoreToolsOnLinux
-        else
-            echo "Azure Functions Core Tools is expected to be installed on a machine. How to install tool, see https://learn.microsoft.com/en-us/azure/azure-functions/functions-run-local"
-            exit 1
-        fi
-    fi
-}
-
 publishFunctionAppScripts() {
     local packageName=$1
     local functionAppName=$2
@@ -119,32 +88,17 @@ publishFunctionAppScripts() {
     # Change directory to the function app scripts folder
     cd "${0%/*}/../../../${packageName}/dist"
 
-    # Publish the function scripts to the function app
-    echo "Publishing ${packageName} scripts to ${functionAppName} Function App..."
+    # Publish the function scripts to the blob storage
+    echo "Publishing ${packageName} scripts to ${functionAppName} function app..."
 
-    # Run function tool with retries due to app service warm up time delay
-    local isPublished=false
-    end=$((SECONDS + 120))
-    while [ "${SECONDS}" -le "${end}" ] && [ "${isPublished}" = false ]; do
-        {
-            isPublished=true
-            func azure functionapp publish "${functionAppName}" --node
-        } || {
-            echo "Failed to publish, retrying..."
-            isPublished=false
-        }
+    zipFileName="${functionAppName}.zip"
+    rm "${zipFileName}" || true 1>/dev/null
+    zip -r "${zipFileName}" .
 
-        if [ "${isPublished}" = false ]; then
-            sleep 5
-        fi
-    done
+    echo "Uploading ${zipFileName} deployment package file to blob storage..."
+    az storage blob upload --account-name "${storageAccountName}" --container-name "function-apps" --file "${zipFileName}" --name "${zipFileName}" --overwrite=true --auth-mode login 1>/dev/null
 
-    if [ "${isPublished}" = false ]; then
-        echo "Publishing ${packageName} scripts to ${functionAppName} Function App was unsuccessful."
-        exit 1
-    fi
-
-    echo "Successfully published ${packageName} scripts to ${functionAppName} Function App."
+    echo "Successfully published ${packageName} scripts to ${functionAppName} function app."
     cd "${currentDir}"
 }
 
@@ -161,7 +115,7 @@ getFunctionAppPrincipalId() {
     local functionAppName=$1
 
     principalId=$(az functionapp identity show --name "${functionAppName}" --resource-group "${resourceGroupName}" --query "principalId" -o tsv)
-    echo "Azure Function App ${functionAppName} has assigned principal ID ${principalId}."
+    echo "Azure function app ${functionAppName} has assigned principal ID ${principalId}."
 }
 
 deployFunctionApp() {
@@ -170,24 +124,24 @@ deployFunctionApp() {
     local functionAppName=$3
     local extraParameters=$4
 
-    echo "Deploying Azure Function App ${functionAppName} using ARM template..."
+    echo "Deploying Azure function app ${functionAppName} using ARM template..."
     az deployment group create \
         --resource-group "${resourceGroupName}" \
         --template-file "${templateFilePath}" \
-        --parameters namePrefix="${functionAppNamePrefix}" releaseVersion="${releaseVersion}" $extraParameters \
+        --parameters namePrefix="${functionAppNamePrefix}" $extraParameters \
         --query "properties.outputResources[].id" \
         -o tsv 1>/dev/null
 
     waitForDeploymentCompletion "${functionAppName}"
-    echo "Successfully deployed Azure Function App ${functionAppName}"
+    echo "Successfully deployed Azure function app ${functionAppName}"
 }
 
 function deployWebApiFunction() {
-    deployFunctionApp "web-api-allyfuncapp" "${webApiFuncTemplateFilePath}" "${webApiFuncAppName}" "clientId=${webApiIdentityClientId} allowedApplications=${allowedApplications}"
+    deployFunctionApp "web-api-allyfuncapp" "${webApiFuncTemplateFilePath}" "${webApiFuncAppName}" "clientId=${webApiIdentityClientId} releaseVersion=${releaseVersion} allowedApplications=${allowedApplications}"
 }
 
 function deployWebWorkersFunction() {
-    deployFunctionApp "web-workers-allyfuncapp" "${webWorkersFuncTemplateFilePath}" "${webWorkersFuncAppName}"
+    deployFunctionApp "web-workers-allyfuncapp" "${webWorkersFuncTemplateFilePath}" "${webWorkersFuncAppName}" "releaseVersion=${releaseVersion}"
 }
 
 function deployE2EWebApisFunction() {
@@ -196,6 +150,14 @@ function deployE2EWebApisFunction() {
 
 function enableStorageAccess() {
     role="Storage Blob Data Contributor"
+    scope="--scope /subscriptions/${subscription}/resourceGroups/${resourceGroupName}/providers/Microsoft.Storage/storageAccounts/${storageAccountName}"
+    . "${0%/*}/create-role-assignment.sh"
+
+    role="Storage Queue Data Contributor"
+    scope="--scope /subscriptions/${subscription}/resourceGroups/${resourceGroupName}/providers/Microsoft.Storage/storageAccounts/${storageAccountName}"
+    . "${0%/*}/create-role-assignment.sh"
+
+    role="Storage Table Data Contributor"
     scope="--scope /subscriptions/${subscription}/resourceGroups/${resourceGroupName}/providers/Microsoft.Storage/storageAccounts/${storageAccountName}"
     . "${0%/*}/create-role-assignment.sh"
 }
@@ -228,7 +190,7 @@ function enableCosmosAccess() {
         --role-definition-id "${RBACRoleId}" 1>/dev/null
 }
 
-function enableManagedIdentityOnFunctions() {
+function enableManagedIdentity() {
     echo "Granting access to ${webApiFuncAppName} function service principal..."
     getFunctionAppPrincipalId "${webApiFuncAppName}"
     . "${0%/*}/key-vault-enable-msi.sh"
@@ -267,20 +229,22 @@ function assignUserIdentity() {
 }
 
 function setupAzureFunctions() {
-    installAzureFunctionsCoreTools
-
+    # "deployWebApiFunction"
+    # "deployWebWorkersFunction"
+    # "deployE2EWebApisFunction"
     local functionSetupProcesses=(
         "deployWebApiFunction"
-        "deployWebWorkersFunction"
         "deployE2EWebApisFunction"
     )
     runCommandsWithoutSecretsInParallel functionSetupProcesses
 
-    enableManagedIdentityOnFunctions
+    enableManagedIdentity
 
+    # "publishWebApiScripts"
+    # "publishWebWorkerScripts"
+    # "publishE2EWebApisScripts"
     functionSetupProcesses=(
-        "publishWebApiScripts"
-        "publishWebWorkerScripts"
+        "deployWebApiFunction"
         "publishE2EWebApisScripts"
     )
     runCommandsWithoutSecretsInParallel functionSetupProcesses

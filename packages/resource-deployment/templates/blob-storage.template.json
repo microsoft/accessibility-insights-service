@@ -68,11 +68,11 @@
                 "description": "The name of the blob container for runtime configuration."
             }
         },
-        "batchLogsContainerName": {
+        "batchFunctionAppsContainerName": {
             "type": "string",
-            "defaultValue": "batch-logs",
+            "defaultValue": "function-apps",
             "metadata": {
-                "description": "The name of the blob container for the preserving batch logs."
+                "description": "The name of the blob container for the function app code."
             }
         }
     },
@@ -134,16 +134,10 @@
                     "dependsOn": ["[parameters('storageAccountName')]"]
                 },
                 {
-                    "name": "[concat('default/', parameters('batchLogsContainerName'))]",
+                    "name": "[concat('default/', parameters('batchFunctionAppsContainerName'))]",
                     "type": "blobServices/containers",
                     "apiVersion": "2023-01-01",
-                    "dependsOn": ["[parameters('storageAccountName')]"],
-                    "properties": {
-                        "deleteRetentionPolicy": {
-                            "enabled": true,
-                            "days": 60
-                        }
-                    }
+                    "dependsOn": ["[parameters('storageAccountName')]"]
                 }
             ]
         },
@@ -157,19 +151,37 @@
                     "rules": [
                         {
                             "enabled": true,
-                            "name": "deleteoldbatchlogs",
+                            "name": "Delete page scan reports after 360 days",
                             "type": "Lifecycle",
                             "definition": {
                                 "actions": {
                                     "baseBlob": {
                                         "delete": {
-                                            "daysAfterModificationGreaterThan": 60
+                                            "daysAfterModificationGreaterThan": 360
                                         }
                                     }
                                 },
                                 "filters": {
                                     "blobTypes": ["blockBlob"],
-                                    "prefixMatch": ["batch-logs"]
+                                    "prefixMatch": ["parameters('pageScanRunReportContainerName')"]
+                                }
+                            }
+                        },
+                        {
+                            "enabled": true,
+                            "name": "Delete combined scan reports after 360 days",
+                            "type": "Lifecycle",
+                            "definition": {
+                                "actions": {
+                                    "baseBlob": {
+                                        "delete": {
+                                            "daysAfterModificationGreaterThan": 360
+                                        }
+                                    }
+                                },
+                                "filters": {
+                                    "blobTypes": ["blockBlob"],
+                                    "prefixMatch": ["parameters('combinedResultsContainerName')"]
                                 }
                             }
                         }
