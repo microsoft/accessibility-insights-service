@@ -8,9 +8,9 @@ import { BlobContentDownloadResponse, BlobSaveCondition, BlobStorageClient, Blob
 import { IMock, Mock } from 'typemoq';
 import { BodyParser, System } from 'common';
 import { PrivacyScanCombinedReport } from 'storage-documents';
-import { GeneratedReport, PrivacyReportWriteResponse } from '..';
 import { DataProvidersCommon } from './data-providers-common';
-import { PrivacyScanCombinedReportProvider } from './privacy-scan-combined-report-provider';
+import { PrivacyReportWriteResponse, PrivacyScanCombinedReportProvider } from './privacy-scan-combined-report-provider';
+import { GeneratedReport } from './report-writer';
 
 describe(PrivacyScanCombinedReportProvider, () => {
     const fileId = 'file id';
@@ -166,7 +166,7 @@ describe(PrivacyScanCombinedReportProvider, () => {
             const actualResults = await testSubject.readCombinedReport(fileId);
 
             expect(actualResults.error.errorCode).toEqual('jsonParseError');
-            expect(actualResults.error.data).toContain(`{\n  name: 'SyntaxError',\n  message: 'Unexpected token u in JSON at position 2',`);
+            expect(actualResults.error.data).toContain(`JSON at position 2`);
         });
     });
 

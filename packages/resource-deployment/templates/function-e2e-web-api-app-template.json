@@ -70,7 +70,7 @@
                         },
                         {
                             "name": "WEBSITE_NODE_DEFAULT_VERSION",
-                            "value": "~16"
+                            "value": "~20"
                         },
                         {
                             "name": "FUNCTIONS_EXTENSION_VERSION",

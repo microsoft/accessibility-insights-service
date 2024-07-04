@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { keys } from 'ts-transformer-keys';
 import { StorageDocument } from './storage-document';
 import { ItemType } from './item-type';
 import { ReportFormat, OnDemandPageScanRunState, ScanState } from './on-demand-page-scan-result';
@@ -119,8 +118,28 @@ export interface WebsiteScanResultPartModel {
     knownPages?: string[];
 }
 
-export const websiteScanResultBaseKeys = keys<WebsiteScanResultBase>();
-export const websiteScanResultPartModelKeys = keys<WebsiteScanResultPartModel>();
+export const websiteScanResultBaseKeys = [
+    'id',
+    'itemType',
+    'partitionKey',
+    'itemVersion',
+    '_rid',
+    '_ts',
+    '_self',
+    '_etag',
+    'itemType',
+    'baseUrl',
+    'scanGroupId',
+    'scanGroupType',
+    'deepScanId',
+    'discoveryPatterns',
+    'reports',
+    'runResult',
+    'pageCount',
+    'deepScanLimit',
+    'created',
+];
+export const websiteScanResultPartModelKeys = ['pageScans', 'knownPages'];
 
 /**
  * The `WebsiteScanResultBase` transient keys that are not part of the stable document model.

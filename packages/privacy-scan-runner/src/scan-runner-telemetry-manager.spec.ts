@@ -9,9 +9,9 @@ import { GuidGenerator } from 'common';
 import { ScanRunnerTelemetryManager } from './scan-runner-telemetry-manager';
 
 class TestableScanRunnerTelemetryManager extends ScanRunnerTelemetryManager {
-    public scanSubmitted: number;
+    public declare scanSubmitted: number;
 
-    public scanStarted: number;
+    public declare scanStarted: number;
 
     public constructor(logger: GlobalLogger, guidGenerator: GuidGenerator, getCurrentTimestamp: () => number = Date.now) {
         super(logger, guidGenerator, getCurrentTimestamp);

@@ -52,9 +52,9 @@ class TestableBatchTaskCreator extends BatchTaskCreator {
 
     public deleteSucceededRequestCallback: (scanMessage: ScanMessage) => Promise<void>;
 
-    public activeScanMessages: ScanMessage[];
+    public declare activeScanMessages: ScanMessage[];
 
-    public jobId: string;
+    public declare jobId: string;
 
     public jobGroup: string = 'jobGroup';
 

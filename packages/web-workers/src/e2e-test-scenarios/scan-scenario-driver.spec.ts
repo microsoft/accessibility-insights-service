@@ -16,9 +16,9 @@ import { ScanScenarioDriver } from './scan-scenario-driver';
 /* eslint-disable @typescript-eslint/tslint/config */
 
 class TestableSingleScanScenario extends ScanScenarioDriver {
-    public testContextData: TestContextData;
+    public declare testContextData: TestContextData;
 
-    public encounteredError: boolean;
+    public declare encounteredError: boolean;
 
     constructor(orchestrationSteps: OrchestrationSteps, testDefinition: E2EScanScenarioDefinition) {
         super(orchestrationSteps, testDefinition);

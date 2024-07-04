@@ -18,7 +18,7 @@ import { WebApiConfig } from './web-api-config';
 /* eslint-disable @typescript-eslint/consistent-type-assertions, @typescript-eslint/no-explicit-any */
 
 class FunctionalTestGroupStub extends FunctionalTestGroup {
-    public testContextData: TestContextData;
+    public declare testContextData: TestContextData;
 
     public async run(testContextData: TestContextData, env: TestEnvironment): Promise<TestContextData> {
         return testContextData;

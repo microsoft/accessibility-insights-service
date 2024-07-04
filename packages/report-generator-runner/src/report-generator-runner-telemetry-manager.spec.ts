@@ -9,9 +9,9 @@ import { GuidGenerator } from 'common';
 import { ReportGeneratorRunnerTelemetryManager } from './report-generator-runner-telemetry-manager';
 
 class TestableReportGeneratorRunnerTelemetryManager extends ReportGeneratorRunnerTelemetryManager {
-    public requestsSubmitted: number;
+    public declare requestsSubmitted: number;
 
-    public requestsStarted: number;
+    public declare requestsStarted: number;
 
     public constructor(logger: GlobalLogger, guidGenerator: GuidGenerator, getCurrentTimestamp: () => number = Date.now) {
         super(logger, guidGenerator, getCurrentTimestamp);
