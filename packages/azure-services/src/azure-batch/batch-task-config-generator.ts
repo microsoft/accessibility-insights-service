@@ -9,13 +9,13 @@ import moment from 'moment';
 
 export declare type UserAccessLevels = 'admin' | 'nonadmin';
 
-export interface BatchTaskPropertyProvider {
+export interface BatchTaskPropertyProviderOptional {
     getResourceFiles?(): BatchServiceModels.ResourceFile[];
     getAdditionalContainerRunOptions?(): string;
 }
 
 @injectable()
-export abstract class BatchTaskPropertyProvider {
+export abstract class BatchTaskPropertyProvider implements BatchTaskPropertyProviderOptional {
     public abstract getImageName(): Promise<string>;
 
     public getAdditionalContainerRunOptions?(): string {

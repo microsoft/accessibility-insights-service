@@ -34,7 +34,7 @@ export interface ScanMessage {
     message: BatchTaskScanData;
 }
 
-export interface BatchTaskCreator {
+export interface BatchTaskCreatorOptional {
     onTasksAdded?(tasks: JobTask[]): Promise<void>;
     handleFailedTasks?(failedTasks: BatchTask[]): Promise<void>;
     onExit?(): Promise<void>;
@@ -42,12 +42,14 @@ export interface BatchTaskCreator {
 }
 
 @injectable()
-export abstract class BatchTaskCreator {
+export abstract class BatchTaskCreator implements BatchTaskCreatorOptional {
     protected jobManagerConfig: JobManagerConfig;
 
     protected jobId: string;
 
     protected activeScanMessages: ScanMessage[];
+
+    protected abstract jobGroup: string;
 
     private hasInitialized = false;
 
@@ -58,8 +60,6 @@ export abstract class BatchTaskCreator {
         @inject(GlobalLogger) protected readonly logger: GlobalLogger,
         protected readonly system: typeof System = System,
     ) {}
-
-    protected abstract jobGroup: string;
 
     /**
      * The batch task may be retried when a task has failed.

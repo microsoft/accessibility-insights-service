@@ -38,3 +38,4 @@ copyright-header.txt
 .yarn/
 **/*.patch
 **/.gdnsuppress
+**/chrome-user-data
