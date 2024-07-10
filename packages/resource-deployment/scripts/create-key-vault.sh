@@ -15,7 +15,7 @@ setupKeyVaultResourcesTemplateFile="${0%/*}/../templates/key-vault-setup-resourc
 
 exitWithUsageInfo() {
     echo "
-Usage: ${BASH_SOURCE} -r <resource group> -c <web API client ID> [-e <environment>]
+Usage: ${BASH_SOURCE} -r <resource group> -c <web API client ID> -b <Azure Batch object ID> [-e <environment>]
 "
     exit 1
 }

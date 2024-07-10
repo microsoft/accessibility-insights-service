@@ -2,6 +2,13 @@
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
+        "environment": {
+            "type": "string",
+            "defaultValue": "dev",
+            "metadata": {
+                "description": "The target deployment environment."
+            }
+        },
         "batchAccount": {
             "type": "string",
             "defaultValue": "[concat('allybatch',toLower(uniqueString(resourceGroup().id)))]",
@@ -45,7 +52,7 @@
             }
         },
         "onDemandScanRequestPoolVmSize": {
-            "defaultValue": "standard_e8d_v5",
+            "defaultValue": "standard_e8ds_v5",
             "type": "string",
             "metadata": {
                 "description": "VM size for on-demand-scan-request-pool pool"
@@ -66,7 +73,7 @@
             }
         },
         "onDemandUrlScanPoolVmSize": {
-            "defaultValue": "standard_e4d_v5",
+            "defaultValue": "standard_e4ds_v5",
             "type": "string",
             "metadata": {
                 "description": "VM size for on-demand-url-scan-pool pool"
@@ -87,7 +94,7 @@
             }
         },
         "privacyScanPoolVmSize": {
-            "defaultValue": "standard_e4d_v5",
+            "defaultValue": "standard_e4ds_v5",
             "type": "string",
             "metadata": {
                 "description": "VM size for privacy-scan-pool pool"
@@ -101,9 +108,53 @@
             }
         }
     },
+    "functions": [
+        {
+            "namespace": "fn",
+            "members": {
+                "vnetPool": {
+                    "parameters": [
+                        {
+                            "name": "vnetName",
+                            "type": "string"
+                        },
+                        {
+                            "name": "poolName",
+                            "type": "string"
+                        }
+                    ],
+                    "output": {
+                        "type": "object",
+                        "value": {
+                            "subnetId": "[concat(resourceId('Microsoft.Network/virtualNetworks', parameters('vnetName')), '/subnets/default')]",
+                            "publicIPAddressConfiguration": {
+                                "ipAddressIds": [
+                                    "[resourceId('Microsoft.Network/publicIPAddresses', concat('public-ip-', parameters('poolName')))]"
+                                ],
+                                "provision": "UserManaged"
+                            },
+                            "dynamicVnetAssignmentScope": "None",
+                            "enableAcceleratedNetworking": true
+                        }
+                    }
+                },
+                "batchPool": {
+                    "output": {
+                        "type": "object",
+                        "value": {
+                            "publicIPAddressConfiguration": {
+                                "provision": "BatchManaged"
+                            },
+                            "dynamicVnetAssignmentScope": "None",
+                            "enableAcceleratedNetworking": true
+                        }
+                    }
+                }
+            }
+        }
+    ],
     "variables": {
         "keyVaultUrl": "[concat('https://', parameters('keyVault'), '.vault.azure.net/')]",
-        "vnetResource": "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnetName'))]",
         "onDemandUrlScanPoolName": "on-demand-url-scan-pool",
         "onDemandScanRequestPoolName": "on-demand-scan-request-pool",
         "privacyScanPoolName": "privacy-scan-pool"
@@ -111,14 +162,20 @@
     "resources": [
         {
             "type": "Microsoft.Batch/batchAccounts",
-            "apiVersion": "2023-05-01",
+            "apiVersion": "2024-02-01",
             "name": "[parameters('batchAccount')]",
             "location": "[parameters('location')]",
+            "identity": {
+                "type": "SystemAssigned"
+            },
             "properties": {
+                "poolAllocationMode": "UserSubscription",
+                "encryption": {
+                    "keySource": "Microsoft.Batch"
+                },
                 "autoStorage": {
                     "storageAccountId": "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"
                 },
-                "poolAllocationMode": "UserSubscription",
                 "keyVaultReference": {
                     "id": "[resourceId('Microsoft.KeyVault/vaults', parameters('keyVault'))]",
                     "url": "[variables('keyVaultUrl')]"
@@ -127,7 +184,7 @@
         },
         {
             "type": "Microsoft.Batch/batchAccounts/pools",
-            "apiVersion": "2023-05-01",
+            "apiVersion": "2024-02-01",
             "name": "[concat(parameters('batchAccount'), '/', variables('onDemandUrlScanPoolName'))]",
             "dependsOn": ["[resourceId('Microsoft.Batch/batchAccounts', parameters('batchAccount'))]"],
             "properties": {
@@ -146,20 +203,25 @@
                             "version": "latest"
                         },
                         "nodeAgentSkuId": "batch.node.windows amd64",
+                        "osDisk": {
+                            "caching": "None",
+                            "managedDisk": {
+                                "storageAccountType": "Premium_LRS"
+                            },
+                            "diskSizeGB": 50
+                        },
+                        "windowsConfiguration": {
+                            "enableAutomaticUpdates": false
+                        },
                         "diskEncryptionConfiguration": {
-                            "targets": ["TemporaryDisk", "OsDisk"]
+                            "targets": ["OsDisk", "TemporaryDisk"]
+                        },
+                        "nodePlacementConfiguration": {
+                            "policy": "Regional"
                         }
                     }
                 },
-                "networkConfiguration": {
-                    "subnetId": "[concat(variables('vnetResource'), '/subnets/default')]",
-                    "publicIPAddressConfiguration": {
-                        "provision": "userManaged",
-                        "ipAddressIds": [
-                            "[resourceId('Microsoft.Network/publicIPAddresses', concat('public-ip-', variables('onDemandUrlScanPoolName')))]"
-                        ]
-                    }
-                },
+                "networkConfiguration": "[if(equals(parameters('environment'), 'dev'), fn.batchPool(), fn.vnetPool(parameters('vnetName'), variables('onDemandUrlScanPoolName')))]",
                 "scaleSettings": {
                     "fixedScale": {
                         "targetDedicatedNodes": "[parameters('onDemandUrlScanPoolNodes')]",
@@ -193,7 +255,7 @@
         },
         {
             "type": "Microsoft.Batch/batchAccounts/pools",
-            "apiVersion": "2023-05-01",
+            "apiVersion": "2024-02-01",
             "name": "[concat(parameters('batchAccount'), '/', variables('onDemandScanRequestPoolName'))]",
             "dependsOn": ["[resourceId('Microsoft.Batch/batchAccounts', parameters('batchAccount'))]"],
             "properties": {
@@ -212,20 +274,25 @@
                             "version": "latest"
                         },
                         "nodeAgentSkuId": "batch.node.windows amd64",
+                        "osDisk": {
+                            "caching": "None",
+                            "managedDisk": {
+                                "storageAccountType": "Premium_LRS"
+                            },
+                            "diskSizeGB": 50
+                        },
+                        "windowsConfiguration": {
+                            "enableAutomaticUpdates": false
+                        },
                         "diskEncryptionConfiguration": {
-                            "targets": ["TemporaryDisk", "OsDisk"]
+                            "targets": ["OsDisk", "TemporaryDisk"]
+                        },
+                        "nodePlacementConfiguration": {
+                            "policy": "Regional"
                         }
                     }
                 },
-                "networkConfiguration": {
-                    "subnetId": "[concat(variables('vnetResource'), '/subnets/default')]",
-                    "publicIPAddressConfiguration": {
-                        "provision": "userManaged",
-                        "ipAddressIds": [
-                            "[resourceId('Microsoft.Network/publicIPAddresses', concat('public-ip-', variables('onDemandScanRequestPoolName')))]"
-                        ]
-                    }
-                },
+                "networkConfiguration": "[if(equals(parameters('environment'), 'dev'), fn.batchPool(), fn.vnetPool(parameters('vnetName'), variables('onDemandScanRequestPoolName')))]",
                 "scaleSettings": {
                     "fixedScale": {
                         "targetDedicatedNodes": "[parameters('onDemandScanRequestPoolNodes')]",
@@ -248,7 +315,7 @@
                     ],
                     "userIdentity": {
                         "autoUser": {
-                            "scope": "Pool",
+                            "scope": "Task",
                             "elevationLevel": "Admin"
                         }
                     },
@@ -259,7 +326,7 @@
         },
         {
             "type": "Microsoft.Batch/batchAccounts/pools",
-            "apiVersion": "2023-05-01",
+            "apiVersion": "2024-02-01",
             "name": "[concat(parameters('batchAccount'), '/', variables('privacyScanPoolName'))]",
             "dependsOn": ["[resourceId('Microsoft.Batch/batchAccounts', parameters('batchAccount'))]"],
             "properties": {
@@ -278,20 +345,25 @@
                             "version": "latest"
                         },
                         "nodeAgentSkuId": "batch.node.windows amd64",
+                        "osDisk": {
+                            "caching": "None",
+                            "managedDisk": {
+                                "storageAccountType": "Premium_LRS"
+                            },
+                            "diskSizeGB": 50
+                        },
+                        "windowsConfiguration": {
+                            "enableAutomaticUpdates": false
+                        },
                         "diskEncryptionConfiguration": {
-                            "targets": ["TemporaryDisk", "OsDisk"]
+                            "targets": ["OsDisk", "TemporaryDisk"]
+                        },
+                        "nodePlacementConfiguration": {
+                            "policy": "Regional"
                         }
                     }
                 },
-                "networkConfiguration": {
-                    "subnetId": "[concat(variables('vnetResource'), '/subnets/default')]",
-                    "publicIPAddressConfiguration": {
-                        "provision": "userManaged",
-                        "ipAddressIds": [
-                            "[resourceId('Microsoft.Network/publicIPAddresses', concat('public-ip-', variables('privacyScanPoolName')))]"
-                        ]
-                    }
-                },
+                "networkConfiguration": "[if(equals(parameters('environment'), 'dev'), fn.batchPool(), fn.vnetPool(parameters('vnetName'), variables('privacyScanPoolName')))]",
                 "scaleSettings": {
                     "fixedScale": {
                         "targetDedicatedNodes": "[parameters('privacyScanPoolNodes')]",

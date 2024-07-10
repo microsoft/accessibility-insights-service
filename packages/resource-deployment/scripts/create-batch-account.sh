@@ -21,7 +21,7 @@ batchTemplateFile="${0%/*}/../templates/batch-account.template.json"
 
 exitWithUsageInfo() {
     echo "
-Usage: ${BASH_SOURCE} -r <resource group> -e <environment> [-t <batch template file (optional)>] [-d <pass \"true\" to force pools to drop>]
+Usage: ${BASH_SOURCE} -r <resource group> -e <environment> -b <Azure Batch object ID> [-t <batch template file (optional)>] [-d <pass \"true\" to force pools to drop>]
 "
     exit 1
 }
@@ -67,18 +67,19 @@ function deployBatch() {
 }
 
 # Read script arguments
-while getopts ":r:t:e:d:" option; do
+while getopts ":r:t:e:d:b:" option; do
     case $option in
     r) resourceGroupName=${OPTARG} ;;
     t) batchTemplateFile=${OPTARG} ;;
     e) environment=${OPTARG} ;;
     d) dropPools=${OPTARG} ;;
+    b) azureBatchObjectId=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
 
 # Print script usage help
-if [[ -z $resourceGroupName ]] || [[ -z $batchTemplateFile ]] || [[ -z $environment ]]; then
+if [[ -z $resourceGroupName ]] || [[ -z $batchTemplateFile ]] || [[ -z $environment ]] || [[ -z $azureBatchObjectId ]]; then
     exitWithUsageInfo
 fi
 

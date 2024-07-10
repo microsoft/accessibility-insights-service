@@ -50,7 +50,7 @@
                     {
                         "name": "AllowBatchPortsInbound",
                         "properties": {
-                            "description": "Allow inbound traffic on ports needed by azure batch",
+                            "description": "Allow Azure Batch inbound traffic",
                             "protocol": "Tcp",
                             "sourcePortRange": "*",
                             "destinationPortRange": "29876-29877",
@@ -66,9 +66,9 @@
                         }
                     },
                     {
-                        "name": "AllowStoragePortOutBound",
+                        "name": "AllowStoragePortOutbound",
                         "properties": {
-                            "description": "Allow outbound traffic from port used by azure storage",
+                            "description": "Allow Azure Batch outbound traffic",
                             "protocol": "Tcp",
                             "sourcePortRange": "*",
                             "destinationPortRange": "443",
