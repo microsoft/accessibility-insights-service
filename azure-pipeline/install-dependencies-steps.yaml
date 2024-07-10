@@ -4,8 +4,8 @@
 steps:
     - task: NodeTool@0
       inputs:
-          versionSpec: '16.x'
-      displayName: Use node 16.x
+          versionSpec: '20.x'
+      displayName: Use node 20
 
     - script: |
           yarn install --immutable

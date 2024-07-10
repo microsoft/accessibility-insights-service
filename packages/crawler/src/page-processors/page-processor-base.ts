@@ -50,6 +50,11 @@ export abstract class PageProcessorBase implements PageProcessor {
     private scanMetadataSaved: boolean;
 
     /**
+     * This function is called to extract data from a single web page.
+     */
+    protected abstract processPage: Crawlee.PuppeteerRequestHandler;
+
+    /**
      * Function that is called for each URL to crawl.
      */
     public requestHandler: Crawlee.PuppeteerRequestHandler = async (context) => {
@@ -138,11 +143,6 @@ export abstract class PageProcessorBase implements PageProcessor {
             await page.setExtraHTTPHeaders({ ['Origin']: originUrl });
         }
     }
-
-    /**
-     * This function is called to extract data from a single web page.
-     */
-    protected abstract processPage: Crawlee.PuppeteerRequestHandler;
 
     protected async saveSnapshot(page: Puppeteer.Page, id: string): Promise<void> {
         if (this.snapshot) {

@@ -22,9 +22,9 @@ import { PageProcessorBase } from './page-processor-base';
 
 describe(PageProcessorBase, () => {
     class TestablePageProcessor extends PageProcessorBase {
-        public snapshot: boolean;
+        public declare snapshot: boolean;
 
-        public baseUrl: string;
+        public declare baseUrl: string;
 
         public processPage: Crawlee.PuppeteerRequestHandler = async () => {
             return;

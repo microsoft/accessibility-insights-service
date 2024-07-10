@@ -12,11 +12,11 @@ import { ContextAwareLogger } from 'logger';
 export abstract class WebController {
     public context: Context;
 
-    constructor(@inject(ContextAwareLogger) protected readonly logger: ContextAwareLogger) {}
-
     public abstract readonly apiVersion: string;
 
     public abstract readonly apiName: string;
+
+    constructor(@inject(ContextAwareLogger) protected readonly logger: ContextAwareLogger) {}
 
     public async invoke(requestContext: Context, ...args: any[]): Promise<unknown> {
         this.context = requestContext;

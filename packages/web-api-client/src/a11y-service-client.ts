@@ -13,10 +13,6 @@ export class A11yServiceClient {
     private readonly defaultRequestObject: Got;
 
     private readonly defaultOptions: ExtendOptions = {
-        searchParams: {
-            // eslint-disable-next-line no-invalid-this
-            'api-version': this.apiVersion,
-        },
         headers: {
             'Content-Type': 'application/json',
         },
@@ -33,6 +29,9 @@ export class A11yServiceClient {
     ) {
         this.defaultRequestObject = request.extend({
             ...this.defaultOptions,
+            searchParams: {
+                'api-version': this.apiVersion,
+            },
             throwHttpErrors: throwOnRequestFailure,
             agent: getAgentsFn(),
         });

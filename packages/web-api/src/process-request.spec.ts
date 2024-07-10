@@ -19,7 +19,7 @@ class TestableController extends ApiController {
 
     public readonly apiName = 'test api name';
 
-    public readonly logger: Logger;
+    public declare readonly logger: Logger;
 
     protected readonly serviceConfig: ServiceConfiguration;
 

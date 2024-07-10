@@ -24,7 +24,7 @@ module.exports = {
         'check-file',
     ],
     ignorePatterns: ['**/dist/*', '**/node_modules/*'],
-    extends: ['eslint:recommended', 'plugin:@typescript-eslint/recommended', 'plugin:security/recommended'],
+    extends: ['eslint:recommended', 'plugin:@typescript-eslint/recommended', 'plugin:security/recommended-legacy'],
     rules: {
         '@typescript-eslint/array-type': [
             'error',

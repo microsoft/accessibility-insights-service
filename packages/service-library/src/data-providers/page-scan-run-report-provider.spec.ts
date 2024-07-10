@@ -126,7 +126,7 @@ describe(PageScanRunReportProvider, () => {
             const actualResults = await testSubject.readReportContent(fileId);
 
             expect(actualResults.errorCode).toEqual('jsonParseError');
-            expect(actualResults.error).toContain(`{\n  name: 'SyntaxError',\n  message: 'Unexpected token i in JSON at position 2',`);
+            expect(actualResults.error).toContain(`in JSON at position 2`);
         });
     });
 });
