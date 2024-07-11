@@ -71,12 +71,12 @@
         "packages/*"
     ],
     "resolutions": {
-        "@axe-core/puppeteer": "4.8.4",
+        "@axe-core/puppeteer": "4.9.1",
         "@npmcli/git": ">=2.1.0",
         "@types/node": "^20.14.9",
         "ansi-regex": "5.0.1",
         "async": ">=3.2.2",
-        "axe-core": "4.8.4",
+        "axe-core": "4.9.1",
         "glob-parent": ">=5.1.2",
         "json-schema": ">=0.4.0",
         "json5": ">=2.2.3",

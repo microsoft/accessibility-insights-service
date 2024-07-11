@@ -3,6 +3,7 @@
 
 import { injectable } from 'inversify';
 import * as Puppeteer from 'puppeteer';
+import type { ProtocolMapping } from 'devtools-protocol/types/protocol-mapping.js';
 import { PuppeteerTimeoutConfig } from './page-timeout-config';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -18,15 +19,14 @@ import { PuppeteerTimeoutConfig } from './page-timeout-config';
  */
 @injectable()
 export class DevToolsSession {
-    // Lowering the timeout from the default puppeteer CDP protocol timeout to be able to catch
-    // the exception.
+    // Lowering the timeout from the default puppeteer CDP protocol timeout to be able to catch the exception.
     public cdpProtocolTimeout = PuppeteerTimeoutConfig.CdpProtocolTimeout - 5000;
 
-    public async send<T extends keyof Puppeteer.ProtocolMapping.Commands>(
+    public async send<T extends keyof ProtocolMapping.Commands>(
         page: Puppeteer.Page,
         method: T,
-        ...paramArgs: Puppeteer.ProtocolMapping.Commands[T]['paramsType']
-    ): Promise<Puppeteer.ProtocolMapping.Commands[T]['returnType']> {
+        params?: ProtocolMapping.Commands[T]['paramsType'][0],
+    ): Promise<ProtocolMapping.Commands[T]['returnType']> {
         let timer;
         let client;
 
@@ -42,7 +42,7 @@ export class DevToolsSession {
 
                 return timer;
             });
-            const send = client.send(method, ...paramArgs);
+            const send = client.send(method, params);
             const result = await Promise.race([send, wait]);
 
             if (timedOut === true) {
