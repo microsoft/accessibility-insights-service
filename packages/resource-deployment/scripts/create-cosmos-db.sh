@@ -91,7 +91,7 @@ function setupCosmos() {
 
     # Increase autoscale maximum throughput for below collection only in case of prod or ppe
     # Refer to https://docs.microsoft.com/en-us/azure/cosmos-db/time-to-live for item TTL scenarios
-    if [[ ${environment} = prod* ]] || [[ ${environment} = ppe* ]]; then
+    if [[ ${environment} == prod* ]] || [[ ${environment} == ppe* ]]; then
         cosmosSetupProcesses=(
             "createCosmosCollection \"scanRuns\" \"$onDemandScannerDbName\" \"2592000\" \"40000\""        # 30 days
             "createCosmosCollection \"scanBatchRequests\" \"$onDemandScannerDbName\" \"604800\" \"4000\"" # 7 days
