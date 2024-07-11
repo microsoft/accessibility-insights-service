@@ -154,7 +154,7 @@
         }
     ],
     "variables": {
-        "devEnvironmentName": "dev",
+        "nonVNetEnvironmentName": "dev",
         "keyVaultUrl": "[concat('https://', parameters('keyVault'), '.vault.azure.net/')]",
         "onDemandUrlScanPoolName": "on-demand-url-scan-pool",
         "onDemandScanRequestPoolName": "on-demand-scan-request-pool",
@@ -222,7 +222,7 @@
                         }
                     }
                 },
-                "networkConfiguration": "[if(equals(parameters('environment'), variables('devEnvironmentName')), fn.batchPool(), fn.vnetPool(parameters('vnetName'), variables('onDemandUrlScanPoolName')))]",
+                "networkConfiguration": "[if(equals(parameters('environment'), variables('nonVNetEnvironmentName')), fn.batchPool(), fn.vnetPool(parameters('vnetName'), variables('onDemandUrlScanPoolName')))]",
                 "scaleSettings": {
                     "fixedScale": {
                         "targetDedicatedNodes": "[parameters('onDemandUrlScanPoolNodes')]",
@@ -293,7 +293,7 @@
                         }
                     }
                 },
-                "networkConfiguration": "[if(equals(parameters('environment'), variables('devEnvironmentName')), fn.batchPool(), fn.vnetPool(parameters('vnetName'), variables('onDemandScanRequestPoolName')))]",
+                "networkConfiguration": "[if(equals(parameters('environment'), variables('nonVNetEnvironmentName')), fn.batchPool(), fn.vnetPool(parameters('vnetName'), variables('onDemandScanRequestPoolName')))]",
                 "scaleSettings": {
                     "fixedScale": {
                         "targetDedicatedNodes": "[parameters('onDemandScanRequestPoolNodes')]",
@@ -364,7 +364,7 @@
                         }
                     }
                 },
-                "networkConfiguration": "[if(equals(parameters('environment'), variables('devEnvironmentName')), fn.batchPool(), fn.vnetPool(parameters('vnetName'), variables('privacyScanPoolName')))]",
+                "networkConfiguration": "[if(equals(parameters('environment'), variables('nonVNetEnvironmentName')), fn.batchPool(), fn.vnetPool(parameters('vnetName'), variables('privacyScanPoolName')))]",
                 "scaleSettings": {
                     "fixedScale": {
                         "targetDedicatedNodes": "[parameters('privacyScanPoolNodes')]",
