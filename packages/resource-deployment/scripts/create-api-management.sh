@@ -46,10 +46,6 @@ fi
 
 echo " Deploying API management instance. This might take up to 45 minutes"
 
-. "${0%/*}/get-resource-names.sh"
-
-az apim deletedservice purge --service-name "${apiManagementName}" --location "${location}"
-
 resources=$(az deployment group create \
     --resource-group "$resourceGroupName" \
     --template-file "$templateFilePath" \
