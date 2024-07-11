@@ -43,7 +43,7 @@ Where:
 
 Resource group - The name of the resource group.
 Subscription - The Azure subscription name or ID.
-Environment - The deployment environment. Supported values dev, prod.
+Environment - The deployment environment. Supported values dev, ci, ppe*, prod*.
 Organization name - The name of organization.
 Publisher email - The notification email.
 Azure Batch object ID - The Azure AD object ID for Microsoft Azure Batch enterprise application, application ID ddbf3205-c6bd-46ae-8127-60eb93363864

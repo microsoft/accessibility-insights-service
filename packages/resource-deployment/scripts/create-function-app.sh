@@ -36,9 +36,9 @@ Usage: ${BASH_SOURCE} \
 }
 
 getAllowedApplications() {
-    if [[ ${environment} == "prod" ]] || [[ ${environment} == "prod-pr" ]]; then
+    if [[ ${environment} == prod* ]]; then
         aclFilePath="${0%/*}/../templates/web-api-aad-acl-prod.txt"
-    elif [[ ${environment} == "ppe" ]] || [[ ${environment} == "ppe-pr" ]]; then
+    elif [[ ${environment} == ppe* ]]; then
         aclFilePath="${0%/*}/../templates/web-api-aad-acl-ppe.txt"
     else
         aclFilePath="${0%/*}/../templates/web-api-aad-acl-dev.txt"

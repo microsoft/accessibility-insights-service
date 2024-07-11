@@ -1,0 +1,36 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "environment": {
+            "value": "canary"
+        },
+        "onDemandScanRequestPoolNodes": {
+            "value": "2"
+        },
+        "onDemandScanRequestPoolVmSize": {
+            "value": "standard_e8ds_v5"
+        },
+        "onDemandScanRequestPoolTaskSlotsPerNode": {
+            "value": "8"
+        },
+        "onDemandUrlScanPoolNodes": {
+            "value": "2"
+        },
+        "onDemandUrlScanPoolVmSize": {
+            "value": "standard_e4ds_v5"
+        },
+        "onDemandUrlScanPoolTaskSlotsPerNode": {
+            "value": "2"
+        },
+        "privacyScanPoolNodes": {
+            "value": "2"
+        },
+        "privacyScanPoolVmSize": {
+            "value": "standard_e4ds_v5"
+        },
+        "privacyScanPoolTaskSlotsPerNode": {
+            "value": "4"
+        }
+    }
+}
