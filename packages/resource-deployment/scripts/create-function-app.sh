@@ -41,10 +41,11 @@ getAllowedApplications() {
     elif [[ ${environment} == ppe* ]]; then
         aclFilePath="${0%/*}/../templates/web-api-aad-acl-ppe.txt"
     else
-        aclFilePath="${0%/*}/../templates/web-api-aad-acl-dev.txt"
+        aclFilePath="${0%/*}/../templates/web-api-aad-acl-${environment}.txt"
     fi
 
     if [[ -f ${aclFilePath} ]]; then
+        echo "Using Azure Functions ACL configuration ${aclFilePath}"
         allowedApplications=$(<"${aclFilePath}")
     else
         echo "Azure Functions ACL configuration file not found. Expected configuration file ${aclFilePath}"
