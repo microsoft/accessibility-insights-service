@@ -38,7 +38,7 @@ if [[ -z $orgName ]] || [[ -z $publisherEmail ]] || [[ -z $resourceGroupName ]] 
     exitWithUsageInfo
 fi
 
-if [[ ${environment} == prod* ]] || [[ ${environment} == ppe* ]]; then
+if [[ ${environment} == prod* ]] || [[ ${environment} == ppe* ]] || [[ ${environment} == "ci" ]]; then
     tier="Standard"
 else
     tier="Developer"

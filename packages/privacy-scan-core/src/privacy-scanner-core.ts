@@ -49,12 +49,23 @@ export class PrivacyScannerCore {
             // should compare encoded Urls
             encodeURI(url) !== page.url
         ) {
-            this.logger?.logWarn(`Scanning performed on redirected page`, { redirectedUrl: page.url });
+            this.logger?.logWarn(`Scanning performed on redirected page.`, { redirectedUrl: page.url });
             scanResult.scannedUrl = page.url;
         }
 
+        this.logger?.logInfo('Privacy scan partial result.', {
+            privacyResult: JSON.stringify({
+                navigationalUri: privacyResult.navigationalUri,
+                bannerDetected: privacyResult.bannerDetected,
+                errors: privacyResult.cookieCollectionConsentResults.map((r) => ({
+                    cookiesUsedForConsent: r.cookiesUsedForConsent,
+                    error: r.error,
+                })),
+            }),
+        });
+
         const errors = privacyResult.cookieCollectionConsentResults
-            .filter((result) => result.error !== undefined)
+            .filter((result) => !isEmpty(result.error))
             .map((result) => result.error);
         if (!isEmpty(errors)) {
             // use first error to parse/return to the client
