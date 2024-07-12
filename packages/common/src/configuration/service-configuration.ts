@@ -154,7 +154,7 @@ export class ServiceConfiguration {
             featureFlags: {
                 sendNotification: {
                     format: 'Boolean',
-                    default: false,
+                    default: true,
                     doc: 'Property to decide if we should notify after scan completed.',
                 },
             },
@@ -168,7 +168,7 @@ export class ServiceConfiguration {
             queueConfig: {
                 maxQueueSize: {
                     format: 'int',
-                    default: 10,
+                    default: 100,
                     doc: 'Maximum message count in scan request queue.',
                 },
                 messageVisibilityTimeoutInSeconds: {
@@ -286,7 +286,7 @@ export class ServiceConfiguration {
                 },
                 scanRequestProcessingDelayInSeconds: {
                     format: 'int',
-                    default: 600,
+                    default: 300,
                     doc: 'The scan request processing delay interval in seconds for a new submitted request.',
                 },
                 minScanPriorityValue: {
@@ -357,13 +357,13 @@ export class ServiceConfiguration {
             crawlConfig: {
                 deepScanDiscoveryLimit: {
                     format: 'int',
-                    default: 6, // Must be at least high enough to allow the largest E2E deep scan test to complete
+                    default: 100, // Must be at least high enough to allow the largest E2E deep scan test to complete
                     doc: 'The maximum number of URLs that will be discovered for a deep scan request',
                 },
                 deepScanUpperLimit: {
                     format: 'int',
-                    default: 10,
-                    doc: 'The maximum number of URLs that will be processed for a deep scan request',
+                    default: 5000,
+                    doc: 'The maximum number of URLs that will be accepted for a deep scan request',
                 },
             },
             privacyScanConfig: {

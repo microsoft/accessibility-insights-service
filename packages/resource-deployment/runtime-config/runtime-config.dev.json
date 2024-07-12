@@ -1,23 +1,20 @@
 {
-    "featureFlags": {
-        "sendNotification": true
-    },
     "availabilityTestConfig": {
-        "environmentDefinition": "canary"
+        "environmentDefinition": "dev"
     },
     "queueConfig": {
         "messageVisibilityTimeoutInSeconds": 300,
         "maxQueueSize": 50
     },
     "scanConfig": {
-        "failedScanRetryIntervalInMinutes": 15,
+        "failedScanRetryIntervalInMinutes": 5,
         "maxFailedScanRetryCount": 1
+    },
+    "taskConfig": {
+        "taskTimeoutInMinutes": 15
     },
     "crawlConfig": {
         "deepScanDiscoveryLimit": 10,
-        "deepScanUpperLimit": 5000
-    },
-    "taskConfig": {
-        "taskTimeoutInMinutes": 10
+        "deepScanUpperLimit": 50
     }
 }

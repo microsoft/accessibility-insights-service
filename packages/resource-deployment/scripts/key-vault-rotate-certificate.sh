@@ -12,7 +12,7 @@ export MSYS_NO_PATHCONV=1
 
 exitWithUsageInfo() {
     echo "
-Usage: ${BASH_SOURCE} -r <resource group> [-k <key vault>] [-n <key vault certificate name>] [-s <subscription name or id>] [-e <environment: dev, ci, ppe, prod or selftest>]
+Usage: ${BASH_SOURCE} -r <resource group> [-k <key vault>] [-n <key vault certificate name>] [-s <subscription name or id>] [-e <environment>]
 "
     exit 1
 }

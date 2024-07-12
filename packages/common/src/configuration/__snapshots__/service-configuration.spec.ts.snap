@@ -56,19 +56,19 @@ exports[`ServiceConfiguration verifies custom config 1`] = `
   },
   "crawlConfig": {
     "deepScanDiscoveryLimit": {
-      "default": 6,
+      "default": 100,
       "doc": "The maximum number of URLs that will be discovered for a deep scan request",
       "format": "int",
     },
     "deepScanUpperLimit": {
-      "default": 10,
-      "doc": "The maximum number of URLs that will be processed for a deep scan request",
+      "default": 5000,
+      "doc": "The maximum number of URLs that will be accepted for a deep scan request",
       "format": "int",
     },
   },
   "featureFlags": {
     "sendNotification": {
-      "default": false,
+      "default": true,
       "doc": "Property to decide if we should notify after scan completed.",
       "format": "Boolean",
     },
@@ -170,7 +170,7 @@ exports[`ServiceConfiguration verifies custom config 1`] = `
   },
   "queueConfig": {
     "maxQueueSize": {
-      "default": 10,
+      "default": 100,
       "doc": "Maximum message count in scan request queue.",
       "format": "int",
     },
@@ -197,7 +197,7 @@ exports[`ServiceConfiguration verifies custom config 1`] = `
       "format": "int",
     },
     "scanRequestProcessingDelayInSeconds": {
-      "default": 600,
+      "default": 300,
       "doc": "The scan request processing delay interval in seconds for a new submitted request.",
       "format": "int",
     },
@@ -300,19 +300,19 @@ exports[`ServiceConfiguration verifies dev config 1`] = `
   },
   "crawlConfig": {
     "deepScanDiscoveryLimit": {
-      "default": 6,
+      "default": 100,
       "doc": "The maximum number of URLs that will be discovered for a deep scan request",
       "format": "int",
     },
     "deepScanUpperLimit": {
-      "default": 10,
-      "doc": "The maximum number of URLs that will be processed for a deep scan request",
+      "default": 5000,
+      "doc": "The maximum number of URLs that will be accepted for a deep scan request",
       "format": "int",
     },
   },
   "featureFlags": {
     "sendNotification": {
-      "default": false,
+      "default": true,
       "doc": "Property to decide if we should notify after scan completed.",
       "format": "Boolean",
     },
@@ -414,7 +414,7 @@ exports[`ServiceConfiguration verifies dev config 1`] = `
   },
   "queueConfig": {
     "maxQueueSize": {
-      "default": 10,
+      "default": 100,
       "doc": "Maximum message count in scan request queue.",
       "format": "int",
     },
@@ -441,7 +441,7 @@ exports[`ServiceConfiguration verifies dev config 1`] = `
       "format": "int",
     },
     "scanRequestProcessingDelayInSeconds": {
-      "default": 600,
+      "default": 300,
       "doc": "The scan request processing delay interval in seconds for a new submitted request.",
       "format": "int",
     },
