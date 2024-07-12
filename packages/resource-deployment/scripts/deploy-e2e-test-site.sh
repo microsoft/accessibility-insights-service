@@ -80,11 +80,14 @@ updateConfigFiles() {
 }
 
 updateOpenApiSpec() {
-    echo "Updating OpenAPI specification"
-    openApiFilePath="$siteContentFolder/openapi.json"
-    tempFilePath="${0%/*}/temp-$(date +%s)$RANDOM.json"
-    gatewayUrl=$(az apim show --name "$apiManagementName" --resource-group "$resourceGroupName" --query "gatewayUrl" -o tsv)
-    jq "if .servers[0].url then . else .servers[0] += {\"url\": \"$gatewayUrl\"} end" $openApiFilePath >$tempFilePath && mv $tempFilePath $openApiFilePath
+    apiManagementId=$(az resource list --resource-group "$resourceGroupName" --name "$apiManagementName" --query "[0].id" -o tsv)
+    if [[ -n ${apiManagementId} ]]; then
+        echo "Updating OpenAPI specification"
+        openApiFilePath="$siteContentFolder/openapi.json"
+        tempFilePath="${0%/*}/temp-$(date +%s)$RANDOM.json"
+        gatewayUrl=$(az apim show --name "$apiManagementName" --resource-group "$resourceGroupName" --query "gatewayUrl" -o tsv)
+        jq "if .servers[0].url then . else .servers[0] += {\"url\": \"$gatewayUrl\"} end" $openApiFilePath >$tempFilePath && mv $tempFilePath $openApiFilePath
+    fi
 }
 
 . "${0%/*}/get-resource-names.sh"

@@ -29,17 +29,8 @@ Usage: ${BASH_SOURCE} -r <resource group> -e <environment> -b <Azure Batch objec
 . "${0%/*}/process-utilities.sh"
 
 function setParameterFilePath() {
-    if [ $environment = "prod" ]; then
-        parameterFilePath="${0%/*}/../templates/batch-account-prod.parameters.json"
-    elif [ $environment = "prod-pr" ]; then
-        parameterFilePath="${0%/*}/../templates/batch-account-prod-pr.parameters.json"
-    elif [ $environment = "ppe" ]; then
-        parameterFilePath="${0%/*}/../templates/batch-account-ppe.parameters.json"
-    elif [ $environment = "ppe-pr" ]; then
-        parameterFilePath="${0%/*}/../templates/batch-account-ppe-pr.parameters.json"
-    else
-        parameterFilePath="${0%/*}/../templates/batch-account-dev.parameters.json"
-    fi
+    parameterFilePath="${0%/*}/../templates/batch-account-${environment}.parameters.json"
+    echo "Using configuration file ${parameterFilePath}"
 }
 
 function createPublicIp() {

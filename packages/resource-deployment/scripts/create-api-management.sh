@@ -38,14 +38,13 @@ if [[ -z $orgName ]] || [[ -z $publisherEmail ]] || [[ -z $resourceGroupName ]] 
     exitWithUsageInfo
 fi
 
-if [ $environment = "prod" ] || [ $environment = "ppe" ] || [ $environment = "prod-pr" ] || [ $environment = "ppe-pr" ]; then
+if [[ ${environment} == prod* ]] || [[ ${environment} == ppe* ]]; then
     tier="Standard"
 else
     tier="Developer"
 fi
 
-# Start deployment
-echo "[create-api-management] Deploying API management instance. This might take up to 45 mins"
+echo " Deploying API management instance. This might take up to 45 minutes"
 
 resources=$(az deployment group create \
     --resource-group "$resourceGroupName" \
@@ -56,4 +55,4 @@ resources=$(az deployment group create \
 
 . "${0%/*}/get-resource-name-from-resource-paths.sh" -p "Microsoft.ApiManagement/service" -r "$resources"
 apiManagementName="$resourceName"
-echo "[create-api-management] Successfully deployed API Managment instance - $resourceName"
+echo "Successfully deployed API Managment instance $resourceName"

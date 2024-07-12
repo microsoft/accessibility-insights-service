@@ -3,10 +3,10 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "environment": {
-            "value": "dev"
+            "value": "canary"
         },
         "onDemandScanRequestPoolNodes": {
-            "value": "1"
+            "value": "2"
         },
         "onDemandScanRequestPoolVmSize": {
             "value": "standard_e4ds_v5"
@@ -15,7 +15,7 @@
             "value": "8"
         },
         "onDemandUrlScanPoolNodes": {
-            "value": "1"
+            "value": "2"
         },
         "onDemandUrlScanPoolVmSize": {
             "value": "standard_e4ds_v5"
@@ -24,7 +24,7 @@
             "value": "2"
         },
         "privacyScanPoolNodes": {
-            "value": "1"
+            "value": "2"
         },
         "privacyScanPoolVmSize": {
             "value": "standard_e4ds_v5"
