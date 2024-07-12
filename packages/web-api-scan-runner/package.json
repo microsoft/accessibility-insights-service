@@ -27,7 +27,7 @@
         "@types/jest": "^29.5.12",
         "@types/lodash": "^4.17.6",
         "@types/node": "^20.14.9",
-        "@types/puppeteer": "^7.0.4",
+        "@types/puppeteer": "7.0.4",
         "@types/sha.js": "^2.4.0",
         "@types/yargs": "^17.0.22",
         "copy-webpack-plugin": "^11.0.0",
@@ -48,13 +48,13 @@
         "webpack-ignore-dynamic-require": "^1.0.0"
     },
     "dependencies": {
-        "@axe-core/puppeteer": "4.8.4",
+        "@axe-core/puppeteer": "4.9.1",
         "@azure/cosmos": "^4.0.0",
-        "accessibility-insights-report": "4.8.0",
+        "accessibility-insights-report": "5.1.0",
         "applicationinsights": "^2.3.1",
-        "axe-core": "4.8.4",
+        "axe-core": "4.9.1",
         "axe-result-converter": "workspace:*",
-        "axe-sarif-converter": "^2.11.1",
+        "axe-sarif-converter": "^2.12.0",
         "azure-services": "workspace:*",
         "common": "workspace:*",
         "dotenv": "^16.0.1",
@@ -65,7 +65,7 @@
         "moment": "^2.29.4",
         "p-limit": "^3.1.0",
         "patch-package": "^8.0.0",
-        "puppeteer": "^22.6.5",
+        "puppeteer": "22.12.1",
         "puppeteer-extra": "^3.3.6",
         "puppeteer-extra-plugin": "^3.2.3",
         "puppeteer-extra-plugin-stealth": "^2.11.2",
@@ -78,8 +78,8 @@
         "yargs": "^17.6.2"
     },
     "resolutions": {
-        "axe-core": "4.8.4",
-        "@axe-core/puppeteer": "4.8.4"
+        "axe-core": "4.9.1",
+        "@axe-core/puppeteer": "4.9.1"
     },
     "overrides": {
         "@crawlee/puppeteer": {

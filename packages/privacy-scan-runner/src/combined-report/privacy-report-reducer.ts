@@ -50,7 +50,7 @@ export class PrivacyReportReducer {
         url: string,
     ): PrivacyScanCombinedReport {
         // banner detection error considered as non-fatal
-        if ((privacyScanResult.error as BrowserError)?.errorType === 'BannerXPathNotDetected') {
+        if (isEmpty(privacyScanResult.error) || (privacyScanResult.error as BrowserError)?.errorType === 'BannerXPathNotDetected') {
             return combinedReport;
         }
 
