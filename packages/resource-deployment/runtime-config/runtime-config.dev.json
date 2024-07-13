@@ -7,7 +7,7 @@
         "maxQueueSize": 50
     },
     "scanConfig": {
-        "failedScanRetryIntervalInMinutes": 15,
+        "failedScanRetryIntervalInMinutes": 5,
         "maxFailedScanRetryCount": 1
     },
     "taskConfig": {

@@ -9,10 +9,11 @@ export declare type LogSource = 'TestContainer' | 'TestRun';
 
 export enum TestEnvironment {
     none = 0,
-    canary = 1,
-    insider = 2,
-    production = 4,
-    all = 7,
+    dev = 1,
+    canary = 2,
+    insider = 4,
+    production = 8,
+    all = 15,
 }
 
 export interface TestDefinition {

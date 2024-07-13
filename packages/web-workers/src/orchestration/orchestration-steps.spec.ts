@@ -207,7 +207,7 @@ describe(OrchestrationSteps, () => {
                             scenarioName,
                         },
                         testContextData,
-                        environment: 1,
+                        environment: 2,
                         releaseId: webApiConfig.releaseId,
                     } as RunFunctionalTestGroupData,
                 };
