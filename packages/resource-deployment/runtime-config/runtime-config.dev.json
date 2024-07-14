@@ -2,10 +2,6 @@
     "availabilityTestConfig": {
         "environmentDefinition": "dev"
     },
-    "queueConfig": {
-        "messageVisibilityTimeoutInSeconds": 300,
-        "maxQueueSize": 50
-    },
     "scanConfig": {
         "failedScanRetryIntervalInMinutes": 5,
         "maxFailedScanRetryCount": 1
