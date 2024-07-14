@@ -3,8 +3,7 @@
         "environmentDefinition": "dev"
     },
     "scanConfig": {
-        "failedScanRetryIntervalInMinutes": 15,
-        "maxFailedScanRetryCount": 1
+        "maxFailedScanRetryCount": 0
     },
     "taskConfig": {
         "taskTimeoutInMinutes": 15
