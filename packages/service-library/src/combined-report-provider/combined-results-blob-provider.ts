@@ -25,7 +25,7 @@ export class CombinedResultsBlobProvider {
 
         if (existingCombinedResultsBlobId === undefined) {
             actualBlobId = this.guidGenerator.createGuid();
-            this.logger.logInfo('Combined axe scan results not found in a blob storage. Creating a new blob.');
+            this.logger.logInfo('Combined axe scan results blob id was not provided. Creating a new blob.', { blobId: actualBlobId });
             blobReadResponse = this.combinedScanResultsProvider.getEmptyResponse();
         } else {
             blobReadResponse = await this.getCombinedResultsBlob(actualBlobId);
@@ -41,12 +41,15 @@ export class CombinedResultsBlobProvider {
         const response = await this.combinedScanResultsProvider.readCombinedResults(combinedResultsBlobId);
         if (response.error) {
             if (response.error.errorCode === 'blobNotFound') {
-                this.logger.logWarn('Combined axe scan results not found in a blob storage. Creating a new blob.');
+                this.logger.logWarn('Combined axe scan results not found in a blob storage. Creating a new blob.', {
+                    blobId: combinedResultsBlobId,
+                });
 
                 return this.combinedScanResultsProvider.getEmptyResponse();
             }
 
             this.logger.logError('Failed to read combined axe results blob.', {
+                blobId: combinedResultsBlobId,
                 error: JSON.stringify(response.error),
             });
 

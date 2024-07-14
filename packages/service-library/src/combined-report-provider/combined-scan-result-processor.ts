@@ -6,6 +6,7 @@ import { GlobalLogger } from 'logger';
 import { RetryHelper, System } from 'common';
 import { AxeScanResults } from 'scanner-global-library';
 import { OnDemandPageScanResult, WebsiteScanData } from 'storage-documents';
+import { cloneDeep } from 'lodash';
 import { ReportWriter } from '../data-providers/report-writer';
 import { WebsiteScanDataProvider } from '../data-providers/website-scan-data-provider';
 import { CombinedAxeResultBuilder } from './combined-axe-result-builder';
@@ -66,7 +67,13 @@ export class CombinedScanResultProcessor {
             return;
         }
 
-        const combinedAxeResults = await this.combinedAxeResultBuilder.mergeAxeResults(axeScanResults.results, combinedResultsBlob);
+        // Make the consolidated report smaller by deleting unnecessary data.
+        const axeScanResultsReduced = cloneDeep(axeScanResults.results);
+        axeScanResultsReduced.inapplicable = [];
+        axeScanResultsReduced.incomplete = [];
+        axeScanResultsReduced.passes = [];
+
+        const combinedAxeResults = await this.combinedAxeResultBuilder.mergeAxeResults(axeScanResultsReduced, combinedResultsBlob);
         const generatedReport = this.combinedReportGenerator.generate(
             combinedResultsBlobId,
             combinedAxeResults,
