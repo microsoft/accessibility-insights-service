@@ -27,8 +27,8 @@ export class AxePuppeteerScanner {
         // any further puppeteer API calls fail to respond. So run the axe scanner only after
         // we have collected all the browser metadata.
         const scanResults: AxeScanResults = {
-            pageTitle: await page.puppeteerPage.title(),
-            browserSpec: await page.browser.version(),
+            pageTitle: page.title,
+            browserSpec: page.browserVersion,
             pageResponseCode: page.navigationResponse.status(),
             userAgent: page.userAgent,
             browserResolution: `${page.browserResolution.width}x${page.browserResolution.height}`,

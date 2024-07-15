@@ -3,7 +3,7 @@
 
 FROM mcr.microsoft.com/windows/servercore:ltsc2022-amd64
 
-ENV NODE_VERSION 18.20.3
+ENV NODE_VERSION 20.15.0
 
 WORKDIR /app
 

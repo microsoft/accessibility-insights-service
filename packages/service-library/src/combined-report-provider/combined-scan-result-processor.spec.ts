@@ -6,8 +6,9 @@ import 'reflect-metadata';
 import { IMock, Mock, It, Times } from 'typemoq';
 import { RetryHelper } from 'common';
 import { AxeScanResults } from 'scanner-global-library';
-import { AxeResults } from 'axe-core';
+import axe, { AxeResults } from 'axe-core';
 import { OnDemandPageScanResult, WebsiteScanData, CombinedScanResults, OnDemandPageScanReport, WebsiteScanReport } from 'storage-documents';
+import { cloneDeep } from 'lodash';
 import { MockableLogger } from '../test-utilities/mockable-logger';
 import { WebsiteScanDataProvider } from '../data-providers/website-scan-data-provider';
 import { GeneratedReport, ReportWriter } from '../data-providers/report-writer';
@@ -27,6 +28,7 @@ let retryHelperMock: IMock<RetryHelper<void>>;
 let loggerMock: IMock<MockableLogger>;
 let combinedScanResultProcessor: CombinedScanResultProcessor;
 let axeScanResults: AxeScanResults;
+let axeScanResultsReduced: axe.AxeResults;
 let pageScanResult: OnDemandPageScanResult;
 let websiteScanData: WebsiteScanData;
 let websiteScanDataUpdate: Partial<WebsiteScanData>;
@@ -55,8 +57,17 @@ describe(CombinedScanResultProcessor, () => {
             userAgent: 'userAgent',
             results: {
                 url: 'url',
+                inapplicable: [{}],
+                incomplete: [{}],
+                passes: [{}],
             } as AxeResults,
         };
+
+        axeScanResultsReduced = cloneDeep(axeScanResults.results);
+        axeScanResultsReduced.inapplicable = [];
+        axeScanResultsReduced.incomplete = [];
+        axeScanResultsReduced.passes = [];
+
         combinedResultsBlob = {
             blobId: combinedResultsBlobId,
         } as CombinedResultsBlob;
@@ -192,7 +203,7 @@ function setupFullPass(): void {
         .returns(() => Promise.resolve(combinedResultsBlob))
         .verifiable();
     combinedAxeResultBuilderMock
-        .setup((o) => o.mergeAxeResults(axeScanResults.results, combinedResultsBlob))
+        .setup((o) => o.mergeAxeResults(axeScanResultsReduced, combinedResultsBlob))
         .returns(() => Promise.resolve(combinedAxeResults))
         .verifiable();
     combinedReportGeneratorMock

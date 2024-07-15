@@ -29,7 +29,6 @@ let scanResults: AxeScanResults;
 let pageMock: IMock<Page>;
 let axePuppeteerFactoryMock: IMock<AxePuppeteerFactory>;
 let loggerMock: IMock<GlobalLogger>;
-let browserMock: IMock<Puppeteer.Browser>;
 let puppeteerPageMock: IMock<Puppeteer.Page>;
 let puppeteerResponseMock: IMock<Puppeteer.HTTPResponse>;
 let puppeteerRequestMock: IMock<Puppeteer.HTTPRequest>;
@@ -40,16 +39,11 @@ describe(AxePuppeteerScanner, () => {
         pageMock = Mock.ofType<Page>();
         axePuppeteerFactoryMock = Mock.ofType(AxePuppeteerFactory);
         loggerMock = Mock.ofType<GlobalLogger>();
-        browserMock = getPromisableDynamicMock(Mock.ofType<Puppeteer.Browser>());
         puppeteerPageMock = getPromisableDynamicMock(Mock.ofType<Puppeteer.Page>());
         puppeteerResponseMock = getPromisableDynamicMock(Mock.ofType<Puppeteer.HTTPResponse>());
         puppeteerRequestMock = getPromisableDynamicMock(Mock.ofType<Puppeteer.HTTPRequest>());
         axePuppeteerMock = getPromisableDynamicMock(Mock.ofType<AxePuppeteer>());
 
-        browserMock
-            .setup(async (o) => o.version())
-            .returns(() => Promise.resolve(scanResults.browserSpec))
-            .verifiable();
         axeResults = { url } as AxeResults;
         scanResults = {
             pageTitle: 'pageTitle',
@@ -224,10 +218,6 @@ function setupPageNavigation(response: Puppeteer.HTTPResponse, browserError?: Br
         .setup((o) => o.url)
         .returns(() => url)
         .verifiable();
-    puppeteerPageMock
-        .setup(async (o) => o.title())
-        .returns(() => Promise.resolve(scanResults.pageTitle))
-        .verifiable();
     puppeteerResponseMock
         .setup((o) => o.status())
         .returns(() => 200)
@@ -240,8 +230,12 @@ function setupPageNavigation(response: Puppeteer.HTTPResponse, browserError?: Br
 
 function setupPageLaunch(): void {
     pageMock
-        .setup((o) => o.browser)
-        .returns(() => browserMock.object)
+        .setup((o) => o.title)
+        .returns(() => scanResults.pageTitle)
+        .verifiable();
+    pageMock
+        .setup((o) => o.browserVersion)
+        .returns(() => scanResults.browserSpec)
         .verifiable();
     pageMock
         .setup((o) => o.userAgent)

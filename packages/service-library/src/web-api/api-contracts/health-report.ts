@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-export declare type TestEnvironment = 'canary' | 'insider' | 'production';
+export declare type TestEnvironment = 'dev' | 'canary' | 'insider' | 'production';
 export declare type TestRunResult = 'pass' | 'fail' | 'warn';
 
 export interface TestRun {

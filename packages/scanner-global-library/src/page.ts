@@ -47,35 +47,39 @@ type Operation = 'load' | 'reload' | 'analysis' | 'auth';
 
 @injectable()
 export class Page {
-    public browser: Puppeteer.Browser;
+    private page: Puppeteer.Page;
 
-    public navigationResponse: Puppeteer.HTTPResponse;
+    private readonly browserWSEndpoint: string;
 
-    public browserError: BrowserError;
-
-    public browserStartOptions: BrowserStartOptions;
-
-    public pageOptions: PageOptions;
+    private readonly enableAuthenticationGlobalFlag: boolean;
 
     public authenticationResult: ResourceAuthenticationResult;
 
-    public pageNavigationTiming: PageNavigationTiming;
+    public browser: Puppeteer.Browser;
+
+    public browserError: BrowserError;
+
+    public browserResolution: Viewport;
+
+    public browserStartOptions: BrowserStartOptions;
+
+    public browserVersion: string;
+
+    public navigationResponse: Puppeteer.HTTPResponse;
 
     public pageAnalysisResult: PageAnalysisResult;
+
+    public pageNavigationTiming: PageNavigationTiming;
+
+    public pageOptions: PageOptions;
 
     public pageState: PageState;
 
     public requestUrl: string;
 
+    public title: string;
+
     public userAgent: string;
-
-    public browserResolution: Viewport;
-
-    private page: Puppeteer.Page;
-
-    private readonly enableAuthenticationGlobalFlag: boolean;
-
-    private readonly browserWSEndpoint: string;
 
     constructor(
         @inject(WebDriver) private readonly webDriver: WebDriver,
@@ -121,6 +125,7 @@ export class Page {
         this.page = await this.browser.newPage();
         this.puppeteerTimeoutConfig.setOperationTimeout(options?.capabilities);
         this.browserResolution = await this.getBrowserResolution();
+        this.browserVersion = await this.browser.version();
 
         const pageCreated = await this.webDriver.waitForPageCreation();
         if (pageCreated !== true) {
@@ -302,6 +307,7 @@ export class Page {
         if (this.pageAnalysisResult.navigationResponse?.browserError !== undefined) {
             this.setLastNavigationState('analysis', this.pageAnalysisResult.navigationResponse);
         } else {
+            this.title = await this.page.title();
             await this.reopenBrowserImpl({ hardReload: true });
         }
     }
