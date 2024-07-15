@@ -273,9 +273,9 @@ export class ServiceConfiguration {
                     doc: 'Maximum sliding window for a scan to complete.',
                 },
                 scanTimeoutInMin: {
-                    default: 5,
+                    default: 7,
                     format: 'int',
-                    doc: 'Maximum allowed time for accessibility scanning a web page in minutes',
+                    doc: 'Maximum allowed time for accessibility scanning a web page, in minutes.',
                 },
             },
             restApiConfig: {
