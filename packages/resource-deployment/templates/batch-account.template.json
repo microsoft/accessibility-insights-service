@@ -154,7 +154,7 @@
         }
     ],
     "variables": {
-        "nonVNetEnvironmentName": "dev",
+        "nonVNetEnvironmentName": "none",
         "keyVaultUrl": "[concat('https://', parameters('keyVault'), '.vault.azure.net/')]",
         "onDemandUrlScanPoolName": "on-demand-url-scan-pool",
         "onDemandScanRequestPoolName": "on-demand-scan-request-pool",
