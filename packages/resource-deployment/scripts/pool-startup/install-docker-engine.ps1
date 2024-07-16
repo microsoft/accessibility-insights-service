@@ -126,7 +126,6 @@ function createVMSwitch() {
     # Enabling Receive Side Scaling (RSS) for network driver."
     netsh int tcp set global rss = enabled
 
-    # Get physical network adapter
     $netAdapter = Get-NetAdapter -Name "Ethernet"
     if (! $netAdapter) {
         Write-Host "Unable to locate network adapter."
