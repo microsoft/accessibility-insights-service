@@ -118,10 +118,25 @@ function installHyperV() {
 
     Set-VMHost -VirtualMachinePath "D:\Hyper-V" -VirtualHardDiskPath "D:\Hyper-V"
 
-    $switch = Get-VMSwitch | Where-Object { $_.Name -eq "vEthernet" }
-    if ($switch -eq $null) {
-        Write-Host "Creating Hyper-V external virtual switch..."
-        New-VMSwitch -Name "vEthernet" -NetAdapterName Ethernet -AllowManagementOS:$true
+}
+
+function createVMSwitch() {
+    Write-Host "Creating Hyper-V external virtual switch..."
+
+    # Enabling Receive Side Scaling (RSS) for network driver."
+    netsh int tcp set global rss = enabled
+
+    # Get physical network adapter
+    $netAdapter = Get-NetAdapter -Name "Ethernet"
+    if (! $netAdapter) {
+        Write-Host "Unable to locate network adapter."
+        $global:rebootRequired = $true
+    }
+    else {
+        $switch = Get-VMSwitch | Where-Object { $_.Name -eq "vEthernet" }
+        if ($switch -eq $null) {
+            New-VMSwitch -Name "vEthernet" -NetAdapterName "Ethernet" -AllowManagementOS:$true
+        }
     }
 }
 
@@ -160,6 +175,7 @@ trap {
 startTranscript
 setPrerequisite
 installHyperV
+createVMSwitch
 validateDockerEngine
 setDockerConfig
 rebootIfRequired
