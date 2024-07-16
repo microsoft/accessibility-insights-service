@@ -154,7 +154,7 @@
         }
     ],
     "variables": {
-        "nonVNetEnvironmentName": "dev",
+        "nonVNetEnvironmentName": "none",
         "keyVaultUrl": "[concat('https://', parameters('keyVault'), '.vault.azure.net/')]",
         "onDemandUrlScanPoolName": "on-demand-url-scan-pool",
         "onDemandScanRequestPoolName": "on-demand-scan-request-pool",
@@ -208,8 +208,7 @@
                             "caching": "None",
                             "managedDisk": {
                                 "storageAccountType": "Premium_LRS"
-                            },
-                            "diskSizeGB": 50
+                            }
                         },
                         "windowsConfiguration": {
                             "enableAutomaticUpdates": false
@@ -279,8 +278,7 @@
                             "caching": "None",
                             "managedDisk": {
                                 "storageAccountType": "Premium_LRS"
-                            },
-                            "diskSizeGB": 50
+                            }
                         },
                         "windowsConfiguration": {
                             "enableAutomaticUpdates": false
@@ -350,8 +348,7 @@
                             "caching": "None",
                             "managedDisk": {
                                 "storageAccountType": "Premium_LRS"
-                            },
-                            "diskSizeGB": 50
+                            }
                         },
                         "windowsConfiguration": {
                             "enableAutomaticUpdates": false
