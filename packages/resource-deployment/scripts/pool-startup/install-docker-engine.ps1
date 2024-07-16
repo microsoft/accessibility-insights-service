@@ -121,9 +121,7 @@ function installHyperV() {
 }
 
 function createVMSwitch() {
-    Write-Host "Creating Hyper-V external virtual switch..."
-
-    # Enabling Receive Side Scaling (RSS) for network driver."
+    # Enabling Receive Side Scaling (RSS) for network driver
     netsh int tcp set global rss = enabled
 
     $netAdapter = Get-NetAdapter -Name "Ethernet"
@@ -134,6 +132,7 @@ function createVMSwitch() {
     else {
         $switch = Get-VMSwitch | Where-Object { $_.Name -eq "vEthernet" }
         if ($switch -eq $null) {
+            Write-Host "Creating Hyper-V external virtual switch..."
             New-VMSwitch -Name "vEthernet" -NetAdapterName "Ethernet" -AllowManagementOS:$true
         }
     }
