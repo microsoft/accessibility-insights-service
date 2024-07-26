@@ -3,9 +3,9 @@
 
 import 'reflect-metadata';
 
-import { Context } from '@azure/functions';
+import { InvocationContext } from '@azure/functions';
 
-export async function run(context: Context): Promise<void> {
+export async function run(context: InvocationContext): Promise<void> {
     context.res = {
         status: 500,
     };

@@ -22,7 +22,10 @@ export declare type NotificationErrorTypes = 'InternalError' | 'HttpErrorCode';
 export declare type ScanType = 'accessibility' | 'privacy';
 export declare type ScanResultResponse = ScanRunResultResponse | ScanRunErrorResponse;
 export declare type AuthenticationState = 'succeeded' | 'failed' | 'unauthenticated';
-export declare type AuthenticationType = 'undetermined' | 'entraId';
+
+// Construct to support type guard
+export const authenticationTypes = ['undetermined', 'entraId'] as const;
+export declare type AuthenticationType = (typeof authenticationTypes)[number];
 
 export declare type ReportFormat =
     | 'axe'

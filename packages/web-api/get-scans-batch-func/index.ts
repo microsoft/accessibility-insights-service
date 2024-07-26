@@ -3,10 +3,17 @@
 
 import 'reflect-metadata';
 
-import { Context } from '@azure/functions';
+import { app, InvocationContext, HttpRequest, HttpResponseInit } from '@azure/functions';
 import { processWebRequest } from '../src/process-request';
 import { BatchScanResultController } from './../src/controllers/batch-scan-result-controller';
 
-export async function run(context: Context): Promise<void> {
-    await processWebRequest(context, BatchScanResultController);
+export async function requestHandler(request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> {
+    return processWebRequest({ request, context }, BatchScanResultController);
 }
+
+app.http('get-scans', {
+    methods: ['POST'],
+    authLevel: 'anonymous',
+    handler: requestHandler,
+    route: 'scans/$batch',
+});

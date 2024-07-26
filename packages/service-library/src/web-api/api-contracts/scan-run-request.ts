@@ -1,9 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { AuthenticationType } from './scan-result-response';
+import { checkObject, checkObjectArray } from '../../type-guard';
+import { AuthenticationType, authenticationTypes } from './scan-result-response';
 
-export declare type CookieBannerType = 'standard';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+// Construct to support type guard
+export const cookieBannerTypes = ['standard'] as const;
+export declare type CookieBannerType = (typeof cookieBannerTypes)[number];
 
 /**
  * Defines REST API HTTP POST scan request contract
@@ -41,4 +46,34 @@ export interface ReportGroup {
 
 export interface PrivacyScan {
     cookieBannerType: CookieBannerType;
+}
+
+export function isScanRunRequest(arg: any): arg is ScanRunRequest {
+    return (
+        checkObject(arg, {
+            primitives: [
+                ['url', 'string'],
+                ['deepScan', 'boolean', true],
+                ['scanNotifyUrl', 'string', true],
+                ['priority', 'number', true],
+            ],
+            literals: [['authenticationType', authenticationTypes, true]],
+        }) &&
+        (!('site' in arg) ||
+            checkObject(arg.site, {
+                primitives: [['baseUrl', 'string']],
+                arrays: [
+                    ['knownPages', 'string', true],
+                    ['discoveryPatterns', 'string', true],
+                ],
+            })) &&
+        (!('privacyScan' in arg) ||
+            checkObject(arg.privacyScan, {
+                literals: [['cookieBannerType', cookieBannerTypes]],
+            })) &&
+        (!('reportGroups' in arg) ||
+            checkObjectArray(arg.reportGroups, {
+                primitives: [['consolidatedId', 'string']],
+            }))
+    );
 }

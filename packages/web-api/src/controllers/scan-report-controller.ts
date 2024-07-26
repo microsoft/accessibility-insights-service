@@ -5,7 +5,9 @@ import { Readable } from 'stream';
 import { GuidGenerator, ServiceConfiguration, BodyParser } from 'common';
 import { inject, injectable } from 'inversify';
 import { ContextAwareLogger } from 'logger';
-import { ApiController, HttpResponse, PageScanRunReportProvider, WebApiErrorCodes } from 'service-library';
+import { ApiController, WebHttpResponse, PageScanRunReportProvider, WebApiErrorCodes } from 'service-library';
+import { HttpResponseInit } from '@azure/functions';
+import { isEmpty } from 'lodash';
 
 @injectable()
 export class ScanReportController extends ApiController {
@@ -23,32 +25,31 @@ export class ScanReportController extends ApiController {
         super(logger);
     }
 
-    public async handleRequest(): Promise<void> {
-        const scanId = <string>this.context.bindingData.scanId;
-        const reportId = <string>this.context.bindingData.reportId;
+    public async handleRequest(): Promise<HttpResponseInit> {
+        const scanId = this.appContext.request.query.get('scanId');
+        const reportId = this.appContext.request.query.get('reportId');
+
         this.logger.setCommonProperties({ source: 'getScanReportRESTApi', scanId, reportId });
 
-        if (!this.guidGenerator.isValidV6Guid(reportId)) {
-            this.context.res = HttpResponse.getErrorResponse(WebApiErrorCodes.invalidResourceId);
+        if (isEmpty(reportId) || !this.guidGenerator.isValidV6Guid(reportId)) {
             this.logger.logError('The request report id is malformed.');
 
-            return;
+            return WebHttpResponse.getErrorResponse(WebApiErrorCodes.invalidResourceId);
         }
 
         const blobContentDownloadResponse = await this.pageScanRunReportProvider.readReport(reportId);
         if (blobContentDownloadResponse.notFound === true) {
-            this.context.res = HttpResponse.getErrorResponse(WebApiErrorCodes.resourceNotFound);
-            this.logger.logError('The report is not found.');
+            this.logger.logError('The report id is not found.');
 
-            return;
+            return WebHttpResponse.getErrorResponse(WebApiErrorCodes.resourceNotFound);
         }
 
         const content = await this.bodyParser.getRawBody(blobContentDownloadResponse.content as Readable);
-        this.context.res = {
-            status: 200, // OK
+        this.logger.logInfo('The report was successfully fetched from a store.');
+
+        return {
+            status: 200,
             body: content,
         };
-
-        this.logger.logInfo('The report successfully fetched from a blob store.');
     }
 }

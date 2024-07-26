@@ -5,11 +5,11 @@ import { WebApiErrorCode } from './web-api-error-codes';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-export class HttpResponse {
-    public static getErrorResponse(webApiErrorCode: WebApiErrorCode): HttpResponse {
+export class WebHttpResponse {
+    public static getErrorResponse(webApiErrorCode: WebApiErrorCode): WebHttpResponse {
         return {
             status: webApiErrorCode.statusCode,
-            body: {
+            jsonBody: {
                 error: webApiErrorCode.error,
             },
         };
@@ -17,5 +17,5 @@ export class HttpResponse {
 
     public status: number;
 
-    public body: any;
+    public jsonBody: any;
 }

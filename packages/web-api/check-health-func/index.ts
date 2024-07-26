@@ -3,10 +3,17 @@
 
 import 'reflect-metadata';
 
-import { Context } from '@azure/functions';
+import { app, HttpRequest, HttpResponseInit, InvocationContext } from '@azure/functions';
 import { HealthCheckController } from '../src/controllers/health-check-controller';
 import { processWebRequest } from '../src/process-request';
 
-export async function run(context: Context): Promise<void> {
-    await processWebRequest(context, HealthCheckController);
+export async function requestHandler(request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> {
+    return processWebRequest({ request, context }, HealthCheckController);
 }
+
+app.http('check-health', {
+    methods: ['GET'],
+    authLevel: 'anonymous',
+    handler: requestHandler,
+    route: 'health/{target:alpha?}/{targetId?}',
+});

@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 import { GuidGenerator } from 'common';
-import { Dictionary, keyBy } from 'lodash';
+import { Dictionary, isEmpty, keyBy } from 'lodash';
 import moment from 'moment';
 import {
     ApiController,
@@ -65,6 +65,7 @@ export abstract class BaseScanResultController extends ApiController {
 
     protected isScanIdValid(scanId: string): boolean {
         return (
+            !isEmpty(scanId) &&
             this.guidGenerator.isValidV6Guid(scanId) &&
             // also check the guid is generated in the past with 10 second buffer.
             moment(this.guidGenerator.getGuidTimestamp(scanId)).isBefore(moment().add(10, 'seconds'))
@@ -76,7 +77,7 @@ export abstract class BaseScanResultController extends ApiController {
         websiteScanData: WebsiteScanResult | WebsiteScanData,
     ): Promise<ScanResultResponse> {
         const segment = '/api/';
-        const baseUrl = this.context.req.url.substring(0, this.context.req.url.indexOf(segment) + segment.length);
+        const baseUrl = this.appContext.request.url.substring(0, this.appContext.request.url.indexOf(segment) + segment.length);
 
         return this.scanResponseConverter.getScanResultResponse(baseUrl, this.apiVersion, pageScanResult, websiteScanData);
     }

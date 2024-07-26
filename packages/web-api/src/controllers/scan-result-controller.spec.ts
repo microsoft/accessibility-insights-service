@@ -3,26 +3,27 @@
 
 import 'reflect-metadata';
 
-import { Context } from '@azure/functions';
 import { GuidGenerator, RestApiConfig, ServiceConfiguration } from 'common';
 import { Logger } from 'logger';
 import moment from 'moment';
 import {
-    HttpResponse,
+    WebHttpResponse,
     OnDemandPageScanRunResultProvider,
     ScanResultResponse,
     WebApiErrorCodes,
     WebsiteScanDataProvider,
     WebsiteScanResultProvider,
+    AppContext,
 } from 'service-library';
 import { ItemType, OnDemandPageScanResult, WebsiteScanResult } from 'storage-documents';
 import { IMock, It, Mock, Times } from 'typemoq';
+import { HttpRequest, HttpRequestInit } from '@azure/functions';
 import { ScanResponseConverter } from '../converters/scan-response-converter';
 import { ScanResultController } from './scan-result-controller';
 
 describe(ScanResultController, () => {
     let scanResultController: ScanResultController;
-    let context: Context;
+    let appContext: AppContext;
     let onDemandPageScanRunResultProviderMock: IMock<OnDemandPageScanRunResultProvider>;
     let serviceConfigurationMock: IMock<ServiceConfiguration>;
     let loggerMock: IMock<Logger>;
@@ -78,19 +79,15 @@ describe(ScanResultController, () => {
     const websiteScanResult = {} as WebsiteScanResult;
 
     beforeEach(() => {
-        context = <Context>(<unknown>{
-            req: {
-                url: `${baseUrl}scans/$batch/`,
-                method: 'GET',
-                headers: {},
-                query: {},
-            },
-            bindingData: {
-                scanId,
-            },
-        });
-        context.req.query['api-version'] = apiVersion;
-        context.req.headers['content-type'] = 'application/json';
+        const funcHttpRequestInit = {
+            url: `${baseUrl}scans/${scanId}/`,
+            method: 'GET',
+            headers: { 'content-type': 'application/json' },
+            query: { 'api-version': apiVersion, scanId: scanId },
+        } as HttpRequestInit;
+        appContext = {
+            request: new HttpRequest(funcHttpRequestInit),
+        } as AppContext;
 
         onDemandPageScanRunResultProviderMock = Mock.ofType<OnDemandPageScanRunResultProvider>();
         websiteScanDataProviderMock = Mock.ofType<WebsiteScanDataProvider>();
@@ -121,9 +118,11 @@ describe(ScanResultController, () => {
         websiteScanResultProviderMock
             .setup((o) => o.read(dbResponse.websiteScanRef.id, true))
             .returns(() => Promise.resolve(websiteScanResult));
+
+        scanResultController = createScanResultController();
     });
 
-    function createScanResultController(contextReq: Context): ScanResultController {
+    function createScanResultController(): ScanResultController {
         const controller = new ScanResultController(
             onDemandPageScanRunResultProviderMock.object,
             websiteScanResultProviderMock.object,
@@ -133,7 +132,7 @@ describe(ScanResultController, () => {
             serviceConfigurationMock.object,
             loggerMock.object,
         );
-        controller.context = contextReq;
+        controller.appContext = appContext;
 
         return controller;
     }
@@ -147,48 +146,42 @@ describe(ScanResultController, () => {
 
     describe('handleRequest', () => {
         it('should return 400 for invalid scan Id that is not a v6 guid', async () => {
-            scanResultController = createScanResultController(context);
             guidGeneratorMock.reset();
             guidGeneratorMock
                 .setup((gm) => gm.isValidV6Guid(scanId))
                 .returns(() => false)
                 .verifiable(Times.once());
-
-            await scanResultController.handleRequest();
+            const response = await scanResultController.handleRequest();
 
             guidGeneratorMock.verifyAll();
-            expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.invalidResourceId));
+            expect(response).toEqual(WebHttpResponse.getErrorResponse(WebApiErrorCodes.invalidResourceId));
         });
 
         it('should return 400 for invalid scan Id that has a future timestamp', async () => {
-            scanResultController = createScanResultController(context);
             const timeStamp = moment().add(1, 'year').toDate();
             setupGetGuidTimestamp(timeStamp);
 
-            await scanResultController.handleRequest();
+            const response = await scanResultController.handleRequest();
 
             guidGeneratorMock.verifyAll();
-            expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.invalidResourceId));
+            expect(response).toEqual(WebHttpResponse.getErrorResponse(WebApiErrorCodes.invalidResourceId));
         });
 
         it('should return a default response for requests made within 10 sec buffer', async () => {
-            scanResultController = createScanResultController(context);
             const timeStamp = moment().add(1, 'second').toDate();
             setupGetGuidTimestamp(timeStamp);
 
-            await scanResultController.handleRequest();
+            const response = await scanResultController.handleRequest();
 
             guidGeneratorMock.verifyAll();
-            expect(context.res.status).toEqual(200);
-            expect(context.res.body).toEqual(tooSoonRequestResponse);
+            expect(response.status).toEqual(200);
+            expect(response.jsonBody).toEqual(tooSoonRequestResponse);
         });
 
         describe('return proper response if scan is not found', () => {
             it('should return tooSoonRequestResponse error code if the request is made too soon', async () => {
-                scanResultController = createScanResultController(context);
                 const timeStamp = moment().subtract(1).toDate();
                 setupGetGuidTimestamp(timeStamp);
-
                 onDemandPageScanRunResultProviderMock
                     .setup(async (om) => om.readScanRuns([scanId]))
                     .returns(async () => {
@@ -196,16 +189,15 @@ describe(ScanResultController, () => {
                     })
                     .verifiable(Times.once());
 
-                await scanResultController.handleRequest();
+                const response = await scanResultController.handleRequest();
 
                 guidGeneratorMock.verifyAll();
                 onDemandPageScanRunResultProviderMock.verifyAll();
-                expect(context.res.status).toEqual(200);
-                expect(context.res.body).toEqual(tooSoonRequestResponse);
+                expect(response.status).toEqual(200);
+                expect(response.jsonBody).toEqual(tooSoonRequestResponse);
             });
 
             it('should return resourceNotFound error code if the request is made after threshold', async () => {
-                scanResultController = createScanResultController(context);
                 setupGetGuidTimestamp(new Date(0));
                 onDemandPageScanRunResultProviderMock
                     .setup(async (om) => om.readScanRuns([scanId]))
@@ -214,19 +206,17 @@ describe(ScanResultController, () => {
                     })
                     .verifiable(Times.once());
 
-                await scanResultController.handleRequest();
+                const response = await scanResultController.handleRequest();
 
                 guidGeneratorMock.verifyAll();
                 onDemandPageScanRunResultProviderMock.verifyAll();
-                expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.resourceNotFound));
+                expect(response).toEqual(WebHttpResponse.getErrorResponse(WebApiErrorCodes.resourceNotFound));
             });
         });
 
         it('should return 200 if successfully fetched result', async () => {
-            scanResultController = createScanResultController(context);
             setupGetGuidTimestamp(new Date(0));
             onDemandPageScanRunResultProviderMock.reset();
-
             onDemandPageScanRunResultProviderMock
                 .setup(async (om) => om.readScanRuns([scanId]))
                 .returns(async () => {
@@ -238,12 +228,12 @@ describe(ScanResultController, () => {
                 .setup((o) => o.getScanResultResponse(baseUrl, apiVersion, dbResponse, websiteScanResult))
                 .returns(() => Promise.resolve(scanClientResponseForDbResponse));
 
-            await scanResultController.handleRequest();
+            const response = await scanResultController.handleRequest();
 
             guidGeneratorMock.verifyAll();
             onDemandPageScanRunResultProviderMock.verifyAll();
-            expect(context.res.status).toEqual(200);
-            expect(context.res.body).toEqual(scanResponse);
+            expect(response.status).toEqual(200);
+            expect(response.jsonBody).toEqual(scanResponse);
         });
     });
 });

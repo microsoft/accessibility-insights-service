@@ -4,8 +4,7 @@
 import { RestApiConfig, ServiceConfiguration } from 'common';
 import { injectable } from 'inversify';
 import { isEmpty } from 'lodash';
-import { HttpResponse } from './http-response';
-import { WebApiErrorCodes } from './web-api-error-codes';
+import { WebApiErrorCode, WebApiErrorCodes } from './web-api-error-codes';
 import { WebController } from './web-controller';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -14,74 +13,62 @@ import { WebController } from './web-controller';
 export abstract class ApiController extends WebController {
     protected abstract readonly serviceConfig: ServiceConfiguration;
 
-    public hasPayload(): boolean {
-        return this.context.req.rawBody !== undefined && !isEmpty(this.tryGetPayload<any>());
-    }
+    protected body: string;
 
     /**
      * Try parse a JSON string from the HTTP request body.
-     * Will return undefined if parsing was unsuccessful; otherwise object representation of a JSON string.
+     * Returns undefined if parsing was unsuccessful; otherwise object representation of a JSON string.
      */
-    public tryGetPayload<T>(): T {
-        try {
-            return JSON.parse(this.context.req.rawBody);
-        } catch (error) {
-            this.context.res = HttpResponse.getErrorResponse(WebApiErrorCodes.invalidJsonDocument);
+    public async tryGetPayload<T>(): Promise<T> {
+        if (this.appContext.request?.bodyUsed === false) {
+            this.body = await this.appContext.request.text();
+        }
+
+        if (!isEmpty(this.body)) {
+            try {
+                const payload = JSON.parse(this.body);
+
+                return isEmpty(payload) ? undefined : payload;
+            } catch {
+                /* empty */
+            }
         }
 
         return undefined;
     }
 
-    protected validateRequest(...args: any[]): boolean {
-        if (!this.validateApiVersion() || !this.validateContentType()) {
-            return false;
-        }
-
-        return true;
+    protected async validateRequest(...args: any[]): Promise<WebApiErrorCode> {
+        return this.validateApiVersion() ?? this.validateContentType();
     }
 
-    protected validateContentType(): boolean {
-        if (this.context.req.method !== 'POST' && this.context.req.method !== 'PUT') {
-            return true;
+    protected async validateContentType(): Promise<WebApiErrorCode> {
+        if (this.appContext.request?.method && this.appContext.request.method.toUpperCase() === 'POST') {
+            if (isEmpty(await this.tryGetPayload())) {
+                return WebApiErrorCodes.invalidJsonDocument;
+            }
+
+            if (this.appContext.request?.headers === undefined || isEmpty(this.appContext.request.headers.get('content-type'))) {
+                return WebApiErrorCodes.missingContentTypeHeader;
+            }
+
+            if (this.appContext.request.headers.get('content-type') !== 'application/json') {
+                return WebApiErrorCodes.unsupportedContentType;
+            }
         }
 
-        if (!this.hasPayload()) {
-            this.context.res = {
-                status: 204, // No Content
-            };
-
-            return false;
-        }
-
-        if (this.context.req.headers === undefined || this.context.req.headers['content-type'] === undefined) {
-            this.context.res = HttpResponse.getErrorResponse(WebApiErrorCodes.missingContentTypeHeader);
-
-            return false;
-        }
-
-        if (this.context.req.headers['content-type'] !== 'application/json') {
-            this.context.res = HttpResponse.getErrorResponse(WebApiErrorCodes.unsupportedContentType);
-
-            return false;
-        }
-
-        return true;
+        return undefined;
     }
 
-    protected validateApiVersion(): boolean {
-        if (this.context.req.query === undefined || this.context.req.query['api-version'] === undefined) {
-            this.context.res = HttpResponse.getErrorResponse(WebApiErrorCodes.missingApiVersionQueryParameter);
-
-            return false;
+    protected validateApiVersion(): WebApiErrorCode {
+        if (this.appContext.request?.query === undefined || isEmpty(this.appContext.request.query.get('api-version'))) {
+            return WebApiErrorCodes.missingApiVersionQueryParameter;
         }
 
-        if (this.context.req.query['api-version'] !== this.apiVersion && this.context.req.query['api-version'] !== '2.0') {
-            this.context.res = HttpResponse.getErrorResponse(WebApiErrorCodes.unsupportedApiVersion);
-
-            return false;
+        if (this.appContext.request.query.get('api-version') !== this.apiVersion) {
+            return WebApiErrorCodes.unsupportedApiVersion;
         }
 
-        return true;
+        return undefined;
     }
 
     protected async getRestApiConfig(): Promise<RestApiConfig> {

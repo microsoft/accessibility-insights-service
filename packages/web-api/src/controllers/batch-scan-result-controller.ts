@@ -10,10 +10,12 @@ import {
     ScanBatchRequest,
     ScanResultResponse,
     WebApiErrorCodes,
+    WebHttpResponse,
     WebsiteScanDataProvider,
     WebsiteScanResultProvider,
 } from 'service-library';
 import { OnDemandPageScanResult } from 'storage-documents';
+import { HttpResponseInit } from '@azure/functions';
 import { ScanResponseConverter } from '../converters/scan-response-converter';
 import { BaseScanResultController } from './base-scan-result-controller';
 
@@ -35,10 +37,16 @@ export class BatchScanResultController extends BaseScanResultController {
         super(logger);
     }
 
-    public async handleRequest(): Promise<void> {
+    public async handleRequest(): Promise<HttpResponseInit> {
         this.logger.setCommonProperties({ source: 'getBatchScanResultRESTApi' });
 
-        const payload = this.tryGetPayload<ScanBatchRequest[]>();
+        const payload = await this.tryGetPayload<ScanBatchRequest[]>();
+        if (payload === undefined || Array.isArray(payload) === false || isEmpty(payload)) {
+            this.logger.logError('The request does not conform to the REST API specifications.', { jsonRequest: JSON.stringify(payload) });
+
+            return WebHttpResponse.getErrorResponse(WebApiErrorCodes.malformedRequest);
+        }
+
         const scanIds = payload.map((request) => request.scanId);
         const responseBody: ScanResultResponse[] = [];
         const scanIdsToQueryFromDb: string[] = [];
@@ -64,12 +72,12 @@ export class BatchScanResultController extends BaseScanResultController {
         const scanResponseBody = await this.getScanResponseBody(scanIdsToQueryFromDb, scanResultItemMap);
         responseBody.push(...scanResponseBody);
 
-        this.context.res = {
-            status: 200,
-            body: responseBody,
-        };
-
         this.logger.logInfo('Batch scan result successfully fetched.', { scanIds: JSON.stringify(scanIdsToQueryFromDb) });
+
+        return {
+            status: 200,
+            jsonBody: responseBody,
+        };
     }
 
     private async getScanResponseBody(

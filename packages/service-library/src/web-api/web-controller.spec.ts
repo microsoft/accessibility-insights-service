@@ -3,16 +3,17 @@
 
 import 'reflect-metadata';
 
-import { Context } from '@azure/functions';
 import { System } from 'common';
 import { IMock, It, Mock, Times } from 'typemoq';
+import { HttpResponse } from '@azure/functions';
 import { MockableLogger } from '../test-utilities/mockable-logger';
-import { WebController } from './web-controller';
+import { AppContext, WebController } from './web-controller';
+import { WebApiErrorCode, WebApiErrorCodes } from './web-api-error-codes';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 export class TestableWebController extends WebController {
-    public static readonly handleRequestResponse = 'handle-request-response';
+    public readonly appResponse = { body: 'response', headers: new HttpResponse().headers } as any;
 
     public readonly apiVersion = '1.0';
 
@@ -28,35 +29,43 @@ export class TestableWebController extends WebController {
         return super.getBaseTelemetryProperties();
     }
 
-    protected validateRequest(...args: any[]): boolean {
+    protected async validateRequest(...args: any[]): Promise<WebApiErrorCode> {
         this.validateRequestInvoked = true;
 
-        return args[0] === 'valid';
+        return args[0] !== 'valid' ? WebApiErrorCodes.internalError : undefined;
     }
 
-    protected async handleRequest(...args: any[]): Promise<unknown> {
+    protected async handleRequest(...args: any[]): Promise<any> {
         this.handleRequestInvoked = true;
         if (args[0] === undefined) {
             throw new Error('At least one parameter is expected');
         }
 
-        return TestableWebController.handleRequestResponse;
+        return this.appResponse;
     }
 }
 
+const invocationId = 'test-invocation-id';
+
 describe(WebController, () => {
-    let context: Context;
+    let appContext: AppContext;
     let testSubject: TestableWebController;
-    const invocationId = 'test-invocation-id';
     let loggerMock: IMock<MockableLogger>;
 
     beforeEach(() => {
-        context = <Context>(<unknown>{ bindingDefinitions: {}, res: {}, invocationId: invocationId });
+        appContext = {
+            context: {
+                invocationId,
+                options: {
+                    trigger: {
+                        type: 'httpTrigger',
+                    },
+                },
+            },
+        } as AppContext;
         loggerMock = Mock.ofType(MockableLogger);
-
-        testSubject = new TestableWebController(loggerMock.object);
-
         loggerMock.setup((l) => l.setCommonProperties(It.isAny())).returns(() => Promise.resolve(undefined));
+        testSubject = new TestableWebController(loggerMock.object);
     });
 
     it('should setup context aware logger', async () => {
@@ -74,50 +83,36 @@ describe(WebController, () => {
             )
             .verifiable(Times.once());
 
-        await testSubject.invoke(context, 'valid');
+        await testSubject.invoke(appContext, 'valid');
         loggerMock.verifyAll();
     });
 
     it('should handle request if request is valid', async () => {
-        await testSubject.invoke(context, 'valid');
+        await testSubject.invoke(appContext, 'valid');
         expect(testSubject.validateRequestInvoked).toEqual(true);
         expect(testSubject.handleRequestInvoked).toEqual(true);
     });
 
     it('should not handle request if request is invalid', async () => {
-        await testSubject.invoke(context, 'invalid');
+        await testSubject.invoke(appContext, 'invalid');
         expect(testSubject.validateRequestInvoked).toEqual(true);
         expect(testSubject.handleRequestInvoked).toEqual(false);
     });
 
-    it('should add content-type response header if no any', async () => {
-        await testSubject.invoke(context, 'valid');
-        expect(testSubject.context.res.headers['content-type']).toEqual('application/json; charset=utf-8');
-        expect(testSubject.context.res.headers['X-Content-Type-Options']).toEqual('nosniff');
+    it('should set content-type response header if missing', async () => {
+        await testSubject.invoke(appContext, 'valid');
+        expect(testSubject.appResponse.headers.get('content-type')).toEqual('application/json; charset=utf-8');
+        expect(testSubject.appResponse.headers.get('X-Content-Type-Options')).toEqual('nosniff');
     });
 
-    it('should add content-type response header if if other', async () => {
-        context.res.headers = {
-            'content-length': 100,
-        };
-        await testSubject.invoke(context, 'valid');
-        expect(testSubject.context.res.headers['content-type']).toEqual('application/json; charset=utf-8');
-        expect(testSubject.context.res.headers['X-Content-Type-Options']).toEqual('nosniff');
-    });
-
-    it('should skip adding content-type response header if any', async () => {
-        context.res.headers = {
-            'content-type': 'text/plain',
-        };
-        await testSubject.invoke(context, 'valid');
-        expect(testSubject.context.res.headers['content-type']).toEqual('text/plain');
+    it('should not set content-type response header if exists', async () => {
+        await testSubject.invoke(appContext, 'valid');
+        testSubject.appResponse.headers.set('content-type', 'text/plain');
+        expect(testSubject.appResponse.headers.get('content-type')).toEqual('text/plain');
     });
 
     it('verifies base telemetry properties', async () => {
-        context.res.headers = {
-            'content-type': 'text/plain',
-        };
-        await testSubject.invoke(context, 'valid');
+        await testSubject.invoke(appContext, 'valid');
 
         expect(testSubject.getBaseTelemetryProperties()).toEqual({
             apiName: testSubject.apiName,
@@ -128,7 +123,7 @@ describe(WebController, () => {
     });
 
     it('returns handleRequest result', async () => {
-        await expect(testSubject.invoke(context, 'valid')).resolves.toBe(TestableWebController.handleRequestResponse);
+        await expect(testSubject.invoke(appContext, 'valid')).resolves.toBe(testSubject.appResponse);
     });
 
     it('log exception', async () => {
@@ -147,6 +142,6 @@ describe(WebController, () => {
             })
             .verifiable();
 
-        await expect(testSubject.invoke(context, 'valid')).rejects.toEqual(error);
+        await expect(testSubject.invoke(appContext, 'valid')).rejects.toEqual(error);
     });
 });

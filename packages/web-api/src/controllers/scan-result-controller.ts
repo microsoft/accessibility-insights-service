@@ -6,12 +6,13 @@ import { inject, injectable } from 'inversify';
 import { isEmpty } from 'lodash';
 import { ContextAwareLogger } from 'logger';
 import {
-    HttpResponse,
+    WebHttpResponse,
     OnDemandPageScanRunResultProvider,
     WebApiErrorCodes,
     WebsiteScanDataProvider,
     WebsiteScanResultProvider,
 } from 'service-library';
+import { HttpResponseInit } from '@azure/functions';
 import { ScanResponseConverter } from '../converters/scan-response-converter';
 import { BaseScanResultController } from './base-scan-result-controller';
 
@@ -33,42 +34,44 @@ export class ScanResultController extends BaseScanResultController {
         super(logger);
     }
 
-    public async handleRequest(): Promise<void> {
-        const scanId = <string>this.context.bindingData.scanId;
+    public async handleRequest(): Promise<HttpResponseInit> {
+        const scanId = this.appContext.request.query.get('scanId');
         this.logger.setCommonProperties({ source: 'getScanResultRESTApi', scanId });
 
         if (!this.isScanIdValid(scanId)) {
-            this.context.res = HttpResponse.getErrorResponse(WebApiErrorCodes.invalidResourceId);
             this.logger.logError('The client request scan id is malformed.');
 
-            return;
+            return WebHttpResponse.getErrorResponse(WebApiErrorCodes.invalidResourceId);
         }
 
         const scanResultItemMap = await this.getScanResultMapKeyByScanId([scanId]);
         const pageScanResult = scanResultItemMap[scanId];
 
         if (isEmpty(pageScanResult)) {
-            // scan result not found in result storage
+            // scan result was not found in result storage
             if (await this.isRequestMadeTooSoon(scanId)) {
                 // user made the scan result query too soon after the scan request, will return a default pending response.
-                this.context.res = {
-                    status: 200,
-                    body: this.getTooSoonRequestResponse(scanId),
-                };
                 this.logger.logWarn('Scan result is not ready in a storage.');
+
+                return {
+                    status: 200,
+                    jsonBody: this.getTooSoonRequestResponse(scanId),
+                };
             } else {
-                // return scan not found response
-                this.context.res = HttpResponse.getErrorResponse(WebApiErrorCodes.resourceNotFound);
-                this.logger.logError('Scan result not found in a storage.');
+                // return scan was not found response
+                this.logger.logError('Scan result was not found in a storage.');
+
+                return WebHttpResponse.getErrorResponse(WebApiErrorCodes.resourceNotFound);
             }
         } else {
             const websiteScanResult = await this.getWebsiteScanResult(pageScanResult);
-            const body = await this.getScanResultResponse(pageScanResult, websiteScanResult);
-            this.context.res = {
+            const jsonBody = await this.getScanResultResponse(pageScanResult, websiteScanResult);
+            this.logger.logInfo('Scan result was successfully fetched from a storage.');
+
+            return {
                 status: 200,
-                body,
+                jsonBody,
             };
-            this.logger.logInfo('Scan result successfully fetched from a storage.');
         }
     }
 }
