@@ -345,12 +345,12 @@ export class ServiceConfiguration {
                 },
                 scanNotifyApiEndpoint: {
                     format: 'String',
-                    default: '/scan-notification-url',
+                    default: '/scan-notification-pass',
                     doc: 'The end-point to hit when a scan is completed and will respond successfully',
                 },
                 scanNotifyFailApiEndpoint: {
                     format: 'String',
-                    default: '/scan-notification-url-fail',
+                    default: '/scan-notification-fail',
                     doc: 'The end-point to hit when a scan is completed and will respond unsuccessfully',
                 },
             },

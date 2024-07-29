@@ -3,10 +3,10 @@
 
 import 'reflect-metadata';
 
-import { Context } from '@azure/functions';
 import { GuidGenerator, RestApiConfig, ServiceConfiguration } from 'common';
 import moment from 'moment';
 import {
+    AppContext,
     OnDemandPageScanRunResultProvider,
     ScanBatchRequest,
     ScanResultResponse,
@@ -15,13 +15,16 @@ import {
 } from 'service-library';
 import { ItemType, OnDemandPageScanResult, WebsiteScanResult } from 'storage-documents';
 import { IMock, It, Mock, Times } from 'typemoq';
+import { HttpRequest, HttpRequestInit } from '@azure/functions';
 import { ScanResponseConverter } from '../converters/scan-response-converter';
 import { MockableLogger } from '../test-utilities/mockable-logger';
 import { BatchScanResultController } from './batch-scan-result-controller';
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 describe(BatchScanResultController, () => {
     let batchScanResultController: BatchScanResultController;
-    let context: Context;
+    let appContext: AppContext;
     let onDemandPageScanRunResultProviderMock: IMock<OnDemandPageScanRunResultProvider>;
     let serviceConfigurationMock: IMock<ServiceConfiguration>;
     let loggerMock: IMock<MockableLogger>;
@@ -69,17 +72,6 @@ describe(BatchScanResultController, () => {
     const websiteScanResult = {} as WebsiteScanResult;
 
     beforeEach(() => {
-        context = <Context>(<unknown>{
-            req: {
-                url: `${baseUrl}scans/$batch/`,
-                method: 'POST',
-                headers: {},
-                rawBody: `[]`,
-                query: {},
-            },
-        });
-        context.req.query['api-version'] = apiVersion;
-        context.req.headers['content-type'] = 'application/json';
         onDemandPageScanRunResultProviderMock = Mock.ofType<OnDemandPageScanRunResultProvider>();
         websiteScanDataProviderMock = Mock.ofType<WebsiteScanDataProvider>();
         onDemandPageScanRunResultProviderMock
@@ -120,7 +112,23 @@ describe(BatchScanResultController, () => {
             .returns(() => Promise.resolve(websiteScanResult));
     });
 
-    function createScanResultController(contextReq: Context): BatchScanResultController {
+    function createContext(body: string): void {
+        const funcHttpRequestInit = {
+            url: `${baseUrl}scans/$batch/`,
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            query: { 'api-version': apiVersion },
+        } as HttpRequestInit;
+        if (body) {
+            funcHttpRequestInit.body = { string: body };
+        }
+        appContext = {
+            request: new HttpRequest(funcHttpRequestInit),
+        } as AppContext;
+    }
+
+    function createScanResultController(requestBody: any): BatchScanResultController {
+        createContext(JSON.stringify(requestBody));
         const controller = new BatchScanResultController(
             onDemandPageScanRunResultProviderMock.object,
             websiteScanResultProviderMock.object,
@@ -130,7 +138,7 @@ describe(BatchScanResultController, () => {
             serviceConfigurationMock.object,
             loggerMock.object,
         );
-        controller.context = contextReq;
+        controller.appContext = appContext;
 
         return controller;
     }
@@ -144,8 +152,7 @@ describe(BatchScanResultController, () => {
 
     describe('handleRequest', () => {
         it('should return different response for different kind of scanIds', async () => {
-            context.req.rawBody = JSON.stringify(batchRequestBody);
-            batchScanResultController = createScanResultController(context);
+            batchScanResultController = createScanResultController(batchRequestBody);
             const requestTooSoonTimeStamp = moment().subtract(1).toDate();
             const validTimeStamp = new Date(0);
 
@@ -153,11 +160,10 @@ describe(BatchScanResultController, () => {
             setupGetGuidTimestamp(requestedTooSoonScanId, requestTooSoonTimeStamp);
             setupGetGuidTimestamp(notFoundScanId, validTimeStamp);
 
-            await batchScanResultController.handleRequest();
+            const response = await batchScanResultController.handleRequest();
 
             guidGeneratorMock.verifyAll();
-            expect(context.res.status).toEqual(200);
-            expect(context.res.body).toMatchSnapshot();
+            expect(response).toMatchSnapshot();
         });
     });
 });

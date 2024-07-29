@@ -1,31 +1,34 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`BatchScanResultController handleRequest should return different response for different kind of scanIds 1`] = `
-[
-  {
-    "error": {
-      "code": "InvalidResourceId",
-      "codeId": 4002,
-      "message": "The resource ID is not valid.",
+{
+  "jsonBody": [
+    {
+      "error": {
+        "code": "InvalidResourceId",
+        "codeId": 4002,
+        "message": "The resource ID is not valid.",
+      },
+      "scanId": "invalid-scan-id",
     },
-    "scanId": "invalid-scan-id",
-  },
-  {
-    "run": {
-      "state": "pending",
+    {
+      "run": {
+        "state": "pending",
+      },
+      "scanId": "requested-too-soon-scan-id",
+      "scanType": undefined,
+      "url": undefined,
     },
-    "scanId": "requested-too-soon-scan-id",
-    "scanType": undefined,
-    "url": undefined,
-  },
-  {
-    "error": {
-      "code": "ResourceNotFound",
-      "codeId": 4001,
-      "message": "The specified resource does not exist.",
+    {
+      "error": {
+        "code": "ResourceNotFound",
+        "codeId": 4001,
+        "message": "The specified resource does not exist.",
+      },
+      "scanId": "not-found-scan-id",
     },
-    "scanId": "not-found-scan-id",
-  },
-  undefined,
-]
+    undefined,
+  ],
+  "status": 200,
+}
 `;

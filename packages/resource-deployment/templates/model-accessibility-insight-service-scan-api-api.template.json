@@ -466,14 +466,14 @@
         {
             "type": "Microsoft.ApiManagement/service/apis/operations",
             "apiVersion": "2022-08-01",
-            "name": "[concat(parameters('apimServiceName'), '/accessibility-insight-service-scan-api/ping-scan-notification-url')]",
+            "name": "[concat(parameters('apimServiceName'), '/accessibility-insight-service-scan-api/ping-scan-notification-pass')]",
             "dependsOn": [
                 "[resourceId('Microsoft.ApiManagement/service/apis', parameters('apimServiceName'), 'accessibility-insight-service-scan-api')]"
             ],
             "properties": {
                 "displayName": "Ping scan notification url",
                 "method": "POST",
-                "urlTemplate": "/scan-notification-url",
+                "urlTemplate": "/scan-notification-pass",
                 "templateParameters": [],
                 "description": "Hits the scan notification url api for successful notification",
                 "responses": []
@@ -482,14 +482,14 @@
         {
             "type": "Microsoft.ApiManagement/service/apis/operations",
             "apiVersion": "2022-08-01",
-            "name": "[concat(parameters('apimServiceName'), '/accessibility-insight-service-scan-api/ping-scan-notification-url-fail')]",
+            "name": "[concat(parameters('apimServiceName'), '/accessibility-insight-service-scan-api/ping-scan-notification-fail')]",
             "dependsOn": [
                 "[resourceId('Microsoft.ApiManagement/service/apis', parameters('apimServiceName'), 'accessibility-insight-service-scan-api')]"
             ],
             "properties": {
                 "displayName": "Ping scan notification url (fail)",
                 "method": "POST",
-                "urlTemplate": "/scan-notification-url-fail",
+                "urlTemplate": "/scan-notification-fail",
                 "templateParameters": [],
                 "description": "Hits the scan notification url api for unsuccessful notification",
                 "responses": []
@@ -510,9 +510,9 @@
         {
             "type": "Microsoft.ApiManagement/service/apis/operations/policies",
             "apiVersion": "2022-08-01",
-            "name": "[concat(parameters('apimServiceName'), '/accessibility-insight-service-scan-api/ping-scan-notification-url/policy')]",
+            "name": "[concat(parameters('apimServiceName'), '/accessibility-insight-service-scan-api/ping-scan-notification-pass/policy')]",
             "dependsOn": [
-                "[resourceId('Microsoft.ApiManagement/service/apis/operations', parameters('apimServiceName'), 'accessibility-insight-service-scan-api','ping-scan-notification-url')]"
+                "[resourceId('Microsoft.ApiManagement/service/apis/operations', parameters('apimServiceName'), 'accessibility-insight-service-scan-api','ping-scan-notification-pass')]"
             ],
             "properties": {
                 "value": "[concat('<policies>\r\n\t<inbound>\r\n\t\t<base />\r\n\t\t<set-backend-service id=\"apim-generated-policy\" backend-id=\"', parameters('e2eFunctionName'), '\" />\r\n\t</inbound>\r\n\t<backend>\r\n\t\t<base />\r\n\t</backend>\r\n\t<outbound>\r\n\t\t<base />\r\n\t\t<redirect-content-urls />\r\n\t</outbound>\r\n\t<on-error>\r\n\t\t<base />\r\n\t</on-error>\r\n</policies>')]",
@@ -522,9 +522,9 @@
         {
             "type": "Microsoft.ApiManagement/service/apis/operations/policies",
             "apiVersion": "2022-08-01",
-            "name": "[concat(parameters('apimServiceName'), '/accessibility-insight-service-scan-api/ping-scan-notification-url-fail/policy')]",
+            "name": "[concat(parameters('apimServiceName'), '/accessibility-insight-service-scan-api/ping-scan-notification-fail/policy')]",
             "dependsOn": [
-                "[resourceId('Microsoft.ApiManagement/service/apis/operations', parameters('apimServiceName'), 'accessibility-insight-service-scan-api','ping-scan-notification-url-fail')]"
+                "[resourceId('Microsoft.ApiManagement/service/apis/operations', parameters('apimServiceName'), 'accessibility-insight-service-scan-api','ping-scan-notification-fail')]"
             ],
             "properties": {
                 "value": "[concat('<policies>\r\n\t<inbound>\r\n\t\t<base />\r\n\t\t<set-backend-service id=\"apim-generated-policy\" backend-id=\"', parameters('e2eFunctionName'), '\" />\r\n\t</inbound>\r\n\t<backend>\r\n\t\t<base />\r\n\t</backend>\r\n\t<outbound>\r\n\t\t<base />\r\n\t\t<redirect-content-urls />\r\n\t</outbound>\r\n\t<on-error>\r\n\t\t<base />\r\n\t</on-error>\r\n</policies>')]",

@@ -3,14 +3,14 @@
 
 import 'reflect-metadata';
 
-import { Context } from '@azure/functions';
 import { RestApiConfig, ServiceConfiguration } from 'common';
 import { Logger } from 'logger';
-import { IMock, Mock, Times } from 'typemoq';
+import { IMock, Mock } from 'typemoq';
+import { HttpRequest } from '@azure/functions';
 import { MockableLogger } from '../test-utilities/mockable-logger';
 import { ApiController } from './api-controller';
-import { HttpResponse } from './http-response';
-import { WebApiErrorCodes } from './web-api-error-codes';
+import { WebApiErrorCode, WebApiErrorCodes } from './web-api-error-codes';
+import { AppContext } from './web-controller';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -23,25 +23,25 @@ class TestableApiController extends ApiController {
 
     public args: any[];
 
-    public constructor(logger: Logger, public requestContext: Context = null, public readonly serviceConfig: ServiceConfiguration = null) {
+    public constructor(logger: Logger, public requestContext: AppContext, public readonly serviceConfig: ServiceConfiguration = undefined) {
         super(logger);
-        this.context = requestContext;
+        this.appContext = requestContext;
     }
 
-    public async handleRequest(...requestArgs: any[]): Promise<void> {
+    public async handleRequest(...requestArgs: any[]): Promise<any> {
         this.handleRequestInvoked = true;
         this.args = requestArgs;
     }
 
-    public validateRequest(): boolean {
+    public async validateRequest(): Promise<WebApiErrorCode> {
         return super.validateRequest();
     }
 
-    public validateContentType(): boolean {
+    public async validateContentType(): Promise<WebApiErrorCode> {
         return super.validateContentType();
     }
 
-    public validateApiVersion(): boolean {
+    public validateApiVersion(): WebApiErrorCode {
         return super.validateApiVersion();
     }
 
@@ -52,286 +52,224 @@ class TestableApiController extends ApiController {
 
 describe(ApiController, () => {
     let loggerMock: IMock<MockableLogger>;
+
     beforeEach(() => {
         loggerMock = Mock.ofType(MockableLogger);
     });
 
     describe('validateContentType()', () => {
-        it('should not fail content validation on non POST or PUT', () => {
-            const context = <Context>(<unknown>{
-                req: {
+        it('should skip content validation on GET', async () => {
+            const appContext = {
+                request: {
                     method: 'GET',
                 },
-            });
-            const apiControllerMock = new TestableApiController(loggerMock.object, context);
-            const valid = apiControllerMock.validateContentType();
-            expect(context.res).toEqual(undefined);
-            expect(valid).toEqual(true);
+            } as AppContext;
+            const apiControllerMock = new TestableApiController(loggerMock.object, appContext);
+            const result = await apiControllerMock.validateContentType();
+            expect(result).toBeUndefined();
         });
 
-        it('should detect empty body for POST', () => {
-            const context = <Context>(<unknown>{
-                req: {
+        it('should fail when empty request body', async () => {
+            const appContext = {
+                request: {
                     method: 'POST',
+                    bodyUsed: true,
                 },
-            });
-            const apiControllerMock = new TestableApiController(loggerMock.object, context);
-            const valid = apiControllerMock.validateContentType();
-            expect(context.res).toEqual({ status: 204 });
-            expect(valid).toEqual(false);
+            } as AppContext;
+            const apiControllerMock = new TestableApiController(loggerMock.object, appContext);
+            const result = await apiControllerMock.validateContentType();
+            expect(result).toEqual(WebApiErrorCodes.invalidJsonDocument);
         });
 
-        it('should detect empty body for PUT', () => {
-            const context = <Context>(<unknown>{
-                req: {
-                    method: 'PUT',
-                },
-            });
-            const apiControllerMock = new TestableApiController(loggerMock.object, context);
-            const valid = apiControllerMock.validateContentType();
-            expect(context.res).toEqual({ status: 204 });
-            expect(valid).toEqual(false);
-        });
-
-        it('should fail when no HTTP headers present', () => {
-            const context = <Context>(<unknown>{
-                req: {
+        it('should fail when no HTTP headers present', async () => {
+            const appContext = {
+                request: {
                     method: 'POST',
-                    rawBody: `{ "id": "1" }`,
+                    bodyUsed: false,
+                    text: async () => Promise.resolve(`{ "id": "1" }`),
                 },
-            });
-            const apiControllerMock = new TestableApiController(loggerMock.object, context);
-            const valid = apiControllerMock.validateContentType();
-            expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.missingContentTypeHeader));
-            expect(valid).toEqual(false);
+            } as AppContext;
+            const apiControllerMock = new TestableApiController(loggerMock.object, appContext);
+            const result = await apiControllerMock.validateContentType();
+            expect(result).toEqual(WebApiErrorCodes.missingContentTypeHeader);
         });
 
-        it('should fail when missing content-type HTTP header', () => {
-            const context = <Context>(<unknown>{
-                req: {
+        it('should fail when missing content-type HTTP header', async () => {
+            const appContext = {
+                request: {
                     method: 'POST',
-                    rawBody: `{ "id": "1" }`,
-                    headers: { host: 'localhost' },
+                    bodyUsed: false,
+                    text: () => Promise.resolve(`{ "id": "1" }`),
+                    headers: new HttpRequest({ url: 'http://localhost/', method: 'POST' }).headers,
                 },
-            });
-            const apiControllerMock = new TestableApiController(loggerMock.object, context);
-            const valid = apiControllerMock.validateContentType();
-            expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.missingContentTypeHeader));
-            expect(valid).toEqual(false);
+            } as AppContext;
+            const apiControllerMock = new TestableApiController(loggerMock.object, appContext);
+            const result = await apiControllerMock.validateContentType();
+            expect(result).toEqual(WebApiErrorCodes.missingContentTypeHeader);
         });
 
-        it('should fail when non valid content-type HTTP header', () => {
-            const context = <Context>(<unknown>{
-                req: {
+        it('should fail when content-type HTTP header is invalid', async () => {
+            const appContext = {
+                request: {
                     method: 'POST',
-                    rawBody: `{ "id": "1" }`,
-                    headers: {},
+                    bodyUsed: false,
+                    text: () => Promise.resolve(`{ "id": "1" }`),
+                    headers: new HttpRequest({ url: 'http://localhost/', method: 'POST', headers: { 'content-type': 'text/plain' } })
+                        .headers,
                 },
-            });
-            context.req.headers['content-type'] = 'text/plain';
-            const apiControllerMock = new TestableApiController(loggerMock.object, context);
-            const valid = apiControllerMock.validateContentType();
-            expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.unsupportedContentType));
-            expect(valid).toEqual(false);
+            } as AppContext;
+            const apiControllerMock = new TestableApiController(loggerMock.object, appContext);
+            const result = await apiControllerMock.validateContentType();
+            expect(result).toEqual(WebApiErrorCodes.unsupportedContentType);
         });
 
-        it('should accept valid content-type HTTP header', () => {
-            const context = <Context>(<unknown>{
-                req: {
+        it('should accept valid content-type HTTP header', async () => {
+            const appContext = {
+                request: {
                     method: 'POST',
-                    rawBody: `{ "id": "1" }`,
-                    headers: {},
+                    bodyUsed: false,
+                    text: () => Promise.resolve(`{ "id": "1" }`),
+                    headers: new HttpRequest({ url: 'http://localhost/', method: 'POST', headers: { 'content-type': 'application/json' } })
+                        .headers,
                 },
-            });
-            context.req.headers['content-type'] = 'application/json';
-            const apiControllerMock = new TestableApiController(loggerMock.object, context);
-            const valid = apiControllerMock.validateContentType();
-            expect(context.res).toEqual(undefined);
-            expect(valid).toEqual(true);
+            } as AppContext;
+            const apiControllerMock = new TestableApiController(loggerMock.object, appContext);
+            const result = await apiControllerMock.validateContentType();
+            expect(result).toBeUndefined();
         });
     });
 
     describe('validateApiVersion()', () => {
         it('should fail when missing api-version query param', () => {
-            const context = <Context>(<unknown>{
-                req: {},
-            });
-            const apiControllerMock = new TestableApiController(loggerMock.object, context);
-            const valid = apiControllerMock.validateApiVersion();
-            expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.missingApiVersionQueryParameter));
-            expect(valid).toEqual(false);
+            const appContext = {
+                request: {},
+            } as AppContext;
+            const apiControllerMock = new TestableApiController(loggerMock.object, appContext);
+            const result = apiControllerMock.validateApiVersion();
+            expect(result).toEqual(WebApiErrorCodes.missingApiVersionQueryParameter);
         });
 
         it('should fail when invalid api-version query param value', () => {
-            const context = <Context>(<unknown>{
-                req: {
-                    query: {},
+            const appContext = {
+                request: {
+                    query: new HttpRequest({ url: 'http://localhost/', method: 'POST', query: { 'api-version': '7.0' } }).query,
                 },
-            });
-            context.req.query['api-version'] = '3.0';
-            const apiControllerMock = new TestableApiController(loggerMock.object, context);
-            const valid = apiControllerMock.validateApiVersion();
-            expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.unsupportedApiVersion));
-            expect(valid).toEqual(false);
+            } as AppContext;
+            const apiControllerMock = new TestableApiController(loggerMock.object, appContext);
+            const result = apiControllerMock.validateApiVersion();
+            expect(result).toEqual(WebApiErrorCodes.unsupportedApiVersion);
         });
 
         it('should accept valid api-version', () => {
-            const context = <Context>(<unknown>{
-                req: {
-                    query: {},
+            const appContext = {
+                request: {
+                    query: new HttpRequest({ url: 'http://localhost/', method: 'POST', query: { 'api-version': '1.0' } }).query,
                 },
-            });
-            context.req.query['api-version'] = '1.0';
-            const apiControllerMock = new TestableApiController(loggerMock.object, context);
-            const valid = apiControllerMock.validateApiVersion();
-            expect(context.res).toEqual(undefined);
-            expect(valid).toEqual(true);
-        });
-    });
-
-    describe('hasPayload()', () => {
-        it('should detect no payload in request', () => {
-            const context = <Context>(<unknown>{
-                req: {},
-            });
-            const apiControllerMock = new TestableApiController(loggerMock.object, context);
-            const valid = apiControllerMock.hasPayload();
-            expect(valid).toEqual(false);
-        });
-
-        it('should detect empty payload in request', () => {
-            const context = <Context>(<unknown>{
-                req: {
-                    rawBody: `[]`,
-                },
-            });
-            const apiControllerMock = new TestableApiController(loggerMock.object, context);
-            const valid = apiControllerMock.hasPayload();
-
-            expect(valid).toEqual(false);
-        });
-
-        it('should detect payload in request', () => {
-            const context = <Context>(<unknown>{
-                req: {
-                    rawBody: `{ "id": "1" }`,
-                },
-            });
-            const apiControllerMock = new TestableApiController(loggerMock.object, context);
-            const valid = apiControllerMock.hasPayload();
-            expect(valid).toEqual(true);
-        });
-    });
-
-    describe('validateRequest()', () => {
-        it('should reject invalid request', () => {
-            const context = <Context>(<unknown>{
-                req: {
-                    method: 'POST',
-                },
-            });
-            const apiControllerMock = new TestableApiController(loggerMock.object, context);
-            const valid = apiControllerMock.validateRequest();
-            expect(valid).toEqual(false);
-        });
-
-        it('should accept valid request', () => {
-            const context = <Context>(<unknown>{
-                req: {
-                    method: 'POST',
-                    rawBody: `{ "id": "1" }`,
-                    headers: {},
-                    query: {},
-                },
-            });
-            context.req.query['api-version'] = '1.0';
-            context.req.headers['content-type'] = 'application/json';
-            const apiControllerMock = new TestableApiController(loggerMock.object, context);
-            const valid = apiControllerMock.validateRequest();
-            expect(valid).toEqual(true);
-        });
-    });
-
-    describe('invoke()', () => {
-        it('should not handle invalid request', async () => {
-            const context = <Context>(<unknown>{
-                req: {
-                    method: 'POST',
-                },
-            });
-            const apiControllerMock = new TestableApiController(loggerMock.object);
-            expect(apiControllerMock.context).toBeNull();
-            await apiControllerMock.invoke(context);
-            expect(apiControllerMock.handleRequestInvoked).toEqual(false);
-        });
-
-        it('should handle valid request', async () => {
-            const context = <Context>(<unknown>{
-                req: {
-                    method: 'POST',
-                    rawBody: `{ "id": "1" }`,
-                    headers: {},
-                    query: {},
-                },
-            });
-            context.req.query['api-version'] = '1.0';
-            context.req.headers['content-type'] = 'application/json';
-            const apiControllerMock = new TestableApiController(loggerMock.object);
-            expect(apiControllerMock.context).toBeNull();
-            await apiControllerMock.invoke(context);
-            expect(apiControllerMock.handleRequestInvoked).toEqual(true);
-        });
-
-        it('should pass request args', async () => {
-            const context = <Context>(<unknown>{
-                req: {
-                    method: 'POST',
-                    rawBody: `{ "id": "1" }`,
-                    headers: {},
-                    query: {},
-                },
-            });
-            context.req.query['api-version'] = '1.0';
-            context.req.headers['content-type'] = 'application/json';
-            const apiControllerMock = new TestableApiController(loggerMock.object);
-            await apiControllerMock.invoke(context, 'a', 1);
-            expect(apiControllerMock.handleRequestInvoked).toEqual(true);
-            expect(apiControllerMock.args).toEqual(['a', 1]);
+            } as AppContext;
+            const apiControllerMock = new TestableApiController(loggerMock.object, appContext);
+            const result = apiControllerMock.validateApiVersion();
+            expect(result).toBeUndefined();
         });
     });
 
     describe('tryGetPayload()', () => {
-        interface PayloadType {
-            id: number;
-        }
-
-        it('should detect invalid content', () => {
-            const context = <Context>(<unknown>{
-                req: {
-                    rawBody: `{ "id": "1"`,
-                },
-            });
-            const apiControllerMock = new TestableApiController(loggerMock.object, context);
-            const payload = apiControllerMock.tryGetPayload<PayloadType>();
-            expect(payload).toEqual(undefined);
-            expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.invalidJsonDocument));
+        it('should detect no payload in request', async () => {
+            const appContext = {
+                request: {},
+            } as AppContext;
+            const apiControllerMock = new TestableApiController(loggerMock.object, appContext);
+            const payload = await apiControllerMock.tryGetPayload();
+            expect(payload).toBeUndefined();
         });
 
-        it('should parse valid content', () => {
-            const context = <Context>(<unknown>{
-                req: {
-                    rawBody: `{ "id": "1" }`,
+        it('should detect empty payload in request', async () => {
+            const appContext = {
+                request: {
+                    bodyUsed: false,
+                    text: () => Promise.resolve('{}'),
                 },
+            } as AppContext;
+            const apiControllerMock = new TestableApiController(loggerMock.object, appContext);
+            const payload = await apiControllerMock.tryGetPayload();
+            expect(payload).toBeUndefined();
+        });
+
+        it('should detect invalid content', async () => {
+            const appContext = {
+                request: {
+                    bodyUsed: false,
+                    text: () => Promise.resolve(`{ "id": "1"`),
+                },
+            } as AppContext;
+            const apiControllerMock = new TestableApiController(loggerMock.object, appContext);
+            const payload = await apiControllerMock.tryGetPayload();
+            expect(payload).toEqual(undefined);
+        });
+
+        it('should detect payload in request', async () => {
+            const appContext = {
+                request: {
+                    bodyUsed: false,
+                    text: () => Promise.resolve(`{ "id": 1 }`),
+                },
+            } as AppContext;
+            const apiControllerMock = new TestableApiController(loggerMock.object, appContext);
+            const payload = await apiControllerMock.tryGetPayload();
+            expect(payload).toEqual({ id: 1 });
+        });
+    });
+
+    describe('validateRequest()', () => {
+        it('should reject invalid request on API validation', async () => {
+            const appContext = {
+                request: {
+                    method: 'POST',
+                },
+            } as AppContext;
+            const apiControllerMock = new TestableApiController(loggerMock.object, appContext);
+            const result = await apiControllerMock.validateRequest();
+            expect(result).toEqual(WebApiErrorCodes.missingApiVersionQueryParameter);
+        });
+
+        it('should reject invalid request on content validation', async () => {
+            const appContext = {
+                request: {
+                    method: 'POST',
+                    query: new HttpRequest({ url: 'http://localhost/', method: 'POST', query: { 'api-version': '1.0' } }).query,
+                },
+            } as AppContext;
+            const apiControllerMock = new TestableApiController(loggerMock.object, appContext);
+            const result = await apiControllerMock.validateRequest();
+            expect(result).toEqual(WebApiErrorCodes.invalidJsonDocument);
+        });
+
+        it('should accept valid request', async () => {
+            const httpRequest = new HttpRequest({
+                url: 'http://localhost/',
+                method: 'POST',
+                headers: { 'content-type': 'application/json' },
+                query: { 'api-version': '1.0' },
             });
-            const apiControllerMock = new TestableApiController(loggerMock.object, context);
-            const payload = apiControllerMock.tryGetPayload<PayloadType>();
-            expect(payload).toEqual({ id: '1' });
+            const appContext = {
+                request: {
+                    method: 'POST',
+                    bodyUsed: false,
+                    text: () => Promise.resolve(`{ "id": "1" }`),
+                    headers: httpRequest.headers,
+                    query: httpRequest.query,
+                },
+            } as AppContext;
+            const apiControllerMock = new TestableApiController(loggerMock.object, appContext);
+            const result = await apiControllerMock.validateRequest();
+            expect(result).toBeUndefined();
         });
     });
 
     describe('getRestApiConfig()', () => {
         it('should get config value', async () => {
-            const context = <Context>(<unknown>{});
+            const appContext = {
+                request: {},
+            } as AppContext;
             const configStub: RestApiConfig = {
                 maxScanRequestBatchCount: 1,
                 scanRequestProcessingDelayInSeconds: 2,
@@ -341,13 +279,13 @@ describe(ApiController, () => {
 
             const serviceConfigMock = Mock.ofType(ServiceConfiguration);
             serviceConfigMock
-                .setup(async (sm) => sm.getConfigValue('restApiConfig'))
+                .setup(async (o) => o.getConfigValue('restApiConfig'))
                 .returns(async () => {
                     return Promise.resolve(configStub);
                 })
-                .verifiable(Times.once());
+                .verifiable();
 
-            const apiControllerMock = new TestableApiController(loggerMock.object, context, serviceConfigMock.object);
+            const apiControllerMock = new TestableApiController(loggerMock.object, appContext, serviceConfigMock.object);
             const actualConfig = await apiControllerMock.getRestApiConfig();
 
             expect(actualConfig).toEqual(configStub);

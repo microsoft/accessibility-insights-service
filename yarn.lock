@@ -404,14 +404,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@azure/functions@npm:^3.5.0":
-  version: 3.5.0
-  resolution: "@azure/functions@npm:3.5.0"
+"@azure/functions@npm:^4.5.0":
+  version: 4.5.0
+  resolution: "@azure/functions@npm:4.5.0"
   dependencies:
-    iconv-lite: ^0.6.3
+    cookie: ^0.6.0
     long: ^4.0.0
-    uuid: ^8.3.0
-  checksum: 105ddb7378d4b21e769de3d998b9e88913782356ac0edca20e1c0dbd1ac7fb15f6ca04f86121ce1ed5b2ec49564b64788d2046bf6e71f0199555e37c88cfaf8d
+    undici: ^5.13.0
+  checksum: 8682b848f41169d76e659b4f3bd2369e8e0a790597e6bfdbff90a4b078fff008de112e43c66c10311882703a622f8d70f59d88714c36eaa856e8772f73fdc9de
   languageName: node
   linkType: hard
 
@@ -1778,6 +1778,13 @@ __metadata:
   version: 8.57.0
   resolution: "@eslint/js@npm:8.57.0"
   checksum: 315dc65b0e9893e2bff139bddace7ea601ad77ed47b4550e73da8c9c2d2766c7a575c3cddf17ef85b8fd6a36ff34f91729d0dcca56e73ca887c10df91a41b0bb
+  languageName: node
+  linkType: hard
+
+"@fastify/busboy@npm:^2.0.0":
+  version: 2.1.1
+  resolution: "@fastify/busboy@npm:2.1.1"
+  checksum: 42c32ef75e906c9a4809c1e1930a5ca6d4ddc8d138e1a8c8ba5ea07f997db32210617d23b2e4a85fe376316a41a1a0439fc6ff2dedf5126d96f45a9d80754fb2
   languageName: node
   linkType: hard
 
@@ -6239,6 +6246,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"cookie@npm:^0.6.0":
+  version: 0.6.0
+  resolution: "cookie@npm:0.6.0"
+  checksum: f56a7d32a07db5458e79c726b77e3c2eff655c36792f2b6c58d351fb5f61531e5b1ab7f46987150136e366c65213cbe31729e02a3eaed630c3bf7334635fb410
+  languageName: node
+  linkType: hard
+
 "copy-webpack-plugin@npm:^11.0.0":
   version: 11.0.0
   resolution: "copy-webpack-plugin@npm:11.0.0"
@@ -6992,7 +7006,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "e2e-web-apis@workspace:packages/e2e-web-apis"
   dependencies:
-    "@azure/functions": ^3.5.0
+    "@azure/functions": ^4.5.0
     "@types/dotenv": ^8.2.0
     "@types/jest": ^29.5.12
     "@types/lodash": ^4.17.6
@@ -9176,7 +9190,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"iconv-lite@npm:^0.6.2, iconv-lite@npm:^0.6.3":
+"iconv-lite@npm:^0.6.2":
   version: 0.6.3
   resolution: "iconv-lite@npm:0.6.3"
   dependencies:
@@ -14032,7 +14046,7 @@ __metadata:
   resolution: "service-library@workspace:packages/service-library"
   dependencies:
     "@azure/cosmos": ^4.0.0
-    "@azure/functions": ^3.5.0
+    "@azure/functions": ^4.5.0
     "@azure/identity": ^4.3.0
     "@azure/storage-blob": ^12.12.0
     "@crawlee/puppeteer": ^3.5.0
@@ -15483,6 +15497,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"undici@npm:^5.13.0":
+  version: 5.28.4
+  resolution: "undici@npm:5.28.4"
+  dependencies:
+    "@fastify/busboy": ^2.0.0
+  checksum: a8193132d84540e4dc1895ecc8dbaa176e8a49d26084d6fbe48a292e28397cd19ec5d13bc13e604484e76f94f6e334b2bdc740d5f06a6e50c44072818d0c19f9
+  languageName: node
+  linkType: hard
+
 "unique-filename@npm:^1.1.1":
   version: 1.1.1
   resolution: "unique-filename@npm:1.1.1"
@@ -15983,7 +16006,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "web-api@workspace:packages/web-api"
   dependencies:
-    "@azure/functions": ^3.5.0
+    "@azure/functions": ^4.5.0
     "@types/dotenv": ^8.2.0
     "@types/jest": ^29.5.12
     "@types/lodash": ^4.17.6
@@ -16020,7 +16043,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "web-workers@workspace:packages/web-workers"
   dependencies:
-    "@azure/functions": ^3.5.0
+    "@azure/functions": ^4.5.0
     "@types/dotenv": ^8.2.0
     "@types/jest": ^29.5.12
     "@types/lodash": ^4.17.6

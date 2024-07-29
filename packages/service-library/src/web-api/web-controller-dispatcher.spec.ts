@@ -3,13 +3,13 @@
 
 import 'reflect-metadata';
 
-import { Context } from '@azure/functions';
 import { Container } from 'inversify';
 import { ContextAwareLogger, loggerTypes } from 'logger';
 import { IMock, Mock, Times } from 'typemoq';
 import { MockableLogger } from '../test-utilities/mockable-logger';
-import { WebController } from './web-controller';
+import { AppContext, WebController } from './web-controller';
 import { WebControllerDispatcher } from './web-controller-dispatcher';
+import { WebApiErrorCode } from './web-api-error-codes';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -22,15 +22,15 @@ export class TestableWebController extends WebController {
 
     public requestArgs: any[];
 
-    public async invoke(requestContext: Context, ...args: any[]): Promise<unknown> {
-        this.context = requestContext;
+    public async invoke(appContext: AppContext, ...args: any[]): Promise<any> {
+        this.appContext = appContext;
         this.requestArgs = args;
 
         return TestableWebController.handleRequestResult;
     }
 
-    protected validateRequest(...args: any[]): boolean {
-        return true;
+    protected async validateRequest(...args: any[]): Promise<WebApiErrorCode> {
+        return undefined;
     }
 
     protected async handleRequest(...args: any[]): Promise<void> {
@@ -41,13 +41,13 @@ export class TestableWebController extends WebController {
 describe(WebControllerDispatcher, () => {
     let webControllerDispatcher: WebControllerDispatcher;
     let containerMock: IMock<Container>;
-    let context: Context;
+    let appContext: AppContext;
     let testableWebController: TestableWebController;
     let processLifeCycleContainerMock: IMock<Container>;
     let loggerMock: IMock<MockableLogger>;
 
     beforeEach(() => {
-        context = <Context>(<unknown>{ bindingDefinitions: {} });
+        appContext = { request: {} } as AppContext;
         loggerMock = Mock.ofType(MockableLogger);
         testableWebController = new TestableWebController(loggerMock.object);
 
@@ -72,9 +72,9 @@ describe(WebControllerDispatcher, () => {
             .returns(() => Promise.resolve())
             .verifiable(Times.once());
 
-        await webControllerDispatcher.processRequest(containerMock.object, TestableWebController, context, 1, 'a');
+        await webControllerDispatcher.processRequest(containerMock.object, TestableWebController, appContext, 1, 'a');
 
-        expect(testableWebController.context).toEqual(context);
+        expect(testableWebController.appContext).toEqual(appContext);
         expect(testableWebController.requestArgs).toEqual([1, 'a']);
     });
 
@@ -108,7 +108,7 @@ describe(WebControllerDispatcher, () => {
             .verifiable(Times.once());
 
         webControllerDispatcher = new WebControllerDispatcher(processLifeCycleContainerMock.object);
-        await expect(webControllerDispatcher.processRequest(containerMock.object, TestableWebController, context)).resolves.toBe(
+        await expect(webControllerDispatcher.processRequest(containerMock.object, TestableWebController, appContext)).resolves.toBe(
             TestableWebController.handleRequestResult,
         );
     });

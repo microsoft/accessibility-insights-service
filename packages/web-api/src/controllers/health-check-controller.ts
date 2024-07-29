@@ -5,11 +5,20 @@ import { ApplicationInsightsQueryResponse, Column } from 'azure-services';
 import { AvailabilityTestConfig, getSerializableResponse, ResponseWithBodyType, ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
 import { ContextAwareLogger } from 'logger';
-import { ApiController, HealthReport, HttpResponse, TestEnvironment, TestRun, TestRunResult, WebApiErrorCodes } from 'service-library';
+import {
+    ApiController,
+    HealthReport,
+    WebHttpResponse,
+    TestEnvironment,
+    TestRun,
+    TestRunResult,
+    WebApiErrorCodes,
+    WebApiErrorCode,
+} from 'service-library';
+import { HttpResponseInit } from '@azure/functions';
+import { isEmpty } from 'lodash';
 import { createHealthCheckQueryForRelease } from '../health-check-query';
 import { ApplicationInsightsClientProvider, webApiTypeNames } from '../web-api-types';
-
-/* eslint-disable max-len */
 
 export declare type HealthTarget = 'release';
 
@@ -29,45 +38,48 @@ export class HealthCheckController extends ApiController {
         super(logger);
     }
 
-    public async handleRequest(): Promise<void> {
+    public async handleRequest(): Promise<HttpResponseInit> {
         this.logger.trackEvent('HealthCheck');
         this.logger.setCommonProperties({ source: 'getHealthCheckReportRESTApi' });
 
-        const target: HealthTarget = this.context.bindingData.target as HealthTarget;
-        if (target === undefined) {
-            this.processEchoHealthRequest();
-        } else if (target === 'release') {
-            await this.processReleaseHealthRequest();
-        } else {
-            this.context.res = HttpResponse.getErrorResponse(WebApiErrorCodes.resourceNotFound);
+        const target = this.appContext.request.query.get('target');
+        if (isEmpty(target)) {
+            return this.processEchoHealthRequest();
         }
+
+        if (target === 'release') {
+            return this.processReleaseHealthRequest();
+        }
+
+        return WebHttpResponse.getErrorResponse(WebApiErrorCodes.resourceNotFound);
     }
 
-    // Override this method not to check api version
-    protected validateApiVersion(): boolean {
-        return true;
+    protected validateApiVersion(): WebApiErrorCode {
+        return undefined;
     }
 
-    private async processReleaseHealthRequest(): Promise<void> {
+    private async processReleaseHealthRequest(): Promise<HttpResponseInit> {
         const releaseId = this.getReleaseId();
         if (releaseId === undefined) {
-            this.context.res = HttpResponse.getErrorResponse(WebApiErrorCodes.missingReleaseVersion);
-
-            return;
+            return WebHttpResponse.getErrorResponse(WebApiErrorCodes.missingReleaseVersion);
         }
 
         const queryResponse = await this.executeAppInsightsQuery(releaseId);
         if (queryResponse.statusCode !== 200) {
-            this.context.res = HttpResponse.getErrorResponse(WebApiErrorCodes.internalError);
-
-            return;
+            return WebHttpResponse.getErrorResponse(WebApiErrorCodes.internalError);
         }
 
         const healthReport = this.getHealthReport(queryResponse.body, releaseId);
 
-        this.context.res = {
-            status: 200, // OK
-            body: healthReport,
+        return {
+            status: 200,
+            jsonBody: healthReport,
+        };
+    }
+
+    private processEchoHealthRequest(): HttpResponseInit {
+        return {
+            status: 200,
         };
     }
 
@@ -77,13 +89,13 @@ export class HealthCheckController extends ApiController {
         const queryString = this.createQueryForRelease(releaseId);
         const queryResponse = await appInsightsClient.executeQuery(queryString, logQueryTimeRange);
         if (queryResponse.statusCode === 200) {
-            this.logger.logInfo('App Insights query succeeded.', {
+            this.logger.logInfo('App Insights query has succeeded.', {
                 query: queryString,
                 statusCode: queryResponse.statusCode.toString(),
                 response: JSON.stringify(getSerializableResponse(queryResponse)),
             });
         } else {
-            this.logger.logError('App Insights query failed.', {
+            this.logger.logError('App Insights query has failed.', {
                 query: queryString,
                 statusCode: queryResponse.statusCode.toString(),
                 response: JSON.stringify(getSerializableResponse(queryResponse)),
@@ -140,15 +152,9 @@ export class HealthCheckController extends ApiController {
     }
 
     private getReleaseId(): string {
-        const releaseId = <string>this.context.bindingData.targetId;
+        const releaseId = this.appContext.request.query.get('targetId');
 
-        return releaseId !== undefined ? releaseId : process.env.RELEASE_VERSION;
-    }
-
-    private processEchoHealthRequest(): void {
-        this.context.res = {
-            status: 200, // OK
-        };
+        return isEmpty(releaseId) ? process.env.RELEASE_VERSION : releaseId;
     }
 
     private getColumnValue(columns: Column[], row: string[], columnName: string): string {

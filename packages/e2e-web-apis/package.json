@@ -24,7 +24,6 @@
     },
     "homepage": "https://github.com/Microsoft/accessibility-insights-service#readme",
     "devDependencies": {
-        "@azure/functions": "^3.5.0",
         "@types/dotenv": "^8.2.0",
         "@types/jest": "^29.5.12",
         "@types/lodash": "^4.17.6",
@@ -44,6 +43,7 @@
         "webpack-ignore-dynamic-require": "^1.0.0"
     },
     "dependencies": {
+        "@azure/functions": "^4.5.0",
         "azure-services": "workspace:*",
         "inversify": "^6.0.1",
         "lodash": "^4.17.21",
