@@ -3,11 +3,17 @@
 
 import 'reflect-metadata';
 
-import { InvocationContext } from '@azure/functions';
+import { app, HttpRequest, HttpResponseInit, InvocationContext } from '@azure/functions';
 
-export async function run(context: InvocationContext): Promise<void> {
-    context.res = {
+export async function requestHandler(request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> {
+    return {
         status: 500,
     };
-    context.done();
 }
+
+app.http('scan-notification-fail', {
+    methods: ['POST'],
+    authLevel: 'anonymous',
+    handler: requestHandler,
+    route: 'scan-notification-fail',
+});

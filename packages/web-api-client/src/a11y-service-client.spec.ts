@@ -27,7 +27,7 @@ let getAgentsMock: IMock<() => Agents>;
 describe(A11yServiceClient, () => {
     let response: unknown;
     const agentsStub = {};
-    const scanNotifyUrlStub = 'scan-notification-url-stub';
+    const scanNotifyUrlStub = 'scan-notification-pass-stub';
 
     beforeEach(() => {
         response = { statusCode: 200 };
