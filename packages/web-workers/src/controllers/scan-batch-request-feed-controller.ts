@@ -10,6 +10,8 @@ import {
     PageScanRequestProvider,
     PartitionKeyFactory,
     ScanDataProvider,
+    WebApiErrorCode,
+    WebApiErrorCodes,
     WebController,
     WebsiteScanDataProvider,
 } from 'service-library';
@@ -27,6 +29,8 @@ import {
     WebsiteScanData,
 } from 'storage-documents';
 import pLimit from 'p-limit';
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 @injectable()
 export class ScanBatchRequestFeedController extends WebController {
@@ -49,7 +53,7 @@ export class ScanBatchRequestFeedController extends WebController {
         super(logger);
     }
 
-    public async handleRequest(...args: unknown[]): Promise<void> {
+    public async handleRequest(...args: any[]): Promise<void> {
         this.logger.setCommonProperties({ source: 'scanBatchCosmosFeedTriggerFunc' });
         const limit = pLimit(this.maxConcurrencyLimit);
 
@@ -68,7 +72,7 @@ export class ScanBatchRequestFeedController extends WebController {
         );
     }
 
-    protected validateRequest(...args: unknown[]): boolean {
+    protected async validateRequest(...args: any[]): Promise<WebApiErrorCode> {
         const batchDocuments = <OnDemandPageScanBatchRequest[]>args[0];
 
         return this.validateRequestData(batchDocuments);
@@ -227,14 +231,14 @@ export class ScanBatchRequestFeedController extends WebController {
         return undefined;
     }
 
-    private validateRequestData(documents: OnDemandPageScanBatchRequest[]): boolean {
+    private validateRequestData(documents: OnDemandPageScanBatchRequest[]): WebApiErrorCode {
         if (documents === undefined || documents.length === 0 || !documents.some((d) => d.itemType === ItemType.scanRunBatchRequest)) {
             this.logger.logWarn(`The batch request documents were not formatted correctly.`, { documents: JSON.stringify(documents) });
 
-            return false;
+            return WebApiErrorCodes.malformedRequest;
         }
 
-        return true;
+        return undefined;
     }
 
     private normalizeRequest(request: ScanRunBatchRequest, batchRequestId: string): void {

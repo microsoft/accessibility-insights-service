@@ -4,10 +4,9 @@
 import 'reflect-metadata';
 
 import { AvailabilityTestConfig } from 'common';
-// eslint-disable-next-line import/no-internal-modules
-import { IOrchestrationFunctionContext } from 'durable-functions/lib/src/classes';
 import { Logger } from 'logger';
 import { IMock, Mock } from 'typemoq';
+import * as df from 'durable-functions';
 import { ActivityAction } from '../contracts/activity-actions';
 import { WebApiConfig } from '../controllers/web-api-config';
 import { generatorStub } from '../test-utilities/generator-function';
@@ -24,7 +23,7 @@ describe(createOrchestrationSteps, () => {
     const availabilityTestConfig = {} as AvailabilityTestConfig;
     let activityActionDispatcherMock: IMock<ActivityActionDispatcher>;
     let loggerMock: IMock<Logger>;
-    const contextStub = {} as IOrchestrationFunctionContext;
+    const contextStub = {} as df.OrchestrationContext;
     const createActivityActionDispatcherStub = () => activityActionDispatcherMock.object;
 
     beforeEach(() => {

@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { InvocationContext, HttpRequest, HttpResponse } from '@azure/functions';
+import { InvocationContext, HttpRequest, HttpResponse, Timer } from '@azure/functions';
 import { System } from 'common';
 import { inject, injectable } from 'inversify';
 import { ContextAwareLogger } from 'logger';
@@ -11,7 +11,8 @@ import { WebHttpResponse } from './web-http-response';
 /* eslint-disable @typescript-eslint/no-explicit-any,  */
 
 export interface AppContext {
-    request: HttpRequest;
+    timer?: Timer;
+    request?: HttpRequest;
     context: InvocationContext;
 }
 
@@ -30,6 +31,7 @@ export abstract class WebController {
 
         try {
             this.logger.setCommonProperties(this.getBaseTelemetryProperties());
+            this.logger.logInfo(`Executing '${this.appContext.context.functionName}' function app.`);
 
             const webApiErrorCode = await this.validateRequest(...args);
 
@@ -58,6 +60,7 @@ export abstract class WebController {
             apiName: this.apiName,
             apiVersion: this.apiVersion,
             controller: this.constructor.name,
+            functionName: this.appContext.context?.functionName,
             invocationId: this.appContext.context?.invocationId,
         };
     }

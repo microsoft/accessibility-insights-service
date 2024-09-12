@@ -2,12 +2,11 @@
 // Licensed under the MIT License.
 
 import { SerializableResponse } from 'common';
-// eslint-disable-next-line import/no-internal-modules
-import { IOrchestrationFunctionContext, Task } from 'durable-functions/lib/src/classes';
-import _ from 'lodash';
 import { LogLevel } from 'logger';
 import moment from 'moment';
 import { ScanResultResponse, ScanRunErrorResponse, ScanRunResultResponse } from 'service-library';
+import * as df from 'durable-functions';
+import { isNil } from 'lodash';
 import { ActivityAction } from '../contracts/activity-actions';
 import { ActivityActionDispatcher } from './activity-action-dispatcher';
 import { OrchestrationLogger } from './orchestration-logger';
@@ -16,7 +15,7 @@ import { ScanWaitCondition } from './scan-wait-conditions';
 
 export class ScanWaitOrchestrator {
     constructor(
-        private readonly context: IOrchestrationFunctionContext,
+        private readonly context: df.OrchestrationContext,
         private readonly activityActionDispatcher: ActivityActionDispatcher,
         private readonly orchestrationLogger: OrchestrationLogger,
     ) {}
@@ -27,7 +26,7 @@ export class ScanWaitOrchestrator {
         maxWaitTime: number,
         waitTimeInterval: number,
         waitConditions: ScanWaitCondition,
-    ): Generator<Task, ScanRunResultResponse, SerializableResponse & void> {
+    ): Generator<df.Task, ScanRunResultResponse, SerializableResponse & void> {
         const waitStartTime = moment.utc(this.context.df.currentUtcDateTime);
         const waitEndTime = waitStartTime.clone().add(maxWaitTime, 'seconds');
         let scanResultResponse: SerializableResponse<ScanResultResponse>;
@@ -75,7 +74,7 @@ export class ScanWaitOrchestrator {
         duration: number,
         overallStartTime: moment.Moment,
         overallEndTime: moment.Moment,
-    ): Generator<Task, void, SerializableResponse & void> {
+    ): Generator<df.Task, void, SerializableResponse & void> {
         this.orchestrationLogger.logOrchestrationStep(`Starting timer with wait time ${duration}`, LogLevel.Info, {
             waitStartTime: overallStartTime.toJSON(),
             waitEndTime: overallEndTime.toJSON(),
@@ -95,14 +94,14 @@ export class ScanWaitOrchestrator {
     private scanHasError(response: SerializableResponse<ScanResultResponse>): boolean {
         const scanErrorResultResponse = response.body as ScanRunErrorResponse;
 
-        return !_.isNil(scanErrorResultResponse.error);
+        return !isNil(scanErrorResultResponse.error);
     }
 
     private *onTaskFailure(
         response: SerializableResponse,
         activityName: string,
         traceData?: OrchestrationTelemetryProperties,
-    ): Generator<Task, void, SerializableResponse & void> {
+    ): Generator<df.Task, void, SerializableResponse & void> {
         this.orchestrationLogger.logOrchestrationStep(`Orchestration activity ${activityName} has failed`, LogLevel.Error, {
             requestResponse: JSON.stringify(response),
             ...traceData,

@@ -3,15 +3,17 @@
 
 import 'reflect-metadata';
 
-/* eslint-disable import/no-internal-modules */
-import { Context } from '@azure/functions';
-import { IOrchestrationFunctionContext } from 'durable-functions/lib/src/classes';
-import { HealthMonitorOrchestrationController } from '../src/controllers/health-monitor-orchestration-controller';
+import { app, InvocationContext, Timer, TimerFunctionOptions } from '@azure/functions';
+import * as df from 'durable-functions';
 import { processWebRequest } from '../src/process-web-request';
+import { HealthMonitorOrchestrationController } from '../src/controllers/health-monitor-orchestration-controller';
 
-/**
- * The durable orchestration function to execute the health test workflow.
- */
-export async function run(context: Context): Promise<void> {
-    await processWebRequest(context, HealthMonitorOrchestrationController, (context as unknown as IOrchestrationFunctionContext).df);
+export async function timerHandler(timer: Timer, context: InvocationContext): Promise<TimerFunctionOptions> {
+    return processWebRequest({ timer, context }, HealthMonitorOrchestrationController);
 }
+
+app.timer('health-monitor-orchestration', {
+    schedule: '0 */30 * * * *',
+    handler: timerHandler,
+    extraInputs: [df.input.durableClient()],
+});

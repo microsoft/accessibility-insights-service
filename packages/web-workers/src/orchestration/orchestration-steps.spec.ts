@@ -4,12 +4,11 @@
 import 'reflect-metadata';
 
 import { AvailabilityTestConfig, SerializableResponse } from 'common';
-// eslint-disable-next-line import/no-internal-modules
-import { DurableOrchestrationContext, IOrchestrationFunctionContext } from 'durable-functions/lib/src/classes';
 import { IMock, It, Mock, MockBehavior } from 'typemoq';
 import { ScanRunResponse, ScanRunResultResponse, WebApiError } from 'service-library';
 import { PostScanRequestOptions } from 'web-api-client';
 import { TestContextData, TestGroupName } from 'functional-tests';
+import * as df from 'durable-functions';
 import { ActivityAction } from '../contracts/activity-actions';
 import { GeneratorExecutor } from '../test-utilities/generator-executor';
 import { generatorStub } from '../test-utilities/generator-function';
@@ -30,8 +29,8 @@ import { ScanWaitConditions } from './scan-wait-conditions';
 const orchestrationInstanceId = 'orchestration instance Id';
 
 describe(OrchestrationSteps, () => {
-    let context: IOrchestrationFunctionContext;
-    let orchestrationContext: IMock<DurableOrchestrationContext>;
+    let context: df.OrchestrationContext;
+    let durableOrchestrationContextMock: IMock<df.DurableOrchestrationContext>;
     let testSubject: OrchestrationSteps;
     let availabilityTestConfig: AvailabilityTestConfig;
     let loggerMock: IMock<OrchestrationLogger>;
@@ -46,8 +45,8 @@ describe(OrchestrationSteps, () => {
     };
 
     beforeEach(() => {
-        orchestrationContext = Mock.ofType<DurableOrchestrationContext>();
-        orchestrationContext.setup((oc) => oc.instanceId).returns(() => orchestrationInstanceId);
+        durableOrchestrationContextMock = Mock.ofType<df.DurableOrchestrationContext>();
+        durableOrchestrationContextMock.setup((oc) => oc.instanceId).returns(() => orchestrationInstanceId);
         loggerMock = Mock.ofType<OrchestrationLogger>();
         activityActionDispatcherMock = Mock.ofType(ActivityActionDispatcher, MockBehavior.Strict);
         scanWaitOrchestratorMock = Mock.ofType<ScanWaitOrchestrator>();
@@ -65,8 +64,8 @@ describe(OrchestrationSteps, () => {
             maxDeepScanWaitTimeInSeconds: 40,
         };
 
-        context = <IOrchestrationFunctionContext>(<unknown>{
-            df: orchestrationContext.object,
+        context = <df.OrchestrationContext>(<unknown>{
+            df: durableOrchestrationContextMock.object,
         });
 
         testSubject = new OrchestrationSteps(
@@ -80,7 +79,7 @@ describe(OrchestrationSteps, () => {
     });
 
     afterEach(() => {
-        orchestrationContext.verifyAll();
+        durableOrchestrationContextMock.verifyAll();
         activityActionDispatcherMock.verifyAll();
         scanWaitOrchestratorMock.verifyAll();
         loggerMock.verifyAll();

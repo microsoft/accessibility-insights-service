@@ -3,13 +3,12 @@
 
 import 'reflect-metadata';
 
-// eslint-disable-next-line import/no-internal-modules
-import { DurableOrchestrationContext, IOrchestrationFunctionContext } from 'durable-functions/lib/src/classes';
 import { Mock, Times, IMock, It } from 'typemoq';
 import moment from 'moment';
-import _ from 'lodash';
 import { ScanResultResponse, ScanRunErrorResponse, ScanRunResultResponse, WebApiError } from 'service-library';
 import { SerializableResponse } from 'common';
+import * as df from 'durable-functions';
+import { isNil } from 'lodash';
 import { GeneratorExecutor } from '../test-utilities/generator-executor';
 import { ActivityAction } from '../contracts/activity-actions';
 import { generatorStub } from '../test-utilities/generator-function';
@@ -20,8 +19,8 @@ import { ScanWaitCondition } from './scan-wait-conditions';
 
 describe(ScanWaitOrchestrator, () => {
     let loggerMock: IMock<OrchestrationLogger>;
-    let context: IOrchestrationFunctionContext;
-    let orchestrationContextMock: IMock<DurableOrchestrationContext>;
+    let context: df.OrchestrationContext;
+    let durableOrchestrationContextMock: IMock<df.DurableOrchestrationContext>;
     let activityActionDispatcherMock: IMock<ActivityActionDispatcher>;
     let generatorExecutor: GeneratorExecutor;
     let nextTime1: moment.Moment;
@@ -65,11 +64,11 @@ describe(ScanWaitOrchestrator, () => {
 
     beforeEach(() => {
         loggerMock = Mock.ofType<OrchestrationLogger>();
-        orchestrationContextMock = Mock.ofType<DurableOrchestrationContext>();
-        orchestrationContextMock.setup((o) => o.currentUtcDateTime).returns(() => currentUtcDateTime);
+        durableOrchestrationContextMock = Mock.ofType<df.DurableOrchestrationContext>();
+        durableOrchestrationContextMock.setup((o) => o.currentUtcDateTime).returns(() => currentUtcDateTime);
         context = {
-            df: orchestrationContextMock.object,
-        } as unknown as IOrchestrationFunctionContext;
+            df: durableOrchestrationContextMock.object,
+        } as unknown as df.OrchestrationContext;
         activityActionDispatcherMock = Mock.ofType<ActivityActionDispatcher>();
         trackAvailabilityCallback = jest.fn();
         currentScanStatusResponse = initialScanStatusResponse;
@@ -88,7 +87,7 @@ describe(ScanWaitOrchestrator, () => {
     });
 
     afterEach(() => {
-        orchestrationContextMock.verifyAll();
+        durableOrchestrationContextMock.verifyAll();
         activityActionDispatcherMock.verifyAll();
         loggerMock.verifyAll();
     });
@@ -171,11 +170,11 @@ describe(ScanWaitOrchestrator, () => {
     }
 
     function setupCreateTimer(fireTime: moment.Moment, callback?: () => void): void {
-        orchestrationContextMock
+        durableOrchestrationContextMock
             .setup((oc) => oc.createTimer(fireTime.toDate()))
             .returns(() => {
                 currentUtcDateTime = fireTime.toDate();
-                if (!_.isNil(callback)) {
+                if (!isNil(callback)) {
                     callback();
                 }
 
@@ -185,7 +184,7 @@ describe(ScanWaitOrchestrator, () => {
     }
 
     function setupCreateTimerNeverCalled(fireTime: moment.Moment): void {
-        orchestrationContextMock.setup((oc) => oc.createTimer(fireTime.toDate())).verifiable(Times.never());
+        durableOrchestrationContextMock.setup((oc) => oc.createTimer(fireTime.toDate())).verifiable(Times.never());
     }
 
     function setupWaitWithStatusChange(updatedScanStatusResponse: SerializableResponse<ScanResultResponse>): void {

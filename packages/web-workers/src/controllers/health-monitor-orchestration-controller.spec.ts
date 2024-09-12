@@ -4,71 +4,103 @@
 import 'reflect-metadata';
 
 import { AvailabilityTestConfig, ServiceConfiguration } from 'common';
-import * as durableFunctions from 'durable-functions';
-// eslint-disable-next-line import/no-internal-modules
-import { IOrchestrationFunctionContext } from 'durable-functions/lib/src/classes';
 import { TestEnvironment } from 'functional-tests';
-import { It, Mock } from 'typemoq';
-import { ContextBindingData, Context } from '@azure/functions';
+import { It, Mock, IMock } from 'typemoq';
+import { ActivityOptions, OrchestrationContext } from 'durable-functions';
+import { InvocationContextExtraInputs } from '@azure/functions';
+import { AppContext } from 'service-library';
 import { OrchestrationSteps } from '../orchestration/orchestration-steps';
 import { GeneratorExecutor } from '../test-utilities/generator-executor';
-import { MockableLogger } from '../test-utilities/mockable-logger';
 import { finalizerTestGroupName } from '../e2e-test-group-names';
 import { generatorStub } from '../test-utilities/generator-function';
 import { ScanScenarioDriver } from '../e2e-test-scenarios/scan-scenario-driver';
+import { MockableLogger } from '../test-utilities/mockable-logger';
 import { HealthMonitorOrchestrationController } from './health-monitor-orchestration-controller';
 import { TestIdentifier } from './activity-request-data';
+import { HealthMonitorActivity } from './health-monitor-activity';
 
-describe('HealthMonitorOrchestrationController', () => {
-    let testSubject: HealthMonitorOrchestrationController;
-    let orchestratorIterator: GeneratorExecutor;
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
-    const scanScenarioDriverMock = Mock.ofType<ScanScenarioDriver>();
-    const orchestrationStepsMock = Mock.ofType<OrchestrationSteps>();
-    const loggerMock = Mock.ofType(MockableLogger);
-    const allTestIdentifiers: TestIdentifier[] = [{ testGroupName: 'PostScan', scenarioName: 'TestScenario' }];
+class InvocationContextExtraInputsStub implements InvocationContextExtraInputs {
+    public readonly values: any = {};
 
-    const availabilityTestConfig: AvailabilityTestConfig = {
-        urlToScan: 'some-url',
-        scanWaitIntervalInSeconds: 10,
-        maxScanWaitTimeInSeconds: 20,
-        logQueryTimeRange: 'P1D',
-        environmentDefinition: TestEnvironment[TestEnvironment.canary],
-        consolidatedIdBase: 'some-report-id',
-        scanNotifyApiEndpoint: '/some-endpoint',
-        maxScanCompletionNotificationWaitTimeInSeconds: 30,
-        scanNotifyFailApiEndpoint: '/some-fail-endpoint',
-        maxDeepScanWaitTimeInSeconds: 40,
-    };
-    const contextStub = {
-        bindingData: {},
-        executionContext: {
-            functionName: 'function-name',
-            invocationId: 'id',
+    public get(inputOrName: any): any {
+        return this.values[inputOrName];
+    }
+
+    public set(inputOrName: any, value: any): void {
+        this.values[inputOrName] = value;
+    }
+}
+
+let testSubject: HealthMonitorOrchestrationController;
+let orchestratorIterator: GeneratorExecutor;
+let orchestrationContextMock: IMock<OrchestrationContext>;
+let invocationContextExtraInputs: InvocationContextExtraInputs;
+let scanScenarioDriverMock: IMock<ScanScenarioDriver>;
+let orchestrationStepsMock: IMock<OrchestrationSteps>;
+let healthMonitorActivityMock: IMock<HealthMonitorActivity>;
+let appContext: AppContext;
+
+const allTestIdentifiers: TestIdentifier[] = [{ testGroupName: 'PostScan', scenarioName: 'TestScenario' }];
+const availabilityTestConfig: AvailabilityTestConfig = {
+    urlToScan: 'some-url',
+    scanWaitIntervalInSeconds: 10,
+    maxScanWaitTimeInSeconds: 20,
+    logQueryTimeRange: 'P1D',
+    environmentDefinition: TestEnvironment[TestEnvironment.canary],
+    consolidatedIdBase: 'some-report-id',
+    scanNotifyApiEndpoint: '/some-endpoint',
+    maxScanCompletionNotificationWaitTimeInSeconds: 30,
+    scanNotifyFailApiEndpoint: '/some-fail-endpoint',
+    maxDeepScanWaitTimeInSeconds: 40,
+};
+const loggerMock = Mock.ofType(MockableLogger);
+const durableClient = {
+    startNew: jest.fn().mockImplementation(() => '1'),
+};
+const activityFn = jest.fn();
+const activityOptions = {
+    handler: () => {},
+};
+
+jest.mock('durable-functions', () => ({
+    getClient: () => durableClient,
+    app: {
+        orchestration: (name: string, handler: any) => {
+            handler(orchestrationContextMock);
         },
-    } as IOrchestrationFunctionContext;
+        activity: (name: string, options: ActivityOptions) => {
+            activityFn(name, options);
+        },
+    },
+}));
 
+describe(HealthMonitorOrchestrationController, () => {
     beforeEach(() => {
-        contextStub.bindingData = {} as unknown as ContextBindingData;
+        scanScenarioDriverMock = Mock.ofType<ScanScenarioDriver>();
+        orchestrationStepsMock = Mock.ofType<OrchestrationSteps>();
+        orchestrationContextMock = Mock.ofType<OrchestrationContext>();
+        healthMonitorActivityMock = Mock.ofType<HealthMonitorActivity>();
+        invocationContextExtraInputs = new InvocationContextExtraInputsStub();
+
+        appContext = {
+            context: {
+                extraInputs: invocationContextExtraInputs,
+            },
+        } as AppContext;
 
         const serviceConfigurationMock = Mock.ofType(ServiceConfiguration);
         serviceConfigurationMock
             .setup(async (sc) => sc.getConfigValue('availabilityTestConfig'))
             .returns(async () => availabilityTestConfig);
 
-        const df = Mock.ofType<typeof durableFunctions>(undefined);
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        const orchestratorGeneratorMock = Mock.ofInstance<(contextObj: IOrchestrationFunctionContext) => void>(() => {});
-        df.setup((d) => d.orchestrator(It.isAny()))
-            .callback((fn: (context: IOrchestrationFunctionContext) => IterableIterator<unknown>) => {
-                orchestratorIterator = new GeneratorExecutor(fn(contextStub));
-            })
-            .returns(() => orchestratorGeneratorMock.object);
+        orchestrationContextMock.setup((o) => o.extraInputs).returns(() => invocationContextExtraInputs);
 
         testSubject = new HealthMonitorOrchestrationController(
+            healthMonitorActivityMock.object,
             serviceConfigurationMock.object,
             loggerMock.object,
-            df.object,
             (_, __) => [scanScenarioDriverMock.object],
             (_, __, ___) => generatorStub(() => null, orchestrationStepsMock.object),
             (_) => allTestIdentifiers,
@@ -81,14 +113,13 @@ describe('HealthMonitorOrchestrationController', () => {
 
     describe('invoke', () => {
         it('sets context required for orchestrator execution', async () => {
-            await testSubject.invoke(contextStub as unknown as Context);
-            expect(contextStub.bindingData.controller).toBe(testSubject);
-            expect(contextStub.bindingData.availabilityTestConfig).toEqual(availabilityTestConfig);
+            await testSubject.invoke(appContext);
+            expect((invocationContextExtraInputs as InvocationContextExtraInputsStub).values.controller).toBe(testSubject);
+            expect((invocationContextExtraInputs as InvocationContextExtraInputsStub).values.config).toEqual(availabilityTestConfig);
         });
 
         it('executes activities in sequence', async () => {
-            await testSubject.invoke(contextStub as unknown as Context);
-
+            healthMonitorActivityMock.setup((o) => o.handler).returns(() => activityOptions.handler);
             orchestrationStepsMock
                 .setup((m) => m.logTestRunStart(allTestIdentifiers))
                 .returns((_) => generatorStub())
@@ -115,10 +146,16 @@ describe('HealthMonitorOrchestrationController', () => {
                 .returns((_) => generatorStub())
                 .verifiable();
 
+            await testSubject.invoke(appContext);
+            orchestratorIterator = new GeneratorExecutor(testSubject.orchestrationHandler(orchestrationContextMock.object));
+
             orchestratorIterator.runTillEnd();
 
             orchestrationStepsMock.verifyAll();
             scanScenarioDriverMock.verifyAll();
+
+            expect(durableClient.startNew).toHaveBeenCalledWith(testSubject.orchestrationFuncName);
+            expect(activityFn).toHaveBeenCalledWith(HealthMonitorActivity.name, { handler: activityOptions.handler });
         });
     });
 });

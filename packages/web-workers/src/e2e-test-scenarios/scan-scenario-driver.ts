@@ -2,10 +2,9 @@
 // Licensed under the MIT License.
 
 import { SerializableResponse } from 'common';
-// eslint-disable-next-line import/no-internal-modules
-import { Task, TaskSet } from 'durable-functions/lib/src/classes';
 import { TestContextData, TestGroupName } from 'functional-tests';
-import _ from 'lodash';
+import { Task } from 'durable-functions';
+import { compact, uniq } from 'lodash';
 import { OrchestrationSteps } from '../orchestration/orchestration-steps';
 import { E2EScanScenarioDefinition } from './e2e-scan-scenario-definitions';
 
@@ -18,17 +17,17 @@ export class ScanScenarioDriver {
         this.testContextData = testDefinition.initialTestContextData;
     }
 
-    public *submitScanPhase(): Generator<Task | TaskSet, void, SerializableResponse & void> {
+    public *submitScanPhase(): Generator<Task, void, SerializableResponse & void> {
         yield* this.skipIfError(this.submitScanForTests(), this.testDefinition.testGroups.postScanSubmissionTests);
     }
 
-    public *waitForScanCompletionPhase(): Generator<Task | TaskSet, void, SerializableResponse & void> {
+    public *waitForScanCompletionPhase(): Generator<Task, void, SerializableResponse & void> {
         let testsToRun = [].concat(this.testDefinition.testGroups.postScanCompletionTests, this.testDefinition.testGroups.scanReportTests);
-        testsToRun = _.uniq(_.compact(testsToRun));
+        testsToRun = uniq(compact(testsToRun));
         yield* this.skipIfError(this.orchestrationSteps.waitForBaseScanCompletion(this.testContextData.scanId), testsToRun);
     }
 
-    public *afterScanCompletedPhase(): Generator<Task | TaskSet, void, SerializableResponse & void> {
+    public *afterScanCompletedPhase(): Generator<Task, void, SerializableResponse & void> {
         const scanRequestOptions = this.testDefinition.scanOptions;
         if (scanRequestOptions.deepScan) {
             yield* this.skipIfError(
@@ -60,9 +59,9 @@ export class ScanScenarioDriver {
     to report failure.
     */
     private *skipIfError(
-        generator: Generator<Task | TaskSet, unknown, SerializableResponse & void>,
+        generator: Generator<Task, unknown, SerializableResponse & void>,
         testGroupNames?: TestGroupName[],
-    ): Generator<Task | TaskSet, void, SerializableResponse & void> {
+    ): Generator<Task, void, SerializableResponse & void> {
         if (this.encounteredError !== true) {
             try {
                 yield* generator;

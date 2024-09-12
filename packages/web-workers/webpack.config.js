@@ -16,8 +16,6 @@ module.exports = (env) => {
         externals: ['@azure/functions'],
         entry: {
             ['scan-batch-requests-feed-func']: path.resolve('./scan-batch-requests-feed-func/index.ts'),
-            ['health-monitor-timer-func']: path.resolve('./health-monitor-timer-func/index.ts'),
-            ['health-monitor-client-func']: path.resolve('./health-monitor-client-func/index.ts'),
             ['health-monitor-orchestration-func']: path.resolve('./health-monitor-orchestration-func/index.ts'),
         },
         mode: 'development',
@@ -80,10 +78,6 @@ module.exports = (env) => {
                         to: '',
                     },
                     {
-                        from: '*.csproj',
-                        to: '',
-                    },
-                    {
                         from: '../../yarn.lock',
                         to: '',
                     },
@@ -95,17 +89,7 @@ module.exports = (env) => {
                     {
                         context: '../parallel-workers/dist/',
                         from: '**/*.js',
-                        to: 'health-monitor-client-func',
-                    },
-                    {
-                        context: '../parallel-workers/dist/',
-                        from: '**/*.js',
                         to: 'health-monitor-orchestration-func',
-                    },
-                    {
-                        context: '../parallel-workers/dist/',
-                        from: '**/*.js',
-                        to: 'health-monitor-timer-func',
                     },
                     {
                         context: '../parallel-workers/dist/',

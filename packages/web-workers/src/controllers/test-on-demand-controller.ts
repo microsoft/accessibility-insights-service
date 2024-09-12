@@ -4,7 +4,7 @@
 import { GuidGenerator, ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
 import { ContextAwareLogger } from 'logger';
-import { WebController, OnDemandPageScanRunResultProvider } from 'service-library';
+import { WebController, OnDemandPageScanRunResultProvider, WebApiErrorCode } from 'service-library';
 import { functionalTestGroupTypes, TestRunner, TestEnvironment, TestGroupConstructor } from 'functional-tests';
 import { a11yServiceClientTypeNames, A11yServiceClientProvider } from 'web-api-client';
 import { RunFunctionalTestGroupData } from './activity-request-data';
@@ -36,10 +36,6 @@ export class TestOnDemandController extends WebController {
 
     protected async handleRequest(...args: any[]): Promise<void> {
         this.logger.setCommonProperties({ source: 'testOnDemandFunc' });
-        this.logger.logInfo(`Executing '${this.context.executionContext.functionName}' function.`, {
-            funcName: this.context.executionContext.functionName,
-            invocationId: this.context.executionContext.invocationId,
-        });
 
         const data: RunFunctionalTestGroupData = {
             runId: '1',
@@ -70,7 +66,7 @@ export class TestOnDemandController extends WebController {
         await this.testRunner.run(functionalTestGroup, testRunMetadata);
     }
 
-    protected validateRequest(...args: any[]): boolean {
-        return true;
+    protected async validateRequest(...args: any[]): Promise<WebApiErrorCode> {
+        return undefined;
     }
 }

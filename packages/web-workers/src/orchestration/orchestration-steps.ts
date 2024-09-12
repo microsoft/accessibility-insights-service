@@ -1,13 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-/* eslint-disable import/no-internal-modules */
 import { AvailabilityTestConfig, SerializableResponse } from 'common';
-import { IOrchestrationFunctionContext, Task, TaskSet } from 'durable-functions/lib/src/classes';
 import { TestContextData, TestEnvironment, TestGroupName } from 'functional-tests';
 import { LogLevel } from 'logger';
 import { ScanCompletedNotification, ScanRunResponse, ScanRunResultResponse } from 'service-library';
 import { PostScanRequestOptions } from 'web-api-client';
+import * as df from 'durable-functions';
 import { ActivityAction } from '../contracts/activity-actions';
 import {
     ActivityRequestData,
@@ -25,7 +24,7 @@ import { ScanWaitOrchestrator } from './scan-wait-orchestrator';
 
 export class OrchestrationSteps {
     constructor(
-        private readonly context: IOrchestrationFunctionContext,
+        private readonly context: df.OrchestrationContext,
         private readonly availabilityTestConfig: AvailabilityTestConfig,
         private readonly logger: OrchestrationLogger,
         private readonly activityActionDispatcher: ActivityActionDispatcher,
@@ -37,14 +36,14 @@ export class OrchestrationSteps {
         return this.webApiConfig;
     }
 
-    public *invokeHealthCheckRestApi(): Generator<Task, void, SerializableResponse & void> {
+    public *invokeHealthCheckRestApi(): Generator<df.Task, void, SerializableResponse & void> {
         yield* this.activityActionDispatcher.callWebRequestActivity(ActivityAction.getHealthStatus);
     }
 
     public *invokeGetScanReportRestApi(
         scanId: string,
         reportId: string,
-    ): Generator<Task, SerializableResponse, SerializableResponse & void> {
+    ): Generator<df.Task, SerializableResponse, SerializableResponse & void> {
         const activityName = ActivityAction.getScanReport;
         const requestData: GetScanReportData = {
             scanId: scanId,
@@ -54,7 +53,7 @@ export class OrchestrationSteps {
         return yield* this.activityActionDispatcher.callWebRequestActivity(activityName, requestData);
     }
 
-    public *waitForBaseScanCompletion(scanId: string): Generator<Task, ScanRunResultResponse, SerializableResponse & void> {
+    public *waitForBaseScanCompletion(scanId: string): Generator<df.Task, ScanRunResultResponse, SerializableResponse & void> {
         return yield* this.scanWaitOrchestrator.waitFor(
             scanId,
             'waitForBaseScanCompletion',
@@ -64,7 +63,7 @@ export class OrchestrationSteps {
         );
     }
 
-    public *waitForScanCompletionNotification(scanId: string): Generator<Task, ScanCompletedNotification, SerializableResponse & void> {
+    public *waitForScanCompletionNotification(scanId: string): Generator<df.Task, ScanCompletedNotification, SerializableResponse & void> {
         const scanStatus = yield* this.scanWaitOrchestrator.waitFor(
             scanId,
             'waitForScanCompletionNotification',
@@ -76,7 +75,7 @@ export class OrchestrationSteps {
         return scanStatus?.notification;
     }
 
-    public *waitForDeepScanCompletion(scanId: string): Generator<Task, ScanRunResultResponse, SerializableResponse & void> {
+    public *waitForDeepScanCompletion(scanId: string): Generator<df.Task, ScanRunResultResponse, SerializableResponse & void> {
         return yield* this.scanWaitOrchestrator.waitFor(
             scanId,
             'waitForDeepScanCompletion',
@@ -89,7 +88,7 @@ export class OrchestrationSteps {
     public *invokeSubmitScanRequestRestApi(
         scanUrl: string,
         scanOptions?: PostScanRequestOptions,
-    ): Generator<Task, string, SerializableResponse & void> {
+    ): Generator<df.Task, string, SerializableResponse & void> {
         const requestData: CreateScanRequestData = {
             scanUrl,
             scanOptions: {
@@ -109,7 +108,7 @@ export class OrchestrationSteps {
         testScenarioName: string,
         testContextData: TestContextData,
         testGroupNames: TestGroupName[],
-    ): Generator<TaskSet, void, void> {
+    ): Generator<df.Task, void, void> {
         const activities: ActivityRequestData[] = testGroupNames?.map((testGroupName: TestGroupName) => {
             const testData: RunFunctionalTestGroupData = {
                 runId: this.context.df.instanceId,
@@ -131,7 +130,7 @@ export class OrchestrationSteps {
         yield* this.activityActionDispatcher.callActivitiesInParallel(activities, `Run functional tests: ${testGroupNames}`);
     }
 
-    public *logTestRunStart(testsToRun: TestIdentifier[]): Generator<Task, void, SerializableResponse & void> {
+    public *logTestRunStart(testsToRun: TestIdentifier[]): Generator<df.Task, void, SerializableResponse & void> {
         const activityData: LogTestRunStartData = {
             runId: this.context.df.instanceId,
             environmentName: this.availabilityTestConfig.environmentDefinition,
@@ -141,7 +140,7 @@ export class OrchestrationSteps {
         yield* this.activityActionDispatcher.callActivity(ActivityAction.logTestRunStart, activityData);
     }
 
-    public *trackScanRequestCompleted(): Generator<Task, void, SerializableResponse & void> {
+    public *trackScanRequestCompleted(): Generator<df.Task, void, SerializableResponse & void> {
         yield* this.activityActionDispatcher.callTrackAvailability(true, {
             activityName: 'scanRequestCompleted',
         });
@@ -160,7 +159,7 @@ export class OrchestrationSteps {
     private *getScanIdFromResponse(
         response: SerializableResponse,
         activityName: string,
-    ): Generator<Task, string, SerializableResponse & void> {
+    ): Generator<df.Task, string, SerializableResponse & void> {
         const body = response.body as ScanRunResponse[];
         const scanRunResponse = body[0];
         if (scanRunResponse.error !== undefined) {

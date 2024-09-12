@@ -3,17 +3,17 @@
 
 import 'reflect-metadata';
 
-import { Context } from '@azure/functions';
 import { GuidGenerator, ResponseWithBodyType, ServiceConfiguration } from 'common';
 import { FunctionalTestGroup, TestContextData, TestEnvironment, TestGroupConstructor, TestRunMetadata, TestRunner } from 'functional-tests';
 import { OnDemandPageScanRunResultProvider } from 'service-library';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { A11yServiceClient } from 'web-api-client';
+import { InvocationContext } from '@azure/functions';
 import { ActivityAction } from '../contracts/activity-actions';
 import { MockableLogger } from '../test-utilities/mockable-logger';
 import { ActivityRequestData, LogTestRunStartData, RunFunctionalTestGroupData, TrackAvailabilityData } from './activity-request-data';
-import { HealthMonitorClientController } from './health-monitor-client-controller';
 import { WebApiConfig } from './web-api-config';
+import { HealthMonitorActivity } from './health-monitor-activity';
 
 /* eslint-disable @typescript-eslint/consistent-type-assertions, @typescript-eslint/no-explicit-any */
 
@@ -32,17 +32,17 @@ class FunctionalTestGroupStub extends FunctionalTestGroup {
     protected registerTestCases(env: TestEnvironment): void {}
 }
 
-describe(HealthMonitorClientController, () => {
-    let testSubject: HealthMonitorClientController;
+describe(HealthMonitorActivity, () => {
+    let testSubject: HealthMonitorActivity;
     let serviceConfigurationMock: IMock<ServiceConfiguration>;
     let loggerMock: IMock<MockableLogger>;
-    let context: Context;
     let webApiClientMock: IMock<A11yServiceClient>;
     let jsonResponse: any;
     let expectedResponse: ResponseWithBodyType<any>;
     let guidGeneratorMock: IMock<GuidGenerator>;
     let onDemandPageScanRunResultProviderMock: IMock<OnDemandPageScanRunResultProvider>;
     let testRunnerMock: IMock<TestRunner>;
+    let context: InvocationContext;
 
     const testGroupTypes: { [key: string]: TestGroupConstructor } = {
         PostScan: FunctionalTestGroupStub,
@@ -58,15 +58,15 @@ describe(HealthMonitorClientController, () => {
         webApiClientMock = Mock.ofType(A11yServiceClient);
         guidGeneratorMock = Mock.ofType(GuidGenerator);
         onDemandPageScanRunResultProviderMock = Mock.ofType(OnDemandPageScanRunResultProvider);
-        context = <Context>(<unknown>{ bindingDefinitions: {}, bindings: {} });
         testRunnerMock = Mock.ofType(TestRunner);
 
+        context = {} as InvocationContext;
         jsonResponse = { testResponse: true } as any;
         expectedResponse = {
             body: 'some body content',
         } as ResponseWithBodyType<any>;
 
-        testSubject = new HealthMonitorClientController(
+        testSubject = new HealthMonitorActivity(
             serviceConfigurationMock.object,
             loggerMock.object,
             async () => Promise.resolve(webApiClientMock.object),
@@ -101,7 +101,7 @@ describe(HealthMonitorClientController, () => {
                     scanOptions: scanOptions,
                 },
             };
-            const result = await testSubject.invoke(context, args);
+            const result = await testSubject.handler(args, context);
             expect(result).toEqual(jsonResponse);
         });
 
@@ -118,7 +118,7 @@ describe(HealthMonitorClientController, () => {
                     scanId: scanId,
                 },
             };
-            const result = await testSubject.invoke(context, args);
+            const result = await testSubject.handler(args, context);
             expect(result).toEqual(jsonResponse);
         });
 
@@ -137,7 +137,7 @@ describe(HealthMonitorClientController, () => {
                     reportId: reportId,
                 },
             };
-            const result = await testSubject.invoke(context, args);
+            const result = await testSubject.handler(args, context);
             expect(result).toEqual(jsonResponse);
             expect(expectedResponse.body).toBeUndefined();
         });
@@ -151,7 +151,7 @@ describe(HealthMonitorClientController, () => {
             const args: ActivityRequestData = {
                 activityName: ActivityAction.getHealthStatus,
             };
-            await testSubject.invoke(context, args);
+            await testSubject.handler(args, context);
         });
 
         it('handles trackAvailability', async () => {
@@ -165,7 +165,7 @@ describe(HealthMonitorClientController, () => {
                 activityName: ActivityAction.trackAvailability,
                 data: data,
             };
-            await testSubject.invoke(context, args);
+            await testSubject.handler(args, context);
         });
 
         it('handles runFunctionalTestGroup', async () => {
@@ -204,7 +204,7 @@ describe(HealthMonitorClientController, () => {
                 })
                 .verifiable(Times.once());
 
-            await testSubject.invoke(context, args);
+            await testSubject.handler(args, context);
 
             const functionalTestGroupStub = testContainer as FunctionalTestGroupStub;
             expect(functionalTestGroupStub).toBeDefined();
@@ -251,7 +251,7 @@ describe(HealthMonitorClientController, () => {
             };
             loggerMock.setup((l) => l.trackEvent('FunctionalTest', expectedLogProperties)).verifiable();
 
-            await testSubject.invoke(context, args);
+            await testSubject.handler(args, context);
         });
 
         it('handles getWebApiConfig', async () => {
@@ -265,8 +265,8 @@ describe(HealthMonitorClientController, () => {
                 activityName: ActivityAction.getWebApiConfig,
             };
 
-            const actualConfig = await testSubject.invoke(context, args);
-            expect(actualConfig).toEqual(expectedConfig);
+            const result = await testSubject.handler(args, context);
+            expect(result).toEqual(expectedConfig);
         });
     });
 });

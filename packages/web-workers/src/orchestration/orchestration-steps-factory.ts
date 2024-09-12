@@ -2,9 +2,8 @@
 // Licensed under the MIT License.
 
 import { AvailabilityTestConfig } from 'common';
-// eslint-disable-next-line import/no-internal-modules
-import { IOrchestrationFunctionContext, Task } from 'durable-functions/lib/src/classes';
 import { Logger } from 'logger';
+import * as df from 'durable-functions';
 import { ActivityAction } from '../contracts/activity-actions';
 import { WebApiConfig } from '../controllers/web-api-config';
 import { ActivityActionDispatcher } from './activity-action-dispatcher';
@@ -15,14 +14,14 @@ import { ScanWaitOrchestrator } from './scan-wait-orchestrator';
 export type OrchestrationStepsFactory = typeof createOrchestrationSteps;
 
 export function* createOrchestrationSteps(
-    orchestrationContext: IOrchestrationFunctionContext,
+    orchestrationContext: df.OrchestrationContext,
     availabilityTestConfig: AvailabilityTestConfig,
     logger: Logger,
-    createActivityActionDispatcher: (context: IOrchestrationFunctionContext, logger: OrchestrationLogger) => ActivityActionDispatcher = (
+    createActivityActionDispatcher: (context: df.OrchestrationContext, logger: OrchestrationLogger) => ActivityActionDispatcher = (
         context,
         orchLogger,
     ) => new ActivityActionDispatcher(context, orchLogger),
-): Generator<Task, OrchestrationSteps, void> {
+): Generator<df.Task, OrchestrationSteps, void> {
     const orchestrationLogger = new OrchestrationLogger(orchestrationContext, logger);
     const activityActionDispatcher = createActivityActionDispatcher(orchestrationContext, orchestrationLogger);
     const scanWaitOrchestrator = new ScanWaitOrchestrator(orchestrationContext, activityActionDispatcher, orchestrationLogger);

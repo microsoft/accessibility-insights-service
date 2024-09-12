@@ -3,11 +3,11 @@
 
 import 'reflect-metadata';
 
-import { Context } from '@azure/functions';
 import { CrawlConfig, GuidGenerator, ServiceConfiguration, Url } from 'common';
 import { cloneDeep, isEmpty, isNil, pullAllBy, uniqBy } from 'lodash';
 import * as MockDate from 'mockdate';
 import {
+    AppContext,
     OnDemandPageScanRunResultProvider,
     PageScanRequestProvider,
     PartitionKeyFactory,
@@ -32,7 +32,7 @@ import { IMock, It, Mock, Times } from 'typemoq';
 import { MockableLogger } from '../test-utilities/mockable-logger';
 import { ScanBatchRequestFeedController } from './scan-batch-request-feed-controller';
 
-/* eslint-disable @typescript-eslint/no-explicit-any,  */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 let scanBatchRequestFeedController: ScanBatchRequestFeedController;
 let onDemandPageScanRunResultProviderMock: IMock<OnDemandPageScanRunResultProvider>;
@@ -43,7 +43,7 @@ let serviceConfigurationMock: IMock<ServiceConfiguration>;
 let loggerMock: IMock<MockableLogger>;
 let websiteScanDataProviderMock: IMock<WebsiteScanDataProvider>;
 let guidGeneratorMock: IMock<GuidGenerator>;
-let context: Context;
+let appContext: AppContext;
 let dateNow: Date;
 
 const guid = 'guid-1';
@@ -62,7 +62,7 @@ beforeEach(() => {
     loggerMock = Mock.ofType(MockableLogger);
     websiteScanDataProviderMock = Mock.ofType(WebsiteScanDataProvider);
     guidGeneratorMock = Mock.ofType<GuidGenerator>();
-    context = <Context>(<unknown>{ bindingDefinitions: {} });
+    appContext = {} as AppContext;
 
     serviceConfigurationMock
         .setup((o) => o.getConfigValue('crawlConfig'))
@@ -96,24 +96,24 @@ afterEach(() => {
 describe(ScanBatchRequestFeedController, () => {
     it('should skip processing on invalid undefined documents', async () => {
         setupMocksWithTimesNever();
-        await scanBatchRequestFeedController.invoke(context);
+        await scanBatchRequestFeedController.invoke(appContext);
     });
 
     it('should skip processing on invalid empty documents', async () => {
         setupMocksWithTimesNever();
-        await scanBatchRequestFeedController.invoke(context, <OnDemandPageScanBatchRequest[]>(<unknown>[]));
+        await scanBatchRequestFeedController.invoke(appContext, <OnDemandPageScanBatchRequest[]>(<unknown>[]));
     });
 
     it('should skip processing on other document type', async () => {
         setupMocksWithTimesNever();
-        await scanBatchRequestFeedController.invoke(context, <OnDemandPageScanBatchRequest[]>(
+        await scanBatchRequestFeedController.invoke(appContext, <OnDemandPageScanBatchRequest[]>(
             (<unknown>[{ ItemType: ItemType.onDemandPageScanRequest }])
         ));
     });
 
     it('should skip processing if request has no valid accepted scans', async () => {
         setupMocksWithTimesNever();
-        await scanBatchRequestFeedController.invoke(context, <OnDemandPageScanBatchRequest[]>(
+        await scanBatchRequestFeedController.invoke(appContext, <OnDemandPageScanBatchRequest[]>(
             (<unknown>[{ ItemType: ItemType.scanRunBatchRequest }])
         ));
     });
@@ -150,7 +150,7 @@ describe(ScanBatchRequestFeedController, () => {
         setupScanDataProviderMock(documents);
         setupPartitionKeyFactoryMock(documents);
 
-        await scanBatchRequestFeedController.invoke(context, documents);
+        await scanBatchRequestFeedController.invoke(appContext, documents);
     });
 
     it.each([
@@ -223,7 +223,7 @@ describe(ScanBatchRequestFeedController, () => {
         setupScanDataProviderMock(documents);
         setupPartitionKeyFactoryMock(documents);
 
-        await scanBatchRequestFeedController.invoke(context, documents);
+        await scanBatchRequestFeedController.invoke(appContext, documents);
     });
 });
 

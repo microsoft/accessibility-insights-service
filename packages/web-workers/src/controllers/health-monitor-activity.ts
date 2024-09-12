@@ -5,8 +5,9 @@ import { GuidGenerator, ServiceConfiguration, getSerializableResponse, ResponseS
 import { functionalTestGroupTypes, TestGroupConstructor, TestRunner } from 'functional-tests';
 import { inject, injectable } from 'inversify';
 import { ContextAwareLogger } from 'logger';
-import { HealthReport, OnDemandPageScanRunResultProvider, ScanResultResponse, ScanRunResponse, WebController } from 'service-library';
+import { HealthReport, OnDemandPageScanRunResultProvider, ScanResultResponse, ScanRunResponse } from 'service-library';
 import { A11yServiceClientProvider, a11yServiceClientTypeNames } from 'web-api-client';
+import { ActivityHandler } from 'durable-functions';
 import { ActivityAction } from '../contracts/activity-actions';
 import {
     ActivityRequestData,
@@ -19,15 +20,13 @@ import {
 } from './activity-request-data';
 import { WebApiConfig } from './web-api-config';
 
-/* eslint-disable @typescript-eslint/no-explicit-any, no-invalid-this */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 @injectable()
-export class HealthMonitorClientController extends WebController {
-    public readonly apiVersion = '1.0';
+export class HealthMonitorActivity {
+    public static readonly name = 'health-monitor-activity';
 
-    public readonly apiName = 'health-monitor-client';
-
-    private readonly activityCallbacks: { [activityName: string]: (args: unknown) => Promise<unknown> };
+    private readonly activityCallbacks: { [activityName: string]: (args: any) => Promise<any> };
 
     private readonly createScanRequest = async (data: CreateScanRequestData): Promise<SerializableResponse<ScanRunResponse[]>> => {
         const webApiClient = await this.webApiClientProvider();
@@ -100,6 +99,18 @@ export class HealthMonitorClientController extends WebController {
         return new WebApiConfig();
     };
 
+    public handler: ActivityHandler = async (activityRequestData: ActivityRequestData): Promise<any> => {
+        this.logger.setCommonProperties({ source: 'healthMonitorActivity' });
+        this.logger.logInfo(`Executing ${activityRequestData.activityName} activity action.`);
+
+        const activityCallback = this.activityCallbacks[activityRequestData.activityName];
+        const result = await activityCallback(activityRequestData.data);
+
+        this.logger.logInfo(`${activityRequestData.activityName} activity action completed with result ${JSON.stringify(result)}`);
+
+        return result;
+    };
+
     public constructor(
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
         @inject(ContextAwareLogger) protected readonly logger: ContextAwareLogger,
@@ -110,8 +121,6 @@ export class HealthMonitorClientController extends WebController {
         protected readonly testGroupTypes: { [key: string]: TestGroupConstructor } = functionalTestGroupTypes,
         protected readonly serializeResponse: ResponseSerializer = getSerializableResponse,
     ) {
-        super(logger);
-
         testRunner.setLogger(this.logger);
 
         this.activityCallbacks = {
@@ -124,21 +133,5 @@ export class HealthMonitorClientController extends WebController {
             [ActivityAction.logTestRunStart]: this.logTestRunStart,
             [ActivityAction.getWebApiConfig]: this.getWebApiConfig,
         };
-    }
-
-    protected async handleRequest(...args: any[]): Promise<unknown> {
-        const activityRequestData = args[0] as ActivityRequestData;
-        this.logger.setCommonProperties({ source: 'healthMonitorClientFunc' });
-        this.logger.logInfo(`Executing ${activityRequestData.activityName} activity action.`);
-
-        const activityCallback = this.activityCallbacks[activityRequestData.activityName];
-        const result = await activityCallback(activityRequestData.data);
-        this.logger.logInfo(`${activityRequestData.activityName} activity action completed with result ${JSON.stringify(result)}`);
-
-        return result;
-    }
-
-    protected validateRequest(...args: any[]): boolean {
-        return true;
     }
 }
