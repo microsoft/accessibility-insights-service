@@ -63,12 +63,6 @@ module.exports = (env) => {
                 patterns: [
                     {
                         context: './',
-                        from: '**/function.json',
-                        to: '',
-                        globOptions: { ignore: ['dist/**'] },
-                    },
-                    {
-                        context: './',
                         from: 'host.json',
                         to: '',
                         globOptions: { ignore: ['dist/**'] },

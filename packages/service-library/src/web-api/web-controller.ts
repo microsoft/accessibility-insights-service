@@ -31,7 +31,7 @@ export abstract class WebController {
 
         try {
             this.logger.setCommonProperties(this.getBaseTelemetryProperties());
-            this.logger.logInfo(`Executing '${this.appContext.context.functionName}' function app.`);
+            this.logger.logInfo(`Executing '${this.appContext.context?.functionName}' function app.`);
 
             const webApiErrorCode = await this.validateRequest(...args);
 

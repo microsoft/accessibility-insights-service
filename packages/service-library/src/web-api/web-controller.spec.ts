@@ -56,6 +56,7 @@ describe(WebController, () => {
         appContext = {
             context: {
                 invocationId,
+                functionName: 'functionName',
                 options: {
                     trigger: {
                         type: 'httpTrigger',
@@ -77,6 +78,7 @@ describe(WebController, () => {
                         apiName: testSubject.apiName,
                         apiVersion: testSubject.apiVersion,
                         controller: 'TestableWebController',
+                        functionName: 'functionName',
                         invocationId,
                     }),
                 ),
@@ -118,6 +120,7 @@ describe(WebController, () => {
             apiName: testSubject.apiName,
             apiVersion: testSubject.apiVersion,
             controller: 'TestableWebController',
+            functionName: 'functionName',
             invocationId,
         });
     });
