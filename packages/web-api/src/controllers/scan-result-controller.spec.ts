@@ -83,7 +83,10 @@ describe(ScanResultController, () => {
             url: `${baseUrl}scans/${scanId}/`,
             method: 'GET',
             headers: { 'content-type': 'application/json' },
-            query: { 'api-version': apiVersion, scanId: scanId },
+            query: { 'api-version': apiVersion },
+            params: {
+                scanId,
+            },
         } as HttpRequestInit;
         appContext = {
             request: new HttpRequest(funcHttpRequestInit),

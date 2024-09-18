@@ -70,7 +70,7 @@ export class ActivityActionDispatcher {
             return;
         }
         const parallelTasks = activities.map((activityRequestData: ActivityRequestData) => {
-            return this.context.df.callActivity(HealthMonitorActivity.name, activityRequestData);
+            return this.context.df.callActivity(HealthMonitorActivity.activityName, activityRequestData);
         });
 
         this.orchestrationLogger.logOrchestrationStep(`Starting ${taskName}`);
@@ -91,7 +91,7 @@ export class ActivityActionDispatcher {
         };
 
         this.orchestrationLogger.logOrchestrationStep(`Executing '${activityName}' orchestration step.`);
-        const activityResult = yield this.context.df.callActivity(HealthMonitorActivity.name, activityRequestData);
+        const activityResult = yield this.context.df.callActivity(HealthMonitorActivity.activityName, activityRequestData);
         if (logActivitySuccess) {
             this.orchestrationLogger.logOrchestrationStep(`${activityName} activity completed`);
         }

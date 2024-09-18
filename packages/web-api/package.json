@@ -23,6 +23,7 @@
         "url": "https://github.com/Microsoft/accessibility-insights-service/issues"
     },
     "homepage": "https://github.com/Microsoft/accessibility-insights-service#readme",
+    "main": "dist/**/index.js",
     "devDependencies": {
         "@types/dotenv": "^8.2.0",
         "@types/jest": "^29.5.12",

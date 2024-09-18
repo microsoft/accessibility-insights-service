@@ -7,7 +7,7 @@ import { ProcessEntryPointBase } from '../process-entry-point-base';
 import { Newable } from './web-api-ioc-types';
 import { AppContext, WebController } from './web-controller';
 
-/* eslint-disable @typescript-eslint/no-explicit-any,  */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 export class WebControllerDispatcher extends ProcessEntryPointBase {
     constructor(private readonly processLifeCycleContainer: Container) {

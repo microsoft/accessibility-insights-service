@@ -65,20 +65,23 @@ describe(ScanReportController, () => {
         loggerMock = Mock.ofType<MockableLogger>();
     });
 
-    function createContext(queryParam: string, queryValue: string): void {
+    function createContext(urlParam: string, urlValue: string): void {
         const funcHttpRequestInit = {
             url: 'http://localhost/',
             method: 'GET',
             headers: { 'content-type': 'application/json' },
-            query: { 'api-version': '1.0', [queryParam]: queryValue },
+            query: { 'api-version': '1.0' },
+            params: {
+                [urlParam]: urlValue,
+            },
         } as HttpRequestInit;
         appContext = {
             request: new HttpRequest(funcHttpRequestInit),
         } as AppContext;
     }
 
-    function createScanResultController(queryParam: string, queryValue: string): ScanReportController {
-        createContext(queryParam, queryValue);
+    function createScanResultController(urlParam: string, urlValue: string): ScanReportController {
+        createContext(urlParam, urlValue);
         const controller = new ScanReportController(
             pageScanRunReportProviderMock.object,
             guidGeneratorMock.object,

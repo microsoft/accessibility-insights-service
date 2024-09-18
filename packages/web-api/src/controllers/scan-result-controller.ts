@@ -35,7 +35,7 @@ export class ScanResultController extends BaseScanResultController {
     }
 
     public async handleRequest(): Promise<HttpResponseInit> {
-        const scanId = this.appContext.request.query.get('scanId');
+        const scanId = this.appContext.request.params.scanId;
         this.logger.setCommonProperties({ source: 'getScanResultRESTApi', scanId });
 
         if (!this.isScanIdValid(scanId)) {

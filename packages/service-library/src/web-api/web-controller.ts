@@ -8,7 +8,7 @@ import { ContextAwareLogger } from 'logger';
 import { WebApiErrorCode } from './web-api-error-codes';
 import { WebHttpResponse } from './web-http-response';
 
-/* eslint-disable @typescript-eslint/no-explicit-any,  */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 export interface AppContext {
     timer?: Timer;

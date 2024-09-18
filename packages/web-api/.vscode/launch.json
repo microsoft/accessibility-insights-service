@@ -5,9 +5,8 @@
             "name": "Attach to web-api",
             "type": "node",
             "request": "attach",
-            "port": 9229,
-            "preLaunchTask": "func: host start",
-            "resolveSourceMapLocations": ["${workspaceFolder}/dist/**/*.js", "${workspaceFolder}/../**/dist/**/*.js"]
+            "preLaunchTask": "func-start",
+            "resolveSourceMapLocations": ["${workspaceFolder}/../**/dist/**/*.js"]
         }
     ]
 }

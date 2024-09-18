@@ -3,17 +3,15 @@
     "tasks": [
         {
             "type": "func",
-            "command": "host start",
-            "problemMatcher": "$func-watch",
+            "label": "func-start",
+            "command": "host start --verbose",
+            "problemMatcher": "$func-node-watch",
             "isBackground": true,
-            "dependsOn": "copy-dotenv",
-            "options": {
-                "cwd": "${workspaceRoot}/dist"
-            }
+            "dependsOn": "copy-env"
         },
         {
             "type": "shell",
-            "label": "copy-dotenv",
+            "label": "copy-env",
             "dependsOn": "copy-local-settings",
             "windows": {
                 "command": "xcopy /Y .env .\\dist\\"
@@ -38,7 +36,7 @@
             "label": "copy-runtime-config",
             "dependsOn": "tsc",
             "windows": {
-                "command": "xcopy /Y local.settings.json .\\dist\\"
+                "command": "xcopy /Y ..\\resource-deployment\\runtime-config\\runtime-config.dev.json ..\\common\\dist\\configuration\\runtime-config.json"
             },
             "osx": {
                 "command": "cp ../resource-deployment/runtime-config/runtime-config.dev.json ../common/dist/configuration/runtime-config.json"
@@ -47,8 +45,19 @@
         {
             "type": "shell",
             "label": "tsc",
+            "dependsOn": "func-stop",
             "command": "tsc",
             "problemMatcher": "$tsc"
+        },
+        {
+            "type": "shell",
+            "label": "func-stop",
+            "windows": {
+                "command": "taskkill /im func /f /t"
+            },
+            "osx": {
+                "command": "pkill -9 -f func & true"
+            }
         }
     ]
 }

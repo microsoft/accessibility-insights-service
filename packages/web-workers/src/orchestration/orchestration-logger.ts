@@ -18,7 +18,7 @@ export class OrchestrationLogger {
     private getDefaultLogProperties(): OrchestrationTelemetryProperties {
         return {
             instanceId: this.context.df.instanceId,
-            isReplaying: this.context.df.isReplaying.toString(),
+            isReplaying: (this.context.df.isReplaying ?? false).toString(),
             currentUtcDateTime: this.context.df.currentUtcDateTime.toUTCString(),
         };
     }

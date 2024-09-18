@@ -184,7 +184,7 @@ describe(ActivityActionDispatcher, () => {
             data: data,
         };
         durableOrchestrationContextMock
-            .setup((o) => o.callActivity(HealthMonitorActivity.name, activityRequestData))
+            .setup((o) => o.callActivity(HealthMonitorActivity.activityName, activityRequestData))
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             .returns(() => result as any)
             .verifiable(Times.once());
@@ -208,7 +208,9 @@ describe(ActivityActionDispatcher, () => {
 
     function setupTrackAvailabilityNeverCalled(): void {
         durableOrchestrationContextMock
-            .setup((o) => o.callActivity(HealthMonitorActivity.name, It.isObjectWith({ activityName: ActivityAction.trackAvailability })))
+            .setup((o) =>
+                o.callActivity(HealthMonitorActivity.activityName, It.isObjectWith({ activityName: ActivityAction.trackAvailability })),
+            )
             .verifiable(Times.never());
     }
 });

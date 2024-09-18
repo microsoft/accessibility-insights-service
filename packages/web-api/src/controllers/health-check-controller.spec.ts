@@ -60,12 +60,15 @@ describe(HealthCheckController, () => {
         );
     });
 
-    function createContext(queryParams: any): void {
+    function createContext(urlParams: any): void {
         const funcHttpRequestInit = {
             url: 'http://localhost/',
             method: 'GET',
             headers: { 'content-type': 'application/json' },
-            query: { 'api-version': '1.0', ...queryParams },
+            query: { 'api-version': '1.0' },
+            params: {
+                ...urlParams,
+            },
         } as HttpRequestInit;
         appContext = {
             request: new HttpRequest(funcHttpRequestInit),

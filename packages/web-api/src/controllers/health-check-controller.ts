@@ -42,7 +42,7 @@ export class HealthCheckController extends ApiController {
         this.logger.trackEvent('HealthCheck');
         this.logger.setCommonProperties({ source: 'getHealthCheckReportRESTApi' });
 
-        const target = this.appContext.request.query.get('target');
+        const target = this.appContext.request.params.target;
         if (isEmpty(target)) {
             return this.processEchoHealthRequest();
         }
@@ -152,7 +152,7 @@ export class HealthCheckController extends ApiController {
     }
 
     private getReleaseId(): string {
-        const releaseId = this.appContext.request.query.get('targetId');
+        const releaseId = this.appContext.request.params.targetId;
 
         return isEmpty(releaseId) ? process.env.RELEASE_VERSION : releaseId;
     }

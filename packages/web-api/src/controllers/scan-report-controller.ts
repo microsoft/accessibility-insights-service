@@ -26,8 +26,8 @@ export class ScanReportController extends ApiController {
     }
 
     public async handleRequest(): Promise<HttpResponseInit> {
-        const scanId = this.appContext.request.query.get('scanId');
-        const reportId = this.appContext.request.query.get('reportId');
+        const scanId = this.appContext.request.params.scanId;
+        const reportId = this.appContext.request.params.reportId;
 
         this.logger.setCommonProperties({ source: 'getScanReportRESTApi', scanId, reportId });
 

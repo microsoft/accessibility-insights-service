@@ -24,7 +24,7 @@ import { WebApiConfig } from './web-api-config';
 
 @injectable()
 export class HealthMonitorActivity {
-    public static readonly name = 'health-monitor-activity';
+    public static readonly activityName = 'health-monitor-activity';
 
     private readonly activityCallbacks: { [activityName: string]: (args: any) => Promise<any> };
 
