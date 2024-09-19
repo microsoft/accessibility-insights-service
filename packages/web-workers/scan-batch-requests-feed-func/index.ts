@@ -13,10 +13,10 @@ export async function requestHandler(documents: OnDemandPageScanBatchRequest[], 
 }
 
 app.cosmosDB('scan-batch-requests-feed', {
-    connectionStringSetting: 'COSMOS_CONNECTION_STRING',
+    connection: 'COSMOS_CONNECTION_STRING',
     databaseName: 'onDemandScanner',
-    collectionName: 'scanBatchRequests',
-    createLeaseCollectionIfNotExists: true,
+    containerName: 'scanBatchRequests',
+    createLeaseContainerIfNotExists: true,
     startFromBeginning: true,
     maxItemsPerInvocation: 1,
     handler: requestHandler,
