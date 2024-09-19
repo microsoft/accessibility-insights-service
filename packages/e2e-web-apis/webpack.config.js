@@ -75,21 +75,6 @@ module.exports = (env) => {
                         from: '../../yarn.lock',
                         to: '',
                     },
-                    {
-                        context: '../parallel-workers/dist/',
-                        from: '**/*.js',
-                        to: '',
-                    },
-                    {
-                        context: '../parallel-workers/dist/',
-                        from: '**/*.js',
-                        to: 'scan-notification-client-func',
-                    },
-                    {
-                        context: '../parallel-workers/dist/',
-                        from: '**/*.js',
-                        to: 'scan-notification-client-func-fail',
-                    },
                 ],
             }),
         ],

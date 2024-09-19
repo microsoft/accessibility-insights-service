@@ -43,12 +43,6 @@
         "webpack-ignore-dynamic-require": "^1.0.0"
     },
     "dependencies": {
-        "@azure/functions": "^4.5.0",
-        "azure-services": "workspace:*",
-        "inversify": "^6.0.1",
-        "lodash": "^4.17.21",
-        "logger": "workspace:*",
-        "parallel-workers": "workspace:*",
-        "reflect-metadata": "^0.1.13"
+        "@azure/functions": "^4.5.0"
     }
 }
