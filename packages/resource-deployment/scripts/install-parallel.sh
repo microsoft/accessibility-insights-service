@@ -153,24 +153,6 @@ function validateDotnetSdk() {
     printf ".Net SDK version\n${dotnetSdk}\n"
 }
 
-function validateAzureFunctionsCoreTools() {
-    local funcVersion
-    local kernelName
-
-    funcVersion=$(func version 2>/dev/null) || true
-    if [[ -z ${funcVersion} ]]; then
-        kernelName=$(uname -s 2>/dev/null) || true
-        if [[ ${kernelName} == "Linux" ]]; then
-            echo "Azure Functions Core Tools is not detected on a machine and will be installed by the deployment script."
-        else
-            echo "Azure Functions Core Tools is expected to be installed on a machine. How to install tool, see https://learn.microsoft.com/en-us/azure/azure-functions/functions-run-local"
-            exit 1
-        fi
-    else
-        echo "Azure Functions Core Tools version ${funcVersion}"
-    fi
-}
-
 function install() {
     # Login to Azure if required
     if ! az account show 1>/dev/null; then
@@ -225,7 +207,6 @@ function install() {
 validateAzCliVersion
 validateJqTool
 validateDotnetSdk
-validateAzureFunctionsCoreTools
 install
 
 echo "Installation completed"

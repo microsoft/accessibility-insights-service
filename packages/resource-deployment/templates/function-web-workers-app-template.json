@@ -100,7 +100,7 @@
                         },
                         {
                             "name": "WEBSITE_NODE_DEFAULT_VERSION",
-                            "value": "~20"
+                            "value": "~18"
                         },
                         {
                             "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
@@ -111,7 +111,7 @@
                             "value": "[first(listConnectionStrings(resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('cosmosAccountName')), '2015-11-06').connectionStrings).connectionString]"
                         },
                         {
-                            "name": "AI_KEY_VAULT_URL",
+                            "name": "KEY_VAULT_URL",
                             "value": "[concat('https://', parameters('keyVaultName'), '.vault.azure.net/')]"
                         },
                         {
