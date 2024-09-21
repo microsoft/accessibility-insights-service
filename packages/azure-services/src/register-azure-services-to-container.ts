@@ -100,7 +100,7 @@ function setupAzureKeyVaultClientProvider(container: Container): void {
         const credentialProvider = container.get(CredentialsProvider);
         const credentials = credentialProvider.getAzureCredential();
 
-        return new SecretClient(process.env.KEY_VAULT_URL, credentials);
+        return new SecretClient(process.env.AI_KEY_VAULT_URL, credentials);
     });
 }
 
