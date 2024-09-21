@@ -103,7 +103,7 @@ publishFunctionAppScripts() {
     cd "${currentDir}"
 }
 
-waitForDeploymentCompletion() {
+waitForFunctionStart() {
     local functionAppName=$1
 
     az functionapp start --resource-group "${resourceGroupName}" --name "${functionAppName}"
@@ -119,7 +119,7 @@ getFunctionAppPrincipalId() {
     echo "Azure function app ${functionAppName} has assigned principal ID ${principalId}."
 }
 
-deployFunctionApp() {
+deployFunctionAppTemplate() {
     local functionAppNamePrefix=$1
     local templateFilePath=$2
     local functionAppName=$3
@@ -133,34 +133,8 @@ deployFunctionApp() {
         --query "properties.outputResources[].id" \
         -o tsv 1>/dev/null
 
-    waitForDeploymentCompletion "${functionAppName}"
+    waitForFunctionStart "${functionAppName}"
     echo "Successfully deployed Azure function app ${functionAppName}"
-}
-
-function deployWebApiFunction() {
-    deployFunctionApp "web-api-allyfuncapp" "${webApiFuncTemplateFilePath}" "${webApiFuncAppName}" "clientId=${webApiIdentityClientId} releaseVersion=${releaseVersion} allowedApplications=${allowedApplications}"
-}
-
-function deployWebWorkersFunction() {
-    deployFunctionApp "web-workers-allyfuncapp" "${webWorkersFuncTemplateFilePath}" "${webWorkersFuncAppName}" "releaseVersion=${releaseVersion}"
-}
-
-function deployE2EWebApisFunction() {
-    deployFunctionApp "e2e-web-apis-allyfuncapp" "${e2eWebApiFuncTemplateFilePath}" "${e2eWebApisFuncAppName}"
-}
-
-function enableStorageAccess() {
-    role="Storage Blob Data Contributor"
-    scope="--scope /subscriptions/${subscription}/resourceGroups/${resourceGroupName}/providers/Microsoft.Storage/storageAccounts/${storageAccountName}"
-    . "${0%/*}/create-role-assignment.sh"
-
-    role="Storage Queue Data Contributor"
-    scope="--scope /subscriptions/${subscription}/resourceGroups/${resourceGroupName}/providers/Microsoft.Storage/storageAccounts/${storageAccountName}"
-    . "${0%/*}/create-role-assignment.sh"
-
-    role="Storage Table Data Contributor"
-    scope="--scope /subscriptions/${subscription}/resourceGroups/${resourceGroupName}/providers/Microsoft.Storage/storageAccounts/${storageAccountName}"
-    . "${0%/*}/create-role-assignment.sh"
 }
 
 function enableCosmosAccess() {
@@ -191,6 +165,26 @@ function enableCosmosAccess() {
         --role-definition-id "${RBACRoleId}" 1>/dev/null
 }
 
+function assignUserIdentity() {
+    local functionAppName=$1
+
+    az webapp identity assign --identities "${userIdentityId}" --name "${functionAppName}" --resource-group "${resourceGroupName}" 1>/dev/null
+}
+
+function enableStorageAccess() {
+    role="Storage Blob Data Contributor"
+    scope="--scope /subscriptions/${subscription}/resourceGroups/${resourceGroupName}/providers/Microsoft.Storage/storageAccounts/${storageAccountName}"
+    . "${0%/*}/create-role-assignment.sh"
+
+    role="Storage Queue Data Contributor"
+    scope="--scope /subscriptions/${subscription}/resourceGroups/${resourceGroupName}/providers/Microsoft.Storage/storageAccounts/${storageAccountName}"
+    . "${0%/*}/create-role-assignment.sh"
+
+    role="Storage Table Data Contributor"
+    scope="--scope /subscriptions/${subscription}/resourceGroups/${resourceGroupName}/providers/Microsoft.Storage/storageAccounts/${storageAccountName}"
+    . "${0%/*}/create-role-assignment.sh"
+}
+
 function enableManagedIdentity() {
     echo "Granting access to ${webApiFuncAppName} function service principal..."
     getFunctionAppPrincipalId "${webApiFuncAppName}"
@@ -210,48 +204,35 @@ function enableManagedIdentity() {
     enableStorageAccess
 }
 
-function publishWebApiScripts() {
+function deployWebApiFunction() {
+    deployFunctionAppTemplate "web-api-allyfuncapp" "${webApiFuncTemplateFilePath}" "${webApiFuncAppName}" "clientId=${webApiIdentityClientId} releaseVersion=${releaseVersion} allowedApplications=${allowedApplications}"
     publishFunctionAppScripts "web-api" "${webApiFuncAppName}"
+    assignUserIdentity "${webApiFuncAppName}"
+    az functionapp restart --resource-group "${resourceGroupName}" --name "${webApiFuncAppName}"
 }
 
-function publishWebWorkerScripts() {
+function deployWebWorkersFunction() {
+    deployFunctionAppTemplate "web-workers-allyfuncapp" "${webWorkersFuncTemplateFilePath}" "${webWorkersFuncAppName}" "releaseVersion=${releaseVersion}"
     publishFunctionAppScripts "web-workers" "${webWorkersFuncAppName}"
+    assignUserIdentity "${webWorkersFuncAppName}"
+    az functionapp restart --resource-group "${resourceGroupName}" --name "${webWorkersFuncAppName}"
 }
 
-function publishE2EWebApisScripts() {
+function deployE2EWebApisFunction() {
+    deployFunctionAppTemplate "e2e-web-apis-allyfuncapp" "${e2eWebApiFuncTemplateFilePath}" "${e2eWebApisFuncAppName}"
     publishFunctionAppScripts "e2e-web-apis" "${e2eWebApisFuncAppName}"
-}
-
-function assignUserIdentity() {
-    local functionAppName=$1
-
-    userIdentityId=$(az identity show --name "${webApiManagedIdentityName}" --resource-group "${resourceGroupName}" --query id -o tsv)
-    az webapp identity assign --identities "${userIdentityId}" --name "${functionAppName}" --resource-group "${resourceGroupName}" 1>/dev/null
+    assignUserIdentity "${e2eWebApisFuncAppName}"
+    az functionapp restart --resource-group "${resourceGroupName}" --name "${e2eWebApisFuncAppName}"
 }
 
 function setupAzureFunctions() {
-    # "deployWebApiFunction"
-    # "deployWebWorkersFunction"
-    # "deployE2EWebApisFunction"
     local functionSetupProcesses=(
         "deployWebApiFunction"
-        "deployE2EWebApisFunction"
-    )
+        "deployWebWorkersFunction"
+        "deployE2EWebApisFunction")
     runCommandsWithoutSecretsInParallel functionSetupProcesses
 
     enableManagedIdentity
-
-    # "publishWebApiScripts"
-    # "publishWebWorkerScripts"
-    # "publishE2EWebApisScripts"
-    functionSetupProcesses=(
-        "deployWebApiFunction"
-        "publishE2EWebApisScripts"
-    )
-    runCommandsWithoutSecretsInParallel functionSetupProcesses
-
-    assignUserIdentity "${webWorkersFuncAppName}"
-
     echo "Successfully published Azure Functions."
 }
 
@@ -282,6 +263,7 @@ echo "Setting up function apps with arguments:
 "
 
 webApiIdentityClientId=$(az identity show --name "${webApiManagedIdentityName}" --resource-group "${resourceGroupName}" --query clientId -o tsv)
+userIdentityId=$(az identity show --name "${webApiManagedIdentityName}" --resource-group "${resourceGroupName}" --query id -o tsv)
 
 getAllowedApplications
 setupAzureFunctions

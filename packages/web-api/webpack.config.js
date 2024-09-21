@@ -71,12 +71,8 @@ module.exports = (env) => {
                         globOptions: { ignore: ['dist/**'] },
                     },
                     {
-                        from: 'package.json',
-                        to: '',
-                    },
-                    {
-                        from: '../../yarn.lock',
-                        to: '',
+                        from: 'package-func.json',
+                        to: 'package.json',
                     },
                     {
                         context: '../parallel-workers/dist/',
