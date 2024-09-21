@@ -138,7 +138,22 @@
                     ]
                 }
             },
-            "dependsOn": ["[resourceId('Microsoft.Web/serverfarms', variables('appPlanName'))]"]
+            "dependsOn": ["[resourceId('Microsoft.Web/serverfarms', variables('appPlanName'))]"],
+            "resources": [
+                {
+                    "name": "[concat(parameters('name'), '/authsettingsV2')]",
+                    "apiVersion": "2022-09-01",
+                    "type": "Microsoft.Web/sites/config",
+                    "location": "[parameters('location')]",
+                    "dependsOn": ["[resourceId('Microsoft.Web/sites', parameters('name'))]"],
+                    "properties": {
+                        "platform": {
+                            "enabled": false,
+                            "runtimeVersion": "~1"
+                        }
+                    }
+                }
+            ]
         }
     ]
 }
