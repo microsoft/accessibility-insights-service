@@ -246,7 +246,6 @@ describe('RegisterAzureServicesToContainer', () => {
 
     describe('CosmosClientProvider', () => {
         const cosmosDbUrl = 'db url';
-        const cosmosDbKey = 'db key';
 
         let secretProviderMock: IMock<SecretProvider>;
         let credentialsProviderMock: IMock<CredentialsProvider>;
