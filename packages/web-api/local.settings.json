@@ -2,6 +2,6 @@
     "IsEncrypted": false,
     "Values": {
         "FUNCTIONS_WORKER_RUNTIME": "node",
-        "AzureWebJobsStorage": "{AzureWebJobsStorage}"
+        "AzureWebJobsStorage__accountName": "{AccountName}"
     }
 }

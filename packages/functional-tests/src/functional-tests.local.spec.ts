@@ -25,8 +25,6 @@ describe('functional tests', () => {
     const clientSecret = process.env.REST_API_SP_APP_SECRET;
     const tenantId = process.env.SP_TENANT;
     const apimName = process.env.APIM_SERVICE_NAME;
-    const cosmosKey = process.env.COSMOS_DB_KEY;
-    const cosmosUrl = process.env.COSMOS_DB_URL;
 
     let logger: GlobalLogger;
     let a11yServiceClient: A11yServiceClient;
@@ -69,14 +67,7 @@ describe('functional tests', () => {
     testEach(['SingleScanPostCompletion', 'ScanQueueing', 'ScanReports', 'Finalizer'], isServiceCredProvided);
 
     function isServiceCredProvided(): boolean {
-        return (
-            !isEmpty(clientId) &&
-            !isEmpty(clientSecret) &&
-            !isEmpty(tenantId) &&
-            !isEmpty(apimName) &&
-            !isEmpty(cosmosKey) &&
-            !isEmpty(cosmosUrl)
-        );
+        return !isEmpty(clientId) && !isEmpty(clientSecret) && !isEmpty(tenantId) && !isEmpty(apimName);
     }
 
     function testIf(name: string, condition: () => boolean | Promise<boolean>, callback: () => void): void {

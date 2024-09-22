@@ -112,12 +112,12 @@
                             "value": "[parameters('storageAccountName')]"
                         },
                         {
-                            "name": "WEBSITE_RUN_FROM_PACKAGE",
-                            "value": "[format('https://{0}.blob.core.windows.net/function-apps/{1}.zip', parameters('storageAccountName'), parameters('name'))]"
+                            "name": "COSMOS_CONNECTION__accountEndpoint",
+                            "value": "[concat('https://', parameters('cosmosAccountName'), '.documents.azure.com:443/')]"
                         },
                         {
-                            "name": "COSMOS_CONNECTION_STRING",
-                            "value": "[first(listConnectionStrings(resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('cosmosAccountName')), '2015-11-06').connectionStrings).connectionString]"
+                            "name": "WEBSITE_RUN_FROM_PACKAGE",
+                            "value": "[format('https://{0}.blob.core.windows.net/function-apps/{1}.zip', parameters('storageAccountName'), parameters('name'))]"
                         },
                         {
                             "name": "WEB_API_BASE_URL",

@@ -137,13 +137,9 @@ function setupQueueServiceClientProvider(container: Container): void {
 function setupCosmosClientProvider(container: Container, cosmosClientFactory: (options: CosmosClientOptions) => CosmosClient): void {
     container.bind<interfaces.Factory<CosmosClient>>(iocTypeNames.CosmosClientProvider).toFactory<Promise<CosmosClient>>((context) => {
         return async () => {
-            if (!isEmpty(process.env.COSMOS_DB_URL) && !isEmpty(process.env.COSMOS_DB_KEY)) {
-                return cosmosClientFactory({ endpoint: process.env.COSMOS_DB_URL, key: process.env.COSMOS_DB_KEY });
-            } else {
-                const cosmosCredential = await context.container.get<() => Promise<CosmosCredential>>(iocTypeNames.CosmosCredential)();
+            const cosmosCredential = await context.container.get<() => Promise<CosmosCredential>>(iocTypeNames.CosmosCredential)();
 
-                return cosmosClientFactory({ endpoint: cosmosCredential.endpoint, aadCredentials: cosmosCredential.tokenCredential });
-            }
+            return cosmosClientFactory({ endpoint: cosmosCredential.endpoint, aadCredentials: cosmosCredential.tokenCredential });
         };
     });
 }

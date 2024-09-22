@@ -314,22 +314,6 @@ describe('RegisterAzureServicesToContainer', () => {
             expect(cosmosCredential2).toEqual(expectedOptions);
             expect(cosmosCredential1).toBe(cosmosCredential2);
         });
-
-        it('use environment variables if available', async () => {
-            const expectedOptions = { endpoint: cosmosDbUrl, key: cosmosDbKey };
-            secretProviderMock.reset();
-            secretProviderMock.setup(async (s) => s.getSecret(secretNames.cosmosDbUrl)).verifiable(Times.never());
-            process.env.COSMOS_DB_URL = cosmosDbUrl;
-            process.env.COSMOS_DB_KEY = cosmosDbKey;
-
-            runCosmosClientTest(container, secretProviderMock);
-
-            const expectedCosmosClient = cosmosClientFactoryStub(expectedOptions);
-            const cosmosClientProvider = container.get<CosmosClientProvider>(iocTypeNames.CosmosClientProvider);
-            const cosmosClient = await cosmosClientProvider();
-
-            expect(cosmosClient).toEqual(expectedCosmosClient);
-        });
     });
 });
 

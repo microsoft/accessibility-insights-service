@@ -26,32 +26,6 @@ getCosmosDbUrl() {
     fi
 }
 
-getCosmosDbAccessKey() {
-    cosmosDbAccessKey=$(az cosmosdb keys list --name "$cosmosAccountName" --resource-group "$resourceGroupName" --query "primaryMasterKey" -o tsv)
-
-    if [[ -z $cosmosDbAccessKey ]]; then
-        echo "Unable to get access key for cosmos DB account $cosmosAccountName"
-        exit 1
-    fi
-}
-
-getStorageConnectionString() {
-    storageConnectionString=$(az storage account show-connection-string \
-        --name "$storageAccountName" \
-        --resource-group "$resourceGroupName" \
-        --subscription "$subscription" \
-        --query connectionString --out tsv)
-}
-
-getCosmosDbConnectionString() {
-    cosmosDbConnectionString=$(az cosmosdb keys list \
-        --type connection-strings \
-        --name "$cosmosAccountName" \
-        --resource-group "$resourceGroupName" \
-        --subscription "$subscription" \
-        --query connectionStrings[0].connectionString --out tsv)
-}
-
 getAppInsightKey() {
     id="/subscriptions/$subscription/resourceGroups/$resourceGroupName/providers/microsoft.insights/components/$appInsightsName"
     appInsightInstrumentationKey=$(az resource show --id "$id" --query properties.InstrumentationKey --out tsv)
@@ -84,9 +58,6 @@ fi
 . "${0%/*}/create-sp-for-debug.sh"
 
 getCosmosDbUrl
-getCosmosDbAccessKey
-getStorageConnectionString
-getCosmosDbConnectionString
 getAppInsightKey
 getBatchAccountEndpoint
 
@@ -105,8 +76,6 @@ AI_STORAGE_PRIVACY_SCAN_QUEUE=privacy-scan-request
 AI_KEY_VAULT_URL=https://$keyVault.vault.azure.net/
 APPINSIGHTS_INSTRUMENTATIONKEY=$appInsightInstrumentationKey
 AZURE_STORAGE_NAME=$storageAccountName
-COSMOS_DB_URL=$cosmosDbUrl
-COSMOS_DB_KEY=$cosmosDbAccessKey
 
 AZ_BATCH_POOL_ID=
 AZ_BATCH_JOB_ID=1-dev-test-job
@@ -139,8 +108,8 @@ START of local.settings.json file >>> \033[32m
     \"IsEncrypted\": false,
     \"Values\": {
         \"FUNCTIONS_WORKER_RUNTIME\": \"node\",
-        \"AzureWebJobsStorage\": \"$storageConnectionString\",
-        \"COSMOS_CONNECTION_STRING\": \"$cosmosDbConnectionString\"
+        \"AzureWebJobsStorage__accountName\": \"$storageAccountName\",
+        \"COSMOS_CONNECTION__accountEndpoint\": \"$cosmosDbUrl\"
     }
 }
 
