@@ -141,18 +141,6 @@ function validateJqTool() {
     echo "jq tool version ${jqVersion}"
 }
 
-function validateDotnetSdk() {
-    local dotnetSdk
-
-    dotnetSdk=$(dotnet --list-sdks 2>/dev/null) || true
-    if [[ -z ${dotnetSdk} ]]; then
-        echo "Expected .Net SDK to be installed on a machine. How to install .Net SDK, see https://dotnet.microsoft.com/en-us/download"
-        exit 1
-    fi
-
-    printf ".Net SDK version\n${dotnetSdk}\n"
-}
-
 function install() {
     # Login to Azure if required
     if ! az account show 1>/dev/null; then
@@ -167,10 +155,11 @@ function install() {
     . "${0%/*}/create-managed-identity.sh"
     . "${0%/*}/deploy-e2e-test-site.sh"
 
-    echo "Starting parallel processes..."
-
     . "${0%/*}/create-api-management.sh" &
     apiManagmentProcessId="$!"
+
+    . "${0%/*}/push-image-to-container-registry.sh" &
+    containerRegistryProcessId="$!"
 
     # Add to parallelProcesses array to enable
     # "${0%/*}/app-insights-create.sh"
@@ -185,9 +174,7 @@ function install() {
 
     # The following scripts all depend on the result from the above scripts.
     # Additionally, these should run sequentially because of interdependence.
-
     . "${0%/*}/create-key-vault.sh"
-    . "${0%/*}/push-image-to-container-registry.sh"
     . "${0%/*}/create-batch-account.sh"
     . "${0%/*}/create-job-schedule.sh"
     . "${0%/*}/create-function-app.sh"
@@ -200,13 +187,13 @@ function install() {
     echo "Deploying REST API configuration to API Management service"
     . "${0%/*}/deploy-rest-api.sh"
 
-    echo "Waiting for dashboard deployment completion"
+    echo "Waiting for pending deployment processes completion"
     waitForProcesses dashboardProcessId
+    waitForProcesses containerRegistryProcessId
 }
 
 validateAzCliVersion
 validateJqTool
-validateDotnetSdk
 install
 
 echo "Installation completed"
