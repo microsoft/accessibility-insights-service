@@ -13,7 +13,7 @@ export async function requestHandler(documents: OnDemandPageScanBatchRequest[], 
 }
 
 app.cosmosDB('scan-batch-requests-feed', {
-    connection: 'COSMOS_CONNECTION__accountEndpoint',
+    connection: 'COSMOS_CONNECTION',
     databaseName: 'onDemandScanner',
     containerName: 'scanBatchRequests',
     createLeaseContainerIfNotExists: true,

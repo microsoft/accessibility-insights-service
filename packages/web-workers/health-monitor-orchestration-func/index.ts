@@ -76,7 +76,7 @@ const timerHandler = (timer: Timer, context: InvocationContext): Promise<TimerFu
     df.app.activity(HealthMonitorActivity.activityName, { handler: healthMonitorActivity.handler });
 
     app.timer('health-monitor-orchestration', {
-        schedule: '0 */30 * * * *',
+        schedule: '0 */15 * * * *',
         handler: timerHandler,
         runOnStartup: System.isDebugEnabled(),
         extraInputs: [df.input.durableClient()],
