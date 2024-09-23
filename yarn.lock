@@ -397,21 +397,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@azure/functions@npm:^1.2.3":
-  version: 1.2.3
-  resolution: "@azure/functions@npm:1.2.3"
-  checksum: c02b716dff53f869cc2caa35768a0c19b36ffa2d5871c48f3120ca9aa70bac5f5aa53df909393b51bfdc64ab7d9837d0ce7f4d39f4df29af666807350b619af9
-  languageName: node
-  linkType: hard
-
-"@azure/functions@npm:^3.5.0":
-  version: 3.5.0
-  resolution: "@azure/functions@npm:3.5.0"
+"@azure/functions@npm:^4.0.0, @azure/functions@npm:^4.5.0":
+  version: 4.5.0
+  resolution: "@azure/functions@npm:4.5.0"
   dependencies:
-    iconv-lite: ^0.6.3
+    cookie: ^0.6.0
     long: ^4.0.0
-    uuid: ^8.3.0
-  checksum: 105ddb7378d4b21e769de3d998b9e88913782356ac0edca20e1c0dbd1ac7fb15f6ca04f86121ce1ed5b2ec49564b64788d2046bf6e71f0199555e37c88cfaf8d
+    undici: ^5.13.0
+  checksum: 8682b848f41169d76e659b4f3bd2369e8e0a790597e6bfdbff90a4b078fff008de112e43c66c10311882703a622f8d70f59d88714c36eaa856e8772f73fdc9de
   languageName: node
   linkType: hard
 
@@ -1778,6 +1771,13 @@ __metadata:
   version: 8.57.0
   resolution: "@eslint/js@npm:8.57.0"
   checksum: 315dc65b0e9893e2bff139bddace7ea601ad77ed47b4550e73da8c9c2d2766c7a575c3cddf17ef85b8fd6a36ff34f91729d0dcca56e73ca887c10df91a41b0bb
+  languageName: node
+  linkType: hard
+
+"@fastify/busboy@npm:^2.0.0":
+  version: 2.1.1
+  resolution: "@fastify/busboy@npm:2.1.1"
+  checksum: 42c32ef75e906c9a4809c1e1930a5ca6d4ddc8d138e1a8c8ba5ea07f997db32210617d23b2e4a85fe376316a41a1a0439fc6ff2dedf5126d96f45a9d80754fb2
   languageName: node
   linkType: hard
 
@@ -3614,13 +3614,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/lodash@npm:^4.14.119":
-  version: 4.14.182
-  resolution: "@types/lodash@npm:4.14.182"
-  checksum: 7dd137aa9dbabd632408bd37009d984655164fa1ecc3f2b6eb94afe35bf0a5852cbab6183148d883e9c73a958b7fec9a9bcf7c8e45d41195add6a18c34958209
-  languageName: node
-  linkType: hard
-
 "@types/lodash@npm:^4.17.6":
   version: 4.17.6
   resolution: "@types/lodash@npm:4.17.6"
@@ -3794,20 +3787,6 @@ __metadata:
   dependencies:
     "@types/node": "*"
   checksum: 53e23a1f9fb14a491c00425b2a4fc443817564d77be5e1b95fcbeb6d009551b62ea82ffc3e5ca0c6b9f6b186824ca6ec46e7450c1bcd6674a46d1325f0116e24
-  languageName: node
-  linkType: hard
-
-"@types/uuid@npm:~3.4.4":
-  version: 3.4.9
-  resolution: "@types/uuid@npm:3.4.9"
-  checksum: 64cbb7edc694a230f7093dacaa66db69f820b9c2c3491dcc29f3e5017a7ffae960567038a4f9b6520bfee591c2335b3258fd55705a18bf1b462948ed0aaf1381
-  languageName: node
-  linkType: hard
-
-"@types/validator@npm:^9.4.3":
-  version: 9.4.4
-  resolution: "@types/validator@npm:9.4.4"
-  checksum: d639ffbdb8dcbba951780977376701b7d5ecc574129ffcd591479461bcd40439ae5bf9663d2bfa513ef3f4f58c2e8ac7edbce994b58dfd2f82205cc2e38cc804
   languageName: node
   linkType: hard
 
@@ -5091,6 +5070,35 @@ __metadata:
   languageName: node
   linkType: hard
 
+"axios@npm:^1.6.1":
+  version: 1.7.2
+  resolution: "axios@npm:1.7.2"
+  dependencies:
+    follow-redirects: ^1.15.6
+    form-data: ^4.0.0
+    proxy-from-env: ^1.1.0
+  checksum: e457e2b0ab748504621f6fa6609074ac08c824bf0881592209dfa15098ece7e88495300e02cd22ba50b3468fd712fe687e629dcb03d6a3f6a51989727405aedf
+  languageName: node
+  linkType: hard
+
+"azure-functions-core-tools@npm:^4.x":
+  version: 4.0.5907
+  resolution: "azure-functions-core-tools@npm:4.0.5907"
+  dependencies:
+    chalk: 3.0.0
+    extract-zip: ^2.0.1
+    https-proxy-agent: 5.0.0
+    progress: 2.0.3
+    rimraf: 4.4.1
+  bin:
+    azfun: lib/main.js
+    azurefunctions: lib/main.js
+    func: lib/main.js
+  checksum: 9145dfb79786210a7143e09a828fee317de19d94cec76dafc29257d30abcea69b23c0876bd9212ee9686abe1d4f98de52c7faafc9e80493a5e309fdfee60f18c
+  conditions: (os=win32 | os=darwin | os=linux)
+  languageName: node
+  linkType: hard
+
 "azure-services@workspace:*, azure-services@workspace:packages/azure-services":
   version: 0.0.0-use.local
   resolution: "azure-services@workspace:packages/azure-services"
@@ -5713,6 +5721,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"chalk@npm:3.0.0":
+  version: 3.0.0
+  resolution: "chalk@npm:3.0.0"
+  dependencies:
+    ansi-styles: ^4.1.0
+    supports-color: ^7.1.0
+  checksum: 8e3ddf3981c4da405ddbd7d9c8d91944ddf6e33d6837756979f7840a29272a69a5189ecae0ff84006750d6d1e92368d413335eab4db5476db6e6703a1d1e0505
+  languageName: node
+  linkType: hard
+
 "chalk@npm:4.1.2, chalk@npm:^4.0.0, chalk@npm:^4.1.0, chalk@npm:^4.1.1, chalk@npm:^4.1.2":
   version: 4.1.2
   resolution: "chalk@npm:4.1.2"
@@ -6127,15 +6145,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"commander@npm:~2.9.0":
-  version: 2.9.0
-  resolution: "commander@npm:2.9.0"
-  dependencies:
-    graceful-readlink: ">= 1.0.0"
-  checksum: 37939b6866ae190784fa946ea5b926dfe713731064c746e818642ac59e28f513b54e88e35d8c34b4d24d063cb465977dca2efd2ec974f91e495c743fcb2ae7a2
-  languageName: node
-  linkType: hard
-
 "comment-parser@npm:1.4.1":
   version: 1.4.1
   resolution: "comment-parser@npm:1.4.1"
@@ -6236,6 +6245,13 @@ __metadata:
     lodash.clonedeep: ^4.5.0
     yargs-parser: ^20.2.7
   checksum: e14da5c359e3b0452d39c005429e5e4ab1192fa94e51824e135ca8e6b921e95dfd803c15993ea6d23837b6cecb5a402e981a5dd37bee52a62a7a0924798eefe0
+  languageName: node
+  linkType: hard
+
+"cookie@npm:^0.6.0":
+  version: 0.6.0
+  resolution: "cookie@npm:0.6.0"
+  checksum: f56a7d32a07db5458e79c726b77e3c2eff655c36792f2b6c58d351fb5f61531e5b1ab7f46987150136e366c65213cbe31729e02a3eaed630c3bf7334635fb410
   languageName: node
   linkType: hard
 
@@ -6958,23 +6974,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"durable-functions@npm:^1.5.4":
-  version: 1.5.4
-  resolution: "durable-functions@npm:1.5.4"
+"durable-functions@npm:^3.1.0":
+  version: 3.1.0
+  resolution: "durable-functions@npm:3.1.0"
   dependencies:
-    "@azure/functions": ^1.2.3
-    "@types/lodash": ^4.14.119
-    "@types/node": 10.14.2
-    "@types/uuid": ~3.4.4
-    "@types/validator": ^9.4.3
-    axios: ^0.21.1
-    commander: ~2.9.0
+    "@azure/functions": ^4.0.0
+    axios: ^1.6.1
     debug: ~2.6.9
     lodash: ^4.17.15
-    rimraf: ~2.5.4
+    moment: ^2.29.2
     uuid: ~3.3.2
     validator: ~13.7.0
-  checksum: e4d7108dfdb9a230981c780bd1045f3c8d8222555fae59c427138d56e6428f3cba9857b2d530920fd6f4ce148227eb9f6854a083473f06232c926f13e9a14673
+  checksum: b3145687f7bd57c6e5ba994849bc2cb42afb1f607dee367ff322cfab4f0110f583229117093c026c176f260b93793d0c440ea10b0ee02c2a1ba11b8a1461d1fa
   languageName: node
   linkType: hard
 
@@ -6992,23 +7003,17 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "e2e-web-apis@workspace:packages/e2e-web-apis"
   dependencies:
-    "@azure/functions": ^3.5.0
+    "@azure/functions": ^4.5.0
     "@types/dotenv": ^8.2.0
     "@types/jest": ^29.5.12
     "@types/lodash": ^4.17.6
     "@types/node": ^20.14.9
-    azure-services: "workspace:*"
     copy-webpack-plugin: ^11.0.0
     fork-ts-checker-webpack-plugin: ^7.3.0
-    inversify: ^6.0.1
     jest: ^29.7.0
     jest-junit: ^16.0.0
-    lodash: ^4.17.21
-    logger: "workspace:*"
     node-loader: ^2.0.0
     npm-run-all: ^4.1.5
-    parallel-workers: "workspace:*"
-    reflect-metadata: ^0.1.13
     rimraf: ^4.1.2
     ts-jest: ^29.1.5
     ts-loader: ^9.4.2
@@ -7814,7 +7819,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"extract-zip@npm:2.0.1":
+"extract-zip@npm:2.0.1, extract-zip@npm:^2.0.1":
   version: 2.0.1
   resolution: "extract-zip@npm:2.0.1"
   dependencies:
@@ -8577,7 +8582,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"glob@npm:^7.0.5, glob@npm:^7.1.1, glob@npm:^7.1.3, glob@npm:^7.1.4, glob@npm:^7.1.6":
+"glob@npm:^7.1.1, glob@npm:^7.1.3, glob@npm:^7.1.4, glob@npm:^7.1.6":
   version: 7.2.0
   resolution: "glob@npm:7.2.0"
   dependencies:
@@ -8601,6 +8606,18 @@ __metadata:
     minimatch: ^5.0.1
     once: ^1.3.0
   checksum: 92fbea3221a7d12075f26f0227abac435de868dd0736a17170663783296d0dd8d3d532a5672b4488a439bf5d7fb85cdd07c11185d6cd39184f0385cbdfb86a47
+  languageName: node
+  linkType: hard
+
+"glob@npm:^9.2.0":
+  version: 9.3.5
+  resolution: "glob@npm:9.3.5"
+  dependencies:
+    fs.realpath: ^1.0.0
+    minimatch: ^8.0.2
+    minipass: ^4.2.4
+    path-scurry: ^1.6.1
+  checksum: 94b093adbc591bc36b582f77927d1fb0dbf3ccc231828512b017601408be98d1fe798fc8c0b19c6f2d1a7660339c3502ce698de475e9d938ccbb69b47b647c84
   languageName: node
   linkType: hard
 
@@ -8767,13 +8784,6 @@ __metadata:
   version: 4.2.9
   resolution: "graceful-fs@npm:4.2.9"
   checksum: 68ea4e07ff2c041ada184f9278b830375f8e0b75154e3f080af6b70f66172fabb4108d19b3863a96b53fc068a310b9b6493d86d1291acc5f3861eb4b79d26ad6
-  languageName: node
-  linkType: hard
-
-"graceful-readlink@npm:>= 1.0.0":
-  version: 1.0.1
-  resolution: "graceful-readlink@npm:1.0.1"
-  checksum: 4c1889ca0a6fc0bb9585b55c26a99719be132cbc4b7d84036193b70608059b9783e52e2a866d5a8e39821b16a69e899644ca75c6206563f1319b6720836b9ab2
   languageName: node
   linkType: hard
 
@@ -9112,6 +9122,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"https-proxy-agent@npm:5.0.0":
+  version: 5.0.0
+  resolution: "https-proxy-agent@npm:5.0.0"
+  dependencies:
+    agent-base: 6
+    debug: 4
+  checksum: 165bfb090bd26d47693597661298006841ab733d0c7383a8cb2f17373387a94c903a3ac687090aa739de05e379ab6f868bae84ab4eac288ad85c328cd1ec9e53
+  languageName: node
+  linkType: hard
+
 "https-proxy-agent@npm:5.0.1, https-proxy-agent@npm:^5.0.0":
   version: 5.0.1
   resolution: "https-proxy-agent@npm:5.0.1"
@@ -9176,7 +9196,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"iconv-lite@npm:^0.6.2, iconv-lite@npm:^0.6.3":
+"iconv-lite@npm:^0.6.2":
   version: 0.6.3
   resolution: "iconv-lite@npm:0.6.3"
   dependencies:
@@ -11124,6 +11144,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"lru-cache@npm:^10.2.0":
+  version: 10.4.3
+  resolution: "lru-cache@npm:10.4.3"
+  checksum: 6476138d2125387a6d20f100608c2583d415a4f64a0fecf30c9e2dda976614f09cad4baa0842447bd37dd459a7bd27f57d9d8f8ce558805abd487c583f3d774a
+  languageName: node
+  linkType: hard
+
 "lru-cache@npm:^5.1.1":
   version: 5.1.1
   resolution: "lru-cache@npm:5.1.1"
@@ -11429,6 +11456,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"minimatch@npm:^8.0.2":
+  version: 8.0.4
+  resolution: "minimatch@npm:8.0.4"
+  dependencies:
+    brace-expansion: ^2.0.1
+  checksum: 2e46cffb86bacbc524ad45a6426f338920c529dd13f3a732cc2cf7618988ee1aae88df4ca28983285aca9e0f45222019ac2d14ebd17c1edadd2ee12221ab801a
+  languageName: node
+  linkType: hard
+
 "minimatch@npm:^9.0.0":
   version: 9.0.1
   resolution: "minimatch@npm:9.0.1"
@@ -11534,10 +11570,24 @@ __metadata:
   languageName: node
   linkType: hard
 
+"minipass@npm:^4.2.4":
+  version: 4.2.8
+  resolution: "minipass@npm:4.2.8"
+  checksum: 7f4914d5295a9a30807cae5227a37a926e6d910c03f315930fde52332cf0575dfbc20295318f91f0baf0e6bb11a6f668e30cde8027dea7a11b9d159867a3c830
+  languageName: node
+  linkType: hard
+
 "minipass@npm:^5.0.0":
   version: 5.0.0
   resolution: "minipass@npm:5.0.0"
   checksum: 425dab288738853fded43da3314a0b5c035844d6f3097a8e3b5b29b328da8f3c1af6fc70618b32c29ff906284cf6406b6841376f21caaadd0793c1d5a6a620ea
+  languageName: node
+  linkType: hard
+
+"minipass@npm:^5.0.0 || ^6.0.2 || ^7.0.0":
+  version: 7.1.2
+  resolution: "minipass@npm:7.1.2"
+  checksum: 2bfd325b95c555f2b4d2814d49325691c7bee937d753814861b0b49d5edcda55cbbf22b6b6a60bb91eddac8668771f03c5ff647dcd9d0f798e9548b9cdc46ee3
   languageName: node
   linkType: hard
 
@@ -11615,6 +11665,13 @@ __metadata:
   version: 3.0.5
   resolution: "mockdate@npm:3.0.5"
   checksum: 72b66786d9e072379693f80bf9fb82eb5153c9741030a4294184e3ccaf952d0713fae8966f77780580cf902f8ec7ccc95577b0ad47980d255e2ffb71fc7ca49c
+  languageName: node
+  linkType: hard
+
+"moment@npm:^2.29.2":
+  version: 2.30.1
+  resolution: "moment@npm:2.30.1"
+  checksum: 859236bab1e88c3e5802afcf797fc801acdbd0ee509d34ea3df6eea21eb6bcc2abd4ae4e4e64aa7c986aa6cba563c6e62806218e6412a765010712e5fa121ba6
   languageName: node
   linkType: hard
 
@@ -12279,7 +12336,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"parallel-workers@workspace:*, parallel-workers@workspace:packages/parallel-workers":
+"parallel-workers@workspace:packages/parallel-workers":
   version: 0.0.0-use.local
   resolution: "parallel-workers@workspace:packages/parallel-workers"
   dependencies:
@@ -12447,6 +12504,16 @@ __metadata:
   version: 1.0.7
   resolution: "path-parse@npm:1.0.7"
   checksum: 49abf3d81115642938a8700ec580da6e830dde670be21893c62f4e10bd7dd4c3742ddc603fe24f898cba7eb0c6bc1777f8d9ac14185d34540c6d4d80cd9cae8a
+  languageName: node
+  linkType: hard
+
+"path-scurry@npm:^1.6.1":
+  version: 1.11.1
+  resolution: "path-scurry@npm:1.11.1"
+  dependencies:
+    lru-cache: ^10.2.0
+    minipass: ^5.0.0 || ^6.0.2 || ^7.0.0
+  checksum: 890d5abcd593a7912dcce7cf7c6bf7a0b5648e3dee6caf0712c126ca0a65c7f3d7b9d769072a4d1baf370f61ce493ab5b038d59988688e0c5f3f646ee3c69023
   languageName: node
   linkType: hard
 
@@ -13715,6 +13782,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"rimraf@npm:4.4.1":
+  version: 4.4.1
+  resolution: "rimraf@npm:4.4.1"
+  dependencies:
+    glob: ^9.2.0
+  bin:
+    rimraf: dist/cjs/src/bin.js
+  checksum: b786adc02651e2e24bbedb04bbdea80652fc9612632931ff2d9f898c5e4708fe30956186597373c568bd5230a4dc2fadfc816ccacba8a1daded3a006a6b74f1a
+  languageName: node
+  linkType: hard
+
 "rimraf@npm:^2.6.3":
   version: 2.7.1
   resolution: "rimraf@npm:2.7.1"
@@ -13743,17 +13821,6 @@ __metadata:
   bin:
     rimraf: dist/cjs/src/bin.js
   checksum: 480b8147fd9bcbef3ac118f88a7b1169c3872977a3411a0c84df838bfc30e175a394c0db6f9619fc8b8a886a18c6d779d5e74f380a0075ecc710afaf81b3f50c
-  languageName: node
-  linkType: hard
-
-"rimraf@npm:~2.5.4":
-  version: 2.5.4
-  resolution: "rimraf@npm:2.5.4"
-  dependencies:
-    glob: ^7.0.5
-  bin:
-    rimraf: ./bin.js
-  checksum: 3d217997a312d520e0db3f89b148add6abfe1b03c3f82ab0fc6b0e1d43d0e9b63856bb0708dee18d4f397717af0d06cb52153c606ba145caa0dc567bc4f4ed4d
   languageName: node
   linkType: hard
 
@@ -14012,7 +14079,7 @@ __metadata:
   resolution: "service-library@workspace:packages/service-library"
   dependencies:
     "@azure/cosmos": ^4.0.0
-    "@azure/functions": ^3.5.0
+    "@azure/functions": ^4.5.0
     "@azure/identity": ^4.3.0
     "@azure/storage-blob": ^12.12.0
     "@crawlee/puppeteer": ^3.5.0
@@ -15463,6 +15530,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"undici@npm:^5.13.0":
+  version: 5.28.4
+  resolution: "undici@npm:5.28.4"
+  dependencies:
+    "@fastify/busboy": ^2.0.0
+  checksum: a8193132d84540e4dc1895ecc8dbaa176e8a49d26084d6fbe48a292e28397cd19ec5d13bc13e604484e76f94f6e334b2bdc740d5f06a6e50c44072818d0c19f9
+  languageName: node
+  linkType: hard
+
 "unique-filename@npm:^1.1.1":
   version: 1.1.1
   resolution: "unique-filename@npm:1.1.1"
@@ -15963,12 +16039,13 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "web-api@workspace:packages/web-api"
   dependencies:
-    "@azure/functions": ^3.5.0
+    "@azure/functions": ^4.5.0
     "@types/dotenv": ^8.2.0
     "@types/jest": ^29.5.12
     "@types/lodash": ^4.17.6
     "@types/node": ^20.14.9
     "@types/sha.js": ^2.4.0
+    azure-functions-core-tools: ^4.x
     azure-services: "workspace:*"
     common: "workspace:*"
     copy-webpack-plugin: ^11.0.0
@@ -16000,16 +16077,17 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "web-workers@workspace:packages/web-workers"
   dependencies:
-    "@azure/functions": ^3.5.0
+    "@azure/functions": ^4.5.0
     "@types/dotenv": ^8.2.0
     "@types/jest": ^29.5.12
     "@types/lodash": ^4.17.6
     "@types/node": ^20.14.9
     "@types/sha.js": ^2.4.0
+    azure-functions-core-tools: ^4.x
     azure-services: "workspace:*"
     common: "workspace:*"
     copy-webpack-plugin: ^11.0.0
-    durable-functions: ^1.5.4
+    durable-functions: ^3.1.0
     fork-ts-checker-webpack-plugin: ^7.3.0
     functional-tests: "workspace:*"
     inversify: ^6.0.1

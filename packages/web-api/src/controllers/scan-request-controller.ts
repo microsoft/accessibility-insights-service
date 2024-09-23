@@ -1,18 +1,20 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+import { HttpResponseInit } from '@azure/functions';
 import { GuidGenerator, RestApiConfig, ServiceConfiguration, Url, CrawlConfig } from 'common';
 import { inject, injectable } from 'inversify';
 import { isEmpty, isNil, groupBy, filter, isArray } from 'lodash';
 import { ContextAwareLogger, ScanRequestReceivedMeasurements } from 'logger';
 import {
     ApiController,
-    HttpResponse,
+    WebHttpResponse,
     ScanDataProvider,
     ScanRunRequest,
     ScanRunResponse,
     WebApiError,
     WebApiErrorCodes,
+    isScanRunRequest,
 } from 'service-library';
 import { ScanRunBatchRequest } from 'storage-documents';
 
@@ -45,22 +47,25 @@ export class ScanRequestController extends ApiController {
         super(logger);
     }
 
-    public async handleRequest(): Promise<void> {
+    public async handleRequest(): Promise<HttpResponseInit> {
         await this.init();
-        let payload: ScanRunRequest[];
-        try {
-            payload = this.extractPayload();
-        } catch (e) {
-            this.context.res = HttpResponse.getErrorResponse(WebApiErrorCodes.malformedRequest);
 
-            return;
+        const payload = await this.tryGetPayload<ScanRunRequest[]>();
+        if (
+            payload === undefined ||
+            Array.isArray(payload) === false ||
+            isEmpty(payload) ||
+            payload.some((request) => isScanRunRequest(request) === false)
+        ) {
+            this.logger.logError('The request does not conform to the REST API specifications.', { jsonRequest: JSON.stringify(payload) });
+
+            return WebHttpResponse.getErrorResponse(WebApiErrorCodes.malformedRequest);
         }
 
         if (payload.length > this.restApiConfig.maxScanRequestBatchCount) {
-            this.context.res = HttpResponse.getErrorResponse(WebApiErrorCodes.requestBodyTooLarge);
-            this.logger.logError(`The HTTP request body is too large. The requests count: ${payload.length}.`);
+            this.logger.logError(`The HTTP request body is too large. Received ${payload.length} scan requests.`);
 
-            return;
+            return WebHttpResponse.getErrorResponse(WebApiErrorCodes.requestBodyTooLarge);
         }
 
         const batchId = this.guidGenerator.createGuid();
@@ -68,14 +73,9 @@ export class ScanRequestController extends ApiController {
 
         const processedData = this.getProcessedRequestData(batchId, payload);
         await this.scanDataProvider.writeScanRunBatchRequest(batchId, processedData.scanRequestsToBeStoredInDb);
-        this.context.res = {
-            status: 202, // Accepted
-            body: this.getResponse(processedData),
-        };
 
         const totalUrls: number = processedData.scanResponses.length;
         const invalidUrls: number = processedData.scanResponses.filter((i) => i.error !== undefined).length;
-
         this.logger.logInfo('Accepted scan run batch request.', {
             batchId: batchId,
             totalUrls: totalUrls.toString(),
@@ -88,36 +88,12 @@ export class ScanRequestController extends ApiController {
             pendingScanRequests: totalUrls - invalidUrls,
             rejectedScanRequests: invalidUrls,
         };
-
         this.logger.trackEvent('ScanRequestReceived', null, measurements);
-    }
 
-    private getResponse(processedData: ProcessedBatchRequestData): ScanRunResponse | ScanRunResponse[] {
-        const isV2 = this.context.req.query['api-version'] === '2.0' ? true : false;
-        let response;
-        if (isV2) {
-            response = processedData.scanResponses.find((x) => x !== undefined);
-        } else {
-            response = processedData.scanResponses;
-        }
-
-        return response;
-    }
-
-    private extractPayload(): ScanRunRequest[] {
-        const isV2 = this.context.req.query['api-version'] === '2.0';
-        let payload: ScanRunRequest[];
-        if (isV2) {
-            const singularRequest: ScanRunRequest = this.tryGetPayload<ScanRunRequest>();
-            if (Array.isArray(singularRequest)) {
-                throw new Error('Malformed HTTP request body.');
-            }
-            payload = [singularRequest];
-        } else {
-            payload = this.tryGetPayload<ScanRunRequest[]>();
-        }
-
-        return payload;
+        return {
+            status: 202, // Accepted
+            jsonBody: processedData.scanResponses,
+        };
     }
 
     private getProcessedRequestData(batchId: string, scanRunRequests: ScanRunRequest[]): ProcessedBatchRequestData {

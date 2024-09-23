@@ -63,38 +63,13 @@ module.exports = (env) => {
                 patterns: [
                     {
                         context: './',
-                        from: '**/function.json',
-                        to: '',
-                        globOptions: { ignore: ['dist/**'] },
-                    },
-                    {
-                        context: './',
                         from: 'host.json',
                         to: '',
                         globOptions: { ignore: ['dist/**'] },
                     },
                     {
-                        from: 'package.json',
-                        to: '',
-                    },
-                    {
-                        from: '../../yarn.lock',
-                        to: '',
-                    },
-                    {
-                        context: '../parallel-workers/dist/',
-                        from: '**/*.js',
-                        to: '',
-                    },
-                    {
-                        context: '../parallel-workers/dist/',
-                        from: '**/*.js',
-                        to: 'scan-notification-client-func',
-                    },
-                    {
-                        context: '../parallel-workers/dist/',
-                        from: '**/*.js',
-                        to: 'scan-notification-client-func-fail',
+                        from: 'package-func.json',
+                        to: 'package.json',
                     },
                 ],
             }),

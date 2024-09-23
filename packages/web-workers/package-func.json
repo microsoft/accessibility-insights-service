@@ -1,0 +1,10 @@
+{
+    "name": "web-workers",
+    "version": "1.0.0",
+    "author": "Microsoft",
+    "license": "MIT",
+    "main": "**/index.js",
+    "dependencies": {
+        "@azure/functions": "4.*"
+    }
+}

@@ -13,7 +13,7 @@ describe('ScanWaitConditions', () => {
             ${'pass'}       | ${true}
             ${'fail'}       | ${true}
             ${'pending'}    | ${false}
-        `('isSucceded evaluates to $expectedResult when scanResult.state=$scanResultState', ({ scanResultState, expectedResult }) => {
+        `('isSucceeded evaluates to $expectedResult when scanResult.state=$scanResultState', ({ scanResultState, expectedResult }) => {
             const scanRunResponse = {
                 scanResult: {
                     state: scanResultState,
@@ -58,15 +58,18 @@ describe('ScanWaitConditions', () => {
             ${'sending'}      | ${false}
             ${'sent'}         | ${true}
             ${'sendFailed'}   | ${true}
-        `('isSucceded evaluates to $expectedResult when notification.state=$notificationState', ({ notificationState, expectedResult }) => {
-            const scanRunResponse = {
-                notification: {
-                    state: notificationState,
-                },
-            } as ScanRunResultResponse;
+        `(
+            'isSucceeded evaluates to $expectedResult when notification.state=$notificationState',
+            ({ notificationState, expectedResult }) => {
+                const scanRunResponse = {
+                    notification: {
+                        state: notificationState,
+                    },
+                } as ScanRunResultResponse;
 
-            expect(ScanWaitConditions.scanNotification.isSucceeded(scanRunResponse)).toBe(expectedResult);
-        });
+                expect(ScanWaitConditions.scanNotification.isSucceeded(scanRunResponse)).toBe(expectedResult);
+            },
+        );
 
         it.each`
             notificationState | expectedResult

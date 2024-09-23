@@ -3,27 +3,26 @@
 
 import 'reflect-metadata';
 
-// eslint-disable-next-line import/no-internal-modules
-import { DurableOrchestrationContext, IOrchestrationFunctionContext } from 'durable-functions/lib/src/classes';
 import { Logger, LogLevel } from 'logger';
 import { Mock } from 'typemoq';
 import { IMock } from 'typemoq/Api/IMock';
+import * as df from 'durable-functions';
 import { OrchestrationLogger } from './orchestration-logger';
 
 describe(OrchestrationLogger, () => {
     let loggerMock: IMock<Logger>;
-    let context: IOrchestrationFunctionContext;
+    let context: df.OrchestrationContext;
     const orchestrationContext = {
         currentUtcDateTime: new Date(0, 1, 2, 3),
         instanceId: 'instanceId',
         isReplaying: true,
-    } as DurableOrchestrationContext;
+    } as df.DurableOrchestrationContext;
 
     let testSubject: OrchestrationLogger;
 
     beforeEach(() => {
         loggerMock = Mock.ofType<Logger>();
-        context = <IOrchestrationFunctionContext>(<unknown>{
+        context = <df.OrchestrationContext>(<unknown>{
             df: orchestrationContext,
         });
 

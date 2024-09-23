@@ -3,47 +3,60 @@
     "tasks": [
         {
             "type": "func",
-            "command": "host start",
-            "dependsOn": "install-func-extensions",
-            "problemMatcher": "$func-watch",
+            "label": "func-start",
+            "command": "host start --verbose",
+            "problemMatcher": "$func-node-watch",
             "isBackground": true,
-            "options": {
-                "cwd": "${workspaceRoot}/dist"
-            }
+            "dependsOn": "copy-env"
         },
         {
             "type": "shell",
-            "label": "install-func-extensions",
+            "label": "copy-env",
             "dependsOn": "copy-local-settings",
-            "command": "func extensions install",
-            "options": {
-                "cwd": "${workspaceRoot}/dist"
+            "windows": {
+                "command": "xcopy /Y .env .\\dist\\"
+            },
+            "osx": {
+                "command": "cp .env ./dist"
             }
         },
         {
             "type": "shell",
             "label": "copy-local-settings",
-            "dependsOn": "tsc",
+            "dependsOn": "copy-runtime-config",
             "windows": {
-                "command": "xcopy local.settings.json ./dist /y & xcopy .env ./dist /y"
+                "command": "xcopy /Y local.settings.json .\\dist\\"
             },
             "osx": {
-                "command": "cp local.settings.json ./dist ; cp .env ./dist"
+                "command": "cp local.settings.json ./dist"
+            }
+        },
+        {
+            "type": "shell",
+            "label": "copy-runtime-config",
+            "dependsOn": "tsc",
+            "windows": {
+                "command": "echo F | xcopy /Y ..\\resource-deployment\\runtime-config\\runtime-config.dev.json ..\\common\\dist\\configuration\\runtime-config.json"
+            },
+            "osx": {
+                "command": "cp ../resource-deployment/runtime-config/runtime-config.dev.json ../common/dist/configuration/runtime-config.json"
             }
         },
         {
             "type": "shell",
             "label": "tsc",
-            "dependsOn": "restore-dotnet-packages",
+            "dependsOn": "func-stop",
             "command": "tsc",
             "problemMatcher": "$tsc"
         },
         {
             "type": "shell",
-            "label": "restore-dotnet-packages",
-            "command": "dotnet restore",
-            "options": {
-                "cwd": "${workspaceRoot}/dist"
+            "label": "func-stop",
+            "windows": {
+                "command": "taskkill /im func.exe /f /t ; echo OK"
+            },
+            "osx": {
+                "command": "pkill -9 -f func & true"
             }
         }
     ]

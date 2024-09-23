@@ -66,23 +66,13 @@ module.exports = (env) => {
                 patterns: [
                     {
                         context: './',
-                        from: '**/function.json',
-                        to: '',
-                        globOptions: { ignore: ['dist/**'] },
-                    },
-                    {
-                        context: './',
                         from: 'host.json',
                         to: '',
                         globOptions: { ignore: ['dist/**'] },
                     },
                     {
-                        from: 'package.json',
-                        to: '',
-                    },
-                    {
-                        from: '../../yarn.lock',
-                        to: '',
+                        from: 'package-func.json',
+                        to: 'package.json',
                     },
                     {
                         context: '../parallel-workers/dist/',

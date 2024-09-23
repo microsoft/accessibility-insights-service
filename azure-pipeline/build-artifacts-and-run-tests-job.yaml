@@ -51,7 +51,7 @@ steps:
               health-client/dist/**/*
               cli/drop/*
               api-contracts/*
-              !**/node_modules/**/*
+              !node_modules/**/*
               !**/.vscode/**/*
               !**/*.md
           TargetFolder: '$(Build.ArtifactStagingDirectory)'

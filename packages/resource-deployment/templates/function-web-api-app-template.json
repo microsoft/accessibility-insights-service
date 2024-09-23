@@ -10,21 +10,21 @@
         },
         "name": {
             "type": "string",
-            "defaultValue": "[toLower(concat(parameters('namePrefix'),uniqueString(resourceGroup().id)))]",
+            "defaultValue": "[toLower(concat(parameters('namePrefix'), uniqueString(resourceGroup().id)))]",
             "metadata": {
                 "description": "The function app name"
             }
         },
         "storageAccountName": {
             "type": "string",
-            "defaultValue": "[concat('allystorage',toLower(uniqueString(resourceGroup().id)))]",
+            "defaultValue": "[concat('allystorage', toLower(uniqueString(resourceGroup().id)))]",
             "metadata": {
                 "description": "The storage account resource name."
             }
         },
         "appInsightsName": {
             "type": "string",
-            "defaultValue": "[concat('allyinsights',toLower(uniqueString(resourceGroup().id)))]",
+            "defaultValue": "[concat('allyinsights', toLower(uniqueString(resourceGroup().id)))]",
             "metadata": {
                 "description": "The app insights resource name."
             }
@@ -52,7 +52,7 @@
         },
         "keyVaultName": {
             "type": "string",
-            "defaultValue": "[concat('allyvault',toLower(uniqueString(resourceGroup().id)))]",
+            "defaultValue": "[concat('allyvault', toLower(uniqueString(resourceGroup().id)))]",
             "metadata": {
                 "description": "The name of the key vault service."
             }
@@ -64,7 +64,22 @@
             }
         }
     },
+    "variables": {
+        "appPlanName": "[toLower(concat('app-service-plan-', uniqueString(resourceGroup().id)))]"
+    },
     "resources": [
+        {
+            "type": "Microsoft.Web/serverfarms",
+            "apiVersion": "2022-09-01",
+            "name": "[variables('appPlanName')]",
+            "sku": {
+                "name": "Y1",
+                "tier": "Dynamic"
+            },
+            "kind": "functionapp",
+            "location": "[parameters('location')]",
+            "properties": {}
+        },
         {
             "type": "Microsoft.Web/sites",
             "apiVersion": "2022-09-01",
@@ -75,32 +90,30 @@
                 "type": "SystemAssigned"
             },
             "properties": {
+                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('appPlanName'))]",
                 "httpsOnly": true,
                 "siteConfig": {
+                    "minTlsVersion": "1.2",
                     "appSettings": [
                         {
                             "name": "FUNCTIONS_WORKER_RUNTIME",
                             "value": "node"
                         },
                         {
-                            "name": "AzureWebJobsStorage",
-                            "value": "[concat('DefaultEndpointsProtocol=https;AccountName=',parameters('storageAccountName'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2015-05-01-preview').key1)]"
-                        },
-                        {
                             "name": "FUNCTIONS_EXTENSION_VERSION",
                             "value": "~4"
                         },
                         {
-                            "name": "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING",
-                            "value": "[concat('DefaultEndpointsProtocol=https;AccountName=',parameters('storageAccountName'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2015-05-01-preview').key1)]"
-                        },
-                        {
-                            "name": "WEBSITE_CONTENTSHARE",
-                            "value": "[concat(toLower(parameters('name')), '8d09')]"
-                        },
-                        {
                             "name": "WEBSITE_NODE_DEFAULT_VERSION",
                             "value": "~20"
+                        },
+                        {
+                            "name": "AzureWebJobsStorage__accountName",
+                            "value": "[parameters('storageAccountName')]"
+                        },
+                        {
+                            "name": "WEBSITE_RUN_FROM_PACKAGE",
+                            "value": "[format('https://{0}.blob.core.windows.net/function-apps/{1}.zip', parameters('storageAccountName'), parameters('name'))]"
                         },
                         {
                             "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
@@ -121,6 +134,7 @@
                     ]
                 }
             },
+            "dependsOn": ["[resourceId('Microsoft.Web/serverfarms', variables('appPlanName'))]"],
             "resources": [
                 {
                     "name": "[concat(parameters('name'), '/authsettingsV2')]",

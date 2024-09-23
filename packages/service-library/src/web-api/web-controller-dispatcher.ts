@@ -1,12 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { Context } from '@azure/functions';
 import { Container } from 'inversify';
 import { BaseTelemetryProperties, ContextAwareLogger, loggerTypes } from 'logger';
 import { ProcessEntryPointBase } from '../process-entry-point-base';
 import { Newable } from './web-api-ioc-types';
-import { WebController } from './web-controller';
+import { AppContext, WebController } from './web-controller';
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 export class WebControllerDispatcher extends ProcessEntryPointBase {
     constructor(private readonly processLifeCycleContainer: Container) {
@@ -16,19 +17,19 @@ export class WebControllerDispatcher extends ProcessEntryPointBase {
     public async processRequest(
         container: Container,
         controllerType: Newable<WebController>,
-        context: Context,
-        ...args: unknown[]
-    ): Promise<unknown> {
+        appContext: AppContext,
+        ...args: any[]
+    ): Promise<any> {
         const logger = container.get(ContextAwareLogger);
         await logger.setup();
 
         const controller = container.get(controllerType) as WebController;
 
-        return controller.invoke(context, ...args);
+        return controller.invoke(appContext, ...args);
     }
 
     // eslint-disable-next-line no-empty,@typescript-eslint/no-empty-function, @typescript-eslint/no-explicit-any
-    protected async runCustomAction(container: Container, ...args: unknown[]): Promise<void> {}
+    protected async runCustomAction(container: Container, ...args: any[]): Promise<void> {}
 
     protected getTelemetryBaseProperties(): BaseTelemetryProperties {
         const currentProcess: typeof process = this.processLifeCycleContainer.get(loggerTypes.Process);

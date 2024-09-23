@@ -3,22 +3,22 @@
 
 import 'reflect-metadata';
 
-// eslint-disable-next-line import/no-internal-modules
-import { DurableOrchestrationContext, IOrchestrationFunctionContext, ITaskMethods, Task } from 'durable-functions/lib/src/classes';
 import { It, Mock, Times } from 'typemoq';
 import { IMock } from 'typemoq/Api/IMock';
 import { SerializableResponse } from 'common';
+import * as df from 'durable-functions';
 import { ActivityAction } from '../contracts/activity-actions';
 import { ActivityRequestData } from '../controllers/activity-request-data';
 import { GeneratorExecutor } from '../test-utilities/generator-executor';
+import { HealthMonitorActivity } from '../controllers/health-monitor-activity';
 import { OrchestrationLogger } from './orchestration-logger';
 import { ActivityActionDispatcher } from './activity-action-dispatcher';
 import { OrchestrationTelemetryProperties } from './orchestration-telemetry-properties';
 
 describe(ActivityActionDispatcher, () => {
     let loggerMock: IMock<OrchestrationLogger>;
-    let context: IOrchestrationFunctionContext;
-    let orchestrationContextMock: IMock<DurableOrchestrationContext>;
+    let context: df.OrchestrationContext;
+    let durableOrchestrationContextMock: IMock<df.DurableOrchestrationContext>;
 
     const instanceId = 'instance id';
     const currentUtcDateTime = new Date(0, 1, 2, 3);
@@ -27,19 +27,19 @@ describe(ActivityActionDispatcher, () => {
 
     beforeEach(() => {
         loggerMock = Mock.ofType<OrchestrationLogger>();
-        orchestrationContextMock = Mock.ofType<DurableOrchestrationContext>();
-        orchestrationContextMock.setup((o) => o.instanceId).returns(() => instanceId);
-        orchestrationContextMock.setup((o) => o.currentUtcDateTime).returns(() => currentUtcDateTime);
+        durableOrchestrationContextMock = Mock.ofType<df.DurableOrchestrationContext>();
+        durableOrchestrationContextMock.setup((o) => o.instanceId).returns(() => instanceId);
+        durableOrchestrationContextMock.setup((o) => o.currentUtcDateTime).returns(() => currentUtcDateTime);
         context = {
-            df: orchestrationContextMock.object,
-        } as unknown as IOrchestrationFunctionContext;
+            df: durableOrchestrationContextMock.object,
+        } as unknown as df.OrchestrationContext;
 
         testSubject = new ActivityActionDispatcher(context, loggerMock.object);
     });
 
     afterEach(() => {
         loggerMock.verifyAll();
-        orchestrationContextMock.verifyAll();
+        durableOrchestrationContextMock.verifyAll();
     });
 
     it('callActivity', () => {
@@ -105,13 +105,18 @@ describe(ActivityActionDispatcher, () => {
         });
     });
 
+    interface TaskOps {
+        all(tasks: df.Task[]): df.Task;
+        any(tasks: df.Task[]): df.Task;
+    }
+
     describe('callActivitiesInParallel', () => {
-        let taskMethodsMock: IMock<ITaskMethods>;
+        let taskMethodsMock: IMock<TaskOps>;
         const taskName = 'test task';
 
         beforeEach(() => {
-            taskMethodsMock = Mock.ofType<ITaskMethods>();
-            orchestrationContextMock.setup((oc) => oc.Task).returns(() => taskMethodsMock.object);
+            taskMethodsMock = Mock.ofType<TaskOps>();
+            durableOrchestrationContextMock.setup((o) => o.Task).returns(() => taskMethodsMock.object);
         });
 
         afterEach(() => {
@@ -119,7 +124,7 @@ describe(ActivityActionDispatcher, () => {
         });
 
         it('does nothing if list is undefined', () => {
-            orchestrationContextMock.setup((oc) => oc.callActivity(It.isAny(), It.isAny())).verifiable(Times.never());
+            durableOrchestrationContextMock.setup((o) => o.callActivity(It.isAny(), It.isAny())).verifiable(Times.never());
             taskMethodsMock.setup((t) => t.all(It.isAny())).verifiable(Times.never());
 
             const generatorExecutor = new GeneratorExecutor(testSubject.callActivitiesInParallel(undefined, taskName));
@@ -127,7 +132,7 @@ describe(ActivityActionDispatcher, () => {
         });
 
         it('does nothing if list is empty', () => {
-            orchestrationContextMock.setup((oc) => oc.callActivity(It.isAny(), It.isAny())).verifiable(Times.never());
+            durableOrchestrationContextMock.setup((o) => o.callActivity(It.isAny(), It.isAny())).verifiable(Times.never());
             taskMethodsMock.setup((t) => t.all(It.isAny())).verifiable(Times.never());
 
             const generatorExecutor = new GeneratorExecutor(testSubject.callActivitiesInParallel([], taskName));
@@ -153,15 +158,15 @@ describe(ActivityActionDispatcher, () => {
                 isCompleted: true,
                 isFaulted: false,
                 action: undefined,
-            } as Task;
+            } as df.Task;
             activities.forEach((activityRequestData: ActivityRequestData) => {
                 setupCallActivity(activityRequestData.activityName, activityRequestData.data, task);
             });
 
-            let taskList: Task[];
+            let taskList: df.Task[];
             taskMethodsMock
                 .setup((t) => t.all(It.isAny()))
-                .callback((tasks: Task[]) => (taskList = tasks))
+                .callback((tasks: df.Task[]) => (taskList = tasks))
                 .verifiable(Times.once());
 
             const generatorExecutor = new GeneratorExecutor(testSubject.callActivitiesInParallel(activities, taskName));
@@ -178,8 +183,8 @@ describe(ActivityActionDispatcher, () => {
             activityName: activityName,
             data: data,
         };
-        orchestrationContextMock
-            .setup((oc) => oc.callActivity(ActivityActionDispatcher.activityTriggerFuncName, activityRequestData))
+        durableOrchestrationContextMock
+            .setup((o) => o.callActivity(HealthMonitorActivity.activityName, activityRequestData))
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             .returns(() => result as any)
             .verifiable(Times.once());
@@ -202,12 +207,9 @@ describe(ActivityActionDispatcher, () => {
     }
 
     function setupTrackAvailabilityNeverCalled(): void {
-        orchestrationContextMock
-            .setup((oc) =>
-                oc.callActivity(
-                    ActivityActionDispatcher.activityTriggerFuncName,
-                    It.isObjectWith({ activityName: ActivityAction.trackAvailability }),
-                ),
+        durableOrchestrationContextMock
+            .setup((o) =>
+                o.callActivity(HealthMonitorActivity.activityName, It.isObjectWith({ activityName: ActivityAction.trackAvailability })),
             )
             .verifiable(Times.never());
     }

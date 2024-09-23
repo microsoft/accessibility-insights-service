@@ -3,11 +3,21 @@
 
 import 'reflect-metadata';
 
-import { Context } from '@azure/functions';
+import { app, InvocationContext } from '@azure/functions';
 import { OnDemandPageScanBatchRequest } from 'storage-documents';
 import { ScanBatchRequestFeedController } from '../src/controllers/scan-batch-request-feed-controller';
 import { processWebRequest } from '../src/process-web-request';
 
-export async function run(context: Context, documents: OnDemandPageScanBatchRequest[]): Promise<void> {
-    await processWebRequest(context, ScanBatchRequestFeedController, documents);
+export async function requestHandler(documents: OnDemandPageScanBatchRequest[], context: InvocationContext): Promise<void> {
+    await processWebRequest({ context }, ScanBatchRequestFeedController, documents);
 }
+
+app.cosmosDB('scan-batch-requests-feed', {
+    connection: 'COSMOS_CONNECTION',
+    databaseName: 'onDemandScanner',
+    containerName: 'scanBatchRequests',
+    createLeaseContainerIfNotExists: true,
+    startFromBeginning: true,
+    maxItemsPerInvocation: 1,
+    handler: requestHandler,
+});

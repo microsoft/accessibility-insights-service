@@ -17,8 +17,6 @@ import { PoolLoad, PoolMetricsInfo } from './pool-load-generator';
 
 @injectable()
 export class Batch {
-    public static readonly batchLogContainerName = 'batch-logs';
-
     public constructor(
         @inject(iocTypeNames.BatchServiceClientProvider) private readonly batchClientProvider: BatchServiceClientProvider,
         @optional()

@@ -3,7 +3,7 @@
     "version": "1.0.0",
     "description": "This project welcomes contributions and suggestions.  Most contributions require you to agree to a Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us the rights to use your contribution. For details, visit https://cla.microsoft.com.",
     "scripts": {
-        "build": "webpack --config ./webpack.config.js --config-name web-workers \"$@\"",
+        "build": "webpack --config ./webpack.config.js --config-name web-workers \"$@\" && cd ./dist && npm install",
         "cbuild": "npm-run-all --serial 'clean' 'build'",
         "clean": "rimraf dist test-results",
         "lint": "eslint -c ../../.eslintrc.js --ext .ts ./",
@@ -23,13 +23,14 @@
         "url": "https://github.com/Microsoft/accessibility-insights-service/issues"
     },
     "homepage": "https://github.com/Microsoft/accessibility-insights-service#readme",
+    "main": "dist/**/index.js",
     "devDependencies": {
-        "@azure/functions": "^3.5.0",
         "@types/dotenv": "^8.2.0",
         "@types/jest": "^29.5.12",
         "@types/lodash": "^4.17.6",
         "@types/node": "^20.14.9",
         "@types/sha.js": "^2.4.0",
+        "azure-functions-core-tools": "^4.x",
         "copy-webpack-plugin": "^11.0.0",
         "fork-ts-checker-webpack-plugin": "^7.3.0",
         "jest": "^29.7.0",
@@ -47,9 +48,10 @@
         "webpack-ignore-dynamic-require": "^1.0.0"
     },
     "dependencies": {
+        "@azure/functions": "^4.5.0",
         "azure-services": "workspace:*",
         "common": "workspace:*",
-        "durable-functions": "^1.5.4",
+        "durable-functions": "^3.1.0",
         "functional-tests": "workspace:*",
         "inversify": "^6.0.1",
         "lodash": "^4.17.21",

@@ -31,7 +31,7 @@ if [[ -z $environment ]]; then
     environment="dev"
 fi
 
-onExit-key-vault-rotate-certificate() {
+onExit-push-image-to-container-registry() {
     local exitCode=$?
 
     if [[ $exitCode != 0 ]]; then
@@ -79,7 +79,7 @@ prepareImageBuildSource() {
 
 # function runs in a subshell to isolate trap handler
 pushImagesToRegistry() (
-    trap "onExit-key-vault-rotate-certificate" EXIT
+    trap "onExit-push-image-to-container-registry" EXIT
 
     # shellcheck disable=SC2034
     local imageBuildProcesses=(

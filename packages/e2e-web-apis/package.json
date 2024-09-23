@@ -3,7 +3,7 @@
     "version": "1.0.0",
     "description": "This project welcomes contributions and suggestions.  Most contributions require you to agree to a Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us the rights to use your contribution. For details, visit https://cla.microsoft.com.",
     "scripts": {
-        "build": "webpack --config ./webpack.config.js --config-name e2e-web-apis \"$@\"",
+        "build": "webpack --config ./webpack.config.js --config-name e2e-web-apis \"$@\" && cd ./dist && npm install",
         "cbuild": "npm-run-all --serial 'clean' 'build'",
         "clean": "rimraf dist test-results",
         "lint": "eslint -c ../../.eslintrc.js --ext .ts ./",
@@ -24,7 +24,6 @@
     },
     "homepage": "https://github.com/Microsoft/accessibility-insights-service#readme",
     "devDependencies": {
-        "@azure/functions": "^3.5.0",
         "@types/dotenv": "^8.2.0",
         "@types/jest": "^29.5.12",
         "@types/lodash": "^4.17.6",
@@ -44,11 +43,6 @@
         "webpack-ignore-dynamic-require": "^1.0.0"
     },
     "dependencies": {
-        "azure-services": "workspace:*",
-        "inversify": "^6.0.1",
-        "lodash": "^4.17.21",
-        "logger": "workspace:*",
-        "parallel-workers": "workspace:*",
-        "reflect-metadata": "^0.1.13"
+        "@azure/functions": "^4.5.0"
     }
 }

@@ -192,7 +192,7 @@ export class ServiceConfiguration {
             jobManagerConfig: {
                 activeToRunningTasksRatio: {
                     format: Number,
-                    default: 3,
+                    default: 2,
                     doc: `The target overload ratio of queued to running tasks. Higher ratio value will result higher queued tasks count.`,
                 },
                 addTasksIntervalInSeconds: {
@@ -345,12 +345,12 @@ export class ServiceConfiguration {
                 },
                 scanNotifyApiEndpoint: {
                     format: 'String',
-                    default: '/scan-notification-url',
+                    default: '/scan-notification-pass',
                     doc: 'The end-point to hit when a scan is completed and will respond successfully',
                 },
                 scanNotifyFailApiEndpoint: {
                     format: 'String',
-                    default: '/scan-notification-url-fail',
+                    default: '/scan-notification-fail',
                     doc: 'The end-point to hit when a scan is completed and will respond unsuccessfully',
                 },
             },

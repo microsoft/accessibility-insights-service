@@ -1,13 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-// eslint-disable-next-line import/no-internal-modules
-import { IOrchestrationFunctionContext } from 'durable-functions/lib/src/classes';
+import * as df from 'durable-functions';
 import { Logger, LogLevel } from 'logger';
 import { OrchestrationTelemetryProperties } from './orchestration-telemetry-properties';
 
 export class OrchestrationLogger {
-    constructor(private readonly context: IOrchestrationFunctionContext, private readonly logger: Logger) {}
+    constructor(private readonly context: df.OrchestrationContext, private readonly logger: Logger) {}
 
     public logOrchestrationStep(message: string, logType: LogLevel = LogLevel.Info, properties?: OrchestrationTelemetryProperties): void {
         this.logger.log(message, logType, {
@@ -19,7 +18,7 @@ export class OrchestrationLogger {
     private getDefaultLogProperties(): OrchestrationTelemetryProperties {
         return {
             instanceId: this.context.df.instanceId,
-            isReplaying: this.context.df.isReplaying.toString(),
+            isReplaying: (this.context.df.isReplaying ?? false).toString(),
             currentUtcDateTime: this.context.df.currentUtcDateTime.toUTCString(),
         };
     }
