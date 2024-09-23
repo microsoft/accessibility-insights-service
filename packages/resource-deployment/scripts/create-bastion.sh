@@ -9,7 +9,7 @@ set -eo pipefail
 
 exitWithUsageInfo() {
     echo "
-Usage: ${BASH_SOURCE} -r <resource group> [-s <subscription name or id>]
+Usage: ${BASH_SOURCE} -r <resource group>
 "
     exit 1
 }
@@ -42,9 +42,8 @@ createBastion() {
 }
 
 # Read script arguments
-while getopts ":s:r:" option; do
+while getopts ":r:" option; do
     case $option in
-    s) subscription=${OPTARG} ;;
     r) resourceGroupName=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac

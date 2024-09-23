@@ -192,7 +192,7 @@ export class ServiceConfiguration {
             jobManagerConfig: {
                 activeToRunningTasksRatio: {
                     format: Number,
-                    default: 3,
+                    default: 2,
                     doc: `The target overload ratio of queued to running tasks. Higher ratio value will result higher queued tasks count.`,
                 },
                 addTasksIntervalInSeconds: {
