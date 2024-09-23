@@ -80,7 +80,7 @@ exports[`ServiceConfiguration verifies custom config 1`] = `
       "format": "String",
     },
     "activeToRunningTasksRatio": {
-      "default": 3,
+      "default": 2,
       "doc": "The target overload ratio of queued to running tasks. Higher ratio value will result higher queued tasks count.",
       "format": [Function],
     },
@@ -324,7 +324,7 @@ exports[`ServiceConfiguration verifies dev config 1`] = `
       "format": "String",
     },
     "activeToRunningTasksRatio": {
-      "default": 3,
+      "default": 2,
       "doc": "The target overload ratio of queued to running tasks. Higher ratio value will result higher queued tasks count.",
       "format": [Function],
     },
