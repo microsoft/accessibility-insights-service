@@ -22,7 +22,7 @@ function waitForVmssToCompleteSetup() {
     local end=$((SECONDS + 300))
     echo "Waiting for Batch pools VMSS to complete setup"
     printf " - Running .."
-    while [ $SECONDS -le $end ]; do
+    while [ "${SECONDS}" -le "${end}" ]; do
         sleep 15
         printf "."
     done
@@ -68,6 +68,13 @@ function setupPools() {
     done
 }
 
+function enableStorageAccess() {
+    principalId=$(az identity show --name "${batchNodeManagedIdentityName}" --resource-group "${resourceGroupName}" --query principalId -o tsv)
+    role="Storage Blob Data Contributor"
+    scope="--scope /subscriptions/${subscription}/resourceGroups/${resourceGroupName}/providers/Microsoft.Storage/storageAccounts/${storageAccountName}"
+    . "${0%/*}/create-role-assignment.sh"
+}
+
 # Read script arguments
 while getopts ":r:" option; do
     case ${option} in
@@ -84,10 +91,11 @@ fi
 . "${0%/*}/get-resource-names.sh"
 
 # Login into Azure Batch account
-echo "Logging into $batchAccountName Azure Batch account"
-az batch account login --name "$batchAccountName" --resource-group "$resourceGroupName"
+echo "Logging into ${batchAccountName} Azure Batch account"
+az batch account login --name "${batchAccountName}" --resource-group "${resourceGroupName}"
 
+enableStorageAccess
 waitForVmssToCompleteSetup
 setupPools
 
-echo "Successfully setup all pools for batch account $batchAccountName"
+echo "Successfully setup all pools for batch account ${batchAccountName}"
