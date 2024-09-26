@@ -8,7 +8,7 @@ set -eo pipefail
 
 exitWithUsageInfo() {
     echo "
-Usage: ${BASH_SOURCE} -r <resource group> [-n <name of the identity resource>]
+Usage: ${BASH_SOURCE} -r <resource group>
 "
     exit 1
 }
@@ -26,9 +26,15 @@ if [[ -z ${resourceGroupName} ]]; then
     exitWithUsageInfo
 fi
 
+function createIdentity() {
+    local managedIdentityName=$1
+
+    identity=$(az identity create --resource-group "${resourceGroupName}" --name "${managedIdentityName}")
+    echo "Created ${managedIdentityName} user-managed identity."
+    echo "${identity}"
+}
+
 . "${0%/*}/get-resource-names.sh"
 
-identity=$(az identity create --resource-group "${resourceGroupName}" --name "${webApiManagedIdentityName}")
-
-echo "Created ${webApiManagedIdentityName} user-managed identity."
-echo "${identity}"
+createIdentity "${webApiManagedIdentityName}"
+createIdentity "${batchNodeManagedIdentityName}"

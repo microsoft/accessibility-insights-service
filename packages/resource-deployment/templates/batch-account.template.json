@@ -37,6 +37,13 @@
                 "description": "Storage account name."
             }
         },
+        "batchNodeManagedIdentity": {
+            "type": "string",
+            "defaultValue": "[concat('batch-node-identity-',toLower(uniqueString(resourceGroup().id)))]",
+            "metadata": {
+                "description": "Batch node user managed identity."
+            }
+        },
         "vnetName": {
             "defaultValue": "[concat('vnet-a11y',toLower(uniqueString(resourceGroup().id)))]",
             "type": "string",
@@ -171,7 +178,11 @@
                     "keySource": "Microsoft.Batch"
                 },
                 "autoStorage": {
-                    "storageAccountId": "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"
+                    "storageAccountId": "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]",
+                    "authenticationMode": "BatchAccountManagedIdentity",
+                    "nodeIdentityReference": {
+                        "resourceId": "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('batchNodeManagedIdentity'))]"
+                    }
                 },
                 "keyVaultReference": {
                     "id": "[resourceId('Microsoft.KeyVault/vaults', parameters('keyVault'))]",
@@ -184,6 +195,12 @@
             "apiVersion": "2024-02-01",
             "name": "[concat(parameters('batchAccount'), '/', variables('onDemandUrlScanPoolName'))]",
             "dependsOn": ["[resourceId('Microsoft.Batch/batchAccounts', parameters('batchAccount'))]"],
+            "identity": {
+                "type": "UserAssigned",
+                "userAssignedIdentities": {
+                    "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('batchNodeManagedIdentity'))]": {}
+                }
+            },
             "properties": {
                 "vmSize": "[parameters('onDemandUrlScanPoolVmSize')]",
                 "interNodeCommunication": "Disabled",
@@ -254,6 +271,12 @@
             "apiVersion": "2024-02-01",
             "name": "[concat(parameters('batchAccount'), '/', variables('onDemandScanRequestPoolName'))]",
             "dependsOn": ["[resourceId('Microsoft.Batch/batchAccounts', parameters('batchAccount'))]"],
+            "identity": {
+                "type": "UserAssigned",
+                "userAssignedIdentities": {
+                    "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('batchNodeManagedIdentity'))]": {}
+                }
+            },
             "properties": {
                 "vmSize": "[parameters('onDemandScanRequestPoolVmSize')]",
                 "interNodeCommunication": "Disabled",
@@ -324,6 +347,12 @@
             "apiVersion": "2024-02-01",
             "name": "[concat(parameters('batchAccount'), '/', variables('privacyScanPoolName'))]",
             "dependsOn": ["[resourceId('Microsoft.Batch/batchAccounts', parameters('batchAccount'))]"],
+            "identity": {
+                "type": "UserAssigned",
+                "userAssignedIdentities": {
+                    "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('batchNodeManagedIdentity'))]": {}
+                }
+            },
             "properties": {
                 "vmSize": "[parameters('privacyScanPoolVmSize')]",
                 "interNodeCommunication": "Disabled",
