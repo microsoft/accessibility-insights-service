@@ -12,13 +12,12 @@ function setupAADAuthenticationFlow(
     accountName: string,
     accountPassword: string,
     success: boolean = true,
+    passwordAuthenticationPreference: boolean = false,
 ): void {
     keyboardMock.setup((k) => k.press('Enter')).verifiable(Times.exactly(2));
     pageMock.setup((p) => p.goto('https://portal.azure.com')).verifiable(Times.exactly(1));
-    pageMock.setup((p) => p.waitForSelector(It.isAnyString())).verifiable(Times.exactly(2));
     pageMock.setup((p) => p.type(It.isAnyString(), accountName)).verifiable(Times.exactly(1));
     pageMock.setup((p) => p.type(It.isAnyString(), accountPassword)).verifiable(Times.exactly(1));
-    pageMock.setup((p) => p.click('#FormsAuthentication')).verifiable(Times.exactly(1));
     pageMock.setup((p) => p.$eval('#errorText', It.isAny())).returns(() => Promise.resolve(success ? '' : 'this is an error'));
     pageMock
         .setup((p) => p.waitForSelector('#idBtn_Back', It.isAny()))
@@ -29,6 +28,17 @@ function setupAADAuthenticationFlow(
         .returns(() => 'https://login.microsoftonline.com')
         .verifiable(Times.exactly(2));
 
+    if (passwordAuthenticationPreference) {
+        pageMock.setup((p) => p.waitForSelector('input[name="loginfmt"]')).verifiable(Times.exactly(1));
+        pageMock
+            .setup((p) => p.waitForSelector('#FormsAuthentication'))
+            .returns(() => Promise.reject('TimeoutError: waiting for selector `#FormsAuthentication` failed: timeout 30000ms exceeded'));
+        pageMock.setup((p) => p.waitForSelector('input[type="password"]')).verifiable(Times.exactly(1));
+        pageMock.setup((p) => p.click('input[type="password"]')).verifiable(Times.exactly(1));
+    } else {
+        pageMock.setup((p) => p.waitForSelector(It.isAnyString())).verifiable(Times.exactly(2));
+        pageMock.setup((p) => p.click('#FormsAuthentication')).verifiable(Times.exactly(1));
+    }
     if (success) {
         pageMock
             .setup((p) => p.url())
@@ -69,9 +79,16 @@ describe(AzureActiveDirectoryAuthentication, () => {
         consoleInfoMock.mockRestore();
     });
 
-    it('follows portal.azure.com authentication flow', async () => {
+    it('follows portal.azure.com authentication flow with no authentication preference', async () => {
         pageMock.setup((p) => p.waitForNavigation({ waitUntil: 'networkidle0' })).verifiable(Times.exactly(1));
         setupAADAuthenticationFlow(pageMock, keyboardMock, accountName, accountPassword);
+        await testSubject.authenticate(pageMock.object);
+        expect(consoleInfoMock).toHaveBeenCalledWith('Authentication succeeded.');
+    });
+
+    it('follows portal.azure.com authentication flow with password authentication preference', async () => {
+        pageMock.setup((p) => p.waitForNavigation({ waitUntil: 'networkidle0' })).verifiable(Times.exactly(1));
+        setupAADAuthenticationFlow(pageMock, keyboardMock, accountName, accountPassword, true, true);
         await testSubject.authenticate(pageMock.object);
         expect(consoleInfoMock).toHaveBeenCalledWith('Authentication succeeded.');
     });
@@ -128,13 +145,16 @@ describe(AzureActiveDirectoryAuthentication, () => {
             .setup((p) => p.waitForSelector('#FormsAuthentication'))
             .returns(() => Promise.reject('TimeoutError: waiting for selector `#FormsAuthentication` failed: timeout 30000ms exceeded'));
         pageMock
+            .setup((p) => p.waitForSelector('input[type="password"]'))
+            .returns(() => Promise.reject('TimeoutError: waiting for selector `input[type="password"]` failed: timeout 30000ms exceeded'));
+        pageMock
             .setup((p) => p.url())
             .returns(() => 'https://login.microsoftonline.com')
             .verifiable(Times.exactly(1));
 
         expect.assertions(1);
         const expectedErrorMessage = new Error(
-            'Authentication failed. Authentication requires a non-people service account. To learn how to set up a service account, visit: https://aka.ms/AI-action-auth. TimeoutError: waiting for selector `#FormsAuthentication` failed: timeout 30000ms exceeded',
+            'Authentication failed. Authentication requires a non-people service account. To learn how to set up a service account, visit: https://aka.ms/AI-action-auth. TimeoutError: waiting for selector `input[type="password"]` failed: timeout 30000ms exceeded',
         );
 
         try {

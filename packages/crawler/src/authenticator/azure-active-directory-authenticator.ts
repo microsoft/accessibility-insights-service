@@ -32,13 +32,18 @@ export class AzureActiveDirectoryAuthentication implements AuthenticationMethod 
 
         try {
             await page.waitForSelector('#FormsAuthentication');
+            await page.click('#FormsAuthentication');
         } catch (error) {
-            throw new Error(
-                `Authentication failed. Authentication requires a non-people service account. To learn how to set up a service account, visit: https://aka.ms/AI-action-auth. ${error}`,
-            );
+            try {
+                await page.waitForSelector('input[type="password"]');
+                await page.click('input[type="password"]');
+            } catch (errorPassword) {
+                throw new Error(
+                    `Authentication failed. Authentication requires a non-people service account. To learn how to set up a service account, visit: https://aka.ms/AI-action-auth. ${errorPassword}`,
+                );
+            }
         }
 
-        await page.click('#FormsAuthentication');
         await page.type('input[type="password"]', this.accountPassword);
         await Promise.all([page.waitForNavigation({ waitUntil: 'networkidle0' }), page.keyboard.press('Enter')]);
 
