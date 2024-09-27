@@ -14,21 +14,6 @@ Usage: ${BASH_SOURCE} -r <resource group>
     exit 1
 }
 
-. "${0%/*}/process-utilities.sh"
-
-function waitForVmssToCompleteSetup() {
-    # Allow VMSS to complete initial setup to mitigate system identity reset issue
-    # There is no reliable way to detect when VMSS has completed initial setup hence use fixed delay
-    local end=$((SECONDS + 300))
-    echo "Waiting for Batch pools VMSS to complete setup"
-    printf " - Running .."
-    while [ "${SECONDS}" -le "${end}" ]; do
-        sleep 15
-        printf "."
-    done
-    echo " ended"
-}
-
 function setupPools() {
     # Enable managed identity on Batch pools
     pools=$(az batch pool list --query "[].id" -o tsv)
@@ -39,7 +24,7 @@ function setupPools() {
         pool="${pool//[$'\t\r\n ']/}"
 
         command=". \"${0%/*}/add-tags-for-batch-vmss.sh\""
-        commandName="Setup tags for pool $pool"
+        commandName="Setup tags for pool ${pool}"
         . "${0%/*}/run-command-on-all-vmss-for-pool.sh" &
         parallelProcesses+=("$!")
     done
@@ -51,28 +36,65 @@ function setupPools() {
         pool="${pool//[$'\t\r\n ']/}"
 
         command=". \"${0%/*}/enable-os-image-upgrade.sh\""
-        commandName="Enable VMSS automatic OS image upgrades for pool $pool"
+        commandName="Enable VMSS automatic OS image upgrades for pool ${pool}"
         . "${0%/*}/run-command-on-all-vmss-for-pool.sh" &
         parallelProcesses+=("$!")
     done
     waitForProcesses parallelProcesses
+}
 
-    echo "Enable system identity for VMSS"
-    # Runs pools update script sequentially
-    for pool in ${pools}; do
-        pool="${pool//[$'\t\r\n ']/}"
+function enableCosmosAccess() {
+    cosmosAccountId=$(az cosmosdb show --name "${cosmosAccountName}" --resource-group "${resourceGroupName}" --query id -o tsv)
+    scope="--scope ${cosmosAccountId}"
+    role="DocumentDB Account Contributor"
+    . "${0%/*}/create-role-assignment.sh"
+}
 
-        command=". ${0%/*}/enable-system-identity-for-batch-vmss.sh"
-        commandName="Enable system identity for pool $pool"
-        . "${0%/*}/run-command-on-all-vmss-for-pool.sh"
-    done
+function enableCosmosRBAC() {
+    # Create and assign custom Cosmos DB RBAC role
+    customRoleName="CosmosDocumentRW"
+    RBACRoleId=$(az cosmosdb sql role definition list --account-name "${cosmosAccountName}" --resource-group "${resourceGroupName}" --query "[?roleName=='${customRoleName}'].id" -o tsv)
+    if [[ -z "${RBACRoleId}" ]]; then
+        echo "Creating a custom Cosmos DB RBAC role ${customRoleName} with read-write permissions"
+        RBACRoleId=$(az cosmosdb sql role definition create --account-name "${cosmosAccountName}" \
+            --resource-group "${resourceGroupName}" \
+            --body "@${0%/*}/../templates/cosmos-db-rw-role.json" \
+            --query "id" -o tsv)
+        az cosmosdb sql role definition wait --account-name "${cosmosAccountName}" \
+            --resource-group "${resourceGroupName}" \
+            --id "${RBACRoleId}" \
+            --exists 1>/dev/null
+    fi
+
+    az cosmosdb sql role assignment create --account-name "${cosmosAccountName}" \
+        --resource-group "${resourceGroupName}" \
+        --scope "/" \
+        --principal-id "${principalId}" \
+        --role-definition-id "${RBACRoleId}" 1>/dev/null
 }
 
 function enableStorageAccess() {
-    principalId=$(az identity show --name "${batchNodeManagedIdentityName}" --resource-group "${resourceGroupName}" --query principalId -o tsv)
-    role="Storage Blob Data Contributor"
     scope="--scope /subscriptions/${subscription}/resourceGroups/${resourceGroupName}/providers/Microsoft.Storage/storageAccounts/${storageAccountName}"
+    role="Storage Blob Data Contributor"
     . "${0%/*}/create-role-assignment.sh"
+
+    role="Storage Queue Data Contributor"
+    . "${0%/*}/create-role-assignment.sh"
+}
+
+function enableResourceGroupAccess() {
+    role="Contributor"
+    scope="--scope /subscriptions/${subscription}/resourceGroups/${resourceGroupName}"
+    . "${0%/*}/create-role-assignment.sh"
+}
+
+function enableAccess() {
+    local enableAccessProcesses=(
+        "enableResourceGroupAccess"
+        "enableStorageAccess"
+        "enableCosmosAccess"
+        "enableCosmosRBAC")
+    runCommandsWithoutSecretsInParallel enableAccessProcesses
 }
 
 # Read script arguments
@@ -88,14 +110,15 @@ if [[ -z ${resourceGroupName} ]]; then
     exitWithUsageInfo
 fi
 
+. "${0%/*}/process-utilities.sh"
 . "${0%/*}/get-resource-names.sh"
 
-# Login into Azure Batch account
 echo "Logging into ${batchAccountName} Azure Batch account"
 az batch account login --name "${batchAccountName}" --resource-group "${resourceGroupName}"
 
-enableStorageAccess
-waitForVmssToCompleteSetup
+principalId=$(az identity show --name "${batchNodeManagedIdentityName}" --resource-group "${resourceGroupName}" --query principalId -o tsv)
+
+enableAccess
 setupPools
 
 echo "Successfully setup all pools for batch account ${batchAccountName}"
