@@ -173,7 +173,7 @@
                 "type": "SystemAssigned"
             },
             "properties": {
-                "poolAllocationMode": "UserSubscription",
+                "poolAllocationMode": "BatchService",
                 "encryption": {
                     "keySource": "Microsoft.Batch"
                 },
