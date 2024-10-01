@@ -14,35 +14,6 @@ Usage: ${BASH_SOURCE} -r <resource group>
     exit 1
 }
 
-function setupPools() {
-    # Enable managed identity on Batch pools
-    pools=$(az batch pool list --query "[].id" -o tsv)
-
-    echo "Setup tags for VMSS"
-    parallelProcesses=()
-    for pool in ${pools}; do
-        pool="${pool//[$'\t\r\n ']/}"
-
-        command=". \"${0%/*}/add-tags-for-batch-vmss.sh\""
-        commandName="Setup tags for pool ${pool}"
-        . "${0%/*}/run-command-on-all-vmss-for-pool.sh" &
-        parallelProcesses+=("$!")
-    done
-    waitForProcesses parallelProcesses
-
-    echo "Enable VMSS automatic OS image upgrades"
-    parallelProcesses=()
-    for pool in ${pools}; do
-        pool="${pool//[$'\t\r\n ']/}"
-
-        command=". \"${0%/*}/enable-os-image-upgrade.sh\""
-        commandName="Enable VMSS automatic OS image upgrades for pool ${pool}"
-        . "${0%/*}/run-command-on-all-vmss-for-pool.sh" &
-        parallelProcesses+=("$!")
-    done
-    waitForProcesses parallelProcesses
-}
-
 function enableCosmosAccess() {
     cosmosAccountId=$(az cosmosdb show --name "${cosmosAccountName}" --resource-group "${resourceGroupName}" --query id -o tsv)
     scope="--scope ${cosmosAccountId}"
@@ -88,9 +59,14 @@ function enableResourceGroupAccess() {
     . "${0%/*}/create-role-assignment.sh"
 }
 
+function enableKeyVaultAccess() {
+    . "${0%/*}/key-vault-enable-msi.sh"
+}
+
 function enableAccess() {
     local enableAccessProcesses=(
         "enableResourceGroupAccess"
+        "enableKeyVaultAccess"
         "enableStorageAccess"
         "enableCosmosAccess"
         "enableCosmosRBAC")
@@ -119,6 +95,4 @@ az batch account login --name "${batchAccountName}" --resource-group "${resource
 principalId=$(az identity show --name "${batchNodeManagedIdentityName}" --resource-group "${resourceGroupName}" --query principalId -o tsv)
 
 enableAccess
-setupPools
-
-echo "Successfully setup all pools for batch account ${batchAccountName}"
+echo "Successfully setup pools for Azure Batch account ${batchAccountName}"

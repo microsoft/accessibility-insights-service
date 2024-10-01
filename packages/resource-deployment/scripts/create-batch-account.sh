@@ -54,7 +54,7 @@ function deployBatch() {
             -o tsv
     )
 
-    echo "Deployed Batch account $batchAccountName"
+    echo "Deployed Batch account ${batchAccountName}"
 }
 
 # Read script arguments
@@ -70,16 +70,13 @@ while getopts ":r:t:e:d:b:" option; do
 done
 
 # Print script usage help
-if [[ -z $resourceGroupName ]] || [[ -z $batchTemplateFile ]] || [[ -z $environment ]] || [[ -z $azureBatchObjectId ]]; then
+if [[ -z ${resourceGroupName} ]] || [[ -z ${batchTemplateFile} ]] || [[ -z ${environment} ]] || [[ -z ${azureBatchObjectId} ]]; then
     exitWithUsageInfo
 fi
 
 . "${0%/*}/get-resource-names.sh"
 
 echo "Setting up batch account ${batchAccountName}"
-
-# Configure Azure subscription account to support Batch account in user subscription mode
-. "${0%/*}/enable-batch-provider.sh"
 
 setParameterFilePath
 
@@ -94,4 +91,4 @@ deployBatch
 
 . "${0%/*}/setup-batch-pools.sh"
 
-echo "The $batchAccountName Azure Batch account successfully deployed."
+echo "The ${batchAccountName} Azure Batch account successfully deployed."
