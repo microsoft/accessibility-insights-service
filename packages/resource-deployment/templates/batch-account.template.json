@@ -59,7 +59,7 @@
             }
         },
         "onDemandScanRequestPoolVmSize": {
-            "defaultValue": "standard_e8ds_v5",
+            "defaultValue": "standard_e8ds_v4",
             "type": "string",
             "metadata": {
                 "description": "VM size for on-demand-scan-request-pool pool"
@@ -80,7 +80,7 @@
             }
         },
         "onDemandUrlScanPoolVmSize": {
-            "defaultValue": "standard_e4ds_v5",
+            "defaultValue": "standard_e4ds_v4",
             "type": "string",
             "metadata": {
                 "description": "VM size for on-demand-url-scan-pool pool"
@@ -101,7 +101,7 @@
             }
         },
         "privacyScanPoolVmSize": {
-            "defaultValue": "standard_e4ds_v5",
+            "defaultValue": "standard_e4ds_v4",
             "type": "string",
             "metadata": {
                 "description": "VM size for privacy-scan-pool pool"
