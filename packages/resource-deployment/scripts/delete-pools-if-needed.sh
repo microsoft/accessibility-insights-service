@@ -218,7 +218,10 @@ fi
 . "${0%/*}/get-resource-names.sh"
 . "${0%/*}/process-utilities.sh"
 
-echo "Logging into ${batchAccountName} Azure Batch account"
-az batch account login --name "${batchAccountName}" --resource-group "${resourceGroupName}"
+batchAccountExists=$(az resource list --name "${batchAccountName}" -o tsv)
+if [[ -n ${batchAccountExists} ]]; then
+    echo "Logging into ${batchAccountName} Azure Batch account"
+    az batch account login --name "${batchAccountName}" --resource-group "${resourceGroupName}"
 
-deletePoolsIfNeeded
+    deletePoolsIfNeeded
+fi
