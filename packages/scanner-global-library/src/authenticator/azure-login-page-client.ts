@@ -4,6 +4,8 @@
 import * as Puppeteer from 'puppeteer';
 import { inject, optional, injectable } from 'inversify';
 import { AuthenticationType } from 'storage-documents';
+import { GlobalLogger } from 'logger';
+import { System } from 'common';
 import { PageNavigator, NavigationResponse } from '../page-navigator';
 import { ServicePrincipalCredentialProvider } from './service-principal-credential-provider';
 
@@ -26,6 +28,7 @@ export class AzureLoginPageClient implements LoginPageClient {
         @inject(ServicePrincipalCredentialProvider)
         @optional()
         private readonly servicePrincipalCredentialProvider: ServicePrincipalCredentialProvider = new ServicePrincipalCredentialProvider(),
+        @inject(GlobalLogger) @optional() private readonly logger: GlobalLogger,
     ) {}
 
     public async login(page: Puppeteer.Page): Promise<NavigationResponse> {
@@ -52,18 +55,15 @@ export class AzureLoginPageClient implements LoginPageClient {
             return this.getErrorResponse(navigationResponse, page, '#usernameError');
         }
 
-        // Select 'Password' authentication option
+        // Select optional 'Password' authentication option
         try {
             await page.waitForSelector('#FormsAuthentication', { timeout: this.selectorTimeoutMsec });
             await page.click('#FormsAuthentication');
         } catch (error) {
-            return {
-                browserError: {
-                    errorType: 'AuthenticationError',
-                    message: error.name === 'TimeoutError' ? 'Password authentication option is not presented.' : error.message,
-                    stack: error.stack,
-                },
-            };
+            this.logger?.logWarn('Password authentication option is not presented.', {
+                selector: '#FormsAuthentication',
+                error: System.serializeError(error),
+            });
         }
 
         // Enter account password

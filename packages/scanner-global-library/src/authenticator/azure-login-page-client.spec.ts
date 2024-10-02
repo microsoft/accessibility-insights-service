@@ -5,6 +5,7 @@ import 'reflect-metadata';
 
 import { IMock, Mock, It, Times } from 'typemoq';
 import * as Puppeteer from 'puppeteer';
+import { GlobalLogger } from 'logger';
 import { PageNavigator, NavigationResponse } from '../page-navigator';
 import { AzureLoginPageClient } from './azure-login-page-client';
 import { ServicePrincipalCredentialProvider, ServicePrincipalCredential } from './service-principal-credential-provider';
@@ -17,6 +18,7 @@ let servicePrincipalCredential: ServicePrincipalCredential;
 let azureLoginPageClient: AzureLoginPageClient;
 let puppeteerPageMock: IMock<Puppeteer.Page>;
 let puppeteerKeyboardMock: IMock<Puppeteer.Keyboard>;
+let loggerMock: IMock<GlobalLogger>;
 
 describe(AzureLoginPageClient, () => {
     beforeEach(() => {
@@ -28,13 +30,18 @@ describe(AzureLoginPageClient, () => {
         pageNavigatorMock = Mock.ofType<PageNavigator>();
         servicePrincipalCredentialProviderMock = Mock.ofType<ServicePrincipalCredentialProvider>();
         puppeteerKeyboardMock = Mock.ofType<Puppeteer.Keyboard>();
+        loggerMock = Mock.ofType<GlobalLogger>();
         puppeteerPageMock.setup((o) => o.keyboard).returns(() => puppeteerKeyboardMock.object);
         servicePrincipalCredentialProviderMock
             .setup((o) => o.getAzureAuthClientCredential())
             .returns(() => Promise.resolve(servicePrincipalCredential))
             .verifiable();
 
-        azureLoginPageClient = new AzureLoginPageClient(pageNavigatorMock.object, servicePrincipalCredentialProviderMock.object);
+        azureLoginPageClient = new AzureLoginPageClient(
+            pageNavigatorMock.object,
+            servicePrincipalCredentialProviderMock.object,
+            loggerMock.object,
+        );
     });
 
     afterEach(() => {
@@ -42,6 +49,7 @@ describe(AzureLoginPageClient, () => {
         pageNavigatorMock.verifyAll();
         servicePrincipalCredentialProviderMock.verifyAll();
         puppeteerKeyboardMock.verifyAll();
+        loggerMock.verifyAll();
     });
 
     it('should complete authentication workflow', async () => {

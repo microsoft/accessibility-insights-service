@@ -9,7 +9,7 @@ export resourceGroupName
 
 exitWithUsageInfo() {
     echo "
-Usage: ${BASH_SOURCE} -r <resource group>
+Usage: ${BASH_SOURCE} -r <resource group> [-o <Batch node managed identity object (principal) ID>]
 "
     exit 1
 }
@@ -95,4 +95,4 @@ fi
 . "${0%/*}/get-resource-names.sh"
 
 enableAccess
-echo "Successfully enabled batch node managed identity ${principalId}"
+echo "Successfully enabled Batch node managed identity ${principalId}"
