@@ -74,8 +74,9 @@ function enableAccess() {
 }
 
 # Read script arguments
-while getopts ":r:" option; do
+while getopts ":r:o:" option; do
     case ${option} in
+    o) principalId=${OPTARG} ;;
     r) resourceGroupName=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
@@ -86,13 +87,12 @@ if [[ -z ${resourceGroupName} ]]; then
     exitWithUsageInfo
 fi
 
+if [[ -z ${principalId} ]]; then
+    principalId=$(az identity show --name "${batchNodeManagedIdentityName}" --resource-group "${resourceGroupName}" --query principalId -o tsv)
+fi
+
 . "${0%/*}/process-utilities.sh"
 . "${0%/*}/get-resource-names.sh"
 
-echo "Logging into ${batchAccountName} Azure Batch account"
-az batch account login --name "${batchAccountName}" --resource-group "${resourceGroupName}"
-
-principalId=$(az identity show --name "${batchNodeManagedIdentityName}" --resource-group "${resourceGroupName}" --query principalId -o tsv)
-
 enableAccess
-echo "Successfully setup pools for Azure Batch account ${batchAccountName}"
+echo "Successfully enabled batch node managed identity ${principalId}"
