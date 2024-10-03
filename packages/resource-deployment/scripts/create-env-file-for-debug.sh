@@ -18,34 +18,34 @@ Usage: ${BASH_SOURCE} -r <resource group> [-s <subscription name or id>]
 }
 
 getCosmosDbUrl() {
-    cosmosDbUrl=$(az cosmosdb show --name "$cosmosAccountName" --resource-group "$resourceGroupName" --query "documentEndpoint" -o tsv)
+    cosmosDbUrl=$(az cosmosdb show --name "${cosmosAccountName}" --resource-group "${resourceGroupName}" --query "documentEndpoint" -o tsv)
 
-    if [[ -z $cosmosDbUrl ]]; then
-        echo "Unable to get cosmos DB URL for cosmos account $cosmosAccountName"
+    if [[ -z ${cosmosDbUrl} ]]; then
+        echo "Unable to get cosmos DB URL for cosmos account ${cosmosAccountName}"
         exit 1
     fi
 }
 
 getAppInsightKey() {
-    id="/subscriptions/$subscription/resourceGroups/$resourceGroupName/providers/microsoft.insights/components/$appInsightsName"
-    appInsightInstrumentationKey=$(az resource show --id "$id" --query properties.InstrumentationKey --out tsv)
+    id="/subscriptions/${subscription}/resourceGroups/${resourceGroupName}/providers/microsoft.insights/components/${appInsightsName}"
+    appInsightInstrumentationKey=$(az resource show --id "${id}" --query properties.InstrumentationKey --out tsv)
 }
 
 getBatchAccountEndpoint() {
-    az batch account login --name "$batchAccountName" --resource-group "$resourceGroupName"
+    az batch account login --name "${batchAccountName}" --resource-group "${resourceGroupName}"
     batchAccountEndpoint=$(az batch account show --query accountEndpoint --out tsv)
 }
 
 # Read script arguments
 while getopts ":s:r:" option; do
-    case $option in
+    case ${option} in
     s) subscription=${OPTARG} ;;
     r) resourceGroupName=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
 
-if [[ -z $resourceGroupName ]]; then
+if [[ -z ${resourceGroupName} ]]; then
     exitWithUsageInfo
 fi
 
@@ -55,7 +55,6 @@ if ! az account show 1>/dev/null; then
 fi
 
 . "${0%/*}/get-resource-names.sh"
-. "${0%/*}/create-sp-for-debug.sh"
 
 getCosmosDbUrl
 getAppInsightKey
@@ -65,17 +64,17 @@ echo -e "
 Copy below output into .env file
 START of .env file >>> \033[32m
 
-SUBSCRIPTION=$subscription
-RESOURCE_GROUP=$resourceGroupName
+SUBSCRIPTION=${subscription}
+RESOURCE_GROUP=${resourceGroupName}
 
-AZ_BATCH_ACCOUNT_NAME=$batchAccountName
-AZ_BATCH_ACCOUNT_URL=https://$batchAccountEndpoint/
+AZ_BATCH_ACCOUNT_NAME=${batchAccountName}
+AZ_BATCH_ACCOUNT_URL=https://${batchAccountEndpoint}/
 AI_STORAGE_NOTIFICATION_QUEUE=ondemand-send-notification
 AI_STORAGE_SCAN_QUEUE=ondemand-scanrequest
 AI_STORAGE_PRIVACY_SCAN_QUEUE=privacy-scan-request
-AI_KEY_VAULT_URL=https://$keyVault.vault.azure.net/
-APPINSIGHTS_INSTRUMENTATIONKEY=$appInsightInstrumentationKey
-AZURE_STORAGE_NAME=$storageAccountName
+AI_KEY_VAULT_URL=https://${keyVault}.vault.azure.net/
+APPINSIGHTS_INSTRUMENTATIONKEY=${appInsightInstrumentationKey}
+AZURE_STORAGE_NAME=${storageAccountName}
 
 AZ_BATCH_POOL_ID=
 AZ_BATCH_JOB_ID=1-dev-test-job
@@ -89,11 +88,11 @@ DEEP_SCAN=
 SCANGROUPID=
 TARGETREPORT=
 
-HEADLESS=false
-DEV_TOOLS=false
-AZ_CLI_AUTH=true
-PAGE_AUTH=false
-NETWORK_TRACE=false
+HEADLESS=
+DEV_TOOLS=
+AZ_CLI_AUTH=
+PAGE_AUTH=
+NETWORK_TRACE=
 USER_AGENT=
 X_FORWARDED_FOR_HTTP_HEADER=
 AZURE_AUTH_CLIENT_NAME=
@@ -108,8 +107,8 @@ START of local.settings.json file >>> \033[32m
     \"IsEncrypted\": false,
     \"Values\": {
         \"FUNCTIONS_WORKER_RUNTIME\": \"node\",
-        \"AzureWebJobsStorage__accountName\": \"$storageAccountName\",
-        \"COSMOS_CONNECTION__accountEndpoint\": \"$cosmosDbUrl\"
+        \"AzureWebJobsStorage__accountName\": \"${storageAccountName}\",
+        \"COSMOS_CONNECTION__accountEndpoint\": \"${cosmosDbUrl}\"
     }
 }
 
