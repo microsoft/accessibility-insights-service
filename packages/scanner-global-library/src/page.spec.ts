@@ -437,7 +437,7 @@ describe(Page, () => {
         });
 
         it('setCookies()', async () => {
-            const cookies = [{ name: 'c1' }, { name: 'c2' }] as Puppeteer.Protocol.Network.CookieParam[];
+            const cookies = [{ name: 'c1' }, { name: 'c2' }] as Puppeteer.CookieParam[];
             simulatePageLaunch();
             puppeteerPageMock
                 .setup((o) => o.setCookie(...cookies))

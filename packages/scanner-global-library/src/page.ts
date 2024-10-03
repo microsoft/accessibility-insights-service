@@ -263,7 +263,7 @@ export class Page {
         return cookies;
     }
 
-    public async setCookies(cookies: Puppeteer.Protocol.Network.CookieParam[]): Promise<void> {
+    public async setCookies(cookies: Puppeteer.CookieParam[]): Promise<void> {
         await this.page.setCookie(...cookies);
     }
 
