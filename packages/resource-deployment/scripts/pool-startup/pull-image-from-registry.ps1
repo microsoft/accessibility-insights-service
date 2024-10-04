@@ -77,11 +77,10 @@ function getSecretValue($key) {
 
 function loginToContainerRegistry() {
     $containerRegistryUsername = getSecretValue "containerRegistryUsername"
-    $containerRegistryPassword = getSecretValue "containerRegistryPassword"
     $global:azurecr = "$containerRegistryUsername.azurecr.io"
 
     Write-Host "Login to the container registry $azurecr..."
-    Write-Output "$containerRegistryPassword" | docker login -u "$containerRegistryUsername" --password-stdin "$azurecr"
+    az acr login --name "$azurecr"
 }
 
 function pullImages() {

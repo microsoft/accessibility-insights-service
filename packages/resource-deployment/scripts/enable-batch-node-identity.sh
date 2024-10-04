@@ -53,19 +53,19 @@ function enableStorageAccess() {
     . "${0%/*}/create-role-assignment.sh"
 }
 
-function enableResourceGroupAccess() {
-    role="Contributor"
-    scope="--scope /subscriptions/${subscription}/resourceGroups/${resourceGroupName}"
-    . "${0%/*}/create-role-assignment.sh"
-}
-
 function enableKeyVaultAccess() {
     . "${0%/*}/key-vault-enable-msi.sh"
 }
 
+function enableContainerRegistryAccess() {
+    role="acrpull"
+    scope="--scope /subscriptions/${subscription}/resourceGroups/${resourceGroupName}/providers/Microsoft.ContainerRegistry/registries/${containerRegistryName}"
+    . "${0%/*}/create-role-assignment.sh"
+}
+
 function enableAccess() {
     local enableAccessProcesses=(
-        "enableResourceGroupAccess"
+        "enableContainerRegistryAccess"
         "enableKeyVaultAccess"
         "enableStorageAccess"
         "enableCosmosAccess"

@@ -25,7 +25,10 @@
                 "tier": "Standard"
             },
             "properties": {
-                "adminUserEnabled": true,
+                "adminUserEnabled": false,
+                "anonymousPullEnabled": false,
+                "dataEndpointEnabled": false,
+                "publicNetworkAccess": "Enabled",
                 "policies": {
                     "quarantinePolicy": {
                         "status": "disabled"
@@ -41,9 +44,7 @@
                 },
                 "encryption": {
                     "status": "disabled"
-                },
-                "dataEndpointEnabled": false,
-                "publicNetworkAccess": "Enabled"
+                }
             }
         }
     ]
