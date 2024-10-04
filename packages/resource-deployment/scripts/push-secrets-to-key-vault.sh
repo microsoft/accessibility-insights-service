@@ -67,16 +67,6 @@ getCosmosDbUrl() {
     fi
 }
 
-getContainerRegistryLogin() {
-    containerRegistryUsername=$(az acr credential show --name "${containerRegistryName}" --query "username" -o tsv)
-    containerRegistryPassword=$(az acr credential show --name "${containerRegistryName}" --query "passwords[0].value" -o tsv)
-
-    if [[ -z ${containerRegistryUsername} ]] || [[ -z ${containerRegistryPassword} ]]; then
-        echo "Unable to get login credentials for container registry ${containerRegistryName}"
-        exit 1
-    fi
-}
-
 createAppInsightsApiKey() {
     apiKeyParams="--app $appInsightsName --resource-group $resourceGroupName --api-key $appInsightsName-api-key"
     apiKeyExists=$(az monitor app-insights api-key show $apiKeyParams)
@@ -110,9 +100,7 @@ pushSecretsToKeyVault() (
     # createAppInsightsApiKey
     # pushSecretToKeyVault "appInsightsApiKey" "${appInsightsApiKey}"
 
-    getContainerRegistryLogin
-    pushSecretToKeyVault "containerRegistryUsername" "${containerRegistryUsername}"
-    pushSecretToKeyVault "containerRegistryPassword" "${containerRegistryPassword}"
+    pushSecretToKeyVault "containerRegistryName" "${containerRegistryName}"
 )
 
 # Read script arguments

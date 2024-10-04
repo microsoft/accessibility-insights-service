@@ -76,8 +76,8 @@ function getSecretValue($key) {
 }
 
 function loginToContainerRegistry() {
-    $containerRegistryUsername = getSecretValue "containerRegistryUsername"
-    $global:azurecr = "$containerRegistryUsername.azurecr.io"
+    $containerRegistryName = getSecretValue "containerRegistryName"
+    $global:azurecr = "$containerRegistryName.azurecr.io"
 
     Write-Host "Login to the container registry $azurecr..."
     $token = $(az acr login --name "$azurecr" --expose-token --query "accessToken" -o tsv)
