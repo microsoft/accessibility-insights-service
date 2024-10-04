@@ -80,7 +80,8 @@ function loginToContainerRegistry() {
     $global:azurecr = "$containerRegistryUsername.azurecr.io"
 
     Write-Host "Login to the container registry $azurecr..."
-    az acr login --name "$azurecr"
+    $token = $(az acr login --name "$azurecr" --expose-token --query "accessToken" -o tsv)
+    Write-Output "$token" | docker login --username "00000000-0000-0000-0000-000000000000" --password-stdin "$azurecr"
 }
 
 function pullImages() {
