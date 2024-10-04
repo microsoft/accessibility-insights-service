@@ -11,38 +11,6 @@ export location
 exitWithUsageInfo() {
     echo "
 Usage: ${BASH_SOURCE} -r <resource group> -l <Azure region>
-
-List of available Azure regions:
-
-centralus
-eastasia
-southeastasia
-eastus
-eastus2
-westus
-westus2
-northcentralus
-southcentralus
-westcentralus
-northeurope
-westeurope
-japaneast
-japanwest
-brazilsouth
-australiasoutheast
-australiaeast
-westindia
-southindia
-centralindia
-canadacentral
-canadaeast
-uksouth
-ukwest
-koreacentral
-koreasouth
-francecentral
-southafricanorth
-uaenorth
 "
     exit 1
 }

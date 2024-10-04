@@ -9,7 +9,7 @@ export resourceGroupName
 
 exitWithUsageInfo() {
     echo "
-Usage: ${BASH_SOURCE} -r <resource group> [-o <Batch node managed identity object (principal) ID>]
+Usage: ${BASH_SOURCE} -r <resource group> [-o <Azure Entra object (principal) ID>]
 "
     exit 1
 }

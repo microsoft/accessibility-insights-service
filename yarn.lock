@@ -3098,7 +3098,25 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@puppeteer/browsers@npm:2.2.3, @puppeteer/browsers@npm:^2.1.0":
+"@puppeteer/browsers@npm:2.4.0":
+  version: 2.4.0
+  resolution: "@puppeteer/browsers@npm:2.4.0"
+  dependencies:
+    debug: ^4.3.6
+    extract-zip: ^2.0.1
+    progress: ^2.0.3
+    proxy-agent: ^6.4.0
+    semver: ^7.6.3
+    tar-fs: ^3.0.6
+    unbzip2-stream: ^1.4.3
+    yargs: ^17.7.2
+  bin:
+    browsers: lib/cjs/main-cli.js
+  checksum: c5f9890f1bf355783574c00b42e8a9bf9e4788d0dce76cc4cd50fcf80b5e5f99ae2b4325edd5350d4fb289f7dfa89f67edf8bc2da9abd53eba1f815caae97beb
+  languageName: node
+  linkType: hard
+
+"@puppeteer/browsers@npm:^2.1.0":
   version: 2.2.3
   resolution: "@puppeteer/browsers@npm:2.2.3"
   dependencies:
@@ -3703,7 +3721,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/puppeteer@npm:7.0.4":
+"@types/puppeteer@npm:^7.0.4":
   version: 7.0.4
   resolution: "@types/puppeteer@npm:7.0.4"
   dependencies:
@@ -4292,7 +4310,7 @@ __metadata:
     "@types/levelup": ^5.1.1
     "@types/node": ^20.14.9
     "@types/normalize-path": ^3.0.0
-    "@types/puppeteer": 7.0.4
+    "@types/puppeteer": ^7.0.4
     accessibility-insights-report: 5.1.0
     axe-core: 4.9.1
     axe-core-scanner: "workspace:*"
@@ -4308,7 +4326,7 @@ __metadata:
     normalize-path: ^3.0.0
     normalize-url: 6.1.0
     npm-run-all: ^4.1.5
-    puppeteer: 22.12.1
+    puppeteer: ^23.5.0
     reflect-metadata: ^0.1.13
     rimraf: ^4.1.2
     rollup: ^3.13.0
@@ -4358,7 +4376,7 @@ __metadata:
     "@types/lodash": ^4.17.6
     "@types/node": ^20.14.9
     "@types/normalize-path": ^3.0.0
-    "@types/puppeteer": 7.0.4
+    "@types/puppeteer": ^7.0.4
     "@types/table": ^6.3.2
     accessibility-insights-crawler: "workspace:*"
     accessibility-insights-report: 5.1.0
@@ -4388,7 +4406,7 @@ __metadata:
     normalize-path: ^3.0.0
     normalize-url: 6.1.0
     npm-run-all: ^4.1.5
-    puppeteer: 22.12.1
+    puppeteer: ^23.5.0
     raw-body: ^2.5.1
     reflect-metadata: ^0.1.13
     rimraf: ^4.1.2
@@ -4997,7 +5015,7 @@ __metadata:
     "@types/jest": ^29.5.12
     "@types/lodash": ^4.17.6
     "@types/node": ^20.14.9
-    "@types/puppeteer": 7.0.4
+    "@types/puppeteer": ^7.0.4
     axe-core: 4.9.1
     cpy-cli: ^4.1.0
     inversify: ^6.0.1
@@ -5005,7 +5023,7 @@ __metadata:
     jest-junit: ^16.0.0
     lodash: ^4.17.21
     npm-run-all: ^4.1.5
-    puppeteer: 22.12.1
+    puppeteer: ^23.5.0
     reflect-metadata: ^0.1.13
     rimraf: ^4.1.2
     ts-jest: ^29.1.5
@@ -5844,16 +5862,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"chromium-bidi@npm:0.5.24":
-  version: 0.5.24
-  resolution: "chromium-bidi@npm:0.5.24"
+"chromium-bidi@npm:0.8.0":
+  version: 0.8.0
+  resolution: "chromium-bidi@npm:0.8.0"
   dependencies:
     mitt: 3.0.1
     urlpattern-polyfill: 10.0.0
     zod: 3.23.8
   peerDependencies:
     devtools-protocol: "*"
-  checksum: 26c283e3740201c880eb7dbbf0854ffe53ce6c4890e0f1039ddf703b7a68cfea9d5d30e8069b93b95333d852c4028ec6b365f13759dd9763ad1399aae8d47a16
+  checksum: 5c5b12e00564b6f145511ca4c159db24b07bfc6a1eb6add26d88c4331d74ef6cc8cd2f58bc169e0726c689910a1888313722f39ccab1bac14284d1918155d5e9
   languageName: node
   linkType: hard
 
@@ -6510,7 +6528,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"debug@npm:^4.3.1, debug@npm:^4.3.5":
+"debug@npm:^4.3.1":
   version: 4.3.5
   resolution: "debug@npm:4.3.5"
   dependencies:
@@ -6519,6 +6537,18 @@ __metadata:
     supports-color:
       optional: true
   checksum: 7c002b51e256257f936dda09eb37167df952758c57badf6bf44bdc40b89a4bcb8e5a0a2e4c7b53f97c69e2970dd5272d33a757378a12c8f8e64ea7bf99e8e86e
+  languageName: node
+  linkType: hard
+
+"debug@npm:^4.3.6, debug@npm:^4.3.7":
+  version: 4.3.7
+  resolution: "debug@npm:4.3.7"
+  dependencies:
+    ms: ^2.1.3
+  peerDependenciesMeta:
+    supports-color:
+      optional: true
+  checksum: 822d74e209cd910ef0802d261b150314bbcf36c582ccdbb3e70f0894823c17e49a50d3e66d96b633524263975ca16b6a833f3e3b7e030c157169a5fabac63160
   languageName: node
   linkType: hard
 
@@ -6810,10 +6840,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"devtools-protocol@npm:0.0.1299070":
-  version: 0.0.1299070
-  resolution: "devtools-protocol@npm:0.0.1299070"
-  checksum: 5b03189a83a64f6a02675062ae83d40257098d334bda0abb940310b21008f2e3279105208cf25649253a1e6165062d32a4f46d934d0adcb48b5cff6954db799c
+"devtools-protocol@npm:0.0.1342118":
+  version: 0.0.1342118
+  resolution: "devtools-protocol@npm:0.0.1342118"
+  checksum: 081d2a03b9cc28dae31fa6bde3b96f999b3d28e382cbfc9646fec639e425d21abbf8d2118424292a7341a1afde024835bfdc35bf29e367e3a12ebdb75106c942
   languageName: node
   linkType: hard
 
@@ -11685,7 +11715,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ms@npm:^2.1.1":
+"ms@npm:^2.1.1, ms@npm:^2.1.3":
   version: 2.1.3
   resolution: "ms@npm:2.1.3"
   checksum: aa92de608021b242401676e35cfa5aa42dd70cbdc082b916da7fb925c542173e36bce97ea3e804923fe92c0ad991434e4a38327e15a1b5b5f945d66df615ae6d
@@ -12734,7 +12764,7 @@ __metadata:
     "@types/jest": ^29.5.12
     "@types/lodash": ^4.17.6
     "@types/node": ^20.14.9
-    "@types/puppeteer": 7.0.4
+    "@types/puppeteer": ^7.0.4
     common: "workspace:*"
     inversify: ^6.0.1
     jest: ^29.7.0
@@ -12743,7 +12773,7 @@ __metadata:
     logger: "workspace:*"
     mockdate: ^3.0.5
     npm-run-all: ^4.1.5
-    puppeteer: 22.12.1
+    puppeteer: ^23.5.0
     reflect-metadata: ^0.1.13
     rimraf: ^4.1.2
     scanner-global-library: "workspace:*"
@@ -12803,7 +12833,7 @@ __metadata:
     "@types/jest": ^29.5.12
     "@types/lodash": ^4.17.6
     "@types/node": ^20.14.9
-    "@types/puppeteer": 7.0.4
+    "@types/puppeteer": ^7.0.4
     "@types/yargs": ^17.0.22
     applicationinsights: ^2.3.1
     azure-services: "workspace:*"
@@ -12823,7 +12853,7 @@ __metadata:
     npm-run-all: ^4.1.5
     p-limit: ^3.1.0
     privacy-scan-core: "workspace:*"
-    puppeteer: 22.12.1
+    puppeteer: ^23.5.0
     puppeteer-extra: ^3.3.6
     puppeteer-extra-plugin: ^3.2.3
     puppeteer-extra-plugin-stealth: ^2.11.2
@@ -12857,7 +12887,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"progress@npm:2.0.3":
+"progress@npm:2.0.3, progress@npm:^2.0.3":
   version: 2.0.3
   resolution: "progress@npm:2.0.3"
   checksum: f67403fe7b34912148d9252cb7481266a354bd99ce82c835f79070643bb3c6583d10dbcfda4d41e04bbc1d8437e9af0fb1e1f2135727878f5308682a579429b7
@@ -12942,7 +12972,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"proxy-agent@npm:6.4.0":
+"proxy-agent@npm:6.4.0, proxy-agent@npm:^6.4.0":
   version: 6.4.0
   resolution: "proxy-agent@npm:6.4.0"
   dependencies:
@@ -13022,16 +13052,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"puppeteer-core@npm:22.12.1":
-  version: 22.12.1
-  resolution: "puppeteer-core@npm:22.12.1"
+"puppeteer-core@npm:23.5.0":
+  version: 23.5.0
+  resolution: "puppeteer-core@npm:23.5.0"
   dependencies:
-    "@puppeteer/browsers": 2.2.3
-    chromium-bidi: 0.5.24
-    debug: ^4.3.5
-    devtools-protocol: 0.0.1299070
-    ws: ^8.17.1
-  checksum: 22678bba55cfc84aad3994ed653e1bc7ded0b0b933db15dae93415fe7cc6a188561ec7ddcd7bc36fc7c86f4e261cd742328a8d323b0e5ac74f9db8a73baa7d13
+    "@puppeteer/browsers": 2.4.0
+    chromium-bidi: 0.8.0
+    debug: ^4.3.7
+    devtools-protocol: 0.0.1342118
+    typed-query-selector: ^2.12.0
+    ws: ^8.18.0
+  checksum: 2feceb682ef27e44283e8c152df5aed3f0c98c6d531b684f551ec7deffb0b3004571acf1b1a89debe856aa838b7559c40edb33f1f290f989049d723f68318428
   languageName: node
   linkType: hard
 
@@ -13149,17 +13180,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"puppeteer@npm:22.12.1":
-  version: 22.12.1
-  resolution: "puppeteer@npm:22.12.1"
+"puppeteer@npm:^23.5.0":
+  version: 23.5.0
+  resolution: "puppeteer@npm:23.5.0"
   dependencies:
-    "@puppeteer/browsers": 2.2.3
+    "@puppeteer/browsers": 2.4.0
+    chromium-bidi: 0.8.0
     cosmiconfig: ^9.0.0
-    devtools-protocol: 0.0.1299070
-    puppeteer-core: 22.12.1
+    devtools-protocol: 0.0.1342118
+    puppeteer-core: 23.5.0
+    typed-query-selector: ^2.12.0
   bin:
-    puppeteer: lib/esm/puppeteer/node/cli.js
-  checksum: 07e899d987857c00c7124f282007c413c79a2e98068a5d44dbd85dbcf869602e4a5528603349750007b108e36bb9e4af4442621279083e3030eeec093ef34b87
+    puppeteer: lib/cjs/puppeteer/node/cli.js
+  checksum: 9132391cc84168ab5d10edabe9b0a9f259d41880b06c9423337968a35368498b3fecf647e575072ded27cb4d27ae52acaf7a888c3a5dd9573a0b17261d83590e
   languageName: node
   linkType: hard
 
@@ -13502,7 +13535,7 @@ __metadata:
     "@types/jest": ^29.5.12
     "@types/lodash": ^4.17.6
     "@types/node": ^20.14.9
-    "@types/puppeteer": 7.0.4
+    "@types/puppeteer": ^7.0.4
     "@types/yargs": ^17.0.22
     applicationinsights: ^2.3.1
     azure-services: "workspace:*"
@@ -13521,7 +13554,7 @@ __metadata:
     npm-force-resolutions: ^0.0.10
     npm-run-all: ^4.1.5
     p-limit: ^3.1.0
-    puppeteer: 22.12.1
+    puppeteer: ^23.5.0
     puppeteer-extra: ^3.3.6
     puppeteer-extra-plugin: ^3.2.3
     puppeteer-extra-plugin-stealth: ^2.11.2
@@ -13933,7 +13966,7 @@ __metadata:
     "@types/lodash": ^4.17.6
     "@types/node": ^20.14.9
     "@types/pidusage": ^2.0.5
-    "@types/puppeteer": 7.0.4
+    "@types/puppeteer": ^7.0.4
     axe-core: 4.9.1
     axe-core-scanner: "workspace:*"
     common: "workspace:*"
@@ -13945,7 +13978,7 @@ __metadata:
     logger: "workspace:*"
     npm-run-all: ^4.1.5
     pidusage: ^3.0.2
-    puppeteer: 22.12.1
+    puppeteer: ^23.5.0
     puppeteer-extra: ^3.3.6
     puppeteer-extra-plugin: ^3.2.3
     puppeteer-extra-plugin-stealth: ^2.11.2
@@ -14075,7 +14108,7 @@ __metadata:
     "@types/jest": ^29.5.12
     "@types/node": ^20.14.9
     "@types/paralleljs": ^0.0.21
-    "@types/puppeteer": 7.0.4
+    "@types/puppeteer": ^7.0.4
     "@types/sha.js": ^2.4.0
     "@types/yargs": ^17.0.22
     accessibility-insights-report: 5.1.0
@@ -14099,7 +14132,7 @@ __metadata:
     p-limit: ^3.1.0
     paralleljs: ^1.1.0
     privacy-scan-core: "workspace:*"
-    puppeteer: 22.12.1
+    puppeteer: ^23.5.0
     reflect-metadata: ^0.1.13
     rimraf: ^4.1.2
     scanner-global-library: "workspace:*"
@@ -14953,6 +14986,23 @@ __metadata:
   languageName: node
   linkType: hard
 
+"tar-fs@npm:^3.0.6":
+  version: 3.0.6
+  resolution: "tar-fs@npm:3.0.6"
+  dependencies:
+    bare-fs: ^2.1.1
+    bare-path: ^2.1.0
+    pump: ^3.0.0
+    tar-stream: ^3.1.5
+  dependenciesMeta:
+    bare-fs:
+      optional: true
+    bare-path:
+      optional: true
+  checksum: b4fa09c70f75caf05bf5cf87369cd2862f1ac5fb75c4ddf9d25d55999f7736a94b58ad679d384196cba837c5f5ff14086e060fafccef5474a16e2d3058ffa488
+  languageName: node
+  linkType: hard
+
 "tar-stream@npm:^1.5.2":
   version: 1.6.2
   resolution: "tar-stream@npm:1.6.2"
@@ -15432,6 +15482,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"typed-query-selector@npm:^2.12.0":
+  version: 2.12.0
+  resolution: "typed-query-selector@npm:2.12.0"
+  checksum: c4652f2eec16112d69e0da30c2effab3f03d1710f9559da1e1209bbfc9a20990d5de4ba97890c11f9d17d85c8ae3310953a86c198166599d4c36abc63664f169
+  languageName: node
+  linkType: hard
+
 "typemoq@npm:^2.1.0":
   version: 2.1.0
   resolution: "typemoq@npm:2.1.0"
@@ -15495,7 +15552,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"unbzip2-stream@npm:1.4.3, unbzip2-stream@npm:^1.0.9":
+"unbzip2-stream@npm:1.4.3, unbzip2-stream@npm:^1.0.9, unbzip2-stream@npm:^1.4.3":
   version: 1.4.3
   resolution: "unbzip2-stream@npm:1.4.3"
   dependencies:
@@ -15893,7 +15950,7 @@ __metadata:
     "@types/jest": ^29.5.12
     "@types/lodash": ^4.17.6
     "@types/node": ^20.14.9
-    "@types/puppeteer": 7.0.4
+    "@types/puppeteer": ^7.0.4
     "@types/sha.js": ^2.4.0
     "@types/yargs": ^17.0.22
     accessibility-insights-report: 5.1.0
@@ -15919,7 +15976,7 @@ __metadata:
     npm-run-all: ^4.1.5
     p-limit: ^3.1.0
     patch-package: ^8.0.0
-    puppeteer: 22.12.1
+    puppeteer: ^23.5.0
     puppeteer-extra: ^3.3.6
     puppeteer-extra-plugin: ^3.2.3
     puppeteer-extra-plugin-stealth: ^2.11.2
@@ -15990,7 +16047,7 @@ __metadata:
     "@types/jest": ^29.5.12
     "@types/lodash": ^4.17.6
     "@types/node": ^20.14.9
-    "@types/puppeteer": 7.0.4
+    "@types/puppeteer": ^7.0.4
     "@types/sha.js": ^2.4.0
     "@types/yargs": ^17.0.22
     applicationinsights: ^2.3.1
@@ -16353,7 +16410,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ws@npm:^8.17.1":
+"ws@npm:^8.18.0":
   version: 8.18.0
   resolution: "ws@npm:8.18.0"
   peerDependencies:
