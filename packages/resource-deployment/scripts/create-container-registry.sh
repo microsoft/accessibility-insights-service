@@ -17,7 +17,7 @@ Usage: ${BASH_SOURCE} -r <resource group> [-t <container registry template file 
 
 # Read script arguments
 while getopts ":r:t:" option; do
-    case $option in
+    case ${option} in
     r) resourceGroupName=${OPTARG} ;;
     t) registryTemplateFile=${OPTARG} ;;
     *) exitWithUsageInfo ;;
@@ -25,16 +25,16 @@ while getopts ":r:t:" option; do
 done
 
 # Print script usage help
-if [[ -z $resourceGroupName ]] || [[ -z $registryTemplateFile ]]; then
+if [[ -z ${resourceGroupName} ]] || [[ -z ${registryTemplateFile} ]]; then
     exitWithUsageInfo
 fi
 
 # Deploy Azure Container registry
-echo "Deploying Azure Container registry in resource group $resourceGroupName with template $registryTemplateFile"
+echo "Deploying Azure Container registry in resource group ${resourceGroupName} with template ${registryTemplateFile}"
 resources=$(
     az deployment group create \
-        --resource-group "$resourceGroupName" \
-        --template-file "$registryTemplateFile" \
+        --resource-group "${resourceGroupName}" \
+        --template-file "${registryTemplateFile}" \
         --query "properties.outputResources[].id" \
         -o tsv
 )

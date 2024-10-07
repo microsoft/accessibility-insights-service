@@ -21,12 +21,31 @@ function enableCosmosAccess() {
     . "${0%/*}/create-role-assignment.sh"
 }
 
-function enableCosmosRBAC() {
-    # Create and assign custom Cosmos DB RBAC role
+function enableBatchAccount() {
+    roleDefinitionFileName="${0%/*}/../templates/batch-account-custom-role.json"
+    roleDefinitionGeneratedFileName="batch-account-custom-role.generated.json"
+    sed -e "s@%SUBSCRIPTION_TOKEN%@${subscription}@" "${roleDefinitionFileName}" >"${roleDefinitionGeneratedFileName}"
+
+    customRoleName="BatchAccountJobSubmitter"
+    RBACRoleId=$(az role definition list --custom-role-only true --query "[?roleName=='${customRoleName}'].id" -o tsv)
+    if [[ -z "${RBACRoleId}" ]]; then
+        echo "Creating a custom Batch Account access role ${customRoleName}"
+        RBACRoleId=$(az role definition create --role-definition "${roleDefinitionGeneratedFileName}" --query "id" -o tsv)
+    else
+        echo "Updating a custom Batch Account access role ${customRoleName}"
+        RBACRoleId=$(az role definition update --role-definition "${roleDefinitionGeneratedFileName}" --query "id" -o tsv)
+    fi
+
+    scope="--scope /subscriptions/${subscription}/resourceGroups/${resourceGroupName}/providers/Microsoft.Batch/batchAccounts/${batchAccountName}"
+    role=${customRoleName}
+    . "${0%/*}/create-role-assignment.sh"
+}
+
+function enableCosmosRole() {
     customRoleName="CosmosDocumentRW"
     RBACRoleId=$(az cosmosdb sql role definition list --account-name "${cosmosAccountName}" --resource-group "${resourceGroupName}" --query "[?roleName=='${customRoleName}'].id" -o tsv)
     if [[ -z "${RBACRoleId}" ]]; then
-        echo "Creating a custom Cosmos DB RBAC role ${customRoleName} with read-write permissions"
+        echo "Creating a custom Cosmos DB access role ${customRoleName}"
         RBACRoleId=$(az cosmosdb sql role definition create --account-name "${cosmosAccountName}" \
             --resource-group "${resourceGroupName}" \
             --body "@${0%/*}/../templates/cosmos-db-rw-role.json" \
@@ -53,23 +72,24 @@ function enableStorageAccess() {
     . "${0%/*}/create-role-assignment.sh"
 }
 
-function enableResourceGroupAccess() {
-    role="Contributor"
-    scope="--scope /subscriptions/${subscription}/resourceGroups/${resourceGroupName}"
-    . "${0%/*}/create-role-assignment.sh"
-}
-
 function enableKeyVaultAccess() {
     . "${0%/*}/key-vault-enable-msi.sh"
 }
 
+function enableContainerRegistryAccess() {
+    role="acrpull"
+    scope="--scope /subscriptions/${subscription}/resourceGroups/${resourceGroupName}/providers/Microsoft.ContainerRegistry/registries/${containerRegistryName}"
+    . "${0%/*}/create-role-assignment.sh"
+}
+
 function enableAccess() {
     local enableAccessProcesses=(
-        "enableResourceGroupAccess"
+        "enableContainerRegistryAccess"
         "enableKeyVaultAccess"
         "enableStorageAccess"
         "enableCosmosAccess"
-        "enableCosmosRBAC")
+        "enableBatchAccount"
+        "enableCosmosRole")
     runCommandsWithoutSecretsInParallel enableAccessProcesses
 }
 

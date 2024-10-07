@@ -1,0 +1,20 @@
+{
+    "name": "BatchAccountJobSubmitter",
+    "type": "CustomRole",
+    "description": "Allows a user to submit jobs to Azure Batch but not manage pools",
+    "assignableScopes": ["/subscriptions/%SUBSCRIPTION_TOKEN%"],
+    "permissions": [
+        {
+            "actions": [
+                "Microsoft.Batch/*/read",
+                "Microsoft.Authorization/*/read",
+                "Microsoft.Resources/subscriptions/resourceGroups/read",
+                "Microsoft.Support/*",
+                "Microsoft.Insights/alertRules/*"
+            ],
+            "notActions": [],
+            "dataActions": ["Microsoft.Batch/batchAccounts/jobs/*", "Microsoft.Batch/batchAccounts/jobSchedules/*"],
+            "notDataActions": []
+        }
+    ]
+}
