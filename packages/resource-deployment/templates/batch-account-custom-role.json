@@ -1,5 +1,5 @@
 {
-    "name": "BatchAccountJobSubmitter",
+    "name": "%NAME_TOKEN%",
     "type": "CustomRole",
     "description": "Allows a user to submit jobs to Azure Batch but not manage pools",
     "assignableScopes": ["/subscriptions/%SUBSCRIPTION_TOKEN%"],

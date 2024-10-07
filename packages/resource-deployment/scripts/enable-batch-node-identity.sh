@@ -24,35 +24,39 @@ function enableCosmosAccess() {
 function enableBatchAccount() {
     roleDefinitionFileName="${0%/*}/../templates/batch-account-custom-role.json"
     roleDefinitionGeneratedFileName="batch-account-custom-role.generated.json"
-    sed -e "s@%SUBSCRIPTION_TOKEN%@${subscription}@" "${roleDefinitionFileName}" >"${roleDefinitionGeneratedFileName}"
 
-    customRoleName="BatchAccountJobSubmitter"
-    RBACRoleId=$(az role definition list --custom-role-only true --query "[?roleName=='${customRoleName}'].id" -o tsv)
-    if [[ -z "${RBACRoleId}" ]]; then
-        echo "Creating a custom Batch Account access role ${customRoleName}"
-        RBACRoleId=$(az role definition create --role-definition "${roleDefinitionGeneratedFileName}" --query "id" -o tsv)
-    else
-        echo "Updating a custom Batch Account access role ${customRoleName}"
-        RBACRoleId=$(az role definition update --role-definition "${roleDefinitionGeneratedFileName}" --query "id" -o tsv)
+    # The role is assigned under a tenant in the subscription scope. Creating it under another subscription
+    # may fail due to lack of access to the original scope, so a unique role is created per subscription scope.
+    roleNameSuffix=${subscription:24:12}
+    roleName="BatchAccountJobSubmitter_${roleNameSuffix}"
+
+    sed -e "s@%NAME_TOKEN%@${roleName}@" -e "s@%SUBSCRIPTION_TOKEN%@${subscription}@" "${roleDefinitionFileName}" >"${roleDefinitionGeneratedFileName}"
+
+    roleId=$(az role definition list --custom-role-only true --query "[?roleName=='${roleName}'].id" -o tsv)
+    if [[ -z "${roleId}" ]]; then
+        echo "Creating a custom Batch Account access role ${roleName}..."
+        roleId=$(az role definition create --role-definition "${roleDefinitionGeneratedFileName}" --query "id" -o tsv)
+        # Wait for the new role to propagate in Azure.
+        sleep 60
     fi
 
     scope="--scope /subscriptions/${subscription}/resourceGroups/${resourceGroupName}/providers/Microsoft.Batch/batchAccounts/${batchAccountName}"
-    role=${customRoleName}
+    role=${roleName}
     . "${0%/*}/create-role-assignment.sh"
 }
 
 function enableCosmosRole() {
     customRoleName="CosmosDocumentRW"
-    RBACRoleId=$(az cosmosdb sql role definition list --account-name "${cosmosAccountName}" --resource-group "${resourceGroupName}" --query "[?roleName=='${customRoleName}'].id" -o tsv)
-    if [[ -z "${RBACRoleId}" ]]; then
+    roleId=$(az cosmosdb sql role definition list --account-name "${cosmosAccountName}" --resource-group "${resourceGroupName}" --query "[?roleName=='${customRoleName}'].id" -o tsv)
+    if [[ -z "${roleId}" ]]; then
         echo "Creating a custom Cosmos DB access role ${customRoleName}"
-        RBACRoleId=$(az cosmosdb sql role definition create --account-name "${cosmosAccountName}" \
+        roleId=$(az cosmosdb sql role definition create --account-name "${cosmosAccountName}" \
             --resource-group "${resourceGroupName}" \
             --body "@${0%/*}/../templates/cosmos-db-rw-role.json" \
             --query "id" -o tsv)
         az cosmosdb sql role definition wait --account-name "${cosmosAccountName}" \
             --resource-group "${resourceGroupName}" \
-            --id "${RBACRoleId}" \
+            --id "${roleId}" \
             --exists 1>/dev/null
     fi
 
@@ -60,7 +64,7 @@ function enableCosmosRole() {
         --resource-group "${resourceGroupName}" \
         --scope "/" \
         --principal-id "${principalId}" \
-        --role-definition-id "${RBACRoleId}" 1>/dev/null
+        --role-definition-id "${roleId}" 1>/dev/null
 }
 
 function enableStorageAccess() {
