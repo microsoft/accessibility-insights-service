@@ -4,6 +4,7 @@
 import { PuppeteerExtraPlugin, PluginOptions, PluginRequirements } from 'puppeteer-extra-plugin';
 import * as Puppeteer from 'puppeteer';
 import { inject, injectable, optional } from 'inversify';
+import { isEmpty } from 'lodash';
 import { iocTypes, SecretVault } from './ioc-types';
 import { LoginPageDetector } from './authenticator/login-page-detector';
 
@@ -13,9 +14,13 @@ import { LoginPageDetector } from './authenticator/login-page-detector';
 export class UserAgentPlugin extends PuppeteerExtraPlugin {
     public static Name = 'user-agent-plugin';
 
+    public emulateEdge: boolean;
+
     private readonly loadCompletedDataKey = 'loadCompleted';
 
     private readonly pluginData: Map<string, any> = new Map();
+
+    private browserMajorVersion: string;
 
     constructor(
         @inject(iocTypes.SecretVaultProvider)
@@ -63,6 +68,11 @@ export class UserAgentPlugin extends PuppeteerExtraPlugin {
         userAgent = this.setUserAgentPlatform(userAgent, page);
         // Remove headless chromium flag
         userAgent = userAgent.replace('HeadlessChrome/', 'Chrome/');
+        // Emulate Edge user agent
+        if (this.emulateEdge === true) {
+            const majorVersion = await this.getBrowserMajorVersion(page);
+            userAgent = `${userAgent} Edg/${majorVersion}.0.0.0`;
+        }
         // Add scanner bypass key
         userAgent = `${userAgent} WebInsights/${secretVault.webScannerBypassKey}`;
 
@@ -93,8 +103,7 @@ export class UserAgentPlugin extends PuppeteerExtraPlugin {
      * https://source.chromium.org/chromium/chromium/src/+/refs/heads/main:components/embedder_support/user_agent_utils.cc
      */
     private async getBrands(page: Puppeteer.Page): Promise<Puppeteer.Protocol.Emulation.UserAgentBrandVersion[]> {
-        const browserVersion = await page.browser().version();
-        const majorVersion = browserVersion.match(/Chrome\/(\d+)\.(.*)/i)[1];
+        const majorVersion = await this.getBrowserMajorVersion(page);
         const seed = Number(majorVersion);
         const brandOrder = [
             [0, 1, 2],
@@ -124,6 +133,15 @@ export class UserAgentPlugin extends PuppeteerExtraPlugin {
         };
 
         return brandList;
+    }
+
+    private async getBrowserMajorVersion(page: Puppeteer.Page): Promise<string> {
+        if (isEmpty(this.browserMajorVersion)) {
+            const browserVersion = await page.browser().version();
+            this.browserMajorVersion = browserVersion.match(/Chrome\/(\d+)\.(.*)/i)[1];
+        }
+
+        return this.browserMajorVersion;
     }
 
     private setUserAgentPlatform(userAgent: string, page: Puppeteer.Page): string {

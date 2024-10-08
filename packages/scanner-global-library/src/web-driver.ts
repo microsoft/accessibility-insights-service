@@ -27,6 +27,7 @@ export interface WebDriverConfigurationOptions {
     clearDiskCache?: boolean;
     keepUserData?: boolean;
     capabilities?: WebDriverCapabilities;
+    emulateEdge?: boolean;
 }
 
 @injectable()
@@ -72,7 +73,7 @@ export class WebDriver {
      * @default options = { clearDiskCache: true, keepUserData: false, capabilities: { webgl: false } }
      */
     public async launch(options?: WebDriverConfigurationOptions): Promise<Puppeteer.Browser> {
-        this.setupPuppeteerPlugins();
+        this.setupPuppeteerPlugins(options);
 
         if (options?.keepUserData !== true) {
             fs.rmSync(this.userDataDirectory, { recursive: true, force: true });
@@ -166,7 +167,7 @@ export class WebDriver {
         return options as Puppeteer.LaunchOptions;
     }
 
-    private setupPuppeteerPlugins(): void {
+    private setupPuppeteerPlugins(configurationOptions: WebDriverConfigurationOptions): void {
         // Disable iframe.contentWindow evasion to avoid interference with privacy banner
         this.stealthPlugin.enabledEvasions.delete('iframe.contentWindow');
         // Disable user-agent-override evasion as it will not set User Agent string in headless mode
@@ -174,6 +175,7 @@ export class WebDriver {
         // Plugin to hide puppeteer automation from a webserver
         this.puppeteerExtra.use(this.stealthPlugin);
         // Custom user agent plugin to override default user agent string
+        this.userAgentPlugin.emulateEdge = configurationOptions.emulateEdge;
         this.puppeteerExtra.use(this.userAgentPlugin);
     }
 }

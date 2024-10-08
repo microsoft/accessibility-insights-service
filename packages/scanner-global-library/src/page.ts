@@ -25,6 +25,7 @@ export interface BrowserStartOptions {
     clearBrowserCache?: boolean;
     preserveUserProfile?: boolean;
     capabilities?: WebDriverCapabilities;
+    emulateEdge?: boolean;
 }
 
 export interface Viewport {
