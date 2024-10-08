@@ -131,6 +131,9 @@ export class Page {
         if (pageCreated !== true) {
             this.logger?.logWarn('Browser plugins did not complete load on page startup.');
         }
+
+        const userAgent = await this.page.evaluate(() => navigator.userAgent);
+        this.logger?.logInfo('Page instance started.', { userAgent, options: JSON.stringify(options) });
     }
 
     public async analyze(url: string, options?: PageOptions): Promise<PageAnalysisResult> {
