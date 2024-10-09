@@ -272,11 +272,7 @@ export class Page {
     }
 
     public async reopenBrowser(options?: BrowserStartOptions): Promise<void> {
-        this.browserStartOptions = {
-            ...this.browserStartOptions,
-            ...options,
-        };
-        await this.reopenBrowserImpl();
+        await this.reopenBrowserImpl(options);
     }
 
     public async close(): Promise<void> {
@@ -312,7 +308,7 @@ export class Page {
             this.setLastNavigationState('analysis', this.pageAnalysisResult.navigationResponse);
         } else {
             this.title = await this.page.title();
-            await this.reopenBrowserImpl({ hardReload: true });
+            await this.reopenBrowserImpl({ clearBrowserCache: false, preserveUserProfile: false });
         }
     }
 
@@ -376,7 +372,7 @@ export class Page {
      * Hard reload (close and reopen browser) will delete all browser's data but preserve html/image/script/css/etc. cached files.
      */
     private async hardReload(): Promise<void> {
-        await this.reopenBrowserImpl({ hardReload: true });
+        await this.reopenBrowserImpl({ clearBrowserCache: false, preserveUserProfile: false });
         await this.navigate(this.requestUrl, this.pageOptions);
     }
 
@@ -385,19 +381,18 @@ export class Page {
         this.setLastNavigationState('reload', response);
     }
 
-    private async reopenBrowserImpl(options?: { hardReload?: boolean }): Promise<void> {
+    private async reopenBrowserImpl(options: BrowserStartOptions = { clearBrowserCache: false }): Promise<void> {
         if (this.browserStartOptions?.browserWSEndpoint || this.browserWSEndpoint) {
             return;
         }
 
         // Preserve user profile to reuse authentication cookies
         const preserveUserProfile =
-            options?.hardReload !== true &&
-            this.pageAnalysisResult.authentication === true &&
-            this.pageAnalysisResult.authenticationType !== 'undetermined';
+            options?.preserveUserProfile ??
+            (this.pageAnalysisResult.authentication === true && this.pageAnalysisResult.authenticationType !== 'undetermined');
 
         await this.close();
-        await this.create({ ...this.browserStartOptions, clearBrowserCache: false, preserveUserProfile });
+        await this.create({ ...this.browserStartOptions, ...options, preserveUserProfile });
         // Wait for browser to start
         await System.wait(3000);
     }

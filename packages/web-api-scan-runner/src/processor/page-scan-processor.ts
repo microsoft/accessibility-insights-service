@@ -8,6 +8,7 @@ import { OnDemandPageScanResult, WebsiteScanData } from 'storage-documents';
 import { DeepScanner, PageMetadata, PageMetadataGenerator, RunnerScanMetadata } from 'service-library';
 import { isEmpty } from 'lodash';
 import { AxeScanner } from './axe-scanner';
+import { HighContrastScanner } from './high-contrast-scanner';
 
 @injectable()
 export class PageScanProcessor {
@@ -15,6 +16,7 @@ export class PageScanProcessor {
         @inject(Page) private readonly page: Page,
         @inject(AxeScanner) private readonly axeScanner: AxeScanner,
         @inject(DeepScanner) private readonly deepScanner: DeepScanner,
+        @inject(HighContrastScanner) private readonly highContrastScanner: HighContrastScanner,
         @inject(PageMetadataGenerator) private readonly pageMetadataGenerator: PageMetadataGenerator,
         @inject(GlobalLogger) private readonly logger: GlobalLogger,
     ) {}
@@ -49,6 +51,11 @@ export class PageScanProcessor {
             // Taking a screenshot of the page might break the page layout. Run at the end of the workflow.
             const pageState = await this.page.capturePageState();
             axeScanResults = { ...axeScanResults, ...pageState };
+
+            // Execute additional scanners once the primary scan is finished.
+            if (pageScanResult.browserValidation?.highContrastProperties === 'pending') {
+                await this.highContrastScanner.scan(this.page, runnerScanMetadata.url, { enableAuthentication });
+            }
         } finally {
             await this.page.close();
         }
