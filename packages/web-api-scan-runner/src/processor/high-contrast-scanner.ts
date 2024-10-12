@@ -15,7 +15,7 @@ export interface ScannerResults {
 
 @injectable()
 export class HighContrastScanner {
-    private readonly cssProperties = ['-ms-high-contrast', '-ms-high-contrast-adjust'];
+    // private readonly cssProperties = ['-ms-high-contrast', '-ms-high-contrast-adjust'];
 
     constructor(@inject(GlobalLogger) private readonly logger: GlobalLogger) {}
 
@@ -28,6 +28,10 @@ export class HighContrastScanner {
             return { error: page.browserError };
         }
 
-        return undefined;
+        return {
+            result: 'pending',
+            pageResponseCode: page.navigationResponse?.status(),
+            scannedUrl: page.url,
+        };
     }
 }

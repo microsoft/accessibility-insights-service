@@ -175,7 +175,7 @@ export class WebDriver {
         // Plugin to hide puppeteer automation from a webserver
         this.puppeteerExtra.use(this.stealthPlugin);
         // Custom user agent plugin to override default user agent string
-        this.userAgentPlugin.emulateEdge = configurationOptions.emulateEdge;
+        this.userAgentPlugin.emulateEdge = configurationOptions?.emulateEdge;
         this.puppeteerExtra.use(this.userAgentPlugin);
     }
 }

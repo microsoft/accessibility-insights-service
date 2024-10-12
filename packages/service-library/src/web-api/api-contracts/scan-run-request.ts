@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 import { checkObject, checkObjectArray } from '../../type-guard';
-import { AuthenticationType, authenticationTypes } from './scan-result-response';
+import { AuthenticationType, authenticationTypes, BrowserValidationTypes } from './scan-result-response';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -32,6 +32,7 @@ export interface ScanRunRequest {
      * Resource authentication type hint
      */
     authenticationType?: AuthenticationType;
+    browserValidations?: BrowserValidationTypes[];
 }
 
 export interface Website {
