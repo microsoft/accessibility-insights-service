@@ -54,7 +54,7 @@ export class PageScanProcessor {
 
             // Execute additional scanners once the primary scan is finished.
             if (pageScanResult.browserValidationResult?.highContrastProperties === 'pending') {
-                await this.highContrastScanner.scan(this.page, runnerScanMetadata.url, { enableAuthentication });
+                await this.highContrastScanner.scan(runnerScanMetadata.url);
             }
         } finally {
             await this.page.close();

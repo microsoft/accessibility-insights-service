@@ -3,8 +3,9 @@
 
 import { inject, injectable } from 'inversify';
 import { GlobalLogger } from 'logger';
-import { BrowserError, Page, PageOptions } from 'scanner-global-library';
+import { BrowserError } from 'scanner-global-library';
 import { ScanState } from 'storage-documents';
+import { chromium } from '@playwright/test';
 
 export interface ScannerResults {
     result?: ScanState;
@@ -19,19 +20,32 @@ export class HighContrastScanner {
 
     constructor(@inject(GlobalLogger) private readonly logger: GlobalLogger) {}
 
-    public async scan(page: Page, url: string, options?: PageOptions): Promise<ScannerResults> {
+    public async scan(url: string): Promise<ScannerResults> {
         this.logger?.logInfo('Running high contrast CSS properties scanner.');
 
-        await page.reopenBrowser({ clearBrowserCache: true, emulateEdge: true, capabilities: undefined });
-        await page.navigate(url, options);
-        if (!page.navigationResponse?.ok()) {
-            return { error: page.browserError };
-        }
+        const browser = await chromium.launch({
+            channel: 'msedge',
+            headless: false,
+        });
 
-        return {
-            result: 'pending',
-            pageResponseCode: page.navigationResponse?.status(),
-            scannedUrl: page.url,
-        };
+        const context = await browser.newContext();
+        const page = await context.newPage();
+        await page.goto(url);
+        await page.waitForTimeout(30000);
+        await browser.close();
+
+        // await page.reopenBrowser({ clearBrowserCache: true, emulateEdge: true, capabilities: undefined });
+        // await page.navigate(url, options);
+        // if (!page.navigationResponse?.ok()) {
+        //     return { error: page.browserError };
+        // }
+
+        // return {
+        //     result: 'pending',
+        //     pageResponseCode: page.navigationResponse?.status(),
+        //     scannedUrl: page.url,
+        // };
+
+        return undefined;
     }
 }

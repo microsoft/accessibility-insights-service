@@ -1,0 +1,21 @@
+diff --git a/node_modules/@crawlee/core/session_pool/session.d.ts b/node_modules/@crawlee/core/session_pool/session.d.ts
+index a2a7f3a..45b3ed3 100644
+--- a/node_modules/@crawlee/core/session_pool/session.d.ts
++++ b/node_modules/@crawlee/core/session_pool/session.d.ts
+@@ -1,14 +1,14 @@
+ import type { IncomingMessage } from 'node:http';
+ import type { Log } from '@apify/log';
+ import type { BrowserLikeResponse, Cookie as CookieObject, Dictionary } from '@crawlee/types';
+-import type { Cookie, SerializedCookieJar } from 'tough-cookie';
++import type { Cookie } from 'tough-cookie';
+ import { CookieJar } from 'tough-cookie';
+ /**
+  * Persistable {@apilink Session} state.
+  */
+ export interface SessionState {
+     id: string;
+-    cookieJar: SerializedCookieJar;
++    cookieJar: any;
+     userData: object;
+     errorScore: number;
+     maxErrorScore: number;
