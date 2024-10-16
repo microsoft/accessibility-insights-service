@@ -3,9 +3,10 @@
 
 import { inject, injectable } from 'inversify';
 import { GlobalLogger } from 'logger';
-import { BrowserError } from 'scanner-global-library';
+import { BrowserError, PageResponseProcessor } from 'scanner-global-library';
 import { ScanState } from 'storage-documents';
 import { chromium } from '@playwright/test';
+import { System } from 'common';
 
 export interface ScannerResults {
     result?: ScanState;
@@ -18,34 +19,52 @@ export interface ScannerResults {
 export class HighContrastScanner {
     // private readonly cssProperties = ['-ms-high-contrast', '-ms-high-contrast-adjust'];
 
-    constructor(@inject(GlobalLogger) private readonly logger: GlobalLogger) {}
+    constructor(
+        @inject(PageResponseProcessor) public readonly pageResponseProcessor: PageResponseProcessor,
+        @inject(GlobalLogger) private readonly logger: GlobalLogger,
+    ) {}
 
     public async scan(url: string): Promise<ScannerResults> {
         this.logger?.logInfo('Running high contrast CSS properties scanner.');
 
-        const browser = await chromium.launch({
-            channel: 'msedge',
-            headless: false,
-        });
+        let browser;
+        let response;
+        try {
+            browser = await chromium.launch({
+                channel: 'msedge',
+                headless: false,
+            });
 
-        const context = await browser.newContext();
-        const page = await context.newPage();
-        await page.goto(url);
-        await page.waitForTimeout(30000);
-        await browser.close();
+            const page = await browser.newPage();
+            page.on('console', (message) => {
+                console.log(message.text());
+            });
 
-        // await page.reopenBrowser({ clearBrowserCache: true, emulateEdge: true, capabilities: undefined });
-        // await page.navigate(url, options);
-        // if (!page.navigationResponse?.ok()) {
-        //     return { error: page.browserError };
-        // }
+            try {
+                response = await page.goto(url, { timeout: 10000, waitUntil: 'commit' });
+            } catch (error) {
+                const browserError = this.pageResponseProcessor.getNavigationError(error as Error);
 
-        // return {
-        //     result: 'pending',
-        //     pageResponseCode: page.navigationResponse?.status(),
-        //     scannedUrl: page.url,
-        // };
+                return {
+                    error: browserError,
+                    pageResponseCode: response?.status(),
+                    scannedUrl: response?.url(),
+                };
+            }
 
-        return undefined;
+            return {
+                result: 'pending',
+                pageResponseCode: response.status(),
+                scannedUrl: response.url(),
+            };
+        } catch (error) {
+            this.logger?.logWarn('Error while validating high contrast CSS properties.', { error: System.serializeError(error) });
+
+            return {
+                error,
+            };
+        } finally {
+            await browser?.close();
+        }
     }
 }
