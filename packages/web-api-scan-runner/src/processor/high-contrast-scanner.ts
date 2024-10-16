@@ -1,12 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { inject, injectable } from 'inversify';
+import { inject, injectable, optional } from 'inversify';
 import { GlobalLogger } from 'logger';
-import { BrowserError, PageResponseProcessor } from 'scanner-global-library';
+import { BrowserError, PageResponseProcessor, SecretVault } from 'scanner-global-library';
 import { ScanState } from 'storage-documents';
-import { chromium } from '@playwright/test';
+import * as playwright from '@playwright/test';
 import { System } from 'common';
+import { iocTypeNames } from '../ioc-types';
 
 export interface ScannerResults {
     result?: ScanState;
@@ -21,6 +22,9 @@ export class HighContrastScanner {
 
     constructor(
         @inject(PageResponseProcessor) public readonly pageResponseProcessor: PageResponseProcessor,
+        @inject(iocTypeNames.SecretVaultProvider)
+        @optional()
+        private readonly secretVaultProvider: () => Promise<SecretVault> = () => Promise.resolve({ webScannerBypassKey: '1.0' }),
         @inject(GlobalLogger) private readonly logger: GlobalLogger,
     ) {}
 
@@ -32,12 +36,13 @@ export class HighContrastScanner {
 
         this.logger?.logInfo('Starting high contrast CSS properties scan.');
         try {
-            browser = await chromium.launch({
+            browser = await playwright.chromium.launch({
                 channel: 'msedge',
                 headless: process.env.HEADLESS === 'false' ? false : true,
             });
 
-            const page = await browser.newPage();
+            const context = await this.createBrowserContext(browser);
+            const page = await context.newPage();
             page.on('console', (message) => {
                 if (message.type() === 'warning') {
                     const text = message.text();
@@ -62,13 +67,14 @@ export class HighContrastScanner {
             await System.waitLoop(
                 async () => warnings.size > 0,
                 async (flagged) => flagged,
-                5000,
+                3000,
                 500,
             );
 
             if (warnings.size > 0) {
                 result = 'fail';
                 this.logger?.logWarn('Detected deprecated high contrast CSS properties.', {
+                    scannedUrl: response.url(),
                     warnings: JSON.stringify([...warnings]),
                 });
             }
@@ -88,5 +94,21 @@ export class HighContrastScanner {
             await browser?.close();
             this.logger?.logInfo('The high contrast CSS properties scan is complete.');
         }
+    }
+
+    private async createBrowserContext(browser: playwright.Browser): Promise<playwright.BrowserContext> {
+        // Get default user agent string
+        const page = await browser.newPage();
+        const browserUserAgent = await page.evaluate(() => navigator.userAgent);
+        await page.close();
+        // Add scanner bypass key
+        const secretVault = await this.secretVaultProvider();
+        const userAgent = `${browserUserAgent} WebInsights/${secretVault.webScannerBypassKey}`;
+        // Set new user agent string
+        const context = await browser.newContext({
+            userAgent,
+        });
+
+        return context;
     }
 }
