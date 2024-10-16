@@ -17,7 +17,7 @@ export interface ScannerResults {
 
 @injectable()
 export class HighContrastScanner {
-    // private readonly cssProperties = ['-ms-high-contrast', '-ms-high-contrast-adjust'];
+    private readonly css = ['-ms-high-contrast', '-ms-high-contrast-adjust'];
 
     constructor(
         @inject(PageResponseProcessor) public readonly pageResponseProcessor: PageResponseProcessor,
@@ -25,10 +25,12 @@ export class HighContrastScanner {
     ) {}
 
     public async scan(url: string): Promise<ScannerResults> {
-        this.logger?.logInfo('Running high contrast CSS properties scanner.');
-
+        const warnings = new Set<string>();
+        let result: ScanState = 'pass';
         let browser;
         let response;
+
+        this.logger?.logInfo('Starting high contrast CSS properties scan.');
         try {
             browser = await chromium.launch({
                 channel: 'msedge',
@@ -37,7 +39,12 @@ export class HighContrastScanner {
 
             const page = await browser.newPage();
             page.on('console', (message) => {
-                console.log(message.text());
+                if (message.type() === 'warning') {
+                    const text = message.text();
+                    if (this.css.some((p) => text.includes(p)) && !warnings.has(text)) {
+                        warnings.add(text);
+                    }
+                }
             });
 
             try {
@@ -52,8 +59,22 @@ export class HighContrastScanner {
                 };
             }
 
+            await System.waitLoop(
+                async () => warnings.values.length > 0,
+                async (flagged) => flagged,
+                5000,
+                500,
+            );
+
+            if (warnings.values.length > 0) {
+                result = 'fail';
+                this.logger?.logWarn('Detected obsoleted high contrast CSS properties.', {
+                    warnings: JSON.stringify(warnings.values),
+                });
+            }
+
             return {
-                result: 'pending',
+                result,
                 pageResponseCode: response.status(),
                 scannedUrl: response.url(),
             };
@@ -61,10 +82,11 @@ export class HighContrastScanner {
             this.logger?.logWarn('Error while validating high contrast CSS properties.', { error: System.serializeError(error) });
 
             return {
-                error,
+                error: System.serializeError(error),
             };
         } finally {
             await browser?.close();
+            this.logger?.logInfo('The high contrast CSS properties scan is complete.');
         }
     }
 }

@@ -118,6 +118,10 @@ export class ScanBatchRequestFeedController extends WebController {
                         ),
                         websiteScanRef,
                         ...(request.authenticationType === undefined ? {} : { authentication: { hint: request.authenticationType } }),
+                        ...(request.privacyScan === undefined ? {} : { privacyScan: request.privacyScan }),
+                        ...(request.browserValidations === undefined
+                            ? {}
+                            : { browserValidationResult: { highContrastProperties: 'pending' } }),
                         run: {
                             state: 'accepted',
                             timestamp: new Date().toJSON(),
@@ -130,7 +134,6 @@ export class ScanBatchRequestFeedController extends WebController {
                                       scanNotifyUrl: request.scanNotifyUrl,
                                   },
                               }),
-                        ...(request.privacyScan === undefined ? {} : { privacyScan: request.privacyScan }),
                     };
 
                     await this.onDemandPageScanRunResultProvider.writeScanRuns([dbDocument]);
@@ -193,6 +196,7 @@ export class ScanBatchRequestFeedController extends WebController {
                         ...(isEmpty(request.reportGroups) ? {} : { reportGroups: request.reportGroups }),
                         ...(request.privacyScan === undefined ? {} : { privacyScan: request.privacyScan }),
                         ...(request.authenticationType === undefined ? {} : { authenticationType: request.authenticationType }),
+                        ...(request.browserValidations === undefined ? {} : { browserValidations: request.browserValidations }),
                         ...scanNotifyUrl,
                         ...(isEmpty(request.site) ? {} : { site: request.site }),
                     };

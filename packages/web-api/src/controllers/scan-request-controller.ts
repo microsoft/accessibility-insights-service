@@ -131,8 +131,8 @@ export class ScanRequestController extends ApiController {
                     ...(scanRunRequest.privacyScan === undefined ? {} : { privacyScan: scanRunRequest.privacyScan }),
                     ...(scanRunRequest.browserValidations === undefined ? {} : { browserValidations: scanRunRequest.browserValidations }),
                     ...(isEmpty(scanRunRequest.reportGroups) ? {} : { reportGroups: scanRunRequest.reportGroups }),
-                    ...(isEmpty(scanRunRequest.site) ? {} : { site: scanRunRequest.site }),
                     ...(isEmpty(scanRunRequest.scanNotifyUrl) ? {} : { scanNotifyUrl: scanRunRequest.scanNotifyUrl }),
+                    ...(isEmpty(scanRunRequest.site) ? {} : { site: scanRunRequest.site }),
                 });
 
                 scanResponses.push({
