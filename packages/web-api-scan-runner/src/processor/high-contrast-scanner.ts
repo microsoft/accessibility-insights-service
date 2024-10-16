@@ -60,16 +60,16 @@ export class HighContrastScanner {
             }
 
             await System.waitLoop(
-                async () => warnings.values.length > 0,
+                async () => warnings.size > 0,
                 async (flagged) => flagged,
                 5000,
                 500,
             );
 
-            if (warnings.values.length > 0) {
+            if (warnings.size > 0) {
                 result = 'fail';
-                this.logger?.logWarn('Detected obsoleted high contrast CSS properties.', {
-                    warnings: JSON.stringify(warnings.values),
+                this.logger?.logWarn('Detected deprecated high contrast CSS properties.', {
+                    warnings: JSON.stringify([...warnings]),
                 });
             }
 
