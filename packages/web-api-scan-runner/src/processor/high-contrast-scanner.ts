@@ -34,7 +34,7 @@ export class HighContrastScanner {
         try {
             browser = await chromium.launch({
                 channel: 'msedge',
-                headless: false,
+                headless: process.env.HEADLESS === 'false' ? false : true,
             });
 
             const page = await browser.newPage();
