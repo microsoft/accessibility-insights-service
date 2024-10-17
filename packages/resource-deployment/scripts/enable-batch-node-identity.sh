@@ -26,8 +26,8 @@ function enableBatchAccount() {
     roleDefinitionGeneratedFileName="batch-account-custom-role.generated.json"
 
     # The role is assigned under a tenant in the subscription scope. Creating it under another subscription
-    # may fail due to lack of access to the original scope, so a unique role is created per subscription scope.
-    roleNameSuffix=${subscription:24:12}
+    # may fail due to lack of access to the original scope, so a unique role is created per resource group scope.
+    roleNameSuffix=$(echo "${resourceGroupName}" | tr '[:upper:]' '[:lower:]')
     roleName="BatchAccountJobSubmitter_${roleNameSuffix}"
 
     sed -e "s@%NAME_TOKEN%@${roleName}@" -e "s@%SUBSCRIPTION_TOKEN%@${subscription}@" "${roleDefinitionFileName}" >"${roleDefinitionGeneratedFileName}"
