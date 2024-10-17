@@ -73,8 +73,10 @@ export class HighContrastScanner {
 
             if (warnings.size > 0) {
                 result = 'fail';
+                const userAgent = await page.evaluate(() => navigator.userAgent);
                 this.logger?.logWarn('Detected deprecated high contrast CSS properties.', {
                     scannedUrl: response.url(),
+                    userAgent,
                     warnings: JSON.stringify([...warnings]),
                 });
             }
