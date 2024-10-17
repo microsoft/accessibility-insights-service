@@ -67,7 +67,7 @@ export class UserAgentPlugin extends PuppeteerExtraPlugin {
         let userAgent = await page.browser().userAgent();
         userAgent = this.setUserAgentPlatform(userAgent, page);
         // Remove headless chromium flag
-        userAgent = userAgent.replace('HeadlessChrome/', 'Chrome/');
+        userAgent = userAgent.replace(/Headless/g, '');
         // Emulate Edge user agent
         if (this.emulateEdge === true) {
             const majorVersion = await this.getBrowserMajorVersion(page);

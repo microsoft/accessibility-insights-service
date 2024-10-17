@@ -100,7 +100,7 @@ describe(PageScanProcessor, () => {
 
         const results = await testSubject.scan(scanMetadata, pageScanResult, websiteScanData);
 
-        expect(results).toEqual(axeScanResults);
+        expect(results.axeScanResults).toEqual(axeScanResults);
     });
 
     it('scan with authentication enabled', async () => {
@@ -155,7 +155,7 @@ describe(PageScanProcessor, () => {
         const results = await testSubject.scan(scanMetadata, pageScanResult, websiteScanData);
 
         expect(pageScanResult).toEqual(expectedPageScanResult);
-        expect(results).toEqual(axeScanResults);
+        expect(results.axeScanResults).toEqual(axeScanResults);
     });
 
     it('scans successfully when deep scan is enabled', async () => {
@@ -178,7 +178,7 @@ describe(PageScanProcessor, () => {
 
         const results = await testSubject.scan(scanMetadata, pageScanResult, websiteScanData);
 
-        expect(results).toEqual(axeScanResults);
+        expect(results.axeScanResults).toEqual(axeScanResults);
     });
 
     it('returns error thrown by axe scanner', async () => {
@@ -220,7 +220,7 @@ describe(PageScanProcessor, () => {
         };
         const results = await testSubject.scan(scanMetadata, pageScanResult, websiteScanData);
 
-        expect(results).toEqual(expectedResult);
+        expect(results.axeScanResults).toEqual(expectedResult);
     });
 
     it('returns error thrown by deep scanner', async () => {

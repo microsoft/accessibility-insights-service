@@ -404,7 +404,7 @@ function setupPageScanProcessor(succeeded: boolean = true, error: Error = undefi
                 return Promise.reject(error);
             }
 
-            return Promise.resolve(axeScanResults);
+            return Promise.resolve({ axeScanResults });
         })
         .verifiable();
 }

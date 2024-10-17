@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { inject, injectable, optional } from 'inversify';
+import { inject, injectable } from 'inversify';
 import { GlobalLogger } from 'logger';
 import { BrowserError, PageResponseProcessor, SecretVault } from 'scanner-global-library';
 import { ScanState } from 'storage-documents';
@@ -12,7 +12,6 @@ import { iocTypeNames } from '../ioc-types';
 export interface ScannerResults {
     result?: ScanState;
     error?: string | BrowserError;
-    pageResponseCode?: number;
     scannedUrl?: string;
 }
 
@@ -23,7 +22,6 @@ export class HighContrastScanner {
     constructor(
         @inject(PageResponseProcessor) public readonly pageResponseProcessor: PageResponseProcessor,
         @inject(iocTypeNames.SecretVaultProvider)
-        @optional()
         private readonly secretVaultProvider: () => Promise<SecretVault> = () => Promise.resolve({ webScannerBypassKey: '1.0' }),
         @inject(GlobalLogger) private readonly logger: GlobalLogger,
     ) {}
@@ -56,11 +54,13 @@ export class HighContrastScanner {
                 response = await page.goto(url, { timeout: 10000, waitUntil: 'commit' });
             } catch (error) {
                 const browserError = this.pageResponseProcessor.getNavigationError(error as Error);
+                this.logger?.logError(`Page navigation error.`, {
+                    error: System.serializeError(error),
+                    browserError: System.serializeError(browserError),
+                });
 
                 return {
                     error: browserError,
-                    pageResponseCode: response?.status(),
-                    scannedUrl: response?.url(),
                 };
             }
 
@@ -81,14 +81,13 @@ export class HighContrastScanner {
 
             return {
                 result,
-                pageResponseCode: response.status(),
                 scannedUrl: response.url(),
             };
         } catch (error) {
-            this.logger?.logWarn('Error while validating high contrast CSS properties.', { error: System.serializeError(error) });
+            this.logger?.logError('Error while validating high contrast CSS properties.', { error: System.serializeError(error) });
 
             return {
-                error: System.serializeError(error),
+                error,
             };
         } finally {
             await browser?.close();
@@ -101,10 +100,11 @@ export class HighContrastScanner {
         const page = await browser.newPage();
         const browserUserAgent = await page.evaluate(() => navigator.userAgent);
         await page.close();
-        // Add scanner bypass key
+        // Create scanner user agent string
+        let userAgent = browserUserAgent.replace(/Headless/g, '');
         const secretVault = await this.secretVaultProvider();
-        const userAgent = `${browserUserAgent} WebInsights/${secretVault.webScannerBypassKey}`;
-        // Set new user agent string
+        userAgent = `${userAgent} WebInsights/${secretVault.webScannerBypassKey}`;
+        // Set scanner user agent string
         const context = await browser.newContext({
             userAgent,
         });

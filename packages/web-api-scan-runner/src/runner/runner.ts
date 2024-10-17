@@ -54,7 +54,7 @@ export class Runner {
         this.logger.setCommonProperties({ scanId: runnerScanMetadata.id, url: runnerScanMetadata.url });
         this.logger.logInfo('Starting accessibility page scan task.');
 
-        const pageScanResult = await this.updateScanRunStateToRunning(runnerScanMetadata.id);
+        let pageScanResult = await this.updateScanRunStateToRunning(runnerScanMetadata.id);
         if (pageScanResult === undefined) {
             this.logger.logWarn('Page scan result document not found in storage.');
 
@@ -66,7 +66,9 @@ export class Runner {
         this.telemetryManager.trackScanStarted(runnerScanMetadata.id);
         let axeScanResults: AxeScanResults;
         try {
-            axeScanResults = await this.pageScanProcessor.scan(runnerScanMetadata, pageScanResult, websiteScanData);
+            const scanProcessorResult = await this.pageScanProcessor.scan(runnerScanMetadata, pageScanResult, websiteScanData);
+            axeScanResults = scanProcessorResult?.axeScanResults;
+
             if (axeScanResults?.unscannable === true) {
                 // unscannable URL
                 this.setRunResult(pageScanResult, 'unscannable', axeScanResults.scannedUrl, axeScanResults.error);
@@ -78,8 +80,15 @@ export class Runner {
                 await this.onFailedScan(axeScanResults, pageScanResult);
             }
 
-            pageScanResult.run.pageTitle = axeScanResults.pageTitle;
-            pageScanResult.run.pageResponseCode = axeScanResults.pageResponseCode;
+            pageScanResult = {
+                ...pageScanResult,
+                run: {
+                    ...pageScanResult.run,
+                    pageTitle: axeScanResults?.pageTitle,
+                    pageResponseCode: axeScanResults?.pageResponseCode,
+                },
+                ...scanProcessorResult?.browserValidationResult,
+            };
         } catch (error) {
             const errorMessage = System.serializeError(error);
             this.setRunResult(pageScanResult, 'failed', axeScanResults?.scannedUrl, errorMessage);
