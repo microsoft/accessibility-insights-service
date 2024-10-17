@@ -52,6 +52,8 @@ export declare type ScanErrorTypes =
     | 'UrlNavigationTimeout'
     | 'UrlNotResolved';
 
+export declare type BrowserValidationTypes = 'highContrastProperties';
+
 export interface ScanError {
     errorType: ScanErrorTypes;
     message: string;
@@ -77,6 +79,11 @@ export interface OnDemandPageScanResult extends StorageDocument {
     notification?: ScanCompletedNotification;
     privacyScan?: PrivacyScan;
     authentication?: AuthenticationResult;
+    browserValidationResult?: BrowserValidationResult;
+}
+
+export interface BrowserValidationResult {
+    highContrastProperties?: ScanState;
 }
 
 export interface AuthenticationResult {

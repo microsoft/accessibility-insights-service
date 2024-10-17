@@ -55,8 +55,8 @@
     "dependencies": {
         "@apify/log": "2.2.18",
         "@axe-core/puppeteer": "4.9.1",
-        "@crawlee/browser-pool": "^3.5.0",
-        "@crawlee/puppeteer": "^3.5.0",
+        "@crawlee/browser-pool": "^3.11.5",
+        "@crawlee/puppeteer": "^3.11.5",
         "@medv/finder": "^2.1.0",
         "@opentelemetry/api": "^1.4.1",
         "@opentelemetry/exporter-metrics-otlp-grpc": "^0.41.0",

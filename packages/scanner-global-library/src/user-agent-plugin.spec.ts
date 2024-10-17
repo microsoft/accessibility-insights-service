@@ -14,6 +14,7 @@ const version = 'Chrome/107.1.2.3';
 const chromiumUserAgent =
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/107.1.2.3 Safari/537.36';
 const expectedUserAgent = `Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.1.2.3 Safari/537.36 WebInsights/${secretVaultData.webScannerBypassKey}`;
+const expectedEdgeUserAgent = `Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.1.2.3 Safari/537.36 Edg/107.0.0.0 WebInsights/${secretVaultData.webScannerBypassKey}`;
 const expectedLinuxUserAgent = `Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.1.2.3 Safari/537.36 WebInsights/${secretVaultData.webScannerBypassKey}`;
 const url = 'authUrl';
 
@@ -52,6 +53,16 @@ describe(UserAgentPlugin, () => {
     afterEach(() => {
         puppeteerPageMock.verifyAll();
         loginPageDetectorMock.verifyAll();
+    });
+
+    it('validate user agent string for Edge browser', async () => {
+        puppeteerPageMock
+            .setup((o) => o.setUserAgent(expectedEdgeUserAgent, userAgentMetadata))
+            .returns(() => Promise.resolve())
+            .verifiable(Times.atLeastOnce());
+
+        userAgentPlugin.emulateEdge = true;
+        await userAgentPlugin.onPageCreated(puppeteerPageMock.object);
     });
 
     it('validate user agent string', async () => {

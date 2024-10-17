@@ -4,10 +4,16 @@
 import { inject, injectable } from 'inversify';
 import { GlobalLogger } from 'logger';
 import { AxeScanResults, Page } from 'scanner-global-library';
-import { OnDemandPageScanResult, WebsiteScanData } from 'storage-documents';
+import { BrowserValidationResult, OnDemandPageScanResult, WebsiteScanData } from 'storage-documents';
 import { DeepScanner, PageMetadata, PageMetadataGenerator, RunnerScanMetadata } from 'service-library';
 import { isEmpty } from 'lodash';
 import { AxeScanner } from './axe-scanner';
+import { HighContrastScanner } from './high-contrast-scanner';
+
+export interface ScanProcessorResult {
+    axeScanResults: AxeScanResults;
+    browserValidationResult?: BrowserValidationResult;
+}
 
 @injectable()
 export class PageScanProcessor {
@@ -15,6 +21,7 @@ export class PageScanProcessor {
         @inject(Page) private readonly page: Page,
         @inject(AxeScanner) private readonly axeScanner: AxeScanner,
         @inject(DeepScanner) private readonly deepScanner: DeepScanner,
+        @inject(HighContrastScanner) private readonly highContrastScanner: HighContrastScanner,
         @inject(PageMetadataGenerator) private readonly pageMetadataGenerator: PageMetadataGenerator,
         @inject(GlobalLogger) private readonly logger: GlobalLogger,
     ) {}
@@ -23,15 +30,14 @@ export class PageScanProcessor {
         runnerScanMetadata: RunnerScanMetadata,
         pageScanResult: OnDemandPageScanResult,
         websiteScanData: WebsiteScanData,
-    ): Promise<AxeScanResults> {
-        let axeScanResults: AxeScanResults;
+    ): Promise<ScanProcessorResult> {
         try {
             const pageMetadata = await this.pageMetadataGenerator.getMetadata(runnerScanMetadata.url, this.page, websiteScanData);
             const state = this.getScannableState(pageMetadata);
             if (state.unscannable === true) {
                 this.setAuthenticationResult(pageMetadata, pageScanResult);
 
-                return state;
+                return { axeScanResults: state };
             }
 
             // Turn on WebGL to show all page elements and get a complete accessibility scan result
@@ -40,20 +46,36 @@ export class PageScanProcessor {
             await this.page.navigate(runnerScanMetadata.url, { enableAuthentication });
             this.setAuthenticationResult(pageMetadata, pageScanResult);
             if (!isEmpty(this.page.browserError)) {
-                return { error: this.page.browserError, pageResponseCode: this.page.browserError.statusCode };
+                return {
+                    axeScanResults: {
+                        error: this.page.browserError,
+                        pageResponseCode: this.page.browserError.statusCode,
+                    },
+                };
             }
 
-            axeScanResults = await this.axeScanner.scan(this.page);
+            let axeScanResults = await this.axeScanner.scan(this.page);
             await this.deepScanner.runDeepScan(pageScanResult, websiteScanData, this.page);
 
             // Taking a screenshot of the page might break the page layout. Run at the end of the workflow.
             const pageState = await this.page.capturePageState();
             axeScanResults = { ...axeScanResults, ...pageState };
+
+            // Execute additional scanners once the primary scan is finished.
+            let highContrastResult;
+            if (pageScanResult.browserValidationResult?.highContrastProperties === 'pending') {
+                highContrastResult = await this.highContrastScanner.scan(runnerScanMetadata.url);
+            }
+
+            return {
+                axeScanResults,
+                browserValidationResult: {
+                    highContrastProperties: highContrastResult?.result,
+                },
+            };
         } finally {
             await this.page.close();
         }
-
-        return axeScanResults;
     }
 
     private getScannableState(pageMetadata: PageMetadata): AxeScanResults {

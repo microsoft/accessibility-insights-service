@@ -27,7 +27,7 @@ export type PartialScanData = {
 
 export interface PageProcessor {
     requestHandler: Crawlee.PuppeteerRequestHandler;
-    failedRequestHandler: Crawlee.BrowserErrorHandler;
+    failedRequestHandler: Crawlee.BrowserErrorHandler<Crawlee.PuppeteerCrawlingContext>;
 }
 
 export interface SessionData {
@@ -104,7 +104,7 @@ export abstract class PageProcessorBase implements PageProcessor {
     /**
      * This function is called when the crawling of a request failed after several reties
      */
-    public failedRequestHandler: Crawlee.BrowserErrorHandler = async ({ request }, error) => {
+    public failedRequestHandler: Crawlee.BrowserErrorHandler<Crawlee.PuppeteerCrawlingContext> = async ({ request }, error) => {
         const scanData: ScanData = {
             id: request.id as string,
             url: request.url,

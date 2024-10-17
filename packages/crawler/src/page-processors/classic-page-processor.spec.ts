@@ -111,7 +111,11 @@ describe(ClassicPageProcessor, () => {
             succeeded: true,
             issueCount: 1,
         };
-        const context = { page: puppeteerPageStub, request: requestStub, session: {} } as Crawlee.PuppeteerCrawlingContext;
+        const context = {
+            page: puppeteerPageStub,
+            request: requestStub,
+            session: {},
+        } as any;
         accessibilityScanOpMock
             .setup((o) => o.run(puppeteerPageStub, testId, It.isAny()))
             .returns(async () => Promise.resolve(axeResults))

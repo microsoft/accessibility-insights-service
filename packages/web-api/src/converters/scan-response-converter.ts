@@ -113,6 +113,11 @@ export class ScanResponseConverter {
                       },
                   }
                 : {}),
+            ...(pageScanResult.browserValidationResult !== undefined
+                ? {
+                      browserValidationResult: pageScanResult.browserValidationResult,
+                  }
+                : {}),
             run: {
                 state: effectiveRunState,
                 timestamp: pageScanResult.run.timestamp,

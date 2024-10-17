@@ -143,13 +143,13 @@ describe(PageProcessorBase, () => {
         };
         dataStoreMock.setup((o) => o.pushData(expectedScanData)).verifiable();
         setupScanErrorLogging();
-        const context = { request: requestStub } as Crawlee.PuppeteerCrawlingContext;
+        const context = { request: requestStub } as any;
 
         await pageProcessorBase.failedRequestHandler(context, error);
     });
 
     it('requestHandler', async () => {
-        const context: Crawlee.PuppeteerCrawlingContext = {
+        const context = {
             page: puppeteerPageStub,
             request: requestStub,
             session: {
@@ -169,7 +169,7 @@ describe(PageProcessorBase, () => {
     });
 
     it('requestHandler should logs browser error', async () => {
-        const context: Crawlee.PuppeteerCrawlingContext = {
+        const context = {
             page: puppeteerPageStub,
             request: requestStub,
             session: {
@@ -189,7 +189,7 @@ describe(PageProcessorBase, () => {
     });
 
     it('requestHandler should logs errors', async () => {
-        const context: Crawlee.PuppeteerCrawlingContext = {
+        const context = {
             page: puppeteerPageStub,
             request: requestStub,
             session: {

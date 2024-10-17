@@ -256,6 +256,7 @@ function getPageScanResult(options: options): OnDemandPageScanResult {
             state: 'fail',
             issueCount: 1,
         },
+        browserValidationResult: { highContrastProperties: 'pass' },
         reports: [
             {
                 reportId: 'reportIdSarif',
@@ -301,6 +302,9 @@ function getScanResultClientResponseFull(options: options): ScanResultResponse {
         scanResult: {
             state: 'fail',
             issueCount: 1,
+        },
+        browserValidationResult: {
+            highContrastProperties: 'pass',
         },
         reports: [
             {

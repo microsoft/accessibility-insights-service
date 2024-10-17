@@ -293,6 +293,11 @@
                                 "example": "standard"
                             }
                         }
+                    },
+                    "browserValidations": {
+                        "type": "array",
+                        "description": "Enables browser validations.",
+                        "items": ["highContrastProperties"]
                     }
                 }
             },

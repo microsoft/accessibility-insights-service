@@ -27,6 +27,10 @@ export declare type AuthenticationState = 'succeeded' | 'failed' | 'unauthentica
 export const authenticationTypes = ['undetermined', 'entraId'] as const;
 export declare type AuthenticationType = (typeof authenticationTypes)[number];
 
+// Construct to support type guard
+export const browserValidationTypes = ['highContrastProperties'] as const;
+export declare type BrowserValidationTypes = (typeof browserValidationTypes)[number];
+
 export declare type ReportFormat =
     | 'axe'
     | 'sarif'
@@ -52,6 +56,7 @@ export interface ScanRunResultResponse {
     deepScanResult?: DeepScanResultItem[];
     reports?: ScanReport[];
     notification?: ScanCompletedNotification;
+    browserValidationResult?: BrowserValidationResult;
 }
 
 export interface ScanRunErrorResponse {
@@ -110,4 +115,8 @@ export interface DeepScanResultItem {
 export interface AuthenticationResult {
     detected: AuthenticationType;
     state: AuthenticationState;
+}
+
+export interface BrowserValidationResult {
+    highContrastProperties?: ScanState;
 }

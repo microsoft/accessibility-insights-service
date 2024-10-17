@@ -125,7 +125,7 @@ describe(SimulatorPageProcessor, () => {
             page: puppeteerPageStub,
             request: requestStub,
             session: { userData: [] } as any,
-        } as Crawlee.PuppeteerCrawlingContext;
+        } as any;
         const expectedScanData = {
             id: testId,
             url: testUrl,
@@ -170,7 +170,7 @@ describe(SimulatorPageProcessor, () => {
             page: puppeteerPageStub,
             request: requestStubClick,
             session: { userData: [] } as any,
-        } as Crawlee.PuppeteerCrawlingContext;
+        } as any;
         const expectedScanData = {
             id: testId,
             url: testUrl,

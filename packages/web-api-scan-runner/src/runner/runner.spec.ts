@@ -94,6 +94,7 @@ describe(Runner, () => {
                 scanGroupType: 'group-scan',
             },
             scannedUrl: 'scannedUrl',
+            browserValidationResult: {},
         } as OnDemandPageScanResult;
         pageScanResult = {} as OnDemandPageScanResult;
         axeScanResults = {
@@ -404,7 +405,7 @@ function setupPageScanProcessor(succeeded: boolean = true, error: Error = undefi
                 return Promise.reject(error);
             }
 
-            return Promise.resolve(axeScanResults);
+            return Promise.resolve({ axeScanResults });
         })
         .verifiable();
 }

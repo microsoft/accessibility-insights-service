@@ -25,6 +25,7 @@ module.exports = (env) => {
             'puppeteer-extra-plugin',
             'puppeteer-extra-plugin-stealth',
             'patch-package',
+            '@playwright/test',
         ],
         entry: {
             ['web-api-scan-runner']: path.resolve('./src/index.ts'),
