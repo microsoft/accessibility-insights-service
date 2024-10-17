@@ -21,5 +21,6 @@ COPY . .
 # Install app dependencies
 RUN npm install
 RUN npx patch-package
+RUN npx playwright install msedge
 
 CMD ["powershell.exe", "./web-api-scan-runner.ps1"]

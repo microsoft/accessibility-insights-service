@@ -94,6 +94,7 @@ describe(Runner, () => {
                 scanGroupType: 'group-scan',
             },
             scannedUrl: 'scannedUrl',
+            browserValidationResult: {},
         } as OnDemandPageScanResult;
         pageScanResult = {} as OnDemandPageScanResult;
         axeScanResults = {

@@ -87,7 +87,10 @@ export class Runner {
                     pageTitle: axeScanResults?.pageTitle,
                     pageResponseCode: axeScanResults?.pageResponseCode,
                 },
-                ...scanProcessorResult?.browserValidationResult,
+                browserValidationResult: {
+                    ...pageScanResult.browserValidationResult,
+                    ...scanProcessorResult?.browserValidationResult,
+                },
             };
         } catch (error) {
             const errorMessage = System.serializeError(error);
