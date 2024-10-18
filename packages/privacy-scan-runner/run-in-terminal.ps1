@@ -11,4 +11,4 @@ foreach($var in $variables) {
     Write-Host "$key=$([Environment]::GetEnvironmentVariable($key))"
 }
 
-node ./privacy-scan-runner.js
+node --max-old-space-size=8192 ./privacy-scan-runner.js
