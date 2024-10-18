@@ -6,4 +6,4 @@ $gateway = (Get-NetRoute '0.0.0.0/0').NextHop
 $arguments = 'add', '169.254.169.0', 'mask', '255.255.255.0', $gateway
 route $arguments | Out-Null
 
-node ./privacy-scan-runner.js
+node --max-old-space-size=8192 ./privacy-scan-runner.js
