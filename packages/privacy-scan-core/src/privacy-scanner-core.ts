@@ -57,10 +57,12 @@ export class PrivacyScannerCore {
             privacyResult: JSON.stringify({
                 navigationalUri: privacyResult.navigationalUri,
                 bannerDetected: privacyResult.bannerDetected,
-                errors: privacyResult.cookieCollectionConsentResults.map((r) => ({
-                    cookiesUsedForConsent: r.cookiesUsedForConsent,
-                    error: r.error,
-                })),
+                errors: privacyResult.cookieCollectionConsentResults
+                    .map((r) => ({
+                        cookiesUsedForConsent: r.cookiesUsedForConsent,
+                        error: r.error,
+                    }))
+                    .find((e) => e.error !== undefined),
             }),
         });
 

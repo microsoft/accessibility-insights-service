@@ -36,7 +36,7 @@ const defaultArgs = [
 // 3) '--in-process-gpu' Required. This enables WebGL rendering in container environment.
 
 const webglArgs = ['--disable-gpu', '--in-process-gpu'];
-const noWebglArgs = ['--disable-webgl', '--disable-webgl2'];
+const noWebglArgs = ['--disable-webgl', '--disable-webgl2', '--disable-accelerated-2d-canvas', '--disable-gpu-program-cache'];
 
 const defaultLaunchOptions: Puppeteer.PuppeteerNodeLaunchOptions = {
     // The new headless mode https://developer.chrome.com/articles/new-headless
