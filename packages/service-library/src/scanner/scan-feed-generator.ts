@@ -3,7 +3,13 @@
 
 import { injectable, inject } from 'inversify';
 import { GlobalLogger } from 'logger';
-import { OnDemandPageScanResult, WebsiteScanData, ScanRunBatchRequest, KnownPage } from 'storage-documents';
+import {
+    OnDemandPageScanResult,
+    WebsiteScanData,
+    ScanRunBatchRequest,
+    KnownPage,
+    convertToBrowserValidationTypes,
+} from 'storage-documents';
 import { isElement, isEmpty } from 'lodash';
 import { GuidGenerator, System } from 'common';
 import { ScanDataProvider } from '../data-providers/scan-data-provider';
@@ -90,11 +96,14 @@ export class ScanFeedGenerator {
                 // Propagate the deep scan id to subsequent requests
                 deepScanId: websiteScanData.deepScanId,
                 authenticationType: pageScanResult.authentication?.hint ?? undefined,
+                ...(pageScanResult.privacyScan === undefined ? {} : { privacyScan: pageScanResult.privacyScan }),
+                ...(convertToBrowserValidationTypes(pageScanResult.browserValidationResult) === undefined
+                    ? {}
+                    : convertToBrowserValidationTypes(pageScanResult.browserValidationResult)),
+                scanNotifyUrl: pageScanResult.notification?.scanNotifyUrl ?? undefined,
                 site: {
                     baseUrl: websiteScanData.baseUrl,
                 },
-                ...(pageScanResult.privacyScan === undefined ? {} : { privacyScan: pageScanResult.privacyScan }),
-                scanNotifyUrl: pageScanResult.notification?.scanNotifyUrl ?? undefined,
                 reportGroups: [
                     {
                         consolidatedId: websiteScanData.scanGroupId,
