@@ -63,15 +63,13 @@ export class PageScanProcessor {
 
             // Execute additional scanners once the primary scan is finished.
             let highContrastResult;
-            if (pageScanResult.browserValidationResult?.highContrastProperties === 'pending') {
+            if (['pending', 'error'].includes(pageScanResult.browserValidationResult?.highContrastProperties)) {
                 highContrastResult = await this.highContrastScanner.scan(runnerScanMetadata.url);
             }
 
             return {
                 axeScanResults,
-                browserValidationResult: {
-                    highContrastProperties: highContrastResult?.result,
-                },
+                ...(isEmpty(highContrastResult) ? {} : { browserValidationResult: { highContrastProperties: highContrastResult.result } }),
             };
         } finally {
             await this.page.close();
