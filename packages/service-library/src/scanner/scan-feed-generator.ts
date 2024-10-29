@@ -99,7 +99,7 @@ export class ScanFeedGenerator {
                 ...(pageScanResult.privacyScan === undefined ? {} : { privacyScan: pageScanResult.privacyScan }),
                 ...(convertToBrowserValidationTypes(pageScanResult.browserValidationResult) === undefined
                     ? {}
-                    : convertToBrowserValidationTypes(pageScanResult.browserValidationResult)),
+                    : { browserValidations: convertToBrowserValidationTypes(pageScanResult.browserValidationResult) }),
                 scanNotifyUrl: pageScanResult.notification?.scanNotifyUrl ?? undefined,
                 site: {
                     baseUrl: websiteScanData.baseUrl,
