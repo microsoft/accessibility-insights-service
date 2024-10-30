@@ -75,7 +75,7 @@
         "filenamify": "^4.3.0",
         "filenamify-url": "^2.1.2",
         "got": "^11.8.5",
-        "inversify": "^6.0.1",
+        "inversify": "^6.0.3",
         "json5": ">=2.2.3",
         "leveldown": "^6.1.1",
         "levelup": "^5.1.1",
