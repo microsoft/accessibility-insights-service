@@ -16,6 +16,7 @@ import {
     WebsiteScanDataProvider,
 } from 'service-library';
 import {
+    convertToBrowserValidationResult,
     ItemType,
     KnownPage,
     OnDemandPageScanBatchRequest,
@@ -119,9 +120,9 @@ export class ScanBatchRequestFeedController extends WebController {
                         websiteScanRef,
                         ...(request.authenticationType === undefined ? {} : { authentication: { hint: request.authenticationType } }),
                         ...(request.privacyScan === undefined ? {} : { privacyScan: request.privacyScan }),
-                        ...(request.browserValidations === undefined
+                        ...(convertToBrowserValidationResult(request.browserValidations) === undefined
                             ? {}
-                            : { browserValidationResult: { highContrastProperties: 'pending' } }),
+                            : { browserValidationResult: convertToBrowserValidationResult(request.browserValidations) }),
                         run: {
                             state: 'accepted',
                             timestamp: new Date().toJSON(),

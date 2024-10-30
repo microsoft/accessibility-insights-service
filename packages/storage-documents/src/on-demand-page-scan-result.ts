@@ -18,6 +18,7 @@ export declare type OnDemandPageScanRunState =
     | 'failed'
     | 'unscannable';
 export declare type ScanState = 'pending' | 'pass' | 'fail';
+export declare type ScanStateExt = ScanState | 'error';
 export declare type NotificationState = 'pending' | 'queued' | 'queueFailed' | 'sending' | 'sent' | 'sendFailed';
 export declare type NotificationErrorTypes = 'InternalError' | 'HttpErrorCode';
 export declare type AuthenticationState = 'succeeded' | 'failed' | 'unauthenticated';
@@ -83,7 +84,7 @@ export interface OnDemandPageScanResult extends StorageDocument {
 }
 
 export interface BrowserValidationResult {
-    highContrastProperties?: ScanState;
+    highContrastProperties?: ScanStateExt;
 }
 
 export interface AuthenticationResult {

@@ -7,6 +7,7 @@ import { WebApiError } from '../web-api-error-codes';
 
 export declare type LinkType = 'self';
 export declare type ScanState = 'pending' | 'pass' | 'fail';
+export declare type ScanStateExt = ScanState | 'error';
 export declare type RunState =
     | 'pending'
     | 'accepted'
@@ -118,5 +119,5 @@ export interface AuthenticationResult {
 }
 
 export interface BrowserValidationResult {
-    highContrastProperties?: ScanState;
+    highContrastProperties?: ScanStateExt;
 }

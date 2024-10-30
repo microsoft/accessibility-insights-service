@@ -480,6 +480,9 @@
                     },
                     "authentication": {
                         "$ref": "#/components/schemas/AuthenticationResult"
+                    },
+                    "browserValidationResult": {
+                        "$ref": "#/components/schemas/BrowserValidationResult"
                     }
                 }
             },
@@ -600,6 +603,17 @@
                         "type": "string",
                         "enum": ["succeeded", "failed", "unauthenticated"],
                         "example": "succeeded"
+                    }
+                }
+            },
+            "BrowserValidationResult": {
+                "type": "object",
+                "properties": {
+                    "highContrastProperties": {
+                        "type": "string",
+                        "default": "pending",
+                        "enum": ["pending", "pass", "fail", "error"],
+                        "example": "pass"
                     }
                 }
             }

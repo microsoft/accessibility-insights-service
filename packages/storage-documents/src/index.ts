@@ -16,3 +16,4 @@ export * from './combined-scan-results';
 export * from './privacy-scan-types/privacy-page-scan-report';
 export * from './privacy-scan-types/privacy-scan-combined-report';
 export * from './known-page-type-converter';
+export * from './request-type-converter';

@@ -4,13 +4,13 @@
 import { inject, injectable } from 'inversify';
 import { GlobalLogger } from 'logger';
 import { BrowserError, PageResponseProcessor, SecretVault } from 'scanner-global-library';
-import { ScanState } from 'storage-documents';
+import { ScanStateExt } from 'storage-documents';
 import * as playwright from '@playwright/test';
 import { System } from 'common';
 import { iocTypeNames } from '../ioc-types';
 
 export interface ScannerResults {
-    result?: ScanState;
+    result?: ScanStateExt;
     error?: string | BrowserError;
     scannedUrl?: string;
 }
@@ -28,7 +28,7 @@ export class HighContrastScanner {
 
     public async scan(url: string): Promise<ScannerResults> {
         const warnings = new Set<string>();
-        let result: ScanState = 'pass';
+        let result: ScanStateExt = 'pass';
         let browser;
         let response;
 
@@ -60,6 +60,7 @@ export class HighContrastScanner {
                 });
 
                 return {
+                    result: 'error',
                     error: browserError,
                 };
             }
@@ -89,6 +90,7 @@ export class HighContrastScanner {
             this.logger?.logError('Error while validating high contrast CSS properties.', { error: System.serializeError(error) });
 
             return {
+                result: 'error',
                 error,
             };
         } finally {
