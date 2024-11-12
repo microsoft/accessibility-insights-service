@@ -69,7 +69,6 @@ export const webAxeRunOptions: AxeRunOptions = {
             'scrollable-region-focusable',
             'select-name',
             'server-side-image-map',
-            'summary-name',
             'svg-img-alt',
             'td-headers-attr',
             'th-has-data-cells',
