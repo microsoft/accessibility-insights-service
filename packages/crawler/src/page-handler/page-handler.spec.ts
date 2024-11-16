@@ -10,6 +10,8 @@ import { System } from '../common/system';
 import { PageHandler } from './page-handler';
 import { scrollToBottom } from './page-client-lib';
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 type Writeable<T> = { -readonly [P in keyof T]: Writeable<T[P]> };
 
 describe(PageHandler, () => {
@@ -48,7 +50,9 @@ describe(PageHandler, () => {
         pageMock.setup((o) => o.isClosed()).returns(() => false);
         pageMock.setup((o) => o.url()).returns(() => 'url');
 
-        pageHandler = new PageHandler(loggerMock.object, checkIntervalMsecs, pageDomStableTimeMsec, scrollToBottomMock);
+        pageHandler = new PageHandler(loggerMock.object, scrollToBottomMock);
+        (pageHandler as any).pageDomStableTimeMsec = pageDomStableTimeMsec;
+        (pageHandler as any).checkIntervalMsecs = checkIntervalMsecs;
     });
 
     afterEach(() => {

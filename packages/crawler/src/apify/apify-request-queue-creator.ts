@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 import * as fs from 'fs';
-import { injectable } from 'inversify';
+import { inject, injectable, optional } from 'inversify';
 import * as Crawlee from '@crawlee/puppeteer';
 import { ApifySettingsHandler, apifySettingsHandler } from './apify-settings';
 
@@ -25,8 +25,8 @@ export class ApifyRequestQueueCreator implements ResourceCreator {
     private readonly requestQueueName = 'scanRequests';
 
     public constructor(
-        private readonly settingsHandler: ApifySettingsHandler = apifySettingsHandler,
-        private readonly fileSystem: typeof fs = fs,
+        @optional() @inject('ApifySettingsHandler') private readonly settingsHandler: ApifySettingsHandler = apifySettingsHandler,
+        @optional() @inject('fs') private readonly fileSystem: typeof fs = fs,
     ) {}
 
     public async createRequestQueue(baseUrl: string, options?: RequestQueueOptions): Promise<Crawlee.RequestQueue> {

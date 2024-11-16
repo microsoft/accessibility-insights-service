@@ -4,11 +4,11 @@
 import 'reflect-metadata';
 
 import * as Axe from 'axe-core';
-import { injectable } from 'inversify';
+import { inject, injectable, optional } from 'inversify';
 
 @injectable()
 export class AxeInfo {
-    constructor(private readonly axe: typeof Axe = Axe) {}
+    constructor(@optional() @inject('Axe') private readonly axe: typeof Axe = Axe) {}
 
     public get version(): string {
         return this.axe.version;

@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { injectable } from 'inversify';
+import { inject, injectable, optional } from 'inversify';
 import { ApifyConsoleLoggerClient } from './apify-console-logger-client';
 
 export enum LogLevel {
@@ -22,7 +22,7 @@ export interface LoggerClient {
 
 @injectable()
 export class Logger {
-    constructor(private readonly loggerClients: LoggerClient[] = [new ApifyConsoleLoggerClient()]) {}
+    constructor(@optional() @inject('LoggerClient') private readonly loggerClients: LoggerClient[] = [new ApifyConsoleLoggerClient()]) {}
 
     public setCommonProperties(properties: LoggerProperties): void {
         this.invokeLoggerClients((client) => client.setCommonProperties(properties));
