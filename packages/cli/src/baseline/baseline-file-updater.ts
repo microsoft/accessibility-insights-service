@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { inject, injectable } from 'inversify';
+import { inject, injectable, optional } from 'inversify';
 import { isEmpty } from 'lodash';
 import { OutputFileWriter } from '../files/output-file-writer';
 import { ScanArguments } from '../scan-arguments';
@@ -13,7 +13,7 @@ export class BaselineFileUpdater {
     constructor(
         @inject(BaselineFileFormatter) private readonly baselineFileFormatter: BaselineFileFormatter,
         @inject(OutputFileWriter) private readonly outputFileWriter: OutputFileWriter,
-        private readonly stdoutWriter: (output: string) => void = console.log,
+        @optional() @inject('stdoutWriter') private readonly stdoutWriter: (output: string) => void = console.log,
     ) {}
 
     public async updateBaseline(scanArguments: ScanArguments, baselineEvaluation: BaselineEvaluation): Promise<void> {

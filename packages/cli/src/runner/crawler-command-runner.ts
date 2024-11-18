@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 import * as fs from 'fs';
-import { inject, injectable } from 'inversify';
+import { inject, injectable, optional } from 'inversify';
 import { isEmpty } from 'lodash';
 import { ScanArguments } from '../scan-arguments';
 import { ConsolidatedReportGenerator } from '../report/consolidated-report-generator';
@@ -24,8 +24,8 @@ export class CrawlerCommandRunner implements CommandRunner {
         @inject(BaselineOptionsBuilder) private readonly baselineOptionsBuilder: BaselineOptionsBuilder,
         @inject(BaselineFileUpdater) private readonly baselineFileUpdater: BaselineFileUpdater,
         @inject(ReportNameGenerator) private readonly reportNameGenerator: ReportNameGenerator,
-        private readonly fileSystem: typeof fs = fs,
-        private readonly stdoutWriter: (output: string) => void = console.log,
+        @optional() @inject('fs') private readonly fileSystem: typeof fs = fs,
+        @optional() @inject('stdoutWriter') private readonly stdoutWriter: (output: string) => void = console.log,
     ) {}
 
     public async runCommand(scanArguments: ScanArguments): Promise<void> {

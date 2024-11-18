@@ -10,11 +10,13 @@ import { scrollToBottom } from './page-client-lib';
 
 @injectable()
 export class PageHandler {
+    private readonly checkIntervalMsecs: number = 200;
+
+    private readonly pageDomStableTimeMsec: number = puppeteerTimeoutConfig.pageDomStableTimeMsec;
+
     constructor(
-        @inject(Logger) @optional() private readonly logger: Logger,
-        private readonly checkIntervalMsecs: number = 200,
-        private readonly pageDomStableTimeMsec: number = puppeteerTimeoutConfig.pageDomStableTimeMsec,
-        private readonly scrollToPageBottom: typeof scrollToBottom = scrollToBottom,
+        @optional() @inject(Logger) private readonly logger: Logger,
+        @optional() @inject('scrollToBottom') private readonly scrollToPageBottom: typeof scrollToBottom = scrollToBottom,
     ) {}
 
     public async waitForPageToCompleteRendering(

@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { injectable } from 'inversify';
+import { inject, injectable, optional } from 'inversify';
 
 @injectable()
 export class PromiseUtils {
-    constructor(private readonly globalObj = global) {}
+    constructor(@optional() @inject('global') private readonly globalObj = global) {}
 
     public async waitFor<T, Y>(fn: Promise<T>, timeoutInMsec: number, onTimeoutCallback: () => Promise<Y>): Promise<T | Y> {
         let timeoutHandle: NodeJS.Timeout;

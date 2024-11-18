@@ -4,7 +4,7 @@
 import * as fs from 'fs';
 import path from 'path';
 import filenamifyCombined from 'filenamify';
-import { injectable } from 'inversify';
+import { inject, injectable, optional } from 'inversify';
 import normalizePath from 'normalize-path';
 import { ensureDirectory } from 'accessibility-insights-crawler';
 
@@ -16,9 +16,9 @@ const filenamifyUrl = require('filenamify-url');
 @injectable()
 export class OutputFileWriter {
     constructor(
-        private readonly fileSystem: typeof fs = fs,
-        private readonly fileSystemPath = path,
-        private readonly ensureDirectoryFunc: typeof ensureDirectory = ensureDirectory,
+        @optional() @inject('fs') private readonly fileSystem: typeof fs = fs,
+        @optional() @inject('fileSystemPath') private readonly fileSystemPath = path,
+        @optional() @inject('ensureDirectory') private readonly ensureDirectoryFunc: typeof ensureDirectory = ensureDirectory,
     ) {}
 
     public writeToDirectory(directory: string, fileBaseName: string, fileExtension: string, content: string): string {
