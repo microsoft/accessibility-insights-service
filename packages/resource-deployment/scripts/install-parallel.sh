@@ -184,16 +184,19 @@ function install() {
     echo "Waiting for API Management service deployment completion"
     waitForProcesses apiManagmentProcessId
 
+    echo "Deploying REST API configuration to API Management service"
+    . "${0%/*}/deploy-rest-api.sh" & apiConfigurationProcessId="$!"
+
+    echo "Waiting for api configuration for rest API"
+    waitForProcesses apiConfigurationProcessId
     # deploy e2e test site is dependent on API Management service
     echo "Deploying test website"
-    . "${0%/*}/deploy-e2e-test-site.sh"
-
-    echo "Deploying REST API configuration to API Management service"
-    . "${0%/*}/deploy-rest-api.sh"
+    . "${0%/*}/deploy-e2e-test-site.sh" & depoyTestProcessId="$!"
 
     echo "Waiting for pending deployment processes completion"
     waitForProcesses dashboardProcessId
     waitForProcesses containerRegistryProcessId
+    waitForProcesses depoyTestProcessId
 }
 
 validateAzCliVersion
