@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { injectable } from 'inversify';
+import { inject, injectable, optional } from 'inversify';
 import { isEmpty } from 'lodash';
 import { ApifySettings, ApifySettingsHandler, apifySettingsHandler } from '../apify/apify-settings';
 import { CrawlerRunOptions } from '../types/crawler-run-options';
@@ -13,7 +13,9 @@ export class CrawlerConfiguration {
     private _crawlerRunOptions: CrawlerRunOptions;
 
     public constructor(
-        private readonly settingsHandler: ApifySettingsHandler = apifySettingsHandler,
+        @optional() @inject('ApifySettingsHandler') private readonly settingsHandler: ApifySettingsHandler = apifySettingsHandler,
+        @optional()
+        @inject('DiscoveryPatternFactory')
         private readonly createDiscoveryPattern: DiscoveryPatternFactory = getDiscoveryPatternForUrl,
     ) {}
 

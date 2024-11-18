@@ -2,13 +2,13 @@
 // Licensed under the MIT License.
 
 import * as fs from 'fs';
-import { injectable } from 'inversify';
+import { inject, injectable, optional } from 'inversify';
 import { CrawlerRunOptions, Url } from 'accessibility-insights-crawler';
 import { ScanArguments } from '../scan-arguments';
 
 @injectable()
 export class CrawlerParametersBuilder {
-    constructor(private readonly urlObj: typeof Url = Url, private readonly fileSystem: typeof fs = fs) {}
+    constructor(@optional() @inject('fileSystem') private readonly urlObj: typeof Url = Url, private readonly fileSystem: typeof fs = fs) {}
 
     public build(scanArguments: ScanArguments): CrawlerRunOptions {
         if (scanArguments.crawl && scanArguments.url) {

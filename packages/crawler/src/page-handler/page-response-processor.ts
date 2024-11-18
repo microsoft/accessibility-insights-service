@@ -7,7 +7,7 @@ import { BrowserError, BrowserErrorTypes, pageNavigationErrorPatterns } from './
 
 @injectable()
 export class PageResponseProcessor {
-    constructor(private readonly navigationErrorPatterns: Partial<Record<BrowserErrorTypes, string[]>> = pageNavigationErrorPatterns) {}
+    private readonly navigationErrorPatterns: Partial<Record<BrowserErrorTypes, string[]>> = pageNavigationErrorPatterns;
 
     public getResponseError(response: Puppeteer.HTTPResponse, error: Error = new Error()): BrowserError {
         if (response.ok() !== true && response.status() !== 304) {

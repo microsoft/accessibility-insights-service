@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { inject, injectable } from 'inversify';
+import { inject, injectable, optional } from 'inversify';
 import { isNil } from 'lodash';
 import * as Puppeteer from 'puppeteer';
 import { BrowserError } from './browser-error';
@@ -16,7 +16,9 @@ export class PageNavigationHooks {
         @inject(PageConfigurator) public readonly pageConfigurator: PageConfigurator,
         @inject(PageResponseProcessor) protected readonly pageResponseProcessor: PageResponseProcessor,
         @inject(PageHandler) protected readonly pageRenderingHandler: PageHandler,
-        private readonly scrollTimeoutMsec = puppeteerTimeoutConfig.scrollTimeoutMsec,
+        @optional() @inject('scrollTimeoutMsec') private readonly scrollTimeoutMsec = puppeteerTimeoutConfig.scrollTimeoutMsec,
+        @optional()
+        @inject('pageRenderingTimeoutMsec')
         private readonly pageRenderingTimeoutMsec = puppeteerTimeoutConfig.pageRenderingTimeoutMsec,
     ) {}
 

@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 import fnv1a from '@sindresorhus/fnv1a';
-import { injectable } from 'inversify';
+import { inject, injectable, optional } from 'inversify';
 import { JumpConsistentHash } from './jump-consistent-hash';
 
 /* eslint-disable @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires */
@@ -10,7 +10,7 @@ const shaJS = require('sha.js');
 
 @injectable()
 export class HashGenerator {
-    public constructor(private readonly shaObj = shaJS) {}
+    public constructor(@optional() @inject('sha') private readonly shaObj = shaJS) {}
 
     public getWebsiteScanResultDocumentId(baseUrl: string, scanGroupId: string): string {
         // Preserve parameters order below for the hash generation compatibility
