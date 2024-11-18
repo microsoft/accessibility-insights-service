@@ -159,7 +159,7 @@ function install() {
 
     . "${0%/*}/push-image-to-container-registry.sh" &
     containerRegistryProcessId="$!"
-
+    waitForProcesses containerRegistryProcessId
     # Add to parallelProcesses array to enable
     # "${0%/*}/app-insights-create.sh"
     parallelProcesses=(
@@ -195,7 +195,7 @@ function install() {
 
     echo "Waiting for pending deployment processes completion"
     waitForProcesses dashboardProcessId
-    waitForProcesses containerRegistryProcessId
+
     waitForProcesses depoyTestProcessId
 }
 
