@@ -153,7 +153,6 @@ function install() {
     . "${0%/*}/wait-for-pending-deployments.sh"
     . "${0%/*}/create-storage-account.sh"
     . "${0%/*}/create-managed-identity.sh"
-    . "${0%/*}/deploy-e2e-test-site.sh"
 
     . "${0%/*}/create-api-management.sh" &
     apiManagmentProcessId="$!"
@@ -184,6 +183,11 @@ function install() {
 
     echo "Waiting for API Management service deployment completion"
     waitForProcesses apiManagmentProcessId
+
+    # deploy e2e test site is dependent on API Management service
+    echo "Deploying test website"
+    . "${0%/*}/deploy-e2e-test-site.sh"
+
     echo "Deploying REST API configuration to API Management service"
     . "${0%/*}/deploy-rest-api.sh"
 
