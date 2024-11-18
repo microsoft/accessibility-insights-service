@@ -66,6 +66,7 @@ export const webAxeRunOptions: AxeRunOptions = {
             'role-img-alt',
             'select-name',
             'server-side-image-map',
+            'summary-name',
             'svg-img-alt',
             'td-headers-attr',
             'th-has-data-cells',
