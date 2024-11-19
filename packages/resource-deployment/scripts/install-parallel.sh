@@ -157,9 +157,7 @@ function install() {
     . "${0%/*}/create-api-management.sh" &
     apiManagmentProcessId="$!"
 
-    . "${0%/*}/push-image-to-container-registry.sh" &
-    containerRegistryProcessId="$!"
-    waitForProcesses containerRegistryProcessId
+
     # Add to parallelProcesses array to enable
     # "${0%/*}/app-insights-create.sh"
     parallelProcesses=(
@@ -171,6 +169,8 @@ function install() {
     )
     runCommandsWithoutSecretsInParallel parallelProcesses
 
+    . "${0%/*}/push-image-to-container-registry.sh" &
+    containerRegistryProcessId="$!"
     # The following scripts all depend on the result from the above scripts.
     # Additionally, these should run sequentially because of interdependence.
     . "${0%/*}/create-key-vault.sh"
