@@ -9,6 +9,7 @@ import { BrowserErrorTypes } from './browser-error';
 import { PageResponseProcessor } from './page-response-processor';
 
 /* eslint-disable @typescript-eslint/consistent-type-assertions */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 describe(PageResponseProcessor, () => {
     let pageResponseProcessor: PageResponseProcessor;
@@ -138,7 +139,8 @@ describe('handles navigation errors', () => {
     ];
 
     test.each(testCaseMappings)('should parse navigation error: %o', async (testCase: NavigationErrorTestCase) => {
-        const pageResponseProcessor = new PageResponseProcessor(stubPatterns);
+        const pageResponseProcessor = new PageResponseProcessor();
+        (pageResponseProcessor as any).navigationErrorPatterns = stubPatterns;
 
         const actualError = pageResponseProcessor.getNavigationError({
             message: testCase.message,

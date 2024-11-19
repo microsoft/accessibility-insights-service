@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 import urlLib from 'url';
-import { inject, injectable } from 'inversify';
+import { inject, injectable, optional } from 'inversify';
 import * as Puppeteer from 'puppeteer';
 import { isArray } from 'lodash';
 import * as Crawlee from '@crawlee/puppeteer';
@@ -128,6 +128,8 @@ export abstract class PageProcessorBase implements PageProcessor {
         @inject(CrawlerConfiguration) protected readonly crawlerConfiguration: CrawlerConfiguration,
         @inject(PageNavigator) protected readonly pageNavigator: PageNavigator,
         @inject(Logger) protected readonly logger: Logger,
+        @optional()
+        @inject('saveSnapshot')
         protected readonly saveSnapshotExt: typeof Crawlee.puppeteerUtils.saveSnapshot = Crawlee.puppeteerUtils.saveSnapshot,
     ) {
         this.baseUrl = this.crawlerConfiguration.baseUrl();

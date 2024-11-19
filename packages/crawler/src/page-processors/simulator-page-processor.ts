@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 import * as Crawlee from '@crawlee/puppeteer';
-import { inject, injectable } from 'inversify';
+import { inject, injectable, optional } from 'inversify';
 import { ActiveElement } from '../active-elements-finder';
 import { CrawlerConfiguration } from '../crawler/crawler-configuration';
 import { DataBase } from '../level-storage/data-base';
@@ -88,6 +88,8 @@ export class SimulatorPageProcessor extends PageProcessorBase {
         @inject(CrawlerConfiguration) protected readonly crawlerConfiguration: CrawlerConfiguration,
         @inject(PageNavigator) protected readonly pageNavigator: PageNavigator,
         @inject(Logger) protected readonly logger: Logger,
+        @optional()
+        @inject('saveSnapshot')
         protected readonly saveSnapshotExt: typeof Crawlee.puppeteerUtils.saveSnapshot = Crawlee.puppeteerUtils.saveSnapshot,
     ) {
         super(accessibilityScanOp, dataStore, blobStore, dataBase, crawlerConfiguration, pageNavigator, logger, saveSnapshotExt);

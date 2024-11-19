@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 import * as fs from 'fs';
-import { inject, injectable } from 'inversify';
+import { inject, injectable, optional } from 'inversify';
 import { ScanArguments } from '../scan-arguments';
 import { BaselineFileFormatter } from './baseline-file-formatter';
 import { BaselineFileContent, BaselineOptions } from './baseline-types';
@@ -13,7 +13,7 @@ import { BaselineFileContent, BaselineOptions } from './baseline-types';
 export class BaselineOptionsBuilder {
     constructor(
         @inject(BaselineFileFormatter) private readonly baselineFileFormatter: BaselineFileFormatter,
-        private readonly fileSystem: typeof fs = fs,
+        @optional() @inject('fs') private readonly fileSystem: typeof fs = fs,
     ) {}
 
     public build(scanArguments: ScanArguments): BaselineOptions | null {

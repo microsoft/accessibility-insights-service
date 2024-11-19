@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { injectable } from 'inversify';
+import { inject, injectable, optional } from 'inversify';
 import { Log } from '@apify/log';
 import moment from 'moment';
 import { LogLevel, LoggerClient, LoggerProperties } from './logger';
@@ -12,7 +12,7 @@ import { LogLevel, LoggerClient, LoggerProperties } from './logger';
 export class ApifyConsoleLoggerClient implements LoggerClient {
     private baseProperties: LoggerProperties;
 
-    constructor(private readonly logger: Log = new Log({ prefix: 'Scanner' })) {}
+    constructor(@optional() @inject('Log') private readonly logger: Log = new Log({ prefix: 'Scanner' })) {}
 
     public log(message: string, logLevel: LogLevel, properties?: LoggerProperties): void {
         const logMessage = `[${moment.utc().toISOString()}] ${message}`;

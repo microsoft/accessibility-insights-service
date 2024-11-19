@@ -3,7 +3,7 @@
 
 import * as fs from 'fs';
 import * as Crawlee from '@crawlee/puppeteer';
-import { inject, injectable } from 'inversify';
+import { inject, injectable, optional } from 'inversify';
 import { isEmpty } from 'lodash';
 import * as Puppeteer from 'puppeteer';
 import { AuthenticatorFactory } from '../authenticator/authenticator-factory';
@@ -26,7 +26,7 @@ export class SiteCrawlerEngine implements CrawlerEngine {
         @inject(CrawlerFactory) private readonly crawlerFactory: CrawlerFactory,
         @inject(AuthenticatorFactory) private readonly authenticatorFactory: AuthenticatorFactory,
         @inject(CrawlerConfiguration) private readonly crawlerConfiguration: CrawlerConfiguration,
-        private readonly puppeteer: typeof Puppeteer = Puppeteer,
+        @optional() @inject('Puppeteer') private readonly puppeteer: typeof Puppeteer = Puppeteer,
     ) {}
 
     public async start(crawlerRunOptions: CrawlerRunOptions): Promise<void> {

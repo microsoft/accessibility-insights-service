@@ -20,10 +20,10 @@ export class DataBase implements AsyncIterable<ScanResult> {
     private iterator: AsyncIterableIterator<string | Buffer>;
 
     constructor(
-        @inject(crawlerIocTypes.LevelUp) @optional() protected db?: LevelUp,
-        protected readonly levelupObj: typeof levelup = levelup,
-        protected readonly leveldownObj: typeof leveldown = leveldown,
-        protected readonly encodeObj: typeof encode = encode,
+        @optional() @inject(crawlerIocTypes.LevelUp) protected db?: LevelUp,
+        @optional() @inject('levelup') protected readonly levelupObj: typeof levelup = levelup,
+        @optional() @inject('leveldown') protected readonly leveldownObj: typeof leveldown = leveldown,
+        @optional() @inject('encode') protected readonly encodeObj: typeof encode = encode,
     ) {}
 
     public [Symbol.asyncIterator](): AsyncIterator<ScanResult> {
