@@ -159,14 +159,7 @@ function install() {
 
     . "${0%/*}/push-image-to-container-registry.sh" &
     containerRegistryProcessId="$!"
-    waitForProcesses containerRegistryProcessId
 
-    # Login to Azure if required
-    #if ! az account show 1>/dev/null; then
-    az login
-    #fi
-
-    az account set --subscription "${subscription}"
     # Add to parallelProcesses array to enable
     # "${0%/*}/app-insights-create.sh"
     parallelProcesses=(
@@ -174,6 +167,7 @@ function install() {
         "${0%/*}/create-queues.sh"
         "${0%/*}/create-cosmos-db.sh"
         "${0%/*}/create-vnet.sh"
+        "${0%/*}/app-insights-create.sh"
         "${0%/*}/create-container-registry.sh"
     )
     runCommandsWithoutSecretsInParallel parallelProcesses
@@ -202,7 +196,7 @@ function install() {
 
     echo "Waiting for pending deployment processes completion"
     waitForProcesses dashboardProcessId
-
+    waitForProcesses containerRegistryProcessId
     waitForProcesses depoyTestProcessId
 }
 
