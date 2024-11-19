@@ -71,12 +71,12 @@
         "packages/*"
     ],
     "resolutions": {
-        "@axe-core/puppeteer": "4.9.1",
+        "@axe-core/puppeteer": "4.10.1",
         "@npmcli/git": ">=2.1.0",
         "@types/node": "^20.14.9",
         "ansi-regex": "5.0.1",
         "async": ">=3.2.2",
-        "axe-core": "4.9.1",
+        "axe-core": "4.10.2",
         "glob-parent": ">=5.1.2",
         "json-schema": ">=0.4.0",
         "json5": ">=2.2.3",
@@ -90,7 +90,7 @@
         "tough-cookie": ">=4.1.3"
     },
     "dependencies": {
-        "accessibility-insights-report": "5.1.0"
+        "accessibility-insights-report": "5.2.0"
     },
     "packageManager": "yarn@3.2.2"
 }

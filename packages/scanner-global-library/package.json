@@ -37,8 +37,8 @@
         "typescript": "^5.5.3"
     },
     "dependencies": {
-        "@axe-core/puppeteer": "4.9.1",
-        "axe-core": "4.9.1",
+        "@axe-core/puppeteer": "4.10.1",
+        "axe-core": "4.10.2",
         "axe-core-scanner": "workspace:*",
         "common": "workspace:*",
         "inversify": "^6.0.1",
