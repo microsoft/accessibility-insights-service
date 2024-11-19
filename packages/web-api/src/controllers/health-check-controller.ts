@@ -84,6 +84,7 @@ export class HealthCheckController extends ApiController {
     }
 
     private async executeAppInsightsQuery(releaseId: string): Promise<ResponseWithBodyType<ApplicationInsightsQueryResponse>> {
+        this.logger
         const appInsightsClient = await this.appInsightsClientProvider();
         const logQueryTimeRange = (await this.getAvailabilityTestConfig()).logQueryTimeRange;
         const queryString = this.createQueryForRelease(releaseId);

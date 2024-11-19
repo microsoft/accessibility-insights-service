@@ -38,7 +38,7 @@ describe(ApplicationInsightsClient, () => {
             get: getMock.object,
             post: postMock.object,
         };
-        testSubject = new ApplicationInsightsClient(appId, apiKey, requestStub, getAgentsStub);
+        testSubject = new ApplicationInsightsClient(appId,requestStub, getAgentsStub);
     });
 
     afterEach(() => {
@@ -63,7 +63,7 @@ describe(ApplicationInsightsClient, () => {
             .returns(() => 'some object' as any)
             .verifiable(Times.once());
 
-        testSubject = new ApplicationInsightsClient(appId, apiKey, requestStub, getAgentsStub);
+        testSubject = new ApplicationInsightsClient(appId, requestStub, getAgentsStub);
 
         extendsMock.verifyAll();
     });

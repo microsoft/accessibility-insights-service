@@ -21,10 +21,10 @@ export function getProcessLifeCycleContainer(): inversify.Container {
             webApiTypeNames.ApplicationInsightsClientProvider,
             processLifeCycleContainer,
             async (context) => {
-                const secretProvider = context.container.get(SecretProvider);
-                const appInsightsApiKey = await secretProvider.getSecret(secretNames.appInsightsApiKey);
+              //  const secretProvider = context.container.get(SecretProvider);
+               // const appInsightsApiKey = await secretProvider.getSecret(secretNames.appInsightsApiKey);
 
-                return new ApplicationInsightsClient(process.env.APPINSIGHTS_APPID, appInsightsApiKey);
+                return new ApplicationInsightsClient(process.env.APPINSIGHTS_APPID);
             },
         );
     }

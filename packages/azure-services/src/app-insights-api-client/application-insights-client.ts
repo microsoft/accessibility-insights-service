@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-
+import { ManagedIdentityCredential } from '@azure/identity';
 import { injectable } from 'inversify';
 import got, { Agents, Got, ExtendOptions, Options } from 'got';
 import { getForeverAgents, ResponseWithBodyType } from 'common';
@@ -24,14 +24,14 @@ export class ApplicationInsightsClient {
 
     constructor(
         private readonly appId: string,
-        private readonly apiKey: string,
         request: Got = got,
         getAgentsFn: () => Agents = getForeverAgents,
     ) {
+        const token = this.getAccessToken();
         this.defaultRequestObject = request.extend({
             ...this.defaultOptions,
             headers: {
-                'X-Api-Key': this.apiKey,
+                'Authorization': `Bearer ${token}`,
             },
             agent: getAgentsFn(),
         });
@@ -65,4 +65,17 @@ export class ApplicationInsightsClient {
             ResponseWithBodyType<ApplicationInsightsEventsResponse>
         >;
     }
+
+    private async getAccessToken(): Promise<string> {
+        const credential = new ManagedIdentityCredential();
+        
+        // Obtain the token for accessing Application Insights API
+        const tokenResponse = await credential.getToken('https://api.applicationinsights.io/.default');
+        
+        if (!tokenResponse) {
+          throw new Error('Failed to obtain access token');
+        }
+        
+        return tokenResponse.token;
+      }
 }
