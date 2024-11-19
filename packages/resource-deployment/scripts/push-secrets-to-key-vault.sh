@@ -97,7 +97,7 @@ pushSecretsToKeyVault() (
     webApiIdentityClientId=$(az identity show --name "${webApiManagedIdentityName}" --resource-group "${resourceGroupName}" --query clientId -o tsv)
     pushSecretToKeyVault "webApiIdentityClientId" "${webApiIdentityClientId}"
 
-    # createAppInsightsApiKey
+    createAppInsightsApiKey
     pushSecretToKeyVault "appInsightsApiKey" "${appInsightsApiKey}"
 
     pushSecretToKeyVault "containerRegistryName" "${containerRegistryName}"
