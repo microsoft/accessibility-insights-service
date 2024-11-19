@@ -87,5 +87,4 @@ createPublicIp "on-demand-url-scan-pool"
 createPublicIp "privacy-scan-pool"
 
 deployBatch
-
 echo "The ${batchAccountName} Azure Batch account successfully deployed."

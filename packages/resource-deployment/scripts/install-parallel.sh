@@ -185,14 +185,12 @@ function install() {
 
     echo "Waiting for API Management service deployment completion"
     waitForProcesses apiManagmentProcessId
-
     echo "Deploying REST API configuration to API Management service"
     . "${0%/*}/deploy-rest-api.sh"
 
     echo "Waiting for pending deployment processes completion"
     waitForProcesses dashboardProcessId
     waitForProcesses containerRegistryProcessId
-    waitForProcesses depoyTestProcessId
 }
 
 validateAzCliVersion
