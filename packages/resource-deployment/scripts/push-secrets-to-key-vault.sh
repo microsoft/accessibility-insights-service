@@ -98,7 +98,7 @@ pushSecretsToKeyVault() (
     pushSecretToKeyVault "webApiIdentityClientId" "${webApiIdentityClientId}"
 
     # createAppInsightsApiKey
-    # pushSecretToKeyVault "appInsightsApiKey" "${appInsightsApiKey}"
+    pushSecretToKeyVault "appInsightsApiKey" "${appInsightsApiKey}"
 
     pushSecretToKeyVault "containerRegistryName" "${containerRegistryName}"
 )
