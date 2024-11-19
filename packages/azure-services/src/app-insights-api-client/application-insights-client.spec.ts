@@ -4,6 +4,7 @@
 import 'reflect-metadata';
 
 import http from 'http';
+import { ManagedIdentityCredential } from '@azure/identity';
 import { IMock, Mock, Times } from 'typemoq';
 import { Agents, ExtendOptions, Options } from 'got';
 import { ApplicationInsightsClient } from './application-insights-client';
@@ -17,11 +18,11 @@ import { EventsQueryOptions } from './events-query-options';
 describe(ApplicationInsightsClient, () => {
     let testSubject: ApplicationInsightsClient;
     const appId = 'appId';
-    const apiKey = 'apiKey';
     let baseUrl: string;
     let requestStub: any;
     let getMock: IMock<(url: string, options?: Options) => {}>;
     let postMock: IMock<(url: string, options?: Options) => {}>;
+    let managedIdentityMock: IMock<ManagedIdentityCredential>;
     const agents: Agents = { http: {} as http.Agent };
     const getAgentsStub = () => agents;
 
@@ -38,7 +39,11 @@ describe(ApplicationInsightsClient, () => {
             get: getMock.object,
             post: postMock.object,
         };
-        testSubject = new ApplicationInsightsClient(appId,requestStub, getAgentsStub);
+        managedIdentityMock = Mock.ofType(ManagedIdentityCredential);
+        managedIdentityMock
+            .setup(async (m) => m.getToken('https://api.applicationinsights.io/.default'))
+            .returns(async () => Promise.resolve({ token: 'Bearer tokenValue', expiresOnTimestamp: 0 }));
+        testSubject = new ApplicationInsightsClient(appId, requestStub, getAgentsStub);
     });
 
     afterEach(() => {
@@ -54,7 +59,7 @@ describe(ApplicationInsightsClient, () => {
             .setup((d) =>
                 d({
                     headers: {
-                        'X-Api-Key': apiKey,
+                        Authorization: 'Bearer [object Promise]',
                     },
                     responseType: 'json',
                     agent: agents,
@@ -62,6 +67,10 @@ describe(ApplicationInsightsClient, () => {
             )
             .returns(() => 'some object' as any)
             .verifiable(Times.once());
+
+        managedIdentityMock
+            .setup(async (m) => m.getToken('https://api.applicationinsights.io/.default'))
+            .returns(async () => Promise.resolve({ token: 'Bearer tokenValue', expiresOnTimestamp: 0 }));
 
         testSubject = new ApplicationInsightsClient(appId, requestStub, getAgentsStub);
 
