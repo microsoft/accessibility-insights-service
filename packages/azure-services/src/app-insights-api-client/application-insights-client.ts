@@ -18,7 +18,8 @@ export class ApplicationInsightsClient {
     private readonly baseUrl = 'https://api.applicationinsights.io/v1/apps';
 
     private readonly defaultRequestObject: Got;
-    private readonly managedIdentity : TokenCredential;
+
+    private readonly managedIdentity: TokenCredential;
 
     private readonly defaultOptions: ExtendOptions = {
         responseType: 'json',
@@ -50,9 +51,10 @@ export class ApplicationInsightsClient {
         const token = await this.getAccessToken();
         const request = this.defaultRequestObject.extend({
             headers: {
-                'Authorization': `Bearer ${token}`,
+                Authorization: `Bearer ${token}`,
             },
-        })
+        });
+
         return (await request.post(requestUrl, options)) as ResponseWithBodyType<ApplicationInsightsQueryResponse>;
     }
 
@@ -69,16 +71,14 @@ export class ApplicationInsightsClient {
         const token = await this.getAccessToken();
         const request = this.defaultRequestObject.extend({
             headers: {
-                'Authorization': `Bearer ${token}`,
+                Authorization: `Bearer ${token}`,
             },
-        })
-        return (await request.get(requestUrl, options)) as Promise<
-            ResponseWithBodyType<ApplicationInsightsEventsResponse>
-        >;
+        });
+
+        return (await request.get(requestUrl, options)) as Promise<ResponseWithBodyType<ApplicationInsightsEventsResponse>>;
     }
 
     private async getAccessToken(): Promise<string> {
-
         // Obtain the token for accessing Application Insights API
         const tokenResponse = await this.managedIdentity.getToken('https://api.applicationinsights.io/.default');
         if (!tokenResponse) {

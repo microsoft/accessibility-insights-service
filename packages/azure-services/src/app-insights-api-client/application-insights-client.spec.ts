@@ -63,7 +63,6 @@ describe(ApplicationInsightsClient, () => {
             .returns(() => 'some object' as any)
             .verifiable(Times.once());
 
-
         testSubject = new ApplicationInsightsClient(appId, managedIdentityMock.object, requestStub, getAgentsStub);
 
         extendsMock.verifyAll();
@@ -146,7 +145,7 @@ describe(ApplicationInsightsClient, () => {
                 .setup(async (m) => m.getToken('https://api.applicationinsights.io/.default'))
                 .returns(async () => Promise.resolve({ token: 'Bearer tokenValue', expiresOnTimestamp: 0 }))
                 .verifiable(Times.once());
-                
+
             const actualResponse = await testSubject.queryEvents(eventType);
 
             expect(actualResponse).toEqual(response);

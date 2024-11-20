@@ -44,9 +44,11 @@ describe(getProcessLifeCycleContainer, () => {
     });
 
     it('verifies A11yServiceClient registration', async () => {
-
         const testCredential = {} as TokenCredential;
-        credentialsProviderMock.setup((o) => o.getAzureCredential()).returns(() => testCredential).verifiable();
+        credentialsProviderMock
+            .setup((o) => o.getAzureCredential())
+            .returns(() => testCredential)
+            .verifiable();
 
         const applicationInsightsClientProvider1 = testSubject.get<ApplicationInsightsClientProvider>(
             webApiTypeNames.ApplicationInsightsClientProvider,
