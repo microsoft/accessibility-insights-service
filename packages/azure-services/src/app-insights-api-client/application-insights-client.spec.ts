@@ -4,7 +4,7 @@
 import 'reflect-metadata';
 
 import http from 'http';
-import { ManagedIdentityCredential } from '@azure/identity';
+import { TokenCredential } from '@azure/identity';
 import { IMock, Mock, Times } from 'typemoq';
 import { Agents, ExtendOptions, Options } from 'got';
 import { ApplicationInsightsClient } from './application-insights-client';
@@ -22,7 +22,7 @@ describe(ApplicationInsightsClient, () => {
     let requestStub: any;
     let getMock: IMock<(url: string, options?: Options) => {}>;
     let postMock: IMock<(url: string, options?: Options) => {}>;
-    let managedIdentityMock: IMock<ManagedIdentityCredential>;
+    let managedIdentityMock: IMock<TokenCredential>;
     const agents: Agents = { http: {} as http.Agent };
     const getAgentsStub = () => agents;
 
@@ -39,16 +39,14 @@ describe(ApplicationInsightsClient, () => {
             get: getMock.object,
             post: postMock.object,
         };
-        managedIdentityMock = Mock.ofType(ManagedIdentityCredential);
-        managedIdentityMock
-            .setup(async (m) => m.getToken('https://api.applicationinsights.io/.default'))
-            .returns(async () => Promise.resolve({ token: 'Bearer tokenValue', expiresOnTimestamp: 0 }));
-        testSubject = new ApplicationInsightsClient(appId, requestStub, getAgentsStub);
+        managedIdentityMock = Mock.ofType<TokenCredential>();
+        testSubject = new ApplicationInsightsClient(appId, managedIdentityMock.object, requestStub, getAgentsStub);
     });
 
     afterEach(() => {
         getMock.verifyAll();
         postMock.verifyAll();
+        managedIdentityMock.verifyAll();
     });
 
     it('verify default options', () => {
@@ -58,9 +56,6 @@ describe(ApplicationInsightsClient, () => {
         extendsMock
             .setup((d) =>
                 d({
-                    headers: {
-                        Authorization: 'Bearer [object Promise]',
-                    },
                     responseType: 'json',
                     agent: agents,
                 }),
@@ -68,11 +63,8 @@ describe(ApplicationInsightsClient, () => {
             .returns(() => 'some object' as any)
             .verifiable(Times.once());
 
-        managedIdentityMock
-            .setup(async (m) => m.getToken('https://api.applicationinsights.io/.default'))
-            .returns(async () => Promise.resolve({ token: 'Bearer tokenValue', expiresOnTimestamp: 0 }));
 
-        testSubject = new ApplicationInsightsClient(appId, requestStub, getAgentsStub);
+        testSubject = new ApplicationInsightsClient(appId, managedIdentityMock.object, requestStub, getAgentsStub);
 
         extendsMock.verifyAll();
     });
@@ -103,6 +95,10 @@ describe(ApplicationInsightsClient, () => {
                 .setup((req) => req(requestUrl, options))
                 .returns(async () => Promise.resolve(response))
                 .verifiable(Times.once());
+            managedIdentityMock
+                .setup(async (m) => m.getToken('https://api.applicationinsights.io/.default'))
+                .returns(async () => Promise.resolve({ token: 'Bearer tokenValue', expiresOnTimestamp: 0 }))
+                .verifiable(Times.once());
 
             const actualResponse = await testSubject.executeQuery(query, timespan);
 
@@ -116,6 +112,10 @@ describe(ApplicationInsightsClient, () => {
             postMock
                 .setup((req) => req(requestUrl, options))
                 .returns(async () => Promise.resolve(response))
+                .verifiable(Times.once());
+            managedIdentityMock
+                .setup(async (m) => m.getToken('https://api.applicationinsights.io/.default'))
+                .returns(async () => Promise.resolve({ token: 'Bearer tokenValue', expiresOnTimestamp: 0 }))
                 .verifiable(Times.once());
 
             const actualResponse = await testSubject.executeQuery(query, timespan);
@@ -142,7 +142,11 @@ describe(ApplicationInsightsClient, () => {
                 .setup((req) => req(eventsUrl, options))
                 .returns(async () => Promise.resolve(response))
                 .verifiable(Times.once());
-
+            managedIdentityMock
+                .setup(async (m) => m.getToken('https://api.applicationinsights.io/.default'))
+                .returns(async () => Promise.resolve({ token: 'Bearer tokenValue', expiresOnTimestamp: 0 }))
+                .verifiable(Times.once());
+                
             const actualResponse = await testSubject.queryEvents(eventType);
 
             expect(actualResponse).toEqual(response);
@@ -162,6 +166,10 @@ describe(ApplicationInsightsClient, () => {
                 .setup((req) => req(eventsUrl, options))
                 .returns(async () => Promise.resolve(response))
                 .verifiable(Times.once());
+            managedIdentityMock
+                .setup(async (m) => m.getToken('https://api.applicationinsights.io/.default'))
+                .returns(async () => Promise.resolve({ token: 'Bearer tokenValue', expiresOnTimestamp: 0 }))
+                .verifiable(Times.once());
 
             const actualResponse = await testSubject.queryEvents(eventType, eventsQueryOptions);
 
@@ -178,6 +186,10 @@ describe(ApplicationInsightsClient, () => {
             getMock
                 .setup((req) => req(eventsUrl, options))
                 .returns(async () => Promise.resolve(response))
+                .verifiable(Times.once());
+            managedIdentityMock
+                .setup(async (m) => m.getToken('https://api.applicationinsights.io/.default'))
+                .returns(async () => Promise.resolve({ token: 'Bearer tokenValue', expiresOnTimestamp: 0 }))
                 .verifiable(Times.once());
 
             const actualResponse = await testSubject.queryEvents(eventType);

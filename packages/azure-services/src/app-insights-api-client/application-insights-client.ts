@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { ManagedIdentityCredential } from '@azure/identity';
+import { TokenCredential } from '@azure/identity';
 import { injectable } from 'inversify';
 import got, { Agents, Got, ExtendOptions, Options } from 'got';
 import { getForeverAgents, ResponseWithBodyType } from 'common';
@@ -18,18 +18,21 @@ export class ApplicationInsightsClient {
     private readonly baseUrl = 'https://api.applicationinsights.io/v1/apps';
 
     private readonly defaultRequestObject: Got;
+    private readonly managedIdentity : TokenCredential;
 
     private readonly defaultOptions: ExtendOptions = {
         responseType: 'json',
     };
 
-    constructor(private readonly appId: string, request: Got = got, getAgentsFn: () => Agents = getForeverAgents) {
-        const token = this.getAccessToken();
+    constructor(
+        private readonly appId: string,
+        managedIdentity: TokenCredential,
+        request: Got = got,
+        getAgentsFn: () => Agents = getForeverAgents,
+    ) {
+        this.managedIdentity = managedIdentity;
         this.defaultRequestObject = request.extend({
             ...this.defaultOptions,
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
             agent: getAgentsFn(),
         });
     }
@@ -44,8 +47,13 @@ export class ApplicationInsightsClient {
             json: requestBody,
             throwHttpErrors: this.throwOnRequestFailure,
         };
-
-        return (await this.defaultRequestObject.post(requestUrl, options)) as ResponseWithBodyType<ApplicationInsightsQueryResponse>;
+        const token = await this.getAccessToken();
+        const request = this.defaultRequestObject.extend({
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            },
+        })
+        return (await request.post(requestUrl, options)) as ResponseWithBodyType<ApplicationInsightsQueryResponse>;
     }
 
     public async queryEvents(
@@ -58,16 +66,21 @@ export class ApplicationInsightsClient {
             throwHttpErrors: this.throwOnRequestFailure,
         };
 
-        return (await this.defaultRequestObject.get(requestUrl, options)) as Promise<
+        const token = await this.getAccessToken();
+        const request = this.defaultRequestObject.extend({
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            },
+        })
+        return (await request.get(requestUrl, options)) as Promise<
             ResponseWithBodyType<ApplicationInsightsEventsResponse>
         >;
     }
 
     private async getAccessToken(): Promise<string> {
-        const credential = new ManagedIdentityCredential();
 
         // Obtain the token for accessing Application Insights API
-        const tokenResponse = await credential.getToken('https://api.applicationinsights.io/.default');
+        const tokenResponse = await this.managedIdentity.getToken('https://api.applicationinsights.io/.default');
         if (!tokenResponse) {
             throw new Error('Failed to obtain access token');
         }
