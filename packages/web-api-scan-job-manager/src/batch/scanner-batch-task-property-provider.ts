@@ -3,7 +3,7 @@
 
 import { BatchTaskPropertyProvider, UserAccessLevels } from 'azure-services';
 import { ServiceConfiguration } from 'common';
-import { inject, injectable, optional } from 'inversify';
+import { inject, injectable } from 'inversify';
 
 @injectable()
 export class ScannerBatchTaskPropertyProvider extends BatchTaskPropertyProvider {
