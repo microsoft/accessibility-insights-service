@@ -13065,11 +13065,7 @@ __metadata:
     copy-webpack-plugin: ^11.0.0
     dotenv: ^16.0.1
     fork-ts-checker-webpack-plugin: ^7.3.0
-<<<<<<< HEAD
     inversify: ^6.1.4
-=======
-    inversify: ^6.0.3
->>>>>>> c053dde899bfcd72c4438c324490b05ae22e11f7
     jest: ^29.7.0
     jest-junit: ^16.0.0
     lodash: ^4.17.21
