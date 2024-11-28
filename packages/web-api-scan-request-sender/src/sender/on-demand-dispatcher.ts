@@ -25,7 +25,9 @@ export class OnDemandDispatcher {
         @optional() @inject('Queue') private readonly queue: Queue,
         @optional() @inject('PageScanRequestProvider') private readonly pageScanRequestProvider: PageScanRequestProvider,
         @optional() @inject('ScanRequestSelector') private readonly scanRequestSelector: ScanRequestSelector,
-        @optional() @inject('OnDemandPageScanRunResultProvider') private readonly onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider,
+        @optional()
+        @inject('OnDemandPageScanRunResultProvider')
+        private readonly onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider,
         @optional() @inject('WebsiteScanDataProvider') private readonly websiteScanDataProvider: WebsiteScanDataProvider,
         @optional() @inject('ScanNotificationProcessor') protected readonly scanNotificationProcessor: ScanNotificationProcessor,
         @optional() @inject('StorageConfig') private readonly storageConfig: StorageConfig,

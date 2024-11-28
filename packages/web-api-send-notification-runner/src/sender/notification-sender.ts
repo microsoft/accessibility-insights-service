@@ -16,8 +16,12 @@ import { NotificationSenderMetadata } from '../types/notification-sender-metadat
 @injectable()
 export class NotificationSender {
     constructor(
-        @optional() @inject('OnDemandPageScanRunResultProvider') private readonly onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider,
-        @optional() @inject('NotificationSenderWebAPIClient') private readonly notificationSenderWebAPIClient: NotificationSenderWebAPIClient,
+        @optional()
+        @inject('OnDemandPageScanRunResultProvider')
+        private readonly onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider,
+        @optional()
+        @inject('NotificationSenderWebAPIClient')
+        private readonly notificationSenderWebAPIClient: NotificationSenderWebAPIClient,
         @optional() @inject('NotificationSenderConfig') private readonly notificationSenderConfig: NotificationSenderConfig,
         @optional() @inject('GlobalLogger') private readonly logger: GlobalLogger,
         @optional() @inject('ServiceConfiguration') private readonly serviceConfig: ServiceConfiguration,
