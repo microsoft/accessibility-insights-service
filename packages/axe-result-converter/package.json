@@ -38,7 +38,7 @@
         "accessibility-insights-report": "5.1.0",
         "axe-core": "4.9.1",
         "common": "workspace:*",
-        "inversify": "^6.0.1",
+        "inversify": "^6.1.4",
         "lodash": "^4.17.21",
         "reflect-metadata": "^0.1.13"
     }

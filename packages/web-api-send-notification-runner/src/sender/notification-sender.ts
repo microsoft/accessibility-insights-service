@@ -3,7 +3,7 @@
 
 import { client } from 'azure-services';
 import { ScanRunTimeConfig, ServiceConfiguration, System } from 'common';
-import { inject, injectable } from 'inversify';
+import { inject, injectable, optional } from 'inversify';
 import { GlobalLogger } from 'logger';
 import { OnDemandPageScanRunResultProvider } from 'service-library';
 import { NotificationError, NotificationState, OnDemandPageScanResult, ScanCompletedNotification } from 'storage-documents';
@@ -16,13 +16,13 @@ import { NotificationSenderMetadata } from '../types/notification-sender-metadat
 @injectable()
 export class NotificationSender {
     constructor(
-        @inject(OnDemandPageScanRunResultProvider) private readonly onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider,
-        @inject(NotificationSenderWebAPIClient) private readonly notificationSenderWebAPIClient: NotificationSenderWebAPIClient,
-        @inject(NotificationSenderConfig) private readonly notificationSenderConfig: NotificationSenderConfig,
-        @inject(GlobalLogger) private readonly logger: GlobalLogger,
-        @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
-        private readonly system: typeof System = System,
-        private readonly responseParser: typeof client = client,
+        @optional() @inject('OnDemandPageScanRunResultProvider') private readonly onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider,
+        @optional() @inject('NotificationSenderWebAPIClient') private readonly notificationSenderWebAPIClient: NotificationSenderWebAPIClient,
+        @optional() @inject('NotificationSenderConfig') private readonly notificationSenderConfig: NotificationSenderConfig,
+        @optional() @inject('GlobalLogger') private readonly logger: GlobalLogger,
+        @optional() @inject('ServiceConfiguration') private readonly serviceConfig: ServiceConfiguration,
+        @optional() @inject('System') private readonly system: typeof System = System,
+        @optional() @inject('client') private readonly responseParser: typeof client = client,
     ) {}
 
     public async sendNotification(): Promise<void> {

@@ -51,7 +51,7 @@
         "azure-services": "workspace:*",
         "common": "workspace:*",
         "functional-tests": "workspace:*",
-        "inversify": "^6.0.1",
+        "inversify": "^6.1.4",
         "lodash": "^4.17.21",
         "logger": "workspace:*",
         "moment": "^2.29.4",

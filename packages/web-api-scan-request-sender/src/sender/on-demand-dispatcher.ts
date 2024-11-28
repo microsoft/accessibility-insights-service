@@ -3,7 +3,7 @@
 
 import { Queue, StorageConfig } from 'azure-services';
 import { ServiceConfiguration } from 'common';
-import { inject, injectable } from 'inversify';
+import { inject, injectable, optional } from 'inversify';
 import { ContextAwareLogger } from 'logger';
 import {
     PageScanRequestProvider,
@@ -22,15 +22,15 @@ export class OnDemandDispatcher {
     private targetQueueSize: number;
 
     constructor(
-        @inject(Queue) private readonly queue: Queue,
-        @inject(PageScanRequestProvider) private readonly pageScanRequestProvider: PageScanRequestProvider,
-        @inject(ScanRequestSelector) private readonly scanRequestSelector: ScanRequestSelector,
-        @inject(OnDemandPageScanRunResultProvider) private readonly onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider,
-        @inject(WebsiteScanDataProvider) private readonly websiteScanDataProvider: WebsiteScanDataProvider,
-        @inject(ScanNotificationProcessor) protected readonly scanNotificationProcessor: ScanNotificationProcessor,
-        @inject(StorageConfig) private readonly storageConfig: StorageConfig,
-        @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
-        @inject(ContextAwareLogger) private readonly logger: ContextAwareLogger,
+        @optional() @inject('Queue') private readonly queue: Queue,
+        @optional() @inject('PageScanRequestProvider') private readonly pageScanRequestProvider: PageScanRequestProvider,
+        @optional() @inject('ScanRequestSelector') private readonly scanRequestSelector: ScanRequestSelector,
+        @optional() @inject('OnDemandPageScanRunResultProvider') private readonly onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider,
+        @optional() @inject('WebsiteScanDataProvider') private readonly websiteScanDataProvider: WebsiteScanDataProvider,
+        @optional() @inject('ScanNotificationProcessor') protected readonly scanNotificationProcessor: ScanNotificationProcessor,
+        @optional() @inject('StorageConfig') private readonly storageConfig: StorageConfig,
+        @optional() @inject('ServiceConfiguration') private readonly serviceConfig: ServiceConfiguration,
+        @optional() @inject('ContextAwareLogger') private readonly logger: ContextAwareLogger,
     ) {}
 
     public async dispatchScanRequests(): Promise<void> {

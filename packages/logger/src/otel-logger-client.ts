@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { inject, injectable } from 'inversify';
+import { inject, injectable, optional } from 'inversify';
 import { Resource } from '@opentelemetry/resources';
 import {
     AggregationTemporality,
@@ -35,8 +35,8 @@ export class OTelLoggerClient implements LoggerClient {
     private exporter: PushMetricExporter;
 
     constructor(
-        @inject(OTelConfigProvider) private readonly otelConfigProvider: OTelConfigProvider,
-        private readonly resource: Resource = Resource.default(),
+        @optional() @inject('OTelConfigProvider') private readonly otelConfigProvider: OTelConfigProvider,
+        @optional() @inject('Resource') private readonly resource: Resource = Resource.default(),
     ) {}
 
     public async setup(baseProperties?: BaseTelemetryProperties): Promise<void> {

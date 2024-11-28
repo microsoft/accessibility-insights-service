@@ -2,8 +2,8 @@
 // Licensed under the MIT License.
 
 export const loggerTypes = {
-    AppInsights: 'AppInsights',
-    Process: 'Process',
-    Console: 'Console',
+    AppInsights: 'appInsights',
+    Process: 'process',
+    Console: 'console',
     DotEnvConfig: 'DotEnvConfig',
 };

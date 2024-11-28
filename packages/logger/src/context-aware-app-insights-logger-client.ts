@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 import { TelemetryClient } from 'applicationinsights';
-import { inject, injectable } from 'inversify';
+import { inject, injectable, optional } from 'inversify';
 import { merge } from 'lodash';
 import { AppInsightsLoggerClient } from './app-insights-logger-client';
 import { BaseAppInsightsLoggerClient } from './base-app-insights-logger-client';
@@ -11,7 +11,7 @@ import { LoggerProperties } from './logger-client';
 @injectable()
 export class ContextAwareAppInsightsLoggerClient extends BaseAppInsightsLoggerClient {
     constructor(
-        @inject(AppInsightsLoggerClient) private readonly globalLoggerClient: AppInsightsLoggerClient,
+        @optional() @inject('AppInsightsLoggerClient') private readonly globalLoggerClient: AppInsightsLoggerClient,
         protected getTelemetryClient: () => TelemetryClient = () => new TelemetryClient(),
     ) {
         super();

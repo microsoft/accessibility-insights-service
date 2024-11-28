@@ -3,7 +3,7 @@
 
 import * as fs from 'fs';
 import convict from 'convict';
-import { injectable } from 'inversify';
+import { inject, injectable, optional } from 'inversify';
 import { isNil } from 'lodash';
 
 export interface RuntimeConfig {
@@ -103,11 +103,11 @@ export declare type ResourceType = 'batch' | 'registry';
 export class ServiceConfiguration {
     public static readonly profilePath = `${__dirname}/runtime-config.json`;
 
-    private readonly fileSystem: typeof fs;
+    @optional() @inject('fs') private readonly fileSystem: typeof fs;
 
     private loadConfigPromise: Promise<convict.Config<RuntimeConfig>>;
 
-    private readonly convictModule: typeof convict;
+    @optional() @inject('convict') private readonly convictModule: typeof convict;
 
     constructor(fileSystem: typeof fs = fs, convictModule: typeof convict = convict) {
         this.fileSystem = fileSystem;

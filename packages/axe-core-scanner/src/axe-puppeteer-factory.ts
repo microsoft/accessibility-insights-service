@@ -3,7 +3,7 @@
 
 import * as fs from 'fs';
 import { AxePuppeteer } from '@axe-core/puppeteer';
-import { inject, injectable } from 'inversify';
+import { inject, injectable, optional } from 'inversify';
 import { isEmpty } from 'lodash';
 import * as Puppeteer from 'puppeteer';
 import { AxeConfiguration } from './axe-configuration';
@@ -15,7 +15,7 @@ export class AxePuppeteerFactory {
     constructor(
         @inject(axeScannerIocTypes.AxeConfiguration) private readonly axeConfiguration: AxeConfiguration,
         @inject(axeScannerIocTypes.AxeRunOptions) private readonly axeRunOptions: AxeRunOptions,
-        private readonly fileSystemObj: typeof fs = fs,
+        @optional() @inject('fs') private readonly fileSystemObj: typeof fs = fs,
     ) {}
 
     public async createAxePuppeteer(page: Puppeteer.Page, contentSourcePath?: string, legacyMode: boolean = false): Promise<AxePuppeteer> {
