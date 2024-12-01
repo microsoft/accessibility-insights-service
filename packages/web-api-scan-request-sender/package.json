@@ -35,7 +35,7 @@
         "typemoq": "^2.1.0",
         "typescript": "^5.5.3",
         "webpack": "^5.76.2",
-        "webpack-cli": "^5.0.1",
+        "webpack-cli": "^5.1.4",
         "webpack-ignore-dynamic-require": "^1.0.0"
     },
     "dependencies": {
