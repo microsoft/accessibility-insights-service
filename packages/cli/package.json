@@ -83,7 +83,7 @@
         "moment": "^2.29.4",
         "normalize-path": "^3.0.0",
         "normalize-url": "6.1.0",
-        "puppeteer": "^23.5.0",
+        "puppeteer": "^23.9.0",
         "raw-body": "^2.5.1",
         "reflect-metadata": "^0.1.13",
         "serialize-error": "^8.1.0",
