@@ -42,7 +42,7 @@
         "applicationinsights": "^2.3.1",
         "azure-services": "workspace:*",
         "common": "workspace:*",
-        "inversify": "^6.0.1",
+        "inversify": "^6.1.5",
         "lodash": "^4.17.21",
         "logger": "workspace:*",
         "moment": "^2.29.4",
