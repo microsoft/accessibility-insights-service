@@ -1550,16 +1550,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@crawlee/basic@npm:3.11.5":
-  version: 3.11.5
-  resolution: "@crawlee/basic@npm:3.11.5"
+"@crawlee/basic@npm:3.12.0":
+  version: 3.12.0
+  resolution: "@crawlee/basic@npm:3.12.0"
   dependencies:
     "@apify/log": ^2.4.0
     "@apify/timeout": ^0.3.0
     "@apify/utilities": ^2.7.10
-    "@crawlee/core": 3.11.5
-    "@crawlee/types": 3.11.5
-    "@crawlee/utils": 3.11.5
+    "@crawlee/core": 3.12.0
+    "@crawlee/types": 3.12.0
+    "@crawlee/utils": 3.12.0
     csv-stringify: ^6.2.0
     fs-extra: ^11.0.0
     got-scraping: ^4.0.0
@@ -1567,11 +1567,41 @@ __metadata:
     tldts: ^6.0.0
     tslib: ^2.4.0
     type-fest: ^4.0.0
-  checksum: c9e228596b5a91e7e0f2064ec4f3326d2c2fa661a265e8307a1f38d57859ae97eb7024153e6f0f71b67899a7386c2109d590bd516edaa21be53064e6886270c4
+  checksum: 79819257e33b0b9a17f0f168bb363974eaa6622ee9ffc2516045c3c728a37fa5239c6b817cb8456b6e0669fcb7d17cc18b78583c788ca4863f7c96652b55fda2
   languageName: node
   linkType: hard
 
-"@crawlee/browser-pool@npm:3.11.5, @crawlee/browser-pool@npm:^3.11.5":
+"@crawlee/browser-pool@npm:3.12.0":
+  version: 3.12.0
+  resolution: "@crawlee/browser-pool@npm:3.12.0"
+  dependencies:
+    "@apify/log": ^2.4.0
+    "@apify/timeout": ^0.3.0
+    "@crawlee/core": 3.12.0
+    "@crawlee/types": 3.12.0
+    fingerprint-generator: ^2.0.6
+    fingerprint-injector: ^2.0.5
+    lodash.merge: ^4.6.2
+    nanoid: ^3.3.4
+    ow: ^0.28.1
+    p-limit: ^3.1.0
+    proxy-chain: ^2.0.1
+    quick-lru: ^5.1.1
+    tiny-typed-emitter: ^2.1.0
+    tslib: ^2.4.0
+  peerDependencies:
+    playwright: "*"
+    puppeteer: "*"
+  peerDependenciesMeta:
+    playwright:
+      optional: true
+    puppeteer:
+      optional: true
+  checksum: 34722272ddfbf50a2956fc227972ee6f258d7ce6aa008676c978df028db606a9a3c544c76d690218b4b227af27fc1e965601333be3e4d4bc67023cacb8154cd5
+  languageName: node
+  linkType: hard
+
+"@crawlee/browser-pool@npm:^3.11.5":
   version: 3.11.5
   resolution: "@crawlee/browser-pool@npm:3.11.5"
   dependencies:
@@ -1601,15 +1631,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@crawlee/browser@npm:3.11.5":
-  version: 3.11.5
-  resolution: "@crawlee/browser@npm:3.11.5"
+"@crawlee/browser@npm:3.12.0":
+  version: 3.12.0
+  resolution: "@crawlee/browser@npm:3.12.0"
   dependencies:
     "@apify/timeout": ^0.3.0
-    "@crawlee/basic": 3.11.5
-    "@crawlee/browser-pool": 3.11.5
-    "@crawlee/types": 3.11.5
-    "@crawlee/utils": 3.11.5
+    "@crawlee/basic": 3.12.0
+    "@crawlee/browser-pool": 3.12.0
+    "@crawlee/types": 3.12.0
+    "@crawlee/utils": 3.12.0
     ow: ^0.28.1
     tslib: ^2.4.0
     type-fest: ^4.0.0
@@ -1621,7 +1651,7 @@ __metadata:
       optional: true
     puppeteer:
       optional: true
-  checksum: 4f1157db8e1835b1627bca18313692394a7cfed0d8b839f9db0e9d8a282716d1bf27eb867b6cff26aa246b6c6c1ea93c337c47e3e2361a9cf9bfb411bdfc0391
+  checksum: 91161a072e276fcf9cacb59b9e6ba86f1ead38d93346b403fc810b77f6faedc7c5562cb21cb0f318d39ac1e9acf8fa2268adbefc2fca211232c46ed00ff4e07a
   languageName: node
   linkType: hard
 
@@ -1655,6 +1685,36 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@crawlee/core@npm:3.12.0":
+  version: 3.12.0
+  resolution: "@crawlee/core@npm:3.12.0"
+  dependencies:
+    "@apify/consts": ^2.20.0
+    "@apify/datastructures": ^2.0.0
+    "@apify/log": ^2.4.0
+    "@apify/pseudo_url": ^2.0.30
+    "@apify/timeout": ^0.3.0
+    "@apify/utilities": ^2.7.10
+    "@crawlee/memory-storage": 3.12.0
+    "@crawlee/types": 3.12.0
+    "@crawlee/utils": 3.12.0
+    "@sapphire/async-queue": ^1.5.1
+    "@vladfrangu/async_event_emitter": ^2.2.2
+    csv-stringify: ^6.2.0
+    fs-extra: ^11.0.0
+    got-scraping: ^4.0.0
+    json5: ^2.2.3
+    minimatch: ^9.0.0
+    ow: ^0.28.1
+    stream-json: ^1.8.0
+    tldts: ^6.0.0
+    tough-cookie: ^5.0.0
+    tslib: ^2.4.0
+    type-fest: ^4.0.0
+  checksum: 4bb393760268ec8d26873d86c7da943fc7e10ff82f7e56249ef0d7d7843ec209d45254ff135028a75f1b49cdeb5c9f5ff40e187e6f7df94d36dbbc5d13f9383f
+  languageName: node
+  linkType: hard
+
 "@crawlee/memory-storage@npm:3.11.5":
   version: 3.11.5
   resolution: "@crawlee/memory-storage@npm:3.11.5"
@@ -1673,16 +1733,34 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@crawlee/puppeteer@npm:^3.11.5":
-  version: 3.11.5
-  resolution: "@crawlee/puppeteer@npm:3.11.5"
+"@crawlee/memory-storage@npm:3.12.0":
+  version: 3.12.0
+  resolution: "@crawlee/memory-storage@npm:3.12.0"
+  dependencies:
+    "@apify/log": ^2.4.0
+    "@crawlee/types": 3.12.0
+    "@sapphire/async-queue": ^1.5.0
+    "@sapphire/shapeshift": ^3.0.0
+    content-type: ^1.0.4
+    fs-extra: ^11.0.0
+    json5: ^2.2.3
+    mime-types: ^2.1.35
+    proper-lockfile: ^4.1.2
+    tslib: ^2.4.0
+  checksum: 9b8a4569f0ecedbfaaba853f8ca7d18ec5596549d6e3c7f6084e49fef91c09674ae8c598c3473337682a41d3bfc26436864275dee33dd9300a000965c225a5f6
+  languageName: node
+  linkType: hard
+
+"@crawlee/puppeteer@npm:^3.12.0":
+  version: 3.12.0
+  resolution: "@crawlee/puppeteer@npm:3.12.0"
   dependencies:
     "@apify/datastructures": ^2.0.0
     "@apify/log": ^2.4.0
-    "@crawlee/browser": 3.11.5
-    "@crawlee/browser-pool": 3.11.5
-    "@crawlee/types": 3.11.5
-    "@crawlee/utils": 3.11.5
+    "@crawlee/browser": 3.12.0
+    "@crawlee/browser-pool": 3.12.0
+    "@crawlee/types": 3.12.0
+    "@crawlee/utils": 3.12.0
     cheerio: 1.0.0-rc.12
     devtools-protocol: "*"
     idcac-playwright: ^0.1.2
@@ -1694,7 +1772,7 @@ __metadata:
   peerDependenciesMeta:
     puppeteer:
       optional: true
-  checksum: c3e10a26dfb92c58923372408a104547511ceb7d7d1f31024c9e2476794977f68e17f92b5a18e34541934159836f17cc317ce30b2486ab3ff15edca730838ea2
+  checksum: 61e132e88b0edcd6729a312d7d479302bba9935db75b3e64a10e41aead80acdcf144b9142b6b0bb0ea3e82ec61edd6b01722fd7a389e63b8e640542ee3485d8e
   languageName: node
   linkType: hard
 
@@ -1704,6 +1782,15 @@ __metadata:
   dependencies:
     tslib: ^2.4.0
   checksum: 6653aa2ae17254b6cca7399e43a9a9bab032e2aa18f31d18432183d9623f498109cb65e31dab51fed629b84961080acc535d243fff8100a08fbefd3d95e8e9df
+  languageName: node
+  linkType: hard
+
+"@crawlee/types@npm:3.12.0":
+  version: 3.12.0
+  resolution: "@crawlee/types@npm:3.12.0"
+  dependencies:
+    tslib: ^2.4.0
+  checksum: bcc3cc248fdea7eb8bccaac3ee0a3290d949c5ed719540258cef7b46e77a253556b71ab7c5d507cb3afccfd6a8d549774dc821f306200ffefa449f19889e13dc
   languageName: node
   linkType: hard
 
@@ -1724,6 +1811,26 @@ __metadata:
     tslib: ^2.4.0
     whatwg-mimetype: ^4.0.0
   checksum: 9d6940abcfff3bdf2959e107e76e60d1be610d7f1da7a3a1cb07128b8589d04129b5139a82d744291cc205110fa2a4cacb4a25ee58a53a2e2146a190737e7219
+  languageName: node
+  linkType: hard
+
+"@crawlee/utils@npm:3.12.0":
+  version: 3.12.0
+  resolution: "@crawlee/utils@npm:3.12.0"
+  dependencies:
+    "@apify/log": ^2.4.0
+    "@apify/ps-tree": ^1.2.0
+    "@crawlee/types": 3.12.0
+    "@types/sax": ^1.2.7
+    cheerio: 1.0.0-rc.12
+    file-type: ^19.0.0
+    got-scraping: ^4.0.3
+    ow: ^0.28.1
+    robots-parser: ^3.0.1
+    sax: ^1.4.1
+    tslib: ^2.4.0
+    whatwg-mimetype: ^4.0.0
+  checksum: c214d8a59ebd86ea9c554ab6f2bf25e9e1809859d78b3ffb0313eab84587f535bb0bdb59a8b9dfa3871afaef65f42636e80de68a88036884448ba3ec147e46c7
   languageName: node
   linkType: hard
 
@@ -4370,7 +4477,7 @@ __metadata:
     "@apify/log": 2.2.18
     "@axe-core/puppeteer": 4.9.1
     "@crawlee/browser-pool": ^3.11.5
-    "@crawlee/puppeteer": ^3.11.5
+    "@crawlee/puppeteer": ^3.12.0
     "@medv/finder": ^2.1.0
     "@rollup/plugin-commonjs": ^24.0.1
     "@rollup/plugin-node-resolve": ^15.0.0
@@ -4434,7 +4541,7 @@ __metadata:
     "@apify/log": 2.2.18
     "@axe-core/puppeteer": 4.9.1
     "@crawlee/browser-pool": ^3.11.5
-    "@crawlee/puppeteer": ^3.11.5
+    "@crawlee/puppeteer": ^3.12.0
     "@medv/finder": ^2.1.0
     "@opentelemetry/api": ^1.4.1
     "@opentelemetry/exporter-metrics-otlp-grpc": ^0.41.0
@@ -14320,7 +14427,7 @@ __metadata:
     "@azure/functions": ^4.5.0
     "@azure/identity": ^4.3.0
     "@azure/storage-blob": ^12.12.0
-    "@crawlee/puppeteer": ^3.11.5
+    "@crawlee/puppeteer": ^3.12.0
     "@types/jest": ^29.5.12
     "@types/node": ^20.14.9
     "@types/paralleljs": ^0.0.21
