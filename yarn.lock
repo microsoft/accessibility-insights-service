@@ -4382,7 +4382,7 @@ __metadata:
     "@types/node": ^20.14.9
     "@types/normalize-path": ^3.0.0
     "@types/puppeteer": ^7.0.4
-    accessibility-insights-report: 5.1.0
+    accessibility-insights-report: 5.2.0
     axe-core: 4.9.1
     axe-core-scanner: "workspace:*"
     dotenv: ^16.0.1
@@ -4410,20 +4410,20 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"accessibility-insights-report@npm:5.1.0":
-  version: 5.1.0
-  resolution: "accessibility-insights-report@npm:5.1.0"
+"accessibility-insights-report@npm:5.2.0":
+  version: 5.2.0
+  resolution: "accessibility-insights-report@npm:5.2.0"
   dependencies:
     "@fluentui/react": ^8.118.1
-    axe-core: 4.9.1
+    axe-core: 4.10.2
     classnames: ^2.5.1
     lodash: ^4.17.21
-    luxon: ^3.4.4
+    luxon: ^3.5.0
     react: ^18.3.1
     react-dom: ^18.3.1
     react-helmet-async: ^2.0.5
     uuid: ^9.0.1
-  checksum: e6a2b4bf5741f7b9ce62176a9d5c2c3e2e1e38fb088f16231abb1ff1003fc2c31c6637ef5e16a0527179a5f7af34f7996f6569dde840355b362dfc910254122a
+  checksum: 94d1892e9b1941480775588e6555076e8c50d8589bfa23662e50fdf06a0d94d07abd3aa529ac4b6bfcb15cb3aeccd0dacd4fb5459611f3cb11e4f3bc0cb7de80
   languageName: node
   linkType: hard
 
@@ -4450,7 +4450,7 @@ __metadata:
     "@types/puppeteer": ^7.0.4
     "@types/table": ^6.3.2
     accessibility-insights-crawler: "workspace:*"
-    accessibility-insights-report: 5.1.0
+    accessibility-insights-report: 5.2.0
     ajv: ^8.12.0
     applicationinsights: ^2.3.1
     axe-core: 4.9.1
@@ -4504,7 +4504,7 @@ __metadata:
     "@typescript-eslint/eslint-plugin": ^7.15.0
     "@typescript-eslint/eslint-plugin-tslint": ^7.0.2
     "@typescript-eslint/parser": ^7.15.0
-    accessibility-insights-report: 5.1.0
+    accessibility-insights-report: 5.2.0
     combine-dependabot-prs: ^1.0.5
     commander: ^10.0.0
     eslint: ^8.57.0
@@ -5118,7 +5118,7 @@ __metadata:
     "@types/jest": ^29.5.12
     "@types/lodash": ^4.17.6
     "@types/node": ^20.14.9
-    accessibility-insights-report: 5.1.0
+    accessibility-insights-report: 5.2.0
     axe-core: 4.9.1
     common: "workspace:*"
     inversify: ^6.0.1
@@ -11346,10 +11346,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"luxon@npm:^3.4.4":
-  version: 3.4.4
-  resolution: "luxon@npm:3.4.4"
-  checksum: 36c1f99c4796ee4bfddf7dc94fa87815add43ebc44c8934c924946260a58512f0fd2743a629302885df7f35ccbd2d13f178c15df046d0e3b6eb71db178f1c60c
+"luxon@npm:^3.5.0":
+  version: 3.5.0
+  resolution: "luxon@npm:3.5.0"
+  checksum: f290fe5788c8e51e748744f05092160d4be12150dca70f9fadc0d233e53d60ce86acd82e7d909a114730a136a77e56f0d3ebac6141bbb82fd310969a4704825b
   languageName: node
   linkType: hard
 
@@ -14327,7 +14327,7 @@ __metadata:
     "@types/puppeteer": ^7.0.4
     "@types/sha.js": ^2.4.0
     "@types/yargs": ^17.0.22
-    accessibility-insights-report: 5.1.0
+    accessibility-insights-report: 5.2.0
     async-mutex: ^0.3.2
     axe-core: 4.9.1
     axe-result-converter: "workspace:*"
@@ -16211,7 +16211,7 @@ __metadata:
     "@types/puppeteer": ^7.0.4
     "@types/sha.js": ^2.4.0
     "@types/yargs": ^17.0.22
-    accessibility-insights-report: 5.1.0
+    accessibility-insights-report: 5.2.0
     applicationinsights: ^2.3.1
     axe-core: 4.9.1
     axe-result-converter: "workspace:*"

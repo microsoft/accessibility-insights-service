@@ -51,7 +51,7 @@
         "@axe-core/puppeteer": "4.9.1",
         "@azure/cosmos": "^4.0.0",
         "@playwright/test": "^1.48.0",
-        "accessibility-insights-report": "5.1.0",
+        "accessibility-insights-report": "5.2.0",
         "applicationinsights": "^2.3.1",
         "axe-core": "4.9.1",
         "axe-result-converter": "workspace:*",
