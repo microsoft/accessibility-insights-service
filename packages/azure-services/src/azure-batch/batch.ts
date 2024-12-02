@@ -18,14 +18,12 @@ import { PoolLoad, PoolMetricsInfo } from './pool-load-generator';
 @injectable()
 export class Batch {
     public constructor(
-        @inject(iocTypeNames.BatchServiceClientProvider) private readonly batchClientProvider: BatchServiceClientProvider,
-        @optional()
-        @inject(BatchTaskConfigGenerator)
-        private readonly batchTaskConfigGenerator: BatchTaskConfigGenerator,
-        @inject(BatchConfig) private readonly config: BatchConfig,
-        @inject(GlobalLogger) private readonly logger: GlobalLogger,
+        @optional() @inject(iocTypeNames.BatchServiceClientProvider) private readonly batchClientProvider: BatchServiceClientProvider,
+        @optional() @inject('BatchTaskConfigGenerator') private readonly batchTaskConfigGenerator: BatchTaskConfigGenerator,
+        @optional() @inject('BatchConfig') private readonly config: BatchConfig,
+        @optional() @inject('GlobalLogger') private readonly logger: GlobalLogger,
         // Azure Batch supports the maximum 100 tasks to be added in a single addTaskCollection() API call
-        private readonly maxTasks = 100,
+        @optional() @inject('number') private readonly maxTasks: number = 100,
     ) {}
 
     public async getSucceededTasks(jobId: string): Promise<BatchTask[]> {

@@ -34,7 +34,6 @@ describe(getProcessLifeCycleContainer, () => {
 
         expect(testSubject.get(CredentialsProvider)).toBeDefined();
         expect(testSubject.get(SecretProvider)).toBeDefined();
-        expect(testSubject.get(CredentialsProvider)).toBeDefined();
     });
 
     it('should not create more than one instance of container', () => {

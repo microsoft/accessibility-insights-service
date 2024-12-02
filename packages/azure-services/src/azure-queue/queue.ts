@@ -3,7 +3,7 @@
 
 import * as util from 'util';
 import { QueueRuntimeConfig, RetryHelper, ServiceConfiguration } from 'common';
-import { inject, injectable } from 'inversify';
+import { inject, injectable, optional } from 'inversify';
 import _ from 'lodash';
 import { ContextAwareLogger } from 'logger';
 import { DequeuedMessageItem, QueueClient, MessagesDequeueOptionalParams } from '@azure/storage-queue';
@@ -15,12 +15,14 @@ export class Queue {
     private readonly maxDequeueCount = 1; // increasing dequeue count may destroy global scan retry logic
 
     constructor(
-        @inject(iocTypeNames.QueueServiceClientProvider) private readonly queueServiceClientProvider: QueueServiceClientProvider,
-        @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
-        @inject(ContextAwareLogger) private readonly logger: ContextAwareLogger,
-        @inject(RetryHelper) private readonly retryHelper: RetryHelper<void>,
-        private readonly maxEnqueueRetryCount: number = 3,
-        private readonly retryIntervalMilliseconds: number = 1000,
+        @optional()
+        @inject(iocTypeNames.QueueServiceClientProvider)
+        private readonly queueServiceClientProvider: QueueServiceClientProvider,
+        @optional() @inject('ServiceConfiguration') private readonly serviceConfig: ServiceConfiguration,
+        @optional() @inject('ContextAwareLogger') private readonly logger: ContextAwareLogger,
+        @optional() @inject('RetryHelper') private readonly retryHelper: RetryHelper<void>,
+        @optional() @inject('number') private readonly maxEnqueueRetryCount: number = 3,
+        @optional() @inject('number') private readonly retryIntervalMilliseconds: number = 1000,
     ) {}
 
     /**

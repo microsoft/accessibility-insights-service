@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 import { AccessToken, GetTokenOptions, TokenCredential } from '@azure/core-auth';
-import { injectable } from 'inversify';
+import { inject, injectable, optional } from 'inversify';
 import { AzureCliCredential, ManagedIdentityCredential } from '@azure/identity';
 import { isEmpty } from 'lodash';
 import { IdentityCredentialCache } from './identity-credential-cache';
@@ -21,8 +21,10 @@ export class IdentityCredentialProvider implements TokenCredential {
      * logged-in user login information via the Azure CLI ('az') command line tool.
      */
     constructor(
+        @optional()
+        @inject('IdentityCredentialCache')
         private readonly identityCredentialCache: IdentityCredentialCache = new IdentityCredentialCache(),
-        private readonly azCliAuth?: boolean,
+        @optional() @inject('azCliAuth') private readonly azCliAuth?: boolean,
     ) {
         this.azCliAuth = this.azCliAuth ?? process.env.AZ_CLI_AUTH === 'true';
     }

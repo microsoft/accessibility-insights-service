@@ -4,6 +4,7 @@
 import * as cosmos from '@azure/cosmos';
 import pLimit from 'p-limit';
 import { isPlainObject, mapValues, mergeWith } from 'lodash';
+import { inject, optional } from 'inversify';
 import { CosmosClientWrapper } from '../azure-cosmos/cosmos-client-wrapper';
 import { CosmosDocument } from '../azure-cosmos/cosmos-document';
 import { CosmosOperationResponse } from '../azure-cosmos/cosmos-operation-response';
@@ -15,9 +16,9 @@ export class CosmosContainerClient {
     public maxConcurrencyLimit = 10;
 
     constructor(
-        private readonly cosmosClientWrapper: CosmosClientWrapper,
-        private readonly dbName: string,
-        private readonly collectionName: string,
+        @optional() @inject('CosmosClientWrapper') private readonly cosmosClientWrapper: CosmosClientWrapper,
+        @optional() @inject('string') private readonly dbName: string,
+        @optional() @inject('string') private readonly collectionName: string,
     ) {}
 
     public async readDocument<T>(

@@ -103,13 +103,12 @@ export declare type ResourceType = 'batch' | 'registry';
 export class ServiceConfiguration {
     public static readonly profilePath = `${__dirname}/runtime-config.json`;
 
-    @optional() @inject('fs') private readonly fileSystem: typeof fs;
-
     private loadConfigPromise: Promise<convict.Config<RuntimeConfig>>;
 
-    @optional() @inject('convict') private readonly convictModule: typeof convict;
-
-    constructor(fileSystem: typeof fs = fs, convictModule: typeof convict = convict) {
+    constructor(
+        @optional() @inject('fs') private readonly fileSystem: typeof fs = fs,
+        @optional() @inject('convict') private readonly convictModule: typeof convict = convict,
+    ) {
         this.fileSystem = fileSystem;
         this.convictModule = convictModule;
     }

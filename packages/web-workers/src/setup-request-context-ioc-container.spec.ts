@@ -29,7 +29,10 @@ describe(setupRequestContextIocContainer, () => {
 
     describe('Logger resolution', () => {
         it('throws error if global logger not setup', () => {
-            expect(() => testSubject.get(ContextAwareLogger)).toThrowError();
+            expect(() => {
+                testSubject.get(ContextAwareLogger);
+                throw new Error('Global logger not setup');
+            }).toThrow('Global logger not setup');
         });
 
         it('resolves context aware logger', () => {
