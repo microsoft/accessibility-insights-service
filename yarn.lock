@@ -3446,12 +3446,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/convict@npm:^6.1.1":
-  version: 6.1.1
-  resolution: "@types/convict@npm:6.1.1"
+"@types/convict@npm:^6.1.6":
+  version: 6.1.6
+  resolution: "@types/convict@npm:6.1.6"
   dependencies:
     "@types/node": "*"
-  checksum: 0150048098eec1ff0df5d04e77fd44ff0fa8e732cc5d5e43a2fe603b2d3f05c9f1e369977a109844b8b449b096818c017737b166ccb52b569161642d884e17d2
+  checksum: 95abd7e68b0cdf399ebf6da3febc4860f87c4605562a7ff0efe423efc7a6ca36c5d24289c6f7f11569a81100eb4dffc52b900197beea6b4f1d6076b6710cc960
   languageName: node
   linkType: hard
 
@@ -6247,7 +6247,7 @@ __metadata:
   resolution: "common@workspace:packages/common"
   dependencies:
     "@sindresorhus/fnv1a": ^2.0.1
-    "@types/convict": ^6.1.1
+    "@types/convict": ^6.1.6
     "@types/jest": ^29.5.12
     "@types/node": ^20.14.9
     "@types/normalize-path": ^3.0.0
