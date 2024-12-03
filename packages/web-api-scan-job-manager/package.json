@@ -52,7 +52,7 @@
         "lodash": "^4.17.21",
         "logger": "workspace:*",
         "moment": "^2.29.4",
-        "reflect-metadata": "^0.1.13",
+        "reflect-metadata": "^0.2.2",
         "service-library": "workspace:*",
         "storage-documents": "workspace:*",
         "yargs": "^17.6.2"
