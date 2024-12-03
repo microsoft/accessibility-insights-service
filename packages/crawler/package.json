@@ -39,7 +39,7 @@
         "rollup": "^3.13.0",
         "ts-jest": "^29.1.5",
         "typemoq": "^2.1.0",
-        "typescript": "^5.5.3"
+        "typescript": "^5.7.2"
     },
     "standAlonePackage": "This is a stand-alone package. Do NOT add dependencies to any service packages.",
     "dependencies": {
