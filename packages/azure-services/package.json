@@ -32,15 +32,15 @@
         "npm-run-all": "^4.1.5",
         "rimraf": "^4.1.2",
         "ts-jest": "^29.1.5",
-        "ts-loader": "^9.4.2",
+        "ts-loader": "^9.5.1",
         "typemoq": "^2.1.0",
         "typescript": "^5.5.3",
         "webpack": "^5.76.2",
-        "webpack-cli": "^5.0.1"
+        "webpack-cli": "^5.1.4"
     },
     "dependencies": {
         "@azure/batch": "^10.2.0",
-        "@azure/core-auth": "^1.7.2",
+        "@azure/core-auth": "^1.9.0",
         "@azure/cosmos": "^4.0.0",
         "@azure/identity": "^4.3.0",
         "@azure/keyvault-secrets": "^4.6.0",
@@ -58,7 +58,7 @@
         "moment": "^2.29.4",
         "node-cache": "^5.1.2",
         "p-limit": "^3.1.0",
-        "pretty-format": "^29.4.1",
+        "pretty-format": "^29.7.0",
         "reflect-metadata": "^0.1.13",
         "storage-documents": "workspace:*"
     }
