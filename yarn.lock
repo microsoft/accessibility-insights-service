@@ -5178,19 +5178,19 @@ __metadata:
   linkType: hard
 
 "azure-functions-core-tools@npm:^4.x":
-  version: 4.0.5907
-  resolution: "azure-functions-core-tools@npm:4.0.5907"
+  version: 4.0.6610
+  resolution: "azure-functions-core-tools@npm:4.0.6610"
   dependencies:
     chalk: 3.0.0
     extract-zip: ^2.0.1
-    https-proxy-agent: 5.0.0
+    https-proxy-agent: 5.0.1
     progress: 2.0.3
     rimraf: 4.4.1
   bin:
     azfun: lib/main.js
     azurefunctions: lib/main.js
     func: lib/main.js
-  checksum: 9145dfb79786210a7143e09a828fee317de19d94cec76dafc29257d30abcea69b23c0876bd9212ee9686abe1d4f98de52c7faafc9e80493a5e309fdfee60f18c
+  checksum: ad885ceb4d1a6e6fcf95bbfff565983fd9f4b8fb52ae04b03fd88ec408f52491e8f57c86e51f0d7fd1cc1dbcda8b7fd44a235e26093c85163eba234b8777cd97
   conditions: (os=win32 | os=darwin | os=linux)
   languageName: node
   linkType: hard
@@ -9297,16 +9297,6 @@ __metadata:
     quick-lru: ^5.1.1
     resolve-alpn: ^1.2.0
   checksum: e95e55e22c6fd61182ce81fecb9b7da3af680d479febe8ad870d05f7ebbc9f076e455193766f4e7934e50913bf1d8da3ba121fb5cd2928892390b58cf9d5c509
-  languageName: node
-  linkType: hard
-
-"https-proxy-agent@npm:5.0.0":
-  version: 5.0.0
-  resolution: "https-proxy-agent@npm:5.0.0"
-  dependencies:
-    agent-base: 6
-    debug: 4
-  checksum: 165bfb090bd26d47693597661298006841ab733d0c7383a8cb2f17373387a94c903a3ac687090aa739de05e379ab6f868bae84ab4eac288ad85c328cd1ec9e53
   languageName: node
   linkType: hard
 
