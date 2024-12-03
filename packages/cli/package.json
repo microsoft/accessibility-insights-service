@@ -49,7 +49,7 @@
         "typemoq": "^2.1.0",
         "typescript": "^5.5.3",
         "webpack": "^5.76.2",
-        "webpack-cli": "^5.0.1",
+        "webpack-cli": "^5.1.4",
         "webpack-node-externals": "^3.0.0"
     },
     "dependencies": {
