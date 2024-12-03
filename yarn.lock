@@ -4506,7 +4506,7 @@ __metadata:
     puppeteer: ^23.9.0
     reflect-metadata: ^0.1.13
     rimraf: ^4.1.2
-    rollup: ^3.13.0
+    rollup: ^3.29.5
     serialize-error: ^8.1.0
     sha.js: ^2.4.11
     ts-jest: ^29.1.5
@@ -14165,9 +14165,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rollup@npm:^3.13.0":
-  version: 3.29.2
-  resolution: "rollup@npm:3.29.2"
+"rollup@npm:^3.29.5":
+  version: 3.29.5
+  resolution: "rollup@npm:3.29.5"
   dependencies:
     fsevents: ~2.3.2
   dependenciesMeta:
@@ -14175,7 +14175,7 @@ __metadata:
       optional: true
   bin:
     rollup: dist/bin/rollup
-  checksum: 2eacb5a2522cb41e46e0bd78cca2c2da29b09b1fbd5b7c6ebb0afb3864af125a06fba528dfd6699704e49384e106ff58b359ce4abef61d7db12a7840d3b56e54
+  checksum: 6f8304e58ac8170a715e61e46c4aa674b2ae2587ed2a712dab58f72e5e54803ae40b485fbe6b3e6a694f4c8f7a59ab936ccf9f6b686c7cfd1f1970fa9ecadf1a
   languageName: node
   linkType: hard
 
