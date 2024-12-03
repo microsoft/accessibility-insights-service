@@ -59,7 +59,7 @@
         "npm-run-all": "^4.1.5",
         "patch-package": "^8.0.0",
         "prettier": "2.8.3",
-        "rimraf": "^4.1.2",
+        "rimraf": "^6.0.1",
         "shellcheck": "^3.0.0",
         "simple-git": "^3.16.0",
         "syncpack": "^8.4.11",
