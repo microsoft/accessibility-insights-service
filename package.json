@@ -61,7 +61,7 @@
         "prettier": "2.8.3",
         "rimraf": "^4.1.2",
         "shellcheck": "^3.0.0",
-        "simple-git": "^3.16.0",
+        "simple-git": "^3.27.0",
         "syncpack": "^8.4.11",
         "ts-jest": "^29.1.5",
         "tslint": "^6.1.3",
