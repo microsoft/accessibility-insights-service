@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 import * as appInsights from 'applicationinsights';
-import { inject, injectable } from 'inversify';
+import { inject, injectable, optional } from 'inversify';
 import { isNil, omitBy } from 'lodash';
 import { BaseAppInsightsLoggerClient } from './base-app-insights-logger-client';
 import { loggerTypes } from './logger-types';
@@ -11,8 +11,8 @@ import { LoggerProperties } from './logger-client';
 @injectable()
 export class AppInsightsLoggerClient extends BaseAppInsightsLoggerClient {
     constructor(
-        @inject(loggerTypes.AppInsights) private readonly appInsightsObject: typeof appInsights,
-        @inject(loggerTypes.Process) private readonly currentProcess: typeof process,
+        @optional() @inject(loggerTypes.AppInsights) private readonly appInsightsObject: typeof appInsights,
+        @optional() @inject(loggerTypes.Process) private readonly currentProcess: typeof process,
     ) {
         super();
     }

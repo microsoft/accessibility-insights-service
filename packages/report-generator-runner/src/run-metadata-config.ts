@@ -1,13 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { injectable } from 'inversify';
+import { inject, injectable, optional } from 'inversify';
 import yargs, { Arguments, Argv } from 'yargs';
 import { ReportGeneratorMetadata } from './types/report-generator-metadata';
 
 @injectable()
 export class RunMetadataConfig {
-    constructor(private readonly argvObj: Argv = yargs) {
+    constructor(@optional() @inject('argvObj') private readonly argvObj: Argv = yargs) {
         argvObj.options({
             scanGroupId: {
                 type: 'string',

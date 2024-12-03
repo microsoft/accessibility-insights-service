@@ -41,7 +41,7 @@
         "common": "workspace:*",
         "deep-equal-in-any-order": "^2.0.2",
         "dotenv": "^16.0.1",
-        "inversify": "^6.0.1",
+        "inversify": "^6.1.4",
         "lodash": "^4.17.21",
         "logger": "workspace:*",
         "reflect-metadata": "^0.1.13",

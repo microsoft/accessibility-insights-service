@@ -35,7 +35,7 @@
     "dependencies": {
         "axe-result-converter": "workspace:*",
         "common": "workspace:*",
-        "inversify": "^6.0.1",
+        "inversify": "^6.1.4",
         "lodash": "^4.17.21",
         "reflect-metadata": "^0.1.13"
     }

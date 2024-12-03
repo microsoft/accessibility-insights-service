@@ -3,7 +3,7 @@
 
 import { BatchServiceModels } from '@azure/batch';
 import { EnvironmentSettings, ServiceConfiguration, TaskRuntimeConfig } from 'common';
-import { inject, injectable } from 'inversify';
+import { inject, injectable, optional } from 'inversify';
 import { cloneDeep } from 'lodash';
 import moment from 'moment';
 
@@ -48,9 +48,9 @@ export class BatchTaskConfigGenerator {
         '--init --rm --cpus=2 --shm-size=2gb --workdir /app -v d: --env-file %AZ_BATCH_TASK_WORKING_DIR%\\.env';
 
     public constructor(
-        @inject(BatchTaskPropertyProvider) protected readonly batchTaskPropertyProvider: BatchTaskPropertyProvider,
-        @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
-        @inject(EnvironmentSettings) private readonly environmentSettings: EnvironmentSettings,
+        @optional() @inject('BatchTaskPropertyProvider') protected readonly batchTaskPropertyProvider: BatchTaskPropertyProvider,
+        @optional() @inject('ServiceConfiguration') protected readonly serviceConfig: ServiceConfiguration,
+        @optional() @inject('EnvironmentSettings') private readonly environmentSettings: EnvironmentSettings,
     ) {}
 
     public async getTaskConfigWithImageSupport(
