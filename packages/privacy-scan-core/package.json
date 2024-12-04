@@ -41,7 +41,7 @@
         "lodash": "^4.17.21",
         "logger": "workspace:*",
         "puppeteer": "^23.9.0",
-        "reflect-metadata": "^0.1.13",
+        "reflect-metadata": "^0.2.2",
         "scanner-global-library": "workspace:*",
         "storage-documents": "workspace:*"
     }

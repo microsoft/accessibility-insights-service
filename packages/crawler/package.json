@@ -62,7 +62,7 @@
         "normalize-path": "^3.0.0",
         "normalize-url": "6.1.0",
         "puppeteer": "^23.9.0",
-        "reflect-metadata": "^0.1.13",
+        "reflect-metadata": "^0.2.2",
         "serialize-error": "^8.1.0",
         "sha.js": "^2.4.11",
         "yargs": "^17.6.2"

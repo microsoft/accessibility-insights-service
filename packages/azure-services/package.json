@@ -59,7 +59,7 @@
         "node-cache": "^5.1.2",
         "p-limit": "^3.1.0",
         "pretty-format": "^29.7.0",
-        "reflect-metadata": "^0.1.13",
+        "reflect-metadata": "^0.2.2",
         "storage-documents": "workspace:*"
     }
 }

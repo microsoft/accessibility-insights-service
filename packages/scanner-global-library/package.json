@@ -49,7 +49,7 @@
         "puppeteer-extra": "^3.3.6",
         "puppeteer-extra-plugin": "^3.2.3",
         "puppeteer-extra-plugin-stealth": "^2.11.2",
-        "reflect-metadata": "^0.1.13",
+        "reflect-metadata": "^0.2.2",
         "storage-documents": "workspace:*"
     }
 }

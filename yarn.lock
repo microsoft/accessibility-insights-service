@@ -4511,7 +4511,7 @@ __metadata:
     normalize-url: 6.1.0
     npm-run-all: ^4.1.5
     puppeteer: ^23.9.0
-    reflect-metadata: ^0.1.13
+    reflect-metadata: ^0.2.2
     rimraf: ^4.1.2
     rollup: ^3.29.5
     serialize-error: ^8.1.0
@@ -4592,7 +4592,7 @@ __metadata:
     npm-run-all: ^4.1.5
     puppeteer: ^23.9.0
     raw-body: ^2.5.1
-    reflect-metadata: ^0.1.13
+    reflect-metadata: ^0.2.2
     rimraf: ^4.1.2
     serialize-error: ^8.1.0
     sha.js: ^2.4.11
@@ -5190,7 +5190,7 @@ __metadata:
     lodash: ^4.17.21
     npm-run-all: ^4.1.5
     puppeteer: ^23.9.0
-    reflect-metadata: ^0.1.13
+    reflect-metadata: ^0.2.2
     rimraf: ^4.1.2
     ts-jest: ^29.1.5
     typemoq: ^2.1.0
@@ -5221,7 +5221,7 @@ __metadata:
     jest-junit: ^16.0.0
     lodash: ^4.17.21
     npm-run-all: ^4.1.5
-    reflect-metadata: ^0.1.13
+    reflect-metadata: ^0.2.2
     rimraf: ^4.1.2
     ts-jest: ^29.1.5
     typemoq: ^2.1.0
@@ -5304,7 +5304,7 @@ __metadata:
     npm-run-all: ^4.1.5
     p-limit: ^3.1.0
     pretty-format: ^29.7.0
-    reflect-metadata: ^0.1.13
+    reflect-metadata: ^0.2.2
     rimraf: ^4.1.2
     storage-documents: "workspace:*"
     ts-jest: ^29.1.5
@@ -6389,7 +6389,7 @@ __metadata:
     normalize-url: 6.1.0
     npm-run-all: ^4.1.5
     raw-body: ^2.5.1
-    reflect-metadata: ^0.1.13
+    reflect-metadata: ^0.2.2
     rimraf: ^4.1.2
     serialize-error: ^8.1.0
     sha.js: ^2.4.11
@@ -8658,7 +8658,7 @@ __metadata:
     logger: "workspace:*"
     mockdate: ^3.0.5
     npm-run-all: ^4.1.5
-    reflect-metadata: ^0.1.13
+    reflect-metadata: ^0.2.2
     rimraf: ^4.1.2
     service-library: "workspace:*"
     storage-documents: "workspace:*"
@@ -9276,7 +9276,7 @@ __metadata:
     lodash: ^4.17.21
     logger: "workspace:*"
     npm-run-all: ^4.1.5
-    reflect-metadata: ^0.1.13
+    reflect-metadata: ^0.2.2
     rimraf: ^4.1.2
     service-library: "workspace:*"
     shebang-loader: ^0.0.1
@@ -11389,7 +11389,7 @@ __metadata:
     lodash: ^4.17.21
     moment: ^2.29.4
     npm-run-all: ^4.1.5
-    reflect-metadata: ^0.1.13
+    reflect-metadata: ^0.2.2
     rimraf: ^4.1.2
     ts-jest: ^29.1.5
     typemoq: ^2.1.0
@@ -13096,7 +13096,7 @@ __metadata:
     mockdate: ^3.0.5
     npm-run-all: ^4.1.5
     puppeteer: ^23.9.0
-    reflect-metadata: ^0.1.13
+    reflect-metadata: ^0.2.2
     rimraf: ^4.1.2
     scanner-global-library: "workspace:*"
     storage-documents: "workspace:*"
@@ -13131,7 +13131,7 @@ __metadata:
     moment: ^2.29.4
     node-loader: ^2.0.0
     npm-run-all: ^4.1.5
-    reflect-metadata: ^0.1.13
+    reflect-metadata: ^0.2.2
     rimraf: ^4.1.2
     service-library: "workspace:*"
     storage-documents: "workspace:*"
@@ -13179,7 +13179,7 @@ __metadata:
     puppeteer-extra: ^3.3.6
     puppeteer-extra-plugin: ^3.2.3
     puppeteer-extra-plugin-stealth: ^2.11.2
-    reflect-metadata: ^0.1.13
+    reflect-metadata: ^0.2.2
     rimraf: ^4.1.2
     scanner-global-library: "workspace:*"
     service-library: "workspace:*"
@@ -13774,10 +13774,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"reflect-metadata@npm:^0.1.13":
-  version: 0.1.13
-  resolution: "reflect-metadata@npm:0.1.13"
-  checksum: 798d379a7b6f6455501145419505c97dd11cbc23857a386add2b9ef15963ccf15a48d9d15507afe01d4cd74116df8a213247200bac00320bd7c11ddeaa5e8fb4
+"reflect-metadata@npm:^0.2.2":
+  version: 0.2.2
+  resolution: "reflect-metadata@npm:0.2.2"
+  checksum: a66c7b583e4efdd8f3c3124fbff33da2d0c86d8280617516308b32b2159af7a3698c961db3246387f56f6316b1d33a608f39bb2b49d813316dfc58f6d3bf3210
   languageName: node
   linkType: hard
 
@@ -13840,7 +13840,7 @@ __metadata:
     moment: ^2.29.4
     node-loader: ^2.0.0
     npm-run-all: ^4.1.5
-    reflect-metadata: ^0.1.13
+    reflect-metadata: ^0.2.2
     rimraf: ^4.1.2
     service-library: "workspace:*"
     storage-documents: "workspace:*"
@@ -13887,7 +13887,7 @@ __metadata:
     puppeteer-extra: ^3.3.6
     puppeteer-extra-plugin: ^3.2.3
     puppeteer-extra-plugin-stealth: ^2.11.2
-    reflect-metadata: ^0.1.13
+    reflect-metadata: ^0.2.2
     rimraf: ^4.1.2
     scanner-global-library: "workspace:*"
     service-library: "workspace:*"
@@ -14325,7 +14325,7 @@ __metadata:
     puppeteer-extra: ^3.3.6
     puppeteer-extra-plugin: ^3.2.3
     puppeteer-extra-plugin-stealth: ^2.11.2
-    reflect-metadata: ^0.1.13
+    reflect-metadata: ^0.2.2
     rimraf: ^4.1.2
     storage-documents: "workspace:*"
     ts-jest: ^29.1.5
@@ -14487,7 +14487,7 @@ __metadata:
     paralleljs: ^1.1.0
     privacy-scan-core: "workspace:*"
     puppeteer: ^23.9.0
-    reflect-metadata: ^0.1.13
+    reflect-metadata: ^0.2.2
     rimraf: ^4.1.2
     scanner-global-library: "workspace:*"
     sha.js: ^2.4.11
@@ -14950,7 +14950,7 @@ __metadata:
     jest-junit: ^16.0.0
     lodash: ^4.17.21
     npm-run-all: ^4.1.5
-    reflect-metadata: ^0.1.13
+    reflect-metadata: ^0.2.2
     rimraf: ^4.1.2
     ts-jest: ^29.1.5
     typemoq: ^2.1.0
@@ -16265,7 +16265,7 @@ __metadata:
     lodash: ^4.17.21
     logger: "workspace:*"
     npm-run-all: ^4.1.5
-    reflect-metadata: ^0.1.13
+    reflect-metadata: ^0.2.2
     rimraf: ^4.1.2
     service-library: "workspace:*"
     ts-jest: ^29.1.5
@@ -16299,7 +16299,7 @@ __metadata:
     moment: ^2.29.4
     node-loader: ^2.0.0
     npm-run-all: ^4.1.5
-    reflect-metadata: ^0.1.13
+    reflect-metadata: ^0.2.2
     rimraf: ^4.1.2
     service-library: "workspace:*"
     storage-documents: "workspace:*"
@@ -16333,7 +16333,7 @@ __metadata:
     moment: ^2.29.4
     node-loader: ^2.0.0
     npm-run-all: ^4.1.5
-    reflect-metadata: ^0.1.13
+    reflect-metadata: ^0.2.2
     rimraf: ^4.1.2
     service-library: "workspace:*"
     storage-documents: "workspace:*"
@@ -16389,7 +16389,7 @@ __metadata:
     puppeteer-extra: ^3.3.6
     puppeteer-extra-plugin: ^3.2.3
     puppeteer-extra-plugin-stealth: ^2.11.2
-    reflect-metadata: ^0.1.13
+    reflect-metadata: ^0.2.2
     request: ^2.88.2
     rimraf: ^4.1.2
     scanner-global-library: "workspace:*"
@@ -16431,7 +16431,7 @@ __metadata:
     moment: ^2.29.4
     node-loader: ^2.0.0
     npm-run-all: ^4.1.5
-    reflect-metadata: ^0.1.13
+    reflect-metadata: ^0.2.2
     rimraf: ^4.1.2
     service-library: "workspace:*"
     storage-documents: "workspace:*"
@@ -16474,7 +16474,7 @@ __metadata:
     mockdate: ^3.0.5
     node-loader: ^2.0.0
     npm-run-all: ^4.1.5
-    reflect-metadata: ^0.1.13
+    reflect-metadata: ^0.2.2
     rimraf: ^4.1.2
     service-library: "workspace:*"
     sha.js: ^2.4.11
@@ -16514,7 +16514,7 @@ __metadata:
     moment: ^2.29.4
     node-loader: ^2.0.0
     npm-run-all: ^4.1.5
-    reflect-metadata: ^0.1.13
+    reflect-metadata: ^0.2.2
     rimraf: ^4.1.2
     service-library: "workspace:*"
     storage-documents: "workspace:*"
@@ -16555,7 +16555,7 @@ __metadata:
     node-loader: ^2.0.0
     npm-run-all: ^4.1.5
     p-limit: ^3.1.0
-    reflect-metadata: ^0.1.13
+    reflect-metadata: ^0.2.2
     rimraf: ^4.1.2
     service-library: "workspace:*"
     storage-documents: "workspace:*"
