@@ -2084,6 +2084,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@isaacs/cliui@npm:^8.0.2":
+  version: 8.0.2
+  resolution: "@isaacs/cliui@npm:8.0.2"
+  dependencies:
+    string-width: ^5.1.2
+    string-width-cjs: "npm:string-width@^4.2.0"
+    strip-ansi: ^7.0.1
+    strip-ansi-cjs: "npm:strip-ansi@^6.0.1"
+    wrap-ansi: ^8.1.0
+    wrap-ansi-cjs: "npm:wrap-ansi@^7.0.0"
+  checksum: 4a473b9b32a7d4d3cfb7a614226e555091ff0c5a29a1734c28c72a182c2f6699b26fc6b5c2131dfd841e86b185aea714c72201d7c98c2fba5f17709333a67aeb
+  languageName: node
+  linkType: hard
+
 "@istanbuljs/load-nyc-config@npm:^1.0.0":
   version: 1.1.0
   resolution: "@istanbuljs/load-nyc-config@npm:1.1.0"
@@ -4517,7 +4531,7 @@ __metadata:
     npm-run-all: ^4.1.5
     puppeteer: ^23.9.0
     reflect-metadata: ^0.2.2
-    rimraf: ^4.1.2
+    rimraf: ^6.0.1
     rollup: ^3.29.5
     serialize-error: ^8.1.0
     sha.js: ^2.4.11
@@ -4598,7 +4612,7 @@ __metadata:
     puppeteer: ^23.9.0
     raw-body: ^2.5.1
     reflect-metadata: ^0.2.2
-    rimraf: ^4.1.2
+    rimraf: ^6.0.1
     serialize-error: ^8.1.0
     sha.js: ^2.4.11
     ts-jest: ^29.1.5
@@ -4642,7 +4656,7 @@ __metadata:
     npm-run-all: ^4.1.5
     patch-package: ^8.0.0
     prettier: 2.8.3
-    rimraf: ^4.1.2
+    rimraf: ^6.0.1
     shellcheck: ^3.0.0
     simple-git: ^3.27.0
     syncpack: ^8.4.11
@@ -4876,6 +4890,13 @@ __metadata:
   version: 5.2.0
   resolution: "ansi-styles@npm:5.2.0"
   checksum: d7f4e97ce0623aea6bc0d90dcd28881ee04cba06c570b97fd3391bd7a268eedfd9d5e2dd4fdcbdd82b8105df5faf6f24aaedc08eaf3da898e702db5948f63469
+  languageName: node
+  linkType: hard
+
+"ansi-styles@npm:^6.1.0":
+  version: 6.2.1
+  resolution: "ansi-styles@npm:6.2.1"
+  checksum: ef940f2f0ced1a6347398da88a91da7930c33ecac3c77b72c5905f8b8fe402c52e6fde304ff5347f616e27a742da3f1dc76de98f6866c69251ad0b07a66776d9
   languageName: node
   linkType: hard
 
@@ -5196,7 +5217,7 @@ __metadata:
     npm-run-all: ^4.1.5
     puppeteer: ^23.9.0
     reflect-metadata: ^0.2.2
-    rimraf: ^4.1.2
+    rimraf: ^6.0.1
     ts-jest: ^29.1.5
     typemoq: ^2.1.0
     typescript: ^5.5.3
@@ -5227,7 +5248,7 @@ __metadata:
     lodash: ^4.17.21
     npm-run-all: ^4.1.5
     reflect-metadata: ^0.2.2
-    rimraf: ^4.1.2
+    rimraf: ^6.0.1
     ts-jest: ^29.1.5
     typemoq: ^2.1.0
     typescript: ^5.5.3
@@ -5310,7 +5331,7 @@ __metadata:
     p-limit: ^3.1.0
     pretty-format: ^29.7.0
     reflect-metadata: ^0.2.2
-    rimraf: ^4.1.2
+    rimraf: ^6.0.1
     storage-documents: "workspace:*"
     ts-jest: ^29.1.5
     ts-loader: ^9.5.1
@@ -6395,7 +6416,7 @@ __metadata:
     npm-run-all: ^4.1.5
     raw-body: ^2.5.1
     reflect-metadata: ^0.2.2
-    rimraf: ^4.1.2
+    rimraf: ^6.0.1
     serialize-error: ^8.1.0
     sha.js: ^2.4.11
     ts-jest: ^29.1.5
@@ -6624,7 +6645,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cross-spawn@npm:^6.0.5, cross-spawn@npm:^7.0.2, cross-spawn@npm:^7.0.3":
+"cross-spawn@npm:^6.0.5, cross-spawn@npm:^7.0.0, cross-spawn@npm:^7.0.2, cross-spawn@npm:^7.0.3":
   version: 7.0.6
   resolution: "cross-spawn@npm:7.0.6"
   dependencies:
@@ -7248,7 +7269,7 @@ __metadata:
   dependencies:
     cpy-cli: ^4.1.0
     npm-run-all: ^4.1.5
-    rimraf: ^4.1.2
+    rimraf: ^6.0.1
   languageName: unknown
   linkType: soft
 
@@ -7267,7 +7288,7 @@ __metadata:
     jest-junit: ^16.0.0
     node-loader: ^2.0.0
     npm-run-all: ^4.1.5
-    rimraf: ^4.1.2
+    rimraf: ^6.0.1
     ts-jest: ^29.1.5
     ts-loader: ^9.5.1
     typescript: ^5.5.3
@@ -7276,6 +7297,13 @@ __metadata:
     webpack-ignore-dynamic-require: ^1.0.0
   languageName: unknown
   linkType: soft
+
+"eastasianwidth@npm:^0.2.0":
+  version: 0.2.0
+  resolution: "eastasianwidth@npm:0.2.0"
+  checksum: 7d00d7cd8e49b9afa762a813faac332dee781932d6f2c848dc348939c4253f1d4564341b7af1d041853bc3f32c2ef141b58e0a4d9862c17a7f08f68df1e0f1ed
+  languageName: node
+  linkType: hard
 
 "ecc-jsbn@npm:~0.1.1":
   version: 0.1.2
@@ -7358,6 +7386,13 @@ __metadata:
   version: 8.0.0
   resolution: "emoji-regex@npm:8.0.0"
   checksum: d4c5c39d5a9868b5fa152f00cada8a936868fd3367f33f71be515ecee4c803132d11b31a6222b2571b1e5f7e13890156a94880345594d0ce7e3c9895f560f192
+  languageName: node
+  linkType: hard
+
+"emoji-regex@npm:^9.2.2":
+  version: 9.2.2
+  resolution: "emoji-regex@npm:9.2.2"
+  checksum: 8487182da74aabd810ac6d6f1994111dfc0e331b01271ae01ec1eb0ad7b5ecc2bbbbd2f053c05cb55a1ac30449527d819bbfbf0e3de1023db308cbcb47f86601
   languageName: node
   linkType: hard
 
@@ -8438,6 +8473,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"foreground-child@npm:^3.1.0":
+  version: 3.3.0
+  resolution: "foreground-child@npm:3.3.0"
+  dependencies:
+    cross-spawn: ^7.0.0
+    signal-exit: ^4.0.1
+  checksum: 1989698488f725b05b26bc9afc8a08f08ec41807cd7b92ad85d96004ddf8243fd3e79486b8348c64a3011ae5cc2c9f0936af989e1f28339805d8bc178a75b451
+  languageName: node
+  linkType: hard
+
 "forever-agent@npm:^0.6.1, forever-agent@npm:~0.6.1":
   version: 0.6.1
   resolution: "forever-agent@npm:0.6.1"
@@ -8677,7 +8722,7 @@ __metadata:
     mockdate: ^3.0.5
     npm-run-all: ^4.1.5
     reflect-metadata: ^0.2.2
-    rimraf: ^4.1.2
+    rimraf: ^6.0.1
     service-library: "workspace:*"
     storage-documents: "workspace:*"
     ts-jest: ^29.1.5
@@ -8895,6 +8940,22 @@ __metadata:
     minimatch: ^5.0.1
     once: ^1.3.0
   checksum: 50bcdea19d8e79d8de5f460b1939ffc2b3299eac28deb502093fdca22a78efebc03e66bf54f0abc3d3d07d8134d19a32850288b7440d77e072aa55f9d33b18c5
+  languageName: node
+  linkType: hard
+
+"glob@npm:^11.0.0":
+  version: 11.0.0
+  resolution: "glob@npm:11.0.0"
+  dependencies:
+    foreground-child: ^3.1.0
+    jackspeak: ^4.0.1
+    minimatch: ^10.0.0
+    minipass: ^7.1.2
+    package-json-from-dist: ^1.0.0
+    path-scurry: ^2.0.0
+  bin:
+    glob: dist/esm/bin.mjs
+  checksum: 8a2dd914d5776987be5244624d9491bbcaf19f2387e06783737003ff696ebfd2264190c47014f8709c1c02d8bc892f17660cf986c587b107e194c0a3151ab333
   languageName: node
   linkType: hard
 
@@ -9295,7 +9356,7 @@ __metadata:
     logger: "workspace:*"
     npm-run-all: ^4.1.5
     reflect-metadata: ^0.2.2
-    rimraf: ^4.1.2
+    rimraf: ^6.0.1
     service-library: "workspace:*"
     shebang-loader: ^0.0.1
     ts-jest: ^29.1.5
@@ -10225,6 +10286,15 @@ __metadata:
     html-escaper: ^2.0.0
     istanbul-lib-report: ^3.0.0
   checksum: ef6e0d9ed05ecab1974c6eb46cc2a12d8570911934192db4ed40cf1978449240ea80aae32c4dd5555b67407cdf860212d1a9e415443af69641aa57ed1da5ebbb
+  languageName: node
+  linkType: hard
+
+"jackspeak@npm:^4.0.1":
+  version: 4.0.2
+  resolution: "jackspeak@npm:4.0.2"
+  dependencies:
+    "@isaacs/cliui": ^8.0.2
+  checksum: 210030029edfa1658328799ad88c3d0fc057c4cb8a069fc4137cc8d2cc4b65c9721c6e749e890f9ca77a954bb54f200f715b8896e50d330e5f3e902e72b40974
   languageName: node
   linkType: hard
 
@@ -11418,7 +11488,7 @@ __metadata:
     moment: ^2.29.4
     npm-run-all: ^4.1.5
     reflect-metadata: ^0.2.2
-    rimraf: ^4.1.2
+    rimraf: ^6.0.1
     ts-jest: ^29.1.5
     typemoq: ^2.1.0
     typescript: ^5.5.3
@@ -11477,6 +11547,13 @@ __metadata:
   version: 10.4.3
   resolution: "lru-cache@npm:10.4.3"
   checksum: 6476138d2125387a6d20f100608c2583d415a4f64a0fecf30c9e2dda976614f09cad4baa0842447bd37dd459a7bd27f57d9d8f8ce558805abd487c583f3d774a
+  languageName: node
+  linkType: hard
+
+"lru-cache@npm:^11.0.0":
+  version: 11.0.2
+  resolution: "lru-cache@npm:11.0.2"
+  checksum: f9c27c58919a30f42834de9444de9f75bcbbb802c459239f96dd449ad880d8f9a42f51556d13659864dc94ab2dbded9c4a4f42a3e25a45b6da01bb86111224df
   languageName: node
   linkType: hard
 
@@ -11783,6 +11860,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"minimatch@npm:^10.0.0":
+  version: 10.0.1
+  resolution: "minimatch@npm:10.0.1"
+  dependencies:
+    brace-expansion: ^2.0.1
+  checksum: f5b63c2f30606091a057c5f679b067f84a2cd0ffbd2dbc9143bda850afd353c7be81949ff11ae0c86988f07390eeca64efd7143ee05a0dab37f6c6b38a2ebb6c
+  languageName: node
+  linkType: hard
+
 "minimatch@npm:^3.0.4, minimatch@npm:^3.0.5, minimatch@npm:^3.1.2":
   version: 3.1.2
   resolution: "minimatch@npm:3.1.2"
@@ -11920,7 +12006,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"minipass@npm:^5.0.0 || ^6.0.2 || ^7.0.0":
+"minipass@npm:^5.0.0 || ^6.0.2 || ^7.0.0, minipass@npm:^7.1.2":
   version: 7.1.2
   resolution: "minipass@npm:7.1.2"
   checksum: 2bfd325b95c555f2b4d2814d49325691c7bee937d753814861b0b49d5edcda55cbbf22b6b6a60bb91eddac8668771f03c5ff647dcd9d0f798e9548b9cdc46ee3
@@ -12685,6 +12771,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"package-json-from-dist@npm:^1.0.0":
+  version: 1.0.1
+  resolution: "package-json-from-dist@npm:1.0.1"
+  checksum: 58ee9538f2f762988433da00e26acc788036914d57c71c246bf0be1b60cdbd77dd60b6a3e1a30465f0b248aeb80079e0b34cb6050b1dfa18c06953bb1cbc7602
+  languageName: node
+  linkType: hard
+
 "parallel-workers@workspace:packages/parallel-workers":
   version: 0.0.0-use.local
   resolution: "parallel-workers@workspace:packages/parallel-workers"
@@ -12699,7 +12792,7 @@ __metadata:
     lodash: ^4.17.21
     moment: ^2.29.4
     npm-run-all: ^4.1.5
-    rimraf: ^4.1.2
+    rimraf: ^6.0.1
     storage-documents: "workspace:*"
     ts-jest: ^29.1.5
     ts-loader: ^9.5.1
@@ -12856,6 +12949,16 @@ __metadata:
     lru-cache: ^10.2.0
     minipass: ^5.0.0 || ^6.0.2 || ^7.0.0
   checksum: 890d5abcd593a7912dcce7cf7c6bf7a0b5648e3dee6caf0712c126ca0a65c7f3d7b9d769072a4d1baf370f61ce493ab5b038d59988688e0c5f3f646ee3c69023
+  languageName: node
+  linkType: hard
+
+"path-scurry@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "path-scurry@npm:2.0.0"
+  dependencies:
+    lru-cache: ^11.0.0
+    minipass: ^7.1.2
+  checksum: 9953ce3857f7e0796b187a7066eede63864b7e1dfc14bf0484249801a5ab9afb90d9a58fc533ebb1b552d23767df8aa6a2c6c62caf3f8a65f6ce336a97bbb484
   languageName: node
   linkType: hard
 
@@ -13125,7 +13228,7 @@ __metadata:
     npm-run-all: ^4.1.5
     puppeteer: ^23.9.0
     reflect-metadata: ^0.2.2
-    rimraf: ^4.1.2
+    rimraf: ^6.0.1
     scanner-global-library: "workspace:*"
     storage-documents: "workspace:*"
     ts-jest: ^29.1.5
@@ -13160,7 +13263,7 @@ __metadata:
     node-loader: ^2.0.0
     npm-run-all: ^4.1.5
     reflect-metadata: ^0.2.2
-    rimraf: ^4.1.2
+    rimraf: ^6.0.1
     service-library: "workspace:*"
     storage-documents: "workspace:*"
     ts-jest: ^29.1.5
@@ -13208,7 +13311,7 @@ __metadata:
     puppeteer-extra-plugin: ^3.2.3
     puppeteer-extra-plugin-stealth: ^2.11.2
     reflect-metadata: ^0.2.2
-    rimraf: ^4.1.2
+    rimraf: ^6.0.1
     scanner-global-library: "workspace:*"
     service-library: "workspace:*"
     storage-documents: "workspace:*"
@@ -13869,7 +13972,7 @@ __metadata:
     node-loader: ^2.0.0
     npm-run-all: ^4.1.5
     reflect-metadata: ^0.2.2
-    rimraf: ^4.1.2
+    rimraf: ^6.0.1
     service-library: "workspace:*"
     storage-documents: "workspace:*"
     ts-jest: ^29.1.5
@@ -13916,7 +14019,7 @@ __metadata:
     puppeteer-extra-plugin: ^3.2.3
     puppeteer-extra-plugin-stealth: ^2.11.2
     reflect-metadata: ^0.2.2
-    rimraf: ^4.1.2
+    rimraf: ^6.0.1
     scanner-global-library: "workspace:*"
     service-library: "workspace:*"
     storage-documents: "workspace:*"
@@ -14115,7 +14218,7 @@ __metadata:
   dependencies:
     cpy-cli: ^4.1.0
     npm-run-all: ^4.1.5
-    rimraf: ^4.1.2
+    rimraf: ^6.0.1
   languageName: unknown
   linkType: soft
 
@@ -14200,6 +14303,18 @@ __metadata:
   bin:
     rimraf: dist/cjs/src/bin.js
   checksum: 480b8147fd9bcbef3ac118f88a7b1169c3872977a3411a0c84df838bfc30e175a394c0db6f9619fc8b8a886a18c6d779d5e74f380a0075ecc710afaf81b3f50c
+  languageName: node
+  linkType: hard
+
+"rimraf@npm:^6.0.1":
+  version: 6.0.1
+  resolution: "rimraf@npm:6.0.1"
+  dependencies:
+    glob: ^11.0.0
+    package-json-from-dist: ^1.0.0
+  bin:
+    rimraf: dist/esm/bin.mjs
+  checksum: 8ba5b84131c1344e9417cb7e8c05d8368bb73cbe5dd4c1d5eb49fc0b558209781658d18c450460e30607d0b7865bb067482839a2f343b186b07ae87715837e66
   languageName: node
   linkType: hard
 
@@ -14354,7 +14469,7 @@ __metadata:
     puppeteer-extra-plugin: ^3.2.3
     puppeteer-extra-plugin-stealth: ^2.11.2
     reflect-metadata: ^0.2.2
-    rimraf: ^4.1.2
+    rimraf: ^6.0.1
     storage-documents: "workspace:*"
     ts-jest: ^29.1.5
     typemoq: ^2.1.0
@@ -14679,6 +14794,13 @@ __metadata:
   version: 3.0.7
   resolution: "signal-exit@npm:3.0.7"
   checksum: a2f098f247adc367dffc27845853e9959b9e88b01cb301658cfe4194352d8d2bb32e18467c786a7fe15f1d44b233ea35633d076d5e737870b7139949d1ab6318
+  languageName: node
+  linkType: hard
+
+"signal-exit@npm:^4.0.1":
+  version: 4.1.0
+  resolution: "signal-exit@npm:4.1.0"
+  checksum: 64c757b498cb8629ffa5f75485340594d2f8189e9b08700e69199069c8e3070fb3e255f7ab873c05dc0b3cec412aea7402e10a5990cb6a050bd33ba062a6c549
   languageName: node
   linkType: hard
 
@@ -15045,7 +15167,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"string-width@npm:^1.0.2 || 2 || 3 || 4, string-width@npm:^4.1.0, string-width@npm:^4.2.0, string-width@npm:^4.2.3":
+"string-width-cjs@npm:string-width@^4.2.0, string-width@npm:^1.0.2 || 2 || 3 || 4, string-width@npm:^4.1.0, string-width@npm:^4.2.0, string-width@npm:^4.2.3":
   version: 4.2.3
   resolution: "string-width@npm:4.2.3"
   dependencies:
@@ -15064,6 +15186,17 @@ __metadata:
     is-fullwidth-code-point: ^2.0.0
     strip-ansi: ^5.1.0
   checksum: 57f7ca73d201682816d573dc68bd4bb8e1dff8dc9fcf10470fdfc3474135c97175fec12ea6a159e67339b41e86963112355b64529489af6e7e70f94a7caf08b2
+  languageName: node
+  linkType: hard
+
+"string-width@npm:^5.0.1, string-width@npm:^5.1.2":
+  version: 5.1.2
+  resolution: "string-width@npm:5.1.2"
+  dependencies:
+    eastasianwidth: ^0.2.0
+    emoji-regex: ^9.2.2
+    strip-ansi: ^7.0.1
+  checksum: 7369deaa29f21dda9a438686154b62c2c5f661f8dda60449088f9f980196f7908fc39fdd1803e3e01541970287cf5deae336798337e9319a7055af89dafa7193
   languageName: node
   linkType: hard
 
@@ -15149,7 +15282,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"strip-ansi@npm:6.0.1, strip-ansi@npm:^6.0.0, strip-ansi@npm:^6.0.1":
+"strip-ansi-cjs@npm:strip-ansi@^6.0.1, strip-ansi@npm:6.0.1, strip-ansi@npm:^6.0.0, strip-ansi@npm:^6.0.1":
   version: 6.0.1
   resolution: "strip-ansi@npm:6.0.1"
   dependencies:
@@ -15164,6 +15297,15 @@ __metadata:
   dependencies:
     ansi-regex: ^4.1.0
   checksum: bdb5f76ade97062bd88e7723aa019adbfacdcba42223b19ccb528ffb9fb0b89a5be442c663c4a3fb25268eaa3f6ea19c7c3fbae830bd1562d55adccae1fcec46
+  languageName: node
+  linkType: hard
+
+"strip-ansi@npm:^7.0.1":
+  version: 7.1.0
+  resolution: "strip-ansi@npm:7.1.0"
+  dependencies:
+    ansi-regex: ^6.0.1
+  checksum: 859c73fcf27869c22a4e4d8c6acfe690064659e84bef9458aa6d13719d09ca88dcfd40cbf31fd0be63518ea1a643fe070b4827d353e09533a5b0b9fd4553d64d
   languageName: node
   linkType: hard
 
@@ -16788,6 +16930,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"wrap-ansi-cjs@npm:wrap-ansi@^7.0.0, wrap-ansi@npm:^7.0.0":
+  version: 7.0.0
+  resolution: "wrap-ansi@npm:7.0.0"
+  dependencies:
+    ansi-styles: ^4.0.0
+    string-width: ^4.1.0
+    strip-ansi: ^6.0.0
+  checksum: a790b846fd4505de962ba728a21aaeda189b8ee1c7568ca5e817d85930e06ef8d1689d49dbf0e881e8ef84436af3a88bc49115c2e2788d841ff1b8b5b51a608b
+  languageName: node
+  linkType: hard
+
 "wrap-ansi@npm:^5.1.0":
   version: 5.1.0
   resolution: "wrap-ansi@npm:5.1.0"
@@ -16799,14 +16952,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"wrap-ansi@npm:^7.0.0":
-  version: 7.0.0
-  resolution: "wrap-ansi@npm:7.0.0"
+"wrap-ansi@npm:^8.1.0":
+  version: 8.1.0
+  resolution: "wrap-ansi@npm:8.1.0"
   dependencies:
-    ansi-styles: ^4.0.0
-    string-width: ^4.1.0
-    strip-ansi: ^6.0.0
-  checksum: a790b846fd4505de962ba728a21aaeda189b8ee1c7568ca5e817d85930e06ef8d1689d49dbf0e881e8ef84436af3a88bc49115c2e2788d841ff1b8b5b51a608b
+    ansi-styles: ^6.1.0
+    string-width: ^5.0.1
+    strip-ansi: ^7.0.1
+  checksum: 371733296dc2d616900ce15a0049dca0ef67597d6394c57347ba334393599e800bab03c41d4d45221b6bc967b8c453ec3ae4749eff3894202d16800fdfe0e238
   languageName: node
   linkType: hard
 
