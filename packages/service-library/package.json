@@ -34,7 +34,7 @@
         "jest-junit": "^16.0.0",
         "mockdate": "^3.0.5",
         "npm-run-all": "^4.1.5",
-        "rimraf": "^4.1.2",
+        "rimraf": "^6.0.1",
         "ts-jest": "^29.1.5",
         "typemoq": "^2.1.0",
         "typescript": "^5.5.3"
@@ -42,7 +42,7 @@
     "dependencies": {
         "@azure/cosmos": "^4.0.0",
         "@azure/functions": "^4.5.0",
-        "@azure/identity": "^4.3.0",
+        "@azure/identity": "^4.5.0",
         "@azure/storage-blob": "^12.12.0",
         "@crawlee/puppeteer": "^3.11.5",
         "accessibility-insights-report": "5.1.0",
@@ -61,7 +61,7 @@
         "paralleljs": "^1.1.0",
         "privacy-scan-core": "workspace:*",
         "puppeteer": "^23.9.0",
-        "reflect-metadata": "^0.1.13",
+        "reflect-metadata": "^0.2.2",
         "scanner-global-library": "workspace:*",
         "sha.js": "^2.4.11",
         "storage-documents": "workspace:*",
