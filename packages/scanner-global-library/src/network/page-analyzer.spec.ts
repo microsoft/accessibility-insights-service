@@ -47,6 +47,7 @@ describe(PageAnalyzer, () => {
             .setup((o) => o.goto(url, { waitUntil: 'networkidle2', timeout: PuppeteerTimeoutConfig.defaultNavigationTimeoutMsec }))
             .returns(() => Promise.resolve(puppeteerGotoResponse))
             .verifiable(Times.atLeastOnce());
+        // puppeteerPageMock.setup((o) => o.url()).returns(() => url);
 
         pageAnalyzer = new PageAnalyzer(
             pageResponseProcessorMock.object,
@@ -83,6 +84,10 @@ describe(PageAnalyzer, () => {
             .setup((o) => o.getNavigationError(error))
             .returns(() => ({ errorType: 'UrlNavigationTimeout' } as BrowserError));
         puppeteerPageMock.reset();
+        puppeteerPageMock
+            .setup((o) => o.url())
+            .returns(() => url)
+            .verifiable(Times.atLeastOnce());
         puppeteerPageMock
             .setup((o) => o.goto(url, { waitUntil: 'networkidle2', timeout: PuppeteerTimeoutConfig.defaultNavigationTimeoutMsec }))
             .returns(() => Promise.reject(error))
@@ -121,6 +126,10 @@ describe(PageAnalyzer, () => {
             .returns(async () => pageOperation(url, puppeteerPageMock.object))
             .verifiable();
         pageRequestInterceptorMock.setup((o) => o.interceptedRequests).returns(() => interceptedRequests);
+        puppeteerPageMock
+            .setup((o) => o.url())
+            .returns(() => url)
+            .verifiable(Times.atLeastOnce());
 
         const actualResult = await pageAnalyzer.analyze(url, puppeteerPageMock.object);
 
