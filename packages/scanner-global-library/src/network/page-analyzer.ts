@@ -5,7 +5,7 @@ import * as Puppeteer from 'puppeteer';
 import { injectable, inject, optional } from 'inversify';
 import { System, Url } from 'common';
 import { GlobalLogger } from 'logger';
-import { isNil } from 'lodash';
+import { isEmpty, isNil } from 'lodash';
 import { AuthenticationType } from 'storage-documents';
 import { LoginPageDetector } from '../authenticator/login-page-detector';
 import { NavigationResponse, PageOperationResult } from '../page-navigator';
@@ -140,19 +140,18 @@ export class PageAnalyzer {
         let redirection = false;
         let redirectionType: RedirectionType;
 
-        // Should compare encoded Urls
-        const loadedUrl = encodeURI(operationResult.response.url());
-        if (loadedUrl && encodeURI(url) !== loadedUrl) {
+        let loadedUrl = operationResult.response.url();
+        // Check the final URL to catch any missed redirection.
+        if (!isEmpty(loadedUrl) && !isEmpty(page.url()) && encodeURI(loadedUrl) !== encodeURI(page.url())) {
+            loadedUrl = page.url();
+        }
+
+        // Check if requested location was redirected.
+        if (!isEmpty(loadedUrl) && encodeURI(url) !== encodeURI(loadedUrl)) {
             redirection = true;
             const indirectRedirects = this.getIndirectRequests(url);
             redirectionType = indirectRedirects.length > 0 ? 'client' : 'server';
-        } else if (loadedUrl && encodeURI(url) !== encodeURI(page.url())) {
-            // Check the final URL to catch any missed redirection.
-            redirection = true;
-            redirectionType = 'client';
-        }
 
-        if (redirection) {
             this.logger?.logWarn('Page redirection was detected.', {
                 redirectChain: JSON.stringify(this.pageRequestInterceptor.interceptedRequests.map((r) => r.url)),
                 redirectionType,
