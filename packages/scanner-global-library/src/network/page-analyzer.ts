@@ -209,7 +209,7 @@ export class PageAnalyzer {
             });
 
             // Wait for the client initiated redirection to complete.
-            await System.wait(2000);
+            await System.wait(5000);
 
             return { response, navigationTiming: { goto: System.getElapsedTime(timestamp) } as PageNavigationTiming };
         } catch (error) {

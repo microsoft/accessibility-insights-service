@@ -47,6 +47,7 @@ describe(PageAnalyzer, () => {
             .setup((o) => o.goto(url, { waitUntil: 'networkidle2', timeout: PuppeteerTimeoutConfig.defaultNavigationTimeoutMsec }))
             .returns(() => Promise.resolve(puppeteerGotoResponse))
             .verifiable(Times.atLeastOnce());
+        System.wait = async () => Promise.resolve();
 
         pageAnalyzer = new PageAnalyzer(
             pageResponseProcessorMock.object,
