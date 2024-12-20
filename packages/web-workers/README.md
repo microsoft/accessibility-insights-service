@@ -43,7 +43,7 @@ Select **Attach to Azure Functions host** from Debug options within Visual Studi
 
 When debugging a durable function, it is recommended to trigger durable function instance directly. Avoid using timer-based Azure function to trigger a durable function instance. Disable the existing timer-based function (if any) by renaming the corresponding **function.json** file.
 
-To trigger the durable function locally use any HTTP web client tool (Postman, etc..) to send the HTTP POST request to the following URL:
+To trigger the durable function locally use any HTTP web client tool to send the HTTP POST request to the following URL:
 
 ```
 http://localhost:7071/runtime/webhooks/durabletask/orchestrators/<function name>
