@@ -204,12 +204,11 @@ export class PageAnalyzer {
         try {
             this.logger?.logInfo('Navigate page to URL for analysis.');
             const response = await page.goto(url, {
-                waitUntil: 'networkidle2',
-                timeout: PuppeteerTimeoutConfig.defaultNavigationTimeoutMsec,
+                // It is necessary to use the `networkidle0` option to ensure that all activities are finalized,
+                // thus obtaining a comprehensive analysis result that includes client script redirection.
+                waitUntil: 'networkidle0',
+                timeout: PuppeteerTimeoutConfig.analysisNavigationTimeoutMsec,
             });
-
-            // Wait for the client initiated redirection to complete.
-            await System.wait(5000);
 
             return { response, navigationTiming: { goto: System.getElapsedTime(timestamp) } as PageNavigationTiming };
         } catch (error) {

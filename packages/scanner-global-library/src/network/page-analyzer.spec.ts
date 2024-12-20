@@ -44,7 +44,7 @@ describe(PageAnalyzer, () => {
         puppeteerGotoResponse = { puppeteerResponse: 'goto', url: () => url, status: () => 200 } as unknown as Puppeteer.HTTPResponse;
         pageOperationResult = { response: puppeteerGotoResponse, navigationTiming: { goto: 100 } as PageNavigationTiming };
         puppeteerPageMock
-            .setup((o) => o.goto(url, { waitUntil: 'networkidle2', timeout: PuppeteerTimeoutConfig.defaultNavigationTimeoutMsec }))
+            .setup((o) => o.goto(url, { waitUntil: 'networkidle0', timeout: PuppeteerTimeoutConfig.analysisNavigationTimeoutMsec }))
             .returns(() => Promise.resolve(puppeteerGotoResponse))
             .verifiable(Times.atLeastOnce());
         System.wait = async () => Promise.resolve();
@@ -89,7 +89,7 @@ describe(PageAnalyzer, () => {
             .returns(() => url)
             .verifiable(Times.atLeastOnce());
         puppeteerPageMock
-            .setup((o) => o.goto(url, { waitUntil: 'networkidle2', timeout: PuppeteerTimeoutConfig.defaultNavigationTimeoutMsec }))
+            .setup((o) => o.goto(url, { waitUntil: 'networkidle0', timeout: PuppeteerTimeoutConfig.analysisNavigationTimeoutMsec }))
             .returns(() => Promise.reject(error))
             .verifiable();
         pageRequestInterceptorMock.setup((o) => o.interceptedRequests).returns(() => interceptedRequests);
