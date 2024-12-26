@@ -64,6 +64,10 @@ export class PageNavigator {
 
     private createPageOperation(page: Puppeteer.Page, url?: string): PageOperation {
         return async () => {
+            // Log the URL being navigated to
+            console.log('Navigate page to URL:', url);
+            // Log the effective navigation timeout value
+            console.log('Effective navigation timeout:', this.waitForOptions.timeout);
             this.logger?.logInfo('Navigate page to URL.', { url });
             const response = await page.goto(url, this.waitForOptions);
 
