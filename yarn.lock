@@ -5255,9 +5255,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"axe-sarif-converter@npm:^2.12.0":
-  version: 2.12.0
-  resolution: "axe-sarif-converter@npm:2.12.0"
+"axe-sarif-converter@npm:^2.13.0":
+  version: 2.13.0
+  resolution: "axe-sarif-converter@npm:2.13.0"
   dependencies:
     "@puppeteer/browsers": ^2.1.0
     "@types/sarif": ">=2.1.1 <=2.1.8"
@@ -5265,7 +5265,7 @@ __metadata:
     yargs: ^17.0.0
   bin:
     axe-sarif-converter: dist/cli.js
-  checksum: 4fac8f640631b14ad36110ae1ee5ac4df2502cea4201b30b7da342365cd4a420980d32adbc176093af3153f983bff38089e8b98ea55df2cb71de62bdd91ab6ff
+  checksum: 38ce6cb0c0856cf7ce6669a18baabac072260f6f57e10b36cb3e7f7713ec788ce798c45ff26560cd2e5f406cc9f9803dd00ec242c7ab02f03b108c90cfc6d711
   languageName: node
   linkType: hard
 
@@ -16527,7 +16527,7 @@ __metadata:
     applicationinsights: ^2.3.1
     axe-core: 4.9.1
     axe-result-converter: "workspace:*"
-    axe-sarif-converter: ^2.12.0
+    axe-sarif-converter: ^2.13.0
     azure-services: "workspace:*"
     common: "workspace:*"
     copy-webpack-plugin: ^11.0.0
