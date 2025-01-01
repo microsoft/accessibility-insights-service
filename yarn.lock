@@ -4647,7 +4647,7 @@ __metadata:
     eslint-plugin-jsdoc: ^48.5.0
     eslint-plugin-prefer-arrow: ^1.2.3
     eslint-plugin-security: ^3.0.1
-    eslint-plugin-sort-class-members: ^1.20.0
+    eslint-plugin-sort-class-members: ^1.21.0
     jest: ^29.7.0
     jest-extended: ^4.0.2
     jest-html-reporter: ^3.10.2
@@ -7856,12 +7856,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-plugin-sort-class-members@npm:^1.20.0":
-  version: 1.20.0
-  resolution: "eslint-plugin-sort-class-members@npm:1.20.0"
+"eslint-plugin-sort-class-members@npm:^1.21.0":
+  version: 1.21.0
+  resolution: "eslint-plugin-sort-class-members@npm:1.21.0"
   peerDependencies:
     eslint: ">=0.8.0"
-  checksum: 210b5bf48d574b2eecfaadfa93ca341442a1d3c1aeaa08e9cdc93bdbf43607c8335bb342ea656679c730a77cc39d4af0b451f14ac5869c7b50530c323c542e08
+  checksum: bada85130ce776541ba90312e2b5b51b209cc7ba31ccfda71e874446f901231ffb907800529ff3b37f5bdc98899d3ec300fb0f1ffdbef051590a1131d918c644
   languageName: node
   linkType: hard
 
