@@ -43,7 +43,7 @@
     },
     "standAlonePackage": "This is a stand-alone package. Do NOT add dependencies to any service packages.",
     "dependencies": {
-        "@apify/log": "2.2.18",
+        "@apify/log": "2.5.11",
         "@axe-core/puppeteer": "4.9.1",
         "@crawlee/browser-pool": "^3.11.5",
         "@crawlee/puppeteer": "^3.11.5",
