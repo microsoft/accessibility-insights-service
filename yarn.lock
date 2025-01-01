@@ -5328,7 +5328,7 @@ __metadata:
     moment: ^2.29.4
     node-cache: ^5.1.2
     npm-run-all: ^4.1.5
-    p-limit: ^3.1.0
+    p-limit: ^6.2.0
     pretty-format: ^29.7.0
     reflect-metadata: ^0.2.2
     rimraf: ^6.0.1
@@ -12683,6 +12683,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"p-limit@npm:^6.2.0":
+  version: 6.2.0
+  resolution: "p-limit@npm:6.2.0"
+  dependencies:
+    yocto-queue: ^1.1.1
+  checksum: ea46ba4a3013daa3335833013156bdcdd8f5c67b49ad2f33b34832b0d528f003d29b55bf5beeedc39ba9d9ada3dab7b1f4b890db3ebc8260a044a011126c6fc9
+  languageName: node
+  linkType: hard
+
 "p-locate@npm:^3.0.0":
   version: 3.0.0
   resolution: "p-locate@npm:3.0.0"
@@ -13304,7 +13313,7 @@ __metadata:
     node-loader: ^2.0.0
     npm-force-resolutions: ^0.0.10
     npm-run-all: ^4.1.5
-    p-limit: ^3.1.0
+    p-limit: ^6.2.0
     privacy-scan-core: "workspace:*"
     puppeteer: ^23.9.0
     puppeteer-extra: ^3.3.6
@@ -14013,7 +14022,7 @@ __metadata:
     node-loader: ^2.0.0
     npm-force-resolutions: ^0.0.10
     npm-run-all: ^4.1.5
-    p-limit: ^3.1.0
+    p-limit: ^6.2.0
     puppeteer: ^23.9.0
     puppeteer-extra: ^3.3.6
     puppeteer-extra-plugin: ^3.2.3
@@ -14617,7 +14626,7 @@ __metadata:
     moment: ^2.29.4
     node-fetch: ^2.6.7
     npm-run-all: ^4.1.5
-    p-limit: ^3.1.0
+    p-limit: ^6.2.0
     paralleljs: ^1.1.0
     privacy-scan-core: "workspace:*"
     puppeteer: ^23.9.0
@@ -16544,7 +16553,7 @@ __metadata:
     node-loader: ^2.0.0
     npm-force-resolutions: ^0.0.10
     npm-run-all: ^4.1.5
-    p-limit: ^3.1.0
+    p-limit: ^6.2.0
     patch-package: ^8.0.0
     puppeteer: ^23.9.0
     puppeteer-extra: ^3.3.6
@@ -16715,7 +16724,7 @@ __metadata:
     moment: ^2.29.4
     node-loader: ^2.0.0
     npm-run-all: ^4.1.5
-    p-limit: ^3.1.0
+    p-limit: ^6.2.0
     reflect-metadata: ^0.2.2
     rimraf: ^6.0.1
     service-library: "workspace:*"
@@ -17235,6 +17244,13 @@ __metadata:
   version: 0.1.0
   resolution: "yocto-queue@npm:0.1.0"
   checksum: f77b3d8d00310def622123df93d4ee654fc6a0096182af8bd60679ddcdfb3474c56c6c7190817c84a2785648cdee9d721c0154eb45698c62176c322fb46fc700
+  languageName: node
+  linkType: hard
+
+"yocto-queue@npm:^1.1.1":
+  version: 1.1.1
+  resolution: "yocto-queue@npm:1.1.1"
+  checksum: f2e05b767ed3141e6372a80af9caa4715d60969227f38b1a4370d60bffe153c9c5b33a862905609afc9b375ec57cd40999810d20e5e10229a204e8bde7ef255c
   languageName: node
   linkType: hard
 
