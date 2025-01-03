@@ -4632,7 +4632,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "accessibility-insights-service@workspace:."
   dependencies:
-    "@types/node": ^20.14.9
+    "@types/node": ^22.10.2
     "@typescript-eslint/eslint-plugin": ^7.15.0
     "@typescript-eslint/eslint-plugin-tslint": ^7.0.2
     "@typescript-eslint/parser": ^8.16.0

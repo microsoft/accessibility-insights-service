@@ -68,7 +68,7 @@ export abstract class PageProcessorBase implements PageProcessor {
                 return;
             }
 
-            const navigationTimeout = context.request.userData?.navigationTimeout ?? 30000; // Default timeout is 30 seconds
+            const navigationTimeout = context.request.userData?.navigationTimeout;
             await this.setOrigin(context.request.url, context.page);
             response = await this.pageNavigator.navigate(context.request.url, context.page, navigationTimeout);
             if (response.browserError) {
@@ -169,6 +169,7 @@ export abstract class PageProcessorBase implements PageProcessor {
         try {
             const userData = context.request.userData;
             const keepUrlFragment = userData?.keepUrlFragment ?? false;
+            const navigationTimeout = userData?.navigationTimeout ?? 30000; // Default timeout is 30 seconds
             const enqueued = await context.enqueueLinks({
                 // eslint-disable-next-line security/detect-non-literal-regexp
                 regexps: this.discoveryPatterns?.length > 0 ? this.discoveryPatterns.map((p) => new RegExp(p)) : undefined,
@@ -176,12 +177,13 @@ export abstract class PageProcessorBase implements PageProcessor {
                     newRequest.keepUrlFragment = keepUrlFragment;
                     if (newRequest.userData) {
                         newRequest.userData.keepUrlFragment = keepUrlFragment;
+                        newRequest.userData.navigationTimeout = navigationTimeout;
                     } else {
                         newRequest.userData = {
                             keepUrlFragment: keepUrlFragment,
+                            navigationTimeout: navigationTimeout
                         };
                     }
-                    console.log("inside page-processor-base");
                     return newRequest;
                 },
             });
