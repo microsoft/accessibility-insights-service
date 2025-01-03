@@ -169,6 +169,12 @@ function getScanArguments(): ScanArguments {
                 default: false,
                 alias: 'keepurlfragment',
             },
+            navigationTimeout: {
+                type: 'number', // Timeout is numeric
+                describe: `The maximum time (in milliseconds) to wait for page navigation to complete. Default is 5000ms.`,
+                default: 5000, // Default timeout value
+                alias: 'navtimeout', // Optional shorthand alias
+            },
         })
         .check((args) => {
             validateScanArguments(args as ScanArguments);

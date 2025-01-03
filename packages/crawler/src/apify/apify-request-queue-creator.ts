@@ -12,6 +12,7 @@ export type RequestQueueOptions = {
     clear?: boolean;
     inputUrls?: string[];
     keepUrlFragment?: boolean;
+    navigationTimeout?: number;
 };
 
 export type ApifyRequestQueueFactory = () => Promise<Crawlee.RequestQueue>;
@@ -36,8 +37,10 @@ export class ApifyRequestQueueCreator implements ResourceCreator {
 
         const requestQueue = await Crawlee.RequestQueue.open(this.requestQueueName);
         const keepUrlFragment = this.getKeepUrlFragment(options?.keepUrlFragment);
+        const navigationTimeout = this.getNavigationTimeout(options?.navigationTimeout);
         const userData = {
             keepUrlFragment: keepUrlFragment,
+            navigationTimeout: navigationTimeout,
         } as Crawlee.Dictionary;
         if (baseUrl) {
             await requestQueue.addRequest({ url: baseUrl.trim(), skipNavigation: true, keepUrlFragment: keepUrlFragment, userData });
@@ -69,5 +72,9 @@ export class ApifyRequestQueueCreator implements ResourceCreator {
 
     private getKeepUrlFragment(keepUrlFragment?: boolean): boolean {
         return keepUrlFragment ?? false;
+    }
+
+    private getNavigationTimeout(navigationTimeout?: number): number {
+        return navigationTimeout ?? 30000;
     }
 }

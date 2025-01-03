@@ -158,7 +158,7 @@ describe(PageProcessorBase, () => {
         } as any;
         processPageMock.setup((o) => o(context)).verifiable();
         pageNavigatorMock
-            .setup((o) => o.navigate(testUrl, puppeteerPageStub))
+            .setup((o) => o.navigate(testUrl, puppeteerPageStub, 123))
             .returns(() => Promise.resolve({}))
             .verifiable();
         const saveScanMetadataFn = jest.fn().mockImplementation(() => Promise.resolve());
@@ -179,7 +179,7 @@ describe(PageProcessorBase, () => {
         const response = { browserError: {} } as NavigationResponse;
         processPageMock.setup((o) => o(context)).verifiable(Times.never());
         pageNavigatorMock
-            .setup((o) => o.navigate(testUrl, puppeteerPageStub))
+            .setup((o) => o.navigate(testUrl, puppeteerPageStub, 123))
             .returns(() => Promise.resolve(response))
             .verifiable();
         const saveBrowserErrorFn = jest.fn().mockImplementation(() => Promise.resolve());
@@ -202,7 +202,7 @@ describe(PageProcessorBase, () => {
             .verifiable();
         setupScanErrorLogging();
         pageNavigatorMock
-            .setup((o) => o.navigate(testUrl, puppeteerPageStub))
+            .setup((o) => o.navigate(testUrl, puppeteerPageStub, 123))
             .returns(() => Promise.resolve({}))
             .verifiable();
         const saveScanMetadataFn = jest.fn().mockImplementation(() => Promise.resolve());

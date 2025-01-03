@@ -31,4 +31,5 @@ export interface ScanArguments {
     adhereFilesystemPattern?: boolean;
     browserOptions?: string[];
     keepUrlFragment?: boolean;
+    navigationTimeout?: number;
 }

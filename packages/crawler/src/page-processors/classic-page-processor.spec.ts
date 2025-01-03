@@ -78,7 +78,7 @@ describe(ClassicPageProcessor, () => {
             url: () => testUrl,
         } as any;
         pageNavigatorMock
-            .setup((o) => o.navigate(testUrl, puppeteerPageStub))
+            .setup((o) => o.navigate(testUrl, puppeteerPageStub, 123))
             .returns(() => Promise.resolve({}))
             .verifiable();
         pageNavigatorMock.setup((o) => o.logger).returns(() => loggerMock.object);
