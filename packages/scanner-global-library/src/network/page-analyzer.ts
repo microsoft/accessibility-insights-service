@@ -210,6 +210,9 @@ export class PageAnalyzer {
                 timeout: PuppeteerTimeoutConfig.analysisNavigationTimeoutMsec,
             });
 
+            // Wait for the client initiated redirection to complete.
+            await System.wait(5000);
+
             return { response, navigationTiming: { goto: System.getElapsedTime(timestamp) } as PageNavigationTiming };
         } catch (error) {
             const browserError = this.pageResponseProcessor.getNavigationError(error as Error);
