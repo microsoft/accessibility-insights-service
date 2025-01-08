@@ -5,7 +5,7 @@ import * as Puppeteer from 'puppeteer';
 import { injectable, inject, optional } from 'inversify';
 import { System, Url } from 'common';
 import { GlobalLogger } from 'logger';
-import { isNil } from 'lodash';
+import { isEmpty, isNil } from 'lodash';
 import { AuthenticationType } from 'storage-documents';
 import { LoginPageDetector } from '../authenticator/login-page-detector';
 import { NavigationResponse, PageOperationResult } from '../page-navigator';
@@ -72,7 +72,7 @@ export class PageAnalyzer {
             };
         }
 
-        const redirectResult = await this.detectRedirection(url, actualResponse.operationResult);
+        const redirectResult = await this.detectRedirection(url, page, actualResponse.operationResult);
         const authenticationType = this.detectAuth(page);
         const result = {
             url,
@@ -136,17 +136,19 @@ export class PageAnalyzer {
         };
     }
 
-    private async detectRedirection(url: string, operationResult: PageOperationResult): Promise<RedirectResult> {
+    private async detectRedirection(url: string, page: Puppeteer.Page, operationResult: PageOperationResult): Promise<RedirectResult> {
         let redirection = false;
         let redirectionType: RedirectionType;
 
-        // Should compare encoded Urls
-        const loadedUrl = encodeURI(operationResult.response.url());
-        if (loadedUrl && encodeURI(url) !== loadedUrl) {
-            redirection = true;
+        let loadedUrl = operationResult.response.url();
+        // Check the final URL to catch any missed redirection.
+        if (!isEmpty(loadedUrl) && !isEmpty(page.url()) && encodeURI(loadedUrl) !== encodeURI(page.url())) {
+            loadedUrl = page.url();
         }
 
-        if (redirection) {
+        // Check if requested location was redirected.
+        if (!isEmpty(loadedUrl) && encodeURI(url) !== encodeURI(loadedUrl)) {
+            redirection = true;
             const indirectRedirects = this.getIndirectRequests(url);
             redirectionType = indirectRedirects.length > 0 ? 'client' : 'server';
 
@@ -202,9 +204,14 @@ export class PageAnalyzer {
         try {
             this.logger?.logInfo('Navigate page to URL for analysis.');
             const response = await page.goto(url, {
-                waitUntil: 'networkidle2',
-                timeout: PuppeteerTimeoutConfig.defaultNavigationTimeoutMsec,
+                // It is necessary to use the `networkidle0` option to ensure that all activities are finalized,
+                // thus obtaining a comprehensive analysis result that includes client script redirection.
+                waitUntil: 'networkidle0',
+                timeout: PuppeteerTimeoutConfig.analysisNavigationTimeoutMsec,
             });
+
+            // Wait for the client initiated redirection to complete.
+            await System.wait(5000);
 
             return { response, navigationTiming: { goto: System.getElapsedTime(timestamp) } as PageNavigationTiming };
         } catch (error) {

@@ -55,7 +55,7 @@ function getScanArguments(): LoadTestArgs {
         alias: 't',
         default: process.env.adAuthToken,
         demandOption: true,
-        description: 'Azure Active Directory auth token. Can be created using Postman. Option can also be set via adAuthToken env variable',
+        description: 'Azure Active Directory auth token. Option can also be set via adAuthToken env variable',
     });
 
     yargs.wrap(yargs.terminalWidth()).describe('help', 'Show help');
