@@ -3381,6 +3381,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@sindresorhus/merge-streams@npm:^2.1.0":
+  version: 2.3.0
+  resolution: "@sindresorhus/merge-streams@npm:2.3.0"
+  checksum: e989d53dee68d7e49b4ac02ae49178d561c461144cea83f66fa91ff012d981ad0ad2340cbd13f2fdb57989197f5c987ca22a74eb56478626f04e79df84291159
+  languageName: node
+  linkType: hard
+
 "@sinonjs/commons@npm:^2.0.0":
   version: 2.0.0
   resolution: "@sinonjs/commons@npm:2.0.0"
@@ -4587,7 +4594,7 @@ __metadata:
     applicationinsights: ^2.3.1
     axe-core: 4.10.2
     convict: ^6.2.4
-    copy-webpack-plugin: ^11.0.0
+    copy-webpack-plugin: ^12.0.2
     dotenv: ^16.0.1
     dts-bundle-generator: ^7.2.0
     encoding-down: ^7.1.0
@@ -4797,7 +4804,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ajv-keywords@npm:^5.0.0":
+"ajv-keywords@npm:^5.1.0":
   version: 5.1.0
   resolution: "ajv-keywords@npm:5.1.0"
   dependencies:
@@ -4820,7 +4827,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ajv@npm:^8.0.0, ajv@npm:^8.0.1, ajv@npm:^8.8.0":
+"ajv@npm:^8.0.0, ajv@npm:^8.0.1":
   version: 8.10.0
   resolution: "ajv@npm:8.10.0"
   dependencies:
@@ -4832,7 +4839,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ajv@npm:^8.17.1":
+"ajv@npm:^8.17.1, ajv@npm:^8.9.0":
   version: 8.17.1
   resolution: "ajv@npm:8.17.1"
   dependencies:
@@ -6497,19 +6504,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"copy-webpack-plugin@npm:^11.0.0":
-  version: 11.0.0
-  resolution: "copy-webpack-plugin@npm:11.0.0"
+"copy-webpack-plugin@npm:^12.0.2":
+  version: 12.0.2
+  resolution: "copy-webpack-plugin@npm:12.0.2"
   dependencies:
-    fast-glob: ^3.2.11
+    fast-glob: ^3.3.2
     glob-parent: ^6.0.1
-    globby: ^13.1.1
+    globby: ^14.0.0
     normalize-path: ^3.0.0
-    schema-utils: ^4.0.0
-    serialize-javascript: ^6.0.0
+    schema-utils: ^4.2.0
+    serialize-javascript: ^6.0.2
   peerDependencies:
     webpack: ^5.1.0
-  checksum: df4f8743f003a29ee7dd3d9b1789998a3a99051c92afb2ba2203d3dacfa696f4e757b275560fafb8f206e520a0aa78af34b990324a0e36c2326cefdeef3ca82e
+  checksum: 98127735336c6db5924688486d3a1854a41835963d0c0b81695b2e3d58c6675164be7d23dee7090b84a56d3c9923175d3d0863ac1942bcc3317d2efc1962b927
   languageName: node
   linkType: hard
 
@@ -7282,7 +7289,7 @@ __metadata:
     "@types/jest": ^29.5.12
     "@types/lodash": ^4.17.6
     "@types/node": ^20.14.9
-    copy-webpack-plugin: ^11.0.0
+    copy-webpack-plugin: ^12.0.2
     fork-ts-checker-webpack-plugin: ^9.0.2
     jest: ^29.7.0
     jest-junit: ^16.0.0
@@ -9080,6 +9087,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"globby@npm:^14.0.0":
+  version: 14.0.2
+  resolution: "globby@npm:14.0.2"
+  dependencies:
+    "@sindresorhus/merge-streams": ^2.1.0
+    fast-glob: ^3.3.2
+    ignore: ^5.2.4
+    path-type: ^5.0.0
+    slash: ^5.1.0
+    unicorn-magic: ^0.1.0
+  checksum: 2cee79efefca4383a825fc2fcbdb37e5706728f2d39d4b63851927c128fff62e6334ef7d4d467949d411409ad62767dc2d214e0f837a0f6d4b7290b6711d485c
+  languageName: node
+  linkType: hard
+
 "gopd@npm:^1.0.1":
   version: 1.0.1
   resolution: "gopd@npm:1.0.1"
@@ -9346,7 +9367,7 @@ __metadata:
     "@types/node": ^20.14.9
     chai: ^4.3.7
     common: "workspace:*"
-    copy-webpack-plugin: ^11.0.0
+    copy-webpack-plugin: ^12.0.2
     dotenv: ^16.0.1
     functional-tests: "workspace:*"
     inversify: ^6.0.1
@@ -9606,6 +9627,13 @@ __metadata:
   version: 5.2.0
   resolution: "ignore@npm:5.2.0"
   checksum: 6b1f926792d614f64c6c83da3a1f9c83f6196c2839aa41e1e32dd7b8d174cef2e329d75caabb62cb61ce9dc432f75e67d07d122a037312db7caa73166a1bdb77
+  languageName: node
+  linkType: hard
+
+"ignore@npm:^5.2.4":
+  version: 5.3.2
+  resolution: "ignore@npm:5.3.2"
+  checksum: 2acfd32a573260ea522ea0bfeff880af426d68f6831f973129e2ba7363f422923cf53aab62f8369cbf4667c7b25b6f8a3761b34ecdb284ea18e87a5262a865be
   languageName: node
   linkType: hard
 
@@ -12785,7 +12813,7 @@ __metadata:
     "@types/jest": ^29.5.12
     "@types/lodash": ^4.17.6
     "@types/node": ^20.14.9
-    copy-webpack-plugin: ^11.0.0
+    copy-webpack-plugin: ^12.0.2
     fork-ts-checker-webpack-plugin: ^9.0.2
     jest: ^29.7.0
     jest-junit: ^16.0.0
@@ -12975,6 +13003,13 @@ __metadata:
   version: 4.0.0
   resolution: "path-type@npm:4.0.0"
   checksum: 5b1e2daa247062061325b8fdbfd1fb56dde0a448fb1455453276ea18c60685bdad23a445dc148cf87bc216be1573357509b7d4060494a6fd768c7efad833ee45
+  languageName: node
+  linkType: hard
+
+"path-type@npm:^5.0.0":
+  version: 5.0.0
+  resolution: "path-type@npm:5.0.0"
+  checksum: 15ec24050e8932c2c98d085b72cfa0d6b4eeb4cbde151a0a05726d8afae85784fc5544f733d8dfc68536587d5143d29c0bd793623fad03d7e61cc00067291cd5
   languageName: node
   linkType: hard
 
@@ -13250,7 +13285,7 @@ __metadata:
     applicationinsights: ^2.3.1
     azure-services: "workspace:*"
     common: "workspace:*"
-    copy-webpack-plugin: ^11.0.0
+    copy-webpack-plugin: ^12.0.2
     dotenv: ^16.0.1
     fork-ts-checker-webpack-plugin: ^9.0.2
     inversify: ^6.0.1
@@ -13291,7 +13326,7 @@ __metadata:
     applicationinsights: ^2.3.1
     azure-services: "workspace:*"
     common: "workspace:*"
-    copy-webpack-plugin: ^11.0.0
+    copy-webpack-plugin: ^12.0.2
     dotenv: ^16.0.1
     fork-ts-checker-webpack-plugin: ^9.0.2
     inversify: ^6.0.1
@@ -13959,7 +13994,7 @@ __metadata:
     applicationinsights: ^2.3.1
     azure-services: "workspace:*"
     common: "workspace:*"
-    copy-webpack-plugin: ^11.0.0
+    copy-webpack-plugin: ^12.0.2
     dotenv: ^16.0.1
     fork-ts-checker-webpack-plugin: ^9.0.2
     inversify: ^6.0.1
@@ -14000,7 +14035,7 @@ __metadata:
     applicationinsights: ^2.3.1
     azure-services: "workspace:*"
     common: "workspace:*"
-    copy-webpack-plugin: ^11.0.0
+    copy-webpack-plugin: ^12.0.2
     dotenv: ^16.0.1
     fork-ts-checker-webpack-plugin: ^9.0.2
     inversify: ^6.0.1
@@ -14499,15 +14534,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"schema-utils@npm:^4.0.0":
-  version: 4.0.0
-  resolution: "schema-utils@npm:4.0.0"
+"schema-utils@npm:^4.2.0":
+  version: 4.3.0
+  resolution: "schema-utils@npm:4.3.0"
   dependencies:
     "@types/json-schema": ^7.0.9
-    ajv: ^8.8.0
+    ajv: ^8.9.0
     ajv-formats: ^2.1.1
-    ajv-keywords: ^5.0.0
-  checksum: c843e92fdd1a5c145dbb6ffdae33e501867f9703afac67bdf35a685e49f85b1dcc10ea250033175a64bd9d31f0555bc6785b8359da0c90bcea30cf6dfbb55a8f
+    ajv-keywords: ^5.1.0
+  checksum: 3dbd9056727c871818eaf3cabeeb5c9e173ae2b17bbf2a9c7a2e49c220fa1a580e44df651c876aea3b4926cecf080730a39e28202cb63f2b68d99872b49cd37a
   languageName: node
   linkType: hard
 
@@ -14566,16 +14601,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"serialize-javascript@npm:^6.0.0":
-  version: 6.0.0
-  resolution: "serialize-javascript@npm:6.0.0"
-  dependencies:
-    randombytes: ^2.1.0
-  checksum: 56f90b562a1bdc92e55afb3e657c6397c01a902c588c0fe3d4c490efdcc97dcd2a3074ba12df9e94630f33a5ce5b76a74784a7041294628a6f4306e0ec84bf93
-  languageName: node
-  linkType: hard
-
-"serialize-javascript@npm:^6.0.1":
+"serialize-javascript@npm:^6.0.1, serialize-javascript@npm:^6.0.2":
   version: 6.0.2
   resolution: "serialize-javascript@npm:6.0.2"
   dependencies:
@@ -14831,6 +14857,13 @@ __metadata:
   version: 4.0.0
   resolution: "slash@npm:4.0.0"
   checksum: da8e4af73712253acd21b7853b7e0dbba776b786e82b010a5bfc8b5051a1db38ed8aba8e1e8f400dd2c9f373be91eb1c42b66e91abb407ff42b10feece5e1d2d
+  languageName: node
+  linkType: hard
+
+"slash@npm:^5.1.0":
+  version: 5.1.0
+  resolution: "slash@npm:5.1.0"
+  checksum: 70434b34c50eb21b741d37d455110258c42d2cf18c01e6518aeb7299f3c6e626330c889c0c552b5ca2ef54a8f5a74213ab48895f0640717cacefeef6830a1ba4
   languageName: node
   linkType: hard
 
@@ -16140,6 +16173,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"unicorn-magic@npm:^0.1.0":
+  version: 0.1.0
+  resolution: "unicorn-magic@npm:0.1.0"
+  checksum: 48c5882ca3378f380318c0b4eb1d73b7e3c5b728859b060276e0a490051d4180966beeb48962d850fd0c6816543bcdfc28629dcd030bb62a286a2ae2acb5acb6
+  languageName: node
+  linkType: hard
+
 "unique-filename@npm:^1.1.1":
   version: 1.1.1
   resolution: "unique-filename@npm:1.1.1"
@@ -16448,7 +16488,7 @@ __metadata:
     applicationinsights: ^2.3.1
     azure-services: "workspace:*"
     common: "workspace:*"
-    copy-webpack-plugin: ^11.0.0
+    copy-webpack-plugin: ^12.0.2
     dotenv: ^16.0.1
     fork-ts-checker-webpack-plugin: ^9.0.2
     inversify: ^6.0.1
@@ -16483,7 +16523,7 @@ __metadata:
     applicationinsights: ^2.3.1
     azure-services: "workspace:*"
     common: "workspace:*"
-    copy-webpack-plugin: ^11.0.0
+    copy-webpack-plugin: ^12.0.2
     fork-ts-checker-webpack-plugin: ^9.0.2
     inversify: ^6.0.1
     jest: ^29.7.0
@@ -16530,7 +16570,7 @@ __metadata:
     axe-sarif-converter: ^2.13.0
     azure-services: "workspace:*"
     common: "workspace:*"
-    copy-webpack-plugin: ^11.0.0
+    copy-webpack-plugin: ^12.0.2
     dotenv: ^16.0.1
     fork-ts-checker-webpack-plugin: ^9.0.2
     inversify: ^6.0.1
@@ -16581,7 +16621,7 @@ __metadata:
     applicationinsights: ^2.3.1
     azure-services: "workspace:*"
     common: "workspace:*"
-    copy-webpack-plugin: ^11.0.0
+    copy-webpack-plugin: ^12.0.2
     dotenv: ^16.0.1
     fork-ts-checker-webpack-plugin: ^9.0.2
     inversify: ^6.0.1
@@ -16623,7 +16663,7 @@ __metadata:
     applicationinsights: ^2.3.1
     azure-services: "workspace:*"
     common: "workspace:*"
-    copy-webpack-plugin: ^11.0.0
+    copy-webpack-plugin: ^12.0.2
     dotenv: ^16.0.1
     fork-ts-checker-webpack-plugin: ^9.0.2
     got: ^11.8.5
@@ -16664,7 +16704,7 @@ __metadata:
     azure-functions-core-tools: ^4.x
     azure-services: "workspace:*"
     common: "workspace:*"
-    copy-webpack-plugin: ^11.0.0
+    copy-webpack-plugin: ^12.0.2
     fork-ts-checker-webpack-plugin: ^9.0.2
     functional-tests: "workspace:*"
     inversify: ^6.0.1
@@ -16702,7 +16742,7 @@ __metadata:
     azure-functions-core-tools: ^4.x
     azure-services: "workspace:*"
     common: "workspace:*"
-    copy-webpack-plugin: ^11.0.0
+    copy-webpack-plugin: ^12.0.2
     durable-functions: ^3.1.0
     fork-ts-checker-webpack-plugin: ^9.0.2
     functional-tests: "workspace:*"
