@@ -50,17 +50,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@apify/consts@npm:^2.15.0":
-  version: 2.15.0
-  resolution: "@apify/consts@npm:2.15.0"
-  checksum: 287878b99a0e4f925a6a31664acf5e0846a1a790ecf0a036fceb65a99fc45c9d25d240a119a5470e6ebee08f3c3e30014131e3a67cea487923aa4906f8c28bd5
-  languageName: node
-  linkType: hard
-
 "@apify/consts@npm:^2.20.0":
   version: 2.20.0
   resolution: "@apify/consts@npm:2.20.0"
   checksum: 6a016fab9e5f2503e8c68565e6bcc9fd098341d0ca697bfbaed550d472123c8d0a3036a1dd133eaa064db8343453dab1d272af1b869cb3ca909686096732dad5
+  languageName: node
+  linkType: hard
+
+"@apify/consts@npm:^2.36.0":
+  version: 2.36.0
+  resolution: "@apify/consts@npm:2.36.0"
+  checksum: ab860ecc4e729e43ff3acc79bf922559ce36d955ff27b6187c79a5603c589ce565d8943c2b64249aef7a40caaa4adbb06c0c456e20220bf0a9c5fa2955fa7586
   languageName: node
   linkType: hard
 
@@ -71,13 +71,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@apify/log@npm:2.2.18":
-  version: 2.2.18
-  resolution: "@apify/log@npm:2.2.18"
+"@apify/log@npm:2.5.12":
+  version: 2.5.12
+  resolution: "@apify/log@npm:2.5.12"
   dependencies:
-    "@apify/consts": ^2.15.0
+    "@apify/consts": ^2.36.0
     ansi-colors: ^4.1.1
-  checksum: 82b76763982276789eaa411e31440374f16c06319d02aebda97afa5e4929ab24f2a27116d2c71703c2fb712a7be7d9c408ab357caa0901a35ad1a472215bcbb5
+  checksum: d47846a4fd2420a7f5b7ed628b3c956e53a8c8a33bed70b72dbb157c57c6ff268e98be9d274276e61368c10eedf913b0983c679c779eac24f710b661d004c004
   languageName: node
   linkType: hard
 
@@ -4499,7 +4499,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "accessibility-insights-crawler@workspace:packages/crawler"
   dependencies:
-    "@apify/log": 2.2.18
+    "@apify/log": 2.5.12
     "@axe-core/puppeteer": 4.10.1
     "@crawlee/browser-pool": ^3.11.5
     "@crawlee/puppeteer": ^3.11.5
@@ -4563,7 +4563,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "accessibility-insights-scan@workspace:packages/cli"
   dependencies:
-    "@apify/log": 2.2.18
+    "@apify/log": 2.5.12
     "@axe-core/puppeteer": 4.10.1
     "@crawlee/browser-pool": ^3.11.5
     "@crawlee/puppeteer": ^3.11.5
@@ -11468,7 +11468,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "logger@workspace:packages/logger"
   dependencies:
-    "@apify/log": 2.2.18
+    "@apify/log": 2.5.12
     "@opentelemetry/api": ^1.4.1
     "@opentelemetry/exporter-metrics-otlp-grpc": ^0.41.0
     "@opentelemetry/resources": ^1.15.0
