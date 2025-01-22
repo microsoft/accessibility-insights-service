@@ -31,12 +31,13 @@ function setupAADAuthenticationFlow(
     if (passwordAuthenticationPreference) {
         pageMock.setup((p) => p.waitForSelector('input[name="loginfmt"]')).verifiable(Times.exactly(1));
         pageMock
-            .setup((p) => p.waitForSelector('#FormsAuthentication'))
-            .returns(() => Promise.reject('TimeoutError: waiting for selector `#FormsAuthentication` failed: timeout 30000ms exceeded'));
-        pageMock.setup((p) => p.waitForSelector('input[type="password"]')).verifiable(Times.exactly(1));
+            .setup((p) => p.waitForSelector('#FormsAuthentication', { timeout: 10000 }))
+            .returns(() => Promise.reject('TimeoutError: waiting for selector `#FormsAuthentication` failed: timeout 10000ms exceeded'));
+        pageMock.setup((p) => p.waitForSelector('input[type="password"]', { timeout: 10000 })).verifiable(Times.exactly(1));
         pageMock.setup((p) => p.click('input[type="password"]')).verifiable(Times.exactly(1));
     } else {
-        pageMock.setup((p) => p.waitForSelector(It.isAnyString())).verifiable(Times.exactly(2));
+        pageMock.setup((p) => p.waitForSelector('#FormsAuthentication', { timeout: 10000 })).verifiable(Times.exactly(1));
+        pageMock.setup((p) => p.waitForSelector('input[type="password"]', { timeout: 10000 })).verifiable(Times.exactly(1));
         pageMock.setup((p) => p.click('#FormsAuthentication')).verifiable(Times.exactly(1));
     }
     if (success) {
@@ -142,11 +143,11 @@ describe(AzureActiveDirectoryAuthentication, () => {
         pageMock.setup((p) => p.type(It.isAnyString(), accountName)).verifiable(Times.exactly(1));
         pageMock.setup((o) => o.waitForNavigation()).verifiable(Times.exactly(1));
         pageMock
-            .setup((p) => p.waitForSelector('#FormsAuthentication'))
-            .returns(() => Promise.reject('TimeoutError: waiting for selector `#FormsAuthentication` failed: timeout 30000ms exceeded'));
+            .setup((p) => p.waitForSelector('#FormsAuthentication', { timeout: 10000 }))
+            .returns(() => Promise.reject('TimeoutError: waiting for selector `#FormsAuthentication` failed: timeout 10000ms exceeded'));
         pageMock
-            .setup((p) => p.waitForSelector('input[type="password"]'))
-            .returns(() => Promise.reject('TimeoutError: waiting for selector `input[type="password"]` failed: timeout 30000ms exceeded'));
+            .setup((p) => p.waitForSelector('input[type="password"]', { timeout: 10000 }))
+            .returns(() => Promise.reject('TimeoutError: waiting for selector `input[type="password"]` failed: timeout 10000ms exceeded'));
         pageMock
             .setup((p) => p.url())
             .returns(() => 'https://login.microsoftonline.com')
@@ -154,7 +155,7 @@ describe(AzureActiveDirectoryAuthentication, () => {
 
         expect.assertions(1);
         const expectedErrorMessage = new Error(
-            'Authentication failed. Authentication requires a non-people service account. To learn how to set up a service account, visit: https://aka.ms/AI-action-auth. TimeoutError: waiting for selector `input[type="password"]` failed: timeout 30000ms exceeded',
+            'Authentication failed. Authentication requires a non-people service account. To learn how to set up a service account, visit: https://aka.ms/AI-action-auth. TimeoutError: waiting for selector `input[type="password"]` failed: timeout 10000ms exceeded',
         );
 
         try {
