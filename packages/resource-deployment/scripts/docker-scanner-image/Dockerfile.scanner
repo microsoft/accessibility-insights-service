@@ -1,7 +1,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
 
-FROM prescanner
+FROM engineering.microsoft.com/compliance/scanner:prescanner
 
 ARG BUILD_KEY=
 ARG INSTALLATION_TYPE=
