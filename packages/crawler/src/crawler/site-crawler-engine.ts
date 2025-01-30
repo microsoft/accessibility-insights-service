@@ -78,7 +78,8 @@ export class SiteCrawlerEngine implements CrawlerEngine {
                         }
                     },
                 ],
-                // A new flag in @crawlee v3.9.1 checks for inactive browsers. The default value is 10 seconds, but during AAD Auth, the browser remains inactive for 10 seconds while waiting for #FormsAuthenticator and password selectors.
+                // A new flag in @crawlee v3.9.1 checks for inactive browsers. The default value is 10 seconds.
+                // During AAD Auth, the browser remains inactive for 10 seconds while waiting for FormsAuthenticator and password selectors.
                 // Therefore, we have increased this time to prevent the browser from closing prematurely.
                 retireInactiveBrowserAfterSecs: 30,
             },
