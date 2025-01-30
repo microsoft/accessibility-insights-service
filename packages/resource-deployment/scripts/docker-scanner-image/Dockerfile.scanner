@@ -1,6 +1,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
 
+# The image is available in the local registry only.
 FROM mcr.microsoft.com/windows/prescanner
 
 ARG BUILD_KEY=

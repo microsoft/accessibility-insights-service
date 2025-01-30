@@ -1,6 +1,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
 
+# The image is available in the local registry only.
 FROM mcr.microsoft.com/windows/web-api-scan-runner:prescanner
 
 CMD ["powershell.exe", "./web-api-scan-runner.ps1", "-nodeargs --inspect-brk=0.0.0.0"]
