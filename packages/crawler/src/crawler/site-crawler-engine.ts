@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import * as fs from 'fs';
 import * as Crawlee from '@crawlee/puppeteer';
 import { inject, injectable, optional } from 'inversify';
 import { isEmpty } from 'lodash';
@@ -35,16 +34,12 @@ export class SiteCrawlerEngine implements CrawlerEngine {
         this.crawlerConfiguration.setMemoryMBytes(crawlerRunOptions.memoryMBytes);
         this.crawlerConfiguration.setSilentMode(crawlerRunOptions.silentMode);
 
-        const userDataDirectory = `${__dirname}/ChromeData`;
-        fs.rmSync(userDataDirectory, { recursive: true, force: true });
-
         const puppeteerOptions = crawlerRunOptions.browserOptions ? crawlerRunOptions.browserOptions.map((o) => `--${o}`) : [];
         const puppeteerDefaultOptions = [
             '--disable-dev-shm-usage',
             '--no-sandbox',
             '--disable-setuid-sandbox',
             '--js-flags=--max-old-space-size=8192',
-            `--user-data-dir=${userDataDirectory}`,
         ];
 
         const pageProcessor = this.pageProcessorFactory();
@@ -83,6 +78,9 @@ export class SiteCrawlerEngine implements CrawlerEngine {
                         }
                     },
                 ],
+                // A new flag in @crawlee v3.9.1 checks for inactive browsers. The default value is 10 seconds, but during AAD Auth, the browser remains inactive for 10 seconds while waiting for #FormsAuthenticator and password selectors.
+                // Therefore, we have increased this time to prevent the browser from closing prematurely.
+                retireInactiveBrowserAfterSecs: 30,
             },
         };
 
