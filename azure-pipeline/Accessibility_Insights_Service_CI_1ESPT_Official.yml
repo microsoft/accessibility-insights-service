@@ -22,6 +22,8 @@ extends:
                 name: AccessibilityInsights-ubuntu-20.04
                 image: Win-2022
                 os: windows
+            policheck:
+                enabled: true
             tsa:
                 enabled: true
                 configFile: '$(Build.SourcesDirectory)/azure-pipeline/TSAOptions.json'
