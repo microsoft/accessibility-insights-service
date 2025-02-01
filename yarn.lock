@@ -4589,7 +4589,7 @@ __metadata:
     convict: ^6.2.4
     copy-webpack-plugin: ^11.0.0
     dotenv: ^16.0.1
-    dts-bundle-generator: ^7.2.0
+    dts-bundle-generator: ^9.5.1
     encoding-down: ^7.1.0
     exponential-backoff: ^3.1.0
     filenamify: ^4.3.0
@@ -7229,15 +7229,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dts-bundle-generator@npm:^7.2.0":
-  version: 7.2.0
-  resolution: "dts-bundle-generator@npm:7.2.0"
+"dts-bundle-generator@npm:^9.5.1":
+  version: 9.5.1
+  resolution: "dts-bundle-generator@npm:9.5.1"
   dependencies:
-    typescript: ">=4.5.2"
+    typescript: ">=5.0.2"
     yargs: ^17.6.0
   bin:
     dts-bundle-generator: dist/bin/dts-bundle-generator.js
-  checksum: 0f00792b604873f2c9fe59b5bb279b9592404c8c5a598a7b188269e98ad472b383b5e571c5b1dce2558821fb003ab39b32d12f89f1b48502fc9473d01d61a1e0
+  checksum: e67b0a3d7e2e53035aa3940d15ae9d6e5a9894dc885c74c9b3118ca588076f24d4c817bfb267aa6b72ad86fc903adad5cfb5c1c79a55b2660ed7edceb4a6494f
   languageName: node
   linkType: hard
 
@@ -16048,13 +16048,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@npm:>=4.5.2":
-  version: 5.2.2
-  resolution: "typescript@npm:5.2.2"
+"typescript@npm:>=5.0.2":
+  version: 5.7.3
+  resolution: "typescript@npm:5.7.3"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: 7912821dac4d962d315c36800fe387cdc0a6298dba7ec171b350b4a6e988b51d7b8f051317786db1094bd7431d526b648aba7da8236607febb26cf5b871d2d3c
+  checksum: 6c38b1e989918e576f0307e6ee013522ea480dfce5f3ca85c9b2d8adb1edeffd37f4f30cd68de0c38a44563d12ba922bdb7e36aa2dac9c51de5d561e6e9a2e9c
   languageName: node
   linkType: hard
 
@@ -16068,13 +16068,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@>=4.5.2#~builtin<compat/typescript>":
-  version: 5.2.2
-  resolution: "typescript@patch:typescript@npm%3A5.2.2#~builtin<compat/typescript>::version=5.2.2&hash=f456af"
+"typescript@patch:typescript@>=5.0.2#~builtin<compat/typescript>":
+  version: 5.7.3
+  resolution: "typescript@patch:typescript@npm%3A5.7.3#~builtin<compat/typescript>::version=5.7.3&hash=f456af"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: 07106822b4305de3f22835cbba949a2b35451cad50888759b6818421290ff95d522b38ef7919e70fb381c5fe9c1c643d7dea22c8b31652a717ddbd57b7f4d554
+  checksum: 633cd749d6cd7bc842c6b6245847173bba99742a60776fae3c0fbcc0d1733cd51a733995e5f4dadd8afb0e64e57d3c7dbbeae953a072ee303940eca69e22f311
   languageName: node
   linkType: hard
 
