@@ -35,14 +35,16 @@ export class PageNavigator {
         @inject(Logger) @optional() public readonly logger: Logger,
     ) {}
 
-    public async navigate(url: string, page: Puppeteer.Page): Promise<NavigationResponse> {
+    public async navigate(url: string, page: Puppeteer.Page, navigationTimeout:number): Promise<NavigationResponse> {
         await this.pageNavigationHooks.preNavigation(page);
-        const pageOperation = this.createPageOperation(page, url);
 
-        return this.navigatePage(pageOperation, page);
+        this.waitForOptions.timeout = navigationTimeout;
+        console.log("inside page-navigator.ts/navigate" + this.waitForOptions.timeout);
+        const pageOperation = this.createPageOperation(page, url);
+        return this.navigatePage(pageOperation, page, navigationTimeout);
     }
 
-    private async navigatePage(pageOperation: PageOperation, page: Puppeteer.Page): Promise<NavigationResponse> {
+    private async navigatePage(pageOperation: PageOperation, page: Puppeteer.Page, navigationTimeout: number): Promise<NavigationResponse> {
         const opResult = await this.invokePageOperation(pageOperation);
 
         if (opResult.browserError) {
@@ -56,14 +58,20 @@ export class PageNavigator {
             opResult.browserError = browserError;
         });
 
+        //const pageOperationnew = this.createPageOperation(page, url);
         return {
             httpResponse: opResult.response,
             browserError: opResult.browserError,
+
         };
     }
 
     private createPageOperation(page: Puppeteer.Page, url?: string): PageOperation {
         return async () => {
+            // Log the URL being navigated to
+            console.log('Inside the page-navigator and Navigate page to URL:', url);
+            // Log the effective navigation timeout value
+            console.log('Effective navigation timeout:', this.waitForOptions.timeout);
             this.logger?.logInfo('Navigate page to URL.', { url });
             const response = await page.goto(url, this.waitForOptions);
 
