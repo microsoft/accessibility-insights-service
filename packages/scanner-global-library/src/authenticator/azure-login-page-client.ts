@@ -14,7 +14,7 @@ export interface LoginPageClient {
     login(page: Puppeteer.Page): Promise<NavigationResponse>;
 }
 
-export declare type AuthenticationSteps = 'account' | 'password' | 'passwordOptions' | 'permissions' | 'kmsi';
+export declare type AuthenticationSteps = 'account' | 'password' | 'authenticationOptions' | 'permissions' | 'kmsi';
 
 /**
  * The Microsoft Azure Login page https://login.microsoftonline.com/ automation client.
@@ -59,7 +59,7 @@ export class AzureLoginPageClient implements LoginPageClient {
             await page.click('#FormsAuthentication');
             this.logger?.logInfo('The option for password authentication has been selected.');
         } catch (error) {
-            const formError = this.getFormError('passwordOptions', error);
+            const formError = this.getFormError('authenticationOptions', error);
             if (formError) {
                 return { browserError: formError };
             }
