@@ -5,14 +5,16 @@ import * as Puppeteer from 'puppeteer';
 import { inject, optional, injectable } from 'inversify';
 import { AuthenticationType } from 'storage-documents';
 import { GlobalLogger } from 'logger';
-import { System } from 'common';
 import { PageNavigator, NavigationResponse } from '../page-navigator';
+import { BrowserError } from '../browser-error';
 import { ServicePrincipalCredentialProvider } from './service-principal-credential-provider';
 
 export interface LoginPageClient {
     authenticationType: AuthenticationType;
     login(page: Puppeteer.Page): Promise<NavigationResponse>;
 }
+
+export declare type AuthenticationSteps = 'account' | 'password' | 'passwordOptions' | 'permissions' | 'kmsi';
 
 /**
  * The Microsoft Azure Login page https://login.microsoftonline.com/ automation client.
@@ -21,7 +23,7 @@ export interface LoginPageClient {
 export class AzureLoginPageClient implements LoginPageClient {
     public readonly authenticationType = 'entraId';
 
-    private readonly selectorTimeoutMsec = 10000;
+    private readonly selectorTimeoutMsec = 5000;
 
     constructor(
         @inject(PageNavigator) private readonly pageNavigator: PageNavigator,
@@ -38,14 +40,9 @@ export class AzureLoginPageClient implements LoginPageClient {
         try {
             await page.waitForSelector('input[name="loginfmt"]', { timeout: this.selectorTimeoutMsec });
             await page.type('input[name="loginfmt"]', azureAuthClientCredential.name);
+            this.logger?.logInfo('The account name has been entered into the login form.');
         } catch (error) {
-            return {
-                browserError: {
-                    errorType: 'AuthenticationError',
-                    message: error.name === 'TimeoutError' ? 'Failed to detect account input prompt on a login page.' : error.message,
-                    stack: error.stack,
-                },
-            };
+            return { browserError: this.getFormError('account', error) };
         }
 
         // Submit account form
@@ -54,40 +51,38 @@ export class AzureLoginPageClient implements LoginPageClient {
         if (navigationResponse.browserError !== undefined) {
             return this.getErrorResponse(navigationResponse, page, '#usernameError');
         }
+        this.logger?.logInfo('The login form with the account name has been submitted.');
 
         // Select optional 'Password' authentication option
         try {
             await page.waitForSelector('#FormsAuthentication', { timeout: this.selectorTimeoutMsec });
             await page.click('#FormsAuthentication');
+            this.logger?.logInfo('The option for password authentication has been selected.');
         } catch (error) {
-            this.logger?.logWarn('Password authentication option is not presented.', {
-                selector: '#FormsAuthentication',
-                error: System.serializeError(error),
-            });
+            const formError = this.getFormError('passwordOptions', error);
+            if (formError) {
+                return { browserError: formError };
+            }
         }
 
         // Enter account password
         try {
             await page.waitForSelector('input[type="password"]', { timeout: this.selectorTimeoutMsec });
             await page.type('input[type="password"]', azureAuthClientCredential.password);
+            this.logger?.logInfo('The account password has been entered into the login form.');
         } catch (error) {
-            return {
-                browserError: {
-                    errorType: 'AuthenticationError',
-                    message: error.name === 'TimeoutError' ? 'Failed to detect password input prompt on a login page.' : error.message,
-                    stack: error.stack,
-                },
-            };
+            return { browserError: this.getFormError('password', error) };
         }
 
         // Submit password form
         await page.keyboard.press('Enter');
+        this.logger?.logInfo('The login form with the account password has been submitted.');
 
         // Validate for  multi-factor authentication prompt
         const smartcardPrompt = await this.getElementContent('#CertificateAuthentication', page);
         const phonePrompt = await this.getElementContent('#WindowsAzureMultiFactorAuthentication', page);
         if (smartcardPrompt !== undefined || phonePrompt !== undefined) {
-            const message = 'Multi-factor authentication user prompt is detected.';
+            const message = 'Unsupported multi-factor authentication user prompt has been detected.';
 
             return {
                 browserError: {
@@ -98,21 +93,30 @@ export class AzureLoginPageClient implements LoginPageClient {
             };
         }
 
-        // Enable Keep Me Signed In (KMSI)
-        // eslint-disable-next-line max-len
-        // https://learn.microsoft.com/en-us/azure/active-directory/fundamentals/active-directory-users-profile-azure-portal#learn-about-the-stay-signed-in-prompt
+        // Accept permissions request
+        try {
+            await page.waitForSelector('input[name="idSIButton9"]', { timeout: this.selectorTimeoutMsec });
+            responses = await Promise.all([this.pageNavigator.waitForNavigation(page), page.click('input[name="idSIButton9"]')]);
+            navigationResponse = responses[0];
+            this.logger?.logInfo('The permissions request has been accepted.');
+        } catch (error) {
+            const formError = this.getFormError('permissions', error);
+            if (formError) {
+                return { browserError: formError };
+            }
+        }
+
+        // Enable Keep Me Signed In (KMSI) option
         try {
             await page.waitForSelector('#idSIButton9', { timeout: this.selectorTimeoutMsec });
             responses = await Promise.all([this.pageNavigator.waitForNavigation(page), page.keyboard.press('Enter')]);
             navigationResponse = responses[0];
+            this.logger?.logInfo('The KMSI option has been accepted.');
         } catch (error) {
-            return {
-                browserError: {
-                    errorType: 'AuthenticationError',
-                    message: error.name === 'TimeoutError' ? 'Failed to detect KMSI prompt on a login page.' : error.message,
-                    stack: error.stack,
-                },
-            };
+            const formError = this.getFormError('kmsi', error);
+            if (formError) {
+                return { browserError: formError };
+            }
         }
 
         return navigationResponse;
@@ -134,6 +138,23 @@ export class AzureLoginPageClient implements LoginPageClient {
     }
 
     private async getElementContent(errorMessageSelector: string, page: Puppeteer.Page): Promise<string> {
-        return page.$eval(errorMessageSelector, (div) => div.textContent).catch(() => undefined);
+        return page
+            .$eval(errorMessageSelector, (div) => div.textContent)
+            .catch((): string => {
+                return undefined;
+            });
+    }
+
+    private getFormError(step: AuthenticationSteps, error: Puppeteer.PuppeteerError): BrowserError {
+        // Skip mandatory steps
+        if (!['account', 'password'].includes(step) && error?.name === 'TimeoutError') {
+            return undefined;
+        }
+
+        return {
+            errorType: 'AuthenticationError',
+            message: `Error at ${step} authentication step. ${error.message}`,
+            stack: error.stack,
+        };
     }
 }
