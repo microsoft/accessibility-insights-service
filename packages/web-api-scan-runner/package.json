@@ -50,7 +50,7 @@
     "dependencies": {
         "@axe-core/puppeteer": "4.10.1",
         "@azure/cosmos": "^4.0.0",
-        "@playwright/test": "^1.49.0",
+        "@playwright/test": "^1.50.1",
         "accessibility-insights-report": "5.2.0",
         "applicationinsights": "^2.3.1",
         "axe-core": "4.10.2",
