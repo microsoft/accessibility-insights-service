@@ -109,7 +109,7 @@ function pullImages() {
 }
 
 function buildScannerImage() {
-    .\build-scanner-image.ps1
+    .\build-scanner-image.ps1 -InstallHostFonts
 }
 
 if ([string]::IsNullOrEmpty($global:keyvault)) {
