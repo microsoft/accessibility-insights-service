@@ -50,7 +50,7 @@
         "applicationinsights": "^2.3.1",
         "azure-services": "workspace:*",
         "common": "workspace:*",
-        "dotenv": "^16.0.1",
+        "dotenv": "^16.4.7",
         "got": "^11.8.5",
         "inversify": "^6.0.1",
         "lodash": "^4.17.21",
