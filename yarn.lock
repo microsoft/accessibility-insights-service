@@ -3738,13 +3738,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/encoding-down@npm:^5.0.1":
-  version: 5.0.2
-  resolution: "@types/encoding-down@npm:5.0.2"
+"@types/encoding-down@npm:^5.0.5":
+  version: 5.0.5
+  resolution: "@types/encoding-down@npm:5.0.5"
   dependencies:
     "@types/abstract-leveldown": "*"
     "@types/level-codec": "*"
-  checksum: 3ef6612e776f199c369c6d040f2c9017be95257466ac0a6f64a64d96a564145fe030fc131e69e99349ca9acbba6f2524d9f38b491fd691ffcb3c158dfce9918c
+  checksum: f5f223bd349a7975a7abbdba01ed08dcd919c2fbd28a6c991d1f67312a935467f8038c53ff2ba0df728ed2ab3c02ef0d608bd8d68be1920359b280bd54a8439d
   languageName: node
   linkType: hard
 
@@ -4683,7 +4683,7 @@ __metadata:
     "@rollup/plugin-commonjs": ^24.0.1
     "@rollup/plugin-node-resolve": ^15.3.0
     "@sindresorhus/fnv1a": ^2.0.1
-    "@types/encoding-down": ^5.0.1
+    "@types/encoding-down": ^5.0.5
     "@types/jest": ^29.5.12
     "@types/leveldown": ^4.0.2
     "@types/levelup": ^5.1.1
