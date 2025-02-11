@@ -4100,12 +4100,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/sha.js@npm:^2.4.0":
-  version: 2.4.0
-  resolution: "@types/sha.js@npm:2.4.0"
+"@types/sha.js@npm:^2.4.4":
+  version: 2.4.4
+  resolution: "@types/sha.js@npm:2.4.4"
   dependencies:
     "@types/node": "*"
-  checksum: 0e1bd1a98d88dbbf87180b8ef81ab2bf8c2bd066a99858c76299fb599fd912df807072a55a6f484077498dd972a1b55eaa03aae6ea2654027a4dd0331db7e201
+  checksum: e5917afe3116971c882b475298c7ca99aae69715057948526f805ca75dd67675eeaad7014f525c80e1243022923c496f52546164b90231285364f72aba874989
   languageName: node
   linkType: hard
 
@@ -6579,7 +6579,7 @@ __metadata:
     "@types/jest": ^29.5.12
     "@types/node": ^20.14.9
     "@types/normalize-path": ^3.0.0
-    "@types/sha.js": ^2.4.0
+    "@types/sha.js": ^2.4.4
     convict: ^6.2.4
     exponential-backoff: ^3.1.0
     got: ^11.8.5
@@ -14813,7 +14813,7 @@ __metadata:
     "@types/node": ^20.14.9
     "@types/paralleljs": ^0.0.24
     "@types/puppeteer": ^7.0.4
-    "@types/sha.js": ^2.4.0
+    "@types/sha.js": ^2.4.4
     "@types/yargs": ^17.0.22
     accessibility-insights-report: 5.2.0
     async-mutex: ^0.3.2
@@ -16747,7 +16747,7 @@ __metadata:
     "@types/lodash": ^4.17.6
     "@types/node": ^20.14.9
     "@types/puppeteer": ^7.0.4
-    "@types/sha.js": ^2.4.0
+    "@types/sha.js": ^2.4.4
     "@types/yargs": ^17.0.22
     accessibility-insights-report: 5.2.0
     applicationinsights: ^2.3.1
@@ -16844,7 +16844,7 @@ __metadata:
     "@types/lodash": ^4.17.6
     "@types/node": ^20.14.9
     "@types/puppeteer": ^7.0.4
-    "@types/sha.js": ^2.4.0
+    "@types/sha.js": ^2.4.4
     "@types/yargs": ^17.0.22
     applicationinsights: ^2.3.1
     azure-services: "workspace:*"
@@ -16886,7 +16886,7 @@ __metadata:
     "@types/jest": ^29.5.12
     "@types/lodash": ^4.17.6
     "@types/node": ^20.14.9
-    "@types/sha.js": ^2.4.0
+    "@types/sha.js": ^2.4.4
     azure-functions-core-tools: ^4.x
     azure-services: "workspace:*"
     common: "workspace:*"
@@ -16924,7 +16924,7 @@ __metadata:
     "@types/jest": ^29.5.12
     "@types/lodash": ^4.17.6
     "@types/node": ^20.14.9
-    "@types/sha.js": ^2.4.0
+    "@types/sha.js": ^2.4.4
     azure-functions-core-tools: ^4.x
     azure-services: "workspace:*"
     common: "workspace:*"
