@@ -4031,10 +4031,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/paralleljs@npm:^0.0.21":
-  version: 0.0.21
-  resolution: "@types/paralleljs@npm:0.0.21"
-  checksum: dccc1c583a4347bef2f61c51e637970d372aa83aa37acf33703231ca82353c515267fdcb7f7d746925b14e1cb716762a8cc05d951a24560ebb4917183008067c
+"@types/paralleljs@npm:^0.0.24":
+  version: 0.0.24
+  resolution: "@types/paralleljs@npm:0.0.24"
+  checksum: b94fb2a9923df33b5ee49eb7aac7dac157bba6436e04f2f29d976ce09d73e3157980b1610ab49b546b4505ede82eae255e2a331bd0189ff701c6e9995758d458
   languageName: node
   linkType: hard
 
@@ -14811,7 +14811,7 @@ __metadata:
     "@crawlee/puppeteer": ^3.11.5
     "@types/jest": ^29.5.12
     "@types/node": ^20.14.9
-    "@types/paralleljs": ^0.0.21
+    "@types/paralleljs": ^0.0.24
     "@types/puppeteer": ^7.0.4
     "@types/sha.js": ^2.4.0
     "@types/yargs": ^17.0.22
