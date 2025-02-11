@@ -4795,7 +4795,7 @@ __metadata:
     typemoq: ^2.1.0
     typescript: ^5.5.3
     uuid-with-v6: ^2.0.0
-    webpack: ^5.94.0
+    webpack: ^5.97.1
     webpack-cli: ^5.1.4
     webpack-node-externals: ^3.0.0
     yargs: ^17.6.2
@@ -5513,7 +5513,7 @@ __metadata:
     ts-loader: ^9.5.1
     typemoq: ^2.1.0
     typescript: ^5.5.3
-    webpack: ^5.94.0
+    webpack: ^5.97.1
     webpack-cli: ^5.1.4
   languageName: unknown
   linkType: soft
@@ -7482,7 +7482,7 @@ __metadata:
     ts-jest: ^29.1.5
     ts-loader: ^9.5.1
     typescript: ^5.5.3
-    webpack: ^5.94.0
+    webpack: ^5.97.1
     webpack-cli: ^5.1.4
     webpack-ignore-dynamic-require: ^1.0.0
   languageName: unknown
@@ -9572,7 +9572,7 @@ __metadata:
     typemoq: ^2.1.0
     typescript: ^5.5.3
     web-api-client: "workspace:*"
-    webpack: ^5.94.0
+    webpack: ^5.97.1
     webpack-cli: ^5.1.4
     webpack-ignore-dynamic-require: ^1.0.0
     yargs: ^17.6.2
@@ -13007,7 +13007,7 @@ __metadata:
     ts-loader: ^9.5.1
     typemoq: ^2.1.0
     typescript: ^5.5.3
-    webpack: ^5.94.0
+    webpack: ^5.97.1
     webpack-cli: ^5.1.4
   languageName: unknown
   linkType: soft
@@ -13486,7 +13486,7 @@ __metadata:
     ts-loader: ^9.5.1
     typemoq: ^2.1.0
     typescript: ^5.5.3
-    webpack: ^5.94.0
+    webpack: ^5.97.1
     webpack-cli: ^5.1.4
     webpack-ignore-dynamic-require: ^1.0.0
     yargs: ^17.6.2
@@ -13535,7 +13535,7 @@ __metadata:
     ts-loader: ^9.5.1
     typemoq: ^2.1.0
     typescript: ^5.5.3
-    webpack: ^5.94.0
+    webpack: ^5.97.1
     webpack-cli: ^5.1.4
     webpack-ignore-dynamic-require: ^1.0.0
     yargs: ^17.6.2
@@ -14195,7 +14195,7 @@ __metadata:
     ts-loader: ^9.5.1
     typemoq: ^2.1.0
     typescript: ^5.5.3
-    webpack: ^5.94.0
+    webpack: ^5.97.1
     webpack-cli: ^5.1.4
     webpack-ignore-dynamic-require: ^1.0.0
     yargs: ^17.6.2
@@ -14243,7 +14243,7 @@ __metadata:
     ts-loader: ^9.5.1
     typemoq: ^2.1.0
     typescript: ^5.5.3
-    webpack: ^5.94.0
+    webpack: ^5.97.1
     webpack-cli: ^5.1.4
     webpack-ignore-dynamic-require: ^1.0.0
     yargs: ^17.6.2
@@ -16694,7 +16694,7 @@ __metadata:
     ts-loader: ^9.5.1
     typemoq: ^2.1.0
     typescript: ^5.5.3
-    webpack: ^5.94.0
+    webpack: ^5.97.1
     webpack-cli: ^5.1.4
     webpack-ignore-dynamic-require: ^1.0.0
     yargs: ^17.6.2
@@ -16728,7 +16728,7 @@ __metadata:
     ts-loader: ^9.5.1
     typemoq: ^2.1.0
     typescript: ^5.5.3
-    webpack: ^5.94.0
+    webpack: ^5.97.1
     webpack-cli: ^5.1.4
     webpack-ignore-dynamic-require: ^1.0.0
     yargs: ^17.6.2
@@ -16787,7 +16787,7 @@ __metadata:
     ts-loader: ^9.5.1
     typemoq: ^2.1.0
     typescript: ^5.5.3
-    webpack: ^5.94.0
+    webpack: ^5.97.1
     webpack-cli: ^5.1.4
     webpack-ignore-dynamic-require: ^1.0.0
     yargs: ^17.6.2
@@ -16826,7 +16826,7 @@ __metadata:
     ts-loader: ^9.5.1
     typemoq: ^2.1.0
     typescript: ^5.5.3
-    webpack: ^5.94.0
+    webpack: ^5.97.1
     webpack-cli: ^5.1.4
     webpack-ignore-dynamic-require: ^1.0.0
     yargs: ^17.6.2
@@ -16870,7 +16870,7 @@ __metadata:
     ts-loader: ^9.5.1
     typemoq: ^2.1.0
     typescript: ^5.5.3
-    webpack: ^5.94.0
+    webpack: ^5.97.1
     webpack-cli: ^5.1.4
     webpack-ignore-dynamic-require: ^1.0.0
     yargs: ^17.6.2
@@ -16909,7 +16909,7 @@ __metadata:
     ts-loader: ^9.5.1
     typemoq: ^2.1.0
     typescript: ^5.5.3
-    webpack: ^5.94.0
+    webpack: ^5.97.1
     webpack-cli: ^5.1.4
     webpack-ignore-dynamic-require: ^1.0.0
   languageName: unknown
@@ -16951,7 +16951,7 @@ __metadata:
     typemoq: ^2.1.0
     typescript: ^5.5.3
     web-api-client: "workspace:*"
-    webpack: ^5.94.0
+    webpack: ^5.97.1
     webpack-cli: ^5.1.4
     webpack-ignore-dynamic-require: ^1.0.0
   languageName: unknown
@@ -17027,9 +17027,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"webpack@npm:^5.94.0":
-  version: 5.97.0
-  resolution: "webpack@npm:5.97.0"
+"webpack@npm:^5.97.1":
+  version: 5.97.1
+  resolution: "webpack@npm:5.97.1"
   dependencies:
     "@types/eslint-scope": ^3.7.7
     "@types/estree": ^1.0.6
@@ -17059,7 +17059,7 @@ __metadata:
       optional: true
   bin:
     webpack: bin/webpack.js
-  checksum: 07ca08bd8b39080e548e05aca559b887f200bf057f8b9116907eaf22697e943a30cf7fbe9f884615906c30ea8cd911e49608afc481157a190327087ecb996a96
+  checksum: 649065e2258b495ae41a4088be804b4be2ec07d280aa514ebef43da79caf96fa973d26a08826c3902b5676a098d9b37c589f16be7b4da17b68b08b6c76441196
   languageName: node
   linkType: hard
 
