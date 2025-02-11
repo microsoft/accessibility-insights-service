@@ -41,7 +41,7 @@
         "@typescript-eslint/eslint-plugin-tslint": "^7.0.2",
         "@typescript-eslint/parser": "^8.16.0",
         "combine-dependabot-prs": "^1.0.5",
-        "commander": "^12.1.0",
+        "commander": "^13.1.0",
         "eslint": "^8.57.0",
         "eslint-plugin-check-file": "^2.8.0",
         "eslint-plugin-header": "^3.1.1",
