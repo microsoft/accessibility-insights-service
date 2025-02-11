@@ -13,7 +13,6 @@ Before you start, make sure you have the Owner permission, or Contributor with U
 
 -   Docker Desktop
 -   Azure CLI
--   Postman
 
 Follow instructions from https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest to install Azure CLI.
 
@@ -62,38 +61,6 @@ When installing Azure CLI for [Windows Subsystem for Linux (WSL)](https://docs.m
     ```bash
     ./dist/scripts/install-parallel.sh -r "<resource group>" -s "<subscription name or ID>" -l "<Azure region>" -e "<environment (dev|ppe|prod)>" -o "<organization name>" -p "<publisher email>" -c "<client ID>" -t "<client secret>" -v "<release version>" -b "<Azure Batch object ID>"
     ```
-
-## Submit scan request
-
-### 1. Create Azure Active Directory client registration
-
--   Create Azure Active Directory client registration to use with Postman client
--   Sign in to the Azure portal and create new application registration in Azure Active Directory with provided default settings
--   Add a client secret
--   Use Application (client) ID and secret value in Postman client
-
-### 2. Postman setup
-
--   Open Postman
--   Import all files from [Postman](https://github.com/microsoft/accessibility-insights-service/tree/main/packages/resource-deployment/postman) directory
--   Open "Accessibility Insights Service" environment
--   Set Current Values as follows:
-    -   client_id - Azure AD client registration ID
-    -   client_secret - Azure AD client registration secret
-    -   base_url **and** call_back_url - API Management service Gateway URL (Copy from Azure portal service overview page)
-    -   target_client_id - Azure AD application registration ID
-    -   token_url - `https://login.microsoftonline.com/<Azure AD (tenant) ID>/oauth2/v2.0/token`
-    -   auth_url - `https://login.microsoftonline.com/<Azure AD (tenant) ID>/oauth2/v2.0/authorize`
--   Save environment
-
-### 3. Submit scan request
-
--   Select "Accessibility Insights Service" environment as active from the top right drop down menu
--   Open "Accessibility Insights Service" collection
--   Select "Get access token" and send request. Token is valid for 24 hours
--   Select "Submit accessibility scan" and send request
--   Select "Get scan status" and send request
--   Monitor scan status by re-submitting request
 
 ## Service health
 

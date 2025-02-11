@@ -10,6 +10,8 @@ export class AzureActiveDirectoryAuthentication implements AuthenticationMethod 
 
     private readonly loadedAuthUrl = 'https://ms.portal.azure.com';
 
+    private readonly selectorTimeoutMsec = 10000;
+
     constructor(private readonly accountName: string, private readonly accountPassword: string) {}
 
     public async authenticate(page: Puppeteer.Page): Promise<void> {
@@ -31,17 +33,19 @@ export class AzureActiveDirectoryAuthentication implements AuthenticationMethod 
         }
 
         try {
-            await page.waitForSelector('#FormsAuthentication');
+            await page.waitForSelector('#FormsAuthentication', { timeout: this.selectorTimeoutMsec });
             await page.click('#FormsAuthentication');
         } catch (error) {
-            try {
-                await page.waitForSelector('input[type="password"]');
-                await page.click('input[type="password"]');
-            } catch (errorPassword) {
-                throw new Error(
-                    `Authentication failed. Authentication requires a non-people service account. To learn how to set up a service account, visit: https://aka.ms/AI-action-auth. ${errorPassword}`,
-                );
-            }
+            console.info('Password authentication option is not presented.');
+        }
+
+        try {
+            await page.waitForSelector('input[type="password"]', { timeout: this.selectorTimeoutMsec });
+            await page.click('input[type="password"]');
+        } catch (errorPassword) {
+            throw new Error(
+                `Authentication failed. Authentication requires a non-people service account. To learn how to set up a service account, visit: https://aka.ms/AI-action-auth. ${errorPassword}`,
+            );
         }
 
         await page.type('input[type="password"]', this.accountPassword);
