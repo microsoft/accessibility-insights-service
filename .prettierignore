@@ -39,3 +39,4 @@ copyright-header.txt
 **/*.patch
 **/.gdnsuppress
 **/chrome-user-data
+.config/1espt
