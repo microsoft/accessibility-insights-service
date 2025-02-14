@@ -68,21 +68,21 @@ function setDockerConfig() {
         $global:rebootRequired = $true
     }
 
-    # Set Hyper-V isolation
-    $hypervIsolation = "isolation=hyperv"
+    # Set Docker process isolation
+    $processIsolation = "isolation=process"
     if ($config."exec-opts" -is [array]) {
         $isolationOpt = @($config."exec-opts" | Where-Object { $_ -like "isolation*" })
-        if (-not ($isolationOpt.Count -eq 1 -and $isolationOpt[0] -eq $hypervIsolation)) {
+        if (-not ($isolationOpt.Count -eq 1 -and $isolationOpt[0] -eq $processIsolation)) {
             # Update property value
             $execOpts = @($config."exec-opts" | Where-Object { $_ -notlike "isolation*" })
-            $execOpts += $hypervIsolation
+            $execOpts += $processIsolation
             $config."exec-opts" = $execOpts
             $global:rebootRequired = $true
         }
     }
     elseif (-not $config."exec-opts") {
         # Add property value
-        $config | Add-Member -Name "exec-opts" -Value @($hypervIsolation) -MemberType NoteProperty
+        $config | Add-Member -Name "exec-opts" -Value @($processIsolation) -MemberType NoteProperty
         $global:rebootRequired = $true
     }
 
