@@ -4,6 +4,7 @@
 FROM mcr.microsoft.com/windows/servercore:ltsc2022-amd64
 
 ENV NODE_VERSION 20.15.0
+ENV USER_KEY=
 
 WORKDIR /app
 
@@ -23,4 +24,4 @@ RUN npm install
 RUN npx patch-package
 RUN npx playwright install msedge
 
-CMD ["powershell.exe", "./web-api-scan-runner.ps1"]
+CMD ["powershell", "./web-api-scan-runner.ps1"]

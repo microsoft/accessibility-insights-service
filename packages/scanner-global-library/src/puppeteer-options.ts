@@ -35,7 +35,7 @@ const defaultArgs = [
 // for compositing, (maybe) raster and WebGL.
 // 3) '--in-process-gpu' Required. This enables WebGL rendering in container environment.
 
-const webglArgs = ['--disable-gpu', '--in-process-gpu'];
+const webglArgs = ['--enable-webgl', '--enable-webgl2', '--use-angle=swiftshader', '--use-gl=swiftshader', '--ignore-gpu-blocklist'];
 const noWebglArgs = ['--disable-webgl', '--disable-webgl2', '--disable-accelerated-2d-canvas', '--disable-gpu-program-cache'];
 
 const defaultLaunchOptions: Puppeteer.PuppeteerNodeLaunchOptions = {
