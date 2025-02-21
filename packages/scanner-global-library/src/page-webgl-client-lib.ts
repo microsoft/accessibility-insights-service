@@ -35,12 +35,6 @@ export async function injectWebglOptimizations(page: Puppeteer.Page): Promise<vo
             });
         });
 
-        // Throttle WebGL Animation Frame Rate
-        const originalRAF = window.requestAnimationFrame;
-        window.requestAnimationFrame = function (callback): number {
-            return window.setTimeout(() => originalRAF(callback), 16 * 2); // Lock to ~30 FPS
-        };
-
         // Reduce CPU Load by Skipping Redundant Draw Calls
         const originalDrawArrays = WebGLRenderingContext.prototype.drawArrays;
         WebGLRenderingContext.prototype.drawArrays = function (mode: number, first: number, count: number): void {
