@@ -5,7 +5,7 @@ import { inject, injectable } from 'inversify';
 import { GlobalLogger } from 'logger';
 import { BrowserError, PageResponseProcessor, SecretVault } from 'scanner-global-library';
 import { ScanStateExt } from 'storage-documents';
-import * as playwright from '@playwright/test';
+import { chromium, Browser, BrowserContext } from '@playwright/test';
 import { System } from 'common';
 import { iocTypeNames } from '../ioc-types';
 
@@ -34,7 +34,7 @@ export class HighContrastScanner {
 
         this.logger?.logInfo('Starting high contrast CSS properties scan.');
         try {
-            browser = await playwright.chromium.launch({
+            browser = await chromium.launch({
                 channel: 'msedge',
                 headless: process.env.HEADLESS === 'false' ? false : true,
             });
@@ -99,7 +99,7 @@ export class HighContrastScanner {
         }
     }
 
-    private async createBrowserContext(browser: playwright.Browser): Promise<playwright.BrowserContext> {
+    private async createBrowserContext(browser: Browser): Promise<BrowserContext> {
         // Get default user agent string
         const page = await browser.newPage();
         const browserUserAgent = await page.evaluate(() => navigator.userAgent);
