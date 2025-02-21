@@ -4,7 +4,7 @@
 import * as Puppeteer from 'puppeteer';
 import { WebDriverCapabilities } from './web-driver';
 
-export const defaultBrowserOptions: Puppeteer.BrowserConnectOptions = {
+export const defaultBrowserOptions: Puppeteer.ConnectOptions = {
     defaultViewport: null,
 };
 
@@ -28,13 +28,13 @@ const defaultArgs = [
 const webglArgs = ['--enable-webgl', '--enable-webgl2', '--use-angle=swiftshader', '--use-gl=swiftshader', '--ignore-gpu-blocklist'];
 const noWebglArgs = ['--disable-webgl', '--disable-webgl2', '--disable-accelerated-2d-canvas', '--disable-gpu-program-cache'];
 
-const defaultLaunchOptions: Puppeteer.PuppeteerNodeLaunchOptions = {
+const defaultLaunchOptions: Puppeteer.LaunchOptions = {
     // The new headless mode https://developer.chrome.com/articles/new-headless
     headless: true,
     ...defaultBrowserOptions,
 };
 
-export function launchOptions(capabilities?: WebDriverCapabilities): Puppeteer.PuppeteerNodeLaunchOptions {
+export function launchOptions(capabilities?: WebDriverCapabilities): Puppeteer.LaunchOptions {
     if (capabilities?.webgl === true) {
         return { ...defaultLaunchOptions, args: [...defaultArgs, ...webglArgs] };
     }
