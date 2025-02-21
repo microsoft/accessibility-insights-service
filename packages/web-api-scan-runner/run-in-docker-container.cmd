@@ -19,4 +19,4 @@ docker build --tag mcr.microsoft.com/windows/web-api-scan-runner:prescanner -f D
 cd ..\..\resource-deployment\scripts\docker-scanner-image &&^
 powershell .\build-scanner-image.ps1 -InstallHostFonts &&^
 cd ..\..\..\web-api-scan-runner &&^
-docker run --cpus=2 --init --shm-size=2gb --ipc=host -p 9229:9229 --env-file .env mcr.microsoft.com/windows/web-api-scan-runner
+docker run --isolation=process --cpus=2 --init --shm-size=2gb --ipc=host -p 9229:9229 --env-file .env mcr.microsoft.com/windows/web-api-scan-runner

@@ -25,7 +25,8 @@
         ".yarn/",
         ".yarnrc.yml",
         "**/*.patch",
-        "**/.gdnsuppress"
+        "**/.gdnsuppress",
+        ".config/1espt"
     ],
     "license": "./copyright-header.txt",
     "licenseFormats": {

@@ -9,6 +9,7 @@ import { PageConfigurator } from './page-configurator';
 import { PageHandler } from './page-handler';
 import { PageResponseProcessor } from './page-response-processor';
 import { PuppeteerTimeoutConfig, PageNavigationTiming } from './page-timeout-config';
+import { injectWebglOptimizations } from './page-webgl-client-lib';
 
 @injectable()
 export class PageNavigationHooks {
@@ -23,6 +24,7 @@ export class PageNavigationHooks {
 
     public async preNavigation(page: Puppeteer.Page): Promise<void> {
         await this.pageConfigurator.configurePage(page);
+        await injectWebglOptimizations(page);
         this.dismissAlertBox(page);
     }
 

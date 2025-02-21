@@ -53,7 +53,7 @@ export class PuppeteerTimeoutConfig {
      * a navigation timeout error and stop the loading process. Need to adjust the navigation timeout
      * to allow more time for WebGL webpages to load.
      */
-    public static readonly webglNavigationTimeoutMsec: number = 180000;
+    public static readonly webglNavigationTimeoutMsec: number = 120000;
 
     public static readonly defaultNavigationTimeoutMsec: number = 60000;
 
