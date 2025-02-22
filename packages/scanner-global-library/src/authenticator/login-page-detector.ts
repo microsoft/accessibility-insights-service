@@ -4,9 +4,30 @@
 import { injectable } from 'inversify';
 import { Url } from 'common';
 import { AuthenticationType } from 'storage-documents';
+import { isEmpty } from 'lodash';
 
-const entraLoginDomains = ['login.microsoftonline.com', 'login.live.com'];
-const urlLoginHints = ['auth', 'onmicrosoft', 'sso', 'login', 'openid', 'token'];
+// Unsupported yet recognized authentication providers are marked as undetermined.
+const authProviders = [
+    {
+        type: 'entraId' as AuthenticationType as AuthenticationType,
+        name: 'Microsoft Entra ID (Azure AD)',
+        pattern: /login\.microsoftonline\.com/i,
+    },
+    { type: 'undetermined' as AuthenticationType, name: 'Microsoft Personal Account (MSA)', pattern: /login\.live\.com/i },
+    { type: 'undetermined' as AuthenticationType, name: 'Common Sign-in Pattern', pattern: /\.com\/.*(\/)?(signin|sign-in|login)/i },
+    { type: 'undetermined' as AuthenticationType, name: 'Common Sign-in Pattern', pattern: /\.com\/.*(\/)?saml2/i },
+    { type: 'undetermined' as AuthenticationType, name: 'Common Sign-in Pattern', pattern: /login\..*\.com/i },
+    { type: 'undetermined' as AuthenticationType, name: 'Common Sign-in Pattern', pattern: /\.com\/.*(\/)?[o]?auth[2]?\//i },
+    { type: 'undetermined' as AuthenticationType, name: 'Google Sign-in', pattern: /accounts\.google\.com/i },
+    { type: 'undetermined' as AuthenticationType, name: 'Okta SSO', pattern: /\.okta\.com/i },
+    { type: 'undetermined' as AuthenticationType, name: 'Auth0 SSO', pattern: /\.auth0\.com/i },
+    { type: 'undetermined' as AuthenticationType, name: 'Amazon Sign-in', pattern: /amazon\.com\/ap\/signin/i },
+    { type: 'undetermined' as AuthenticationType, name: 'Federated SSO (ADFS)', pattern: /sts\..*/i },
+    { type: 'undetermined' as AuthenticationType, name: 'Federated SSO (ADFS)', pattern: /adfs\..*/i },
+    { type: 'undetermined' as AuthenticationType, name: 'Custom Identity Provider', pattern: /id[p]?\..*/i },
+    { type: 'undetermined' as AuthenticationType, name: 'Enterprise SSO', pattern: /sso\..*/i },
+    { type: 'undetermined' as AuthenticationType, name: 'SAML Provider', pattern: /auth[n]?\..*/i },
+];
 
 @injectable()
 export class LoginPageDetector {
@@ -16,31 +37,16 @@ export class LoginPageDetector {
             return undefined;
         }
 
-        let authType = this.detectLoginDomain(urlObj.hostname);
-        if (authType !== undefined) {
-            return authType;
+        const authProvider = authProviders.find((provider) => provider.pattern.test(urlObj.href));
+
+        // Handle the exception case when using an MSA account for authentication on a Microsoft website.
+        if (authProvider?.type === 'undetermined' && !isEmpty(urlObj.query)) {
+            const wreply = Url.getParameterValue('wreply', urlObj.href);
+            if (wreply?.includes('microsoft')) {
+                authProvider.type = 'entraId';
+            }
         }
 
-        authType = this.detectLoginHint(urlObj.href);
-
-        return authType;
-    }
-
-    private detectLoginDomain(hostname: string): AuthenticationType {
-        if (entraLoginDomains.includes(hostname.toLowerCase())) {
-            return 'entraId';
-        }
-
-        return undefined;
-    }
-
-    private detectLoginHint(url: string): AuthenticationType {
-        const decodedURI = decodeURI(url);
-        const hints = urlLoginHints.find((hint) => decodedURI.includes(hint));
-        if (hints !== undefined) {
-            return 'undetermined';
-        }
-
-        return undefined;
+        return authProvider?.type;
     }
 }
