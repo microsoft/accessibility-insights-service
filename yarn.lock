@@ -5409,7 +5409,7 @@ __metadata:
     rimraf: ^6.0.1
     storage-documents: "workspace:*"
     ts-jest: ^29.1.5
-    ts-loader: ^9.5.1
+    ts-loader: ^9.5.2
     typemoq: ^2.1.0
     typescript: ^5.5.3
     webpack: ^5.97.1
@@ -7434,7 +7434,7 @@ __metadata:
     npm-run-all: ^4.1.5
     rimraf: ^6.0.1
     ts-jest: ^29.1.5
-    ts-loader: ^9.5.1
+    ts-loader: ^9.5.2
     typescript: ^5.5.3
     webpack: ^5.97.1
     webpack-cli: ^5.1.4
@@ -12981,7 +12981,7 @@ __metadata:
     rimraf: ^6.0.1
     storage-documents: "workspace:*"
     ts-jest: ^29.1.5
-    ts-loader: ^9.5.1
+    ts-loader: ^9.5.2
     typemoq: ^2.1.0
     typescript: ^5.5.3
     webpack: ^5.97.1
@@ -13453,7 +13453,7 @@ __metadata:
     service-library: "workspace:*"
     storage-documents: "workspace:*"
     ts-jest: ^29.1.5
-    ts-loader: ^9.5.1
+    ts-loader: ^9.5.2
     typemoq: ^2.1.0
     typescript: ^5.5.3
     webpack: ^5.97.1
@@ -13502,7 +13502,7 @@ __metadata:
     service-library: "workspace:*"
     storage-documents: "workspace:*"
     ts-jest: ^29.1.5
-    ts-loader: ^9.5.1
+    ts-loader: ^9.5.2
     typemoq: ^2.1.0
     typescript: ^5.5.3
     webpack: ^5.97.1
@@ -14178,7 +14178,7 @@ __metadata:
     service-library: "workspace:*"
     storage-documents: "workspace:*"
     ts-jest: ^29.1.5
-    ts-loader: ^9.5.1
+    ts-loader: ^9.5.2
     typemoq: ^2.1.0
     typescript: ^5.5.3
     webpack: ^5.97.1
@@ -14226,7 +14226,7 @@ __metadata:
     service-library: "workspace:*"
     storage-documents: "workspace:*"
     ts-jest: ^29.1.5
-    ts-loader: ^9.5.1
+    ts-loader: ^9.5.2
     typemoq: ^2.1.0
     typescript: ^5.5.3
     webpack: ^5.97.1
@@ -16036,9 +16036,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ts-loader@npm:^9.5.1":
-  version: 9.5.1
-  resolution: "ts-loader@npm:9.5.1"
+"ts-loader@npm:^9.5.2":
+  version: 9.5.2
+  resolution: "ts-loader@npm:9.5.2"
   dependencies:
     chalk: ^4.1.0
     enhanced-resolve: ^5.0.0
@@ -16048,7 +16048,7 @@ __metadata:
   peerDependencies:
     typescript: "*"
     webpack: ^5.0.0
-  checksum: 7cf396e656d905388ea2a9b5e82f16d3c955fda8d3df2fbf219f4bee16ff50a3c995c44ae3e584634e9443f056cec70bb3151add3917ffb4588ecd7394bac0ec
+  checksum: f4c117042e25434e733c4b70873adaa9a79b14c2b3d8e5db53bbfd42060289f8a3eb97cfff64c83123b735d954f0eaa0f60f093afb0682cd2d1d7fa17f81e223
   languageName: node
   linkType: hard
 
@@ -16682,7 +16682,7 @@ __metadata:
     service-library: "workspace:*"
     storage-documents: "workspace:*"
     ts-jest: ^29.1.5
-    ts-loader: ^9.5.1
+    ts-loader: ^9.5.2
     typemoq: ^2.1.0
     typescript: ^5.5.3
     webpack: ^5.97.1
@@ -16716,7 +16716,7 @@ __metadata:
     service-library: "workspace:*"
     storage-documents: "workspace:*"
     ts-jest: ^29.1.5
-    ts-loader: ^9.5.1
+    ts-loader: ^9.5.2
     typemoq: ^2.1.0
     typescript: ^5.5.3
     webpack: ^5.97.1
@@ -16775,7 +16775,7 @@ __metadata:
     sha.js: ^2.4.11
     storage-documents: "workspace:*"
     ts-jest: ^29.1.5
-    ts-loader: ^9.5.1
+    ts-loader: ^9.5.2
     typemoq: ^2.1.0
     typescript: ^5.5.3
     webpack: ^5.97.1
@@ -16814,7 +16814,7 @@ __metadata:
     service-library: "workspace:*"
     storage-documents: "workspace:*"
     ts-jest: ^29.1.5
-    ts-loader: ^9.5.1
+    ts-loader: ^9.5.2
     typemoq: ^2.1.0
     typescript: ^5.5.3
     webpack: ^5.97.1
@@ -16858,7 +16858,7 @@ __metadata:
     sha.js: ^2.4.11
     storage-documents: "workspace:*"
     ts-jest: ^29.1.5
-    ts-loader: ^9.5.1
+    ts-loader: ^9.5.2
     typemoq: ^2.1.0
     typescript: ^5.5.3
     webpack: ^5.97.1
@@ -16897,7 +16897,7 @@ __metadata:
     service-library: "workspace:*"
     storage-documents: "workspace:*"
     ts-jest: ^29.1.5
-    ts-loader: ^9.5.1
+    ts-loader: ^9.5.2
     typemoq: ^2.1.0
     typescript: ^5.5.3
     webpack: ^5.97.1
@@ -16938,7 +16938,7 @@ __metadata:
     service-library: "workspace:*"
     storage-documents: "workspace:*"
     ts-jest: ^29.1.5
-    ts-loader: ^9.5.1
+    ts-loader: ^9.5.2
     typemoq: ^2.1.0
     typescript: ^5.5.3
     web-api-client: "workspace:*"
