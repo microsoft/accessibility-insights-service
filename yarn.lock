@@ -3834,13 +3834,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/leveldown@npm:^4.0.2":
-  version: 4.0.4
-  resolution: "@types/leveldown@npm:4.0.4"
+"@types/leveldown@npm:^4.0.6":
+  version: 4.0.6
+  resolution: "@types/leveldown@npm:4.0.6"
   dependencies:
     "@types/abstract-leveldown": "*"
     "@types/node": "*"
-  checksum: 630b2d2d1c48f83d14ab0f6c03ad2af1c427675c3692873c4fd3d673bde4140eabc028ce5736ad3d76aeea20769cf53df6f83468a4f0cf28f6d04dbb435edf48
+  checksum: 8b06cbc6858f3956fe8e10a8bb58edd75369587e72ce33ab7e35e21e1f1c8e89981a337c977ffd3a635d4441113e434362ba37e343d8a0ec69cd7c8988450977
   languageName: node
   linkType: hard
 
@@ -4577,7 +4577,7 @@ __metadata:
     "@sindresorhus/fnv1a": ^2.0.1
     "@types/encoding-down": ^5.0.5
     "@types/jest": ^29.5.12
-    "@types/leveldown": ^4.0.2
+    "@types/leveldown": ^4.0.6
     "@types/levelup": ^5.1.1
     "@types/node": ^20.14.9
     "@types/normalize-path": ^3.0.0
