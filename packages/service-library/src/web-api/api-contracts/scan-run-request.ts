@@ -9,7 +9,7 @@ import { AuthenticationType, authenticationTypes, BrowserValidationTypes } from 
 // Construct to support type guard
 export const cookieBannerTypes = ['standard'] as const;
 export declare type CookieBannerType = (typeof cookieBannerTypes)[number];
-export const scanDefinitionTypes = ['eval_agent'] as const;
+export const scanDefinitionTypes = ['accessibility_agent'] as const;
 export declare type ScanDefinitionType = (typeof scanDefinitionTypes)[number];
 
 /**
@@ -35,7 +35,7 @@ export interface ScanRunRequest {
      */
     authenticationType?: AuthenticationType;
     browserValidations?: BrowserValidationTypes[];
-    scanDefinition?: ScanDefinition;
+    scanDefinitions?: ScanDefinition[];
 }
 
 export interface Website {
@@ -84,8 +84,8 @@ export function isScanRunRequest(arg: any): arg is ScanRunRequest {
             checkObjectArray(arg.reportGroups, {
                 primitives: [['consolidatedId', 'string']],
             })) &&
-        (!('scanDefinition' in arg) ||
-            checkObject(arg.scanDefinition, {
+        (!('scanDefinitions' in arg) ||
+            checkObjectArray(arg.scanDefinitions, {
                 literals: [['name', scanDefinitionTypes]],
             }))
     );

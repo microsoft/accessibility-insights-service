@@ -38,7 +38,6 @@ export class OnDemandDispatcher {
         this.logger.logInfo(`Target scan queue size ${this.targetQueueSize}.`);
 
         await this.dispatchRequests('accessibility', this.storageConfig.scanQueue);
-        await this.dispatchRequests('eval_agent', this.storageConfig.scanQueue);
         await this.dispatchRequests('privacy', this.storageConfig.privacyScanQueue);
     }
 

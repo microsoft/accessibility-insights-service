@@ -19,7 +19,7 @@ export interface PageScanRequest {
     privacyScan?: PrivacyScan;
     authenticationType?: AuthenticationType;
     browserValidations?: BrowserValidationTypes[];
-    scanDefinition?: ScanDefinition;
+    scanDefinitions?: ScanDefinition[];
 }
 
 export interface OnDemandPageScanRequest extends StorageDocument, PageScanRequest {

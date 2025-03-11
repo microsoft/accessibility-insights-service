@@ -118,7 +118,7 @@ export class ScanBatchRequestFeedController extends WebController {
                             request.scanId,
                         ),
                         websiteScanRef,
-                        ...(request.scanDefinition === undefined ? {} : { scanDefinition: request.scanDefinition }),
+                        ...(request.scanDefinitions === undefined ? {} : { scanDefinitions: request.scanDefinitions }),
                         ...(request.privacyScan === undefined ? {} : { privacyScan: request.privacyScan }),
                         ...(request.authenticationType === undefined ? {} : { authentication: { hint: request.authenticationType } }),
                         ...(convertToBrowserValidationResult(request.browserValidations) === undefined
@@ -196,7 +196,7 @@ export class ScanBatchRequestFeedController extends WebController {
                         itemType: ItemType.onDemandPageScanRequest,
                         partitionKey: PartitionKey.pageScanRequestDocuments,
                         ...(isEmpty(request.reportGroups) ? {} : { reportGroups: request.reportGroups }),
-                        ...(request.scanDefinition === undefined ? {} : { scanDefinition: request.scanDefinition }),
+                        ...(request.scanDefinitions === undefined ? {} : { scanDefinitions: request.scanDefinitions }),
                         ...(request.privacyScan === undefined ? {} : { privacyScan: request.privacyScan }),
                         ...(request.authenticationType === undefined ? {} : { authenticationType: request.authenticationType }),
                         ...(request.browserValidations === undefined ? {} : { browserValidations: request.browserValidations }),
@@ -282,10 +282,6 @@ export class ScanBatchRequestFeedController extends WebController {
 
         if (!isEmpty(request.privacyScan)) {
             return 'privacy';
-        }
-
-        if (!isEmpty(request.scanDefinition?.name)) {
-            return request.scanDefinition.name;
         }
 
         return 'accessibility';

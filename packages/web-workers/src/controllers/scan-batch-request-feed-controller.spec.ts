@@ -138,7 +138,7 @@ describe(ScanBatchRequestFeedController, () => {
                         },
                         reportGroups: [{ consolidatedId: 'consolidated-id-1' }],
                         privacyScan: { cookieBannerType: 'standard' },
-                        scanDefinition: { name: 'eval_agent', args: { arg1: 'some-args' } },
+                        scanDefinitions: [{ name: 'accessibility_agent', args: { arg1: 'some-args' } }],
                         authenticationType: 'entraId',
                     },
                 ],
@@ -213,7 +213,7 @@ describe(ScanBatchRequestFeedController, () => {
             scanId: 'scan-6',
             url: 'http://url-6',
             priority: 0,
-            scanDefinition: { name: 'eval_agent', args: { arg1: 'some-args' } },
+            scanDefinitions: [{ name: 'accessibility_agent', args: { arg1: 'some-args' } }],
         },
     ] as ScanRunBatchRequest[])('should process scans request %s', async (request: ScanRunBatchRequest) => {
         const documents = [
@@ -328,7 +328,7 @@ function setupOnDemandPageScanRunResultProviderMock(
                           }),
                     websiteScanRef,
                     ...(request.privacyScan === undefined ? {} : { privacyScan: request.privacyScan }),
-                    ...(request.scanDefinition === undefined ? {} : { scanDefinition: request.scanDefinition }),
+                    ...(request.scanDefinitions === undefined ? {} : { scanDefinitions: request.scanDefinitions }),
                     ...(request.authenticationType === undefined ? {} : { authentication: { hint: request.authenticationType } }),
                 };
 
@@ -378,8 +378,8 @@ function setupPageScanRequestProviderMock(documents: OnDemandPageScanBatchReques
                     request.privacyScan = scanRequest.privacyScan;
                 }
 
-                if (!isEmpty(scanRequest.scanDefinition)) {
-                    request.scanDefinition = scanRequest.scanDefinition;
+                if (!isEmpty(scanRequest.scanDefinitions)) {
+                    request.scanDefinitions = scanRequest.scanDefinitions;
                 }
 
                 pageScanRequestProviderMock.setup(async (o) => o.insertRequests(It.isValue([request]))).verifiable(Times.once());
@@ -426,10 +426,6 @@ function getScanType(request: ScanRunBatchRequest): ScanType {
 
     if (!isEmpty(request.privacyScan)) {
         return 'privacy';
-    }
-
-    if (!isEmpty(request.scanDefinition?.name)) {
-        return request.scanDefinition.name;
     }
 
     return 'accessibility';

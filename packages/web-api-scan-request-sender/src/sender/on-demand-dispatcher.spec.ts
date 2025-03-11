@@ -254,7 +254,7 @@ describe(OnDemandDispatcher, () => {
                     ),
                 )
                 .returns(() => Promise.resolve())
-                .verifiable(Times.atLeast(3));
+                .verifiable(Times.exactly(2));
 
             await onDemandDispatcher.dispatchScanRequests();
         },
@@ -305,13 +305,7 @@ describe(OnDemandDispatcher, () => {
             },
             'privacy',
         );
-        setupScanRequestSelector(
-            {
-                queueRequests: [],
-                deleteRequests: [],
-            },
-            'eval_agent',
-        );
+
         setupPageScanRequestProvider(scanRequests);
         setupOnDemandPageScanRunResultProvider(scanRequests);
 
@@ -343,7 +337,7 @@ function setupPageScanRequestProvider(scanRequests: ScanRequests): void {
         if (scanRequest.result) {
             scanRequest.result.websiteScanRef = scanRequest.result.websiteScanRef ?? ({ id: 'websiteScanRefId' } as WebsiteScanRef);
         }
-        pageScanRequestProviderMock.setup((o) => o.deleteRequests([scanRequest.request.id])).verifiable(Times.atLeast(3));
+        pageScanRequestProviderMock.setup((o) => o.deleteRequests([scanRequest.request.id])).verifiable(Times.exactly(2));
     });
 }
 
@@ -365,7 +359,7 @@ function setupQueue(scanType: ScanType = undefined, scanRequests: ScanRequests =
     queueMock
         .setup((o) => o.getMessageCount(accessabilityScanQueueName))
         .returns(() => Promise.resolve(accessibilityQueueMessageCount))
-        .verifiable(Times.atLeast(2));
+        .verifiable();
     queueMock
         .setup((o) => o.getMessageCount(privacyScanQueueName))
         .returns(() => Promise.resolve(privacyQueueMessageCount))

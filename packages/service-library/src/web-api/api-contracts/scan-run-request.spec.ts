@@ -29,15 +29,17 @@ describe(isScanRunRequest, () => {
                         consolidatedId: 'consolidatedId',
                     },
                 ],
-                scanDefinition: {
-                    name: 'eval_agent',
-                    args: {
-                        arg1: 'full',
+                scanDefinitions: [
+                    {
+                        name: 'accessibility_agent',
+                        args: {
+                            arg1: 'full',
+                        },
+                        options: {
+                            opt1: 'full',
+                        },
                     },
-                    options: {
-                        opt1: 'full',
-                    },
-                },
+                ],
             }),
         ).toEqual(true);
     });
@@ -114,14 +116,14 @@ describe(isScanRunRequest, () => {
     });
 
     test.each([
-        { url: 'url', scanDefinition: undefined },
-        { url: 'url', scanDefinition: 'nan' },
-        { url: 'url', scanDefinition: { name: undefined } },
-        { url: 'url', scanDefinition: { args: { agr1: 'full', arg2: undefined } } },
-        { url: 'url', scanDefinition: { args: { agr1: 'full', agr2: {} } } },
-        { url: 'url', scanDefinition: { options: { opt1: 'full', opt2: undefined } } },
-        { url: 'url', scanDefinition: { options: { opt1: 'full', opt2: {} } } },
-    ])('validate `scanDefinition` property', (obj: any) => {
+        { url: 'url', scanDefinitions: undefined },
+        { url: 'url', scanDefinitions: 'nan' },
+        { url: 'url', scanDefinitions: [{ name: undefined }] },
+        { url: 'url', scanDefinitions: [{ args: { agr1: 'full', arg2: undefined } }] },
+        { url: 'url', scanDefinitions: [{ args: { agr1: 'full', agr2: {} } }] },
+        { url: 'url', scanDefinitions: [{ options: { opt1: 'full', opt2: undefined } }] },
+        { url: 'url', scanDefinitions: [{ options: { opt1: 'full', opt2: {} } }] },
+    ])('validate `scanDefinitions` array', (obj: any) => {
         expect(isScanRunRequest(obj)).toEqual(false);
     });
 });
