@@ -130,6 +130,7 @@ export class ScanRequestController extends ApiController {
                     ...(scanRunRequest.authenticationType === undefined ? {} : { authenticationType: scanRunRequest.authenticationType }),
                     ...(scanRunRequest.privacyScan === undefined ? {} : { privacyScan: scanRunRequest.privacyScan }),
                     ...(scanRunRequest.browserValidations === undefined ? {} : { browserValidations: scanRunRequest.browserValidations }),
+                    ...(scanRunRequest.scanDefinition === undefined ? {} : { scanDefinition: scanRunRequest.scanDefinition }),
                     ...(isEmpty(scanRunRequest.reportGroups) ? {} : { reportGroups: scanRunRequest.reportGroups }),
                     ...(isEmpty(scanRunRequest.scanNotifyUrl) ? {} : { scanNotifyUrl: scanRunRequest.scanNotifyUrl }),
                     ...(isEmpty(scanRunRequest.site) ? {} : { site: scanRunRequest.site }),

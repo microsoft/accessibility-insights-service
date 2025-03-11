@@ -24,7 +24,8 @@ export declare type NotificationErrorTypes = 'InternalError' | 'HttpErrorCode';
 export declare type AuthenticationState = 'succeeded' | 'failed' | 'unauthenticated';
 export declare type CookieBannerType = 'standard';
 export declare type AuthenticationType = 'undetermined' | 'entraId';
-export declare type ScanType = 'accessibility' | 'privacy';
+export declare type ScanDefinitionType = 'eval_agent';
+export declare type ScanType = ScanDefinitionType | 'accessibility' | 'privacy';
 
 export declare type ReportFormat =
     | 'axe'
@@ -81,6 +82,7 @@ export interface OnDemandPageScanResult extends StorageDocument {
     privacyScan?: PrivacyScan;
     authentication?: AuthenticationResult;
     browserValidationResult?: BrowserValidationResult;
+    scanDefinition?: ScanDefinition;
 }
 
 export interface BrowserValidationResult {
@@ -133,4 +135,10 @@ export interface WebsiteScanRef {
 
 export interface WorkflowRunResults {
     report: ReportScanRunResult;
+}
+
+export interface ScanDefinition {
+    name: ScanType;
+    args?: Record<string, string | number | boolean>;
+    options?: Record<string, string | number | boolean>;
 }

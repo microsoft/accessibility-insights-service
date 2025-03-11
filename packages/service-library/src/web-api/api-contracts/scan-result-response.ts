@@ -4,6 +4,7 @@
 import { ScanNotificationErrorCodeName } from '../scan-notification-error-codes';
 import { ScanRunErrorCodeName } from '../scan-run-error-codes';
 import { WebApiError } from '../web-api-error-codes';
+import { ScanDefinitionType } from './scan-run-request';
 
 export declare type LinkType = 'self';
 export declare type ScanState = 'pending' | 'pass' | 'fail';
@@ -20,7 +21,7 @@ export declare type RunState =
     | 'unscannable';
 export declare type NotificationState = 'pending' | 'queued' | 'queueFailed' | 'sending' | 'sent' | 'sendFailed';
 export declare type NotificationErrorTypes = 'InternalError' | 'HttpErrorCode';
-export declare type ScanType = 'accessibility' | 'privacy';
+export declare type ScanType = ScanDefinitionType | 'accessibility' | 'privacy';
 export declare type ScanResultResponse = ScanRunResultResponse | ScanRunErrorResponse;
 export declare type AuthenticationState = 'succeeded' | 'failed' | 'unauthenticated';
 
