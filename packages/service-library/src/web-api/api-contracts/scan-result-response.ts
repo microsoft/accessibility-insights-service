@@ -4,6 +4,7 @@
 import { ScanNotificationErrorCodeName } from '../scan-notification-error-codes';
 import { ScanRunErrorCodeName } from '../scan-run-error-codes';
 import { WebApiError } from '../web-api-error-codes';
+import { ScanDefinitionType } from './scan-run-request';
 
 export declare type LinkType = 'self';
 export declare type ScanState = 'pending' | 'pass' | 'fail';
@@ -99,6 +100,13 @@ export interface ScanRun {
     error?: ScanRunError;
     pageResponseCode?: number;
     pageTitle?: string;
+    scanRunDetails?: ScanRunDetail[];
+}
+
+export interface ScanRunDetail {
+    name: ScanDefinitionType;
+    state: RunState;
+    details?: unknown;
 }
 
 export interface ScanRunError {

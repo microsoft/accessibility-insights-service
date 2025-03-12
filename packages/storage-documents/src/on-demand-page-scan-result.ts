@@ -124,6 +124,13 @@ export interface OnDemandPageScanRunResult {
     pageTitle?: string;
     pageResponseCode?: number;
     retryCount?: number;
+    scanRunDetails?: ScanRunDetail[];
+}
+
+export interface ScanRunDetail {
+    name: ScanDefinitionType;
+    state: OnDemandPageScanRunState;
+    details?: unknown;
 }
 
 export interface WebsiteScanRef {

@@ -79,6 +79,7 @@ export class ScanResponseConverter {
                 error: this.scanErrorConverter.getScanRunErrorCode(pageScanResult.run?.error),
                 pageResponseCode: pageScanResult.run?.pageResponseCode,
                 pageTitle: pageScanResult.run?.pageTitle,
+                scanRunDetails: pageScanResult.run?.scanRunDetails,
             },
             ...this.getRunCompleteNotificationResponse(pageScanResult.notification),
         };
@@ -124,6 +125,7 @@ export class ScanResponseConverter {
                 error: this.scanErrorConverter.getScanRunErrorCode(pageScanResult.run?.error),
                 pageResponseCode: pageScanResult.run.pageResponseCode,
                 pageTitle: pageScanResult.run.pageTitle,
+                scanRunDetails: pageScanResult.run.scanRunDetails,
             },
             ...this.getRunCompleteNotificationResponse(pageScanResult.notification),
             reports: this.getScanReports(baseUrl, apiVersion, pageScanResult),
