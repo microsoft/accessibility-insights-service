@@ -25,7 +25,7 @@ export declare type AuthenticationState = 'succeeded' | 'failed' | 'unauthentica
 export declare type CookieBannerType = 'standard';
 export declare type AuthenticationType = 'undetermined' | 'entraId';
 export declare type ScanType = 'accessibility' | 'privacy';
-
+export declare type ScanDefinitionType = 'accessibility_agent';
 export declare type ReportFormat =
     | 'axe'
     | 'sarif'
@@ -81,6 +81,7 @@ export interface OnDemandPageScanResult extends StorageDocument {
     privacyScan?: PrivacyScan;
     authentication?: AuthenticationResult;
     browserValidationResult?: BrowserValidationResult;
+    scanDefinitions?: ScanDefinition[];
 }
 
 export interface BrowserValidationResult {
@@ -123,6 +124,13 @@ export interface OnDemandPageScanRunResult {
     pageTitle?: string;
     pageResponseCode?: number;
     retryCount?: number;
+    scanRunDetails?: ScanRunDetail[];
+}
+
+export interface ScanRunDetail {
+    name: ScanDefinitionType;
+    state: OnDemandPageScanRunState;
+    details?: unknown;
 }
 
 export interface WebsiteScanRef {
@@ -133,4 +141,10 @@ export interface WebsiteScanRef {
 
 export interface WorkflowRunResults {
     report: ReportScanRunResult;
+}
+
+export interface ScanDefinition {
+    name: ScanDefinitionType;
+    args?: Record<string, string | number | boolean>;
+    options?: Record<string, string | number | boolean>;
 }

@@ -297,7 +297,62 @@
                     "browserValidations": {
                         "type": "array",
                         "description": "Enables browser validations.",
-                        "items": ["highContrastProperties"]
+                        "items": {
+                            "type": "string",
+                            "enum": ["highContrastProperties"],
+                            "example": "highContrastProperties"
+                        }
+                    },
+                    "scanDefinitions": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "description": "Definition for the additional scanner.",
+                            "required": ["name"],
+                            "properties": {
+                                "name": {
+                                    "type": "string",
+                                    "enum": ["accessibility_agent"],
+                                    "example": "accessibility_agent"
+                                },
+                                "args": {
+                                    "type": "object",
+                                    "description": "Parameters to provide to the scanner for execution.",
+                                    "properties": {
+                                        "string": {
+                                            "type": "string",
+                                            "example": "value"
+                                        },
+                                        "integer": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "boolean": {
+                                            "type": "boolean",
+                                            "example": true
+                                        }
+                                    }
+                                },
+                                "options": {
+                                    "type": "object",
+                                    "description": "Parameters to configure the service for controlling scanner execution.",
+                                    "properties": {
+                                        "string": {
+                                            "type": "string",
+                                            "example": "value"
+                                        },
+                                        "integer": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "boolean": {
+                                            "type": "boolean",
+                                            "example": true
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             },
@@ -390,6 +445,28 @@
                     "pageTitle": {
                         "type": "string",
                         "example": "Accessibility Insights"
+                    },
+                    "scanRunDetails": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "description": "Scan run result for the additional scanner.",
+                            "required": ["name", "state"],
+                            "properties": {
+                                "name": {
+                                    "type": "string",
+                                    "enum": ["accessibility_agent"],
+                                    "example": "accessibility_agent"
+                                },
+                                "state": {
+                                    "$ref": "#/components/schemas/RunState"
+                                },
+                                "details": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
                     }
                 }
             },

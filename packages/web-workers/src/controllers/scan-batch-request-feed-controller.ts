@@ -118,8 +118,9 @@ export class ScanBatchRequestFeedController extends WebController {
                             request.scanId,
                         ),
                         websiteScanRef,
-                        ...(request.authenticationType === undefined ? {} : { authentication: { hint: request.authenticationType } }),
+                        ...(request.scanDefinitions === undefined ? {} : { scanDefinitions: request.scanDefinitions }),
                         ...(request.privacyScan === undefined ? {} : { privacyScan: request.privacyScan }),
+                        ...(request.authenticationType === undefined ? {} : { authentication: { hint: request.authenticationType } }),
                         ...(convertToBrowserValidationResult(request.browserValidations) === undefined
                             ? {}
                             : { browserValidationResult: convertToBrowserValidationResult(request.browserValidations) }),
@@ -195,6 +196,7 @@ export class ScanBatchRequestFeedController extends WebController {
                         itemType: ItemType.onDemandPageScanRequest,
                         partitionKey: PartitionKey.pageScanRequestDocuments,
                         ...(isEmpty(request.reportGroups) ? {} : { reportGroups: request.reportGroups }),
+                        ...(request.scanDefinitions === undefined ? {} : { scanDefinitions: request.scanDefinitions }),
                         ...(request.privacyScan === undefined ? {} : { privacyScan: request.privacyScan }),
                         ...(request.authenticationType === undefined ? {} : { authenticationType: request.authenticationType }),
                         ...(request.browserValidations === undefined ? {} : { browserValidations: request.browserValidations }),
@@ -274,7 +276,15 @@ export class ScanBatchRequestFeedController extends WebController {
     }
 
     private getScanType(request: ScanRunBatchRequest): ScanType {
-        return request.scanType ?? (request.privacyScan ? 'privacy' : 'accessibility');
+        if (!isEmpty(request.scanType)) {
+            return request.scanType;
+        }
+
+        if (!isEmpty(request.privacyScan)) {
+            return 'privacy';
+        }
+
+        return 'accessibility';
     }
 
     // Gets deep scan limit based on request's know pages size

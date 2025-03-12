@@ -138,6 +138,7 @@ describe(ScanBatchRequestFeedController, () => {
                         },
                         reportGroups: [{ consolidatedId: 'consolidated-id-1' }],
                         privacyScan: { cookieBannerType: 'standard' },
+                        scanDefinitions: [{ name: 'accessibility_agent', args: { arg1: 'some-args' } }],
                         authenticationType: 'entraId',
                     },
                 ],
@@ -206,6 +207,13 @@ describe(ScanBatchRequestFeedController, () => {
             priority: 0,
             scanType: 'privacy',
             privacyScan: { cookieBannerType: 'standard' },
+        },
+        {
+            schemaVersion: '2',
+            scanId: 'scan-6',
+            url: 'http://url-6',
+            priority: 0,
+            scanDefinitions: [{ name: 'accessibility_agent', args: { arg1: 'some-args' } }],
         },
     ] as ScanRunBatchRequest[])('should process scans request %s', async (request: ScanRunBatchRequest) => {
         const documents = [
@@ -320,6 +328,7 @@ function setupOnDemandPageScanRunResultProviderMock(
                           }),
                     websiteScanRef,
                     ...(request.privacyScan === undefined ? {} : { privacyScan: request.privacyScan }),
+                    ...(request.scanDefinitions === undefined ? {} : { scanDefinitions: request.scanDefinitions }),
                     ...(request.authenticationType === undefined ? {} : { authentication: { hint: request.authenticationType } }),
                 };
 
@@ -369,6 +378,10 @@ function setupPageScanRequestProviderMock(documents: OnDemandPageScanBatchReques
                     request.privacyScan = scanRequest.privacyScan;
                 }
 
+                if (!isEmpty(scanRequest.scanDefinitions)) {
+                    request.scanDefinitions = scanRequest.scanDefinitions;
+                }
+
                 pageScanRequestProviderMock.setup(async (o) => o.insertRequests(It.isValue([request]))).verifiable(Times.once());
             });
     });
@@ -407,7 +420,15 @@ function setupMocksWithTimesNever(): void {
 }
 
 function getScanType(request: ScanRunBatchRequest): ScanType {
-    return request.scanType ?? (request.privacyScan ? 'privacy' : 'accessibility');
+    if (!isEmpty(request.scanType)) {
+        return request.scanType;
+    }
+
+    if (!isEmpty(request.privacyScan)) {
+        return 'privacy';
+    }
+
+    return 'accessibility';
 }
 
 function getDeepScanLimit(websiteScanData: Partial<WebsiteScanData>): number {
