@@ -261,11 +261,13 @@ function getPageScanResult(options: options): OnDemandPageScanResult {
             {
                 reportId: 'reportIdSarif',
                 format: 'sarif',
+                source: 'accessibility-scan',
                 href: 'href',
             },
             {
                 reportId: 'reportIdHtml',
                 format: 'html',
+                source: 'accessibility-scan',
                 href: 'href',
             },
         ],
@@ -311,6 +313,7 @@ function getScanResultClientResponseFull(options: options): ScanResultResponse {
             {
                 reportId: 'reportIdSarif',
                 format: 'sarif',
+                source: 'accessibility-scan',
                 links: {
                     rel: 'self',
                     href: 'https://localhost/api/scans/id/reports/reportIdSarif?api-version=1.0',
@@ -319,6 +322,7 @@ function getScanResultClientResponseFull(options: options): ScanResultResponse {
             {
                 reportId: 'reportIdHtml',
                 format: 'html',
+                source: 'accessibility-scan',
                 links: {
                     rel: 'self',
                     href: 'https://localhost/api/scans/id/reports/reportIdHtml?api-version=1.0',

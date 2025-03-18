@@ -3,7 +3,7 @@
 
 import { StorageDocument } from './storage-document';
 import { ItemType } from './item-type';
-import { ReportFormat, OnDemandPageScanRunState, ScanState } from './on-demand-page-scan-result';
+import { ReportFormat, OnDemandPageScanRunState, ScanState, ReportSource } from './on-demand-page-scan-result';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -97,6 +97,7 @@ export interface WebsiteScanResultPart extends StorageDocument, WebsiteScanResul
 export interface WebsiteScanReport {
     reportId: string;
     format: ReportFormat;
+    source?: ReportSource;
     href: string;
 }
 

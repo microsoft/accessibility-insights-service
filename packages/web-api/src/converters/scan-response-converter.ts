@@ -164,6 +164,7 @@ export class ScanResponseConverter {
             return {
                 reportId: report.reportId,
                 format: report.format,
+                source: report.source,
                 links: {
                     rel: 'self',
                     href: `${baseUrlFixed}/scans/${pageScanResult.id}/reports/${report.reportId}?api-version=${apiVersion}`,

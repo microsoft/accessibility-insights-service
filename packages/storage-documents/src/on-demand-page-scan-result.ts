@@ -26,6 +26,7 @@ export declare type CookieBannerType = 'standard';
 export declare type AuthenticationType = 'undetermined' | 'entraId';
 export declare type ScanType = 'accessibility' | 'privacy';
 export declare type ScanDefinitionType = 'accessibility_agent';
+export declare type ReportSource = 'accessibility-agent' | 'accessibility-scan' | 'privacy-scan';
 export declare type ReportFormat =
     | 'axe'
     | 'sarif'
@@ -114,6 +115,7 @@ export interface OnDemandScanResult {
 export interface OnDemandPageScanReport {
     reportId: string;
     format: ReportFormat;
+    source?: ReportSource;
     href: string;
 }
 

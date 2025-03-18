@@ -480,8 +480,13 @@
                     },
                     "format": {
                         "type": "string",
-                        "description": "SARIF format specification https://www.oasis-open.org/committees/sarif/charter.php",
-                        "enum": ["axe", "sarif", "html", "consolidated.html", "json", "consolidated.json", "page.png", "page.mhtml"]
+                        "enum": ["axe", "sarif", "html", "consolidated.html", "json", "consolidated.json", "page.png", "page.mhtml"],
+                        "example": "sarif"
+                    },
+                    "source": {
+                        "type": "string",
+                        "enum": ["accessibility-agent", "accessibility-scan", "privacy-scan"],
+                        "example": "accessibility-scan"
                     },
                     "links": {
                         "$ref": "#/components/schemas/Links"

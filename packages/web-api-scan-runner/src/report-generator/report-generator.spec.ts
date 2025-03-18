@@ -8,7 +8,8 @@ import { GuidGenerator } from 'common';
 import { AxeScanResults } from 'scanner-global-library';
 import { ReportFormat } from 'storage-documents';
 import { IMock, Mock } from 'typemoq';
-import { GeneratedReport, ReportGenerator } from './report-generator';
+import { GeneratedReport } from 'service-library';
+import { ReportGenerator } from './report-generator';
 import { AxeResultConverter } from './axe-result-converter';
 
 class AxeResultConverterStub implements AxeResultConverter {
@@ -39,11 +40,13 @@ describe('ReportGenerator', () => {
         content: 'report 1 content',
         format: 'sarif',
         id: 'report id 1',
+        source: 'accessibility-scan',
     };
     const report2: GeneratedReport = {
         content: 'report 2 content',
         format: 'html',
         id: 'report id 2',
+        source: 'accessibility-scan',
     };
 
     beforeEach(() => {

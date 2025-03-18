@@ -4,15 +4,9 @@
 import { GuidGenerator } from 'common';
 import { inject, injectable } from 'inversify';
 import { AxeScanResults } from 'scanner-global-library';
-import { ReportFormat } from 'storage-documents';
+import { GeneratedReport } from 'service-library';
 import { iocTypeNames } from '../ioc-types';
 import { AxeResultConverter } from './axe-result-converter';
-
-export type GeneratedReport = {
-    content: string;
-    id: string;
-    format: ReportFormat;
-};
 
 @injectable()
 export class ReportGenerator {
@@ -27,6 +21,7 @@ export class ReportGenerator {
                 content: axeResultConverter.convert(axeScanResults),
                 id: this.guidGenerator.createGuid(),
                 format: axeResultConverter.targetReportFormat,
+                source: 'accessibility-scan',
             };
         });
     }
