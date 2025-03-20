@@ -28,6 +28,7 @@ import { ReportGenerator } from '../report-generator/report-generator';
 import { RunnerScanMetadataConfig } from '../runner-scan-metadata-config';
 import { ScanRunnerTelemetryManager } from '../scan-runner-telemetry-manager';
 import { PageScanProcessor, ScanProcessorResult } from '../processor/page-scan-processor';
+import { conditionsToDispatchScanner } from '../scanner/scanner-dispatcher';
 
 @injectable()
 export class Runner {
@@ -113,7 +114,7 @@ export class Runner {
 
     private async onFailedScan(axeScanResults: AxeScanResults, pageScanResult: OnDemandPageScanResult): Promise<void> {
         this.setRunResult(pageScanResult, 'failed', axeScanResults.scannedUrl, axeScanResults.error);
-        this.logger.logError('Browser has failed to scan a page.', { error: JSON.stringify(axeScanResults.error) });
+        this.logger.logError('Scanner has failed to scan a page.', { error: JSON.stringify(axeScanResults.error) });
         this.telemetryManager.trackBrowserScanFailed();
     }
 
@@ -176,15 +177,44 @@ export class Runner {
 
     private async updateScanRunStateToRunning(scanId: string): Promise<OnDemandPageScanResult> {
         this.logger.logInfo(`Updating page scan run state to 'running'.`);
+
+        // Read the existing page scan run result
+        const pageScanResult = await this.onDemandPageScanRunResultProvider.readScanRun(scanId);
+
+        // Delete the existing reports and run states if there are any pending scanner results
+        const scannerResultToKeep: string[] = [];
+        if (!isEmpty(pageScanResult.run?.scanRunDetails)) {
+            pageScanResult.run.scanRunDetails = pageScanResult.run.scanRunDetails.map((detail) => {
+                if (conditionsToDispatchScanner.includes(detail.state)) {
+                    scannerResultToKeep.push(detail.name);
+
+                    return {
+                        name: detail.name,
+                        state: 'pending',
+                        timestamp: new Date().toJSON(),
+                        error: null,
+                        details: null,
+                    };
+                } else {
+                    return detail;
+                }
+            });
+        }
+        if (scannerResultToKeep.length > 0 && !isEmpty(pageScanResult.reports)) {
+            pageScanResult.reports = pageScanResult.reports.filter((r) => scannerResultToKeep.includes(r.source));
+        }
+
+        // Update the page scan run state to 'running'
         const partialPageScanResult: Partial<OnDemandPageScanResult> = {
             id: scanId,
             run: {
                 state: 'running',
                 timestamp: new Date().toJSON(),
                 error: null,
+                scanRunDetails: isEmpty(pageScanResult.run?.scanRunDetails) ? null : pageScanResult.run.scanRunDetails,
             },
             scanResult: null,
-            reports: null,
+            reports: isEmpty(pageScanResult.reports) ? null : pageScanResult.reports,
         };
         const response = await this.onDemandPageScanRunResultProvider.tryUpdateScanRun(partialPageScanResult);
         if (!response.succeeded) {

@@ -133,7 +133,7 @@ export interface ScanRunDetail {
     name: ScanDefinitionType;
     state: ScanStateExt;
     timestamp?: string;
-    error?: string;
+    error?: string | null;
     details?: unknown;
 }
 

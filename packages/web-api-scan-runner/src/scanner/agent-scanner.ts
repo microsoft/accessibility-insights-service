@@ -26,7 +26,7 @@ export interface AgentResults {
 
 @injectable()
 export class AgentScanner {
-    private readonly agentFolder = `${__dirname}/agent`;
+    private readonly agentFolder = `${__dirname}/a11y_agent`;
 
     private readonly agentExePath = `${this.agentFolder}/A11yAgent.Console.exe`;
 
@@ -113,7 +113,10 @@ export class AgentScanner {
         const timeoutMsec: number = 120000;
 
         try {
-            const { stdout, stderr } = await execAsync(`${this.agentExeCommand} ${encodeURI(url)}`, { timeout: timeoutMsec });
+            const { stdout, stderr } = await execAsync(`${this.agentExeCommand} ${encodeURI(url)}`, {
+                timeout: timeoutMsec,
+                cwd: this.agentFolder,
+            });
 
             if (stderr) {
                 this.logger.logError('Agent exited with error code.', { error: stderr });

@@ -348,7 +348,7 @@ function setupProcessScanResult(): void {
             error: axeScanResults.error,
         };
         loggerMock
-            .setup((o) => o.logError(`Browser has failed to scan a page.`, { error: JSON.stringify(axeScanResults.error) }))
+            .setup((o) => o.logError(`Scanner has failed to scan a page.`, { error: JSON.stringify(axeScanResults.error) }))
             .verifiable();
     } else {
         pageScanResult.run = {
@@ -424,6 +424,11 @@ function setupScanRunnerTelemetryManager(taskSucceeded: boolean = true, scanSucc
 }
 
 function setupUpdateScanRunStateToRunning(succeeded: boolean = true): void {
+    onDemandPageScanRunResultProviderMock
+        .setup((o) => o.readScanRun(runnerScanMetadata.id))
+        .returns(() => Promise.resolve(pageScanResultDbDocument))
+        .verifiable();
+
     pageScanResult = { ...pageScanResult, ...pageScanResultDbDocument };
     const partialPageScanResult: Partial<OnDemandPageScanResult> = {
         id: runnerScanMetadata.id,
@@ -431,6 +436,7 @@ function setupUpdateScanRunStateToRunning(succeeded: boolean = true): void {
             state: 'running',
             timestamp: dateNow.toJSON(),
             error: null,
+            scanRunDetails: null,
         },
         scanResult: null,
         reports: null,

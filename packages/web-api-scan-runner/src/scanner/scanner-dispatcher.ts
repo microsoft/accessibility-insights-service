@@ -12,6 +12,8 @@ import { HighContrastResults, HighContrastScanner } from '../scanner/high-contra
 import { ScanProcessorResult } from '../processor/page-scan-processor';
 import { AgentResults, AgentScanner } from './agent-scanner';
 
+export const conditionsToDispatchScanner = ['pending', 'error'] as string[];
+
 @injectable()
 export class ScannerDispatcher {
     public constructor(
@@ -73,7 +75,7 @@ export class ScannerDispatcher {
         pageScanResult: OnDemandPageScanResult,
     ): Promise<HighContrastResults> {
         // Preventing the execution of a scanner on retry that was initiated due to the failure of another scanner.
-        if (['pending', 'error'].includes(pageScanResult.browserValidationResult?.highContrastProperties)) {
+        if (conditionsToDispatchScanner.includes(pageScanResult.browserValidationResult?.highContrastProperties)) {
             this.logger.logInfo(`Dispatching high contrast website page scanner.`);
 
             return this.highContrastScanner.scan(runnerScanMetadata.url);
@@ -84,7 +86,7 @@ export class ScannerDispatcher {
 
     private async dispatchAgentScan(runnerScanMetadata: RunnerScanMetadata, pageScanResult: OnDemandPageScanResult): Promise<AgentResults> {
         // Preventing the execution of a scanner on retry that was initiated due to the failure of another scanner.
-        if (['pending', 'error'].includes(pageScanResult.run.scanRunDetails?.find((s) => s.name === 'accessibility_agent')?.state)) {
+        if (conditionsToDispatchScanner.includes(pageScanResult.run.scanRunDetails?.find((s) => s.name === 'accessibility_agent')?.state)) {
             // Scan only for the original client request and disregard internal crawler requests. For
             // supporting crawler requests, ensure that the relevant request portion is duplicated by
             // the scan feed generator.
