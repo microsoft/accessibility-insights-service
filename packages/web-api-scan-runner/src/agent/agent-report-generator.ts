@@ -5,8 +5,8 @@ import { GuidGenerator } from 'common';
 import { inject, injectable } from 'inversify';
 import { GeneratedReport } from 'service-library';
 import { iocTypeNames } from '../ioc-types';
+import { AgentResults } from '../scanner/agent-scanner';
 import { AgentResultConverter } from './agent-result-converter';
-import { AgentResults } from './agent-scanner';
 
 @injectable()
 export class AgentReportGenerator {

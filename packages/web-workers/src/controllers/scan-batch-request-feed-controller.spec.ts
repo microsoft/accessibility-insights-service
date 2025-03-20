@@ -27,6 +27,7 @@ import {
     ScanGroupType,
     ScanType,
     KnownPage,
+    ScanRunDetail,
 } from 'storage-documents';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { MockableLogger } from '../test-utilities/mockable-logger';
@@ -304,6 +305,13 @@ function setupOnDemandPageScanRunResultProviderMock(
                         scanGroupType: r.scanGroupType,
                     } as WebsiteScanRef;
                 })[i++];
+                const scanDefinitionsRunState: ScanRunDetail[] = request.scanDefinitions?.map((scanDefinition) => {
+                    return {
+                        name: scanDefinition.name,
+                        state: 'pending',
+                        timestamp: new Date().toJSON(),
+                    };
+                });
                 const result: OnDemandPageScanResult = {
                     schemaVersion: request.schemaVersion,
                     id: request.scanId,
@@ -315,6 +323,7 @@ function setupOnDemandPageScanRunResultProviderMock(
                     run: {
                         state: 'accepted',
                         timestamp: dateNow.toJSON(),
+                        scanRunDetails: scanDefinitionsRunState ?? [],
                     },
                     batchRequestId: document.id,
                     deepScanId: request.deepScanId ?? request.scanId,

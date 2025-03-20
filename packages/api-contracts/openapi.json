@@ -459,7 +459,17 @@
                                     "example": "accessibility_agent"
                                 },
                                 "state": {
-                                    "$ref": "#/components/schemas/RunState"
+                                    "type": "string",
+                                    "enum": ["pending", "pass", "fail", "error", "completed"],
+                                    "example": "completed"
+                                },
+                                "timestamp": {
+                                    "description": "Full date and time string format as defined by ISO 8601",
+                                    "type": "string",
+                                    "example": "2024-04-02T00:25:32.508Z"
+                                },
+                                "error": {
+                                    "type": "string"
                                 },
                                 "details": {
                                     "type": "object",

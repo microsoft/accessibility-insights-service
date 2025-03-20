@@ -2,11 +2,12 @@
 // Licensed under the MIT License.
 
 import 'reflect-metadata';
+
 import { IMock, Mock, Times } from 'typemoq';
 import { GuidGenerator } from 'common';
 import { GeneratedReport } from 'service-library';
+import { AgentResults } from '../scanner/agent-scanner';
 import { AgentResultConverter } from './agent-result-converter';
-import { AgentResults } from './agent-scanner';
 import { AgentReportGenerator } from './agent-report-generator';
 
 describe(AgentReportGenerator, () => {

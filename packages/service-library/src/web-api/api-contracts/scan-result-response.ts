@@ -9,7 +9,7 @@ import { ScanDefinitionType } from './scan-run-request';
 
 export declare type LinkType = 'self';
 export declare type ScanState = 'pending' | 'pass' | 'fail';
-export declare type ScanStateExt = ScanState | 'error';
+export declare type ScanStateExt = ScanState | 'error' | 'completed';
 export declare type RunState =
     | 'pending'
     | 'accepted'
@@ -107,7 +107,9 @@ export interface ScanRun {
 
 export interface ScanRunDetail {
     name: ScanDefinitionType;
-    state: RunState;
+    state: ScanStateExt;
+    timestamp?: string;
+    error?: string;
     details?: unknown;
 }
 

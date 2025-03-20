@@ -3,86 +3,147 @@
 
 import 'reflect-metadata';
 
-import { AxeResults } from 'axe-core';
+import { IMock, It, Mock, Times } from 'typemoq';
 import { GuidGenerator } from 'common';
 import { AxeScanResults } from 'scanner-global-library';
-import { ReportFormat } from 'storage-documents';
-import { IMock, Mock } from 'typemoq';
 import { GeneratedReport } from 'service-library';
-import { ReportGenerator } from './report-generator';
 import { AxeResultConverter } from './axe-result-converter';
+import { ReportGenerator } from './report-generator';
 
-class AxeResultConverterStub implements AxeResultConverter {
-    public convertCallCount = 0;
-
-    public readonly targetReportFormat: ReportFormat;
-
-    constructor(public readonly reportValue: string, reportType: ReportFormat) {
-        this.targetReportFormat = reportType;
-    }
-
-    public convert(axeScanResults: AxeScanResults): string {
-        this.convertCallCount += 1;
-
-        return this.reportValue;
-    }
-}
-
-describe('ReportGenerator', () => {
-    let reportGenerator: ReportGenerator;
-    let axeResultConverters: AxeResultConverterStub[];
+describe(ReportGenerator, () => {
     let guidGeneratorMock: IMock<GuidGenerator>;
-    let axeScanResults: AxeScanResults;
+    let axeResultConverterMock1: IMock<AxeResultConverter>;
+    let axeResultConverterMock2: IMock<AxeResultConverter>;
+    let reportGenerator: ReportGenerator;
 
-    const pageTitle = 'test page title';
-    const pageResponseCode = 101;
-    const report1: GeneratedReport = {
-        content: 'report 1 content',
-        format: 'sarif',
-        id: 'report id 1',
-        source: 'accessibility-scan',
-    };
-    const report2: GeneratedReport = {
-        content: 'report 2 content',
-        format: 'html',
-        id: 'report id 2',
-        source: 'accessibility-scan',
-    };
+    const axeScanResults1: AxeScanResults = {
+        pageTitle: 'test page 1',
+        results: {
+            violations: [{ id: 'violation1' }],
+            passes: [{ id: 'pass1' }],
+            inapplicable: [{ id: 'inapplicable1' }],
+            incomplete: [{ id: 'incomplete1' }],
+        },
+    } as AxeScanResults;
+
+    const axeScanResults2: AxeScanResults = {
+        pageTitle: 'test page 2',
+        results: {
+            violations: [{ id: 'violation2' }],
+            passes: [{ id: 'pass2' }],
+            inapplicable: [{ id: 'inapplicable2' }],
+            incomplete: [{ id: 'incomplete2' }],
+        },
+    } as AxeScanResults;
+
+    const mergedAxeScanResults: AxeScanResults = {
+        pageTitle: 'test page 1',
+        results: {
+            violations: [{ id: 'violation1' }, { id: 'violation2' }],
+            passes: [{ id: 'pass1' }, { id: 'pass2' }],
+            inapplicable: [{ id: 'inapplicable1' }, { id: 'inapplicable2' }],
+            incomplete: [{ id: 'incomplete1' }, { id: 'incomplete2' }],
+        },
+    } as AxeScanResults;
+
+    const generatedGuid1 = 'guid-1';
+    const generatedGuid2 = 'guid-2';
 
     beforeEach(() => {
-        axeResultConverters = [
-            new AxeResultConverterStub(report1.content, report1.format),
-            new AxeResultConverterStub(report2.content, report2.format),
-        ];
-        axeScanResults = {
-            results: {
-                url: 'url',
-            } as unknown as AxeResults,
-            pageResponseCode,
-            pageTitle,
-        };
         guidGeneratorMock = Mock.ofType<GuidGenerator>();
-        guidGeneratorMock.setup((g) => g.createGuid()).returns(() => report1.id);
-        guidGeneratorMock.setup((g) => g.createGuid()).returns(() => report2.id);
-        reportGenerator = new ReportGenerator(guidGeneratorMock.object, axeResultConverters);
+        axeResultConverterMock1 = Mock.ofType<AxeResultConverter>();
+        axeResultConverterMock2 = Mock.ofType<AxeResultConverter>();
+
+        axeResultConverterMock1.setup((converter) => converter.convert(It.isAny())).returns(() => 'converted-content-1');
+        axeResultConverterMock1.setup((converter) => converter.targetReportFormat).returns(() => 'axe');
+
+        axeResultConverterMock2.setup((converter) => converter.convert(It.isAny())).returns(() => 'converted-content-2');
+        axeResultConverterMock2.setup((converter) => converter.targetReportFormat).returns(() => 'html');
+
+        guidGeneratorMock
+            .setup((g) => g.createGuid())
+            .returns(() => generatedGuid1)
+            .verifiable(Times.once());
+        guidGeneratorMock
+            .setup((g) => g.createGuid())
+            .returns(() => generatedGuid2)
+            .verifiable(Times.once());
+
+        reportGenerator = new ReportGenerator(guidGeneratorMock.object, [axeResultConverterMock1.object, axeResultConverterMock2.object]);
     });
 
-    afterEach(() => {
-        guidGeneratorMock.verifyAll();
+    it('should generate reports for a single AxeScanResults object', () => {
+        const reports = reportGenerator.generateReports(axeScanResults1);
+
+        const expectedReports: GeneratedReport[] = [
+            {
+                content: 'converted-content-1',
+                id: generatedGuid1,
+                format: 'axe',
+                source: 'accessibility-scan',
+            },
+            {
+                content: 'converted-content-2',
+                id: generatedGuid2,
+                format: 'html',
+                source: 'accessibility-scan',
+            },
+        ];
+
+        expect(reports).toEqual(expectedReports);
+
+        axeResultConverterMock1.verify((converter) => converter.convert(axeScanResults1), Times.once());
+        axeResultConverterMock2.verify((converter) => converter.convert(axeScanResults1), Times.once());
+        guidGeneratorMock.verify((g) => g.createGuid(), Times.exactly(2));
     });
 
-    it('calls convert on all axeResultConverters', () => {
-        reportGenerator.generateReports(axeScanResults);
+    it('should merge multiple AxeScanResults objects and generate reports', () => {
+        const reports = reportGenerator.generateReports(axeScanResults1, axeScanResults2);
 
-        // eslint-disable-next-line prefer-const
-        axeResultConverters.forEach((axeResultConverter: AxeResultConverterStub) => {
-            expect(axeResultConverter.convertCallCount).toBe(1);
-        });
+        const expectedReports: GeneratedReport[] = [
+            {
+                content: 'converted-content-1',
+                id: generatedGuid1,
+                format: 'axe',
+                source: 'accessibility-scan',
+            },
+            {
+                content: 'converted-content-2',
+                id: generatedGuid2,
+                format: 'html',
+                source: 'accessibility-scan',
+            },
+        ];
+
+        expect(reports).toEqual(expectedReports);
+
+        axeResultConverterMock1.verify((converter) => converter.convert(mergedAxeScanResults), Times.once());
+        axeResultConverterMock2.verify((converter) => converter.convert(mergedAxeScanResults), Times.once());
+        guidGeneratorMock.verify((g) => g.createGuid(), Times.exactly(2));
     });
 
-    it('generates reports', () => {
-        const reports: GeneratedReport[] = reportGenerator.generateReports(axeScanResults);
-        expect(reports[0]).toEqual(report1);
-        expect(reports[1]).toEqual(report2);
+    it('should handle empty AxeScanResults objects gracefully', () => {
+        const reports = reportGenerator.generateReports(axeScanResults1, {} as AxeScanResults);
+
+        const expectedReports: GeneratedReport[] = [
+            {
+                content: 'converted-content-1',
+                id: generatedGuid1,
+                format: 'axe',
+                source: 'accessibility-scan',
+            },
+            {
+                content: 'converted-content-2',
+                id: generatedGuid2,
+                format: 'html',
+                source: 'accessibility-scan',
+            },
+        ];
+
+        expect(reports).toEqual(expectedReports);
+
+        axeResultConverterMock1.verify((converter) => converter.convert(axeScanResults1), Times.once());
+        axeResultConverterMock2.verify((converter) => converter.convert(axeScanResults1), Times.once());
+        guidGeneratorMock.verify((g) => g.createGuid(), Times.exactly(2));
     });
 });

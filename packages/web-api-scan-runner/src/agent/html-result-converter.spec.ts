@@ -2,10 +2,11 @@
 // Licensed under the MIT License.
 
 import 'reflect-metadata';
+
 import { IMock, It, Mock, Times } from 'typemoq';
 import { Reporter, ReporterFactory } from 'accessibility-insights-report';
 import { AxeResults } from 'axe-core';
-import { AgentResults } from './agent-scanner';
+import { AgentResults } from '../scanner/agent-scanner';
 import { HtmlResultConverter } from './html-result-converter';
 
 describe(HtmlResultConverter, () => {

@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 import { ReportFormat } from 'storage-documents';
-import { AgentResults } from './agent-scanner';
+import { AgentResults } from '../scanner/agent-scanner';
 
 export interface AgentResultConverter {
     readonly targetReportFormat: ReportFormat;

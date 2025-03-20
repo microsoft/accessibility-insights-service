@@ -11,7 +11,7 @@ import { System } from 'common';
 import { AxeResults } from 'axe-core';
 import { isEmpty } from 'lodash';
 import { ReportWriter } from 'service-library';
-import { AgentReportGenerator } from './agent-report-generator';
+import { AgentReportGenerator } from '../agent/agent-report-generator';
 
 /* eslint-disable security/detect-child-process */
 /* eslint-disable security/detect-non-literal-fs-filename */
@@ -28,7 +28,7 @@ export interface AgentResults {
 export class AgentScanner {
     private readonly agentFolder = `${__dirname}/agent`;
 
-    private readonly agentExePath = `${this.agentFolder}/agent.exe`;
+    private readonly agentExePath = `${this.agentFolder}/A11yAgent.Console.exe`;
 
     private readonly agentArtifactsPath = `${this.agentFolder}/output`;
 
@@ -95,7 +95,7 @@ export class AgentScanner {
             this.logger.logError('Agent did not produce axe results file.', { path: this.agentAxeResultPath });
 
             return {
-                result: 'fail',
+                result: 'error',
                 error: 'Agent did not produce axe results file.',
             };
         }
@@ -103,7 +103,7 @@ export class AgentScanner {
         const axeResults = fs.readFileSync(this.agentAxeResultPath, 'utf8');
 
         return {
-            result: 'pass',
+            result: 'completed',
             axeResults: JSON.parse(axeResults),
         };
     }
@@ -119,7 +119,7 @@ export class AgentScanner {
                 this.logger.logError('Agent exited with error code.', { error: stderr });
 
                 return {
-                    result: 'fail',
+                    result: 'error',
                     error: stderr,
                 };
             }
@@ -127,7 +127,7 @@ export class AgentScanner {
             this.logger.logInfo('Agent console output.', { stdout });
 
             return {
-                result: 'pass',
+                result: 'completed',
             };
         } catch (error) {
             if (error.killed) {

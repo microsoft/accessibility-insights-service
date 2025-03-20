@@ -26,6 +26,7 @@ import {
     ReportGroupRequest,
     ScanGroupType,
     ScanRunBatchRequest,
+    ScanRunDetail,
     ScanType,
     WebsiteScanData,
 } from 'storage-documents';
@@ -103,7 +104,13 @@ export class ScanBatchRequestFeedController extends WebController {
                         scanGroupId: websiteScanData.scanGroupId,
                         scanGroupType: websiteScanData.scanGroupType,
                     };
-
+                    const scanDefinitionsRunState: ScanRunDetail[] = request.scanDefinitions?.map((scanDefinition) => {
+                        return {
+                            name: scanDefinition.name,
+                            state: 'pending',
+                            timestamp: new Date().toJSON(),
+                        };
+                    });
                     const dbDocument: OnDemandPageScanResult = {
                         schemaVersion: '2',
                         id: request.scanId,
@@ -127,6 +134,7 @@ export class ScanBatchRequestFeedController extends WebController {
                         run: {
                             state: 'accepted',
                             timestamp: new Date().toJSON(),
+                            scanRunDetails: scanDefinitionsRunState ?? [],
                         },
                         ...(isEmpty(request.scanNotifyUrl)
                             ? {}

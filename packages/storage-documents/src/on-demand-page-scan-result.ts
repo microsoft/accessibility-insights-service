@@ -18,7 +18,7 @@ export declare type OnDemandPageScanRunState =
     | 'failed'
     | 'unscannable';
 export declare type ScanState = 'pending' | 'pass' | 'fail';
-export declare type ScanStateExt = ScanState | 'error';
+export declare type ScanStateExt = ScanState | 'error' | 'completed';
 export declare type NotificationState = 'pending' | 'queued' | 'queueFailed' | 'sending' | 'sent' | 'sendFailed';
 export declare type NotificationErrorTypes = 'InternalError' | 'HttpErrorCode';
 export declare type AuthenticationState = 'succeeded' | 'failed' | 'unauthenticated';
@@ -131,7 +131,9 @@ export interface OnDemandPageScanRunResult {
 
 export interface ScanRunDetail {
     name: ScanDefinitionType;
-    state: OnDemandPageScanRunState;
+    state: ScanStateExt;
+    timestamp?: string;
+    error?: string;
     details?: unknown;
 }
 

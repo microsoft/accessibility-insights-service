@@ -6,8 +6,8 @@ import { SarifLog } from 'axe-sarif-converter';
 import { inject, injectable } from 'inversify';
 import { ReportFormat } from 'storage-documents';
 import { iocTypeNames } from '../ioc-types';
+import { AgentResults } from '../scanner/agent-scanner';
 import { AgentResultConverter } from './agent-result-converter';
-import { AgentResults } from './agent-scanner';
 
 @injectable()
 export class SarifResultConverter implements AgentResultConverter {

@@ -5,8 +5,8 @@ import { AxeReportParameters, ReporterFactory } from 'accessibility-insights-rep
 import { inject, injectable } from 'inversify';
 import { ReportFormat } from 'storage-documents';
 import { iocTypeNames } from '../ioc-types';
+import { AgentResults } from '../scanner/agent-scanner';
 import { AxeResultConverter } from './axe-result-converter';
-import { AgentResults } from './agent-scanner';
 
 @injectable()
 export class HtmlResultConverter implements AxeResultConverter {

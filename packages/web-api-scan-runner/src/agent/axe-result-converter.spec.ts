@@ -2,9 +2,10 @@
 // Licensed under the MIT License.
 
 import 'reflect-metadata';
+
 import { AxeResults } from 'axe-core';
+import { AgentResults } from '../scanner/agent-scanner';
 import { AxeResultConverter } from './axe-result-converter';
-import { AgentResults } from './agent-scanner';
 
 describe(AxeResultConverter, () => {
     let axeResultConverter: AxeResultConverter;

@@ -22,6 +22,6 @@ COPY . .
 # Install app dependencies
 RUN npm install
 RUN npx patch-package
-RUN npx playwright install msedge
+RUN npx playwright install chromium msedge
 
 CMD ["powershell", "./web-api-scan-runner.ps1"]

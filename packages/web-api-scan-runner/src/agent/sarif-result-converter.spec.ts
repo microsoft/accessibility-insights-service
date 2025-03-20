@@ -2,11 +2,12 @@
 // Licensed under the MIT License.
 
 import 'reflect-metadata';
+
 import { IMock, Mock, Times } from 'typemoq';
 import { AxeResults } from 'axe-core';
 import { SarifLog } from 'axe-sarif-converter';
+import { AgentResults } from '../scanner/agent-scanner';
 import { SarifResultConverter } from './sarif-result-converter';
-import { AgentResults } from './agent-scanner';
 
 describe(SarifResultConverter, () => {
     let convertAxeToSarifFuncMock: IMock<(axeResults: AxeResults) => SarifLog>;
