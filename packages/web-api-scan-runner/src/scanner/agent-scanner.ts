@@ -11,6 +11,7 @@ import { System } from 'common';
 import { AxeResults } from 'axe-core';
 import { isEmpty } from 'lodash';
 import { ReportWriter } from 'service-library';
+import fixPath from 'fix-path';
 import { AgentReportGenerator } from '../agent/agent-report-generator';
 
 /* eslint-disable security/detect-child-process */
@@ -41,6 +42,7 @@ export class AgentScanner {
         @inject(ReportWriter) protected readonly reportWriter: ReportWriter,
         @inject(GlobalLogger) private readonly logger: GlobalLogger,
     ) {
+        fixPath();
         this.agentFolder = `${__dirname}/a11y_agent`;
         if (System.isDebugEnabled) {
             this.agentFolder = `${__dirname}/../../../a11y_agent`;
