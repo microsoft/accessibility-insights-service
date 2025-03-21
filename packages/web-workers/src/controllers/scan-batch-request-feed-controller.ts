@@ -167,7 +167,7 @@ export class ScanBatchRequestFeedController extends WebController {
             deepScanId: this.getDeepScanId(request),
             knownPages: request.site?.knownPages
                 ? request.site.knownPages.map((url) => {
-                      return { url };
+                      return { url, source: 'request' } as KnownPage;
                   })
                 : [],
             discoveryPatterns: request.site?.discoveryPatterns?.length > 0 ? request.site.discoveryPatterns : undefined,

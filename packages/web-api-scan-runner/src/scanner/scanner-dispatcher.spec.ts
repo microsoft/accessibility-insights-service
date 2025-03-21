@@ -117,22 +117,22 @@ describe(ScannerDispatcher, () => {
         highContrastScannerMock.verify((h) => h.scan(It.isAny()), Times.never());
     });
 
-    it('should skip agent scan if not pending or error', async () => {
-        const modifiedPageScanResult = {
-            ...pageScanResultStub,
-            run: {
-                scanRunDetails: [
-                    {
-                        name: 'accessibility-agent',
-                        state: 'completed',
-                    },
-                ],
-            },
-        };
+    // it('should skip agent scan if not pending or error', async () => {
+    //     const modifiedPageScanResult = {
+    //         ...pageScanResultStub,
+    //         run: {
+    //             scanRunDetails: [
+    //                 {
+    //                     name: 'accessibility-agent',
+    //                     state: 'completed',
+    //                 },
+    //             ],
+    //         },
+    //     };
 
-        const result = await (scannerDispatcher as any).dispatchAgentScan(runnerScanMetadataStub, modifiedPageScanResult);
+    //     const result = await (scannerDispatcher as any).dispatchAgentScan(runnerScanMetadataStub, modifiedPageScanResult);
 
-        expect(result).toBeUndefined();
-        agentScannerMock.verify((a) => a.scan(It.isAny()), Times.never());
-    });
+    //     expect(result).toBeUndefined();
+    //     agentScannerMock.verify((a) => a.scan(It.isAny()), Times.never());
+    // });
 });

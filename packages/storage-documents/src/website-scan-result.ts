@@ -8,6 +8,7 @@ import { ReportFormat, OnDemandPageScanRunState, ScanState, ReportSource } from 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 export declare type ScanGroupType = 'single-scan' | 'group-scan' | 'deep-scan';
+export declare type KnownPageSource = 'request' | 'crawler';
 
 /**
  * Represents website scan result data.
@@ -19,7 +20,7 @@ export interface WebsiteScanData extends StorageDocument {
     scanGroupId: string;
     scanGroupType: ScanGroupType;
     created: string;
-    // This value is immutable and is set on new db document creation.
+    /** This value is immutable and is set on new db document creation. */
     deepScanId?: string;
     deepScanLimit?: number;
     discoveryPatterns?: string[];
@@ -38,15 +39,22 @@ export interface WebsiteScanData extends StorageDocument {
  *
  * The current 2 MB Cosmos DB document size limit allows for roughly 10K URLs in one document.
  *
- * The value is a string that compacts JSON object {@link KnownPage} in format `url|scanId|runState|scanState`
+ * The value is a string that compacts JSON object {@link KnownPage} in format `url|source|scanId|runState|scanState`
  * Use `convertKnownPageToString`, `convertStringToKnownPage`, and `convertObjectToKnownPages` functions to convert data.
  */
 export interface KnownPages {
     [key: string]: string;
 }
 
+/**
+ * Represents a known page data.
+ * When stored in the Cosmos DB, the object is converted to a string and stored in the `KnownPages` object.
+ * The object is converted to a string in format `url|source|scanId|runState|scanState`.
+ * Use `convertKnownPageToString`, `convertStringToKnownPage`, and `convertObjectToKnownPages` functions to convert data.
+ */
 export interface KnownPage {
     url: string;
+    source?: KnownPageSource;
     scanId?: string;
     runState?: OnDemandPageScanRunState;
     scanState?: ScanState;

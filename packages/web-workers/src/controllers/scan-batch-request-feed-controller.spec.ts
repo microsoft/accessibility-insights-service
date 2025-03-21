@@ -267,7 +267,7 @@ function setupWebsiteScanDataProviderMock(documents: OnDemandPageScanBatchReques
                     scanGroupType,
                     knownPages: knownPages
                         ? (knownPages.map((url) => {
-                              return { url };
+                              return { url, source: 'request' } as KnownPage;
                           }) as KnownPage[])
                         : ([] as KnownPage[]),
                     discoveryPatterns: request.site?.discoveryPatterns,
