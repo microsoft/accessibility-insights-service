@@ -184,7 +184,7 @@ export class Runner {
         // Delete the existing reports and run states if there are any pending scanner results
         const scannerResultToKeep: string[] = [];
         if (!isEmpty(pageScanResult.run?.scanRunDetails)) {
-            const scanRunDetails = pageScanResult.run.scanRunDetails.map((detail) => {
+            pageScanResult.run.scanRunDetails = pageScanResult.run.scanRunDetails.map((detail) => {
                 if (conditionsToDispatchScanner.includes(detail.state)) {
                     return {
                         name: detail.name,
@@ -199,11 +199,11 @@ export class Runner {
                     return detail;
                 }
             });
-
-            pageScanResult.run.scanRunDetails = scanRunDetails;
         }
         if (scannerResultToKeep.length > 0 && !isEmpty(pageScanResult.reports)) {
             pageScanResult.reports = pageScanResult.reports.filter((r) => scannerResultToKeep.includes(r.source));
+        } else {
+            pageScanResult.reports = undefined;
         }
 
         // Update the page scan run state to 'running'

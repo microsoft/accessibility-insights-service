@@ -426,7 +426,7 @@ function setupScanRunnerTelemetryManager(taskSucceeded: boolean = true, scanSucc
 function setupUpdateScanRunStateToRunning(succeeded: boolean = true): void {
     onDemandPageScanRunResultProviderMock
         .setup((o) => o.readScanRun(runnerScanMetadata.id))
-        .returns(() => Promise.resolve(pageScanResultDbDocument))
+        .returns(() => Promise.resolve(cloneDeep(pageScanResultDbDocument)))
         .verifiable();
 
     pageScanResult = { ...pageScanResult, ...pageScanResultDbDocument };

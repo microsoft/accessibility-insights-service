@@ -26,21 +26,30 @@ export interface AgentResults {
 
 @injectable()
 export class AgentScanner {
-    private readonly agentFolder = `${__dirname}/a11y_agent`;
+    private readonly agentFolder;
 
-    private readonly agentExePath = `${this.agentFolder}/A11yAgent.Console.exe`;
+    private readonly agentExePath;
 
-    private readonly agentArtifactsPath = `${this.agentFolder}/output`;
+    private readonly agentArtifactsPath;
 
-    private readonly agentAxeResultPath = `${this.agentArtifactsPath}/axe-results.json`;
+    private readonly agentAxeResultPath;
 
-    private readonly agentExeCommand = `${this.agentExePath} --headless true --url`;
+    private readonly agentExeCommand;
 
     constructor(
         @inject(AgentReportGenerator) private readonly agentReportGenerator: AgentReportGenerator,
         @inject(ReportWriter) protected readonly reportWriter: ReportWriter,
         @inject(GlobalLogger) private readonly logger: GlobalLogger,
-    ) {}
+    ) {
+        this.agentFolder = `${__dirname}/a11y_agent`;
+        if (System.isDebugEnabled) {
+            this.agentFolder = `${__dirname}/../../../a11y_agent`;
+        }
+        this.agentExePath = `${this.agentFolder}/A11yAgent.Console.exe`;
+        this.agentArtifactsPath = `${this.agentFolder}/output`;
+        this.agentAxeResultPath = `${this.agentArtifactsPath}/axe-results.json`;
+        this.agentExeCommand = `${this.agentExePath} --headless true --url`;
+    }
 
     public async scan(url: string): Promise<AgentResults> {
         let response;
@@ -121,10 +130,10 @@ export class AgentScanner {
             if (stderr) {
                 this.logger.logError('Agent exited with error code.', { error: stderr });
 
-                return {
-                    result: 'error',
-                    error: stderr,
-                };
+                // return {
+                //     result: 'error',
+                //     error: stderr,
+                // };
             }
 
             this.logger.logInfo('Agent console output.', { stdout });
