@@ -139,7 +139,7 @@ describe(ScanBatchRequestFeedController, () => {
                         },
                         reportGroups: [{ consolidatedId: 'consolidated-id-1' }],
                         privacyScan: { cookieBannerType: 'standard' },
-                        scanDefinitions: [{ name: 'accessibility_agent', args: { arg1: 'some-args' } }],
+                        scanDefinitions: [{ name: 'accessibility-agent', args: { arg1: 'some-args' } }],
                         authenticationType: 'entraId',
                     },
                 ],
@@ -214,7 +214,7 @@ describe(ScanBatchRequestFeedController, () => {
             scanId: 'scan-6',
             url: 'http://url-6',
             priority: 0,
-            scanDefinitions: [{ name: 'accessibility_agent', args: { arg1: 'some-args' } }],
+            scanDefinitions: [{ name: 'accessibility-agent', args: { arg1: 'some-args' } }],
         },
     ] as ScanRunBatchRequest[])('should process scans request %s', async (request: ScanRunBatchRequest) => {
         const documents = [

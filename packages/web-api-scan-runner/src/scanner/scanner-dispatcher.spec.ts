@@ -37,7 +37,7 @@ describe(ScannerDispatcher, () => {
         run: {
             scanRunDetails: [
                 {
-                    name: 'accessibility_agent',
+                    name: 'accessibility-agent',
                     state: 'pending',
                 },
             ],
@@ -123,7 +123,7 @@ describe(ScannerDispatcher, () => {
             run: {
                 scanRunDetails: [
                     {
-                        name: 'accessibility_agent',
+                        name: 'accessibility-agent',
                         state: 'completed',
                     },
                 ],

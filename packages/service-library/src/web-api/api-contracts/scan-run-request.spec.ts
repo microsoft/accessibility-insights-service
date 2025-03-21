@@ -31,7 +31,7 @@ describe(isScanRunRequest, () => {
                 ],
                 scanDefinitions: [
                     {
-                        name: 'accessibility_agent',
+                        name: 'accessibility-agent',
                         args: {
                             arg1: 'full',
                         },

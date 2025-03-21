@@ -128,14 +128,14 @@ export class Runner {
         // Combine accessibility scan results with agents results
         if (!isEmpty(scanProcessorResult.agentResults)) {
             const agentRunState: ScanRunDetail = {
-                name: 'accessibility_agent',
+                name: 'accessibility-agent',
                 state: scanProcessorResult.agentResults.result,
                 timestamp: new Date().toJSON(),
                 error: scanProcessorResult.agentResults.error,
             };
             const scanRunDetails = isEmpty(pageScanResult.run.scanRunDetails)
                 ? [agentRunState]
-                : [agentRunState, ...pageScanResult.run.scanRunDetails.filter((detail) => !['accessibility_agent'].includes(detail.name))];
+                : [agentRunState, ...pageScanResult.run.scanRunDetails.filter((detail) => !['accessibility-agent'].includes(detail.name))];
             pageScanResult.run = {
                 ...pageScanResult.run,
                 scanRunDetails,
@@ -184,21 +184,23 @@ export class Runner {
         // Delete the existing reports and run states if there are any pending scanner results
         const scannerResultToKeep: string[] = [];
         if (!isEmpty(pageScanResult.run?.scanRunDetails)) {
-            pageScanResult.run.scanRunDetails = pageScanResult.run.scanRunDetails.map((detail) => {
+            const scanRunDetails = pageScanResult.run.scanRunDetails.map((detail) => {
                 if (conditionsToDispatchScanner.includes(detail.state)) {
-                    scannerResultToKeep.push(detail.name);
-
                     return {
                         name: detail.name,
                         state: 'pending',
                         timestamp: new Date().toJSON(),
                         error: null,
                         details: null,
-                    };
+                    } as ScanRunDetail;
                 } else {
+                    scannerResultToKeep.push(detail.name);
+
                     return detail;
                 }
             });
+
+            pageScanResult.run.scanRunDetails = scanRunDetails;
         }
         if (scannerResultToKeep.length > 0 && !isEmpty(pageScanResult.reports)) {
             pageScanResult.reports = pageScanResult.reports.filter((r) => scannerResultToKeep.includes(r.source));

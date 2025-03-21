@@ -9,7 +9,7 @@ import { AuthenticationType, authenticationTypes, BrowserValidationTypes } from 
 // Construct to support type guard
 export const cookieBannerTypes = ['standard'] as const;
 export declare type CookieBannerType = (typeof cookieBannerTypes)[number];
-export const scanDefinitionTypes = ['accessibility_agent'] as const;
+export const scanDefinitionTypes = ['accessibility-agent'] as const;
 export declare type ScanDefinitionType = (typeof scanDefinitionTypes)[number];
 
 /**
