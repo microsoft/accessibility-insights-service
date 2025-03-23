@@ -9,7 +9,7 @@ import { chromium, Browser, BrowserContext } from '@playwright/test';
 import { System } from 'common';
 import { iocTypeNames } from '../ioc-types';
 
-export interface ScannerResults {
+export interface HighContrastResults {
     result?: ScanStateExt;
     error?: string | BrowserError;
     scannedUrl?: string;
@@ -26,7 +26,7 @@ export class HighContrastScanner {
         @inject(GlobalLogger) private readonly logger: GlobalLogger,
     ) {}
 
-    public async scan(url: string): Promise<ScannerResults> {
+    public async scan(url: string): Promise<HighContrastResults> {
         const warnings = new Set<string>();
         let result: ScanStateExt = 'pass';
         let browser;

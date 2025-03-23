@@ -12,6 +12,7 @@ import {
     ReportGeneratorRequestProvider,
     ScanNotificationProcessor,
     RunnerScanMetadata,
+    GeneratedReport,
 } from 'service-library';
 import { GlobalLogger } from 'logger';
 import * as MockDate from 'mockdate';
@@ -30,7 +31,7 @@ import { AxeResults } from 'axe-core';
 import { cloneDeep } from 'lodash';
 import { RunnerScanMetadataConfig } from '../runner-scan-metadata-config';
 import { PageScanProcessor } from '../processor/page-scan-processor';
-import { ReportGenerator, GeneratedReport } from '../report-generator/report-generator';
+import { ReportGenerator } from '../report-generator/report-generator';
 import { ScanRunnerTelemetryManager } from '../scan-runner-telemetry-manager';
 import { Runner } from './runner';
 
@@ -347,7 +348,7 @@ function setupProcessScanResult(): void {
             error: axeScanResults.error,
         };
         loggerMock
-            .setup((o) => o.logError(`Browser has failed to scan a page.`, { error: JSON.stringify(axeScanResults.error) }))
+            .setup((o) => o.logError(`Scanner has failed to scan a page.`, { error: JSON.stringify(axeScanResults.error) }))
             .verifiable();
     } else {
         pageScanResult.run = {
@@ -378,7 +379,7 @@ function setupProcessScanResult(): void {
 
         const generatedReports = [{ id: 'id', format: 'html', content: 'content' }] as GeneratedReport[];
         reportGeneratorMock
-            .setup((o) => o.generateReports(axeScanResults))
+            .setup((o) => o.generateReports(axeScanResults, It.isAny()))
             .returns(() => generatedReports)
             .verifiable();
         reportWriterMock
@@ -423,6 +424,11 @@ function setupScanRunnerTelemetryManager(taskSucceeded: boolean = true, scanSucc
 }
 
 function setupUpdateScanRunStateToRunning(succeeded: boolean = true): void {
+    onDemandPageScanRunResultProviderMock
+        .setup((o) => o.readScanRun(runnerScanMetadata.id))
+        .returns(() => Promise.resolve(cloneDeep(pageScanResultDbDocument)))
+        .verifiable();
+
     pageScanResult = { ...pageScanResult, ...pageScanResultDbDocument };
     const partialPageScanResult: Partial<OnDemandPageScanResult> = {
         id: runnerScanMetadata.id,
@@ -430,6 +436,7 @@ function setupUpdateScanRunStateToRunning(succeeded: boolean = true): void {
             state: 'running',
             timestamp: dateNow.toJSON(),
             error: null,
+            scanRunDetails: null,
         },
         scanResult: null,
         reports: null,
