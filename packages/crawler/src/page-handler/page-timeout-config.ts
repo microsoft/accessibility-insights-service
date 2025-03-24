@@ -1,15 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-process.env.NAVIGATION_TIMEOUT_MSEC = "36000";
+process.env.NAVIGATION_TIMEOUT_MSEC = '36000';
 export const puppeteerTimeoutConfig = {
     /**
      * Maximum wait time, in milliseconds, to complete page navigation.
      */
     //navigationTimeoutMsec: 30000,
-    navigationTimeoutMsec: process.env.NAVIGATION_TIMEOUT_MSEC
-        ? parseInt(process.env.NAVIGATION_TIMEOUT_MSEC, 10)
-        : 30000,
+    navigationTimeoutMsec: process.env.NAVIGATION_TIMEOUT_MSEC ? parseInt(process.env.NAVIGATION_TIMEOUT_MSEC, 10) : 30000,
 
     /**
      * Maximum wait time, in milliseconds, to wait when network is idle.

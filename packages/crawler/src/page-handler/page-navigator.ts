@@ -35,11 +35,11 @@ export class PageNavigator {
         @inject(Logger) @optional() public readonly logger: Logger,
     ) {}
 
-    public async navigate(url: string, page: Puppeteer.Page, navigationTimeout:number): Promise<NavigationResponse> {
+    public async navigate(url: string, page: Puppeteer.Page, navigationTimeout: number): Promise<NavigationResponse> {
         await this.pageNavigationHooks.preNavigation(page);
 
         this.waitForOptions.timeout = navigationTimeout;
-        console.log("inside page-navigator.ts/navigate" + this.waitForOptions.timeout);
+        console.log('inside page-navigator.ts/navigate' + this.waitForOptions.timeout);
         const pageOperation = this.createPageOperation(page, url);
         return this.navigatePage(pageOperation, page, navigationTimeout);
     }
@@ -62,7 +62,6 @@ export class PageNavigator {
         return {
             httpResponse: opResult.response,
             browserError: opResult.browserError,
-
         };
     }
 
