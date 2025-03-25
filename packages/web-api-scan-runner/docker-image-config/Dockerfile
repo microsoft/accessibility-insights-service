@@ -22,7 +22,7 @@ COPY . .
 # Install app dependencies
 RUN npm install
 RUN npx patch-package
-RUN npx playwright install chromium msedge
+RUN npx playwright install msedge
 
 # TODO: Remove the following workaround once the Playwright CLI supports installing specific versions of Playwright.
 #

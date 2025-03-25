@@ -312,8 +312,8 @@
                             "properties": {
                                 "name": {
                                     "type": "string",
-                                    "enum": ["accessibility_agent"],
-                                    "example": "accessibility_agent"
+                                    "enum": ["accessibility-agent"],
+                                    "example": "accessibility-agent"
                                 },
                                 "args": {
                                     "type": "object",
@@ -455,8 +455,8 @@
                             "properties": {
                                 "name": {
                                     "type": "string",
-                                    "enum": ["accessibility_agent"],
-                                    "example": "accessibility_agent"
+                                    "enum": ["accessibility-agent"],
+                                    "example": "accessibility-agent"
                                 },
                                 "state": {
                                     "type": "string",
