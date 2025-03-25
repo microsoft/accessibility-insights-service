@@ -297,7 +297,62 @@
                     "browserValidations": {
                         "type": "array",
                         "description": "Enables browser validations.",
-                        "items": ["highContrastProperties"]
+                        "items": {
+                            "type": "string",
+                            "enum": ["highContrastProperties"],
+                            "example": "highContrastProperties"
+                        }
+                    },
+                    "scanDefinitions": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "description": "Definition for the additional scanner.",
+                            "required": ["name"],
+                            "properties": {
+                                "name": {
+                                    "type": "string",
+                                    "enum": ["accessibility_agent"],
+                                    "example": "accessibility_agent"
+                                },
+                                "args": {
+                                    "type": "object",
+                                    "description": "Parameters to provide to the scanner for execution.",
+                                    "properties": {
+                                        "string": {
+                                            "type": "string",
+                                            "example": "value"
+                                        },
+                                        "integer": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "boolean": {
+                                            "type": "boolean",
+                                            "example": true
+                                        }
+                                    }
+                                },
+                                "options": {
+                                    "type": "object",
+                                    "description": "Parameters to configure the service for controlling scanner execution.",
+                                    "properties": {
+                                        "string": {
+                                            "type": "string",
+                                            "example": "value"
+                                        },
+                                        "integer": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "boolean": {
+                                            "type": "boolean",
+                                            "example": true
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             },
@@ -390,6 +445,38 @@
                     "pageTitle": {
                         "type": "string",
                         "example": "Accessibility Insights"
+                    },
+                    "scanRunDetails": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "description": "Scan run result for the additional scanner.",
+                            "required": ["name", "state"],
+                            "properties": {
+                                "name": {
+                                    "type": "string",
+                                    "enum": ["accessibility_agent"],
+                                    "example": "accessibility_agent"
+                                },
+                                "state": {
+                                    "type": "string",
+                                    "enum": ["pending", "pass", "fail", "error", "completed"],
+                                    "example": "completed"
+                                },
+                                "timestamp": {
+                                    "description": "Full date and time string format as defined by ISO 8601",
+                                    "type": "string",
+                                    "example": "2024-04-02T00:25:32.508Z"
+                                },
+                                "error": {
+                                    "type": "string"
+                                },
+                                "details": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
                     }
                 }
             },
@@ -403,8 +490,13 @@
                     },
                     "format": {
                         "type": "string",
-                        "description": "SARIF format specification https://www.oasis-open.org/committees/sarif/charter.php",
-                        "enum": ["axe", "sarif", "html", "consolidated.html", "json", "consolidated.json", "page.png", "page.mhtml"]
+                        "enum": ["axe", "sarif", "html", "consolidated.html", "json", "consolidated.json", "page.png", "page.mhtml"],
+                        "example": "sarif"
+                    },
+                    "source": {
+                        "type": "string",
+                        "enum": ["accessibility-agent", "accessibility-scan", "privacy-scan"],
+                        "example": "accessibility-scan"
                     },
                     "links": {
                         "$ref": "#/components/schemas/Links"

@@ -58,7 +58,7 @@ function buildImage() {
             Write-Host "Building docker image for $($baseImage.Repository)"
 
             $baseImageTag = "$($baseImage.Repository):$($baseImage.Tag)"
-            docker tag $baseImageTag "prescanner"
+            docker tag $baseImageTag "mcr.microsoft.com/windows/prescanner"
             docker build --file Dockerfile.scanner --tag $baseImage.Repository --build-arg BUILD_KEY="$env:BUILD_KEY" --build-arg INSTALLATION_TYPE="$global:installationType" .
         }
     }

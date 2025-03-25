@@ -10,7 +10,7 @@ import { PageNavigator, NavigationResponse } from '../page-navigator';
 import { AzureLoginPageClient } from './azure-login-page-client';
 import { ServicePrincipalCredentialProvider, ServicePrincipalCredential } from './service-principal-credential-provider';
 
-const selectorTimeoutMsec = 10000;
+const selectorTimeoutMsec = 5000;
 
 let pageNavigatorMock: IMock<PageNavigator>;
 let servicePrincipalCredentialProviderMock: IMock<ServicePrincipalCredentialProvider>;
@@ -60,12 +60,25 @@ describe(AzureLoginPageClient, () => {
         setupEnterAccountPassword();
         setupSubmitForAuthentication(authNavigationResponse);
         setupValidateMfaPrompt();
+        setupAcceptPermissionPrompt(authNavigationResponse);
         setupKMSIPrompt();
 
         const navigationResponse = await azureLoginPageClient.login(puppeteerPageMock.object);
         expect(navigationResponse).toEqual(authNavigationResponse);
     });
 });
+
+function setupAcceptPermissionPrompt(navigationResponse: NavigationResponse): void {
+    setupPageWaitForSelector('input[name="idSIButton9"]');
+    puppeteerPageMock
+        .setup((o) => o.click('input[name="idSIButton9"]'))
+        .returns(() => Promise.resolve())
+        .verifiable();
+    pageNavigatorMock
+        .setup((o) => o.waitForNavigation(puppeteerPageMock.object))
+        .returns(() => Promise.resolve(navigationResponse))
+        .verifiable(Times.atLeast(2));
+}
 
 function setupKMSIPrompt(): void {
     setupPageWaitForSelector('#idSIButton9');
@@ -80,7 +93,7 @@ function setupValidateMfaPrompt(): void {
     setupGetElementContent('#WindowsAzureMultiFactorAuthentication');
 }
 
-function setupSubmitForAuthentication(navigationResponse: NavigationResponse = {}): void {
+function setupSubmitForAuthentication(navigationResponse: NavigationResponse): void {
     pageNavigatorMock
         .setup((o) => o.waitForNavigation(puppeteerPageMock.object))
         .returns(() => Promise.resolve(navigationResponse))

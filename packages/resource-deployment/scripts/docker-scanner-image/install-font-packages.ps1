@@ -3,6 +3,7 @@
 
 $gateway = (Get-NetRoute '0.0.0.0/0').NextHop
 net use S: \\$gateway\WinSxS /user:DockerBuild "${env:BUILD_KEY}" | Out-Null
+Write-Host "Windows font source contains:" ( Get-ChildItem S: | Measure-Object ).Count "files"
 
 if ("${env:INSTALLATION_TYPE}" -eq "Server") {
     Write-Host "Enabling Windows fonts feature..."

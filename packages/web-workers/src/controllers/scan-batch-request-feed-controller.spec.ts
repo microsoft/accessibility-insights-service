@@ -27,6 +27,7 @@ import {
     ScanGroupType,
     ScanType,
     KnownPage,
+    ScanRunDetail,
 } from 'storage-documents';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { MockableLogger } from '../test-utilities/mockable-logger';
@@ -138,6 +139,7 @@ describe(ScanBatchRequestFeedController, () => {
                         },
                         reportGroups: [{ consolidatedId: 'consolidated-id-1' }],
                         privacyScan: { cookieBannerType: 'standard' },
+                        scanDefinitions: [{ name: 'accessibility-agent', args: { arg1: 'some-args' } }],
                         authenticationType: 'entraId',
                     },
                 ],
@@ -207,6 +209,13 @@ describe(ScanBatchRequestFeedController, () => {
             scanType: 'privacy',
             privacyScan: { cookieBannerType: 'standard' },
         },
+        {
+            schemaVersion: '2',
+            scanId: 'scan-6',
+            url: 'http://url-6',
+            priority: 0,
+            scanDefinitions: [{ name: 'accessibility-agent', args: { arg1: 'some-args' } }],
+        },
     ] as ScanRunBatchRequest[])('should process scans request %s', async (request: ScanRunBatchRequest) => {
         const documents = [
             {
@@ -258,7 +267,7 @@ function setupWebsiteScanDataProviderMock(documents: OnDemandPageScanBatchReques
                     scanGroupType,
                     knownPages: knownPages
                         ? (knownPages.map((url) => {
-                              return { url };
+                              return { url, source: 'request' } as KnownPage;
                           }) as KnownPage[])
                         : ([] as KnownPage[]),
                     discoveryPatterns: request.site?.discoveryPatterns,
@@ -296,6 +305,13 @@ function setupOnDemandPageScanRunResultProviderMock(
                         scanGroupType: r.scanGroupType,
                     } as WebsiteScanRef;
                 })[i++];
+                const scanDefinitionsRunState: ScanRunDetail[] = request.scanDefinitions?.map((scanDefinition) => {
+                    return {
+                        name: scanDefinition.name,
+                        state: 'pending',
+                        timestamp: new Date().toJSON(),
+                    };
+                });
                 const result: OnDemandPageScanResult = {
                     schemaVersion: request.schemaVersion,
                     id: request.scanId,
@@ -307,6 +323,7 @@ function setupOnDemandPageScanRunResultProviderMock(
                     run: {
                         state: 'accepted',
                         timestamp: dateNow.toJSON(),
+                        scanRunDetails: scanDefinitionsRunState ?? [],
                     },
                     batchRequestId: document.id,
                     deepScanId: request.deepScanId ?? request.scanId,
@@ -320,6 +337,7 @@ function setupOnDemandPageScanRunResultProviderMock(
                           }),
                     websiteScanRef,
                     ...(request.privacyScan === undefined ? {} : { privacyScan: request.privacyScan }),
+                    ...(request.scanDefinitions === undefined ? {} : { scanDefinitions: request.scanDefinitions }),
                     ...(request.authenticationType === undefined ? {} : { authentication: { hint: request.authenticationType } }),
                 };
 
@@ -369,6 +387,10 @@ function setupPageScanRequestProviderMock(documents: OnDemandPageScanBatchReques
                     request.privacyScan = scanRequest.privacyScan;
                 }
 
+                if (!isEmpty(scanRequest.scanDefinitions)) {
+                    request.scanDefinitions = scanRequest.scanDefinitions;
+                }
+
                 pageScanRequestProviderMock.setup(async (o) => o.insertRequests(It.isValue([request]))).verifiable(Times.once());
             });
     });
@@ -407,7 +429,15 @@ function setupMocksWithTimesNever(): void {
 }
 
 function getScanType(request: ScanRunBatchRequest): ScanType {
-    return request.scanType ?? (request.privacyScan ? 'privacy' : 'accessibility');
+    if (!isEmpty(request.scanType)) {
+        return request.scanType;
+    }
+
+    if (!isEmpty(request.privacyScan)) {
+        return 'privacy';
+    }
+
+    return 'accessibility';
 }
 
 function getDeepScanLimit(websiteScanData: Partial<WebsiteScanData>): number {

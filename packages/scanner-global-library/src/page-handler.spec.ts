@@ -9,7 +9,6 @@ import { System } from 'common';
 import { PageHandler } from './page-handler';
 import { MockableLogger } from './test-utilities/mockable-logger';
 import { scrollToBottom } from './page-client-lib';
-import { CpuUsageStats, PageCpuUsage } from './network/page-cpu-usage';
 import { DevToolsSession } from './dev-tools-session';
 import { getPromisableDynamicMock } from './test-utilities/promisable-mock';
 
@@ -19,14 +18,12 @@ type Writeable<T> = { -readonly [P in keyof T]: Writeable<T[P]> };
 
 let windowStub: Partial<Writeable<Window & typeof globalThis>>;
 let pageHandler: PageHandler;
-let pageCpuUsageMock: IMock<PageCpuUsage>;
 let loggerMock: IMock<MockableLogger>;
 let puppeteerPageMock: IMock<Page>;
 let devToolsSessionMock: IMock<DevToolsSession>;
 let originalWindow: Window & typeof globalThis;
 let scrollToBottomMock: typeof scrollToBottom;
 let timeoutScroll: boolean;
-let cpuUsageStats: CpuUsageStats;
 
 const windowHeight = 100;
 const pageDomStableDurationMsec = 200;
@@ -37,7 +34,6 @@ const renderTimeoutMsecs = 500;
 describe(PageHandler, () => {
     beforeEach(() => {
         loggerMock = Mock.ofType<MockableLogger>();
-        pageCpuUsageMock = Mock.ofType<PageCpuUsage>();
         puppeteerPageMock = Mock.ofType<Page>();
         devToolsSessionMock = getPromisableDynamicMock(Mock.ofType<DevToolsSession>());
 
@@ -53,33 +49,17 @@ describe(PageHandler, () => {
         originalWindow = global.window;
         global.window = windowStub as unknown as Window & typeof globalThis;
 
-        cpuUsageStats = {
-            cpus: 1,
-            average: 0,
-        } as CpuUsageStats;
-        pageCpuUsageMock
-            .setup((o) => o.getCpuUsage(puppeteerPageMock.object, It.isAny()))
-            .returns(() => Promise.resolve(cpuUsageStats))
-            .verifiable();
-
         System.wait = async () => Promise.resolve();
         setupDevToolsSessionMock();
 
         puppeteerPageMock.setup((o) => o.evaluate(It.isAny())).returns(async (action) => action());
         puppeteerPageMock.setup((o) => o.isClosed()).returns(() => false);
 
-        pageHandler = new PageHandler(
-            pageCpuUsageMock.object,
-            devToolsSessionMock.object,
-            loggerMock.object,
-            pageDomStableDurationMsec,
-            scrollToBottomMock,
-        );
+        pageHandler = new PageHandler(devToolsSessionMock.object, loggerMock.object, pageDomStableDurationMsec, scrollToBottomMock);
     });
 
     afterEach(() => {
         global.window = originalWindow;
-        pageCpuUsageMock.verifyAll();
         puppeteerPageMock.verifyAll();
         devToolsSessionMock.verifyAll();
         loggerMock.verifyAll();
@@ -127,39 +107,6 @@ describe(PageHandler, () => {
             renderTimeoutMsecs,
         );
         expect(pageTiming.htmlContentTimeout).toEqual(true);
-    });
-
-    it('terminate wait and warn if page did not complete graphical rendering', async () => {
-        pageCpuUsageMock.reset();
-        cpuUsageStats = {
-            cpus: 1,
-            average: 80,
-        } as CpuUsageStats;
-
-        const pageCpuUsageStub = {
-            getCpuUsage: async () => {
-                await System.wait(renderTimeoutMsecs * 2);
-
-                return cpuUsageStats;
-            },
-        } as any;
-
-        loggerMock.setup((l) => l.logWarn(It.isAny(), { timeout: `${renderTimeoutMsecs}` })).verifiable();
-        pageHandler = new PageHandler(
-            pageCpuUsageStub,
-            devToolsSessionMock.object,
-            loggerMock.object,
-            pageDomStableDurationMsec,
-            scrollToBottomMock,
-        );
-
-        const pageTiming = await pageHandler.waitForPageToCompleteRendering(
-            puppeteerPageMock.object,
-            scrollTimeoutMsec,
-            contentTimeoutMsecs,
-            renderTimeoutMsecs,
-        );
-        expect(pageTiming.renderTimeout).toEqual(true);
     });
 });
 

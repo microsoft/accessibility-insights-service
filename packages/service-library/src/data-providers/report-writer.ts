@@ -3,13 +3,14 @@
 
 import { inject, injectable } from 'inversify';
 import { GlobalLogger } from 'logger';
-import { OnDemandPageScanReport, ReportFormat } from 'storage-documents';
+import { OnDemandPageScanReport, ReportFormat, ReportSource } from 'storage-documents';
 import { PageScanRunReportProvider } from './page-scan-run-report-provider';
 
 export type GeneratedReport = {
     content: string;
     id: string;
     format: ReportFormat;
+    source?: ReportSource;
 };
 
 @injectable()
@@ -25,12 +26,16 @@ export class ReportWriter {
 
     public async write(report: GeneratedReport): Promise<OnDemandPageScanReport> {
         const href = await this.pageScanRunReportProvider.saveReport(report.id, report.content);
-        this.logger.logInfo(`The '${report.format}' report saved to a blob storage.`, { reportId: report.id, blobUrl: href });
+        this.logger.logInfo(`The ${report.source} ${report.format} report saved to a blob storage.`, {
+            reportId: report.id,
+            blobUrl: href,
+        });
 
         return {
-            format: report.format,
-            href,
             reportId: report.id,
+            format: report.format,
+            source: report.source,
+            href,
         };
     }
 }

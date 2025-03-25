@@ -34,7 +34,7 @@
         "ts-loader": "^9.5.1",
         "typemoq": "^2.1.0",
         "typescript": "^5.5.3",
-        "webpack": "^5.94.0",
+        "webpack": "^5.97.1",
         "webpack-cli": "^5.1.4",
         "webpack-ignore-dynamic-require": "^1.0.0"
     },
@@ -45,7 +45,7 @@
         "inversify": "^6.0.1",
         "lodash": "^4.17.21",
         "logger": "workspace:*",
-        "moment": "^2.29.4",
+        "moment": "^2.30.1",
         "reflect-metadata": "^0.2.2",
         "service-library": "workspace:*",
         "storage-documents": "workspace:*",

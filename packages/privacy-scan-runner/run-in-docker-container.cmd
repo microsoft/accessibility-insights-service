@@ -6,10 +6,13 @@ echo off
 rem The script builds and runs the docker image
 
 copy ..\resource-deployment\runtime-config\runtime-config.dev.json .\dist\runtime-config.json &&^
+cd ..\scanner-global-library &&^
+yarn build &&^
+cd ..\privacy-scan-runner &&^
 yarn build &&^
 cd .\dist &&^
-docker build --tag privacy-scan-runner:prescanner . &&^
+docker build --tag mcr.microsoft.com/windows/privacy-scan-runner:prescanner . &&^
 cd ..\..\resource-deployment\scripts\docker-scanner-image &&^
-powershell .\build-scanner-image.ps1 &&^
+powershell .\build-scanner-image.ps1 -InstallHostFonts &&^
 cd ..\..\..\privacy-scan-runner &&^
-docker run --init --ipc=host --env-file .env privacy-scan-runner
+docker run --init --ipc=host --env-file .env mcr.microsoft.com/windows/privacy-scan-runner

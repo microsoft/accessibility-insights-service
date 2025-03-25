@@ -35,12 +35,12 @@
         "ts-loader": "^9.5.1",
         "typemoq": "^2.1.0",
         "typescript": "^5.5.3",
-        "webpack": "^5.94.0",
+        "webpack": "^5.97.1",
         "webpack-cli": "^5.1.4"
     },
     "dependencies": {
         "lodash": "^4.17.21",
-        "moment": "^2.29.4",
+        "moment": "^2.30.1",
         "storage-documents": "workspace:*"
     }
 }

@@ -1,13 +1,15 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+import { ReportSource } from 'storage-documents';
 import { ScanNotificationErrorCodeName } from '../scan-notification-error-codes';
 import { ScanRunErrorCodeName } from '../scan-run-error-codes';
 import { WebApiError } from '../web-api-error-codes';
+import { ScanDefinitionType } from './scan-run-request';
 
 export declare type LinkType = 'self';
 export declare type ScanState = 'pending' | 'pass' | 'fail';
-export declare type ScanStateExt = ScanState | 'error';
+export declare type ScanStateExt = ScanState | 'error' | 'completed';
 export declare type RunState =
     | 'pending'
     | 'accepted'
@@ -85,6 +87,7 @@ export interface ScanResult {
 export interface ScanReport {
     reportId: string;
     format: ReportFormat;
+    source?: ReportSource;
     links: Links;
 }
 
@@ -99,6 +102,15 @@ export interface ScanRun {
     error?: ScanRunError;
     pageResponseCode?: number;
     pageTitle?: string;
+    scanRunDetails?: ScanRunDetail[];
+}
+
+export interface ScanRunDetail {
+    name: ScanDefinitionType;
+    state: ScanStateExt;
+    timestamp?: string;
+    error?: string;
+    details?: unknown;
 }
 
 export interface ScanRunError {

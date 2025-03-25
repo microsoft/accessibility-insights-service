@@ -18,14 +18,15 @@ export declare type OnDemandPageScanRunState =
     | 'failed'
     | 'unscannable';
 export declare type ScanState = 'pending' | 'pass' | 'fail';
-export declare type ScanStateExt = ScanState | 'error';
+export declare type ScanStateExt = ScanState | 'error' | 'completed';
 export declare type NotificationState = 'pending' | 'queued' | 'queueFailed' | 'sending' | 'sent' | 'sendFailed';
 export declare type NotificationErrorTypes = 'InternalError' | 'HttpErrorCode';
 export declare type AuthenticationState = 'succeeded' | 'failed' | 'unauthenticated';
 export declare type CookieBannerType = 'standard';
 export declare type AuthenticationType = 'undetermined' | 'entraId';
 export declare type ScanType = 'accessibility' | 'privacy';
-
+export declare type ScanDefinitionType = 'accessibility-agent';
+export declare type ReportSource = 'accessibility-agent' | 'accessibility-scan' | 'privacy-scan';
 export declare type ReportFormat =
     | 'axe'
     | 'sarif'
@@ -81,6 +82,7 @@ export interface OnDemandPageScanResult extends StorageDocument {
     privacyScan?: PrivacyScan;
     authentication?: AuthenticationResult;
     browserValidationResult?: BrowserValidationResult;
+    scanDefinitions?: ScanDefinition[];
 }
 
 export interface BrowserValidationResult {
@@ -113,6 +115,7 @@ export interface OnDemandScanResult {
 export interface OnDemandPageScanReport {
     reportId: string;
     format: ReportFormat;
+    source?: ReportSource;
     href: string;
 }
 
@@ -123,6 +126,15 @@ export interface OnDemandPageScanRunResult {
     pageTitle?: string;
     pageResponseCode?: number;
     retryCount?: number;
+    scanRunDetails?: ScanRunDetail[];
+}
+
+export interface ScanRunDetail {
+    name: ScanDefinitionType;
+    state: ScanStateExt;
+    timestamp?: string;
+    error?: string | null;
+    details?: unknown;
 }
 
 export interface WebsiteScanRef {
@@ -133,4 +145,10 @@ export interface WebsiteScanRef {
 
 export interface WorkflowRunResults {
     report: ReportScanRunResult;
+}
+
+export interface ScanDefinition {
+    name: ScanDefinitionType;
+    args?: Record<string, string | number | boolean>;
+    options?: Record<string, string | number | boolean>;
 }
