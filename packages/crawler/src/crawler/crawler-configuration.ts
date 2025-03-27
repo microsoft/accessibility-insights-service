@@ -69,6 +69,7 @@ export class CrawlerConfiguration {
 
     public requestQueueOptions(): RequestQueueOptions {
         console.log('inside crawler-configuration.ts');
+
         return {
             clear: this.crawlerRunOptions.restartCrawl,
             inputUrls: this.crawlerRunOptions.inputUrls,

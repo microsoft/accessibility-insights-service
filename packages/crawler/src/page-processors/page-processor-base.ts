@@ -184,6 +184,7 @@ export abstract class PageProcessorBase implements PageProcessor {
                             navigationTimeout: navigationTimeout,
                         };
                     }
+
                     return newRequest;
                 },
             });

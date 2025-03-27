@@ -39,8 +39,9 @@ export class PageNavigator {
         await this.pageNavigationHooks.preNavigation(page);
 
         this.waitForOptions.timeout = navigationTimeout;
-        console.log('inside page-navigator.ts/navigate' + this.waitForOptions.timeout);
+        console.log(`inside page-navigator.ts/navigate${  this.waitForOptions.timeout}`);
         const pageOperation = this.createPageOperation(page, url);
+
         return this.navigatePage(pageOperation, page, navigationTimeout);
     }
 
