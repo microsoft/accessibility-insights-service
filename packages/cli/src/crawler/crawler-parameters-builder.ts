@@ -39,6 +39,8 @@ export class CrawlerParametersBuilder {
             }
         }
 
+        console.log(`inside crawler-parameters-builder.ts`);
+
         return {
             crawl: scanArguments.crawl,
             baseUrl: scanArguments.url,
@@ -63,6 +65,7 @@ export class CrawlerParametersBuilder {
             adhereFilesystemPattern: scanArguments.adhereFilesystemPattern,
             browserOptions: scanArguments.browserOptions,
             keepUrlFragment: scanArguments.keepUrlFragment ?? false,
+            navigationTimeout: scanArguments.navigationTimeout,
         };
     }
 
