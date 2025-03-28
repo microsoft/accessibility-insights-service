@@ -125,15 +125,16 @@ export class AgentScanner {
             const { stdout, stderr } = await execAsync(`${this.agentExeCommand} ${encodeURI(url)}`, {
                 timeout: timeoutMsec,
                 cwd: this.agentFolder,
+                env: { ...process.env, VSCODE_INSPECTOR_OPTIONS: '' }, // Disable VSCode inspector to prevent dotnet debugger attachment
             });
 
             if (stderr) {
                 this.logger.logError('Agent exited with error code.', { error: stderr });
 
-                // return {
-                //     result: 'error',
-                //     error: stderr,
-                // };
+                return {
+                    result: 'error',
+                    error: stderr,
+                };
             }
 
             this.logger.logInfo('Agent console output.', { stdout });
