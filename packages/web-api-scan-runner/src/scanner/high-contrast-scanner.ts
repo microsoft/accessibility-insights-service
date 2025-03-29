@@ -4,13 +4,13 @@
 import { inject, injectable } from 'inversify';
 import { GlobalLogger } from 'logger';
 import { BrowserError, PageResponseProcessor, SecretVault } from 'scanner-global-library';
-import { ScanStateExt } from 'storage-documents';
+import { ScanState } from 'storage-documents';
 import { chromium, Browser, BrowserContext } from '@playwright/test';
 import { System } from 'common';
 import { iocTypeNames } from '../ioc-types';
 
-export interface ScannerResults {
-    result?: ScanStateExt;
+export interface HighContrastResults {
+    result?: ScanState;
     error?: string | BrowserError;
     scannedUrl?: string;
 }
@@ -26,9 +26,9 @@ export class HighContrastScanner {
         @inject(GlobalLogger) private readonly logger: GlobalLogger,
     ) {}
 
-    public async scan(url: string): Promise<ScannerResults> {
+    public async scan(url: string): Promise<HighContrastResults> {
         const warnings = new Set<string>();
-        let result: ScanStateExt = 'pass';
+        let result: ScanState = 'pass';
         let browser;
         let response;
 

@@ -3,9 +3,10 @@
 
 param([Parameter(Mandatory = $false)][switch]$InstallHostFonts = $false) 
 
-$shareName = "WinSxS"
-$sharePathServer = "${env:windir}\WinSxS"
-$sharePathClient = "${env:windir}\Fonts"
+$shareNameWin = "WinSxS"
+$sharePathWin = "${env:windir}\WinSxS"
+$shareNameFonts = "Fonts"
+$sharePathFonts = "${env:windir}\Fonts"
 $userName = "DockerBuild"
 $global:installationType = ""
 
@@ -15,9 +16,13 @@ function deleteShare() {
         net user $userName /delete /y | Out-Null
     }
 
-    $share = Get-WmiObject -Class Win32_Share | Where-Object { $_.Name -eq $shareName }
+    $share = Get-WmiObject -Class Win32_Share | Where-Object { $_.Name -eq $shareNameWin }
     if ($share) {
-        net share $shareName /delete /y | Out-Null
+        net share $shareNameWin /delete /y | Out-Null
+    }
+    $share = Get-WmiObject -Class Win32_Share | Where-Object { $_.Name -eq $shareNameFonts }
+    if ($share) {
+        net share $shareNameFonts /delete /y | Out-Null
     }
 }
 
@@ -34,17 +39,9 @@ function createShare() {
     
     Write-Host "Detected '$global:installationType' host machine type"
 
-    if ($global:installationType -eq "Server") {
-        $sharePath = $sharePathServer
-    }
-    else {
-        $sharePath = $sharePathClient
-    }
-
-    Write-Host "Shared '$sharePath' host machine path"
-
     net user $userName "${env:BUILD_KEY}" /ADD | Out-Null
-    net share $shareName=$sharePath /grant:"$($userName),READ" | Out-Null
+    net share $shareNameWin=$sharePathWin /grant:"$($userName),READ" | Out-Null
+    net share $shareNameFonts=$sharePathFonts /grant:"$($userName),READ" | Out-Null
 }
 
 function buildImage() {

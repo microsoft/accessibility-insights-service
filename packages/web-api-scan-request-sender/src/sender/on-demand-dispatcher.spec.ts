@@ -305,6 +305,7 @@ describe(OnDemandDispatcher, () => {
             },
             'privacy',
         );
+
         setupPageScanRequestProvider(scanRequests);
         setupOnDemandPageScanRunResultProvider(scanRequests);
 
