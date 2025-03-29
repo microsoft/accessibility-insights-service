@@ -122,11 +122,10 @@ export class AgentScanner {
         const timeoutMsec: number = 120000;
 
         try {
-            const { stdout, stderr } = await execAsync(`start cmd /C "${this.agentExeCommand} ${encodeURI(url)}"`, {
+            const { stdout, stderr } = await execAsync(`${this.agentExeCommand} ${encodeURI(url)}`, {
                 timeout: timeoutMsec,
                 cwd: this.agentFolder,
                 env: { ...process.env, VSCODE_INSPECTOR_OPTIONS: '' }, // Disable VSCode inspector to prevent dotnet debugger attachment
-                windowsHide: false,
             });
 
             if (stderr) {
