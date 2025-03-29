@@ -21,21 +21,41 @@ export class ReportGenerator {
      * The first parameter is used as the base to merge the results of the other parameters.
      */
     public generateReports(...axeScanResults: AxeScanResults[]): GeneratedReport[] {
-        const baseAxeScanResult = axeScanResults[0];
+        const accessibilityReport = this.generateAccessibilityReport(axeScanResults[0]);
+
         if (axeScanResults.length > 1) {
-            const mergedAxeResults = this.mergeAxeScanResults(axeScanResults.filter((r) => isEmpty(r) === false).map((r) => r.results));
-            baseAxeScanResult.results.violations = mergedAxeResults.violations;
-            baseAxeScanResult.results.passes = mergedAxeResults.passes;
-            baseAxeScanResult.results.inapplicable = mergedAxeResults.inapplicable;
-            baseAxeScanResult.results.incomplete = mergedAxeResults.incomplete;
+            const accessibilityCombinedReport = this.generateAccessibilityCombinedReport(axeScanResults);
+            accessibilityReport.push(...accessibilityCombinedReport);
         }
+
+        return accessibilityReport;
+    }
+
+    private generateAccessibilityReport(axeScanResults: AxeScanResults): GeneratedReport[] {
+        return this.axeResultConverters.map<GeneratedReport>((axeResultConverter) => {
+            return {
+                content: axeResultConverter.convert(axeScanResults),
+                id: this.guidGenerator.createGuid(),
+                format: axeResultConverter.targetReportFormat,
+                source: 'accessibility-scan',
+            };
+        });
+    }
+
+    private generateAccessibilityCombinedReport(axeScanResults: AxeScanResults[]): GeneratedReport[] {
+        const baseAxeScanResult = axeScanResults[0];
+        const mergedAxeResults = this.mergeAxeScanResults(axeScanResults.filter((r) => isEmpty(r) === false).map((r) => r.results));
+        baseAxeScanResult.results.violations = mergedAxeResults.violations;
+        baseAxeScanResult.results.passes = mergedAxeResults.passes;
+        baseAxeScanResult.results.inapplicable = mergedAxeResults.inapplicable;
+        baseAxeScanResult.results.incomplete = mergedAxeResults.incomplete;
 
         return this.axeResultConverters.map<GeneratedReport>((axeResultConverter) => {
             return {
                 content: axeResultConverter.convert(baseAxeScanResult),
                 id: this.guidGenerator.createGuid(),
                 format: axeResultConverter.targetReportFormat,
-                source: 'accessibility-scan',
+                source: 'accessibility-combined',
             };
         });
     }

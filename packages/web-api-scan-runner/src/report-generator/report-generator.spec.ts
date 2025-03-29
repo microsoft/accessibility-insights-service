@@ -15,6 +15,7 @@ describe(ReportGenerator, () => {
     let axeResultConverterMock1: IMock<AxeResultConverter>;
     let axeResultConverterMock2: IMock<AxeResultConverter>;
     let reportGenerator: ReportGenerator;
+    let guidId: number;
 
     const axeScanResults1: AxeScanResults = {
         pageTitle: 'test page 1',
@@ -46,8 +47,7 @@ describe(ReportGenerator, () => {
         },
     } as AxeScanResults;
 
-    const generatedGuid1 = 'guid-1';
-    const generatedGuid2 = 'guid-2';
+    const generatedGuids: string[] = ['guid-1', 'guid-2', 'guid-3', 'guid-4'];
 
     beforeEach(() => {
         guidGeneratorMock = Mock.ofType<GuidGenerator>();
@@ -60,14 +60,8 @@ describe(ReportGenerator, () => {
         axeResultConverterMock2.setup((converter) => converter.convert(It.isAny())).returns(() => 'converted-content-2');
         axeResultConverterMock2.setup((converter) => converter.targetReportFormat).returns(() => 'html');
 
-        guidGeneratorMock
-            .setup((g) => g.createGuid())
-            .returns(() => generatedGuid1)
-            .verifiable(Times.once());
-        guidGeneratorMock
-            .setup((g) => g.createGuid())
-            .returns(() => generatedGuid2)
-            .verifiable(Times.once());
+        guidId = 0;
+        guidGeneratorMock.setup((g) => g.createGuid()).returns(() => generatedGuids[guidId++]);
 
         reportGenerator = new ReportGenerator(guidGeneratorMock.object, [axeResultConverterMock1.object, axeResultConverterMock2.object]);
     });
@@ -78,13 +72,13 @@ describe(ReportGenerator, () => {
         const expectedReports: GeneratedReport[] = [
             {
                 content: 'converted-content-1',
-                id: generatedGuid1,
+                id: generatedGuids[0],
                 format: 'axe',
                 source: 'accessibility-scan',
             },
             {
                 content: 'converted-content-2',
-                id: generatedGuid2,
+                id: generatedGuids[1],
                 format: 'html',
                 source: 'accessibility-scan',
             },
@@ -103,15 +97,27 @@ describe(ReportGenerator, () => {
         const expectedReports: GeneratedReport[] = [
             {
                 content: 'converted-content-1',
-                id: generatedGuid1,
+                id: generatedGuids[0],
                 format: 'axe',
                 source: 'accessibility-scan',
             },
             {
                 content: 'converted-content-2',
-                id: generatedGuid2,
+                id: generatedGuids[1],
                 format: 'html',
                 source: 'accessibility-scan',
+            },
+            {
+                content: 'converted-content-1',
+                id: generatedGuids[2],
+                format: 'axe',
+                source: 'accessibility-combined',
+            },
+            {
+                content: 'converted-content-2',
+                id: generatedGuids[3],
+                format: 'html',
+                source: 'accessibility-combined',
             },
         ];
 
@@ -119,22 +125,22 @@ describe(ReportGenerator, () => {
 
         axeResultConverterMock1.verify((converter) => converter.convert(mergedAxeScanResults), Times.once());
         axeResultConverterMock2.verify((converter) => converter.convert(mergedAxeScanResults), Times.once());
-        guidGeneratorMock.verify((g) => g.createGuid(), Times.exactly(2));
+        guidGeneratorMock.verify((g) => g.createGuid(), Times.exactly(4));
     });
 
     it('should handle empty AxeScanResults objects gracefully', () => {
-        const reports = reportGenerator.generateReports(axeScanResults1, {} as AxeScanResults);
+        const reports = reportGenerator.generateReports(axeScanResults1);
 
         const expectedReports: GeneratedReport[] = [
             {
                 content: 'converted-content-1',
-                id: generatedGuid1,
+                id: generatedGuids[0],
                 format: 'axe',
                 source: 'accessibility-scan',
             },
             {
                 content: 'converted-content-2',
-                id: generatedGuid2,
+                id: generatedGuids[1],
                 format: 'html',
                 source: 'accessibility-scan',
             },

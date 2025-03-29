@@ -238,7 +238,7 @@ export class Runner {
             results: scanProcessorResult.agentResults?.axeResults,
         });
 
-        // Generate and save reports for accessibility scan results
+        // Save reports for accessibility scan results
         const availableReports = reports.filter((r) => !isEmpty(r.content));
         const accessibilityReportRefs = await this.reportWriter.writeBatch(availableReports);
 

@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { ReportSource } from 'storage-documents';
 import { ScanNotificationErrorCodeName } from '../scan-notification-error-codes';
 import { ScanRunErrorCodeName } from '../scan-run-error-codes';
 import { WebApiError } from '../web-api-error-codes';
@@ -32,7 +31,7 @@ export declare type AuthenticationType = (typeof authenticationTypes)[number];
 // Construct to support type guard
 export const browserValidationTypes = ['highContrastProperties'] as const;
 export declare type BrowserValidationTypes = (typeof browserValidationTypes)[number];
-
+export declare type ReportSource = 'accessibility-agent' | 'accessibility-scan' | 'accessibility-combined' | 'privacy-scan';
 export declare type ReportFormat =
     | 'axe'
     | 'sarif'
