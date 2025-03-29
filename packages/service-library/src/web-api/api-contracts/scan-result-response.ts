@@ -1,15 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { ReportSource } from 'storage-documents';
 import { ScanNotificationErrorCodeName } from '../scan-notification-error-codes';
 import { ScanRunErrorCodeName } from '../scan-run-error-codes';
 import { WebApiError } from '../web-api-error-codes';
 import { ScanDefinitionType } from './scan-run-request';
 
 export declare type LinkType = 'self';
-export declare type ScanState = 'pending' | 'pass' | 'fail';
-export declare type ScanStateExt = ScanState | 'error' | 'completed';
+export declare type ScanState = 'pending' | 'pass' | 'fail' | 'error';
 export declare type RunState =
     | 'pending'
     | 'accepted'
@@ -33,7 +31,7 @@ export declare type AuthenticationType = (typeof authenticationTypes)[number];
 // Construct to support type guard
 export const browserValidationTypes = ['highContrastProperties'] as const;
 export declare type BrowserValidationTypes = (typeof browserValidationTypes)[number];
-
+export declare type ReportSource = 'accessibility-agent' | 'accessibility-scan' | 'accessibility-combined' | 'privacy-scan';
 export declare type ReportFormat =
     | 'axe'
     | 'sarif'
@@ -107,7 +105,7 @@ export interface ScanRun {
 
 export interface ScanRunDetail {
     name: ScanDefinitionType;
-    state: ScanStateExt;
+    state: RunState;
     timestamp?: string;
     error?: string;
     details?: unknown;
@@ -131,5 +129,5 @@ export interface AuthenticationResult {
 }
 
 export interface BrowserValidationResult {
-    highContrastProperties?: ScanStateExt;
+    highContrastProperties?: ScanState;
 }

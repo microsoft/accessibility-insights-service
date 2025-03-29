@@ -6,7 +6,7 @@ import { promisify } from 'util';
 import fs from 'fs';
 import { inject, injectable } from 'inversify';
 import { GlobalLogger } from 'logger';
-import { OnDemandPageScanReport, ScanStateExt } from 'storage-documents';
+import { OnDemandPageScanReport, OnDemandPageScanRunState } from 'storage-documents';
 import { System } from 'common';
 import { AxeResults } from 'axe-core';
 import { isEmpty } from 'lodash';
@@ -17,7 +17,7 @@ import { AgentReportGenerator } from '../agent/agent-report-generator';
 /* eslint-disable security/detect-non-literal-fs-filename */
 
 export interface AgentResults {
-    result?: ScanStateExt;
+    result?: OnDemandPageScanRunState;
     scannedUrl?: string;
     error?: string;
     axeResults?: AxeResults;
@@ -57,12 +57,12 @@ export class AgentScanner {
         this.logger.logInfo('Starting accessibility agent scan.');
         try {
             response = await this.executeAgent(url);
-            if (response.result === 'error') {
+            if (response.result === 'failed') {
                 return { ...response, scannedUrl: url };
             }
 
             response = await this.processAxeResults();
-            if (response.result === 'error') {
+            if (response.result === 'failed') {
                 return { ...response, scannedUrl: url };
             }
 
@@ -71,7 +71,7 @@ export class AgentScanner {
                 this.logger.logError('No reports were generated from accessibility agent scan.', { scannedUrl: url });
 
                 return {
-                    result: 'error',
+                    result: 'failed',
                     scannedUrl: url,
                     error: 'No reports were generated from accessibility agent scan.',
                 };
@@ -82,7 +82,7 @@ export class AgentScanner {
             this.logger.logError('Error while running accessibility agent scan.', { error: System.serializeError(error) });
 
             return {
-                result: 'error',
+                result: 'failed',
                 scannedUrl: url,
                 error: System.serializeError(error),
             };
@@ -104,7 +104,7 @@ export class AgentScanner {
             this.logger.logError('Agent did not produce axe results file.', { path: this.agentAxeResultPath });
 
             return {
-                result: 'error',
+                result: 'failed',
                 error: 'Agent did not produce axe results file.',
             };
         }
@@ -125,15 +125,16 @@ export class AgentScanner {
             const { stdout, stderr } = await execAsync(`${this.agentExeCommand} ${encodeURI(url)}`, {
                 timeout: timeoutMsec,
                 cwd: this.agentFolder,
+                env: { ...process.env, VSCODE_INSPECTOR_OPTIONS: '' }, // Disable VSCode inspector to prevent dotnet debugger attachment
             });
 
             if (stderr) {
                 this.logger.logError('Agent exited with error code.', { error: stderr });
 
-                // return {
-                //     result: 'error',
-                //     error: stderr,
-                // };
+                return {
+                    result: 'failed',
+                    error: stderr,
+                };
             }
 
             this.logger.logInfo('Agent console output.', { stdout });
@@ -142,15 +143,18 @@ export class AgentScanner {
                 result: 'completed',
             };
         } catch (error) {
+            let message;
             if (error.killed) {
-                this.logger.logError('Agent process was terminated due to timeout.', { timeout: timeoutMsec.toString() });
+                message = 'Agent process was terminated due to timeout.';
+                this.logger.logError(message, { timeout: timeoutMsec.toString() });
             } else {
+                message = `Error while executing agent. ${System.serializeError(error)}`;
                 this.logger.logError('Error while executing agent.', { error: System.serializeError(error) });
             }
 
             return {
-                result: 'error',
-                error: System.serializeError(error),
+                result: 'failed',
+                error: message,
             };
         }
     }
