@@ -75,7 +75,7 @@ describe(ScannerDispatcher, () => {
     it('should dispatch all scanners and return results', async () => {
         const axeScanResultsStub = { violations: [] } as AxeScanResults;
         const highContrastResultsStub: HighContrastResults = { result: 'pass' };
-        const agentResultsStub: AgentResults = { result: 'pass' };
+        const agentResultsStub: AgentResults = { result: 'completed' };
 
         axeScannerMock
             .setup((a) => a.scan(pageMock.object))

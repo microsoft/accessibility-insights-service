@@ -17,7 +17,7 @@ describe(AgentReportGenerator, () => {
     let agentReportGenerator: AgentReportGenerator;
 
     const agentResultsStub: AgentResults = {
-        result: 'pass',
+        result: 'completed',
         scannedUrl: 'https://example.com',
     } as AgentResults;
 

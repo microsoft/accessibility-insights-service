@@ -459,9 +459,7 @@
                                     "example": "accessibility-agent"
                                 },
                                 "state": {
-                                    "type": "string",
-                                    "enum": ["pending", "pass", "fail", "error", "completed"],
-                                    "example": "completed"
+                                    "$ref": "#/components/schemas/RunState"
                                 },
                                 "timestamp": {
                                     "description": "Full date and time string format as defined by ISO 8601",
@@ -673,7 +671,7 @@
             "ScanState": {
                 "type": "string",
                 "default": "pending",
-                "enum": ["pending", "pass", "fail"],
+                "enum": ["pending", "pass", "fail", "error"],
                 "example": "fail"
             },
             "RunState": {

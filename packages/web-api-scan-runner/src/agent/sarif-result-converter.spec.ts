@@ -38,7 +38,7 @@ describe(SarifResultConverter, () => {
     };
 
     const agentResultsStub: AgentResults = {
-        result: 'pass',
+        result: 'completed',
         scannedUrl: 'https://example.com',
         axeResults: axeResultsStub,
     };
