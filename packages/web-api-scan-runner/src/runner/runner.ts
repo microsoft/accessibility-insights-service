@@ -73,7 +73,7 @@ export class Runner {
             if (axeScanResults?.unscannable === true) {
                 // unscannable URL
                 this.setRunResult(pageScanResult, 'unscannable', axeScanResults.scannedUrl, axeScanResults.error);
-            } else if (axeScanResults.error === undefined && scanProcessorResult.agentResults?.result !== 'error') {
+            } else if (axeScanResults.error === undefined && scanProcessorResult.agentResults?.result !== 'failed') {
                 // scan completed successfully
                 await this.onCompletedScan(scanProcessorResult, pageScanResult);
             } else {
