@@ -21,17 +21,17 @@ export class ReportGenerator {
      * The first parameter is used as the base to merge the results of the other parameters.
      */
     public generateReports(...axeScanResults: AxeScanResults[]): GeneratedReport[] {
-        const accessibilityReport = this.generateAccessibilityReport(axeScanResults[0]);
+        const accessibilityReports = this.generateAccessibilityReports(axeScanResults[0]);
 
         if (axeScanResults.length > 1) {
-            const accessibilityCombinedReport = this.generateAccessibilityCombinedReport(axeScanResults);
-            accessibilityReport.push(...accessibilityCombinedReport);
+            const accessibilityCombinedReport = this.generateAccessibilityCombinedReports(axeScanResults);
+            accessibilityReports.push(...accessibilityCombinedReport);
         }
 
-        return accessibilityReport;
+        return accessibilityReports;
     }
 
-    private generateAccessibilityReport(axeScanResults: AxeScanResults): GeneratedReport[] {
+    private generateAccessibilityReports(axeScanResults: AxeScanResults): GeneratedReport[] {
         return this.axeResultConverters.map<GeneratedReport>((axeResultConverter) => {
             return {
                 content: axeResultConverter.convert(axeScanResults),
@@ -42,7 +42,7 @@ export class ReportGenerator {
         });
     }
 
-    private generateAccessibilityCombinedReport(axeScanResults: AxeScanResults[]): GeneratedReport[] {
+    private generateAccessibilityCombinedReports(axeScanResults: AxeScanResults[]): GeneratedReport[] {
         const baseAxeScanResult = axeScanResults[0];
         const mergedAxeResults = this.mergeAxeScanResults(axeScanResults.filter((r) => isEmpty(r) === false).map((r) => r.results));
         baseAxeScanResult.results.violations = mergedAxeResults.violations;
