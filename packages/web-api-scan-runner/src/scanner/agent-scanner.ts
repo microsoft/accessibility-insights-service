@@ -143,15 +143,18 @@ export class AgentScanner {
                 result: 'completed',
             };
         } catch (error) {
+            let message;
             if (error.killed) {
-                this.logger.logError('Agent process was terminated due to timeout.', { timeout: timeoutMsec.toString() });
+                message = 'Agent process was terminated due to timeout.';
+                this.logger.logError(message, { timeout: timeoutMsec.toString() });
             } else {
+                message = `Error while executing agent. ${System.serializeError(error)}`;
                 this.logger.logError('Error while executing agent.', { error: System.serializeError(error) });
             }
 
             return {
                 result: 'failed',
-                error: System.serializeError(error),
+                error: message,
             };
         }
     }
