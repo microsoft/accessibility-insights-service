@@ -5409,7 +5409,7 @@ __metadata:
     rimraf: ^6.0.1
     storage-documents: "workspace:*"
     ts-jest: ^29.1.5
-    ts-loader: ^9.5.1
+    ts-loader: ^9.5.2
     typemoq: ^2.1.0
     typescript: ^5.5.3
     webpack: ^5.97.1
@@ -5514,17 +5514,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"bare-fs@npm:^2.1.1":
-  version: 2.2.3
-  resolution: "bare-fs@npm:2.2.3"
-  dependencies:
-    bare-events: ^2.0.0
-    bare-path: ^2.0.0
-    streamx: ^2.13.0
-  checksum: 598f1998f08b19c7f1eea76291e5c93664c82b60b997e56aa0e6dea05193d74d3865cfe1172d05684893253ef700ce3abb4e76c55da799fed2ee7a82597a5c44
-  languageName: node
-  linkType: hard
-
 "bare-fs@npm:^4.0.1":
   version: 4.0.1
   resolution: "bare-fs@npm:4.0.1"
@@ -5536,26 +5525,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"bare-os@npm:^2.1.0":
-  version: 2.2.1
-  resolution: "bare-os@npm:2.2.1"
-  checksum: 7d870d8955531809253dfbceeda5b68e8396ef640166f8ff6c4c5e344f18a6bc9253f6d5e7d9ae2841426b66e9b7b1a39b2a102e6b23e1ddff26ad8a8981af81
-  languageName: node
-  linkType: hard
-
 "bare-os@npm:^3.0.1":
   version: 3.4.0
   resolution: "bare-os@npm:3.4.0"
   checksum: a473da6219f901b2101fac176ff271b28b9aee7e2d01b13b96320a56656c2f83a7d8275db89238ff46ed348638d86338761b6682684fbd0c4bb6b09201446047
-  languageName: node
-  linkType: hard
-
-"bare-path@npm:^2.0.0, bare-path@npm:^2.1.0":
-  version: 2.1.1
-  resolution: "bare-path@npm:2.1.1"
-  dependencies:
-    bare-os: ^2.1.0
-  checksum: f25710be4ee4106f15b405b85ceea5c8da799f803b237008dc4a3533c0db01acd2500742f2204a37909c6871949725fb1907cf95434d80710bf832716d0da8df
   languageName: node
   linkType: hard
 
@@ -5639,7 +5612,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"bl@npm:^4.0.3, bl@npm:^4.1.0":
+"bl@npm:^4.1.0":
   version: 4.1.0
   resolution: "bl@npm:4.1.0"
   dependencies:
@@ -6172,13 +6145,6 @@ __metadata:
     fsevents:
       optional: true
   checksum: b49fcde40176ba007ff361b198a2d35df60d9bb2a5aab228279eb810feae9294a6b4649ab15981304447afe1e6ffbf4788ad5db77235dc770ab777c6e771980c
-  languageName: node
-  linkType: hard
-
-"chownr@npm:^1.1.1":
-  version: 1.1.4
-  resolution: "chownr@npm:1.1.4"
-  checksum: 115648f8eb38bac5e41c3857f3e663f9c39ed6480d1349977c4d96c95a47266fcacc5a5aabf3cb6c481e22d72f41992827db47301851766c4fd77ac21a4f081d
   languageName: node
   linkType: hard
 
@@ -7434,7 +7400,7 @@ __metadata:
     npm-run-all: ^4.1.5
     rimraf: ^6.0.1
     ts-jest: ^29.1.5
-    ts-loader: ^9.5.1
+    ts-loader: ^9.5.2
     typescript: ^5.5.3
     webpack: ^5.97.1
     webpack-cli: ^5.1.4
@@ -7568,7 +7534,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"end-of-stream@npm:^1.0.0, end-of-stream@npm:^1.1.0, end-of-stream@npm:^1.4.1":
+"end-of-stream@npm:^1.0.0, end-of-stream@npm:^1.1.0":
   version: 1.4.4
   resolution: "end-of-stream@npm:1.4.4"
   dependencies:
@@ -12218,13 +12184,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mkdirp-classic@npm:^0.5.2":
-  version: 0.5.3
-  resolution: "mkdirp-classic@npm:0.5.3"
-  checksum: 3f4e088208270bbcc148d53b73e9a5bd9eef05ad2cbf3b3d0ff8795278d50dd1d11a8ef1875ff5aea3fa888931f95bfcb2ad5b7c1061cfefd6284d199e6776ac
-  languageName: node
-  linkType: hard
-
 "mkdirp@npm:^0.5.3":
   version: 0.5.5
   resolution: "mkdirp@npm:0.5.5"
@@ -12974,7 +12933,7 @@ __metadata:
     rimraf: ^6.0.1
     storage-documents: "workspace:*"
     ts-jest: ^29.1.5
-    ts-loader: ^9.5.1
+    ts-loader: ^9.5.2
     typemoq: ^2.1.0
     typescript: ^5.5.3
     webpack: ^5.97.1
@@ -13446,7 +13405,7 @@ __metadata:
     service-library: "workspace:*"
     storage-documents: "workspace:*"
     ts-jest: ^29.1.5
-    ts-loader: ^9.5.1
+    ts-loader: ^9.5.2
     typemoq: ^2.1.0
     typescript: ^5.5.3
     webpack: ^5.97.1
@@ -13495,7 +13454,7 @@ __metadata:
     service-library: "workspace:*"
     storage-documents: "workspace:*"
     ts-jest: ^29.1.5
-    ts-loader: ^9.5.1
+    ts-loader: ^9.5.2
     typemoq: ^2.1.0
     typescript: ^5.5.3
     webpack: ^5.97.1
@@ -14051,7 +14010,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"readable-stream@npm:^3.1.1, readable-stream@npm:^3.4.0, readable-stream@npm:^3.6.0":
+"readable-stream@npm:^3.4.0, readable-stream@npm:^3.6.0":
   version: 3.6.0
   resolution: "readable-stream@npm:3.6.0"
   dependencies:
@@ -14171,7 +14130,7 @@ __metadata:
     service-library: "workspace:*"
     storage-documents: "workspace:*"
     ts-jest: ^29.1.5
-    ts-loader: ^9.5.1
+    ts-loader: ^9.5.2
     typemoq: ^2.1.0
     typescript: ^5.5.3
     webpack: ^5.97.1
@@ -14219,7 +14178,7 @@ __metadata:
     service-library: "workspace:*"
     storage-documents: "workspace:*"
     ts-jest: ^29.1.5
-    ts-loader: ^9.5.1
+    ts-loader: ^9.5.2
     typemoq: ^2.1.0
     typescript: ^5.5.3
     webpack: ^5.97.1
@@ -15318,20 +15277,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"streamx@npm:^2.13.0":
-  version: 2.16.1
-  resolution: "streamx@npm:2.16.1"
-  dependencies:
-    bare-events: ^2.2.0
-    fast-fifo: ^1.1.0
-    queue-tick: ^1.0.1
-  dependenciesMeta:
-    bare-events:
-      optional: true
-  checksum: 6bbb4c38c0ab6ddbe0857d55e72f71288f308f2a9f4413b7b07391cdf9f94232ffc2bbe40a1212d2e09634ecdbd5052b444c73cc8d67ae1c97e2b7e553dad559
-  languageName: node
-  linkType: hard
-
 "streamx@npm:^2.15.0":
   version: 2.15.0
   resolution: "streamx@npm:2.15.0"
@@ -15682,36 +15627,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tar-fs@npm:2.1.1":
-  version: 2.1.1
-  resolution: "tar-fs@npm:2.1.1"
-  dependencies:
-    chownr: ^1.1.1
-    mkdirp-classic: ^0.5.2
-    pump: ^3.0.0
-    tar-stream: ^2.1.4
-  checksum: f5b9a70059f5b2969e65f037b4e4da2daf0fa762d3d232ffd96e819e3f94665dbbbe62f76f084f1acb4dbdcce16c6e4dac08d12ffc6d24b8d76720f4d9cf032d
-  languageName: node
-  linkType: hard
-
-"tar-fs@npm:3.0.5":
-  version: 3.0.5
-  resolution: "tar-fs@npm:3.0.5"
-  dependencies:
-    bare-fs: ^2.1.1
-    bare-path: ^2.1.0
-    pump: ^3.0.0
-    tar-stream: ^3.1.5
-  dependenciesMeta:
-    bare-fs:
-      optional: true
-    bare-path:
-      optional: true
-  checksum: e31c7e3e525fec0afecdec1cac58071809e396187725f2eba442f08a4c5649c8cd6b7ce25982f9a91bb0f055628df47c08177dd2ea4f5dafd3c22f42f8da8f00
-  languageName: node
-  linkType: hard
-
-"tar-fs@npm:^3.0.8":
+"tar-fs@npm:2.1.1, tar-fs@npm:3.0.5, tar-fs@npm:^3.0.8":
   version: 3.0.8
   resolution: "tar-fs@npm:3.0.8"
   dependencies:
@@ -15740,19 +15656,6 @@ __metadata:
     to-buffer: ^1.1.1
     xtend: ^4.0.0
   checksum: a5d49e232d3e33321bbd150381b6a4e5046bf12b1c2618acb95435b7871efde4d98bd1891eb2200478a7142ef7e304e033eb29bbcbc90451a2cdfa1890e05245
-  languageName: node
-  linkType: hard
-
-"tar-stream@npm:^2.1.4":
-  version: 2.2.0
-  resolution: "tar-stream@npm:2.2.0"
-  dependencies:
-    bl: ^4.0.3
-    end-of-stream: ^1.4.1
-    fs-constants: ^1.0.0
-    inherits: ^2.0.3
-    readable-stream: ^3.1.1
-  checksum: 699831a8b97666ef50021c767f84924cfee21c142c2eb0e79c63254e140e6408d6d55a065a2992548e72b06de39237ef2b802b99e3ece93ca3904a37622a66f3
   languageName: node
   linkType: hard
 
@@ -16029,9 +15932,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ts-loader@npm:^9.5.1":
-  version: 9.5.1
-  resolution: "ts-loader@npm:9.5.1"
+"ts-loader@npm:^9.5.2":
+  version: 9.5.2
+  resolution: "ts-loader@npm:9.5.2"
   dependencies:
     chalk: ^4.1.0
     enhanced-resolve: ^5.0.0
@@ -16041,7 +15944,7 @@ __metadata:
   peerDependencies:
     typescript: "*"
     webpack: ^5.0.0
-  checksum: 7cf396e656d905388ea2a9b5e82f16d3c955fda8d3df2fbf219f4bee16ff50a3c995c44ae3e584634e9443f056cec70bb3151add3917ffb4588ecd7394bac0ec
+  checksum: f4c117042e25434e733c4b70873adaa9a79b14c2b3d8e5db53bbfd42060289f8a3eb97cfff64c83123b735d954f0eaa0f60f093afb0682cd2d1d7fa17f81e223
   languageName: node
   linkType: hard
 
@@ -16675,7 +16578,7 @@ __metadata:
     service-library: "workspace:*"
     storage-documents: "workspace:*"
     ts-jest: ^29.1.5
-    ts-loader: ^9.5.1
+    ts-loader: ^9.5.2
     typemoq: ^2.1.0
     typescript: ^5.5.3
     webpack: ^5.97.1
@@ -16709,7 +16612,7 @@ __metadata:
     service-library: "workspace:*"
     storage-documents: "workspace:*"
     ts-jest: ^29.1.5
-    ts-loader: ^9.5.1
+    ts-loader: ^9.5.2
     typemoq: ^2.1.0
     typescript: ^5.5.3
     webpack: ^5.97.1
@@ -16768,7 +16671,7 @@ __metadata:
     sha.js: ^2.4.11
     storage-documents: "workspace:*"
     ts-jest: ^29.1.5
-    ts-loader: ^9.5.1
+    ts-loader: ^9.5.2
     typemoq: ^2.1.0
     typescript: ^5.5.3
     webpack: ^5.97.1
@@ -16807,7 +16710,7 @@ __metadata:
     service-library: "workspace:*"
     storage-documents: "workspace:*"
     ts-jest: ^29.1.5
-    ts-loader: ^9.5.1
+    ts-loader: ^9.5.2
     typemoq: ^2.1.0
     typescript: ^5.5.3
     webpack: ^5.97.1
@@ -16851,7 +16754,7 @@ __metadata:
     sha.js: ^2.4.11
     storage-documents: "workspace:*"
     ts-jest: ^29.1.5
-    ts-loader: ^9.5.1
+    ts-loader: ^9.5.2
     typemoq: ^2.1.0
     typescript: ^5.5.3
     webpack: ^5.97.1
@@ -16890,7 +16793,7 @@ __metadata:
     service-library: "workspace:*"
     storage-documents: "workspace:*"
     ts-jest: ^29.1.5
-    ts-loader: ^9.5.1
+    ts-loader: ^9.5.2
     typemoq: ^2.1.0
     typescript: ^5.5.3
     webpack: ^5.97.1
@@ -16931,7 +16834,7 @@ __metadata:
     service-library: "workspace:*"
     storage-documents: "workspace:*"
     ts-jest: ^29.1.5
-    ts-loader: ^9.5.1
+    ts-loader: ^9.5.2
     typemoq: ^2.1.0
     typescript: ^5.5.3
     web-api-client: "workspace:*"

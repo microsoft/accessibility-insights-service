@@ -493,7 +493,7 @@
                     },
                     "source": {
                         "type": "string",
-                        "enum": ["accessibility-agent", "accessibility-scan", "privacy-scan"],
+                        "enum": ["accessibility-agent", "accessibility-scan", "accessibility-combined", "privacy-scan"],
                         "example": "accessibility-scan"
                     },
                     "links": {
