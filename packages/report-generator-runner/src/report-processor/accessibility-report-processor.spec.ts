@@ -65,7 +65,23 @@ describe(AccessibilityReportProcessor, () => {
         loggerMock.verifyAll();
     });
 
-    it('generate report', async () => {
+    it('generate accessibility report without source', async () => {
+        setupCombinedScanResultProcessor();
+        setupPageScanRunReportProvider();
+
+        await accessibilityReportProcessor.generate(pageScanResult, queuedRequest);
+    });
+
+    it('generate accessibility report', async () => {
+        pageScanResult.reports[0].source = 'accessibility-scan';
+        setupCombinedScanResultProcessor();
+        setupPageScanRunReportProvider();
+
+        await accessibilityReportProcessor.generate(pageScanResult, queuedRequest);
+    });
+
+    it('generate accessibility agent combined report', async () => {
+        pageScanResult.reports[0].source = 'accessibility-combined';
         setupCombinedScanResultProcessor();
         setupPageScanRunReportProvider();
 
