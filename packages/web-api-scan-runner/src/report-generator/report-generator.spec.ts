@@ -56,9 +56,15 @@ describe(ReportGenerator, () => {
 
         axeResultConverterMock1.setup((converter) => converter.convert(It.isAny())).returns(() => 'converted-content-1');
         axeResultConverterMock1.setup((converter) => converter.targetReportFormat).returns(() => 'axe');
+        axeResultConverterMock1
+            .setup((converter) => converter.targetReportSource)
+            .returns(() => ['accessibility-scan', 'accessibility-combined']);
 
         axeResultConverterMock2.setup((converter) => converter.convert(It.isAny())).returns(() => 'converted-content-2');
         axeResultConverterMock2.setup((converter) => converter.targetReportFormat).returns(() => 'html');
+        axeResultConverterMock2
+            .setup((converter) => converter.targetReportSource)
+            .returns(() => ['accessibility-scan', 'accessibility-combined']);
 
         guidId = 0;
         guidGeneratorMock.setup((g) => g.createGuid()).returns(() => generatedGuids[guidId++]);

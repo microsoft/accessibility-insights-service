@@ -4,7 +4,7 @@
 import { AxeResults } from 'axe-core';
 import { SarifLog } from 'axe-sarif-converter';
 import { inject, injectable } from 'inversify';
-import { ReportFormat } from 'storage-documents';
+import { ReportFormat, ReportSource } from 'storage-documents';
 import { AxeScanResults } from 'scanner-global-library';
 import { iocTypeNames } from '../ioc-types';
 import { AxeResultConverter } from './axe-result-converter';
@@ -12,6 +12,8 @@ import { AxeResultConverter } from './axe-result-converter';
 @injectable()
 export class AxeResultToSarifConverter implements AxeResultConverter {
     public readonly targetReportFormat: ReportFormat = 'sarif';
+
+    public readonly targetReportSource: ReportSource[] = ['accessibility-scan', 'accessibility-combined'];
 
     constructor(@inject(iocTypeNames.ConvertAxeToSarifFunc) private readonly convertAxeToSarifFunc: (axeResults: AxeResults) => SarifLog) {}
 

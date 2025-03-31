@@ -32,17 +32,26 @@ export class ReportGenerator {
     }
 
     private generateAccessibilityReports(axeScanResults: AxeScanResults): GeneratedReport[] {
-        return this.axeResultConverters.map<GeneratedReport>((axeResultConverter) => {
-            return {
-                content: axeResultConverter.convert(axeScanResults),
-                id: this.guidGenerator.createGuid(),
-                format: axeResultConverter.targetReportFormat,
-                source: 'accessibility-scan',
-            };
-        });
+        const source = 'accessibility-scan';
+
+        return (
+            this.axeResultConverters
+                // Filter out the converters that are not applicable to the current axeScanResults
+                .filter((axeResultConverter) => axeResultConverter.targetReportSource.includes(source))
+                .map<GeneratedReport>((axeResultConverter) => {
+                    return {
+                        content: axeResultConverter.convert(axeScanResults),
+                        id: this.guidGenerator.createGuid(),
+                        format: axeResultConverter.targetReportFormat,
+                        source,
+                    };
+                })
+        );
     }
 
     private generateAccessibilityCombinedReports(axeScanResults: AxeScanResults[]): GeneratedReport[] {
+        const source = 'accessibility-combined';
+
         const baseAxeScanResult = axeScanResults[0];
         const mergedAxeResults = this.mergeAxeScanResults(axeScanResults.filter((r) => isEmpty(r) === false).map((r) => r.results));
         baseAxeScanResult.results.violations = mergedAxeResults.violations;
@@ -50,14 +59,19 @@ export class ReportGenerator {
         baseAxeScanResult.results.inapplicable = mergedAxeResults.inapplicable;
         baseAxeScanResult.results.incomplete = mergedAxeResults.incomplete;
 
-        return this.axeResultConverters.map<GeneratedReport>((axeResultConverter) => {
-            return {
-                content: axeResultConverter.convert(baseAxeScanResult),
-                id: this.guidGenerator.createGuid(),
-                format: axeResultConverter.targetReportFormat,
-                source: 'accessibility-combined',
-            };
-        });
+        return (
+            this.axeResultConverters
+                // Filter out the converters that are not applicable to the current axeScanResults
+                .filter((axeResultConverter) => axeResultConverter.targetReportSource.includes(source))
+                .map<GeneratedReport>((axeResultConverter) => {
+                    return {
+                        content: axeResultConverter.convert(baseAxeScanResult),
+                        id: this.guidGenerator.createGuid(),
+                        format: axeResultConverter.targetReportFormat,
+                        source,
+                    };
+                })
+        );
     }
 
     private mergeAxeScanResults(axeScanResults: AxeResults[]): AxeResults {
