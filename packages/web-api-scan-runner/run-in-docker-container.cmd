@@ -9,6 +9,7 @@ SET DOCKER_CLI_HINTS=false
 
 copy ..\resource-deployment\runtime-config\runtime-config.dev.json .\dist\runtime-config.json &&^
 copy /y .\docker-image-config\Dockerfile.debug .\dist\Dockerfile.debug &&^
+xcopy ..\a11y_agent .\dist\a11y_agent\ /s /e /y &&^
 cd ..\scanner-global-library &&^
 yarn build &&^
 cd ..\web-api-scan-runner &&^

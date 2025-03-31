@@ -21,6 +21,7 @@ describe(ReportWriter, () => {
         generatedReportStub = {
             content: 'consolidated report content',
             format: 'consolidated.html',
+            source: 'accessibility-scan',
             id: 'id1',
         } as GeneratedReport;
 
@@ -36,8 +37,9 @@ describe(ReportWriter, () => {
         const generatedReports = [generatedReportStub, { ...generatedReportStub, id: 'id2' }];
         const expectedReports = generatedReports.map((report) => {
             return {
-                format: report.format,
                 reportId: report.id,
+                format: report.format,
+                source: 'accessibility-scan',
                 href: `href-${report.id}`,
             };
         });
@@ -49,8 +51,9 @@ describe(ReportWriter, () => {
 
     test('save report', async () => {
         const expectedReport: OnDemandPageScanReport = {
-            format: generatedReportStub.format,
             reportId: generatedReportStub.id,
+            format: generatedReportStub.format,
+            source: 'accessibility-scan',
             href: `href-${generatedReportStub.id}`,
         };
 

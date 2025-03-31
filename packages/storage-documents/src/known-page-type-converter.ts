@@ -4,7 +4,7 @@
 import { isEmpty } from 'lodash';
 import { inject, injectable } from 'inversify';
 import { HashGenerator } from 'common';
-import { KnownPage, KnownPages } from './website-scan-result';
+import { KnownPage, KnownPages, KnownPageSource } from './website-scan-result';
 import { OnDemandPageScanRunState, ScanState } from './on-demand-page-scan-result';
 
 @injectable()
@@ -12,14 +12,16 @@ export class KnownPageTypeConverter {
     constructor(@inject(HashGenerator) private readonly hashGenerator: HashGenerator) {}
 
     /**
-     * Compacts object {@link KnownPage} to a string in format `url|scanId|runState|scanState`
+     * Compacts object {@link KnownPage} to a string in format `url|source|scanId|runState|scanState`
      */
     public convertKnownPageToString(knownPage: KnownPage): string {
         if (isEmpty(knownPage)) {
             return '';
         }
 
-        const properties = [knownPage.url, knownPage.scanId, knownPage.runState, knownPage.scanState];
+        const properties = !isEmpty(knownPage.source)
+            ? [knownPage.url, knownPage.source, knownPage.scanId, knownPage.runState, knownPage.scanState]
+            : [knownPage.url, knownPage.scanId, knownPage.runState, knownPage.scanState];
         const value = properties.join('|');
 
         // Remove separator chars at the end
@@ -48,12 +50,27 @@ export class KnownPageTypeConverter {
                     knownPage.url = property;
                     break;
                 case 1:
-                    knownPage.scanId = property;
+                    if (['request', 'crawler'].includes(property)) {
+                        knownPage.source = property as KnownPageSource;
+                    } else {
+                        knownPage.scanId = property;
+                    }
                     break;
                 case 2:
-                    knownPage.runState = property as OnDemandPageScanRunState;
+                    if (!knownPage.scanId) {
+                        knownPage.scanId = property;
+                    } else {
+                        knownPage.runState = property as OnDemandPageScanRunState;
+                    }
                     break;
                 case 3:
+                    if (!knownPage.runState) {
+                        knownPage.runState = property as OnDemandPageScanRunState;
+                    } else {
+                        knownPage.scanState = property as ScanState;
+                    }
+                    break;
+                case 4:
                     knownPage.scanState = property as ScanState;
                     break;
                 default:
