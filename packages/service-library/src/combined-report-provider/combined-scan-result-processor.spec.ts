@@ -55,7 +55,7 @@ describe(CombinedScanResultProcessor, () => {
         axeScanResults = {
             browserResolution: 'browserResolution',
             userAgent: 'userAgent',
-            results: {
+            axeResults: {
                 url: 'url',
                 inapplicable: [{}],
                 incomplete: [{}],
@@ -63,7 +63,7 @@ describe(CombinedScanResultProcessor, () => {
             } as AxeResults,
         };
 
-        axeScanResultsReduced = cloneDeep(axeScanResults.results);
+        axeScanResultsReduced = cloneDeep(axeScanResults.axeResults);
         axeScanResultsReduced.inapplicable = [];
         axeScanResultsReduced.incomplete = [];
         axeScanResultsReduced.passes = [];

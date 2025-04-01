@@ -6,7 +6,7 @@ import { ReportSource } from 'storage-documents';
 import { BrowserError } from '../browser-error';
 
 export interface AxeScanResults {
-    results?: AxeResults;
+    axeResults?: AxeResults;
     error?: string | BrowserError;
     pageResponseCode?: number;
     unscannable?: boolean;

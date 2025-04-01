@@ -272,10 +272,10 @@ export class Runner {
     }
 
     private evaluateAxeScanResults(axeResults: AxeScanResults): OnDemandScanResult {
-        if (axeResults?.results?.violations !== undefined && axeResults.results.violations.length > 0) {
+        if (axeResults?.axeResults?.violations !== undefined && axeResults.axeResults.violations.length > 0) {
             return {
                 state: 'fail',
-                issueCount: axeResults.results.violations.reduce((a, b) => a + b.nodes.length, 0),
+                issueCount: axeResults.axeResults.violations.reduce((a, b) => a + b.nodes.length, 0),
             };
         } else {
             return {

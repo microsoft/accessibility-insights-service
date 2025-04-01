@@ -29,7 +29,7 @@ const readableStream = {
 const axeScanResults = {
     scannedUrl: 'scannedUrl',
     pageTitle: 'pageTitle',
-    results: {
+    axeResults: {
         url: 'url',
         passes: [{ id: 'aria-allowed-attr', impact: null }],
         violations: [{ id: 'frame-title', impact: 'serious' }],

@@ -34,7 +34,7 @@ describe('ReportGenerator', () => {
             url: scanUrl,
         } as unknown as AxeResults;
 
-        axeScanResults = { results: axeResults, pageTitle: 'page title' };
+        axeScanResults = { axeResults, pageTitle: 'page title' };
         reportGenerationTime = new Date(2019, 2, 3);
         MockDate.set(reportGenerationTime);
     });
@@ -49,9 +49,9 @@ describe('ReportGenerator', () => {
             pageTitle: axeScanResults.pageTitle,
         };
         const htmlReportParams: AxeReportParameters = {
-            results: axeScanResults.results,
+            results: axeScanResults.axeResults,
             description: `Automated report for accessibility scan of url ${
-                axeScanResults.results.url
+                axeScanResults.axeResults.url
             } completed at ${reportGenerationTime.toUTCString()}.`,
             serviceName: serviceName,
             scanContext: {
