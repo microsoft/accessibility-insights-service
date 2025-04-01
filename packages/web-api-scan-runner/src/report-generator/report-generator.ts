@@ -75,16 +75,17 @@ export class ReportGenerator {
     private generateAccessibilityCombinedReports(reportResults: ReportResult[]): GeneratedReport[] {
         const reportSource = 'accessibility-combined';
 
+        // If there is only one report, we don't need to merge the results
         if (reportResults.length === 1) {
             return [];
         }
 
+        // Merge the axe scan results from all the reports
         const baseAxeScanResult = reportResults[0];
         const mergedAxeResults = this.mergeAxeScanResults(
             reportResults
                 .filter(
                     // Filter out the reports that are not applicable to the current axeScanResults
-                    // and the reports that are empty
                     (r) => isEmpty(r) === false && (r.reportSource === 'accessibility-scan' || r.reportSource === 'accessibility-agent'),
                 )
                 .map((r) => r.axeResults),
