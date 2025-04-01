@@ -40,7 +40,7 @@
         "typescript": "^5.5.3"
     },
     "dependencies": {
-        "@azure/cosmos": "^4.0.0",
+        "@azure/cosmos": "^4.3.0",
         "@azure/functions": "^4.6.0",
         "@azure/identity": "^4.5.0",
         "@azure/storage-blob": "^12.12.0",
