@@ -13197,12 +13197,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pidusage@npm:^3.0.2":
-  version: 3.0.2
-  resolution: "pidusage@npm:3.0.2"
+"pidusage@npm:^4.0.0":
+  version: 4.0.0
+  resolution: "pidusage@npm:4.0.0"
   dependencies:
     safe-buffer: ^5.2.1
-  checksum: 4939ce5a5efa1238986ea631ad22588104779c8a48e5c8949e0e38662cbaf80cef6d57c699c15f87b7ae129091401a3f140f82d1d3ff7809a9217620f1d6e5da
+  checksum: fd34e4a67016c1753c8a74128320cbade20aea9da6134c167559c997c929d30d29dc310bb9344aeb119c5c578049ea7e2f1aba2fda62107285af256d6a172c5e
   languageName: node
   linkType: hard
 
@@ -14608,7 +14608,7 @@ __metadata:
     lodash: ^4.17.21
     logger: "workspace:*"
     npm-run-all: ^4.1.5
-    pidusage: ^3.0.2
+    pidusage: ^4.0.0
     puppeteer: ^24.2.1
     puppeteer-extra: ^3.3.6
     puppeteer-extra-plugin: ^3.2.3
