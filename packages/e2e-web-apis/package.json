@@ -43,6 +43,6 @@
         "webpack-ignore-dynamic-require": "^1.0.0"
     },
     "dependencies": {
-        "@azure/functions": "^4.6.0"
+        "@azure/functions": "^4.7.0"
     }
 }
