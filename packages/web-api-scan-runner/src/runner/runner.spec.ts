@@ -379,7 +379,7 @@ function setupProcessScanResult(): void {
 
         const generatedReports = [{ id: 'id', format: 'html', content: 'content' }] as GeneratedReport[];
         reportGeneratorMock
-            .setup((o) => o.generateReports(axeScanResults, It.isAny()))
+            .setup((o) => o.generateReports({ reportSource: 'accessibility-scan', ...axeScanResults }, It.isAny()))
             .returns(() => generatedReports)
             .verifiable();
         reportWriterMock

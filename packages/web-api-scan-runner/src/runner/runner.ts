@@ -216,7 +216,7 @@ export class Runner {
                 scanRunDetails: isEmpty(pageScanResult.run?.scanRunDetails) ? null : pageScanResult.run.scanRunDetails,
             },
             scanResult: null,
-            reports: isEmpty(pageScanResult.reports) ? null : pageScanResult.reports,
+            reports: null,
         };
         const response = await this.onDemandPageScanRunResultProvider.tryUpdateScanRun(partialPageScanResult);
         if (!response.succeeded) {
@@ -233,24 +233,17 @@ export class Runner {
     private async generateScanReports(scanProcessorResult: ScanProcessorResult, pageScanResult: OnDemandPageScanResult): Promise<void> {
         this.logger.logInfo(`Generating reports from scan results.`);
 
-        // Will combine accessibility scan results with agents results.
-        const reports = this.reportGenerator.generateReports(scanProcessorResult.axeScanResults, {
-            results: scanProcessorResult.agentResults?.axeResults,
-        });
+        const reports = this.reportGenerator.generateReports(
+            { reportSource: 'accessibility-scan', ...scanProcessorResult.axeScanResults },
+            {
+                reportSource: 'accessibility-agent',
+                ...scanProcessorResult.agentResults,
+            },
+        );
 
         // Save reports for accessibility scan results
         const availableReports = reports.filter((r) => !isEmpty(r.content));
-        const accessibilityReportRefs = await this.reportWriter.writeBatch(availableReports);
-
-        // Keep the existing agents reports if agent results are not available
-        if (isEmpty(scanProcessorResult.agentResults?.reportRefs)) {
-            pageScanResult.reports = [
-                ...accessibilityReportRefs,
-                ...(pageScanResult.reports ?? []).filter((r) => r.source !== 'accessibility-scan'),
-            ];
-        } else {
-            pageScanResult.reports = [...accessibilityReportRefs, ...scanProcessorResult.agentResults.reportRefs];
-        }
+        pageScanResult.reports = await this.reportWriter.writeBatch(availableReports);
     }
 
     private setRunResult(

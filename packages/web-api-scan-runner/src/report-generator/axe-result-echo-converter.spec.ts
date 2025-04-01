@@ -3,21 +3,22 @@
 
 import 'reflect-metadata';
 
-import { AxeScanResults } from 'scanner-global-library';
+import { ReportResult } from 'scanner-global-library';
 import { AxeResultEchoConverter } from './axe-result-echo-converter';
 
 describe(AxeResultEchoConverter, () => {
-    let axeScanResults: AxeScanResults;
+    let axeScanResults: ReportResult;
     let axeResultEchoConverter: AxeResultEchoConverter;
 
     beforeEach(() => {
         axeResultEchoConverter = new AxeResultEchoConverter();
         axeScanResults = {
-            results: {
+            axeResults: {
                 url: 'url',
             },
             pageTitle: 'pageTitle',
-        } as unknown as AxeScanResults;
+            scannedUrl: undefined,
+        } as unknown as ReportResult;
     });
 
     it('has correct report type', () => {
@@ -25,7 +26,9 @@ describe(AxeResultEchoConverter, () => {
     });
 
     it('convert', () => {
+        const expectedReport = { results: axeScanResults.axeResults, ...axeScanResults };
+        delete expectedReport.axeResults;
         const report = axeResultEchoConverter.convert(axeScanResults);
-        expect(report).toEqual(JSON.stringify(axeScanResults));
+        expect(report).toEqual(JSON.stringify(expectedReport));
     });
 });

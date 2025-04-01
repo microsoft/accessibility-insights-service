@@ -2,10 +2,10 @@
 // Licensed under the MIT License.
 
 import { ReportFormat, ReportSource } from 'storage-documents';
-import { AxeScanResults } from 'scanner-global-library';
+import { ReportResult } from 'scanner-global-library';
 
 export interface AxeResultConverter {
     readonly targetReportFormat: ReportFormat;
     readonly targetReportSource: ReportSource[];
-    convert(axeScanResults: AxeScanResults): string;
+    convert(reportResult: ReportResult): string;
 }

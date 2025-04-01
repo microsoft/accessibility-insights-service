@@ -3,7 +3,7 @@
 
 import { GuidGenerator } from 'common';
 import { inject, injectable } from 'inversify';
-import { AxeScanResults } from 'scanner-global-library';
+import { ReportResult } from 'scanner-global-library';
 import { GeneratedReport } from 'service-library';
 import { isEmpty } from 'lodash';
 import { AxeResults } from 'axe-core';
@@ -20,55 +20,90 @@ export class ReportGenerator {
     /**
      * The first parameter is used as the base to merge the results of the other parameters.
      */
-    public generateReports(...axeScanResults: AxeScanResults[]): GeneratedReport[] {
-        const accessibilityReports = this.generateAccessibilityReports(axeScanResults[0]);
-
-        if (axeScanResults.length > 1) {
-            const accessibilityCombinedReport = this.generateAccessibilityCombinedReports(axeScanResults);
-            accessibilityReports.push(...accessibilityCombinedReport);
-        }
+    public generateReports(...reportResults: ReportResult[]): GeneratedReport[] {
+        const accessibilityReports = this.generateAccessibilityReports(reportResults);
+        accessibilityReports.push(...this.generateAgentReports(reportResults));
+        accessibilityReports.push(...this.generateAccessibilityCombinedReports(reportResults));
 
         return accessibilityReports;
     }
 
-    private generateAccessibilityReports(axeScanResults: AxeScanResults): GeneratedReport[] {
-        const source = 'accessibility-scan';
+    private generateAccessibilityReports(reportResults: ReportResult[]): GeneratedReport[] {
+        const reportSource = 'accessibility-scan';
+        const reportResult = reportResults.find((r) => r.reportSource === reportSource);
+        if (reportResult === undefined) {
+            return [];
+        }
 
         return (
             this.axeResultConverters
                 // Filter out the converters that are not applicable to the current axeScanResults
-                .filter((axeResultConverter) => axeResultConverter.targetReportSource.includes(source))
+                .filter((axeResultConverter) => axeResultConverter.targetReportSource.includes(reportSource))
                 .map<GeneratedReport>((axeResultConverter) => {
                     return {
-                        content: axeResultConverter.convert(axeScanResults),
+                        content: axeResultConverter.convert(reportResult),
                         id: this.guidGenerator.createGuid(),
                         format: axeResultConverter.targetReportFormat,
-                        source,
+                        source: reportSource,
                     };
                 })
         );
     }
 
-    private generateAccessibilityCombinedReports(axeScanResults: AxeScanResults[]): GeneratedReport[] {
-        const source = 'accessibility-combined';
-
-        const baseAxeScanResult = axeScanResults[0];
-        const mergedAxeResults = this.mergeAxeScanResults(axeScanResults.filter((r) => isEmpty(r) === false).map((r) => r.results));
-        baseAxeScanResult.results.violations = mergedAxeResults.violations;
-        baseAxeScanResult.results.passes = mergedAxeResults.passes;
-        baseAxeScanResult.results.inapplicable = mergedAxeResults.inapplicable;
-        baseAxeScanResult.results.incomplete = mergedAxeResults.incomplete;
+    private generateAgentReports(reportResults: ReportResult[]): GeneratedReport[] {
+        const reportSource = 'accessibility-agent';
+        const reportResult = reportResults.find((r) => r.reportSource === reportSource);
+        if (reportResult === undefined) {
+            return [];
+        }
 
         return (
             this.axeResultConverters
                 // Filter out the converters that are not applicable to the current axeScanResults
-                .filter((axeResultConverter) => axeResultConverter.targetReportSource.includes(source))
+                .filter((axeResultConverter) => axeResultConverter.targetReportSource.includes(reportSource))
+                .map<GeneratedReport>((axeResultConverter) => {
+                    return {
+                        content: axeResultConverter.convert(reportResult),
+                        id: this.guidGenerator.createGuid(),
+                        format: axeResultConverter.targetReportFormat,
+                        source: reportSource,
+                    };
+                })
+        );
+    }
+
+    private generateAccessibilityCombinedReports(reportResults: ReportResult[]): GeneratedReport[] {
+        const reportSource = 'accessibility-combined';
+
+        if (reportResults.length === 1) {
+            return [];
+        }
+
+        const baseAxeScanResult = reportResults[0];
+        const mergedAxeResults = this.mergeAxeScanResults(
+            reportResults
+                .filter(
+                    // Filter out the reports that are not applicable to the current axeScanResults
+                    // and the reports that are empty
+                    (r) => isEmpty(r) === false && (r.reportSource === 'accessibility-scan' || r.reportSource === 'accessibility-agent'),
+                )
+                .map((r) => r.axeResults),
+        );
+        baseAxeScanResult.axeResults.violations = mergedAxeResults.violations;
+        baseAxeScanResult.axeResults.passes = mergedAxeResults.passes;
+        baseAxeScanResult.axeResults.inapplicable = mergedAxeResults.inapplicable;
+        baseAxeScanResult.axeResults.incomplete = mergedAxeResults.incomplete;
+
+        return (
+            this.axeResultConverters
+                // Filter out the converters that are not applicable to the current axeScanResults
+                .filter((axeResultConverter) => axeResultConverter.targetReportSource.includes(reportSource))
                 .map<GeneratedReport>((axeResultConverter) => {
                     return {
                         content: axeResultConverter.convert(baseAxeScanResult),
                         id: this.guidGenerator.createGuid(),
                         format: axeResultConverter.targetReportFormat,
-                        source,
+                        source: reportSource,
                     };
                 })
         );

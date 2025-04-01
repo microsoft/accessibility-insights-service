@@ -9,7 +9,6 @@ import { Runner } from './runner/runner';
 import { setupWebApiScanRunnerContainer } from './setup-web-api-scan-runner-container';
 import { iocTypeNames } from './ioc-types';
 import { AxeResultConverter } from './report-generator/axe-result-converter';
-import { AgentResultConverter } from './agent/agent-result-converter';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -41,15 +40,5 @@ describe(setupWebApiScanRunnerContainer, () => {
         expect(axeResultConverterTypes).toContain('axe');
         expect(axeResultConverterTypes).toContain('page.png');
         expect(axeResultConverterTypes).toContain('page.mhtml');
-    });
-
-    it('container has all required agent report generators', () => {
-        container = setupWebApiScanRunnerContainer();
-
-        const agentResultConverters: AgentResultConverter[] = container.get(iocTypeNames.AgentResultConverters);
-        const agentResultConverterTypes = agentResultConverters.map((converter) => converter.targetReportFormat);
-        expect(agentResultConverterTypes).toContain('axe');
-        expect(agentResultConverterTypes).toContain('html');
-        expect(agentResultConverterTypes).toContain('sarif');
     });
 });

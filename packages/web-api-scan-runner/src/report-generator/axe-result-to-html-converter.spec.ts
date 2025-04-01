@@ -6,7 +6,7 @@ import 'reflect-metadata';
 import { Report, Reporter, ReporterFactory } from 'accessibility-insights-report';
 import * as MockDate from 'mockdate';
 import { IMock, Mock, Times } from 'typemoq';
-import { AxeScanResults } from 'scanner-global-library';
+import { ReportResult } from 'scanner-global-library';
 import { AxeResultToHtmlConverter } from './axe-result-to-html-converter';
 import { htmlReportStrings } from './html-report-strings';
 
@@ -14,7 +14,7 @@ describe('AxeResultToHtmlConverter', () => {
     let axeHtmlResultConverter: AxeResultToHtmlConverter;
     let reporterMock: IMock<Reporter>;
     let htmlReport: Report;
-    let axeScanResults: AxeScanResults;
+    let axeScanResults: ReportResult;
     let time: Date;
 
     const htmlReportString = 'html report';
@@ -25,11 +25,11 @@ describe('AxeResultToHtmlConverter', () => {
         const reporterFactory: ReporterFactory = () => reporterMock.object;
         axeHtmlResultConverter = new AxeResultToHtmlConverter(reporterFactory);
         axeScanResults = {
-            results: {
+            axeResults: {
                 url: scanUrl,
             },
             pageTitle: 'page title',
-        } as unknown as AxeScanResults;
+        } as unknown as ReportResult;
         htmlReport = {
             asHTML: () => htmlReportString,
         };
@@ -43,7 +43,7 @@ describe('AxeResultToHtmlConverter', () => {
 
     it('convert', () => {
         const reportParameters = {
-            results: axeScanResults.results,
+            results: axeScanResults.axeResults,
             description: `Automated report for accessibility scan of url ${scanUrl} completed at ${time.toUTCString()}.`,
             serviceName: htmlReportStrings.serviceName,
             scanContext: {

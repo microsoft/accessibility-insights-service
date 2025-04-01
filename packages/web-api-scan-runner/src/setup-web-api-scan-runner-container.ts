@@ -15,9 +15,6 @@ import { AxeResultToHtmlConverter } from './report-generator/axe-result-to-html-
 import { AxeResultEchoConverter } from './report-generator/axe-result-echo-converter';
 import { AxeResultScreenshotConverter } from './report-generator/axe-result-screenshot-converter';
 import { AxeResultSnapshotConverter } from './report-generator/axe-result-snapshot-converter';
-import { AxeResultConverter } from './agent/axe-result-converter';
-import { SarifResultConverter } from './agent/sarif-result-converter';
-import { HtmlResultConverter } from './agent/html-result-converter';
 
 export function setupWebApiScanRunnerContainer(): inversify.Container {
     const container = new inversify.Container({ autoBindInjectable: true, skipBaseClassChecks: true });
@@ -29,7 +26,6 @@ export function setupWebApiScanRunnerContainer(): inversify.Container {
     registerAzureServicesToContainer(container);
     setupScannerContainer(container);
     registerReportGeneratorToContainer(container);
-    registerAgentReportGeneratorToContainer(container);
 
     return container;
 }
@@ -43,15 +39,5 @@ function registerReportGeneratorToContainer(container: Container): void {
             container.get<AxeResultEchoConverter>(AxeResultEchoConverter),
             container.get<AxeResultScreenshotConverter>(AxeResultScreenshotConverter),
             container.get<AxeResultSnapshotConverter>(AxeResultSnapshotConverter),
-        ]);
-}
-
-function registerAgentReportGeneratorToContainer(container: Container): void {
-    container
-        .bind(iocTypeNames.AgentResultConverters)
-        .toConstantValue([
-            container.get<AxeResultConverter>(AxeResultConverter),
-            container.get<HtmlResultConverter>(HtmlResultConverter),
-            container.get<SarifResultConverter>(SarifResultConverter),
         ]);
 }

@@ -5,7 +5,7 @@ import { AxeReportParameters, ReporterFactory } from 'accessibility-insights-rep
 import { AxeResults } from 'axe-core';
 import { inject, injectable } from 'inversify';
 import { ReportFormat, ReportSource } from 'storage-documents';
-import { AxeScanResults } from 'scanner-global-library';
+import { ReportResult } from 'scanner-global-library';
 import { iocTypeNames } from '../ioc-types';
 import { AxeResultConverter } from './axe-result-converter';
 import { htmlReportStrings } from './html-report-strings';
@@ -14,19 +14,19 @@ import { htmlReportStrings } from './html-report-strings';
 export class AxeResultToHtmlConverter implements AxeResultConverter {
     public readonly targetReportFormat: ReportFormat = 'html';
 
-    public readonly targetReportSource: ReportSource[] = ['accessibility-scan', 'accessibility-combined'];
+    public readonly targetReportSource: ReportSource[] = ['accessibility-scan', 'accessibility-agent', 'accessibility-combined'];
 
     constructor(@inject(iocTypeNames.ReporterFactory) private readonly reporterFactoryFunc: ReporterFactory) {}
 
-    public convert(axeScanResults: AxeScanResults): string {
+    public convert(reportResult: ReportResult): string {
         const reporter = this.reporterFactoryFunc();
 
         const htmlReportParams: AxeReportParameters = {
-            results: axeScanResults.results,
-            description: this.createDescription(axeScanResults.results),
+            results: reportResult.axeResults,
+            description: this.createDescription(reportResult.axeResults),
             serviceName: htmlReportStrings.serviceName,
             scanContext: {
-                pageTitle: axeScanResults.pageTitle,
+                pageTitle: reportResult.pageTitle ?? '',
             },
         };
 
