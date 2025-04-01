@@ -32,7 +32,7 @@
         "@types/sha.js": "^2.4.4",
         "azure-functions-core-tools": "^4.x",
         "copy-webpack-plugin": "^11.0.0",
-        "fork-ts-checker-webpack-plugin": "^9.0.2",
+        "fork-ts-checker-webpack-plugin": "^9.0.3",
         "jest": "^29.7.0",
         "jest-junit": "^16.0.0",
         "node-loader": "^2.0.0",
