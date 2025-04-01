@@ -3780,13 +3780,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/jest@npm:^29.5.12":
-  version: 29.5.12
-  resolution: "@types/jest@npm:29.5.12"
+"@types/jest@npm:^29.5.14":
+  version: 29.5.14
+  resolution: "@types/jest@npm:29.5.14"
   dependencies:
     expect: ^29.0.0
     pretty-format: ^29.0.0
-  checksum: 19b1efdeed9d9a60a81edc8226cdeae5af7479e493eaed273e01243891c9651f7b8b4c08fc633a7d0d1d379b091c4179bbaa0807af62542325fd72f2dd17ce1c
+  checksum: 18dba4623f26661641d757c63da2db45e9524c9be96a29ef713c703a9a53792df9ecee9f7365a0858ddbd6440d98fe6b65ca67895ca5884b73cbc7ffc11f3838
   languageName: node
   linkType: hard
 
@@ -4576,7 +4576,7 @@ __metadata:
     "@rollup/plugin-node-resolve": ^15.3.0
     "@sindresorhus/fnv1a": ^2.0.1
     "@types/encoding-down": ^5.0.5
-    "@types/jest": ^29.5.12
+    "@types/jest": ^29.5.14
     "@types/leveldown": ^4.0.2
     "@types/levelup": ^5.1.1
     "@types/node": ^20.14.9
@@ -4643,7 +4643,7 @@ __metadata:
     "@opentelemetry/semantic-conventions": ^1.15.0
     "@sindresorhus/fnv1a": ^2.0.1
     "@types/escape-html": ^1.0.4
-    "@types/jest": ^29.5.12
+    "@types/jest": ^29.5.14
     "@types/lodash": ^4.17.6
     "@types/node": ^20.14.9
     "@types/normalize-path": ^3.0.0
@@ -5279,7 +5279,7 @@ __metadata:
   resolution: "axe-core-scanner@workspace:packages/axe-core-scanner"
   dependencies:
     "@axe-core/puppeteer": 4.10.1
-    "@types/jest": ^29.5.12
+    "@types/jest": ^29.5.14
     "@types/lodash": ^4.17.6
     "@types/node": ^20.14.9
     "@types/puppeteer": ^7.0.4
@@ -5311,7 +5311,7 @@ __metadata:
   resolution: "axe-result-converter@workspace:packages/axe-result-converter"
   dependencies:
     "@types/fingerprint-generator": 1.0.0
-    "@types/jest": ^29.5.12
+    "@types/jest": ^29.5.14
     "@types/lodash": ^4.17.6
     "@types/node": ^20.14.9
     accessibility-insights-report: 5.2.0
@@ -5387,7 +5387,7 @@ __metadata:
     "@azure/storage-blob": ^12.12.0
     "@azure/storage-queue": ^12.11.0
     "@types/got": ^9.6.11
-    "@types/jest": ^29.5.12
+    "@types/jest": ^29.5.14
     "@types/lodash": ^4.17.6
     async-mutex: ^0.5.0
     common: "workspace:*"
@@ -6484,7 +6484,7 @@ __metadata:
   dependencies:
     "@sindresorhus/fnv1a": ^2.0.1
     "@types/convict": ^6.1.6
-    "@types/jest": ^29.5.12
+    "@types/jest": ^29.5.14
     "@types/node": ^20.14.9
     "@types/normalize-path": ^3.0.0
     "@types/sha.js": ^2.4.4
@@ -7389,7 +7389,7 @@ __metadata:
   dependencies:
     "@azure/functions": ^4.6.0
     "@types/dotenv": ^8.2.0
-    "@types/jest": ^29.5.12
+    "@types/jest": ^29.5.14
     "@types/lodash": ^4.17.6
     "@types/node": ^20.14.9
     copy-webpack-plugin: ^11.0.0
@@ -8830,7 +8830,7 @@ __metadata:
     "@types/chai": ^4.3.4
     "@types/deep-equal-in-any-order": ^1.0.1
     "@types/dotenv": ^8.2.0
-    "@types/jest": ^29.5.12
+    "@types/jest": ^29.5.14
     "@types/lodash": ^4.17.6
     "@types/node": ^20.14.9
     azure-services: "workspace:*"
@@ -9465,7 +9465,7 @@ __metadata:
   dependencies:
     "@types/chai": ^4.3.4
     "@types/dotenv": ^8.2.0
-    "@types/jest": ^29.5.12
+    "@types/jest": ^29.5.14
     "@types/lodash": ^4.17.6
     "@types/node": ^20.14.9
     chai: ^4.3.7
@@ -11612,7 +11612,7 @@ __metadata:
     "@opentelemetry/sdk-metrics": ^1.28.0
     "@opentelemetry/semantic-conventions": ^1.15.0
     "@types/dotenv": ^8.2.0
-    "@types/jest": ^29.5.12
+    "@types/jest": ^29.5.14
     "@types/lodash": ^4.17.6
     "@types/node": ^20.14.9
     applicationinsights: ^2.3.1
@@ -12920,7 +12920,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "parallel-workers@workspace:packages/parallel-workers"
   dependencies:
-    "@types/jest": ^29.5.12
+    "@types/jest": ^29.5.14
     "@types/lodash": ^4.17.6
     "@types/node": ^20.14.9
     copy-webpack-plugin: ^11.0.0
@@ -13352,7 +13352,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "privacy-scan-core@workspace:packages/privacy-scan-core"
   dependencies:
-    "@types/jest": ^29.5.12
+    "@types/jest": ^29.5.14
     "@types/lodash": ^4.17.6
     "@types/node": ^20.14.9
     "@types/puppeteer": ^7.0.4
@@ -13382,7 +13382,7 @@ __metadata:
     "@azure/batch": ^10.2.0
     "@azure/ms-rest-nodeauth": ^3.1.1
     "@types/dotenv": ^8.2.0
-    "@types/jest": ^29.5.12
+    "@types/jest": ^29.5.14
     "@types/lodash": ^4.17.6
     "@types/node": ^20.14.9
     applicationinsights: ^2.3.1
@@ -13421,7 +13421,7 @@ __metadata:
   dependencies:
     "@azure/cosmos": ^4.0.0
     "@types/dotenv": ^8.2.0
-    "@types/jest": ^29.5.12
+    "@types/jest": ^29.5.14
     "@types/lodash": ^4.17.6
     "@types/node": ^20.14.9
     "@types/puppeteer": ^7.0.4
@@ -14107,7 +14107,7 @@ __metadata:
     "@azure/batch": ^10.2.0
     "@azure/ms-rest-nodeauth": ^3.1.1
     "@types/dotenv": ^8.2.0
-    "@types/jest": ^29.5.12
+    "@types/jest": ^29.5.14
     "@types/lodash": ^4.17.6
     "@types/node": ^20.14.9
     applicationinsights: ^2.3.1
@@ -14146,7 +14146,7 @@ __metadata:
   dependencies:
     "@azure/cosmos": ^4.0.0
     "@types/dotenv": ^8.2.0
-    "@types/jest": ^29.5.12
+    "@types/jest": ^29.5.14
     "@types/lodash": ^4.17.6
     "@types/node": ^20.14.9
     "@types/puppeteer": ^7.0.4
@@ -14593,7 +14593,7 @@ __metadata:
   resolution: "scanner-global-library@workspace:packages/scanner-global-library"
   dependencies:
     "@axe-core/puppeteer": 4.10.1
-    "@types/jest": ^29.5.12
+    "@types/jest": ^29.5.14
     "@types/lodash": ^4.17.6
     "@types/node": ^20.14.9
     "@types/pidusage": ^2.0.5
@@ -14738,7 +14738,7 @@ __metadata:
     "@azure/identity": ^4.5.0
     "@azure/storage-blob": ^12.12.0
     "@crawlee/puppeteer": ^3.12.2
-    "@types/jest": ^29.5.12
+    "@types/jest": ^29.5.14
     "@types/node": ^20.14.9
     "@types/paralleljs": ^0.0.24
     "@types/puppeteer": ^7.0.4
@@ -15235,7 +15235,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "storage-documents@workspace:packages/storage-documents"
   dependencies:
-    "@types/jest": ^29.5.12
+    "@types/jest": ^29.5.14
     "@types/node": ^20.14.9
     axe-result-converter: "workspace:*"
     common: "workspace:*"
@@ -16526,7 +16526,7 @@ __metadata:
   resolution: "web-api-client@workspace:packages/web-api-client"
   dependencies:
     "@types/got": ^9.6.11
-    "@types/jest": ^29.5.12
+    "@types/jest": ^29.5.14
     "@types/lodash": ^4.17.6
     "@types/node": ^20.14.9
     azure-services: "workspace:*"
@@ -16555,7 +16555,7 @@ __metadata:
     "@azure/batch": ^10.2.0
     "@azure/ms-rest-nodeauth": ^3.1.1
     "@types/dotenv": ^8.2.0
-    "@types/jest": ^29.5.12
+    "@types/jest": ^29.5.14
     "@types/lodash": ^4.17.6
     "@types/node": ^20.14.9
     applicationinsights: ^2.3.1
@@ -16592,7 +16592,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "web-api-scan-request-sender@workspace:packages/web-api-scan-request-sender"
   dependencies:
-    "@types/jest": ^29.5.12
+    "@types/jest": ^29.5.14
     applicationinsights: ^2.3.1
     azure-services: "workspace:*"
     common: "workspace:*"
@@ -16630,7 +16630,7 @@ __metadata:
     "@azure/cosmos": ^4.0.0
     "@playwright/test": ^1.50.1
     "@types/dotenv": ^8.2.0
-    "@types/jest": ^29.5.12
+    "@types/jest": ^29.5.14
     "@types/lodash": ^4.17.6
     "@types/node": ^20.14.9
     "@types/puppeteer": ^7.0.4
@@ -16688,7 +16688,7 @@ __metadata:
     "@azure/batch": ^10.2.0
     "@azure/ms-rest-nodeauth": ^3.1.1
     "@types/dotenv": ^8.2.0
-    "@types/jest": ^29.5.12
+    "@types/jest": ^29.5.14
     "@types/lodash": ^4.17.6
     "@types/node": ^20.14.9
     applicationinsights: ^2.3.1
@@ -16727,7 +16727,7 @@ __metadata:
     "@azure/cosmos": ^4.0.0
     "@types/dotenv": ^8.2.0
     "@types/got": ^9.6.11
-    "@types/jest": ^29.5.12
+    "@types/jest": ^29.5.14
     "@types/lodash": ^4.17.6
     "@types/node": ^20.14.9
     "@types/puppeteer": ^7.0.4
@@ -16770,7 +16770,7 @@ __metadata:
   dependencies:
     "@azure/functions": ^4.6.0
     "@types/dotenv": ^8.2.0
-    "@types/jest": ^29.5.12
+    "@types/jest": ^29.5.14
     "@types/lodash": ^4.17.6
     "@types/node": ^20.14.9
     "@types/sha.js": ^2.4.4
@@ -16808,7 +16808,7 @@ __metadata:
   dependencies:
     "@azure/functions": ^4.6.0
     "@types/dotenv": ^8.2.0
-    "@types/jest": ^29.5.12
+    "@types/jest": ^29.5.14
     "@types/lodash": ^4.17.6
     "@types/node": ^20.14.9
     "@types/sha.js": ^2.4.4

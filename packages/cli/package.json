@@ -29,7 +29,7 @@
     "standAlonePackage": "This is a stand-alone package. Do NOT add dependencies to any service packages.",
     "devDependencies": {
         "@types/escape-html": "^1.0.4",
-        "@types/jest": "^29.5.12",
+        "@types/jest": "^29.5.14",
         "@types/lodash": "^4.17.6",
         "@types/node": "^20.14.9",
         "@types/normalize-path": "^3.0.0",
