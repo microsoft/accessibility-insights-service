@@ -14,6 +14,7 @@ export class AxeResultEchoConverter implements AxeResultConverter {
 
     public convert(reportResult: ReportResult): string {
         const report = {
+            // We must keep the original JSON report format for backward compatibility.
             results: reportResult.axeResults,
             scannedUrl: reportResult.scannedUrl,
             pageTitle: reportResult.pageTitle,
