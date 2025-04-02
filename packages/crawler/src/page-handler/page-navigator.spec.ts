@@ -74,7 +74,7 @@ describe(PageNavigator, () => {
                 httpResponse: pageOperationResult.response,
             } as NavigationResponse;
 
-            const actualResponse = await pageNavigator.navigate(url, puppeteerPageMock.object);
+            const actualResponse = await pageNavigator.navigate(url, puppeteerPageMock.object, 123);
 
             expect(actualResponse).toEqual(expectedResponse);
         });
@@ -99,7 +99,7 @@ describe(PageNavigator, () => {
                 browserError: pageOperationResult.browserError,
             } as NavigationResponse;
 
-            const actualResponse = await pageNavigator.navigate(url, puppeteerPageMock.object);
+            const actualResponse = await pageNavigator.navigate(url, puppeteerPageMock.object, 123);
 
             expect(actualResponse).toEqual(expectedResponse);
         });
@@ -130,7 +130,7 @@ describe(PageNavigator, () => {
                 browserError,
             } as NavigationResponse;
 
-            const actualResponse = await pageNavigator.navigate(url, puppeteerPageMock.object);
+            const actualResponse = await pageNavigator.navigate(url, puppeteerPageMock.object, 123);
 
             expect(actualResponse).toEqual(expectedResponse);
         });
