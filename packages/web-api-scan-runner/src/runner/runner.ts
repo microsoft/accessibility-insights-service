@@ -3,7 +3,7 @@
 
 import { inject, injectable } from 'inversify';
 import { GlobalLogger } from 'logger';
-import { AxeScanResults } from 'scanner-global-library';
+import { AxeScanResults, ReportResult } from 'scanner-global-library';
 import {
     OnDemandPageScanRunResultProvider,
     WebsiteScanDataProvider,
@@ -233,13 +233,13 @@ export class Runner {
     private async generateScanReports(scanProcessorResult: ScanProcessorResult, pageScanResult: OnDemandPageScanResult): Promise<void> {
         this.logger.logInfo(`Generating reports from scan results.`);
 
-        const reports = this.reportGenerator.generateReports(
-            { reportSource: 'accessibility-scan', ...scanProcessorResult.axeScanResults },
-            {
-                reportSource: 'accessibility-agent',
-                ...scanProcessorResult.agentResults,
-            },
-        );
+        // Generate reports for accessibility scan results
+        const reportResults: ReportResult[] = [{ reportSource: 'accessibility-scan', ...scanProcessorResult.axeScanResults }];
+        // Generate reports for agent scan results
+        if (scanProcessorResult.agentResults) {
+            reportResults.push({ reportSource: 'accessibility-agent', ...scanProcessorResult.agentResults });
+        }
+        const reports = this.reportGenerator.generateReports(...reportResults);
 
         // Save reports for accessibility scan results
         const availableReports = reports.filter((r) => !isEmpty(r.content));
