@@ -9,6 +9,8 @@ import { AxeScanResults } from 'scanner-global-library';
 import { QueuedRequest } from '../runner/request-selector';
 import { TargetReportProcessor } from './report-processor';
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 @injectable()
 export class AccessibilityReportProcessor implements TargetReportProcessor {
     constructor(
@@ -46,6 +48,11 @@ export class AccessibilityReportProcessor implements TargetReportProcessor {
             );
         }
 
-        return reportContent.content;
+        // The blob content uses an older format of AxeScanResults type that is incompatible with the new format.
+        // The axeResults.results property needs to be deleted and replaced with the axeResults.axeResults counterpart.
+        const axeScanResults: any = reportContent.content;
+        delete Object.assign(axeScanResults, { ['axeResults']: axeScanResults.results }).results;
+
+        return axeScanResults;
     }
 }

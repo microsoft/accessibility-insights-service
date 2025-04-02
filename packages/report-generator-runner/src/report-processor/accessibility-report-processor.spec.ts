@@ -11,12 +11,15 @@ import { AxeScanResults } from 'scanner-global-library';
 import { QueuedRequest } from '../runner/request-selector';
 import { AccessibilityReportProcessor } from './accessibility-report-processor';
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 let combinedScanResultProcessorMock: IMock<CombinedScanResultProcessor>;
 let pageScanRunReportProviderMock: IMock<PageScanRunReportProvider>;
 let loggerMock: IMock<GlobalLogger>;
 let accessibilityReportProcessor: AccessibilityReportProcessor;
 let pageScanResult: OnDemandPageScanResult;
 let queuedRequest: QueuedRequest;
+let axeScanResultsBlob: AxeScanResults;
 let axeScanResults: AxeScanResults;
 let axeReport: OnDemandPageScanReport;
 let reportContent: ReportContent;
@@ -43,12 +46,18 @@ describe(AccessibilityReportProcessor, () => {
             },
         } as QueuedRequest;
 
+        axeScanResultsBlob = {
+            scannedUrl: 'scannedUrl',
+            results: { obj: 'results' } as any,
+        } as AxeScanResults;
+
         axeScanResults = {
             scannedUrl: 'scannedUrl',
+            axeResults: (axeScanResultsBlob as any).results,
         } as AxeScanResults;
 
         reportContent = {
-            content: axeScanResults,
+            content: axeScanResultsBlob,
             errorCode: undefined,
         } as ReportContent;
 
