@@ -85,11 +85,6 @@ export class ScannerDispatcher {
     }
 
     private async dispatchAgentScan(runnerScanMetadata: RunnerScanMetadata, pageScanResult: OnDemandPageScanResult): Promise<AgentResults> {
-        // Preventing the execution of a scanner on retry that was initiated due to the failure of another scanner.
-        // if (conditionsToDispatchScanner.includes(pageScanResult.run.scanRunDetails?
-        // .find((s) => s.name === 'accessibility-agent')?.state)) {
-
-        // TODO Temporary execute the agent scanner on every run until the retry logic is implemented.
         if (pageScanResult.run.scanRunDetails?.find((s) => s.name === 'accessibility-agent') !== undefined) {
             // Scan only for the original client request and disregard internal crawler requests. For
             // supporting crawler requests, ensure that the relevant request portion is duplicated by
