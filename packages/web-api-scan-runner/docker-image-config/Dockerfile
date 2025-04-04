@@ -24,4 +24,8 @@ RUN npm install
 RUN npx patch-package
 RUN npx playwright install msedge
 
+# Install a11y agent dependencies
+RUN powershell -Command \
+    if (Test-Path -Path ".\a11y_agent") { Write-Host "Install a11y agent dependencies" ; .\a11y_agent\docker-install.ps1 ; }
+
 CMD ["powershell", "./web-api-scan-runner.ps1"]
