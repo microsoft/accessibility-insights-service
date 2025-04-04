@@ -236,7 +236,7 @@ export class Runner {
         // Generate reports for accessibility scan results
         const reportResults: ReportResult[] = [{ reportSource: 'accessibility-scan', ...scanProcessorResult.axeScanResults }];
         // Generate reports for agent scan results
-        if (scanProcessorResult.agentResults) {
+        if (!isEmpty(scanProcessorResult.agentResults?.axeResults)) {
             reportResults.push({ reportSource: 'accessibility-agent', ...scanProcessorResult.agentResults });
         }
         const reports = this.reportGenerator.generateReports(...reportResults);
