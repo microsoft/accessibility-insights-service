@@ -3916,10 +3916,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/normalize-path@npm:^3.0.0":
-  version: 3.0.0
-  resolution: "@types/normalize-path@npm:3.0.0"
-  checksum: 19f49b1cef57e4ce58a5aafa65b75bbea900d1fc0509c412b67d0e9d4a941e1e6fe6a52c29466cea920a0eec9766b2a188279eeec155a565eaba2c8ddd6ec9db
+"@types/normalize-path@npm:^3.0.2":
+  version: 3.0.2
+  resolution: "@types/normalize-path@npm:3.0.2"
+  checksum: 0fafa7d0c19eca1501cc4f9ce8a8c6ca7739d0fcd58f5851c56ad2babafc07c6113d593b4d8cc045678e0828af134f2339901f8dfe200801ee7b2d3e1496c316
   languageName: node
   linkType: hard
 
@@ -4580,7 +4580,7 @@ __metadata:
     "@types/leveldown": ^4.0.2
     "@types/levelup": ^5.1.1
     "@types/node": ^20.14.9
-    "@types/normalize-path": ^3.0.0
+    "@types/normalize-path": ^3.0.2
     "@types/puppeteer": ^7.0.4
     accessibility-insights-report: 5.2.0
     axe-core: 4.10.2
@@ -4646,7 +4646,7 @@ __metadata:
     "@types/jest": ^29.5.12
     "@types/lodash": ^4.17.6
     "@types/node": ^20.14.9
-    "@types/normalize-path": ^3.0.0
+    "@types/normalize-path": ^3.0.2
     "@types/puppeteer": ^7.0.4
     "@types/table": ^6.3.2
     accessibility-insights-crawler: "workspace:*"
@@ -6486,7 +6486,7 @@ __metadata:
     "@types/convict": ^6.1.6
     "@types/jest": ^29.5.12
     "@types/node": ^20.14.9
-    "@types/normalize-path": ^3.0.0
+    "@types/normalize-path": ^3.0.2
     "@types/sha.js": ^2.4.4
     convict: ^6.2.4
     exponential-backoff: ^3.1.0

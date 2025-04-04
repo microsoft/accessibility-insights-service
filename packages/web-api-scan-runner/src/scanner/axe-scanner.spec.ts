@@ -119,7 +119,7 @@ describe(AxeScanner, () => {
     function setupPageScanCall(axeResults: AxeResults): void {
         axePuppeteerScannerMock
             .setup(async (p) => p.scan(pageMock.object))
-            .returns(async () => Promise.resolve({ results: axeResults, pageResponseCode: 101 }))
+            .returns(async () => Promise.resolve({ axeResults, pageResponseCode: 101 }))
             .verifiable(Times.once());
     }
 

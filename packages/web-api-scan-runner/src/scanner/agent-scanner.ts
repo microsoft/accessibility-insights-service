@@ -6,12 +6,9 @@ import { promisify } from 'util';
 import fs from 'fs';
 import { inject, injectable } from 'inversify';
 import { GlobalLogger } from 'logger';
-import { OnDemandPageScanReport, OnDemandPageScanRunState } from 'storage-documents';
+import { OnDemandPageScanRunState } from 'storage-documents';
 import { System } from 'common';
 import { AxeResults } from 'axe-core';
-import { isEmpty } from 'lodash';
-import { ReportWriter } from 'service-library';
-import { AgentReportGenerator } from '../agent/agent-report-generator';
 
 /* eslint-disable security/detect-child-process */
 /* eslint-disable security/detect-non-literal-fs-filename */
@@ -21,7 +18,6 @@ export interface AgentResults {
     scannedUrl?: string;
     error?: string;
     axeResults?: AxeResults;
-    reportRefs?: OnDemandPageScanReport[];
 }
 
 @injectable()
@@ -36,11 +32,7 @@ export class AgentScanner {
 
     private readonly agentExeCommand;
 
-    constructor(
-        @inject(AgentReportGenerator) private readonly agentReportGenerator: AgentReportGenerator,
-        @inject(ReportWriter) protected readonly reportWriter: ReportWriter,
-        @inject(GlobalLogger) private readonly logger: GlobalLogger,
-    ) {
+    constructor(@inject(GlobalLogger) private readonly logger: GlobalLogger) {
         this.agentFolder = `${__dirname}/a11y_agent`;
         if (System.isDebugEnabled() === true) {
             this.agentFolder = `${__dirname}/../../../a11y_agent`;
@@ -66,18 +58,7 @@ export class AgentScanner {
                 return { ...response, scannedUrl: url };
             }
 
-            const reportRefs = await this.generateScanReports(response);
-            if (reportRefs.length === 0) {
-                this.logger.logError('No reports were generated from accessibility agent scan.', { scannedUrl: url });
-
-                return {
-                    result: 'failed',
-                    scannedUrl: url,
-                    error: 'No reports were generated from accessibility agent scan.',
-                };
-            }
-
-            return { ...response, scannedUrl: url, reportRefs };
+            return { ...response, scannedUrl: url };
         } catch (error) {
             this.logger.logError('Error while running accessibility agent scan.', { error: System.serializeError(error) });
 
@@ -89,14 +70,6 @@ export class AgentScanner {
         } finally {
             this.logger.logInfo('The accessibility agent scan is complete.');
         }
-    }
-
-    private async generateScanReports(agentResults: AgentResults): Promise<OnDemandPageScanReport[]> {
-        this.logger.logInfo(`Generating reports from accessibility agent scan results.`);
-        const reports = this.agentReportGenerator.generateReports(agentResults);
-        const availableReports = reports.filter((r) => !isEmpty(r.content));
-
-        return this.reportWriter.writeBatch(availableReports);
     }
 
     private async processAxeResults(): Promise<AgentResults> {

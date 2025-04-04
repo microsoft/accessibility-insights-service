@@ -3,7 +3,7 @@
 
 import { inject, injectable } from 'inversify';
 import { GlobalLogger } from 'logger';
-import { AxeScanResults } from 'scanner-global-library';
+import { AxeScanResults, ReportResult } from 'scanner-global-library';
 import {
     OnDemandPageScanRunResultProvider,
     WebsiteScanDataProvider,
@@ -216,7 +216,7 @@ export class Runner {
                 scanRunDetails: isEmpty(pageScanResult.run?.scanRunDetails) ? null : pageScanResult.run.scanRunDetails,
             },
             scanResult: null,
-            reports: isEmpty(pageScanResult.reports) ? null : pageScanResult.reports,
+            reports: null,
         };
         const response = await this.onDemandPageScanRunResultProvider.tryUpdateScanRun(partialPageScanResult);
         if (!response.succeeded) {
@@ -233,24 +233,17 @@ export class Runner {
     private async generateScanReports(scanProcessorResult: ScanProcessorResult, pageScanResult: OnDemandPageScanResult): Promise<void> {
         this.logger.logInfo(`Generating reports from scan results.`);
 
-        // Will combine accessibility scan results with agents results.
-        const reports = this.reportGenerator.generateReports(scanProcessorResult.axeScanResults, {
-            results: scanProcessorResult.agentResults?.axeResults,
-        });
+        // Generate reports for accessibility scan results
+        const reportResults: ReportResult[] = [{ reportSource: 'accessibility-scan', ...scanProcessorResult.axeScanResults }];
+        // Generate reports for agent scan results
+        if (!isEmpty(scanProcessorResult.agentResults?.axeResults)) {
+            reportResults.push({ reportSource: 'accessibility-agent', ...scanProcessorResult.agentResults });
+        }
+        const reports = this.reportGenerator.generateReports(...reportResults);
 
         // Save reports for accessibility scan results
         const availableReports = reports.filter((r) => !isEmpty(r.content));
-        const accessibilityReportRefs = await this.reportWriter.writeBatch(availableReports);
-
-        // Keep the existing agents reports if agent results are not available
-        if (isEmpty(scanProcessorResult.agentResults?.reportRefs)) {
-            pageScanResult.reports = [
-                ...accessibilityReportRefs,
-                ...(pageScanResult.reports ?? []).filter((r) => r.source !== 'accessibility-scan'),
-            ];
-        } else {
-            pageScanResult.reports = [...accessibilityReportRefs, ...scanProcessorResult.agentResults.reportRefs];
-        }
+        pageScanResult.reports = await this.reportWriter.writeBatch(availableReports);
     }
 
     private setRunResult(
@@ -279,10 +272,10 @@ export class Runner {
     }
 
     private evaluateAxeScanResults(axeResults: AxeScanResults): OnDemandScanResult {
-        if (axeResults?.results?.violations !== undefined && axeResults.results.violations.length > 0) {
+        if (axeResults?.axeResults?.violations !== undefined && axeResults.axeResults.violations.length > 0) {
             return {
                 state: 'fail',
-                issueCount: axeResults.results.violations.reduce((a, b) => a + b.nodes.length, 0),
+                issueCount: axeResults.axeResults.violations.reduce((a, b) => a + b.nodes.length, 0),
             };
         } else {
             return {

@@ -215,7 +215,7 @@ describe(Runner, () => {
     );
 
     it('handle scan result violations', async () => {
-        axeScanResults.results = {
+        axeScanResults.axeResults = {
             violations: [
                 {
                     nodes: [{}],
@@ -366,10 +366,10 @@ function setupProcessScanResult(): void {
         pageScanResult.reports = reports;
         pageScanResult.scannedUrl = axeScanResults.scannedUrl;
 
-        if (axeScanResults.results) {
+        if (axeScanResults.axeResults) {
             pageScanResult.scanResult = {
                 state: 'fail',
-                issueCount: axeScanResults.results.violations.reduce((a, b) => a + b.nodes.length, 0),
+                issueCount: axeScanResults.axeResults.violations.reduce((a, b) => a + b.nodes.length, 0),
             };
         } else {
             pageScanResult.scanResult = {
@@ -379,7 +379,7 @@ function setupProcessScanResult(): void {
 
         const generatedReports = [{ id: 'id', format: 'html', content: 'content' }] as GeneratedReport[];
         reportGeneratorMock
-            .setup((o) => o.generateReports(axeScanResults, It.isAny()))
+            .setup((o) => o.generateReports({ reportSource: 'accessibility-scan', ...axeScanResults }, It.isAny()))
             .returns(() => generatedReports)
             .verifiable();
         reportWriterMock
