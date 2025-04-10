@@ -38,10 +38,27 @@ export abstract class BaseAppInsightsLoggerClient implements LoggerClient {
     public log(message: string, logLevel: LogLevel, properties?: LoggerProperties): void {
         const severity = this.getAppInsightsSeverityLevel(logLevel);
 
-        this.telemetryClient.trackTrace({
-            message: this.setMessageSource(message),
-            severity: severity,
-            properties: merge(this.getCommonProperties(), this.expandProperties(properties)),
+        // Workaround for the async nature of the resource attribute collection
+        // in the application insights telemetry client
+        // The telemetry client does not wait for the async attributes to be collected
+        // before sending the telemetry data, which can lead to missing attributes
+        // in the telemetry data. This workaround ensures that the telemetry data is
+        // sent only after the async attributes have been collected.
+        // This is a temporary solution until the application insights telemetry client
+        // is updated to handle async attributes correctly.
+        // Appears as the following trace error: Accessing resource attributes before async attributes settled
+        (async () => {
+            const resource = (this.telemetryClient as any)._logApi?._logger?._sharedState?.resource;
+            if (resource) {
+                await resource.waitForAsyncAttributes();
+            }
+            this.telemetryClient.trackTrace({
+                message: this.setMessageSource(message),
+                severity: severity,
+                properties: merge(this.getCommonProperties(), this.expandProperties(properties)),
+            });
+        })().catch((error) => {
+            console.error('Error waiting for logger async attributes:', error);
         });
     }
 
