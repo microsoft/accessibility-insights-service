@@ -9,4 +9,5 @@ export const secretNames = {
     azureAuthClientName: 'azureAuthClientName',
     azureAuthClientPassword: 'azureAuthClientPassword',
     webScannerBypassKey: 'webScannerBypassKey',
+    appInsightsConnectionString: 'appInsightsConnectionString',
 };

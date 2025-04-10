@@ -36,7 +36,7 @@ export class BatchTaskConfigGenerator {
     // The TASK_ARGUMENTS environment variable is used by batch processor to access task run arguments
     private readonly taskArgsValueName = 'TASK_ARGUMENTS';
 
-    private readonly appInsightKeyValueName = 'APPINSIGHTS_INSTRUMENTATIONKEY';
+    private readonly appInsightsConnectionString = 'APPLICATIONINSIGHTS_CONNECTION_STRING';
 
     // The --rm option removes the container after the task finishes
     // The --cpus option limits container to use number of CPUs on host VM
@@ -128,8 +128,8 @@ export class BatchTaskConfigGenerator {
     private getHostEnvironmentSettings(): BatchServiceModels.EnvironmentSetting[] {
         return [
             {
-                name: this.appInsightKeyValueName,
-                value: this.environmentSettings.getValue(this.appInsightKeyValueName),
+                name: this.appInsightsConnectionString,
+                value: this.environmentSettings.getValue(this.appInsightsConnectionString),
             },
         ];
     }

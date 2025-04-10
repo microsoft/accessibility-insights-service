@@ -165,6 +165,12 @@ function enableCosmosAccess() {
         --role-definition-id "${RBACRoleId}" 1>/dev/null
 }
 
+function enableApplicationInsightsAccess() {
+    role="Monitoring Metrics Publisher"
+    scope="--scope /subscriptions/${subscription}/resourceGroups/${resourceGroupName}/providers/microsoft.insights/components/${appInsightsName}"
+    . "${0%/*}/create-role-assignment.sh"
+}
+
 function assignUserIdentity() {
     local functionAppName=$1
 
@@ -191,12 +197,14 @@ function enableManagedIdentity() {
     . "${0%/*}/key-vault-enable-msi.sh"
     enableStorageAccess
     enableCosmosAccess
+    enableApplicationInsightsAccess
 
     echo "Granting access to ${webWorkersFuncAppName} function service principal..."
     getFunctionAppPrincipalId "${webWorkersFuncAppName}"
     . "${0%/*}/key-vault-enable-msi.sh"
     enableStorageAccess
     enableCosmosAccess
+    enableApplicationInsightsAccess
 
     echo "Granting access to ${e2eWebApisFuncAppName} function service principal..."
     getFunctionAppPrincipalId "${e2eWebApisFuncAppName}"

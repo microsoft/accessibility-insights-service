@@ -124,8 +124,12 @@
                             "value": "[parameters('webApiBaseUrl')]"
                         },
                         {
-                            "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
-                            "value": "[reference(concat('microsoft.insights/components/', parameters('appInsightsName')), '2015-05-01').InstrumentationKey]"
+                            "name": "APPLICATIONINSIGHTS_CONNECTION_STRING",
+                            "value": "[reference(concat('microsoft.insights/components/', parameters('appInsightsName')), '2015-05-01').ConnectionString]"
+                        },
+                        {
+                            "name": "APPLICATIONINSIGHTS_AUTHENTICATION_STRING",
+                            "value": "Authorization=AAD"
                         },
                         {
                             "name": "AI_KEY_VAULT_URL",

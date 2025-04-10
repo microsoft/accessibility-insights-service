@@ -68,8 +68,8 @@ function enableCosmosRole() {
 }
 
 function enableStorageAccess() {
-    scope="--scope /subscriptions/${subscription}/resourceGroups/${resourceGroupName}/providers/Microsoft.Storage/storageAccounts/${storageAccountName}"
     role="Storage Blob Data Contributor"
+    scope="--scope /subscriptions/${subscription}/resourceGroups/${resourceGroupName}/providers/Microsoft.Storage/storageAccounts/${storageAccountName}"
     . "${0%/*}/create-role-assignment.sh"
 
     role="Storage Queue Data Contributor"
@@ -86,6 +86,12 @@ function enableContainerRegistryAccess() {
     . "${0%/*}/create-role-assignment.sh"
 }
 
+function enableApplicationInsightsAccess() {
+    role="Monitoring Metrics Publisher"
+    scope="--scope /subscriptions/${subscription}/resourceGroups/${resourceGroupName}/providers/microsoft.insights/components/${appInsightsName}"
+    . "${0%/*}/create-role-assignment.sh"
+}
+
 function enableAccess() {
     local enableAccessProcesses=(
         "enableContainerRegistryAccess"
@@ -93,7 +99,8 @@ function enableAccess() {
         "enableStorageAccess"
         "enableCosmosAccess"
         "enableBatchAccount"
-        "enableCosmosRole")
+        "enableCosmosRole"
+        "enableApplicationInsightsAccess")
     runCommandsWithoutSecretsInParallel enableAccessProcesses
 }
 

@@ -28,8 +28,12 @@
         },
         "commonEnvironmentSettings": [
             {
-                "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
-                "value": "%APP_INSIGHTS_TOKEN%"
+                "name": "APPLICATIONINSIGHTS_CONNECTION_STRING",
+                "value": "%APP_INSIGHTS_CONNECTION_STRING%"
+            },
+            {
+                "name": "APPLICATIONINSIGHTS_AUTHENTICATION_STRING",
+                "value": "%APP_INSIGHTS_AUTH_STRING%"
             },
             {
                 "name": "AI_STORAGE_NOTIFICATION_QUEUE",

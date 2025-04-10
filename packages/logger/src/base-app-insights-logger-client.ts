@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { Contracts, TelemetryClient } from 'applicationinsights';
+import { KnownSeverityLevel, TelemetryClient } from 'applicationinsights';
 import { injectable } from 'inversify';
 import { merge } from 'lodash';
 import { LogLevel } from './logger';
@@ -63,13 +63,7 @@ export abstract class BaseAppInsightsLoggerClient implements LoggerClient {
     }
 
     public async flush(): Promise<void> {
-        return new Promise((resolve) => {
-            this.telemetryClient.flush({
-                callback: () => {
-                    resolve();
-                },
-            });
-        });
+        await this.telemetryClient.flush();
     }
 
     public setCommonProperties(properties: LoggerProperties): void {
@@ -91,19 +85,19 @@ export abstract class BaseAppInsightsLoggerClient implements LoggerClient {
         return source !== undefined ? `[${source}] ${message}` : message;
     }
 
-    private getAppInsightsSeverityLevel(logLevel: LogLevel): Contracts.SeverityLevel {
+    private getAppInsightsSeverityLevel(logLevel: LogLevel): KnownSeverityLevel {
         switch (logLevel) {
             case LogLevel.Info:
-                return Contracts.SeverityLevel.Information;
+                return KnownSeverityLevel.Information;
 
             case LogLevel.Error:
-                return Contracts.SeverityLevel.Error;
+                return KnownSeverityLevel.Error;
 
             case LogLevel.Verbose:
-                return Contracts.SeverityLevel.Verbose;
+                return KnownSeverityLevel.Verbose;
 
             case LogLevel.Warn:
-                return Contracts.SeverityLevel.Warning;
+                return KnownSeverityLevel.Warning;
 
             default:
                 throw new Error(`Unknown log level '${logLevel}'`);
