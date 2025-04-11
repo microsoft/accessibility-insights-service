@@ -7395,7 +7395,7 @@ __metadata:
     fork-ts-checker-webpack-plugin: ^9.0.2
     jest: ^29.7.0
     jest-junit: ^16.0.0
-    node-loader: ^2.0.0
+    node-loader: ^2.1.0
     npm-run-all: ^4.1.5
     rimraf: ^6.0.1
     ts-jest: ^29.1.5
@@ -11507,14 +11507,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"loader-utils@npm:^2.0.0":
-  version: 2.0.0
-  resolution: "loader-utils@npm:2.0.0"
+"loader-utils@npm:^2.0.3":
+  version: 2.0.4
+  resolution: "loader-utils@npm:2.0.4"
   dependencies:
     big.js: ^5.2.2
     emojis-list: ^3.0.0
     json5: ^2.1.2
-  checksum: 6856423131b50b6f5f259da36f498cfd7fc3c3f8bb17777cf87fdd9159e797d4ba4288d9a96415fd8da62c2906960e88f74711dee72d03a9003bddcd0d364a51
+  checksum: a5281f5fff1eaa310ad5e1164095689443630f3411e927f95031ab4fb83b4a98f388185bb1fe949e8ab8d4247004336a625e9255c22122b815bb9a4c5d8fc3b7
   languageName: node
   linkType: hard
 
@@ -12385,14 +12385,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"node-loader@npm:^2.0.0":
-  version: 2.0.0
-  resolution: "node-loader@npm:2.0.0"
+"node-loader@npm:^2.1.0":
+  version: 2.1.0
+  resolution: "node-loader@npm:2.1.0"
   dependencies:
-    loader-utils: ^2.0.0
+    loader-utils: ^2.0.3
   peerDependencies:
     webpack: ^5.0.0
-  checksum: 9252a92b226c0e6fdd29fef92d9853d6c389a4c65119a32306dc12cee7886f2ab4dde333dda5e37df92283c34bd0267e98c384be6d548dbe69676e3343f549ea
+  checksum: c86312b510f49c001df1908437f3327314d29c7282c2a87cfb7067d6e35f255a0c67b5852a19ced9861c67fa109bab129ff3fe42d8e4d5cdbad39b6c35f09023
   languageName: node
   linkType: hard
 
@@ -13416,7 +13416,7 @@ __metadata:
     logger: "workspace:*"
     mockdate: ^3.0.5
     moment: ^2.30.1
-    node-loader: ^2.0.0
+    node-loader: ^2.1.0
     npm-run-all: ^4.1.5
     reflect-metadata: ^0.2.2
     rimraf: ^6.0.1
@@ -13457,7 +13457,7 @@ __metadata:
     logger: "workspace:*"
     mockdate: ^3.0.5
     moment: ^2.30.1
-    node-loader: ^2.0.0
+    node-loader: ^2.1.0
     npm-force-resolutions: ^0.0.10
     npm-run-all: ^4.1.5
     p-limit: ^3.1.0
@@ -14141,7 +14141,7 @@ __metadata:
     logger: "workspace:*"
     mockdate: ^3.0.5
     moment: ^2.30.1
-    node-loader: ^2.0.0
+    node-loader: ^2.1.0
     npm-run-all: ^4.1.5
     reflect-metadata: ^0.2.2
     rimraf: ^6.0.1
@@ -14182,7 +14182,7 @@ __metadata:
     logger: "workspace:*"
     mockdate: ^3.0.5
     moment: ^2.30.1
-    node-loader: ^2.0.0
+    node-loader: ^2.1.0
     npm-force-resolutions: ^0.0.10
     npm-run-all: ^4.1.5
     p-limit: ^3.1.0
@@ -16599,7 +16599,7 @@ __metadata:
     logger: "workspace:*"
     mockdate: ^3.0.5
     moment: ^2.30.1
-    node-loader: ^2.0.0
+    node-loader: ^2.1.0
     npm-run-all: ^4.1.5
     reflect-metadata: ^0.2.2
     rimraf: ^6.0.1
@@ -16633,7 +16633,7 @@ __metadata:
     logger: "workspace:*"
     mockdate: ^3.0.5
     moment: ^2.30.1
-    node-loader: ^2.0.0
+    node-loader: ^2.1.0
     npm-run-all: ^4.1.5
     reflect-metadata: ^0.2.2
     rimraf: ^6.0.1
@@ -16682,7 +16682,7 @@ __metadata:
     logger: "workspace:*"
     mockdate: ^3.0.5
     moment: ^2.30.1
-    node-loader: ^2.0.0
+    node-loader: ^2.1.0
     npm-force-resolutions: ^0.0.10
     npm-run-all: ^4.1.5
     p-limit: ^3.1.0
@@ -16731,7 +16731,7 @@ __metadata:
     lodash: ^4.17.21
     logger: "workspace:*"
     moment: ^2.30.1
-    node-loader: ^2.0.0
+    node-loader: ^2.1.0
     npm-run-all: ^4.1.5
     reflect-metadata: ^0.2.2
     rimraf: ^6.0.1
@@ -16774,7 +16774,7 @@ __metadata:
     lodash: ^4.17.21
     logger: "workspace:*"
     mockdate: ^3.0.5
-    node-loader: ^2.0.0
+    node-loader: ^2.1.0
     npm-run-all: ^4.1.5
     reflect-metadata: ^0.2.2
     rimraf: ^6.0.1
@@ -16814,7 +16814,7 @@ __metadata:
     lodash: ^4.17.21
     logger: "workspace:*"
     moment: ^2.30.1
-    node-loader: ^2.0.0
+    node-loader: ^2.1.0
     npm-run-all: ^4.1.5
     reflect-metadata: ^0.2.2
     rimraf: ^6.0.1
@@ -16854,7 +16854,7 @@ __metadata:
     logger: "workspace:*"
     mockdate: ^3.0.5
     moment: ^2.30.1
-    node-loader: ^2.0.0
+    node-loader: ^2.1.0
     npm-run-all: ^4.1.5
     p-limit: ^3.1.0
     reflect-metadata: ^0.2.2
