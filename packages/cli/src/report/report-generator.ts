@@ -15,7 +15,7 @@ import { iocTypes } from '../ioc-types';
 import { serviceName } from '../service-name';
 
 export interface AxeScanResults {
-    results?: AxeResults;
+    axeResults?: AxeResults;
     pageTitle?: string;
 }
 
@@ -33,9 +33,9 @@ export class ReportGenerator {
         const reportGenerationTime = new Date();
         const reporter = this.reporterFactoryFunc();
         const htmlReportParams: AxeReportParameters = {
-            results: axeResults.results,
+            results: axeResults.axeResults,
             description: `Automated report for accessibility scan of url ${
-                axeResults.results.url
+                axeResults.axeResults.url
             } completed at ${reportGenerationTime.toUTCString()}.`,
             serviceName: serviceName,
             scanContext: {

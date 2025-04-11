@@ -9,6 +9,8 @@ import { AxeScanResults } from 'scanner-global-library';
 import { QueuedRequest } from '../runner/request-selector';
 import { TargetReportProcessor } from './report-processor';
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 @injectable()
 export class AccessibilityReportProcessor implements TargetReportProcessor {
     constructor(
@@ -25,7 +27,12 @@ export class AccessibilityReportProcessor implements TargetReportProcessor {
     }
 
     private async getAxeScanResults(pageScanResult: OnDemandPageScanResult, queuedRequest: QueuedRequest): Promise<AxeScanResults> {
-        const axeReport = pageScanResult.reports.find((r) => r.format === 'axe');
+        // Use accessibility agent combined report if available, otherwise use accessibility scan report
+        const axeReport =
+            pageScanResult.reports.find((r) => r.format === 'axe' && r.source === 'accessibility-combined') ??
+            pageScanResult.reports.find((r) => r.format === 'axe' && r.source === 'accessibility-scan') ??
+            pageScanResult.reports.find((r) => r.format === 'axe');
+
         const reportContent = await this.pageScanRunReportProvider.readReportContent(axeReport.reportId);
         if (reportContent.errorCode) {
             this.logger.logError('Failure to read axe report blob.', {
@@ -41,6 +48,11 @@ export class AccessibilityReportProcessor implements TargetReportProcessor {
             );
         }
 
-        return reportContent.content;
+        // The blob content uses an older format of AxeScanResults type that is incompatible with the new format.
+        // The axeResults.results property needs to be deleted and replaced with the axeResults.axeResults counterpart.
+        const axeScanResults: any = reportContent.content;
+        delete Object.assign(axeScanResults, { ['axeResults']: axeScanResults.results }).results;
+
+        return axeScanResults;
     }
 }

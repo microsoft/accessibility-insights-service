@@ -53,9 +53,10 @@ export class PrivacyScanCombinedReportProvider {
             return {
                 etag: response.etag,
                 report: {
-                    format: report.format,
-                    href: filePath,
                     reportId: report.id,
+                    format: report.format,
+                    source: 'privacy-scan',
+                    href: filePath,
                 },
             };
         }

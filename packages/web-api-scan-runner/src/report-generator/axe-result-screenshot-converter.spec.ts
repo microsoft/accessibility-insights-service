@@ -3,18 +3,18 @@
 
 import 'reflect-metadata';
 
-import { AxeScanResults } from 'scanner-global-library';
+import { ReportResult } from 'scanner-global-library';
 import { AxeResultScreenshotConverter } from './axe-result-screenshot-converter';
 
 describe(AxeResultScreenshotConverter, () => {
-    let axeScanResults: AxeScanResults;
+    let axeScanResults: ReportResult;
     let axeResultScreenshotConverter: AxeResultScreenshotConverter;
 
     beforeEach(() => {
         axeResultScreenshotConverter = new AxeResultScreenshotConverter();
         axeScanResults = {
             pageScreenshot: 'page screenshot',
-        } as AxeScanResults;
+        } as ReportResult;
     });
 
     it('has correct report type', () => {

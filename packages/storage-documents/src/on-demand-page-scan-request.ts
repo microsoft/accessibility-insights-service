@@ -4,7 +4,7 @@
 import { ItemType } from './item-type';
 import { StorageDocument } from './storage-document';
 import { WebsiteRequest, ReportGroupRequest, PrivacyScan } from './on-demand-page-scan-batch-request';
-import { AuthenticationType, SchemaVersion, ScanType, BrowserValidationTypes } from './on-demand-page-scan-result';
+import { AuthenticationType, SchemaVersion, ScanType, BrowserValidationTypes, ScanDefinition } from './on-demand-page-scan-result';
 
 export interface PageScanRequest {
     schemaVersion?: SchemaVersion;
@@ -19,6 +19,7 @@ export interface PageScanRequest {
     privacyScan?: PrivacyScan;
     authenticationType?: AuthenticationType;
     browserValidations?: BrowserValidationTypes[];
+    scanDefinitions?: ScanDefinition[];
 }
 
 export interface OnDemandPageScanRequest extends StorageDocument, PageScanRequest {

@@ -135,7 +135,7 @@ export class Runner {
                 this.logger.logWarn(`The privacy banner was not detected. Mark a scan for retry.`);
             }
         } else {
-            this.logger.logError('Browser has failed to scan a webpage.', { error: System.serializeError(privacyScanResult.error) });
+            this.logger.logError('Scanner has failed to scan a webpage.', { error: System.serializeError(privacyScanResult.error) });
             this.telemetryManager.trackBrowserScanFailed();
         }
 

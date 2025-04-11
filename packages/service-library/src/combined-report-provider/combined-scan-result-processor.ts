@@ -68,7 +68,7 @@ export class CombinedScanResultProcessor {
         }
 
         // Make the consolidated report smaller by deleting unnecessary data.
-        const axeScanResultsReduced = cloneDeep(axeScanResults.results);
+        const axeScanResultsReduced = cloneDeep(axeScanResults.axeResults);
         axeScanResultsReduced.inapplicable = [];
         axeScanResultsReduced.incomplete = [];
         axeScanResultsReduced.passes = [];
