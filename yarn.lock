@@ -3628,12 +3628,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/dotenv@npm:^8.2.0":
-  version: 8.2.0
-  resolution: "@types/dotenv@npm:8.2.0"
+"@types/dotenv@npm:^8.2.3":
+  version: 8.2.3
+  resolution: "@types/dotenv@npm:8.2.3"
   dependencies:
     dotenv: "*"
-  checksum: a1f524da7dc18b09bdb6c2613b9abbbe8ca575621cce4625efc7f98daf2ba07c7dbab622c9bb394507a12c5c515f9cbbbba4aeec17b801c88faeb8e8e656d460
+  checksum: 3075371abbcaf231593c57297338c9b731a45b3dd519ab96c1708a2f7fa345fcf885daf1ba3e39d84942873706fb1aa656b560cde9ccb62ce598ceb563502470
   languageName: node
   linkType: hard
 
@@ -7394,7 +7394,7 @@ __metadata:
   resolution: "e2e-web-apis@workspace:packages/e2e-web-apis"
   dependencies:
     "@azure/functions": ^4.6.0
-    "@types/dotenv": ^8.2.0
+    "@types/dotenv": ^8.2.3
     "@types/jest": ^29.5.12
     "@types/lodash": ^4.17.6
     "@types/node": ^20.14.9
@@ -8847,7 +8847,7 @@ __metadata:
     "@azure/cosmos": ^4.0.0
     "@types/chai": ^4.3.4
     "@types/deep-equal-in-any-order": ^1.0.1
-    "@types/dotenv": ^8.2.0
+    "@types/dotenv": ^8.2.3
     "@types/jest": ^29.5.12
     "@types/lodash": ^4.17.6
     "@types/node": ^20.14.9
@@ -9482,7 +9482,7 @@ __metadata:
   resolution: "health-client@workspace:packages/health-client"
   dependencies:
     "@types/chai": ^4.3.4
-    "@types/dotenv": ^8.2.0
+    "@types/dotenv": ^8.2.3
     "@types/jest": ^29.5.12
     "@types/lodash": ^4.17.6
     "@types/node": ^20.14.9
@@ -11629,7 +11629,7 @@ __metadata:
     "@opentelemetry/resources": ^1.15.0
     "@opentelemetry/sdk-metrics": ^1.28.0
     "@opentelemetry/semantic-conventions": ^1.30.0
-    "@types/dotenv": ^8.2.0
+    "@types/dotenv": ^8.2.3
     "@types/jest": ^29.5.12
     "@types/lodash": ^4.17.6
     "@types/node": ^20.14.9
@@ -13406,7 +13406,7 @@ __metadata:
   dependencies:
     "@azure/batch": ^10.2.0
     "@azure/ms-rest-nodeauth": ^3.1.1
-    "@types/dotenv": ^8.2.0
+    "@types/dotenv": ^8.2.3
     "@types/jest": ^29.5.12
     "@types/lodash": ^4.17.6
     "@types/node": ^20.14.9
@@ -13445,7 +13445,7 @@ __metadata:
   resolution: "privacy-scan-runner@workspace:packages/privacy-scan-runner"
   dependencies:
     "@azure/cosmos": ^4.0.0
-    "@types/dotenv": ^8.2.0
+    "@types/dotenv": ^8.2.3
     "@types/jest": ^29.5.12
     "@types/lodash": ^4.17.6
     "@types/node": ^20.14.9
@@ -14131,7 +14131,7 @@ __metadata:
   dependencies:
     "@azure/batch": ^10.2.0
     "@azure/ms-rest-nodeauth": ^3.1.1
-    "@types/dotenv": ^8.2.0
+    "@types/dotenv": ^8.2.3
     "@types/jest": ^29.5.12
     "@types/lodash": ^4.17.6
     "@types/node": ^20.14.9
@@ -14170,7 +14170,7 @@ __metadata:
   resolution: "report-generator-runner@workspace:packages/report-generator-runner"
   dependencies:
     "@azure/cosmos": ^4.0.0
-    "@types/dotenv": ^8.2.0
+    "@types/dotenv": ^8.2.3
     "@types/jest": ^29.5.12
     "@types/lodash": ^4.17.6
     "@types/node": ^20.14.9
@@ -16589,7 +16589,7 @@ __metadata:
   dependencies:
     "@azure/batch": ^10.2.0
     "@azure/ms-rest-nodeauth": ^3.1.1
-    "@types/dotenv": ^8.2.0
+    "@types/dotenv": ^8.2.3
     "@types/jest": ^29.5.12
     "@types/lodash": ^4.17.6
     "@types/node": ^20.14.9
@@ -16664,7 +16664,7 @@ __metadata:
     "@axe-core/puppeteer": 4.10.1
     "@azure/cosmos": ^4.0.0
     "@playwright/test": ^1.50.1
-    "@types/dotenv": ^8.2.0
+    "@types/dotenv": ^8.2.3
     "@types/jest": ^29.5.12
     "@types/lodash": ^4.17.6
     "@types/node": ^20.14.9
@@ -16722,7 +16722,7 @@ __metadata:
   dependencies:
     "@azure/batch": ^10.2.0
     "@azure/ms-rest-nodeauth": ^3.1.1
-    "@types/dotenv": ^8.2.0
+    "@types/dotenv": ^8.2.3
     "@types/jest": ^29.5.12
     "@types/lodash": ^4.17.6
     "@types/node": ^20.14.9
@@ -16760,7 +16760,7 @@ __metadata:
   resolution: "web-api-send-notification-runner@workspace:packages/web-api-send-notification-runner"
   dependencies:
     "@azure/cosmos": ^4.0.0
-    "@types/dotenv": ^8.2.0
+    "@types/dotenv": ^8.2.3
     "@types/got": ^9.6.11
     "@types/jest": ^29.5.12
     "@types/lodash": ^4.17.6
@@ -16804,7 +16804,7 @@ __metadata:
   resolution: "web-api@workspace:packages/web-api"
   dependencies:
     "@azure/functions": ^4.6.0
-    "@types/dotenv": ^8.2.0
+    "@types/dotenv": ^8.2.3
     "@types/jest": ^29.5.12
     "@types/lodash": ^4.17.6
     "@types/node": ^20.14.9
@@ -16842,7 +16842,7 @@ __metadata:
   resolution: "web-workers@workspace:packages/web-workers"
   dependencies:
     "@azure/functions": ^4.6.0
-    "@types/dotenv": ^8.2.0
+    "@types/dotenv": ^8.2.3
     "@types/jest": ^29.5.12
     "@types/lodash": ^4.17.6
     "@types/node": ^20.14.9
