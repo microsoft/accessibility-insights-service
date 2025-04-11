@@ -11,7 +11,7 @@
         },
         "jobManagerTask": {
             "id": "privacy-scan-job-manager-task",
-            "commandLine": "cmd /c \"powershell.exe %AZ_BATCH_NODE_STARTUP_WORKING_DIR%\\prepare-run.ps1 && docker run --init --rm --workdir /app -v d: --env-file %AZ_BATCH_TASK_WORKING_DIR%\\.env -e APPINSIGHTS_INSTRUMENTATIONKEY %CONTAINER_REGISTRY_TOKEN%.azurecr.io/batch-privacy-scan-manager\"",
+            "commandLine": "cmd /c \"powershell.exe %AZ_BATCH_NODE_STARTUP_WORKING_DIR%\\prepare-run.ps1 && docker run --init --rm --workdir /app -v d: --env-file %AZ_BATCH_TASK_WORKING_DIR%\\.env -e APPLICATIONINSIGHTS_CONNECTION_STRING -e APPLICATIONINSIGHTS_AUTHENTICATION_STRING %CONTAINER_REGISTRY_TOKEN%.azurecr.io/batch-privacy-scan-manager\"",
             "constraints": {
                 "maxWallClockTime": "PT1H",
                 "retentionTime": "P3D",

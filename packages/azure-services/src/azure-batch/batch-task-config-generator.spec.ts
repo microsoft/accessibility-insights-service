@@ -27,6 +27,7 @@ class BatchTaskPropertyProviderStub extends BatchTaskPropertyProvider {
 }
 
 const appInsightsConnectionString = 'appInsightsConnectionStringValue';
+const appInsightsAuthenticationString = 'appInsightsAuthenticationStringValue';
 const taskRuntimeConfig: TaskRuntimeConfig = {
     retentionTimeInDays: 1,
     taskTimeoutInMinutes: 5,
@@ -54,6 +55,9 @@ describe(BatchTaskConfigGenerator, () => {
         environmentSettingsMock
             .setup((s) => s.getValue('APPLICATIONINSIGHTS_CONNECTION_STRING'))
             .returns(() => appInsightsConnectionString);
+        environmentSettingsMock
+            .setup((s) => s.getValue('APPLICATIONINSIGHTS_AUTHENTICATION_STRING'))
+            .returns(() => appInsightsAuthenticationString);
 
         testSubject = new BatchTaskConfigGenerator(batchTaskPropertyProviderStub, serviceConfigMock.object, environmentSettingsMock.object);
     });
@@ -68,7 +72,7 @@ describe(BatchTaskConfigGenerator, () => {
         const environmentSettings = getEnvironmentSettings(taskArgsString);
         const actualContainerRunOptions = testSubject.getContainerRunOptions(taskArgsString, environmentSettings);
         expect(actualContainerRunOptions).toEqual(
-            '--init --rm --cpus=2 --shm-size=2gb --workdir /app -v d: --env-file %AZ_BATCH_TASK_WORKING_DIR%\\.env -e APPLICATIONINSIGHTS_CONNECTION_STRING -e TASK_ARGUMENTS -e arg1=arg1Value -e arg2=arg2Value -e arg3=arg3Value --addon option',
+            '--init --rm --cpus=2 --shm-size=2gb --workdir /app -v d: --env-file %AZ_BATCH_TASK_WORKING_DIR%\\.env -e APPLICATIONINSIGHTS_CONNECTION_STRING -e APPLICATIONINSIGHTS_AUTHENTICATION_STRING -e TASK_ARGUMENTS -e arg1=arg1Value -e arg2=arg2Value -e arg3=arg3Value --addon option',
         );
     });
 
@@ -79,7 +83,7 @@ describe(BatchTaskConfigGenerator, () => {
         const environmentSettings = getEnvironmentSettings(taskArgsString);
         const actualContainerRunOptions = testSubject.getContainerRunOptions(taskArgsString, environmentSettings);
         expect(actualContainerRunOptions).toEqual(
-            '--init --rm --cpus=2 --shm-size=2gb --workdir /app -v d: --env-file %AZ_BATCH_TASK_WORKING_DIR%\\.env -e APPLICATIONINSIGHTS_CONNECTION_STRING -e TASK_ARGUMENTS -e url=https%3A%2F%2Flocalhost%2Findex.html%3Fparam1%3Dvalue%20one%26id%3D2 --addon option',
+            '--init --rm --cpus=2 --shm-size=2gb --workdir /app -v d: --env-file %AZ_BATCH_TASK_WORKING_DIR%\\.env -e APPLICATIONINSIGHTS_CONNECTION_STRING -e APPLICATIONINSIGHTS_AUTHENTICATION_STRING -e TASK_ARGUMENTS -e url=https%3A%2F%2Flocalhost%2Findex.html%3Fparam1%3Dvalue%20one%26id%3D2 --addon option',
         );
     });
 
@@ -100,7 +104,7 @@ describe(BatchTaskConfigGenerator, () => {
         const expectedEnvironmentSettings = getEnvironmentSettings(taskArgsString);
         const expectedTaskConfig = {
             id: 'taskId',
-            commandLine: `cmd /c "powershell.exe %AZ_BATCH_NODE_STARTUP_WORKING_DIR%\\prepare-run.ps1 && docker run --init --rm --cpus=2 --shm-size=2gb --workdir /app -v d: --env-file %AZ_BATCH_TASK_WORKING_DIR%\\.env -e APPLICATIONINSIGHTS_CONNECTION_STRING -e TASK_ARGUMENTS -e arg1=arg1Value -e arg2=arg2Value -e arg3=arg3Value --addon option allyContainerRegistry.azurecr.io/imageNameValue"`,
+            commandLine: `cmd /c "powershell.exe %AZ_BATCH_NODE_STARTUP_WORKING_DIR%\\prepare-run.ps1 && docker run --init --rm --cpus=2 --shm-size=2gb --workdir /app -v d: --env-file %AZ_BATCH_TASK_WORKING_DIR%\\.env -e APPLICATIONINSIGHTS_CONNECTION_STRING -e APPLICATIONINSIGHTS_AUTHENTICATION_STRING -e TASK_ARGUMENTS -e arg1=arg1Value -e arg2=arg2Value -e arg3=arg3Value --addon option allyContainerRegistry.azurecr.io/imageNameValue"`,
             resourceFiles: [
                 {
                     autoStorageContainerName: 'containerName',
@@ -131,7 +135,10 @@ describe(BatchTaskConfigGenerator, () => {
                 name: 'APPLICATIONINSIGHTS_CONNECTION_STRING',
                 value: appInsightsConnectionString,
             },
-
+            {
+                name: 'APPLICATIONINSIGHTS_AUTHENTICATION_STRING',
+                value: appInsightsAuthenticationString,
+            },
             {
                 name: 'TASK_ARGUMENTS',
                 value: taskArgsString,

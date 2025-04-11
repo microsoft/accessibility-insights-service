@@ -38,6 +38,8 @@ export class BatchTaskConfigGenerator {
 
     private readonly appInsightsConnectionString = 'APPLICATIONINSIGHTS_CONNECTION_STRING';
 
+    private readonly appInsightsAuthenticationString = 'APPLICATIONINSIGHTS_AUTHENTICATION_STRING';
+
     // The --rm option removes the container after the task finishes
     // The --cpus option limits container to use number of CPUs on host VM
     // The --workdir option defines task working directory
@@ -130,6 +132,10 @@ export class BatchTaskConfigGenerator {
             {
                 name: this.appInsightsConnectionString,
                 value: this.environmentSettings.getValue(this.appInsightsConnectionString),
+            },
+            {
+                name: this.appInsightsAuthenticationString,
+                value: this.environmentSettings.getValue(this.appInsightsAuthenticationString),
             },
         ];
     }
