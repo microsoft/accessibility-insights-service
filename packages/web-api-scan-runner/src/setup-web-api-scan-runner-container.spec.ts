@@ -4,23 +4,41 @@
 import 'reflect-metadata';
 
 import { ServiceConfiguration } from 'common';
+import { Container } from 'inversify';
 import { Runner } from './runner/runner';
 import { setupWebApiScanRunnerContainer } from './setup-web-api-scan-runner-container';
+import { iocTypeNames } from './ioc-types';
+import { AxeResultConverter } from './report-generator/axe-result-converter';
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
+
+let container: Container;
 
 describe(setupWebApiScanRunnerContainer, () => {
     it('resolves runner dependencies', () => {
-        const container = setupWebApiScanRunnerContainer();
+        container = setupWebApiScanRunnerContainer();
 
         expect(container.get(Runner)).toBeDefined();
     });
 
     it('resolves singleton dependencies', () => {
-        const container = setupWebApiScanRunnerContainer();
+        container = setupWebApiScanRunnerContainer();
 
         const serviceConfig = container.get(ServiceConfiguration);
 
         expect(serviceConfig).toBeInstanceOf(ServiceConfiguration);
         expect(serviceConfig).toBe(container.get(ServiceConfiguration));
+    });
+
+    it('container has all required report generators', () => {
+        container = setupWebApiScanRunnerContainer();
+
+        const axeResultConverters: AxeResultConverter[] = container.get(iocTypeNames.AxeResultConverters);
+        const axeResultConverterTypes = axeResultConverters.map((converter) => converter.targetReportFormat);
+        expect(axeResultConverterTypes).toContain('html');
+        expect(axeResultConverterTypes).toContain('sarif');
+        expect(axeResultConverterTypes).toContain('axe');
+        expect(axeResultConverterTypes).toContain('page.png');
+        expect(axeResultConverterTypes).toContain('page.mhtml');
     });
 });

@@ -46,7 +46,7 @@ export class AxePuppeteerScanner {
             return { error: `Axe core puppeteer scan error. ${System.serializeError(axeRunResult.error)}`, scannedUrl: page.url };
         }
 
-        scanResults.results = axeRunResult.axeResults;
+        scanResults.axeResults = axeRunResult.axeResults;
         if (
             page.navigationResponse.request()?.redirectChain()?.length > 0 ||
             // Should compare encoded Urls

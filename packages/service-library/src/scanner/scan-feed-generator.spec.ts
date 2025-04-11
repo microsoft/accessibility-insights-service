@@ -7,6 +7,7 @@ import { IMock, Mock, Times } from 'typemoq';
 import { GuidGenerator, System } from 'common';
 import { GlobalLogger } from 'logger';
 import { WebsiteScanData, OnDemandPageScanResult, ScanRunBatchRequest, KnownPage } from 'storage-documents';
+import { cloneDeep } from 'lodash';
 import { ScanDataProvider } from '../data-providers/scan-data-provider';
 import { WebsiteScanDataProvider } from '../data-providers/website-scan-data-provider';
 import { ScanFeedGenerator } from './scan-feed-generator';
@@ -87,6 +88,28 @@ describe(ScanFeedGenerator, () => {
         await scanFeedGenerator.queueDiscoveredPages(websiteScanData, pageScanResult);
     });
 
+    it('queue scan requests for request pages only', async () => {
+        pageScanResult.scanDefinitions = [{ name: 'accessibility-agent' }];
+        const newPages = [
+            { url: 'page3', runState: 'pending' },
+            { url: 'page4', source: 'request', runState: 'pending' },
+        ] as KnownPage[];
+        setupGuidGeneratorMock(newPages);
+        (websiteScanData.knownPages as KnownPage[]) = newPages;
+        const scanRequests = createScanRequests(newPages, true, true);
+        const queuedKnownPages = createKnowPages(scanRequests);
+        websiteScanDataProviderMock
+            .setup((o) => o.updateKnownPages(websiteScanData, queuedKnownPages))
+            .returns(() => Promise.resolve(undefined))
+            .verifiable();
+
+        const scanRequestsExpected = cloneDeep(scanRequests);
+        delete scanRequestsExpected[0].scanDefinitions;
+        setupScanDataProviderMock(scanRequestsExpected);
+
+        await scanFeedGenerator.queueDiscoveredPages(websiteScanData, pageScanResult);
+    });
+
     it('queue scan requests in batches', async () => {
         maxBatchSize = 2;
         scanFeedGenerator.maxBatchSize = maxBatchSize;
@@ -150,7 +173,7 @@ function setupScanDataProviderMock(scanRequests: ScanRunBatchRequest[]): void {
     }
 }
 
-function createScanRequests(knownPages: KnownPage[], deepScan: boolean = true): ScanRunBatchRequest[] {
+function createScanRequests(knownPages: KnownPage[], deepScan: boolean = true, scanDefinitions: boolean = false): ScanRunBatchRequest[] {
     const urls = knownPages.map((p) => p.url);
 
     return urls.map((url) => {
@@ -160,6 +183,7 @@ function createScanRequests(knownPages: KnownPage[], deepScan: boolean = true): 
             priority: pageScanResult.priority,
             deepScan,
             deepScanId: websiteScanData.deepScanId,
+            ...(scanDefinitions === false ? {} : { scanDefinitions: [{ name: 'accessibility-agent' }] }),
             scanNotifyUrl: pageScanResult.notification.scanNotifyUrl,
             ...(pageScanResult.privacyScan === undefined ? {} : { privacyScan: pageScanResult.privacyScan }),
             site: {

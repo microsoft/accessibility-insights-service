@@ -24,9 +24,20 @@
         {
             "type": "shell",
             "label": "tsc-scanner-library",
-            "dependsOn": "clean",
+            "dependsOn": "copy-agent-binaries",
             "command": "tsc -p ./../scanner-global-library/",
             "problemMatcher": ["$tsc"]
+        },
+        {
+            "type": "shell",
+            "label": "copy-agent-binaries",
+            "dependsOn": "clean",
+            "windows": {
+                "command": "xcopy ..\\..\\packages\\a11y_agent ..\\..\\packages\\web-api-scan-runner\\dist\\a11y_agent\\ /s /e /y"
+            },
+            "osx": {
+                "command": "cp ../../packages/a11y_agent ../../packages/service-library/dist/a11y_agent"
+            }
         },
         {
             "type": "shell",

@@ -7,13 +7,11 @@ import * as Puppeteer from 'puppeteer';
 import { System } from 'common';
 import { PuppeteerTimeoutConfig, PageNavigationTiming } from './page-timeout-config';
 import { scrollToBottom } from './page-client-lib';
-import { PageCpuUsage } from './network/page-cpu-usage';
 import { DevToolsSession } from './dev-tools-session';
 
 @injectable()
 export class PageHandler {
     constructor(
-        @inject(PageCpuUsage) private readonly pageCpuUsage: PageCpuUsage,
         @inject(DevToolsSession) protected readonly devToolsSession: DevToolsSession,
         @inject(GlobalLogger) @optional() private readonly logger: GlobalLogger,
         private readonly pageDomStableDurationMsec: number = PuppeteerTimeoutConfig.pageDomStableDurationMsec,
@@ -38,26 +36,6 @@ export class PageHandler {
      * will result a high CPU usage as it continues to render the graphical content of the page.
      */
     private async waitForPageRendering(page: Puppeteer.Page, timeoutMsecs: number): Promise<Partial<PageNavigationTiming>> {
-        const lowCpuUsageThreshold = 0.1;
-        let renderingCompleted = false;
-
-        const timestamp = System.getTimestamp();
-        while (!renderingCompleted && System.getTimestamp() < timestamp + timeoutMsecs && !page.isClosed()) {
-            const cpuUsageStats = await this.pageCpuUsage.getCpuUsage(page);
-            this.logger?.logInfo(`Browser process usage statistics.`, {
-                snapshots: JSON.stringify(cpuUsageStats),
-            });
-
-            renderingCompleted = cpuUsageStats.average < lowCpuUsageThreshold * (100 * cpuUsageStats.cpus);
-        }
-
-        const elapsed = System.getElapsedTime(timestamp);
-        if (!renderingCompleted) {
-            this.logger?.logWarn(`Page did not complete graphic rendering after ${timeoutMsecs / 1000} seconds.`, {
-                timeout: `${timeoutMsecs}`,
-            });
-        }
-
         // Unfreeze JavaScript execution in the background page.
         // Related to https://github.com/WICG/web-lifecycle/
         // Rendering WebGL might have caused the page to freeze. This will fix the page freeze.
@@ -69,7 +47,7 @@ export class PageHandler {
             this.logger?.logError(`Failed to update the web lifecycle state of the page.`, { error: System.serializeError(error) });
         }
 
-        return { render: elapsed, renderTimeout: !renderingCompleted };
+        return { render: 0, renderTimeout: false };
     }
 
     /**

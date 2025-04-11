@@ -5,24 +5,23 @@ import { inject, injectable } from 'inversify';
 import { GlobalLogger } from 'logger';
 import { AxeScanResults, Page } from 'scanner-global-library';
 import { BrowserValidationResult, OnDemandPageScanResult, WebsiteScanData } from 'storage-documents';
-import { DeepScanner, PageMetadata, PageMetadataGenerator, RunnerScanMetadata } from 'service-library';
+import { PageMetadata, PageMetadataGenerator, RunnerScanMetadata } from 'service-library';
 import { isEmpty } from 'lodash';
-import { AxeScanner } from './axe-scanner';
-import { HighContrastScanner } from './high-contrast-scanner';
+import { ScannerDispatcher } from '../scanner/scanner-dispatcher';
+import { AgentResults } from '../scanner/agent-scanner';
 
 export interface ScanProcessorResult {
     axeScanResults: AxeScanResults;
     browserValidationResult?: BrowserValidationResult;
+    agentResults?: AgentResults;
 }
 
 @injectable()
 export class PageScanProcessor {
     public constructor(
         @inject(Page) private readonly page: Page,
-        @inject(AxeScanner) private readonly axeScanner: AxeScanner,
-        @inject(DeepScanner) private readonly deepScanner: DeepScanner,
-        @inject(HighContrastScanner) private readonly highContrastScanner: HighContrastScanner,
         @inject(PageMetadataGenerator) private readonly pageMetadataGenerator: PageMetadataGenerator,
+        @inject(ScannerDispatcher) private readonly scannerDispatcher: ScannerDispatcher,
         @inject(GlobalLogger) private readonly logger: GlobalLogger,
     ) {}
 
@@ -54,23 +53,7 @@ export class PageScanProcessor {
                 };
             }
 
-            let axeScanResults = await this.axeScanner.scan(this.page);
-            await this.deepScanner.runDeepScan(pageScanResult, websiteScanData, this.page);
-
-            // Taking a screenshot of the page might break the page layout. Run at the end of the workflow.
-            const pageState = await this.page.capturePageState();
-            axeScanResults = { ...axeScanResults, ...pageState };
-
-            // Execute additional scanners once the primary scan is finished.
-            let highContrastResult;
-            if (['pending', 'error'].includes(pageScanResult.browserValidationResult?.highContrastProperties)) {
-                highContrastResult = await this.highContrastScanner.scan(runnerScanMetadata.url);
-            }
-
-            return {
-                axeScanResults,
-                ...(isEmpty(highContrastResult) ? {} : { browserValidationResult: { highContrastProperties: highContrastResult.result } }),
-            };
+            return await this.scannerDispatcher.dispatch(runnerScanMetadata, pageScanResult, websiteScanData, this.page);
         } finally {
             await this.page.close();
         }

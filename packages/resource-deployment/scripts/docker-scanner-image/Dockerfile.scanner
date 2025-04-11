@@ -1,13 +1,18 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
 
-FROM prescanner
+# The image is available in the local registry only.
+FROM mcr.microsoft.com/windows/prescanner
 
 ARG BUILD_KEY=
 ARG INSTALLATION_TYPE=
 
+ENV USER_KEY=$BUILD_KEY
+
 COPY install-font-packages.ps1 .
 COPY add-font-resources.ps1 .
+COPY enable-virtual-display.ps1 .
 
 RUN powershell .\install-font-packages.ps1
 RUN powershell .\add-font-resources.ps1
+RUN powershell .\enable-virtual-display.ps1

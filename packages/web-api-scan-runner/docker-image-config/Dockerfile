@@ -4,6 +4,7 @@
 FROM mcr.microsoft.com/windows/servercore:ltsc2022-amd64
 
 ENV NODE_VERSION 20.15.0
+ENV USER_KEY=
 
 WORKDIR /app
 
@@ -23,4 +24,8 @@ RUN npm install
 RUN npx patch-package
 RUN npx playwright install msedge
 
-CMD ["powershell.exe", "./web-api-scan-runner.ps1"]
+# Install a11y agent dependencies
+RUN powershell -Command \
+    if (Test-Path -Path ".\a11y_agent") { Write-Host "Install a11y agent dependencies" ; .\a11y_agent\docker-install.ps1 ; }
+
+CMD ["powershell", "./web-api-scan-runner.ps1"]

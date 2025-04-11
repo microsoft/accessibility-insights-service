@@ -2,22 +2,25 @@
 // Licensed under the MIT License.
 
 import { injectable } from 'inversify';
-import { ReportFormat } from 'storage-documents';
-import { AxeScanResults } from 'scanner-global-library';
+import { ReportFormat, ReportSource } from 'storage-documents';
+import { ReportResult } from 'scanner-global-library';
 import { AxeResultConverter } from './axe-result-converter';
 
 @injectable()
 export class AxeResultEchoConverter implements AxeResultConverter {
     public readonly targetReportFormat: ReportFormat = 'axe';
 
-    public convert(axeScanResults: AxeScanResults): string {
+    public readonly targetReportSource: ReportSource[] = ['accessibility-scan', 'accessibility-agent', 'accessibility-combined'];
+
+    public convert(reportResult: ReportResult): string {
         const report = {
-            results: axeScanResults.results,
-            scannedUrl: axeScanResults.scannedUrl,
-            pageTitle: axeScanResults.pageTitle,
-            browserSpec: axeScanResults.browserSpec,
-            userAgent: axeScanResults.userAgent,
-            browserResolution: axeScanResults.browserResolution,
+            // We must keep the original JSON report format for backward compatibility.
+            results: reportResult.axeResults,
+            scannedUrl: reportResult.scannedUrl,
+            pageTitle: reportResult.pageTitle,
+            browserSpec: reportResult.browserSpec,
+            userAgent: reportResult.userAgent,
+            browserResolution: reportResult.browserResolution,
         };
 
         return JSON.stringify(report);
