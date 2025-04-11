@@ -2601,10 +2601,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@medv/finder@npm:^2.1.0":
-  version: 2.1.0
-  resolution: "@medv/finder@npm:2.1.0"
-  checksum: eedf5d4cb2733be09502f8ae1514ba7f5777ac074a833dba8f2fcf3899af25a029e0bdd379d58586cb1a73539ed56fe671686b0e1544b59bd5d13acc3ec23bbf
+"@medv/finder@npm:^4.0.2":
+  version: 4.0.2
+  resolution: "@medv/finder@npm:4.0.2"
+  checksum: 59883612cec628e41884806a550ebbe25d9d1222d824da181f16545968fd81a6bf13c54d0a02150612facbc8171952dcc1ef47c3b3cdd7058edbb5a666bd0857
   languageName: node
   linkType: hard
 
@@ -3119,7 +3119,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@opentelemetry/semantic-conventions@npm:1.15.0, @opentelemetry/semantic-conventions@npm:^1.15.0":
+"@opentelemetry/semantic-conventions@npm:1.15.0":
   version: 1.15.0
   resolution: "@opentelemetry/semantic-conventions@npm:1.15.0"
   dependencies:
@@ -3139,6 +3139,13 @@ __metadata:
   version: 1.28.0
   resolution: "@opentelemetry/semantic-conventions@npm:1.28.0"
   checksum: 1d708afa654990236cdb6b5da84f7ab899b70bff9f753bc49d93616a5c7f7f339ba1eba6a9fbb57dee596995334f4e7effa57a4624741882ab5b3c419c3511e2
+  languageName: node
+  linkType: hard
+
+"@opentelemetry/semantic-conventions@npm:^1.30.0":
+  version: 1.30.0
+  resolution: "@opentelemetry/semantic-conventions@npm:1.30.0"
+  checksum: 53d3489f11eeae07d12e878e4ae6df2de72b6a05ea434cfa2c2301023b9d3df35bcaafaeb294be708b93ae946b510067baf35008a3fd0275f52f0e0790014240
   languageName: node
   linkType: hard
 
@@ -3621,12 +3628,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/dotenv@npm:^8.2.0":
-  version: 8.2.0
-  resolution: "@types/dotenv@npm:8.2.0"
+"@types/dotenv@npm:^8.2.3":
+  version: 8.2.3
+  resolution: "@types/dotenv@npm:8.2.3"
   dependencies:
     dotenv: "*"
-  checksum: a1f524da7dc18b09bdb6c2613b9abbbe8ca575621cce4625efc7f98daf2ba07c7dbab622c9bb394507a12c5c515f9cbbbba4aeec17b801c88faeb8e8e656d460
+  checksum: 3075371abbcaf231593c57297338c9b731a45b3dd519ab96c1708a2f7fa345fcf885daf1ba3e39d84942873706fb1aa656b560cde9ccb62ce598ceb563502470
   languageName: node
   linkType: hard
 
@@ -3834,13 +3841,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/leveldown@npm:^4.0.2":
-  version: 4.0.4
-  resolution: "@types/leveldown@npm:4.0.4"
+"@types/leveldown@npm:^4.0.6":
+  version: 4.0.6
+  resolution: "@types/leveldown@npm:4.0.6"
   dependencies:
     "@types/abstract-leveldown": "*"
     "@types/node": "*"
-  checksum: 630b2d2d1c48f83d14ab0f6c03ad2af1c427675c3692873c4fd3d673bde4140eabc028ce5736ad3d76aeea20769cf53df6f83468a4f0cf28f6d04dbb435edf48
+  checksum: 8b06cbc6858f3956fe8e10a8bb58edd75369587e72ce33ab7e35e21e1f1c8e89981a337c977ffd3a635d4441113e434362ba37e343d8a0ec69cd7c8988450977
   languageName: node
   linkType: hard
 
@@ -4040,12 +4047,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/yargs@npm:^17.0.22":
-  version: 17.0.22
-  resolution: "@types/yargs@npm:17.0.22"
+"@types/yargs@npm:^17.0.33":
+  version: 17.0.33
+  resolution: "@types/yargs@npm:17.0.33"
   dependencies:
     "@types/yargs-parser": "*"
-  checksum: 0773523fda71bafdc52f13f5970039e535a353665a60ba9261149a5c9c2b908242e6e77fbb7a8c06931ec78ce889d64d09673c68ba23eb5f5742d5385d0d1982
+  checksum: ee013f257472ab643cb0584cf3e1ff9b0c44bca1c9ba662395300a7f1a6c55fa9d41bd40ddff42d99f5d95febb3907c9ff600fbcb92dadbec22c6a76de7e1236
   languageName: node
   linkType: hard
 
@@ -4571,13 +4578,13 @@ __metadata:
     "@axe-core/puppeteer": 4.10.1
     "@crawlee/browser-pool": ^3.12.2
     "@crawlee/puppeteer": ^3.12.2
-    "@medv/finder": ^2.1.0
+    "@medv/finder": ^4.0.2
     "@rollup/plugin-commonjs": ^24.0.1
     "@rollup/plugin-node-resolve": ^15.3.0
     "@sindresorhus/fnv1a": ^2.0.1
     "@types/encoding-down": ^5.0.5
     "@types/jest": ^29.5.12
-    "@types/leveldown": ^4.0.2
+    "@types/leveldown": ^4.0.6
     "@types/levelup": ^5.1.1
     "@types/node": ^20.14.9
     "@types/normalize-path": ^3.0.2
@@ -4606,7 +4613,7 @@ __metadata:
     ts-jest: ^29.1.5
     typemoq: ^2.1.0
     typescript: ^5.5.3
-    yargs: ^17.6.2
+    yargs: ^17.7.2
   languageName: unknown
   linkType: soft
 
@@ -4635,12 +4642,12 @@ __metadata:
     "@axe-core/puppeteer": 4.10.1
     "@crawlee/browser-pool": ^3.12.2
     "@crawlee/puppeteer": ^3.12.2
-    "@medv/finder": ^2.1.0
+    "@medv/finder": ^4.0.2
     "@opentelemetry/api": ^1.4.1
     "@opentelemetry/exporter-metrics-otlp-grpc": ^0.57.1
     "@opentelemetry/resources": ^1.15.0
     "@opentelemetry/sdk-metrics": ^1.28.0
-    "@opentelemetry/semantic-conventions": ^1.15.0
+    "@opentelemetry/semantic-conventions": ^1.30.0
     "@sindresorhus/fnv1a": ^2.0.1
     "@types/escape-html": ^1.0.4
     "@types/jest": ^29.5.12
@@ -4655,7 +4662,7 @@ __metadata:
     applicationinsights: ^2.3.1
     axe-core: 4.10.2
     convict: ^6.2.4
-    copy-webpack-plugin: ^11.0.0
+    copy-webpack-plugin: ^13.0.0
     dotenv: ^16.4.7
     dts-bundle-generator: ^7.2.0
     encoding-down: ^7.1.0
@@ -4671,7 +4678,7 @@ __metadata:
     leveldown: ^6.1.1
     levelup: ^5.1.1
     lodash: ^4.17.21
-    mkdirp: ^2.1.3
+    mkdirp: ^3.0.1
     mockdate: ^3.0.5
     moment: ^2.30.1
     normalize-path: ^3.0.0
@@ -4690,7 +4697,7 @@ __metadata:
     webpack: ^5.97.1
     webpack-cli: ^5.1.4
     webpack-node-externals: ^3.0.0
-    yargs: ^17.6.2
+    yargs: ^17.7.2
   bin:
     ai-scan: dist/ai-scan-cli.js
   languageName: unknown
@@ -4725,7 +4732,7 @@ __metadata:
     patch-package: ^8.0.0
     prettier: 2.8.3
     rimraf: ^6.0.1
-    shellcheck: ^3.0.0
+    shellcheck: ^3.1.0
     simple-git: ^3.27.0
     syncpack: ^8.4.11
     ts-jest: ^29.1.5
@@ -4872,7 +4879,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ajv-keywords@npm:^5.0.0":
+"ajv-keywords@npm:^5.1.0":
   version: 5.1.0
   resolution: "ajv-keywords@npm:5.1.0"
   dependencies:
@@ -4895,7 +4902,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ajv@npm:^8.0.0, ajv@npm:^8.0.1, ajv@npm:^8.8.0":
+"ajv@npm:^8.0.0, ajv@npm:^8.0.1":
   version: 8.10.0
   resolution: "ajv@npm:8.10.0"
   dependencies:
@@ -4907,7 +4914,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ajv@npm:^8.17.1":
+"ajv@npm:^8.17.1, ajv@npm:^8.9.0":
   version: 8.17.1
   resolution: "ajv@npm:8.17.1"
   dependencies:
@@ -6588,19 +6595,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"copy-webpack-plugin@npm:^11.0.0":
-  version: 11.0.0
-  resolution: "copy-webpack-plugin@npm:11.0.0"
+"copy-webpack-plugin@npm:^13.0.0":
+  version: 13.0.0
+  resolution: "copy-webpack-plugin@npm:13.0.0"
   dependencies:
-    fast-glob: ^3.2.11
     glob-parent: ^6.0.1
-    globby: ^13.1.1
     normalize-path: ^3.0.0
-    schema-utils: ^4.0.0
-    serialize-javascript: ^6.0.0
+    schema-utils: ^4.2.0
+    serialize-javascript: ^6.0.2
+    tinyglobby: ^0.2.12
   peerDependencies:
     webpack: ^5.1.0
-  checksum: df4f8743f003a29ee7dd3d9b1789998a3a99051c92afb2ba2203d3dacfa696f4e757b275560fafb8f206e520a0aa78af34b990324a0e36c2326cefdeef3ca82e
+  checksum: 668af779d5d29cbaff02b79588c3af03ab358fe6f8446859421f88cb857f3c7462366a1d02857667133238983ff4cdfb29427816f6959163b7639b94532c1153
   languageName: node
   linkType: hard
 
@@ -7020,13 +7026,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"deep-equal-in-any-order@npm:^2.0.2":
-  version: 2.0.2
-  resolution: "deep-equal-in-any-order@npm:2.0.2"
+"deep-equal-in-any-order@npm:^2.0.6":
+  version: 2.0.6
+  resolution: "deep-equal-in-any-order@npm:2.0.6"
   dependencies:
     lodash.mapvalues: ^4.6.0
     sort-any: ^2.0.0
-  checksum: 9459fd4832f4c03130fbc097ab4e94773271693d9fb97e76ca3909a3905bd3d573988d9f155df9763017265ec4ffdd9771b7282e0d6bfbe87888f0df38ca77a8
+  checksum: c975530c2455a15c835306bf388e9c5f7a79b6a45ff0c9c9c5c3ba089c36613ffa7b5b63031ec666e5209f7c7b035155039575d6b7c9876b9cfb7b410af3de2f
   languageName: node
   linkType: hard
 
@@ -7388,15 +7394,15 @@ __metadata:
   resolution: "e2e-web-apis@workspace:packages/e2e-web-apis"
   dependencies:
     "@azure/functions": ^4.6.0
-    "@types/dotenv": ^8.2.0
+    "@types/dotenv": ^8.2.3
     "@types/jest": ^29.5.12
     "@types/lodash": ^4.17.6
     "@types/node": ^20.14.9
-    copy-webpack-plugin: ^11.0.0
+    copy-webpack-plugin: ^13.0.0
     fork-ts-checker-webpack-plugin: ^9.0.2
     jest: ^29.7.0
     jest-junit: ^16.0.0
-    node-loader: ^2.0.0
+    node-loader: ^2.1.0
     npm-run-all: ^4.1.5
     rimraf: ^6.0.1
     ts-jest: ^29.1.5
@@ -8375,6 +8381,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"fdir@npm:^6.4.3":
+  version: 6.4.3
+  resolution: "fdir@npm:6.4.3"
+  peerDependencies:
+    picomatch: ^3 || ^4
+  peerDependenciesMeta:
+    picomatch:
+      optional: true
+  checksum: fa53e13c63e8c14add5b70fd47e28267dd5481ebbba4b47720ec25aae7d10a800ef0f2e33de350faaf63c10b3d7b64138925718832220d593f75e724846c736d
+  languageName: node
+  linkType: hard
+
 "fflate@npm:^0.8.2":
   version: 0.8.2
   resolution: "fflate@npm:0.8.2"
@@ -8829,14 +8847,14 @@ __metadata:
     "@azure/cosmos": ^4.0.0
     "@types/chai": ^4.3.4
     "@types/deep-equal-in-any-order": ^1.0.1
-    "@types/dotenv": ^8.2.0
+    "@types/dotenv": ^8.2.3
     "@types/jest": ^29.5.12
     "@types/lodash": ^4.17.6
     "@types/node": ^20.14.9
     azure-services: "workspace:*"
     chai: ^4.3.7
     common: "workspace:*"
-    deep-equal-in-any-order: ^2.0.2
+    deep-equal-in-any-order: ^2.0.6
     dotenv: ^16.4.7
     inversify: ^6.0.1
     jest: ^29.7.0
@@ -8853,7 +8871,7 @@ __metadata:
     typemoq: ^2.1.0
     typescript: ^5.5.3
     web-api-client: "workspace:*"
-    yargs: ^17.6.2
+    yargs: ^17.7.2
   languageName: unknown
   linkType: soft
 
@@ -9464,13 +9482,13 @@ __metadata:
   resolution: "health-client@workspace:packages/health-client"
   dependencies:
     "@types/chai": ^4.3.4
-    "@types/dotenv": ^8.2.0
+    "@types/dotenv": ^8.2.3
     "@types/jest": ^29.5.12
     "@types/lodash": ^4.17.6
     "@types/node": ^20.14.9
     chai: ^4.3.7
     common: "workspace:*"
-    copy-webpack-plugin: ^11.0.0
+    copy-webpack-plugin: ^13.0.0
     dotenv: ^16.4.7
     functional-tests: "workspace:*"
     inversify: ^6.0.1
@@ -9490,7 +9508,7 @@ __metadata:
     webpack: ^5.97.1
     webpack-cli: ^5.1.4
     webpack-ignore-dynamic-require: ^1.0.0
-    yargs: ^17.6.2
+    yargs: ^17.7.2
   languageName: unknown
   linkType: soft
 
@@ -11496,14 +11514,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"loader-utils@npm:^2.0.0":
-  version: 2.0.0
-  resolution: "loader-utils@npm:2.0.0"
+"loader-utils@npm:^2.0.3":
+  version: 2.0.4
+  resolution: "loader-utils@npm:2.0.4"
   dependencies:
     big.js: ^5.2.2
     emojis-list: ^3.0.0
     json5: ^2.1.2
-  checksum: 6856423131b50b6f5f259da36f498cfd7fc3c3f8bb17777cf87fdd9159e797d4ba4288d9a96415fd8da62c2906960e88f74711dee72d03a9003bddcd0d364a51
+  checksum: a5281f5fff1eaa310ad5e1164095689443630f3411e927f95031ab4fb83b4a98f388185bb1fe949e8ab8d4247004336a625e9255c22122b815bb9a4c5d8fc3b7
   languageName: node
   linkType: hard
 
@@ -11610,8 +11628,8 @@ __metadata:
     "@opentelemetry/exporter-metrics-otlp-grpc": ^0.57.1
     "@opentelemetry/resources": ^1.15.0
     "@opentelemetry/sdk-metrics": ^1.28.0
-    "@opentelemetry/semantic-conventions": ^1.15.0
-    "@types/dotenv": ^8.2.0
+    "@opentelemetry/semantic-conventions": ^1.30.0
+    "@types/dotenv": ^8.2.3
     "@types/jest": ^29.5.12
     "@types/lodash": ^4.17.6
     "@types/node": ^20.14.9
@@ -12204,12 +12222,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mkdirp@npm:^2.1.3":
-  version: 2.1.6
-  resolution: "mkdirp@npm:2.1.6"
+"mkdirp@npm:^3.0.1":
+  version: 3.0.1
+  resolution: "mkdirp@npm:3.0.1"
   bin:
     mkdirp: dist/cjs/src/bin.js
-  checksum: 8a1d09ffac585e55f41c54f445051f5bc33a7de99b952bb04c576cafdf1a67bb4bae8cb93736f7da6838771fbf75bc630430a3a59e1252047d2278690bd150ee
+  checksum: 972deb188e8fb55547f1e58d66bd6b4a3623bf0c7137802582602d73e6480c1c2268dcbafbfb1be466e00cc7e56ac514d7fd9334b7cf33e3e2ab547c16f83a8d
   languageName: node
   linkType: hard
 
@@ -12374,14 +12392,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"node-loader@npm:^2.0.0":
-  version: 2.0.0
-  resolution: "node-loader@npm:2.0.0"
+"node-loader@npm:^2.1.0":
+  version: 2.1.0
+  resolution: "node-loader@npm:2.1.0"
   dependencies:
-    loader-utils: ^2.0.0
+    loader-utils: ^2.0.3
   peerDependencies:
     webpack: ^5.0.0
-  checksum: 9252a92b226c0e6fdd29fef92d9853d6c389a4c65119a32306dc12cee7886f2ab4dde333dda5e37df92283c34bd0267e98c384be6d548dbe69676e3343f549ea
+  checksum: c86312b510f49c001df1908437f3327314d29c7282c2a87cfb7067d6e35f255a0c67b5852a19ced9861c67fa109bab129ff3fe42d8e4d5cdbad39b6c35f09023
   languageName: node
   linkType: hard
 
@@ -12923,7 +12941,7 @@ __metadata:
     "@types/jest": ^29.5.12
     "@types/lodash": ^4.17.6
     "@types/node": ^20.14.9
-    copy-webpack-plugin: ^11.0.0
+    copy-webpack-plugin: ^13.0.0
     fork-ts-checker-webpack-plugin: ^9.0.2
     jest: ^29.7.0
     jest-junit: ^16.0.0
@@ -13188,6 +13206,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"picomatch@npm:^4.0.2":
+  version: 4.0.2
+  resolution: "picomatch@npm:4.0.2"
+  checksum: a7a5188c954f82c6585720e9143297ccd0e35ad8072231608086ca950bee672d51b0ef676254af0788205e59bd4e4deb4e7708769226bed725bf13370a7d1464
+  languageName: node
+  linkType: hard
+
 "pidtree@npm:^0.3.0":
   version: 0.3.1
   resolution: "pidtree@npm:0.3.1"
@@ -13381,14 +13406,14 @@ __metadata:
   dependencies:
     "@azure/batch": ^10.2.0
     "@azure/ms-rest-nodeauth": ^3.1.1
-    "@types/dotenv": ^8.2.0
+    "@types/dotenv": ^8.2.3
     "@types/jest": ^29.5.12
     "@types/lodash": ^4.17.6
     "@types/node": ^20.14.9
     applicationinsights: ^2.3.1
     azure-services: "workspace:*"
     common: "workspace:*"
-    copy-webpack-plugin: ^11.0.0
+    copy-webpack-plugin: ^13.0.0
     dotenv: ^16.4.7
     fork-ts-checker-webpack-plugin: ^9.0.2
     inversify: ^6.0.1
@@ -13398,7 +13423,7 @@ __metadata:
     logger: "workspace:*"
     mockdate: ^3.0.5
     moment: ^2.30.1
-    node-loader: ^2.0.0
+    node-loader: ^2.1.0
     npm-run-all: ^4.1.5
     reflect-metadata: ^0.2.2
     rimraf: ^6.0.1
@@ -13411,7 +13436,7 @@ __metadata:
     webpack: ^5.97.1
     webpack-cli: ^5.1.4
     webpack-ignore-dynamic-require: ^1.0.0
-    yargs: ^17.6.2
+    yargs: ^17.7.2
   languageName: unknown
   linkType: soft
 
@@ -13420,16 +13445,16 @@ __metadata:
   resolution: "privacy-scan-runner@workspace:packages/privacy-scan-runner"
   dependencies:
     "@azure/cosmos": ^4.0.0
-    "@types/dotenv": ^8.2.0
+    "@types/dotenv": ^8.2.3
     "@types/jest": ^29.5.12
     "@types/lodash": ^4.17.6
     "@types/node": ^20.14.9
     "@types/puppeteer": ^7.0.4
-    "@types/yargs": ^17.0.22
+    "@types/yargs": ^17.0.33
     applicationinsights: ^2.3.1
     azure-services: "workspace:*"
     common: "workspace:*"
-    copy-webpack-plugin: ^11.0.0
+    copy-webpack-plugin: ^13.0.0
     dotenv: ^16.4.7
     fork-ts-checker-webpack-plugin: ^9.0.2
     inversify: ^6.0.1
@@ -13439,7 +13464,7 @@ __metadata:
     logger: "workspace:*"
     mockdate: ^3.0.5
     moment: ^2.30.1
-    node-loader: ^2.0.0
+    node-loader: ^2.1.0
     npm-force-resolutions: ^0.0.10
     npm-run-all: ^4.1.5
     p-limit: ^3.1.0
@@ -13460,7 +13485,7 @@ __metadata:
     webpack: ^5.97.1
     webpack-cli: ^5.1.4
     webpack-ignore-dynamic-require: ^1.0.0
-    yargs: ^17.6.2
+    yargs: ^17.7.2
   languageName: unknown
   linkType: soft
 
@@ -14106,14 +14131,14 @@ __metadata:
   dependencies:
     "@azure/batch": ^10.2.0
     "@azure/ms-rest-nodeauth": ^3.1.1
-    "@types/dotenv": ^8.2.0
+    "@types/dotenv": ^8.2.3
     "@types/jest": ^29.5.12
     "@types/lodash": ^4.17.6
     "@types/node": ^20.14.9
     applicationinsights: ^2.3.1
     azure-services: "workspace:*"
     common: "workspace:*"
-    copy-webpack-plugin: ^11.0.0
+    copy-webpack-plugin: ^13.0.0
     dotenv: ^16.4.7
     fork-ts-checker-webpack-plugin: ^9.0.2
     inversify: ^6.0.1
@@ -14123,7 +14148,7 @@ __metadata:
     logger: "workspace:*"
     mockdate: ^3.0.5
     moment: ^2.30.1
-    node-loader: ^2.0.0
+    node-loader: ^2.1.0
     npm-run-all: ^4.1.5
     reflect-metadata: ^0.2.2
     rimraf: ^6.0.1
@@ -14136,7 +14161,7 @@ __metadata:
     webpack: ^5.97.1
     webpack-cli: ^5.1.4
     webpack-ignore-dynamic-require: ^1.0.0
-    yargs: ^17.6.2
+    yargs: ^17.7.2
   languageName: unknown
   linkType: soft
 
@@ -14145,16 +14170,16 @@ __metadata:
   resolution: "report-generator-runner@workspace:packages/report-generator-runner"
   dependencies:
     "@azure/cosmos": ^4.0.0
-    "@types/dotenv": ^8.2.0
+    "@types/dotenv": ^8.2.3
     "@types/jest": ^29.5.12
     "@types/lodash": ^4.17.6
     "@types/node": ^20.14.9
     "@types/puppeteer": ^7.0.4
-    "@types/yargs": ^17.0.22
+    "@types/yargs": ^17.0.33
     applicationinsights: ^2.3.1
     azure-services: "workspace:*"
     common: "workspace:*"
-    copy-webpack-plugin: ^11.0.0
+    copy-webpack-plugin: ^13.0.0
     dotenv: ^16.4.7
     fork-ts-checker-webpack-plugin: ^9.0.2
     inversify: ^6.0.1
@@ -14164,7 +14189,7 @@ __metadata:
     logger: "workspace:*"
     mockdate: ^3.0.5
     moment: ^2.30.1
-    node-loader: ^2.0.0
+    node-loader: ^2.1.0
     npm-force-resolutions: ^0.0.10
     npm-run-all: ^4.1.5
     p-limit: ^3.1.0
@@ -14184,7 +14209,7 @@ __metadata:
     webpack: ^5.97.1
     webpack-cli: ^5.1.4
     webpack-ignore-dynamic-require: ^1.0.0
-    yargs: ^17.6.2
+    yargs: ^17.7.2
   languageName: unknown
   linkType: soft
 
@@ -14653,15 +14678,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"schema-utils@npm:^4.0.0":
-  version: 4.0.0
-  resolution: "schema-utils@npm:4.0.0"
+"schema-utils@npm:^4.2.0":
+  version: 4.3.0
+  resolution: "schema-utils@npm:4.3.0"
   dependencies:
     "@types/json-schema": ^7.0.9
-    ajv: ^8.8.0
+    ajv: ^8.9.0
     ajv-formats: ^2.1.1
-    ajv-keywords: ^5.0.0
-  checksum: c843e92fdd1a5c145dbb6ffdae33e501867f9703afac67bdf35a685e49f85b1dcc10ea250033175a64bd9d31f0555bc6785b8359da0c90bcea30cf6dfbb55a8f
+    ajv-keywords: ^5.1.0
+  checksum: 3dbd9056727c871818eaf3cabeeb5c9e173ae2b17bbf2a9c7a2e49c220fa1a580e44df651c876aea3b4926cecf080730a39e28202cb63f2b68d99872b49cd37a
   languageName: node
   linkType: hard
 
@@ -14720,7 +14745,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"serialize-javascript@npm:^6.0.0, serialize-javascript@npm:^6.0.1":
+"serialize-javascript@npm:^6.0.1, serialize-javascript@npm:^6.0.2":
   version: 6.0.2
   resolution: "serialize-javascript@npm:6.0.2"
   dependencies:
@@ -14743,7 +14768,7 @@ __metadata:
     "@types/paralleljs": ^0.0.24
     "@types/puppeteer": ^7.0.4
     "@types/sha.js": ^2.4.4
-    "@types/yargs": ^17.0.22
+    "@types/yargs": ^17.0.33
     accessibility-insights-report: 5.2.0
     async-mutex: ^0.5.0
     axe-core: 4.10.2
@@ -14774,7 +14799,7 @@ __metadata:
     ts-jest: ^29.1.5
     typemoq: ^2.1.0
     typescript: ^5.5.3
-    yargs: ^17.6.2
+    yargs: ^17.7.2
   languageName: unknown
   linkType: soft
 
@@ -14888,16 +14913,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"shellcheck@npm:^3.0.0":
-  version: 3.0.0
-  resolution: "shellcheck@npm:3.0.0"
+"shellcheck@npm:^3.1.0":
+  version: 3.1.0
+  resolution: "shellcheck@npm:3.1.0"
   dependencies:
     decompress: ^4.2.1
     envalid: ^8.0.0
     global-agent: ^3.0.0
   bin:
     shellcheck: bin/shellcheck.js
-  checksum: 4f19f6d8f3c659715937e4d7c313103d20f2ee9c5be4b3a14916a3b49d5e926bc185ef853c1155ea3539287ef05cd822e866457bf27e4f3083adc1d4a2fe2b22
+  checksum: ff30299774b7cb733dd6483e247fa0d55878453a503a80fbcf354738b21d302e7ad55f7ebe3059beca98c8647b524d98bdccae30f5a5263d5230ae46c88e87c8
   languageName: node
   linkType: hard
 
@@ -15771,6 +15796,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"tinyglobby@npm:^0.2.12":
+  version: 0.2.12
+  resolution: "tinyglobby@npm:0.2.12"
+  dependencies:
+    fdir: ^6.4.3
+    picomatch: ^4.0.2
+  checksum: ef9357fa1b2b661afdccd315cb4995f5f36bce948faaace68aae85fe57bdd8f837883045c88efc50d3186bac6586e4ae2f31026b9a3aac061b884217e6092e23
+  languageName: node
+  linkType: hard
+
 "tldts-core@npm:^6.0.5":
   version: 6.0.5
   resolution: "tldts-core@npm:6.0.5"
@@ -16554,14 +16589,14 @@ __metadata:
   dependencies:
     "@azure/batch": ^10.2.0
     "@azure/ms-rest-nodeauth": ^3.1.1
-    "@types/dotenv": ^8.2.0
+    "@types/dotenv": ^8.2.3
     "@types/jest": ^29.5.12
     "@types/lodash": ^4.17.6
     "@types/node": ^20.14.9
     applicationinsights: ^2.3.1
     azure-services: "workspace:*"
     common: "workspace:*"
-    copy-webpack-plugin: ^11.0.0
+    copy-webpack-plugin: ^13.0.0
     dotenv: ^16.4.7
     fork-ts-checker-webpack-plugin: ^9.0.2
     inversify: ^6.0.1
@@ -16571,7 +16606,7 @@ __metadata:
     logger: "workspace:*"
     mockdate: ^3.0.5
     moment: ^2.30.1
-    node-loader: ^2.0.0
+    node-loader: ^2.1.0
     npm-run-all: ^4.1.5
     reflect-metadata: ^0.2.2
     rimraf: ^6.0.1
@@ -16584,7 +16619,7 @@ __metadata:
     webpack: ^5.97.1
     webpack-cli: ^5.1.4
     webpack-ignore-dynamic-require: ^1.0.0
-    yargs: ^17.6.2
+    yargs: ^17.7.2
   languageName: unknown
   linkType: soft
 
@@ -16596,7 +16631,7 @@ __metadata:
     applicationinsights: ^2.3.1
     azure-services: "workspace:*"
     common: "workspace:*"
-    copy-webpack-plugin: ^11.0.0
+    copy-webpack-plugin: ^13.0.0
     fork-ts-checker-webpack-plugin: ^9.0.2
     inversify: ^6.0.1
     jest: ^29.7.0
@@ -16605,7 +16640,7 @@ __metadata:
     logger: "workspace:*"
     mockdate: ^3.0.5
     moment: ^2.30.1
-    node-loader: ^2.0.0
+    node-loader: ^2.1.0
     npm-run-all: ^4.1.5
     reflect-metadata: ^0.2.2
     rimraf: ^6.0.1
@@ -16618,7 +16653,7 @@ __metadata:
     webpack: ^5.97.1
     webpack-cli: ^5.1.4
     webpack-ignore-dynamic-require: ^1.0.0
-    yargs: ^17.6.2
+    yargs: ^17.7.2
   languageName: unknown
   linkType: soft
 
@@ -16629,13 +16664,13 @@ __metadata:
     "@axe-core/puppeteer": 4.10.1
     "@azure/cosmos": ^4.0.0
     "@playwright/test": ^1.50.1
-    "@types/dotenv": ^8.2.0
+    "@types/dotenv": ^8.2.3
     "@types/jest": ^29.5.12
     "@types/lodash": ^4.17.6
     "@types/node": ^20.14.9
     "@types/puppeteer": ^7.0.4
     "@types/sha.js": ^2.4.4
-    "@types/yargs": ^17.0.22
+    "@types/yargs": ^17.0.33
     accessibility-insights-report: 5.2.0
     applicationinsights: ^2.3.1
     axe-core: 4.10.2
@@ -16643,7 +16678,7 @@ __metadata:
     axe-sarif-converter: ^3.0.0
     azure-services: "workspace:*"
     common: "workspace:*"
-    copy-webpack-plugin: ^11.0.0
+    copy-webpack-plugin: ^13.0.0
     dotenv: ^16.4.7
     fork-ts-checker-webpack-plugin: ^9.0.2
     inversify: ^6.0.1
@@ -16654,7 +16689,7 @@ __metadata:
     logger: "workspace:*"
     mockdate: ^3.0.5
     moment: ^2.30.1
-    node-loader: ^2.0.0
+    node-loader: ^2.1.0
     npm-force-resolutions: ^0.0.10
     npm-run-all: ^4.1.5
     p-limit: ^3.1.0
@@ -16677,7 +16712,7 @@ __metadata:
     webpack: ^5.97.1
     webpack-cli: ^5.1.4
     webpack-ignore-dynamic-require: ^1.0.0
-    yargs: ^17.6.2
+    yargs: ^17.7.2
   languageName: unknown
   linkType: soft
 
@@ -16687,14 +16722,14 @@ __metadata:
   dependencies:
     "@azure/batch": ^10.2.0
     "@azure/ms-rest-nodeauth": ^3.1.1
-    "@types/dotenv": ^8.2.0
+    "@types/dotenv": ^8.2.3
     "@types/jest": ^29.5.12
     "@types/lodash": ^4.17.6
     "@types/node": ^20.14.9
     applicationinsights: ^2.3.1
     azure-services: "workspace:*"
     common: "workspace:*"
-    copy-webpack-plugin: ^11.0.0
+    copy-webpack-plugin: ^13.0.0
     dotenv: ^16.4.7
     fork-ts-checker-webpack-plugin: ^9.0.2
     inversify: ^6.0.1
@@ -16703,7 +16738,7 @@ __metadata:
     lodash: ^4.17.21
     logger: "workspace:*"
     moment: ^2.30.1
-    node-loader: ^2.0.0
+    node-loader: ^2.1.0
     npm-run-all: ^4.1.5
     reflect-metadata: ^0.2.2
     rimraf: ^6.0.1
@@ -16716,7 +16751,7 @@ __metadata:
     webpack: ^5.97.1
     webpack-cli: ^5.1.4
     webpack-ignore-dynamic-require: ^1.0.0
-    yargs: ^17.6.2
+    yargs: ^17.7.2
   languageName: unknown
   linkType: soft
 
@@ -16725,18 +16760,18 @@ __metadata:
   resolution: "web-api-send-notification-runner@workspace:packages/web-api-send-notification-runner"
   dependencies:
     "@azure/cosmos": ^4.0.0
-    "@types/dotenv": ^8.2.0
+    "@types/dotenv": ^8.2.3
     "@types/got": ^9.6.11
     "@types/jest": ^29.5.12
     "@types/lodash": ^4.17.6
     "@types/node": ^20.14.9
     "@types/puppeteer": ^7.0.4
     "@types/sha.js": ^2.4.4
-    "@types/yargs": ^17.0.22
+    "@types/yargs": ^17.0.33
     applicationinsights: ^2.3.1
     azure-services: "workspace:*"
     common: "workspace:*"
-    copy-webpack-plugin: ^11.0.0
+    copy-webpack-plugin: ^13.0.0
     dotenv: ^16.4.7
     fork-ts-checker-webpack-plugin: ^9.0.2
     got: ^11.8.5
@@ -16746,7 +16781,7 @@ __metadata:
     lodash: ^4.17.21
     logger: "workspace:*"
     mockdate: ^3.0.5
-    node-loader: ^2.0.0
+    node-loader: ^2.1.0
     npm-run-all: ^4.1.5
     reflect-metadata: ^0.2.2
     rimraf: ^6.0.1
@@ -16760,7 +16795,7 @@ __metadata:
     webpack: ^5.97.1
     webpack-cli: ^5.1.4
     webpack-ignore-dynamic-require: ^1.0.0
-    yargs: ^17.6.2
+    yargs: ^17.7.2
   languageName: unknown
   linkType: soft
 
@@ -16769,7 +16804,7 @@ __metadata:
   resolution: "web-api@workspace:packages/web-api"
   dependencies:
     "@azure/functions": ^4.6.0
-    "@types/dotenv": ^8.2.0
+    "@types/dotenv": ^8.2.3
     "@types/jest": ^29.5.12
     "@types/lodash": ^4.17.6
     "@types/node": ^20.14.9
@@ -16777,7 +16812,7 @@ __metadata:
     azure-functions-core-tools: ^4.x
     azure-services: "workspace:*"
     common: "workspace:*"
-    copy-webpack-plugin: ^11.0.0
+    copy-webpack-plugin: ^13.0.0
     fork-ts-checker-webpack-plugin: ^9.0.2
     functional-tests: "workspace:*"
     inversify: ^6.0.1
@@ -16786,7 +16821,7 @@ __metadata:
     lodash: ^4.17.21
     logger: "workspace:*"
     moment: ^2.30.1
-    node-loader: ^2.0.0
+    node-loader: ^2.1.0
     npm-run-all: ^4.1.5
     reflect-metadata: ^0.2.2
     rimraf: ^6.0.1
@@ -16807,7 +16842,7 @@ __metadata:
   resolution: "web-workers@workspace:packages/web-workers"
   dependencies:
     "@azure/functions": ^4.6.0
-    "@types/dotenv": ^8.2.0
+    "@types/dotenv": ^8.2.3
     "@types/jest": ^29.5.12
     "@types/lodash": ^4.17.6
     "@types/node": ^20.14.9
@@ -16815,7 +16850,7 @@ __metadata:
     azure-functions-core-tools: ^4.x
     azure-services: "workspace:*"
     common: "workspace:*"
-    copy-webpack-plugin: ^11.0.0
+    copy-webpack-plugin: ^13.0.0
     durable-functions: ^3.1.0
     fork-ts-checker-webpack-plugin: ^9.0.2
     functional-tests: "workspace:*"
@@ -16826,7 +16861,7 @@ __metadata:
     logger: "workspace:*"
     mockdate: ^3.0.5
     moment: ^2.30.1
-    node-loader: ^2.0.0
+    node-loader: ^2.1.0
     npm-run-all: ^4.1.5
     p-limit: ^3.1.0
     reflect-metadata: ^0.2.2
@@ -17316,21 +17351,6 @@ __metadata:
     y18n: ^5.0.5
     yargs-parser: ^21.0.0
   checksum: 00d58a2c052937fa044834313f07910fd0a115dec5ee35919e857eeee3736b21a4eafa8264535800ba8bac312991ce785ecb8a51f4d2cc8c4676d865af1cfbde
-  languageName: node
-  linkType: hard
-
-"yargs@npm:^17.6.2":
-  version: 17.6.2
-  resolution: "yargs@npm:17.6.2"
-  dependencies:
-    cliui: ^8.0.1
-    escalade: ^3.1.1
-    get-caller-file: ^2.0.5
-    require-directory: ^2.1.1
-    string-width: ^4.2.3
-    y18n: ^5.0.5
-    yargs-parser: ^21.1.1
-  checksum: 47da1b0d854fa16d45a3ded57b716b013b2179022352a5f7467409da5a04a1eef5b3b3d97a2dfc13e8bbe5f2ffc0afe3bc6a4a72f8254e60f5a4bd7947138643
   languageName: node
   linkType: hard
 

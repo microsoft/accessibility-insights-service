@@ -20,11 +20,11 @@
     "homepage": "https://github.com/Microsoft/accessibility-insights-service#readme",
     "devDependencies": {
         "@types/chai": "^4.3.4",
-        "@types/dotenv": "^8.2.0",
+        "@types/dotenv": "^8.2.3",
         "@types/jest": "^29.5.12",
         "@types/lodash": "^4.17.6",
         "@types/node": "^20.14.9",
-        "copy-webpack-plugin": "^11.0.0",
+        "copy-webpack-plugin": "^13.0.0",
         "jest": "^29.7.0",
         "jest-junit": "^16.0.0",
         "npm-run-all": "^4.1.5",
@@ -48,6 +48,6 @@
         "reflect-metadata": "^0.2.2",
         "service-library": "workspace:*",
         "web-api-client": "workspace:*",
-        "yargs": "^17.6.2"
+        "yargs": "^17.7.2"
     }
 }
