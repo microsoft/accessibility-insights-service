@@ -24,6 +24,7 @@
     "devDependencies": {
         "@types/jest": "^29.5.12",
         "@types/node": "^20.14.9",
+        "@types/node-fetch": "^2.6.12",
         "@types/paralleljs": "^0.0.24",
         "@types/puppeteer": "^7.0.4",
         "@types/sha.js": "^2.4.4",
@@ -40,10 +41,10 @@
         "typescript": "^5.5.3"
     },
     "dependencies": {
-        "@azure/cosmos": "^4.0.0",
+        "@azure/cosmos": "^4.3.0",
         "@azure/functions": "^4.6.0",
-        "@azure/identity": "^4.5.0",
-        "@azure/storage-blob": "^12.12.0",
+        "@azure/identity": "^4.8.0",
+        "@azure/storage-blob": "^12.27.0",
         "@crawlee/puppeteer": "^3.12.2",
         "accessibility-insights-report": "5.2.0",
         "async-mutex": "^0.5.0",
@@ -56,7 +57,7 @@
         "lodash": "^4.17.21",
         "logger": "workspace:*",
         "moment": "^2.30.1",
-        "node-fetch": "^2.6.7",
+        "node-fetch": "^3.3.2",
         "p-limit": "^3.1.0",
         "paralleljs": "^1.1.0",
         "privacy-scan-core": "workspace:*",
