@@ -4732,7 +4732,7 @@ __metadata:
     patch-package: ^8.0.0
     prettier: 2.8.3
     rimraf: ^6.0.1
-    shellcheck: ^3.0.0
+    shellcheck: ^3.1.0
     simple-git: ^3.27.0
     syncpack: ^8.4.11
     ts-jest: ^29.1.5
@@ -14913,16 +14913,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"shellcheck@npm:^3.0.0":
-  version: 3.0.0
-  resolution: "shellcheck@npm:3.0.0"
+"shellcheck@npm:^3.1.0":
+  version: 3.1.0
+  resolution: "shellcheck@npm:3.1.0"
   dependencies:
     decompress: ^4.2.1
     envalid: ^8.0.0
     global-agent: ^3.0.0
   bin:
     shellcheck: bin/shellcheck.js
-  checksum: 4f19f6d8f3c659715937e4d7c313103d20f2ee9c5be4b3a14916a3b49d5e926bc185ef853c1155ea3539287ef05cd822e866457bf27e4f3083adc1d4a2fe2b22
+  checksum: ff30299774b7cb733dd6483e247fa0d55878453a503a80fbcf354738b21d302e7ad55f7ebe3059beca98c8647b524d98bdccae30f5a5263d5230ae46c88e87c8
   languageName: node
   linkType: hard
 
