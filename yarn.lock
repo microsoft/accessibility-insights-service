@@ -4040,12 +4040,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/yargs@npm:^17.0.22":
-  version: 17.0.22
-  resolution: "@types/yargs@npm:17.0.22"
+"@types/yargs@npm:^17.0.33":
+  version: 17.0.33
+  resolution: "@types/yargs@npm:17.0.33"
   dependencies:
     "@types/yargs-parser": "*"
-  checksum: 0773523fda71bafdc52f13f5970039e535a353665a60ba9261149a5c9c2b908242e6e77fbb7a8c06931ec78ce889d64d09673c68ba23eb5f5742d5385d0d1982
+  checksum: ee013f257472ab643cb0584cf3e1ff9b0c44bca1c9ba662395300a7f1a6c55fa9d41bd40ddff42d99f5d95febb3907c9ff600fbcb92dadbec22c6a76de7e1236
   languageName: node
   linkType: hard
 
@@ -4606,7 +4606,7 @@ __metadata:
     ts-jest: ^29.1.5
     typemoq: ^2.1.0
     typescript: ^5.5.3
-    yargs: ^17.6.2
+    yargs: ^17.7.2
   languageName: unknown
   linkType: soft
 
@@ -4690,7 +4690,7 @@ __metadata:
     webpack: ^5.97.1
     webpack-cli: ^5.1.4
     webpack-node-externals: ^3.0.0
-    yargs: ^17.6.2
+    yargs: ^17.7.2
   bin:
     ai-scan: dist/ai-scan-cli.js
   languageName: unknown
@@ -8864,7 +8864,7 @@ __metadata:
     typemoq: ^2.1.0
     typescript: ^5.5.3
     web-api-client: "workspace:*"
-    yargs: ^17.6.2
+    yargs: ^17.7.2
   languageName: unknown
   linkType: soft
 
@@ -9501,7 +9501,7 @@ __metadata:
     webpack: ^5.97.1
     webpack-cli: ^5.1.4
     webpack-ignore-dynamic-require: ^1.0.0
-    yargs: ^17.6.2
+    yargs: ^17.7.2
   languageName: unknown
   linkType: soft
 
@@ -13429,7 +13429,7 @@ __metadata:
     webpack: ^5.97.1
     webpack-cli: ^5.1.4
     webpack-ignore-dynamic-require: ^1.0.0
-    yargs: ^17.6.2
+    yargs: ^17.7.2
   languageName: unknown
   linkType: soft
 
@@ -13443,7 +13443,7 @@ __metadata:
     "@types/lodash": ^4.17.6
     "@types/node": ^20.14.9
     "@types/puppeteer": ^7.0.4
-    "@types/yargs": ^17.0.22
+    "@types/yargs": ^17.0.33
     applicationinsights: ^2.3.1
     azure-services: "workspace:*"
     common: "workspace:*"
@@ -13478,7 +13478,7 @@ __metadata:
     webpack: ^5.97.1
     webpack-cli: ^5.1.4
     webpack-ignore-dynamic-require: ^1.0.0
-    yargs: ^17.6.2
+    yargs: ^17.7.2
   languageName: unknown
   linkType: soft
 
@@ -14154,7 +14154,7 @@ __metadata:
     webpack: ^5.97.1
     webpack-cli: ^5.1.4
     webpack-ignore-dynamic-require: ^1.0.0
-    yargs: ^17.6.2
+    yargs: ^17.7.2
   languageName: unknown
   linkType: soft
 
@@ -14168,7 +14168,7 @@ __metadata:
     "@types/lodash": ^4.17.6
     "@types/node": ^20.14.9
     "@types/puppeteer": ^7.0.4
-    "@types/yargs": ^17.0.22
+    "@types/yargs": ^17.0.33
     applicationinsights: ^2.3.1
     azure-services: "workspace:*"
     common: "workspace:*"
@@ -14202,7 +14202,7 @@ __metadata:
     webpack: ^5.97.1
     webpack-cli: ^5.1.4
     webpack-ignore-dynamic-require: ^1.0.0
-    yargs: ^17.6.2
+    yargs: ^17.7.2
   languageName: unknown
   linkType: soft
 
@@ -14761,7 +14761,7 @@ __metadata:
     "@types/paralleljs": ^0.0.24
     "@types/puppeteer": ^7.0.4
     "@types/sha.js": ^2.4.4
-    "@types/yargs": ^17.0.22
+    "@types/yargs": ^17.0.33
     accessibility-insights-report: 5.2.0
     async-mutex: ^0.5.0
     axe-core: 4.10.2
@@ -14792,7 +14792,7 @@ __metadata:
     ts-jest: ^29.1.5
     typemoq: ^2.1.0
     typescript: ^5.5.3
-    yargs: ^17.6.2
+    yargs: ^17.7.2
   languageName: unknown
   linkType: soft
 
@@ -16612,7 +16612,7 @@ __metadata:
     webpack: ^5.97.1
     webpack-cli: ^5.1.4
     webpack-ignore-dynamic-require: ^1.0.0
-    yargs: ^17.6.2
+    yargs: ^17.7.2
   languageName: unknown
   linkType: soft
 
@@ -16646,7 +16646,7 @@ __metadata:
     webpack: ^5.97.1
     webpack-cli: ^5.1.4
     webpack-ignore-dynamic-require: ^1.0.0
-    yargs: ^17.6.2
+    yargs: ^17.7.2
   languageName: unknown
   linkType: soft
 
@@ -16663,7 +16663,7 @@ __metadata:
     "@types/node": ^20.14.9
     "@types/puppeteer": ^7.0.4
     "@types/sha.js": ^2.4.4
-    "@types/yargs": ^17.0.22
+    "@types/yargs": ^17.0.33
     accessibility-insights-report: 5.2.0
     applicationinsights: ^2.3.1
     axe-core: 4.10.2
@@ -16705,7 +16705,7 @@ __metadata:
     webpack: ^5.97.1
     webpack-cli: ^5.1.4
     webpack-ignore-dynamic-require: ^1.0.0
-    yargs: ^17.6.2
+    yargs: ^17.7.2
   languageName: unknown
   linkType: soft
 
@@ -16744,7 +16744,7 @@ __metadata:
     webpack: ^5.97.1
     webpack-cli: ^5.1.4
     webpack-ignore-dynamic-require: ^1.0.0
-    yargs: ^17.6.2
+    yargs: ^17.7.2
   languageName: unknown
   linkType: soft
 
@@ -16760,7 +16760,7 @@ __metadata:
     "@types/node": ^20.14.9
     "@types/puppeteer": ^7.0.4
     "@types/sha.js": ^2.4.4
-    "@types/yargs": ^17.0.22
+    "@types/yargs": ^17.0.33
     applicationinsights: ^2.3.1
     azure-services: "workspace:*"
     common: "workspace:*"
@@ -16788,7 +16788,7 @@ __metadata:
     webpack: ^5.97.1
     webpack-cli: ^5.1.4
     webpack-ignore-dynamic-require: ^1.0.0
-    yargs: ^17.6.2
+    yargs: ^17.7.2
   languageName: unknown
   linkType: soft
 
@@ -17344,21 +17344,6 @@ __metadata:
     y18n: ^5.0.5
     yargs-parser: ^21.0.0
   checksum: 00d58a2c052937fa044834313f07910fd0a115dec5ee35919e857eeee3736b21a4eafa8264535800ba8bac312991ce785ecb8a51f4d2cc8c4676d865af1cfbde
-  languageName: node
-  linkType: hard
-
-"yargs@npm:^17.6.2":
-  version: 17.6.2
-  resolution: "yargs@npm:17.6.2"
-  dependencies:
-    cliui: ^8.0.1
-    escalade: ^3.1.1
-    get-caller-file: ^2.0.5
-    require-directory: ^2.1.1
-    string-width: ^4.2.3
-    y18n: ^5.0.5
-    yargs-parser: ^21.1.1
-  checksum: 47da1b0d854fa16d45a3ded57b716b013b2179022352a5f7467409da5a04a1eef5b3b3d97a2dfc13e8bbe5f2ffc0afe3bc6a4a72f8254e60f5a4bd7947138643
   languageName: node
   linkType: hard
 

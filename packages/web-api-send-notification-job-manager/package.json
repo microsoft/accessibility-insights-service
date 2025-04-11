@@ -54,6 +54,6 @@
         "reflect-metadata": "^0.2.2",
         "service-library": "workspace:*",
         "storage-documents": "workspace:*",
-        "yargs": "^17.6.2"
+        "yargs": "^17.7.2"
     }
 }

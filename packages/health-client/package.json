@@ -48,6 +48,6 @@
         "reflect-metadata": "^0.2.2",
         "service-library": "workspace:*",
         "web-api-client": "workspace:*",
-        "yargs": "^17.6.2"
+        "yargs": "^17.7.2"
     }
 }
