@@ -2601,10 +2601,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@medv/finder@npm:^2.1.0":
-  version: 2.1.0
-  resolution: "@medv/finder@npm:2.1.0"
-  checksum: eedf5d4cb2733be09502f8ae1514ba7f5777ac074a833dba8f2fcf3899af25a029e0bdd379d58586cb1a73539ed56fe671686b0e1544b59bd5d13acc3ec23bbf
+"@medv/finder@npm:^4.0.2":
+  version: 4.0.2
+  resolution: "@medv/finder@npm:4.0.2"
+  checksum: 59883612cec628e41884806a550ebbe25d9d1222d824da181f16545968fd81a6bf13c54d0a02150612facbc8171952dcc1ef47c3b3cdd7058edbb5a666bd0857
   languageName: node
   linkType: hard
 
@@ -4571,7 +4571,7 @@ __metadata:
     "@axe-core/puppeteer": 4.10.1
     "@crawlee/browser-pool": ^3.12.2
     "@crawlee/puppeteer": ^3.12.2
-    "@medv/finder": ^2.1.0
+    "@medv/finder": ^4.0.2
     "@rollup/plugin-commonjs": ^24.0.1
     "@rollup/plugin-node-resolve": ^15.3.0
     "@sindresorhus/fnv1a": ^2.0.1
@@ -4635,7 +4635,7 @@ __metadata:
     "@axe-core/puppeteer": 4.10.1
     "@crawlee/browser-pool": ^3.12.2
     "@crawlee/puppeteer": ^3.12.2
-    "@medv/finder": ^2.1.0
+    "@medv/finder": ^4.0.2
     "@opentelemetry/api": ^1.4.1
     "@opentelemetry/exporter-metrics-otlp-grpc": ^0.57.1
     "@opentelemetry/resources": ^1.15.0
