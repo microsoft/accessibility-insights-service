@@ -7019,13 +7019,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"deep-equal-in-any-order@npm:^2.0.2":
-  version: 2.0.2
-  resolution: "deep-equal-in-any-order@npm:2.0.2"
+"deep-equal-in-any-order@npm:^2.0.6":
+  version: 2.0.6
+  resolution: "deep-equal-in-any-order@npm:2.0.6"
   dependencies:
     lodash.mapvalues: ^4.6.0
     sort-any: ^2.0.0
-  checksum: 9459fd4832f4c03130fbc097ab4e94773271693d9fb97e76ca3909a3905bd3d573988d9f155df9763017265ec4ffdd9771b7282e0d6bfbe87888f0df38ca77a8
+  checksum: c975530c2455a15c835306bf388e9c5f7a79b6a45ff0c9c9c5c3ba089c36613ffa7b5b63031ec666e5209f7c7b035155039575d6b7c9876b9cfb7b410af3de2f
   languageName: node
   linkType: hard
 
@@ -8847,7 +8847,7 @@ __metadata:
     azure-services: "workspace:*"
     chai: ^4.3.7
     common: "workspace:*"
-    deep-equal-in-any-order: ^2.0.2
+    deep-equal-in-any-order: ^2.0.6
     dotenv: ^16.4.7
     inversify: ^6.0.1
     jest: ^29.7.0
