@@ -2,15 +2,17 @@
 // Licensed under the MIT License.
 
 import { injectable } from 'inversify';
-import { ReportFormat } from 'storage-documents';
-import { AxeScanResults } from 'scanner-global-library';
+import { ReportFormat, ReportSource } from 'storage-documents';
+import { ReportResult } from 'scanner-global-library';
 import { AxeResultConverter } from './axe-result-converter';
 
 @injectable()
 export class AxeResultSnapshotConverter implements AxeResultConverter {
     public readonly targetReportFormat: ReportFormat = 'page.mhtml';
 
-    public convert(axeScanResults: AxeScanResults): string {
-        return axeScanResults.pageSnapshot;
+    public readonly targetReportSource: ReportSource[] = ['accessibility-scan'];
+
+    public convert(reportResult: ReportResult): string {
+        return reportResult.pageSnapshot;
     }
 }

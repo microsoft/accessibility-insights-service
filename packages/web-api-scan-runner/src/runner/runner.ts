@@ -3,7 +3,7 @@
 
 import { inject, injectable } from 'inversify';
 import { GlobalLogger } from 'logger';
-import { AxeScanResults } from 'scanner-global-library';
+import { AxeScanResults, ReportResult } from 'scanner-global-library';
 import {
     OnDemandPageScanRunResultProvider,
     WebsiteScanDataProvider,
@@ -13,7 +13,6 @@ import {
     RunnerScanMetadata,
 } from 'service-library';
 import {
-    OnDemandPageScanReport,
     OnDemandPageScanResult,
     OnDemandPageScanRunState,
     OnDemandScanResult,
@@ -21,13 +20,15 @@ import {
     ReportGeneratorRequest,
     KnownPage,
     WebsiteScanData,
+    ScanRunDetail,
 } from 'storage-documents';
 import { System, ServiceConfiguration, GuidGenerator, ScanRunTimeConfig } from 'common';
 import { isEmpty, isString } from 'lodash';
 import { ReportGenerator } from '../report-generator/report-generator';
 import { RunnerScanMetadataConfig } from '../runner-scan-metadata-config';
 import { ScanRunnerTelemetryManager } from '../scan-runner-telemetry-manager';
-import { PageScanProcessor } from '../processor/page-scan-processor';
+import { PageScanProcessor, ScanProcessorResult } from '../processor/page-scan-processor';
+import { conditionsToDispatchScanner } from '../scanner/scanner-dispatcher';
 
 @injectable()
 export class Runner {
@@ -54,7 +55,7 @@ export class Runner {
         this.logger.setCommonProperties({ scanId: runnerScanMetadata.id, url: runnerScanMetadata.url });
         this.logger.logInfo('Starting accessibility page scan task.');
 
-        let pageScanResult = await this.updateScanRunStateToRunning(runnerScanMetadata.id);
+        const pageScanResult = await this.updateScanRunStateToRunning(runnerScanMetadata.id);
         if (pageScanResult === undefined) {
             this.logger.logWarn('Page scan result document not found in storage.');
 
@@ -72,33 +73,15 @@ export class Runner {
             if (axeScanResults?.unscannable === true) {
                 // unscannable URL
                 this.setRunResult(pageScanResult, 'unscannable', axeScanResults.scannedUrl, axeScanResults.error);
-            } else if (axeScanResults.error === undefined) {
-                // axe scan completed successfully
-                await this.onCompletedScan(axeScanResults, pageScanResult);
+            } else if (axeScanResults.error === undefined && scanProcessorResult.agentResults?.result !== 'failed') {
+                // scan completed successfully
+                await this.onCompletedScan(scanProcessorResult, pageScanResult);
             } else {
-                // axe scan has failed
+                // scan has failed
                 await this.onFailedScan(axeScanResults, pageScanResult);
             }
 
-            pageScanResult = {
-                ...pageScanResult,
-                run: {
-                    ...pageScanResult.run,
-                    pageTitle: axeScanResults?.pageTitle,
-                    pageResponseCode: axeScanResults?.pageResponseCode,
-                },
-                ...(isEmpty({
-                    ...pageScanResult.browserValidationResult,
-                    ...scanProcessorResult?.browserValidationResult,
-                })
-                    ? {}
-                    : {
-                          browserValidationResult: {
-                              ...pageScanResult.browserValidationResult,
-                              ...scanProcessorResult?.browserValidationResult,
-                          },
-                      }),
-            };
+            this.setPageScanResult(pageScanResult, scanProcessorResult);
         } catch (error) {
             const errorMessage = System.serializeError(error);
             this.setRunResult(pageScanResult, 'failed', axeScanResults?.scannedUrl, errorMessage);
@@ -109,7 +92,7 @@ export class Runner {
             this.telemetryManager.trackScanCompleted();
         }
 
-        websiteScanData = await this.updateScanResult(runnerScanMetadata, pageScanResult, websiteScanData);
+        websiteScanData = await this.updateScanResultDocument(runnerScanMetadata, pageScanResult, websiteScanData);
         if (this.isScanWorkflowCompleted(pageScanResult) || (await this.isPageScanFailed(pageScanResult))) {
             await this.scanNotificationProcessor.sendScanCompletionNotification(pageScanResult, websiteScanData);
         }
@@ -117,25 +100,59 @@ export class Runner {
         this.logger.logInfo('Accessibility page scan task completed.');
     }
 
-    private async onCompletedScan(axeScanResults: AxeScanResults, pageScanResult: OnDemandPageScanResult): Promise<void> {
-        pageScanResult.scanResult = this.getScanStatus(axeScanResults);
-        pageScanResult.reports = await this.generateScanReports(axeScanResults);
+    private async onCompletedScan(scanProcessorResult: ScanProcessorResult, pageScanResult: OnDemandPageScanResult): Promise<void> {
+        pageScanResult.scanResult = this.evaluateAxeScanResults(scanProcessorResult.axeScanResults);
+        await this.generateScanReports(scanProcessorResult, pageScanResult);
 
         if (this.isScanWorkflowCompleted(pageScanResult)) {
-            this.setRunResult(pageScanResult, 'completed', axeScanResults.scannedUrl);
+            this.setRunResult(pageScanResult, 'completed', scanProcessorResult.axeScanResults.scannedUrl);
         } else {
             await this.sendGenerateConsolidatedReportRequest(pageScanResult);
-            this.setRunResult(pageScanResult, 'report', axeScanResults.scannedUrl);
+            this.setRunResult(pageScanResult, 'report', scanProcessorResult.axeScanResults.scannedUrl);
         }
     }
 
     private async onFailedScan(axeScanResults: AxeScanResults, pageScanResult: OnDemandPageScanResult): Promise<void> {
         this.setRunResult(pageScanResult, 'failed', axeScanResults.scannedUrl, axeScanResults.error);
-        this.logger.logError('Browser has failed to scan a page.', { error: JSON.stringify(axeScanResults.error) });
+        this.logger.logError('Scanner has failed to scan a page.', { error: JSON.stringify(axeScanResults.error) });
         this.telemetryManager.trackBrowserScanFailed();
     }
 
-    private async updateScanResult(
+    private setPageScanResult(pageScanResult: OnDemandPageScanResult, scanProcessorResult: ScanProcessorResult): void {
+        pageScanResult.run = {
+            ...pageScanResult.run,
+            pageTitle: scanProcessorResult.axeScanResults?.pageTitle,
+            pageResponseCode: scanProcessorResult.axeScanResults?.pageResponseCode,
+        };
+
+        // Combine accessibility scan results with agents results
+        if (!isEmpty(scanProcessorResult.agentResults)) {
+            const agentRunState: ScanRunDetail = {
+                name: 'accessibility-agent',
+                state: scanProcessorResult.agentResults.result,
+                timestamp: new Date().toJSON(),
+                error: scanProcessorResult.agentResults.error,
+            };
+            const scanRunDetails = isEmpty(pageScanResult.run.scanRunDetails)
+                ? [agentRunState]
+                : [agentRunState, ...pageScanResult.run.scanRunDetails.filter((detail) => !['accessibility-agent'].includes(detail.name))];
+            pageScanResult.run = {
+                ...pageScanResult.run,
+                scanRunDetails,
+            };
+        }
+
+        // Combine browser validation results
+        const browserValidationResult = {
+            ...pageScanResult.browserValidationResult,
+            ...scanProcessorResult.browserValidationResult,
+        };
+        if (!isEmpty(browserValidationResult)) {
+            pageScanResult.browserValidationResult = browserValidationResult;
+        }
+    }
+
+    private async updateScanResultDocument(
         runnerScanMetadata: RunnerScanMetadata,
         pageScanResult: Partial<OnDemandPageScanResult>,
         websiteScanData: WebsiteScanData,
@@ -160,12 +177,43 @@ export class Runner {
 
     private async updateScanRunStateToRunning(scanId: string): Promise<OnDemandPageScanResult> {
         this.logger.logInfo(`Updating page scan run state to 'running'.`);
+
+        // Read the existing page scan run result
+        const pageScanResult = await this.onDemandPageScanRunResultProvider.readScanRun(scanId);
+
+        // Delete the existing reports and run states if there are any pending scanner results
+        const scannerResultToKeep: string[] = [];
+        if (!isEmpty(pageScanResult.run?.scanRunDetails)) {
+            pageScanResult.run.scanRunDetails = pageScanResult.run.scanRunDetails.map((detail) => {
+                if (conditionsToDispatchScanner.includes(detail.state)) {
+                    return {
+                        name: detail.name,
+                        state: 'pending',
+                        timestamp: new Date().toJSON(),
+                        error: null,
+                        details: null,
+                    } as ScanRunDetail;
+                } else {
+                    scannerResultToKeep.push(detail.name);
+
+                    return detail;
+                }
+            });
+        }
+        if (scannerResultToKeep.length > 0 && !isEmpty(pageScanResult.reports)) {
+            pageScanResult.reports = pageScanResult.reports.filter((r) => scannerResultToKeep.includes(r.source));
+        } else {
+            pageScanResult.reports = undefined;
+        }
+
+        // Update the page scan run state to 'running'
         const partialPageScanResult: Partial<OnDemandPageScanResult> = {
             id: scanId,
             run: {
                 state: 'running',
                 timestamp: new Date().toJSON(),
                 error: null,
+                scanRunDetails: isEmpty(pageScanResult.run?.scanRunDetails) ? null : pageScanResult.run.scanRunDetails,
             },
             scanResult: null,
             reports: null,
@@ -182,12 +230,20 @@ export class Runner {
         return response.result;
     }
 
-    private async generateScanReports(axeResults: AxeScanResults): Promise<OnDemandPageScanReport[]> {
+    private async generateScanReports(scanProcessorResult: ScanProcessorResult, pageScanResult: OnDemandPageScanResult): Promise<void> {
         this.logger.logInfo(`Generating reports from scan results.`);
-        const reports = this.reportGenerator.generateReports(axeResults);
-        const availableReports = reports.filter((r) => !isEmpty(r.content));
 
-        return this.reportWriter.writeBatch(availableReports);
+        // Generate reports for accessibility scan results
+        const reportResults: ReportResult[] = [{ reportSource: 'accessibility-scan', ...scanProcessorResult.axeScanResults }];
+        // Generate reports for agent scan results
+        if (!isEmpty(scanProcessorResult.agentResults?.axeResults)) {
+            reportResults.push({ reportSource: 'accessibility-agent', ...scanProcessorResult.agentResults });
+        }
+        const reports = this.reportGenerator.generateReports(...reportResults);
+
+        // Save reports for accessibility scan results
+        const availableReports = reports.filter((r) => !isEmpty(r.content));
+        pageScanResult.reports = await this.reportWriter.writeBatch(availableReports);
     }
 
     private setRunResult(
@@ -215,11 +271,11 @@ export class Runner {
         }
     }
 
-    private getScanStatus(axeResults: AxeScanResults): OnDemandScanResult {
-        if (axeResults?.results?.violations !== undefined && axeResults.results.violations.length > 0) {
+    private evaluateAxeScanResults(axeResults: AxeScanResults): OnDemandScanResult {
+        if (axeResults?.axeResults?.violations !== undefined && axeResults.axeResults.violations.length > 0) {
             return {
                 state: 'fail',
-                issueCount: axeResults.results.violations.reduce((a, b) => a + b.nodes.length, 0),
+                issueCount: axeResults.axeResults.violations.reduce((a, b) => a + b.nodes.length, 0),
             };
         } else {
             return {

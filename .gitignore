@@ -16,6 +16,7 @@ dist*
 drop/
 test-results/
 out/
+a11y_agent/
 crawler_storage*
 undefined*
 /data*

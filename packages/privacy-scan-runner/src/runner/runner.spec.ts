@@ -249,7 +249,7 @@ function setupProcessScanResult(): void {
         } else {
             loggerMock
                 .setup((o) =>
-                    o.logError(`Browser has failed to scan a webpage.`, { error: System.serializeError(privacyScanResults.error) }),
+                    o.logError(`Scanner has failed to scan a webpage.`, { error: System.serializeError(privacyScanResults.error) }),
                 )
                 .verifiable();
         }

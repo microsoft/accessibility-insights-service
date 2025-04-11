@@ -59,8 +59,9 @@ describe(PrivacyScanCombinedReportProvider, () => {
                 etag,
                 report: {
                     reportId: fileId,
-                    href: filePath,
                     format: 'consolidated.json',
+                    source: 'privacy-scan',
+                    href: filePath,
                 },
             };
             setupSave(resultsString, 200);
@@ -75,8 +76,9 @@ describe(PrivacyScanCombinedReportProvider, () => {
                 etag,
                 report: {
                     reportId: fileId,
-                    href: filePath,
                     format: 'consolidated.json',
+                    source: 'privacy-scan',
+                    href: filePath,
                 },
             };
             setupSave(resultsString, 200, { ifMatchEtag: etag });

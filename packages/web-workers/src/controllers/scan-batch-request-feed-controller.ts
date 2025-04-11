@@ -26,6 +26,7 @@ import {
     ReportGroupRequest,
     ScanGroupType,
     ScanRunBatchRequest,
+    ScanRunDetail,
     ScanType,
     WebsiteScanData,
 } from 'storage-documents';
@@ -103,7 +104,13 @@ export class ScanBatchRequestFeedController extends WebController {
                         scanGroupId: websiteScanData.scanGroupId,
                         scanGroupType: websiteScanData.scanGroupType,
                     };
-
+                    const scanDefinitionsRunState: ScanRunDetail[] = request.scanDefinitions?.map((scanDefinition) => {
+                        return {
+                            name: scanDefinition.name,
+                            state: 'pending',
+                            timestamp: new Date().toJSON(),
+                        };
+                    });
                     const dbDocument: OnDemandPageScanResult = {
                         schemaVersion: '2',
                         id: request.scanId,
@@ -118,14 +125,16 @@ export class ScanBatchRequestFeedController extends WebController {
                             request.scanId,
                         ),
                         websiteScanRef,
-                        ...(request.authenticationType === undefined ? {} : { authentication: { hint: request.authenticationType } }),
+                        ...(request.scanDefinitions === undefined ? {} : { scanDefinitions: request.scanDefinitions }),
                         ...(request.privacyScan === undefined ? {} : { privacyScan: request.privacyScan }),
+                        ...(request.authenticationType === undefined ? {} : { authentication: { hint: request.authenticationType } }),
                         ...(convertToBrowserValidationResult(request.browserValidations) === undefined
                             ? {}
                             : { browserValidationResult: convertToBrowserValidationResult(request.browserValidations) }),
                         run: {
                             state: 'accepted',
                             timestamp: new Date().toJSON(),
+                            scanRunDetails: scanDefinitionsRunState ?? [],
                         },
                         ...(isEmpty(request.scanNotifyUrl)
                             ? {}
@@ -158,7 +167,7 @@ export class ScanBatchRequestFeedController extends WebController {
             deepScanId: this.getDeepScanId(request),
             knownPages: request.site?.knownPages
                 ? request.site.knownPages.map((url) => {
-                      return { url };
+                      return { url, source: 'request' } as KnownPage;
                   })
                 : [],
             discoveryPatterns: request.site?.discoveryPatterns?.length > 0 ? request.site.discoveryPatterns : undefined,
@@ -195,6 +204,7 @@ export class ScanBatchRequestFeedController extends WebController {
                         itemType: ItemType.onDemandPageScanRequest,
                         partitionKey: PartitionKey.pageScanRequestDocuments,
                         ...(isEmpty(request.reportGroups) ? {} : { reportGroups: request.reportGroups }),
+                        ...(request.scanDefinitions === undefined ? {} : { scanDefinitions: request.scanDefinitions }),
                         ...(request.privacyScan === undefined ? {} : { privacyScan: request.privacyScan }),
                         ...(request.authenticationType === undefined ? {} : { authenticationType: request.authenticationType }),
                         ...(request.browserValidations === undefined ? {} : { browserValidations: request.browserValidations }),
@@ -274,7 +284,15 @@ export class ScanBatchRequestFeedController extends WebController {
     }
 
     private getScanType(request: ScanRunBatchRequest): ScanType {
-        return request.scanType ?? (request.privacyScan ? 'privacy' : 'accessibility');
+        if (!isEmpty(request.scanType)) {
+            return request.scanType;
+        }
+
+        if (!isEmpty(request.privacyScan)) {
+            return 'privacy';
+        }
+
+        return 'accessibility';
     }
 
     // Gets deep scan limit based on request's know pages size

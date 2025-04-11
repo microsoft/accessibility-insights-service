@@ -3,22 +3,21 @@
 
 import 'reflect-metadata';
 
-import { IMock, It, Mock, Times } from 'typemoq';
+import { IMock, Mock, Times } from 'typemoq';
 import { GlobalLogger } from 'logger';
 import { AxeScanResults, Page, BrowserError, ResourceAuthenticationResult } from 'scanner-global-library';
 import { OnDemandPageScanResult, WebsiteScanData } from 'storage-documents';
 import { cloneDeep } from 'lodash';
-import { DeepScanner, PageMetadata, PageMetadataGenerator } from 'service-library';
-import { AxeScanner } from './axe-scanner';
+import { PageMetadata, PageMetadataGenerator } from 'service-library';
+import { ScannerDispatcher } from '../scanner/scanner-dispatcher';
 import { PageScanProcessor } from './page-scan-processor';
-import { HighContrastScanner } from './high-contrast-scanner';
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 let loggerMock: IMock<GlobalLogger>;
 let pageMock: IMock<Page>;
-let axeScannerMock: IMock<AxeScanner>;
-let deepScannerMock: IMock<DeepScanner>;
 let pageMetadataGeneratorMock: IMock<PageMetadataGenerator>;
-let highContrastScannerMock: IMock<HighContrastScanner>;
+let scannerDispatcherMock: IMock<ScannerDispatcher>;
 let testSubject: PageScanProcessor;
 let axeScanResults: AxeScanResults;
 let pageScanResult: OnDemandPageScanResult;
@@ -34,10 +33,8 @@ describe(PageScanProcessor, () => {
     beforeEach(() => {
         loggerMock = Mock.ofType<GlobalLogger>();
         pageMock = Mock.ofType<Page>();
-        axeScannerMock = Mock.ofType<AxeScanner>();
-        deepScannerMock = Mock.ofType<DeepScanner>();
         pageMetadataGeneratorMock = Mock.ofType<PageMetadataGenerator>();
-        highContrastScannerMock = Mock.ofType<HighContrastScanner>();
+        scannerDispatcherMock = Mock.ofType<ScannerDispatcher>();
         axeScanResults = { scannedUrl: url } as AxeScanResults;
         pageScanResult = { id: 'id' } as OnDemandPageScanResult;
         websiteScanData = {} as WebsiteScanData;
@@ -52,10 +49,8 @@ describe(PageScanProcessor, () => {
 
         testSubject = new PageScanProcessor(
             pageMock.object,
-            axeScannerMock.object,
-            deepScannerMock.object,
-            highContrastScannerMock.object,
             pageMetadataGeneratorMock.object,
+            scannerDispatcherMock.object,
             loggerMock.object,
         );
     });
@@ -63,10 +58,8 @@ describe(PageScanProcessor, () => {
     afterEach(() => {
         loggerMock.verifyAll();
         pageMock.verifyAll();
-        axeScannerMock.verifyAll();
-        deepScannerMock.verifyAll();
         pageMetadataGeneratorMock.verifyAll();
-        highContrastScannerMock.verifyAll();
+        scannerDispatcherMock.verifyAll();
     });
 
     it('skip page scan for forbidden location', async () => {
@@ -109,7 +102,6 @@ describe(PageScanProcessor, () => {
             id: 'id',
         };
         axeScanResults = { ...axeScanResults, pageScreenshot, pageSnapshot };
-
         pageMetadata = {
             foreignLocation: true,
             authentication: true,
@@ -123,18 +115,14 @@ describe(PageScanProcessor, () => {
 
         setupReopenBrowser();
         setupNavigatePage(url, true);
-        setupCapturePageState();
         setupClosePage();
-        axeScannerMock
-            .setup((s) => s.scan(pageMock.object))
-            .returns(() => Promise.resolve(axeScanResults))
-            .verifiable();
-        deepScannerMock.setup((o) => o.runDeepScan(It.isAny(), websiteScanData, It.isAny())).verifiable();
+
         pageScanResult = {
             ...pageScanResult,
-            authentication: { hint: 'entraId' },
+            authentication: {
+                hint: 'entraId',
+            },
         };
-
         const authenticationResult = {
             authenticationType: 'entraId',
             authenticated: true,
@@ -146,11 +134,15 @@ describe(PageScanProcessor, () => {
         const expectedPageScanResult = cloneDeep({
             ...pageScanResult,
             authentication: {
-                hint: 'entraId',
                 detected: 'entraId',
                 state: 'succeeded',
+                hint: 'entraId',
             },
         });
+        scannerDispatcherMock
+            .setup((s) => s.dispatch(scanMetadata, expectedPageScanResult as any, websiteScanData, pageMock.object))
+            .returns(() => Promise.resolve({ axeScanResults }))
+            .verifiable();
 
         const results = await testSubject.scan(scanMetadata, pageScanResult, websiteScanData);
 
@@ -168,32 +160,15 @@ describe(PageScanProcessor, () => {
 
         setupReopenBrowser();
         setupNavigatePage();
-        setupCapturePageState();
         setupClosePage();
-        axeScannerMock
-            .setup((s) => s.scan(pageMock.object))
-            .returns(() => Promise.resolve(axeScanResults))
+        scannerDispatcherMock
+            .setup((s) => s.dispatch(scanMetadata, pageScanResult, websiteScanData, pageMock.object))
+            .returns(() => Promise.resolve({ axeScanResults }))
             .verifiable();
-        deepScannerMock.setup((o) => o.runDeepScan(It.isAny(), websiteScanData, It.isAny())).verifiable();
 
         const results = await testSubject.scan(scanMetadata, pageScanResult, websiteScanData);
 
         expect(results.axeScanResults).toEqual(axeScanResults);
-    });
-
-    it('returns error thrown by axe scanner', async () => {
-        const scanMetadata = {
-            url: url,
-            id: 'id',
-        };
-        const error = new Error('test error');
-
-        setupNavigatePage();
-        setupClosePage();
-        axeScannerMock.setup((s) => s.scan(pageMock.object)).throws(error);
-        deepScannerMock.setup((o) => o.runDeepScan(It.isAny(), websiteScanData, It.isAny())).verifiable(Times.never());
-
-        await expect(testSubject.scan(scanMetadata, pageScanResult, websiteScanData)).rejects.toThrowError('test error');
     });
 
     it('returns error if page failed to load.', async () => {
@@ -222,25 +197,6 @@ describe(PageScanProcessor, () => {
 
         expect(results.axeScanResults).toEqual(expectedResult);
     });
-
-    it('returns error thrown by deep scanner', async () => {
-        const scanMetadata = {
-            url: url,
-            id: 'id',
-            deepScan: true,
-        };
-        const error = new Error('test error');
-
-        setupNavigatePage();
-        setupClosePage();
-        axeScannerMock
-            .setup((s) => s.scan(pageMock.object))
-            .returns(() => Promise.resolve(axeScanResults))
-            .verifiable();
-        deepScannerMock.setup((o) => o.runDeepScan(pageScanResult, websiteScanData, pageMock.object)).throws(error);
-
-        await expect(testSubject.scan(scanMetadata, pageScanResult, websiteScanData)).rejects.toThrowError('test error');
-    });
 });
 
 function setupReopenBrowser(): void {
@@ -253,11 +209,4 @@ function setupNavigatePage(urlParam: string = url, enableAuthentication: boolean
 
 function setupClosePage(): void {
     pageMock.setup((p) => p.close()).verifiable();
-}
-
-function setupCapturePageState(): void {
-    pageMock
-        .setup((o) => o.capturePageState())
-        .returns(() => Promise.resolve({ pageScreenshot, pageSnapshot }))
-        .verifiable();
 }

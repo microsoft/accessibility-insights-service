@@ -29,6 +29,17 @@ describe(isScanRunRequest, () => {
                         consolidatedId: 'consolidatedId',
                     },
                 ],
+                scanDefinitions: [
+                    {
+                        name: 'accessibility-agent',
+                        args: {
+                            arg1: 'full',
+                        },
+                        options: {
+                            opt1: 'full',
+                        },
+                    },
+                ],
             }),
         ).toEqual(true);
     });
@@ -101,6 +112,18 @@ describe(isScanRunRequest, () => {
         { url: 'url', reportGroups: [{ consolidatedId: undefined }] },
         { url: 'url', reportGroups: [{ consolidatedId: 123 }] },
     ])('validate `reportGroups` object', (obj: any) => {
+        expect(isScanRunRequest(obj)).toEqual(false);
+    });
+
+    test.each([
+        { url: 'url', scanDefinitions: undefined },
+        { url: 'url', scanDefinitions: 'nan' },
+        { url: 'url', scanDefinitions: [{ name: undefined }] },
+        { url: 'url', scanDefinitions: [{ args: { agr1: 'full', arg2: undefined } }] },
+        { url: 'url', scanDefinitions: [{ args: { agr1: 'full', agr2: {} } }] },
+        { url: 'url', scanDefinitions: [{ options: { opt1: 'full', opt2: undefined } }] },
+        { url: 'url', scanDefinitions: [{ options: { opt1: 'full', opt2: {} } }] },
+    ])('validate `scanDefinitions` array', (obj: any) => {
         expect(isScanRunRequest(obj)).toEqual(false);
     });
 });

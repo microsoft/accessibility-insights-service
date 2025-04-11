@@ -35,18 +35,18 @@
         "typescript": "^5.5.3"
     },
     "dependencies": {
-        "@apify/log": "2.2.18",
+        "@apify/log": "2.5.13",
         "@opentelemetry/api": "^1.4.1",
-        "@opentelemetry/exporter-metrics-otlp-grpc": "^0.41.0",
+        "@opentelemetry/exporter-metrics-otlp-grpc": "^0.57.1",
         "@opentelemetry/resources": "^1.15.0",
         "@opentelemetry/sdk-metrics": "^1.28.0",
         "@opentelemetry/semantic-conventions": "^1.15.0",
         "applicationinsights": "^2.3.1",
         "common": "workspace:*",
-        "dotenv": "^16.0.1",
+        "dotenv": "^16.4.7",
         "inversify": "^6.0.1",
         "lodash": "^4.17.21",
-        "moment": "^2.29.4",
+        "moment": "^2.30.1",
         "reflect-metadata": "^0.2.2"
     }
 }

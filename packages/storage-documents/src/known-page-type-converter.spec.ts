@@ -38,13 +38,25 @@ describe(KnownPageTypeConverter, () => {
         value = knownPageTypeConverter.convertKnownPageToString(knownPage);
         expect(value).toEqual('url2|scanId');
 
+        knownPage = { url: 'url2', source: 'request', scanId: 'scanId' } as KnownPage;
+        value = knownPageTypeConverter.convertKnownPageToString(knownPage);
+        expect(value).toEqual('url2|request|scanId');
+
         knownPage = { url: 'url3', scanState: 'pass' } as KnownPage;
         value = knownPageTypeConverter.convertKnownPageToString(knownPage);
         expect(value).toEqual('url3|||pass');
 
+        knownPage = { url: 'url3', source: 'request', scanState: 'pass' } as KnownPage;
+        value = knownPageTypeConverter.convertKnownPageToString(knownPage);
+        expect(value).toEqual('url3|request|||pass');
+
         knownPage = { url: 'url4', scanId: 'scanId', runState: 'completed', scanState: 'pass' } as KnownPage;
         value = knownPageTypeConverter.convertKnownPageToString(knownPage);
         expect(value).toEqual('url4|scanId|completed|pass');
+
+        knownPage = { url: 'url4', source: 'request', scanId: 'scanId', runState: 'completed', scanState: 'pass' } as KnownPage;
+        value = knownPageTypeConverter.convertKnownPageToString(knownPage);
+        expect(value).toEqual('url4|request|scanId|completed|pass');
     });
 
     test('convert to object', () => {
@@ -57,9 +69,14 @@ describe(KnownPageTypeConverter, () => {
         let expected = { url: 'url1', scanId: 'scanId', runState: 'completed', scanState: 'pass' } as KnownPage;
         expect(knownPage).toEqual(expected);
 
-        value = 'url2|||pass';
+        value = 'url2|scanId';
         knownPage = knownPageTypeConverter.convertStringToKnownPage(value);
-        expected = { url: 'url2', scanState: 'pass' } as KnownPage;
+        expected = { url: 'url2', scanId: 'scanId' } as KnownPage;
+        expect(knownPage).toEqual(expected);
+
+        value = 'url3|request|scanId';
+        knownPage = knownPageTypeConverter.convertStringToKnownPage(value);
+        expected = { url: 'url3', source: 'request', scanId: 'scanId' } as KnownPage;
         expect(knownPage).toEqual(expected);
     });
 

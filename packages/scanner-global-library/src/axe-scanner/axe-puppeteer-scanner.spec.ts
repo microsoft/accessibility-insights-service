@@ -51,7 +51,7 @@ describe(AxePuppeteerScanner, () => {
             pageResponseCode: 200,
             userAgent,
             browserResolution,
-            results: axeResults,
+            axeResults: axeResults,
         };
 
         setupPageLaunch();
@@ -102,7 +102,7 @@ describe(AxePuppeteerScanner, () => {
         setupPageNavigation(puppeteerResponseMock.object);
         const expectedAxeScanResults = {
             ...scanResults,
-            results: axeResults,
+            axeResults,
             scannedUrl: undefined, // redirected flag
         } as AxeScanResults;
         pageMock
@@ -164,7 +164,7 @@ describe(AxePuppeteerScanner, () => {
 
         const expectedAxeScanResults = {
             ...scanResults,
-            results: axeResults,
+            axeResults,
             scannedUrl: redirectUrl,
         } as AxeScanResults;
         loggerMock.setup((o) => o.logWarn(`Scan performed on redirected page.`, { redirectUrl })).verifiable();

@@ -1,0 +1,46 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
+name: $(Build.SourceBranchName)_$(Date:yyyyMMdd)$(Rev:.r)
+trigger: none
+
+# The `resources` specify the location and version of the 1ES PT.
+resources:
+    repositories:
+        - repository: 1esPipelines
+          type: git
+          name: 1ESPipelineTemplates/1ESPipelineTemplates
+          ref: refs/tags/release
+
+extends:
+    template: v1/1ES.Official.PipelineTemplate.yml@1esPipelines
+    parameters:
+        sdl:
+            suppression:
+                suppressionFile: $(Build.SourcesDirectory)/azure-pipeline/guardian/SDL/.gdnsuppress
+            sourceAnalysisPool:
+                name: AccessibilityInsights-ubuntu-20.04
+                image: Win-2022
+                os: windows
+            policheck:
+                enabled: true
+            tsa:
+                enabled: true
+                configFile: '$(Build.SourcesDirectory)/azure-pipeline/TSAOptions.json'
+        # Update the pool with your team's 1ES hosted pool.
+        pool:
+            os: linux
+            image: ubuntu-20.04
+            name: AccessibilityInsights-ubuntu-20.04
+
+        stages:
+            - stage: Stage
+              jobs:
+                  - job: 'BuildArtifactsAndRunUnitTests'
+                    templateContext:
+                        outputs:
+                            - output: buildArtifacts
+                              PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+                              ArtifactName: drop
+                    steps:
+                        - template: ./azure-pipeline/build-artifacts-and-run-tests-job.yaml@self

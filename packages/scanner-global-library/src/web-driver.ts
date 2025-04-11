@@ -136,9 +136,7 @@ export class WebDriver {
         }
     }
 
-    private createLaunchOptions(
-        configurationOptions: WebDriverConfigurationOptions,
-    ): Puppeteer.LaunchOptions & Puppeteer.BrowserLaunchArgumentOptions {
+    private createLaunchOptions(configurationOptions: WebDriverConfigurationOptions): Puppeteer.LaunchOptions & Puppeteer.LaunchOptions {
         const options = {
             ...launchOptions({ ...configurationOptions?.capabilities }),
             // The new headless mode https://developer.chrome.com/articles/new-headless
