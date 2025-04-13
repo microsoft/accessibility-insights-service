@@ -4487,6 +4487,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/node-fetch@npm:^2.6.12":
+  version: 2.6.12
+  resolution: "@types/node-fetch@npm:2.6.12"
+  dependencies:
+    "@types/node": "*"
+    form-data: ^4.0.0
+  checksum: 9647e68f9a125a090220c38d77b3c8e669c488658ae7506f1b4f9568214beba087624b1705bba1dc76649a65281ce3fd5b400e15266cbef8088027fb88777557
+  languageName: node
+  linkType: hard
+
 "@types/node@npm:^20.14.9":
   version: 20.14.9
   resolution: "@types/node@npm:20.14.9"
@@ -15611,6 +15621,7 @@ __metadata:
     "@crawlee/puppeteer": ^3.12.2
     "@types/jest": ^29.5.12
     "@types/node": ^20.14.9
+    "@types/node-fetch": ^2.6.12
     "@types/paralleljs": ^0.0.24
     "@types/puppeteer": ^7.0.4
     "@types/sha.js": ^2.4.4
