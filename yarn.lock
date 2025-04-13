@@ -158,16 +158,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@azure/batch@npm:^12.0.0":
-  version: 12.0.0
-  resolution: "@azure/batch@npm:12.0.0"
+"@azure/batch@npm:^10.2.0":
+  version: 10.2.0
+  resolution: "@azure/batch@npm:10.2.0"
   dependencies:
     "@azure/ms-rest-azure-js": ^2.1.0
     "@azure/ms-rest-js": ^2.2.0
     jssha: ^3.2.0
     tslib: ^1.10.0
     url-parse: ^1.5.3
-  checksum: 3b423a1051161963077db2422fbb99b962eff5044953798611c9d90b7b2e7e89c8cc33c4af8c36e2da37082c62ff92e7a3e63ee1dfec1076e02470c586a07113
+  checksum: ddc6977aa45b70b484af69bff4e6a177c3571b6e9a07cec4e162eb16b71f98fbe2c4c5ceac37abadd15b77420d4cb8ddfd0ebb2831d7dd9fb161b30a3abe9f11
   languageName: node
   linkType: hard
 
@@ -414,7 +414,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@azure/cosmos@npm:^4.3.0":
+"@azure/cosmos@npm:^4.0.0":
   version: 4.3.0
   resolution: "@azure/cosmos@npm:4.3.0"
   dependencies:
@@ -466,7 +466,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@azure/identity@npm:^4.6.0, @azure/identity@npm:^4.8.0":
+"@azure/identity@npm:^4.5.0, @azure/identity@npm:^4.6.0":
   version: 4.8.0
   resolution: "@azure/identity@npm:4.8.0"
   dependencies:
@@ -722,7 +722,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@azure/storage-blob@npm:^12.27.0":
+"@azure/storage-blob@npm:^12.12.0":
   version: 12.27.0
   resolution: "@azure/storage-blob@npm:12.27.0"
   dependencies:
@@ -743,7 +743,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@azure/storage-queue@npm:^12.26.0":
+"@azure/storage-queue@npm:^12.11.0":
   version: 12.26.0
   resolution: "@azure/storage-queue@npm:12.26.0"
   dependencies:
@@ -4487,16 +4487,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node-fetch@npm:^2.6.7":
-  version: 2.6.12
-  resolution: "@types/node-fetch@npm:2.6.12"
-  dependencies:
-    "@types/node": "*"
-    form-data: ^4.0.0
-  checksum: 9647e68f9a125a090220c38d77b3c8e669c488658ae7506f1b4f9568214beba087624b1705bba1dc76649a65281ce3fd5b400e15266cbef8088027fb88777557
-  languageName: node
-  linkType: hard
-
 "@types/node@npm:^20.14.9":
   version: 20.14.9
   resolution: "@types/node@npm:20.14.9"
@@ -6010,15 +6000,15 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "azure-services@workspace:packages/azure-services"
   dependencies:
-    "@azure/batch": ^12.0.0
+    "@azure/batch": ^10.2.0
     "@azure/core-auth": ^1.9.0
-    "@azure/cosmos": ^4.3.0
-    "@azure/identity": ^4.8.0
+    "@azure/cosmos": ^4.0.0
+    "@azure/identity": ^4.5.0
     "@azure/keyvault-secrets": ^4.9.0
     "@azure/ms-rest-js": ^2.7.0
     "@azure/ms-rest-nodeauth": ^3.1.1
-    "@azure/storage-blob": ^12.27.0
-    "@azure/storage-queue": ^12.26.0
+    "@azure/storage-blob": ^12.12.0
+    "@azure/storage-queue": ^12.11.0
     "@types/got": ^9.6.11
     "@types/jest": ^29.5.12
     "@types/lodash": ^4.17.6
@@ -9476,7 +9466,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "functional-tests@workspace:packages/functional-tests"
   dependencies:
-    "@azure/cosmos": ^4.3.0
+    "@azure/cosmos": ^4.0.0
     "@types/chai": ^4.3.4
     "@types/deep-equal-in-any-order": ^1.0.1
     "@types/dotenv": ^8.2.0
@@ -14205,7 +14195,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "privacy-scan-job-manager@workspace:packages/privacy-scan-job-manager"
   dependencies:
-    "@azure/batch": ^12.0.0
+    "@azure/batch": ^10.2.0
     "@azure/ms-rest-nodeauth": ^3.1.1
     "@types/dotenv": ^8.2.0
     "@types/jest": ^29.5.12
@@ -14245,7 +14235,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "privacy-scan-runner@workspace:packages/privacy-scan-runner"
   dependencies:
-    "@azure/cosmos": ^4.3.0
+    "@azure/cosmos": ^4.0.0
     "@types/dotenv": ^8.2.0
     "@types/jest": ^29.5.12
     "@types/lodash": ^4.17.6
@@ -14934,7 +14924,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "report-generator-job-manager@workspace:packages/report-generator-job-manager"
   dependencies:
-    "@azure/batch": ^12.0.0
+    "@azure/batch": ^10.2.0
     "@azure/ms-rest-nodeauth": ^3.1.1
     "@types/dotenv": ^8.2.0
     "@types/jest": ^29.5.12
@@ -14974,7 +14964,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "report-generator-runner@workspace:packages/report-generator-runner"
   dependencies:
-    "@azure/cosmos": ^4.3.0
+    "@azure/cosmos": ^4.0.0
     "@types/dotenv": ^8.2.0
     "@types/jest": ^29.5.12
     "@types/lodash": ^4.17.6
@@ -15614,14 +15604,13 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "service-library@workspace:packages/service-library"
   dependencies:
-    "@azure/cosmos": ^4.3.0
+    "@azure/cosmos": ^4.0.0
     "@azure/functions": ^4.6.0
-    "@azure/identity": ^4.8.0
-    "@azure/storage-blob": ^12.27.0
+    "@azure/identity": ^4.5.0
+    "@azure/storage-blob": ^12.12.0
     "@crawlee/puppeteer": ^3.12.2
     "@types/jest": ^29.5.12
     "@types/node": ^20.14.9
-    "@types/node-fetch": ^2.6.7
     "@types/paralleljs": ^0.0.24
     "@types/puppeteer": ^7.0.4
     "@types/sha.js": ^2.4.4
@@ -17448,7 +17437,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "web-api-scan-job-manager@workspace:packages/web-api-scan-job-manager"
   dependencies:
-    "@azure/batch": ^12.0.0
+    "@azure/batch": ^10.2.0
     "@azure/ms-rest-nodeauth": ^3.1.1
     "@types/dotenv": ^8.2.0
     "@types/jest": ^29.5.12
@@ -17523,7 +17512,7 @@ __metadata:
   resolution: "web-api-scan-runner@workspace:packages/web-api-scan-runner"
   dependencies:
     "@axe-core/puppeteer": 4.10.1
-    "@azure/cosmos": ^4.3.0
+    "@azure/cosmos": ^4.0.0
     "@playwright/test": ^1.50.1
     "@types/dotenv": ^8.2.0
     "@types/jest": ^29.5.12
@@ -17581,7 +17570,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "web-api-send-notification-job-manager@workspace:packages/web-api-send-notification-job-manager"
   dependencies:
-    "@azure/batch": ^12.0.0
+    "@azure/batch": ^10.2.0
     "@azure/ms-rest-nodeauth": ^3.1.1
     "@types/dotenv": ^8.2.0
     "@types/jest": ^29.5.12
@@ -17620,7 +17609,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "web-api-send-notification-runner@workspace:packages/web-api-send-notification-runner"
   dependencies:
-    "@azure/cosmos": ^4.3.0
+    "@azure/cosmos": ^4.0.0
     "@types/dotenv": ^8.2.0
     "@types/got": ^9.6.11
     "@types/jest": ^29.5.12
