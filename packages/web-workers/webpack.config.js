@@ -13,7 +13,7 @@ module.exports = (env) => {
 
     return {
         devtool: 'cheap-source-map',
-        externals: ['@azure/functions'],
+        externals: ['@azure/functions', '@azure/functions-core'],
         entry: {
             ['scan-batch-requests-feed-func']: path.resolve('./scan-batch-requests-feed-func/index.ts'),
             ['health-monitor-orchestration-func']: path.resolve('./health-monitor-orchestration-func/index.ts'),

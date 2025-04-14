@@ -13,7 +13,7 @@ module.exports = (env) => {
 
     return {
         devtool: 'cheap-source-map',
-        externals: ['yargs'],
+        externals: ['@azure/functions-core', 'yargs'],
         entry: {
             ['health-checker']: path.resolve('./src/health-checker.ts'),
         },
