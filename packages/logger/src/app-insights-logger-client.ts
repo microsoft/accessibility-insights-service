@@ -18,25 +18,17 @@ export class AppInsightsLoggerClient extends BaseAppInsightsLoggerClient {
     }
 
     public async setup(baseProperties?: LoggerProperties): Promise<void> {
-        this.appInsightsObject
-            .setup()
-            .setAutoCollectConsole(true)
-            .setAutoCollectExceptions(true)
-            .setAutoCollectRequests(true)
-            .setAutoCollectDependencies(true)
-            .setAutoDependencyCorrelation(true);
+        // Console logging is disabled by default
+        this.appInsightsObject.setup().setAutoCollectConsole(true, true);
 
         // this should be set after calling setup
-
         this.appInsightsObject.defaultClient.commonProperties = {
             ...this.getBatchProperties(),
             ...baseProperties,
         };
 
         this.appInsightsObject.start();
-
         this.telemetryClient = this.appInsightsObject.defaultClient;
-
         this.initialized = true;
     }
 
