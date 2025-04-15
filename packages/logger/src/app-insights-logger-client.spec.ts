@@ -129,7 +129,7 @@ describe(AppInsightsLoggerClient, () => {
 
     function setupAppInsightsConfigurationCall(): void {
         appInsightsConfigMock
-            .setup((c) => c.setAutoCollectConsole(true, true))
+            .setup((c) => c.setAutoCollectConsole(true))
             .returns(() => appInsightsConfigMock.object)
             .verifiable(Times.once());
     }
