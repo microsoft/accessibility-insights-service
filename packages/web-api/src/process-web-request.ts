@@ -4,6 +4,7 @@
 import { HttpResponseInit } from '@azure/functions';
 import { AppContext, getGlobalWebControllerDispatcher, Newable, WebController } from 'service-library';
 import { Container } from 'inversify';
+import * as appInsights from 'applicationinsights';
 import { getProcessLifeCycleContainer } from './get-process-life-cycle-container';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -19,5 +20,13 @@ export async function processWebRequest(
     const container = new Container({ autoBindInjectable: true });
     container.parent = processLifeCycleContainer;
 
-    return dispatcher.processRequest(container, controllerType, appContext, ...args);
+    const headers: { [key: string]: string } = {};
+    appContext.request.headers.forEach((value, key) => {
+        headers[key] = value;
+    });
+    const correlationContext = appInsights.startOperation(appContext.context, { ...appContext.request, headers });
+
+    return appInsights.wrapWithCorrelationContext<any>(async () => {
+        return dispatcher.processRequest(container, controllerType, appContext, ...args);
+    }, correlationContext);
 }
