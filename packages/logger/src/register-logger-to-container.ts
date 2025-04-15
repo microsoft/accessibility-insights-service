@@ -6,9 +6,6 @@ import * as dotenv from 'dotenv';
 import { Container } from 'inversify';
 import { AppInsightsLoggerClient } from './app-insights-logger-client';
 import { ConsoleLoggerClient } from './console-logger-client';
-import { ContextAwareAppInsightsLoggerClient } from './context-aware-app-insights-logger-client';
-import { ContextAwareConsoleLoggerClient } from './context-aware-console-logger-client';
-import { ContextAwareLogger } from './context-aware-logger';
 import { GlobalLogger } from './global-logger';
 import { loggerTypes } from './logger-types';
 import { OTelLoggerClient } from './otel-logger-client';
@@ -16,23 +13,6 @@ import { OTelLoggerClient } from './otel-logger-client';
 export function registerLoggerToContainer(container: Container): void {
     registerLoggerDependenciesToContainer(container);
     registerGlobalLoggerToContainer(container);
-    registerContextAwareLoggerToContainer(container);
-}
-
-export function registerContextAwareLoggerToContainer(container: Container): void {
-    container.bind(ContextAwareAppInsightsLoggerClient).toSelf().inSingletonScope();
-    container.bind(ContextAwareConsoleLoggerClient).toSelf().inSingletonScope();
-
-    container
-        .bind(ContextAwareLogger)
-        .toDynamicValue((context) => {
-            const appInsightsLoggerClient = context.container.get(ContextAwareAppInsightsLoggerClient);
-            const consoleLoggerClient = context.container.get(ContextAwareConsoleLoggerClient);
-            const oTelLoggerClient = context.container.get(OTelLoggerClient);
-
-            return new ContextAwareLogger([appInsightsLoggerClient, consoleLoggerClient, oTelLoggerClient]);
-        })
-        .inSingletonScope();
 }
 
 function registerGlobalLoggerToContainer(container: Container): void {

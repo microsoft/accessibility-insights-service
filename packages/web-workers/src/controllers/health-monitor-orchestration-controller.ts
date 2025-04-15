@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 import { inject, injectable } from 'inversify';
-import { ContextAwareLogger } from 'logger';
+import { GlobalLogger } from 'logger';
 import { WebApiErrorCode, WebController } from 'service-library';
 import * as df from 'durable-functions';
 import { orchestrationName } from '../orchestration/orchestration-name';
@@ -15,7 +15,7 @@ export class HealthMonitorOrchestrationController extends WebController {
 
     public readonly apiName = 'health-monitor-orchestration';
 
-    public constructor(@inject(ContextAwareLogger) protected readonly logger: ContextAwareLogger) {
+    public constructor(@inject(GlobalLogger) protected readonly logger: GlobalLogger) {
         super(logger);
     }
 

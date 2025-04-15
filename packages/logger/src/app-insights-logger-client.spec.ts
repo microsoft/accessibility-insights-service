@@ -129,27 +129,7 @@ describe(AppInsightsLoggerClient, () => {
 
     function setupAppInsightsConfigurationCall(): void {
         appInsightsConfigMock
-            .setup((c) => c.setAutoCollectConsole(true))
-            .returns(() => appInsightsConfigMock.object)
-            .verifiable(Times.once());
-
-        appInsightsConfigMock
-            .setup((c) => c.setAutoCollectExceptions(true))
-            .returns(() => appInsightsConfigMock.object)
-            .verifiable(Times.once());
-
-        appInsightsConfigMock
-            .setup((c) => c.setAutoCollectDependencies(true))
-            .returns(() => appInsightsConfigMock.object)
-            .verifiable(Times.once());
-
-        appInsightsConfigMock
-            .setup((c) => c.setAutoDependencyCorrelation(true))
-            .returns(() => appInsightsConfigMock.object)
-            .verifiable(Times.once());
-
-        appInsightsConfigMock
-            .setup((c) => c.setAutoCollectRequests(true))
+            .setup((c) => c.setAutoCollectConsole(true, true))
             .returns(() => appInsightsConfigMock.object)
             .verifiable(Times.once());
     }

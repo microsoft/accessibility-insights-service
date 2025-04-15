@@ -4,7 +4,7 @@
 import { InvocationContext, HttpRequest, HttpResponse, Timer } from '@azure/functions';
 import { System } from 'common';
 import { inject, injectable } from 'inversify';
-import { ContextAwareLogger } from 'logger';
+import { GlobalLogger } from 'logger';
 import { WebApiErrorCode } from './web-api-error-codes';
 import { WebHttpResponse } from './web-http-response';
 
@@ -24,7 +24,7 @@ export abstract class WebController {
 
     public abstract readonly apiName: string;
 
-    constructor(@inject(ContextAwareLogger) protected readonly logger: ContextAwareLogger) {}
+    constructor(@inject(GlobalLogger) protected readonly logger: GlobalLogger) {}
 
     public async invoke(appContext: AppContext, ...args: any[]): Promise<any> {
         this.appContext = appContext;

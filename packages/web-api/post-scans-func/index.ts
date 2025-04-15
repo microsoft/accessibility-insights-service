@@ -5,7 +5,7 @@ import 'reflect-metadata';
 
 import { app, InvocationContext, HttpRequest, HttpResponseInit } from '@azure/functions';
 import { ScanRequestController } from '../src/controllers/scan-request-controller';
-import { processWebRequest } from '../src/process-request';
+import { processWebRequest } from '../src/process-web-request';
 
 export async function requestHandler(request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> {
     return processWebRequest({ request, context }, ScanRequestController);

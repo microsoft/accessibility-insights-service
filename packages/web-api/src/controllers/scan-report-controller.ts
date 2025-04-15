@@ -4,7 +4,7 @@
 import { Readable } from 'stream';
 import { GuidGenerator, ServiceConfiguration, BodyParser } from 'common';
 import { inject, injectable } from 'inversify';
-import { ContextAwareLogger } from 'logger';
+import { GlobalLogger } from 'logger';
 import { ApiController, WebHttpResponse, PageScanRunReportProvider, WebApiErrorCodes } from 'service-library';
 import { HttpResponseInit } from '@azure/functions';
 import { isEmpty } from 'lodash';
@@ -19,7 +19,7 @@ export class ScanReportController extends ApiController {
         @inject(PageScanRunReportProvider) private readonly pageScanRunReportProvider: PageScanRunReportProvider,
         @inject(GuidGenerator) protected readonly guidGenerator: GuidGenerator,
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
-        @inject(ContextAwareLogger) protected readonly logger: ContextAwareLogger,
+        @inject(GlobalLogger) protected readonly logger: GlobalLogger,
         @inject(BodyParser) private readonly bodyParser: BodyParser,
     ) {
         super(logger);

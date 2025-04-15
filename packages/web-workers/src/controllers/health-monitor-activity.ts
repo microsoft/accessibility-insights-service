@@ -4,7 +4,7 @@
 import { GuidGenerator, ServiceConfiguration, getSerializableResponse, ResponseSerializer, SerializableResponse } from 'common';
 import { functionalTestGroupTypes, TestGroupConstructor, TestRunner } from 'functional-tests';
 import { inject, injectable } from 'inversify';
-import { ContextAwareLogger } from 'logger';
+import { GlobalLogger } from 'logger';
 import { HealthReport, OnDemandPageScanRunResultProvider, ScanResultResponse, ScanRunResponse } from 'service-library';
 import { A11yServiceClientProvider, a11yServiceClientTypeNames } from 'web-api-client';
 import { ActivityHandler } from 'durable-functions';
@@ -113,7 +113,7 @@ export class HealthMonitorActivity {
 
     public constructor(
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
-        @inject(ContextAwareLogger) protected readonly logger: ContextAwareLogger,
+        @inject(GlobalLogger) protected readonly logger: GlobalLogger,
         @inject(a11yServiceClientTypeNames.A11yServiceClientProvider) protected readonly webApiClientProvider: A11yServiceClientProvider,
         @inject(OnDemandPageScanRunResultProvider) protected readonly onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider,
         @inject(GuidGenerator) protected readonly guidGenerator: GuidGenerator,

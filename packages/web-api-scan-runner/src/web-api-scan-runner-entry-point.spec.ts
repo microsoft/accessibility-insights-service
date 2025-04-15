@@ -4,7 +4,7 @@
 import 'reflect-metadata';
 
 import { Container } from 'inversify';
-import { BaseTelemetryProperties, ContextAwareLogger, Logger } from 'logger';
+import { BaseTelemetryProperties, GlobalLogger, Logger } from 'logger';
 import { IMock, Mock, Times } from 'typemoq';
 import { Runner } from './runner/runner';
 import { WebApiScanRunnerEntryPoint } from './web-api-scan-runner-entry-point';
@@ -30,12 +30,12 @@ describe(WebApiScanRunnerEntryPoint, () => {
     beforeEach(() => {
         containerMock = Mock.ofType(Container);
         runnerMock = Mock.ofType(Runner);
-        loggerMock = Mock.ofType(ContextAwareLogger);
+        loggerMock = Mock.ofType(GlobalLogger);
 
         testSubject = new TestWebApiScanRunnerEntryPoint(containerMock.object);
 
         containerMock.setup((c) => c.get(Runner)).returns(() => runnerMock.object);
-        containerMock.setup((c) => c.get(ContextAwareLogger)).returns(() => loggerMock.object);
+        containerMock.setup((c) => c.get(GlobalLogger)).returns(() => loggerMock.object);
     });
 
     it('invokes runner.run', async () => {

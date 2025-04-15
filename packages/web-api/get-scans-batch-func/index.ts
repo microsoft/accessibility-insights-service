@@ -4,7 +4,7 @@
 import 'reflect-metadata';
 
 import { app, InvocationContext, HttpRequest, HttpResponseInit } from '@azure/functions';
-import { processWebRequest } from '../src/process-request';
+import { processWebRequest } from '../src/process-web-request';
 import { BatchScanResultController } from './../src/controllers/batch-scan-result-controller';
 
 export async function requestHandler(request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> {
