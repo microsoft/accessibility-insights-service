@@ -26,7 +26,8 @@ export async function processWebRequest(
     });
     const correlationContext = appInsights.startOperation(appContext.context, { ...appContext.request, headers });
 
-    return appInsights.wrapWithCorrelationContext<any>(async () => {
-        return dispatcher.processRequest(container, controllerType, appContext, ...args);
-    }, correlationContext);
+    return appInsights.wrapWithCorrelationContext<Promise<HttpResponseInit>>(
+        dispatcher.processRequest(container, controllerType, appContext, ...args),
+        correlationContext,
+    );
 }

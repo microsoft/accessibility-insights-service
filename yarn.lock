@@ -17813,6 +17813,7 @@ __metadata:
     "@types/lodash": ^4.17.6
     "@types/node": ^20.14.9
     "@types/sha.js": ^2.4.4
+    applicationinsights: ^3.6.0
     azure-functions-core-tools: ^4.x
     azure-services: "workspace:*"
     common: "workspace:*"
