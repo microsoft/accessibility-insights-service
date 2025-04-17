@@ -173,14 +173,14 @@ export class ServiceConfiguration {
                 },
                 messageVisibilityTimeoutInSeconds: {
                     format: 'int',
-                    default: 30 * 1.5 * 60, // maxWallClockTimeInMinutes * delta termination wait time
+                    default: 40 * 1.5 * 60, // maxWallClockTimeInMinutes * delta termination wait time
                     doc: 'Message visibility timeout in seconds. Must correlate with jobManagerConfig.maxWallClockTimeInMinutes config value.',
                 },
             },
             taskConfig: {
                 taskTimeoutInMinutes: {
                     format: 'int',
-                    default: 20,
+                    default: 30,
                     doc: 'Timeout value after which the task has to be terminated. Must correlate with queueConfig.messageVisibilityTimeoutInSeconds config value.',
                 },
                 retentionTimeInDays: {
@@ -202,7 +202,7 @@ export class ServiceConfiguration {
                 },
                 maxWallClockTimeInMinutes: {
                     format: 'int',
-                    default: 30,
+                    default: 40,
                     doc: 'The amount of time the job manager instance will run continuously. Must correlate with queueConfig.messageVisibilityTimeoutInSeconds config value.',
                 },
                 sendNotificationTasksCount: {
@@ -269,7 +269,7 @@ export class ServiceConfiguration {
                 },
                 maxScanStaleTimeoutInMinutes: {
                     format: 'int',
-                    default: 4320,
+                    default: 4320, // 3 days
                     doc: 'Maximum sliding window for a scan to complete.',
                 },
                 scanTimeoutInMin: {

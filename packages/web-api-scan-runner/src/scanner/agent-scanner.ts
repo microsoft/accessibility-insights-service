@@ -92,7 +92,7 @@ export class AgentScanner {
 
     private async executeAgent(url: string): Promise<AgentResults> {
         const execAsync = promisify(exec);
-        const timeoutMsec: number = 120000;
+        const timeoutMsec: number = 1200000; // 20 minutes
 
         try {
             const { stdout, stderr } = await execAsync(`${this.agentExeCommand} ${encodeURI(url)}`, {

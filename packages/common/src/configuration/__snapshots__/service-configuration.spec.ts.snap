@@ -90,7 +90,7 @@ exports[`ServiceConfiguration verifies custom config 1`] = `
       "format": "int",
     },
     "maxWallClockTimeInMinutes": {
-      "default": 30,
+      "default": 40,
       "doc": "The amount of time the job manager instance will run continuously. Must correlate with queueConfig.messageVisibilityTimeoutInSeconds config value.",
       "format": "int",
     },
@@ -175,7 +175,7 @@ exports[`ServiceConfiguration verifies custom config 1`] = `
       "format": "int",
     },
     "messageVisibilityTimeoutInSeconds": {
-      "default": 2700,
+      "default": 3600,
       "doc": "Message visibility timeout in seconds. Must correlate with jobManagerConfig.maxWallClockTimeInMinutes config value.",
       "format": "int",
     },
@@ -236,7 +236,7 @@ exports[`ServiceConfiguration verifies custom config 1`] = `
       "format": "int",
     },
     "taskTimeoutInMinutes": {
-      "default": 20,
+      "default": 30,
       "doc": "Timeout value after which the task has to be terminated. Must correlate with queueConfig.messageVisibilityTimeoutInSeconds config value.",
       "format": "int",
     },
@@ -334,7 +334,7 @@ exports[`ServiceConfiguration verifies dev config 1`] = `
       "format": "int",
     },
     "maxWallClockTimeInMinutes": {
-      "default": 30,
+      "default": 40,
       "doc": "The amount of time the job manager instance will run continuously. Must correlate with queueConfig.messageVisibilityTimeoutInSeconds config value.",
       "format": "int",
     },
@@ -419,7 +419,7 @@ exports[`ServiceConfiguration verifies dev config 1`] = `
       "format": "int",
     },
     "messageVisibilityTimeoutInSeconds": {
-      "default": 2700,
+      "default": 3600,
       "doc": "Message visibility timeout in seconds. Must correlate with jobManagerConfig.maxWallClockTimeInMinutes config value.",
       "format": "int",
     },
@@ -480,7 +480,7 @@ exports[`ServiceConfiguration verifies dev config 1`] = `
       "format": "int",
     },
     "taskTimeoutInMinutes": {
-      "default": 20,
+      "default": 30,
       "doc": "Timeout value after which the task has to be terminated. Must correlate with queueConfig.messageVisibilityTimeoutInSeconds config value.",
       "format": "int",
     },
