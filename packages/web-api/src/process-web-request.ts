@@ -21,9 +21,11 @@ export async function processWebRequest(
     container.parent = processLifeCycleContainer;
 
     const headers: { [key: string]: string } = {};
-    appContext.request.headers.forEach((value, key) => {
-        headers[key] = value;
-    });
+    if (appContext.request?.headers) {
+        appContext.request.headers.forEach((value, key) => {
+            headers[key] = value;
+        });
+    }
     const correlationContext = appInsights.startOperation(appContext.context, { ...appContext.request, headers });
 
     return appInsights.wrapWithCorrelationContext<Promise<HttpResponseInit>>(

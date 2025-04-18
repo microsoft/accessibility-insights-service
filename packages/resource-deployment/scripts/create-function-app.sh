@@ -94,7 +94,8 @@ publishFunctionAppScripts() {
 
     zipFileName="${functionAppName}.zip"
     rm "${zipFileName}" || true 1>/dev/null
-    zip -r "${zipFileName}" .
+    # Fallback to PowerShell if zip command is not available
+    zip -r "${zipFileName}" . || powershell Compress-Archive ".\*" "${zipFileName}"
 
     echo "Uploading ${zipFileName} deployment package file to blob storage..."
     az storage blob upload --account-name "${storageAccountName}" --container-name "function-apps" --file "${zipFileName}" --name "${zipFileName}" --overwrite=true --auth-mode login 1>/dev/null
