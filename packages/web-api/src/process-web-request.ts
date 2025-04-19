@@ -5,6 +5,7 @@ import { HttpResponseInit } from '@azure/functions';
 import { AppContext, getGlobalWebControllerDispatcher, Newable, WebController } from 'service-library';
 import { Container } from 'inversify';
 import * as appInsights from 'applicationinsights';
+import { isEmpty } from 'lodash';
 import { getProcessLifeCycleContainer } from './get-process-life-cycle-container';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -20,16 +21,24 @@ export async function processWebRequest(
     const container = new Container({ autoBindInjectable: true });
     container.parent = processLifeCycleContainer;
 
-    const headers: { [key: string]: string } = {};
-    if (appContext.request?.headers) {
-        appContext.request.headers.forEach((value, key) => {
-            headers[key] = value;
+    let correlationContext;
+    if (appContext.request) {
+        const headers: { [key: string]: string } = {};
+        if (appContext.request.headers) {
+            appContext.request.headers.forEach((value, key) => {
+                headers[key] = value;
+            });
+        }
+        correlationContext = appInsights.startOperation(appContext.context, {
+            ...appContext.request,
+            headers: isEmpty(headers) ? undefined : headers,
         });
-    }
-    const correlationContext = appInsights.startOperation(appContext.context, { ...appContext.request, headers });
 
-    return appInsights.wrapWithCorrelationContext<Promise<HttpResponseInit>>(
-        dispatcher.processRequest(container, controllerType, appContext, ...args),
-        correlationContext,
-    );
+        return appInsights.wrapWithCorrelationContext<Promise<HttpResponseInit>>(
+            dispatcher.processRequest(container, controllerType, appContext, ...args),
+            correlationContext,
+        );
+    } else {
+        return dispatcher.processRequest(container, controllerType, appContext, ...args);
+    }
 }
