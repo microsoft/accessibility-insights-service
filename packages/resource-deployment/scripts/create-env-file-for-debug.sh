@@ -108,6 +108,7 @@ START of local.settings.json file >>> \033[32m
     \"Values\": {
         \"FUNCTIONS_WORKER_RUNTIME\": \"node\",
         \"AzureWebJobsStorage__accountName\": \"${storageAccountName}\",
+        \"AzureWebJobsStorage__clientId\": \"${vmManagedIdentityClientID}\",
         \"COSMOS_CONNECTION__accountEndpoint\": \"${cosmosDbUrl}\"
     }
 }
