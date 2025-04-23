@@ -13,6 +13,7 @@ let processLifeCycleContainer: inversify.Container;
 export function getProcessLifeCycleContainer(): inversify.Container {
     if (isEmpty(processLifeCycleContainer)) {
         processLifeCycleContainer = new inversify.Container({ autoBindInjectable: true });
+
         setupRuntimeConfigContainer(processLifeCycleContainer);
         registerLoggerToContainer(processLifeCycleContainer);
         registerAzureServicesToContainer(processLifeCycleContainer);
