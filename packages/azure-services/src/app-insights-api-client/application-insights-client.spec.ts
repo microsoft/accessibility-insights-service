@@ -17,6 +17,7 @@ import { EventsQueryOptions } from './events-query-options';
 describe(ApplicationInsightsClient, () => {
     let testSubject: ApplicationInsightsClient;
     const appId = 'appId';
+    const azureClientId = 'azureClientId';
     let baseUrl: string;
     let requestStub: any;
     let getMock: IMock<(url: string, options?: Options) => {}>;
@@ -42,7 +43,7 @@ describe(ApplicationInsightsClient, () => {
             get: getMock.object,
             post: postMock.object,
         };
-        testSubject = new ApplicationInsightsClient(appId, tokenCredentialStub, requestStub, getAgentsStub);
+        testSubject = new ApplicationInsightsClient(appId, azureClientId, tokenCredentialStub, requestStub, getAgentsStub);
     });
 
     afterEach(() => {
@@ -64,7 +65,7 @@ describe(ApplicationInsightsClient, () => {
             .returns(() => 'some object' as any)
             .verifiable(Times.once());
 
-        testSubject = new ApplicationInsightsClient(appId, tokenCredentialStub, requestStub, getAgentsStub);
+        testSubject = new ApplicationInsightsClient(appId, azureClientId, tokenCredentialStub, requestStub, getAgentsStub);
 
         extendsMock.verifyAll();
     });

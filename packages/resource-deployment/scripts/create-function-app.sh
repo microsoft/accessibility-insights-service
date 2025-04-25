@@ -170,6 +170,9 @@ function enableApplicationInsightsAccess() {
     role="Monitoring Metrics Publisher"
     scope="--scope /subscriptions/${subscription}/resourceGroups/${resourceGroupName}/providers/microsoft.insights/components/${appInsightsName}"
     . "${0%/*}/create-role-assignment.sh"
+
+    role="Reader"
+    . "${0%/*}/create-role-assignment.sh"
 }
 
 function assignUserIdentity() {

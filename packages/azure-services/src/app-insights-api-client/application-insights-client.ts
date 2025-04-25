@@ -27,6 +27,7 @@ export class ApplicationInsightsClient {
 
     constructor(
         private readonly appId: string,
+        private readonly azureClientId: string,
         private readonly credential: TokenCredential,
         request: Got = got,
         getAgentsFn: () => Agents = getForeverAgents,
@@ -39,7 +40,8 @@ export class ApplicationInsightsClient {
 
     public async executeQuery(query: string, queryTimeRange: string): Promise<ResponseWithBodyType<ApplicationInsightsQueryResponse>> {
         const requestUrl = `${this.baseUrl}/${this.appId}/query`;
-        const token = await this.credential.getToken(this.resource);
+        // The clientId is supported by the ManagedIdentityCredential class
+        const token = await this.credential.getToken(this.resource, { clientId: this.azureClientId } as any);
         const headers = {
             Authorization: `Bearer ${token.token}`,
         };

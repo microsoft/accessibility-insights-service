@@ -49,14 +49,4 @@ resources=$(az deployment group create \
 . "${0%/*}/get-resource-name-from-resource-paths.sh" -p "Microsoft.insights/components" -r "${resources}"
 appInsightsName=${resourceName}
 
-# The servicePrincipalId is Azure DevOps service connection application (client) id used by release pipeline.
-# Set by Azure DevOps environment. Task option 'Access service principal details in script' should be enabled.
-if [[ -n ${servicePrincipalId} ]]; then
-    principalId=${servicePrincipalId}
-    role="Reader"
-    scope="--scope /subscriptions/${subscription}/resourceGroups/${resourceGroupName}/providers/microsoft.insights/components/${appInsightsName}"
-    . "${0%/*}/create-role-assignment.sh"
-    echo "Added role assignment to Application Insights resource for Azure DevOps service connection with application (client) ID ${servicePrincipalId}"
-fi
-
 echo "Successfully created Application Insights ${appInsightsName}"
