@@ -170,13 +170,10 @@ function enableApplicationInsightsWriteAccess() {
     role="Monitoring Metrics Publisher"
     scope="--scope /subscriptions/${subscription}/resourceGroups/${resourceGroupName}/providers/microsoft.insights/components/${appInsightsName}"
     . "${0%/*}/create-role-assignment.sh"
-
-    role="Reader"
-    . "${0%/*}/create-role-assignment.sh"
 }
 
 function enableApplicationInsightsReadAccess() {
-    principalId=${webApiIdentityClientId}
+    principalId=$(az identity show --name "${webApiManagedIdentityName}" --resource-group "${resourceGroupName}" --query principalId -o tsv)
     role="Reader"
     scope="--scope /subscriptions/${subscription}/resourceGroups/${resourceGroupName}/providers/microsoft.insights/components/${appInsightsName}"
     . "${0%/*}/create-role-assignment.sh"
