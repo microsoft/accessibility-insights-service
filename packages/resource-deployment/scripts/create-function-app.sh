@@ -166,12 +166,19 @@ function enableCosmosAccess() {
         --role-definition-id "${RBACRoleId}" 1>/dev/null
 }
 
-function enableApplicationInsightsAccess() {
+function enableApplicationInsightsWriteAccess() {
     role="Monitoring Metrics Publisher"
     scope="--scope /subscriptions/${subscription}/resourceGroups/${resourceGroupName}/providers/microsoft.insights/components/${appInsightsName}"
     . "${0%/*}/create-role-assignment.sh"
 
     role="Reader"
+    . "${0%/*}/create-role-assignment.sh"
+}
+
+function enableApplicationInsightsReadAccess() {
+    principalId=${webApiIdentityClientId}
+    role="Reader"
+    scope="--scope /subscriptions/${subscription}/resourceGroups/${resourceGroupName}/providers/microsoft.insights/components/${appInsightsName}"
     . "${0%/*}/create-role-assignment.sh"
 }
 
@@ -201,14 +208,15 @@ function enableManagedIdentity() {
     . "${0%/*}/key-vault-enable-msi.sh"
     enableStorageAccess
     enableCosmosAccess
-    enableApplicationInsightsAccess
+    enableApplicationInsightsWriteAccess
+    enableApplicationInsightsReadAccess
 
     echo "Granting access to ${webWorkersFuncAppName} function service principal..."
     getFunctionAppPrincipalId "${webWorkersFuncAppName}"
     . "${0%/*}/key-vault-enable-msi.sh"
     enableStorageAccess
     enableCosmosAccess
-    enableApplicationInsightsAccess
+    enableApplicationInsightsWriteAccess
 
     echo "Granting access to ${e2eWebApisFuncAppName} function service principal..."
     getFunctionAppPrincipalId "${e2eWebApisFuncAppName}"
