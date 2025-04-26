@@ -44,7 +44,7 @@
     },
     "resources": [
         {
-            "apiVersion": "2023-09-01-preview",
+            "apiVersion": "2024-06-01-preview",
             "name": "[parameters('name')]",
             "location": "[parameters('location')]",
             "type": "Microsoft.ApiManagement/service",

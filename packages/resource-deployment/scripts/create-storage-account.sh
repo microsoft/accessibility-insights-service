@@ -25,7 +25,7 @@ if [[ -z $resourceGroupName ]]; then
     exitWithUsageInfo
 fi
 
-templateFile="${0%/*}/../templates/blob-storage.template.json"
+templateFile="${0%/*}/../templates/storage.template.json"
 
 echo "Creating storage account under resource group $resourceGroupName using ARM template $templateFile"
 resources=$(az deployment group create --resource-group "$resourceGroupName" --template-file "$templateFile" --query "properties.outputResources[].id" -o tsv)

@@ -17,7 +17,7 @@ export class BatchCredentialProvider {
         return executeWithExponentialRetry(async () => {
             let credentials;
             try {
-                credentials = await this.msRestAzureObj.loginWithVmMSI({ resource: this.resource });
+                credentials = await this.msRestAzureObj.loginWithVmMSI({ resource: this.resource, clientId: process.env.AZURE_CLIENT_ID });
             } catch (error) {
                 throw new Error(`The @azure/ms-rest-nodeauth credentials provider has failed. ${System.serializeError(error)}`);
             }

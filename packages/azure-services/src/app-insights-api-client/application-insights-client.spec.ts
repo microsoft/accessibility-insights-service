@@ -17,13 +17,18 @@ import { EventsQueryOptions } from './events-query-options';
 describe(ApplicationInsightsClient, () => {
     let testSubject: ApplicationInsightsClient;
     const appId = 'appId';
-    const apiKey = 'apiKey';
+    const azureClientId = 'azureClientId';
     let baseUrl: string;
     let requestStub: any;
     let getMock: IMock<(url: string, options?: Options) => {}>;
     let postMock: IMock<(url: string, options?: Options) => {}>;
     const agents: Agents = { http: {} as http.Agent };
     const getAgentsStub = () => agents;
+    const tokenCredentialStub = {
+        getToken: async () => {
+            return Promise.resolve({ token: 'token' } as any);
+        },
+    };
 
     beforeEach(() => {
         baseUrl = `https://api.applicationinsights.io/v1/apps/${appId}`;
@@ -38,7 +43,7 @@ describe(ApplicationInsightsClient, () => {
             get: getMock.object,
             post: postMock.object,
         };
-        testSubject = new ApplicationInsightsClient(appId, apiKey, requestStub, getAgentsStub);
+        testSubject = new ApplicationInsightsClient(appId, azureClientId, tokenCredentialStub, requestStub, getAgentsStub);
     });
 
     afterEach(() => {
@@ -53,9 +58,6 @@ describe(ApplicationInsightsClient, () => {
         extendsMock
             .setup((d) =>
                 d({
-                    headers: {
-                        'X-Api-Key': apiKey,
-                    },
                     responseType: 'json',
                     agent: agents,
                 }),
@@ -63,7 +65,7 @@ describe(ApplicationInsightsClient, () => {
             .returns(() => 'some object' as any)
             .verifiable(Times.once());
 
-        testSubject = new ApplicationInsightsClient(appId, apiKey, requestStub, getAgentsStub);
+        testSubject = new ApplicationInsightsClient(appId, azureClientId, tokenCredentialStub, requestStub, getAgentsStub);
 
         extendsMock.verifyAll();
     });
@@ -80,6 +82,9 @@ describe(ApplicationInsightsClient, () => {
         const options = {
             json: requestBody,
             throwHttpErrors: false,
+            headers: {
+                Authorization: `Bearer token`,
+            },
         };
         let requestUrl: string;
 
@@ -128,6 +133,9 @@ describe(ApplicationInsightsClient, () => {
             const options = {
                 searchParams: undefined as EventsQueryOptions,
                 throwHttpErrors: testSubject.throwOnRequestFailure,
+                headers: {
+                    Authorization: `Bearer token`,
+                },
             };
             getMock
                 .setup((req) => req(eventsUrl, options))
@@ -147,6 +155,9 @@ describe(ApplicationInsightsClient, () => {
             const options = {
                 searchParams: eventsQueryOptions,
                 throwHttpErrors: testSubject.throwOnRequestFailure,
+                headers: {
+                    Authorization: `Bearer token`,
+                },
             };
 
             getMock
@@ -164,6 +175,9 @@ describe(ApplicationInsightsClient, () => {
             const options = {
                 searchParams: undefined as EventsQueryOptions,
                 throwHttpErrors: throwOnFailure,
+                headers: {
+                    Authorization: `Bearer token`,
+                },
             };
 
             getMock

@@ -4,7 +4,7 @@
 import { Queue, StorageConfig } from 'azure-services';
 import { ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
-import { ContextAwareLogger } from 'logger';
+import { GlobalLogger } from 'logger';
 import {
     PageScanRequestProvider,
     OnDemandPageScanRunResultProvider,
@@ -30,7 +30,7 @@ export class OnDemandDispatcher {
         @inject(ScanNotificationProcessor) protected readonly scanNotificationProcessor: ScanNotificationProcessor,
         @inject(StorageConfig) private readonly storageConfig: StorageConfig,
         @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
-        @inject(ContextAwareLogger) private readonly logger: ContextAwareLogger,
+        @inject(GlobalLogger) private readonly logger: GlobalLogger,
     ) {}
 
     public async dispatchScanRequests(): Promise<void> {

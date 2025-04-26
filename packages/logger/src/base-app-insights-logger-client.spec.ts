@@ -19,7 +19,7 @@ import { AvailabilityTelemetry, BaseTelemetryProperties } from './logger-client'
 
 interface TrackTraceTestCase {
     logLevel: LogLevel;
-    appInsightsLogLevel: appInsights.Contracts.SeverityLevel;
+    appInsightsLogLevel: appInsights.KnownSeverityLevel;
 }
 
 class TestableBaseAppInsightsLoggerClient extends BaseAppInsightsLoggerClient {
@@ -35,7 +35,6 @@ class TestableBaseAppInsightsLoggerClient extends BaseAppInsightsLoggerClient {
             {
                 commonProperties: null,
                 config: null,
-                channel: null,
                 trackTrace: (() => {}) as any,
                 trackMetric: (() => {}) as any,
                 trackException: (() => {}) as any,
@@ -189,7 +188,7 @@ describe(BaseAppInsightsLoggerClient, () => {
                     t.trackTrace(
                         It.isValue({
                             message: 'trace1',
-                            severity: appInsights.Contracts.SeverityLevel.Information,
+                            severity: appInsights.KnownSeverityLevel.Information,
                             properties: { ...testSubject.getCommonProperties() },
                         }),
                     ),
@@ -209,7 +208,7 @@ describe(BaseAppInsightsLoggerClient, () => {
                     t.trackTrace(
                         It.isValue({
                             message: '[log source] log message',
-                            severity: appInsights.Contracts.SeverityLevel.Information,
+                            severity: appInsights.KnownSeverityLevel.Information,
                             properties: { ...testSubject.getCommonProperties() },
                         }),
                     ),
@@ -224,19 +223,19 @@ describe(BaseAppInsightsLoggerClient, () => {
         test.each([
             {
                 logLevel: LogLevel.Error,
-                appInsightsLogLevel: appInsights.Contracts.SeverityLevel.Error,
+                appInsightsLogLevel: appInsights.KnownSeverityLevel.Error,
             },
             {
                 logLevel: LogLevel.Warn,
-                appInsightsLogLevel: appInsights.Contracts.SeverityLevel.Warning,
+                appInsightsLogLevel: appInsights.KnownSeverityLevel.Warning,
             },
             {
                 logLevel: LogLevel.Info,
-                appInsightsLogLevel: appInsights.Contracts.SeverityLevel.Information,
+                appInsightsLogLevel: appInsights.KnownSeverityLevel.Information,
             },
             {
                 logLevel: LogLevel.Verbose,
-                appInsightsLogLevel: appInsights.Contracts.SeverityLevel.Verbose,
+                appInsightsLogLevel: appInsights.KnownSeverityLevel.Verbose,
             },
         ])('when properties passed %o', async (testCase: TrackTraceTestCase) => {
             await testSubject.setup();
@@ -316,17 +315,12 @@ describe(BaseAppInsightsLoggerClient, () => {
         });
 
         it('flushes events', async () => {
-            let flushCb: () => void;
             testSubject.telemetryClientMock
-                .setup((t) => t.flush(It.isAny()))
-                .returns((options) => {
-                    flushCb = options.callback;
-                    flushCb();
-                })
+                .setup((t) => t.flush())
+                .returns(() => Promise.resolve())
                 .verifiable();
 
             await testSubject.flush();
-            expect(flushCb).toBeDefined();
             verifyMocks();
         });
     });

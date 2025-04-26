@@ -58,29 +58,6 @@ pushSecretToKeyVault() {
     az keyvault secret set --vault-name "${keyVault}" --name "${secretName}" --value "${secretValue}" 1>/dev/null
 }
 
-getCosmosDbUrl() {
-    cosmosDbUrl=$(az cosmosdb show --name "${cosmosAccountName}" --resource-group "${resourceGroupName}" --query "documentEndpoint" -o tsv)
-
-    if [[ -z ${cosmosDbUrl} ]]; then
-        echo "Unable to get Cosmos DB URL for account ${cosmosAccountName} under resource group ${resourceGroupName}"
-        exit 1
-    fi
-}
-
-createAppInsightsApiKey() {
-    apiKeyParams="--app $appInsightsName --resource-group $resourceGroupName --api-key $appInsightsName-api-key"
-    apiKeyExists=$(az monitor app-insights api-key show $apiKeyParams)
-
-    # If api key already exists, delete and recreate it
-    if [[ -n "${apiKeyExists}" ]]; then
-        echo "Deleting existing App Insights API key"
-        az monitor app-insights api-key delete $apiKeyParams --yes 1>/dev/null
-    fi
-
-    appInsightsApiKey=$(az monitor app-insights api-key create $apiKeyParams --read-properties ReadTelemetry --query "apiKey" -o tsv)
-    echo "App Insights API key was created ${appInsightsApiKey}"
-}
-
 # Function runs in a separate shell to keep trap handler apart
 pushSecretsToKeyVault() (
     echo "Pushing secrets to keyvault ${keyVault} in resourceGroup ${resourceGroupName}"
@@ -89,7 +66,7 @@ pushSecretsToKeyVault() (
     trap 'onExit-push-secrets-to-key-vault' EXIT
     grantWritePermissionToKeyVault
 
-    getCosmosDbUrl
+    cosmosDbUrl=$(az cosmosdb show --name "${cosmosAccountName}" --resource-group "${resourceGroupName}" --query "documentEndpoint" -o tsv)
     pushSecretToKeyVault "cosmosDbUrl" "${cosmosDbUrl}"
 
     pushSecretToKeyVault "storageAccountName" "${storageAccountName}"
@@ -97,8 +74,8 @@ pushSecretsToKeyVault() (
     webApiIdentityClientId=$(az identity show --name "${webApiManagedIdentityName}" --resource-group "${resourceGroupName}" --query clientId -o tsv)
     pushSecretToKeyVault "webApiIdentityClientId" "${webApiIdentityClientId}"
 
-    # createAppInsightsApiKey
-    # pushSecretToKeyVault "appInsightsApiKey" "${appInsightsApiKey}"
+    appInsightsConnectionString=$(az monitor app-insights component show --app "$appInsightsName" --resource-group "$resourceGroupName" --query "connectionString" -o tsv)
+    pushSecretToKeyVault "appInsightsConnectionString" "${appInsightsConnectionString}"
 
     pushSecretToKeyVault "containerRegistryName" "${containerRegistryName}"
 )

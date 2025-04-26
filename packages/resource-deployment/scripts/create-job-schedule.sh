@@ -34,34 +34,34 @@ adjustJob() {
     local allJobsScheduleList=$3
     local foundJobSchedule=false
 
-    for schedule in $allJobsScheduleList; do
+    for schedule in ${allJobsScheduleList}; do
         local scheduleId="${schedule//[$'\t\r\n ']/}"
 
-        if [[ $scheduleId == "$jobName" ]]; then
+        if [[ ${scheduleId} == "${jobName}" ]]; then
             foundJobSchedule=true
             break
         fi
     done
 
-    if [[ $foundJobSchedule == true ]]; then
-        echo "The $jobName job schedule exists. Resetting job schedule."
-        az batch job-schedule reset --job-schedule-id "$jobName" --json-file "$jobTemplate" 1>/dev/null
+    if [[ ${foundJobSchedule} == true ]]; then
+        echo "The ${jobName} job schedule exists. Resetting job schedule."
+        az batch job-schedule reset --job-schedule-id "${jobName}" --json-file "${jobTemplate}" 1>/dev/null
     else
-        echo "The $jobName job schedule doesn't exist. Creating job schedule."
-        az batch job-schedule create --json-file "$jobTemplate" 1>/dev/null
+        echo "The ${jobName} job schedule doesn't exist. Creating job schedule."
+        az batch job-schedule create --json-file "${jobTemplate}" 1>/dev/null
     fi
 }
 
 exitWithUsageInfo() {
     echo "
-        Usage: ${BASH_SOURCE} -b <batch account name> -r <resource group name> [-k <key vault url>] [-t <path to template folder (optional), defaults to $templatesFolder folder relative to the current working directory>]
+        Usage: ${BASH_SOURCE} -b <batch account name> -r <resource group name> [-k <key vault url>] [-t <path to template folder (optional), defaults to ${templatesFolder} folder relative to the current working directory>]
     "
     exit 1
 }
 
 # Read script arguments
 while getopts ":b:r:k:t:" option; do
-    case $option in
+    case ${option} in
     b) batchAccountName=${OPTARG} ;;
     r) resourceGroupName=${OPTARG} ;;
     k) keyVaultUrl=${OPTARG} ;;
@@ -71,34 +71,37 @@ while getopts ":b:r:k:t:" option; do
 done
 
 # Print script usage help
-if [[ -z $batchAccountName ]] || [[ -z $resourceGroupName ]]; then
+if [[ -z ${batchAccountName} ]] || [[ -z ${resourceGroupName} ]]; then
     exitWithUsageInfo
 fi
 
 . "${0%/*}/get-resource-names.sh"
 
-if [[ -z $keyVaultUrl ]]; then
-    keyVaultUrl="https://$keyVault.vault.azure.net/"
+if [[ -z ${keyVaultUrl} ]]; then
+    keyVaultUrl="https://${keyVault}.vault.azure.net/"
 fi
 
-appInsightsKey=$(az monitor app-insights component show --app "$appInsightsName" --resource-group "$resourceGroupName" --query "instrumentationKey" -o tsv)
+appInsightsConnectionString=$(az monitor app-insights component show --app "${appInsightsName}" --resource-group "${resourceGroupName}" --query "connectionString" -o tsv)
 
-sed -e "s@%APP_INSIGHTS_TOKEN%@$appInsightsKey@" -e "s@%KEY_VAULT_TOKEN%@$keyVaultUrl@" -e "s@%CONTAINER_REGISTRY_TOKEN%@$containerRegistryName@" "$templatesFolder/on-demand-url-scan-schedule.template.json" >"$parsedOnDemandScanScheduleFileName"
-sed -e "s@%APP_INSIGHTS_TOKEN%@$appInsightsKey@" -e "s@%KEY_VAULT_TOKEN%@$keyVaultUrl@" -e "s@%CONTAINER_REGISTRY_TOKEN%@$containerRegistryName@" "$templatesFolder/on-demand-scan-req-schedule.template.json" >"$parsedOnDemandScanReqScheduleFileName"
-sed -e "s@%APP_INSIGHTS_TOKEN%@$appInsightsKey@" -e "s@%KEY_VAULT_TOKEN%@$keyVaultUrl@" -e "s@%CONTAINER_REGISTRY_TOKEN%@$containerRegistryName@" "$templatesFolder/on-demand-send-notification-schedule.template.json" >"$parsedOnDemandSendNotificationFileName"
-sed -e "s@%APP_INSIGHTS_TOKEN%@$appInsightsKey@" -e "s@%KEY_VAULT_TOKEN%@$keyVaultUrl@" -e "s@%CONTAINER_REGISTRY_TOKEN%@$containerRegistryName@" "$templatesFolder/privacy-scan-schedule.template.json" >"$parsedPrivacyScanScheduleFileName"
-sed -e "s@%APP_INSIGHTS_TOKEN%@$appInsightsKey@" -e "s@%KEY_VAULT_TOKEN%@$keyVaultUrl@" -e "s@%CONTAINER_REGISTRY_TOKEN%@$containerRegistryName@" "$templatesFolder/report-generator-schedule.template.json" >"$parsedReportGeneratorScheduleFileName"
+clientId=$(az identity show --name "${batchNodeManagedIdentityName}" --resource-group "${resourceGroupName}" --query clientId -o tsv)
+appInsightsAuthString="Authorization=AAD;ClientId=${clientId}"
 
-echo "Logging into batch account $batchAccountName in resource group $resourceGroupName..."
-az batch account login --name "$batchAccountName" --resource-group "$resourceGroupName"
+sed -e "s@%APP_INSIGHTS_CONNECTION_STRING%@${appInsightsConnectionString}@" -e "s@%APP_INSIGHTS_AUTH_STRING%@${appInsightsAuthString}@" -e "s@%KEY_VAULT_TOKEN%@${keyVaultUrl}@" -e "s@%CONTAINER_REGISTRY_TOKEN%@${containerRegistryName}@" "${templatesFolder}/on-demand-url-scan-schedule.template.json" >"${parsedOnDemandScanScheduleFileName}"
+sed -e "s@%APP_INSIGHTS_CONNECTION_STRING%@${appInsightsConnectionString}@" -e "s@%APP_INSIGHTS_AUTH_STRING%@${appInsightsAuthString}@" -e "s@%KEY_VAULT_TOKEN%@${keyVaultUrl}@" -e "s@%CONTAINER_REGISTRY_TOKEN%@${containerRegistryName}@" "${templatesFolder}/on-demand-scan-req-schedule.template.json" >"${parsedOnDemandScanReqScheduleFileName}"
+sed -e "s@%APP_INSIGHTS_CONNECTION_STRING%@${appInsightsConnectionString}@" -e "s@%APP_INSIGHTS_AUTH_STRING%@${appInsightsAuthString}@" -e "s@%KEY_VAULT_TOKEN%@${keyVaultUrl}@" -e "s@%CONTAINER_REGISTRY_TOKEN%@${containerRegistryName}@" "${templatesFolder}/on-demand-send-notification-schedule.template.json" >"${parsedOnDemandSendNotificationFileName}"
+sed -e "s@%APP_INSIGHTS_CONNECTION_STRING%@${appInsightsConnectionString}@" -e "s@%APP_INSIGHTS_AUTH_STRING%@${appInsightsAuthString}@" -e "s@%KEY_VAULT_TOKEN%@${keyVaultUrl}@" -e "s@%CONTAINER_REGISTRY_TOKEN%@${containerRegistryName}@" "${templatesFolder}/privacy-scan-schedule.template.json" >"${parsedPrivacyScanScheduleFileName}"
+sed -e "s@%APP_INSIGHTS_CONNECTION_STRING%@${appInsightsConnectionString}@" -e "s@%APP_INSIGHTS_AUTH_STRING%@${appInsightsAuthString}@" -e "s@%KEY_VAULT_TOKEN%@${keyVaultUrl}@" -e "s@%CONTAINER_REGISTRY_TOKEN%@${containerRegistryName}@" "${templatesFolder}/report-generator-schedule.template.json" >"${parsedReportGeneratorScheduleFileName}"
+
+echo "Logging into batch account ${batchAccountName} in resource group ${resourceGroupName}..."
+az batch account login --name "${batchAccountName}" --resource-group "${resourceGroupName}"
 
 echo "Fetching existing job schedule list..."
 allJobsScheduleList=$(az batch job-schedule list --query "[*].id" -o tsv)
 
-adjustJob "$onDemandScanScheduleJobName" "$parsedOnDemandScanScheduleFileName" "$allJobsScheduleList"
-adjustJob "$onDemandScanReqScheduleJobName" "$parsedOnDemandScanReqScheduleFileName" "$allJobsScheduleList"
-adjustJob "$onDemandSendNotificationJobName" "$parsedOnDemandSendNotificationFileName" "$allJobsScheduleList"
-adjustJob "$privacyScanScheduleJobName" "$parsedPrivacyScanScheduleFileName" "$allJobsScheduleList"
-adjustJob "$reportGeneratorScheduleJobName" "$parsedReportGeneratorScheduleFileName" "$allJobsScheduleList"
+adjustJob "${onDemandScanScheduleJobName}" "${parsedOnDemandScanScheduleFileName}" "${allJobsScheduleList}"
+adjustJob "${onDemandScanReqScheduleJobName}" "${parsedOnDemandScanReqScheduleFileName}" "${allJobsScheduleList}"
+adjustJob "${onDemandSendNotificationJobName}" "${parsedOnDemandSendNotificationFileName}" "${allJobsScheduleList}"
+adjustJob "${privacyScanScheduleJobName}" "${parsedPrivacyScanScheduleFileName}" "${allJobsScheduleList}"
+adjustJob "${reportGeneratorScheduleJobName}" "${parsedReportGeneratorScheduleFileName}" "${allJobsScheduleList}"
 
 echo "Job schedules were created successfully."

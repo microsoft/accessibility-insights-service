@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+import { HttpResponseInit } from '@azure/functions';
 import { AppContext, getGlobalWebControllerDispatcher, Newable, WebController } from 'service-library';
 import { Container } from 'inversify';
 import * as appInsights from 'applicationinsights';
@@ -9,7 +10,11 @@ import { getProcessLifeCycleContainer } from './get-process-life-cycle-container
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-export async function processWebRequest(appContext: AppContext, controllerType: Newable<WebController>, ...args: any[]): Promise<any> {
+export async function processWebRequest(
+    appContext: AppContext,
+    controllerType: Newable<WebController>,
+    ...args: any[]
+): Promise<HttpResponseInit> {
     const processLifeCycleContainer = getProcessLifeCycleContainer();
     const dispatcher = await getGlobalWebControllerDispatcher(processLifeCycleContainer);
 
@@ -29,7 +34,7 @@ export async function processWebRequest(appContext: AppContext, controllerType: 
             headers: isEmpty(headers) ? undefined : headers,
         });
 
-        return appInsights.wrapWithCorrelationContext<Promise<any>>(
+        return appInsights.wrapWithCorrelationContext<Promise<HttpResponseInit>>(
             dispatcher.processRequest(container, controllerType, appContext, ...args),
             correlationContext,
         );

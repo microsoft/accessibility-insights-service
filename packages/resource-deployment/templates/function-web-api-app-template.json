@@ -116,8 +116,12 @@
                             "value": "[format('https://{0}.blob.core.windows.net/function-apps/{1}.zip', parameters('storageAccountName'), parameters('name'))]"
                         },
                         {
-                            "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
-                            "value": "[reference(concat('microsoft.insights/components/', parameters('appInsightsName')), '2015-05-01').InstrumentationKey]"
+                            "name": "APPLICATIONINSIGHTS_CONNECTION_STRING",
+                            "value": "[reference(concat('microsoft.insights/components/', parameters('appInsightsName')), '2015-05-01').ConnectionString]"
+                        },
+                        {
+                            "name": "APPLICATIONINSIGHTS_AUTHENTICATION_STRING",
+                            "value": "Authorization=AAD"
                         },
                         {
                             "name": "APPINSIGHTS_APPID",

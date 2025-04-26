@@ -5,7 +5,7 @@ import { HttpResponseInit } from '@azure/functions';
 import { GuidGenerator, RestApiConfig, ServiceConfiguration, Url, CrawlConfig } from 'common';
 import { inject, injectable } from 'inversify';
 import { isEmpty, isNil, groupBy, filter, isArray } from 'lodash';
-import { ContextAwareLogger, ScanRequestReceivedMeasurements } from 'logger';
+import { GlobalLogger, ScanRequestReceivedMeasurements } from 'logger';
 import {
     ApiController,
     WebHttpResponse,
@@ -42,7 +42,7 @@ export class ScanRequestController extends ApiController {
         @inject(ScanDataProvider) private readonly scanDataProvider: ScanDataProvider,
         @inject(GuidGenerator) private readonly guidGenerator: GuidGenerator,
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
-        @inject(ContextAwareLogger) protected readonly logger: ContextAwareLogger,
+        @inject(GlobalLogger) protected readonly logger: GlobalLogger,
     ) {
         super(logger);
     }

@@ -36,7 +36,7 @@
             "label": "copy-runtime-config",
             "dependsOn": "tsc",
             "windows": {
-                "command": "echo F | xcopy /Y ..\\resource-deployment\\runtime-config\\runtime-config.dev.json ..\\common\\dist\\configuration\\runtime-config.json"
+                "command": "xcopy /Y ..\\resource-deployment\\runtime-config\\runtime-config.dev.json ..\\common\\dist\\configuration\\runtime-config.json"
             },
             "osx": {
                 "command": "cp ../resource-deployment/runtime-config/runtime-config.dev.json ../common/dist/configuration/runtime-config.json"

@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 import { Container } from 'inversify';
-import { BaseTelemetryProperties, ContextAwareLogger, loggerTypes } from 'logger';
+import { BaseTelemetryProperties, GlobalLogger, loggerTypes } from 'logger';
 import { ProcessEntryPointBase } from '../process-entry-point-base';
 import { Newable } from './web-api-ioc-types';
 import { AppContext, WebController } from './web-controller';
@@ -20,7 +20,7 @@ export class WebControllerDispatcher extends ProcessEntryPointBase {
         appContext: AppContext,
         ...args: any[]
     ): Promise<any> {
-        const logger = container.get(ContextAwareLogger);
+        const logger = container.get(GlobalLogger);
         await logger.setup();
 
         const controller = container.get(controllerType) as WebController;
