@@ -1,18 +1,19 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { ApplicationInsightsClient, registerAzureServicesToContainer, secretNames, SecretProvider } from 'azure-services';
+import { ApplicationInsightsClient, CredentialsProvider, registerAzureServicesToContainer, SecretProvider } from 'azure-services';
 import { IoC, setupRuntimeConfigContainer } from 'common';
 import * as inversify from 'inversify';
-import { isNil } from 'lodash';
+import { isEmpty } from 'lodash';
 import { registerLoggerToContainer } from 'logger';
 import { webApiTypeNames } from './web-api-types';
 
 let processLifeCycleContainer: inversify.Container;
 
 export function getProcessLifeCycleContainer(): inversify.Container {
-    if (isNil(processLifeCycleContainer)) {
+    if (isEmpty(processLifeCycleContainer)) {
         processLifeCycleContainer = new inversify.Container({ autoBindInjectable: true });
+
         setupRuntimeConfigContainer(processLifeCycleContainer);
         registerLoggerToContainer(processLifeCycleContainer);
         registerAzureServicesToContainer(processLifeCycleContainer);
@@ -21,10 +22,14 @@ export function getProcessLifeCycleContainer(): inversify.Container {
             webApiTypeNames.ApplicationInsightsClientProvider,
             processLifeCycleContainer,
             async (context) => {
+                const credentialProvider = context.container.get(CredentialsProvider);
+                const credentials = credentialProvider.getAzureCredential();
+                // We need to use the webApiIdentityClientId to get the token for Application Insights
+                // The webApiIdentityClientId is a user-managed identity for REST API function and web worker app
                 const secretProvider = context.container.get(SecretProvider);
-                const appInsightsApiKey = await secretProvider.getSecret(secretNames.appInsightsApiKey);
+                const webApiIdentityClientId = await secretProvider.getSecret('webApiIdentityClientId');
 
-                return new ApplicationInsightsClient(process.env.APPINSIGHTS_APPID, appInsightsApiKey);
+                return new ApplicationInsightsClient(process.env.APPINSIGHTS_APPID, webApiIdentityClientId, credentials);
             },
         );
     }

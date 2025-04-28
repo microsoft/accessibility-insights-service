@@ -3,7 +3,7 @@
 
 import { GuidGenerator, ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
-import { ContextAwareLogger } from 'logger';
+import { GlobalLogger } from 'logger';
 import { WebController, OnDemandPageScanRunResultProvider, WebApiErrorCode } from 'service-library';
 import { functionalTestGroupTypes, TestRunner, TestEnvironment, TestGroupConstructor } from 'functional-tests';
 import { a11yServiceClientTypeNames, A11yServiceClientProvider } from 'web-api-client';
@@ -24,7 +24,7 @@ export class TestOnDemandController extends WebController {
 
     public constructor(
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
-        @inject(ContextAwareLogger) protected readonly logger: ContextAwareLogger,
+        @inject(GlobalLogger) protected readonly logger: GlobalLogger,
         @inject(GuidGenerator) private readonly guidGenerator: GuidGenerator,
         @inject(TestRunner) protected readonly testRunner: TestRunner,
         @inject(a11yServiceClientTypeNames.A11yServiceClientProvider) protected readonly webApiClientProvider: A11yServiceClientProvider,

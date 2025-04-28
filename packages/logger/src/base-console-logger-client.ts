@@ -12,6 +12,8 @@ import { LoggerEvent } from './logger-event';
 import { BaseTelemetryMeasurements, TelemetryMeasurements } from './logger-event-measurements';
 import { loggerTypes } from './logger-types';
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 @injectable()
 export abstract class BaseConsoleLoggerClient implements LoggerClient {
     public initialized: boolean = false;
@@ -47,8 +49,9 @@ export abstract class BaseConsoleLoggerClient implements LoggerClient {
         });
     }
 
-    // eslint-disable-next-line no-empty,@typescript-eslint/no-empty-function
-    public trackAvailability(name: string, telemetry: AvailabilityTelemetry): void {}
+    public trackAvailability(name: string, telemetry: AvailabilityTelemetry): void {
+        return;
+    }
 
     public log(message: string, logLevel: LogLevel, properties?: LoggerProperties): void {
         this.executeInDebugMode(() => {
@@ -62,8 +65,9 @@ export abstract class BaseConsoleLoggerClient implements LoggerClient {
         });
     }
 
-    // eslint-disable-next-line no-empty,@typescript-eslint/no-empty-function
-    public async flush(): Promise<void> {}
+    public async flush(): Promise<void> {
+        return;
+    }
 
     public setCommonProperties(properties: LoggerProperties): void {
         this.baseProperties = { ...this.baseProperties, ...properties };
@@ -91,7 +95,6 @@ export abstract class BaseConsoleLoggerClient implements LoggerClient {
         }
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private getPrintableString(obj: any): string {
         return utils.inspect(obj, { depth: null });
     }

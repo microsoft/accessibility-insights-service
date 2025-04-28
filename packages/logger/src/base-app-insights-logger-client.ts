@@ -1,15 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { Contracts, TelemetryClient } from 'applicationinsights';
+import { KnownSeverityLevel, TelemetryClient } from 'applicationinsights';
 import { injectable } from 'inversify';
 import { merge } from 'lodash';
 import { LogLevel } from './logger';
 import { AvailabilityTelemetry, BaseTelemetryProperties, LoggerClient, LoggerProperties } from './logger-client';
 import { LoggerEvent } from './logger-event';
 import { TelemetryMeasurements } from './logger-event-measurements';
-
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
 @injectable()
 export abstract class BaseAppInsightsLoggerClient implements LoggerClient {
@@ -37,7 +35,6 @@ export abstract class BaseAppInsightsLoggerClient implements LoggerClient {
 
     public log(message: string, logLevel: LogLevel, properties?: LoggerProperties): void {
         const severity = this.getAppInsightsSeverityLevel(logLevel);
-
         this.telemetryClient.trackTrace({
             message: this.setMessageSource(message),
             severity: severity,
@@ -63,13 +60,7 @@ export abstract class BaseAppInsightsLoggerClient implements LoggerClient {
     }
 
     public async flush(): Promise<void> {
-        return new Promise((resolve) => {
-            this.telemetryClient.flush({
-                callback: () => {
-                    resolve();
-                },
-            });
-        });
+        await this.telemetryClient.flush();
     }
 
     public setCommonProperties(properties: LoggerProperties): void {
@@ -91,19 +82,19 @@ export abstract class BaseAppInsightsLoggerClient implements LoggerClient {
         return source !== undefined ? `[${source}] ${message}` : message;
     }
 
-    private getAppInsightsSeverityLevel(logLevel: LogLevel): Contracts.SeverityLevel {
+    private getAppInsightsSeverityLevel(logLevel: LogLevel): KnownSeverityLevel {
         switch (logLevel) {
             case LogLevel.Info:
-                return Contracts.SeverityLevel.Information;
+                return KnownSeverityLevel.Information;
 
             case LogLevel.Error:
-                return Contracts.SeverityLevel.Error;
+                return KnownSeverityLevel.Error;
 
             case LogLevel.Verbose:
-                return Contracts.SeverityLevel.Verbose;
+                return KnownSeverityLevel.Verbose;
 
             case LogLevel.Warn:
-                return Contracts.SeverityLevel.Warning;
+                return KnownSeverityLevel.Warning;
 
             default:
                 throw new Error(`Unknown log level '${logLevel}'`);

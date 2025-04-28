@@ -4,7 +4,7 @@
 import 'reflect-metadata';
 
 import { Container } from 'inversify';
-import { BaseTelemetryProperties, ContextAwareLogger, Logger } from 'logger';
+import { BaseTelemetryProperties, GlobalLogger, Logger } from 'logger';
 import { IMock, Mock, Times } from 'typemoq';
 import { NotificationSender } from './sender/notification-sender';
 import { WebApiNotificationSenderEntryPoint } from './web-api-notification-sender-entry-point';
@@ -30,12 +30,12 @@ describe(WebApiNotificationSenderEntryPoint, () => {
     beforeEach(() => {
         containerMock = Mock.ofType(Container);
         senderMock = Mock.ofType(NotificationSender);
-        loggerMock = Mock.ofType(ContextAwareLogger);
+        loggerMock = Mock.ofType(GlobalLogger);
 
         testSubject = new TestWebApiSendNotificationRunnerEntryPoint(containerMock.object);
 
         containerMock.setup((c) => c.get(NotificationSender)).returns(() => senderMock.object);
-        containerMock.setup((c) => c.get(ContextAwareLogger)).returns(() => loggerMock.object);
+        containerMock.setup((c) => c.get(GlobalLogger)).returns(() => loggerMock.object);
     });
 
     it('invokes sender.sendNotification', async () => {

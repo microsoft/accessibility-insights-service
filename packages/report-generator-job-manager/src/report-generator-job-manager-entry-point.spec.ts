@@ -4,7 +4,7 @@
 import 'reflect-metadata';
 
 import { Container } from 'inversify';
-import { BaseTelemetryProperties, ContextAwareLogger, Logger } from 'logger';
+import { BaseTelemetryProperties, GlobalLogger, Logger } from 'logger';
 import { IMock, Mock, Times } from 'typemoq';
 import { ReportGeneratorJobManagerEntryPoint } from './report-generator-job-manager-entry-point';
 import { Worker } from './worker/worker';
@@ -30,7 +30,7 @@ describe(ReportGeneratorJobManagerEntryPoint, () => {
     beforeEach(() => {
         containerMock = Mock.ofType(Container);
         workerMock = Mock.ofType(Worker);
-        loggerMock = Mock.ofType(ContextAwareLogger);
+        loggerMock = Mock.ofType(GlobalLogger);
 
         testSubject = new ReportGeneratorScanJobManagerEntryPointWrapper(containerMock.object);
     });
@@ -46,7 +46,7 @@ describe(ReportGeneratorJobManagerEntryPoint, () => {
     describe('runCustomAction', () => {
         beforeEach(() => {
             containerMock.setup((c) => c.get(Worker)).returns(() => workerMock.object);
-            containerMock.setup((c) => c.get(ContextAwareLogger)).returns(() => loggerMock.object);
+            containerMock.setup((c) => c.get(GlobalLogger)).returns(() => loggerMock.object);
         });
 
         it('invokes worker', async () => {

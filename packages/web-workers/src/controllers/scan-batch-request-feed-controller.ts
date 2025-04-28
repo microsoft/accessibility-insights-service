@@ -4,7 +4,7 @@
 import { GuidGenerator, ServiceConfiguration, Url } from 'common';
 import { inject, injectable } from 'inversify';
 import { filter, groupBy, isEmpty, pullAllBy, uniqBy } from 'lodash';
-import { ContextAwareLogger, ScanRequestAcceptedMeasurements } from 'logger';
+import { GlobalLogger, ScanRequestAcceptedMeasurements } from 'logger';
 import {
     OnDemandPageScanRunResultProvider,
     PageScanRequestProvider,
@@ -50,7 +50,7 @@ export class ScanBatchRequestFeedController extends WebController {
         @inject(PartitionKeyFactory) private readonly partitionKeyFactory: PartitionKeyFactory,
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
         @inject(GuidGenerator) private readonly guidGenerator: GuidGenerator,
-        @inject(ContextAwareLogger) protected readonly logger: ContextAwareLogger,
+        @inject(GlobalLogger) protected readonly logger: GlobalLogger,
     ) {
         super(logger);
     }

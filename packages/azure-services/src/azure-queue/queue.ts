@@ -5,7 +5,7 @@ import * as util from 'util';
 import { QueueRuntimeConfig, RetryHelper, ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
 import _ from 'lodash';
-import { ContextAwareLogger } from 'logger';
+import { GlobalLogger } from 'logger';
 import { DequeuedMessageItem, QueueClient, MessagesDequeueOptionalParams } from '@azure/storage-queue';
 import { iocTypeNames, QueueServiceClientProvider } from '../ioc-types';
 import { Message } from './message';
@@ -17,7 +17,7 @@ export class Queue {
     constructor(
         @inject(iocTypeNames.QueueServiceClientProvider) private readonly queueServiceClientProvider: QueueServiceClientProvider,
         @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
-        @inject(ContextAwareLogger) private readonly logger: ContextAwareLogger,
+        @inject(GlobalLogger) private readonly logger: GlobalLogger,
         @inject(RetryHelper) private readonly retryHelper: RetryHelper<void>,
         private readonly maxEnqueueRetryCount: number = 3,
         private readonly retryIntervalMilliseconds: number = 1000,

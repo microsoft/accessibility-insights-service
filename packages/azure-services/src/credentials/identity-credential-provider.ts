@@ -29,9 +29,10 @@ export class IdentityCredentialProvider implements TokenCredential {
 
     public async getToken(scopes: string | string[], options?: GetTokenOptions & IdentityCredentialProviderOptions): Promise<AccessToken> {
         const scope = this.getResource(scopes);
-        const identityProvider = this.getIdentityProvider(options?.clientId);
+        const clientId = options?.clientId ?? process.env.AZURE_CLIENT_ID;
+        const identityProvider = this.getIdentityProvider(clientId);
         const getAccessToken = async () => identityProvider.getToken(scope, options);
-        const accessToken = await this.identityCredentialCache.getToken(scope, options?.clientId, getAccessToken);
+        const accessToken = await this.identityCredentialCache.getToken(scope, clientId, getAccessToken);
 
         return accessToken;
     }

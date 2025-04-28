@@ -28,7 +28,7 @@ getCosmosDbUrl() {
 
 getAppInsightKey() {
     id="/subscriptions/${subscription}/resourceGroups/${resourceGroupName}/providers/microsoft.insights/components/${appInsightsName}"
-    appInsightInstrumentationKey=$(az resource show --id "${id}" --query properties.InstrumentationKey --out tsv)
+    appInsightsConnectionString=$(az resource show --id "${id}" --query properties.ConnectionString --out tsv)
 }
 
 getBatchAccountEndpoint() {
@@ -73,7 +73,7 @@ AI_STORAGE_NOTIFICATION_QUEUE=ondemand-send-notification
 AI_STORAGE_SCAN_QUEUE=ondemand-scanrequest
 AI_STORAGE_PRIVACY_SCAN_QUEUE=privacy-scan-request
 AI_KEY_VAULT_URL=https://${keyVault}.vault.azure.net/
-APPINSIGHTS_INSTRUMENTATIONKEY=${appInsightInstrumentationKey}
+APPLICATIONINSIGHTS_CONNECTION_STRING=${appInsightsConnectionString}
 AZURE_STORAGE_NAME=${storageAccountName}
 
 AZ_BATCH_POOL_ID=
@@ -108,6 +108,7 @@ START of local.settings.json file >>> \033[32m
     \"Values\": {
         \"FUNCTIONS_WORKER_RUNTIME\": \"node\",
         \"AzureWebJobsStorage__accountName\": \"${storageAccountName}\",
+        \"AzureWebJobsStorage__clientId\": \"${vmManagedIdentityClientID}\",
         \"COSMOS_CONNECTION__accountEndpoint\": \"${cosmosDbUrl}\"
     }
 }

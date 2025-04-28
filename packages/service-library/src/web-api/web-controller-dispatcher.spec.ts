@@ -4,7 +4,7 @@
 import 'reflect-metadata';
 
 import { Container } from 'inversify';
-import { ContextAwareLogger, loggerTypes } from 'logger';
+import { GlobalLogger, loggerTypes } from 'logger';
 import { IMock, Mock, Times } from 'typemoq';
 import { MockableLogger } from '../test-utilities/mockable-logger';
 import { AppContext, WebController } from './web-controller';
@@ -55,7 +55,7 @@ describe(WebControllerDispatcher, () => {
         processLifeCycleContainerMock = Mock.ofType(Container);
 
         containerMock.setup((c) => c.get(TestableWebController)).returns(() => testableWebController);
-        containerMock.setup((c) => c.get(ContextAwareLogger)).returns(() => loggerMock.object);
+        containerMock.setup((c) => c.get(GlobalLogger)).returns(() => loggerMock.object);
     });
 
     afterEach(() => {

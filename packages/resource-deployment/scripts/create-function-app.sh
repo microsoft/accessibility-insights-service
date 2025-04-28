@@ -94,7 +94,8 @@ publishFunctionAppScripts() {
 
     zipFileName="${functionAppName}.zip"
     rm "${zipFileName}" || true 1>/dev/null
-    zip -r "${zipFileName}" .
+    # Fallback to PowerShell if zip command is not available
+    zip -r "${zipFileName}" . || powershell Compress-Archive ".\*" "${zipFileName}"
 
     echo "Uploading ${zipFileName} deployment package file to blob storage..."
     az storage blob upload --account-name "${storageAccountName}" --container-name "function-apps" --file "${zipFileName}" --name "${zipFileName}" --overwrite=true --auth-mode login 1>/dev/null
@@ -165,6 +166,19 @@ function enableCosmosAccess() {
         --role-definition-id "${RBACRoleId}" 1>/dev/null
 }
 
+function enableApplicationInsightsWriteAccess() {
+    role="Monitoring Metrics Publisher"
+    scope="--scope /subscriptions/${subscription}/resourceGroups/${resourceGroupName}/providers/microsoft.insights/components/${appInsightsName}"
+    . "${0%/*}/create-role-assignment.sh"
+}
+
+function enableApplicationInsightsReadAccess() {
+    principalId=$(az identity show --name "${webApiManagedIdentityName}" --resource-group "${resourceGroupName}" --query principalId -o tsv)
+    role="Reader"
+    scope="--scope /subscriptions/${subscription}/resourceGroups/${resourceGroupName}/providers/microsoft.insights/components/${appInsightsName}"
+    . "${0%/*}/create-role-assignment.sh"
+}
+
 function assignUserIdentity() {
     local functionAppName=$1
 
@@ -191,12 +205,15 @@ function enableManagedIdentity() {
     . "${0%/*}/key-vault-enable-msi.sh"
     enableStorageAccess
     enableCosmosAccess
+    enableApplicationInsightsWriteAccess
+    enableApplicationInsightsReadAccess
 
     echo "Granting access to ${webWorkersFuncAppName} function service principal..."
     getFunctionAppPrincipalId "${webWorkersFuncAppName}"
     . "${0%/*}/key-vault-enable-msi.sh"
     enableStorageAccess
     enableCosmosAccess
+    enableApplicationInsightsWriteAccess
 
     echo "Granting access to ${e2eWebApisFuncAppName} function service principal..."
     getFunctionAppPrincipalId "${e2eWebApisFuncAppName}"

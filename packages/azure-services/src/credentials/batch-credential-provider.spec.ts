@@ -8,6 +8,7 @@ import { IMock, Mock, Times } from 'typemoq';
 import { BatchCredentialProvider } from './batch-credential-provider';
 
 const resource = 'https://batch.core.windows.net/';
+const clientId = 'clientId';
 
 let batchCredentialProvider: BatchCredentialProvider;
 let clientCredentials: msRestNodeAuth.MSIVmTokenCredentials;
@@ -18,15 +19,17 @@ describe(BatchCredentialProvider, () => {
         msRestNodeAuthMock = Mock.ofInstance(msRestNodeAuth);
         clientCredentials = { clientId: 'clientId' } as msRestNodeAuth.MSIVmTokenCredentials;
         batchCredentialProvider = new BatchCredentialProvider(msRestNodeAuthMock.object);
+        process.env.AZURE_CLIENT_ID = clientId;
     });
 
     afterEach(() => {
         msRestNodeAuthMock.verifyAll();
+        process.env.AZURE_CLIENT_ID = undefined;
     });
 
     it('get credentials for batch service', async () => {
         msRestNodeAuthMock
-            .setup((o) => o.loginWithVmMSI({ resource }))
+            .setup((o) => o.loginWithVmMSI({ resource, clientId }))
             .returns(() => Promise.resolve(clientCredentials))
             .verifiable();
         const credential = await batchCredentialProvider.getCredential();
@@ -39,7 +42,7 @@ describe(BatchCredentialProvider, () => {
 
         let count = 0;
         msRestNodeAuthMock
-            .setup((o) => o.loginWithVmMSI({ resource }))
+            .setup((o) => o.loginWithVmMSI({ resource, clientId }))
             .returns(() => {
                 count++;
 

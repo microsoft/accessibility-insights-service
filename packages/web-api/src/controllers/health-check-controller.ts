@@ -4,7 +4,7 @@
 import { ApplicationInsightsQueryResponse, Column } from 'azure-services';
 import { AvailabilityTestConfig, getSerializableResponse, ResponseWithBodyType, ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
-import { ContextAwareLogger } from 'logger';
+import { GlobalLogger } from 'logger';
 import {
     ApiController,
     HealthReport,
@@ -30,7 +30,7 @@ export class HealthCheckController extends ApiController {
 
     public constructor(
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
-        @inject(ContextAwareLogger) protected readonly logger: ContextAwareLogger,
+        @inject(GlobalLogger) protected readonly logger: GlobalLogger,
         @inject(webApiTypeNames.ApplicationInsightsClientProvider)
         protected readonly appInsightsClientProvider: ApplicationInsightsClientProvider,
         protected readonly createQueryForRelease: typeof createHealthCheckQueryForRelease = createHealthCheckQueryForRelease,

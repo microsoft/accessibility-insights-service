@@ -4,14 +4,14 @@
 import { registerAzureServicesToContainer, SecretProvider } from 'azure-services';
 import { IoC, setupRuntimeConfigContainer } from 'common';
 import * as inversify from 'inversify';
-import { isNil } from 'lodash';
+import { isEmpty } from 'lodash';
 import { registerLoggerToContainer } from 'logger';
 import { A11yServiceClient, a11yServiceClientTypeNames, A11yServiceCredential } from 'web-api-client';
 
 let processLifeCycleContainer: inversify.Container;
 
 export function getProcessLifeCycleContainer(): inversify.Container {
-    if (isNil(processLifeCycleContainer)) {
+    if (isEmpty(processLifeCycleContainer)) {
         processLifeCycleContainer = new inversify.Container({ autoBindInjectable: true });
 
         setupRuntimeConfigContainer(processLifeCycleContainer);

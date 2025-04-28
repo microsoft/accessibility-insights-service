@@ -4,7 +4,7 @@
 import 'reflect-metadata';
 
 import { Container } from 'inversify';
-import { BaseTelemetryProperties, ContextAwareLogger, Logger } from 'logger';
+import { BaseTelemetryProperties, GlobalLogger, Logger } from 'logger';
 import { IMock, Mock, Times } from 'typemoq';
 import { SendNotificationJobManagerEntryPoint } from './send-notification-job-manager-entry-point';
 import { SendNotificationTaskCreator } from './task/send-notification-task-creator';
@@ -30,7 +30,7 @@ describe(SendNotificationJobManagerEntryPoint, () => {
     beforeEach(() => {
         containerMock = Mock.ofType(Container);
         sendNotificationTaskCreatorMock = Mock.ofType(SendNotificationTaskCreator);
-        loggerMock = Mock.ofType(ContextAwareLogger);
+        loggerMock = Mock.ofType(GlobalLogger);
 
         testSubject = new TestableSendNotificationJobManagerEntryPoint(containerMock.object);
     });
@@ -46,7 +46,7 @@ describe(SendNotificationJobManagerEntryPoint, () => {
     describe('runCustomAction', () => {
         beforeEach(() => {
             containerMock.setup((c) => c.get(SendNotificationTaskCreator)).returns(() => sendNotificationTaskCreatorMock.object);
-            containerMock.setup((c) => c.get(ContextAwareLogger)).returns(() => loggerMock.object);
+            containerMock.setup((c) => c.get(GlobalLogger)).returns(() => loggerMock.object);
         });
 
         it('invokes worker', async () => {

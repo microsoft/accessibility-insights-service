@@ -4,7 +4,7 @@
 import { GuidGenerator, ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
 import { isEmpty } from 'lodash';
-import { ContextAwareLogger } from 'logger';
+import { GlobalLogger } from 'logger';
 import {
     WebHttpResponse,
     OnDemandPageScanRunResultProvider,
@@ -29,7 +29,7 @@ export class ScanResultController extends BaseScanResultController {
         @inject(ScanResponseConverter) protected readonly scanResponseConverter: ScanResponseConverter,
         @inject(GuidGenerator) protected readonly guidGenerator: GuidGenerator,
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
-        @inject(ContextAwareLogger) protected readonly logger: ContextAwareLogger,
+        @inject(GlobalLogger) protected readonly logger: GlobalLogger,
     ) {
         super(logger);
     }

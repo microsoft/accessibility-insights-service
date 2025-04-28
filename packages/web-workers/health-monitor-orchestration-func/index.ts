@@ -6,9 +6,10 @@ import 'reflect-metadata';
 import { app, InvocationContext, Timer, TimerFunctionOptions } from '@azure/functions';
 import * as df from 'durable-functions';
 import { AvailabilityTestConfig, SerializableResponse, ServiceConfiguration, System } from 'common';
-import { ContextAwareLogger } from 'logger';
+import { GlobalLogger } from 'logger';
 import { TestContextData } from 'functional-tests';
-import { getRequestContainer, processWebRequest } from '../src/process-web-request';
+import { Container } from 'inversify';
+import { processWebRequest } from '../src/process-web-request';
 import { HealthMonitorOrchestrationController } from '../src/controllers/health-monitor-orchestration-controller';
 import { HealthMonitorActivity } from '../src/controllers/health-monitor-activity';
 import { createScenarioDrivers } from '../src/e2e-test-scenarios/create-scenarios';
@@ -16,10 +17,11 @@ import { getTestIdentifiersForScenario } from '../src/e2e-test-scenarios/get-tes
 import { createOrchestrationSteps, OrchestrationStepsFactory } from '../src/orchestration/orchestration-steps-factory';
 import { finalizerTestGroupName } from '../src/e2e-test-group-names';
 import { orchestrationName } from '../src/orchestration/orchestration-name';
+import { getProcessLifeCycleContainer } from '../src/get-process-life-cycle-container';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-let logger: ContextAwareLogger;
+let logger: GlobalLogger;
 let availabilityTestConfig: AvailabilityTestConfig;
 let healthMonitorActivity: HealthMonitorActivity;
 
@@ -61,10 +63,12 @@ const timerHandler = (timer: Timer, context: InvocationContext): Promise<TimerFu
 };
 
 (async () => {
-    const requestContainer = getRequestContainer();
+    const processLifeCycleContainer = getProcessLifeCycleContainer();
+    const requestContainer = new Container({ autoBindInjectable: true });
+    requestContainer.parent = processLifeCycleContainer;
 
     // The logger instance must be initialized as a singleton prior to any other function objects.
-    logger = requestContainer.get(ContextAwareLogger);
+    logger = requestContainer.get(GlobalLogger);
     await logger.setup();
 
     const serviceConfig = requestContainer.get(ServiceConfiguration);

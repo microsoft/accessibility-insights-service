@@ -80,7 +80,7 @@
         {
             "name": "[parameters('storageAccountName')]",
             "type": "Microsoft.Storage/storageAccounts",
-            "apiVersion": "2023-01-01",
+            "apiVersion": "2024-01-01",
             "location": "[parameters('location')]",
             "kind": "[parameters('storageAccountKind')]",
             "sku": {
@@ -113,31 +113,31 @@
                 {
                     "name": "[concat('default/', parameters('poolStartupScriptContainerName'))]",
                     "type": "blobServices/containers",
-                    "apiVersion": "2023-01-01",
+                    "apiVersion": "2024-01-01",
                     "dependsOn": ["[parameters('storageAccountName')]"]
                 },
                 {
                     "name": "[concat('default/', parameters('runtimeConfigurationContainerName'))]",
                     "type": "blobServices/containers",
-                    "apiVersion": "2023-01-01",
+                    "apiVersion": "2024-01-01",
                     "dependsOn": ["[parameters('storageAccountName')]"]
                 },
                 {
                     "name": "[concat('default/', parameters('pageScanRunReportContainerName'))]",
                     "type": "blobServices/containers",
-                    "apiVersion": "2023-01-01",
+                    "apiVersion": "2024-01-01",
                     "dependsOn": ["[parameters('storageAccountName')]"]
                 },
                 {
                     "name": "[concat('default/', parameters('combinedResultsContainerName'))]",
                     "type": "blobServices/containers",
-                    "apiVersion": "2023-01-01",
+                    "apiVersion": "2024-01-01",
                     "dependsOn": ["[parameters('storageAccountName')]"]
                 },
                 {
                     "name": "[concat('default/', parameters('batchFunctionAppsContainerName'))]",
                     "type": "blobServices/containers",
-                    "apiVersion": "2023-01-01",
+                    "apiVersion": "2024-01-01",
                     "dependsOn": ["[parameters('storageAccountName')]"]
                 }
             ]
@@ -145,7 +145,7 @@
         {
             "name": "[concat(parameters('storageAccountName'), '/default')]",
             "type": "Microsoft.Storage/storageAccounts/managementPolicies",
-            "apiVersion": "2023-01-01",
+            "apiVersion": "2024-01-01",
             "dependsOn": ["[parameters('storageAccountName')]"],
             "properties": {
                 "policy": {
