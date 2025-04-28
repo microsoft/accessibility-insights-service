@@ -5301,7 +5301,7 @@ __metadata:
     "@types/node": ^20.14.9
     "@types/normalize-path": ^3.0.2
     "@types/puppeteer": ^7.0.4
-    accessibility-insights-report: 5.2.0
+    accessibility-insights-report: 7.0.0
     axe-core: 4.10.2
     axe-core-scanner: "workspace:*"
     dotenv: ^16.4.7
@@ -5329,9 +5329,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"accessibility-insights-report@npm:5.2.0":
-  version: 5.2.0
-  resolution: "accessibility-insights-report@npm:5.2.0"
+"accessibility-insights-report@npm:7.0.0":
+  version: 7.0.0
+  resolution: "accessibility-insights-report@npm:7.0.0"
   dependencies:
     "@fluentui/react": ^8.118.1
     axe-core: 4.10.2
@@ -5342,7 +5342,7 @@ __metadata:
     react-dom: ^18.3.1
     react-helmet-async: ^2.0.5
     uuid: ^9.0.1
-  checksum: 94d1892e9b1941480775588e6555076e8c50d8589bfa23662e50fdf06a0d94d07abd3aa529ac4b6bfcb15cb3aeccd0dacd4fb5459611f3cb11e4f3bc0cb7de80
+  checksum: f9f056fae2588287ba520e4ba359927352405013348c454936f449b551712fb448e28087e4a59aea26450630fc57b41f72ad57f5fbbd5215ffed8a7ba7195a8a
   languageName: node
   linkType: hard
 
@@ -5369,7 +5369,7 @@ __metadata:
     "@types/puppeteer": ^7.0.4
     "@types/table": ^6.3.2
     accessibility-insights-crawler: "workspace:*"
-    accessibility-insights-report: 5.2.0
+    accessibility-insights-report: 7.0.0
     ajv: ^8.17.1
     applicationinsights: ^3.6.0
     axe-core: 4.10.2
@@ -5423,7 +5423,7 @@ __metadata:
     "@typescript-eslint/eslint-plugin": ^7.15.0
     "@typescript-eslint/eslint-plugin-tslint": ^7.0.2
     "@typescript-eslint/parser": ^8.16.0
-    accessibility-insights-report: 5.2.0
+    accessibility-insights-report: 7.0.0
     combine-dependabot-prs: ^1.0.5
     commander: ^13.1.0
     eslint: ^8.57.0
@@ -6033,7 +6033,7 @@ __metadata:
     "@types/jest": ^29.5.12
     "@types/lodash": ^4.17.6
     "@types/node": ^20.14.9
-    accessibility-insights-report: 5.2.0
+    accessibility-insights-report: 7.0.0
     axe-core: 4.10.2
     common: "workspace:*"
     inversify: ^6.0.1
@@ -15757,7 +15757,7 @@ __metadata:
     "@types/puppeteer": ^7.0.4
     "@types/sha.js": ^2.4.4
     "@types/yargs": ^17.0.22
-    accessibility-insights-report: 5.2.0
+    accessibility-insights-report: 7.0.0
     async-mutex: ^0.5.0
     axe-core: 4.10.2
     axe-result-converter: "workspace:*"
@@ -17656,7 +17656,7 @@ __metadata:
     "@types/puppeteer": ^7.0.4
     "@types/sha.js": ^2.4.4
     "@types/yargs": ^17.0.22
-    accessibility-insights-report: 5.2.0
+    accessibility-insights-report: 7.0.0
     applicationinsights: ^3.6.0
     axe-core: 4.10.2
     axe-result-converter: "workspace:*"
