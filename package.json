@@ -60,7 +60,7 @@
         "patch-package": "^8.0.0",
         "prettier": "2.8.3",
         "rimraf": "^6.0.1",
-        "shellcheck": "^3.0.0",
+        "shellcheck": "^3.1.0",
         "simple-git": "^3.27.0",
         "syncpack": "^8.4.11",
         "ts-jest": "^29.1.5",
