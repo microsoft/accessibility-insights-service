@@ -3737,7 +3737,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@opentelemetry/semantic-conventions@npm:1.15.0, @opentelemetry/semantic-conventions@npm:^1.15.0":
+"@opentelemetry/semantic-conventions@npm:1.15.0":
   version: 1.15.0
   resolution: "@opentelemetry/semantic-conventions@npm:1.15.0"
   dependencies:
@@ -4273,15 +4273,6 @@ __metadata:
   version: 1.0.1
   resolution: "@types/deep-equal-in-any-order@npm:1.0.1"
   checksum: 09a76203438bc2ed9e3ac3f22b6fd43f3561ac4ae5403cf62b4e69359f3016680fbd6ce31f80704e310c3616f4d134e3252ba70e963fc4ca4dd261719c6eb4fd
-  languageName: node
-  linkType: hard
-
-"@types/dotenv@npm:^8.2.0":
-  version: 8.2.0
-  resolution: "@types/dotenv@npm:8.2.0"
-  dependencies:
-    dotenv: "*"
-  checksum: a1f524da7dc18b09bdb6c2613b9abbbe8ca575621cce4625efc7f98daf2ba07c7dbab622c9bb394507a12c5c515f9cbbbba4aeec17b801c88faeb8e8e656d460
   languageName: node
   linkType: hard
 
@@ -12438,8 +12429,8 @@ __metadata:
     "@opentelemetry/instrumentation": ^0.57.1
     "@opentelemetry/resources": ^1.15.0
     "@opentelemetry/sdk-metrics": ^1.28.0
-    "@opentelemetry/semantic-conventions": ^1.15.0
-    "@types/dotenv": ^8.2.0
+    "@opentelemetry/semantic-conventions": ^1.30.0
+    "@types/dotenv": ^8.2.3
     "@types/jest": ^29.5.12
     "@types/lodash": ^4.17.6
     "@types/node": ^20.14.9
