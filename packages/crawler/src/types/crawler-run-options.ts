@@ -28,4 +28,5 @@ export interface CrawlerRunOptions {
     adhereFilesystemPattern?: boolean;
     browserOptions?: string[];
     keepUrlFragment?: boolean;
+    navigationTimeout?: number;
 }
