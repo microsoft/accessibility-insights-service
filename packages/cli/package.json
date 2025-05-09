@@ -69,7 +69,7 @@
         "applicationinsights": "^3.6.0",
         "axe-core": "4.10.2",
         "convict": "^6.2.4",
-        "dotenv": "^16.4.7",
+        "dotenv": "^16.5.0",
         "encoding-down": "^7.1.0",
         "exponential-backoff": "^3.1.0",
         "filenamify": "^4.3.0",
