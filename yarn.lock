@@ -5455,7 +5455,7 @@ __metadata:
     license-check-and-add: "npm:^4.0.5"
     npm-run-all: "npm:^4.1.5"
     patch-package: "npm:^8.0.0"
-    prettier: "npm:2.8.3"
+    prettier: "npm:3.5.3"
     rimraf: "npm:^6.0.1"
     shellcheck: "npm:^3.1.0"
     simple-git: "npm:^3.27.0"
@@ -14285,12 +14285,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prettier@npm:2.8.3":
-  version: 2.8.3
-  resolution: "prettier@npm:2.8.3"
+"prettier@npm:3.5.3":
+  version: 3.5.3
+  resolution: "prettier@npm:3.5.3"
   bin:
-    prettier: bin-prettier.js
-  checksum: 10/7bed36a82608a7a162feb47a81241952bea475cc8bc170fc86cf5941de6db0ebbe7dae39c962bc4ea136bae84429ec2cd7b113a87d17864d306bbf15046e4b51
+    prettier: bin/prettier.cjs
+  checksum: 10/7050c08f674d9e49fbd9a4c008291d0715471f64e94cc5e4b01729affce221dfc6875c8de7e66b728c64abc9352eefb7eaae071b5f79d30081be207b53774b78
   languageName: node
   linkType: hard
 
