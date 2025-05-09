@@ -5335,7 +5335,7 @@ __metadata:
     rollup: "npm:^3.29.5"
     serialize-error: "npm:^8.1.0"
     sha.js: "npm:^2.4.11"
-    ts-jest: "npm:^29.1.5"
+    ts-jest: "npm:^29.3.2"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
     yargs: "npm:^17.7.2"
@@ -5415,7 +5415,7 @@ __metadata:
     rimraf: "npm:^6.0.1"
     serialize-error: "npm:^8.1.0"
     sha.js: "npm:^2.4.11"
-    ts-jest: "npm:^29.1.5"
+    ts-jest: "npm:^29.3.2"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
     uuid-with-v6: "npm:^2.0.0"
@@ -5460,7 +5460,7 @@ __metadata:
     shellcheck: "npm:^3.1.0"
     simple-git: "npm:^3.27.0"
     syncpack: "npm:^8.4.11"
-    ts-jest: "npm:^29.1.5"
+    ts-jest: "npm:^29.3.2"
     tslint: "npm:^6.1.3"
     typescript: "npm:^5.5.3"
   languageName: unknown
@@ -6025,7 +6025,7 @@ __metadata:
     puppeteer: "npm:^24.2.1"
     reflect-metadata: "npm:^0.2.2"
     rimraf: "npm:^6.0.1"
-    ts-jest: "npm:^29.1.5"
+    ts-jest: "npm:^29.3.2"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
   languageName: unknown
@@ -6056,7 +6056,7 @@ __metadata:
     npm-run-all: "npm:^4.1.5"
     reflect-metadata: "npm:^0.2.2"
     rimraf: "npm:^6.0.1"
-    ts-jest: "npm:^29.1.5"
+    ts-jest: "npm:^29.3.2"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
   languageName: unknown
@@ -6140,7 +6140,7 @@ __metadata:
     reflect-metadata: "npm:^0.2.2"
     rimraf: "npm:^6.0.1"
     storage-documents: "workspace:*"
-    ts-jest: "npm:^29.1.5"
+    ts-jest: "npm:^29.3.2"
     ts-loader: "npm:^9.5.2"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
@@ -6468,7 +6468,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"bs-logger@npm:0.x":
+"bs-logger@npm:^0.2.6":
   version: 0.2.6
   resolution: "bs-logger@npm:0.2.6"
   dependencies:
@@ -6799,7 +6799,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"chalk@npm:4.1.2, chalk@npm:^4.0.0, chalk@npm:^4.1.0, chalk@npm:^4.1.1, chalk@npm:^4.1.2":
+"chalk@npm:4.1.2, chalk@npm:^4.0.0, chalk@npm:^4.0.2, chalk@npm:^4.1.0, chalk@npm:^4.1.1, chalk@npm:^4.1.2":
   version: 4.1.2
   resolution: "chalk@npm:4.1.2"
   dependencies:
@@ -7240,7 +7240,7 @@ __metadata:
     rimraf: "npm:^6.0.1"
     serialize-error: "npm:^8.1.0"
     sha.js: "npm:^2.4.11"
-    ts-jest: "npm:^29.1.5"
+    ts-jest: "npm:^29.3.2"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
     uuid-with-v6: "npm:^2.0.0"
@@ -8149,7 +8149,7 @@ __metadata:
     node-loader: "npm:^2.1.0"
     npm-run-all: "npm:^4.1.5"
     rimraf: "npm:^6.0.1"
-    ts-jest: "npm:^29.1.5"
+    ts-jest: "npm:^29.3.2"
     ts-loader: "npm:^9.5.2"
     typescript: "npm:^5.5.3"
     webpack: "npm:^5.97.1"
@@ -8181,6 +8181,17 @@ __metadata:
   dependencies:
     safe-buffer: "npm:^5.0.1"
   checksum: 10/878e1aab8a42773320bc04c6de420bee21aebd71810e40b1799880a8a1c4594bcd6adc3d4213a0fb8147d4c3f529d8f9a618d7f59ad5a9a41b142058aceda23f
+  languageName: node
+  linkType: hard
+
+"ejs@npm:^3.1.10":
+  version: 3.1.10
+  resolution: "ejs@npm:3.1.10"
+  dependencies:
+    jake: "npm:^10.8.5"
+  bin:
+    ejs: bin/cli.js
+  checksum: 10/a9cb7d7cd13b7b1cd0be5c4788e44dd10d92f7285d2f65b942f33e127230c054f99a42db4d99f766d8dbc6c57e94799593ee66a14efd7c8dd70c4812bf6aa384
   languageName: node
   linkType: hard
 
@@ -9193,6 +9204,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"filelist@npm:^1.0.4":
+  version: 1.0.4
+  resolution: "filelist@npm:1.0.4"
+  dependencies:
+    minimatch: "npm:^5.0.1"
+  checksum: 10/4b436fa944b1508b95cffdfc8176ae6947b92825483639ef1b9a89b27d82f3f8aa22b21eed471993f92709b431670d4e015b39c087d435a61e1bb04564cf51de
+  languageName: node
+  linkType: hard
+
 "filename-reserved-regex@npm:^2.0.0":
   version: 2.0.0
   resolution: "filename-reserved-regex@npm:2.0.0"
@@ -9616,7 +9636,7 @@ __metadata:
     rimraf: "npm:^6.0.1"
     service-library: "workspace:*"
     storage-documents: "workspace:*"
-    ts-jest: "npm:^29.1.5"
+    ts-jest: "npm:^29.3.2"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
     web-api-client: "workspace:*"
@@ -10250,7 +10270,7 @@ __metadata:
     rimraf: "npm:^6.0.1"
     service-library: "workspace:*"
     shebang-loader: "npm:^0.0.1"
-    ts-jest: "npm:^29.1.5"
+    ts-jest: "npm:^29.3.2"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
     web-api-client: "workspace:*"
@@ -11242,6 +11262,20 @@ __metadata:
   dependencies:
     "@isaacs/cliui": "npm:^8.0.2"
   checksum: 10/d9722f0e55f6c322c57aedf094c405f4201b834204629817187953988075521cfddb23df83e2a7b845723ca7eb0555068c5ce1556732e9c275d32a531881efa8
+  languageName: node
+  linkType: hard
+
+"jake@npm:^10.8.5":
+  version: 10.9.2
+  resolution: "jake@npm:10.9.2"
+  dependencies:
+    async: "npm:^3.2.3"
+    chalk: "npm:^4.0.2"
+    filelist: "npm:^1.0.4"
+    minimatch: "npm:^3.1.2"
+  bin:
+    jake: bin/cli.js
+  checksum: 10/3be324708f99f031e0aec49ef8fd872eb4583cbe8a29a0c875f554f6ac638ee4ea5aa759bb63723fd54f77ca6d7db851eaa78353301734ed3700db9cb109a0cd
   languageName: node
   linkType: hard
 
@@ -12385,7 +12419,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lodash.memoize@npm:4.x":
+"lodash.memoize@npm:^4.1.2":
   version: 4.1.2
   resolution: "lodash.memoize@npm:4.1.2"
   checksum: 10/192b2168f310c86f303580b53acf81ab029761b9bd9caa9506a019ffea5f3363ea98d7e39e7e11e6b9917066c9d36a09a11f6fe16f812326390d8f3a54a1a6da
@@ -12463,7 +12497,7 @@ __metadata:
     npm-run-all: "npm:^4.1.5"
     reflect-metadata: "npm:^0.2.2"
     rimraf: "npm:^6.0.1"
-    ts-jest: "npm:^29.1.5"
+    ts-jest: "npm:^29.3.2"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
   languageName: unknown
@@ -12597,7 +12631,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"make-error@npm:1.x":
+"make-error@npm:^1.3.6":
   version: 1.3.6
   resolution: "make-error@npm:1.3.6"
   checksum: 10/b86e5e0e25f7f777b77fabd8e2cbf15737972869d852a22b7e73c17623928fccb826d8e46b9951501d3f20e51ad74ba8c59ed584f610526a48f8ccf88aaec402
@@ -13795,7 +13829,7 @@ __metadata:
     npm-run-all: "npm:^4.1.5"
     rimraf: "npm:^6.0.1"
     storage-documents: "workspace:*"
-    ts-jest: "npm:^29.1.5"
+    ts-jest: "npm:^29.3.2"
     ts-loader: "npm:^9.5.2"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
@@ -14355,7 +14389,7 @@ __metadata:
     rimraf: "npm:^6.0.1"
     scanner-global-library: "workspace:*"
     storage-documents: "workspace:*"
-    ts-jest: "npm:^29.1.5"
+    ts-jest: "npm:^29.3.2"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
   languageName: unknown
@@ -14390,7 +14424,7 @@ __metadata:
     rimraf: "npm:^6.0.1"
     service-library: "workspace:*"
     storage-documents: "workspace:*"
-    ts-jest: "npm:^29.1.5"
+    ts-jest: "npm:^29.3.2"
     ts-loader: "npm:^9.5.2"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
@@ -14439,7 +14473,7 @@ __metadata:
     scanner-global-library: "workspace:*"
     service-library: "workspace:*"
     storage-documents: "workspace:*"
-    ts-jest: "npm:^29.1.5"
+    ts-jest: "npm:^29.3.2"
     ts-loader: "npm:^9.5.2"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
@@ -15126,7 +15160,7 @@ __metadata:
     rimraf: "npm:^6.0.1"
     service-library: "workspace:*"
     storage-documents: "workspace:*"
-    ts-jest: "npm:^29.1.5"
+    ts-jest: "npm:^29.3.2"
     ts-loader: "npm:^9.5.2"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
@@ -15174,7 +15208,7 @@ __metadata:
     scanner-global-library: "workspace:*"
     service-library: "workspace:*"
     storage-documents: "workspace:*"
-    ts-jest: "npm:^29.1.5"
+    ts-jest: "npm:^29.3.2"
     ts-loader: "npm:^9.5.2"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
@@ -15664,7 +15698,7 @@ __metadata:
     reflect-metadata: "npm:^0.2.2"
     rimraf: "npm:^6.0.1"
     storage-documents: "workspace:*"
-    ts-jest: "npm:^29.1.5"
+    ts-jest: "npm:^29.3.2"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
   languageName: unknown
@@ -15820,7 +15854,7 @@ __metadata:
     scanner-global-library: "workspace:*"
     sha.js: "npm:^2.4.11"
     storage-documents: "workspace:*"
-    ts-jest: "npm:^29.1.5"
+    ts-jest: "npm:^29.3.2"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
     yargs: "npm:^17.7.2"
@@ -16288,7 +16322,7 @@ __metadata:
     npm-run-all: "npm:^4.1.5"
     reflect-metadata: "npm:^0.2.2"
     rimraf: "npm:^6.0.1"
-    ts-jest: "npm:^29.1.5"
+    ts-jest: "npm:^29.3.2"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
   languageName: unknown
@@ -16955,18 +16989,20 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ts-jest@npm:^29.1.5":
-  version: 29.1.5
-  resolution: "ts-jest@npm:29.1.5"
+"ts-jest@npm:^29.3.2":
+  version: 29.3.2
+  resolution: "ts-jest@npm:29.3.2"
   dependencies:
-    bs-logger: "npm:0.x"
-    fast-json-stable-stringify: "npm:2.x"
+    bs-logger: "npm:^0.2.6"
+    ejs: "npm:^3.1.10"
+    fast-json-stable-stringify: "npm:^2.1.0"
     jest-util: "npm:^29.0.0"
     json5: "npm:^2.2.3"
-    lodash.memoize: "npm:4.x"
-    make-error: "npm:1.x"
-    semver: "npm:^7.5.3"
-    yargs-parser: "npm:^21.0.1"
+    lodash.memoize: "npm:^4.1.2"
+    make-error: "npm:^1.3.6"
+    semver: "npm:^7.7.1"
+    type-fest: "npm:^4.39.1"
+    yargs-parser: "npm:^21.1.1"
   peerDependencies:
     "@babel/core": ">=7.0.0-beta.0 <8"
     "@jest/transform": ^29.0.0
@@ -16987,7 +17023,7 @@ __metadata:
       optional: true
   bin:
     ts-jest: cli.js
-  checksum: 10/11a29a49130f1c9bef5aebe8007f6be3e630af6c2dea6b00ff5a86d649321854a43966b4990a43960d77a3f98d7a753b9b7e19c20c42a2d38341d6e67a3e48d1
+  checksum: 10/62fb226a4df408174a3f28919c89440b2f5df4dec404bb49696591e61d75536b1c3be8ae726d187958a467654d82294d81d2dd70d9ec370542a30907183aaf61
   languageName: node
   linkType: hard
 
@@ -17161,6 +17197,13 @@ __metadata:
   version: 4.26.1
   resolution: "type-fest@npm:4.26.1"
   checksum: 10/b82676194f80af228cb852e320d2ea8381c89d667d2e4d9f2bdfc8f254bccc039c7741a90c53617a4de0c9fdca8265ed18eb0888cd628f391c5c381c33a9f94b
+  languageName: node
+  linkType: hard
+
+"type-fest@npm:^4.39.1":
+  version: 4.41.0
+  resolution: "type-fest@npm:4.41.0"
+  checksum: 10/617ace794ac0893c2986912d28b3065ad1afb484cad59297835a0807dc63286c39e8675d65f7de08fafa339afcb8fe06a36e9a188b9857756ae1e92ee8bda212
   languageName: node
   linkType: hard
 
@@ -17617,7 +17660,7 @@ __metadata:
     reflect-metadata: "npm:^0.2.2"
     rimraf: "npm:^6.0.1"
     service-library: "workspace:*"
-    ts-jest: "npm:^29.1.5"
+    ts-jest: "npm:^29.3.2"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
   languageName: unknown
@@ -17652,7 +17695,7 @@ __metadata:
     rimraf: "npm:^6.0.1"
     service-library: "workspace:*"
     storage-documents: "workspace:*"
-    ts-jest: "npm:^29.1.5"
+    ts-jest: "npm:^29.3.2"
     ts-loader: "npm:^9.5.2"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
@@ -17686,7 +17729,7 @@ __metadata:
     rimraf: "npm:^6.0.1"
     service-library: "workspace:*"
     storage-documents: "workspace:*"
-    ts-jest: "npm:^29.1.5"
+    ts-jest: "npm:^29.3.2"
     ts-loader: "npm:^9.5.2"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
@@ -17745,7 +17788,7 @@ __metadata:
     service-library: "workspace:*"
     sha.js: "npm:^2.4.11"
     storage-documents: "workspace:*"
-    ts-jest: "npm:^29.1.5"
+    ts-jest: "npm:^29.3.2"
     ts-loader: "npm:^9.5.2"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
@@ -17784,7 +17827,7 @@ __metadata:
     rimraf: "npm:^6.0.1"
     service-library: "workspace:*"
     storage-documents: "workspace:*"
-    ts-jest: "npm:^29.1.5"
+    ts-jest: "npm:^29.3.2"
     ts-loader: "npm:^9.5.2"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
@@ -17828,7 +17871,7 @@ __metadata:
     service-library: "workspace:*"
     sha.js: "npm:^2.4.11"
     storage-documents: "workspace:*"
-    ts-jest: "npm:^29.1.5"
+    ts-jest: "npm:^29.3.2"
     ts-loader: "npm:^9.5.2"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
@@ -17868,7 +17911,7 @@ __metadata:
     rimraf: "npm:^6.0.1"
     service-library: "workspace:*"
     storage-documents: "workspace:*"
-    ts-jest: "npm:^29.1.5"
+    ts-jest: "npm:^29.3.2"
     ts-loader: "npm:^9.5.2"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
@@ -17910,7 +17953,7 @@ __metadata:
     rimraf: "npm:^6.0.1"
     service-library: "workspace:*"
     storage-documents: "workspace:*"
-    ts-jest: "npm:^29.1.5"
+    ts-jest: "npm:^29.3.2"
     ts-loader: "npm:^9.5.2"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
@@ -18322,7 +18365,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"yargs-parser@npm:^21.0.1, yargs-parser@npm:^21.1.1":
+"yargs-parser@npm:^21.1.1":
   version: 21.1.1
   resolution: "yargs-parser@npm:21.1.1"
   checksum: 10/9dc2c217ea3bf8d858041252d43e074f7166b53f3d010a8c711275e09cd3d62a002969a39858b92bbda2a6a63a585c7127014534a560b9c69ed2d923d113406e
