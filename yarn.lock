@@ -5440,7 +5440,7 @@ __metadata:
     combine-dependabot-prs: "npm:^1.0.5"
     commander: "npm:^13.1.0"
     eslint: "npm:^8.57.0"
-    eslint-plugin-check-file: "npm:^2.8.0"
+    eslint-plugin-check-file: "npm:^3.2.0"
     eslint-plugin-header: "npm:^3.1.1"
     eslint-plugin-import: "npm:^2.31.0"
     eslint-plugin-jest: "npm:^28.6.0"
@@ -8601,15 +8601,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-plugin-check-file@npm:^2.8.0":
-  version: 2.8.0
-  resolution: "eslint-plugin-check-file@npm:2.8.0"
+"eslint-plugin-check-file@npm:^3.2.0":
+  version: 3.2.0
+  resolution: "eslint-plugin-check-file@npm:3.2.0"
   dependencies:
     is-glob: "npm:^4.0.3"
-    micromatch: "npm:^4.0.5"
+    micromatch: "npm:^4.0.8"
   peerDependencies:
-    eslint: ">=7.28.0"
-  checksum: 10/eafa2e759c061f12a0d3dda3e201d6d32f9d4031ec7efc45f2eb2f6123ae278dff9cac12f4ed6f2d7522f75e4cb985e570888a1bc062a7a443e2df85ad1a4ead
+    eslint: ">=9.0.0"
+  checksum: 10/dd84e36de757bf22f9ae331b95de2ae2d12204d7e5eefca6bf14a4c943fc0a056272f944167c34eacf677abaaa43589ccfe0661b6f3148688156f493c7844266
   languageName: node
   linkType: hard
 
@@ -12755,7 +12755,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"micromatch@npm:^4.0.0, micromatch@npm:^4.0.2, micromatch@npm:^4.0.4, micromatch@npm:^4.0.5":
+"micromatch@npm:^4.0.0, micromatch@npm:^4.0.2, micromatch@npm:^4.0.4, micromatch@npm:^4.0.8":
   version: 4.0.8
   resolution: "micromatch@npm:4.0.8"
   dependencies:
