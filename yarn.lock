@@ -500,28 +500,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@azure/identity@npm:^4.5.0":
-  version: 4.5.0
-  resolution: "@azure/identity@npm:4.5.0"
-  dependencies:
-    "@azure/abort-controller": "npm:^2.0.0"
-    "@azure/core-auth": "npm:^1.9.0"
-    "@azure/core-client": "npm:^1.9.2"
-    "@azure/core-rest-pipeline": "npm:^1.17.0"
-    "@azure/core-tracing": "npm:^1.0.0"
-    "@azure/core-util": "npm:^1.11.0"
-    "@azure/logger": "npm:^1.0.0"
-    "@azure/msal-browser": "npm:^3.26.1"
-    "@azure/msal-node": "npm:^2.15.0"
-    events: "npm:^3.0.0"
-    jws: "npm:^4.0.0"
-    open: "npm:^8.0.0"
-    stoppable: "npm:^1.1.0"
-    tslib: "npm:^2.2.0"
-  checksum: 10/b25711ce403c287da7fed446561891c4ee5c942f7e261b463c0936136122418823ff24dd8cc249f5bc5311ba7c76205ebc3dc32361e668fa3f88e5f74f72ba33
-  languageName: node
-  linkType: hard
-
 "@azure/identity@npm:^4.6.0":
   version: 4.8.0
   resolution: "@azure/identity@npm:4.8.0"
@@ -541,6 +519,25 @@ __metadata:
     stoppable: "npm:^1.1.0"
     tslib: "npm:^2.2.0"
   checksum: 10/55f5e8f8fb5478d32942f66f656bf14768a2348a998624c6491f9fc1b72c6fad569c13bb03186daa11ae67bbf009bd51d4712ad14948d9f607c4d66c7f6660a0
+  languageName: node
+  linkType: hard
+
+"@azure/identity@npm:^4.9.1":
+  version: 4.9.1
+  resolution: "@azure/identity@npm:4.9.1"
+  dependencies:
+    "@azure/abort-controller": "npm:^2.0.0"
+    "@azure/core-auth": "npm:^1.9.0"
+    "@azure/core-client": "npm:^1.9.2"
+    "@azure/core-rest-pipeline": "npm:^1.17.0"
+    "@azure/core-tracing": "npm:^1.0.0"
+    "@azure/core-util": "npm:^1.11.0"
+    "@azure/logger": "npm:^1.0.0"
+    "@azure/msal-browser": "npm:^4.2.0"
+    "@azure/msal-node": "npm:^3.5.0"
+    open: "npm:^10.1.0"
+    tslib: "npm:^2.2.0"
+  checksum: 10/55afd98f3ba554917b1a474ea2f573456fdfc773677cf1814e2b62cf6479d3d87659cd17ef05e214e4625afa5fdca73cce6add0df161fa459ba58a8a2bd9de49
   languageName: node
   linkType: hard
 
@@ -737,28 +734,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@azure/msal-browser@npm:^3.26.1":
-  version: 3.27.0
-  resolution: "@azure/msal-browser@npm:3.27.0"
-  dependencies:
-    "@azure/msal-common": "npm:14.16.0"
-  checksum: 10/2c691afed699424202052d8bde8f8ef65ef8fd1eb2f364605fc0b3a7c123bc2f49579a53e4006a8645ef3663b94bb70033bff3ef7c16682a43228a52afef3a1f
-  languageName: node
-  linkType: hard
-
 "@azure/msal-browser@npm:^4.2.0":
   version: 4.10.0
   resolution: "@azure/msal-browser@npm:4.10.0"
   dependencies:
     "@azure/msal-common": "npm:15.5.0"
   checksum: 10/300ca794751b7f339a075dfb6e09f7c753b7ad2fcbee616bfef1e0a94a1424d8e732ad3bf93cf3f53965653493931f8e46461da89af11db3b7ed2b1d444a7137
-  languageName: node
-  linkType: hard
-
-"@azure/msal-common@npm:14.16.0":
-  version: 14.16.0
-  resolution: "@azure/msal-common@npm:14.16.0"
-  checksum: 10/1f650b00636cd657b93601a12f495cbc9c35b4ed06197468e24e86ed7a0227f9be8003186d8b00abe12532f26b8002811f553ade76fe2cb57a8e62b827b0152c
   languageName: node
   linkType: hard
 
@@ -769,14 +750,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@azure/msal-node@npm:^2.15.0":
-  version: 2.16.2
-  resolution: "@azure/msal-node@npm:2.16.2"
-  dependencies:
-    "@azure/msal-common": "npm:14.16.0"
-    jsonwebtoken: "npm:^9.0.0"
-    uuid: "npm:^8.3.0"
-  checksum: 10/52f07dc78263d9e44ee2b598072d939e606d822823d7ed680ca07a36c77f37cb49452c133a35206309d26f1d6acc05719bb70bcba62e0ffa7082dd05b882b109
+"@azure/msal-common@npm:15.6.0":
+  version: 15.6.0
+  resolution: "@azure/msal-common@npm:15.6.0"
+  checksum: 10/975ad7821fa5bdc682c9ef08e02642923571b715f199e94c9fbda17248b301caae5cf9cddfa2fdf37f4a05cce7eaf3ddebaef28f83909d78f452caf72367022a
   languageName: node
   linkType: hard
 
@@ -788,6 +765,17 @@ __metadata:
     jsonwebtoken: "npm:^9.0.0"
     uuid: "npm:^8.3.0"
   checksum: 10/2b373531c4e1e8cf4813b69ddcf760f3ef806e9958f46fd8a64f6f1fbb3efbed152cf87393f49d56258f25223d3ca2f5ad3ab7eb0a83e2c9aed7ca9c357516ab
+  languageName: node
+  linkType: hard
+
+"@azure/msal-node@npm:^3.5.0":
+  version: 3.5.3
+  resolution: "@azure/msal-node@npm:3.5.3"
+  dependencies:
+    "@azure/msal-common": "npm:15.6.0"
+    jsonwebtoken: "npm:^9.0.0"
+    uuid: "npm:^8.3.0"
+  checksum: 10/58c3755c67cdbe06e8319e48b3917086331738de00ddd3dc44f682e7b776f48425d785c5450413982830a36a73961cd72d868b3ec0f9acc39435050d328b61f4
   languageName: node
   linkType: hard
 
@@ -6112,7 +6100,7 @@ __metadata:
     "@azure/batch": "npm:^10.2.0"
     "@azure/core-auth": "npm:^1.9.0"
     "@azure/cosmos": "npm:^4.0.0"
-    "@azure/identity": "npm:^4.5.0"
+    "@azure/identity": "npm:^4.9.1"
     "@azure/keyvault-secrets": "npm:^4.9.0"
     "@azure/ms-rest-js": "npm:^2.7.0"
     "@azure/ms-rest-nodeauth": "npm:^3.1.1"
@@ -7828,13 +7816,6 @@ __metadata:
     es-errors: "npm:^1.3.0"
     gopd: "npm:^1.0.1"
   checksum: 10/abdcb2505d80a53524ba871273e5da75e77e52af9e15b3aa65d8aad82b8a3a424dad7aee2cc0b71470ac7acf501e08defac362e8b6a73cdb4309f028061df4ae
-  languageName: node
-  linkType: hard
-
-"define-lazy-prop@npm:^2.0.0":
-  version: 2.0.0
-  resolution: "define-lazy-prop@npm:2.0.0"
-  checksum: 10/0115fdb065e0490918ba271d7339c42453d209d4cb619dfe635870d906731eff3e1ade8028bb461ea27ce8264ec5e22c6980612d332895977e89c1bbc80fcee2
   languageName: node
   linkType: hard
 
@@ -10812,15 +10793,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"is-docker@npm:^2.1.1":
-  version: 2.2.1
-  resolution: "is-docker@npm:2.2.1"
-  bin:
-    is-docker: cli.js
-  checksum: 10/3fef7ddbf0be25958e8991ad941901bf5922ab2753c46980b60b05c1bf9c9c2402d35e6dc32e4380b980ef5e1970a5d9d5e5aa2e02d77727c3b6b5e918474c56
-  languageName: node
-  linkType: hard
-
 "is-docker@npm:^3.0.0":
   version: 3.0.0
   resolution: "is-docker@npm:3.0.0"
@@ -11111,7 +11083,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"is-wsl@npm:^2.1.1, is-wsl@npm:^2.2.0":
+"is-wsl@npm:^2.1.1":
   version: 2.2.0
   resolution: "is-wsl@npm:2.2.0"
   dependencies:
@@ -13536,17 +13508,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"open@npm:^8.0.0":
-  version: 8.4.0
-  resolution: "open@npm:8.4.0"
-  dependencies:
-    define-lazy-prop: "npm:^2.0.0"
-    is-docker: "npm:^2.1.1"
-    is-wsl: "npm:^2.2.0"
-  checksum: 10/ccb8760068b48e277868423cdf21f4f4e5682ec86dbc3a5cf1c34ef0e8b49721ad98b3f001b4eb2cbd7df7921f84551ec5b9fecace3b3eced3e46dca1c785f03
-  languageName: node
-  linkType: hard
-
 "optionator@npm:^0.9.3":
   version: 0.9.4
   resolution: "optionator@npm:0.9.4"
@@ -15783,7 +15744,7 @@ __metadata:
   dependencies:
     "@azure/cosmos": "npm:^4.0.0"
     "@azure/functions": "npm:^4.6.0"
-    "@azure/identity": "npm:^4.5.0"
+    "@azure/identity": "npm:^4.9.1"
     "@azure/storage-blob": "npm:^12.12.0"
     "@crawlee/puppeteer": "npm:^3.12.2"
     "@types/jest": "npm:^29.5.12"
