@@ -7,7 +7,7 @@
         "url": "git+https://github.com/Microsoft/accessibility-insights-service.git"
     },
     "scripts": {
-        "packages": "yarn workspaces foreach --no-private --parallel --verbose",
+        "packages": "yarn workspaces foreach --no-private --parallel --verbose --all",
         "clean": "yarn packages run clean && rimraf dist test-results ./**/coverage",
         "build": "yarn packages --topological-dev run build",
         "cbuild": "yarn packages --topological-dev run cbuild",
@@ -94,5 +94,5 @@
     "dependencies": {
         "accessibility-insights-report": "7.0.0"
     },
-    "packageManager": "yarn@3.2.2"
+    "packageManager": "yarn@4.9.1"
 }
