@@ -19,7 +19,7 @@
     },
     "homepage": "https://github.com/Microsoft/accessibility-insights-service#readme",
     "devDependencies": {
-        "@types/chai": "^4.3.4",
+        "@types/chai": "^5.2.2",
         "@types/deep-equal-in-any-order": "^1.0.1",
         "@types/dotenv": "^8.2.3",
         "@types/jest": "^29.5.12",
@@ -37,7 +37,7 @@
     "dependencies": {
         "@azure/cosmos": "^4.0.0",
         "azure-services": "workspace:*",
-        "chai": "^4.3.7",
+        "chai": "^5.2.0",
         "common": "workspace:*",
         "deep-equal-in-any-order": "^2.0.6",
         "dotenv": "^16.4.7",
