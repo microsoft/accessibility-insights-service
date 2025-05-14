@@ -35,14 +35,17 @@ export class AxeResultsReducer {
             for (const currentResult of currentResults) {
                 if (currentResult) {
                     for (const node of currentResult.nodes) {
-                        if (node) {                            
+                        if (node) {
                             const selectorInfo = this.getSelectorInfo(node);
                             const fingerprint = this.getElementFingerprint(currentResult, node, selectorInfo);
                             const matchingResult = accumulatedResults.get(fingerprint);
 
                             //Known false positive and added intentionally by fluentui.
                             //Please refer https://github.com/microsoft/fluentui/issues/25133 for more details
-                            if (currentResult.id.toLowerCase() === 'aria-hidden-focus' && node.html.toLowerCase().includes('data-tabster-dummy')) {
+                            if (
+                                currentResult.id.toLowerCase() === 'aria-hidden-focus' &&
+                                node.html.toLowerCase().includes('data-tabster-dummy')
+                            ) {
                                 continue;
                             }
 
