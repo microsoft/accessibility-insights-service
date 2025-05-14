@@ -40,6 +40,12 @@ export class AxeResultsReducer {
                             const fingerprint = this.getElementFingerprint(currentResult, node, selectorInfo);
                             const matchingResult = accumulatedResults.get(fingerprint);
 
+                            //Known false positive and added intentionally by fluentui.
+                            //Please refer https://github.com/microsoft/fluentui/issues/25133 for more details
+                            if (currentResult.id.toLowerCase() === 'aria-hidden-focus' && node.html.toLowerCase().includes('data-tabster-dummy')) {
+                                continue;
+                            }
+
                             if (matchingResult !== undefined) {
                                 if (!matchingResult.urls.some((u) => u === url)) {
                                     matchingResult.urls.push(url);
