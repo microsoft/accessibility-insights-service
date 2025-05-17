@@ -90,7 +90,7 @@ describe(SimulatorPageProcessor, () => {
             url: () => testUrl,
         } as Page;
         pageNavigatorMock
-            .setup((o) => o.navigate(testUrl, puppeteerPageStub))
+            .setup((o) => o.navigate(testUrl, puppeteerPageStub, 123))
             .returns(() => Promise.resolve({}))
             .verifiable();
         pageNavigatorMock.setup((o) => o.logger).returns(() => loggerMock.object);

@@ -68,8 +68,9 @@ export abstract class PageProcessorBase implements PageProcessor {
                 return;
             }
 
+            const navigationTimeout = context.request.userData?.navigationTimeout;
             await this.setOrigin(context.request.url, context.page);
-            response = await this.pageNavigator.navigate(context.request.url, context.page);
+            response = await this.pageNavigator.navigate(context.request.url, context.page, navigationTimeout);
             if (response.browserError) {
                 return;
             }
@@ -168,6 +169,7 @@ export abstract class PageProcessorBase implements PageProcessor {
         try {
             const userData = context.request.userData;
             const keepUrlFragment = userData?.keepUrlFragment ?? false;
+            const navigationTimeout = userData?.navigationTimeout ?? 30000; // Default timeout is 30 seconds
             const enqueued = await context.enqueueLinks({
                 // eslint-disable-next-line security/detect-non-literal-regexp
                 regexps: this.discoveryPatterns?.length > 0 ? this.discoveryPatterns.map((p) => new RegExp(p)) : undefined,
@@ -175,9 +177,11 @@ export abstract class PageProcessorBase implements PageProcessor {
                     newRequest.keepUrlFragment = keepUrlFragment;
                     if (newRequest.userData) {
                         newRequest.userData.keepUrlFragment = keepUrlFragment;
+                        newRequest.userData.navigationTimeout = navigationTimeout;
                     } else {
                         newRequest.userData = {
                             keepUrlFragment: keepUrlFragment,
+                            navigationTimeout: navigationTimeout,
                         };
                     }
 
@@ -200,6 +204,39 @@ export abstract class PageProcessorBase implements PageProcessor {
             }
         }
     }
+
+    //    protected async processNavigationTimeout(context: Crawlee.PuppeteerCrawlingContext): Promise<void> {
+    //    try {
+    //        // Retrieve userData from the current request context
+    //        const userData = context.request.userData;
+
+    //        // Extract the navigation timeout value from userData or use a default value
+    //        const navigationTimeout = userData?.navigationTimeout ?? 30000; // Default timeout is 30 seconds
+
+    //        console.log(`Inside processNavigationTimeout. Navigation timeout set to: ${navigationTimeout} ms`);
+
+    //        // Example: Apply the navigation timeout during a Puppeteer navigation
+    //        const page = context.page;
+
+    //        // Log the URL being processed
+    //        console.log(`Navigating to URL: ${context.request.url} with timeout: ${navigationTimeout} ms`);
+
+    //        // Perform navigation with the specified timeout
+    //        const response = await page.goto(context.request.url, {
+    //            timeout: navigationTimeout,
+    //            waitUntil: 'load',
+    //        });
+
+    //        if (response) {
+    //            console.log(`Navigation to ${context.request.url} succeeded with status: ${response.status()}`);
+    //        } else {
+    //            console.log(`Navigation to ${context.request.url} completed without an HTTP response.`);
+    //        }
+    //    } catch (error) {
+    //        console.error(`Error during navigation: ${error.message}`, { url: context.request.url });
+    //        throw error;
+    //    }
+    //}
 
     protected async pushScanData(scanData: PartialScanData): Promise<void> {
         await this.blobStore.setValue(`${scanData.id}.data`, scanData);
