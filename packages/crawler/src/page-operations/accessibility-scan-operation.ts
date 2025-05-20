@@ -85,8 +85,10 @@ export class AccessibilityScanOperation {
                     if (filteredNodes.length > 0) {
                         return { ...violation, nodes: filteredNodes };
                     }
+
                     return null;
                 }
+
                 return violation;
             })
             .filter((v): v is Result => v !== null);
