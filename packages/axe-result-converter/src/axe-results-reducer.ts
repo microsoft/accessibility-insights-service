@@ -24,18 +24,13 @@ export class AxeResultsReducer {
 
     public reduce(accumulatedAxeResults: AxeCoreResults, currentAxeResults: axe.AxeResults): void {
         this.setUrl(accumulatedAxeResults, currentAxeResults);
-        this.reduceResults(currentAxeResults.url, accumulatedAxeResults.violations, currentAxeResults.violations, true);
+        this.reduceResults(currentAxeResults.url, accumulatedAxeResults.violations, currentAxeResults.violations);
         this.reduceResults(currentAxeResults.url, accumulatedAxeResults.passes, currentAxeResults.passes);
         this.reduceResults(currentAxeResults.url, accumulatedAxeResults.incomplete, currentAxeResults.incomplete);
         this.reduceResultsWithoutNodes(currentAxeResults.url, accumulatedAxeResults.inapplicable, currentAxeResults.inapplicable);
     }
 
-    private reduceResults(
-        url: string,
-        accumulatedResults: AxeResultsList,
-        currentResults: axe.Result[],
-        isCurrentResultsVoilation = false,
-    ): void {
+    private reduceResults(url: string, accumulatedResults: AxeResultsList, currentResults: axe.Result[]): void {
         if (currentResults) {
             for (const currentResult of currentResults) {
                 if (currentResult) {
@@ -44,16 +39,6 @@ export class AxeResultsReducer {
                             const selectorInfo = this.getSelectorInfo(node);
                             const fingerprint = this.getElementFingerprint(currentResult, node, selectorInfo);
                             const matchingResult = accumulatedResults.get(fingerprint);
-
-                            //Known false positive and added intentionally by fluentui.
-                            //Please refer https://github.com/microsoft/fluentui/issues/25133 for more details
-                            if (
-                                isCurrentResultsVoilation &&
-                                currentResult.id.toLowerCase() === 'aria-hidden-focus' &&
-                                node.html.toLowerCase().includes('data-tabster-dummy')
-                            ) {
-                                continue;
-                            }
 
                             if (matchingResult !== undefined) {
                                 if (!matchingResult.urls.some((u) => u === url)) {
