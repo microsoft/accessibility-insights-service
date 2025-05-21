@@ -104,12 +104,11 @@ export class AxePuppeteerScanner {
 
                 return violation;
             })
-            .filter(v => v !== null);
+            .filter((v) => v !== null);
 
         return {
             ...axeResults,
             violations: filteredViolations,
         };
     }
-}
 }

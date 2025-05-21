@@ -91,7 +91,7 @@ export class AccessibilityScanOperation {
 
                 return violation;
             })
-            .filter(v => v !== null);
+            .filter((v) => v !== null);
 
         return {
             ...axeResults,
