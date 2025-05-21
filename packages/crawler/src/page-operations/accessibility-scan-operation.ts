@@ -78,24 +78,28 @@ export class AccessibilityScanOperation {
          * Tabster inserts hidden but focusable elements into the DOM, which can trigger
          * false positives for the 'aria-hidden-focus' rule in WCP accessibility scans.
          */
-        const filteredViolations = axeResults.violations
-            .map((violation) => {
-                if (violation.id === 'aria-hidden-focus') {
-                    const filteredNodes = violation.nodes.filter((node) => !node.html?.includes('data-tabster-dummy'));
-                    if (filteredNodes.length > 0) {
-                        return { ...violation, nodes: filteredNodes };
+        if (axeResults.violations) {
+            const filteredViolations = axeResults.violations
+                .map((violation) => {
+                    if (violation.id === 'aria-hidden-focus') {
+                        const filteredNodes = violation.nodes.filter((node) => !node.html?.includes('data-tabster-dummy'));
+                        if (filteredNodes.length > 0) {
+                            return { ...violation, nodes: filteredNodes };
+                        }
+
+                        return null;
                     }
 
-                    return null;
-                }
+                    return violation;
+                })
+                .filter((v) => v !== null);
 
-                return violation;
-            })
-            .filter((v) => v !== null);
+            return {
+                ...axeResults,
+                violations: filteredViolations,
+            };
+        }
 
-        return {
-            ...axeResults,
-            violations: filteredViolations,
-        };
+        return axeResults;
     }
 }

@@ -173,6 +173,69 @@ describe(AxePuppeteerScanner, () => {
 
         expect(axeScanResults).toEqual(expectedAxeScanResults);
     });
+
+    it("suppressFluentUITabsterResult - filters out 'aria-hidden-focus' violations with 'data-tabster-dummy'", () => {
+        const axeResultsWithTabster: AxeResults = {
+            url: 'url',
+            passes: [],
+            violations: [
+                {
+                    id: 'aria-hidden-focus',
+                    nodes: [
+                        {
+                            target: ['[data-tabster-dummy=""]'],
+                            html: '<i tabindex="0" data-tabster-dummy="" aria-hidden="true">False positive</i>',
+                        },
+                        {
+                            target: ['#other'],
+                            html: '<i tabindex="0" aria-hidden="true">Violation</i>',
+                        },
+                    ],
+                },
+                {
+                    id: 'color-contrast',
+                    nodes: [
+                        {
+                            target: ['#contrast'],
+                            html: '<div id="contrast"></div>',
+                        },
+                    ],
+                },
+            ],
+            incomplete: [],
+            inapplicable: [],
+        } as AxeResults;
+
+        const filteredAxeResultsWithTabster: AxeResults = {
+            url: 'url',
+            passes: [],
+            violations: [
+                {
+                    id: 'aria-hidden-focus',
+                    nodes: [
+                        {
+                            target: ['#other'],
+                            html: '<i tabindex="0" aria-hidden="true">Violation</i>',
+                        },
+                    ],
+                },
+                {
+                    id: 'color-contrast',
+                    nodes: [
+                        {
+                            target: ['#contrast'],
+                            html: '<div id="contrast"></div>',
+                        },
+                    ],
+                },
+            ],
+            incomplete: [],
+            inapplicable: [],
+        } as AxeResults;
+
+        const filtered = axePuppeteerScanner.suppressFluentUITabsterResult(axeResultsWithTabster);
+        expect(filtered).toEqual(filteredAxeResultsWithTabster);
+    });
 });
 
 function setupAxePuppeteerFactoryMock(axeCoreError?: Error): void {
