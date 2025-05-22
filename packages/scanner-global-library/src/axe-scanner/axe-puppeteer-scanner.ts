@@ -95,7 +95,13 @@ export class AxePuppeteerScanner {
             const filteredViolations = axeResults.violations
                 .map((violation) => {
                     if (violation.id === 'aria-hidden-focus') {
-                        const filteredNodes = violation.nodes.filter((node) => !node.html?.includes('data-tabster-dummy'));
+                        const filteredNodes = violation.nodes.filter(
+                            (node) =>
+                                !(
+                                    node.html?.includes('data-tabster-dummy') ||
+                                    node.html?.includes('data-is-focus-trap-zone-bumper="true"')
+                                ),
+                        );
                         if (filteredNodes.length > 0) {
                             return { ...violation, nodes: filteredNodes };
                         }

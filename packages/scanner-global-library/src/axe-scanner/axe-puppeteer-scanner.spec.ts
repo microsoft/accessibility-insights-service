@@ -187,6 +187,10 @@ describe(AxePuppeteerScanner, () => {
                             html: '<i tabindex="0" data-tabster-dummy="" aria-hidden="true">False positive</i>',
                         },
                         {
+                            target: ['[data-is-focus-trap-zone-bumper="true"]'],
+                            html: '<i tabindex="0" data-is-focus-trap-zone-bumper="true" aria-hidden="true">False positive</i>',
+                        },
+                        {
                             target: ['#other'],
                             html: '<i tabindex="0" aria-hidden="true">Violation</i>',
                         },
