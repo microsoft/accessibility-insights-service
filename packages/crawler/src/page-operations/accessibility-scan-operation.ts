@@ -27,18 +27,19 @@ export class AccessibilityScanOperation {
 
     public async run(page: Puppeteer.Page, id: string, axeSourcePath?: string): Promise<AxeResults> {
         const axeResults = await this.scan(page, axeSourcePath);
-        const report = this.reportGenerator.generateReport(axeResults, page.url(), await page.title());
+        const filteredAxeResults = this.suppressFluentUITabsterResult(axeResults);
+        const report = this.reportGenerator.generateReport(filteredAxeResults, page.url(), await page.title());
 
-        await this.blobStore.setValue(`${id}.axe`, axeResults);
+        await this.blobStore.setValue(`${id}.axe`, filteredAxeResults);
         await this.blobStore.setValue(`${id}.report`, report.asHTML(), { contentType: 'text/html' });
 
-        if (axeResults.violations.length > 0) {
-            this.logger.logWarn(`Found ${axeResults.violations.length} accessibility issues.`, {
+        if (filteredAxeResults.violations.length > 0) {
+            this.logger.logWarn(`Found ${filteredAxeResults.violations.length} accessibility issues.`, {
                 url: page.url(),
             });
         }
 
-        return axeResults;
+        return filteredAxeResults;
     }
 
     private async scan(page: Puppeteer.Page, axeSourcePath?: string): Promise<AxeResults> {
@@ -68,5 +69,43 @@ export class AccessibilityScanOperation {
                 return Promise.resolve('ScanTimeout');
             },
         );
+    }
+
+    public suppressFluentUITabsterResult(axeResults: AxeResults): AxeResults {
+        /**
+         * [False Positive] aria-hidden-focus on elements with data-tabster-dummy #2769
+         * Resolves a known issue with Fluent UI, which uses Tabster to manage focus.
+         * Tabster inserts hidden but focusable elements into the DOM, which can trigger
+         * false positives for the 'aria-hidden-focus' rule in WCP accessibility scans.
+         */
+        if (axeResults.violations) {
+            const filteredViolations = axeResults.violations
+                .map((violation) => {
+                    if (violation.id === 'aria-hidden-focus') {
+                        const filteredNodes = violation.nodes.filter(
+                            (node) =>
+                                !(
+                                    node.html?.includes('data-tabster-dummy') ||
+                                    node.html?.includes('data-is-focus-trap-zone-bumper="true"')
+                                ),
+                        );
+                        if (filteredNodes.length > 0) {
+                            return { ...violation, nodes: filteredNodes };
+                        }
+
+                        return null;
+                    }
+
+                    return violation;
+                })
+                .filter((v) => v !== null);
+
+            return {
+                ...axeResults,
+                violations: filteredViolations,
+            };
+        }
+
+        return axeResults;
     }
 }

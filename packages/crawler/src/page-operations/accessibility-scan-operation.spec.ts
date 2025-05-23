@@ -111,6 +111,73 @@ describe(AccessibilityScanOperation, () => {
         await expect(() => accessibilityScanOp.run(pageMock.object, id)).rejects.toThrowError(`Accessibility core scanner timed out`);
     });
 
+    it("suppressFluentUITabsterResult - filters out 'aria-hidden-focus' violations with 'data-tabster-dummy'", () => {
+        const axeResultsWithTabster: AxeResults = {
+            url: 'url',
+            passes: [],
+            violations: [
+                {
+                    id: 'aria-hidden-focus',
+                    nodes: [
+                        {
+                            target: ['[data-tabster-dummy=""]'],
+                            html: '<i tabindex="0" data-tabster-dummy="" aria-hidden="true">False positive</i>',
+                        },
+                        {
+                            target: ['[data-is-focus-trap-zone-bumper="true"]'],
+                            html: '<i tabindex="0" data-is-focus-trap-zone-bumper="true" aria-hidden="true">False positive</i>',
+                        },
+                        {
+                            target: ['#other'],
+                            html: '<i tabindex="0" aria-hidden="true">Violation</i>',
+                        },
+                    ],
+                },
+                {
+                    id: 'color-contrast',
+                    nodes: [
+                        {
+                            target: ['#contrast'],
+                            html: '<div id="contrast"></div>',
+                        },
+                    ],
+                },
+            ],
+            incomplete: [],
+            inapplicable: [],
+        } as AxeResults;
+
+        const filteredAxeResultsWithTabster: AxeResults = {
+            url: 'url',
+            passes: [],
+            violations: [
+                {
+                    id: 'aria-hidden-focus',
+                    nodes: [
+                        {
+                            target: ['#other'],
+                            html: '<i tabindex="0" aria-hidden="true">Violation</i>',
+                        },
+                    ],
+                },
+                {
+                    id: 'color-contrast',
+                    nodes: [
+                        {
+                            target: ['#contrast'],
+                            html: '<div id="contrast"></div>',
+                        },
+                    ],
+                },
+            ],
+            incomplete: [],
+            inapplicable: [],
+        } as AxeResults;
+
+        const filtered = accessibilityScanOp.suppressFluentUITabsterResult(axeResultsWithTabster);
+        expect(filtered).toEqual(filteredAxeResultsWithTabster);
+    });
+
     function setMocks(axeResult: AxeResults): void {
         blobStoreMock
             .setup((s) => s.setValue(`${id}.axe`, axeResults))
