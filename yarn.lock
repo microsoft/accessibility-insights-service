@@ -3067,6 +3067,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@opentelemetry/api-logs@npm:0.201.1":
+  version: 0.201.1
+  resolution: "@opentelemetry/api-logs@npm:0.201.1"
+  dependencies:
+    "@opentelemetry/api": "npm:^1.3.0"
+  checksum: 10/baa14906caf848b7ff32fdd2b8cbad5c96b6e5b4bb4e52cb4118b323b77b2e99630b4d58d92f110343d475a21fd5bdcaaa37c29a4a386136ed4ee01528a2b2ed
+  languageName: node
+  linkType: hard
+
 "@opentelemetry/api-logs@npm:0.57.1":
   version: 0.57.1
   resolution: "@opentelemetry/api-logs@npm:0.57.1"
@@ -3473,6 +3482,21 @@ __metadata:
   peerDependencies:
     "@opentelemetry/api": ^1.3.0
   checksum: 10/b66b840e87976a5edf551a7011a395df8df5985571ac0506412943d07b4309fcc78fe71d3f55217a00f44384fbf61f59f1e54d544ab12f5490f6a7a56b71e02a
+  languageName: node
+  linkType: hard
+
+"@opentelemetry/instrumentation@npm:^0.201.1":
+  version: 0.201.1
+  resolution: "@opentelemetry/instrumentation@npm:0.201.1"
+  dependencies:
+    "@opentelemetry/api-logs": "npm:0.201.1"
+    "@types/shimmer": "npm:^1.2.0"
+    import-in-the-middle: "npm:^1.8.1"
+    require-in-the-middle: "npm:^7.1.1"
+    shimmer: "npm:^1.2.1"
+  peerDependencies:
+    "@opentelemetry/api": ^1.3.0
+  checksum: 10/cef0b05ce1b153f9d7ce770782c67f2422d98a6c1bd4bc5d69db6c2c3d91523c7030bb0ff6ff16ae246586334f4774c8d1b71bef5e395b7e7cba4645a73a14c4
   languageName: node
   linkType: hard
 
@@ -12444,7 +12468,7 @@ __metadata:
     "@apify/log": "npm:2.5.13"
     "@opentelemetry/api": "npm:^1.4.1"
     "@opentelemetry/exporter-metrics-otlp-grpc": "npm:^0.57.1"
-    "@opentelemetry/instrumentation": "npm:^0.57.1"
+    "@opentelemetry/instrumentation": "npm:^0.201.1"
     "@opentelemetry/resources": "npm:^1.15.0"
     "@opentelemetry/sdk-metrics": "npm:^1.28.0"
     "@opentelemetry/semantic-conventions": "npm:^1.30.0"
