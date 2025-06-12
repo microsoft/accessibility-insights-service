@@ -15,6 +15,7 @@ export const windowSize = {
 
 const defaultArgs = [
     '--no-sandbox',
+    '--no-zygote',
     '--disable-dev-shm-usage',
     '--disable-setuid-sandbox',
     '--disable-features=BackForwardCache',
@@ -26,7 +27,14 @@ const defaultArgs = [
 // Hardware OpenGL does not work in container environment. We need to use SwiftShader as
 // an alternative software OpenGL implementation.
 const webglArgs = ['--enable-webgl', '--enable-webgl2', '--use-angle=swiftshader', '--use-gl=swiftshader', '--ignore-gpu-blocklist'];
-const noWebglArgs = ['--disable-webgl', '--disable-webgl2', '--disable-accelerated-2d-canvas', '--disable-gpu-program-cache'];
+// The '--disable-gpu' option is mandatory to avoid browser crashes in some environments, such as Docker containers.
+const noWebglArgs = [
+    '--disable-webgl',
+    '--disable-webgl2',
+    '--disable-accelerated-2d-canvas',
+    '--disable-gpu-program-cache',
+    '--disable-gpu',
+];
 
 const defaultLaunchOptions: Puppeteer.LaunchOptions = {
     // The new headless mode https://developer.chrome.com/articles/new-headless
