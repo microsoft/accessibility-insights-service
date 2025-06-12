@@ -70,6 +70,11 @@ module.exports = (env) => {
                         from: '**/*.js',
                         to: '',
                     },
+                    {
+                        context: '.',
+                        from: 'package-ext.json',
+                        to: 'package.json',
+                    },
                 ],
             }),
         ],
