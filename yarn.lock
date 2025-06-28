@@ -70,10 +70,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@apify/consts@npm:^2.37.0":
-  version: 2.37.0
-  resolution: "@apify/consts@npm:2.37.0"
-  checksum: 10/ef95b7298c7063ae58a0b5b9015461f7e61124a52a40729163abef6a6676b2365f328f393ec283655c39662c6cc06460bda399bc5b7a1ea049ea46f792e0bb95
+"@apify/consts@npm:^2.41.0":
+  version: 2.41.0
+  resolution: "@apify/consts@npm:2.41.0"
+  checksum: 10/0cf0c3fa74bc11abedfb6cc5dea2e7f0c415e3cc8d5ca148e51df39922ab32d872bd70934308097269f1912dfdbb5e0bf1b45b34dde9c8907d6b3a18ec1b0eee
   languageName: node
   linkType: hard
 
@@ -84,13 +84,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@apify/log@npm:2.5.13":
-  version: 2.5.13
-  resolution: "@apify/log@npm:2.5.13"
+"@apify/log@npm:2.5.18":
+  version: 2.5.18
+  resolution: "@apify/log@npm:2.5.18"
   dependencies:
-    "@apify/consts": "npm:^2.37.0"
+    "@apify/consts": "npm:^2.41.0"
     ansi-colors: "npm:^4.1.1"
-  checksum: 10/a157f0d14344c68054efc3612967cddebc3365068cc443833ca8f17bccdc6ce915eccb76c04ffb36192029611b0c741ace23db5c7ad70ef2affe8f2a205e0aa4
+  checksum: 10/203b1e18677f2d5a0ae14f239ab6899b5d69a1978817c220b41e2dba150be5af472facff5fbfaf60074c0d9e198e028de3aabacf420fb87332fdedca517aeb70
   languageName: node
   linkType: hard
 
@@ -5299,7 +5299,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "accessibility-insights-crawler@workspace:packages/crawler"
   dependencies:
-    "@apify/log": "npm:2.5.13"
+    "@apify/log": "npm:2.5.18"
     "@axe-core/puppeteer": "npm:4.10.1"
     "@crawlee/browser-pool": "npm:^3.12.2"
     "@crawlee/puppeteer": "npm:^3.12.2"
@@ -5363,7 +5363,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "accessibility-insights-scan@workspace:packages/cli"
   dependencies:
-    "@apify/log": "npm:2.5.13"
+    "@apify/log": "npm:2.5.18"
     "@axe-core/puppeteer": "npm:4.10.1"
     "@crawlee/browser-pool": "npm:^3.12.2"
     "@crawlee/puppeteer": "npm:^3.12.2"
@@ -12441,7 +12441,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "logger@workspace:packages/logger"
   dependencies:
-    "@apify/log": "npm:2.5.13"
+    "@apify/log": "npm:2.5.18"
     "@opentelemetry/api": "npm:^1.4.1"
     "@opentelemetry/exporter-metrics-otlp-grpc": "npm:^0.57.1"
     "@opentelemetry/instrumentation": "npm:^0.57.1"
