@@ -4512,14 +4512,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/levelup@npm:^5.1.1":
-  version: 5.1.3
-  resolution: "@types/levelup@npm:5.1.3"
+"@types/levelup@npm:^5.1.5":
+  version: 5.1.5
+  resolution: "@types/levelup@npm:5.1.5"
   dependencies:
     "@types/abstract-leveldown": "npm:*"
     "@types/level-errors": "npm:*"
     "@types/node": "npm:*"
-  checksum: 10/cf481654133c08318926c8fa4e516d1ecd2c48e78846848f1232088783aff5a92710fb52cd63c3ac682b6addc4991fcd08227aed06e98f6e092e2a303346430f
+  checksum: 10/844798bdc805e3c449e478e283eb1196892d3f4fb6b24158faa5f10b283fa785da736917de1ec030ce1b8be9a8c54881cee2354632cb540ef80a325a19d920d1
   languageName: node
   linkType: hard
 
@@ -5310,7 +5310,7 @@ __metadata:
     "@types/encoding-down": "npm:^5.0.5"
     "@types/jest": "npm:^29.5.12"
     "@types/leveldown": "npm:^4.0.6"
-    "@types/levelup": "npm:^5.1.1"
+    "@types/levelup": "npm:^5.1.5"
     "@types/node": "npm:^20.14.9"
     "@types/normalize-path": "npm:^3.0.2"
     "@types/puppeteer": "npm:^7.0.4"
