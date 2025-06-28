@@ -5329,7 +5329,7 @@ __metadata:
     normalize-path: "npm:^3.0.0"
     normalize-url: "npm:6.1.0"
     npm-run-all: "npm:^4.1.5"
-    puppeteer: "npm:^24.10.0"
+    puppeteer: "npm:^24.10.1"
     reflect-metadata: "npm:^0.2.2"
     rimraf: "npm:^6.0.1"
     rollup: "npm:^3.29.5"
@@ -5409,7 +5409,7 @@ __metadata:
     normalize-path: "npm:^3.0.0"
     normalize-url: "npm:6.1.0"
     npm-run-all: "npm:^4.1.5"
-    puppeteer: "npm:^24.10.0"
+    puppeteer: "npm:^24.10.1"
     raw-body: "npm:^2.5.1"
     reflect-metadata: "npm:^0.2.2"
     rimraf: "npm:^6.0.1"
@@ -6022,7 +6022,7 @@ __metadata:
     jest-junit: "npm:^16.0.0"
     lodash: "npm:^4.17.21"
     npm-run-all: "npm:^4.1.5"
-    puppeteer: "npm:^24.10.0"
+    puppeteer: "npm:^24.10.1"
     reflect-metadata: "npm:^0.2.2"
     rimraf: "npm:^6.0.1"
     ts-jest: "npm:^29.1.5"
@@ -14350,7 +14350,7 @@ __metadata:
     logger: "workspace:*"
     mockdate: "npm:^3.0.5"
     npm-run-all: "npm:^4.1.5"
-    puppeteer: "npm:^24.10.0"
+    puppeteer: "npm:^24.10.1"
     reflect-metadata: "npm:^0.2.2"
     rimraf: "npm:^6.0.1"
     scanner-global-library: "workspace:*"
@@ -14430,7 +14430,7 @@ __metadata:
     npm-run-all: "npm:^4.1.5"
     p-limit: "npm:^3.1.0"
     privacy-scan-core: "workspace:*"
-    puppeteer: "npm:^24.10.0"
+    puppeteer: "npm:^24.10.1"
     puppeteer-extra: "npm:^3.3.6"
     puppeteer-extra-plugin: "npm:^3.2.3"
     puppeteer-extra-plugin-stealth: "npm:^2.11.2"
@@ -14645,9 +14645,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"puppeteer-core@npm:24.10.0":
-  version: 24.10.0
-  resolution: "puppeteer-core@npm:24.10.0"
+"puppeteer-core@npm:24.10.1":
+  version: 24.10.1
+  resolution: "puppeteer-core@npm:24.10.1"
   dependencies:
     "@puppeteer/browsers": "npm:2.10.5"
     chromium-bidi: "npm:5.1.0"
@@ -14655,7 +14655,7 @@ __metadata:
     devtools-protocol: "npm:0.0.1452169"
     typed-query-selector: "npm:^2.12.0"
     ws: "npm:^8.18.2"
-  checksum: 10/c1f95c8055f7ac048aa04f884c1b954da5fba9b5d641c51ee0d5ac2cc387fa40f5494e5a002129fe2a7b2a480ed1a6aac97bcc55c7e5b63c7c1c0b99e592c04a
+  checksum: 10/6c9306c2cc1ef4d580799214433a7d08698ab0c83c7efb5abada8af4ea5c521205ca8e8cecead1bc6a264e596bb63cb1f74c720d52518b2e2c34e945d3048373
   languageName: node
   linkType: hard
 
@@ -14773,19 +14773,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"puppeteer@npm:^24.10.0":
-  version: 24.10.0
-  resolution: "puppeteer@npm:24.10.0"
+"puppeteer@npm:^24.10.1":
+  version: 24.10.1
+  resolution: "puppeteer@npm:24.10.1"
   dependencies:
     "@puppeteer/browsers": "npm:2.10.5"
     chromium-bidi: "npm:5.1.0"
     cosmiconfig: "npm:^9.0.0"
     devtools-protocol: "npm:0.0.1452169"
-    puppeteer-core: "npm:24.10.0"
+    puppeteer-core: "npm:24.10.1"
     typed-query-selector: "npm:^2.12.0"
   bin:
     puppeteer: lib/cjs/puppeteer/node/cli.js
-  checksum: 10/3817c2025aab5923c25bb62212a80591bee3850852a22ec3368da9d33c14ab2c016c28be6cefb0ec60fc9224aad8f29bb343d6c2974d012be876dea56611d3d3
+  checksum: 10/7052d117b8057f2f31e4f2688ee765a395ee92ea69140c0f6505faa7d12f6b706f2bcdb75f4ce24d09392158d58b031accd1bd61fbfe7bdc07f0b5c14e32d2b2
   languageName: node
   linkType: hard
 
@@ -15165,7 +15165,7 @@ __metadata:
     npm-force-resolutions: "npm:^0.0.10"
     npm-run-all: "npm:^4.1.5"
     p-limit: "npm:^3.1.0"
-    puppeteer: "npm:^24.10.0"
+    puppeteer: "npm:^24.10.1"
     puppeteer-extra: "npm:^3.3.6"
     puppeteer-extra-plugin: "npm:^3.2.3"
     puppeteer-extra-plugin-stealth: "npm:^2.11.2"
@@ -15657,7 +15657,7 @@ __metadata:
     logger: "workspace:*"
     npm-run-all: "npm:^4.1.5"
     pidusage: "npm:^3.0.2"
-    puppeteer: "npm:^24.10.0"
+    puppeteer: "npm:^24.10.1"
     puppeteer-extra: "npm:^3.3.6"
     puppeteer-extra-plugin: "npm:^3.2.3"
     puppeteer-extra-plugin-stealth: "npm:^2.11.2"
@@ -15814,7 +15814,7 @@ __metadata:
     p-limit: "npm:^3.1.0"
     paralleljs: "npm:^1.1.0"
     privacy-scan-core: "workspace:*"
-    puppeteer: "npm:^24.10.0"
+    puppeteer: "npm:^24.10.1"
     reflect-metadata: "npm:^0.2.2"
     rimraf: "npm:^6.0.1"
     scanner-global-library: "workspace:*"
@@ -17725,7 +17725,7 @@ __metadata:
     npm-run-all: "npm:^4.1.5"
     p-limit: "npm:^3.1.0"
     patch-package: "npm:^8.0.0"
-    puppeteer: "npm:^24.10.0"
+    puppeteer: "npm:^24.10.1"
     puppeteer-extra: "npm:^3.3.6"
     puppeteer-extra-plugin: "npm:^3.2.3"
     puppeteer-extra-plugin-stealth: "npm:^2.11.2"
