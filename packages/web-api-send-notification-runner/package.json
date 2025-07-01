@@ -59,6 +59,6 @@
         "service-library": "workspace:*",
         "sha.js": "^2.4.11",
         "storage-documents": "workspace:*",
-        "yargs": "^17.7.2"
+        "yargs": "^18.0.0"
     }
 }

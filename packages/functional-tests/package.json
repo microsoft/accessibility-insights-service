@@ -48,6 +48,6 @@
         "service-library": "workspace:*",
         "storage-documents": "workspace:*",
         "web-api-client": "workspace:*",
-        "yargs": "^17.7.2"
+        "yargs": "^18.0.0"
     }
 }

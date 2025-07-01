@@ -65,7 +65,7 @@
         "reflect-metadata": "^0.2.2",
         "serialize-error": "^8.1.0",
         "sha.js": "^2.4.11",
-        "yargs": "^17.7.2"
+        "yargs": "^18.0.0"
     },
     "overrides": {
         "@crawlee/browser-pool": {

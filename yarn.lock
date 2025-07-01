@@ -5338,7 +5338,7 @@ __metadata:
     ts-jest: "npm:^29.1.5"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
-    yargs: "npm:^17.7.2"
+    yargs: "npm:^18.0.0"
   languageName: unknown
   linkType: soft
 
@@ -5422,7 +5422,7 @@ __metadata:
     webpack: "npm:^5.97.1"
     webpack-cli: "npm:^5.1.4"
     webpack-node-externals: "npm:^3.0.0"
-    yargs: "npm:^17.7.2"
+    yargs: "npm:^18.0.0"
   bin:
     ai-scan: dist/ai-scan-cli.js
   languageName: unknown
@@ -5709,7 +5709,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ansi-styles@npm:^6.1.0":
+"ansi-styles@npm:^6.1.0, ansi-styles@npm:^6.2.1":
   version: 6.2.1
   resolution: "ansi-styles@npm:6.2.1"
   checksum: 10/70fdf883b704d17a5dfc9cde206e698c16bcd74e7f196ab821511651aee4f9f76c9514bdfa6ca3a27b5e49138b89cb222a28caf3afe4567570139577f991df32
@@ -7042,6 +7042,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"cliui@npm:^9.0.1":
+  version: 9.0.1
+  resolution: "cliui@npm:9.0.1"
+  dependencies:
+    string-width: "npm:^7.2.0"
+    strip-ansi: "npm:^7.1.0"
+    wrap-ansi: "npm:^9.0.0"
+  checksum: 10/df43d8d1c6e3254cbb64b1905310d5f6672c595496a3cbe76946c6d24777136886470686f2772ac9edfe547a74bb70e8017530b3554715aee119efd7752fc0d9
+  languageName: node
+  linkType: hard
+
 "clone-deep@npm:^0.2.4":
   version: 0.2.4
   resolution: "clone-deep@npm:0.2.4"
@@ -8223,6 +8234,13 @@ __metadata:
   version: 0.13.1
   resolution: "emittery@npm:0.13.1"
   checksum: 10/fbe214171d878b924eedf1757badf58a5dce071cd1fa7f620fa841a0901a80d6da47ff05929d53163105e621ce11a71b9d8acb1148ffe1745e045145f6e69521
+  languageName: node
+  linkType: hard
+
+"emoji-regex@npm:^10.3.0":
+  version: 10.4.0
+  resolution: "emoji-regex@npm:10.4.0"
+  checksum: 10/76bb92c5bcf0b6980d37e535156231e4a9d0aa6ab3b9f5eabf7690231d5aa5d5b8e516f36e6804cbdd0f1c23dfef2a60c40ab7bb8aedd890584281a565b97c50
   languageName: node
   linkType: hard
 
@@ -9620,7 +9638,7 @@ __metadata:
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
     web-api-client: "workspace:*"
-    yargs: "npm:^17.7.2"
+    yargs: "npm:^18.0.0"
   languageName: unknown
   linkType: soft
 
@@ -9678,6 +9696,13 @@ __metadata:
   version: 2.0.5
   resolution: "get-caller-file@npm:2.0.5"
   checksum: 10/b9769a836d2a98c3ee734a88ba712e62703f1df31b94b784762c433c27a386dd6029ff55c2a920c392e33657d80191edbf18c61487e198844844516f843496b9
+  languageName: node
+  linkType: hard
+
+"get-east-asian-width@npm:^1.0.0":
+  version: 1.3.0
+  resolution: "get-east-asian-width@npm:1.3.0"
+  checksum: 10/8e8e779eb28701db7fdb1c8cab879e39e6ae23f52dadd89c8aed05869671cee611a65d4f8557b83e981428623247d8bc5d0c7a4ef3ea7a41d826e73600112ad8
   languageName: node
   linkType: hard
 
@@ -10257,7 +10282,7 @@ __metadata:
     webpack: "npm:^5.97.1"
     webpack-cli: "npm:^5.1.4"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
-    yargs: "npm:^17.7.2"
+    yargs: "npm:^18.0.0"
   languageName: unknown
   linkType: soft
 
@@ -14397,7 +14422,7 @@ __metadata:
     webpack: "npm:^5.97.1"
     webpack-cli: "npm:^5.1.4"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
-    yargs: "npm:^17.7.2"
+    yargs: "npm:^18.0.0"
   languageName: unknown
   linkType: soft
 
@@ -14446,7 +14471,7 @@ __metadata:
     webpack: "npm:^5.97.1"
     webpack-cli: "npm:^5.1.4"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
-    yargs: "npm:^17.7.2"
+    yargs: "npm:^18.0.0"
   languageName: unknown
   linkType: soft
 
@@ -15133,7 +15158,7 @@ __metadata:
     webpack: "npm:^5.97.1"
     webpack-cli: "npm:^5.1.4"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
-    yargs: "npm:^17.7.2"
+    yargs: "npm:^18.0.0"
   languageName: unknown
   linkType: soft
 
@@ -15181,7 +15206,7 @@ __metadata:
     webpack: "npm:^5.97.1"
     webpack-cli: "npm:^5.1.4"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
-    yargs: "npm:^17.7.2"
+    yargs: "npm:^18.0.0"
   languageName: unknown
   linkType: soft
 
@@ -15823,7 +15848,7 @@ __metadata:
     ts-jest: "npm:^29.1.5"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
-    yargs: "npm:^17.7.2"
+    yargs: "npm:^18.0.0"
   languageName: unknown
   linkType: soft
 
@@ -16386,6 +16411,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"string-width@npm:^7.0.0, string-width@npm:^7.2.0":
+  version: 7.2.0
+  resolution: "string-width@npm:7.2.0"
+  dependencies:
+    emoji-regex: "npm:^10.3.0"
+    get-east-asian-width: "npm:^1.0.0"
+    strip-ansi: "npm:^7.1.0"
+  checksum: 10/42f9e82f61314904a81393f6ef75b832c39f39761797250de68c041d8ba4df2ef80db49ab6cd3a292923a6f0f409b8c9980d120f7d32c820b4a8a84a2598a295
+  languageName: node
+  linkType: hard
+
 "string.prototype.padend@npm:^3.0.0":
   version: 3.1.0
   resolution: "string.prototype.padend@npm:3.1.0"
@@ -16486,7 +16522,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"strip-ansi@npm:^7.0.1":
+"strip-ansi@npm:^7.0.1, strip-ansi@npm:^7.1.0":
   version: 7.1.0
   resolution: "strip-ansi@npm:7.1.0"
   dependencies:
@@ -17650,7 +17686,7 @@ __metadata:
     webpack: "npm:^5.97.1"
     webpack-cli: "npm:^5.1.4"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
-    yargs: "npm:^17.7.2"
+    yargs: "npm:^18.0.0"
   languageName: unknown
   linkType: soft
 
@@ -17684,7 +17720,7 @@ __metadata:
     webpack: "npm:^5.97.1"
     webpack-cli: "npm:^5.1.4"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
-    yargs: "npm:^17.7.2"
+    yargs: "npm:^18.0.0"
   languageName: unknown
   linkType: soft
 
@@ -17743,7 +17779,7 @@ __metadata:
     webpack: "npm:^5.97.1"
     webpack-cli: "npm:^5.1.4"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
-    yargs: "npm:^17.7.2"
+    yargs: "npm:^18.0.0"
   languageName: unknown
   linkType: soft
 
@@ -17782,7 +17818,7 @@ __metadata:
     webpack: "npm:^5.97.1"
     webpack-cli: "npm:^5.1.4"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
-    yargs: "npm:^17.7.2"
+    yargs: "npm:^18.0.0"
   languageName: unknown
   linkType: soft
 
@@ -17826,7 +17862,7 @@ __metadata:
     webpack: "npm:^5.97.1"
     webpack-cli: "npm:^5.1.4"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
-    yargs: "npm:^17.7.2"
+    yargs: "npm:^18.0.0"
   languageName: unknown
   linkType: soft
 
@@ -18146,6 +18182,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"wrap-ansi@npm:^9.0.0":
+  version: 9.0.0
+  resolution: "wrap-ansi@npm:9.0.0"
+  dependencies:
+    ansi-styles: "npm:^6.2.1"
+    string-width: "npm:^7.0.0"
+    strip-ansi: "npm:^7.1.0"
+  checksum: 10/b9d91564c091cf3978a7c18ca0f3e4d4606e83549dbe59cf76f5e77feefdd5ec91443155e8102630524d10a8c275efac8a7082c0f26fa43e6b989dc150d176ce
+  languageName: node
+  linkType: hard
+
 "wrappy@npm:1":
   version: 1.0.2
   resolution: "wrappy@npm:1.0.2"
@@ -18320,6 +18367,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"yargs-parser@npm:^22.0.0":
+  version: 22.0.0
+  resolution: "yargs-parser@npm:22.0.0"
+  checksum: 10/f13c42bad6ebed1a587a72f2db5694f5fa772bcaf409a701691d13cf74eb5adfcf61a2611de08807e319b829d3e5e6e1578b16ebe174cae8e8be3bf7b8e7a19e
+  languageName: node
+  linkType: hard
+
 "yargs@npm:17.7.1, yargs@npm:^17.3.1":
   version: 17.7.1
   resolution: "yargs@npm:17.7.1"
@@ -18395,6 +18449,20 @@ __metadata:
     y18n: "npm:^5.0.5"
     yargs-parser: "npm:^21.0.0"
   checksum: 10/2453d52e3403ca86ca9c4279a90da3cbc351b50c7a13cc259bebf2d396530800e53261d9d9c7e2d4b7c049aa16c770f2553bdb04d52c2dbb37271d6cecbdcf2a
+  languageName: node
+  linkType: hard
+
+"yargs@npm:^18.0.0":
+  version: 18.0.0
+  resolution: "yargs@npm:18.0.0"
+  dependencies:
+    cliui: "npm:^9.0.1"
+    escalade: "npm:^3.1.1"
+    get-caller-file: "npm:^2.0.5"
+    string-width: "npm:^7.2.0"
+    y18n: "npm:^5.0.5"
+    yargs-parser: "npm:^22.0.0"
+  checksum: 10/5af36234871390386b31cac99f00e79fcbc2ead858a61b30a8ca381c5fde5df8af0b407c36b000d3f774bcbe4aec5833f2f1c915f6ddc49ce97b78176b651801
   languageName: node
   linkType: hard
 
