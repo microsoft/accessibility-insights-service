@@ -52,7 +52,7 @@
         "accessibility-insights-report": "7.0.0",
         "axe-core": "4.10.2",
         "axe-core-scanner": "workspace:*",
-        "dotenv": "^16.4.7",
+        "dotenv": "^17.0.1",
         "encoding-down": "^7.1.0",
         "inversify": "^6.0.1",
         "leveldown": "^6.1.1",

@@ -58,7 +58,7 @@
         "axe-sarif-converter": "^3.0.0",
         "azure-services": "workspace:*",
         "common": "workspace:*",
-        "dotenv": "^16.4.7",
+        "dotenv": "^17.0.1",
         "inversify": "^6.0.1",
         "leveldown": "^6.1.1",
         "lodash": "^4.17.21",
