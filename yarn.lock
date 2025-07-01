@@ -5329,7 +5329,7 @@ __metadata:
     normalize-path: "npm:^3.0.0"
     normalize-url: "npm:6.1.0"
     npm-run-all: "npm:^4.1.5"
-    puppeteer: "npm:^24.10.0"
+    puppeteer: "npm:^24.11.2"
     reflect-metadata: "npm:^0.2.2"
     rimraf: "npm:^6.0.1"
     rollup: "npm:^3.29.5"
@@ -5409,7 +5409,7 @@ __metadata:
     normalize-path: "npm:^3.0.0"
     normalize-url: "npm:6.1.0"
     npm-run-all: "npm:^4.1.5"
-    puppeteer: "npm:^24.10.0"
+    puppeteer: "npm:^24.11.2"
     raw-body: "npm:^2.5.1"
     reflect-metadata: "npm:^0.2.2"
     rimraf: "npm:^6.0.1"
@@ -6022,7 +6022,7 @@ __metadata:
     jest-junit: "npm:^16.0.0"
     lodash: "npm:^4.17.21"
     npm-run-all: "npm:^4.1.5"
-    puppeteer: "npm:^24.10.0"
+    puppeteer: "npm:^24.11.2"
     reflect-metadata: "npm:^0.2.2"
     rimraf: "npm:^6.0.1"
     ts-jest: "npm:^29.1.5"
@@ -7939,10 +7939,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"devtools-protocol@npm:0.0.1452169":
-  version: 0.0.1452169
-  resolution: "devtools-protocol@npm:0.0.1452169"
-  checksum: 10/5f57635a418c18746c2aa9a22621562c05a930f385c4aa5c75fcea6ccd31c2370ef54c3abee13591f17812bf920ba4daffab394a9085209eb3e71ed63c0077c8
+"devtools-protocol@npm:0.0.1464554":
+  version: 0.0.1464554
+  resolution: "devtools-protocol@npm:0.0.1464554"
+  checksum: 10/c179c23a27d180d6f2196199babaea3c1e59995515df1b082621930cbff7428c2ca2fc12ef0a8fc82fcb133e08dcddaf80e17a7fe841924d6042c2c54511c431
   languageName: node
   linkType: hard
 
@@ -14350,7 +14350,7 @@ __metadata:
     logger: "workspace:*"
     mockdate: "npm:^3.0.5"
     npm-run-all: "npm:^4.1.5"
-    puppeteer: "npm:^24.10.0"
+    puppeteer: "npm:^24.11.2"
     reflect-metadata: "npm:^0.2.2"
     rimraf: "npm:^6.0.1"
     scanner-global-library: "workspace:*"
@@ -14430,7 +14430,7 @@ __metadata:
     npm-run-all: "npm:^4.1.5"
     p-limit: "npm:^3.1.0"
     privacy-scan-core: "workspace:*"
-    puppeteer: "npm:^24.10.0"
+    puppeteer: "npm:^24.11.2"
     puppeteer-extra: "npm:^3.3.6"
     puppeteer-extra-plugin: "npm:^3.2.3"
     puppeteer-extra-plugin-stealth: "npm:^2.11.2"
@@ -14645,17 +14645,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"puppeteer-core@npm:24.10.0":
-  version: 24.10.0
-  resolution: "puppeteer-core@npm:24.10.0"
+"puppeteer-core@npm:24.11.2":
+  version: 24.11.2
+  resolution: "puppeteer-core@npm:24.11.2"
   dependencies:
     "@puppeteer/browsers": "npm:2.10.5"
     chromium-bidi: "npm:5.1.0"
     debug: "npm:^4.4.1"
-    devtools-protocol: "npm:0.0.1452169"
+    devtools-protocol: "npm:0.0.1464554"
     typed-query-selector: "npm:^2.12.0"
-    ws: "npm:^8.18.2"
-  checksum: 10/c1f95c8055f7ac048aa04f884c1b954da5fba9b5d641c51ee0d5ac2cc387fa40f5494e5a002129fe2a7b2a480ed1a6aac97bcc55c7e5b63c7c1c0b99e592c04a
+    ws: "npm:^8.18.3"
+  checksum: 10/bd54dd2752e8a061925c054d9921696971fbad707d5d593fea8968bab0756424826f7e2a25696ffe0ad721bb1d2bc05d7db4b6df94a0710675811659fc2cfd83
   languageName: node
   linkType: hard
 
@@ -14773,19 +14773,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"puppeteer@npm:^24.10.0":
-  version: 24.10.0
-  resolution: "puppeteer@npm:24.10.0"
+"puppeteer@npm:^24.11.2":
+  version: 24.11.2
+  resolution: "puppeteer@npm:24.11.2"
   dependencies:
     "@puppeteer/browsers": "npm:2.10.5"
     chromium-bidi: "npm:5.1.0"
     cosmiconfig: "npm:^9.0.0"
-    devtools-protocol: "npm:0.0.1452169"
-    puppeteer-core: "npm:24.10.0"
+    devtools-protocol: "npm:0.0.1464554"
+    puppeteer-core: "npm:24.11.2"
     typed-query-selector: "npm:^2.12.0"
   bin:
     puppeteer: lib/cjs/puppeteer/node/cli.js
-  checksum: 10/3817c2025aab5923c25bb62212a80591bee3850852a22ec3368da9d33c14ab2c016c28be6cefb0ec60fc9224aad8f29bb343d6c2974d012be876dea56611d3d3
+  checksum: 10/ee270961a8deadc0efd44676593aa74fd733f16070352f7826f398e79014d122066eec69e792cbdc8c8b34145a85a458cc58b88ddc7f5929a9426d4c3fb485ad
   languageName: node
   linkType: hard
 
@@ -15165,7 +15165,7 @@ __metadata:
     npm-force-resolutions: "npm:^0.0.10"
     npm-run-all: "npm:^4.1.5"
     p-limit: "npm:^3.1.0"
-    puppeteer: "npm:^24.10.0"
+    puppeteer: "npm:^24.11.2"
     puppeteer-extra: "npm:^3.3.6"
     puppeteer-extra-plugin: "npm:^3.2.3"
     puppeteer-extra-plugin-stealth: "npm:^2.11.2"
@@ -15657,7 +15657,7 @@ __metadata:
     logger: "workspace:*"
     npm-run-all: "npm:^4.1.5"
     pidusage: "npm:^3.0.2"
-    puppeteer: "npm:^24.10.0"
+    puppeteer: "npm:^24.11.2"
     puppeteer-extra: "npm:^3.3.6"
     puppeteer-extra-plugin: "npm:^3.2.3"
     puppeteer-extra-plugin-stealth: "npm:^2.11.2"
@@ -15814,7 +15814,7 @@ __metadata:
     p-limit: "npm:^3.1.0"
     paralleljs: "npm:^1.1.0"
     privacy-scan-core: "workspace:*"
-    puppeteer: "npm:^24.10.0"
+    puppeteer: "npm:^24.11.2"
     reflect-metadata: "npm:^0.2.2"
     rimraf: "npm:^6.0.1"
     scanner-global-library: "workspace:*"
@@ -17725,7 +17725,7 @@ __metadata:
     npm-run-all: "npm:^4.1.5"
     p-limit: "npm:^3.1.0"
     patch-package: "npm:^8.0.0"
-    puppeteer: "npm:^24.10.0"
+    puppeteer: "npm:^24.11.2"
     puppeteer-extra: "npm:^3.3.6"
     puppeteer-extra-plugin: "npm:^3.2.3"
     puppeteer-extra-plugin-stealth: "npm:^2.11.2"
@@ -18178,9 +18178,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ws@npm:^8.18.2":
-  version: 8.18.2
-  resolution: "ws@npm:8.18.2"
+"ws@npm:^8.18.3":
+  version: 8.18.3
+  resolution: "ws@npm:8.18.3"
   peerDependencies:
     bufferutil: ^4.0.1
     utf-8-validate: ">=5.0.2"
@@ -18189,7 +18189,7 @@ __metadata:
       optional: true
     utf-8-validate:
       optional: true
-  checksum: 10/018e04ec95561d88248d53a2eaf094b4ae131e9b062f2679e6e8a62f04649bc543448f1e038125225ac6bbb25f54c1e65d7a2cc9dbc1e28b43e5e6b7162ad88e
+  checksum: 10/725964438d752f0ab0de582cd48d6eeada58d1511c3f613485b5598a83680bedac6187c765b0fe082e2d8cc4341fc57707c813ae780feee82d0c5efe6a4c61b6
   languageName: node
   linkType: hard
 
