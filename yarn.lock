@@ -5314,7 +5314,7 @@ __metadata:
     "@types/node": "npm:^20.14.9"
     "@types/normalize-path": "npm:^3.0.2"
     "@types/puppeteer": "npm:^7.0.4"
-    accessibility-insights-report: "npm:7.0.0"
+    accessibility-insights-report: "npm:7.1.0"
     axe-core: "npm:4.10.2"
     axe-core-scanner: "workspace:*"
     dotenv: "npm:^16.4.7"
@@ -5342,9 +5342,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"accessibility-insights-report@npm:7.0.0":
-  version: 7.0.0
-  resolution: "accessibility-insights-report@npm:7.0.0"
+"accessibility-insights-report@npm:7.1.0":
+  version: 7.1.0
+  resolution: "accessibility-insights-report@npm:7.1.0"
   dependencies:
     "@fluentui/react": "npm:^8.118.1"
     axe-core: "npm:4.10.2"
@@ -5355,7 +5355,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     react-helmet-async: "npm:^2.0.5"
     uuid: "npm:^9.0.1"
-  checksum: 10/8e95ea53b352614d2ad015f407e82d1dbba76b9379547ca3ac32c17d07078b9f3d5ea0f24f313882f1db85df857259f24b0cb31649a4ea89e58cd5c4acd27775
+  checksum: 10/236a5a1a97dd3cdf6280f69838ad8b11d3840e72ca9402964aff7250505d149c488534d3ac9762e280e8abdd8df8d2b8161bbf668f8d035de07a20d48e23759f
   languageName: node
   linkType: hard
 
@@ -5382,7 +5382,7 @@ __metadata:
     "@types/puppeteer": "npm:^7.0.4"
     "@types/table": "npm:^6.3.2"
     accessibility-insights-crawler: "workspace:*"
-    accessibility-insights-report: "npm:7.0.0"
+    accessibility-insights-report: "npm:7.1.0"
     ajv: "npm:^8.17.1"
     applicationinsights: "npm:^3.6.0"
     axe-core: "npm:4.10.2"
@@ -5436,7 +5436,7 @@ __metadata:
     "@typescript-eslint/eslint-plugin": "npm:^7.15.0"
     "@typescript-eslint/eslint-plugin-tslint": "npm:^7.0.2"
     "@typescript-eslint/parser": "npm:^8.16.0"
-    accessibility-insights-report: "npm:7.0.0"
+    accessibility-insights-report: "npm:7.1.0"
     combine-dependabot-prs: "npm:^1.0.5"
     commander: "npm:^13.1.0"
     eslint: "npm:^8.57.0"
@@ -6046,7 +6046,7 @@ __metadata:
     "@types/jest": "npm:^29.5.12"
     "@types/lodash": "npm:^4.17.6"
     "@types/node": "npm:^20.14.9"
-    accessibility-insights-report: "npm:7.0.0"
+    accessibility-insights-report: "npm:7.1.0"
     axe-core: "npm:4.10.2"
     common: "workspace:*"
     inversify: "npm:^6.0.1"
@@ -15743,7 +15743,7 @@ __metadata:
     "@types/puppeteer": "npm:^7.0.4"
     "@types/sha.js": "npm:^2.4.4"
     "@types/yargs": "npm:^17.0.33"
-    accessibility-insights-report: "npm:7.0.0"
+    accessibility-insights-report: "npm:7.1.0"
     async-mutex: "npm:^0.5.0"
     axe-core: "npm:4.10.2"
     axe-result-converter: "workspace:*"
@@ -17669,7 +17669,7 @@ __metadata:
     "@types/puppeteer": "npm:^7.0.4"
     "@types/sha.js": "npm:^2.4.4"
     "@types/yargs": "npm:^17.0.33"
-    accessibility-insights-report: "npm:7.0.0"
+    accessibility-insights-report: "npm:7.1.0"
     applicationinsights: "npm:^3.6.0"
     axe-core: "npm:4.10.2"
     axe-result-converter: "workspace:*"
