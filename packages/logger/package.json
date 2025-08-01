@@ -44,7 +44,7 @@
         "@opentelemetry/semantic-conventions": "^1.30.0",
         "applicationinsights": "^3.6.0",
         "common": "workspace:*",
-        "dotenv": "^16.4.7",
+        "dotenv": "^17.2.1",
         "inversify": "^6.0.1",
         "lodash": "^4.17.21",
         "moment": "^2.30.1",
