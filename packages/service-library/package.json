@@ -64,7 +64,7 @@
         "puppeteer": "^24.15.0",
         "reflect-metadata": "^0.2.2",
         "scanner-global-library": "workspace:*",
-        "sha.js": "^2.4.11",
+        "sha.js": "^2.4.12",
         "storage-documents": "workspace:*",
         "yargs": "^17.7.2"
     }
