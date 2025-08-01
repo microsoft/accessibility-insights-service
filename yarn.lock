@@ -5337,7 +5337,7 @@ __metadata:
     sha.js: "npm:^2.4.11"
     ts-jest: "npm:^29.1.5"
     typemoq: "npm:^2.1.0"
-    typescript: "npm:^5.5.3"
+    typescript: "npm:^5.9.2"
     yargs: "npm:^17.7.2"
   languageName: unknown
   linkType: soft
@@ -5417,7 +5417,7 @@ __metadata:
     sha.js: "npm:^2.4.11"
     ts-jest: "npm:^29.1.5"
     typemoq: "npm:^2.1.0"
-    typescript: "npm:^5.5.3"
+    typescript: "npm:^5.9.2"
     uuid-with-v6: "npm:^2.0.0"
     webpack: "npm:^5.97.1"
     webpack-cli: "npm:^5.1.4"
@@ -5462,7 +5462,7 @@ __metadata:
     syncpack: "npm:^8.4.11"
     ts-jest: "npm:^29.1.5"
     tslint: "npm:^6.1.3"
-    typescript: "npm:^5.5.3"
+    typescript: "npm:^5.9.2"
   languageName: unknown
   linkType: soft
 
@@ -6027,7 +6027,7 @@ __metadata:
     rimraf: "npm:^6.0.1"
     ts-jest: "npm:^29.1.5"
     typemoq: "npm:^2.1.0"
-    typescript: "npm:^5.5.3"
+    typescript: "npm:^5.9.2"
   languageName: unknown
   linkType: soft
 
@@ -6058,7 +6058,7 @@ __metadata:
     rimraf: "npm:^6.0.1"
     ts-jest: "npm:^29.1.5"
     typemoq: "npm:^2.1.0"
-    typescript: "npm:^5.5.3"
+    typescript: "npm:^5.9.2"
   languageName: unknown
   linkType: soft
 
@@ -6143,7 +6143,7 @@ __metadata:
     ts-jest: "npm:^29.1.5"
     ts-loader: "npm:^9.5.2"
     typemoq: "npm:^2.1.0"
-    typescript: "npm:^5.5.3"
+    typescript: "npm:^5.9.2"
     webpack: "npm:^5.97.1"
     webpack-cli: "npm:^5.1.4"
   languageName: unknown
@@ -7232,7 +7232,7 @@ __metadata:
     sha.js: "npm:^2.4.11"
     ts-jest: "npm:^29.1.5"
     typemoq: "npm:^2.1.0"
-    typescript: "npm:^5.5.3"
+    typescript: "npm:^5.9.2"
     uuid-with-v6: "npm:^2.0.0"
   languageName: unknown
   linkType: soft
@@ -8134,7 +8134,7 @@ __metadata:
     rimraf: "npm:^6.0.1"
     ts-jest: "npm:^29.1.5"
     ts-loader: "npm:^9.5.2"
-    typescript: "npm:^5.5.3"
+    typescript: "npm:^5.9.2"
     webpack: "npm:^5.97.1"
     webpack-cli: "npm:^5.1.4"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
@@ -9568,7 +9568,7 @@ __metadata:
     storage-documents: "workspace:*"
     ts-jest: "npm:^29.1.5"
     typemoq: "npm:^2.1.0"
-    typescript: "npm:^5.5.3"
+    typescript: "npm:^5.9.2"
     web-api-client: "workspace:*"
     yargs: "npm:^17.7.2"
   languageName: unknown
@@ -10202,7 +10202,7 @@ __metadata:
     shebang-loader: "npm:^0.0.1"
     ts-jest: "npm:^29.1.5"
     typemoq: "npm:^2.1.0"
-    typescript: "npm:^5.5.3"
+    typescript: "npm:^5.9.2"
     web-api-client: "workspace:*"
     webpack: "npm:^5.97.1"
     webpack-cli: "npm:^5.1.4"
@@ -12415,7 +12415,7 @@ __metadata:
     rimraf: "npm:^6.0.1"
     ts-jest: "npm:^29.1.5"
     typemoq: "npm:^2.1.0"
-    typescript: "npm:^5.5.3"
+    typescript: "npm:^5.9.2"
   languageName: unknown
   linkType: soft
 
@@ -13748,7 +13748,7 @@ __metadata:
     ts-jest: "npm:^29.1.5"
     ts-loader: "npm:^9.5.2"
     typemoq: "npm:^2.1.0"
-    typescript: "npm:^5.5.3"
+    typescript: "npm:^5.9.2"
     webpack: "npm:^5.97.1"
     webpack-cli: "npm:^5.1.4"
   languageName: unknown
@@ -14307,7 +14307,7 @@ __metadata:
     storage-documents: "workspace:*"
     ts-jest: "npm:^29.1.5"
     typemoq: "npm:^2.1.0"
-    typescript: "npm:^5.5.3"
+    typescript: "npm:^5.9.2"
   languageName: unknown
   linkType: soft
 
@@ -14343,7 +14343,7 @@ __metadata:
     ts-jest: "npm:^29.1.5"
     ts-loader: "npm:^9.5.2"
     typemoq: "npm:^2.1.0"
-    typescript: "npm:^5.5.3"
+    typescript: "npm:^5.9.2"
     webpack: "npm:^5.97.1"
     webpack-cli: "npm:^5.1.4"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
@@ -14392,7 +14392,7 @@ __metadata:
     ts-jest: "npm:^29.1.5"
     ts-loader: "npm:^9.5.2"
     typemoq: "npm:^2.1.0"
-    typescript: "npm:^5.5.3"
+    typescript: "npm:^5.9.2"
     webpack: "npm:^5.97.1"
     webpack-cli: "npm:^5.1.4"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
@@ -15079,7 +15079,7 @@ __metadata:
     ts-jest: "npm:^29.1.5"
     ts-loader: "npm:^9.5.2"
     typemoq: "npm:^2.1.0"
-    typescript: "npm:^5.5.3"
+    typescript: "npm:^5.9.2"
     webpack: "npm:^5.97.1"
     webpack-cli: "npm:^5.1.4"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
@@ -15127,7 +15127,7 @@ __metadata:
     ts-jest: "npm:^29.1.5"
     ts-loader: "npm:^9.5.2"
     typemoq: "npm:^2.1.0"
-    typescript: "npm:^5.5.3"
+    typescript: "npm:^5.9.2"
     webpack: "npm:^5.97.1"
     webpack-cli: "npm:^5.1.4"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
@@ -15616,7 +15616,7 @@ __metadata:
     storage-documents: "workspace:*"
     ts-jest: "npm:^29.1.5"
     typemoq: "npm:^2.1.0"
-    typescript: "npm:^5.5.3"
+    typescript: "npm:^5.9.2"
   languageName: unknown
   linkType: soft
 
@@ -15772,7 +15772,7 @@ __metadata:
     storage-documents: "workspace:*"
     ts-jest: "npm:^29.1.5"
     typemoq: "npm:^2.1.0"
-    typescript: "npm:^5.5.3"
+    typescript: "npm:^5.9.2"
     yargs: "npm:^17.7.2"
   languageName: unknown
   linkType: soft
@@ -16240,7 +16240,7 @@ __metadata:
     rimraf: "npm:^6.0.1"
     ts-jest: "npm:^29.1.5"
     typemoq: "npm:^2.1.0"
-    typescript: "npm:^5.5.3"
+    typescript: "npm:^5.9.2"
   languageName: unknown
   linkType: soft
 
@@ -17211,13 +17211,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@npm:^5.5.3":
-  version: 5.5.3
-  resolution: "typescript@npm:5.5.3"
+"typescript@npm:^5.9.2":
+  version: 5.9.2
+  resolution: "typescript@npm:5.9.2"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: 10/11a867312419ed497929aafd2f1d28b2cd41810a5eb6c6e9e169559112e9ea073d681c121a29102e67cd4478d0a4ae37a306a5800f3717f59c4337e6a9bd5e8d
+  checksum: 10/cc2fe6c822819de5d453fa25aa9f32096bf70dde215d481faa1ad84a283dfb264e33988ed8f6d36bc803dd0b16dbe943efa311a798ef76d5b3892a05dfbfd628
   languageName: node
   linkType: hard
 
@@ -17231,13 +17231,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@npm%3A^5.5.3#optional!builtin<compat/typescript>":
-  version: 5.5.3
-  resolution: "typescript@patch:typescript@npm%3A5.5.3#optional!builtin<compat/typescript>::version=5.5.3&hash=379a07"
+"typescript@patch:typescript@npm%3A^5.9.2#optional!builtin<compat/typescript>":
+  version: 5.9.2
+  resolution: "typescript@patch:typescript@npm%3A5.9.2#optional!builtin<compat/typescript>::version=5.9.2&hash=5786d5"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: 10/7cf7acb78a80f749b82842f2ffe01e90e7b3e709a6f4268588e0b7599c41dca1059be217f47778fe1a380bfaf60933021ef20d002c426d4d7745e1b36c11467b
+  checksum: 10/bd810ab13e8e557225a8b5122370385440b933e4e077d5c7641a8afd207fdc8be9c346e3c678adba934b64e0e70b0acf5eef9493ea05170a48ce22bef845fdc7
   languageName: node
   linkType: hard
 
@@ -17577,7 +17577,7 @@ __metadata:
     service-library: "workspace:*"
     ts-jest: "npm:^29.1.5"
     typemoq: "npm:^2.1.0"
-    typescript: "npm:^5.5.3"
+    typescript: "npm:^5.9.2"
   languageName: unknown
   linkType: soft
 
@@ -17613,7 +17613,7 @@ __metadata:
     ts-jest: "npm:^29.1.5"
     ts-loader: "npm:^9.5.2"
     typemoq: "npm:^2.1.0"
-    typescript: "npm:^5.5.3"
+    typescript: "npm:^5.9.2"
     webpack: "npm:^5.97.1"
     webpack-cli: "npm:^5.1.4"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
@@ -17647,7 +17647,7 @@ __metadata:
     ts-jest: "npm:^29.1.5"
     ts-loader: "npm:^9.5.2"
     typemoq: "npm:^2.1.0"
-    typescript: "npm:^5.5.3"
+    typescript: "npm:^5.9.2"
     webpack: "npm:^5.97.1"
     webpack-cli: "npm:^5.1.4"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
@@ -17706,7 +17706,7 @@ __metadata:
     ts-jest: "npm:^29.1.5"
     ts-loader: "npm:^9.5.2"
     typemoq: "npm:^2.1.0"
-    typescript: "npm:^5.5.3"
+    typescript: "npm:^5.9.2"
     webpack: "npm:^5.97.1"
     webpack-cli: "npm:^5.1.4"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
@@ -17745,7 +17745,7 @@ __metadata:
     ts-jest: "npm:^29.1.5"
     ts-loader: "npm:^9.5.2"
     typemoq: "npm:^2.1.0"
-    typescript: "npm:^5.5.3"
+    typescript: "npm:^5.9.2"
     webpack: "npm:^5.97.1"
     webpack-cli: "npm:^5.1.4"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
@@ -17789,7 +17789,7 @@ __metadata:
     ts-jest: "npm:^29.1.5"
     ts-loader: "npm:^9.5.2"
     typemoq: "npm:^2.1.0"
-    typescript: "npm:^5.5.3"
+    typescript: "npm:^5.9.2"
     webpack: "npm:^5.97.1"
     webpack-cli: "npm:^5.1.4"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
@@ -17829,7 +17829,7 @@ __metadata:
     ts-jest: "npm:^29.1.5"
     ts-loader: "npm:^9.5.2"
     typemoq: "npm:^2.1.0"
-    typescript: "npm:^5.5.3"
+    typescript: "npm:^5.9.2"
     webpack: "npm:^5.97.1"
     webpack-cli: "npm:^5.1.4"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
@@ -17871,7 +17871,7 @@ __metadata:
     ts-jest: "npm:^29.1.5"
     ts-loader: "npm:^9.5.2"
     typemoq: "npm:^2.1.0"
-    typescript: "npm:^5.5.3"
+    typescript: "npm:^5.9.2"
     web-api-client: "workspace:*"
     webpack: "npm:^5.97.1"
     webpack-cli: "npm:^5.1.4"
