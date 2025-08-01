@@ -42,7 +42,7 @@
         "@opentelemetry/resources": "^1.15.0",
         "@opentelemetry/sdk-metrics": "^1.28.0",
         "@opentelemetry/semantic-conventions": "^1.30.0",
-        "applicationinsights": "^3.6.0",
+        "applicationinsights": "^3.8.0",
         "common": "workspace:*",
         "dotenv": "^16.4.7",
         "inversify": "^6.0.1",

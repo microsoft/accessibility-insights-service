@@ -48,7 +48,7 @@
     },
     "dependencies": {
         "@azure/cosmos": "^4.0.0",
-        "applicationinsights": "^3.6.0",
+        "applicationinsights": "^3.8.0",
         "azure-services": "workspace:*",
         "common": "workspace:*",
         "dotenv": "^16.4.7",
