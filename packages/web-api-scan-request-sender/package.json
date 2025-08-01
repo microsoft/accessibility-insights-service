@@ -39,7 +39,7 @@
         "webpack-ignore-dynamic-require": "^1.0.0"
     },
     "dependencies": {
-        "applicationinsights": "^3.6.0",
+        "applicationinsights": "^3.8.0",
         "azure-services": "workspace:*",
         "common": "workspace:*",
         "inversify": "^6.0.1",
