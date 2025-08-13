@@ -57,7 +57,7 @@
         "logger": "workspace:*",
         "reflect-metadata": "^0.2.2",
         "service-library": "workspace:*",
-        "sha.js": "^2.4.11",
+        "sha.js": "^2.4.12",
         "storage-documents": "workspace:*",
         "yargs": "^17.7.2"
     }
