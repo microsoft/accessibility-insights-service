@@ -42,7 +42,7 @@
     },
     "dependencies": {
         "@azure/cosmos": "^4.0.0",
-        "@azure/functions": "^4.6.0",
+        "@azure/functions": "^4.7.2",
         "@azure/identity": "^4.10.2",
         "@azure/storage-blob": "^12.12.0",
         "@crawlee/puppeteer": "^3.12.2",

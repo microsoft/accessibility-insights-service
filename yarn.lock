@@ -500,6 +500,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@azure/functions@npm:^4.7.2":
+  version: 4.7.2
+  resolution: "@azure/functions@npm:4.7.2"
+  dependencies:
+    cookie: "npm:^0.7.0"
+    long: "npm:^4.0.0"
+    undici: "npm:^5.29.0"
+  checksum: 10/ce0caebf89960efc8717072c88abc404a08cdde3c72aca2041818abad691976784d28db4309e90aabdcea73431cd30c147cb9531cb447ff0e928b79838cc752a
+  languageName: node
+  linkType: hard
+
 "@azure/identity@npm:^4.10.2":
   version: 4.10.2
   resolution: "@azure/identity@npm:4.10.2"
@@ -8221,7 +8232,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "e2e-web-apis@workspace:packages/e2e-web-apis"
   dependencies:
-    "@azure/functions": "npm:^4.6.0"
+    "@azure/functions": "npm:^4.7.2"
     "@types/dotenv": "npm:^8.2.3"
     "@types/jest": "npm:^29.5.12"
     "@types/lodash": "npm:^4.17.6"
@@ -15898,7 +15909,7 @@ __metadata:
   resolution: "service-library@workspace:packages/service-library"
   dependencies:
     "@azure/cosmos": "npm:^4.0.0"
-    "@azure/functions": "npm:^4.6.0"
+    "@azure/functions": "npm:^4.7.2"
     "@azure/identity": "npm:^4.10.2"
     "@azure/storage-blob": "npm:^12.12.0"
     "@crawlee/puppeteer": "npm:^3.12.2"
@@ -17480,7 +17491,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"undici@npm:^5.13.0, undici@npm:^5.25.4":
+"undici@npm:^5.13.0, undici@npm:^5.25.4, undici@npm:^5.29.0":
   version: 5.29.0
   resolution: "undici@npm:5.29.0"
   dependencies:
@@ -17997,7 +18008,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "web-api@workspace:packages/web-api"
   dependencies:
-    "@azure/functions": "npm:^4.6.0"
+    "@azure/functions": "npm:^4.7.2"
     "@types/dotenv": "npm:^8.2.3"
     "@types/jest": "npm:^29.5.12"
     "@types/lodash": "npm:^4.17.6"
@@ -18036,7 +18047,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "web-workers@workspace:packages/web-workers"
   dependencies:
-    "@azure/functions": "npm:^4.6.0"
+    "@azure/functions": "npm:^4.7.2"
     "@types/dotenv": "npm:^8.2.3"
     "@types/jest": "npm:^29.5.12"
     "@types/lodash": "npm:^4.17.6"
