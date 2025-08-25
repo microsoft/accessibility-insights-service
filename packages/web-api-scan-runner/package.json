@@ -74,7 +74,7 @@
         "request": "^2.88.2",
         "scanner-global-library": "workspace:*",
         "service-library": "workspace:*",
-        "sha.js": "^2.4.11",
+        "sha.js": "^2.4.12",
         "storage-documents": "workspace:*",
         "yargs": "^17.7.2"
     },
