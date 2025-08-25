@@ -5479,7 +5479,7 @@ __metadata:
     prettier: "npm:2.8.3"
     rimraf: "npm:^6.0.1"
     shellcheck: "npm:^3.1.0"
-    simple-git: "npm:^3.27.0"
+    simple-git: "npm:^3.28.0"
     syncpack: "npm:^8.4.11"
     ts-jest: "npm:^29.1.5"
     tslint: "npm:^6.1.3"
@@ -7662,7 +7662,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"debug@npm:^4.4.1":
+"debug@npm:^4.4.0, debug@npm:^4.4.1":
   version: 4.4.1
   resolution: "debug@npm:4.4.1"
   dependencies:
@@ -16094,14 +16094,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"simple-git@npm:^3.27.0":
-  version: 3.27.0
-  resolution: "simple-git@npm:3.27.0"
+"simple-git@npm:^3.28.0":
+  version: 3.28.0
+  resolution: "simple-git@npm:3.28.0"
   dependencies:
     "@kwsites/file-exists": "npm:^1.1.1"
     "@kwsites/promise-deferred": "npm:^1.1.1"
-    debug: "npm:^4.3.5"
-  checksum: 10/c56c88dd1b5f6ad45c6034eb44f25ee61929a2a5832bd015b8b1b71331071e43bf631edbcc4a8529fa692f9b17576595d95c89218bc5d67be66ed0c1aedc7a76
+    debug: "npm:^4.4.0"
+  checksum: 10/2582e6c1c50db8aa0b7d07ed0f0f86eb4ea647e6b33d1596cf44e509c7b658372da9db1dcbea626e7d71e30e8d826a84410bbc73c5d1066f2526724a31836f81
   languageName: node
   linkType: hard
 
