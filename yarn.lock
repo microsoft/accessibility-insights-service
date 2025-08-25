@@ -4282,10 +4282,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/deep-equal-in-any-order@npm:^1.0.1":
-  version: 1.0.1
-  resolution: "@types/deep-equal-in-any-order@npm:1.0.1"
-  checksum: 10/d32392e892314e022d5c395f377c084610c32a7c4e421d5e6f9cbef5a48ab06b7848130af3e15fab16038831dd0e63149d390bace46121483e9ad92ccff3b67b
+"@types/deep-equal-in-any-order@npm:^1.0.4":
+  version: 1.0.4
+  resolution: "@types/deep-equal-in-any-order@npm:1.0.4"
+  checksum: 10/b50e522dac566add6f90bc59992d382767ef5530c54a5c05dd25d4c8e64e089c06bcb4dc65b1b7ec22417dc6a59db6e6845a621acf700e8cf877705b1bad050a
   languageName: node
   linkType: hard
 
@@ -9652,7 +9652,7 @@ __metadata:
   dependencies:
     "@azure/cosmos": "npm:^4.0.0"
     "@types/chai": "npm:^4.3.4"
-    "@types/deep-equal-in-any-order": "npm:^1.0.1"
+    "@types/deep-equal-in-any-order": "npm:^1.0.4"
     "@types/dotenv": "npm:^8.2.3"
     "@types/jest": "npm:^29.5.12"
     "@types/lodash": "npm:^4.17.6"
