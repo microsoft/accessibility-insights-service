@@ -6520,7 +6520,7 @@ __metadata:
     moment: "npm:^2.30.1"
     node-cache: "npm:^5.1.2"
     npm-run-all: "npm:^4.1.5"
-    p-limit: "npm:^3.1.0"
+    p-limit: "npm:^7.1.1"
     pretty-format: "npm:^30.0.5"
     reflect-metadata: "npm:^0.2.2"
     rimraf: "npm:^6.0.1"
@@ -14192,6 +14192,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"p-limit@npm:^7.1.1":
+  version: 7.1.1
+  resolution: "p-limit@npm:7.1.1"
+  dependencies:
+    yocto-queue: "npm:^1.2.1"
+  checksum: 10/4539596f3425b2067fb1778725d902e367b1d9cd4dca3cd73f4883df5a889b84b21ca893cb0da5e601dd0102e570a2bf75a0f9905977b3226a29112891cda46d
+  languageName: node
+  linkType: hard
+
 "p-locate@npm:^3.0.0":
   version: 3.0.0
   resolution: "p-locate@npm:3.0.0"
@@ -14972,7 +14981,7 @@ __metadata:
     node-loader: "npm:^2.1.0"
     npm-force-resolutions: "npm:^0.0.10"
     npm-run-all: "npm:^4.1.5"
-    p-limit: "npm:^3.1.0"
+    p-limit: "npm:^7.1.1"
     privacy-scan-core: "workspace:*"
     puppeteer: "npm:^24.15.0"
     puppeteer-extra: "npm:^3.3.6"
@@ -15682,7 +15691,7 @@ __metadata:
     node-loader: "npm:^2.1.0"
     npm-force-resolutions: "npm:^0.0.10"
     npm-run-all: "npm:^4.1.5"
-    p-limit: "npm:^3.1.0"
+    p-limit: "npm:^7.1.1"
     puppeteer: "npm:^24.15.0"
     puppeteer-extra: "npm:^3.3.6"
     puppeteer-extra-plugin: "npm:^3.2.3"
@@ -16318,7 +16327,7 @@ __metadata:
     moment: "npm:^2.30.1"
     node-fetch: "npm:^2.6.7"
     npm-run-all: "npm:^4.1.5"
-    p-limit: "npm:^3.1.0"
+    p-limit: "npm:^7.1.1"
     paralleljs: "npm:^1.1.0"
     privacy-scan-core: "workspace:*"
     puppeteer: "npm:^24.15.0"
@@ -18307,7 +18316,7 @@ __metadata:
     node-loader: "npm:^2.1.0"
     npm-force-resolutions: "npm:^0.0.10"
     npm-run-all: "npm:^4.1.5"
-    p-limit: "npm:^3.1.0"
+    p-limit: "npm:^7.1.1"
     patch-package: "npm:^8.0.0"
     puppeteer: "npm:^24.15.0"
     puppeteer-extra: "npm:^3.3.6"
@@ -18480,7 +18489,7 @@ __metadata:
     moment: "npm:^2.30.1"
     node-loader: "npm:^2.1.0"
     npm-run-all: "npm:^4.1.5"
-    p-limit: "npm:^3.1.0"
+    p-limit: "npm:^7.1.1"
     reflect-metadata: "npm:^0.2.2"
     rimraf: "npm:^6.0.1"
     service-library: "workspace:*"
@@ -19030,6 +19039,13 @@ __metadata:
   version: 0.1.0
   resolution: "yocto-queue@npm:0.1.0"
   checksum: 10/f77b3d8d00310def622123df93d4ee654fc6a0096182af8bd60679ddcdfb3474c56c6c7190817c84a2785648cdee9d721c0154eb45698c62176c322fb46fc700
+  languageName: node
+  linkType: hard
+
+"yocto-queue@npm:^1.2.1":
+  version: 1.2.1
+  resolution: "yocto-queue@npm:1.2.1"
+  checksum: 10/0843d6c2c0558e5c06e98edf9c17942f25c769e21b519303a5c2adefd5b738c9b2054204dc856ac0cd9d134b1bc27d928ce84fd23c9e2423b7e013d5a6f50577
   languageName: node
   linkType: hard
 
