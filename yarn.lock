@@ -6296,7 +6296,7 @@ __metadata:
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
     uuid-with-v6: "npm:^2.0.0"
-    webpack: "npm:^5.101.0"
+    webpack: "npm:^5.101.3"
     webpack-cli: "npm:^5.1.4"
     webpack-node-externals: "npm:^3.0.0"
     yargs: "npm:^17.7.2"
@@ -7067,7 +7067,7 @@ __metadata:
     ts-loader: "npm:^9.5.4"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
-    webpack: "npm:^5.101.0"
+    webpack: "npm:^5.101.3"
     webpack-cli: "npm:^5.1.4"
   languageName: unknown
   linkType: soft
@@ -9115,7 +9115,7 @@ __metadata:
     ts-jest: "npm:^29.4.1"
     ts-loader: "npm:^9.5.4"
     typescript: "npm:^5.5.3"
-    webpack: "npm:^5.101.0"
+    webpack: "npm:^5.101.3"
     webpack-cli: "npm:^5.1.4"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
   languageName: unknown
@@ -9257,13 +9257,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"enhanced-resolve@npm:^5.17.2":
-  version: 5.18.2
-  resolution: "enhanced-resolve@npm:5.18.2"
+"enhanced-resolve@npm:^5.17.3":
+  version: 5.18.3
+  resolution: "enhanced-resolve@npm:5.18.3"
   dependencies:
     graceful-fs: "npm:^4.2.4"
     tapable: "npm:^2.2.0"
-  checksum: 10/d1b517c908b69d1afbf87b476bbe7dd8d1daf11070127b9ec4f8553f0c6020d30f79103c938776645d569e954e4e04c326f408d2ea3820ade71e72798fb7d36f
+  checksum: 10/a4d0a1eacba3079f617b68c8f7e17583c3cbc572055c2edca41c0fa0230a49f6e9b2c6ffd4128cc5f84e15ea6cc313ae2b01e1057fcd252fabef70220a5d9f6a
   languageName: node
   linkType: hard
 
@@ -11485,7 +11485,7 @@ __metadata:
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
     web-api-client: "workspace:*"
-    webpack: "npm:^5.101.0"
+    webpack: "npm:^5.101.3"
     webpack-cli: "npm:^5.1.4"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
     yargs: "npm:^17.7.2"
@@ -15266,7 +15266,7 @@ __metadata:
     ts-loader: "npm:^9.5.4"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
-    webpack: "npm:^5.101.0"
+    webpack: "npm:^5.101.3"
     webpack-cli: "npm:^5.1.4"
   languageName: unknown
   linkType: soft
@@ -15886,7 +15886,7 @@ __metadata:
     ts-loader: "npm:^9.5.4"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
-    webpack: "npm:^5.101.0"
+    webpack: "npm:^5.101.3"
     webpack-cli: "npm:^5.1.4"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
     yargs: "npm:^17.7.2"
@@ -15935,7 +15935,7 @@ __metadata:
     ts-loader: "npm:^9.5.4"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
-    webpack: "npm:^5.101.0"
+    webpack: "npm:^5.101.3"
     webpack-cli: "npm:^5.1.4"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
     yargs: "npm:^17.7.2"
@@ -16626,7 +16626,7 @@ __metadata:
     ts-loader: "npm:^9.5.4"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
-    webpack: "npm:^5.101.0"
+    webpack: "npm:^5.101.3"
     webpack-cli: "npm:^5.1.4"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
     yargs: "npm:^17.7.2"
@@ -16674,7 +16674,7 @@ __metadata:
     ts-loader: "npm:^9.5.4"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
-    webpack: "npm:^5.101.0"
+    webpack: "npm:^5.101.3"
     webpack-cli: "npm:^5.1.4"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
     yargs: "npm:^17.7.2"
@@ -19477,7 +19477,7 @@ __metadata:
     ts-loader: "npm:^9.5.4"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
-    webpack: "npm:^5.101.0"
+    webpack: "npm:^5.101.3"
     webpack-cli: "npm:^5.1.4"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
     yargs: "npm:^17.7.2"
@@ -19511,7 +19511,7 @@ __metadata:
     ts-loader: "npm:^9.5.4"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
-    webpack: "npm:^5.101.0"
+    webpack: "npm:^5.101.3"
     webpack-cli: "npm:^5.1.4"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
     yargs: "npm:^17.7.2"
@@ -19570,7 +19570,7 @@ __metadata:
     ts-loader: "npm:^9.5.4"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
-    webpack: "npm:^5.101.0"
+    webpack: "npm:^5.101.3"
     webpack-cli: "npm:^5.1.4"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
     yargs: "npm:^17.7.2"
@@ -19609,7 +19609,7 @@ __metadata:
     ts-loader: "npm:^9.5.4"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
-    webpack: "npm:^5.101.0"
+    webpack: "npm:^5.101.3"
     webpack-cli: "npm:^5.1.4"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
     yargs: "npm:^17.7.2"
@@ -19653,7 +19653,7 @@ __metadata:
     ts-loader: "npm:^9.5.4"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
-    webpack: "npm:^5.101.0"
+    webpack: "npm:^5.101.3"
     webpack-cli: "npm:^5.1.4"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
     yargs: "npm:^17.7.2"
@@ -19693,7 +19693,7 @@ __metadata:
     ts-loader: "npm:^9.5.4"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
-    webpack: "npm:^5.101.0"
+    webpack: "npm:^5.101.3"
     webpack-cli: "npm:^5.1.4"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
   languageName: unknown
@@ -19736,7 +19736,7 @@ __metadata:
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
     web-api-client: "workspace:*"
-    webpack: "npm:^5.101.0"
+    webpack: "npm:^5.101.3"
     webpack-cli: "npm:^5.1.4"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
   languageName: unknown
@@ -19812,9 +19812,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"webpack@npm:^5.101.0":
-  version: 5.101.0
-  resolution: "webpack@npm:5.101.0"
+"webpack@npm:^5.101.3":
+  version: 5.101.3
+  resolution: "webpack@npm:5.101.3"
   dependencies:
     "@types/eslint-scope": "npm:^3.7.7"
     "@types/estree": "npm:^1.0.8"
@@ -19826,7 +19826,7 @@ __metadata:
     acorn-import-phases: "npm:^1.0.3"
     browserslist: "npm:^4.24.0"
     chrome-trace-event: "npm:^1.0.2"
-    enhanced-resolve: "npm:^5.17.2"
+    enhanced-resolve: "npm:^5.17.3"
     es-module-lexer: "npm:^1.2.1"
     eslint-scope: "npm:5.1.1"
     events: "npm:^3.2.0"
@@ -19846,7 +19846,7 @@ __metadata:
       optional: true
   bin:
     webpack: bin/webpack.js
-  checksum: 10/edeb24a88cbe96902c601bc1292cd344d27c89c5eceb187f4e9936c8a17356c62b23a5dc441c12b16e62bb6c40804bd10d691135c638398f921760f2dba6a761
+  checksum: 10/c4740e9c59d1e0562d1e5654e12559e6308acd60fc639cf3089657c85e946c8910ba06cbd9d74b08daa7f28b5ff786c0482617415a7c1fa8e4637a88b20b76a6
   languageName: node
   linkType: hard
 
