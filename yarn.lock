@@ -2310,6 +2310,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@felipecrs/decompress-tarxz@npm:5.0.4":
+  version: 5.0.4
+  resolution: "@felipecrs/decompress-tarxz@npm:5.0.4"
+  dependencies:
+    "@xhmikosr/decompress-tar": "npm:^8.1.0"
+    file-type: "npm:^20.5.0"
+    is-stream: "npm:^2.0.1"
+    xz-decompress: "npm:^0.2.3"
+  checksum: 10/b3715e3d6477a8fb1279d5972166e8de91af299611fd11834907d9dcd56478905180f9070709ee795de4d33a74815de1eb4082be79bb0f3378abb8b6e98deae4
+  languageName: node
+  linkType: hard
+
 "@fluentui/date-time-utilities@npm:^8.6.9":
   version: 8.6.9
   resolution: "@fluentui/date-time-utilities@npm:8.6.9"
@@ -6080,6 +6092,28 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@xhmikosr/decompress-tar@npm:^8.1.0":
+  version: 8.1.0
+  resolution: "@xhmikosr/decompress-tar@npm:8.1.0"
+  dependencies:
+    file-type: "npm:^20.5.0"
+    is-stream: "npm:^2.0.1"
+    tar-stream: "npm:^3.1.7"
+  checksum: 10/c827aac52b6e894e8fb23815cfcfbdda656759c7fcb897e35a26369215ba61a7a9086fc90c82866e17a9bec3355a106b1f4e7c89a9de01181c976a10ef454fa4
+  languageName: node
+  linkType: hard
+
+"@xhmikosr/decompress-unzip@npm:7.1.0":
+  version: 7.1.0
+  resolution: "@xhmikosr/decompress-unzip@npm:7.1.0"
+  dependencies:
+    file-type: "npm:^20.5.0"
+    get-stream: "npm:^6.0.1"
+    yauzl: "npm:^3.1.2"
+  checksum: 10/7b085f50472cfeadfa690110a8f39d4177c90a30db08d6dd988abb0a0504eec650c0df7f0f3b538aa909d0653dea6652798f3851a546e742badb161ef75b94f4
+  languageName: node
+  linkType: hard
+
 "@xmldom/xmldom@npm:^0.8.3":
   version: 0.8.6
   resolution: "@xmldom/xmldom@npm:0.8.6"
@@ -6300,7 +6334,7 @@ __metadata:
     patch-package: "npm:^8.0.0"
     prettier: "npm:2.8.3"
     rimraf: "npm:^6.0.1"
-    shellcheck: "npm:^3.1.0"
+    shellcheck: "npm:^4.1.0"
     simple-git: "npm:^3.28.0"
     syncpack: "npm:^8.4.11"
     ts-jest: "npm:^29.4.1"
@@ -8634,7 +8668,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"decompress@npm:^4.2.1":
+"decompress@npm:4.2.1":
   version: 4.2.1
   resolution: "decompress@npm:4.2.1"
   dependencies:
@@ -9254,12 +9288,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"envalid@npm:^8.0.0":
-  version: 8.0.0
-  resolution: "envalid@npm:8.0.0"
+"envalid@npm:8.1.0":
+  version: 8.1.0
+  resolution: "envalid@npm:8.1.0"
   dependencies:
-    tslib: "npm:2.6.2"
-  checksum: 10/cf2159a070c7335ecc9cd01523654fb7c8fdc63b92bef47d18027c406dfcf2b4a72663e70ddd91fa91967fa71c7716fe643dcd4a652f9ab0f93722feddb9e1b2
+    tslib: "npm:2.8.1"
+  checksum: 10/4a2d635ebdae430b867d5c307e6a3f5c4bae9334cbc0d9f0de0f59eecdf865f304a054c3ddcae1715b97b823620c7e94f7c9ae5813e993244631b85eee7cab17
   languageName: node
   linkType: hard
 
@@ -10254,6 +10288,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"file-type@npm:^20.5.0":
+  version: 20.5.0
+  resolution: "file-type@npm:20.5.0"
+  dependencies:
+    "@tokenizer/inflate": "npm:^0.2.6"
+    strtok3: "npm:^10.2.0"
+    token-types: "npm:^6.0.0"
+    uint8array-extras: "npm:^1.4.0"
+  checksum: 10/1cc1ccd7cf76086e10b65cba88c708e0653676fbae900107deeb91c46de011acd1492200bf47e75cddf395de27dbe8584ca042f4cfa4a1efdf933644b7143f1d
+  languageName: node
+  linkType: hard
+
 "file-type@npm:^3.8.0":
   version: 3.9.0
   resolution: "file-type@npm:3.9.0"
@@ -10868,7 +10914,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"get-stream@npm:^6.0.0":
+"get-stream@npm:^6.0.0, get-stream@npm:^6.0.1":
   version: 6.0.1
   resolution: "get-stream@npm:6.0.1"
   checksum: 10/781266d29725f35c59f1d214aedc92b0ae855800a980800e2923b3fbc4e56b3cb6e462c42e09a1cf1a00c64e056a78fa407cbe06c7c92b7e5cd49b4b85c2a497
@@ -11022,7 +11068,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"global-agent@npm:^3.0.0":
+"global-agent@npm:3.0.0":
   version: 3.0.0
   resolution: "global-agent@npm:3.0.0"
   dependencies:
@@ -12343,6 +12389,13 @@ __metadata:
   version: 2.0.0
   resolution: "is-stream@npm:2.0.0"
   checksum: 10/4dc47738e26bc4f1b3be9070b6b9e39631144f204fc6f87db56961220add87c10a999ba26cf81699f9ef9610426f69cb08a4713feff8deb7d8cadac907826935
+  languageName: node
+  linkType: hard
+
+"is-stream@npm:^2.0.1":
+  version: 2.0.1
+  resolution: "is-stream@npm:2.0.1"
+  checksum: 10/b8e05ccdf96ac330ea83c12450304d4a591f9958c11fd17bed240af8d5ffe08aedafa4c0f4cfccd4d28dc9d4d129daca1023633d5c11601a6cbc77521f6fae66
   languageName: node
   linkType: hard
 
@@ -17479,16 +17532,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"shellcheck@npm:^3.1.0":
-  version: 3.1.0
-  resolution: "shellcheck@npm:3.1.0"
+"shellcheck@npm:^4.1.0":
+  version: 4.1.0
+  resolution: "shellcheck@npm:4.1.0"
   dependencies:
-    decompress: "npm:^4.2.1"
-    envalid: "npm:^8.0.0"
-    global-agent: "npm:^3.0.0"
+    "@felipecrs/decompress-tarxz": "npm:5.0.4"
+    "@xhmikosr/decompress-unzip": "npm:7.1.0"
+    decompress: "npm:4.2.1"
+    envalid: "npm:8.1.0"
+    global-agent: "npm:3.0.0"
   bin:
     shellcheck: bin/shellcheck.js
-  checksum: 10/aaf716860f3169c5c1828b88f608fb2bf5730021b1482dbf212a59489edfd618194083a10fccb109e83d012a9b37c14f9ed3d80a0e6f37079686be34e1a47ec2
+  checksum: 10/3ead5d22309c862807e171ed703c2c7463a6e015cb9434ec5679e32da836806173bd5429b2fa6252c4d05a106ee391ae3a2b6ddd62ff73c14c23971d9dcdaa5e
   languageName: node
   linkType: hard
 
@@ -18373,6 +18428,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"tar-stream@npm:^3.1.7":
+  version: 3.1.7
+  resolution: "tar-stream@npm:3.1.7"
+  dependencies:
+    b4a: "npm:^1.6.4"
+    fast-fifo: "npm:^1.2.0"
+    streamx: "npm:^2.15.0"
+  checksum: 10/b21a82705a72792544697c410451a4846af1f744176feb0ff11a7c3dd0896961552e3def5e1c9a6bbee4f0ae298b8252a1f4c9381e9f991553b9e4847976f05c
+  languageName: node
+  linkType: hard
+
 "tar@npm:>=6.1.9":
   version: 6.2.1
   resolution: "tar@npm:6.2.1"
@@ -18695,10 +18761,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tslib@npm:2.6.2, tslib@npm:^2.6.2":
-  version: 2.6.2
-  resolution: "tslib@npm:2.6.2"
-  checksum: 10/bd26c22d36736513980091a1e356378e8b662ded04204453d353a7f34a4c21ed0afc59b5f90719d4ba756e581a162ecbf93118dc9c6be5acf70aa309188166ca
+"tslib@npm:2.8.1, tslib@npm:^2.7.0, tslib@npm:^2.8.1":
+  version: 2.8.1
+  resolution: "tslib@npm:2.8.1"
+  checksum: 10/3e2e043d5c2316461cb54e5c7fe02c30ef6dccb3384717ca22ae5c6b5bc95232a6241df19c622d9c73b809bea33b187f6dbc73030963e29950c2141bc32a79f7
   languageName: node
   linkType: hard
 
@@ -18730,10 +18796,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tslib@npm:^2.7.0, tslib@npm:^2.8.1":
-  version: 2.8.1
-  resolution: "tslib@npm:2.8.1"
-  checksum: 10/3e2e043d5c2316461cb54e5c7fe02c30ef6dccb3384717ca22ae5c6b5bc95232a6241df19c622d9c73b809bea33b187f6dbc73030963e29950c2141bc32a79f7
+"tslib@npm:^2.6.2":
+  version: 2.6.2
+  resolution: "tslib@npm:2.6.2"
+  checksum: 10/bd26c22d36736513980091a1e356378e8b662ded04204453d353a7f34a4c21ed0afc59b5f90719d4ba756e581a162ecbf93118dc9c6be5acf70aa309188166ca
   languageName: node
   linkType: hard
 
@@ -20089,6 +20155,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"xz-decompress@npm:^0.2.3":
+  version: 0.2.3
+  resolution: "xz-decompress@npm:0.2.3"
+  checksum: 10/9c50d0cd6b226b398571d54e1cc137ac2c51e7d5c12d65e02e89aa6a6110be789967715934e0f9ae0ec8b8ff21c89b28746c634707965d20d2b546e6fefc5432
+  languageName: node
+  linkType: hard
+
 "y18n@npm:^4.0.0":
   version: 4.0.3
   resolution: "y18n@npm:4.0.3"
@@ -20249,6 +20322,16 @@ __metadata:
     buffer-crc32: "npm:~0.2.3"
     fd-slicer: "npm:~1.1.0"
   checksum: 10/1e4c311050dc0cf2ee3dbe8854fe0a6cde50e420b3e561a8d97042526b4cf7a0718d6c8d89e9e526a152f4a9cec55bcea9c3617264115f48bd6704cf12a04445
+  languageName: node
+  linkType: hard
+
+"yauzl@npm:^3.1.2":
+  version: 3.2.0
+  resolution: "yauzl@npm:3.2.0"
+  dependencies:
+    buffer-crc32: "npm:~0.2.3"
+    pend: "npm:~1.2.0"
+  checksum: 10/a3cd2bfcf7590673bb35750f2a4e5107e3cc939d32d98a072c0673fe42329e390f471b4a53dbbd72512229099b18aa3b79e6ddb87a73b3a17446080c903a2c4b
   languageName: node
   linkType: hard
 
