@@ -522,9 +522,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@azure/identity@npm:^4.10.2":
-  version: 4.10.2
-  resolution: "@azure/identity@npm:4.10.2"
+"@azure/identity@npm:^4.11.1":
+  version: 4.11.2
+  resolution: "@azure/identity@npm:4.11.2"
   dependencies:
     "@azure/abort-controller": "npm:^2.0.0"
     "@azure/core-auth": "npm:^1.9.0"
@@ -537,7 +537,7 @@ __metadata:
     "@azure/msal-node": "npm:^3.5.0"
     open: "npm:^10.1.0"
     tslib: "npm:^2.2.0"
-  checksum: 10/66bb73773b3f4e6375df32a306feb14d52e0ff9eee53763ae26f31bee7525def3f354e35bc7c1a7b962e0a458cc1a280539ca2ee01d5c17ca86101b5ae890620
+  checksum: 10/34d47b2dd3c504caea9f2456b64da29c64241df971c400da43d3cd37cea6479811db75a8b9a635f77b535ceabe37cb5fd7c100bc78ecfd0d9d456cfba15e84ef
   languageName: node
   linkType: hard
 
@@ -6508,7 +6508,7 @@ __metadata:
     "@azure/batch": "npm:^10.2.0"
     "@azure/core-auth": "npm:^1.10.0"
     "@azure/cosmos": "npm:^4.0.0"
-    "@azure/identity": "npm:^4.10.2"
+    "@azure/identity": "npm:^4.11.1"
     "@azure/keyvault-secrets": "npm:^4.9.0"
     "@azure/ms-rest-js": "npm:^2.7.0"
     "@azure/ms-rest-nodeauth": "npm:^3.1.1"
@@ -16301,7 +16301,7 @@ __metadata:
   dependencies:
     "@azure/cosmos": "npm:^4.0.0"
     "@azure/functions": "npm:^4.7.2"
-    "@azure/identity": "npm:^4.10.2"
+    "@azure/identity": "npm:^4.11.1"
     "@azure/storage-blob": "npm:^12.12.0"
     "@crawlee/puppeteer": "npm:^3.12.2"
     "@types/jest": "npm:^29.5.12"
