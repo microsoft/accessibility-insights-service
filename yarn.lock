@@ -6083,7 +6083,7 @@ __metadata:
     applicationinsights: "npm:^3.9.0"
     axe-core: "npm:4.10.2"
     convict: "npm:^6.2.4"
-    copy-webpack-plugin: "npm:^13.0.0"
+    copy-webpack-plugin: "npm:^13.0.1"
     dotenv: "npm:^17.2.1"
     dts-bundle-generator: "npm:^7.2.0"
     encoding-down: "npm:^7.1.0"
@@ -8046,9 +8046,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"copy-webpack-plugin@npm:^13.0.0":
-  version: 13.0.0
-  resolution: "copy-webpack-plugin@npm:13.0.0"
+"copy-webpack-plugin@npm:^13.0.1":
+  version: 13.0.1
+  resolution: "copy-webpack-plugin@npm:13.0.1"
   dependencies:
     glob-parent: "npm:^6.0.1"
     normalize-path: "npm:^3.0.0"
@@ -8057,7 +8057,7 @@ __metadata:
     tinyglobby: "npm:^0.2.12"
   peerDependencies:
     webpack: ^5.1.0
-  checksum: 10/209051dd3c0bc7ab97170309cdb1826e642044d2d53e0adc35bb227123c89ae1296a504409325e9b955d7b2d1a505b063f0023e924151d382dbcc92cb9325e6a
+  checksum: 10/2abf3b85c32556b1cb9ef47f2198f6497ef414505cf42d249e3b7e65185db738756bec85333b4a32865d1c6b09343ea63eb9e8d154c133ddcebb4c7f066be5af
   languageName: node
   linkType: hard
 
@@ -8856,7 +8856,7 @@ __metadata:
     "@types/jest": "npm:^29.5.12"
     "@types/lodash": "npm:^4.17.20"
     "@types/node": "npm:^20.14.9"
-    copy-webpack-plugin: "npm:^13.0.0"
+    copy-webpack-plugin: "npm:^13.0.1"
     fork-ts-checker-webpack-plugin: "npm:^9.0.2"
     jest: "npm:^29.7.0"
     jest-junit: "npm:^16.0.0"
@@ -11078,7 +11078,7 @@ __metadata:
     "@types/node": "npm:^20.14.9"
     chai: "npm:^4.3.7"
     common: "workspace:*"
-    copy-webpack-plugin: "npm:^13.0.0"
+    copy-webpack-plugin: "npm:^13.0.1"
     dotenv: "npm:^17.2.1"
     functional-tests: "workspace:*"
     inversify: "npm:^6.0.1"
@@ -14644,7 +14644,7 @@ __metadata:
     "@types/jest": "npm:^29.5.12"
     "@types/lodash": "npm:^4.17.20"
     "@types/node": "npm:^20.14.9"
-    copy-webpack-plugin: "npm:^13.0.0"
+    copy-webpack-plugin: "npm:^13.0.1"
     fork-ts-checker-webpack-plugin: "npm:^9.0.2"
     jest: "npm:^29.7.0"
     jest-junit: "npm:^16.0.0"
@@ -15257,7 +15257,7 @@ __metadata:
     applicationinsights: "npm:^3.9.0"
     azure-services: "workspace:*"
     common: "workspace:*"
-    copy-webpack-plugin: "npm:^13.0.0"
+    copy-webpack-plugin: "npm:^13.0.1"
     dotenv: "npm:^17.2.1"
     fork-ts-checker-webpack-plugin: "npm:^9.0.2"
     inversify: "npm:^6.0.1"
@@ -15298,7 +15298,7 @@ __metadata:
     applicationinsights: "npm:^3.9.0"
     azure-services: "workspace:*"
     common: "workspace:*"
-    copy-webpack-plugin: "npm:^13.0.0"
+    copy-webpack-plugin: "npm:^13.0.1"
     dotenv: "npm:^17.2.1"
     fork-ts-checker-webpack-plugin: "npm:^9.0.2"
     inversify: "npm:^6.0.1"
@@ -15967,7 +15967,7 @@ __metadata:
     applicationinsights: "npm:^3.9.0"
     azure-services: "workspace:*"
     common: "workspace:*"
-    copy-webpack-plugin: "npm:^13.0.0"
+    copy-webpack-plugin: "npm:^13.0.1"
     dotenv: "npm:^17.2.1"
     fork-ts-checker-webpack-plugin: "npm:^9.0.2"
     inversify: "npm:^6.0.1"
@@ -16008,7 +16008,7 @@ __metadata:
     applicationinsights: "npm:^3.9.0"
     azure-services: "workspace:*"
     common: "workspace:*"
-    copy-webpack-plugin: "npm:^13.0.0"
+    copy-webpack-plugin: "npm:^13.0.1"
     dotenv: "npm:^17.2.1"
     fork-ts-checker-webpack-plugin: "npm:^9.0.2"
     inversify: "npm:^6.0.1"
@@ -18557,7 +18557,7 @@ __metadata:
     applicationinsights: "npm:^3.9.0"
     azure-services: "workspace:*"
     common: "workspace:*"
-    copy-webpack-plugin: "npm:^13.0.0"
+    copy-webpack-plugin: "npm:^13.0.1"
     dotenv: "npm:^17.2.1"
     fork-ts-checker-webpack-plugin: "npm:^9.0.2"
     inversify: "npm:^6.0.1"
@@ -18592,7 +18592,7 @@ __metadata:
     applicationinsights: "npm:^3.9.0"
     azure-services: "workspace:*"
     common: "workspace:*"
-    copy-webpack-plugin: "npm:^13.0.0"
+    copy-webpack-plugin: "npm:^13.0.1"
     fork-ts-checker-webpack-plugin: "npm:^9.0.2"
     inversify: "npm:^6.0.1"
     jest: "npm:^29.7.0"
@@ -18639,7 +18639,7 @@ __metadata:
     axe-sarif-converter: "npm:^3.0.0"
     azure-services: "workspace:*"
     common: "workspace:*"
-    copy-webpack-plugin: "npm:^13.0.0"
+    copy-webpack-plugin: "npm:^13.0.1"
     dotenv: "npm:^17.2.1"
     fork-ts-checker-webpack-plugin: "npm:^9.0.2"
     inversify: "npm:^6.0.1"
@@ -18690,7 +18690,7 @@ __metadata:
     applicationinsights: "npm:^3.9.0"
     azure-services: "workspace:*"
     common: "workspace:*"
-    copy-webpack-plugin: "npm:^13.0.0"
+    copy-webpack-plugin: "npm:^13.0.1"
     dotenv: "npm:^17.2.1"
     fork-ts-checker-webpack-plugin: "npm:^9.0.2"
     inversify: "npm:^6.0.1"
@@ -18732,7 +18732,7 @@ __metadata:
     applicationinsights: "npm:^3.9.0"
     azure-services: "workspace:*"
     common: "workspace:*"
-    copy-webpack-plugin: "npm:^13.0.0"
+    copy-webpack-plugin: "npm:^13.0.1"
     dotenv: "npm:^17.2.1"
     fork-ts-checker-webpack-plugin: "npm:^9.0.2"
     got: "npm:^11.8.5"
@@ -18774,7 +18774,7 @@ __metadata:
     azure-functions-core-tools: "npm:^4.x"
     azure-services: "workspace:*"
     common: "workspace:*"
-    copy-webpack-plugin: "npm:^13.0.0"
+    copy-webpack-plugin: "npm:^13.0.1"
     fork-ts-checker-webpack-plugin: "npm:^9.0.2"
     functional-tests: "workspace:*"
     inversify: "npm:^6.0.1"
@@ -18813,7 +18813,7 @@ __metadata:
     azure-functions-core-tools: "npm:^4.x"
     azure-services: "workspace:*"
     common: "workspace:*"
-    copy-webpack-plugin: "npm:^13.0.0"
+    copy-webpack-plugin: "npm:^13.0.1"
     durable-functions: "npm:^3.1.0"
     fork-ts-checker-webpack-plugin: "npm:^9.0.2"
     functional-tests: "workspace:*"
