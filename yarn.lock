@@ -315,29 +315,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@azure/core-http@npm:^2.0.0":
-  version: 2.2.4
-  resolution: "@azure/core-http@npm:2.2.4"
-  dependencies:
-    "@azure/abort-controller": "npm:^1.0.0"
-    "@azure/core-asynciterator-polyfill": "npm:^1.0.0"
-    "@azure/core-auth": "npm:^1.3.0"
-    "@azure/core-tracing": "npm:1.0.0-preview.13"
-    "@azure/logger": "npm:^1.0.0"
-    "@types/node-fetch": "npm:^2.5.0"
-    "@types/tunnel": "npm:^0.0.3"
-    form-data: "npm:^4.0.0"
-    node-fetch: "npm:^2.6.7"
-    process: "npm:^0.11.10"
-    tough-cookie: "npm:^4.0.0"
-    tslib: "npm:^2.2.0"
-    tunnel: "npm:^0.0.6"
-    uuid: "npm:^8.3.0"
-    xml2js: "npm:^0.4.19"
-  checksum: 10/9b7155799c1cf286281a7ef3bd858e81f46e3f0cfa9d9ac2a393a1acee8a98c39308e23f033291b76acfb38e75c079441831b76ecc84e8848f8e49dcae4ba3e1
-  languageName: node
-  linkType: hard
-
 "@azure/core-lro@npm:^2.2.0":
   version: 2.2.0
   resolution: "@azure/core-lro@npm:2.2.0"
@@ -507,7 +484,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@azure/core-xml@npm:^1.4.3":
+"@azure/core-xml@npm:^1.4.3, @azure/core-xml@npm:^1.4.5":
   version: 1.5.0
   resolution: "@azure/core-xml@npm:1.5.0"
   dependencies:
@@ -855,19 +832,25 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@azure/storage-blob@npm:^12.12.0":
-  version: 12.12.0
-  resolution: "@azure/storage-blob@npm:12.12.0"
+"@azure/storage-blob@npm:^12.28.0":
+  version: 12.29.0
+  resolution: "@azure/storage-blob@npm:12.29.0"
   dependencies:
-    "@azure/abort-controller": "npm:^1.0.0"
-    "@azure/core-http": "npm:^2.0.0"
+    "@azure/abort-controller": "npm:^2.1.2"
+    "@azure/core-auth": "npm:^1.9.0"
+    "@azure/core-client": "npm:^1.9.3"
+    "@azure/core-http-compat": "npm:^2.2.0"
     "@azure/core-lro": "npm:^2.2.0"
-    "@azure/core-paging": "npm:^1.1.1"
-    "@azure/core-tracing": "npm:1.0.0-preview.13"
-    "@azure/logger": "npm:^1.0.0"
+    "@azure/core-paging": "npm:^1.6.2"
+    "@azure/core-rest-pipeline": "npm:^1.19.1"
+    "@azure/core-tracing": "npm:^1.2.0"
+    "@azure/core-util": "npm:^1.11.0"
+    "@azure/core-xml": "npm:^1.4.5"
+    "@azure/logger": "npm:^1.1.4"
+    "@azure/storage-common": "npm:^12.1.0"
     events: "npm:^3.0.0"
-    tslib: "npm:^2.2.0"
-  checksum: 10/9c745d06dd39ec6b775966376437a04c190f62cf3da3bf834dbf90b7d5146470a86dc5c629dacfc4851b68f0a7105cafbf639ffbd54efe897b326b27dbcea394
+    tslib: "npm:^2.8.1"
+  checksum: 10/28be141bfdb0d8680fe2de0ad48bb4337a444edf5a19d6d2ba55024718ed99a40d4fbc6c4b79ec53a600fa02497bc7792acfeb947b80800b3917dffbfa1a513d
   languageName: node
   linkType: hard
 
@@ -5376,16 +5359,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node-fetch@npm:^2.5.0":
-  version: 2.5.7
-  resolution: "@types/node-fetch@npm:2.5.7"
-  dependencies:
-    "@types/node": "npm:*"
-    form-data: "npm:^3.0.0"
-  checksum: 10/3585b38cf0226172e9cfeac57e5d6666c95efcc0f4ddcf7f1d72e7cd5e9b9736db2552029f626d4d451ce1bc901cbcb70706a6663987ef828aa06b04f5a4784c
-  languageName: node
-  linkType: hard
-
 "@types/node-fetch@npm:^2.6.12":
   version: 2.6.12
   resolution: "@types/node-fetch@npm:2.6.12"
@@ -5569,15 +5542,6 @@ __metadata:
   version: 1.3.5
   resolution: "@types/triple-beam@npm:1.3.5"
   checksum: 10/519b6a1b30d4571965c9706ad5400a200b94e4050feca3e7856e3ea7ac00ec9903e32e9a10e2762d0f7e472d5d03e5f4b29c16c0bd8c1f77c8876c683b2231f1
-  languageName: node
-  linkType: hard
-
-"@types/tunnel@npm:^0.0.3":
-  version: 0.0.3
-  resolution: "@types/tunnel@npm:0.0.3"
-  dependencies:
-    "@types/node": "npm:*"
-  checksum: 10/53e23a1f9fb14a491c00425b2a4fc443817564d77be5e1b95fcbeb6d009551b62ea82ffc3e5ca0c6b9f6b186824ca6ec46e7450c1bcd6674a46d1325f0116e24
   languageName: node
   linkType: hard
 
@@ -7039,7 +7003,7 @@ __metadata:
     "@azure/keyvault-secrets": "npm:^4.9.0"
     "@azure/ms-rest-js": "npm:^2.7.0"
     "@azure/ms-rest-nodeauth": "npm:^3.1.1"
-    "@azure/storage-blob": "npm:^12.12.0"
+    "@azure/storage-blob": "npm:^12.28.0"
     "@azure/storage-queue": "npm:^12.27.0"
     "@types/got": "npm:^9.6.11"
     "@types/jest": "npm:^29.5.12"
@@ -10541,7 +10505,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"form-data@npm:^2.5.0, form-data@npm:^3.0.0, form-data@npm:^4.0.0, form-data@npm:~2.3.2":
+"form-data@npm:^2.5.0, form-data@npm:^4.0.0, form-data@npm:~2.3.2":
   version: 4.0.4
   resolution: "form-data@npm:4.0.4"
   dependencies:
@@ -15949,13 +15913,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"process@npm:^0.11.10":
-  version: 0.11.10
-  resolution: "process@npm:0.11.10"
-  checksum: 10/dbaa7e8d1d5cf375c36963ff43116772a989ef2bb47c9bdee20f38fd8fc061119cf38140631cf90c781aca4d3f0f0d2c834711952b728953f04fd7d238f59f5b
-  languageName: node
-  linkType: hard
-
 "progress@npm:2.0.3, progress@npm:^2.0.3":
   version: 2.0.3
   resolution: "progress@npm:2.0.3"
@@ -17367,7 +17324,7 @@ __metadata:
     "@azure/cosmos": "npm:^4.0.0"
     "@azure/functions": "npm:^4.7.2"
     "@azure/identity": "npm:^4.11.1"
-    "@azure/storage-blob": "npm:^12.12.0"
+    "@azure/storage-blob": "npm:^12.28.0"
     "@crawlee/puppeteer": "npm:^3.12.2"
     "@types/jest": "npm:^29.5.12"
     "@types/node": "npm:^20.14.9"
