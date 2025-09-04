@@ -46,7 +46,7 @@
         "@azure/keyvault-secrets": "^4.9.0",
         "@azure/ms-rest-js": "^2.7.0",
         "@azure/ms-rest-nodeauth": "^3.1.1",
-        "@azure/storage-blob": "^12.12.0",
+        "@azure/storage-blob": "^12.28.0",
         "@azure/storage-queue": "^12.27.0",
         "async-mutex": "^0.5.0",
         "common": "workspace:*",
