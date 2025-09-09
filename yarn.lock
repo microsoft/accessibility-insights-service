@@ -153,6 +153,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@azure-rest/core-client@npm:^2.3.3":
+  version: 2.5.0
+  resolution: "@azure-rest/core-client@npm:2.5.0"
+  dependencies:
+    "@azure/abort-controller": "npm:^2.0.0"
+    "@azure/core-auth": "npm:^1.9.0"
+    "@azure/core-rest-pipeline": "npm:^1.5.0"
+    "@azure/core-tracing": "npm:^1.0.1"
+    "@typespec/ts-http-runtime": "npm:^0.3.0"
+    tslib: "npm:^2.6.2"
+  checksum: 10/d5567ec30f47db26dba692f9f286b0501d75bf1b0f6514a0da2976304ee0c6313b587e735e29f98cdd5f935c764b93652d246fbf99d24bf3ec1e8d03204995e4
+  languageName: node
+  linkType: hard
+
 "@azure/abort-controller@npm:^1.0.0":
   version: 1.0.1
   resolution: "@azure/abort-controller@npm:1.0.1"
@@ -293,17 +307,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@azure/core-http-compat@npm:^2.0.1":
-  version: 2.1.2
-  resolution: "@azure/core-http-compat@npm:2.1.2"
-  dependencies:
-    "@azure/abort-controller": "npm:^2.0.0"
-    "@azure/core-client": "npm:^1.3.0"
-    "@azure/core-rest-pipeline": "npm:^1.3.0"
-  checksum: 10/2b64b2480db6ebb8b0f6e7e104f632d9266bbe08f44ea0117d84439a4ba8846ee533841e827c2766f63ef26709c89e61c0d250878660930bac521c7f45fab49c
-  languageName: node
-  linkType: hard
-
 "@azure/core-http-compat@npm:^2.2.0":
   version: 2.3.0
   resolution: "@azure/core-http-compat@npm:2.3.0"
@@ -346,6 +349,18 @@ __metadata:
     "@azure/logger": "npm:^1.0.0"
     tslib: "npm:^2.2.0"
   checksum: 10/4c947fb5ba2d88100c37cdbf32a97ea85f9c5680f47fa988c5c665445ef863304e90772ba434b5c05f94972e24f44c53c5a88818388e037ce741cfdd68c7fc08
+  languageName: node
+  linkType: hard
+
+"@azure/core-lro@npm:^2.7.2":
+  version: 2.7.2
+  resolution: "@azure/core-lro@npm:2.7.2"
+  dependencies:
+    "@azure/abort-controller": "npm:^2.0.0"
+    "@azure/core-util": "npm:^1.2.0"
+    "@azure/logger": "npm:^1.0.0"
+    tslib: "npm:^2.6.2"
+  checksum: 10/73b4e1d74afc0dc647914db3a79b6212b653d853f6ff7105eb6e19ab2f7af11cef99d6388b3125179c8872db819930ac0ab9768b07c06a3033dd22fa546f8a09
   languageName: node
   linkType: hard
 
@@ -399,7 +414,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@azure/core-rest-pipeline@npm:^1.19.1, @azure/core-rest-pipeline@npm:^1.20.0":
+"@azure/core-rest-pipeline@npm:^1.19.1, @azure/core-rest-pipeline@npm:^1.20.0, @azure/core-rest-pipeline@npm:^1.5.0":
   version: 1.22.0
   resolution: "@azure/core-rest-pipeline@npm:1.22.0"
   dependencies:
@@ -431,7 +446,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@azure/core-rest-pipeline@npm:^1.3.0, @azure/core-rest-pipeline@npm:^1.8.0, @azure/core-rest-pipeline@npm:^1.9.1":
+"@azure/core-rest-pipeline@npm:^1.8.0, @azure/core-rest-pipeline@npm:^1.9.1":
   version: 1.10.0
   resolution: "@azure/core-rest-pipeline@npm:1.10.0"
   dependencies:
@@ -486,7 +501,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@azure/core-util@npm:^1.1.1":
+"@azure/core-util@npm:^1.1.1, @azure/core-util@npm:^1.2.0":
   version: 1.13.0
   resolution: "@azure/core-util@npm:1.13.0"
   dependencies:
@@ -649,23 +664,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@azure/keyvault-secrets@npm:^4.9.0":
-  version: 4.9.0
-  resolution: "@azure/keyvault-secrets@npm:4.9.0"
+"@azure/keyvault-secrets@npm:^4.10.0":
+  version: 4.10.1
+  resolution: "@azure/keyvault-secrets@npm:4.10.1"
   dependencies:
-    "@azure/abort-controller": "npm:^2.0.0"
-    "@azure/core-auth": "npm:^1.3.0"
-    "@azure/core-client": "npm:^1.5.0"
-    "@azure/core-http-compat": "npm:^2.0.1"
-    "@azure/core-lro": "npm:^2.2.0"
-    "@azure/core-paging": "npm:^1.1.1"
-    "@azure/core-rest-pipeline": "npm:^1.8.0"
-    "@azure/core-tracing": "npm:^1.0.0"
-    "@azure/core-util": "npm:^1.0.0"
+    "@azure-rest/core-client": "npm:^2.3.3"
+    "@azure/abort-controller": "npm:^2.1.2"
+    "@azure/core-auth": "npm:^1.9.0"
+    "@azure/core-http-compat": "npm:^2.2.0"
+    "@azure/core-lro": "npm:^2.7.2"
+    "@azure/core-paging": "npm:^1.6.2"
+    "@azure/core-rest-pipeline": "npm:^1.19.0"
+    "@azure/core-tracing": "npm:^1.2.0"
+    "@azure/core-util": "npm:^1.11.0"
     "@azure/keyvault-common": "npm:^2.0.0"
-    "@azure/logger": "npm:^1.0.0"
-    tslib: "npm:^2.2.0"
-  checksum: 10/d64813ecc64f499da1570fd9dc7476801fa010c20edea484145b4a6fcc090ad9de2b2655e6eb691935f7f085e74f02d326372b5cdd0b33d0969c449ccc0756aa
+    "@azure/logger": "npm:^1.1.4"
+    tslib: "npm:^2.8.1"
+  checksum: 10/476d05d53eb7fd07cd361a2388a38412f7880279d42afa5bbb3938aa98a8be687eab3461a4d324d4857c2ca04ad1e429a4dee66aa3bd691eae9676b41687dd05
   languageName: node
   linkType: hard
 
@@ -7033,7 +7048,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"axios@npm:^0.21.1, axios@npm:^1.6.1":
+"axios@npm:^0.21.1":
   version: 1.8.3
   resolution: "axios@npm:1.8.3"
   dependencies:
@@ -7041,6 +7056,17 @@ __metadata:
     form-data: "npm:^4.0.0"
     proxy-from-env: "npm:^1.1.0"
   checksum: 10/050f911cadd6d47a38ddbf91d2f8da2c34661dda8077e7ad6546e8178701125366fddbba07211a648b6815cf6c2c3c91c0a65d8b968e3d1a6054a21141ff9c01
+  languageName: node
+  linkType: hard
+
+"axios@npm:^1.11.0":
+  version: 1.11.0
+  resolution: "axios@npm:1.11.0"
+  dependencies:
+    follow-redirects: "npm:^1.15.6"
+    form-data: "npm:^4.0.4"
+    proxy-from-env: "npm:^1.1.0"
+  checksum: 10/232df4af7a4e4e07baa84621b9cc4b0c518a757b4eacc7f635c0eb3642cb98dff347326739f24b891b3b4481b7b838c79a3a0c4819c9fbc1fc40232431b9c5dc
   languageName: node
   linkType: hard
 
@@ -7070,7 +7096,7 @@ __metadata:
     "@azure/core-auth": "npm:^1.10.0"
     "@azure/cosmos": "npm:^4.0.0"
     "@azure/identity": "npm:^4.11.1"
-    "@azure/keyvault-secrets": "npm:^4.9.0"
+    "@azure/keyvault-secrets": "npm:^4.10.0"
     "@azure/ms-rest-js": "npm:^2.7.0"
     "@azure/ms-rest-nodeauth": "npm:^3.1.1"
     "@azure/storage-blob": "npm:^12.28.0"
@@ -9105,18 +9131,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"durable-functions@npm:^3.1.0":
-  version: 3.1.0
-  resolution: "durable-functions@npm:3.1.0"
+"durable-functions@npm:^3.2.0":
+  version: 3.2.0
+  resolution: "durable-functions@npm:3.2.0"
   dependencies:
     "@azure/functions": "npm:^4.0.0"
-    axios: "npm:^1.6.1"
+    "@opentelemetry/api": "npm:^1.9.0"
+    axios: "npm:^1.11.0"
     debug: "npm:~2.6.9"
     lodash: "npm:^4.17.15"
     moment: "npm:^2.29.2"
-    uuid: "npm:~3.3.2"
+    uuid: "npm:^9.0.1"
     validator: "npm:~13.7.0"
-  checksum: 10/52a525ecc2c6b9f3dcfa5dcb2605c14aef324f2d9112c1376720c862d05e9432f8c15224520533fdbe7835a074e594909e6f7cb16f3e4381bdccf4f5e72d0d8c
+  checksum: 10/1425c651e1f4f5ca0897fef31bdfa40ea365d820af551d740d2f556267bb85602677a86e3999d61550b06ad6a710fe303efdfa681cbbe47905a7b669395db0bb
   languageName: node
   linkType: hard
 
@@ -19368,15 +19395,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"uuid@npm:~3.3.2":
-  version: 3.3.3
-  resolution: "uuid@npm:3.3.3"
-  bin:
-    uuid: ./bin/uuid
-  checksum: 10/f58462baf8d0285c3688ab00ffa282815582deb15d7d0a866574dc8d4560e83d94ef914eb07b8de70ba49d8e28796a3e96cbfba02d8ac29e38bf377ce3659a55
-  languageName: node
-  linkType: hard
-
 "v8-to-istanbul@npm:^9.0.1":
   version: 9.1.0
   resolution: "v8-to-istanbul@npm:9.1.0"
@@ -19748,7 +19766,7 @@ __metadata:
     azure-services: "workspace:*"
     common: "workspace:*"
     copy-webpack-plugin: "npm:^13.0.1"
-    durable-functions: "npm:^3.1.0"
+    durable-functions: "npm:^3.2.0"
     fork-ts-checker-webpack-plugin: "npm:^9.0.2"
     functional-tests: "workspace:*"
     inversify: "npm:^6.0.1"
