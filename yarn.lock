@@ -6973,7 +6973,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"axios@npm:^0.21.1, axios@npm:^1.6.1":
+"axios@npm:^0.21.1":
   version: 1.8.3
   resolution: "axios@npm:1.8.3"
   dependencies:
@@ -6981,6 +6981,17 @@ __metadata:
     form-data: "npm:^4.0.0"
     proxy-from-env: "npm:^1.1.0"
   checksum: 10/050f911cadd6d47a38ddbf91d2f8da2c34661dda8077e7ad6546e8178701125366fddbba07211a648b6815cf6c2c3c91c0a65d8b968e3d1a6054a21141ff9c01
+  languageName: node
+  linkType: hard
+
+"axios@npm:^1.11.0":
+  version: 1.11.0
+  resolution: "axios@npm:1.11.0"
+  dependencies:
+    follow-redirects: "npm:^1.15.6"
+    form-data: "npm:^4.0.4"
+    proxy-from-env: "npm:^1.1.0"
+  checksum: 10/232df4af7a4e4e07baa84621b9cc4b0c518a757b4eacc7f635c0eb3642cb98dff347326739f24b891b3b4481b7b838c79a3a0c4819c9fbc1fc40232431b9c5dc
   languageName: node
   linkType: hard
 
@@ -9045,18 +9056,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"durable-functions@npm:^3.1.0":
-  version: 3.1.0
-  resolution: "durable-functions@npm:3.1.0"
+"durable-functions@npm:^3.2.0":
+  version: 3.2.0
+  resolution: "durable-functions@npm:3.2.0"
   dependencies:
     "@azure/functions": "npm:^4.0.0"
-    axios: "npm:^1.6.1"
+    "@opentelemetry/api": "npm:^1.9.0"
+    axios: "npm:^1.11.0"
     debug: "npm:~2.6.9"
     lodash: "npm:^4.17.15"
     moment: "npm:^2.29.2"
-    uuid: "npm:~3.3.2"
+    uuid: "npm:^9.0.1"
     validator: "npm:~13.7.0"
-  checksum: 10/52a525ecc2c6b9f3dcfa5dcb2605c14aef324f2d9112c1376720c862d05e9432f8c15224520533fdbe7835a074e594909e6f7cb16f3e4381bdccf4f5e72d0d8c
+  checksum: 10/1425c651e1f4f5ca0897fef31bdfa40ea365d820af551d740d2f556267bb85602677a86e3999d61550b06ad6a710fe303efdfa681cbbe47905a7b669395db0bb
   languageName: node
   linkType: hard
 
@@ -10515,7 +10527,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"form-data@npm:^2.5.0, form-data@npm:^4.0.0, form-data@npm:~2.3.2":
+"form-data@npm:^2.5.0, form-data@npm:^4.0.0, form-data@npm:^4.0.4, form-data@npm:~2.3.2":
   version: 4.0.4
   resolution: "form-data@npm:4.0.4"
   dependencies:
@@ -19301,15 +19313,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"uuid@npm:~3.3.2":
-  version: 3.3.3
-  resolution: "uuid@npm:3.3.3"
-  bin:
-    uuid: ./bin/uuid
-  checksum: 10/f58462baf8d0285c3688ab00ffa282815582deb15d7d0a866574dc8d4560e83d94ef914eb07b8de70ba49d8e28796a3e96cbfba02d8ac29e38bf377ce3659a55
-  languageName: node
-  linkType: hard
-
 "v8-to-istanbul@npm:^9.0.1":
   version: 9.1.0
   resolution: "v8-to-istanbul@npm:9.1.0"
@@ -19681,7 +19684,7 @@ __metadata:
     azure-services: "workspace:*"
     common: "workspace:*"
     copy-webpack-plugin: "npm:^13.0.1"
-    durable-functions: "npm:^3.1.0"
+    durable-functions: "npm:^3.2.0"
     fork-ts-checker-webpack-plugin: "npm:^9.0.2"
     functional-tests: "workspace:*"
     inversify: "npm:^6.0.1"
