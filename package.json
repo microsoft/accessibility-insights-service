@@ -72,6 +72,8 @@
     ],
     "resolutions": {
         "@axe-core/puppeteer": "4.10.1",
+        "@azure/storage-blob": "12.18.0",
+        "@azure/storage-queue": "12.16.0",
         "@npmcli/git": ">=2.1.0",
         "@types/node": "^20.14.9",
         "ansi-regex": "5.0.1",
