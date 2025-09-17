@@ -38,3 +38,14 @@ resources=$(
         --query "properties.outputResources[].id" \
         -o tsv
 )
+
+# Extract registry name from resources output
+registryName=$(echo "$resources" | grep 'Microsoft.ContainerRegistry/registries' | awk -F'/' '{print $NF}')
+
+# Apply latest updates to the registry
+if [[ -n "$registryName" ]]; then
+    echo "Applying latest updates to Azure Container Registry: $registryName"
+    az acr update --name "$registryName" --resource-group "$resourceGroupName"
+else
+    echo "Warning: Could not determine registry name for update."
+fi
