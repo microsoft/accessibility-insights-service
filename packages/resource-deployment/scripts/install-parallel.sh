@@ -171,6 +171,33 @@ function install() {
     )
     runCommandsWithoutSecretsInParallel parallelProcesses
 
+    storageAccountName=$(
+    az storage account list \
+        --resource-group "${resourceGroupName}" \
+        --query "[?starts_with(name,'allystorage')].name|[0]" -o tsv
+    )
+
+    if [[ -z ${storageAccountName} ]]; then
+        echo "Unable to get storage account for resource group ${resourceGroupName}"
+        return
+    fi
+
+    id=$(az group show --name "${resourceGroupName}" --query "id" -o tsv)
+    subscription=${id:15:36}
+
+    resourceGroupSuffix=${storageAccountName:11}
+    networkSecurityPerimeterName="nsp-a11y${resourceGroupSuffix}"
+
+    vnetName="vnet-a11y${resourceGroupSuffix}"
+    passResourceId=$(az network vnet show --resource-group "${resourceGroupName}" --name "${vnetName}" --query id -o tsv)
+
+    if [[ -z ${passResourceId} ]]; then
+        echo "Unable to get VNet resource ID for VNet ${vnetName} in resource group ${resourceGroupName}"
+        return
+    fi
+
+    . "${0%/*}/create-nsp.sh" -r "${resourceGroupName}" -n "${networkSecurityPerimeterName}" -p "defaultProfile" -l "${location}" -i "${passResourceId}"
+
     # The following scripts all depend on the result from the above scripts.
     # Additionally, these should run sequentially because of interdependence.
     . "${0%/*}/create-key-vault.sh"

@@ -1,0 +1,56 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "networkSecurityPerimeterName": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the NSP."
+      }
+    },
+    "profileName": {
+      "type": "string",
+      "defaultValue": "defaultProfile",
+      "metadata": {
+        "description": "The name of the NSP Profile."
+      }
+    },
+    "passResourceId": {
+      "type": "string",
+      "metadata": {
+        "description": "The resource id of the resource to associate."
+      }
+    },
+    "resourceAssociationName": {
+      "type": "string",
+      "defaultValue": "[concat('association-', substring(parameters('passResourceId'), add(lastIndexOf(parameters('passResourceId'), '/'), 1)))]",
+      "metadata": {
+        "description": "The name of the association corresponding to resource."
+      }
+    },
+    "associationMode": {
+      "type": "string",
+      "defaultValue": "Learning",
+      "metadata": {
+        "description": "The association mode."
+      }
+    }
+  },
+  "variables": {},
+  "resources": [
+    {
+      "type": "Microsoft.Network/networkSecurityPerimeters/resourceAssociations",
+      "apiVersion": "2023-08-01-preview",
+      "name": "[concat(parameters('networkSecurityPerimeterName'), '/', parameters('resourceAssociationName'))]",
+      "properties": {
+        "privateLinkResource": {
+          "id": "[parameters('passResourceId')]"
+        },
+        "profile": {
+          "id": "[resourceId('Microsoft.Network/networkSecurityPerimeters/profiles', parameters('networkSecurityPerimeterName'), parameters('profileName'))]"
+        },
+        "accessMode": "[parameters('associationMode')]"
+      }
+    }
+  ]
+}
