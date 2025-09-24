@@ -5420,13 +5420,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/paralleljs@npm:^0.0.24":
-  version: 0.0.24
-  resolution: "@types/paralleljs@npm:0.0.24"
-  checksum: 10/75d87341d803fecc616be6a21b78ddcd959cc97f316ebab4973b88e4dff3f39875fcf36d8e8937f95a81f31b6e5c366d9064a22308d5f6ee278587dc6e4158d2
-  languageName: node
-  linkType: hard
-
 "@types/parse-json@npm:^4.0.0":
   version: 4.0.0
   resolution: "@types/parse-json@npm:4.0.0"
@@ -15230,38 +15223,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"parallel-workers@workspace:packages/parallel-workers":
-  version: 0.0.0-use.local
-  resolution: "parallel-workers@workspace:packages/parallel-workers"
-  dependencies:
-    "@types/jest": "npm:^29.5.12"
-    "@types/lodash": "npm:^4.17.20"
-    "@types/node": "npm:^20.14.9"
-    copy-webpack-plugin: "npm:^13.0.1"
-    fork-ts-checker-webpack-plugin: "npm:^9.0.2"
-    jest: "npm:^29.7.0"
-    jest-junit: "npm:^16.0.0"
-    lodash: "npm:^4.17.21"
-    moment: "npm:^2.30.1"
-    npm-run-all: "npm:^4.1.5"
-    rimraf: "npm:^6.0.1"
-    storage-documents: "workspace:*"
-    ts-jest: "npm:^29.4.1"
-    ts-loader: "npm:^9.5.4"
-    typemoq: "npm:^2.1.0"
-    typescript: "npm:^5.5.3"
-    webpack: "npm:^5.101.3"
-    webpack-cli: "npm:^5.1.4"
-  languageName: unknown
-  linkType: soft
-
-"paralleljs@npm:^1.1.0":
-  version: 1.1.0
-  resolution: "paralleljs@npm:1.1.0"
-  checksum: 10/0820f5e714d4eee0f3b473aab7e6044120922624f5c31bd8fc135ba32d10fbdd82d491690513e16d9c9c5042921eaffcb3c2d9af5603113b64f19024266a3fa6
-  languageName: node
-  linkType: hard
-
 "parent-module@npm:^1.0.0":
   version: 1.0.1
   resolution: "parent-module@npm:1.0.1"
@@ -17356,7 +17317,6 @@ __metadata:
     "@types/jest": "npm:^29.5.12"
     "@types/node": "npm:^20.14.9"
     "@types/node-fetch": "npm:^2.6.12"
-    "@types/paralleljs": "npm:^0.0.24"
     "@types/puppeteer": "npm:^7.0.4"
     "@types/sha.js": "npm:^2.4.4"
     "@types/yargs": "npm:^17.0.33"
@@ -17379,7 +17339,6 @@ __metadata:
     node-fetch: "npm:^2.6.7"
     npm-run-all: "npm:^4.1.5"
     p-limit: "npm:^3.1.0"
-    paralleljs: "npm:^1.1.0"
     privacy-scan-core: "workspace:*"
     puppeteer: "npm:^24.18.0"
     reflect-metadata: "npm:^0.2.2"

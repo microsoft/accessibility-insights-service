@@ -8,10 +8,10 @@
             "label": "run",
             "dependsOn": "tsc",
             "windows": {
-                "command": "xcopy .env .\\dist /y; xcopy ..\\..\\packages\\parallel-workers\\dist\\*.js ..\\..\\packages\\service-library\\dist\\data-providers /y"
+                "command": "xcopy .env .\\dist /y"
             },
             "osx": {
-                "command": "cp .env ./dist && cp ../../packages/parallel-workers/dist/*.js ../../packages/service-library/dist/data-providers"
+                "command": "cp .env ./dist"
             }
         },
         {

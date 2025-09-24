@@ -75,11 +75,6 @@ module.exports = (env) => {
                         from: 'web-api-send-notification-runner.ps1',
                         to: '',
                     },
-                    {
-                        context: '../../packages/parallel-workers/dist',
-                        from: '**/*.js',
-                        to: '',
-                    },
                 ],
             }),
         ],
