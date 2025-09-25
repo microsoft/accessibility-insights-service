@@ -7,8 +7,7 @@ import { Readable } from 'stream';
 import { BlobContentDownloadResponse, BlobStorageClient } from 'azure-services';
 import { IMock, Mock } from 'typemoq';
 import { BodyParser, System } from 'common';
-import { AxeScanResults } from 'scanner-global-library';
-import { AxeResults } from 'axe-core';
+import { ValidationScanResults } from 'scanner-global-library';
 import { DataProvidersCommon } from './data-providers-common';
 import { PageScanRunReportProvider } from './page-scan-run-report-provider';
 
@@ -26,18 +25,18 @@ const blobFilePath = `${time.getUTCFullYear()}/${time.getUTCMonth() + 1}/${time.
 const readableStream = {
     readable: true,
 } as NodeJS.ReadableStream;
-const axeScanResults = {
+const validationScanResults = {
     scannedUrl: 'scannedUrl',
     pageTitle: 'pageTitle',
-    axeResults: {
+    validationResults: {
         url: 'url',
         passes: [{ id: 'aria-allowed-attr', impact: null }],
         violations: [{ id: 'frame-title', impact: 'serious' }],
         incomplete: [{ id: 'color-contrast', impact: 'serious' }],
         inapplicable: [{ id: 'area-alt', impact: null }],
-    } as AxeResults,
-} as AxeScanResults;
-const resultsString = JSON.stringify(axeScanResults);
+    } as any,
+} as ValidationScanResults;
+const resultsString = JSON.stringify(validationScanResults);
 
 describe(PageScanRunReportProvider, () => {
     beforeEach(() => {
@@ -84,7 +83,7 @@ describe(PageScanRunReportProvider, () => {
             setupReadBlob();
             setupReadStream(resultsString);
             const expectedResults = {
-                content: axeScanResults,
+                content: validationScanResults,
                 etag: etag,
             };
 

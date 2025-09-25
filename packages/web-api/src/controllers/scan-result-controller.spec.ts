@@ -12,10 +12,9 @@ import {
     ScanResultResponse,
     WebApiErrorCodes,
     WebsiteScanDataProvider,
-    WebsiteScanResultProvider,
     AppContext,
 } from 'service-library';
-import { ItemType, OnDemandPageScanResult, WebsiteScanResult } from 'storage-documents';
+import { ItemType, OnDemandPageScanResult, WebsiteScanData } from 'storage-documents';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { HttpRequest, HttpRequestInit } from '@azure/functions';
 import { ScanResponseConverter } from '../converters/scan-response-converter';
@@ -29,7 +28,6 @@ describe(ScanResultController, () => {
     let loggerMock: IMock<Logger>;
     let guidGeneratorMock: IMock<GuidGenerator>;
     let scanResponseConverterMock: IMock<ScanResponseConverter>;
-    let websiteScanResultProviderMock: IMock<WebsiteScanResultProvider>;
     let websiteScanDataProviderMock: IMock<WebsiteScanDataProvider>;
 
     const apiVersion = '1.0';
@@ -45,6 +43,7 @@ describe(ScanResultController, () => {
     };
     const dbResponse: OnDemandPageScanResult = {
         id: scanId,
+        schemaVersion: '2',
         deepScanId: scanId,
         partitionKey: 'partition-key',
         url: 'url',
@@ -76,7 +75,7 @@ describe(ScanResultController, () => {
             state: 'running',
         },
     };
-    const websiteScanResult = {} as WebsiteScanResult;
+    const websiteScanData = {} as WebsiteScanData;
 
     beforeEach(() => {
         const funcHttpRequestInit = {
@@ -94,6 +93,7 @@ describe(ScanResultController, () => {
 
         onDemandPageScanRunResultProviderMock = Mock.ofType<OnDemandPageScanRunResultProvider>();
         websiteScanDataProviderMock = Mock.ofType<WebsiteScanDataProvider>();
+        websiteScanDataProviderMock.setup(async (o) => o.read(dbResponse.websiteScanRef.id)).returns(async () => websiteScanData);
         onDemandPageScanRunResultProviderMock.setup(async (o) => o.readScanRuns(It.isAny()));
 
         guidGeneratorMock = Mock.ofType(GuidGenerator);
@@ -114,13 +114,6 @@ describe(ScanResultController, () => {
 
         loggerMock = Mock.ofType<Logger>();
         scanResponseConverterMock = Mock.ofType<ScanResponseConverter>();
-        websiteScanResultProviderMock = Mock.ofType<WebsiteScanResultProvider>();
-        websiteScanResultProviderMock
-            .setup((o) => o.read(dbResponse.websiteScanRef.id, false))
-            .returns(() => Promise.resolve({ deepScanId: scanId } as WebsiteScanResult));
-        websiteScanResultProviderMock
-            .setup((o) => o.read(dbResponse.websiteScanRef.id, true))
-            .returns(() => Promise.resolve(websiteScanResult));
 
         scanResultController = createScanResultController();
     });
@@ -128,7 +121,6 @@ describe(ScanResultController, () => {
     function createScanResultController(): ScanResultController {
         const controller = new ScanResultController(
             onDemandPageScanRunResultProviderMock.object,
-            websiteScanResultProviderMock.object,
             websiteScanDataProviderMock.object,
             scanResponseConverterMock.object,
             guidGeneratorMock.object,
@@ -228,7 +220,7 @@ describe(ScanResultController, () => {
                 .verifiable(Times.once());
 
             scanResponseConverterMock
-                .setup((o) => o.getScanResultResponse(baseUrl, apiVersion, dbResponse, websiteScanResult))
+                .setup((o) => o.getScanResultResponse(baseUrl, apiVersion, dbResponse, websiteScanData))
                 .returns(() => Promise.resolve(scanClientResponseForDbResponse));
 
             const response = await scanResultController.handleRequest();

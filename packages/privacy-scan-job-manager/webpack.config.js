@@ -75,11 +75,6 @@ module.exports = (env) => {
                         from: 'privacy-scan-job-manager.ps1',
                         to: '',
                     },
-                    {
-                        context: '../../packages/parallel-workers/dist',
-                        from: '**/*.js',
-                        to: '',
-                    },
                 ],
             }),
         ],

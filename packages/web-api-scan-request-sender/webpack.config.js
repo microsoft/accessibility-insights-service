@@ -75,11 +75,6 @@ module.exports = (env) => {
                         from: 'web-api-scan-request-sender.ps1',
                         to: '',
                     },
-                    {
-                        context: '../../packages/parallel-workers/dist',
-                        from: '**/*.js',
-                        to: '',
-                    },
                 ],
             }),
         ],

@@ -33,14 +33,6 @@ updates:
     include: scope
   versioning-strategy: increase
   ignore:
-    # axe-core updates require extra validation and synchronization with
-    # accessibility-insights-web; we handle them as features, not auto-updates.
-  - dependency-name: axe-core
-    versions:
-    - ">= 0"
-  - dependency-name: "@axe-core/puppeteer"
-    versions:
-    - ">= 0"
     # Major version of @types/node is pinned to match the version of node we
     # use for builds (ideally, latest LTS)
   - dependency-name: "@types/node"

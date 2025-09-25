@@ -71,21 +71,6 @@ module.exports = (env) => {
                         from: 'package-func.json',
                         to: 'package.json',
                     },
-                    {
-                        context: '../parallel-workers/dist/',
-                        from: '**/*.js',
-                        to: '',
-                    },
-                    {
-                        context: '../parallel-workers/dist/',
-                        from: '**/*.js',
-                        to: 'health-monitor-orchestration-func',
-                    },
-                    {
-                        context: '../parallel-workers/dist/',
-                        from: '**/*.js',
-                        to: 'scan-batch-requests-feed-func',
-                    },
                 ],
             }),
         ],

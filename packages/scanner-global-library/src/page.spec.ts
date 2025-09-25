@@ -3,12 +3,10 @@
 
 import 'reflect-metadata';
 
-import { AxePuppeteer } from '@axe-core/puppeteer';
 import * as Puppeteer from 'puppeteer';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { GuidGenerator, System } from 'common';
 import { GlobalLogger } from 'logger';
-import { AxeScanResults } from './axe-scanner/axe-scan-results';
 import { BrowserError } from './browser-error';
 import { BrowserStartOptions, Page } from './page';
 import { getPromisableDynamicMock } from './test-utilities/promisable-mock';
@@ -38,7 +36,7 @@ const pageNavigationTiming: PageNavigationTiming = {
 };
 
 let scrollToTopMock: typeof scrollToTop;
-let scanResults: AxeScanResults;
+let scanResults: any;
 let page: Page;
 let navigationResponse: NavigationResponse;
 let webDriverMock: IMock<WebDriver>;
@@ -48,7 +46,6 @@ let browserMock: IMock<Puppeteer.Browser>;
 let puppeteerPageMock: IMock<Puppeteer.Page>;
 let puppeteerResponseMock: IMock<Puppeteer.HTTPResponse>;
 let puppeteerRequestMock: IMock<Puppeteer.HTTPRequest>;
-let axePuppeteerMock: IMock<AxePuppeteer>;
 let pageNetworkTracerMock: IMock<PageNetworkTracer>;
 let resourceAuthenticatorMock: IMock<ResourceAuthenticator>;
 let pageAnalyzerMock: IMock<PageAnalyzer>;
@@ -74,7 +71,6 @@ describe(Page, () => {
         puppeteerPageMock = getPromisableDynamicMock(Mock.ofType<Puppeteer.Page>());
         puppeteerResponseMock = getPromisableDynamicMock(Mock.ofType<Puppeteer.HTTPResponse>());
         puppeteerRequestMock = getPromisableDynamicMock(Mock.ofType<Puppeteer.HTTPRequest>());
-        axePuppeteerMock = getPromisableDynamicMock(Mock.ofType<AxePuppeteer>());
         pageNetworkTracerMock = Mock.ofType<PageNetworkTracer>();
         resourceAuthenticatorMock = Mock.ofType<ResourceAuthenticator>();
         pageAnalyzerMock = Mock.ofType<PageAnalyzer>();
@@ -116,7 +112,6 @@ describe(Page, () => {
     afterEach(() => {
         webDriverMock.verifyAll();
         pageNavigatorMock.verifyAll();
-        axePuppeteerMock.verifyAll();
         loggerMock.verifyAll();
         puppeteerRequestMock.verifyAll();
         devToolsSessionMock.verifyAll();

@@ -5,28 +5,12 @@
             "path": "../packages/api-contracts"
         },
         {
-            "name": "axe-core-scanner",
-            "path": "../packages/axe-core-scanner"
-        },
-        {
-            "name": "axe-result-converter",
-            "path": "../packages/axe-result-converter"
-        },
-        {
             "name": "azure-services",
             "path": "../packages/azure-services"
         },
         {
-            "name": "cli",
-            "path": "../packages/cli"
-        },
-        {
             "name": "common",
             "path": "../packages/common"
-        },
-        {
-            "name": "crawler",
-            "path": "../packages/crawler"
         },
         {
             "name": "e2e-test-site",
@@ -49,10 +33,6 @@
             "path": "../packages/logger"
         },
         {
-            "name": "parallel-workers",
-            "path": "../packages/parallel-workers"
-        },
-        {
             "name": "privacy-scan-core",
             "path": "../packages/privacy-scan-core"
         },
@@ -63,14 +43,6 @@
         {
             "name": "privacy-scan-runner",
             "path": "../packages/privacy-scan-runner"
-        },
-        {
-            "name": "report-generator-job-manager",
-            "path": "../packages/report-generator-job-manager"
-        },
-        {
-            "name": "report-generator-runner",
-            "path": "../packages/report-generator-runner"
         },
         {
             "name": "resource-deployment",
@@ -105,18 +77,6 @@
             "path": "../packages/web-api-scan-request-sender"
         },
         {
-            "name": "web-api-scan-runner",
-            "path": "../packages/web-api-scan-runner"
-        },
-        {
-            "name": "web-api-send-notification-job-manager",
-            "path": "../packages/web-api-send-notification-job-manager"
-        },
-        {
-            "name": "web-api-send-notification-runner",
-            "path": "../packages/web-api-send-notification-runner"
-        },
-        {
             "name": "web-workers",
             "path": "../packages/web-workers"
         },
@@ -144,8 +104,6 @@
         "prettier.requireConfig": true,
         "csharp.suppressDotnetRestoreNotification": true,
         "eslint.enable": true,
-        "eslint.packageManager": "yarn",
-        "eslint.alwaysShowStatus": true,
         "eslint.workingDirectories": [
             {
                 "mode": "auto"

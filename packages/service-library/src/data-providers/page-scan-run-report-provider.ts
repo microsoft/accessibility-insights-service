@@ -5,12 +5,13 @@ import { Readable } from 'stream';
 import { BlobContentDownloadResponse, BlobStorageClient } from 'azure-services';
 import { inject, injectable } from 'inversify';
 import { BodyParser, System } from 'common';
-import { AxeScanResults } from 'scanner-global-library';
+import { ValidationScanResults } from 'scanner-global-library';
 import { DataProvidersCommon } from './data-providers-common';
-import { ReadErrorCode } from './combined-scan-results-provider';
+
+export type ReadErrorCode = 'blobNotFound' | 'jsonParseError' | 'streamError';
 
 export interface ReportContent {
-    content?: AxeScanResults;
+    content?: ValidationScanResults;
     errorCode?: ReadErrorCode;
     error?: string;
     etag?: string;

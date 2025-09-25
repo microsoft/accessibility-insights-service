@@ -1,8 +1,0 @@
-# Copyright (c) Microsoft Corporation. All rights reserved.
-# Licensed under the MIT License.
-
-# The image is available in the local registry only.
-FROM mcr.microsoft.com/windows/web-api-scan-runner:prescanner
-
-# Use "-nodeargs --inspect-brk=0.0.0.0" to enable debugging in the container.
-CMD ["powershell.exe", "./web-api-scan-runner.ps1"]

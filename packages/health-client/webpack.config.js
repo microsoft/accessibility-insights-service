@@ -66,11 +66,6 @@ module.exports = (env) => {
             new copyWebpackPlugin({
                 patterns: [
                     {
-                        context: '../../packages/parallel-workers/dist',
-                        from: '**/*.js',
-                        to: '',
-                    },
-                    {
                         context: '.',
                         from: 'package-ext.json',
                         to: 'package.json',

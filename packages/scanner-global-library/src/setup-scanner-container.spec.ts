@@ -4,7 +4,6 @@
 import 'reflect-metadata';
 
 import { Container } from 'inversify';
-import { AxePuppeteerFactory, axeScannerIocTypes } from 'axe-core-scanner';
 import { setupScannerContainer } from './setup-scanner-container';
 import { PuppeteerTimeoutConfig } from './page-timeout-config';
 
@@ -18,18 +17,6 @@ describe(setupScannerContainer, () => {
         setupScannerContainer(container);
     });
 
-    it('should register AxePuppeteerFactory as a singleton', () => {
-        verifySingletonResolution(AxePuppeteerFactory);
-    });
-
-    it('should use cloudAxeConfiguration', () => {
-        expect(container.get(axeScannerIocTypes.AxeConfiguration)).toBeDefined();
-    });
-
-    it('should use webAxeRunOptions', () => {
-        expect(container.get(axeScannerIocTypes.AxeRunOptions)).toBeDefined();
-    });
-
     it('PuppeteerTimeoutConfig should be singleton', () => {
         const obj1 = container.get(PuppeteerTimeoutConfig);
         const obj2 = container.get(PuppeteerTimeoutConfig);
@@ -37,9 +24,4 @@ describe(setupScannerContainer, () => {
         expect(obj2).toBeDefined();
         expect(obj1).toEqual(obj2);
     });
-
-    function verifySingletonResolution(key: any): void {
-        expect(container.get(key)).toBeDefined();
-        expect(container.get(key)).toEqual(container.get(key));
-    }
 });

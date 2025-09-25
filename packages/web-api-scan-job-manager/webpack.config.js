@@ -75,11 +75,6 @@ module.exports = (env) => {
                         from: 'web-api-scan-job-manager.ps1',
                         to: '',
                     },
-                    {
-                        context: '../../packages/parallel-workers/dist',
-                        from: '**/*.js',
-                        to: '',
-                    },
                 ],
             }),
         ],
