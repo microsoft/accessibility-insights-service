@@ -33,7 +33,6 @@ describe(ScanScenarioDriver, () => {
     let testsRunCallback: jest.Mock;
     let scanSubmissionCallback: jest.Mock;
     let scanWaitCallback: jest.Mock;
-    let scanNotificationCallback: jest.Mock;
     let deepScanWaitCallback: jest.Mock;
     let trackScanSucceededCallback: jest.Mock;
 
@@ -43,8 +42,7 @@ describe(ScanScenarioDriver, () => {
         postScanSubmissionTests: ['PostScan'],
         postScanCompletionTests: ['SingleScanPostCompletion'],
         scanReportTests: ['ScanReports'],
-        postScanCompletionNotificationTests: ['ScanCompletionNotification'],
-        postDeepScanCompletionTests: ['ConsolidatedScanReports'],
+        postDeepScanCompletionTests: ['DeepScanPostCompletion'],
     };
     const scanOptions: PostScanRequestOptions = {};
     const scenarioName = 'TestScenario';
@@ -177,7 +175,6 @@ describe(ScanScenarioDriver, () => {
                 generatorExecutor.runTillEnd();
 
                 expect(deepScanWaitCallback).toHaveBeenCalledTimes(0);
-                expect(scanNotificationCallback).toHaveBeenCalledTimes(0);
                 expect(trackScanSucceededCallback).toHaveBeenCalled();
             });
 
@@ -187,54 +184,6 @@ describe(ScanScenarioDriver, () => {
                 const generatorExecutor = new GeneratorExecutor(testSubject.afterScanCompletedPhase());
                 generatorExecutor.runTillEnd();
 
-                expect(trackScanSucceededCallback).toHaveBeenCalledTimes(0);
-            });
-        });
-
-        describe('with scan notification url', () => {
-            beforeEach(() => {
-                testDefinition.scanOptions = {
-                    scanNotificationUrl: 'scan-notify-url',
-                };
-                orchestrationStepsMock.setup((o) => o.waitForScanCompletionNotification(scanId)).verifiable();
-                orchestrationStepsMock
-                    .setup((o) =>
-                        o.runFunctionalTestGroups(scenarioName, testContextData, testGroupNames.postScanCompletionNotificationTests),
-                    )
-                    .verifiable();
-            });
-
-            it('runs tests and tracks request completed if notification succeeds', () => {
-                const generatorExecutor = new GeneratorExecutor(testSubject.afterScanCompletedPhase());
-                generatorExecutor.runTillEnd();
-
-                expect(deepScanWaitCallback).toHaveBeenCalledTimes(0);
-                expect(scanNotificationCallback).toHaveBeenCalled();
-                expect(testsRunCallback).toHaveBeenCalled();
-                expect(trackScanSucceededCallback).toHaveBeenCalled();
-            });
-
-            it('runs tests and does not track request completed if notification errors', () => {
-                scanNotificationCallback.mockImplementation(() => {
-                    throw testError;
-                });
-                const generatorExecutor = new GeneratorExecutor(testSubject.afterScanCompletedPhase());
-                generatorExecutor.runTillEnd();
-
-                expect(deepScanWaitCallback).toHaveBeenCalledTimes(0);
-                expect(scanNotificationCallback).toHaveBeenCalled();
-                expect(testsRunCallback).toHaveBeenCalled();
-                expect(trackScanSucceededCallback).toHaveBeenCalledTimes(0);
-            });
-
-            it('does not wait for notification if there was a previous error', () => {
-                testSubject.encounteredError = true;
-                const generatorExecutor = new GeneratorExecutor(testSubject.afterScanCompletedPhase());
-                generatorExecutor.runTillEnd();
-
-                expect(deepScanWaitCallback).toHaveBeenCalledTimes(0);
-                expect(scanNotificationCallback).toHaveBeenCalledTimes(0);
-                expect(testsRunCallback).toHaveBeenCalled();
                 expect(trackScanSucceededCallback).toHaveBeenCalledTimes(0);
             });
         });
@@ -255,7 +204,6 @@ describe(ScanScenarioDriver, () => {
                 generatorExecutor.runTillEnd();
 
                 expect(deepScanWaitCallback).toHaveBeenCalled();
-                expect(scanNotificationCallback).toHaveBeenCalledTimes(0);
                 expect(testsRunCallback).toHaveBeenCalled();
                 expect(trackScanSucceededCallback).toHaveBeenCalled();
             });
@@ -269,7 +217,6 @@ describe(ScanScenarioDriver, () => {
                 generatorExecutor.runTillEnd();
 
                 expect(deepScanWaitCallback).toHaveBeenCalled();
-                expect(scanNotificationCallback).toHaveBeenCalledTimes(0);
                 expect(testsRunCallback).toHaveBeenCalled();
                 expect(trackScanSucceededCallback).toHaveBeenCalledTimes(0);
             });
@@ -281,7 +228,6 @@ describe(ScanScenarioDriver, () => {
                 generatorExecutor.runTillEnd();
 
                 expect(deepScanWaitCallback).toHaveBeenCalledTimes(0);
-                expect(scanNotificationCallback).toHaveBeenCalledTimes(0);
                 expect(testsRunCallback).toHaveBeenCalled();
                 expect(trackScanSucceededCallback).toHaveBeenCalledTimes(0);
             });
@@ -292,20 +238,16 @@ describe(ScanScenarioDriver, () => {
         testsRunCallback = jest.fn();
         scanSubmissionCallback = jest.fn();
         scanWaitCallback = jest.fn();
-        scanNotificationCallback = jest.fn();
         deepScanWaitCallback = jest.fn();
         trackScanSucceededCallback = jest.fn();
 
         orchestrationStepsMock
-            .setup((o) => o.runFunctionalTestGroups(scenarioName, It.isAny(), It.isAny()))
+            .setup((o) => o.runFunctionalTestGroups(It.isAny(), It.isAny(), It.isAny()))
             .returns(() => generatorStub(testsRunCallback));
         orchestrationStepsMock
             .setup((o) => o.invokeSubmitScanRequestRestApi(It.isAny(), It.isAny()))
             .returns(() => generatorStub(scanSubmissionCallback, scanId));
         orchestrationStepsMock.setup((o) => o.waitForBaseScanCompletion(It.isAny())).returns(() => generatorStub(scanWaitCallback));
-        orchestrationStepsMock
-            .setup((o) => o.waitForScanCompletionNotification(It.isAny()))
-            .returns(() => generatorStub(scanNotificationCallback));
         orchestrationStepsMock.setup((o) => o.waitForDeepScanCompletion(It.isAny())).returns(() => generatorStub(deepScanWaitCallback));
         orchestrationStepsMock.setup((o) => o.trackScanRequestCompleted()).returns(() => generatorStub(trackScanSucceededCallback));
     }

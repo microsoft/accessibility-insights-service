@@ -36,9 +36,6 @@ describe(HealthCheckController, () => {
             logQueryTimeRange: 'P1D',
             environmentDefinition: 'canary',
             consolidatedIdBase: 'some-report-id',
-            scanNotifyApiEndpoint: '/some-endpoint',
-            maxScanCompletionNotificationWaitTimeInSeconds: 30,
-            scanNotifyFailApiEndpoint: '/some-fail-endpoint',
             maxDeepScanWaitTimeInSeconds: 40,
         };
 

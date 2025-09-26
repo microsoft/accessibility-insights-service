@@ -10,8 +10,6 @@ import { E2EScanFactories } from './e2e-scan-scenario-definitions';
 describe('E2EScanScenarioDefinitions', () => {
     const availabilityConfig = {
         urlToScan: 'url-to-scan/',
-        scanNotifyApiEndpoint: 'scan-notify-api-endpoint',
-        scanNotifyFailApiEndpoint: 'scan-notify-fail-api-endpoint',
         consolidatedIdBase: 'consolidated-id-base',
     } as AvailabilityTestConfig;
     const webConfig: WebApiConfig = {
@@ -23,21 +21,15 @@ describe('E2EScanScenarioDefinitions', () => {
         const fakeDate = new Date('1/1/2000');
         const expectedRequestOptions = [
             {
-                scanNotificationUrl: 'base-url/scan-notify-api-endpoint',
+                privacyScan: true,
             },
             {
-                scanNotificationUrl: 'base-url/scan-notify-fail-api-endpoint',
-                consolidatedId: `consolidated-id-base-test-release-version-consolidated-${fakeDate.getTime()}`,
-                deepScanOptions: {
-                    knownPages: [`url-to-scan/unlinked/`],
-                },
-            },
-            {
+                privacyScan: true,
                 deepScan: true,
-                scanNotificationUrl: 'base-url/scan-notify-api-endpoint',
                 consolidatedId: `consolidated-id-base-test-release-version-deepScan-${fakeDate.getTime()}`,
             },
             {
+                privacyScan: true,
                 deepScan: true,
                 consolidatedId: `consolidated-id-base-test-release-version-deepScanKnownPages-${fakeDate.getTime()}`,
                 deepScanOptions: {
@@ -45,15 +37,12 @@ describe('E2EScanScenarioDefinitions', () => {
                 },
             },
             {
+                privacyScan: true,
                 deepScan: true,
                 consolidatedId: `consolidated-id-base-test-release-version-deepScanDiscoveryPatterns-${fakeDate.getTime()}`,
                 deepScanOptions: {
                     discoveryPatterns: [`url-to-scan/linked1(.*)`],
                 },
-            },
-            {
-                consolidatedId: `consolidated-id-base-test-release-version-privacy-${fakeDate.getTime()}`,
-                privacyScan: true,
             },
         ];
 

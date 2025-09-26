@@ -5,12 +5,7 @@ import { Queue, StorageConfig } from 'azure-services';
 import { ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
 import { GlobalLogger } from 'logger';
-import {
-    PageScanRequestProvider,
-    OnDemandPageScanRunResultProvider,
-    ScanNotificationProcessor,
-    WebsiteScanDataProvider,
-} from 'service-library';
+import { PageScanRequestProvider, OnDemandPageScanRunResultProvider, WebsiteScanDataProvider } from 'service-library';
 import { OnDemandPageScanRunState, ScanError, OnDemandPageScanResult, ScanType, KnownPage } from 'storage-documents';
 import { isEmpty } from 'lodash';
 import { ScanRequestSelector, ScanRequest, DispatchCondition } from './scan-request-selector';
@@ -27,7 +22,6 @@ export class OnDemandDispatcher {
         @inject(ScanRequestSelector) private readonly scanRequestSelector: ScanRequestSelector,
         @inject(OnDemandPageScanRunResultProvider) private readonly onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider,
         @inject(WebsiteScanDataProvider) private readonly websiteScanDataProvider: WebsiteScanDataProvider,
-        @inject(ScanNotificationProcessor) protected readonly scanNotificationProcessor: ScanNotificationProcessor,
         @inject(StorageConfig) private readonly storageConfig: StorageConfig,
         @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
         @inject(GlobalLogger) private readonly logger: GlobalLogger,
@@ -37,7 +31,6 @@ export class OnDemandDispatcher {
         this.targetQueueSize = (await this.serviceConfig.getConfigValue('queueConfig')).maxQueueSize;
         this.logger.logInfo(`Target scan queue size ${this.targetQueueSize}.`);
 
-        await this.dispatchRequests('accessibility', this.storageConfig.scanQueue);
         await this.dispatchRequests('privacy', this.storageConfig.privacyScanQueue);
     }
 
@@ -187,8 +180,6 @@ export class OnDemandDispatcher {
                 scanId: scanRequest.request.id,
                 deepScanId: websiteScanData?.deepScanId,
             });
-
-            await this.scanNotificationProcessor.sendScanCompletionNotification(pageScanResult, websiteScanData);
         }
     }
 

@@ -17959,46 +17959,6 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"web-api-scan-job-manager@workspace:packages/web-api-scan-job-manager":
-  version: 0.0.0-use.local
-  resolution: "web-api-scan-job-manager@workspace:packages/web-api-scan-job-manager"
-  dependencies:
-    "@azure/batch": "npm:^10.2.0"
-    "@azure/ms-rest-nodeauth": "npm:^3.1.1"
-    "@types/dotenv": "npm:^8.2.3"
-    "@types/jest": "npm:^29.5.12"
-    "@types/lodash": "npm:^4.17.20"
-    "@types/node": "npm:^20.14.9"
-    applicationinsights: "npm:^3.9.0"
-    azure-services: "workspace:*"
-    common: "workspace:*"
-    copy-webpack-plugin: "npm:^13.0.1"
-    dotenv: "npm:^17.2.1"
-    fork-ts-checker-webpack-plugin: "npm:^9.0.2"
-    inversify: "npm:^6.0.1"
-    jest: "npm:^29.7.0"
-    jest-junit: "npm:^16.0.0"
-    lodash: "npm:^4.17.21"
-    logger: "workspace:*"
-    mockdate: "npm:^3.0.5"
-    moment: "npm:^2.30.1"
-    node-loader: "npm:^2.1.0"
-    npm-run-all: "npm:^4.1.5"
-    reflect-metadata: "npm:^0.2.2"
-    rimraf: "npm:^6.0.1"
-    service-library: "workspace:*"
-    storage-documents: "workspace:*"
-    ts-jest: "npm:^29.4.1"
-    ts-loader: "npm:^9.5.4"
-    typemoq: "npm:^2.1.0"
-    typescript: "npm:^5.5.3"
-    webpack: "npm:^5.101.3"
-    webpack-cli: "npm:^5.1.4"
-    webpack-ignore-dynamic-require: "npm:^1.0.0"
-    yargs: "npm:^17.7.2"
-  languageName: unknown
-  linkType: soft
-
 "web-api-scan-request-sender@workspace:packages/web-api-scan-request-sender":
   version: 0.0.0-use.local
   resolution: "web-api-scan-request-sender@workspace:packages/web-api-scan-request-sender"

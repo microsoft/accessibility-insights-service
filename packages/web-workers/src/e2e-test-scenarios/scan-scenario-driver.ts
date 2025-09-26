@@ -35,12 +35,6 @@ export class ScanScenarioDriver {
                 this.testDefinition.testGroups.postDeepScanCompletionTests,
             );
         }
-        if (scanRequestOptions.scanNotificationUrl) {
-            yield* this.skipIfError(
-                this.orchestrationSteps.waitForScanCompletionNotification(this.testContextData.scanId),
-                this.testDefinition.testGroups.postScanCompletionNotificationTests,
-            );
-        }
         yield* this.skipIfError(this.orchestrationSteps.trackScanRequestCompleted());
     }
 
@@ -70,6 +64,8 @@ export class ScanScenarioDriver {
             }
         }
 
-        yield* this.orchestrationSteps.runFunctionalTestGroups(this.testDefinition.readableName, this.testContextData, testGroupNames);
+        if (testGroupNames && testGroupNames.length > 0) {
+            yield* this.orchestrationSteps.runFunctionalTestGroups(this.testDefinition.readableName, this.testContextData, testGroupNames);
+        }
     }
 }

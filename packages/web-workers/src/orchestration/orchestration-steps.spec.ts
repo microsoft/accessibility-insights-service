@@ -58,9 +58,6 @@ describe(OrchestrationSteps, () => {
             logQueryTimeRange: 'P1D',
             environmentDefinition: 'canary',
             consolidatedIdBase: 'somereportid',
-            maxScanCompletionNotificationWaitTimeInSeconds: 30,
-            scanNotifyApiEndpoint: '/scan-notify-api',
-            scanNotifyFailApiEndpoint: '/some-fail-endpoint',
             maxDeepScanWaitTimeInSeconds: 40,
         };
 
@@ -304,36 +301,6 @@ describe(OrchestrationSteps, () => {
             const result = generatorExecutor.runTillEnd();
 
             expect(result).toEqual(response);
-
-            expect(waitCallback).toHaveBeenCalled();
-        });
-    });
-
-    describe('waitForScanCompletionNotification', () => {
-        it('calls waitFor with expected args', async () => {
-            const response = {
-                scanId: scanId,
-                notification: { scanNotifyUrl: notifyScanUrl },
-            } as ScanRunResultResponse;
-            const waitCallback = jest.fn();
-
-            scanWaitOrchestratorMock
-                .setup((s) =>
-                    s.waitFor(
-                        scanId,
-                        'waitForScanCompletionNotification',
-                        availabilityTestConfig.maxScanCompletionNotificationWaitTimeInSeconds,
-                        availabilityTestConfig.scanWaitIntervalInSeconds,
-                        ScanWaitConditions.scanNotification,
-                    ),
-                )
-                .returns(() => generatorStub(waitCallback, response))
-                .verifiable();
-
-            const generatorExecutor = new GeneratorExecutor<string>(testSubject.waitForScanCompletionNotification(scanId));
-            const result = generatorExecutor.runTillEnd();
-
-            expect(result).toEqual(response.notification);
 
             expect(waitCallback).toHaveBeenCalled();
         });

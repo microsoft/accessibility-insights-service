@@ -7,7 +7,6 @@ import { injectable } from 'inversify';
 import { isNil } from 'lodash';
 
 export interface RuntimeConfig {
-    featureFlags: FeatureFlags;
     logConfig: LogRuntimeConfig;
     taskConfig: TaskRuntimeConfig;
     queueConfig: QueueRuntimeConfig;
@@ -38,21 +37,13 @@ export interface JobManagerConfig {
     activeToRunningTasksRatio: number;
     addTasksIntervalInSeconds: number;
     maxWallClockTimeInMinutes: number;
-    sendNotificationTasksCount: number;
-    scanRunnerTaskImageName: string;
-    sendNotificationTaskImageName: string;
     privacyScanRunnerTaskImageName: string;
-    reportGeneratorRunnerTaskImageName: string;
-    accessibilityScanJobGroup: string;
-    sendNotificationJobGroup: string;
     privacyScanJobGroup: string;
-    reportGeneratorJobGroup: string;
 }
 
 export interface ScanRunTimeConfig {
     failedScanRetryIntervalInMinutes: number;
     maxFailedScanRetryCount: number;
-    maxSendNotificationRetryCount: number;
     maxScanStaleTimeoutInMinutes: number;
     scanTimeoutInMin: number;
 }
@@ -64,10 +55,6 @@ export interface RestApiConfig {
     maxScanPriorityValue: number;
 }
 
-export interface FeatureFlags {
-    sendNotification: boolean;
-}
-
 export interface AvailabilityTestConfig {
     urlToScan: string;
     scanWaitIntervalInSeconds: number;
@@ -75,9 +62,6 @@ export interface AvailabilityTestConfig {
     logQueryTimeRange: string;
     environmentDefinition: string;
     consolidatedIdBase: string;
-    scanNotifyApiEndpoint: string;
-    scanNotifyFailApiEndpoint: string;
-    maxScanCompletionNotificationWaitTimeInSeconds: number;
     maxDeepScanWaitTimeInSeconds: number;
 }
 
@@ -151,13 +135,6 @@ export class ServiceConfiguration {
 
     private getRuntimeConfigSchema(): convict.Schema<RuntimeConfig> {
         return {
-            featureFlags: {
-                sendNotification: {
-                    format: 'Boolean',
-                    default: true,
-                    doc: 'Property to decide if we should notify after scan completed.',
-                },
-            },
             logConfig: {
                 logInConsole: {
                     format: 'Boolean',
@@ -205,50 +182,15 @@ export class ServiceConfiguration {
                     default: 40,
                     doc: 'The amount of time the job manager instance will run continuously. Must correlate with queueConfig.messageVisibilityTimeoutInSeconds config value.',
                 },
-                sendNotificationTasksCount: {
-                    format: 'int',
-                    default: 100,
-                    doc: 'Number of scan notification tasks that can be in active/running state',
-                },
-                scanRunnerTaskImageName: {
-                    format: 'String',
-                    default: 'batch-scan-runner',
-                    doc: 'The container image name used for task creation.',
-                },
-                sendNotificationTaskImageName: {
-                    format: 'String',
-                    default: 'batch-scan-notification-runner',
-                    doc: 'The container image name used for task creation.',
-                },
                 privacyScanRunnerTaskImageName: {
                     format: 'String',
                     default: 'batch-privacy-scan-runner',
                     doc: 'The container image name used for task creation.',
                 },
-                reportGeneratorRunnerTaskImageName: {
-                    format: 'String',
-                    default: 'batch-report-generator-runner',
-                    doc: 'The container image name used for task creation.',
-                },
-                accessibilityScanJobGroup: {
-                    format: 'String',
-                    default: 'on-demand-url-scan-schedule',
-                    doc: 'The prefix for accessibility scan batch job id.',
-                },
-                sendNotificationJobGroup: {
-                    format: 'String',
-                    default: 'on-demand-send-notification-schedule',
-                    doc: 'The prefix for send notification batch job id.',
-                },
                 privacyScanJobGroup: {
                     format: 'String',
                     default: 'privacy-scan-schedule',
                     doc: 'The prefix for privacy scan batch job id.',
-                },
-                reportGeneratorJobGroup: {
-                    format: 'String',
-                    default: 'report-generator-schedule',
-                    doc: 'The prefix for report generator batch job id.',
                 },
             },
             scanConfig: {
@@ -261,11 +203,6 @@ export class ServiceConfiguration {
                     format: 'int',
                     default: 2,
                     doc: 'Maximum number of retries (additional times to re-run a scan) allowed for a failed scan request.',
-                },
-                maxSendNotificationRetryCount: {
-                    format: 'int',
-                    default: 5,
-                    doc: 'Maximum number of retries allowed for a scan notification sending',
                 },
                 maxScanStaleTimeoutInMinutes: {
                     format: 'int',
@@ -318,11 +255,6 @@ export class ServiceConfiguration {
                     default: 3600,
                     doc: 'Maximum wait time for scan request to complete',
                 },
-                maxScanCompletionNotificationWaitTimeInSeconds: {
-                    format: 'int',
-                    default: 600,
-                    doc: 'Maximum wait time for scan notification request to complete',
-                },
                 maxDeepScanWaitTimeInSeconds: {
                     format: 'int',
                     default: 3600,
@@ -342,16 +274,6 @@ export class ServiceConfiguration {
                     format: String,
                     default: 'canary',
                     doc: 'The environment definition used to select tests to run',
-                },
-                scanNotifyApiEndpoint: {
-                    format: 'String',
-                    default: '/scan-notification-pass',
-                    doc: 'The end-point to hit when a scan is completed and will respond successfully',
-                },
-                scanNotifyFailApiEndpoint: {
-                    format: 'String',
-                    default: '/scan-notification-fail',
-                    doc: 'The end-point to hit when a scan is completed and will respond unsuccessfully',
                 },
             },
             crawlConfig: {

@@ -4,7 +4,7 @@
 import { AvailabilityTestConfig, SerializableResponse } from 'common';
 import { TestContextData, TestEnvironment, TestGroupName } from 'functional-tests';
 import { LogLevel } from 'logger';
-import { ScanCompletedNotification, ScanRunResponse, ScanRunResultResponse } from 'service-library';
+import { ScanRunResponse, ScanRunResultResponse } from 'service-library';
 import { PostScanRequestOptions } from 'web-api-client';
 import * as df from 'durable-functions';
 import { ActivityAction } from '../contracts/activity-actions';
@@ -61,18 +61,6 @@ export class OrchestrationSteps {
             this.availabilityTestConfig.scanWaitIntervalInSeconds,
             ScanWaitConditions.baseScan,
         );
-    }
-
-    public *waitForScanCompletionNotification(scanId: string): Generator<df.Task, ScanCompletedNotification, SerializableResponse & void> {
-        const scanStatus = yield* this.scanWaitOrchestrator.waitFor(
-            scanId,
-            'waitForScanCompletionNotification',
-            this.availabilityTestConfig.maxScanCompletionNotificationWaitTimeInSeconds,
-            this.availabilityTestConfig.scanWaitIntervalInSeconds,
-            ScanWaitConditions.scanNotification,
-        );
-
-        return scanStatus?.notification;
     }
 
     public *waitForDeepScanCompletion(scanId: string): Generator<df.Task, ScanRunResultResponse, SerializableResponse & void> {

@@ -46,7 +46,7 @@ export class TestOnDemandController extends WebController {
                 scanId: '', // set scanId
             },
             test: {
-                // set testGroupName vale to a key from functionalTestGroupTypes const (functional-tests package)
+                // set testGroupName value to a key from functionalTestGroupTypes const (functional-tests package)
                 // i.e. ScanReportTestGroup -> ScanReports
                 testGroupName: 'ScanReports',
                 scenarioName: '',

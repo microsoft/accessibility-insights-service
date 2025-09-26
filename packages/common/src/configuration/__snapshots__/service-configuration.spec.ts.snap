@@ -23,25 +23,10 @@ exports[`ServiceConfiguration verifies custom config 1`] = `
       "doc": "Maximum wait time for deep scan to complete",
       "format": "int",
     },
-    "maxScanCompletionNotificationWaitTimeInSeconds": {
-      "default": 600,
-      "doc": "Maximum wait time for scan notification request to complete",
-      "format": "int",
-    },
     "maxScanWaitTimeInSeconds": {
       "default": 3600,
       "doc": "Maximum wait time for scan request to complete",
       "format": "int",
-    },
-    "scanNotifyApiEndpoint": {
-      "default": "/scan-notification-pass",
-      "doc": "The end-point to hit when a scan is completed and will respond successfully",
-      "format": "String",
-    },
-    "scanNotifyFailApiEndpoint": {
-      "default": "/scan-notification-fail",
-      "doc": "The end-point to hit when a scan is completed and will respond unsuccessfully",
-      "format": "String",
     },
     "scanWaitIntervalInSeconds": {
       "default": 180,
@@ -66,19 +51,7 @@ exports[`ServiceConfiguration verifies custom config 1`] = `
       "format": "int",
     },
   },
-  "featureFlags": {
-    "sendNotification": {
-      "default": true,
-      "doc": "Property to decide if we should notify after scan completed.",
-      "format": "Boolean",
-    },
-  },
   "jobManagerConfig": {
-    "accessibilityScanJobGroup": {
-      "default": "on-demand-url-scan-schedule",
-      "doc": "The prefix for accessibility scan batch job id.",
-      "format": "String",
-    },
     "activeToRunningTasksRatio": {
       "default": 2,
       "doc": "The target overload ratio of queued to running tasks. Higher ratio value will result higher queued tasks count.",
@@ -103,36 +76,6 @@ exports[`ServiceConfiguration verifies custom config 1`] = `
       "default": "batch-privacy-scan-runner",
       "doc": "The container image name used for task creation.",
       "format": "String",
-    },
-    "reportGeneratorJobGroup": {
-      "default": "report-generator-schedule",
-      "doc": "The prefix for report generator batch job id.",
-      "format": "String",
-    },
-    "reportGeneratorRunnerTaskImageName": {
-      "default": "batch-report-generator-runner",
-      "doc": "The container image name used for task creation.",
-      "format": "String",
-    },
-    "scanRunnerTaskImageName": {
-      "default": "batch-scan-runner",
-      "doc": "The container image name used for task creation.",
-      "format": "String",
-    },
-    "sendNotificationJobGroup": {
-      "default": "on-demand-send-notification-schedule",
-      "doc": "The prefix for send notification batch job id.",
-      "format": "String",
-    },
-    "sendNotificationTaskImageName": {
-      "default": "batch-scan-notification-runner",
-      "doc": "The container image name used for task creation.",
-      "format": "String",
-    },
-    "sendNotificationTasksCount": {
-      "default": 100,
-      "doc": "Number of scan notification tasks that can be in active/running state",
-      "format": "int",
     },
   },
   "logConfig": {
@@ -216,11 +159,6 @@ exports[`ServiceConfiguration verifies custom config 1`] = `
     "maxScanStaleTimeoutInMinutes": {
       "default": 4320,
       "doc": "Maximum sliding window for a scan to complete.",
-      "format": "int",
-    },
-    "maxSendNotificationRetryCount": {
-      "default": 5,
-      "doc": "Maximum number of retries allowed for a scan notification sending",
       "format": "int",
     },
     "scanTimeoutInMin": {
@@ -267,25 +205,10 @@ exports[`ServiceConfiguration verifies dev config 1`] = `
       "doc": "Maximum wait time for deep scan to complete",
       "format": "int",
     },
-    "maxScanCompletionNotificationWaitTimeInSeconds": {
-      "default": 600,
-      "doc": "Maximum wait time for scan notification request to complete",
-      "format": "int",
-    },
     "maxScanWaitTimeInSeconds": {
       "default": 3600,
       "doc": "Maximum wait time for scan request to complete",
       "format": "int",
-    },
-    "scanNotifyApiEndpoint": {
-      "default": "/scan-notification-pass",
-      "doc": "The end-point to hit when a scan is completed and will respond successfully",
-      "format": "String",
-    },
-    "scanNotifyFailApiEndpoint": {
-      "default": "/scan-notification-fail",
-      "doc": "The end-point to hit when a scan is completed and will respond unsuccessfully",
-      "format": "String",
     },
     "scanWaitIntervalInSeconds": {
       "default": 180,
@@ -310,19 +233,7 @@ exports[`ServiceConfiguration verifies dev config 1`] = `
       "format": "int",
     },
   },
-  "featureFlags": {
-    "sendNotification": {
-      "default": true,
-      "doc": "Property to decide if we should notify after scan completed.",
-      "format": "Boolean",
-    },
-  },
   "jobManagerConfig": {
-    "accessibilityScanJobGroup": {
-      "default": "on-demand-url-scan-schedule",
-      "doc": "The prefix for accessibility scan batch job id.",
-      "format": "String",
-    },
     "activeToRunningTasksRatio": {
       "default": 2,
       "doc": "The target overload ratio of queued to running tasks. Higher ratio value will result higher queued tasks count.",
@@ -347,36 +258,6 @@ exports[`ServiceConfiguration verifies dev config 1`] = `
       "default": "batch-privacy-scan-runner",
       "doc": "The container image name used for task creation.",
       "format": "String",
-    },
-    "reportGeneratorJobGroup": {
-      "default": "report-generator-schedule",
-      "doc": "The prefix for report generator batch job id.",
-      "format": "String",
-    },
-    "reportGeneratorRunnerTaskImageName": {
-      "default": "batch-report-generator-runner",
-      "doc": "The container image name used for task creation.",
-      "format": "String",
-    },
-    "scanRunnerTaskImageName": {
-      "default": "batch-scan-runner",
-      "doc": "The container image name used for task creation.",
-      "format": "String",
-    },
-    "sendNotificationJobGroup": {
-      "default": "on-demand-send-notification-schedule",
-      "doc": "The prefix for send notification batch job id.",
-      "format": "String",
-    },
-    "sendNotificationTaskImageName": {
-      "default": "batch-scan-notification-runner",
-      "doc": "The container image name used for task creation.",
-      "format": "String",
-    },
-    "sendNotificationTasksCount": {
-      "default": 100,
-      "doc": "Number of scan notification tasks that can be in active/running state",
-      "format": "int",
     },
   },
   "logConfig": {
@@ -460,11 +341,6 @@ exports[`ServiceConfiguration verifies dev config 1`] = `
     "maxScanStaleTimeoutInMinutes": {
       "default": 4320,
       "doc": "Maximum sliding window for a scan to complete.",
-      "format": "int",
-    },
-    "maxSendNotificationRetryCount": {
-      "default": 5,
-      "doc": "Maximum number of retries allowed for a scan notification sending",
       "format": "int",
     },
     "scanTimeoutInMin": {

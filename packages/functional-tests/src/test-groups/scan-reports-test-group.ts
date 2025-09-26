@@ -19,16 +19,12 @@ export class ScanReportTestGroup extends FunctionalTestGroup {
 
         expect(reports, 'Expected a valid reports response result').to.not.be.undefined;
         expect(
-            reports.find((r) => r.format === 'sarif'),
-            `Expected 'sarif' report to be returned`,
+            reports.find((r) => r.format === 'json'),
+            `Expected privacy scan 'json' report to be returned`,
         ).to.not.be.undefined;
         expect(
-            reports.find((r) => r.format === 'html'),
-            `Expected 'html' report to be returned`,
-        ).to.not.be.undefined;
-        expect(
-            reports.find((r) => r.format === 'axe'),
-            `Expected 'axe' report to be returned`,
+            reports.find((r) => r.format === 'consolidated.json'),
+            `Expected privacy scan 'consolidated.json' report to be returned`,
         ).to.not.be.undefined;
         expect(
             reports.find((r) => r.format === 'page.mhtml'),
@@ -44,12 +40,13 @@ export class ScanReportTestGroup extends FunctionalTestGroup {
     public async testGetReports(): Promise<void> {
         const response = await this.a11yServiceClient.getScanStatus(this.testContextData.scanId);
         const reportsInfo = (<ScanRunResultResponse>response.body).reports;
+
         await Promise.all(
             reportsInfo.map(async (reportData: ScanReport) => {
                 const reportResponse = await this.a11yServiceClient.getScanReport(this.testContextData.scanId, reportData.reportId);
 
                 this.ensureResponseSuccessStatusCode(response);
-                expect(reportResponse.body, 'Get Scan Report API should return response with defined body').to.not.be.undefined;
+                expect(reportResponse.body, 'Get scan report API should return response with defined body').to.not.be.undefined;
             }),
         );
     }

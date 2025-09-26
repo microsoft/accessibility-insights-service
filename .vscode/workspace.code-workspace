@@ -17,10 +17,6 @@
             "path": "../packages/e2e-test-site"
         },
         {
-            "name": "e2e-web-apis",
-            "path": "../packages/e2e-web-apis"
-        },
-        {
             "name": "functional-tests",
             "path": "../packages/functional-tests"
         },
@@ -67,10 +63,6 @@
         {
             "name": "web-api-client",
             "path": "../packages/web-api-client"
-        },
-        {
-            "name": "web-api-scan-job-manager",
-            "path": "../packages/web-api-scan-job-manager"
         },
         {
             "name": "web-api-scan-request-sender",

@@ -13,7 +13,7 @@ export const E2EScanFactories: E2EScanScenarioDefinitionFactory[] = [
         return {
             readableName: 'SingleScan',
             scanOptions: {
-                scanNotificationUrl: `${webApiConfig.baseUrl}${availabilityConfig.scanNotifyApiEndpoint}`,
+                privacyScan: true,
             },
             initialTestContextData: {
                 scanUrl: availabilityConfig.urlToScan,
@@ -22,29 +22,6 @@ export const E2EScanFactories: E2EScanScenarioDefinitionFactory[] = [
                 postScanSubmissionTests: ['PostScan', 'ScanStatus'],
                 postScanCompletionTests: ['SingleScanPostCompletion', 'ScanQueueing'],
                 scanReportTests: ['ScanReports'],
-                postScanCompletionNotificationTests: ['ScanCompletionNotification'],
-            },
-        };
-    },
-    // Consolidated scan with failed notification
-    (availabilityConfig: AvailabilityTestConfig, webApiConfig: WebApiConfig): E2EScanScenarioDefinition => {
-        const baseUrl = availabilityConfig.urlToScan;
-
-        return {
-            readableName: 'ConsolidatedScan',
-            scanOptions: {
-                scanNotificationUrl: `${webApiConfig.baseUrl}${availabilityConfig.scanNotifyFailApiEndpoint}`,
-                consolidatedId: `${availabilityConfig.consolidatedIdBase}-${webApiConfig.releaseId}-consolidated-${Date.now()}`,
-                deepScanOptions: {
-                    knownPages: [`${baseUrl}unlinked/`],
-                },
-            },
-            initialTestContextData: {
-                scanUrl: availabilityConfig.urlToScan,
-            },
-            testGroups: {
-                scanReportTests: ['ConsolidatedScanReports'],
-                postScanCompletionNotificationTests: ['FailedScanNotification'],
             },
         };
     },
@@ -55,8 +32,8 @@ export const E2EScanFactories: E2EScanScenarioDefinitionFactory[] = [
         return {
             readableName: 'DeepScan',
             scanOptions: {
+                privacyScan: true,
                 deepScan: true,
-                scanNotificationUrl: `${webApiConfig.baseUrl}${availabilityConfig.scanNotifyApiEndpoint}`,
                 consolidatedId: `${availabilityConfig.consolidatedIdBase}-${webApiConfig.releaseId}-deepScan-${Date.now()}`,
             },
             initialTestContextData: {
@@ -65,13 +42,7 @@ export const E2EScanFactories: E2EScanScenarioDefinitionFactory[] = [
             },
             testGroups: {
                 postScanCompletionTests: ['DeepScanStatusConsistency'],
-                postDeepScanCompletionTests: [
-                    'DeepScanPostCompletion',
-                    'DeepScanReports',
-                    'ConsolidatedScanReports',
-                    'DeepScanPreCompletionNotification',
-                ],
-                postScanCompletionNotificationTests: ['ScanCompletionNotification'],
+                postDeepScanCompletionTests: ['DeepScanPostCompletion', 'DeepScanReports'],
             },
         };
     },
@@ -82,6 +53,7 @@ export const E2EScanFactories: E2EScanScenarioDefinitionFactory[] = [
         return {
             readableName: 'DeepScanKnownPages',
             scanOptions: {
+                privacyScan: true,
                 deepScan: true,
                 consolidatedId: `${availabilityConfig.consolidatedIdBase}-${webApiConfig.releaseId}-deepScanKnownPages-${Date.now()}`,
                 deepScanOptions: {
@@ -101,7 +73,7 @@ export const E2EScanFactories: E2EScanScenarioDefinitionFactory[] = [
             },
             testGroups: {
                 postScanCompletionTests: ['DeepScanStatusConsistency'],
-                postDeepScanCompletionTests: ['DeepScanPostCompletion', 'DeepScanReports', 'ConsolidatedScanReports'],
+                postDeepScanCompletionTests: ['DeepScanPostCompletion', 'DeepScanReports'],
             },
         };
     },
@@ -112,6 +84,7 @@ export const E2EScanFactories: E2EScanScenarioDefinitionFactory[] = [
         return {
             readableName: 'DeepScanDiscoveryPatterns',
             scanOptions: {
+                privacyScan: true,
                 deepScan: true,
                 consolidatedId: `${availabilityConfig.consolidatedIdBase}-${
                     webApiConfig.releaseId
@@ -126,23 +99,7 @@ export const E2EScanFactories: E2EScanScenarioDefinitionFactory[] = [
             },
             testGroups: {
                 postScanCompletionTests: ['DeepScanStatusConsistency'],
-                postDeepScanCompletionTests: ['DeepScanPostCompletion', 'DeepScanReports', 'ConsolidatedScanReports'],
-            },
-        };
-    },
-    // privacy scan with consolidated report
-    (availabilityConfig: AvailabilityTestConfig, webApiConfig: WebApiConfig): E2EScanScenarioDefinition => {
-        return {
-            readableName: 'PrivacyScan',
-            scanOptions: {
-                consolidatedId: `${availabilityConfig.consolidatedIdBase}-${webApiConfig.releaseId}-privacy-${Date.now()}`,
-                privacyScan: true,
-            },
-            initialTestContextData: {
-                scanUrl: availabilityConfig.urlToScan,
-            },
-            testGroups: {
-                scanReportTests: ['PrivacyScanReports'],
+                postDeepScanCompletionTests: ['DeepScanPostCompletion', 'DeepScanReports'],
             },
         };
     },

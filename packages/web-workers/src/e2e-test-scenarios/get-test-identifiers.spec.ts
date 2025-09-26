@@ -2,8 +2,8 @@
 // Licensed under the MIT License.
 
 import 'reflect-metadata';
-import { TestIdentifier } from '../controllers/activity-request-data';
 
+import { TestIdentifier } from '../controllers/activity-request-data';
 import { E2EScanScenarioDefinition } from './e2e-scan-scenario-definitions';
 import { getTestIdentifiersForScenario } from './get-test-identifiers';
 
@@ -15,7 +15,6 @@ describe(getTestIdentifiersForScenario, () => {
             postScanSubmissionTests: ['PostScan', 'ScanStatus'],
             postScanCompletionTests: ['SingleScanPostCompletion'],
             scanReportTests: [],
-            postScanCompletionNotificationTests: ['ScanCompletionNotification'],
         },
     } as E2EScanScenarioDefinition;
 
@@ -30,10 +29,6 @@ describe(getTestIdentifiersForScenario, () => {
         },
         {
             testGroupName: 'SingleScanPostCompletion',
-            scenarioName: scenarioName,
-        },
-        {
-            testGroupName: 'ScanCompletionNotification',
             scenarioName: scenarioName,
         },
     ];
