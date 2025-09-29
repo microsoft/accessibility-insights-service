@@ -13,7 +13,6 @@ describe(isScanRunRequest, () => {
             isScanRunRequest({
                 url: 'url',
                 deepScan: true,
-                scanNotifyUrl: 'scanNotifyUrl',
                 priority: 100,
                 authenticationType: 'entraId',
                 site: {
@@ -60,13 +59,6 @@ describe(isScanRunRequest, () => {
         { url: 'url', deepScan: undefined },
         { url: 'url', deepScan: 1 },
     ])('validate `deepScan` property', (obj: any) => {
-        expect(isScanRunRequest(obj)).toEqual(false);
-    });
-
-    test.each([
-        { url: 'url', scanNotifyUrl: undefined },
-        { url: 'url', scanNotifyUrl: 1 },
-    ])('validate `scanNotifyUrl` property', (obj: any) => {
         expect(isScanRunRequest(obj)).toEqual(false);
     });
 

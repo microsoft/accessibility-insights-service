@@ -18,14 +18,14 @@ az login
 az account set --subscription <subscription id>
 ```
 
--   Run [create-env-file-for-debug.sh](https://github.com/microsoft/accessibility-insights-service/blob/main/packages/resource-deployment/scripts/create-env-file-for-debug.sh) script to create SP account. Provide resource group name where AI Service is deployed. Use script output to fulfill `AI_OAUTH_*` script parameters below.
+-   Run [create-env-file-for-debug.sh](https://github.com/microsoft/privacy-insights-service/blob/main/packages/resource-deployment/scripts/create-env-file-for-debug.sh) script to create SP account. Provide resource group name where AI Service is deployed. Use script output to fulfill `AI_OAUTH_*` script parameters below.
 
 ```bash
 ./create-env-file-for-debug.sh -r <resource group name>
 ```
 
 -   Create `url.txt` file with list of URLs to scan in data folder
--   Create `.env` file in [service-library](https://github.com/microsoft/accessibility-insights-service/tree/main/packages/service-library) package folder. The `.env` file example:
+-   Create `.env` file in [service-library](https://github.com/microsoft/privacy-insights-service/tree/main/packages/service-library) package folder. The `.env` file example:
 
 ```ini
 AI_SERVICE_BASE_URL=
@@ -45,7 +45,7 @@ AI_OAUTH_RESOURCE_ID=
 yarn build
 ```
 
--   Run [service-client.ts](https://github.com/microsoft/accessibility-insights-service/blob/main/packages/service-library/src/dev-utilities/service-client.ts) script:
+-   Run [service-client.ts](https://github.com/microsoft/privacy-insights-service/blob/main/packages/service-library/src/dev-utilities/service-client.ts) script:
 
 ```bash
 node ./dist/service-client.js
@@ -61,7 +61,7 @@ node ./dist/service-client.js
 OPERATION=get-result
 ```
 
--   Run the [service-client.ts](https://github.com/microsoft/accessibility-insights-service/blob/main/packages/service-library/src/dev-utilities/service-client.ts) script:
+-   Run the [service-client.ts](https://github.com/microsoft/privacy-insights-service/blob/main/packages/service-library/src/dev-utilities/service-client.ts) script:
 
 ```bash
 node ./dist/service-client.js
@@ -93,7 +93,7 @@ WCP_AZURE_STORAGE_KEY=
 WCP_AZURE_BLOB_CONTAINER_NAME=
 ```
 
--   Run the [wcp-data-parser.ts](https://github.com/microsoft/accessibility-insights-service/blob/main/packages/service-library/src/dev-utilities/wcp-data-parser.ts) script:
+-   Run the [wcp-data-parser.ts](https://github.com/microsoft/privacy-insights-service/blob/main/packages/service-library/src/dev-utilities/wcp-data-parser.ts) script:
 
 ```bash
 node ./dist/wcp-data-parser.js
@@ -109,7 +109,7 @@ node ./dist/wcp-data-parser.js
 OPERATION=compare-validation
 ```
 
--   Run the [wcp-data-parser.ts](https://github.com/microsoft/accessibility-insights-service/blob/main/packages/service-library/src/dev-utilities/wcp-data-parser.ts) script:
+-   Run the [wcp-data-parser.ts](https://github.com/microsoft/privacy-insights-service/blob/main/packages/service-library/src/dev-utilities/wcp-data-parser.ts) script:
 
 ```bash
 node ./dist/wcp-data-parser.js

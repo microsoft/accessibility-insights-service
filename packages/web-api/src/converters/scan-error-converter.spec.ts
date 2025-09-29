@@ -3,7 +3,7 @@
 
 import 'reflect-metadata';
 
-import { ScanNotificationErrorCodes, ScanRunErrorCodes } from 'service-library';
+import { ScanRunErrorCodes } from 'service-library';
 import { ScanErrorConverter } from './scan-error-converter';
 
 let testSubject: ScanErrorConverter;
@@ -34,25 +34,6 @@ describe(ScanErrorConverter, () => {
             });
 
             expect(errorCode).toEqual(ScanRunErrorCodes.invalidContentType);
-        });
-    });
-
-    describe('getScanNotificationErrorCode', () => {
-        it('should return undefined for undefined or null error', () => {
-            let errorCode = testSubject.getScanNotificationErrorCode(undefined);
-            expect(errorCode).toBeUndefined();
-
-            errorCode = testSubject.getScanNotificationErrorCode(null);
-            expect(errorCode).toBeUndefined();
-        });
-
-        it('should resolve scanError to scanErrorCode', () => {
-            const errorCode = testSubject.getScanNotificationErrorCode({
-                errorType: 'InternalError',
-                message: 'error message',
-            });
-
-            expect(errorCode).toEqual(ScanNotificationErrorCodes.InternalError);
         });
     });
 });

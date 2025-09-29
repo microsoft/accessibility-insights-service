@@ -33,8 +33,6 @@ function setupQueues() {
     local createQueueProcesses=(
         "createQueue \"ondemand-scanrequest\""
         "createQueue \"ondemand-scanrequest-dead\""
-        "createQueue \"ondemand-send-notification\""
-        "createQueue \"ondemand-send-notification-dead\""
         "createQueue \"privacy-scan-request\""
         "createQueue \"privacy-scan-request-dead\""
     )

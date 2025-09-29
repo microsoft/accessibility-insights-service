@@ -6,7 +6,6 @@ import 'reflect-metadata';
 import { AvailabilityTestConfig, SerializableResponse } from 'common';
 import { IMock, It, Mock, MockBehavior } from 'typemoq';
 import { ScanRunResponse, ScanRunResultResponse, WebApiError } from 'service-library';
-import { PostScanRequestOptions } from 'web-api-client';
 import { TestContextData, TestGroupName } from 'functional-tests';
 import * as df from 'durable-functions';
 import { ActivityAction } from '../contracts/activity-actions';
@@ -38,7 +37,6 @@ describe(OrchestrationSteps, () => {
     let scanWaitOrchestratorMock: IMock<ScanWaitOrchestrator>;
     const scanUrl = 'https://www.bing.com';
     const scanId = 'test-scan-id';
-    const notifyScanUrl = 'scan-notify-url-stub';
     const webApiConfig: WebApiConfig = {
         releaseId: 'releaseId',
         baseUrl: 'base url',
@@ -106,15 +104,11 @@ describe(OrchestrationSteps, () => {
         let scanActivityData: CreateScanRequestData;
 
         beforeEach(() => {
-            const scanRequestOptions: PostScanRequestOptions = {
-                scanNotificationUrl: notifyScanUrl,
-            };
-            generatorExecutor = new GeneratorExecutor<string>(testSubject.invokeSubmitScanRequestRestApi(scanUrl, scanRequestOptions));
+            generatorExecutor = new GeneratorExecutor<string>(testSubject.invokeSubmitScanRequestRestApi(scanUrl));
             scanActivityData = {
                 scanUrl: scanUrl,
                 scanOptions: {
                     priority: 1000,
-                    scanNotificationUrl: notifyScanUrl,
                 },
             };
         });

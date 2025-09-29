@@ -16,7 +16,6 @@ import {
     WebsiteScanDataProvider,
 } from 'service-library';
 import {
-    convertToBrowserValidationResult,
     ItemType,
     KnownPage,
     OnDemandPageScanBatchRequest,
@@ -128,22 +127,11 @@ export class ScanBatchRequestFeedController extends WebController {
                         ...(request.scanDefinitions === undefined ? {} : { scanDefinitions: request.scanDefinitions }),
                         ...(request.privacyScan === undefined ? {} : { privacyScan: request.privacyScan }),
                         ...(request.authenticationType === undefined ? {} : { authentication: { hint: request.authenticationType } }),
-                        ...(convertToBrowserValidationResult(request.browserValidations) === undefined
-                            ? {}
-                            : { browserValidationResult: convertToBrowserValidationResult(request.browserValidations) }),
                         run: {
                             state: 'accepted',
                             timestamp: new Date().toJSON(),
                             scanRunDetails: scanDefinitionsRunState ?? [],
                         },
-                        ...(isEmpty(request.scanNotifyUrl)
-                            ? {}
-                            : {
-                                  notification: {
-                                      state: 'pending',
-                                      scanNotifyUrl: request.scanNotifyUrl,
-                                  },
-                              }),
                     };
 
                     await this.onDemandPageScanRunResultProvider.writeScanRuns([dbDocument]);
@@ -192,7 +180,6 @@ export class ScanBatchRequestFeedController extends WebController {
         await Promise.all(
             requests.map(async (request) =>
                 limit(async () => {
-                    const scanNotifyUrl = isEmpty(request.scanNotifyUrl) ? {} : { scanNotifyUrl: request.scanNotifyUrl };
                     const dbDocument: OnDemandPageScanRequest = {
                         schemaVersion: '2',
                         id: request.scanId,
@@ -207,8 +194,6 @@ export class ScanBatchRequestFeedController extends WebController {
                         ...(request.scanDefinitions === undefined ? {} : { scanDefinitions: request.scanDefinitions }),
                         ...(request.privacyScan === undefined ? {} : { privacyScan: request.privacyScan }),
                         ...(request.authenticationType === undefined ? {} : { authenticationType: request.authenticationType }),
-                        ...(request.browserValidations === undefined ? {} : { browserValidations: request.browserValidations }),
-                        ...scanNotifyUrl,
                         ...(isEmpty(request.site) ? {} : { site: request.site }),
                     };
 
@@ -288,11 +273,7 @@ export class ScanBatchRequestFeedController extends WebController {
             return request.scanType;
         }
 
-        if (!isEmpty(request.privacyScan)) {
-            return 'privacy';
-        }
-
-        return 'accessibility';
+        return 'privacy';
     }
 
     // Gets deep scan limit based on request's know pages size

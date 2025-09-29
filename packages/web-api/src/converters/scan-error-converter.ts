@@ -3,15 +3,9 @@
 
 import { injectable } from 'inversify';
 import { isNil, isString } from 'lodash';
-import {
-    notificationErrorNameToErrorMap,
-    scanErrorNameToErrorMap,
-    ScanNotificationErrorCode,
-    ScanRunErrorCode,
-    ScanRunErrorCodes,
-} from 'service-library';
+import { scanErrorNameToErrorMap, ScanRunErrorCode, ScanRunErrorCodes } from 'service-library';
 
-import { NotificationError, ScanError } from 'storage-documents';
+import { ScanError } from 'storage-documents';
 
 @injectable()
 export class ScanErrorConverter {
@@ -25,13 +19,5 @@ export class ScanErrorConverter {
         }
 
         return scanErrorNameToErrorMap[scanError.errorType];
-    }
-
-    public getScanNotificationErrorCode(scanNotificationError: NotificationError): ScanNotificationErrorCode {
-        if (isNil(scanNotificationError)) {
-            return undefined;
-        }
-
-        return notificationErrorNameToErrorMap[scanNotificationError.errorType];
     }
 }

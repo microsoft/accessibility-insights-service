@@ -11,7 +11,6 @@ import { ScanRunRequest } from '../web-api/api-contracts/scan-run-request';
 type RequestType = 'scan' | 'consolidated-report' | 'deep-scan';
 
 type LoadTestArgs = {
-    scanNotifyUrl: string;
     adAuthToken: string;
     requestUrl: string;
     maxLoad: number;
@@ -31,12 +30,6 @@ function getScanArguments(): LoadTestArgs {
         alias: 'u',
         demandOption: true,
         description: 'The service endpoint URL to send request',
-    });
-
-    yargs.option<keyof LoadTestArgs, yargs.Options>('scanNotifyUrl', {
-        alias: 'n',
-        default: 'http://localhost/',
-        description: 'Scan completion notification URL',
     });
 
     yargs.option<keyof LoadTestArgs, yargs.Options>('consolidatedId', {
@@ -72,7 +65,6 @@ function getRequestOptions(requestId: number, scanArguments: LoadTestArgs): node
     const request: ScanRunRequest = {
         url: `https://www.bing.com/search?q=a ${requestId}`,
         priority: 1,
-        scanNotifyUrl: scanArguments.scanNotifyUrl,
     };
 
     if (scanArguments.requestType === 'consolidated-report' || scanArguments.requestType === 'deep-scan') {

@@ -64,7 +64,7 @@ describe(ScanRequestSelector, () => {
     it('no op', async () => {
         setupPageScanRequestProvider();
 
-        const result = await scanRequestSelector.getRequests('accessibility', targetQueueRequests, targetDeleteRequests);
+        const result = await scanRequestSelector.getRequests('privacy', targetQueueRequests, targetDeleteRequests);
 
         expect(result).toEqual(filteredScanRequests);
     });
@@ -82,7 +82,7 @@ describe(ScanRequestSelector, () => {
         const expectedResult = cloneDeep(filteredScanRequests);
         expectedResult.queueRequests = expectedResult.queueRequests.slice(0, 3);
 
-        const result = await scanRequestSelector.getRequests('accessibility', targetQueueRequests, targetDeleteRequests);
+        const result = await scanRequestSelector.getRequests('privacy', targetQueueRequests, targetDeleteRequests);
 
         expect(result).toEqual(expectedResult);
     });
@@ -108,7 +108,7 @@ describe(ScanRequestSelector, () => {
             scanRequests.map((scanRequest) => scanRequest.id),
         );
 
-        const result = await scanRequestSelector.getRequests('accessibility', targetQueueRequests, targetDeleteRequests);
+        const result = await scanRequestSelector.getRequests('privacy', targetQueueRequests, targetDeleteRequests);
 
         expect(result).toEqual(filteredScanRequests);
     });
@@ -129,7 +129,7 @@ describe(ScanRequestSelector, () => {
             scanRequests.map((scanRequest) => scanRequest.id),
         );
 
-        const result = await scanRequestSelector.getRequests('accessibility', targetQueueRequests, targetDeleteRequests);
+        const result = await scanRequestSelector.getRequests('privacy', targetQueueRequests, targetDeleteRequests);
 
         expect(result).toEqual(filteredScanRequests);
     });
@@ -165,7 +165,7 @@ describe(ScanRequestSelector, () => {
             scanRequests.map((scanRequest) => scanRequest.id),
         );
 
-        const result = await scanRequestSelector.getRequests('accessibility', targetQueueRequests, targetDeleteRequests);
+        const result = await scanRequestSelector.getRequests('privacy', targetQueueRequests, targetDeleteRequests);
 
         expect(result).toEqual(filteredScanRequests);
     });
@@ -190,7 +190,7 @@ describe(ScanRequestSelector, () => {
             scanRequests.map((scanRequest) => scanRequest.id),
         );
 
-        const result = await scanRequestSelector.getRequests('accessibility', targetQueueRequests, targetDeleteRequests);
+        const result = await scanRequestSelector.getRequests('privacy', targetQueueRequests, targetDeleteRequests);
 
         expect(result).toEqual(filteredScanRequests);
     });
@@ -222,7 +222,7 @@ describe(ScanRequestSelector, () => {
             scanRequests.map((scanRequest) => scanRequest.id),
         );
 
-        const result = await scanRequestSelector.getRequests('accessibility', targetQueueRequests, targetDeleteRequests);
+        const result = await scanRequestSelector.getRequests('privacy', targetQueueRequests, targetDeleteRequests);
 
         expect(result).toEqual(filteredScanRequests);
     });
@@ -265,7 +265,7 @@ describe(ScanRequestSelector, () => {
             scanRequests.map((scanRequest) => scanRequest.id),
         );
 
-        const result = await scanRequestSelector.getRequests('accessibility', targetQueueRequests, targetDeleteRequests);
+        const result = await scanRequestSelector.getRequests('privacy', targetQueueRequests, targetDeleteRequests);
 
         expect(result).toEqual(filteredScanRequests);
     });
@@ -328,7 +328,7 @@ function setupOnDemandPageScanRunResultProvider(): void {
 
 function setupPageScanRequestProvider(): void {
     pageScanRequestProviderMock
-        .setup((o) => o.getRequests('accessibility', undefined))
+        .setup((o) => o.getRequests('privacy', undefined))
         .returns(() =>
             Promise.resolve({
                 item: scanRequests.slice(0, targetQueueRequests),
@@ -339,7 +339,7 @@ function setupPageScanRequestProvider(): void {
         .verifiable();
 
     pageScanRequestProviderMock
-        .setup((o) => o.getRequests('accessibility', continuationToken))
+        .setup((o) => o.getRequests('privacy', continuationToken))
         .returns(() => Promise.resolve({ item: [], statusCode: 200 } as CosmosOperationResponse<OnDemandPageScanRequest[]>));
 }
 

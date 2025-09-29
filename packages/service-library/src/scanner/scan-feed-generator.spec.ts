@@ -36,9 +36,6 @@ describe(ScanFeedGenerator, () => {
             websiteScanRef: {
                 scanGroupType: 'deep-scan',
             },
-            notification: {
-                scanNotifyUrl: 'scanNotifyUrl',
-            },
         } as OnDemandPageScanResult;
         websiteScanData = {
             id: 'websiteScanDataId',
@@ -135,7 +132,6 @@ describe(ScanFeedGenerator, () => {
         {},
         {
             priority: 7,
-            notification: { scanNotifyUrl: 'url' },
             authentication: { hint: 'entraId' },
             privacyScan: { cookieBannerType: 'standard' },
         } as OnDemandPageScanResult,
@@ -184,7 +180,6 @@ function createScanRequests(knownPages: KnownPage[], deepScan: boolean = true, s
             deepScan,
             deepScanId: websiteScanData.deepScanId,
             ...(scanDefinitions === false ? {} : { scanDefinitions: [{ name: 'accessibility-agent' }] }),
-            scanNotifyUrl: pageScanResult.notification.scanNotifyUrl,
             ...(pageScanResult.privacyScan === undefined ? {} : { privacyScan: pageScanResult.privacyScan }),
             site: {
                 baseUrl: websiteScanData.baseUrl,

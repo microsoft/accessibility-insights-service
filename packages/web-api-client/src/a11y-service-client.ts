@@ -40,7 +40,6 @@ export class A11yServiceClient {
     public async postScanUrl(scanUrl: string, options?: PostScanRequestOptions): Promise<ResponseWithBodyType<ScanRunResponse[]>> {
         const scanRequestData: ScanRunRequest = {
             url: scanUrl,
-            scanNotifyUrl: options?.scanNotificationUrl,
             priority: options?.priority || 0,
             deepScan: options?.deepScan,
         };

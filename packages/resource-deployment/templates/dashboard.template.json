@@ -64,7 +64,7 @@
                                         "content": {
                                             "settings": {
                                                 "content": "Check the <a href='https://status.azure.com/en-us/status'>Azure status</a> for the ongoing issues that may be impacting our service.",
-                                                "title": "Accessibility Insights Service",
+                                                "title": "Privacy Insights Service",
                                                 "subtitle": "Monitoring Dashboard",
                                                 "markdownSource": 1
                                             }
@@ -380,39 +380,6 @@
                                                             "namespace": "azure.applicationinsights",
                                                             "metricVisualization": {
                                                                 "displayName": "failedScanRequests"
-                                                            }
-                                                        },
-                                                        {
-                                                            "resourceMetadata": {
-                                                                "id": "[variables('appInsightsResourceId')]"
-                                                            },
-                                                            "name": "scanRequestNotificationsStarted",
-                                                            "aggregationType": 1,
-                                                            "namespace": "azure.applicationinsights",
-                                                            "metricVisualization": {
-                                                                "displayName": "scanRequestNotificationsStarted"
-                                                            }
-                                                        },
-                                                        {
-                                                            "resourceMetadata": {
-                                                                "id": "[variables('appInsightsResourceId')]"
-                                                            },
-                                                            "name": "scanRequestNotificationsCompleted",
-                                                            "aggregationType": 1,
-                                                            "namespace": "azure.applicationinsights",
-                                                            "metricVisualization": {
-                                                                "displayName": "scanRequestNotificationsCompleted"
-                                                            }
-                                                        },
-                                                        {
-                                                            "resourceMetadata": {
-                                                                "id": "[variables('appInsightsResourceId')]"
-                                                            },
-                                                            "name": "scanRequestNotificationsFailed",
-                                                            "aggregationType": 1,
-                                                            "namespace": "azure.applicationinsights",
-                                                            "metricVisualization": {
-                                                                "displayName": "scanRequestNotificationsFailed"
                                                             }
                                                         }
                                                     ],
@@ -1513,39 +1480,6 @@
                                                             "namespace": "azure.applicationinsights",
                                                             "metricVisualization": {
                                                                 "displayName": "failedScanTasks"
-                                                            }
-                                                        },
-                                                        {
-                                                            "resourceMetadata": {
-                                                                "id": "[variables('appInsightsResourceId')]"
-                                                            },
-                                                            "name": "startedScanNotificationTasks",
-                                                            "aggregationType": 4,
-                                                            "namespace": "azure.applicationinsights",
-                                                            "metricVisualization": {
-                                                                "displayName": "startedScanNotificationTasks"
-                                                            }
-                                                        },
-                                                        {
-                                                            "resourceMetadata": {
-                                                                "id": "[variables('appInsightsResourceId')]"
-                                                            },
-                                                            "name": "completedScanNotificationTasks",
-                                                            "aggregationType": 4,
-                                                            "namespace": "azure.applicationinsights",
-                                                            "metricVisualization": {
-                                                                "displayName": "completedScanNotificationTasks"
-                                                            }
-                                                        },
-                                                        {
-                                                            "resourceMetadata": {
-                                                                "id": "[variables('appInsightsResourceId')]"
-                                                            },
-                                                            "name": "failedScanNotificationTasks",
-                                                            "aggregationType": 4,
-                                                            "namespace": "azure.applicationinsights",
-                                                            "metricVisualization": {
-                                                                "displayName": "failedScanNotificationTasks"
                                                             }
                                                         }
                                                     ],

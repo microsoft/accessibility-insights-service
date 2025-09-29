@@ -27,7 +27,6 @@ let getAgentsMock: IMock<() => Agents>;
 describe(A11yServiceClient, () => {
     let response: unknown;
     const agentsStub = {};
-    const scanNotifyUrlStub = 'scan-notification-pass-stub';
 
     beforeEach(() => {
         response = { statusCode: 200 };
@@ -87,9 +86,9 @@ describe(A11yServiceClient, () => {
         const scanUrl = 'url';
         const priority = 3;
 
-        it('with priority and notify url', async () => {
-            const scanOptions: PostScanRequestOptions = { scanNotificationUrl: scanNotifyUrlStub, priority };
-            const requestBody = { url: scanUrl, priority, scanNotifyUrl: scanNotifyUrlStub };
+        it('with priority', async () => {
+            const scanOptions: PostScanRequestOptions = { priority };
+            const requestBody = { url: scanUrl, priority };
             const requestOptions = { json: createPostScanRequestObj(requestBody) };
             setupVerifiableSignRequestCall();
             postMock
@@ -120,13 +119,11 @@ describe(A11yServiceClient, () => {
             const reportId = 'some-report-id';
             const scanOptions: PostScanRequestOptions = {
                 consolidatedId: reportId,
-                scanNotificationUrl: scanNotifyUrlStub,
                 priority,
             };
             const requestBody = {
                 url: scanUrl,
                 site: { baseUrl: scanUrl },
-                scanNotifyUrl: scanNotifyUrlStub,
                 reportGroups: [{ consolidatedId: reportId }],
                 priority,
             };
@@ -207,7 +204,6 @@ describe(A11yServiceClient, () => {
                 {
                     url: undefined,
                     priority: undefined,
-                    scanNotifyUrl: undefined,
                     deepScan: undefined,
                     ...scanRunRequest,
                 },

@@ -16,9 +16,6 @@ templatesFolder="${0%/*}/../templates/"
 onDemandScanReqScheduleJobName="on-demand-scan-req-schedule"
 parsedOnDemandScanReqScheduleFileName="on-demand-scan-req-schedule.generated.template.json"
 
-onDemandSendNotificationJobName="on-demand-send-notification-schedule"
-parsedOnDemandSendNotificationFileName="on-demand-send-notification.generated.template.json"
-
 onDemandScanScheduleJobName="on-demand-url-scan-schedule"
 parsedOnDemandScanScheduleFileName="on-demand-url-scan-schedule.generated.template.json"
 
@@ -88,7 +85,6 @@ appInsightsAuthString="Authorization=AAD;ClientId=${clientId}"
 
 sed -e "s@%APP_INSIGHTS_CONNECTION_STRING%@${appInsightsConnectionString}@" -e "s@%APP_INSIGHTS_AUTH_STRING%@${appInsightsAuthString}@" -e "s@%KEY_VAULT_TOKEN%@${keyVaultUrl}@" -e "s@%CONTAINER_REGISTRY_TOKEN%@${containerRegistryName}@" "${templatesFolder}/on-demand-url-scan-schedule.template.json" >"${parsedOnDemandScanScheduleFileName}"
 sed -e "s@%APP_INSIGHTS_CONNECTION_STRING%@${appInsightsConnectionString}@" -e "s@%APP_INSIGHTS_AUTH_STRING%@${appInsightsAuthString}@" -e "s@%KEY_VAULT_TOKEN%@${keyVaultUrl}@" -e "s@%CONTAINER_REGISTRY_TOKEN%@${containerRegistryName}@" "${templatesFolder}/on-demand-scan-req-schedule.template.json" >"${parsedOnDemandScanReqScheduleFileName}"
-sed -e "s@%APP_INSIGHTS_CONNECTION_STRING%@${appInsightsConnectionString}@" -e "s@%APP_INSIGHTS_AUTH_STRING%@${appInsightsAuthString}@" -e "s@%KEY_VAULT_TOKEN%@${keyVaultUrl}@" -e "s@%CONTAINER_REGISTRY_TOKEN%@${containerRegistryName}@" "${templatesFolder}/on-demand-send-notification-schedule.template.json" >"${parsedOnDemandSendNotificationFileName}"
 sed -e "s@%APP_INSIGHTS_CONNECTION_STRING%@${appInsightsConnectionString}@" -e "s@%APP_INSIGHTS_AUTH_STRING%@${appInsightsAuthString}@" -e "s@%KEY_VAULT_TOKEN%@${keyVaultUrl}@" -e "s@%CONTAINER_REGISTRY_TOKEN%@${containerRegistryName}@" "${templatesFolder}/privacy-scan-schedule.template.json" >"${parsedPrivacyScanScheduleFileName}"
 sed -e "s@%APP_INSIGHTS_CONNECTION_STRING%@${appInsightsConnectionString}@" -e "s@%APP_INSIGHTS_AUTH_STRING%@${appInsightsAuthString}@" -e "s@%KEY_VAULT_TOKEN%@${keyVaultUrl}@" -e "s@%CONTAINER_REGISTRY_TOKEN%@${containerRegistryName}@" "${templatesFolder}/report-generator-schedule.template.json" >"${parsedReportGeneratorScheduleFileName}"
 
@@ -100,7 +96,6 @@ allJobsScheduleList=$(az batch job-schedule list --query "[*].id" -o tsv)
 
 adjustJob "${onDemandScanScheduleJobName}" "${parsedOnDemandScanScheduleFileName}" "${allJobsScheduleList}"
 adjustJob "${onDemandScanReqScheduleJobName}" "${parsedOnDemandScanReqScheduleFileName}" "${allJobsScheduleList}"
-adjustJob "${onDemandSendNotificationJobName}" "${parsedOnDemandSendNotificationFileName}" "${allJobsScheduleList}"
 adjustJob "${privacyScanScheduleJobName}" "${parsedPrivacyScanScheduleFileName}" "${allJobsScheduleList}"
 adjustJob "${reportGeneratorScheduleJobName}" "${parsedReportGeneratorScheduleFileName}" "${allJobsScheduleList}"
 

@@ -23,11 +23,11 @@ export class DeepScanReportsTestGroup extends FunctionalTestGroup {
                     item.scanId,
                 )) as ResponseWithBodyType<ScanRunResultResponse>;
 
-                const htmlReportId = crawledResponse.body.reports.find((r) => r.format === 'html').reportId;
-                const reportResponse = await this.a11yServiceClient.getScanReport(this.testContextData.scanId, htmlReportId);
+                const jsonReportId = crawledResponse.body.reports.find((r) => r.format === 'json').reportId;
+                const reportResponse = await this.a11yServiceClient.getScanReport(this.testContextData.scanId, jsonReportId);
 
                 this.ensureResponseSuccessStatusCode(response);
-                expect(reportResponse.body, 'can retrieve individual HTML report for each deep scan crawled URL').to.not.be.undefined;
+                expect(reportResponse.body, 'can retrieve individual JSON report for each deep scan crawled URL').to.not.be.undefined;
             }),
         );
     }

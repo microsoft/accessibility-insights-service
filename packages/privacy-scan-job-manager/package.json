@@ -12,14 +12,14 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/Microsoft/accessibility-insights-service.git"
+        "url": "git+https://github.com/microsoft/privacy-insights-service.git"
     },
     "author": "Microsoft",
     "license": "MIT",
     "bugs": {
-        "url": "https://github.com/Microsoft/accessibility-insights-service/issues"
+        "url": "https://github.com/microsoft/privacy-insights-service/issues"
     },
-    "homepage": "https://github.com/Microsoft/accessibility-insights-service#readme",
+    "homepage": "https://github.com/microsoft/privacy-insights-service#readme",
     "devDependencies": {
         "@types/dotenv": "^8.2.3",
         "@types/jest": "^29.5.12",

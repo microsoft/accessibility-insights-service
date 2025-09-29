@@ -131,9 +131,8 @@ describe(ScanBatchRequestFeedController, () => {
                         scanId: 'scan-1',
                         url: 'http://url-1',
                         priority: 1,
-                        scanType: 'accessibility',
+                        scanType: 'privacy',
                         deepScan: true,
-                        scanNotifyUrl: 'url',
                         site: {
                             baseUrl: 'base-url-1',
                         },
@@ -161,8 +160,7 @@ describe(ScanBatchRequestFeedController, () => {
             scanId: 'scan-1',
             url: 'http://url-1',
             priority: 1,
-            scanType: 'accessibility',
-            scanNotifyUrl: 'reply-url-1',
+            scanType: 'privacy',
             site: {
                 baseUrl: 'base-url-1',
                 knownPages: ['http://page1', 'http://page2'],
@@ -185,7 +183,6 @@ describe(ScanBatchRequestFeedController, () => {
             scanId: 'scan-4',
             url: 'http://url-4',
             priority: 1,
-            scanNotifyUrl: 'reply-url-4',
             site: {
                 baseUrl: 'base-url-4',
                 knownPages: [
@@ -327,14 +324,6 @@ function setupOnDemandPageScanRunResultProviderMock(
                     },
                     batchRequestId: document.id,
                     deepScanId: request.deepScanId ?? request.scanId,
-                    ...(isEmpty(request.scanNotifyUrl)
-                        ? {}
-                        : {
-                              notification: {
-                                  state: 'pending',
-                                  scanNotifyUrl: request.scanNotifyUrl,
-                              },
-                          }),
                     websiteScanRef,
                     ...(request.privacyScan === undefined ? {} : { privacyScan: request.privacyScan }),
                     ...(request.scanDefinitions === undefined ? {} : { scanDefinitions: request.scanDefinitions }),
@@ -363,10 +352,6 @@ function setupPageScanRequestProviderMock(documents: OnDemandPageScanBatchReques
                     deepScanId: scanRequest.deepScanId ?? scanRequest.scanId,
                     ...(scanRequest.authenticationType === undefined ? {} : { authenticationType: scanRequest.authenticationType }),
                 };
-
-                if (!isNil(scanRequest.scanNotifyUrl)) {
-                    request.scanNotifyUrl = scanRequest.scanNotifyUrl;
-                }
 
                 if (!isNil(scanRequest.site)) {
                     request.site = cloneDeep(scanRequest.site);
@@ -433,11 +418,7 @@ function getScanType(request: ScanRunBatchRequest): ScanType {
         return request.scanType;
     }
 
-    if (!isEmpty(request.privacyScan)) {
-        return 'privacy';
-    }
-
-    return 'accessibility';
+    return 'privacy';
 }
 
 function getDeepScanLimit(websiteScanData: Partial<WebsiteScanData>): number {

@@ -38,10 +38,6 @@
             {
                 "name": "AI_KEY_VAULT_URL",
                 "value": "%KEY_VAULT_TOKEN%"
-            },
-            {
-                "name": "AI_STORAGE_NOTIFICATION_QUEUE",
-                "value": "ondemand-send-notification"
             }
         ],
         "poolInfo": {

@@ -220,16 +220,6 @@
                         "type": "integer",
                         "example": 100
                     },
-                    "scanType": {
-                        "description": "The targeted type of the scan",
-                        "type": "string",
-                        "enum": ["accessibility", "privacy"],
-                        "example": "accessibility"
-                    },
-                    "scanNotifyUrl": {
-                        "type": "string",
-                        "example": "https://www.example.com/api/notification"
-                    },
                     "deepScan": {
                         "type": "boolean",
                         "description": "Enable crawling and scanning of website's pages under baseURL provided",
@@ -292,15 +282,6 @@
                                 "enum": ["standard"],
                                 "example": "standard"
                             }
-                        }
-                    },
-                    "browserValidations": {
-                        "type": "array",
-                        "description": "Enables browser validations.",
-                        "items": {
-                            "type": "string",
-                            "enum": ["highContrastProperties"],
-                            "example": "highContrastProperties"
                         }
                     },
                     "scanDefinitions": {
@@ -388,25 +369,6 @@
                     }
                 }
             },
-            "NotificationResult": {
-                "type": "object",
-                "required": ["state"],
-                "properties": {
-                    "state": {
-                        "type": "string",
-                        "enum": ["pending", "queued", "queueFailed", "sending", "sent", "sendFailed"],
-                        "example": "sent"
-                    },
-                    "pageResponseCode": {
-                        "type": "integer",
-                        "example": 200
-                    },
-                    "scanNotifyUrl": {
-                        "type": "string",
-                        "example": "https://www.example.com/api/notification"
-                    }
-                }
-            },
             "Links": {
                 "type": "object",
                 "required": ["rel", "href"],
@@ -488,8 +450,8 @@
                     },
                     "format": {
                         "type": "string",
-                        "enum": ["axe", "sarif", "html", "consolidated.html", "json", "consolidated.json", "page.png", "page.mhtml"],
-                        "example": "sarif"
+                        "enum": ["json", "consolidated.json", "page.png", "page.mhtml"],
+                        "example": "json"
                     },
                     "source": {
                         "type": "string",
@@ -543,6 +505,12 @@
                         "type": "string",
                         "example": "https://accessibilityinsights.io/"
                     },
+                    "scanType": {
+                        "description": "The type of the scan",
+                        "type": "string",
+                        "enum": ["privacy"],
+                        "example": "privacy"
+                    },
                     "deepScanId": {
                         "type": "string",
                         "example": "d6cdd091-a985-4dfd-a046-57c7f4d23bfc"
@@ -565,14 +533,8 @@
                     "run": {
                         "$ref": "#/components/schemas/ScanRun"
                     },
-                    "notification": {
-                        "$ref": "#/components/schemas/NotificationResult"
-                    },
                     "authentication": {
                         "$ref": "#/components/schemas/AuthenticationResult"
-                    },
-                    "browserValidationResult": {
-                        "$ref": "#/components/schemas/BrowserValidationResult"
                     }
                 }
             },
@@ -596,7 +558,6 @@
                             "OutOfRangePriority",
                             "MalformedBody",
                             "MissingReleaseVersion",
-                            "InvalidScanNotifyUrl",
                             "InvalidReportGroup",
                             "MissingRequiredDeepScanProperties",
                             "TooManyKnownPages",
@@ -693,17 +654,6 @@
                         "type": "string",
                         "enum": ["succeeded", "failed", "unauthenticated"],
                         "example": "succeeded"
-                    }
-                }
-            },
-            "BrowserValidationResult": {
-                "type": "object",
-                "properties": {
-                    "highContrastProperties": {
-                        "type": "string",
-                        "default": "pending",
-                        "enum": ["pending", "pass", "fail", "error"],
-                        "example": "pass"
                     }
                 }
             }

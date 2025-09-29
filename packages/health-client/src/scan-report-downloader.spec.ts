@@ -23,11 +23,11 @@ describe(ScanReportDownloader, () => {
     const reports = [
         {
             reportId: 'reportId1',
-            format: 'html',
+            format: 'json',
         },
         {
             reportId: 'reportId2',
-            format: 'sarif',
+            format: 'consolidated.json',
         },
     ] as ScanReport[];
 

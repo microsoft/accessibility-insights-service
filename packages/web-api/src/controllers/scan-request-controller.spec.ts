@@ -95,18 +95,6 @@ describe(ScanRequestController, () => {
             expect(response).toEqual(WebHttpResponse.getErrorResponse(WebApiErrorCodes.requestBodyTooLarge));
         });
 
-        it('rejects request with invalid scan notify url', async () => {
-            const request = [{ url: 'https://abc/path/', scanNotifyUrl: 'invalid-url' }];
-            scanRequestController = createScanRequestController(request);
-            const expectedResponse = {
-                status: 202,
-                jsonBody: [{ url: 'https://abc/path/', error: WebApiErrorCodes.invalidScanNotifyUrl.error }],
-            };
-            const response = await scanRequestController.handleRequest();
-
-            expect(response).toEqual(expectedResponse);
-        });
-
         it('rejects request with invalid base url', async () => {
             const request = [
                 {
@@ -233,7 +221,6 @@ describe(ScanRequestController, () => {
                 {
                     url: 'https://abs/path/',
                     priority: 1,
-                    scanNotifyUrl: 'https://notify/path/',
                     site: {
                         baseUrl: 'https://base/path',
                         knownPages: ['https://base/path/known1', 'https://base/path/known2'],
@@ -259,7 +246,6 @@ describe(ScanRequestController, () => {
                     scanId: guid2,
                     url: 'https://abs/path/',
                     priority: 1,
-                    scanNotifyUrl: 'https://notify/path/',
                     site: {
                         baseUrl: 'https://base/path',
                         knownPages: ['https://base/path/known1', 'https://base/path/known2'],

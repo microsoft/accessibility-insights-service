@@ -69,7 +69,6 @@ RESOURCE_GROUP=${resourceGroupName}
 
 AZ_BATCH_ACCOUNT_NAME=${batchAccountName}
 AZ_BATCH_ACCOUNT_URL=https://${batchAccountEndpoint}/
-AI_STORAGE_NOTIFICATION_QUEUE=ondemand-send-notification
 AI_STORAGE_SCAN_QUEUE=ondemand-scanrequest
 AI_STORAGE_PRIVACY_SCAN_QUEUE=privacy-scan-request
 AI_KEY_VAULT_URL=https://${keyVault}.vault.azure.net/

@@ -96,8 +96,6 @@ function pullImages() {
         docker pull "$azurecr/batch-privacy-scan-runner:prescanner"
     }
     elseif ( $pool -eq "on-demand-scan-request-pool" ) {
-        docker pull "$azurecr/batch-scan-notification-manager:latest"
-        docker pull "$azurecr/batch-scan-notification-runner:latest"
         docker pull "$azurecr/batch-report-generator-manager:latest"
         docker pull "$azurecr/batch-report-generator-runner:latest"
         docker pull "$azurecr/batch-scan-request-sender:latest"

@@ -87,8 +87,7 @@ describe(HealthMonitorActivity, () => {
         it('handles createScanRequest', async () => {
             const scanUrl = 'scan-url';
             const priority = 1;
-            const scanNotifyUrl = 'some-notify-url';
-            const scanOptions = { scanNotificationUrl: scanNotifyUrl, priority };
+            const scanOptions = { priority };
             webApiClientMock
                 .setup(async (w) => w.postScanUrl(scanUrl, scanOptions))
                 .returns(async () => Promise.resolve(expectedResponse))

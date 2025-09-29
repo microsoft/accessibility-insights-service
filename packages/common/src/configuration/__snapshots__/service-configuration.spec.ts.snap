@@ -163,7 +163,7 @@ exports[`ServiceConfiguration verifies custom config 1`] = `
     },
     "scanTimeoutInMin": {
       "default": 7,
-      "doc": "Maximum allowed time for accessibility scanning a web page, in minutes.",
+      "doc": "Maximum allowed time for scanning a web page, in minutes.",
       "format": "int",
     },
   },
@@ -345,7 +345,7 @@ exports[`ServiceConfiguration verifies dev config 1`] = `
     },
     "scanTimeoutInMin": {
       "default": 7,
-      "doc": "Maximum allowed time for accessibility scanning a web page, in minutes.",
+      "doc": "Maximum allowed time for scanning a web page, in minutes.",
       "format": "int",
     },
   },

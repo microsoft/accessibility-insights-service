@@ -14,12 +14,6 @@ export const ScanWaitConditions = {
             scanRunResult.scanResult?.state === 'pass' || scanRunResult.scanResult?.state === 'fail',
         isFailed: (scanRunResult: ScanRunResultResponse): boolean => scanRunResult.run?.state === 'failed',
     },
-    scanNotification: {
-        // Include sendFailed because some tests intentionally cause the notification to fail
-        isSucceeded: (scanRunResponse: ScanRunResultResponse): boolean =>
-            scanRunResponse.notification?.state === 'sendFailed' || scanRunResponse.notification?.state === 'sent',
-        isFailed: (scanRunResponse: ScanRunResultResponse): boolean => scanRunResponse.notification?.state === 'queueFailed',
-    },
     deepScan: {
         isSucceeded: (scanRunResult: ScanRunResultResponse): boolean => scanRunResult.run?.state === 'completed',
         isFailed: (scanRunResult: ScanRunResultResponse): boolean => scanRunResult.run?.state === 'failed',

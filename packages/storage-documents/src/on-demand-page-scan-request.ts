@@ -4,7 +4,7 @@
 import { ItemType } from './item-type';
 import { StorageDocument } from './storage-document';
 import { WebsiteRequest, ReportGroupRequest, PrivacyScan } from './on-demand-page-scan-batch-request';
-import { AuthenticationType, SchemaVersion, ScanType, BrowserValidationTypes, ScanDefinition } from './on-demand-page-scan-result';
+import { AuthenticationType, SchemaVersion, ScanType, ScanDefinition } from './on-demand-page-scan-result';
 
 export interface PageScanRequest {
     schemaVersion?: SchemaVersion;
@@ -13,12 +13,10 @@ export interface PageScanRequest {
     scanType?: ScanType;
     deepScan?: boolean;
     deepScanId?: string;
-    scanNotifyUrl?: string;
     site?: WebsiteRequest;
     reportGroups?: ReportGroupRequest[];
     privacyScan?: PrivacyScan;
     authenticationType?: AuthenticationType;
-    browserValidations?: BrowserValidationTypes[];
     scanDefinitions?: ScanDefinition[];
 }
 

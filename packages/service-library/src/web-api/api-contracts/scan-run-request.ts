@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 import { checkObject, checkObjectArray } from '../../type-guard';
-import { AuthenticationType, authenticationTypes, BrowserValidationTypes } from './scan-result-response';
+import { AuthenticationType, authenticationTypes } from './scan-result-response';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -20,7 +20,6 @@ export interface ScanRunRequest {
     deepScan?: boolean;
     site?: Website;
     reportGroups?: ReportGroup[];
-    scanNotifyUrl?: string;
     /**
      * Priority values can range from -1000 to 1000, with -1000 being the lowest priority and 1000 being the highest priority.
      * The default value is 0.
@@ -34,7 +33,6 @@ export interface ScanRunRequest {
      * Resource authentication type hint
      */
     authenticationType?: AuthenticationType;
-    browserValidations?: BrowserValidationTypes[];
     scanDefinitions?: ScanDefinition[];
 }
 
@@ -63,7 +61,6 @@ export function isScanRunRequest(arg: any): arg is ScanRunRequest {
             primitives: [
                 ['url', 'string'],
                 ['deepScan', 'boolean', true],
-                ['scanNotifyUrl', 'string', true],
                 ['priority', 'number', true],
             ],
             literals: [['authenticationType', authenticationTypes, true]],

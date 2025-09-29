@@ -66,7 +66,7 @@ describe(ReportGeneratorRequestProvider, () => {
     it('read scan group ids', async () => {
         const continuationToken = 'continuationToken';
         const response = {
-            item: [{ scanCount: 1, scanGroupId: 'scanGroupId', targetReport: 'accessibility' } as ScanReportGroup],
+            item: [{ scanCount: 1, scanGroupId: 'scanGroupId', targetReport: 'privacy' } as ScanReportGroup],
             statusCode: 200,
         } as CosmosOperationResponse<ScanReportGroup[]>;
         cosmosContainerClientMock

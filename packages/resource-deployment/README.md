@@ -3,7 +3,7 @@ Copyright (c) Microsoft Corporation. All rights reserved.
 Licensed under the MIT License.
 -->
 
-# Deploy Resources for Accessibility Insights Service
+# Deploy Resources for Privacy Insights Service
 
 The deployment script will create Azure resource group and deploy Azure services under it.
 
@@ -22,17 +22,17 @@ When installing Azure CLI for [Windows Subsystem for Linux (WSL)](https://docs.m
 
 ### 1. Clone the repository and build the solution
 
--   Follow this [README](https://github.com/microsoft/accessibility-insights-service/blob/main/README.md) to clone the repository and build the solution
+-   Follow this [README](https://github.com/microsoft/privacy-insights-service/blob/main/README.md) to clone the repository and build the solution
 -   Select the deployment directory
 
     ```bash
-    cd accessibility-insights-service/packages/resource-deployment
+    cd privacy-insights-service/packages/resource-deployment
     ```
 
 ### 2. Prepare deployment
 
--   Add Azure Active Directory Application (client) ID(s) (comma separated, no double or single quotation marks, no white-spaces) to web-api-aad-acl-\*.txt [template files](https://github.com/microsoft/accessibility-insights-service/tree/main/packages/resource-deployment/custom-scripts/resource-deployment/templates). This client(s) will be authorized to access service REST APIs.
--   Run [packages/resource-deployment/custom-scripts/prepare-deployment.sh](https://github.com/microsoft/accessibility-insights-service/tree/main/packages/resource-deployment/custom-scripts/prepare-deployment.sh) script to prepare deployment.
+-   Add Azure Active Directory Application (client) ID(s) (comma separated, no double or single quotation marks, no white-spaces) to web-api-aad-acl-\*.txt [template files](https://github.com/microsoft/privacy-insights-service/tree/main/packages/resource-deployment/custom-scripts/resource-deployment/templates). This client(s) will be authorized to access service REST APIs.
+-   Run [packages/resource-deployment/custom-scripts/prepare-deployment.sh](https://github.com/microsoft/privacy-insights-service/tree/main/packages/resource-deployment/custom-scripts/prepare-deployment.sh) script to prepare deployment.
 
 ### 3. Login to Azure
 
@@ -56,7 +56,7 @@ When installing Azure CLI for [Windows Subsystem for Linux (WSL)](https://docs.m
 
 ### 6. Deploy service
 
--   Run below script with required parameters as specified in a [script's help](https://github.com/microsoft/accessibility-insights-service/blob/main/packages/resource-deployment/scripts/install-parallel.sh) to deploy Azure resources and binaries
+-   Run below script with required parameters as specified in a [script's help](https://github.com/microsoft/privacy-insights-service/blob/main/packages/resource-deployment/scripts/install-parallel.sh) to deploy Azure resources and binaries
 
     ```bash
     ./dist/scripts/install-parallel.sh -r "<resource group>" -s "<subscription name or ID>" -l "<Azure region>" -e "<environment (dev|ppe|prod)>" -o "<organization name>" -p "<publisher email>" -c "<client ID>" -t "<client secret>" -v "<release version>" -b "<Azure Batch object ID>"
@@ -66,7 +66,7 @@ When installing Azure CLI for [Windows Subsystem for Linux (WSL)](https://docs.m
 
 The service health can be monitored via deployed Azure Shared dashboard.
 
-Documentation for the Azure dashboard can be found [here](https://github.com/microsoft/accessibility-insights-service/blob/main/packages/resource-deployment/templates/dashboard.md)
+Documentation for the Azure dashboard can be found [here](https://github.com/microsoft/privacy-insights-service/blob/main/packages/resource-deployment/templates/dashboard.md)
 
 # Contributing
 

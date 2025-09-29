@@ -62,11 +62,11 @@ const makePrLink = (pr) => {
         return pr;
     }
 
-    return `=HYPERLINK("https://github.com/microsoft/accessibility-insights-service/pull/${pr}", "#${pr}")`;
+    return `=HYPERLINK("https://github.com/microsoft/privacy-insights-service/pull/${pr}", "#${pr}")`;
 };
 
 const makeCommitLink = (commit) => {
-    return `=HYPERLINK("https://github.com/microsoft/accessibility-insights-service/commit/${commit}", "${commit}")`;
+    return `=HYPERLINK("https://github.com/microsoft/privacy-insights-service/commit/${commit}", "${commit}")`;
 };
 
 const generateOutputContent = (gitLogs, version) => {

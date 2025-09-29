@@ -63,11 +63,11 @@ describe(PageScanRequestProvider, () => {
         } as CosmosOperationResponse<OnDemandPageScanRequest[]>;
 
         cosmosContainerClientMock
-            .setup((o) => o.queryDocuments(getQuery('accessibility'), continuationToken))
+            .setup((o) => o.queryDocuments(getQuery('privacy'), continuationToken))
             .returns(() => Promise.resolve(response))
             .verifiable();
 
-        const actualResponse = await testSubject.getRequests('accessibility', continuationToken);
+        const actualResponse = await testSubject.getRequests('privacy', continuationToken);
 
         cosmosContainerClientMock.verifyAll();
         expect(actualResponse).toBe(response);

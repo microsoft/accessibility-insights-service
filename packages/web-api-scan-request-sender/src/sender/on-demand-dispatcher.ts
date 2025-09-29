@@ -133,7 +133,7 @@ export class OnDemandDispatcher {
             return;
         }
 
-        // Force scan run state to `failed` when scan is stale to trigger scan notification
+        // Force scan run state to `failed` when scan is stale
         let runStateUpdated = false;
         if ((['stale', 'abandoned'] as DispatchCondition[]).includes(scanRequest.condition)) {
             runStateUpdated = true;
@@ -171,13 +171,6 @@ export class OnDemandDispatcher {
 
             this.logger.logWarn(`Updated website page scan state for abandon run.`, {
                 scanId: pageScanResult.id,
-                deepScanId: websiteScanData?.deepScanId,
-            });
-        }
-
-        if (runStateUpdated) {
-            this.logger.logInfo('Triggering scan result notification.', {
-                scanId: scanRequest.request.id,
                 deepScanId: websiteScanData?.deepScanId,
             });
         }

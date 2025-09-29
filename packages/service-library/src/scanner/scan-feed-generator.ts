@@ -3,13 +3,7 @@
 
 import { injectable, inject } from 'inversify';
 import { GlobalLogger } from 'logger';
-import {
-    OnDemandPageScanResult,
-    WebsiteScanData,
-    ScanRunBatchRequest,
-    KnownPage,
-    convertToBrowserValidationTypes,
-} from 'storage-documents';
+import { OnDemandPageScanResult, WebsiteScanData, ScanRunBatchRequest, KnownPage } from 'storage-documents';
 import { isElement, isEmpty } from 'lodash';
 import { GuidGenerator, System } from 'common';
 import { ScanDataProvider } from '../data-providers/scan-data-provider';
@@ -105,10 +99,6 @@ export class ScanFeedGenerator {
                 authenticationType: pageScanResult.authentication?.hint ?? undefined,
                 ...scanDefinitions,
                 ...(pageScanResult.privacyScan === undefined ? {} : { privacyScan: pageScanResult.privacyScan }),
-                ...(convertToBrowserValidationTypes(pageScanResult.browserValidationResult) === undefined
-                    ? {}
-                    : { browserValidations: convertToBrowserValidationTypes(pageScanResult.browserValidationResult) }),
-                scanNotifyUrl: pageScanResult.notification?.scanNotifyUrl ?? undefined,
                 site: {
                     baseUrl: websiteScanData.baseUrl,
                 },

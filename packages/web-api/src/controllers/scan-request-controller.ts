@@ -129,10 +129,8 @@ export class ScanRequestController extends ApiController {
                     ...(scanRunRequest.deepScan === undefined ? {} : { deepScan: scanRunRequest.deepScan }),
                     ...(scanRunRequest.authenticationType === undefined ? {} : { authenticationType: scanRunRequest.authenticationType }),
                     ...(scanRunRequest.privacyScan === undefined ? {} : { privacyScan: scanRunRequest.privacyScan }),
-                    ...(scanRunRequest.browserValidations === undefined ? {} : { browserValidations: scanRunRequest.browserValidations }),
                     ...(scanRunRequest.scanDefinitions === undefined ? {} : { scanDefinitions: scanRunRequest.scanDefinitions }),
                     ...(isEmpty(scanRunRequest.reportGroups) ? {} : { reportGroups: scanRunRequest.reportGroups }),
-                    ...(isEmpty(scanRunRequest.scanNotifyUrl) ? {} : { scanNotifyUrl: scanRunRequest.scanNotifyUrl }),
                     ...(isEmpty(scanRunRequest.site) ? {} : { site: scanRunRequest.site }),
                 });
 
@@ -177,10 +175,6 @@ export class ScanRequestController extends ApiController {
     private validateRunRequest(scanRunRequest: ScanRunRequest): RunRequestValidationResult {
         if (Url.tryParseUrlString(scanRunRequest.url) === undefined) {
             return { valid: false, error: WebApiErrorCodes.invalidURL.error };
-        }
-
-        if (!isEmpty(scanRunRequest.scanNotifyUrl) && Url.tryParseUrlString(scanRunRequest.scanNotifyUrl) === undefined) {
-            return { valid: false, error: WebApiErrorCodes.invalidScanNotifyUrl.error };
         }
 
         if (

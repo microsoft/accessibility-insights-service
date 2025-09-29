@@ -36,10 +36,6 @@
                 "value": "%APP_INSIGHTS_AUTH_STRING%"
             },
             {
-                "name": "AI_STORAGE_NOTIFICATION_QUEUE",
-                "value": "ondemand-send-notification"
-            },
-            {
                 "name": "AI_STORAGE_SCAN_QUEUE",
                 "value": "ondemand-scanrequest"
             },

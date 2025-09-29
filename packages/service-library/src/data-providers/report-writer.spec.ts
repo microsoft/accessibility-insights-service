@@ -20,8 +20,8 @@ describe(ReportWriter, () => {
         loggerMock = Mock.ofType(MockableLogger);
         generatedReportStub = {
             content: 'consolidated report content',
-            format: 'consolidated.html',
-            source: 'accessibility-scan',
+            format: 'consolidated.json',
+            source: 'privacy-scan',
             id: 'id1',
         } as GeneratedReport;
 
@@ -39,7 +39,7 @@ describe(ReportWriter, () => {
             return {
                 reportId: report.id,
                 format: report.format,
-                source: 'accessibility-scan',
+                source: 'privacy-scan',
                 href: `href-${report.id}`,
             };
         });
@@ -53,7 +53,7 @@ describe(ReportWriter, () => {
         const expectedReport: OnDemandPageScanReport = {
             reportId: generatedReportStub.id,
             format: generatedReportStub.format,
-            source: 'accessibility-scan',
+            source: 'privacy-scan',
             href: `href-${generatedReportStub.id}`,
         };
 

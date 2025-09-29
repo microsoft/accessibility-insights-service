@@ -3,7 +3,7 @@ Copyright (c) Microsoft Corporation. All rights reserved.
 Licensed under the MIT License.
 -->
 
-# Accessibility Insights Service - Storage
+# Privacy Insights Service - Storage
 
 # Contributing
 

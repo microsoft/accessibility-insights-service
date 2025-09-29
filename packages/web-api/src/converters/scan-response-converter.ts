@@ -3,21 +3,8 @@
 
 import { inject, injectable } from 'inversify';
 import { isEmpty, pickBy } from 'lodash';
-import {
-    DeepScanResultItem,
-    ScanCompletedNotification as NotificationResponse,
-    ScanReport,
-    ScanResultResponse,
-    RunStateClientProvider,
-    RunState,
-} from 'service-library';
-import {
-    OnDemandPageScanResult,
-    ScanCompletedNotification as NotificationDb,
-    WebsiteScanData,
-    ItemType,
-    KnownPage,
-} from 'storage-documents';
+import { DeepScanResultItem, ScanReport, ScanResultResponse, RunStateClientProvider, RunState } from 'service-library';
+import { OnDemandPageScanResult, WebsiteScanData, ItemType, KnownPage } from 'storage-documents';
 import { ScanErrorConverter } from './scan-error-converter';
 
 @injectable()
@@ -60,7 +47,6 @@ export class ScanResponseConverter {
             run: {
                 state: effectiveRunState,
             },
-            ...this.getRunCompleteNotificationResponse(pageScanResult.notification),
         };
     }
 
@@ -78,7 +64,6 @@ export class ScanResponseConverter {
                 pageTitle: pageScanResult.run?.pageTitle,
                 scanRunDetails: pageScanResult.run?.scanRunDetails,
             },
-            ...this.getRunCompleteNotificationResponse(pageScanResult.notification),
         };
     }
 
@@ -111,11 +96,6 @@ export class ScanResponseConverter {
                       },
                   }
                 : {}),
-            ...(pageScanResult.browserValidationResult !== undefined
-                ? {
-                      browserValidationResult: pageScanResult.browserValidationResult,
-                  }
-                : {}),
             run: {
                 state: effectiveRunState,
                 timestamp: pageScanResult.run.timestamp,
@@ -124,7 +104,6 @@ export class ScanResponseConverter {
                 pageTitle: pageScanResult.run.pageTitle,
                 scanRunDetails: pageScanResult.run.scanRunDetails,
             },
-            ...this.getRunCompleteNotificationResponse(pageScanResult.notification),
             reports: this.getScanReports(baseUrl, apiVersion, pageScanResult),
             // Expand scan result for original scan only. Result for descendant scans do not include deep scan result collection.
             // Don't show more details of deep scan result if base URL can't be scanned because it has no further scans available
@@ -168,22 +147,6 @@ export class ScanResponseConverter {
                 },
             };
         });
-    }
-
-    // eslint-disable-next-line @typescript-eslint/ban-types
-    private getRunCompleteNotificationResponse(notification: NotificationDb): { [notification: string]: NotificationResponse } | {} {
-        if (isEmpty(notification)) {
-            return {};
-        }
-
-        const notificationResponse: NotificationResponse = {
-            scanNotifyUrl: notification.scanNotifyUrl,
-            state: notification.state,
-            responseCode: notification.responseCode,
-            error: this.scanErrorConverter.getScanNotificationErrorCode(notification.error),
-        };
-
-        return { notification: notificationResponse };
     }
 
     private getDeepScanResult(websiteScanData: WebsiteScanData): { [deepScanResult: string]: DeepScanResultItem[] } {

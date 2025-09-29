@@ -212,7 +212,7 @@ export class ServiceConfiguration {
                 scanTimeoutInMin: {
                     default: 7,
                     format: 'int',
-                    doc: 'Maximum allowed time for accessibility scanning a web page, in minutes.',
+                    doc: 'Maximum allowed time for scanning a web page, in minutes.',
                 },
             },
             restApiConfig: {

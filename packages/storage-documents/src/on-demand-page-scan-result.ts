@@ -18,23 +18,13 @@ export declare type OnDemandPageScanRunState =
     | 'failed'
     | 'unscannable';
 export declare type ScanState = 'pending' | 'pass' | 'fail' | 'error';
-export declare type NotificationState = 'pending' | 'queued' | 'queueFailed' | 'sending' | 'sent' | 'sendFailed';
-export declare type NotificationErrorTypes = 'InternalError' | 'HttpErrorCode';
 export declare type AuthenticationState = 'succeeded' | 'failed' | 'unauthenticated';
 export declare type CookieBannerType = 'standard';
 export declare type AuthenticationType = 'undetermined' | 'entraId';
-export declare type ScanType = 'accessibility' | 'privacy';
+export declare type ScanType = 'privacy';
 export declare type ScanDefinitionType = 'accessibility-agent';
-export declare type ReportSource = 'accessibility-agent' | 'accessibility-scan' | 'accessibility-combined' | 'privacy-scan';
-export declare type ReportFormat =
-    | 'axe'
-    | 'sarif'
-    | 'html'
-    | 'consolidated.html'
-    | 'json'
-    | 'consolidated.json'
-    | 'page.mhtml'
-    | 'page.png';
+export declare type ReportSource = 'privacy-scan';
+export declare type ReportFormat = 'json' | 'consolidated.json' | 'page.mhtml' | 'page.png';
 
 export declare type ScanErrorTypes =
     | 'AuthenticationError'
@@ -52,8 +42,6 @@ export declare type ScanErrorTypes =
     | 'UnsupportedResource'
     | 'UrlNavigationTimeout'
     | 'UrlNotResolved';
-
-export declare type BrowserValidationTypes = 'highContrastProperties';
 
 export interface ScanError {
     errorType: ScanErrorTypes;
@@ -77,33 +65,15 @@ export interface OnDemandPageScanResult extends StorageDocument {
     subRuns?: WorkflowRunResults;
     scanResult?: OnDemandScanResult;
     reports?: OnDemandPageScanReport[];
-    notification?: ScanCompletedNotification;
     privacyScan?: PrivacyScan;
     authentication?: AuthenticationResult;
-    browserValidationResult?: BrowserValidationResult;
     scanDefinitions?: ScanDefinition[];
-}
-
-export interface BrowserValidationResult {
-    highContrastProperties?: ScanState;
 }
 
 export interface AuthenticationResult {
     hint: AuthenticationType;
     detected?: AuthenticationType;
     state?: AuthenticationState;
-}
-
-export interface ScanCompletedNotification {
-    scanNotifyUrl: string;
-    state?: NotificationState;
-    error?: NotificationError;
-    responseCode?: number;
-}
-
-export interface NotificationError {
-    errorType: NotificationErrorTypes;
-    message: string;
 }
 
 export interface OnDemandScanResult {

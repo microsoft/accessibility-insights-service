@@ -29,7 +29,7 @@ This project can be run in an Azure environment and can be set up easily using t
 -   Clone the repository
 
     ```bash
-    git clone https://github.com/Microsoft/accessibility-insights-service.git
+    git clone https://github.com/microsoft/privacy-insights-service.git
     ```
 
 -   Select the solution directory
@@ -86,7 +86,7 @@ This project can be run in an Azure environment and can be set up easily using t
 
 ## Deployment
 
--   Follow this [README](https://github.com/microsoft/accessibility-insights-service/blob/main/packages/resource-deployment/README.md) to deploy required Azure resources.
+-   Follow this [README](https://github.com/microsoft/privacy-insights-service/blob/main/packages/resource-deployment/README.md) to deploy required Azure resources.
 
 ## Debugging
 
@@ -111,11 +111,11 @@ During deployment, the Azure dashboard will be created to track service metrics 
 
 ## Contributing
 
-All contributions are welcome! Please visit our [Contributing](https://github.com/microsoft/accessibility-insights-service/blob/main/Contributing.md) page.
+All contributions are welcome! Please visit our [Contributing](https://github.com/microsoft/privacy-insights-service/blob/main/Contributing.md) page.
 
 ## Contact us
 
-Please file a [Github Issue](https://github.com/Microsoft/accessibility-insights-service/issues/new/choose). We actively monitor PRs and issues.
+Please file a [Github Issue](https://github.com/microsoft/privacy-insights-service/issues/new/choose). We actively monitor PRs and issues.
 
 Alternatively you may also ask questions on stackoverflow.com and tag them with an `accessibility-insights` tag.
 

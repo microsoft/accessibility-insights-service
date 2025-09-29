@@ -8,7 +8,7 @@ import { WebApiConfig } from '../controllers/web-api-config';
 import { E2ETestGroupNames } from '../e2e-test-group-names';
 
 export const E2EScanFactories: E2EScanScenarioDefinitionFactory[] = [
-    // Simple scan with notification
+    // Simple scan
     (availabilityConfig: AvailabilityTestConfig, webApiConfig: WebApiConfig): E2EScanScenarioDefinition => {
         return {
             readableName: 'SingleScan',

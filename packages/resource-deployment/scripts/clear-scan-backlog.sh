@@ -80,7 +80,6 @@ function clearScanBacklog() {
         "clearCosmosContainer \"scanRequests\""
         "clearRequestQueues \"ondemand-scanrequest\""
         "clearRequestQueues \"privacy-scan-request\""
-        "clearRequestQueues \"ondemand-send-notification\""
     )
 
     runCommandsWithoutSecretsInParallel clearContainerProcesses

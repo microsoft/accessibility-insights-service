@@ -15,12 +15,12 @@
     "license": "MIT",
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/manishsat/accessibility-insights-service.git"
+        "url": "git+https://github.com/microsoft/privacy-insights-service.git"
     },
     "bugs": {
-        "url": "https://github.com/manishsat/accessibility-insights-service/issues"
+        "url": "https://github.com/microsoft/privacy-insights-service/issues"
     },
-    "homepage": "https://github.com/manishsat/accessibility-insights-service#readme",
+    "homepage": "https://github.com/microsoft/privacy-insights-service#readme",
     "devDependencies": {
         "@types/got": "^9.6.11",
         "@types/jest": "^29.5.12",

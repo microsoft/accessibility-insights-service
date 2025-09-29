@@ -14,7 +14,6 @@ export { ScanDataProvider } from './data-providers/scan-data-provider';
 export { PartitionKeyFactory } from './factories/partition-key-factory';
 export * from './web-api/web-api-error-codes';
 export * from './web-api/scan-run-error-codes';
-export * from './web-api/scan-notification-error-codes';
 export { WebHttpResponse } from './web-api/web-http-response';
 export { ScanBatchRequest } from './web-api/api-contracts/scan-batch-request';
 export * from './web-api/api-contracts/scan-result-response';

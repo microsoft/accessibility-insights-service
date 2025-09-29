@@ -62,7 +62,7 @@ describe(ScanResultController, () => {
     const scanClientResponseForDbResponse: ScanResultResponse = {
         scanId: scanId,
         url: 'url',
-        scanType: 'accessibility',
+        scanType: 'privacy',
         run: {
             state: 'running',
         },
@@ -70,7 +70,7 @@ describe(ScanResultController, () => {
     const scanResponse: ScanResultResponse = {
         scanId,
         url: 'url',
-        scanType: 'accessibility',
+        scanType: 'privacy',
         run: {
             state: 'running',
         },

@@ -17,7 +17,6 @@ export declare type WebApiErrorCodeName =
     | 'OutOfRangePriority'
     | 'MalformedBody'
     | 'MissingReleaseVersion'
-    | 'InvalidScanNotifyUrl'
     | 'InvalidReportGroup'
     | 'MissingRequiredDeepScanProperties'
     | 'TooManyKnownPages'
@@ -135,15 +134,6 @@ export class WebApiErrorCodes {
             code: 'MalformedBody',
             codeId: 4011,
             message: 'The request body does not match the API schema for the given API version.',
-        },
-    };
-
-    public static invalidScanNotifyUrl: WebApiErrorCode = {
-        statusCode: 400,
-        error: {
-            code: 'InvalidScanNotifyUrl',
-            codeId: 4012,
-            message: 'The reply URL is not valid.',
         },
     };
 
