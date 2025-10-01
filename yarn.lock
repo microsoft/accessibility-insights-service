@@ -8706,13 +8706,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"deep-equal-in-any-order@npm:^2.0.6":
-  version: 2.0.6
-  resolution: "deep-equal-in-any-order@npm:2.0.6"
+"deep-equal-in-any-order@npm:^2.1.0":
+  version: 2.1.0
+  resolution: "deep-equal-in-any-order@npm:2.1.0"
   dependencies:
     lodash.mapvalues: "npm:^4.6.0"
     sort-any: "npm:^2.0.0"
-  checksum: 10/c975530c2455a15c835306bf388e9c5f7a79b6a45ff0c9c9c5c3ba089c36613ffa7b5b63031ec666e5209f7c7b035155039575d6b7c9876b9cfb7b410af3de2f
+  checksum: 10/aa48cfd68f2498e17ac876e4cbbd83d3d9378f7eb44490ab49772dfa69e9c64c759bed6f4903045c2a72ae70c435a1eb90a20d5fb8616e918475572407ccd68f
   languageName: node
   linkType: hard
 
@@ -10724,7 +10724,7 @@ __metadata:
     azure-services: "workspace:*"
     chai: "npm:^4.3.7"
     common: "workspace:*"
-    deep-equal-in-any-order: "npm:^2.0.6"
+    deep-equal-in-any-order: "npm:^2.1.0"
     dotenv: "npm:^17.2.1"
     inversify: "npm:^6.0.1"
     jest: "npm:^29.7.0"
