@@ -51,7 +51,7 @@
         "applicationinsights": "^3.9.0",
         "azure-services": "workspace:*",
         "common": "workspace:*",
-        "dotenv": "^17.2.1",
+        "dotenv": "^17.2.3",
         "inversify": "^6.0.1",
         "lodash": "^4.17.21",
         "logger": "workspace:*",
