@@ -6288,7 +6288,7 @@ __metadata:
     normalize-url: "npm:6.1.0"
     npm-run-all: "npm:^4.1.5"
     puppeteer: "npm:^24.18.0"
-    raw-body: "npm:^2.5.1"
+    raw-body: "npm:^3.0.1"
     reflect-metadata: "npm:^0.2.2"
     rimraf: "npm:^6.0.1"
     serialize-error: "npm:^8.1.0"
@@ -8180,7 +8180,7 @@ __metadata:
     normalize-path: "npm:^3.0.0"
     normalize-url: "npm:6.1.0"
     npm-run-all: "npm:^4.1.5"
-    raw-body: "npm:^2.5.1"
+    raw-body: "npm:^3.0.1"
     reflect-metadata: "npm:^0.2.2"
     rimraf: "npm:^6.0.1"
     serialize-error: "npm:^8.1.0"
@@ -11679,7 +11679,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"iconv-lite@npm:0.4.24, iconv-lite@npm:^0.4.24":
+"iconv-lite@npm:0.7.0":
+  version: 0.7.0
+  resolution: "iconv-lite@npm:0.7.0"
+  dependencies:
+    safer-buffer: "npm:>= 2.1.2 < 3.0.0"
+  checksum: 10/5bfc897fedfb7e29991ae5ef1c061ed4f864005f8c6d61ef34aba6a3885c04bd207b278c0642b041383aeac2d11645b4319d0ca7b863b0be4be0cde1c9238ca7
+  languageName: node
+  linkType: hard
+
+"iconv-lite@npm:^0.4.24":
   version: 0.4.24
   resolution: "iconv-lite@npm:0.4.24"
   dependencies:
@@ -16330,15 +16339,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"raw-body@npm:^2.5.1":
-  version: 2.5.1
-  resolution: "raw-body@npm:2.5.1"
+"raw-body@npm:^3.0.1":
+  version: 3.0.1
+  resolution: "raw-body@npm:3.0.1"
   dependencies:
     bytes: "npm:3.1.2"
     http-errors: "npm:2.0.0"
-    iconv-lite: "npm:0.4.24"
+    iconv-lite: "npm:0.7.0"
     unpipe: "npm:1.0.0"
-  checksum: 10/280bedc12db3490ecd06f740bdcf66093a07535374b51331242382c0e130bb273ebb611b7bc4cba1b4b4e016cc7b1f4b05a6df885a6af39c2bc3b94c02291c84
+  checksum: 10/3cc63e154147d15200ebf4fe3fb806682b268b8c6256ef3296f60025b07b67a028c1c92b3985b4ec1c7af08b7365ef91b0d0597b957c1c6ac40241b5f6b7d38b
   languageName: node
   linkType: hard
 
