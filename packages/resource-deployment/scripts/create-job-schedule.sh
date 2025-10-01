@@ -16,14 +16,8 @@ templatesFolder="${0%/*}/../templates/"
 onDemandScanReqScheduleJobName="on-demand-scan-req-schedule"
 parsedOnDemandScanReqScheduleFileName="on-demand-scan-req-schedule.generated.template.json"
 
-onDemandScanScheduleJobName="on-demand-url-scan-schedule"
-parsedOnDemandScanScheduleFileName="on-demand-url-scan-schedule.generated.template.json"
-
 privacyScanScheduleJobName="privacy-scan-schedule"
 parsedPrivacyScanScheduleFileName="privacy-scan-schedule.generated.template.json"
-
-reportGeneratorScheduleJobName="report-generator-schedule"
-parsedReportGeneratorScheduleFileName="report-generator-schedule.generated.template.json"
 
 adjustJob() {
     local jobName=$1
@@ -83,10 +77,8 @@ appInsightsConnectionString=$(az monitor app-insights component show --app "${ap
 clientId=$(az identity show --name "${batchNodeManagedIdentityName}" --resource-group "${resourceGroupName}" --query clientId -o tsv)
 appInsightsAuthString="Authorization=AAD;ClientId=${clientId}"
 
-sed -e "s@%APP_INSIGHTS_CONNECTION_STRING%@${appInsightsConnectionString}@" -e "s@%APP_INSIGHTS_AUTH_STRING%@${appInsightsAuthString}@" -e "s@%KEY_VAULT_TOKEN%@${keyVaultUrl}@" -e "s@%CONTAINER_REGISTRY_TOKEN%@${containerRegistryName}@" "${templatesFolder}/on-demand-url-scan-schedule.template.json" >"${parsedOnDemandScanScheduleFileName}"
 sed -e "s@%APP_INSIGHTS_CONNECTION_STRING%@${appInsightsConnectionString}@" -e "s@%APP_INSIGHTS_AUTH_STRING%@${appInsightsAuthString}@" -e "s@%KEY_VAULT_TOKEN%@${keyVaultUrl}@" -e "s@%CONTAINER_REGISTRY_TOKEN%@${containerRegistryName}@" "${templatesFolder}/on-demand-scan-req-schedule.template.json" >"${parsedOnDemandScanReqScheduleFileName}"
 sed -e "s@%APP_INSIGHTS_CONNECTION_STRING%@${appInsightsConnectionString}@" -e "s@%APP_INSIGHTS_AUTH_STRING%@${appInsightsAuthString}@" -e "s@%KEY_VAULT_TOKEN%@${keyVaultUrl}@" -e "s@%CONTAINER_REGISTRY_TOKEN%@${containerRegistryName}@" "${templatesFolder}/privacy-scan-schedule.template.json" >"${parsedPrivacyScanScheduleFileName}"
-sed -e "s@%APP_INSIGHTS_CONNECTION_STRING%@${appInsightsConnectionString}@" -e "s@%APP_INSIGHTS_AUTH_STRING%@${appInsightsAuthString}@" -e "s@%KEY_VAULT_TOKEN%@${keyVaultUrl}@" -e "s@%CONTAINER_REGISTRY_TOKEN%@${containerRegistryName}@" "${templatesFolder}/report-generator-schedule.template.json" >"${parsedReportGeneratorScheduleFileName}"
 
 echo "Logging into batch account ${batchAccountName} in resource group ${resourceGroupName}..."
 az batch account login --name "${batchAccountName}" --resource-group "${resourceGroupName}"
@@ -94,9 +86,7 @@ az batch account login --name "${batchAccountName}" --resource-group "${resource
 echo "Fetching existing job schedule list..."
 allJobsScheduleList=$(az batch job-schedule list --query "[*].id" -o tsv)
 
-adjustJob "${onDemandScanScheduleJobName}" "${parsedOnDemandScanScheduleFileName}" "${allJobsScheduleList}"
 adjustJob "${onDemandScanReqScheduleJobName}" "${parsedOnDemandScanReqScheduleFileName}" "${allJobsScheduleList}"
 adjustJob "${privacyScanScheduleJobName}" "${parsedPrivacyScanScheduleFileName}" "${allJobsScheduleList}"
-adjustJob "${reportGeneratorScheduleJobName}" "${parsedReportGeneratorScheduleFileName}" "${allJobsScheduleList}"
 
 echo "Job schedules were created successfully."

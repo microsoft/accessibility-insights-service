@@ -17,7 +17,6 @@ export MSYS_NO_PATHCONV=1
 templatesFolder="${0%/*}/../templates/"
 webApiFuncTemplateFilePath=${templatesFolder}/function-web-api-app-template.json
 webWorkersFuncTemplateFilePath=${templatesFolder}/function-web-workers-app-template.json
-e2eWebApiFuncTemplateFilePath=${templatesFolder}/function-e2e-web-api-app-template.json
 
 if [[ -z ${dropFolder} ]]; then
     dropFolder="${0%/*}/../../../"
@@ -235,18 +234,10 @@ function deployWebWorkersFunction() {
     az functionapp restart --resource-group "${resourceGroupName}" --name "${webWorkersFuncAppName}"
 }
 
-function deployE2EWebApisFunction() {
-    deployFunctionAppTemplate "e2e-web-apis-allyfuncapp" "${e2eWebApiFuncTemplateFilePath}" "${e2eWebApisFuncAppName}"
-    publishFunctionAppScripts "e2e-web-apis" "${e2eWebApisFuncAppName}"
-    assignUserIdentity "${e2eWebApisFuncAppName}"
-    az functionapp restart --resource-group "${resourceGroupName}" --name "${e2eWebApisFuncAppName}"
-}
-
 function setupAzureFunctions() {
     local functionSetupProcesses=(
         "deployWebApiFunction"
-        "deployWebWorkersFunction"
-        "deployE2EWebApisFunction")
+        "deployWebWorkersFunction")
     runCommandsWithoutSecretsInParallel functionSetupProcesses
 
     enableManagedIdentity

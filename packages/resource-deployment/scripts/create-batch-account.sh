@@ -83,7 +83,6 @@ setParameterFilePath
 
 # Create Batch pool static public IP
 createPublicIp "on-demand-scan-request-pool"
-createPublicIp "on-demand-url-scan-pool"
 createPublicIp "privacy-scan-pool"
 
 deployBatch

@@ -52,24 +52,16 @@ pushImageToRegistry() {
 }
 
 setImageBuildSource() {
-    batchScanRunnerDist="${0%/*}/../../../web-api-scan-runner/dist/"
-    batchScanManagerDist="${0%/*}/../../../web-api-scan-job-manager/dist/"
     batchScanRequestSenderDist="${0%/*}/../../../web-api-scan-request-sender/dist/"
     batchPrivacyScanRunnerDist="${0%/*}/../../../privacy-scan-runner/dist/"
     batchPrivacyScanJobManagerDist="${0%/*}/../../../privacy-scan-job-manager/dist/"
-    batchReportGeneratorRunnerDist="${0%/*}/../../../report-generator-runner/dist/"
-    batchReportGeneratorJobManagerDist="${0%/*}/../../../report-generator-job-manager/dist/"
 }
 
 prepareImageBuildSource() {
     echo "Copy $environment runtime configuration to the docker image build source."
-    cp "${0%/*}/../runtime-config/runtime-config.$environment.json" "${batchScanRunnerDist}runtime-config.json"
-    cp "${0%/*}/../runtime-config/runtime-config.$environment.json" "${batchScanManagerDist}runtime-config.json"
     cp "${0%/*}/../runtime-config/runtime-config.$environment.json" "${batchScanRequestSenderDist}runtime-config.json"
     cp "${0%/*}/../runtime-config/runtime-config.$environment.json" "${batchPrivacyScanRunnerDist}runtime-config.json"
     cp "${0%/*}/../runtime-config/runtime-config.$environment.json" "${batchPrivacyScanJobManagerDist}runtime-config.json"
-    cp "${0%/*}/../runtime-config/runtime-config.$environment.json" "${batchReportGeneratorRunnerDist}runtime-config.json"
-    cp "${0%/*}/../runtime-config/runtime-config.$environment.json" "${batchReportGeneratorJobManagerDist}runtime-config.json"
     echo "Runtime configuration copied successfully."
 }
 
@@ -79,13 +71,9 @@ pushImagesToRegistry() (
 
     # shellcheck disable=SC2034
     local imageBuildProcesses=(
-        "pushImageToRegistry \"batch-scan-runner:prescanner\" $batchScanRunnerDist windows"
-        "pushImageToRegistry \"batch-scan-manager:latest\" $batchScanManagerDist windows"
         "pushImageToRegistry \"batch-scan-request-sender:latest\" $batchScanRequestSenderDist windows"
         "pushImageToRegistry \"batch-privacy-scan-runner:prescanner\" $batchPrivacyScanRunnerDist windows"
         "pushImageToRegistry \"batch-privacy-scan-manager:latest\" $batchPrivacyScanJobManagerDist windows"
-        "pushImageToRegistry \"batch-report-generator-runner:latest\" $batchReportGeneratorRunnerDist windows"
-        "pushImageToRegistry \"batch-report-generator-manager:latest\" $batchReportGeneratorJobManagerDist windows"
     )
 
     echo "Pushing images to Azure Container Registry."

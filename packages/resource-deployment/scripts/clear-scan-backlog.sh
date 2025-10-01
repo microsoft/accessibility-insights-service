@@ -78,7 +78,6 @@ function clearScanBacklog() {
     clearContainerProcesses=(
         "clearCosmosContainer \"scanBatchRequests\""
         "clearCosmosContainer \"scanRequests\""
-        "clearRequestQueues \"ondemand-scanrequest\""
         "clearRequestQueues \"privacy-scan-request\""
     )
 

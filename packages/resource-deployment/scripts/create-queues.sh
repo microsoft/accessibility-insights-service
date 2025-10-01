@@ -31,8 +31,6 @@ Usage: ${BASH_SOURCE} -r <resource group name>
 function setupQueues() {
     echo "Creating Queues in parallel"
     local createQueueProcesses=(
-        "createQueue \"ondemand-scanrequest\""
-        "createQueue \"ondemand-scanrequest-dead\""
         "createQueue \"privacy-scan-request\""
         "createQueue \"privacy-scan-request-dead\""
     )
