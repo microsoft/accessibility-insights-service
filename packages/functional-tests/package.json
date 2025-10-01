@@ -35,7 +35,7 @@
         "typescript": "^5.5.3"
     },
     "dependencies": {
-        "@azure/cosmos": "^4.0.0",
+        "@azure/cosmos": "^4.5.1",
         "azure-services": "workspace:*",
         "chai": "^4.3.7",
         "common": "workspace:*",
