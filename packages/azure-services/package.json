@@ -40,7 +40,7 @@
     },
     "dependencies": {
         "@azure/batch": "^10.2.0",
-        "@azure/core-auth": "^1.10.0",
+        "@azure/core-auth": "^1.10.1",
         "@azure/cosmos": "^4.0.0",
         "@azure/identity": "^4.11.1",
         "@azure/keyvault-secrets": "^4.10.0",
