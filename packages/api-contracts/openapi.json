@@ -220,12 +220,6 @@
                         "type": "integer",
                         "example": 100
                     },
-                    "scanType": {
-                        "description": "The targeted type of the scan",
-                        "type": "string",
-                        "enum": ["accessibility", "privacy"],
-                        "example": "accessibility"
-                    },
                     "scanNotifyUrl": {
                         "type": "string",
                         "example": "https://www.example.com/api/notification"
@@ -542,6 +536,12 @@
                     "url": {
                         "type": "string",
                         "example": "https://accessibilityinsights.io/"
+                    },
+                    "scanType": {
+                        "description": "The type of the scan",
+                        "type": "string",
+                        "enum": ["accessibility"],
+                        "example": "accessibility"
                     },
                     "deepScanId": {
                         "type": "string",
