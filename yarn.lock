@@ -571,14 +571,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@azure/functions@npm:^4.7.2":
-  version: 4.7.2
-  resolution: "@azure/functions@npm:4.7.2"
+"@azure/functions@npm:^4.8.0":
+  version: 4.8.0
+  resolution: "@azure/functions@npm:4.8.0"
   dependencies:
     cookie: "npm:^0.7.0"
     long: "npm:^4.0.0"
     undici: "npm:^5.29.0"
-  checksum: 10/ce0caebf89960efc8717072c88abc404a08cdde3c72aca2041818abad691976784d28db4309e90aabdcea73431cd30c147cb9531cb447ff0e928b79838cc752a
+  checksum: 10/98673a3a4e335b6b43470e3c1c60a99ee19d3ed201d4da4ee0b4c711819abe32cb3bfe5d7d2c51dcf613267e7f8a25df2612929ecf38b4ff0d77a8f23f82a5c3
   languageName: node
   linkType: hard
 
@@ -9102,7 +9102,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "e2e-web-apis@workspace:packages/e2e-web-apis"
   dependencies:
-    "@azure/functions": "npm:^4.7.2"
+    "@azure/functions": "npm:^4.8.0"
     "@types/dotenv": "npm:^8.2.3"
     "@types/jest": "npm:^29.5.12"
     "@types/lodash": "npm:^4.17.20"
@@ -17349,7 +17349,7 @@ __metadata:
   resolution: "service-library@workspace:packages/service-library"
   dependencies:
     "@azure/cosmos": "npm:^4.0.0"
-    "@azure/functions": "npm:^4.7.2"
+    "@azure/functions": "npm:^4.8.0"
     "@azure/identity": "npm:^4.11.1"
     "@azure/storage-blob": "npm:12.18.0"
     "@crawlee/puppeteer": "npm:^3.12.2"
@@ -19632,7 +19632,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "web-api@workspace:packages/web-api"
   dependencies:
-    "@azure/functions": "npm:^4.7.2"
+    "@azure/functions": "npm:^4.8.0"
     "@types/dotenv": "npm:^8.2.3"
     "@types/jest": "npm:^29.5.12"
     "@types/lodash": "npm:^4.17.20"
@@ -19671,7 +19671,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "web-workers@workspace:packages/web-workers"
   dependencies:
-    "@azure/functions": "npm:^4.7.2"
+    "@azure/functions": "npm:^4.8.0"
     "@types/dotenv": "npm:^8.2.3"
     "@types/jest": "npm:^29.5.12"
     "@types/lodash": "npm:^4.17.20"
