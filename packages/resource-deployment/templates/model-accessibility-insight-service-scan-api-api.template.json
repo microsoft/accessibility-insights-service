@@ -8,9 +8,6 @@
         "functionName": {
             "type": "string"
         },
-        "e2eFunctionName": {
-            "type": "string"
-        },
         "maxCallsPerMinute": {
             "type": "int",
             "defaultValue": 3000
@@ -43,20 +40,6 @@
             "type": "Microsoft.ApiManagement/service/backends",
             "apiVersion": "2022-08-01",
             "dependsOn": []
-        },
-        {
-            "type": "Microsoft.ApiManagement/service/backends",
-            "apiVersion": "2022-08-01",
-            "name": "[concat(parameters('apimServiceName'), '/', parameters('e2eFunctionName'))]",
-            "dependsOn": [],
-            "properties": {
-                "url": "[concat('https://', parameters('e2eFunctionName'), '.azurewebsites.net/api')]",
-                "protocol": "http",
-                "resourceId": "[concat('https://management.azure.com/subscriptions/',subscription().subscriptionId,'/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Web/sites/',parameters('e2eFunctionName'))]",
-                "credentials": {
-                    "header": {}
-                }
-            }
         },
         {
             "properties": {

@@ -213,11 +213,6 @@ function enableManagedIdentity() {
     enableStorageAccess
     enableCosmosAccess
     enableApplicationInsightsWriteAccess
-
-    echo "Granting access to ${e2eWebApisFuncAppName} function service principal..."
-    getFunctionAppPrincipalId "${e2eWebApisFuncAppName}"
-    . "${0%/*}/key-vault-enable-msi.sh"
-    enableStorageAccess
 }
 
 function deployWebApiFunction() {
