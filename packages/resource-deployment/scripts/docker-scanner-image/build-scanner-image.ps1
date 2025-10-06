@@ -48,7 +48,16 @@ function buildImage() {
     $images = docker images --no-trunc --format "{{json .}}"
     # Remove non-JSON string prefix
     $json = $images -match ".*(?<json>{.*)"
-    $baseImages = $json | ConvertFrom-Json | Where-Object { $_.Tag -eq "prescanner" }
+
+    try {
+        $baseImages = $json | ConvertFrom-Json | Where-Object { $_.Tag -eq "prescanner" }
+    }
+    catch {
+        Write-Host "No docker images found or unable to parse docker images. Docker images output:"
+        Write-Host ($json | Format-List | Out-String)
+
+        return
+    }
 
     if ($baseImages) {
         foreach ($baseImage in $baseImages) {
