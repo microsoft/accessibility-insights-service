@@ -7,7 +7,10 @@ import { injectable } from 'inversify';
 @injectable()
 export class CrawlerFactory {
     public createPuppeteerCrawler(options: Crawlee.PuppeteerCrawlerOptions): Crawlee.PuppeteerCrawler {
-        return new Crawlee.PuppeteerCrawler(options);
+        const config = new Crawlee.Configuration();
+        config.set('systemInfoV2', true);
+
+        return new Crawlee.PuppeteerCrawler(options, config);
     }
 
     public createBasicCrawler(options: Crawlee.BasicCrawlerOptions): Crawlee.BasicCrawler {
