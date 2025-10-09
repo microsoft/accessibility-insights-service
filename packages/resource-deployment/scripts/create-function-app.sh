@@ -270,6 +270,7 @@ fi
 
 . "${0%/*}/process-utilities.sh"
 . "${0%/*}/get-resource-names.sh"
+. "${0%/*}/set-e2e-test-site-url.sh"
 
 echo "Setting up function apps with arguments:
   resourceGroupName: ${resourceGroupName}

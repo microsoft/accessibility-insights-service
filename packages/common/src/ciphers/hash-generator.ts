@@ -17,11 +17,6 @@ export class HashGenerator {
         return this.generateBase64Hash(baseUrl, scanGroupId);
     }
 
-    public getWebsiteScanPageDataDocumentId(websiteId: string, scanId: string): string {
-        // Preserve parameters order below for the hash generation compatibility
-        return this.generateBase64Hash(websiteId, scanId);
-    }
-
     public getDbHashBucket(prefix: string, ...values: string[]): string {
         // Changing buckets count will affect bucket generation of the same values
         return this.getHashBucket(prefix, 1000, ...values);
