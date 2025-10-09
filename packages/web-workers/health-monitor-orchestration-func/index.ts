@@ -78,14 +78,14 @@ const timerHandler = (timer: Timer, context: InvocationContext): Promise<TimerFu
 
     df.app.orchestration(orchestrationName, orchestrationHandler);
     df.app.activity(HealthMonitorActivity.activityName, { handler: healthMonitorActivity.handler });
-
-    app.timer('health-monitor-orchestration', {
-        schedule: '0 */30 * * * *',
-        handler: timerHandler,
-        runOnStartup: System.isDebugEnabled(),
-        extraInputs: [df.input.durableClient()],
-    });
 })().catch((error) => {
     console.log(System.serializeError(error));
     process.exitCode = 1;
+});
+
+app.timer('health-monitor-orchestration', {
+    schedule: '0 */30 * * * *', // Every 30 minutes
+    handler: timerHandler,
+    runOnStartup: System.isDebugEnabled(),
+    extraInputs: [df.input.durableClient()],
 });

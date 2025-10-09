@@ -16,10 +16,4 @@ export declare type LoggerEvent =
     | 'ScanTaskStarted'
     | 'ScanTaskCompleted'
     | 'ScanTaskFailed'
-    | 'BrowserScanFailed'
-    | 'ReportGeneratorTaskStarted'
-    | 'ReportGeneratorTaskFailed'
-    | 'ReportGeneratorTaskCompleted'
-    | 'ReportGeneratorRequestRunning'
-    | 'ReportGeneratorRequestFailed'
-    | 'ReportGeneratorRequestCompleted';
+    | 'BrowserScanFailed';

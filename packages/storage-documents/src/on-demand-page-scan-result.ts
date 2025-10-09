@@ -5,7 +5,6 @@ import { ItemType } from './item-type';
 import { StorageDocument } from './storage-document';
 import { ScanGroupType } from './website-scan-data';
 import { PrivacyScan } from './on-demand-page-scan-batch-request';
-import { ReportScanRunResult } from './report-generator-request';
 
 export declare type SchemaVersion = '2';
 export declare type OnDemandPageScanRunState =
@@ -62,7 +61,6 @@ export interface OnDemandPageScanResult extends StorageDocument {
     websiteScanRef?: WebsiteScanRef;
     scannedUrl?: string;
     run: OnDemandPageScanRunResult;
-    subRuns?: WorkflowRunResults;
     scanResult?: OnDemandScanResult;
     reports?: OnDemandPageScanReport[];
     privacyScan?: PrivacyScan;
@@ -110,10 +108,6 @@ export interface WebsiteScanRef {
     id: string;
     scanGroupId: string;
     scanGroupType: ScanGroupType;
-}
-
-export interface WorkflowRunResults {
-    report: ReportScanRunResult;
 }
 
 export interface ScanDefinition {

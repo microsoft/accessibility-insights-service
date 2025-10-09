@@ -26,7 +26,6 @@ export { OperationResult } from './data-providers/operation-result';
 export { BatchRequestLoader } from './dev-utilities/batch-request-loader';
 export { ReportWriter, GeneratedReport } from './data-providers/report-writer';
 export * from './data-providers/privacy-scan-combined-report-provider';
-export * from './data-providers/report-generator-request-data-provider';
 export { RunnerScanMetadata } from './runner-scan-metadata';
 export { RunStateClientProvider } from './web-api/run-state-client-provider';
 export * from './website-builder/page-metadata-generator';

@@ -66,35 +66,6 @@ export interface BrowserScanFailedMeasurements extends BaseTelemetryMeasurements
     failedBrowserScans: number;
 }
 
-// Report generator task events
-export interface ReportGeneratorTaskStartedMeasurements extends BaseTelemetryMeasurements {
-    waitTime: number;
-    startedTasks: number;
-}
-
-export interface ReportGeneratorTaskCompletedMeasurements extends BaseTelemetryMeasurements {
-    executionTime: number;
-    totalTime: number;
-    completedTasks: number;
-}
-
-export interface ReportGeneratorTaskFailedMeasurements extends BaseTelemetryMeasurements {
-    failedTasks: number;
-}
-
-// Report generator request run events
-export interface ReportGeneratorRequestRunningMeasurements extends BaseTelemetryMeasurements {
-    runningRequests: number;
-}
-
-export interface ReportGeneratorRequestCompletedMeasurements extends BaseTelemetryMeasurements {
-    completedRequests: number;
-}
-
-export interface ReportGeneratorRequestFailedMeasurements extends BaseTelemetryMeasurements {
-    failedRequests: number;
-}
-
 export type TelemetryMeasurements = {
     HealthCheck: null;
     FunctionalTest: null;
@@ -113,12 +84,4 @@ export type TelemetryMeasurements = {
     ScanTaskStarted: ScanTaskStartedMeasurements;
     ScanTaskCompleted: ScanTaskCompletedMeasurements;
     ScanTaskFailed: ScanTaskFailedMeasurements;
-
-    ReportGeneratorTaskStarted: ReportGeneratorTaskStartedMeasurements;
-    ReportGeneratorTaskCompleted: ReportGeneratorTaskCompletedMeasurements;
-    ReportGeneratorTaskFailed: ReportGeneratorTaskFailedMeasurements;
-
-    ReportGeneratorRequestRunning: ReportGeneratorRequestRunningMeasurements;
-    ReportGeneratorRequestCompleted: ReportGeneratorRequestCompletedMeasurements;
-    ReportGeneratorRequestFailed: ReportGeneratorRequestFailedMeasurements;
 };
