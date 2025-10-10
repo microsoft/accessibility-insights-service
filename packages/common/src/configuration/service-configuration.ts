@@ -262,7 +262,7 @@ export class ServiceConfiguration {
                 },
                 scanWaitIntervalInSeconds: {
                     format: 'int',
-                    default: 180,
+                    default: 300,
                     doc: 'Time to wait before checking E2E test orchestration workflow activity result',
                 },
                 logQueryTimeRange: {
