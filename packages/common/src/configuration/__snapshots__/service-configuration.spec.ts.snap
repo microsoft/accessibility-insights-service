@@ -29,7 +29,7 @@ exports[`ServiceConfiguration verifies custom config 1`] = `
       "format": "int",
     },
     "scanWaitIntervalInSeconds": {
-      "default": 180,
+      "default": 300,
       "doc": "Time to wait before checking E2E test orchestration workflow activity result",
       "format": "int",
     },
@@ -211,7 +211,7 @@ exports[`ServiceConfiguration verifies dev config 1`] = `
       "format": "int",
     },
     "scanWaitIntervalInSeconds": {
-      "default": 180,
+      "default": 300,
       "doc": "Time to wait before checking E2E test orchestration workflow activity result",
       "format": "int",
     },
