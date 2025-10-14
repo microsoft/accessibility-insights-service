@@ -137,14 +137,7 @@ deployFunctionAppTemplate() {
     echo "Successfully deployed Azure function app ${functionAppName}"
 }
 
-function enableCosmosAccess() {
-    cosmosAccountId=$(az cosmosdb show --name "${cosmosAccountName}" --resource-group "${resourceGroupName}" --query id -o tsv)
-    scope="--scope ${cosmosAccountId}"
-
-    role="DocumentDB Account Contributor"
-    . "${0%/*}/create-role-assignment.sh"
-
-    # Create and assign custom RBAC role
+function createCosmosRBACRole() {
     customRoleName="CosmosDocumentRW"
     RBACRoleId=$(az cosmosdb sql role definition list --account-name "${cosmosAccountName}" --resource-group "${resourceGroupName}" --query "[?roleName=='${customRoleName}'].id" -o tsv)
     if [[ -z "${RBACRoleId}" ]]; then
@@ -158,6 +151,14 @@ function enableCosmosAccess() {
             --id "${RBACRoleId}" \
             --exists 1>/dev/null
     fi
+}
+
+function enableCosmosAccess() {
+    cosmosAccountId=$(az cosmosdb show --name "${cosmosAccountName}" --resource-group "${resourceGroupName}" --query id -o tsv)
+    scope="--scope ${cosmosAccountId}"
+    role="DocumentDB Account Contributor"
+    . "${0%/*}/create-role-assignment.sh"
+
     az cosmosdb sql role assignment create --account-name "${cosmosAccountName}" \
         --resource-group "${resourceGroupName}" \
         --scope "/" \
@@ -172,7 +173,7 @@ function enableApplicationInsightsWriteAccess() {
 }
 
 function enableApplicationInsightsReadAccess() {
-    principalId=$(az identity show --name "${webApiManagedIdentityName}" --resource-group "${resourceGroupName}" --query principalId -o tsv)
+    principalId=${webApiIdentityPrincipalId}
     role="Reader"
     scope="--scope /subscriptions/${subscription}/resourceGroups/${resourceGroupName}/providers/microsoft.insights/components/${appInsightsName}"
     . "${0%/*}/create-role-assignment.sh"
@@ -203,28 +204,32 @@ function enableManagedIdentity() {
     getFunctionAppPrincipalId "${webApiFuncAppName}"
     . "${0%/*}/key-vault-enable-msi.sh"
     enableStorageAccess
-    enableCosmosAccess
     enableApplicationInsightsWriteAccess
     enableApplicationInsightsReadAccess
+    enableCosmosAccess
 
     echo "Granting access to ${webWorkersFuncAppName} function service principal..."
     getFunctionAppPrincipalId "${webWorkersFuncAppName}"
     . "${0%/*}/key-vault-enable-msi.sh"
     enableStorageAccess
-    enableCosmosAccess
     enableApplicationInsightsWriteAccess
+    enableCosmosAccess
+    principalId=${webApiIdentityPrincipalId}
+    enableCosmosAccess
 }
 
 function deployWebApiFunction() {
-    deployFunctionAppTemplate "web-api-allyfuncapp" "${webApiFuncTemplateFilePath}" "${webApiFuncAppName}" "clientId=${webApiIdentityClientId} releaseVersion=${releaseVersion} allowedApplications=${allowedApplications}"
+    # Upload the deployment package BEFORE deploying the ARM template
     publishFunctionAppScripts "web-api" "${webApiFuncAppName}"
+    deployFunctionAppTemplate "web-api-allyfuncapp" "${webApiFuncTemplateFilePath}" "${webApiFuncAppName}" "clientId=${webApiIdentityClientId} releaseVersion=${releaseVersion} allowedApplications=${allowedApplications}"
     assignUserIdentity "${webApiFuncAppName}"
     az functionapp restart --resource-group "${resourceGroupName}" --name "${webApiFuncAppName}"
 }
 
 function deployWebWorkersFunction() {
-    deployFunctionAppTemplate "web-workers-allyfuncapp" "${webWorkersFuncTemplateFilePath}" "${webWorkersFuncAppName}" "releaseVersion=${releaseVersion}"
+    # Upload the deployment package BEFORE deploying the ARM template
     publishFunctionAppScripts "web-workers" "${webWorkersFuncAppName}"
+    deployFunctionAppTemplate "web-workers-allyfuncapp" "${webWorkersFuncTemplateFilePath}" "${webWorkersFuncAppName}" "releaseVersion=${releaseVersion}"
     assignUserIdentity "${webWorkersFuncAppName}"
     az functionapp restart --resource-group "${resourceGroupName}" --name "${webWorkersFuncAppName}"
 }
@@ -267,7 +272,9 @@ echo "Setting up function apps with arguments:
 "
 
 webApiIdentityClientId=$(az identity show --name "${webApiManagedIdentityName}" --resource-group "${resourceGroupName}" --query clientId -o tsv)
+webApiIdentityPrincipalId=$(az identity show --name "${webApiManagedIdentityName}" --resource-group "${resourceGroupName}" --query principalId -o tsv)
 userIdentityId=$(az identity show --name "${webApiManagedIdentityName}" --resource-group "${resourceGroupName}" --query id -o tsv)
 
 getAllowedApplications
+createCosmosRBACRole
 setupAzureFunctions

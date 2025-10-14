@@ -72,13 +72,19 @@
             "type": "Microsoft.Web/serverfarms",
             "apiVersion": "2022-09-01",
             "name": "[variables('appPlanName')]",
-            "sku": {
-                "name": "Y1",
-                "tier": "Dynamic"
-            },
-            "kind": "functionapp",
             "location": "[parameters('location')]",
-            "properties": {}
+            "sku": {
+                "name": "EP3",
+                "tier": "ElasticPremium",
+                "capacity": 1
+            },
+            "kind": "elastic",
+            "properties": {
+                "reserved": false,
+                "elasticScaleEnabled": true,
+                "maximumElasticWorkerCount": 20,
+                "zoneRedundant": false
+            }
         },
         {
             "type": "Microsoft.Web/sites",
@@ -92,8 +98,15 @@
             "properties": {
                 "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('appPlanName'))]",
                 "httpsOnly": true,
+                "clientAffinityEnabled": false,
                 "siteConfig": {
+                    "numberOfWorkers": 1,
+                    "nodeVersion": "~20",
                     "minTlsVersion": "1.2",
+                    "alwaysOn": true,
+                    "http20Enabled": false,
+                    "minimumElasticInstanceCount": 1,
+                    "functionAppScaleLimit": 0,
                     "appSettings": [
                         {
                             "name": "FUNCTIONS_WORKER_RUNTIME",
