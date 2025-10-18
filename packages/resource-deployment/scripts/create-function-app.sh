@@ -116,8 +116,8 @@ waitForFunctionStart() {
 getFunctionAppPrincipalId() {
     local functionAppName=$1
 
-    principalId=$(az functionapp identity show --name "${functionAppName}" --resource-group "${resourceGroupName}" --query "principalId" -o tsv)
-    echo "Azure function app ${functionAppName} has assigned principal ID ${principalId}."
+    functionAppPrincipalId=$(az functionapp identity show --name "${functionAppName}" --resource-group "${resourceGroupName}" --query "principalId" -o tsv)
+    echo "Azure function app ${functionAppName} has assigned principal ID ${functionAppPrincipalId}."
 }
 
 deployFunctionAppTemplate() {
@@ -155,6 +155,9 @@ function createCosmosRBACRole() {
 }
 
 function enableCosmosAccess() {
+    local objectId=$1
+
+    principalId=${objectId}
     cosmosAccountId=$(az cosmosdb show --name "${cosmosAccountName}" --resource-group "${resourceGroupName}" --query id -o tsv)
     scope="--scope ${cosmosAccountId}"
     role="DocumentDB Account Contributor"
@@ -168,13 +171,18 @@ function enableCosmosAccess() {
 }
 
 function enableApplicationInsightsWriteAccess() {
+    local objectId=$1
+
+    principalId=${objectId}
     role="Monitoring Metrics Publisher"
     scope="--scope /subscriptions/${subscription}/resourceGroups/${resourceGroupName}/providers/microsoft.insights/components/${appInsightsName}"
     . "${0%/*}/create-role-assignment.sh"
 }
 
 function enableApplicationInsightsReadAccess() {
-    principalId=${webApiIdentityPrincipalId}
+    local objectId=$1
+
+    principalId=${objectId}
     role="Reader"
     scope="--scope /subscriptions/${subscription}/resourceGroups/${resourceGroupName}/providers/microsoft.insights/components/${appInsightsName}"
     . "${0%/*}/create-role-assignment.sh"
@@ -187,6 +195,9 @@ function assignUserIdentity() {
 }
 
 function enableStorageAccess() {
+    local objectId=$1
+
+    principalId=${objectId}
     role="Storage Blob Data Contributor"
     scope="--scope /subscriptions/${subscription}/resourceGroups/${resourceGroupName}/providers/Microsoft.Storage/storageAccounts/${storageAccountName}"
     . "${0%/*}/create-role-assignment.sh"
@@ -200,28 +211,33 @@ function enableStorageAccess() {
     . "${0%/*}/create-role-assignment.sh"
 }
 
+function enableKeyVaultAccess() {
+    local objectId=$1
+
+    principalId=${objectId}
+    . "${0%/*}/key-vault-enable-msi.sh"
+}
+
 function enableManagedIdentity() {
-    echo "Granting access to ${webApiFuncAppName} function service principal..."
+    echo "Granting access to ${webApiFuncAppName} function app..."
     getFunctionAppPrincipalId "${webApiFuncAppName}"
-    . "${0%/*}/key-vault-enable-msi.sh"
-    enableStorageAccess
-    enableApplicationInsightsWriteAccess
-    enableApplicationInsightsReadAccess
-    enableCosmosAccess
+    enableKeyVaultAccess "${functionAppPrincipalId}"
+    enableStorageAccess "${functionAppPrincipalId}"
+    enableApplicationInsightsWriteAccess "${functionAppPrincipalId}"
+    enableApplicationInsightsReadAccess "${webApiIdentityPrincipalId}"
+    enableCosmosAccess "${functionAppPrincipalId}"
 
-    echo "Granting access to ${webWorkersFuncAppName} function service principal..."
+    echo "Granting access to ${webWorkersFuncAppName} function app..."
     getFunctionAppPrincipalId "${webWorkersFuncAppName}"
-    . "${0%/*}/key-vault-enable-msi.sh"
-    enableStorageAccess
-    enableApplicationInsightsWriteAccess
-    enableCosmosAccess
-    principalId=${webApiIdentityPrincipalId}
-    enableCosmosAccess
+    enableKeyVaultAccess "${functionAppPrincipalId}"
+    enableStorageAccess "${functionAppPrincipalId}"
+    enableApplicationInsightsWriteAccess "${functionAppPrincipalId}"
+    enableCosmosAccess "${functionAppPrincipalId}"
 
-    echo "Granting access to ${e2eWebApisFuncAppName} function service principal..."
+    echo "Granting access to ${e2eWebApisFuncAppName} function app..."
     getFunctionAppPrincipalId "${e2eWebApisFuncAppName}"
-    . "${0%/*}/key-vault-enable-msi.sh"
-    enableStorageAccess
+    enableKeyVaultAccess "${functionAppPrincipalId}"
+    enableStorageAccess "${functionAppPrincipalId}"
 }
 
 function deployWebApiFunction() {
@@ -286,9 +302,9 @@ echo "Setting up function apps with arguments:
   releaseVersion: ${releaseVersion}
 "
 
-webApiIdentityClientId=$(az identity show --name "${webApiManagedIdentityName}" --resource-group "${resourceGroupName}" --query clientId -o tsv)
-webApiIdentityPrincipalId=$(az identity show --name "${webApiManagedIdentityName}" --resource-group "${resourceGroupName}" --query principalId -o tsv)
-userIdentityId=$(az identity show --name "${webApiManagedIdentityName}" --resource-group "${resourceGroupName}" --query id -o tsv)
+webApiIdentityClientId=$(az identity show --name "${webApiManagedIdentityName}" --resource-group "${resourceGroupName}" --query "clientId" -o tsv)
+webApiIdentityPrincipalId=$(az identity show --name "${webApiManagedIdentityName}" --resource-group "${resourceGroupName}" --query "principalId" -o tsv)
+userIdentityId=$(az identity show --name "${webApiManagedIdentityName}" --resource-group "${resourceGroupName}" --query "id" -o tsv)
 
 getAllowedApplications
 createCosmosRBACRole
