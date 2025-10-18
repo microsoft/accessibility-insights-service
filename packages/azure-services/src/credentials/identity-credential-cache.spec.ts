@@ -119,7 +119,7 @@ describe(IdentityCredentialCache, () => {
         getAccessToken = async () => Promise.reject(new Error('msi service error'));
 
         await expect(identityCredentialCache.getToken(scopes, undefined, getAccessToken)).rejects.toThrowError(
-            /Credential provider has failed./,
+            /Azure credential provider has failed./,
         );
     });
 });
