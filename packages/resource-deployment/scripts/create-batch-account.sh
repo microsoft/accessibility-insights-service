@@ -78,7 +78,6 @@ fi
 
 echo "Setting up batch account ${batchAccountName}"
 setParameterFilePath
-. "${0%/*}/enable-batch-node-identity.sh"
 . "${0%/*}/delete-pools-if-needed.sh"
 
 # Create Batch pool static public IP
@@ -87,4 +86,6 @@ createPublicIp "on-demand-url-scan-pool"
 createPublicIp "privacy-scan-pool"
 
 deployBatch
+. "${0%/*}/enable-batch-node-identity.sh"
+
 echo "The ${batchAccountName} Azure Batch account successfully deployed."

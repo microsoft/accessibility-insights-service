@@ -12,7 +12,6 @@ import {
     WebApiErrorCodes,
     WebHttpResponse,
     WebsiteScanDataProvider,
-    WebsiteScanResultProvider,
 } from 'service-library';
 import { OnDemandPageScanResult } from 'storage-documents';
 import { HttpResponseInit } from '@azure/functions';
@@ -27,7 +26,6 @@ export class BatchScanResultController extends BaseScanResultController {
 
     public constructor(
         @inject(OnDemandPageScanRunResultProvider) protected readonly onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider,
-        @inject(WebsiteScanResultProvider) protected readonly websiteScanResultProvider: WebsiteScanResultProvider,
         @inject(WebsiteScanDataProvider) protected readonly websiteScanDataProvider: WebsiteScanDataProvider,
         @inject(ScanResponseConverter) protected readonly scanResponseConverter: ScanResponseConverter,
         @inject(GuidGenerator) protected readonly guidGenerator: GuidGenerator,
@@ -95,8 +93,8 @@ export class BatchScanResultController extends BaseScanResultController {
                         error: WebApiErrorCodes.resourceNotFound.error,
                     });
                 } else {
-                    const websiteScanResult = await this.getWebsiteScanResult(pageScanResult);
-                    const response = await this.getScanResultResponse(pageScanResult, websiteScanResult);
+                    const websiteScanData = await this.getWebsiteScanData(pageScanResult);
+                    const response = await this.getScanResultResponse(pageScanResult, websiteScanData);
                     responses.push(response);
                 }
             }),

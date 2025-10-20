@@ -4,22 +4,12 @@
 import { GuidGenerator } from 'common';
 import { Dictionary, isEmpty, keyBy } from 'lodash';
 import moment from 'moment';
-import {
-    ApiController,
-    OnDemandPageScanRunResultProvider,
-    ScanResultResponse,
-    WebsiteScanDataProvider,
-    WebsiteScanResultProvider,
-} from 'service-library';
-import { OnDemandPageScanResult, WebsiteScanData, WebsiteScanResult } from 'storage-documents';
+import { ApiController, OnDemandPageScanRunResultProvider, ScanResultResponse, WebsiteScanDataProvider } from 'service-library';
+import { OnDemandPageScanResult, WebsiteScanData } from 'storage-documents';
 import { ScanResponseConverter } from '../converters/scan-response-converter';
-
-// TODO Remove WebsiteScanResultProvider 30 days after deployment
 
 export abstract class BaseScanResultController extends ApiController {
     protected abstract readonly onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider;
-
-    protected abstract readonly websiteScanResultProvider: WebsiteScanResultProvider;
 
     protected abstract readonly websiteScanDataProvider: WebsiteScanDataProvider;
 
@@ -41,14 +31,11 @@ export abstract class BaseScanResultController extends ApiController {
         return keyBy(scanResultItems, (item) => item.id);
     }
 
-    protected async getWebsiteScanResult(pageScanResult: OnDemandPageScanResult): Promise<WebsiteScanResult | WebsiteScanData> {
+    protected async getWebsiteScanData(pageScanResult: OnDemandPageScanResult): Promise<WebsiteScanData> {
         if (pageScanResult.schemaVersion === '2') {
             return this.websiteScanDataProvider.read(pageScanResult.websiteScanRef.id);
         } else {
-            // Expand scan result for original scan only. Result for descendant scans do not include deep scan result collection.
-            const expandResult = pageScanResult.id === pageScanResult.deepScanId;
-
-            return this.websiteScanResultProvider.read(pageScanResult.websiteScanRef.id, expandResult);
+            throw new Error(`Unsupported schema version: ${pageScanResult.schemaVersion}`);
         }
     }
 
@@ -74,7 +61,7 @@ export abstract class BaseScanResultController extends ApiController {
 
     protected async getScanResultResponse(
         pageScanResult: OnDemandPageScanResult,
-        websiteScanData: WebsiteScanResult | WebsiteScanData,
+        websiteScanData: WebsiteScanData,
     ): Promise<ScanResultResponse> {
         const segment = '/api/';
         const baseUrl = this.appContext.request.url.substring(0, this.appContext.request.url.indexOf(segment) + segment.length);

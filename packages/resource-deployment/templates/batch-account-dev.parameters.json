@@ -12,7 +12,7 @@
             "value": "standard_e4ds_v4"
         },
         "onDemandScanRequestPoolTaskSlotsPerNode": {
-            "value": "8"
+            "value": "4"
         },
         "onDemandUrlScanPoolNodes": {
             "value": "1"

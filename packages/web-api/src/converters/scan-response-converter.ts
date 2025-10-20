@@ -14,14 +14,11 @@ import {
 import {
     OnDemandPageScanResult,
     ScanCompletedNotification as NotificationDb,
-    WebsiteScanResult,
     WebsiteScanData,
     ItemType,
     KnownPage,
 } from 'storage-documents';
 import { ScanErrorConverter } from './scan-error-converter';
-
-// TODO Remove WebsiteScanResult 30 days after deployment
 
 @injectable()
 export class ScanResponseConverter {
@@ -34,7 +31,7 @@ export class ScanResponseConverter {
         baseUrl: string,
         apiVersion: string,
         pageScanResult: OnDemandPageScanResult,
-        websiteScanData: WebsiteScanResult | WebsiteScanData,
+        websiteScanData: WebsiteScanData,
     ): Promise<ScanResultResponse> {
         const effectiveRunState = await this.runStateClientProvider.getEffectiveRunState(pageScanResult);
         switch (effectiveRunState) {
@@ -89,7 +86,7 @@ export class ScanResponseConverter {
         baseUrl: string,
         apiVersion: string,
         pageScanResult: OnDemandPageScanResult,
-        websiteScanData: WebsiteScanResult | WebsiteScanData,
+        websiteScanData: WebsiteScanData,
         effectiveRunState: RunState,
     ): ScanResultResponse {
         const scanResultResponse: ScanResultResponse = {
@@ -189,7 +186,7 @@ export class ScanResponseConverter {
         return { notification: notificationResponse };
     }
 
-    private getDeepScanResult(websiteScanData: WebsiteScanResult | WebsiteScanData): { [deepScanResult: string]: DeepScanResultItem[] } {
+    private getDeepScanResult(websiteScanData: WebsiteScanData): { [deepScanResult: string]: DeepScanResultItem[] } {
         if (websiteScanData.scanGroupType === 'single-scan') {
             return {};
         }
@@ -209,19 +206,7 @@ export class ScanResponseConverter {
 
             return { deepScanResult };
         } else {
-            const deepScanResult: DeepScanResultItem[] = websiteScanData.pageScans.map((pageScan) => {
-                const result = {
-                    scanId: pageScan.scanId,
-                    url: pageScan.url,
-                    scanResultState: pageScan.scanState,
-                    scanRunState: pageScan.runState ?? 'pending',
-                };
-
-                // Remove undefined fields from an object
-                return pickBy(result, (v) => v !== undefined) as unknown as DeepScanResultItem;
-            });
-
-            return { deepScanResult };
+            throw new Error(`Not supported websiteScanData itemType ${websiteScanData.itemType}`); // This should never happen
         }
     }
 }

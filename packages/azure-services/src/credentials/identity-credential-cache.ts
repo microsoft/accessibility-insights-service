@@ -41,7 +41,11 @@ export class IdentityCredentialCache {
             try {
                 return await getAccessToken();
             } catch (error) {
-                throw new Error(`Credential provider has failed. ${System.serializeError(error)}`);
+                throw new Error(
+                    `Azure credential provider has failed. ClientId: ${clientId}. Scope: ${scope}. Error: ${System.serializeError(
+                        error,
+                    )}. Stack: ${new Error().stack}`,
+                );
             }
         });
 

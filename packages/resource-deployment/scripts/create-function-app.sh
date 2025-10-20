@@ -116,8 +116,8 @@ waitForFunctionStart() {
 getFunctionAppPrincipalId() {
     local functionAppName=$1
 
-    principalId=$(az functionapp identity show --name "${functionAppName}" --resource-group "${resourceGroupName}" --query "principalId" -o tsv)
-    echo "Azure function app ${functionAppName} has assigned principal ID ${principalId}."
+    functionAppPrincipalId=$(az functionapp identity show --name "${functionAppName}" --resource-group "${resourceGroupName}" --query "principalId" -o tsv)
+    echo "Azure function app ${functionAppName} has assigned principal ID ${functionAppPrincipalId}."
 }
 
 deployFunctionAppTemplate() {
@@ -138,14 +138,7 @@ deployFunctionAppTemplate() {
     echo "Successfully deployed Azure function app ${functionAppName}"
 }
 
-function enableCosmosAccess() {
-    cosmosAccountId=$(az cosmosdb show --name "${cosmosAccountName}" --resource-group "${resourceGroupName}" --query id -o tsv)
-    scope="--scope ${cosmosAccountId}"
-
-    role="DocumentDB Account Contributor"
-    . "${0%/*}/create-role-assignment.sh"
-
-    # Create and assign custom RBAC role
+function createCosmosRBACRole() {
     customRoleName="CosmosDocumentRW"
     RBACRoleId=$(az cosmosdb sql role definition list --account-name "${cosmosAccountName}" --resource-group "${resourceGroupName}" --query "[?roleName=='${customRoleName}'].id" -o tsv)
     if [[ -z "${RBACRoleId}" ]]; then
@@ -159,6 +152,17 @@ function enableCosmosAccess() {
             --id "${RBACRoleId}" \
             --exists 1>/dev/null
     fi
+}
+
+function enableCosmosAccess() {
+    local objectId=$1
+
+    principalId=${objectId}
+    cosmosAccountId=$(az cosmosdb show --name "${cosmosAccountName}" --resource-group "${resourceGroupName}" --query id -o tsv)
+    scope="--scope ${cosmosAccountId}"
+    role="DocumentDB Account Contributor"
+    . "${0%/*}/create-role-assignment.sh"
+
     az cosmosdb sql role assignment create --account-name "${cosmosAccountName}" \
         --resource-group "${resourceGroupName}" \
         --scope "/" \
@@ -167,13 +171,18 @@ function enableCosmosAccess() {
 }
 
 function enableApplicationInsightsWriteAccess() {
+    local objectId=$1
+
+    principalId=${objectId}
     role="Monitoring Metrics Publisher"
     scope="--scope /subscriptions/${subscription}/resourceGroups/${resourceGroupName}/providers/microsoft.insights/components/${appInsightsName}"
     . "${0%/*}/create-role-assignment.sh"
 }
 
 function enableApplicationInsightsReadAccess() {
-    principalId=$(az identity show --name "${webApiManagedIdentityName}" --resource-group "${resourceGroupName}" --query principalId -o tsv)
+    local objectId=$1
+
+    principalId=${objectId}
     role="Reader"
     scope="--scope /subscriptions/${subscription}/resourceGroups/${resourceGroupName}/providers/microsoft.insights/components/${appInsightsName}"
     . "${0%/*}/create-role-assignment.sh"
@@ -186,6 +195,9 @@ function assignUserIdentity() {
 }
 
 function enableStorageAccess() {
+    local objectId=$1
+
+    principalId=${objectId}
     role="Storage Blob Data Contributor"
     scope="--scope /subscriptions/${subscription}/resourceGroups/${resourceGroupName}/providers/Microsoft.Storage/storageAccounts/${storageAccountName}"
     . "${0%/*}/create-role-assignment.sh"
@@ -199,45 +211,55 @@ function enableStorageAccess() {
     . "${0%/*}/create-role-assignment.sh"
 }
 
+function enableKeyVaultAccess() {
+    local objectId=$1
+
+    principalId=${objectId}
+    . "${0%/*}/key-vault-enable-msi.sh"
+}
+
 function enableManagedIdentity() {
-    echo "Granting access to ${webApiFuncAppName} function service principal..."
+    echo "Granting access to ${webApiFuncAppName} function app..."
     getFunctionAppPrincipalId "${webApiFuncAppName}"
-    . "${0%/*}/key-vault-enable-msi.sh"
-    enableStorageAccess
-    enableCosmosAccess
-    enableApplicationInsightsWriteAccess
-    enableApplicationInsightsReadAccess
+    enableKeyVaultAccess "${functionAppPrincipalId}"
+    enableStorageAccess "${functionAppPrincipalId}"
+    enableApplicationInsightsWriteAccess "${functionAppPrincipalId}"
+    enableApplicationInsightsReadAccess "${webApiIdentityPrincipalId}"
+    enableCosmosAccess "${functionAppPrincipalId}"
 
-    echo "Granting access to ${webWorkersFuncAppName} function service principal..."
+    echo "Granting access to ${webWorkersFuncAppName} function app..."
     getFunctionAppPrincipalId "${webWorkersFuncAppName}"
-    . "${0%/*}/key-vault-enable-msi.sh"
-    enableStorageAccess
-    enableCosmosAccess
-    enableApplicationInsightsWriteAccess
+    enableKeyVaultAccess "${functionAppPrincipalId}"
+    enableStorageAccess "${functionAppPrincipalId}"
+    enableApplicationInsightsWriteAccess "${functionAppPrincipalId}"
+    enableCosmosAccess "${functionAppPrincipalId}"
 
-    echo "Granting access to ${e2eWebApisFuncAppName} function service principal..."
+    echo "Granting access to ${e2eWebApisFuncAppName} function app..."
     getFunctionAppPrincipalId "${e2eWebApisFuncAppName}"
-    . "${0%/*}/key-vault-enable-msi.sh"
-    enableStorageAccess
+    enableKeyVaultAccess "${functionAppPrincipalId}"
+    enableStorageAccess "${functionAppPrincipalId}"
 }
 
 function deployWebApiFunction() {
-    deployFunctionAppTemplate "web-api-allyfuncapp" "${webApiFuncTemplateFilePath}" "${webApiFuncAppName}" "clientId=${webApiIdentityClientId} releaseVersion=${releaseVersion} allowedApplications=${allowedApplications}"
+    # Upload the deployment package BEFORE deploying the ARM template
     publishFunctionAppScripts "web-api" "${webApiFuncAppName}"
+    deployFunctionAppTemplate "web-api-allyfuncapp" "${webApiFuncTemplateFilePath}" "${webApiFuncAppName}" "clientId=${webApiIdentityClientId} releaseVersion=${releaseVersion} allowedApplications=${allowedApplications}"
     assignUserIdentity "${webApiFuncAppName}"
     az functionapp restart --resource-group "${resourceGroupName}" --name "${webApiFuncAppName}"
 }
 
 function deployWebWorkersFunction() {
-    deployFunctionAppTemplate "web-workers-allyfuncapp" "${webWorkersFuncTemplateFilePath}" "${webWorkersFuncAppName}" "releaseVersion=${releaseVersion}"
+    # Upload the deployment package BEFORE deploying the ARM template
     publishFunctionAppScripts "web-workers" "${webWorkersFuncAppName}"
+    deployFunctionAppTemplate "web-workers-allyfuncapp" "${webWorkersFuncTemplateFilePath}" "${webWorkersFuncAppName}" "releaseVersion=${releaseVersion}"
     assignUserIdentity "${webWorkersFuncAppName}"
     az functionapp restart --resource-group "${resourceGroupName}" --name "${webWorkersFuncAppName}"
 }
 
 function deployE2EWebApisFunction() {
-    deployFunctionAppTemplate "e2e-web-apis-allyfuncapp" "${e2eWebApiFuncTemplateFilePath}" "${e2eWebApisFuncAppName}"
+    # Upload the deployment package BEFORE deploying the ARM template
     publishFunctionAppScripts "e2e-web-apis" "${e2eWebApisFuncAppName}"
+    deployFunctionAppTemplate "e2e-web-apis-allyfuncapp" "${e2eWebApiFuncTemplateFilePath}" "${e2eWebApisFuncAppName}"
     assignUserIdentity "${e2eWebApisFuncAppName}"
     az functionapp restart --resource-group "${resourceGroupName}" --name "${e2eWebApisFuncAppName}"
 }
@@ -270,6 +292,7 @@ fi
 
 . "${0%/*}/process-utilities.sh"
 . "${0%/*}/get-resource-names.sh"
+. "${0%/*}/set-e2e-test-site-url.sh"
 
 echo "Setting up function apps with arguments:
   resourceGroupName: ${resourceGroupName}
@@ -279,8 +302,10 @@ echo "Setting up function apps with arguments:
   releaseVersion: ${releaseVersion}
 "
 
-webApiIdentityClientId=$(az identity show --name "${webApiManagedIdentityName}" --resource-group "${resourceGroupName}" --query clientId -o tsv)
-userIdentityId=$(az identity show --name "${webApiManagedIdentityName}" --resource-group "${resourceGroupName}" --query id -o tsv)
+webApiIdentityClientId=$(az identity show --name "${webApiManagedIdentityName}" --resource-group "${resourceGroupName}" --query "clientId" -o tsv)
+webApiIdentityPrincipalId=$(az identity show --name "${webApiManagedIdentityName}" --resource-group "${resourceGroupName}" --query "principalId" -o tsv)
+userIdentityId=$(az identity show --name "${webApiManagedIdentityName}" --resource-group "${resourceGroupName}" --query "id" -o tsv)
 
 getAllowedApplications
+createCosmosRBACRole
 setupAzureFunctions

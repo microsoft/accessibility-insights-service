@@ -49,10 +49,6 @@
             "path": "../packages/logger"
         },
         {
-            "name": "parallel-workers",
-            "path": "../packages/parallel-workers"
-        },
-        {
             "name": "privacy-scan-core",
             "path": "../packages/privacy-scan-core"
         },

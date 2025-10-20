@@ -75,11 +75,6 @@ module.exports = (env) => {
                         from: 'report-generator-runner.ps1',
                         to: '',
                     },
-                    {
-                        context: '../../packages/parallel-workers/dist',
-                        from: '**/*.js',
-                        to: '',
-                    },
                 ],
             }),
         ],

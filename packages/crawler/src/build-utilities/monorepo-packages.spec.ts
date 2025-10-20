@@ -18,7 +18,6 @@ describe('listMonorepoPackageNames', () => {
               "functional-tests",
               "health-client",
               "logger",
-              "parallel-workers",
               "privacy-scan-core",
               "privacy-scan-job-manager",
               "privacy-scan-runner",

@@ -74,36 +74,6 @@ module.exports = (env) => {
                         from: 'package-func.json',
                         to: 'package.json',
                     },
-                    {
-                        context: '../parallel-workers/dist/',
-                        from: '**/*.js',
-                        to: '',
-                    },
-                    {
-                        context: '../parallel-workers/dist/',
-                        from: '**/*.js',
-                        to: 'check-health-func',
-                    },
-                    {
-                        context: '../parallel-workers/dist/',
-                        from: '**/*.js',
-                        to: 'get-report-func',
-                    },
-                    {
-                        context: '../parallel-workers/dist/',
-                        from: '**/*.js',
-                        to: 'get-scan-func',
-                    },
-                    {
-                        context: '../parallel-workers/dist/',
-                        from: '**/*.js',
-                        to: 'get-scans-batch-func',
-                    },
-                    {
-                        context: '../parallel-workers/dist/',
-                        from: '**/*.js',
-                        to: 'post-scans-func',
-                    },
                 ],
             }),
         ],
