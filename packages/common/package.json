@@ -33,7 +33,7 @@
         "rimraf": "^6.0.1",
         "ts-jest": "^29.4.1",
         "typemoq": "^2.1.0",
-        "typescript": "^5.5.3"
+        "typescript": "^5.9.3"
     },
     "dependencies": {
         "@sindresorhus/fnv1a": "^2.0.1",

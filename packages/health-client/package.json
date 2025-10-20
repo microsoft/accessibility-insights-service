@@ -32,7 +32,7 @@
         "shebang-loader": "^0.0.1",
         "ts-jest": "^29.4.1",
         "typemoq": "^2.1.0",
-        "typescript": "^5.5.3",
+        "typescript": "^5.9.3",
         "webpack": "^5.101.3",
         "webpack-cli": "^5.1.4",
         "webpack-ignore-dynamic-require": "^1.0.0"
