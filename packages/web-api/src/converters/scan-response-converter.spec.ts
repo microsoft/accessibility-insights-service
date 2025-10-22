@@ -19,10 +19,11 @@ import {
     OnDemandPageScanResult,
     OnDemandPageScanRunState as RunStateDb,
     ScanCompletedNotification as NotificationDb,
-    WebsiteScanResult,
+    WebsiteScanData,
     OnDemandPageScanRunState,
     NotificationError,
     ScanType,
+    KnownPage,
 } from 'storage-documents';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { ScanErrorConverter } from './scan-error-converter';
@@ -53,7 +54,7 @@ let runStateClientProviderMock: IMock<RunStateClientProvider>;
 let notificationDb: NotificationDb;
 let notificationResponse: ScanCompletedNotification;
 let deepScanResult: DeepScanResultItem[];
-let websiteScanResult: WebsiteScanResult;
+let websiteScanData: WebsiteScanData;
 
 beforeEach(() => {
     scanErrorConverterMock = Mock.ofType(ScanErrorConverter);
@@ -86,7 +87,7 @@ beforeEach(() => {
         responseCode: 200,
     };
     deepScanResult = getDeepScanResult();
-    websiteScanResult = getWebsiteScanResult();
+    websiteScanData = getWebsiteScanData();
 });
 
 describe(ScanResponseConverter, () => {
@@ -102,35 +103,35 @@ describe(ScanResponseConverter, () => {
     test.each([true, false])('return completed scan run result, when notification enabled = %s', async (isNotificationEnabled) => {
         const pageScanDbResult = getPageScanResult({ dbState: 'completed', isNotificationEnabled });
         const responseExpected = getScanResultClientResponseFull({ restApiState: 'completed', isNotificationEnabled });
-        const response = await scanResponseConverter.getScanResultResponse(baseUrl, apiVersion, pageScanDbResult, websiteScanResult);
+        const response = await scanResponseConverter.getScanResultResponse(baseUrl, apiVersion, pageScanDbResult, websiteScanData);
         expect(response).toEqual(responseExpected);
     });
 
     it('return completed scan result with error', async () => {
         const pageScanDbResult = getPageScanResult({ dbState: 'completed', isError: true });
         const responseExpected = getScanResultClientResponseFull({ restApiState: 'completed', isError: true });
-        const response = await scanResponseConverter.getScanResultResponse(baseUrl, apiVersion, pageScanDbResult, websiteScanResult);
+        const response = await scanResponseConverter.getScanResultResponse(baseUrl, apiVersion, pageScanDbResult, websiteScanData);
         expect(response).toEqual(responseExpected);
     });
 
     it('return completed scan result, when deepScan is disabled', async () => {
         const pageScanDbResult = getPageScanResult({ dbState: 'completed' });
         const responseExpected = getScanResultClientResponseFull({ restApiState: 'completed' });
-        const response = await scanResponseConverter.getScanResultResponse(baseUrl, apiVersion, pageScanDbResult, websiteScanResult);
+        const response = await scanResponseConverter.getScanResultResponse(baseUrl, apiVersion, pageScanDbResult, websiteScanData);
         expect(response).toEqual(responseExpected);
     });
 
     it('return completed scan result with authentication result', async () => {
         const pageScanDbResult = getPageScanResult({ dbState: 'completed', isAuthenticationEnabled: true });
         const responseExpected = getScanResultClientResponseFull({ restApiState: 'completed', isAuthenticationEnabled: true });
-        const response = await scanResponseConverter.getScanResultResponse(baseUrl, apiVersion, pageScanDbResult, websiteScanResult);
+        const response = await scanResponseConverter.getScanResultResponse(baseUrl, apiVersion, pageScanDbResult, websiteScanData);
         expect(response).toEqual(responseExpected);
     });
 
     it('return completed privacy scan result', async () => {
         const pageScanDbResult = getPageScanResult({ dbState: 'completed', scanType: 'privacy' });
         const responseExpected = getScanResultClientResponseFull({ restApiState: 'completed', scanType: 'privacy' });
-        const response = await scanResponseConverter.getScanResultResponse(baseUrl, apiVersion, pageScanDbResult, websiteScanResult);
+        const response = await scanResponseConverter.getScanResultResponse(baseUrl, apiVersion, pageScanDbResult, websiteScanData);
         expect(response).toEqual(responseExpected);
     });
 
@@ -144,7 +145,7 @@ describe(ScanResponseConverter, () => {
                 baseUrl,
                 apiVersion,
                 pageScanDbResult,
-                getWebsiteScanResult(deepScanOverallState),
+                getWebsiteScanData(deepScanOverallState),
             );
             expect(response).toEqual(responseExpected);
         },
@@ -158,7 +159,7 @@ describe(ScanResponseConverter, () => {
             restApiState: 'completed',
             isNotificationEnabled: true,
         }) as ScanRunResultResponse;
-        const response = await scanResponseConverter.getScanResultResponse(baseUrl, apiVersion, pageScanDbResult, websiteScanResult);
+        const response = await scanResponseConverter.getScanResultResponse(baseUrl, apiVersion, pageScanDbResult, websiteScanData);
         expect(response).toEqual(responseExpected);
     });
 
@@ -168,13 +169,13 @@ describe(ScanResponseConverter, () => {
             restApiState: 'completed',
             isNotificationEnabled: true,
         }) as ScanRunResultResponse;
-        const response = await scanResponseConverter.getScanResultResponse(baseUrl, apiVersion, pageScanDbResult, websiteScanResult);
+        const response = await scanResponseConverter.getScanResultResponse(baseUrl, apiVersion, pageScanDbResult, websiteScanData);
         expect(response).toEqual(responseExpected);
     });
 
     it('create full canonical REST Get Report URL', async () => {
         const pageScanDbResult = getPageScanResult({ dbState: 'completed' });
-        const response = await scanResponseConverter.getScanResultResponse(baseUrl, apiVersion, pageScanDbResult, websiteScanResult);
+        const response = await scanResponseConverter.getScanResultResponse(baseUrl, apiVersion, pageScanDbResult, websiteScanData);
         expect((<any>response).reports[0].links.href).toEqual('https://localhost/api/scans/id/reports/reportIdSarif?api-version=1.0');
     });
 });
@@ -208,10 +209,11 @@ function getDeepScanResult(deepScanOverallState: RunState = 'pending'): DeepScan
     return result;
 }
 
-function getWebsiteScanResult(deepScanOverallState: RunState = 'pending'): WebsiteScanResult {
+function getWebsiteScanData(deepScanOverallState: RunState = 'pending'): WebsiteScanData {
     const result = {
+        itemType: ItemType.websiteScanData,
         deepScanId: 'id',
-        pageScans: [
+        knownPages: [
             {
                 scanId: 'scanId1',
                 url: 'url1',
@@ -228,12 +230,12 @@ function getWebsiteScanResult(deepScanOverallState: RunState = 'pending'): Websi
                 scanState: 'pass',
             },
         ],
-    } as WebsiteScanResult;
+    } as WebsiteScanData;
     if (deepScanOverallState === 'failed') {
-        result.pageScans.map((scan) => (scan.runState = 'failed'));
+        (result.knownPages as KnownPage[]).map((scan) => (scan.runState = 'failed'));
     } else if (deepScanOverallState === 'completed') {
-        result.pageScans.map((scan) => (scan.runState = 'completed'));
-        result.pageScans[0].runState = 'failed';
+        (result.knownPages as KnownPage[]).map((scan) => (scan.runState = 'completed'));
+        (result.knownPages as KnownPage[])[0].runState = 'failed';
     }
 
     return result;
@@ -241,7 +243,7 @@ function getWebsiteScanResult(deepScanOverallState: RunState = 'pending'): Websi
 
 function getPageScanResult(options: options): OnDemandPageScanResult {
     if (!options.isDeepScanEnabled === true) {
-        websiteScanResult = undefined;
+        websiteScanData = undefined;
     }
 
     return {
@@ -294,7 +296,7 @@ function getPageScanResult(options: options): OnDemandPageScanResult {
 
 function getScanResultClientResponseFull(options: options): ScanResultResponse {
     if (!options.isDeepScanEnabled === true) {
-        websiteScanResult = undefined;
+        websiteScanData = undefined;
     }
 
     return {
@@ -372,6 +374,6 @@ function getScanResultClientResponseShort(options: options): ScanResultResponse 
 async function validateConverterShortResult(options: options): Promise<void> {
     const pageScanDbResult = getPageScanResult(options);
     const responseExpected = getScanResultClientResponseShort(options);
-    const response = await scanResponseConverter.getScanResultResponse(baseUrl, apiVersion, pageScanDbResult, websiteScanResult);
+    const response = await scanResponseConverter.getScanResultResponse(baseUrl, apiVersion, pageScanDbResult, websiteScanData);
     expect(response).toEqual(responseExpected);
 }

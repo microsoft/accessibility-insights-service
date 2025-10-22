@@ -4,7 +4,7 @@
 import { isEmpty } from 'lodash';
 import { inject, injectable } from 'inversify';
 import { HashGenerator } from 'common';
-import { KnownPage, KnownPages, KnownPageSource } from './website-scan-result';
+import { KnownPage, KnownPages, KnownPageSource } from './website-scan-data';
 import { OnDemandPageScanRunState, ScanState } from './on-demand-page-scan-result';
 
 @injectable()

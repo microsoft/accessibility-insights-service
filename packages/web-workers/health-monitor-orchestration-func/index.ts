@@ -62,7 +62,27 @@ const timerHandler = (timer: Timer, context: InvocationContext): Promise<TimerFu
     return processWebRequest({ timer, context }, HealthMonitorOrchestrationController);
 };
 
-(async () => {
+// Register orchestration and activity handlers at module load time (synchronously)
+df.app.orchestration(orchestrationName, orchestrationHandler);
+df.app.activity(HealthMonitorActivity.activityName, {
+    handler: async (input: any, context: InvocationContext) => {
+        if (!healthMonitorActivity) {
+            await initializeServices();
+        }
+
+        return healthMonitorActivity.handler(input, context);
+    },
+});
+
+app.timer('health-monitor-orchestration', {
+    schedule: '0 */30 * * * *', // Every 30 minutes
+    handler: timerHandler,
+    runOnStartup: System.isDebugEnabled(),
+    extraInputs: [df.input.durableClient()],
+});
+
+// Initialize services asynchronously
+async function initializeServices(): Promise<void> {
     const processLifeCycleContainer = getProcessLifeCycleContainer();
     const requestContainer = new Container({ autoBindInjectable: true });
     requestContainer.parent = processLifeCycleContainer;
@@ -75,16 +95,10 @@ const timerHandler = (timer: Timer, context: InvocationContext): Promise<TimerFu
     availabilityTestConfig = await serviceConfig.getConfigValue('availabilityTestConfig');
 
     healthMonitorActivity = requestContainer.get(HealthMonitorActivity);
+}
 
-    df.app.orchestration(orchestrationName, orchestrationHandler);
-    df.app.activity(HealthMonitorActivity.activityName, { handler: healthMonitorActivity.handler });
-
-    app.timer('health-monitor-orchestration', {
-        schedule: '0 */30 * * * *',
-        handler: timerHandler,
-        runOnStartup: System.isDebugEnabled(),
-        extraInputs: [df.input.durableClient()],
-    });
+(async () => {
+    await initializeServices();
 })().catch((error) => {
     console.log(System.serializeError(error));
     process.exitCode = 1;

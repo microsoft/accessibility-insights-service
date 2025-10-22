@@ -83,11 +83,6 @@ module.exports = (env) => {
                         to: '',
                     },
                     {
-                        context: '../../packages/parallel-workers/dist',
-                        from: '**/*.js',
-                        to: '',
-                    },
-                    {
                         context: '../../packages/scanner-global-library',
                         from: 'blank-page.html',
                         to: '',

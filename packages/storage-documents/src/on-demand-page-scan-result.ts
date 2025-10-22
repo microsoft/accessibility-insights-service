@@ -3,7 +3,7 @@
 
 import { ItemType } from './item-type';
 import { StorageDocument } from './storage-document';
-import { ScanGroupType } from './website-scan-result';
+import { ScanGroupType } from './website-scan-data';
 import { PrivacyScan } from './on-demand-page-scan-batch-request';
 import { ReportScanRunResult } from './report-generator-request';
 

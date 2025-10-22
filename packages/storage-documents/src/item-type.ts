@@ -6,10 +6,6 @@ export enum ItemType {
     scanRunBatchRequest = 'scanRunBatchRequest',
     onDemandPageScanRequest = 'pageScanRequest',
     onDemandPageScanRunResult = 'pageScanRunResult',
-    websiteScanResult = 'websiteScanResult',
     websiteScanData = 'websiteScanData',
-    websiteScanResultPart = 'websiteScanResultPart',
-    websiteScanPageData = 'websiteScanPageData',
-    privacyScanConfiguration = 'privacyScanConfiguration',
     reportGeneratorRequest = 'reportGeneratorRequest',
 }

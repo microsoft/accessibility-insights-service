@@ -42,27 +42,6 @@ describe('HashGenerator', () => {
         expect(id).toEqual(expectedId);
     });
 
-    it('generate getWebsiteScanPageDataDocumentId', () => {
-        hashGenerator = new HashGenerator(SHA);
-        const id = hashGenerator.getWebsiteScanPageDataDocumentId('websiteId', 'scanId');
-        const expectedId = hashGenerator.generateBase64Hash('websiteId', 'scanId');
-        expect(id).toEqual(expectedId);
-    });
-
-    it('generate WebsiteScanResultDocumentId', () => {
-        hashGenerator = new HashGenerator(SHA);
-        const id = hashGenerator.getWebsiteScanResultDocumentId('baseUrl', 'scanGroupId');
-        const expectedId = hashGenerator.generateBase64Hash('baseUrl', 'scanGroupId');
-        expect(id).toEqual(expectedId);
-    });
-
-    it('generate WebsiteScanResultPartDocumentId', () => {
-        hashGenerator = new HashGenerator(SHA);
-        const id = hashGenerator.getWebsiteScanResultPartDocumentId('baseId', 'scanId');
-        const expectedId = hashGenerator.generateBase64Hash('baseId', 'scanId');
-        expect(id).toEqual(expectedId);
-    });
-
     it('should generate same hash every time without stubbing', () => {
         hashGenerator = new HashGenerator(SHA);
         const hash1 = hashGenerator.generateBase64Hash('u1', 'f1', 's1', 'r1');

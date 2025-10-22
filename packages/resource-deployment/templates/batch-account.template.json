@@ -183,10 +183,6 @@
                     "nodeIdentityReference": {
                         "resourceId": "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('batchNodeManagedIdentity'))]"
                     }
-                },
-                "keyVaultReference": {
-                    "id": "[resourceId('Microsoft.KeyVault/vaults', parameters('keyVault'))]",
-                    "url": "[variables('keyVaultUrl')]"
                 }
             }
         },

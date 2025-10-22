@@ -5,13 +5,7 @@ import { GuidGenerator, ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
 import { isEmpty } from 'lodash';
 import { GlobalLogger } from 'logger';
-import {
-    WebHttpResponse,
-    OnDemandPageScanRunResultProvider,
-    WebApiErrorCodes,
-    WebsiteScanDataProvider,
-    WebsiteScanResultProvider,
-} from 'service-library';
+import { WebHttpResponse, OnDemandPageScanRunResultProvider, WebApiErrorCodes, WebsiteScanDataProvider } from 'service-library';
 import { HttpResponseInit } from '@azure/functions';
 import { ScanResponseConverter } from '../converters/scan-response-converter';
 import { BaseScanResultController } from './base-scan-result-controller';
@@ -24,7 +18,6 @@ export class ScanResultController extends BaseScanResultController {
 
     public constructor(
         @inject(OnDemandPageScanRunResultProvider) protected readonly onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider,
-        @inject(WebsiteScanResultProvider) protected readonly websiteScanResultProvider: WebsiteScanResultProvider,
         @inject(WebsiteScanDataProvider) protected readonly websiteScanDataProvider: WebsiteScanDataProvider,
         @inject(ScanResponseConverter) protected readonly scanResponseConverter: ScanResponseConverter,
         @inject(GuidGenerator) protected readonly guidGenerator: GuidGenerator,
@@ -64,8 +57,8 @@ export class ScanResultController extends BaseScanResultController {
                 return WebHttpResponse.getErrorResponse(WebApiErrorCodes.resourceNotFound);
             }
         } else {
-            const websiteScanResult = await this.getWebsiteScanResult(pageScanResult);
-            const jsonBody = await this.getScanResultResponse(pageScanResult, websiteScanResult);
+            const websiteScanData = await this.getWebsiteScanData(pageScanResult);
+            const jsonBody = await this.getScanResultResponse(pageScanResult, websiteScanData);
             this.logger.logInfo('Scan result was successfully fetched from a storage.');
 
             return {

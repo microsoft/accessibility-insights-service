@@ -27,7 +27,7 @@ dist/
 **/.env.*
 **/yarn-*.log
 **/*.ts.snap
-copyright-header.txt
+**/*.txt
 **/.DS_Store
 **/.funcignore
 **/extensions.csproj

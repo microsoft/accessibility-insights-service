@@ -6,7 +6,7 @@ import 'reflect-metadata';
 import { IMock, It, Mock } from 'typemoq';
 import { HashGenerator } from 'common';
 import { KnownPageTypeConverter } from './known-page-type-converter';
-import { KnownPage } from './website-scan-result';
+import { KnownPage } from './website-scan-data';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
