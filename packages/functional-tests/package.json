@@ -39,7 +39,7 @@
         "azure-services": "workspace:*",
         "chai": "^4.3.7",
         "common": "workspace:*",
-        "deep-equal-in-any-order": "^2.0.6",
+        "deep-equal-in-any-order": "^2.1.0",
         "dotenv": "^17.2.1",
         "inversify": "^6.0.1",
         "lodash": "^4.17.21",
