@@ -49,7 +49,7 @@
     },
     "dependencies": {
         "@azure/functions": "^4.8.0",
-        "applicationinsights": "^3.9.0",
+        "applicationinsights": "^3.12.0",
         "azure-services": "workspace:*",
         "common": "workspace:*",
         "durable-functions": "^3.2.0",
