@@ -45,8 +45,8 @@
     "dependencies": {
         "@apify/log": "2.5.13",
         "@axe-core/puppeteer": "4.10.1",
-        "@crawlee/browser-pool": "^3.15.1",
-        "@crawlee/puppeteer": "^3.15.1",
+        "@crawlee/browser-pool": "^3.15.2",
+        "@crawlee/puppeteer": "^3.15.2",
         "@medv/finder": "^4.0.2",
         "@sindresorhus/fnv1a": "^2.0.1",
         "accessibility-insights-report": "7.0.0",
