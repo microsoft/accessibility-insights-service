@@ -177,6 +177,7 @@ function install() {
     . "${0%/*}/create-batch-account.sh"
     . "${0%/*}/create-job-schedule.sh"
     . "${0%/*}/create-function-app.sh"
+    . "${0%/*}/create-vnet-integration.sh"
 
     . "${0%/*}/create-dashboard.sh" &
     dashboardProcessId="$!"
