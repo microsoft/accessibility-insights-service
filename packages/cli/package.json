@@ -55,7 +55,6 @@
     "dependencies": {
         "@apify/log": "2.5.23",
         "@axe-core/puppeteer": "4.10.1",
-        "@crawlee/browser-pool": "^3.15.1",
         "@crawlee/puppeteer": "^3.12.2",
         "@medv/finder": "^4.0.2",
         "@opentelemetry/api": "^1.4.1",
