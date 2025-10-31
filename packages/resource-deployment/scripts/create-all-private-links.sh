@@ -79,11 +79,11 @@ for service in "${serviceArray[@]}"; do
     if "${scriptDir}/create-private-link.sh" -r "${resourceGroupName}" -g "${service}"; then
         echo ""
         echo "✓ Successfully created Private Endpoint for: ${service}"
-        ((successCount++))
+        successCount=$((successCount + 1))
     else
         echo ""
         echo "✗ Failed to create Private Endpoint for: ${service}"
-        ((failureCount++))
+        failureCount=$((failureCount + 1))
         failedServices+=("${service}")
     fi
 
@@ -108,11 +108,11 @@ for app in "${vnetIntegrationApps[@]}"; do
     if "${scriptDir}/create-vnet-integration.sh" -r "${resourceGroupName}" -n "${app}"; then
         echo ""
         echo "✓ Successfully created VNet Integration for: ${app}"
-        ((vnetSuccessCount++))
+        vnetSuccessCount=$((vnetSuccessCount + 1))
     else
         echo ""
         echo "✗ Failed to create VNet Integration for: ${app}"
-        ((vnetFailureCount++))
+        vnetFailureCount=$((vnetFailureCount + 1))
         failedVnetApps+=("${app}")
     fi
 
@@ -126,10 +126,6 @@ echo "  Total services processed: ${#serviceArray[@]}"
 echo "  Successful: ${successCount}"
 echo "  Failed: ${failureCount}"
 echo ""
-echo "  Total VNet integrations processed: ${#vnetIntegrationApps[@]}"
-echo "  Successful: ${vnetSuccessCount}"
-echo "  Failed: ${vnetFailureCount}"
-
 echo "  Total VNet integrations processed: ${#vnetIntegrationApps[@]}"
 echo "  Successful: ${vnetSuccessCount}"
 echo "  Failed: ${vnetFailureCount}"
