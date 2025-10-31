@@ -10,10 +10,10 @@
 # VNet: 10.2.0.0/16
 
 # ├── 10.2.0.0/24     - Default subnet (256 addresses)
-# │   └── 10.2.0.0/26 - Azure Bastion subnet (64 addresses, within default)
-# ├── 10.2.1.0/26     - web-api VNet integration (64 addresses)
-# ├── 10.2.1.64/26    - web-workers VNet integration (64 addresses)
-# ├── 10.2.1.128/26   - e2e-web-apis VNet integration (64 addresses)
+# ├── 10.2.1.0/26     - Azure Bastion subnet (64 addresses) - AzureBastionSubnet
+# ├── 10.2.1.64/26    - web-api VNet integration (64 addresses)
+# ├── 10.2.1.128/26   - web-workers VNet integration (64 addresses)
+# ├── 10.2.1.192/26   - e2e-web-apis VNet integration (64 addresses)
 # ├── 10.2.2.0/26     - Storage Blob private endpoint (64 addresses)
 # ├── 10.2.3.0/26     - Storage Queue private endpoint (64 addresses)
 # ├── 10.2.4.0/26     - Storage Table private endpoint (64 addresses)
@@ -26,16 +26,16 @@
 vnetAddressPrefix="10.2.0.0/16"                     # VNet address space
 
 # Default subnet (created with VNet)
-defaultSubnetPrefix="10.2.0.0/24"                   # Default subnet
+defaultSubnetPrefix="10.2.0.0/24"                   # Default subnet (256 addresses)
 
 # Azure Bastion Subnet (fixed name required by Azure)
-azureBastionSubnetPrefix="10.2.0.0/26"              # Azure Bastion subnet (AzureBastionSubnet)
+azureBastionSubnetPrefix="10.2.1.0/26"              # Azure Bastion subnet (AzureBastionSubnet)
 
 # VNet Integration Subnets (require delegation to Microsoft.Web/serverFarms)
-vnetIntegrationSubnetPrefix="10.2.1.0/26"           # Default VNet integration subnet
-webApiVnetIntegrationSubnetPrefix="10.2.1.0/26"     # web-api VNet integration
-webWorkersVnetIntegrationSubnetPrefix="10.2.1.64/26"  # web-workers VNet integration
-e2eWebApisVnetIntegrationSubnetPrefix="10.2.1.128/26" # e2e-web-apis VNet integration
+vnetIntegrationSubnetPrefix="10.2.1.64/26"          # Default VNet integration subnet
+webApiVnetIntegrationSubnetPrefix="10.2.1.64/26"    # web-api VNet integration
+webWorkersVnetIntegrationSubnetPrefix="10.2.1.128/26"  # web-workers VNet integration
+e2eWebApisVnetIntegrationSubnetPrefix="10.2.1.192/26" # e2e-web-apis VNet integration
 
 # Private Endpoint Subnets (cannot be delegated)
 # Storage Account Private Endpoints
