@@ -15,19 +15,30 @@ Usage: ${BASH_SOURCE} -r <resource group>
 }
 
 createBastionSubnet() {
-    az network vnet subnet create --name "AzureBastionSubnet" --resource-group "$resourceGroupName" --vnet-name "$vnetName" --address-prefixes "10.2.1.0/26" 1>/dev/null
+    echo "Creating Azure Bastion subnet..."
+    local bastionSubnetPrefix
+    bastionSubnetPrefix=$(getBastionSubnetPrefix)
+
+    az network vnet subnet create \
+        --name "AzureBastionSubnet" \
+        --resource-group "${resourceGroupName}" \
+        --vnet-name "${vnetName}" \
+        --address-prefixes "${bastionSubnetPrefix}" 1>/dev/null
+
+    echo "Azure Bastion subnet created: ${bastionSubnetPrefix}"
 }
 
 createPublicIp() {
-    bastionIpName="bastion-ip-$resourceGroupSuffix"
-    az network public-ip create --resource-group "$resourceGroupName" --name "$bastionIpName" --sku Standard 1>/dev/null
+    bastionIpName="bastion-ip-${resourceGroupSuffix}"
+    az network public-ip create --resource-group "${resourceGroupName}" --name "${bastionIpName}" --sku Standard 1>/dev/null
 
     local end=$((SECONDS + 300))
     printf " - Running .."
-    while [ $SECONDS -le $end ]; do
+    local name
+    while [ "${SECONDS}" -le "${end}" ]; do
         sleep 10
         printf "."
-        local name=$(az network public-ip list --resource-group "$resourceGroupName" --query "[?name=='${bastionIpName}'].name" -o tsv)
+        name=$(az network public-ip list --resource-group "${resourceGroupName}" --query "[?name=='${bastionIpName}'].name" -o tsv)
         if [[ ! -z "${name}" ]]; then
             break
         fi
@@ -37,19 +48,19 @@ createPublicIp() {
 
 createBastion() {
     echo "Creating Bastion service (it takes about 10 minutes to create and deploy the resource)..."
-    bastionName="bastion-$resourceGroupSuffix"
-    az network bastion create --name "$bastionName" --public-ip-address "$bastionIpName" --resource-group "$resourceGroupName" --vnet-name "$vnetName" 1>/dev/null
+    bastionName="bastion-${resourceGroupSuffix}"
+    az network bastion create --name "${bastionName}" --public-ip-address "${bastionIpName}" --resource-group "${resourceGroupName}" --vnet-name "${vnetName}" 1>/dev/null
 }
 
 # Read script arguments
 while getopts ":r:" option; do
-    case $option in
+    case ${option} in
     r) resourceGroupName=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
 
-if [[ -z $resourceGroupName ]]; then
+if [[ -z ${resourceGroupName} ]]; then
     exitWithUsageInfo
 fi
 
@@ -58,7 +69,10 @@ if ! az account show 1>/dev/null; then
     az login
 fi
 
+# Get resource names and subnet prefixes
 . "${0%/*}/get-resource-names.sh"
+. "${0%/*}/get-subnet-address-prefixes.sh"
+
 createBastionSubnet
 createPublicIp
 createBastion

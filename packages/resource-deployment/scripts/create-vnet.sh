@@ -29,16 +29,27 @@ if [[ -z ${resourceGroupName} ]]; then
     exitWithUsageInfo
 fi
 
+# Login to Azure if required
+if ! az account show 1>/dev/null; then
+    az login
+fi
+
+# Load subnet address prefixes
+. "${0%/*}/get-subnet-address-prefixes.sh"
+
 bastionId=$(az resource list --resource-group "${resourceGroupName}" --query "[?type=='Microsoft.Network/bastionHosts'][].id" -o tsv)
 if [[ -n ${bastionId} ]]; then
     echo "Deleting Azure Bastion service"
     az resource delete --ids "${bastionId}" 1>/dev/null
 fi
 
-addressPrefix=${addressPrefix:-"10.2.0.0/16"}
-subnetAddressPrefix=${subnetAddressPrefix:-"10.2.0.0/24"}
+# Set default values from centralized configuration
+addressPrefix=${addressPrefix:-$(getVnetAddressPrefix)}
+subnetAddressPrefix=${subnetAddressPrefix:-$(getDefaultSubnetPrefix)}
 
 echo "[create-vnet] Starting Virtual Network creation"
+echo "  VNet Address Prefix: ${addressPrefix}"
+echo "  Default Subnet Address Prefix: ${subnetAddressPrefix}"
 
 vnetResource=$(az deployment group create \
     --resource-group "${resourceGroupName}" \
