@@ -7034,7 +7034,7 @@ __metadata:
     "@azure/ms-rest-js": "npm:^2.7.0"
     "@azure/ms-rest-nodeauth": "npm:^3.1.1"
     "@azure/storage-blob": "npm:12.18.0"
-    "@azure/storage-queue": "npm:12.16.0"
+    "@azure/storage-queue": "npm:12.28.1"
     "@types/got": "npm:^9.6.11"
     "@types/jest": "npm:^29.5.12"
     "@types/lodash": "npm:^4.17.20"
