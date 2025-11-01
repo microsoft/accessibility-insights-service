@@ -149,9 +149,13 @@ function install() {
 
     az account set --subscription "${subscription}"
 
+    # Deploy prerequisite resources first
     . "${0%/*}/create-resource-group.sh"
     . "${0%/*}/wait-for-pending-deployments.sh"
     . "${0%/*}/create-storage-account.sh"
+
+    # Deploy other resources
+    . "${0%/*}/enable-all-public-network-access.sh"
     . "${0%/*}/create-managed-identity.sh"
     . "${0%/*}/deploy-e2e-test-site.sh"
 
