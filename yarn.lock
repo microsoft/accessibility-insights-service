@@ -6316,7 +6316,7 @@ __metadata:
     "@typescript-eslint/parser": "npm:^8.41.0"
     accessibility-insights-report: "npm:7.0.0"
     combine-dependabot-prs: "npm:^1.0.5"
-    commander: "npm:^14.0.0"
+    commander: "npm:^14.0.2"
     eslint: "npm:^8.57.0"
     eslint-plugin-check-file: "npm:^3.3.0"
     eslint-plugin-header: "npm:^3.1.1"
@@ -8132,10 +8132,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"commander@npm:^14.0.0":
-  version: 14.0.0
-  resolution: "commander@npm:14.0.0"
-  checksum: 10/c05418bfc35a3e8b5c67bd9f75f5b773f386f9b85f83e70e7c926047f270929cb06cf13cd68f387dd6e7e23c6157de8171b28ba606abd3e6256028f1f789becf
+"commander@npm:^14.0.2":
+  version: 14.0.2
+  resolution: "commander@npm:14.0.2"
+  checksum: 10/2d202db5e5f9bb770112a3c1579b893d17ac6f6d932183077308bdd96d0f87f0bbe6a68b5b9ed2cf3b2514be6bb7de637480703c0e2db9741ee1b383237deb26
   languageName: node
   linkType: hard
 
