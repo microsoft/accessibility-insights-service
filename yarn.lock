@@ -6325,7 +6325,7 @@ __metadata:
     jest-junit: "npm:^16.0.0"
     license-check-and-add: "npm:^4.0.5"
     npm-run-all: "npm:^4.1.5"
-    patch-package: "npm:^8.0.0"
+    patch-package: "npm:^8.0.1"
     prettier: "npm:2.8.3"
     rimraf: "npm:^6.0.1"
     shellcheck: "npm:^4.1.0"
@@ -6890,13 +6890,6 @@ __metadata:
   version: 0.4.0
   resolution: "asynckit@npm:0.4.0"
   checksum: 10/3ce727cbc78f69d6a4722517a58ee926c8c21083633b1d3fdf66fd688f6c127a53a592141bd4866f9b63240a86e9d8e974b13919450bd17fa33c2d22c4558ad8
-  languageName: node
-  linkType: hard
-
-"at-least-node@npm:^1.0.0":
-  version: 1.0.0
-  resolution: "at-least-node@npm:1.0.0"
-  checksum: 10/463e2f8e43384f1afb54bc68485c436d7622acec08b6fad269b421cb1d29cebb5af751426793d0961ed243146fe4dc983402f6d5a51b720b277818dbf6f2e49e
   languageName: node
   linkType: hard
 
@@ -10587,18 +10580,6 @@ __metadata:
     jsonfile: "npm:^4.0.0"
     universalify: "npm:^0.1.0"
   checksum: 10/6fb12449f5349be724a138b4a7b45fe6a317d2972054517f5971959c26fbd17c0e145731a11c7324460262baa33e0a799b183ceace98f7a372c95fbb6f20f5de
-  languageName: node
-  linkType: hard
-
-"fs-extra@npm:^9.0.0":
-  version: 9.1.0
-  resolution: "fs-extra@npm:9.1.0"
-  dependencies:
-    at-least-node: "npm:^1.0.0"
-    graceful-fs: "npm:^4.2.0"
-    jsonfile: "npm:^6.0.1"
-    universalify: "npm:^2.0.0"
-  checksum: 10/08600da1b49552ed23dfac598c8fc909c66776dd130fea54fbcad22e330f7fcc13488bb995f6bc9ce5651aa35b65702faf616fe76370ee56f1aade55da982dca
   languageName: node
   linkType: hard
 
@@ -15307,28 +15288,27 @@ __metadata:
   languageName: node
   linkType: hard
 
-"patch-package@npm:^8.0.0":
-  version: 8.0.0
-  resolution: "patch-package@npm:8.0.0"
+"patch-package@npm:^8.0.1":
+  version: 8.0.1
+  resolution: "patch-package@npm:8.0.1"
   dependencies:
     "@yarnpkg/lockfile": "npm:^1.1.0"
     chalk: "npm:^4.1.2"
     ci-info: "npm:^3.7.0"
     cross-spawn: "npm:^7.0.3"
     find-yarn-workspace-root: "npm:^2.0.0"
-    fs-extra: "npm:^9.0.0"
+    fs-extra: "npm:^10.0.0"
     json-stable-stringify: "npm:^1.0.2"
     klaw-sync: "npm:^6.0.0"
     minimist: "npm:^1.2.6"
     open: "npm:^7.4.2"
-    rimraf: "npm:^2.6.3"
     semver: "npm:^7.5.3"
     slash: "npm:^2.0.0"
-    tmp: "npm:^0.0.33"
+    tmp: "npm:^0.2.4"
     yaml: "npm:^2.2.2"
   bin:
     patch-package: index.js
-  checksum: 10/8714322c35b29266e71c82d58443ce5322400a546a3327f1b8907b8eeb7e366dff33c4fdfbd25e3f0b3a9927189c26e9ac60636ca1e4140d6dbc11cca10f9b5d
+  checksum: 10/920a9fb0001ea67a66d79ea696e6d74e3040b0f282e09addae913978b6d0e8cb5ef9a4030eb77df8a5497e8822fa8449c2dfdc668ecff7fb9ff8bfef0c897c6e
   languageName: node
   linkType: hard
 
@@ -16926,17 +16906,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rimraf@npm:^2.6.3":
-  version: 2.7.1
-  resolution: "rimraf@npm:2.7.1"
-  dependencies:
-    glob: "npm:^7.1.3"
-  bin:
-    rimraf: ./bin.js
-  checksum: 10/4586c296c736483e297da7cffd19475e4a3e41d07b1ae124aad5d687c79e4ffa716bdac8732ed1db942caf65271cee9dd39f8b639611de161a2753e2112ffe1d
-  languageName: node
-  linkType: hard
-
 "rimraf@npm:^3.0.2":
   version: 3.0.2
   resolution: "rimraf@npm:3.0.2"
@@ -18516,6 +18485,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"tmp@npm:^0.2.4":
+  version: 0.2.5
+  resolution: "tmp@npm:0.2.5"
+  checksum: 10/dd4b78b32385eab4899d3ae296007b34482b035b6d73e1201c4a9aede40860e90997a1452c65a2d21aee73d53e93cd167d741c3db4015d90e63b6d568a93d7ec
+  languageName: node
+  linkType: hard
+
 "tmpl@npm:1.0.5":
   version: 1.0.5
   resolution: "tmpl@npm:1.0.5"
@@ -19486,7 +19462,7 @@ __metadata:
     npm-force-resolutions: "npm:^0.0.10"
     npm-run-all: "npm:^4.1.5"
     p-limit: "npm:^3.1.0"
-    patch-package: "npm:^8.0.0"
+    patch-package: "npm:^8.0.1"
     puppeteer: "npm:^24.18.0"
     puppeteer-extra: "npm:^3.3.6"
     puppeteer-extra-plugin: "npm:^3.2.3"
