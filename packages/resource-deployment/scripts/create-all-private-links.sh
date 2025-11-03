@@ -150,5 +150,4 @@ if [[ ${failureCount} -gt 0 ]] || [[ ${vnetFailureCount} -gt 0 ]]; then
 else
     echo ""
     echo "[create-all-private-links] All Private Endpoints and VNet Integrations created successfully"
-    exit 0
 fi

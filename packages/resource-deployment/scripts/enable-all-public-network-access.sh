@@ -109,5 +109,4 @@ if [[ ${failureCount} -gt 0 ]]; then
 else
     echo ""
     echo "[enable-all-public-network-access] All services public network access enabled successfully"
-    exit 0
 fi
