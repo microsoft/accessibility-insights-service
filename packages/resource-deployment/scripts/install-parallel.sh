@@ -180,7 +180,7 @@ function install() {
     . "${0%/*}/create-key-vault.sh"
     . "${0%/*}/create-batch-account.sh"
     . "${0%/*}/create-job-schedule.sh"
-    . "${0%/*}/create-function-app.sh"
+    . "${0%/*}/create-function-apps.sh"
     . "${0%/*}/create-all-private-links.sh"
 
     . "${0%/*}/create-dashboard.sh" &
