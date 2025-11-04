@@ -149,9 +149,13 @@ function install() {
 
     az account set --subscription "${subscription}"
 
+    # Deploy prerequisite resources first
     . "${0%/*}/create-resource-group.sh"
     . "${0%/*}/wait-for-pending-deployments.sh"
     . "${0%/*}/create-storage-account.sh"
+
+    # Deploy other resources
+    . "${0%/*}/enable-all-public-network-access.sh"
     . "${0%/*}/create-managed-identity.sh"
     . "${0%/*}/deploy-e2e-test-site.sh"
 
@@ -176,7 +180,8 @@ function install() {
     . "${0%/*}/create-key-vault.sh"
     . "${0%/*}/create-batch-account.sh"
     . "${0%/*}/create-job-schedule.sh"
-    . "${0%/*}/create-function-app.sh"
+    . "${0%/*}/create-function-apps.sh"
+    . "${0%/*}/create-all-private-links.sh"
 
     . "${0%/*}/create-dashboard.sh" &
     dashboardProcessId="$!"
