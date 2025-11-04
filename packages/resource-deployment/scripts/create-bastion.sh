@@ -93,7 +93,12 @@ createBastion() {
     fi
 
     echo "Creating Bastion service (it takes about 10 minutes to create and deploy the resource)..."
-    az network bastion create --name "${bastionName}" --public-ip-address "${bastionIpName}" --resource-group "${resourceGroupName}" --vnet-name "${vnetName}" 1>/dev/null
+    az network bastion create \
+        --name "${bastionName}" \
+        --public-ip-address "${bastionIpName}" \
+        --resource-group "${resourceGroupName}" \
+        --vnet-name "${vnetName}" \
+        --sku Standard 1>/dev/null
     echo "Bastion service created: ${bastionName}"
 }
 
