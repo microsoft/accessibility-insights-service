@@ -15,6 +15,20 @@ Usage: ${BASH_SOURCE} -r <resource group>
 }
 
 createBastionSubnet() {
+    echo "Checking if Azure Bastion subnet exists..."
+    local existingSubnet
+    existingSubnet=$(az network vnet subnet show \
+        --name "AzureBastionSubnet" \
+        --resource-group "${resourceGroupName}" \
+        --vnet-name "${vnetName}" \
+        --query "name" \
+        -o tsv 2>/dev/null || true)
+
+    if [[ -n "${existingSubnet}" ]]; then
+        echo "Azure Bastion subnet already exists: AzureBastionSubnet"
+        return
+    fi
+
     echo "Creating Azure Bastion subnet..."
     local bastionSubnetPrefix
     bastionSubnetPrefix=$(getBastionSubnetPrefix)
@@ -30,10 +44,25 @@ createBastionSubnet() {
 
 createPublicIp() {
     bastionIpName="bastion-ip-${resourceGroupSuffix}"
+
+    echo "Checking if Bastion public IP exists..."
+    local existingIp
+    existingIp=$(az network public-ip show \
+        --resource-group "${resourceGroupName}" \
+        --name "${bastionIpName}" \
+        --query "name" \
+        -o tsv 2>/dev/null || true)
+
+    if [[ -n "${existingIp}" ]]; then
+        echo "Bastion public IP already exists: ${bastionIpName}"
+        return
+    fi
+
+    echo "Creating Bastion public IP..."
     az network public-ip create --resource-group "${resourceGroupName}" --name "${bastionIpName}" --sku Standard 1>/dev/null
 
     local end=$((SECONDS + 300))
-    printf " - Running .."
+    printf " - Waiting for public IP to be ready .."
     local name
     while [ "${SECONDS}" -le "${end}" ]; do
         sleep 10
@@ -44,12 +73,28 @@ createPublicIp() {
         fi
     done
     echo " "
+    echo "Bastion public IP created: ${bastionIpName}"
 }
 
 createBastion() {
-    echo "Creating Bastion service (it takes about 10 minutes to create and deploy the resource)..."
     bastionName="bastion-${resourceGroupSuffix}"
+
+    echo "Checking if Bastion service exists..."
+    local existingBastion
+    existingBastion=$(az network bastion show \
+        --name "${bastionName}" \
+        --resource-group "${resourceGroupName}" \
+        --query "name" \
+        -o tsv 2>/dev/null || true)
+
+    if [[ -n "${existingBastion}" ]]; then
+        echo "Bastion service already exists: ${bastionName}"
+        return
+    fi
+
+    echo "Creating Bastion service (it takes about 10 minutes to create and deploy the resource)..."
     az network bastion create --name "${bastionName}" --public-ip-address "${bastionIpName}" --resource-group "${resourceGroupName}" --vnet-name "${vnetName}" 1>/dev/null
+    echo "Bastion service created: ${bastionName}"
 }
 
 # Read script arguments

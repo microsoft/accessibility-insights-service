@@ -34,14 +34,23 @@ if ! az account show 1>/dev/null; then
     az login
 fi
 
-# Load subnet address prefixes
 . "${0%/*}/get-subnet-address-prefixes.sh"
+. "${0%/*}/get-resource-names.sh"
 
-bastionId=$(az resource list --resource-group "${resourceGroupName}" --query "[?type=='Microsoft.Network/bastionHosts'][].id" -o tsv)
-if [[ -n ${bastionId} ]]; then
-    echo "Deleting Azure Bastion service"
-    az resource delete --ids "${bastionId}" 1>/dev/null
+# Check if VNet already exists
+echo "Checking if Virtual Network already exists..."
+existingVnet=$(az network vnet show \
+    --resource-group "${resourceGroupName}" \
+    --name "${vnetName}" \
+    --query "name" \
+    -o tsv 2>/dev/null || true)
+
+if [[ -n "${existingVnet}" ]]; then
+    echo "Virtual Network already exists: ${vnetName}"
+    echo "[create-vnet] Skipping VNet creation - VNet already exists"
 fi
+
+echo "Virtual Network does not exist. Proceeding with creation..."
 
 # Set default values from centralized configuration
 addressPrefix=${addressPrefix:-$(getVnetAddressPrefix)}
