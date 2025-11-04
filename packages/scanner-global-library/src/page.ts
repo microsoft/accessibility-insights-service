@@ -314,7 +314,6 @@ export class Page {
         if (this.pageAnalysisResult.navigationResponse?.browserError !== undefined) {
             this.setLastNavigationState('analysis', this.pageAnalysisResult.navigationResponse);
         } else {
-            this.title = await this.page.title();
             await this.reopenBrowserImpl({ clearBrowserCache: false, preserveUserProfile: false });
         }
     }
@@ -331,6 +330,10 @@ export class Page {
         }
 
         const response = await this.pageNavigator.navigate(this.requestUrl, this.page, this.browserStartOptions?.capabilities);
+        // Set title when page is loaded after authentication
+        if (isEmpty(this.title)) {
+            this.title = await this.page.title();
+        }
         this.setLastNavigationState('load', response);
     }
 
