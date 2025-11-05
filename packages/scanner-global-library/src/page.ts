@@ -349,7 +349,7 @@ export class Page {
             });
             this.browserError = {
                 errorType: 'AuthenticationError',
-                message: `Page authentication is required. Authentication type ${this.pageAnalysisResult.authenticationType}`,
+                message: `Page authentication is required. Authentication type ${this.pageAnalysisResult.authenticationType} detected.`,
                 stack: new Error().stack,
             };
 

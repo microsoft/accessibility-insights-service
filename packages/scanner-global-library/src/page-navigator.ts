@@ -13,6 +13,7 @@ import { BrowserCache } from './browser-cache';
 import { PageOperation, PageOperationHandler } from './network/page-operation-handler';
 import { resetSessionHistory } from './page-client-lib';
 import { WebDriverCapabilities } from './web-driver';
+import { LoginPageDetector } from './authenticator/login-page-detector';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -37,6 +38,7 @@ export class PageNavigator {
         @inject(PageNavigationHooks) private readonly pageNavigationHooks: PageNavigationHooks,
         @inject(BrowserCache) private readonly browserCache: BrowserCache,
         @inject(PageOperationHandler) private readonly pageOperationHandler: PageOperationHandler,
+        @inject(LoginPageDetector) private readonly loginPageDetector: LoginPageDetector,
         @inject(PuppeteerTimeoutConfig) private readonly puppeteerTimeoutConfig: PuppeteerTimeoutConfig,
         @inject(GlobalLogger) @optional() public readonly logger: GlobalLogger,
         private readonly resetSessionHistoryFn: typeof resetSessionHistory = resetSessionHistory,
@@ -111,6 +113,24 @@ export class PageNavigator {
         operationResult = await this.handleCachedResponse(operationResult, page);
         if (operationResult.error) {
             return this.getOperationErrorResult(operationResult);
+        }
+
+        const authType = this.loginPageDetector.getAuthenticationType(page.url());
+        if (authType !== undefined) {
+            this.logger?.logInfo('Page authentication is required because it does not persist across browser sessions.', {
+                authenticationType: authType,
+                url: page.url(),
+            });
+            operationResult.browserError = {
+                errorType: 'AuthenticationError',
+                message: `Page authentication is required because it does not persist across browser sessions. Authentication type ${authType} detected.`,
+                stack: new Error().stack,
+            };
+
+            return {
+                ...operationResult,
+                response: undefined,
+            };
         }
 
         await this.resetPageSessionHistory(page);
