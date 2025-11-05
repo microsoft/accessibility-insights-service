@@ -330,6 +330,10 @@ export class Page {
         }
 
         const response = await this.pageNavigator.navigate(this.requestUrl, this.page, this.browserStartOptions?.capabilities);
+        if (this.browserError !== undefined) {
+            return;
+        }
+
         // Set title when page is loaded after authentication
         if (isEmpty(this.title)) {
             this.title = await this.page.title();
