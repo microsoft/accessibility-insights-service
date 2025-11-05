@@ -243,7 +243,7 @@ describe(PageNavigator, () => {
 
             expect(actualResponse.httpResponse).toBeUndefined();
             expect(actualResponse.pageNavigationTiming).toBeUndefined();
-            expect(actualResponse.browserError?.errorType).toBe('AuthenticationError');
+            expect(actualResponse.browserError?.errorType).toBe('AuthenticationNotPersisted');
             expect(actualResponse.browserError?.message).toContain(authenticationType);
             expect(createPageOperationFn).toBeCalledWith('goto', puppeteerPageMock.object, url, undefined);
             expect(handleCachedResponseFn).toBeCalledWith(pageOperationResult, puppeteerPageMock.object);
