@@ -14,6 +14,7 @@ import { BrowserCache } from './browser-cache';
 import { PageOperation, PageOperationHandler } from './network/page-operation-handler';
 import { resetSessionHistory } from './page-client-lib';
 import { WebDriverCapabilities } from './web-driver';
+import { LoginPageDetector } from './authenticator/login-page-detector';
 
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/consistent-type-assertions */
 
@@ -27,6 +28,7 @@ let puppeteerPageMock: IMock<Puppeteer.Page>;
 let loggerMock: IMock<MockableLogger>;
 let browserCacheMock: IMock<BrowserCache>;
 let pageOperationHandlerMock: IMock<PageOperationHandler>;
+let loginPageDetectorMock: IMock<LoginPageDetector>;
 let puppeteerTimeoutConfigMock: IMock<PuppeteerTimeoutConfig>;
 let timingCount: number;
 let pageOperationResult: PageOperationResult;
@@ -41,6 +43,7 @@ describe(PageNavigator, () => {
         puppeteerPageMock = Mock.ofType<Puppeteer.Page>();
         browserCacheMock = Mock.ofType<BrowserCache>();
         pageOperationHandlerMock = Mock.ofType<PageOperationHandler>();
+        loginPageDetectorMock = Mock.ofType<LoginPageDetector>();
         puppeteerTimeoutConfigMock = Mock.ofType<PuppeteerTimeoutConfig>();
         loggerMock = Mock.ofType(MockableLogger);
         pageOperationResult = {} as PageOperationResult;
@@ -66,10 +69,14 @@ describe(PageNavigator, () => {
 
         puppeteerTimeoutConfigMock.setup((o) => o.navigationTimeoutMsec).returns(() => navigationTimeoutMsec);
 
+        // By default, no authentication is required
+        loginPageDetectorMock.setup((o) => o.getAuthenticationType(It.isAny())).returns(() => undefined);
+
         pageNavigator = new PageNavigator(
             pageNavigationHooksMock.object,
             browserCacheMock.object,
             pageOperationHandlerMock.object,
+            loginPageDetectorMock.object,
             puppeteerTimeoutConfigMock.object,
             loggerMock.object,
             resetSessionHistoryMock,
@@ -81,6 +88,7 @@ describe(PageNavigator, () => {
         browserCacheMock.verifyAll();
         puppeteerPageMock.verifyAll();
         pageOperationHandlerMock.verifyAll();
+        loginPageDetectorMock.verifyAll();
         puppeteerTimeoutConfigMock.verifyAll();
         loggerMock.verifyAll();
     });
@@ -194,6 +202,53 @@ describe(PageNavigator, () => {
 
             expect(actualResponse).toEqual(expectedResponse);
             expect(createPageOperationFn).toBeCalledWith('goto', puppeteerPageMock.object, url, undefined);
+        });
+
+        it('navigate to url with authentication required', async () => {
+            const authenticationType = 'entraId';
+            pageOperationResult.response = {
+                status: () => 200,
+            } as Puppeteer.HTTPResponse;
+
+            pageOperation = async () => Promise.resolve(pageOperationResult.response);
+            const createPageOperationFn = jest.fn().mockImplementation(pageOperation);
+            (pageNavigator as any).createPageOperation = createPageOperationFn;
+
+            const handleCachedResponseFn = jest.fn().mockImplementation(() => Promise.resolve(pageOperationResult));
+            (pageNavigator as any).handleCachedResponse = handleCachedResponseFn;
+
+            pageNavigationHooksMock
+                .setup((o) => o.preNavigation(puppeteerPageMock.object))
+                .returns(() => Promise.resolve())
+                .verifiable();
+
+            puppeteerPageMock
+                .setup((o) => o.url())
+                .returns(() => url)
+                .verifiable(Times.atLeastOnce());
+
+            // Override the default setup to return an authentication type
+            loginPageDetectorMock.reset();
+            loginPageDetectorMock
+                .setup((o) => o.getAuthenticationType(url))
+                .returns(() => authenticationType)
+                .verifiable();
+
+            pageOperationHandlerMock
+                .setup((o) => o.invoke(It.isAny(), puppeteerPageMock.object))
+                .returns(() => Promise.resolve(pageOperationResult))
+                .verifiable();
+
+            const actualResponse = await pageNavigator.navigate(url, puppeteerPageMock.object);
+
+            expect(actualResponse.httpResponse).toBeUndefined();
+            expect(actualResponse.pageNavigationTiming).toBeUndefined();
+            expect(actualResponse.browserError?.errorType).toBe('AuthenticationError');
+            expect(actualResponse.browserError?.message).toContain(authenticationType);
+            expect(createPageOperationFn).toBeCalledWith('goto', puppeteerPageMock.object, url, undefined);
+            expect(handleCachedResponseFn).toBeCalledWith(pageOperationResult, puppeteerPageMock.object);
+            // resetSessionHistory should NOT be called when authentication is required
+            expect(resetSessionHistoryMock).not.toBeCalled();
         });
     });
 
