@@ -38,6 +38,7 @@ export declare type ReportFormat =
 
 export declare type ScanErrorTypes =
     | 'AuthenticationError'
+    | 'AuthenticationNotPersisted'
     | 'BannerXPathNotDetected'
     | 'EmptyPage'
     | 'ForeignResourceRedirection'

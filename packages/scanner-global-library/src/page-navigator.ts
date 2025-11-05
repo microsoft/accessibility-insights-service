@@ -122,7 +122,7 @@ export class PageNavigator {
                 url: page.url(),
             });
             operationResult.browserError = {
-                errorType: 'AuthenticationError',
+                errorType: 'AuthenticationNotPersisted',
                 message: `Page authentication is required because it does not persist across browser sessions. Authentication type ${authType} detected.`,
                 stack: new Error().stack,
             };
