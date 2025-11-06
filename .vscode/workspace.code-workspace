@@ -139,7 +139,8 @@
             "serializable",
             "typemoq",
             "unscannable",
-            "upsert"
+            "upsert",
+            "vnet"
         ]
     },
     "extensions": {
