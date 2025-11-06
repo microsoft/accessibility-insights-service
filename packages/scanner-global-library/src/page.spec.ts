@@ -18,6 +18,7 @@ import { PageNetworkTracer } from './network/page-network-tracer';
 import { ResourceAuthenticator, ResourceAuthenticationResult } from './authenticator/resource-authenticator';
 import { PageAnalysisResult, PageAnalyzer } from './network/page-analyzer';
 import { DevToolsSession } from './dev-tools-session';
+import { PageRequestInterceptor } from './network/page-request-interceptor';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -52,6 +53,7 @@ let pageAnalyzerMock: IMock<PageAnalyzer>;
 let guidGeneratorMock: IMock<GuidGenerator>;
 let devToolsSessionMock: IMock<DevToolsSession>;
 let puppeteerTimeoutConfigMock: IMock<PuppeteerTimeoutConfig>;
+let pageRequestInterceptorMock: IMock<PageRequestInterceptor>;
 let browserStartOptions: BrowserStartOptions;
 
 describe(Page, () => {
@@ -77,6 +79,7 @@ describe(Page, () => {
         guidGeneratorMock = Mock.ofType<GuidGenerator>();
         devToolsSessionMock = Mock.ofType<DevToolsSession>();
         puppeteerTimeoutConfigMock = Mock.ofType<PuppeteerTimeoutConfig>();
+        pageRequestInterceptorMock = Mock.ofType<PageRequestInterceptor>();
         browserStartOptions = {} as BrowserStartOptions;
 
         scrollToTopMock = jest.fn().mockImplementation(() => Promise.resolve());
@@ -104,6 +107,7 @@ describe(Page, () => {
             devToolsSessionMock.object,
             puppeteerTimeoutConfigMock.object,
             guidGeneratorMock.object,
+            pageRequestInterceptorMock.object,
             loggerMock.object,
             scrollToTopMock,
         );
@@ -119,6 +123,7 @@ describe(Page, () => {
         resourceAuthenticatorMock.verifyAll();
         pageAnalyzerMock.verifyAll();
         puppeteerTimeoutConfigMock.verifyAll();
+        pageRequestInterceptorMock.verifyAll();
     });
 
     describe('navigate()', () => {
@@ -452,6 +457,10 @@ function setupPageCreate(): void {
         .setup(async (o) => o.newPage())
         .returns(() => Promise.resolve(puppeteerPageMock.object))
         .verifiable();
+    pageRequestInterceptorMock
+        .setup((o) => o.enableInterception(puppeteerPageMock.object, undefined))
+        .returns(() => Promise.resolve())
+        .verifiable(Times.atLeastOnce());
     webDriverMock
         .setup(async (o) => o.launch(It.isAny()))
         .returns(() => Promise.resolve(browserMock.object))

@@ -27,6 +27,7 @@ export declare type ReportFormat = 'json' | 'consolidated.json' | 'page.mhtml' |
 
 export declare type ScanErrorTypes =
     | 'AuthenticationError'
+    | 'AuthenticationNotPersisted'
     | 'BannerXPathNotDetected'
     | 'EmptyPage'
     | 'ForeignResourceRedirection'

@@ -5,6 +5,7 @@
 
 export declare type ScanRunErrorCodeName =
     | 'AuthenticationError'
+    | 'AuthenticationNotPersisted'
     | 'BannerXPathNotDetected'
     | 'EmptyPage'
     | 'ForeignResourceRedirection'
@@ -119,10 +120,17 @@ export class ScanRunErrorCodes {
         codeId: 9015,
         message: 'The resource is not supported',
     };
+
+    public static authenticationNotPersisted: ScanRunErrorCode = {
+        code: 'AuthenticationNotPersisted',
+        codeId: 9016,
+        message: 'The page authentication does not persist across browser sessions',
+    };
 }
 
 export const scanErrorNameToErrorMap: { [key in ScanRunErrorCodeName]: ScanRunErrorCode } = {
     AuthenticationError: ScanRunErrorCodes.authenticationError,
+    AuthenticationNotPersisted: ScanRunErrorCodes.authenticationNotPersisted,
     BannerXPathNotDetected: ScanRunErrorCodes.bannerXPathNotDetected,
     EmptyPage: ScanRunErrorCodes.emptyPage,
     ForeignResourceRedirection: ScanRunErrorCodes.foreignResourceRedirection,

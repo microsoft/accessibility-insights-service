@@ -88,11 +88,24 @@ export class PageRequestInterceptor {
                     }
                 }
 
+                // Must resolve the interception to allow the request to proceed
+                // This ensures the request can complete and trigger response/error events
                 if (!request.isInterceptResolutionHandled()) {
                     await request.continue();
                 }
             } catch (e) {
                 this.traceError('request', e);
+                // Ensure request is continued even if there's an error
+                if (!request.isInterceptResolutionHandled()) {
+                    try {
+                        await request.continue();
+                    } catch (continueError) {
+                        this.logger?.logError('Failed to continue request after error', {
+                            url: request.url(),
+                            error: System.serializeError(continueError),
+                        });
+                    }
+                }
             }
         };
         page.on('request', this.pageOnRequestEventHandler);
@@ -139,15 +152,31 @@ export class PageRequestInterceptor {
     }
 
     /**
-     *
+     * Waits for all intercepted requests to complete (receive response or fail).
+     * This is essential when using request interception to ensure all requests
+     * in the browser redirection chain are completed before proceeding.
      * @returns Returns elapsed time, in msec.
      */
     public async waitForAllRequests(timeoutMsecs: number): Promise<number> {
         const timestamp = System.getTimestamp();
         await System.waitLoop(
             async () => {
-                // returns if there is no pending requests
-                return this.interceptedRequests.every((r) => r.response || r.error);
+                // Returns true if there are no pending requests
+                // A request is considered complete when it has either:
+                // 1. Received a response (r.response exists)
+                // 2. Failed (r.error exists)
+                // 3. Was resolved by request.continue(), request.abort(), or request.respond()
+                const allCompleted = this.interceptedRequests.every((r) => r.response || r.error);
+
+                if (!allCompleted) {
+                    this.logger?.logVerbose(
+                        `Waiting for ${
+                            this.interceptedRequests.filter((r) => !r.response && !r.error).length
+                        } pending requests to complete`,
+                    );
+                }
+
+                return allCompleted;
             },
             async (requests) => requests,
             timeoutMsecs,
