@@ -117,7 +117,7 @@ export class PageNavigator {
 
         const authType = this.loginPageDetector.getAuthenticationType(page.url());
         if (authType !== undefined) {
-            this.logger?.logInfo('Page authentication is required because it does not persist across browser sessions.', {
+            this.logger?.logError('Page authentication is required because it does not persist across browser sessions.', {
                 authenticationType: authType,
                 url: page.url(),
             });
