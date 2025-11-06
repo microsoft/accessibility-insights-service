@@ -1,0 +1,47 @@
+{
+  "properties": {
+    "helpUri": "https://eng.ms/docs/microsoft-security/security/azure-security/cloudai-security-fundamentals-engineering/security-integration/guardian-wiki/microsoft-guardian/general/baselines"
+  },
+  "version": "1.0.0",
+  "baselines": {
+    "default": {
+      "name": "default",
+      "createdDate": "2025-11-06 00:36:14Z",
+      "lastUpdatedDate": "2025-11-06 00:36:14Z"
+    }
+  },
+  "results": {
+    "ef7ba0e8f40181f11264ea9c67014f0af8d41855c66973999e26076ea83cb447": {
+      "signature": "ef7ba0e8f40181f11264ea9c67014f0af8d41855c66973999e26076ea83cb447",
+      "alternativeSignatures": [
+        "b233be46333884e3e910634608f6881bfa3c4f6998ffc6b4340fa5b6c1409017"
+      ],
+      "target": "packages/web-api-scan-runner/docker-image-config/web-api-scan-runner.ps1",
+      "line": 12,
+      "memberOf": [
+        "default"
+      ],
+      "tool": "psscriptanalyzer",
+      "ruleId": "PSAvoidUsingConvertToSecureStringWithPlainText",
+      "createdDate": "2025-11-06 00:36:14Z",
+      "expirationDate": "2026-04-25 00:56:10Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2025-11-06 00:56:10Z"
+    },
+    "137941e65ffb06e1c8c0476b8d6474aa97e69562b9265600ce2c0b43e4125fd6": {
+      "signature": "137941e65ffb06e1c8c0476b8d6474aa97e69562b9265600ce2c0b43e4125fd6",
+      "alternativeSignatures": [
+        "89ebb0d0fb83b36b9b3878e463c317a41750fdb414185fe616d970d149ca572f"
+      ],
+      "target": "packages/resource-deployment/scripts/docker-scanner-image/enable-virtual-display.ps1",
+      "line": 11,
+      "memberOf": [
+        "default"
+      ],
+      "tool": "psscriptanalyzer",
+      "ruleId": "PSAvoidUsingConvertToSecureStringWithPlainText",
+      "createdDate": "2025-11-06 00:36:14Z",
+      "expirationDate": "2026-04-25 00:56:10Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2025-11-06 00:56:10Z"
+    }
+  }
+}
