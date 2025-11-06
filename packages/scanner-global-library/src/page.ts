@@ -16,6 +16,7 @@ import { PageNetworkTracer } from './network/page-network-tracer';
 import { ResourceAuthenticator, ResourceAuthenticationResult } from './authenticator/resource-authenticator';
 import { PageAnalysisResult, PageAnalyzer } from './network/page-analyzer';
 import { DevToolsSession } from './dev-tools-session';
+import { PageRequestInterceptor } from './network/page-request-interceptor';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -91,6 +92,7 @@ export class Page {
         @inject(DevToolsSession) private readonly devToolsSession: DevToolsSession,
         @inject(PuppeteerTimeoutConfig) private readonly puppeteerTimeoutConfig: PuppeteerTimeoutConfig,
         @inject(GuidGenerator) private readonly guidGenerator: GuidGenerator,
+        @inject(PageRequestInterceptor) private readonly pageRequestInterceptor: PageRequestInterceptor,
         @inject(GlobalLogger) @optional() private readonly logger: GlobalLogger,
         private readonly scrollToPageTop: typeof scrollToTop = scrollToTop,
     ) {
@@ -124,6 +126,11 @@ export class Page {
 
         this.userAgent = await this.browser.userAgent();
         this.page = await this.browser.newPage();
+
+        // Enable request interception before any other page operations
+        // This must be done immediately after page creation to avoid protocol timeout errors
+        await this.pageRequestInterceptor.enableInterception(this.page);
+
         this.puppeteerTimeoutConfig.setOperationTimeout(options?.capabilities);
         this.browserResolution = await this.getBrowserResolution();
         this.browserVersion = await this.browser.version();
@@ -307,7 +314,6 @@ export class Page {
         if (this.pageAnalysisResult.navigationResponse?.browserError !== undefined) {
             this.setLastNavigationState('analysis', this.pageAnalysisResult.navigationResponse);
         } else {
-            this.title = await this.page.title();
             await this.reopenBrowserImpl({ clearBrowserCache: false, preserveUserProfile: false });
         }
     }
@@ -324,6 +330,14 @@ export class Page {
         }
 
         const response = await this.pageNavigator.navigate(this.requestUrl, this.page, this.browserStartOptions?.capabilities);
+        if (this.browserError !== undefined) {
+            return;
+        }
+
+        // Set title when page is loaded after authentication
+        if (isEmpty(this.title)) {
+            this.title = await this.page.title();
+        }
         this.setLastNavigationState('load', response);
     }
 
@@ -339,7 +353,7 @@ export class Page {
             });
             this.browserError = {
                 errorType: 'AuthenticationError',
-                message: `Page authentication is required. Authentication type ${this.pageAnalysisResult.authenticationType}`,
+                message: `Page authentication is required. Authentication type ${this.pageAnalysisResult.authenticationType} detected.`,
                 stack: new Error().stack,
             };
 
