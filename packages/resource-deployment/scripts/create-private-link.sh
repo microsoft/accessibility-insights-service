@@ -86,43 +86,30 @@ getServiceResourceId() {
     echo "Auto-detecting service resource ID based on group ID '${groupId}'..."
 
     # Get resource names from get-resource-names.sh (already sourced)
-    # Use Azure CLI to get the proper resource ID instead of manually constructing it
     case "${groupId}" in
     blob | queue | table | file)
         if [[ -z "${storageAccountName}" ]]; then
             echo "Error: Storage account name not found in resource group ${resourceGroupName}"
             exit 1
         fi
+        serviceResourceId="/subscriptions/${subscription}/resourceGroups/${resourceGroupName}/providers/Microsoft.Storage/storageAccounts/${storageAccountName}"
         echo "  Detected Storage Account: ${storageAccountName}"
-        serviceResourceId=$(az storage account show \
-            --resource-group "${resourceGroupName}" \
-            --name "${storageAccountName}" \
-            --query "id" \
-            -o tsv)
         ;;
     vault)
         if [[ -z "${keyVault}" ]]; then
             echo "Error: Key Vault name not found in resource group ${resourceGroupName}"
             exit 1
         fi
+        serviceResourceId="/subscriptions/${subscription}/resourceGroups/${resourceGroupName}/providers/Microsoft.KeyVault/vaults/${keyVault}"
         echo "  Detected Key Vault: ${keyVault}"
-        serviceResourceId=$(az keyvault show \
-            --resource-group "${resourceGroupName}" \
-            --name "${keyVault}" \
-            --query "id" \
-            -o tsv)
         ;;
     sql)
         if [[ -z "${cosmosAccountName}" ]]; then
             echo "Error: Cosmos DB account name not found in resource group ${resourceGroupName}"
             exit 1
         fi
+        serviceResourceId="/subscriptions/${subscription}/resourceGroups/${resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/${cosmosAccountName}"
         echo "  Detected Cosmos DB Account: ${cosmosAccountName}"
-        serviceResourceId=$(az cosmosdb show \
-            --resource-group "${resourceGroupName}" \
-            --name "${cosmosAccountName}" \
-            --query "id" \
-            -o tsv)
         ;;
     *)
         echo "Error: Unknown group ID '${groupId}'. Please provide service resource ID with -s parameter."
@@ -262,22 +249,13 @@ createPrivateEndpoint() {
         return
     fi
 
-    # Get the full subnet resource ID to avoid issues with resource group names containing special characters
-    local subnetId
-    subnetId=$(az network vnet subnet show \
-        --resource-group "${resourceGroupName}" \
-        --vnet-name "${vnetName}" \
-        --name "${subnetName}" \
-        --query "id" \
-        -o tsv)
-
-    # Use --group-ids (plural) for proper group ID specification
     az network private-endpoint create \
         --resource-group "${resourceGroupName}" \
         --name "${privateEndpointName}" \
-        --subnet "${subnetId}" \
+        --vnet-name "${vnetName}" \
+        --subnet "${subnetName}" \
         --private-connection-resource-id "${serviceResourceId}" \
-        --group-ids "${groupId}" \
+        --group-id "${groupId}" \
         --connection-name "${privateEndpointName}-conn" \
         --location "${location}" 1>/dev/null
 
