@@ -271,13 +271,16 @@ createPrivateEndpoint() {
         --query "id" \
         -o tsv)
 
+    # Use --group-ids (plural) with --manual-connection false for explicit auto-approval
+    # This ensures proper validation and connection approval
     az network private-endpoint create \
         --resource-group "${resourceGroupName}" \
         --name "${privateEndpointName}" \
         --subnet "${subnetId}" \
         --private-connection-resource-id "${serviceResourceId}" \
-        --group-id "${groupId}" \
+        --group-ids "${groupId}" \
         --connection-name "${privateEndpointName}-conn" \
+        --manual-connection false \
         --location "${location}" 1>/dev/null
 
     local end=$((SECONDS + 300))
