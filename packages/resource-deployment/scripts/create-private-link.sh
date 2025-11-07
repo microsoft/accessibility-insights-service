@@ -262,11 +262,19 @@ createPrivateEndpoint() {
         return
     fi
 
+    # Get the full subnet resource ID to avoid issues with resource group names containing special characters
+    local subnetId
+    subnetId=$(az network vnet subnet show \
+        --resource-group "${resourceGroupName}" \
+        --vnet-name "${vnetName}" \
+        --name "${subnetName}" \
+        --query "id" \
+        -o tsv)
+
     az network private-endpoint create \
         --resource-group "${resourceGroupName}" \
         --name "${privateEndpointName}" \
-        --vnet-name "${vnetName}" \
-        --subnet "${subnetName}" \
+        --subnet "${subnetId}" \
         --private-connection-resource-id "${serviceResourceId}" \
         --group-id "${groupId}" \
         --connection-name "${privateEndpointName}-conn" \
