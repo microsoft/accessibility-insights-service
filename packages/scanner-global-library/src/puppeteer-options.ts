@@ -16,6 +16,7 @@ export const windowSize = {
 const defaultArgs = [
     '--no-sandbox',
     '--no-zygote',
+    '--restore-last-session', // needed for proper cookies handling for some sites with authentication
     '--disable-dev-shm-usage',
     '--disable-setuid-sandbox',
     '--disable-features=BackForwardCache',
