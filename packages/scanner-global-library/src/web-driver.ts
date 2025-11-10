@@ -91,8 +91,10 @@ export class WebDriver {
 
         // Close all pages except default page to release resources
         try {
+            await System.wait(2000);
             const pages = await this.browser.pages();
             if (pages.length > 0) {
+                await pages[0].goto('about:blank');
                 for (let i = 1; i < pages.length; i++) {
                     await pages[i].close();
                 }
