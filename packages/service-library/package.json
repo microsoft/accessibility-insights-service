@@ -44,7 +44,7 @@
         "@azure/functions": "^4.7.2",
         "@azure/identity": "^4.11.1",
         "@azure/storage-blob": "12.18.0",
-        "@crawlee/puppeteer": "^3.12.2",
+        "@crawlee/puppeteer": "^3.15.2",
         "accessibility-insights-report": "7.0.0",
         "async-mutex": "^0.5.0",
         "axe-core": "4.10.2",

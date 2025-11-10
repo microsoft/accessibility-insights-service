@@ -168,10 +168,20 @@ export abstract class PageProcessorBase implements PageProcessor {
         try {
             const userData = context.request.userData;
             const keepUrlFragment = userData?.keepUrlFragment ?? false;
+            // Use a Set to track seen URLs and avoid duplicates
+            const seenUrls = new Set<string>();
+
             const enqueued = await context.enqueueLinks({
                 // eslint-disable-next-line security/detect-non-literal-regexp
                 regexps: this.discoveryPatterns?.length > 0 ? this.discoveryPatterns.map((p) => new RegExp(p)) : undefined,
                 transformRequestFunction: (newRequest) => {
+                    // Check if the URL has already been seen
+                    if (seenUrls.has(newRequest.url)) {
+                        // Returning false will skip enqueuing this request
+                        return false;
+                    }
+                    seenUrls.add(newRequest.url);
+
                     newRequest.keepUrlFragment = keepUrlFragment;
                     if (newRequest.userData) {
                         newRequest.userData.keepUrlFragment = keepUrlFragment;
