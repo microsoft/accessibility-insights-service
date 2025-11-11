@@ -58,7 +58,7 @@
         "moment": "^2.30.1",
         "p-limit": "^3.1.0",
         "privacy-scan-core": "workspace:*",
-        "puppeteer": "^24.18.0",
+        "puppeteer": "^24.28.0",
         "puppeteer-extra": "^3.3.6",
         "puppeteer-extra-plugin": "^3.2.3",
         "puppeteer-extra-plugin-stealth": "^2.11.2",

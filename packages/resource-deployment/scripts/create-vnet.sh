@@ -12,12 +12,12 @@ Usage: ${BASH_SOURCE} -r <resource group> [-a <address prefix (optional)> -s <su
     exit 1
 }
 
-# Set default vnet template file
+# Set default VNet template file
 templateFilePath="${0%/*}/../templates/vnet.template.json"
 
 # Read script arguments
 while getopts ":a:s:r:" option; do
-    case $option in
+    case ${option} in
     a) addressPrefix=${OPTARG} ;;
     s) subnetAddressPrefix=${OPTARG} ;;
     r) resourceGroupName=${OPTARG} ;;
@@ -25,26 +25,46 @@ while getopts ":a:s:r:" option; do
     esac
 done
 
-if [[ -z $resourceGroupName ]]; then
+if [[ -z ${resourceGroupName} ]]; then
     exitWithUsageInfo
 fi
 
-bastionId=$(az resource list --resource-group "$resourceGroupName" --query "[?type=='Microsoft.Network/bastionHosts'][].id" -o tsv)
-if [[ -n $bastionId ]]; then
-    echo "Deleting Azure Bastion service"
-    az resource delete --ids "$bastionId" 1>/dev/null
+# Login to Azure if required
+if ! az account show 1>/dev/null; then
+    az login
 fi
 
-addressPrefix=${addressPrefix:-"10.2.0.0/16"}
-subnetAddressPrefix=${subnetAddressPrefix:-"10.2.0.0/24"}
+. "${0%/*}/get-subnet-address-prefixes.sh"
+. "${0%/*}/get-resource-names.sh"
 
-echo "[create-vnet] Starting Virtual Network creation"
+# Check if VNet already exists
+echo "Checking if Virtual Network already exists..."
+existingVnet=$(az network vnet show \
+    --resource-group "${resourceGroupName}" \
+    --name "${vnetName}" \
+    --query "name" \
+    -o tsv 2>/dev/null || true)
 
-vnetResource=$(az deployment group create \
-    --resource-group "$resourceGroupName" \
-    --template-file "$templateFilePath" \
-    --parameters addressPrefix="$addressPrefix" subnetAddressPrefix="$subnetAddressPrefix" \
-    --query "properties.outputResources[].id" \
-    -o tsv)
+if [[ -n "${existingVnet}" ]]; then
+    echo "Virtual Network already exists: ${vnetName}"
+    echo "[create-vnet] Skipping VNet creation - VNet already exists"
+else
+    echo "Virtual Network does not exist. Proceeding with creation..."
 
-echo "[create-vnet] Virtual Network created = $vnetResource"
+    # Set default values from centralized configuration
+    addressPrefix=${addressPrefix:-$(getVnetAddressPrefix)}
+    subnetAddressPrefix=${subnetAddressPrefix:-$(getDefaultSubnetPrefix)}
+
+    echo "[create-vnet] Starting Virtual Network creation"
+    echo "  VNet Address Prefix: ${addressPrefix}"
+    echo "  Default Subnet Address Prefix: ${subnetAddressPrefix}"
+
+    vnetResource=$(az deployment group create \
+        --resource-group "${resourceGroupName}" \
+        --template-file "${templateFilePath}" \
+        --parameters addressPrefix="${addressPrefix}" subnetAddressPrefix="${subnetAddressPrefix}" \
+        --query "properties.outputResources[].id" \
+        -o tsv)
+
+    echo "[create-vnet] Virtual Network created = ${vnetResource}"
+fi

@@ -89,6 +89,20 @@ export class WebDriver {
             executablePath: options?.browserExecutablePath ?? Puppeteer.executablePath(),
         });
 
+        // Close all pages except default page to release resources
+        try {
+            await System.wait(2000);
+            const pages = await this.browser.pages();
+            if (pages.length > 0) {
+                await pages[0].goto('about:blank');
+                for (let i = 1; i < pages.length; i++) {
+                    await pages[i].close();
+                }
+            }
+        } catch (error) {
+            this.logger?.logError('An error occurred while closing browser pages.', { error: System.serializeError(error) });
+        }
+
         this.logger?.logInfo('Browser instance started.', { options: JSON.stringify(options) });
 
         return this.browser;

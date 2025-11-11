@@ -1,19 +1,14 @@
-diff --git a/node_modules/@crawlee/core/.DS_Store b/node_modules/@crawlee/core/.DS_Store
-new file mode 100644
-index 0000000..1508723
-Binary files /dev/null and b/node_modules/@crawlee/core/.DS_Store differ
 diff --git a/node_modules/@crawlee/core/session_pool/session.d.ts b/node_modules/@crawlee/core/session_pool/session.d.ts
-index 7e8eaf0..6ba63cf 100644
+index da49c3c8..5343906c 100644
 --- a/node_modules/@crawlee/core/session_pool/session.d.ts
 +++ b/node_modules/@crawlee/core/session_pool/session.d.ts
-@@ -1,6 +1,6 @@
- import type { Log } from '@apify/log';
+@@ -1,5 +1,5 @@
  import type { Cookie as CookieObject, Dictionary } from '@crawlee/types';
 -import type { Cookie, SerializedCookieJar } from 'tough-cookie';
 +import type { Cookie } from 'tough-cookie';
  import { CookieJar } from 'tough-cookie';
+ import type { Log } from '@apify/log';
  import type { ResponseLike } from '../cookie_utils';
- /**
 @@ -8,7 +8,7 @@ import type { ResponseLike } from '../cookie_utils';
   */
  export interface SessionState {
