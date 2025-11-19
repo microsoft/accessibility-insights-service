@@ -63,4 +63,18 @@ describe(LoginPageDetector, () => {
             'https://login.live.com/login.srf?wa=wsignin1.0&rpsnv=1&ct=1&rver=1&wp=SSL&wreply=https:%2F%2Fsway.cloud.microsoft%2Fauthredir&lc=1033&id=1&lw=1&aadredir=1';
         expect(loginPageDetector.getAuthenticationType(url)).toEqual('entraId');
     });
+
+    it('should not detect false positives with similar substrings', () => {
+        const falsePositiveUrls = [
+            'https://example.com/design-insights',
+            'https://example.com/design-insights/report',
+            'https://example.com/assign-insights',
+            'https://example.com/consignor',
+            'https://example.com/ensign',
+        ];
+
+        falsePositiveUrls.forEach((url) => {
+            expect(loginPageDetector.getAuthenticationType(url)).toBeUndefined();
+        });
+    });
 });

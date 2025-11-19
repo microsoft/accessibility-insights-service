@@ -14,7 +14,11 @@ const authProviders = [
         pattern: /login\.microsoftonline\.com/i,
     },
     { type: 'undetermined' as AuthenticationType, name: 'Microsoft Personal Account (MSA)', pattern: /login\.live\.com/i },
-    { type: 'undetermined' as AuthenticationType, name: 'Common Sign-in Pattern', pattern: /\.com\/.*(\/)?(signin|sign-in|login)/i },
+    {
+        type: 'undetermined' as AuthenticationType,
+        name: 'Common Sign-in Pattern',
+        pattern: /\.com\/((\w+\/)(\bsignin\b|\bsign-in\b|\blogin\b)|(\bsignin\b|\bsign-in\b|\blogin\b))/i,
+    },
     { type: 'undetermined' as AuthenticationType, name: 'Common Sign-in Pattern', pattern: /\.com\/.*(\/)?saml2/i },
     { type: 'undetermined' as AuthenticationType, name: 'Common Sign-in Pattern', pattern: /login\..*\.com/i },
     { type: 'undetermined' as AuthenticationType, name: 'Common Sign-in Pattern', pattern: /\.com\/.*(\/)?[o]?auth[2]?\//i },
