@@ -203,8 +203,11 @@ export class PageNavigator {
             case 'reload':
                 return async () => {
                     this.logger?.logInfo('Wait for the page to reload URL.');
+                    await page.goto(`file:///${__dirname}/blank-page.html`);
+                    await System.wait(500);
 
-                    return page.reload(waitForOptions);
+                    // Use of page.goBack() is required with back/forward cache disabled, option --disable-features=BackForwardCache
+                    return page.goBack(waitForOptions);
                 };
             case 'wait':
                 return async () => {

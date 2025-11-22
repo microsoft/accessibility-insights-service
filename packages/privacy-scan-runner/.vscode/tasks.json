@@ -17,8 +17,15 @@
         {
             "type": "shell",
             "label": "tsc",
-            "dependsOn": "clean",
+            "dependsOn": "tsc-scanner-library",
             "command": "tsc",
+            "problemMatcher": ["$tsc"]
+        },
+        {
+            "type": "shell",
+            "label": "tsc-scanner-library",
+            "dependsOn": "clean",
+            "command": "tsc -p ./../scanner-global-library/",
             "problemMatcher": ["$tsc"]
         },
         {
