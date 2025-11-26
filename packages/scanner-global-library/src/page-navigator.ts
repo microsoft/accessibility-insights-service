@@ -117,13 +117,17 @@ export class PageNavigator {
 
         const authType = this.loginPageDetector.getAuthenticationType(page.url());
         if (authType !== undefined) {
-            this.logger?.logError('Page authentication is required because it does not persist across browser sessions.', {
-                authenticationType: authType,
-                url: page.url(),
-            });
+            this.logger?.logError(
+                'Page authentication is required because either authentication is not enabled, or authentication does not persist between browser sessions.',
+                {
+                    authenticationType: authType,
+                    url: page.url(),
+                },
+            );
             operationResult.browserError = {
                 errorType: 'AuthenticationNotPersisted',
-                message: `Page authentication is required because it does not persist across browser sessions. Authentication type ${authType} detected.`,
+                message:
+                    'Page authentication is required because either authentication is not enabled, or authentication does not persist between browser sessions.',
                 stack: new Error().stack,
             };
 
@@ -203,11 +207,8 @@ export class PageNavigator {
             case 'reload':
                 return async () => {
                     this.logger?.logInfo('Wait for the page to reload URL.');
-                    await page.goto(`file:///${__dirname}/blank-page.html`);
-                    await System.wait(500);
 
-                    // Use of page.goBack() is required with back/forward cache disabled, option --disable-features=BackForwardCache
-                    return page.goBack(waitForOptions);
+                    return page.reload();
                 };
             case 'wait':
                 return async () => {

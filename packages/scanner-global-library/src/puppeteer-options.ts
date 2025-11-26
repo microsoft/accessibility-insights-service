@@ -20,6 +20,7 @@ const defaultArgs = [
     '--disable-dev-shm-usage',
     '--disable-setuid-sandbox',
     '--disable-features=BackForwardCache',
+    '--disable-back-forward-cache',
     '--disable-smooth-scrolling',
     '--js-flags=--max-old-space-size=8192',
     `--window-size=${windowSize.width},${windowSize.height}`,

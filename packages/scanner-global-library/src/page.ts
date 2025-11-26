@@ -348,12 +348,12 @@ export class Page {
 
         // Fail if authentication is disabled
         if (options?.enableAuthentication !== true && this.enableAuthenticationGlobalFlag !== true) {
-            this.logger?.logError('Page authentication is required.', {
+            this.logger?.logError('Authentication is required for this page. Ensure authentication is enabled in the scan request.', {
                 authenticationType: this.pageAnalysisResult.authenticationType,
             });
             this.browserError = {
                 errorType: 'AuthenticationError',
-                message: `Page authentication is required. Authentication type ${this.pageAnalysisResult.authenticationType} detected.`,
+                message: 'Authentication is required for this page. Ensure authentication is enabled in the scan request.',
                 stack: new Error().stack,
             };
 
