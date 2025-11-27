@@ -245,7 +245,7 @@ describe(PageNavigator, () => {
             expect(actualResponse.pageNavigationTiming).toBeUndefined();
             expect(actualResponse.browserError?.errorType).toBe('AuthenticationNotPersisted');
             expect(actualResponse.browserError?.message).toBe(
-                'Page authentication is required because either authentication is not enabled, or authentication does not persist between browser sessions.',
+                'Authentication is required for this page. Either enable authentication for the website or ensure it stays active between browser sessions.',
             );
             expect(createPageOperationFn).toBeCalledWith('goto', puppeteerPageMock.object, url, undefined);
             expect(handleCachedResponseFn).toBeCalledWith(pageOperationResult, puppeteerPageMock.object);

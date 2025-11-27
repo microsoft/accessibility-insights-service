@@ -118,7 +118,7 @@ export class PageNavigator {
         const authType = this.loginPageDetector.getAuthenticationType(page.url());
         if (authType !== undefined) {
             this.logger?.logError(
-                'Page authentication is required because either authentication is not enabled, or authentication does not persist between browser sessions.',
+                'Authentication is required for this page. Either enable authentication for the website or ensure it stays active between browser sessions.',
                 {
                     authenticationType: authType,
                     url: page.url(),
@@ -127,7 +127,7 @@ export class PageNavigator {
             operationResult.browserError = {
                 errorType: 'AuthenticationNotPersisted',
                 message:
-                    'Page authentication is required because either authentication is not enabled, or authentication does not persist between browser sessions.',
+                    'Authentication is required for this page. Either enable authentication for the website or ensure it stays active between browser sessions.',
                 stack: new Error().stack,
             };
 
