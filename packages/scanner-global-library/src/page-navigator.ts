@@ -208,6 +208,7 @@ export class PageNavigator {
                 return async () => {
                     this.logger?.logInfo('Wait for the page to reload URL.');
 
+                    // Adding waitForOptions to page.reload() does not work as expected. Keep it without options.
                     return page.reload();
                 };
             case 'wait':
