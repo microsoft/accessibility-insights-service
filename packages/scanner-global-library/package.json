@@ -42,7 +42,7 @@
         "lodash": "^4.17.21",
         "logger": "workspace:*",
         "pidusage": "^4.0.1",
-        "puppeteer": "^24.18.0",
+        "puppeteer": "^24.31.0",
         "puppeteer-extra": "^3.3.6",
         "puppeteer-extra-plugin": "^3.2.3",
         "puppeteer-extra-plugin-stealth": "^2.11.2",

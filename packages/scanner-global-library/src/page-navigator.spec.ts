@@ -244,7 +244,9 @@ describe(PageNavigator, () => {
             expect(actualResponse.httpResponse).toBeUndefined();
             expect(actualResponse.pageNavigationTiming).toBeUndefined();
             expect(actualResponse.browserError?.errorType).toBe('AuthenticationNotPersisted');
-            expect(actualResponse.browserError?.message).toContain(authenticationType);
+            expect(actualResponse.browserError?.message).toBe(
+                'Authentication is required for this page. Either enable authentication for the website or ensure it stays active between browser sessions.',
+            );
             expect(createPageOperationFn).toBeCalledWith('goto', puppeteerPageMock.object, url, undefined);
             expect(handleCachedResponseFn).toBeCalledWith(pageOperationResult, puppeteerPageMock.object);
             // resetSessionHistory should NOT be called when authentication is required
