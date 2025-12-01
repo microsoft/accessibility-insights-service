@@ -117,13 +117,17 @@ export class PageNavigator {
 
         const authType = this.loginPageDetector.getAuthenticationType(page.url());
         if (authType !== undefined) {
-            this.logger?.logError('Page authentication is required because it does not persist across browser sessions.', {
-                authenticationType: authType,
-                url: page.url(),
-            });
+            this.logger?.logError(
+                'Authentication is required for this page. Either enable authentication for the website or ensure it stays active between browser sessions.',
+                {
+                    authenticationType: authType,
+                    url: page.url(),
+                },
+            );
             operationResult.browserError = {
                 errorType: 'AuthenticationNotPersisted',
-                message: `Page authentication is required because it does not persist across browser sessions. Authentication type ${authType} detected.`,
+                message:
+                    'Authentication is required for this page. Either enable authentication for the website or ensure it stays active between browser sessions.',
                 stack: new Error().stack,
             };
 
@@ -204,7 +208,8 @@ export class PageNavigator {
                 return async () => {
                     this.logger?.logInfo('Wait for the page to reload URL.');
 
-                    return page.reload(waitForOptions);
+                    // Adding waitForOptions to page.reload() does not work as expected. Keep it without options.
+                    return page.reload();
                 };
             case 'wait':
                 return async () => {
