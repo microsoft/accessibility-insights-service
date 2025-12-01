@@ -37,7 +37,7 @@
     "dependencies": {
         "@azure/cosmos": "^4.0.0",
         "azure-services": "workspace:*",
-        "chai": "^4.3.7",
+        "chai": "^6.2.1",
         "common": "workspace:*",
         "deep-equal-in-any-order": "^2.1.0",
         "dotenv": "^17.2.1",

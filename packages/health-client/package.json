@@ -38,7 +38,7 @@
         "webpack-ignore-dynamic-require": "^1.0.0"
     },
     "dependencies": {
-        "chai": "^4.3.7",
+        "chai": "^6.2.1",
         "common": "workspace:*",
         "dotenv": "^17.2.1",
         "functional-tests": "workspace:*",
