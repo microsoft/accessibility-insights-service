@@ -27,6 +27,8 @@ export class PageRequestInterceptor {
 
     public errors: { message: string; error: any }[];
 
+    public networkTraceEnabled: boolean;
+
     private pageOnRequestEventHandler: (request: Puppeteer.HTTPRequest) => Promise<void>;
 
     private pageOnResponseEventHandler: (response: Puppeteer.HTTPResponse) => Promise<void>;
@@ -45,6 +47,11 @@ export class PageRequestInterceptor {
         timeoutMsec: number,
         networkTrace: boolean = false,
     ): Promise<T> {
+        // Reset trace data
+        this.errors = [];
+        this.interceptedRequests = [];
+        this.networkTraceEnabled = networkTrace === true || this.globalNetworkTrace === true;
+
         await this.enableInterception(page, networkTrace);
         const operationResult = await pageOperation();
         await this.waitForAllRequests(timeoutMsec);
@@ -56,11 +63,6 @@ export class PageRequestInterceptor {
      * Intercepts only main frame navigational requests.
      */
     public async enableInterception(page: PuppeteerPageExt, networkTrace: boolean = false): Promise<void> {
-        // Reset trace data
-        this.errors = [];
-        this.interceptedRequests = [];
-        const networkTraceEnabled = networkTrace === true || this.globalNetworkTrace === true;
-
         // Adding event handlers to a new page only once
         if (isEmpty(page.id)) {
             page.id = (Math.random() + 1).toString(36);
@@ -75,11 +77,11 @@ export class PageRequestInterceptor {
 
         this.pageOnRequestEventHandler = async (request: Puppeteer.HTTPRequest) => {
             try {
-                if (networkTraceEnabled === true || (request.isNavigationRequest() && request.frame() === page.mainFrame())) {
+                if (this.networkTraceEnabled === true || (request.isNavigationRequest() && request.frame() === page.mainFrame())) {
                     const interceptedRequest = { url: request.url(), interceptionId: (request as any)._interceptionId, request };
                     this.interceptedRequests.push(interceptedRequest);
 
-                    if (networkTraceEnabled === true) {
+                    if (this.networkTraceEnabled === true) {
                         await this.pageNetworkTracerHandler.getPageOnRequestHandler()(interceptedRequest);
                     }
 
@@ -116,7 +118,7 @@ export class PageRequestInterceptor {
                 if (interceptedRequest !== undefined) {
                     interceptedRequest.response = response;
 
-                    if (networkTraceEnabled === true) {
+                    if (this.networkTraceEnabled === true) {
                         await this.pageNetworkTracerHandler.getPageOnResponseHandler()(interceptedRequest);
                     }
 
@@ -136,7 +138,7 @@ export class PageRequestInterceptor {
                 if (interceptedRequest !== undefined) {
                     interceptedRequest.error = request.failure()?.errorText ?? 'unknown';
 
-                    if (networkTraceEnabled === true) {
+                    if (this.networkTraceEnabled === true) {
                         await this.pageNetworkTracerHandler.getPageOnRequestFailedHandler()(interceptedRequest);
                     }
 
