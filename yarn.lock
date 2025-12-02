@@ -8995,9 +8995,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"durable-functions@npm:^3.2.0":
-  version: 3.2.0
-  resolution: "durable-functions@npm:3.2.0"
+"durable-functions@npm:^3.3.0":
+  version: 3.3.0
+  resolution: "durable-functions@npm:3.3.0"
   dependencies:
     "@azure/functions": "npm:^4.0.0"
     "@opentelemetry/api": "npm:^1.9.0"
@@ -9006,8 +9006,8 @@ __metadata:
     lodash: "npm:^4.17.15"
     moment: "npm:^2.29.2"
     uuid: "npm:^9.0.1"
-    validator: "npm:~13.7.0"
-  checksum: 10/1425c651e1f4f5ca0897fef31bdfa40ea365d820af551d740d2f556267bb85602677a86e3999d61550b06ad6a710fe303efdfa681cbbe47905a7b669395db0bb
+    validator: "npm:~13.15.20"
+  checksum: 10/e2d4eb7560f0e8d15e5129415ed2825fde471d052d2559660316600010028945fb99037dfc9d333af5399737f814a02e75faa3ae415e6617863b53ed85c4e390
   languageName: node
   linkType: hard
 
@@ -19259,10 +19259,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"validator@npm:~13.7.0":
-  version: 13.15.20
-  resolution: "validator@npm:13.15.20"
-  checksum: 10/498f9b201dda7b09207bbc13606e6f90595987eab9e3a60fc5b8d8d96141c9351192aea56d392c78640e2462770eedccf545cf13b2ef43e87d73a755ba485c5d
+"validator@npm:~13.15.20":
+  version: 13.15.23
+  resolution: "validator@npm:13.15.23"
+  checksum: 10/03e4a37c04c4e8337b0c91e529bdb6376de6b52ef683616e2e909276be73903e6054203d274ed35e88e3498ec68764125b194338dd2ee893818d3008fbad1ba7
   languageName: node
   linkType: hard
 
@@ -19602,7 +19602,7 @@ __metadata:
     azure-services: "workspace:*"
     common: "workspace:*"
     copy-webpack-plugin: "npm:^13.0.1"
-    durable-functions: "npm:^3.2.0"
+    durable-functions: "npm:^3.3.0"
     fork-ts-checker-webpack-plugin: "npm:^9.0.2"
     functional-tests: "workspace:*"
     inversify: "npm:^6.0.1"
