@@ -98,6 +98,17 @@ export class Page {
     ) {
         this.enableAuthenticationGlobalFlag = process.env.PAGE_AUTH === 'true' ? true : false;
         this.browserWSEndpoint = process.env.BROWSER_ENDPOINT;
+
+        // Pass pageRequestInterceptor instance to dependent classes
+        if (this.pageAnalyzer) {
+            (this.pageAnalyzer as any).pageRequestInterceptor = this.pageRequestInterceptor;
+        }
+        if (this.pageNetworkTracer) {
+            (this.pageNetworkTracer as any).pageRequestInterceptor = this.pageRequestInterceptor;
+        }
+        if (this.pageNavigator) {
+            ((this.pageNavigator as any).pageOperationHandler as any).pageRequestInterceptor = this.pageRequestInterceptor;
+        }
     }
 
     public get puppeteerPage(): Puppeteer.Page {

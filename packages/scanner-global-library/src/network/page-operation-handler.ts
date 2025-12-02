@@ -16,7 +16,7 @@ export declare type PageOperation = () => Promise<Puppeteer.HTTPResponse>;
 @injectable()
 export class PageOperationHandler {
     constructor(
-        @inject(PageRequestInterceptor) private readonly pageRequestInterceptor: PageRequestInterceptor,
+        private readonly pageRequestInterceptor: PageRequestInterceptor,
         @inject(PageResponseProcessor) public readonly pageResponseProcessor: PageResponseProcessor,
         @inject(PuppeteerTimeoutConfig) private readonly puppeteerTimeoutConfig: PuppeteerTimeoutConfig,
         @inject(GlobalLogger) @optional() private readonly logger: GlobalLogger,
