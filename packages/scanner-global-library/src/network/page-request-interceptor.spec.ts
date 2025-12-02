@@ -50,6 +50,8 @@ describe(PageRequestInterceptor, () => {
         const pageOnRequest = jest.fn().mockImplementation(async () => Promise.resolve());
         pageRequestInterceptor.pageOnRequest = pageOnRequest;
 
+        pageRequestInterceptor.errors = [];
+        pageRequestInterceptor.interceptedRequests = [];
         await pageRequestInterceptor.enableInterception(puppeteerPageMock.object);
         await (pageRequestInterceptor as any).pageOnRequestEventHandler(request);
 
@@ -75,7 +77,10 @@ describe(PageRequestInterceptor, () => {
             .returns(() => traceRequestHandler)
             .verifiable();
 
-        await pageRequestInterceptor.enableInterception(puppeteerPageMock.object, true);
+        pageRequestInterceptor.errors = [];
+        pageRequestInterceptor.interceptedRequests = [];
+        pageRequestInterceptor.networkTraceEnabled = true;
+        await pageRequestInterceptor.enableInterception(puppeteerPageMock.object);
         await (pageRequestInterceptor as any).pageOnRequestEventHandler(request);
 
         expect(traceRequestHandler).toBeCalledWith({ url: 'url', request });
@@ -101,6 +106,8 @@ describe(PageRequestInterceptor, () => {
         const pageOnResponse = jest.fn().mockImplementation(async () => Promise.resolve());
         pageRequestInterceptor.pageOnResponse = pageOnResponse;
 
+        pageRequestInterceptor.errors = [];
+        pageRequestInterceptor.interceptedRequests = [];
         await pageRequestInterceptor.enableInterception(puppeteerPageMock.object);
         pageRequestInterceptor.interceptedRequests = [interceptedRequest];
         await (pageRequestInterceptor as any).pageOnResponseEventHandler(response);
@@ -132,7 +139,10 @@ describe(PageRequestInterceptor, () => {
             .returns(() => traceRequestHandler)
             .verifiable();
 
-        await pageRequestInterceptor.enableInterception(puppeteerPageMock.object, true);
+        pageRequestInterceptor.errors = [];
+        pageRequestInterceptor.interceptedRequests = [];
+        pageRequestInterceptor.networkTraceEnabled = true;
+        await pageRequestInterceptor.enableInterception(puppeteerPageMock.object);
         pageRequestInterceptor.interceptedRequests = [interceptedRequest];
         await (pageRequestInterceptor as any).pageOnResponseEventHandler(response);
 
@@ -156,6 +166,8 @@ describe(PageRequestInterceptor, () => {
         const pageOnRequestFailed = jest.fn().mockImplementation(async () => Promise.resolve());
         pageRequestInterceptor.pageOnRequestFailed = pageOnRequestFailed;
 
+        pageRequestInterceptor.errors = [];
+        pageRequestInterceptor.interceptedRequests = [];
         await pageRequestInterceptor.enableInterception(puppeteerPageMock.object);
         pageRequestInterceptor.interceptedRequests = [interceptedRequest];
         await (pageRequestInterceptor as any).pageOnRequestFailedEventHandler(request);
@@ -189,7 +201,10 @@ describe(PageRequestInterceptor, () => {
             .returns(() => traceRequestHandler)
             .verifiable();
 
-        await pageRequestInterceptor.enableInterception(puppeteerPageMock.object, true);
+        pageRequestInterceptor.errors = [];
+        pageRequestInterceptor.interceptedRequests = [];
+        pageRequestInterceptor.networkTraceEnabled = true;
+        await pageRequestInterceptor.enableInterception(puppeteerPageMock.object);
         pageRequestInterceptor.interceptedRequests = [interceptedRequest];
         await (pageRequestInterceptor as any).pageOnRequestFailedEventHandler(request);
 

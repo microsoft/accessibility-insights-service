@@ -100,9 +100,15 @@ export class Page {
         this.browserWSEndpoint = process.env.BROWSER_ENDPOINT;
 
         // Pass pageRequestInterceptor instance to dependent classes
-        (this.pageAnalyzer as any).pageRequestInterceptor = this.pageRequestInterceptor;
-        (this.pageNetworkTracer as any).pageRequestInterceptor = this.pageRequestInterceptor;
-        ((this.pageNavigator as any).pageOperationHandler as any).pageRequestInterceptor = this.pageRequestInterceptor;
+        if (this.pageAnalyzer) {
+            (this.pageAnalyzer as any).pageRequestInterceptor = this.pageRequestInterceptor;
+        }
+        if (this.pageNetworkTracer) {
+            (this.pageNetworkTracer as any).pageRequestInterceptor = this.pageRequestInterceptor;
+        }
+        if (this.pageNavigator) {
+            ((this.pageNavigator as any).pageOperationHandler as any).pageRequestInterceptor = this.pageRequestInterceptor;
+        }
     }
 
     public get puppeteerPage(): Puppeteer.Page {

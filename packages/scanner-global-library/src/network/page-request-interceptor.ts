@@ -52,7 +52,7 @@ export class PageRequestInterceptor {
         this.interceptedRequests = [];
         this.networkTraceEnabled = networkTrace === true || this.globalNetworkTrace === true;
 
-        await this.enableInterception(page, networkTrace);
+        await this.enableInterception(page);
         const operationResult = await pageOperation();
         await this.waitForAllRequests(timeoutMsec);
 
@@ -62,7 +62,7 @@ export class PageRequestInterceptor {
     /**
      * Intercepts only main frame navigational requests.
      */
-    public async enableInterception(page: PuppeteerPageExt, networkTrace: boolean = false): Promise<void> {
+    public async enableInterception(page: PuppeteerPageExt): Promise<void> {
         // Adding event handlers to a new page only once
         if (isEmpty(page.id)) {
             page.id = (Math.random() + 1).toString(36);
@@ -159,7 +159,7 @@ export class PageRequestInterceptor {
      * in the browser redirection chain are completed before proceeding.
      * @returns Returns elapsed time, in msec.
      */
-    public async waitForAllRequests(timeoutMsecs: number): Promise<number> {
+    private async waitForAllRequests(timeoutMsecs: number): Promise<number> {
         const timestamp = System.getTimestamp();
         await System.waitLoop(
             async () => {
