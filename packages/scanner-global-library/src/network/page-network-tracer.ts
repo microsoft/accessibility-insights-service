@@ -11,7 +11,7 @@ import { PageRequestInterceptor } from './page-request-interceptor';
 @injectable()
 export class PageNetworkTracer {
     constructor(
-        @inject(PageRequestInterceptor) private readonly pageRequestInterceptor: PageRequestInterceptor,
+        private readonly pageRequestInterceptor: PageRequestInterceptor,
         @inject(GlobalLogger) @optional() private readonly logger: GlobalLogger,
     ) {}
 

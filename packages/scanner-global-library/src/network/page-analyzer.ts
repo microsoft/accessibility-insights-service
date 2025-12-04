@@ -43,7 +43,7 @@ export class PageAnalyzer {
     constructor(
         @inject(PageResponseProcessor) public readonly pageResponseProcessor: PageResponseProcessor,
         @inject(LoginPageDetector) private readonly loginPageDetector: LoginPageDetector,
-        @inject(PageRequestInterceptor) private readonly pageRequestInterceptor: PageRequestInterceptor,
+        private readonly pageRequestInterceptor: PageRequestInterceptor,
         @inject(GlobalLogger) @optional() private readonly logger: GlobalLogger,
     ) {}
 

@@ -458,7 +458,7 @@ function setupPageCreate(): void {
         .returns(() => Promise.resolve(puppeteerPageMock.object))
         .verifiable();
     pageRequestInterceptorMock
-        .setup((o) => o.enableInterception(puppeteerPageMock.object, undefined))
+        .setup((o) => o.enableInterception(puppeteerPageMock.object))
         .returns(() => Promise.resolve())
         .verifiable(Times.atLeastOnce());
     webDriverMock
