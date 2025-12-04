@@ -124,7 +124,8 @@ export class ScanRunErrorCodes {
     public static authenticationNotPersisted: ScanRunErrorCode = {
         code: 'AuthenticationNotPersisted',
         codeId: 9016,
-        message: 'The page authentication does not persist across browser sessions',
+        message:
+            'Authentication is required for this page. Either enable authentication for the website or ensure it stays active between browser sessions.',
     };
 }
 
