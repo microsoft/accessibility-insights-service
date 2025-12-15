@@ -18,7 +18,7 @@ Usage: ${BASH_SOURCE} -r <resource group> -g <group id> [-n <private endpoint na
 
 Required parameters:
   -r  Resource group name
-  -g  Group ID / sub-resource (e.g., 'blob', 'vault', 'queue', 'table', 'file', 'sql')
+  -g  Group ID / sub-resource (e.g., 'blob', 'vault', 'queue', 'table', 'file', 'sql', 'website')
 
 Optional parameters:
   -n  Private endpoint name prefix (auto-detected based on group ID if not provided)
@@ -50,7 +50,7 @@ getDnsZoneName() {
 
     # Auto-detect DNS zone based on group ID
     case "${groupId}" in
-    blob)
+    blob | website)
         dnsZoneName="privatelink.blob.core.windows.net"
         ;;
     queue)
@@ -87,7 +87,7 @@ getServiceResourceId() {
 
     # Get resource names from get-resource-names.sh (already sourced)
     case "${groupId}" in
-    blob | queue | table | file)
+    blob | queue | table | file | website)
         if [[ -z "${storageAccountName}" ]]; then
             echo "Error: Storage account name not found in resource group ${resourceGroupName}"
             exit 1
@@ -129,6 +129,9 @@ getPrivateEndpointNamePrefix() {
     case "${groupId}" in
     blob | queue | table | file)
         privateEndpointNamePrefix="storage-${groupId}"
+        ;;
+    website)
+        privateEndpointNamePrefix="storage-website"
         ;;
     vault)
         privateEndpointNamePrefix="keyvault"
@@ -324,7 +327,7 @@ disablePublicNetworkAccess() {
     echo "Disabling public network access to the service..."
 
     case "${groupId}" in
-    blob | queue | table | file)
+    blob | queue | table | file | website)
         local accountName
         accountName=$(basename "${serviceResourceId}")
         echo "  Disabling public access for Storage Account: ${accountName}..."

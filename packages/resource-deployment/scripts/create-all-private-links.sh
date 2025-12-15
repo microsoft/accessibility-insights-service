@@ -17,15 +17,15 @@ Required parameters:
 
 Optional parameters:
   -s  Comma-separated list of services to create private endpoints for
-      Available services: blob, queue, table, file, vault, sql
-      Default: All services (blob,queue,table,file,vault,sql)
+      Available services: blob, queue, table, file, vault, sql, website
+      Default: All services (blob,queue,table,file,vault,sql,website)
 
 Examples:
   # Create private endpoints for all supported services
   ${BASH_SOURCE} -r myRG
 
   # Create private endpoints only for storage services
-  ${BASH_SOURCE} -r myRG -s blob,queue,table,file
+  ${BASH_SOURCE} -r myRG -s blob,queue,table,file,website
 
   # Create private endpoints only for vault and sql
   ${BASH_SOURCE} -r myRG -s vault,sql
@@ -34,7 +34,7 @@ Examples:
 }
 
 # Read script arguments
-services="blob,queue,table,file,vault,sql"
+services="blob,queue,table,file,vault,sql,website"
 while getopts ":r:s:" option; do
     case ${option} in
     r) resourceGroupName=${OPTARG} ;;
