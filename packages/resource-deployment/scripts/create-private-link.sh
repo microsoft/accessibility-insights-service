@@ -252,13 +252,19 @@ createPrivateEndpoint() {
         return
     fi
 
+    # Map 'website' to 'blob' for Azure API (website is organizational only)
+    local azureGroupId="${groupId}"
+    if [[ "${groupId}" == "website" ]]; then
+        azureGroupId="blob"
+    fi
+
     az network private-endpoint create \
         --resource-group "${resourceGroupName}" \
         --name "${privateEndpointName}" \
         --vnet-name "${vnetName}" \
         --subnet "${subnetName}" \
         --private-connection-resource-id "${serviceResourceId}" \
-        --group-id "${groupId}" \
+        --group-id "${azureGroupId}" \
         --connection-name "${privateEndpointName}-conn" \
         --location "${location}" 1>/dev/null
 
@@ -313,12 +319,18 @@ createDnsZoneGroup() {
         --query "id" \
         -o tsv)
 
+    # Map 'website' to 'blob' for Azure API (website is organizational only)
+    local azureGroupId="${groupId}"
+    if [[ "${groupId}" == "website" ]]; then
+        azureGroupId="blob"
+    fi
+
     az network private-endpoint dns-zone-group create \
         --resource-group "${resourceGroupName}" \
         --endpoint-name "${privateEndpointName}" \
         --name "${zoneGroupName}" \
         --private-dns-zone "${dnsZoneId}" \
-        --zone-name "${groupId}" 1>/dev/null
+        --zone-name "${azureGroupId}" 1>/dev/null
 
     echo "DNS zone group created successfully"
 }
