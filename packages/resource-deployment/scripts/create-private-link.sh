@@ -87,13 +87,21 @@ getServiceResourceId() {
 
     # Get resource names from get-resource-names.sh (already sourced)
     case "${groupId}" in
-    blob | queue | table | file | website)
+    blob | queue | table | file)
         if [[ -z "${storageAccountName}" ]]; then
             echo "Error: Storage account name not found in resource group ${resourceGroupName}"
             exit 1
         fi
         serviceResourceId="/subscriptions/${subscription}/resourceGroups/${resourceGroupName}/providers/Microsoft.Storage/storageAccounts/${storageAccountName}"
         echo "  Detected Storage Account: ${storageAccountName}"
+        ;;
+    website)
+        if [[ -z "${websiteStorageAccountName}" ]]; then
+            echo "Error: Storage account name not found in resource group ${resourceGroupName}"
+            exit 1
+        fi
+        serviceResourceId="/subscriptions/${subscription}/resourceGroups/${resourceGroupName}/providers/Microsoft.Storage/storageAccounts/${websiteStorageAccountName}"
+        echo "  Detected Storage Account: ${websiteStorageAccountName}"
         ;;
     vault)
         if [[ -z "${keyVault}" ]]; then
