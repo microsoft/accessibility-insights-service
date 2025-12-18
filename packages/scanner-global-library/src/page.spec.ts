@@ -138,7 +138,7 @@ describe(Page, () => {
         it('navigates to page and saves response', async () => {
             setupPageCreate();
             pageNavigatorMock
-                .setup(async (o) => o.navigate(url, puppeteerPageMock.object, browserStartOptions.capabilities))
+                .setup(async (o) => o.navigate(url, puppeteerPageMock.object, browserStartOptions.capabilities, false))
                 .returns(() => Promise.resolve(navigationResponse))
                 .verifiable();
 
@@ -177,7 +177,7 @@ describe(Page, () => {
                 .returns(() => Promise.resolve(authenticationResult))
                 .verifiable();
             pageNavigatorMock
-                .setup(async (o) => o.navigate(url, puppeteerPageMock.object, browserStartOptions.capabilities))
+                .setup(async (o) => o.navigate(url, puppeteerPageMock.object, browserStartOptions.capabilities, false))
                 .returns(() => Promise.resolve(reloadNavigationResponse))
                 .verifiable();
             page.browserStartOptions = browserStartOptions;
@@ -207,7 +207,7 @@ describe(Page, () => {
             setupPageCreate();
             process.env.X_FORWARDED_FOR_HTTP_HEADER = '1.1.1.1';
             pageNavigatorMock
-                .setup(async (o) => o.navigate(url, puppeteerPageMock.object, browserStartOptions.capabilities))
+                .setup(async (o) => o.navigate(url, puppeteerPageMock.object, browserStartOptions.capabilities, false))
                 .returns(() => Promise.resolve(navigationResponse))
                 .verifiable();
             puppeteerPageMock
@@ -229,7 +229,7 @@ describe(Page, () => {
 
         it('reload page and saves response', async () => {
             pageNavigatorMock
-                .setup(async (o) => o.reload(puppeteerPageMock.object, browserStartOptions.capabilities))
+                .setup(async (o) => o.reload(puppeteerPageMock.object, browserStartOptions.capabilities, false))
                 .returns(() => Promise.resolve(navigationResponse))
                 .verifiable();
 
@@ -271,12 +271,12 @@ describe(Page, () => {
                 .verifiable();
             // navigate url
             pageNavigatorMock
-                .setup(async (o) => o.navigate(url, puppeteerPageMock.object, browserStartOptions.capabilities))
+                .setup(async (o) => o.navigate(url, puppeteerPageMock.object, browserStartOptions.capabilities, false))
                 .returns(() => Promise.resolve(navigationResponse))
                 .verifiable();
             // reload page
             pageNavigatorMock
-                .setup(async (o) => o.reload(puppeteerPageMock.object, browserStartOptions.capabilities))
+                .setup(async (o) => o.reload(puppeteerPageMock.object, browserStartOptions.capabilities, false))
                 .returns(() => Promise.resolve(navigationResponse))
                 .verifiable(Times.never());
 
@@ -289,7 +289,7 @@ describe(Page, () => {
             const error = new Error('navigation error');
             const browserError = { errorType: 'SslError', statusCode: 500 } as BrowserError;
             pageNavigatorMock
-                .setup(async (o) => o.reload(puppeteerPageMock.object, browserStartOptions.capabilities))
+                .setup(async (o) => o.reload(puppeteerPageMock.object, browserStartOptions.capabilities, false))
                 .returns(() => Promise.resolve({ error, browserError }))
                 .verifiable();
 

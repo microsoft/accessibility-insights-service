@@ -33,6 +33,8 @@ export class PageScanProcessor {
                 return state;
             }
 
+            // Disable authentication override to allow scanning of login pages.
+            this.page.disableAuthenticationOverride = true;
             await this.page.navigate(scanMetadata.url);
             if (!isEmpty(this.page.browserError)) {
                 return { error: this.page.browserError, pageResponseCode: this.page.browserError.statusCode };
