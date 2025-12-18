@@ -38,6 +38,7 @@ export interface Viewport {
 
 export interface PageOptions {
     enableNetworkTrace?: boolean;
+    // Indicates the type of scan requested: true for authenticated scan, false for unauthenticated scan
     enableAuthentication?: boolean;
 }
 
@@ -67,6 +68,10 @@ export class Page {
     public browserStartOptions: BrowserStartOptions;
 
     public browserVersion: string;
+
+    // When true, disables authentication logic regardless of PageOptions.enableAuthentication value.
+    // This flag overrides the authentication flow and is used to bypass auth for specific scenarios.
+    public disableAuthenticationOverride: boolean = false;
 
     public navigationResponse: Puppeteer.HTTPResponse;
 
@@ -342,7 +347,12 @@ export class Page {
             return;
         }
 
-        const response = await this.pageNavigator.navigate(this.requestUrl, this.page, this.browserStartOptions?.capabilities);
+        const response = await this.pageNavigator.navigate(
+            this.requestUrl,
+            this.page,
+            this.browserStartOptions?.capabilities,
+            this.disableAuthenticationOverride,
+        );
         if (this.browserError !== undefined) {
             return;
         }
@@ -355,7 +365,11 @@ export class Page {
     }
 
     private async authenticate(options?: PageOptions): Promise<void> {
-        if (this.pageAnalysisResult.authentication !== true || this.pageAnalysisResult.authenticationType === 'undetermined') {
+        if (
+            this.disableAuthenticationOverride === true ||
+            this.pageAnalysisResult.authentication !== true ||
+            this.pageAnalysisResult.authenticationType === 'undetermined'
+        ) {
             return;
         }
 
@@ -416,7 +430,11 @@ export class Page {
     }
 
     private async softReload(): Promise<void> {
-        const response = await this.pageNavigator.reload(this.page, this.browserStartOptions?.capabilities);
+        const response = await this.pageNavigator.reload(
+            this.page,
+            this.browserStartOptions?.capabilities,
+            this.disableAuthenticationOverride,
+        );
         this.setLastNavigationState('reload', response);
     }
 
