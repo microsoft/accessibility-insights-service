@@ -176,7 +176,7 @@ describe(PageAnalyzer, () => {
             .verifiable(Times.atLeastOnce());
         loginPageDetectorMock
             .setup((o) => o.getAuthenticationType(authUrl))
-            .returns(() => 'entraId')
+            .returns(() => Promise.resolve('entraId'))
             .verifiable(Times.atLeastOnce());
 
         const actualResult = await pageAnalyzer.analyze(url, puppeteerPageMock.object);

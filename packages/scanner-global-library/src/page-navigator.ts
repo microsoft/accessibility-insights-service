@@ -115,7 +115,7 @@ export class PageNavigator {
             return this.getOperationErrorResult(operationResult);
         }
 
-        const authType = this.loginPageDetector.getAuthenticationType(page.url());
+        const authType = await this.loginPageDetector.getAuthenticationType(page.url());
         if (authType !== undefined) {
             this.logger?.logError(
                 'Authentication is required for this page. Either enable authentication for the website or ensure it stays active between browser sessions.',
