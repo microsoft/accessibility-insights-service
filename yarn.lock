@@ -17125,6 +17125,8 @@ __metadata:
   resolution: "scanner-global-library@workspace:packages/scanner-global-library"
   dependencies:
     "@axe-core/puppeteer": "npm:4.10.1"
+    "@azure/core-auth": "npm:^1.10.1"
+    "@azure/identity": "npm:^4.13.0"
     "@types/jest": "npm:^29.5.12"
     "@types/lodash": "npm:^4.17.20"
     "@types/node": "npm:^20.14.9"

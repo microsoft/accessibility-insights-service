@@ -7,6 +7,7 @@ import { inject, injectable, optional } from 'inversify';
 import { GlobalLogger } from 'logger';
 import * as Puppeteer from 'puppeteer';
 import { isNumber, isEmpty } from 'lodash';
+import { AccessTokenProvider } from './authenticator/access-token-provider';
 import { WebDriver, WebDriverCapabilities } from './web-driver';
 import { PageNavigator, NavigationResponse } from './page-navigator';
 import { BrowserError } from './browser-error';
@@ -95,6 +96,7 @@ export class Page {
         @inject(PageRequestInterceptor) private readonly pageRequestInterceptor: PageRequestInterceptor,
         @inject(GlobalLogger) @optional() private readonly logger: GlobalLogger,
         private readonly scrollToPageTop: typeof scrollToTop = scrollToTop,
+        private readonly accessTokenProvider: AccessTokenProvider = new AccessTokenProvider(),
     ) {
         this.enableAuthenticationGlobalFlag = process.env.PAGE_AUTH === 'true' ? true : false;
         this.browserWSEndpoint = process.env.BROWSER_ENDPOINT;
@@ -371,6 +373,18 @@ export class Page {
             return;
         }
 
+        // Handle bearer token authentication
+        if (this.pageAnalysisResult.authenticationType === 'bearerToken') {
+            await this.setBearerTokenHeader();
+            this.authenticationResult = {
+                authenticated: true,
+                authenticationType: 'bearerToken',
+                navigationResponse: undefined,
+            };
+
+            return;
+        }
+
         // Invoke authentication client
         this.authenticationResult = await this.resourceAuthenticator.authenticate(
             this.requestUrl,
@@ -442,6 +456,25 @@ export class Page {
 
         if (!isEmpty(headers)) {
             this.logger?.logWarn('Added extra HTTP headers to the navigation requests.', { headers: headersObj });
+        }
+    }
+
+    private async setBearerTokenHeader(): Promise<void> {
+        try {
+            const accessToken = await this.accessTokenProvider.getWebsiteToken();
+            const bearerToken = `Bearer ${accessToken.token}`;
+            await this.page.setExtraHTTPHeaders({ Authorization: bearerToken });
+            await this.page.setExtraHTTPHeaders({ 'x-ms-version': '2025-11-05' });
+            this.logger?.logInfo('Bearer token authorization header added to page requests.', {
+                expiresOnTimestamp: accessToken.expiresOnTimestamp.toString(),
+            });
+        } catch (error) {
+            this.logger?.logError('Failed to set bearer token header.', { error: System.serializeError(error) });
+            this.browserError = {
+                errorType: 'AuthenticationError',
+                message: 'Failed to retrieve bearer token for authentication.',
+                stack: error instanceof Error ? error.stack : new Error().stack,
+            };
         }
     }
 

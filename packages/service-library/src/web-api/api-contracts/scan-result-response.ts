@@ -25,7 +25,7 @@ export declare type ScanResultResponse = ScanRunResultResponse | ScanRunErrorRes
 export declare type AuthenticationState = 'succeeded' | 'failed' | 'unauthenticated';
 
 // Construct to support type guard
-export const authenticationTypes = ['undetermined', 'entraId'] as const;
+export const authenticationTypes = ['undetermined', 'entraId', 'bearerToken'] as const;
 export declare type AuthenticationType = (typeof authenticationTypes)[number];
 
 // Construct to support type guard
