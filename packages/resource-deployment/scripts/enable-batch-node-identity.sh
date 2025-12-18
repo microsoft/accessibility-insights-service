@@ -74,6 +74,10 @@ function enableStorageAccess() {
 
     role="Storage Queue Data Contributor"
     . "${0%/*}/create-role-assignment.sh"
+
+    role="Storage Blob Data Reader"
+    scope="--scope /subscriptions/${subscription}/resourceGroups/${resourceGroupName}/providers/Microsoft.Storage/storageAccounts/${websiteStorageAccountName}"
+    . "${0%/*}/create-role-assignment.sh"
 }
 
 function enableKeyVaultAccess() {
