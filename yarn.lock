@@ -142,14 +142,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@axe-core/puppeteer@npm:4.10.1":
-  version: 4.10.1
-  resolution: "@axe-core/puppeteer@npm:4.10.1"
+"@axe-core/puppeteer@npm:4.11.0":
+  version: 4.11.0
+  resolution: "@axe-core/puppeteer@npm:4.11.0"
   dependencies:
-    axe-core: "npm:~4.10.2"
+    axe-core: "npm:~4.11.0"
   peerDependencies:
     puppeteer: ">=1.10.0"
-  checksum: 10/2f6fa1cb9f9f08ce68aae4f4bd9536414ae8e235f4f79d5ec81d6363433ca3d96eb2a498918304b6f6dd3ee76fe495474841f14d5d66b7be990bccd50fd4d059
+  checksum: 10/3d195d5bec48088200a7907f7b753110cfcafce7a881e42a281c8a5e9be46555bc33687b49071039af1a4a947b7bb5967cd1f40bd95e01e0e5e1609d590ea938
   languageName: node
   linkType: hard
 
@@ -6075,7 +6075,7 @@ __metadata:
   resolution: "accessibility-insights-crawler@workspace:packages/crawler"
   dependencies:
     "@apify/log": "npm:2.5.26"
-    "@axe-core/puppeteer": "npm:4.10.1"
+    "@axe-core/puppeteer": "npm:4.11.0"
     "@crawlee/browser-pool": "npm:^3.15.2"
     "@crawlee/puppeteer": "npm:^3.15.2"
     "@medv/finder": "npm:^4.0.2"
@@ -6089,8 +6089,8 @@ __metadata:
     "@types/node": "npm:^20.14.9"
     "@types/normalize-path": "npm:^3.0.2"
     "@types/puppeteer": "npm:^7.0.4"
-    accessibility-insights-report: "npm:7.0.0"
-    axe-core: "npm:4.10.2"
+    accessibility-insights-report: "npm:7.3.0"
+    axe-core: "npm:4.11.0"
     axe-core-scanner: "workspace:*"
     dotenv: "npm:^17.2.1"
     encoding-down: "npm:^7.1.0"
@@ -6117,9 +6117,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"accessibility-insights-report@npm:7.0.0":
-  version: 7.0.0
-  resolution: "accessibility-insights-report@npm:7.0.0"
+"accessibility-insights-report@npm:7.3.0":
+  version: 7.3.0
+  resolution: "accessibility-insights-report@npm:7.3.0"
   dependencies:
     "@fluentui/react": "npm:^8.118.1"
     axe-core: "npm:4.10.2"
@@ -6130,7 +6130,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     react-helmet-async: "npm:^2.0.5"
     uuid: "npm:^9.0.1"
-  checksum: 10/8e95ea53b352614d2ad015f407e82d1dbba76b9379547ca3ac32c17d07078b9f3d5ea0f24f313882f1db85df857259f24b0cb31649a4ea89e58cd5c4acd27775
+  checksum: 10/b59d166875467c2f8aa23687977bc4aab5dd8c9944aeb339546fe994ff52c838ddd0b8391b9a55e9803f6f5dd122b7283ab8426f04be7abba436aedc9dcf788f
   languageName: node
   linkType: hard
 
@@ -6139,7 +6139,7 @@ __metadata:
   resolution: "accessibility-insights-scan@workspace:packages/cli"
   dependencies:
     "@apify/log": "npm:2.5.26"
-    "@axe-core/puppeteer": "npm:4.10.1"
+    "@axe-core/puppeteer": "npm:4.11.0"
     "@crawlee/browser-pool": "npm:^3.15.2"
     "@crawlee/puppeteer": "npm:^3.15.2"
     "@medv/finder": "npm:^4.0.2"
@@ -6157,10 +6157,10 @@ __metadata:
     "@types/puppeteer": "npm:^7.0.4"
     "@types/table": "npm:^6.3.2"
     accessibility-insights-crawler: "workspace:*"
-    accessibility-insights-report: "npm:7.0.0"
+    accessibility-insights-report: "npm:7.3.0"
     ajv: "npm:^8.17.1"
     applicationinsights: "npm:^3.12.0"
-    axe-core: "npm:4.10.2"
+    axe-core: "npm:4.11.0"
     convict: "npm:^6.2.4"
     copy-webpack-plugin: "npm:^13.0.1"
     dotenv: "npm:^17.2.1"
@@ -6211,7 +6211,7 @@ __metadata:
     "@typescript-eslint/eslint-plugin": "npm:^7.15.0"
     "@typescript-eslint/eslint-plugin-tslint": "npm:^7.0.2"
     "@typescript-eslint/parser": "npm:^8.46.2"
-    accessibility-insights-report: "npm:7.0.0"
+    accessibility-insights-report: "npm:7.3.0"
     combine-dependabot-prs: "npm:^1.0.5"
     commander: "npm:^14.0.2"
     eslint: "npm:^8.57.0"
@@ -6814,12 +6814,12 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "axe-core-scanner@workspace:packages/axe-core-scanner"
   dependencies:
-    "@axe-core/puppeteer": "npm:4.10.1"
+    "@axe-core/puppeteer": "npm:4.11.0"
     "@types/jest": "npm:^29.5.12"
     "@types/lodash": "npm:^4.17.20"
     "@types/node": "npm:^20.14.9"
     "@types/puppeteer": "npm:^7.0.4"
-    axe-core: "npm:4.10.2"
+    axe-core: "npm:4.11.0"
     cpy-cli: "npm:^6.0.0"
     inversify: "npm:^6.0.1"
     jest: "npm:^29.7.0"
@@ -6835,10 +6835,10 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"axe-core@npm:4.10.2":
-  version: 4.10.2
-  resolution: "axe-core@npm:4.10.2"
-  checksum: 10/a69423b2ff16c15922c4ea7cf9cc5112728a2817bbe0f2cc212248d648885ffd1ba554e3a341dfc289cd9e67fc0d06f333b5c6837c5c38ca6652507381216fc1
+"axe-core@npm:4.11.0":
+  version: 4.11.0
+  resolution: "axe-core@npm:4.11.0"
+  checksum: 10/18254ee95bc328aec9a909b22e4b22e8ff14a21363fdbd1a5227267e66bf1d2fc1425c186e9001759aab5827cf4ee9dc30f7ea57e8200cbf7a1cd555ed21a908
   languageName: node
   linkType: hard
 
@@ -6850,8 +6850,8 @@ __metadata:
     "@types/jest": "npm:^29.5.12"
     "@types/lodash": "npm:^4.17.20"
     "@types/node": "npm:^20.14.9"
-    accessibility-insights-report: "npm:7.0.0"
-    axe-core: "npm:4.10.2"
+    accessibility-insights-report: "npm:7.3.0"
+    axe-core: "npm:4.11.0"
     common: "workspace:*"
     inversify: "npm:^6.0.1"
     jest: "npm:^29.7.0"
@@ -17103,13 +17103,13 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "scanner-global-library@workspace:packages/scanner-global-library"
   dependencies:
-    "@axe-core/puppeteer": "npm:4.10.1"
+    "@axe-core/puppeteer": "npm:4.11.0"
     "@types/jest": "npm:^29.5.12"
     "@types/lodash": "npm:^4.17.20"
     "@types/node": "npm:^20.14.9"
     "@types/pidusage": "npm:^2.0.5"
     "@types/puppeteer": "npm:^7.0.4"
-    axe-core: "npm:4.10.2"
+    axe-core: "npm:4.11.0"
     axe-core-scanner: "workspace:*"
     common: "workspace:*"
     cpy-cli: "npm:^6.0.0"
@@ -17256,9 +17256,9 @@ __metadata:
     "@types/puppeteer": "npm:^7.0.4"
     "@types/sha.js": "npm:^2.4.4"
     "@types/yargs": "npm:^17.0.33"
-    accessibility-insights-report: "npm:7.0.0"
+    accessibility-insights-report: "npm:7.3.0"
     async-mutex: "npm:^0.5.0"
-    axe-core: "npm:4.10.2"
+    axe-core: "npm:4.11.0"
     axe-result-converter: "workspace:*"
     azure-services: "workspace:*"
     common: "workspace:*"
@@ -19389,7 +19389,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "web-api-scan-runner@workspace:packages/web-api-scan-runner"
   dependencies:
-    "@axe-core/puppeteer": "npm:4.10.1"
+    "@axe-core/puppeteer": "npm:4.11.0"
     "@azure/cosmos": "npm:^4.0.0"
     "@playwright/test": "npm:^1.56.1"
     "@types/dotenv": "npm:^8.2.3"
@@ -19399,9 +19399,9 @@ __metadata:
     "@types/puppeteer": "npm:^7.0.4"
     "@types/sha.js": "npm:^2.4.4"
     "@types/yargs": "npm:^17.0.33"
-    accessibility-insights-report: "npm:7.0.0"
+    accessibility-insights-report: "npm:7.3.0"
     applicationinsights: "npm:^3.12.0"
-    axe-core: "npm:4.10.2"
+    axe-core: "npm:4.11.0"
     axe-result-converter: "workspace:*"
     axe-sarif-converter: "npm:^3.0.0"
     azure-services: "workspace:*"

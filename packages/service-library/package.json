@@ -47,7 +47,7 @@
         "@crawlee/puppeteer": "^3.15.2",
         "accessibility-insights-report": "7.0.0",
         "async-mutex": "^0.5.0",
-        "axe-core": "4.10.2",
+        "axe-core": "4.11.0",
         "axe-result-converter": "workspace:*",
         "azure-services": "workspace:*",
         "common": "workspace:*",
