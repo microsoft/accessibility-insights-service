@@ -6089,7 +6089,7 @@ __metadata:
     "@types/node": "npm:^20.14.9"
     "@types/normalize-path": "npm:^3.0.2"
     "@types/puppeteer": "npm:^7.0.4"
-    accessibility-insights-report: "npm:7.3.0"
+    accessibility-insights-report: "npm:7.0.0"
     axe-core: "npm:4.11.0"
     axe-core-scanner: "workspace:*"
     dotenv: "npm:^17.2.1"
@@ -6116,6 +6116,23 @@ __metadata:
     yargs: "npm:^17.7.2"
   languageName: unknown
   linkType: soft
+
+"accessibility-insights-report@npm:7.0.0":
+  version: 7.0.0
+  resolution: "accessibility-insights-report@npm:7.0.0"
+  dependencies:
+    "@fluentui/react": "npm:^8.118.1"
+    axe-core: "npm:4.10.2"
+    classnames: "npm:^2.5.1"
+    lodash: "npm:^4.17.21"
+    luxon: "npm:^3.5.0"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    react-helmet-async: "npm:^2.0.5"
+    uuid: "npm:^9.0.1"
+  checksum: 10/8e95ea53b352614d2ad015f407e82d1dbba76b9379547ca3ac32c17d07078b9f3d5ea0f24f313882f1db85df857259f24b0cb31649a4ea89e58cd5c4acd27775
+  languageName: node
+  linkType: hard
 
 "accessibility-insights-report@npm:7.3.0":
   version: 7.3.0
@@ -6157,7 +6174,7 @@ __metadata:
     "@types/puppeteer": "npm:^7.0.4"
     "@types/table": "npm:^6.3.2"
     accessibility-insights-crawler: "workspace:*"
-    accessibility-insights-report: "npm:7.3.0"
+    accessibility-insights-report: "npm:7.0.0"
     ajv: "npm:^8.17.1"
     applicationinsights: "npm:^3.12.0"
     axe-core: "npm:4.11.0"
@@ -6850,7 +6867,7 @@ __metadata:
     "@types/jest": "npm:^29.5.12"
     "@types/lodash": "npm:^4.17.20"
     "@types/node": "npm:^20.14.9"
-    accessibility-insights-report: "npm:7.3.0"
+    accessibility-insights-report: "npm:7.0.0"
     axe-core: "npm:4.11.0"
     common: "workspace:*"
     inversify: "npm:^6.0.1"
@@ -17256,7 +17273,7 @@ __metadata:
     "@types/puppeteer": "npm:^7.0.4"
     "@types/sha.js": "npm:^2.4.4"
     "@types/yargs": "npm:^17.0.33"
-    accessibility-insights-report: "npm:7.3.0"
+    accessibility-insights-report: "npm:7.0.0"
     async-mutex: "npm:^0.5.0"
     axe-core: "npm:4.11.0"
     axe-result-converter: "workspace:*"
@@ -19399,7 +19416,7 @@ __metadata:
     "@types/puppeteer": "npm:^7.0.4"
     "@types/sha.js": "npm:^2.4.4"
     "@types/yargs": "npm:^17.0.33"
-    accessibility-insights-report: "npm:7.3.0"
+    accessibility-insights-report: "npm:7.0.0"
     applicationinsights: "npm:^3.12.0"
     axe-core: "npm:4.11.0"
     axe-result-converter: "workspace:*"
