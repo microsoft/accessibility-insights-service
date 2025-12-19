@@ -48,17 +48,26 @@ export class PageNavigator {
         return this.pageNavigationHooks.pageConfigurator;
     }
 
-    public async navigate(url: string, page: Puppeteer.Page, capabilities?: WebDriverCapabilities): Promise<NavigationResponse> {
+    public async navigate(
+        url: string,
+        page: Puppeteer.Page,
+        capabilities?: WebDriverCapabilities,
+        disableAuthenticationOverride: boolean = false,
+    ): Promise<NavigationResponse> {
         await this.pageNavigationHooks.preNavigation(page);
         const pageOperation = this.createPageOperation('goto', page, url, capabilities);
 
-        return this.navigatePage(pageOperation, page);
+        return this.navigatePage(pageOperation, page, disableAuthenticationOverride);
     }
 
-    public async reload(page: Puppeteer.Page, capabilities?: WebDriverCapabilities): Promise<NavigationResponse> {
+    public async reload(
+        page: Puppeteer.Page,
+        capabilities?: WebDriverCapabilities,
+        disableAuthenticationOverride: boolean = false,
+    ): Promise<NavigationResponse> {
         const pageOperation = this.createPageOperation('reload', page, undefined, capabilities);
 
-        return this.navigatePage(pageOperation, page);
+        return this.navigatePage(pageOperation, page, disableAuthenticationOverride);
     }
 
     public async waitForNavigation(page: Puppeteer.Page, capabilities?: WebDriverCapabilities): Promise<NavigationResponse> {
@@ -75,8 +84,12 @@ export class PageNavigator {
         };
     }
 
-    private async navigatePage(pageOperation: PageOperation, page: Puppeteer.Page): Promise<NavigationResponse> {
-        const operationResult = await this.navigatePageImpl(pageOperation, page);
+    private async navigatePage(
+        pageOperation: PageOperation,
+        page: Puppeteer.Page,
+        disableAuthenticationOverride: boolean,
+    ): Promise<NavigationResponse> {
+        const operationResult = await this.navigatePageImpl(pageOperation, page, disableAuthenticationOverride);
 
         if (operationResult.browserError) {
             return {
@@ -104,7 +117,11 @@ export class PageNavigator {
         };
     }
 
-    private async navigatePageImpl(pageOperation: PageOperation, page: Puppeteer.Page): Promise<PageOperationResult> {
+    private async navigatePageImpl(
+        pageOperation: PageOperation,
+        page: Puppeteer.Page,
+        disableAuthenticationOverride: boolean,
+    ): Promise<PageOperationResult> {
         let operationResult = await this.pageOperationHandler.invoke(pageOperation, page);
         if (operationResult.error) {
             return this.getOperationErrorResult(operationResult);
@@ -116,7 +133,7 @@ export class PageNavigator {
         }
 
         const authType = await this.loginPageDetector.getAuthenticationType(page.url());
-        if (authType !== undefined) {
+        if (disableAuthenticationOverride !== true && authType !== undefined) {
             this.logger?.logError(
                 'Authentication is required for this page. Either enable authentication for the website or ensure it stays active between browser sessions.',
                 {
