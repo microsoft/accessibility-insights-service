@@ -94,7 +94,7 @@
         "socks": ">=2.7.4"
     },
     "dependencies": {
-        "accessibility-insights-report": "7.3.0"
+        "accessibility-insights-report": "7.0.0"
     },
     "packageManager": "yarn@4.11.0"
 }
