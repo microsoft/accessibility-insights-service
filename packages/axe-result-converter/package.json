@@ -36,7 +36,7 @@
     },
     "dependencies": {
         "accessibility-insights-report": "7.0.0",
-        "axe-core": "4.10.2",
+        "axe-core": "4.11.0",
         "common": "workspace:*",
         "inversify": "^6.0.1",
         "lodash": "^4.17.21",

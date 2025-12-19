@@ -1,9 +1,8 @@
 diff --git a/node_modules/@axe-core/puppeteer/.DS_Store b/node_modules/@axe-core/puppeteer/.DS_Store
 new file mode 100644
-index 0000000..cfb4781
-Binary files /dev/null and b/node_modules/@axe-core/puppeteer/.DS_Store differ
+index 0000000..e69de29
 diff --git a/node_modules/@axe-core/puppeteer/dist/index.js b/node_modules/@axe-core/puppeteer/dist/index.js
-index b8f1a66..0f9266d 100644
+index 84a4a52..089cb41 100644
 --- a/node_modules/@axe-core/puppeteer/dist/index.js
 +++ b/node_modules/@axe-core/puppeteer/dist/index.js
 @@ -252,6 +252,8 @@ async function getChildFrame(frame, childSelector) {
