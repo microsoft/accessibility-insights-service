@@ -6134,23 +6134,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"accessibility-insights-report@npm:7.3.0":
-  version: 7.3.0
-  resolution: "accessibility-insights-report@npm:7.3.0"
-  dependencies:
-    "@fluentui/react": "npm:^8.118.1"
-    axe-core: "npm:4.10.2"
-    classnames: "npm:^2.5.1"
-    lodash: "npm:^4.17.21"
-    luxon: "npm:^3.5.0"
-    react: "npm:^18.3.1"
-    react-dom: "npm:^18.3.1"
-    react-helmet-async: "npm:^2.0.5"
-    uuid: "npm:^9.0.1"
-  checksum: 10/b59d166875467c2f8aa23687977bc4aab5dd8c9944aeb339546fe994ff52c838ddd0b8391b9a55e9803f6f5dd122b7283ab8426f04be7abba436aedc9dcf788f
-  languageName: node
-  linkType: hard
-
 "accessibility-insights-scan@workspace:packages/cli":
   version: 0.0.0-use.local
   resolution: "accessibility-insights-scan@workspace:packages/cli"
@@ -6228,7 +6211,7 @@ __metadata:
     "@typescript-eslint/eslint-plugin": "npm:^7.15.0"
     "@typescript-eslint/eslint-plugin-tslint": "npm:^7.0.2"
     "@typescript-eslint/parser": "npm:^8.46.2"
-    accessibility-insights-report: "npm:7.3.0"
+    accessibility-insights-report: "npm:7.0.0"
     combine-dependabot-prs: "npm:^1.0.5"
     commander: "npm:^14.0.2"
     eslint: "npm:^8.57.0"
