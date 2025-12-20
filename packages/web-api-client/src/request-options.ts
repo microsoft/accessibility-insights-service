@@ -8,9 +8,12 @@ export type PostScanRequestOptions = {
     deepScan?: boolean;
     deepScanOptions?: DeepScanOptions;
     privacyScan?: boolean;
+    authenticationType?: AuthenticationType;
 };
 
 export type DeepScanOptions = {
     knownPages?: string[];
     discoveryPatterns?: string[];
 };
+
+export type AuthenticationType = 'undetermined' | 'entraId' | 'bearerToken';
