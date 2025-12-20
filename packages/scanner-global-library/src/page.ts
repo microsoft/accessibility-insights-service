@@ -73,6 +73,8 @@ export class Page {
     // This flag overrides the authentication flow and is used to bypass auth for specific scenarios.
     public disableAuthenticationOverride: boolean = false;
 
+    private extraHttpHeaders: Record<string, string> = {};
+
     public navigationResponse: Puppeteer.HTTPResponse;
 
     public pageAnalysisResult: PageAnalysisResult;
@@ -456,8 +458,6 @@ export class Page {
 
     private async setExtraHTTPHeaders(): Promise<void> {
         const nameSuffix = '_HTTP_HEADER';
-        const headers = [];
-        const headersObj = {} as any;
         const environmentVariables = Object.entries(process.env).map(([key, value]) => ({ name: key, value }));
         for (const variable of environmentVariables) {
             if (!variable.name.endsWith(nameSuffix)) {
@@ -466,14 +466,18 @@ export class Page {
 
             // eslint-disable-next-line security/detect-non-literal-regexp
             const name = variable.name.replace(new RegExp(nameSuffix, 'gi'), '').replace(/_/g, '-');
-            headers.push({ name, value: variable.value });
-            headersObj[name] = variable.value;
-
-            await this.page.setExtraHTTPHeaders({ [name]: `${variable.value}` });
+            this.extraHttpHeaders[name] = variable.value;
         }
 
-        if (!isEmpty(headers)) {
-            this.logger?.logWarn('Added extra HTTP headers to the navigation requests.', { headers: headersObj });
+        await this.applyExtraHTTPHeaders();
+    }
+
+    private async applyExtraHTTPHeaders(): Promise<void> {
+        if (!isEmpty(this.extraHttpHeaders)) {
+            await this.page.setExtraHTTPHeaders(this.extraHttpHeaders);
+            this.logger?.logWarn('Applied extra HTTP headers to the navigation requests.', {
+                headers: JSON.stringify(this.extraHttpHeaders),
+            });
         }
     }
 
@@ -481,8 +485,12 @@ export class Page {
         try {
             const accessToken = await this.accessTokenProvider.getWebsiteToken();
             const bearerToken = `Bearer ${accessToken.token}`;
-            await this.page.setExtraHTTPHeaders({ Authorization: bearerToken });
-            await this.page.setExtraHTTPHeaders({ 'x-ms-version': '2025-11-05' });
+
+            this.extraHttpHeaders.Authorization = bearerToken;
+            this.extraHttpHeaders['x-ms-version'] = '2025-11-05';
+
+            await this.applyExtraHTTPHeaders();
+
             this.logger?.logInfo('Bearer token authorization header added to page requests.', {
                 expiresOnTimestamp: accessToken.expiresOnTimestamp.toString(),
             });
