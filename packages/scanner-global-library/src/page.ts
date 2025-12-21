@@ -475,8 +475,13 @@ export class Page {
     private async applyExtraHTTPHeaders(): Promise<void> {
         if (!isEmpty(this.extraHttpHeaders)) {
             await this.page.setExtraHTTPHeaders(this.extraHttpHeaders);
+            // Filter out Authorization header value from logs to avoid exposing sensitive tokens
+            const headersForLog = { ...this.extraHttpHeaders };
+            if (headersForLog.Authorization) {
+                headersForLog.Authorization = '[REDACTED]';
+            }
             this.logger?.logWarn('Applied extra HTTP headers to the navigation requests.', {
-                headers: JSON.stringify(this.extraHttpHeaders),
+                headers: JSON.stringify(headersForLog),
             });
         }
     }
