@@ -42,7 +42,7 @@ updateConfigFiles() {
 . "${0%/*}/get-resource-names.sh"
 
 # Get website blob endpoint URL
-siteUrl="${websiteStorageAccountName}.blob.core.windows.net/\$web/index.html"
+siteUrl="https://${websiteStorageAccountName}.blob.core.windows.net/\$web/index.html"
 
 updateConfigFiles
 echo "Service configuration files updated."
