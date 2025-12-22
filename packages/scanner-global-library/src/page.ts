@@ -420,6 +420,9 @@ export class Page {
     private async navigateWithNetworkTrace(url: string): Promise<void> {
         await this.reopenBrowserImpl();
         await this.setExtraHTTPHeaders();
+        if (this.pageAnalysisResult.authenticationType === 'bearerToken') {
+            await this.setBearerTokenHeader();
+        }
         await this.pageNetworkTracer.trace(url, this.page);
     }
 
