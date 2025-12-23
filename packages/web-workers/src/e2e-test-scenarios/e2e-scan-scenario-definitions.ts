@@ -13,6 +13,7 @@ export const E2EScanFactories: E2EScanScenarioDefinitionFactory[] = [
         return {
             readableName: 'SingleScan',
             scanOptions: {
+                authenticationType: 'bearerToken',
                 scanNotificationUrl: `${webApiConfig.baseUrl}${availabilityConfig.scanNotifyApiEndpoint}`,
             },
             initialTestContextData: {
@@ -33,6 +34,7 @@ export const E2EScanFactories: E2EScanScenarioDefinitionFactory[] = [
         return {
             readableName: 'ConsolidatedScan',
             scanOptions: {
+                authenticationType: 'bearerToken',
                 scanNotificationUrl: `${webApiConfig.baseUrl}${availabilityConfig.scanNotifyFailApiEndpoint}`,
                 consolidatedId: `${availabilityConfig.consolidatedIdBase}-${webApiConfig.releaseId}-consolidated-${Date.now()}`,
                 deepScanOptions: {
@@ -55,6 +57,7 @@ export const E2EScanFactories: E2EScanScenarioDefinitionFactory[] = [
         return {
             readableName: 'DeepScan',
             scanOptions: {
+                authenticationType: 'bearerToken',
                 deepScan: true,
                 scanNotificationUrl: `${webApiConfig.baseUrl}${availabilityConfig.scanNotifyApiEndpoint}`,
                 consolidatedId: `${availabilityConfig.consolidatedIdBase}-${webApiConfig.releaseId}-deepScan-${Date.now()}`,
@@ -82,6 +85,7 @@ export const E2EScanFactories: E2EScanScenarioDefinitionFactory[] = [
         return {
             readableName: 'DeepScanKnownPages',
             scanOptions: {
+                authenticationType: 'bearerToken',
                 deepScan: true,
                 consolidatedId: `${availabilityConfig.consolidatedIdBase}-${webApiConfig.releaseId}-deepScanKnownPages-${Date.now()}`,
                 deepScanOptions: {
@@ -112,6 +116,7 @@ export const E2EScanFactories: E2EScanScenarioDefinitionFactory[] = [
         return {
             readableName: 'DeepScanDiscoveryPatterns',
             scanOptions: {
+                authenticationType: 'bearerToken',
                 deepScan: true,
                 consolidatedId: `${availabilityConfig.consolidatedIdBase}-${
                     webApiConfig.releaseId
@@ -135,6 +140,7 @@ export const E2EScanFactories: E2EScanScenarioDefinitionFactory[] = [
         return {
             readableName: 'PrivacyScan',
             scanOptions: {
+                authenticationType: 'bearerToken',
                 consolidatedId: `${availabilityConfig.consolidatedIdBase}-${webApiConfig.releaseId}-privacy-${Date.now()}`,
                 privacyScan: true,
             },
