@@ -17,7 +17,7 @@ export const E2EScanFactories: E2EScanScenarioDefinitionFactory[] = [
                 scanNotificationUrl: `${webApiConfig.baseUrl}${availabilityConfig.scanNotifyApiEndpoint}`,
             },
             initialTestContextData: {
-                scanUrl: availabilityConfig.urlToScan,
+                scanUrl: getE2EScanSiteUrl(availabilityConfig.urlToScan),
             },
             testGroups: {
                 postScanSubmissionTests: ['PostScan', 'ScanStatus'],
@@ -38,11 +38,11 @@ export const E2EScanFactories: E2EScanScenarioDefinitionFactory[] = [
                 scanNotificationUrl: `${webApiConfig.baseUrl}${availabilityConfig.scanNotifyFailApiEndpoint}`,
                 consolidatedId: `${availabilityConfig.consolidatedIdBase}-${webApiConfig.releaseId}-consolidated-${Date.now()}`,
                 deepScanOptions: {
-                    knownPages: [`${baseUrl}unlinked/`],
+                    knownPages: [getE2EScanSiteUrl(baseUrl, 'unlinked')],
                 },
             },
             initialTestContextData: {
-                scanUrl: availabilityConfig.urlToScan,
+                scanUrl: getE2EScanSiteUrl(availabilityConfig.urlToScan),
             },
             testGroups: {
                 scanReportTests: ['ConsolidatedScanReports'],
@@ -63,8 +63,13 @@ export const E2EScanFactories: E2EScanScenarioDefinitionFactory[] = [
                 consolidatedId: `${availabilityConfig.consolidatedIdBase}-${webApiConfig.releaseId}-deepScan-${Date.now()}`,
             },
             initialTestContextData: {
-                scanUrl: availabilityConfig.urlToScan,
-                expectedCrawledUrls: [baseUrl, `${baseUrl}linked1/`, `${baseUrl}linked2/`, `${baseUrl}linked1/inner-page.html`],
+                scanUrl: getE2EScanSiteUrl(availabilityConfig.urlToScan),
+                expectedCrawledUrls: [
+                    getE2EScanSiteUrl(baseUrl),
+                    getE2EScanSiteUrl(baseUrl, 'linked1'),
+                    getE2EScanSiteUrl(baseUrl, 'linked2'),
+                    getE2EScanSiteUrl(baseUrl, 'linked1/inner-page.html'),
+                ],
             },
             testGroups: {
                 postScanCompletionTests: ['DeepScanStatusConsistency'],
@@ -89,18 +94,18 @@ export const E2EScanFactories: E2EScanScenarioDefinitionFactory[] = [
                 deepScan: true,
                 consolidatedId: `${availabilityConfig.consolidatedIdBase}-${webApiConfig.releaseId}-deepScanKnownPages-${Date.now()}`,
                 deepScanOptions: {
-                    knownPages: [`${baseUrl}unlinked/`],
+                    knownPages: [getE2EScanSiteUrl(baseUrl, 'unlinked')],
                 },
             },
             initialTestContextData: {
-                scanUrl: availabilityConfig.urlToScan,
+                scanUrl: getE2EScanSiteUrl(availabilityConfig.urlToScan),
                 expectedCrawledUrls: [
-                    baseUrl,
-                    `${baseUrl}linked1/`,
-                    `${baseUrl}linked2/`,
-                    `${baseUrl}linked1/inner-page.html`,
-                    `${baseUrl}unlinked/`,
-                    `${baseUrl}unlinked/other.html`,
+                    getE2EScanSiteUrl(baseUrl),
+                    getE2EScanSiteUrl(baseUrl, 'linked1'),
+                    getE2EScanSiteUrl(baseUrl, 'linked2'),
+                    getE2EScanSiteUrl(baseUrl, 'linked1/inner-page.html'),
+                    getE2EScanSiteUrl(baseUrl, 'unlinked'),
+                    getE2EScanSiteUrl(baseUrl, 'unlinked/other.html'),
                 ],
             },
             testGroups: {
@@ -122,12 +127,16 @@ export const E2EScanFactories: E2EScanScenarioDefinitionFactory[] = [
                     webApiConfig.releaseId
                 }-deepScanDiscoveryPatterns-${Date.now()}`,
                 deepScanOptions: {
-                    discoveryPatterns: [`${baseUrl}linked1(.*)`],
+                    discoveryPatterns: [`${baseUrl}${baseUrl.endsWith('/') ? '' : '/'}linked1(.*)`],
                 },
             },
             initialTestContextData: {
-                scanUrl: availabilityConfig.urlToScan,
-                expectedCrawledUrls: [baseUrl, `${baseUrl}linked1/`, `${baseUrl}linked1/inner-page.html`],
+                scanUrl: getE2EScanSiteUrl(availabilityConfig.urlToScan),
+                expectedCrawledUrls: [
+                    getE2EScanSiteUrl(baseUrl),
+                    getE2EScanSiteUrl(baseUrl, 'linked1'),
+                    getE2EScanSiteUrl(baseUrl, 'linked1/inner-page.html'),
+                ],
             },
             testGroups: {
                 postScanCompletionTests: ['DeepScanStatusConsistency'],
@@ -145,7 +154,7 @@ export const E2EScanFactories: E2EScanScenarioDefinitionFactory[] = [
                 privacyScan: true,
             },
             initialTestContextData: {
-                scanUrl: availabilityConfig.urlToScan,
+                scanUrl: getE2EScanSiteUrl(availabilityConfig.urlToScan),
             },
             testGroups: {
                 scanReportTests: ['PrivacyScanReports'],
@@ -165,3 +174,19 @@ export type E2EScanScenarioDefinitionFactory = (
     availabilityConfig: AvailabilityTestConfig,
     webApiConfig: WebApiConfig,
 ) => E2EScanScenarioDefinition;
+
+function getE2EScanSiteUrl(url: string, path?: string): string {
+    // When accessing the blob endpoint, append index.html explicitly since blob endpoint
+    // does not support default document resolution like static website endpoint.
+    let fullUrl = url;
+    if (path) {
+        fullUrl = `${url}${url.endsWith('/') ? '' : '/'}${path}`;
+    }
+
+    // If URL already ends with .html, don't append index.html
+    if (fullUrl.endsWith('.html')) {
+        return fullUrl;
+    }
+
+    return `${fullUrl}${fullUrl.endsWith('/') ? '' : '/'}index.html`;
+}

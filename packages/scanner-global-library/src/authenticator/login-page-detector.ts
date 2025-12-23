@@ -43,6 +43,7 @@ export class LoginPageDetector {
             return undefined;
         }
 
+        // Check if the URL matches the E2E test site URL to use authentication.
         const availabilityTestConfig = await this.serviceConfig.getConfigValue('availabilityTestConfig');
         if (!isEmpty(availabilityTestConfig?.urlToScan)) {
             const configUrlObj = Url.tryParseUrlString(availabilityTestConfig.urlToScan);

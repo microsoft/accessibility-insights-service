@@ -31,7 +31,7 @@ describe('E2EScanScenarioDefinitions', () => {
                 scanNotificationUrl: 'base-url/scan-notify-fail-api-endpoint',
                 consolidatedId: `consolidated-id-base-test-release-version-consolidated-${fakeDate.getTime()}`,
                 deepScanOptions: {
-                    knownPages: [`url-to-scan/unlinked/`],
+                    knownPages: [`url-to-scan/unlinked/index.html`],
                 },
             },
             {
@@ -45,7 +45,7 @@ describe('E2EScanScenarioDefinitions', () => {
                 deepScan: true,
                 consolidatedId: `consolidated-id-base-test-release-version-deepScanKnownPages-${fakeDate.getTime()}`,
                 deepScanOptions: {
-                    knownPages: [`url-to-scan/unlinked/`],
+                    knownPages: [`url-to-scan/unlinked/index.html`],
                 },
             },
             {
