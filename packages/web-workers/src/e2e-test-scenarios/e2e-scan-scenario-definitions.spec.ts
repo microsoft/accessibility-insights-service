@@ -23,9 +23,11 @@ describe('E2EScanScenarioDefinitions', () => {
         const fakeDate = new Date('1/1/2000');
         const expectedRequestOptions = [
             {
+                authenticationType: 'bearerToken',
                 scanNotificationUrl: 'base-url/scan-notify-api-endpoint',
             },
             {
+                authenticationType: 'bearerToken',
                 scanNotificationUrl: 'base-url/scan-notify-fail-api-endpoint',
                 consolidatedId: `consolidated-id-base-test-release-version-consolidated-${fakeDate.getTime()}`,
                 deepScanOptions: {
@@ -33,11 +35,13 @@ describe('E2EScanScenarioDefinitions', () => {
                 },
             },
             {
+                authenticationType: 'bearerToken',
                 deepScan: true,
                 scanNotificationUrl: 'base-url/scan-notify-api-endpoint',
                 consolidatedId: `consolidated-id-base-test-release-version-deepScan-${fakeDate.getTime()}`,
             },
             {
+                authenticationType: 'bearerToken',
                 deepScan: true,
                 consolidatedId: `consolidated-id-base-test-release-version-deepScanKnownPages-${fakeDate.getTime()}`,
                 deepScanOptions: {
@@ -45,6 +49,7 @@ describe('E2EScanScenarioDefinitions', () => {
                 },
             },
             {
+                authenticationType: 'bearerToken',
                 deepScan: true,
                 consolidatedId: `consolidated-id-base-test-release-version-deepScanDiscoveryPatterns-${fakeDate.getTime()}`,
                 deepScanOptions: {
@@ -52,6 +57,7 @@ describe('E2EScanScenarioDefinitions', () => {
                 },
             },
             {
+                authenticationType: 'bearerToken',
                 consolidatedId: `consolidated-id-base-test-release-version-privacy-${fakeDate.getTime()}`,
                 privacyScan: true,
             },
