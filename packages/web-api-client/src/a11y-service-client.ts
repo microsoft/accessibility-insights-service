@@ -43,6 +43,7 @@ export class A11yServiceClient {
             scanNotifyUrl: options?.scanNotificationUrl,
             priority: options?.priority || 0,
             deepScan: options?.deepScan,
+            authenticationType: options?.authenticationType,
         };
 
         if (options?.consolidatedId) {

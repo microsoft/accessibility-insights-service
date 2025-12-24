@@ -209,6 +209,7 @@ describe(A11yServiceClient, () => {
                     priority: undefined,
                     scanNotifyUrl: undefined,
                     deepScan: undefined,
+                    authenticationType: undefined,
                     ...scanRunRequest,
                 },
             ];

@@ -117,7 +117,6 @@ describe(OrchestrationSteps, () => {
                 scanUrl: scanUrl,
                 scanOptions: {
                     priority: 1000,
-                    authenticationType: 'bearerToken',
                     scanNotificationUrl: notifyScanUrl,
                 },
             };

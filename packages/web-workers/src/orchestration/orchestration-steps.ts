@@ -93,7 +93,6 @@ export class OrchestrationSteps {
             scanUrl,
             scanOptions: {
                 priority: 1000,
-                authenticationType: 'bearerToken',
                 ...scanOptions,
             },
         };
