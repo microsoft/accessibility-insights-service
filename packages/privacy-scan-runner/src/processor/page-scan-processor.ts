@@ -48,7 +48,7 @@ export class PageScanProcessor {
                 this.page.disableAuthenticationOverride = true;
             }
 
-            await this.page.navigate(scanMetadata.url);
+            await this.page.navigate(scanMetadata.url, { enableAuthentication: !this.page.disableAuthenticationOverride });
             if (!isEmpty(this.page.browserError)) {
                 return { error: this.page.browserError, pageResponseCode: this.page.browserError.statusCode };
             }
