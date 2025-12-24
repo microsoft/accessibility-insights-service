@@ -12,6 +12,7 @@ export type PostScanRequestOptions = {
 };
 
 export type DeepScanOptions = {
+    baseUrl?: string;
     knownPages?: string[];
     discoveryPatterns?: string[];
 };

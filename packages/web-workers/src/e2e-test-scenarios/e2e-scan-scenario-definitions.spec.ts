@@ -9,7 +9,7 @@ import { E2EScanFactories } from './e2e-scan-scenario-definitions';
 
 describe('E2EScanScenarioDefinitions', () => {
     const availabilityConfig = {
-        urlToScan: 'url-to-scan/',
+        urlToScan: 'https://website.blob.core.windows.net/$web/',
         scanNotifyApiEndpoint: 'scan-notify-api-endpoint',
         scanNotifyFailApiEndpoint: 'scan-notify-fail-api-endpoint',
         consolidatedIdBase: 'consolidated-id-base',
@@ -31,7 +31,8 @@ describe('E2EScanScenarioDefinitions', () => {
                 scanNotificationUrl: 'base-url/scan-notify-fail-api-endpoint',
                 consolidatedId: `consolidated-id-base-test-release-version-consolidated-${fakeDate.getTime()}`,
                 deepScanOptions: {
-                    knownPages: [`url-to-scan/unlinked/index.html`],
+                    baseUrl: 'https://website.blob.core.windows.net/',
+                    knownPages: [`https://website.blob.core.windows.net/$web/unlinked/index.html`],
                 },
             },
             {
@@ -39,13 +40,17 @@ describe('E2EScanScenarioDefinitions', () => {
                 deepScan: true,
                 scanNotificationUrl: 'base-url/scan-notify-api-endpoint',
                 consolidatedId: `consolidated-id-base-test-release-version-deepScan-${fakeDate.getTime()}`,
+                deepScanOptions: {
+                    baseUrl: 'https://website.blob.core.windows.net/',
+                },
             },
             {
                 authenticationType: 'bearerToken',
                 deepScan: true,
                 consolidatedId: `consolidated-id-base-test-release-version-deepScanKnownPages-${fakeDate.getTime()}`,
                 deepScanOptions: {
-                    knownPages: [`url-to-scan/unlinked/index.html`],
+                    baseUrl: 'https://website.blob.core.windows.net/',
+                    knownPages: [`https://website.blob.core.windows.net/$web/unlinked/index.html`],
                 },
             },
             {
@@ -53,7 +58,8 @@ describe('E2EScanScenarioDefinitions', () => {
                 deepScan: true,
                 consolidatedId: `consolidated-id-base-test-release-version-deepScanDiscoveryPatterns-${fakeDate.getTime()}`,
                 deepScanOptions: {
-                    discoveryPatterns: [`url-to-scan/linked1(.*)`],
+                    baseUrl: 'https://website.blob.core.windows.net/',
+                    discoveryPatterns: [`https://website.blob.core.windows.net/$web/linked1(.*)`],
                 },
             },
             {
