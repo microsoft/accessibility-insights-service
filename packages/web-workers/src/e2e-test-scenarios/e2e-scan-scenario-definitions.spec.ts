@@ -59,7 +59,7 @@ describe('E2EScanScenarioDefinitions', () => {
                 consolidatedId: `consolidated-id-base-test-release-version-deepScanDiscoveryPatterns-${fakeDate.getTime()}`,
                 deepScanOptions: {
                     baseUrl: 'https://website.blob.core.windows.net/',
-                    discoveryPatterns: [`https://website.blob.core.windows.net/$web/linked1(.*)`],
+                    discoveryPatterns: [`https://website.blob.core.windows.net/(.*)/linked1(.*)`],
                 },
             },
             {

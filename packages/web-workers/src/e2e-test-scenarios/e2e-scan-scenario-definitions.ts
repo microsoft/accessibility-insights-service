@@ -133,7 +133,7 @@ export const E2EScanFactories: E2EScanScenarioDefinitionFactory[] = [
                 }-deepScanDiscoveryPatterns-${Date.now()}`,
                 deepScanOptions: {
                     baseUrl: getE2EScanSiteBaseUrl(urlToScan),
-                    discoveryPatterns: [`${urlToScan}${urlToScan.endsWith('/') ? '' : '/'}linked1(.*)`],
+                    discoveryPatterns: [`${getE2EScanSiteBaseUrl(urlToScan)}(.*)/linked1(.*)`],
                 },
             },
             initialTestContextData: {
