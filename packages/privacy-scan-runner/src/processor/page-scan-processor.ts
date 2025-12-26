@@ -36,17 +36,7 @@ export class PageScanProcessor {
             }
 
             // Check if the URL matches the E2E test site URL to use authentication.
-            const availabilityTestConfig = await this.serviceConfig.getConfigValue('availabilityTestConfig');
-            if (!isEmpty(availabilityTestConfig?.urlToScan)) {
-                const urlObj = Url.tryParseUrlString(scanMetadata.url);
-                const configUrlObj = Url.tryParseUrlString(availabilityTestConfig.urlToScan);
-                if (configUrlObj !== undefined && urlObj.protocol === configUrlObj.protocol && urlObj.host === configUrlObj.host) {
-                    this.page.disableAuthenticationOverride = false;
-                }
-            } else {
-                // Disable authentication to allow scanning of login pages.
-                this.page.disableAuthenticationOverride = true;
-            }
+            this.page.disableAuthenticationOverride = await this.shouldDisableAuthentication(scanMetadata.url);
 
             await this.page.navigate(scanMetadata.url, { enableAuthentication: !this.page.disableAuthenticationOverride });
             if (!isEmpty(this.page.browserError)) {
@@ -85,5 +75,25 @@ export class PageScanProcessor {
             unscannable: false,
             scannedUrl: pageMetadata.loadedUrl,
         };
+    }
+
+    /**
+     * Determines whether authentication should be disabled for the given URL.
+     * Authentication is enabled (returns false) when the URL matches the E2E test site URL.
+     * Authentication is disabled (returns true) otherwise, to allow scanning of login pages.
+     */
+    private async shouldDisableAuthentication(url: string): Promise<boolean> {
+        const availabilityTestConfig = await this.serviceConfig.getConfigValue('availabilityTestConfig');
+        if (!isEmpty(availabilityTestConfig?.urlToScan)) {
+            const urlObj = Url.tryParseUrlString(url);
+            const configUrlObj = Url.tryParseUrlString(availabilityTestConfig.urlToScan);
+            if (configUrlObj !== undefined && urlObj.protocol === configUrlObj.protocol && urlObj.host === configUrlObj.host) {
+                // Enable authentication override to allow scanning of E2E test site behind authentication.
+                return false;
+            }
+        }
+
+        // Disable authentication to allow scanning of login pages.
+        return true;
     }
 }
