@@ -65,7 +65,7 @@ export class UserAgentPlugin extends PuppeteerExtraPlugin {
     private async getUserAgentString(page: Puppeteer.Page): Promise<string> {
         const secretVault = await this.secretVaultProvider();
         let userAgent = await page.browser().userAgent();
-        userAgent = this.setUserAgentPlatform(userAgent, page);
+        userAgent = await this.setUserAgentPlatform(userAgent, page);
         // Remove headless chromium flag
         userAgent = userAgent.replace(/Headless/g, '');
         // Emulate Edge user agent
@@ -144,11 +144,11 @@ export class UserAgentPlugin extends PuppeteerExtraPlugin {
         return this.browserMajorVersion;
     }
 
-    private setUserAgentPlatform(userAgent: string, page: Puppeteer.Page): string {
+    private async setUserAgentPlatform(userAgent: string, page: Puppeteer.Page): Promise<string> {
         // Set to Linux platform to disable authentication fallback to currently logged in Windows user
         const platform = 'X11; Linux x86_64';
 
-        const authenticationType = this.loginPageDetector?.getAuthenticationType(page.url());
+        const authenticationType = await this.loginPageDetector?.getAuthenticationType(page.url());
         if (authenticationType === undefined) {
             return userAgent;
         }

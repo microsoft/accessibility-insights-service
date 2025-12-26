@@ -41,7 +41,7 @@ updateConfigFiles() {
 
 . "${0%/*}/get-resource-names.sh"
 
-siteUrl=$(az storage account show --name "${websiteStorageAccountName}" --resource-group "${resourceGroupName}" --query "primaryEndpoints.web" --output tsv)
+siteUrl="https://${websiteStorageAccountName}.blob.core.windows.net/\$web"
 
 updateConfigFiles
 echo "Service configuration files updated."

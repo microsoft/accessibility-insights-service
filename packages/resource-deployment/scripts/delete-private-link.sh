@@ -17,7 +17,7 @@ Usage: ${BASH_SOURCE} -r <resource group> -g <group id> [-n <private endpoint na
 
 Required parameters:
   -r  Resource group name
-  -g  Group ID / sub-resource (e.g., 'blob', 'vault', 'queue', 'table', 'file', 'sites', 'sql')
+  -g  Group ID / sub-resource (e.g., 'blob', 'vault', 'queue', 'table', 'file', 'sites', 'sql', 'website')
 
 Optional parameters:
   -n  Private endpoint name prefix (auto-detected based on group ID if not provided)
@@ -49,7 +49,7 @@ getDnsZoneName() {
 
     # Auto-detect DNS zone based on group ID
     case "${groupId}" in
-    blob)
+    blob | website)
         dnsZoneName="privatelink.blob.core.windows.net"
         ;;
     queue)
@@ -88,6 +88,9 @@ getPrivateEndpointNamePrefix() {
     case "${groupId}" in
     blob | queue | table | file)
         privateEndpointNamePrefix="storage-${groupId}"
+        ;;
+    website)
+        privateEndpointNamePrefix="storage-website"
         ;;
     vault)
         privateEndpointNamePrefix="keyvault"

@@ -70,7 +70,7 @@ describe(PageNavigator, () => {
         puppeteerTimeoutConfigMock.setup((o) => o.navigationTimeoutMsec).returns(() => navigationTimeoutMsec);
 
         // By default, no authentication is required
-        loginPageDetectorMock.setup((o) => o.getAuthenticationType(It.isAny())).returns(() => undefined);
+        loginPageDetectorMock.setup((o) => o.getAuthenticationType(It.isAny())).returns(() => Promise.resolve(undefined));
 
         pageNavigator = new PageNavigator(
             pageNavigationHooksMock.object,
@@ -231,7 +231,7 @@ describe(PageNavigator, () => {
             loginPageDetectorMock.reset();
             loginPageDetectorMock
                 .setup((o) => o.getAuthenticationType(url))
-                .returns(() => authenticationType)
+                .returns(() => Promise.resolve(authenticationType))
                 .verifiable();
 
             pageOperationHandlerMock

@@ -38,6 +38,8 @@
     },
     "dependencies": {
         "@axe-core/puppeteer": "4.10.1",
+        "@azure/core-auth": "^1.10.1",
+        "@azure/identity": "^4.13.0",
         "axe-core": "4.10.2",
         "axe-core-scanner": "workspace:*",
         "common": "workspace:*",

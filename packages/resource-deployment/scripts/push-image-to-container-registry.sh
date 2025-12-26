@@ -105,6 +105,8 @@ if [[ $keepImages != true ]]; then
     # Login to container registry
     az acr login --name "$containerRegistryName"
 
+    . "${0%/*}/set-e2e-test-site-url.sh"
+
     setImageBuildSource
     prepareImageBuildSource
     pushImagesToRegistry

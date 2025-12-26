@@ -7,6 +7,7 @@ import { Page, PrivacyScanResult } from 'scanner-global-library';
 import { OnDemandPageScanResult, WebsiteScanData } from 'storage-documents';
 import { isEmpty } from 'lodash';
 import { DeepScanner, PageMetadata, PageMetadataGenerator } from 'service-library';
+import { ServiceConfiguration, Url } from 'common';
 import { PrivacyScanMetadata } from '../types/privacy-scan-metadata';
 import { PrivacyScanner } from './privacy-scanner';
 
@@ -17,6 +18,7 @@ export class PageScanProcessor {
         @inject(PrivacyScanner) private readonly privacyScanner: PrivacyScanner,
         @inject(DeepScanner) private readonly deepScanner: DeepScanner,
         @inject(PageMetadataGenerator) private readonly pageMetadataGenerator: PageMetadataGenerator,
+        @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
         @inject(GlobalLogger) private readonly logger: GlobalLogger,
     ) {}
 
@@ -33,9 +35,10 @@ export class PageScanProcessor {
                 return state;
             }
 
-            // Disable authentication override to allow scanning of login pages.
-            this.page.disableAuthenticationOverride = true;
-            await this.page.navigate(scanMetadata.url);
+            // Check if the URL matches the E2E test site URL to use authentication.
+            this.page.disableAuthenticationOverride = await this.shouldDisableAuthentication(scanMetadata.url);
+
+            await this.page.navigate(scanMetadata.url, { enableAuthentication: !this.page.disableAuthenticationOverride });
             if (!isEmpty(this.page.browserError)) {
                 return { error: this.page.browserError, pageResponseCode: this.page.browserError.statusCode };
             }
@@ -72,5 +75,25 @@ export class PageScanProcessor {
             unscannable: false,
             scannedUrl: pageMetadata.loadedUrl,
         };
+    }
+
+    /**
+     * Determines whether authentication should be disabled for the given URL.
+     * Authentication is enabled (returns false) when the URL matches the E2E test site URL.
+     * Authentication is disabled (returns true) otherwise, to allow scanning of login pages.
+     */
+    private async shouldDisableAuthentication(url: string): Promise<boolean> {
+        const availabilityTestConfig = await this.serviceConfig.getConfigValue('availabilityTestConfig');
+        if (!isEmpty(availabilityTestConfig?.urlToScan)) {
+            const urlObj = Url.tryParseUrlString(url);
+            const configUrlObj = Url.tryParseUrlString(availabilityTestConfig.urlToScan);
+            if (configUrlObj !== undefined && urlObj.protocol === configUrlObj.protocol && urlObj.host === configUrlObj.host) {
+                // Enable authentication override to allow scanning of E2E test site behind authentication.
+                return false;
+            }
+        }
+
+        // Disable authentication to allow scanning of login pages.
+        return true;
     }
 }
