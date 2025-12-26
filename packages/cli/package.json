@@ -62,7 +62,7 @@
         "@opentelemetry/exporter-metrics-otlp-grpc": "^0.57.1",
         "@opentelemetry/resources": "^1.15.0",
         "@opentelemetry/sdk-metrics": "^1.28.0",
-        "@opentelemetry/semantic-conventions": "^1.37.0",
+        "@opentelemetry/semantic-conventions": "^1.38.0",
         "@sindresorhus/fnv1a": "^2.0.1",
         "accessibility-insights-report": "7.0.0",
         "ajv": "^8.17.1",
