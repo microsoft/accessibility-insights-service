@@ -9,7 +9,7 @@ import { E2EScanFactories } from './e2e-scan-scenario-definitions';
 
 describe('E2EScanScenarioDefinitions', () => {
     const availabilityConfig = {
-        urlToScan: 'url-to-scan/',
+        urlToScan: 'https://website.blob.core.windows.net/$web/',
         consolidatedIdBase: 'consolidated-id-base',
     } as AvailabilityTestConfig;
     const webConfig: WebApiConfig = {
@@ -21,27 +21,33 @@ describe('E2EScanScenarioDefinitions', () => {
         const fakeDate = new Date('1/1/2000');
         const expectedRequestOptions = [
             {
+                authenticationType: 'bearerToken',
                 privacyScan: true,
             },
             {
+                authenticationType: 'bearerToken',
                 privacyScan: true,
                 deepScan: true,
                 consolidatedId: `consolidated-id-base-test-release-version-deepScan-${fakeDate.getTime()}`,
             },
             {
+                authenticationType: 'bearerToken',
                 privacyScan: true,
                 deepScan: true,
                 consolidatedId: `consolidated-id-base-test-release-version-deepScanKnownPages-${fakeDate.getTime()}`,
                 deepScanOptions: {
-                    knownPages: [`url-to-scan/unlinked/`],
+                    baseUrl: 'https://website.blob.core.windows.net/',
+                    knownPages: [`https://website.blob.core.windows.net/$web/unlinked/index.html`],
                 },
             },
             {
+                authenticationType: 'bearerToken',
                 privacyScan: true,
                 deepScan: true,
                 consolidatedId: `consolidated-id-base-test-release-version-deepScanDiscoveryPatterns-${fakeDate.getTime()}`,
                 deepScanOptions: {
-                    discoveryPatterns: [`url-to-scan/linked1(.*)`],
+                    baseUrl: 'https://website.blob.core.windows.net/',
+                    discoveryPatterns: [`https://website.blob.core.windows.net/(.*)/linked1(.*)`],
                 },
             },
         ];

@@ -42,12 +42,16 @@ export class A11yServiceClient {
             url: scanUrl,
             priority: options?.priority || 0,
             deepScan: options?.deepScan,
+            authenticationType: options?.authenticationType,
         };
 
         if (options?.consolidatedId) {
             scanRequestData.reportGroups = [{ consolidatedId: options.consolidatedId }];
+        }
+
+        if (options?.deepScanOptions) {
             scanRequestData.site = {
-                baseUrl: scanUrl,
+                baseUrl: options.deepScanOptions.baseUrl,
                 ...options.deepScanOptions,
             };
         }

@@ -123,7 +123,6 @@ describe(A11yServiceClient, () => {
             };
             const requestBody = {
                 url: scanUrl,
-                site: { baseUrl: scanUrl },
                 reportGroups: [{ consolidatedId: reportId }],
                 priority,
             };
@@ -148,6 +147,7 @@ describe(A11yServiceClient, () => {
                 deepScan: true,
                 consolidatedId: reportId,
                 deepScanOptions: {
+                    baseUrl: scanUrl,
                     knownPages: [knownPage],
                 },
             };
@@ -205,6 +205,7 @@ describe(A11yServiceClient, () => {
                     url: undefined,
                     priority: undefined,
                     deepScan: undefined,
+                    authenticationType: undefined,
                     ...scanRunRequest,
                 },
             ];
