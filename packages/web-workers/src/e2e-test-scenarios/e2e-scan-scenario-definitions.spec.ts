@@ -29,6 +29,9 @@ describe('E2EScanScenarioDefinitions', () => {
                 privacyScan: true,
                 deepScan: true,
                 consolidatedId: `consolidated-id-base-test-release-version-deepScan-${fakeDate.getTime()}`,
+                deepScanOptions: {
+                    baseUrl: 'https://website.blob.core.windows.net/',
+                },
             },
             {
                 authenticationType: 'bearerToken',

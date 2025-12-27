@@ -3,7 +3,6 @@
 
 export type PostScanRequestOptions = {
     priority?: number;
-    scanNotificationUrl?: string;
     consolidatedId?: string;
     deepScan?: boolean;
     deepScanOptions?: DeepScanOptions;

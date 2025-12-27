@@ -37,6 +37,9 @@ export const E2EScanFactories: E2EScanScenarioDefinitionFactory[] = [
                 privacyScan: true,
                 deepScan: true,
                 consolidatedId: `${availabilityConfig.consolidatedIdBase}-${webApiConfig.releaseId}-deepScan-${Date.now()}`,
+                deepScanOptions: {
+                    baseUrl: getE2EScanSiteBaseUrl(urlToScan),
+                },
             },
             initialTestContextData: {
                 scanUrl: getE2EScanSiteUrl(urlToScan),
