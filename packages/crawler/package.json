@@ -46,7 +46,7 @@
         "@apify/log": "2.5.28",
         "@axe-core/puppeteer": "4.10.1",
         "@crawlee/browser-pool": "^3.15.2",
-        "@crawlee/puppeteer": "^3.15.2",
+        "@crawlee/puppeteer": "^3.15.3",
         "@medv/finder": "^4.0.2",
         "@sindresorhus/fnv1a": "^2.0.1",
         "accessibility-insights-report": "7.0.0",
