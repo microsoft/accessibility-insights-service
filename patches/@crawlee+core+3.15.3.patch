@@ -1,5 +1,5 @@
 diff --git a/node_modules/@crawlee/core/session_pool/session.d.ts b/node_modules/@crawlee/core/session_pool/session.d.ts
-index da49c3c8..5343906c 100644
+index da49c3c..5343906 100644
 --- a/node_modules/@crawlee/core/session_pool/session.d.ts
 +++ b/node_modules/@crawlee/core/session_pool/session.d.ts
 @@ -1,5 +1,5 @@
