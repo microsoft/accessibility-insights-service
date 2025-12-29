@@ -3473,12 +3473,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@opentelemetry/api-logs@npm:0.207.0":
-  version: 0.207.0
-  resolution: "@opentelemetry/api-logs@npm:0.207.0"
+"@opentelemetry/api-logs@npm:0.208.0":
+  version: 0.208.0
+  resolution: "@opentelemetry/api-logs@npm:0.208.0"
   dependencies:
     "@opentelemetry/api": "npm:^1.3.0"
-  checksum: 10/d50251e34f1cb8208d02870d3c25a0ba31eb2e33844a1ed5c0107d920bfbb52dbc3a1c5072586501a5096778f90e9ef1ce2fef63fa6ab5908bc1f94099121264
+  checksum: 10/ae339416a244e90b1718af1ed5430348188be60871f3799c847bab409bba1513337cac7da40b4883bf7f280680754319b44a9dc95fa2879d15c0413c9955b145
   languageName: node
   linkType: hard
 
@@ -3920,16 +3920,29 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@opentelemetry/instrumentation@npm:^0.207.0":
-  version: 0.207.0
-  resolution: "@opentelemetry/instrumentation@npm:0.207.0"
+"@opentelemetry/instrumentation@npm:^0.202.0":
+  version: 0.202.0
+  resolution: "@opentelemetry/instrumentation@npm:0.202.0"
   dependencies:
-    "@opentelemetry/api-logs": "npm:0.207.0"
+    "@opentelemetry/api-logs": "npm:0.202.0"
+    import-in-the-middle: "npm:^1.8.1"
+    require-in-the-middle: "npm:^7.1.1"
+  peerDependencies:
+    "@opentelemetry/api": ^1.3.0
+  checksum: 10/da1db1ebc4ca847cc68d894b2e3a6c6552851d93af8ea793d42474e920f710664575c8991dc269e1a83fcf8f5abdda2cc724fa24e9cc4ae19fa6f70eb68ffc0e
+  languageName: node
+  linkType: hard
+
+"@opentelemetry/instrumentation@npm:^0.208.0":
+  version: 0.208.0
+  resolution: "@opentelemetry/instrumentation@npm:0.208.0"
+  dependencies:
+    "@opentelemetry/api-logs": "npm:0.208.0"
     import-in-the-middle: "npm:^2.0.0"
     require-in-the-middle: "npm:^8.0.0"
   peerDependencies:
     "@opentelemetry/api": ^1.3.0
-  checksum: 10/ea9b9a7324016116ba5ded98ebf7e8db722625a7408532be707db2ad9f5a760e7f17809097c5fc61b95f135281349534045e0242eaa9fc57c4b508d2ddf4c181
+  checksum: 10/0591121c1bab29b8246ba879b1ed91f2db17680cfce56a635bf2e81390a9140f029b094ff4498ff154132379192bf424d7d234d2114883735603e4a6581a4a79
   languageName: node
   linkType: hard
 
@@ -13879,7 +13892,7 @@ __metadata:
     "@apify/log": "npm:2.5.26"
     "@opentelemetry/api": "npm:^1.4.1"
     "@opentelemetry/exporter-metrics-otlp-grpc": "npm:^0.57.1"
-    "@opentelemetry/instrumentation": "npm:^0.207.0"
+    "@opentelemetry/instrumentation": "npm:^0.208.0"
     "@opentelemetry/resources": "npm:^1.15.0"
     "@opentelemetry/sdk-metrics": "npm:^1.28.0"
     "@opentelemetry/semantic-conventions": "npm:^1.37.0"
