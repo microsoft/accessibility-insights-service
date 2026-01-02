@@ -70,7 +70,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@apify/consts@npm:^2.47.0, @apify/consts@npm:^2.48.0":
+"@apify/consts@npm:^2.48.0":
   version: 2.48.0
   resolution: "@apify/consts@npm:2.48.0"
   checksum: 10/0a7ce00103709555cdf7966254e864db59604111db66fdf776874922d944ae1e361353646095a4b6517a9d5e1f613c31d2b5687149f715ca884f4d10c8d0960c
@@ -81,16 +81,6 @@ __metadata:
   version: 2.0.0
   resolution: "@apify/datastructures@npm:2.0.0"
   checksum: 10/0957a6d7a185bef45cfcefcf5e61024719794fb062592fe9c9d526f335cfc1074bcc0be1ffff7ea8b0713e7a903a88396c6e25ba1422f665692f941f840d7023
-  languageName: node
-  linkType: hard
-
-"@apify/log@npm:2.5.26":
-  version: 2.5.26
-  resolution: "@apify/log@npm:2.5.26"
-  dependencies:
-    "@apify/consts": "npm:^2.47.0"
-    ansi-colors: "npm:^4.1.1"
-  checksum: 10/714fc87bfd634b26a20a95113138397e7b98ab7e3517cdc891889008c74711fef56cc83b09a26ba550922871f8df26f4ede2e7cc72403484e6dec8a3cac60211
   languageName: node
   linkType: hard
 
@@ -2124,7 +2114,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@crawlee/browser-pool@npm:3.15.3, @crawlee/browser-pool@npm:^3.15.2, @crawlee/browser-pool@npm:^3.15.3":
+"@crawlee/browser-pool@npm:3.15.3, @crawlee/browser-pool@npm:^3.15.3":
   version: 3.15.3
   resolution: "@crawlee/browser-pool@npm:3.15.3"
   dependencies:
@@ -2226,7 +2216,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@crawlee/puppeteer@npm:^3.15.2, @crawlee/puppeteer@npm:^3.15.3":
+"@crawlee/puppeteer@npm:^3.15.3":
   version: 3.15.3
   resolution: "@crawlee/puppeteer@npm:3.15.3"
   dependencies:
@@ -6206,10 +6196,10 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "accessibility-insights-scan@workspace:packages/cli"
   dependencies:
-    "@apify/log": "npm:2.5.26"
+    "@apify/log": "npm:2.5.28"
     "@axe-core/puppeteer": "npm:4.10.1"
-    "@crawlee/browser-pool": "npm:^3.15.2"
-    "@crawlee/puppeteer": "npm:^3.15.2"
+    "@crawlee/browser-pool": "npm:^3.15.3"
+    "@crawlee/puppeteer": "npm:^3.15.3"
     "@medv/finder": "npm:^4.0.2"
     "@opentelemetry/api": "npm:^1.4.1"
     "@opentelemetry/exporter-metrics-otlp-grpc": "npm:^0.57.1"
