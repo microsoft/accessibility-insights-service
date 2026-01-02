@@ -602,7 +602,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@azure/functions@npm:^4.10.0, @azure/functions@npm:^4.8.0":
+"@azure/functions@npm:^4.10.0":
   version: 4.10.0
   resolution: "@azure/functions@npm:4.10.0"
   dependencies:
@@ -5303,7 +5303,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/lodash@npm:^4.17.20, @types/lodash@npm:^4.17.21":
+"@types/lodash@npm:^4.17.21":
   version: 4.17.21
   resolution: "@types/lodash@npm:4.17.21"
   checksum: 10/34920830a3bc82ba619cda05e606fef00c148a69b4f19f770645d2587ccdb8e42ef3ddfc174b7884c0c709fc0a1aeb48f7326da969bad12a1464a03efbbe414c
@@ -6205,11 +6205,11 @@ __metadata:
     "@opentelemetry/exporter-metrics-otlp-grpc": "npm:^0.57.1"
     "@opentelemetry/resources": "npm:^1.15.0"
     "@opentelemetry/sdk-metrics": "npm:^1.28.0"
-    "@opentelemetry/semantic-conventions": "npm:^1.37.0"
+    "@opentelemetry/semantic-conventions": "npm:^1.38.0"
     "@sindresorhus/fnv1a": "npm:^2.0.1"
     "@types/escape-html": "npm:^1.0.4"
     "@types/jest": "npm:^29.5.12"
-    "@types/lodash": "npm:^4.17.20"
+    "@types/lodash": "npm:^4.17.21"
     "@types/node": "npm:^20.14.9"
     "@types/normalize-path": "npm:^3.0.2"
     "@types/puppeteer": "npm:^7.0.4"
@@ -6217,7 +6217,7 @@ __metadata:
     accessibility-insights-crawler: "workspace:*"
     accessibility-insights-report: "npm:7.0.0"
     ajv: "npm:^8.17.1"
-    applicationinsights: "npm:^3.12.0"
+    applicationinsights: "npm:^3.12.1"
     axe-core: "npm:4.10.2"
     convict: "npm:^6.2.4"
     copy-webpack-plugin: "npm:^13.0.1"
@@ -6243,12 +6243,12 @@ __metadata:
     normalize-url: "npm:6.1.0"
     npm-run-all: "npm:^4.1.5"
     puppeteer: "npm:^24.34.0"
-    raw-body: "npm:^2.5.1"
+    raw-body: "npm:^3.0.2"
     reflect-metadata: "npm:^0.2.2"
-    rimraf: "npm:^6.0.1"
+    rimraf: "npm:^6.1.2"
     serialize-error: "npm:^8.1.0"
     sha.js: "npm:^2.4.12"
-    ts-jest: "npm:^29.4.5"
+    ts-jest: "npm:^29.4.6"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
     uuid-with-v6: "npm:^2.0.0"
@@ -6282,18 +6282,18 @@ __metadata:
     eslint-plugin-security: "npm:^3.0.1"
     eslint-plugin-sort-class-members: "npm:^1.21.0"
     jest: "npm:^29.7.0"
-    jest-extended: "npm:^6.0.0"
+    jest-extended: "npm:^7.0.0"
     jest-html-reporter: "npm:^4.3.0"
     jest-junit: "npm:^16.0.0"
     license-check-and-add: "npm:^4.0.5"
     npm-run-all: "npm:^4.1.5"
     patch-package: "npm:^8.0.1"
     prettier: "npm:2.8.3"
-    rimraf: "npm:^6.0.1"
+    rimraf: "npm:^6.1.2"
     shellcheck: "npm:^4.1.0"
     simple-git: "npm:^3.29.0"
     syncpack: "npm:^8.4.11"
-    ts-jest: "npm:^29.4.5"
+    ts-jest: "npm:^29.4.6"
     tslint: "npm:^6.1.3"
     typescript: "npm:^5.5.3"
   languageName: unknown
@@ -6587,7 +6587,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"applicationinsights@npm:^3.12.0, applicationinsights@npm:^3.12.1":
+"applicationinsights@npm:^3.12.1":
   version: 3.12.1
   resolution: "applicationinsights@npm:3.12.1"
   dependencies:
@@ -6982,7 +6982,7 @@ __metadata:
     "@azure/storage-queue": "npm:12.16.0"
     "@types/got": "npm:^9.6.11"
     "@types/jest": "npm:^29.5.12"
-    "@types/lodash": "npm:^4.17.20"
+    "@types/lodash": "npm:^4.17.21"
     async-mutex: "npm:^0.5.0"
     common: "workspace:*"
     dotenv: "npm:^17.2.1"
@@ -7000,9 +7000,9 @@ __metadata:
     p-limit: "npm:^3.1.0"
     pretty-format: "npm:^30.2.0"
     reflect-metadata: "npm:^0.2.2"
-    rimraf: "npm:^6.0.1"
+    rimraf: "npm:^6.1.2"
     storage-documents: "workspace:*"
-    ts-jest: "npm:^29.4.5"
+    ts-jest: "npm:^29.4.6"
     ts-loader: "npm:^9.5.4"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
@@ -9076,10 +9076,10 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "e2e-web-apis@workspace:packages/e2e-web-apis"
   dependencies:
-    "@azure/functions": "npm:^4.8.0"
+    "@azure/functions": "npm:^4.10.0"
     "@types/dotenv": "npm:^8.2.3"
     "@types/jest": "npm:^29.5.12"
-    "@types/lodash": "npm:^4.17.20"
+    "@types/lodash": "npm:^4.17.21"
     "@types/node": "npm:^20.14.9"
     copy-webpack-plugin: "npm:^13.0.1"
     fork-ts-checker-webpack-plugin: "npm:^9.0.2"
@@ -9087,8 +9087,8 @@ __metadata:
     jest-junit: "npm:^16.0.0"
     node-loader: "npm:^2.1.0"
     npm-run-all: "npm:^4.1.5"
-    rimraf: "npm:^6.0.1"
-    ts-jest: "npm:^29.4.5"
+    rimraf: "npm:^6.1.2"
+    ts-jest: "npm:^29.4.6"
     ts-loader: "npm:^9.5.4"
     typescript: "npm:^5.5.3"
     webpack: "npm:^5.104.1"
@@ -11406,7 +11406,7 @@ __metadata:
     "@types/chai": "npm:^4.3.4"
     "@types/dotenv": "npm:^8.2.3"
     "@types/jest": "npm:^29.5.12"
-    "@types/lodash": "npm:^4.17.20"
+    "@types/lodash": "npm:^4.17.21"
     "@types/node": "npm:^20.14.9"
     chai: "npm:^4.3.7"
     common: "workspace:*"
@@ -11420,10 +11420,10 @@ __metadata:
     logger: "workspace:*"
     npm-run-all: "npm:^4.1.5"
     reflect-metadata: "npm:^0.2.2"
-    rimraf: "npm:^6.0.1"
+    rimraf: "npm:^6.1.2"
     service-library: "workspace:*"
     shebang-loader: "npm:^0.0.1"
-    ts-jest: "npm:^29.4.5"
+    ts-jest: "npm:^29.4.6"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
     web-api-client: "workspace:*"
@@ -11637,7 +11637,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"iconv-lite@npm:^0.4.24, iconv-lite@npm:~0.4.24":
+"iconv-lite@npm:^0.4.24":
   version: 0.4.24
   resolution: "iconv-lite@npm:0.4.24"
   dependencies:
@@ -12743,18 +12743,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jest-diff@npm:^29.0.0, jest-diff@npm:^29.7.0":
-  version: 29.7.0
-  resolution: "jest-diff@npm:29.7.0"
-  dependencies:
-    chalk: "npm:^4.0.0"
-    diff-sequences: "npm:^29.6.3"
-    jest-get-type: "npm:^29.6.3"
-    pretty-format: "npm:^29.7.0"
-  checksum: 10/6f3a7eb9cd9de5ea9e5aa94aed535631fa6f80221832952839b3cb59dd419b91c20b73887deb0b62230d06d02d6b6cf34ebb810b88d904bb4fe1e2e4f0905c98
-  languageName: node
-  linkType: hard
-
 "jest-diff@npm:^29.5.0":
   version: 29.5.0
   resolution: "jest-diff@npm:29.5.0"
@@ -12764,6 +12752,18 @@ __metadata:
     jest-get-type: "npm:^29.4.3"
     pretty-format: "npm:^29.5.0"
   checksum: 10/c81f8da61d3af9d6b854c1099f1d54f71288d828a8730ff46298e63dc0afd4c89be61c6dfd2959a0bd8176bca14ce1198e34156866f34d5638ddc0f92726c995
+  languageName: node
+  linkType: hard
+
+"jest-diff@npm:^29.7.0":
+  version: 29.7.0
+  resolution: "jest-diff@npm:29.7.0"
+  dependencies:
+    chalk: "npm:^4.0.0"
+    diff-sequences: "npm:^29.6.3"
+    jest-get-type: "npm:^29.6.3"
+    pretty-format: "npm:^29.7.0"
+  checksum: 10/6f3a7eb9cd9de5ea9e5aa94aed535631fa6f80221832952839b3cb59dd419b91c20b73887deb0b62230d06d02d6b6cf34ebb810b88d904bb4fe1e2e4f0905c98
   languageName: node
   linkType: hard
 
@@ -12812,23 +12812,6 @@ __metadata:
     jest-mock: "npm:^29.7.0"
     jest-util: "npm:^29.7.0"
   checksum: 10/9cf7045adf2307cc93aed2f8488942e39388bff47ec1df149a997c6f714bfc66b2056768973770d3f8b1bf47396c19aa564877eb10ec978b952c6018ed1bd637
-  languageName: node
-  linkType: hard
-
-"jest-extended@npm:^6.0.0":
-  version: 6.0.0
-  resolution: "jest-extended@npm:6.0.0"
-  dependencies:
-    jest-diff: "npm:^29.0.0"
-  peerDependencies:
-    jest: ">=27.2.5"
-    typescript: ">=5.0.0"
-  peerDependenciesMeta:
-    jest:
-      optional: true
-    typescript:
-      optional: false
-  checksum: 10/9b23c9a42c46dd364dc9edcd8a6314b0ce6ec518d5453059b8b33fd5d559eadbbba1cb7c30cf7d642e50b41a433f107e55a278ea7cf8ba9c5f15663728ce79ae
   languageName: node
   linkType: hard
 
@@ -15794,9 +15777,9 @@ __metadata:
     "@azure/ms-rest-nodeauth": "npm:^3.1.1"
     "@types/dotenv": "npm:^8.2.3"
     "@types/jest": "npm:^29.5.12"
-    "@types/lodash": "npm:^4.17.20"
+    "@types/lodash": "npm:^4.17.21"
     "@types/node": "npm:^20.14.9"
-    applicationinsights: "npm:^3.12.0"
+    applicationinsights: "npm:^3.12.1"
     azure-services: "workspace:*"
     common: "workspace:*"
     copy-webpack-plugin: "npm:^13.0.1"
@@ -15812,10 +15795,10 @@ __metadata:
     node-loader: "npm:^2.1.0"
     npm-run-all: "npm:^4.1.5"
     reflect-metadata: "npm:^0.2.2"
-    rimraf: "npm:^6.0.1"
+    rimraf: "npm:^6.1.2"
     service-library: "workspace:*"
     storage-documents: "workspace:*"
-    ts-jest: "npm:^29.4.5"
+    ts-jest: "npm:^29.4.6"
     ts-loader: "npm:^9.5.4"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
@@ -15833,11 +15816,11 @@ __metadata:
     "@azure/cosmos": "npm:^4.0.0"
     "@types/dotenv": "npm:^8.2.3"
     "@types/jest": "npm:^29.5.12"
-    "@types/lodash": "npm:^4.17.20"
+    "@types/lodash": "npm:^4.17.21"
     "@types/node": "npm:^20.14.9"
     "@types/puppeteer": "npm:^7.0.4"
     "@types/yargs": "npm:^17.0.33"
-    applicationinsights: "npm:^3.12.0"
+    applicationinsights: "npm:^3.12.1"
     azure-services: "workspace:*"
     common: "workspace:*"
     copy-webpack-plugin: "npm:^13.0.1"
@@ -15860,11 +15843,11 @@ __metadata:
     puppeteer-extra-plugin: "npm:^3.2.3"
     puppeteer-extra-plugin-stealth: "npm:^2.11.2"
     reflect-metadata: "npm:^0.2.2"
-    rimraf: "npm:^6.0.1"
+    rimraf: "npm:^6.1.2"
     scanner-global-library: "workspace:*"
     service-library: "workspace:*"
     storage-documents: "workspace:*"
-    ts-jest: "npm:^29.4.5"
+    ts-jest: "npm:^29.4.6"
     ts-loader: "npm:^9.5.4"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
@@ -16280,18 +16263,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"raw-body@npm:^2.5.1":
-  version: 2.5.3
-  resolution: "raw-body@npm:2.5.3"
-  dependencies:
-    bytes: "npm:~3.1.2"
-    http-errors: "npm:~2.0.1"
-    iconv-lite: "npm:~0.4.24"
-    unpipe: "npm:~1.0.0"
-  checksum: 10/f35759fe5a6548e7c529121ead1de4dd163f899749a5896c42e278479df2d9d7f98b5bb17312737c03617765e5a1433e586f717616e5cfbebc13b4738b820601
-  languageName: node
-  linkType: hard
-
 "raw-body@npm:^3.0.2":
   version: 3.0.2
   resolution: "raw-body@npm:3.0.2"
@@ -16547,9 +16518,9 @@ __metadata:
     "@azure/ms-rest-nodeauth": "npm:^3.1.1"
     "@types/dotenv": "npm:^8.2.3"
     "@types/jest": "npm:^29.5.12"
-    "@types/lodash": "npm:^4.17.20"
+    "@types/lodash": "npm:^4.17.21"
     "@types/node": "npm:^20.14.9"
-    applicationinsights: "npm:^3.12.0"
+    applicationinsights: "npm:^3.12.1"
     azure-services: "workspace:*"
     common: "workspace:*"
     copy-webpack-plugin: "npm:^13.0.1"
@@ -16565,10 +16536,10 @@ __metadata:
     node-loader: "npm:^2.1.0"
     npm-run-all: "npm:^4.1.5"
     reflect-metadata: "npm:^0.2.2"
-    rimraf: "npm:^6.0.1"
+    rimraf: "npm:^6.1.2"
     service-library: "workspace:*"
     storage-documents: "workspace:*"
-    ts-jest: "npm:^29.4.5"
+    ts-jest: "npm:^29.4.6"
     ts-loader: "npm:^9.5.4"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
@@ -16586,11 +16557,11 @@ __metadata:
     "@azure/cosmos": "npm:^4.0.0"
     "@types/dotenv": "npm:^8.2.3"
     "@types/jest": "npm:^29.5.12"
-    "@types/lodash": "npm:^4.17.20"
+    "@types/lodash": "npm:^4.17.21"
     "@types/node": "npm:^20.14.9"
     "@types/puppeteer": "npm:^7.0.4"
     "@types/yargs": "npm:^17.0.33"
-    applicationinsights: "npm:^3.12.0"
+    applicationinsights: "npm:^3.12.1"
     azure-services: "workspace:*"
     common: "workspace:*"
     copy-webpack-plugin: "npm:^13.0.1"
@@ -16612,11 +16583,11 @@ __metadata:
     puppeteer-extra-plugin: "npm:^3.2.3"
     puppeteer-extra-plugin-stealth: "npm:^2.11.2"
     reflect-metadata: "npm:^0.2.2"
-    rimraf: "npm:^6.0.1"
+    rimraf: "npm:^6.1.2"
     scanner-global-library: "workspace:*"
     service-library: "workspace:*"
     storage-documents: "workspace:*"
-    ts-jest: "npm:^29.4.5"
+    ts-jest: "npm:^29.4.6"
     ts-loader: "npm:^9.5.4"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
@@ -16926,7 +16897,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rimraf@npm:^6.0.1, rimraf@npm:^6.1.2":
+"rimraf@npm:^6.1.2":
   version: 6.1.2
   resolution: "rimraf@npm:6.1.2"
   dependencies:
@@ -18646,7 +18617,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ts-jest@npm:^29.4.5, ts-jest@npm:^29.4.6":
+"ts-jest@npm:^29.4.6":
   version: 29.4.6
   resolution: "ts-jest@npm:29.4.6"
   dependencies:
@@ -19410,9 +19381,9 @@ __metadata:
     "@azure/ms-rest-nodeauth": "npm:^3.1.1"
     "@types/dotenv": "npm:^8.2.3"
     "@types/jest": "npm:^29.5.12"
-    "@types/lodash": "npm:^4.17.20"
+    "@types/lodash": "npm:^4.17.21"
     "@types/node": "npm:^20.14.9"
-    applicationinsights: "npm:^3.12.0"
+    applicationinsights: "npm:^3.12.1"
     azure-services: "workspace:*"
     common: "workspace:*"
     copy-webpack-plugin: "npm:^13.0.1"
@@ -19428,10 +19399,10 @@ __metadata:
     node-loader: "npm:^2.1.0"
     npm-run-all: "npm:^4.1.5"
     reflect-metadata: "npm:^0.2.2"
-    rimraf: "npm:^6.0.1"
+    rimraf: "npm:^6.1.2"
     service-library: "workspace:*"
     storage-documents: "workspace:*"
-    ts-jest: "npm:^29.4.5"
+    ts-jest: "npm:^29.4.6"
     ts-loader: "npm:^9.5.4"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
@@ -19447,7 +19418,7 @@ __metadata:
   resolution: "web-api-scan-request-sender@workspace:packages/web-api-scan-request-sender"
   dependencies:
     "@types/jest": "npm:^29.5.12"
-    applicationinsights: "npm:^3.12.0"
+    applicationinsights: "npm:^3.12.1"
     azure-services: "workspace:*"
     common: "workspace:*"
     copy-webpack-plugin: "npm:^13.0.1"
@@ -19462,10 +19433,10 @@ __metadata:
     node-loader: "npm:^2.1.0"
     npm-run-all: "npm:^4.1.5"
     reflect-metadata: "npm:^0.2.2"
-    rimraf: "npm:^6.0.1"
+    rimraf: "npm:^6.1.2"
     service-library: "workspace:*"
     storage-documents: "workspace:*"
-    ts-jest: "npm:^29.4.5"
+    ts-jest: "npm:^29.4.6"
     ts-loader: "npm:^9.5.4"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
@@ -19485,13 +19456,13 @@ __metadata:
     "@playwright/test": "npm:^1.56.1"
     "@types/dotenv": "npm:^8.2.3"
     "@types/jest": "npm:^29.5.12"
-    "@types/lodash": "npm:^4.17.20"
+    "@types/lodash": "npm:^4.17.21"
     "@types/node": "npm:^20.14.9"
     "@types/puppeteer": "npm:^7.0.4"
     "@types/sha.js": "npm:^2.4.4"
     "@types/yargs": "npm:^17.0.33"
     accessibility-insights-report: "npm:7.0.0"
-    applicationinsights: "npm:^3.12.0"
+    applicationinsights: "npm:^3.12.1"
     axe-core: "npm:4.10.2"
     axe-result-converter: "workspace:*"
     axe-sarif-converter: "npm:^3.0.0"
@@ -19519,12 +19490,12 @@ __metadata:
     puppeteer-extra-plugin-stealth: "npm:^2.11.2"
     reflect-metadata: "npm:^0.2.2"
     request: "npm:^2.88.2"
-    rimraf: "npm:^6.0.1"
+    rimraf: "npm:^6.1.2"
     scanner-global-library: "workspace:*"
     service-library: "workspace:*"
     sha.js: "npm:^2.4.12"
     storage-documents: "workspace:*"
-    ts-jest: "npm:^29.4.5"
+    ts-jest: "npm:^29.4.6"
     ts-loader: "npm:^9.5.4"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
@@ -19543,9 +19514,9 @@ __metadata:
     "@azure/ms-rest-nodeauth": "npm:^3.1.1"
     "@types/dotenv": "npm:^8.2.3"
     "@types/jest": "npm:^29.5.12"
-    "@types/lodash": "npm:^4.17.20"
+    "@types/lodash": "npm:^4.17.21"
     "@types/node": "npm:^20.14.9"
-    applicationinsights: "npm:^3.12.0"
+    applicationinsights: "npm:^3.12.1"
     azure-services: "workspace:*"
     common: "workspace:*"
     copy-webpack-plugin: "npm:^13.0.1"
@@ -19560,10 +19531,10 @@ __metadata:
     node-loader: "npm:^2.1.0"
     npm-run-all: "npm:^4.1.5"
     reflect-metadata: "npm:^0.2.2"
-    rimraf: "npm:^6.0.1"
+    rimraf: "npm:^6.1.2"
     service-library: "workspace:*"
     storage-documents: "workspace:*"
-    ts-jest: "npm:^29.4.5"
+    ts-jest: "npm:^29.4.6"
     ts-loader: "npm:^9.5.4"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
@@ -19582,12 +19553,12 @@ __metadata:
     "@types/dotenv": "npm:^8.2.3"
     "@types/got": "npm:^9.6.11"
     "@types/jest": "npm:^29.5.12"
-    "@types/lodash": "npm:^4.17.20"
+    "@types/lodash": "npm:^4.17.21"
     "@types/node": "npm:^20.14.9"
     "@types/puppeteer": "npm:^7.0.4"
     "@types/sha.js": "npm:^2.4.4"
     "@types/yargs": "npm:^17.0.33"
-    applicationinsights: "npm:^3.12.0"
+    applicationinsights: "npm:^3.12.1"
     azure-services: "workspace:*"
     common: "workspace:*"
     copy-webpack-plugin: "npm:^13.0.1"
@@ -19603,11 +19574,11 @@ __metadata:
     node-loader: "npm:^2.1.0"
     npm-run-all: "npm:^4.1.5"
     reflect-metadata: "npm:^0.2.2"
-    rimraf: "npm:^6.0.1"
+    rimraf: "npm:^6.1.2"
     service-library: "workspace:*"
     sha.js: "npm:^2.4.12"
     storage-documents: "workspace:*"
-    ts-jest: "npm:^29.4.5"
+    ts-jest: "npm:^29.4.6"
     ts-loader: "npm:^9.5.4"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
@@ -19622,13 +19593,13 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "web-api@workspace:packages/web-api"
   dependencies:
-    "@azure/functions": "npm:^4.8.0"
+    "@azure/functions": "npm:^4.10.0"
     "@types/dotenv": "npm:^8.2.3"
     "@types/jest": "npm:^29.5.12"
-    "@types/lodash": "npm:^4.17.20"
+    "@types/lodash": "npm:^4.17.21"
     "@types/node": "npm:^20.14.9"
     "@types/sha.js": "npm:^2.4.4"
-    applicationinsights: "npm:^3.12.0"
+    applicationinsights: "npm:^3.12.1"
     azure-functions-core-tools: "npm:^4.x"
     azure-services: "workspace:*"
     common: "workspace:*"
@@ -19644,10 +19615,10 @@ __metadata:
     node-loader: "npm:^2.1.0"
     npm-run-all: "npm:^4.1.5"
     reflect-metadata: "npm:^0.2.2"
-    rimraf: "npm:^6.0.1"
+    rimraf: "npm:^6.1.2"
     service-library: "workspace:*"
     storage-documents: "workspace:*"
-    ts-jest: "npm:^29.4.5"
+    ts-jest: "npm:^29.4.6"
     ts-loader: "npm:^9.5.4"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
@@ -19661,13 +19632,13 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "web-workers@workspace:packages/web-workers"
   dependencies:
-    "@azure/functions": "npm:^4.8.0"
+    "@azure/functions": "npm:^4.10.0"
     "@types/dotenv": "npm:^8.2.3"
     "@types/jest": "npm:^29.5.12"
-    "@types/lodash": "npm:^4.17.20"
+    "@types/lodash": "npm:^4.17.21"
     "@types/node": "npm:^20.14.9"
     "@types/sha.js": "npm:^2.4.4"
-    applicationinsights: "npm:^3.12.0"
+    applicationinsights: "npm:^3.12.1"
     azure-functions-core-tools: "npm:^4.x"
     azure-services: "workspace:*"
     common: "workspace:*"
@@ -19686,10 +19657,10 @@ __metadata:
     npm-run-all: "npm:^4.1.5"
     p-limit: "npm:^3.1.0"
     reflect-metadata: "npm:^0.2.2"
-    rimraf: "npm:^6.0.1"
+    rimraf: "npm:^6.1.2"
     service-library: "workspace:*"
     storage-documents: "workspace:*"
-    ts-jest: "npm:^29.4.5"
+    ts-jest: "npm:^29.4.6"
     ts-loader: "npm:^9.5.4"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
