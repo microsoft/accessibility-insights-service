@@ -171,7 +171,7 @@ createPrivateEndpointSubnet() {
             --vnet-name "${vnetName}" \
             --address-prefixes "${subnetAddressPrefix}" \
             --disable-private-endpoint-network-policies false \
-            1>/dev/null
+            --default-outbound false 1>/dev/null
         echo "Private endpoint subnet created successfully"
     else
         echo "Private endpoint subnet already exists: ${subnetName}"
