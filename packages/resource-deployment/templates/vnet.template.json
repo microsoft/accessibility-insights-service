@@ -104,7 +104,8 @@
                             "addressPrefixes": [],
                             "networkSecurityGroup": {
                                 "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('securityGroupName'))]"
-                            }
+                            },
+                            "defaultOutboundAccess": false
                         }
                     }
                 ],

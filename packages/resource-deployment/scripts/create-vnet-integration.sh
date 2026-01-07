@@ -89,7 +89,8 @@ createVnetIntegrationSubnet() {
             --resource-group "${resourceGroupName}" \
             --vnet-name "${vnetName}" \
             --address-prefixes "${subnetAddressPrefix}" \
-            --delegations Microsoft.Web/serverFarms 1>/dev/null
+            --delegations Microsoft.Web/serverFarms \
+            --default-outbound false 1>/dev/null
         echo "VNet integration subnet created successfully"
     else
         echo "VNet integration subnet already exists: ${subnetName}"
