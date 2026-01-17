@@ -29,7 +29,7 @@ fi
 function createIdentity() {
     local managedIdentityName=$1
 
-    identity=$(az identity create --resource-group "${resourceGroupName}" --name "${managedIdentityName}")
+    identity=$(az identity create --resource-group "${resourceGroupName}" --name "${managedIdentityName}" --isolation-scope Regional)
     echo "Created ${managedIdentityName} user-managed identity."
     echo "${identity}"
 }
