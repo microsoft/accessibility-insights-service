@@ -30,14 +30,12 @@ fi
 function createIdentity() {
     local managedIdentityName=$1
 
-    identity=$(az identity create --resource-group "${resourceGroupName}" --name "${managedIdentityName}")
+    az identity create --resource-group "${resourceGroupName}" --name "${managedIdentityName}" 1>/dev/null
+    echo "Created ${managedIdentityName} user-managed identity."
     az rest \
         --method put \
         --uri "https://management.azure.com/subscriptions/${subscription}/resourceGroups/${resourceGroupName}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/${managedIdentityName}?api-version=2025-01-31-preview" \
-        --body "{\"location\":\"${location}\",\"properties\":{\"isolationScope\":\"Regional\"}}" 1>/dev/null
-
-    echo "Created ${managedIdentityName} user-managed identity."
-    echo "${identity}"
+        --body "{\"location\":\"${location}\",\"properties\":{\"isolationScope\":\"Regional\"}}"
 }
 
 . "${0%/*}/get-resource-names.sh"
