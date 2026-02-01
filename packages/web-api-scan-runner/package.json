@@ -52,7 +52,7 @@
         "@azure/cosmos": "^4.0.0",
         "@playwright/test": "^1.56.1",
         "accessibility-insights-report": "7.0.0",
-        "applicationinsights": "^3.12.0",
+        "applicationinsights": "^3.13.0",
         "axe-core": "4.10.2",
         "axe-result-converter": "workspace:*",
         "axe-sarif-converter": "^3.0.0",
