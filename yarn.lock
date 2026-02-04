@@ -6217,7 +6217,7 @@ __metadata:
     combine-dependabot-prs: "npm:^1.0.5"
     commander: "npm:^14.0.2"
     eslint: "npm:^8.57.0"
-    eslint-plugin-check-file: "npm:^3.3.0"
+    eslint-plugin-check-file: "npm:^3.3.1"
     eslint-plugin-header: "npm:^3.1.1"
     eslint-plugin-import: "npm:^2.32.0"
     eslint-plugin-jest: "npm:^28.6.0"
@@ -9599,15 +9599,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-plugin-check-file@npm:^3.3.0":
-  version: 3.3.0
-  resolution: "eslint-plugin-check-file@npm:3.3.0"
+"eslint-plugin-check-file@npm:^3.3.1":
+  version: 3.3.1
+  resolution: "eslint-plugin-check-file@npm:3.3.1"
   dependencies:
     is-glob: "npm:^4.0.3"
     micromatch: "npm:^4.0.8"
   peerDependencies:
     eslint: ">=9.0.0"
-  checksum: 10/825772b9e65c61874d1067bbbef1a287e3c8c6e3b0268d5bad59955d7eab4f936e4c6f4e66bfa072619bb5c88f301189590744936be02ef3f361d67acf4d464c
+  checksum: 10/d367d66e63ba7e8c488fa295e5185e65a2978c33fa4e1802c51e1c5edce538e4ad83425a37d5b044bede6eccfb4d13c03a6267da6e18f3b7bfb0f653b5695d5c
   languageName: node
   linkType: hard
 
