@@ -43,7 +43,7 @@
         "azure-services": "workspace:*",
         "common": "workspace:*",
         "inversify": "^6.0.1",
-        "lodash": "^4.17.21",
+        "lodash": "^4.17.23",
         "logger": "workspace:*",
         "moment": "^2.30.1",
         "reflect-metadata": "^0.2.2",
