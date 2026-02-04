@@ -4488,9 +4488,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@rollup/plugin-commonjs@npm:^28.0.6":
-  version: 28.0.6
-  resolution: "@rollup/plugin-commonjs@npm:28.0.6"
+"@rollup/plugin-commonjs@npm:^29.0.0":
+  version: 29.0.0
+  resolution: "@rollup/plugin-commonjs@npm:29.0.0"
   dependencies:
     "@rollup/pluginutils": "npm:^5.0.1"
     commondir: "npm:^1.0.1"
@@ -4504,7 +4504,7 @@ __metadata:
   peerDependenciesMeta:
     rollup:
       optional: true
-  checksum: 10/0c46acc1d2efe107555c32c36c67965669bded206b4d4d940e0f30b374f03952c16fa5198d890da967d0c7301d863a95f0f00321fc0a9ccfc147ca5d09109073
+  checksum: 10/9abffe07ebdd0aa5d412e7894c370b2c9d2f52e23d415c3e421ff2e05dc662d86f5b681b878463f468020360c477d74cc1476612facba0c5c987cc0b1ec6c06b
   languageName: node
   linkType: hard
 
@@ -6081,7 +6081,7 @@ __metadata:
     "@crawlee/browser-pool": "npm:^3.15.2"
     "@crawlee/puppeteer": "npm:^3.15.2"
     "@medv/finder": "npm:^4.0.2"
-    "@rollup/plugin-commonjs": "npm:^28.0.6"
+    "@rollup/plugin-commonjs": "npm:^29.0.0"
     "@rollup/plugin-node-resolve": "npm:^15.3.0"
     "@sindresorhus/fnv1a": "npm:^2.0.1"
     "@types/encoding-down": "npm:^5.0.5"
