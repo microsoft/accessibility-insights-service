@@ -44,7 +44,7 @@
         "axe-core-scanner": "workspace:*",
         "common": "workspace:*",
         "inversify": "^6.0.1",
-        "lodash": "^4.17.21",
+        "lodash": "^4.17.23",
         "logger": "workspace:*",
         "pidusage": "^4.0.1",
         "puppeteer": "^24.31.0",

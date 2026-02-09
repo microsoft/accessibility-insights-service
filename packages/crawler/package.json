@@ -57,7 +57,7 @@
         "inversify": "^6.0.1",
         "leveldown": "^6.1.1",
         "levelup": "^5.1.1",
-        "lodash": "^4.17.21",
+        "lodash": "^4.17.23",
         "moment": "^2.30.1",
         "normalize-path": "^3.0.0",
         "normalize-url": "6.1.0",
