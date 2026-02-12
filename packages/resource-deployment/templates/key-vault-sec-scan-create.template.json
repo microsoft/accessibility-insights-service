@@ -4,7 +4,7 @@
     "parameters": {
         "keyVault": {
             "type": "string",
-            "defaultValue": "[concat('allyvaultsecscan',toLower(uniqueString(resourceGroup().id)))]",
+            "defaultValue": "[concat('secscankv',toLower(uniqueString(resourceGroup().id)))]",
             "metadata": {
                 "description": "The key vault name."
             }
