@@ -15,7 +15,7 @@ setupKeyVaultResourcesTemplateFile="${0%/*}/../templates/key-vault-setup-resourc
 
 exitWithUsageInfo() {
     echo "
-Usage: ${BASH_SOURCE} -r <resource group> -c <web API client ID> -b <Azure Batch object ID> [-e <environment>]
+Usage: ${BASH_SOURCE} -r <resource group> [-b <Object ID to grant access>] [-t <key vault ARM template file>]
 "
     exit 1
 }
@@ -45,10 +45,15 @@ function createKeyVaultIfNotExists() {
     if [[ -z ${existingResourceId} ]]; then
         echo "Creating new key vault ${keyVault}"
 
+        local parameters=""
+        if [[ -n ${objectId} ]]; then
+            parameters="--parameters objectId=${objectId}"
+        fi
+
         az deployment group create \
             --resource-group "${resourceGroupName}" \
             --template-file "${createKeyVaultTemplateFile}" \
-            --parameters objectId="${azureBatchObjectId}" \
+            ${parameters} \
             --query "properties.outputResources[].id" \
             -o tsv 1>/dev/null
 
@@ -84,22 +89,19 @@ function setupKeyVaultResources() {
 }
 
 # Read script arguments
-while getopts ":r:b:e:" option; do
+while getopts ":r:b:k:t:" option; do
     case ${option} in
     r) resourceGroupName=${OPTARG} ;;
-    b) azureBatchObjectId=${OPTARG} ;;
-    e) environment=${OPTARG} ;;
+    b) objectId=${OPTARG} ;;
+    k) keyVault=${OPTARG} ;;
+    t) createKeyVaultTemplateFile=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
 
 # Print script usage help
-if [[ -z ${resourceGroupName} ]] || [[ -z ${azureBatchObjectId} ]]; then
+if [[ -z ${resourceGroupName} ]]; then
     exitWithUsageInfo
-fi
-
-if [[ -z ${environment} ]]; then
-    environment="dev"
 fi
 
 . "${0%/*}/get-resource-names.sh"

@@ -1,0 +1,59 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "keyVault": {
+            "type": "string",
+            "defaultValue": "[concat('allyvaultsecscan',toLower(uniqueString(resourceGroup().id)))]",
+            "metadata": {
+                "description": "The key vault name."
+            }
+        },
+        "location": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().location]",
+            "metadata": {
+                "description": "The location in which the Azure resources should be deployed."
+            }
+        },
+        "objectId": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": "The object ID to grant GET access to certificates and secrets."
+            }
+        }
+    },
+    "variables": {
+        "accessPolicies": [
+            {
+                "tenantId": "[subscription().tenantId]",
+                "objectId": "[parameters('objectId')]",
+                "permissions": {
+                    "certificates": ["get"],
+                    "secrets": ["get"]
+                }
+            }
+        ]
+    },
+    "resources": [
+        {
+            "type": "Microsoft.KeyVault/vaults",
+            "apiVersion": "2023-02-01",
+            "name": "[parameters('keyVault')]",
+            "location": "[parameters('location')]",
+            "properties": {
+                "sku": {
+                    "family": "A",
+                    "name": "standard"
+                },
+                "tenantId": "[subscription().tenantId]",
+                "enabledForDeployment": true,
+                "enabledForDiskEncryption": true,
+                "enabledForTemplateDeployment": true,
+                "enableSoftDelete": true,
+                "accessPolicies": "[if(empty(parameters('objectId')), json('[]'), variables('accessPolicies'))]"
+            }
+        }
+    ]
+}
