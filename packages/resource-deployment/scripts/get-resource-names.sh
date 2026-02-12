@@ -26,6 +26,7 @@ resourceGroupSuffix=${storageAccountName:11}
 
 cosmosAccountName="allycosmos${resourceGroupSuffix}"
 keyVault="allyvault${resourceGroupSuffix}"
+keyVaultSecScan="allyvaultsecscan${resourceGroupSuffix}"
 apiManagementName="apim-a11y${resourceGroupSuffix}"
 webApiFuncAppName="web-api-allyfuncapp${resourceGroupSuffix}"
 webWorkersFuncAppName="web-workers-allyfuncapp${resourceGroupSuffix}"

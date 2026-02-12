@@ -41,7 +41,7 @@ grantUserAccessToKeyVault() {
     az role assignment create \
         --role "Key Vault Certificates Officer" \
         --assignee "${principalName}" \
-        --scope "/subscriptions/${subscription}/resourcegroups/${resourceGroupName}/providers/Microsoft.KeyVault/vaults/${keyVault}" 1>/dev/null
+        --scope "/subscriptions/${subscription}/resourcegroups/${resourceGroupName}/providers/Microsoft.KeyVault/vaults/${keyVaultSecScan}" 1>/dev/null
 }
 
 onExit-key-vault-rotate-certificate() {
@@ -49,15 +49,15 @@ onExit-key-vault-rotate-certificate() {
     az role assignment delete \
         --role "Key Vault Certificates Officer" \
         --assignee "${principalName}" \
-        --scope "/subscriptions/${subscription}/resourcegroups/${resourceGroupName}/providers/Microsoft.KeyVault/vaults/${keyVault}" >/dev/null 2>&1
+        --scope "/subscriptions/${subscription}/resourcegroups/${resourceGroupName}/providers/Microsoft.KeyVault/vaults/${keyVaultSecScan}" >/dev/null 2>&1
 }
 
 createNewCertificateVersion() {
     echo "Creating new version of certificate..."
-    thumbprintCurrent=$(az keyvault certificate show --name "${certificateName}" --vault-name "${keyVault}" --query "x509ThumbprintHex" -o tsv)
+    thumbprintCurrent=$(az keyvault certificate show --name "${certificateName}" --vault-name "${keyVaultSecScan}" --query "x509ThumbprintHex" -o tsv)
     certificatePolicyFile="${0%/*}/../templates/${certificatePolicyPrefix}-${environment}.json"
-    az keyvault certificate create --vault-name "${keyVault}" --name "${certificateName}" --policy "@${certificatePolicyFile}"
-    thumbprintNew=$(az keyvault certificate show --name "${certificateName}" --vault-name "${keyVault}" --query "x509ThumbprintHex" -o tsv)
+    az keyvault certificate create --vault-name "${keyVaultSecScan}" --name "${certificateName}" --policy "@${certificatePolicyFile}"
+    thumbprintNew=$(az keyvault certificate show --name "${certificateName}" --vault-name "${keyVaultSecScan}" --query "x509ThumbprintHex" -o tsv)
     if [[ ${thumbprintCurrent} == "${thumbprintNew}" ]]; then
         echo "Error: Failure to create the certificate. Validate command output for details."
         exit 1
@@ -71,7 +71,7 @@ while getopts ":s:r:k:n:e:p:" option; do
     case ${option} in
     s) subscription=${OPTARG} ;;
     r) resourceGroupName=${OPTARG} ;;
-    k) keyVault=${OPTARG} ;;
+    k) keyVaultSecScan=${OPTARG} ;;
     n) certificateName=${OPTARG} ;;
     e) environment=${OPTARG} ;;
     p) certificatePolicyPrefix=${OPTARG} ;;
@@ -79,7 +79,7 @@ while getopts ":s:r:k:n:e:p:" option; do
     esac
 done
 
-if [[ -z ${resourceGroupName} ]] || [[ -z ${keyVault} ]]; then
+if [[ -z ${resourceGroupName} ]]; then
     exitWithUsageInfo
 fi
 
