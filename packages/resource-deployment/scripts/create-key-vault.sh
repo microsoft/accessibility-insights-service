@@ -75,30 +75,26 @@ function setAccessPolicies() {
 }
 
 function assignRbacRoles() {
-    local kvScope
-    kvScope=$(az keyvault show --name "${keyVault}" --resource-group "${resourceGroupName}" --query "id" -o tsv)
+    local kvScope="/subscriptions/${subscription}/resourcegroups/${resourceGroupName}/providers/Microsoft.KeyVault/vaults/${keyVault}"
 
     if [[ "${keyVaultType}" == "secscan" ]]; then
         echo "Assigning Key Vault Secrets User role to ${objectId} on ${keyVault}"
         az role assignment create \
             --role "Key Vault Secrets User" \
             --assignee "${objectId}" \
-            --scope "${kvScope}" \
-            --subscription "${subscription}" 1>/dev/null
+            --scope "${kvScope}" 1>/dev/null
 
         echo "Assigning Key Vault Reader role to ${objectId} on ${keyVault}"
         az role assignment create \
             --role "Key Vault Reader" \
             --assignee "${objectId}" \
-            --scope "${kvScope}" \
-            --subscription "${subscription}" 1>/dev/null
+            --scope "${kvScope}" 1>/dev/null
     else
         echo "Assigning Key Vault Secrets Officer role to ${objectId} on ${keyVault}"
         az role assignment create \
             --role "Key Vault Secrets Officer" \
             --assignee "${objectId}" \
-            --scope "${kvScope}" \
-            --subscription "${subscription}" 1>/dev/null
+            --scope "${kvScope}" 1>/dev/null
     fi
 }
 
