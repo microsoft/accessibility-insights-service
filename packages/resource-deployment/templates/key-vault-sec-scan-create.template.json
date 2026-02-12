@@ -25,16 +25,8 @@
         }
     },
     "variables": {
-        "accessPolicies": [
-            {
-                "tenantId": "[subscription().tenantId]",
-                "objectId": "[parameters('objectId')]",
-                "permissions": {
-                    "certificates": ["get"],
-                    "secrets": ["get"]
-                }
-            }
-        ]
+        "keyVaultSecretsUserRoleId": "4633458b-17de-408a-b874-0445c86b69e6",
+        "keyVaultReaderRoleId": "21090545-7ca7-4776-b22c-e363652d74d2"
     },
     "resources": [
         {
@@ -52,7 +44,32 @@
                 "enabledForDiskEncryption": true,
                 "enabledForTemplateDeployment": true,
                 "enableSoftDelete": true,
-                "accessPolicies": "[if(empty(parameters('objectId')), json('[]'), variables('accessPolicies'))]"
+                "enableRbacAuthorization": true,
+                "accessPolicies": []
+            }
+        },
+        {
+            "condition": "[not(empty(parameters('objectId')))]",
+            "type": "Microsoft.Authorization/roleAssignments",
+            "apiVersion": "2022-04-01",
+            "scope": "[concat('Microsoft.KeyVault/vaults/', parameters('keyVault'))]",
+            "name": "[guid(resourceId('Microsoft.KeyVault/vaults', parameters('keyVault')), parameters('objectId'), variables('keyVaultSecretsUserRoleId'))]",
+            "dependsOn": ["[resourceId('Microsoft.KeyVault/vaults', parameters('keyVault'))]"],
+            "properties": {
+                "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', variables('keyVaultSecretsUserRoleId'))]",
+                "principalId": "[parameters('objectId')]"
+            }
+        },
+        {
+            "condition": "[not(empty(parameters('objectId')))]",
+            "type": "Microsoft.Authorization/roleAssignments",
+            "apiVersion": "2022-04-01",
+            "scope": "[concat('Microsoft.KeyVault/vaults/', parameters('keyVault'))]",
+            "name": "[guid(resourceId('Microsoft.KeyVault/vaults', parameters('keyVault')), parameters('objectId'), variables('keyVaultReaderRoleId'))]",
+            "dependsOn": ["[resourceId('Microsoft.KeyVault/vaults', parameters('keyVault'))]"],
+            "properties": {
+                "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', variables('keyVaultReaderRoleId'))]",
+                "principalId": "[parameters('objectId')]"
             }
         }
     ]

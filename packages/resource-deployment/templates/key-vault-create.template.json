@@ -24,7 +24,9 @@
             }
         }
     },
-    "variables": {},
+    "variables": {
+        "keyVaultSecretsOfficerRoleId": "b86a8fe4-44ce-4948-aee5-eccb2c155cd7"
+    },
     "resources": [
         {
             "type": "Microsoft.KeyVault/vaults",
@@ -37,19 +39,24 @@
                     "name": "standard"
                 },
                 "tenantId": "[subscription().tenantId]",
-                "accessPolicies": [
-                    {
-                        "tenantId": "[subscription().tenantId]",
-                        "objectId": "[parameters('objectId')]",
-                        "permissions": {
-                            "secrets": ["delete", "get", "list", "set", "recover"]
-                        }
-                    }
-                ],
+                "accessPolicies": [],
                 "enabledForDeployment": true,
                 "enabledForDiskEncryption": true,
                 "enabledForTemplateDeployment": true,
-                "enableSoftDelete": true
+                "enableSoftDelete": true,
+                "enableRbacAuthorization": true
+            }
+        },
+        {
+            "condition": "[not(empty(parameters('objectId')))]",
+            "type": "Microsoft.Authorization/roleAssignments",
+            "apiVersion": "2022-04-01",
+            "scope": "[concat('Microsoft.KeyVault/vaults/', parameters('keyVault'))]",
+            "name": "[guid(resourceId('Microsoft.KeyVault/vaults', parameters('keyVault')), parameters('objectId'), variables('keyVaultSecretsOfficerRoleId'))]",
+            "dependsOn": ["[resourceId('Microsoft.KeyVault/vaults', parameters('keyVault'))]"],
+            "properties": {
+                "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', variables('keyVaultSecretsOfficerRoleId'))]",
+                "principalId": "[parameters('objectId')]"
             }
         }
     ]
