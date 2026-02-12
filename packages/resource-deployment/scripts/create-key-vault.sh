@@ -46,15 +46,9 @@ function createKeyVaultIfNotExists() {
     if [[ -z ${existingResourceId} ]]; then
         echo "Creating new key vault ${keyVault}"
 
-        local parameters=""
-        if [[ -n ${objectId} ]]; then
-            parameters="--parameters objectId=${objectId}"
-        fi
-
         az deployment group create \
             --resource-group "${resourceGroupName}" \
             --template-file "${createKeyVaultTemplateFile}" \
-            ${parameters} \
             --query "properties.outputResources[].id" \
             -o tsv 1>/dev/null
 
@@ -78,6 +72,33 @@ function setAccessPolicies() {
         --enabled-for-deployment "true" \
         --enabled-for-template-deployment "true" \
         --enable-rbac-authorization "true" 1>/dev/null
+}
+
+function assignRbacRoles() {
+    local kvScope="/subscriptions/${subscription}/resourcegroups/${resourceGroupName}/providers/Microsoft.KeyVault/vaults/${keyVault}"
+
+    if [[ "${keyVaultType}" == "secscan" ]]; then
+        echo "Assigning Key Vault Secrets User role to ${objectId} on ${keyVault}"
+        az role assignment create \
+            --role "Key Vault Secrets User" \
+            --assignee-object-id "${objectId}" \
+            --assignee-principal-type "ServicePrincipal" \
+            --scope "${kvScope}" 1>/dev/null
+
+        echo "Assigning Key Vault Reader role to ${objectId} on ${keyVault}"
+        az role assignment create \
+            --role "Key Vault Reader" \
+            --assignee-object-id "${objectId}" \
+            --assignee-principal-type "ServicePrincipal" \
+            --scope "${kvScope}" 1>/dev/null
+    else
+        echo "Assigning Key Vault Secrets Officer role to ${objectId} on ${keyVault}"
+        az role assignment create \
+            --role "Key Vault Secrets Officer" \
+            --assignee-object-id "${objectId}" \
+            --assignee-principal-type "ServicePrincipal" \
+            --scope "${kvScope}" 1>/dev/null
+    fi
 }
 
 function setupKeyVaultResources() {
@@ -124,6 +145,10 @@ esac
 createOrRecoverKeyvault
 setupKeyVaultResources
 setAccessPolicies
+
+if [[ -n "${objectId}" ]]; then
+    assignRbacRoles
+fi
 
 if [[ "${keyVaultType}" != "secscan" ]]; then
     . "${0%/*}/push-secrets-to-key-vault.sh"
