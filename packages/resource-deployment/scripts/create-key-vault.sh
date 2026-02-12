@@ -16,7 +16,7 @@ setupKeyVaultResourcesTemplateFile="${0%/*}/../templates/key-vault-setup-resourc
 
 exitWithUsageInfo() {
     echo "
-Usage: ${BASH_SOURCE} -r <resource group> [-b <Object ID to grant access>] [-t <template type: service|secscan>]
+Usage: ${BASH_SOURCE} -r <resource group> [-b <Object ID to grant access>] [-t <key vault type: service|secscan>]
 "
     exit 1
 }
@@ -95,7 +95,7 @@ while getopts ":r:b:k:t:" option; do
     r) resourceGroupName=${OPTARG} ;;
     b) objectId=${OPTARG} ;;
     k) keyVault=${OPTARG} ;;
-    t) templateType=${OPTARG} ;;
+    t) keyVaultType=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
@@ -108,15 +108,15 @@ fi
 . "${0%/*}/get-resource-names.sh"
 . "${0%/*}/process-utilities.sh"
 
-# Select key vault template and name based on template type
-case ${templateType} in
+# Select key vault template and name based on key vault type
+case ${keyVaultType} in
 secscan)
     createKeyVaultTemplateFile="${createKeyVaultSecScanTemplateFile}"
     keyVault="${keyVaultSecScan}"
     ;;
 service | "") ;; # use default createKeyVaultTemplateFile and keyVault
 *)
-    echo "Error: Invalid template type '${templateType}'. Must be 'service' or 'secscan'."
+    echo "Error: Invalid key vault type '${keyVaultType}'. Must be 'service' or 'secscan'."
     exitWithUsageInfo
     ;;
 esac
@@ -124,6 +124,9 @@ esac
 createOrRecoverKeyvault
 setupKeyVaultResources
 setAccessPolicies
-. "${0%/*}/push-secrets-to-key-vault.sh"
+
+if [[ "${keyVaultType}" != "secscan" ]]; then
+    . "${0%/*}/push-secrets-to-key-vault.sh"
+fi
 
 echo "The ${keyVault} Azure Key Vault successfully deployed."
