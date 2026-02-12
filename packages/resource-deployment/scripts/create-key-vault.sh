@@ -11,11 +11,12 @@ export keyVault
 
 # Set default ARM template files
 createKeyVaultTemplateFile="${0%/*}/../templates/key-vault-create.template.json"
+createKeyVaultSecScanTemplateFile="${0%/*}/../templates/key-vault-sec-scan-create.template.json"
 setupKeyVaultResourcesTemplateFile="${0%/*}/../templates/key-vault-setup-resources.template.json"
 
 exitWithUsageInfo() {
     echo "
-Usage: ${BASH_SOURCE} -r <resource group> [-b <Object ID to grant access>] [-t <key vault ARM template file>]
+Usage: ${BASH_SOURCE} -r <resource group> [-b <Object ID to grant access>] [-t <template type: service|secscan>]
 "
     exit 1
 }
@@ -94,7 +95,7 @@ while getopts ":r:b:k:t:" option; do
     r) resourceGroupName=${OPTARG} ;;
     b) objectId=${OPTARG} ;;
     k) keyVault=${OPTARG} ;;
-    t) createKeyVaultTemplateFile=${OPTARG} ;;
+    t) templateType=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
@@ -106,6 +107,19 @@ fi
 
 . "${0%/*}/get-resource-names.sh"
 . "${0%/*}/process-utilities.sh"
+
+# Select key vault template and name based on template type
+case ${templateType} in
+secscan)
+    createKeyVaultTemplateFile="${createKeyVaultSecScanTemplateFile}"
+    keyVault="${keyVaultSecScan}"
+    ;;
+service | "") ;; # use default createKeyVaultTemplateFile and keyVault
+*)
+    echo "Error: Invalid template type '${templateType}'. Must be 'service' or 'secscan'."
+    exitWithUsageInfo
+    ;;
+esac
 
 createOrRecoverKeyvault
 setupKeyVaultResources
