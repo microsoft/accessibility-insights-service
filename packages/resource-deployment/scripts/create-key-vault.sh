@@ -83,19 +83,22 @@ function assignRbacRoles() {
         az role assignment create \
             --role "Key Vault Secrets User" \
             --assignee "${objectId}" \
-            --scope "${kvScope}" 1>/dev/null
+            --scope "${kvScope}" \
+            --subscription "${subscription}" 1>/dev/null
 
         echo "Assigning Key Vault Reader role to ${objectId} on ${keyVault}"
         az role assignment create \
             --role "Key Vault Reader" \
             --assignee "${objectId}" \
-            --scope "${kvScope}" 1>/dev/null
+            --scope "${kvScope}" \
+            --subscription "${subscription}" 1>/dev/null
     else
         echo "Assigning Key Vault Secrets Officer role to ${objectId} on ${keyVault}"
         az role assignment create \
             --role "Key Vault Secrets Officer" \
             --assignee "${objectId}" \
-            --scope "${kvScope}" 1>/dev/null
+            --scope "${kvScope}" \
+            --subscription "${subscription}" 1>/dev/null
     fi
 }
 
