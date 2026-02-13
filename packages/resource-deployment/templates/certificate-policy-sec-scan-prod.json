@@ -1,10 +1,8 @@
 {
     "issuerParameters": {
-        "certificateTransparency": null,
-        "name": "OneCertV2-PrivateCA"
+        "name": "Self"
     },
     "keyProperties": {
-        "curve": null,
         "exportable": true,
         "keySize": 2048,
         "keyType": "RSA",
@@ -16,7 +14,6 @@
                 "actionType": "AutoRenew"
             },
             "trigger": {
-                "daysBeforeExpiry": null,
                 "lifetimePercentage": 24
             }
         }
@@ -29,9 +26,7 @@
         "keyUsage": ["cRLSign", "dataEncipherment", "digitalSignature", "keyAgreement", "keyCertSign", "keyEncipherment"],
         "subject": "CN=a11yserviceprod.ursa.keyvault.accessibilityinsights.com",
         "subjectAlternativeNames": {
-            "dnsNames": ["a11yserviceprod.ursa.keyvault.accessibilityinsights.com"],
-            "emails": null,
-            "upns": null
+            "dnsNames": ["a11yserviceprod.ursa.keyvault.accessibilityinsights.com"]
         },
         "validityInMonths": 12
     }

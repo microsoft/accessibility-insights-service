@@ -55,8 +55,8 @@ onExit-key-vault-rotate-certificate() {
 createNewCertificateVersion() {
     echo "Creating new version of certificate..."
     thumbprintCurrent=$(az keyvault certificate show --name "${certificateName}" --vault-name "${keyVaultSecScan}" --query "x509ThumbprintHex" -o tsv 2>/dev/null) || thumbprintCurrent=""
-    certificatePolicyFile="${0%/*}/../templates/${certificatePolicyPrefix}-${environment}.json"
-    az keyvault certificate create --vault-name "${keyVaultSecScan}" --name "${certificateName}" --policy "$(cat "${certificatePolicyFile}")"
+    certificatePolicyFile="$(cd "${0%/*}/../templates" && pwd)/${certificatePolicyPrefix}-${environment}.json"
+    az keyvault certificate create --vault-name "${keyVaultSecScan}" --name "${certificateName}" --policy "@${certificatePolicyFile}"
     thumbprintNew=$(az keyvault certificate show --name "${certificateName}" --vault-name "${keyVaultSecScan}" --query "x509ThumbprintHex" -o tsv 2>/dev/null) || thumbprintNew=""
     if [[ -z "${thumbprintNew}" ]]; then
         echo "Error: Failure to create the certificate. Validate command output for details."
