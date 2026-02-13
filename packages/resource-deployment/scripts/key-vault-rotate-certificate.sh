@@ -57,9 +57,12 @@ createNewCertificateVersion() {
     thumbprintCurrent=$(az keyvault certificate show --name "${certificateName}" --vault-name "${keyVaultSecScan}" --query "x509ThumbprintHex" -o tsv 2>/dev/null) || thumbprintCurrent=""
     certificatePolicyFile="${0%/*}/../templates/${certificatePolicyPrefix}-${environment}.json"
     az keyvault certificate create --vault-name "${keyVaultSecScan}" --name "${certificateName}" --policy "@${certificatePolicyFile}"
-    thumbprintNew=$(az keyvault certificate show --name "${certificateName}" --vault-name "${keyVaultSecScan}" --query "x509ThumbprintHex" -o tsv)
-    if [[ -n "${thumbprintCurrent}" ]] && [[ "${thumbprintCurrent}" == "${thumbprintNew}" ]]; then
+    thumbprintNew=$(az keyvault certificate show --name "${certificateName}" --vault-name "${keyVaultSecScan}" --query "x509ThumbprintHex" -o tsv 2>/dev/null) || thumbprintNew=""
+    if [[ -z "${thumbprintNew}" ]]; then
         echo "Error: Failure to create the certificate. Validate command output for details."
+        exit 1
+    elif [[ -n "${thumbprintCurrent}" ]] && [[ "${thumbprintCurrent}" == "${thumbprintNew}" ]]; then
+        echo "Error: Certificate thumbprint did not change after creation. Validate command output for details."
         exit 1
     else
         echo "Created new version of ${certificateName} certificate with thumbprint ${thumbprintNew}"
