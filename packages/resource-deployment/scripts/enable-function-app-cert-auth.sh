@@ -38,22 +38,22 @@ fi
 echo "Enabling certificate authentication for ${webApiFuncAppName} function app..."
 
 # Get the certificate thumbprint from Key Vault
-thumbprint=$(az keyvault certificate show --name "${certificateName}" --vault-name "${keyVault}" --query "x509ThumbprintHex" -o tsv)
+thumbprint=$(az keyvault certificate show --name "${certificateName}" --vault-name "${keyVaultSecScan}" --query "x509ThumbprintHex" -o tsv)
 
 if [[ -z ${thumbprint} ]]; then
-    echo "Unable to get certificate thumbprint for certificate ${certificateName} from key vault ${keyVault}"
+    echo "Unable to get certificate thumbprint for certificate ${certificateName} from key vault ${keyVaultSecScan}"
     exit 1
 fi
 
 echo "Using certificate ${certificateName} with thumbprint ${thumbprint}"
 
 # Upload the Key Vault certificate to the function app
-certificateId=$(az keyvault certificate show --name "${certificateName}" --vault-name "${keyVault}" --query "id" -o tsv)
+certificateId=$(az keyvault certificate show --name "${certificateName}" --vault-name "${keyVaultSecScan}" --query "id" -o tsv)
 
 az webapp config ssl import \
     --resource-group "${resourceGroupName}" \
     --name "${webApiFuncAppName}" \
-    --key-vault "${keyVault}" \
+    --key-vault "${keyVaultSecScan}" \
     --key-vault-certificate-name "${certificateName}" 1>/dev/null
 
 echo "Imported certificate ${certificateName} to ${webApiFuncAppName}"
