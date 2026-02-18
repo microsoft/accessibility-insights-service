@@ -55,7 +55,6 @@ onExit-key-vault-rotate-certificate() {
 createNewCertificateVersion() {
     echo "Creating new version of certificate..."
     thumbprintCurrent=$(az keyvault certificate show --name "${certificateName}" --vault-name "${keyVaultSecScan}" --query "x509ThumbprintHex" -o tsv 2>/dev/null) || thumbprintCurrent=""
-    certificatePolicyFile="$(cd "${0%/*}/../templates" && pwd)/${certificatePolicyPrefix}-${environment}.json"
     az keyvault certificate create --vault-name "${keyVaultSecScan}" --name "${certificateName}" --policy "@${certificatePolicyFile}"
     thumbprintNew=$(az keyvault certificate show --name "${certificateName}" --vault-name "${keyVaultSecScan}" --query "x509ThumbprintHex" -o tsv 2>/dev/null) || thumbprintNew=""
     if [[ -z "${thumbprintNew}" ]]; then
@@ -100,5 +99,29 @@ fi
 getCurrentUserDetails
 trap 'onExit-key-vault-rotate-certificate' EXIT
 
+function ensureCertificateIssuer() {
+    certificatePolicyFile="$(cd "${0%/*}/../templates" && pwd)/${certificatePolicyPrefix}-${environment}.json"
+    local issuerName
+    issuerName=$(jq -r '.issuerParameters.name' "${certificatePolicyFile}")
+
+    if [[ "${issuerName}" == "Self" || "${issuerName}" == "Unknown" ]]; then
+        return
+    fi
+
+    local existingIssuer
+    existingIssuer=$(az keyvault certificate issuer show --vault-name "${keyVaultSecScan}" --issuer-name "${issuerName}" --query "provider" -o tsv 2>/dev/null) || existingIssuer=""
+
+    if [[ -z "${existingIssuer}" ]]; then
+        echo "Registering certificate issuer ${issuerName} in ${keyVaultSecScan}"
+        az keyvault certificate issuer create \
+            --vault-name "${keyVaultSecScan}" \
+            --issuer-name "${issuerName}" \
+            --provider-name "${issuerName}" 1>/dev/null
+    else
+        echo "Certificate issuer ${issuerName} already exists in ${keyVaultSecScan}."
+    fi
+}
+
 grantUserAccessToKeyVault
+ensureCertificateIssuer
 createNewCertificateVersion

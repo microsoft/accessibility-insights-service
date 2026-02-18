@@ -1,6 +1,6 @@
 {
     "issuerParameters": {
-        "name": "Self"
+        "name": "OneCertV2-PrivateCA"
     },
     "keyProperties": {
         "exportable": true,
