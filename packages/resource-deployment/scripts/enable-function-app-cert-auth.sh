@@ -53,6 +53,18 @@ grantUserAccessToKeyVault() {
         --scope "/subscriptions/${subscription}/resourcegroups/${resourceGroupName}/providers/Microsoft.KeyVault/vaults/${keyVaultSecScan}" 1>/dev/null
 }
 
+grantAppServiceAccessToKeyVault() {
+    local kvScope="/subscriptions/${subscription}/resourcegroups/${resourceGroupName}/providers/Microsoft.KeyVault/vaults/${keyVaultSecScan}"
+    # Microsoft.Azure.WebSites (App Service) resource provider service principal
+    local appServicePrincipalId="abfa0a7c-a6b6-4736-8310-5855508787cd"
+
+    echo "Granting App Service access to key vault ${keyVaultSecScan}"
+    az role assignment create \
+        --role "Key Vault Secrets User" \
+        --assignee "${appServicePrincipalId}" \
+        --scope "${kvScope}" 1>/dev/null
+}
+
 onExit-enable-function-app-cert-auth() {
     echo "Revoking key vault role assignment for logged in user"
     az role assignment delete \
@@ -64,6 +76,7 @@ onExit-enable-function-app-cert-auth() {
 getCurrentUserDetails
 trap 'onExit-enable-function-app-cert-auth' EXIT
 grantUserAccessToKeyVault
+grantAppServiceAccessToKeyVault
 
 echo "Enabling certificate authentication for ${webApiFuncAppName} function app..."
 
