@@ -55,13 +55,22 @@ onExit-key-vault-rotate-certificate() {
 createNewCertificateVersion() {
     echo "Creating new version of certificate..."
     thumbprintCurrent=$(az keyvault certificate show --name "${certificateName}" --vault-name "${keyVaultSecScan}" --query "x509ThumbprintHex" -o tsv 2>/dev/null) || thumbprintCurrent=""
-    az keyvault certificate create --vault-name "${keyVaultSecScan}" --name "${certificateName}" --policy "@${certificatePolicyFile}"
+
+    az keyvault certificate create --vault-name "${keyVaultSecScan}" --name "${certificateName}" --policy "@${certificatePolicyFile}" 2>/dev/null || true
+
+    # Check certificate operation status for errors
+    local operationStatus
+    operationStatus=$(az keyvault certificate pending show --vault-name "${keyVaultSecScan}" --name "${certificateName}" --query "statusDetails" -o tsv 2>/dev/null) || operationStatus=""
+    if [[ -n "${operationStatus}" ]]; then
+        echo "Certificate operation status: ${operationStatus}"
+    fi
+
     thumbprintNew=$(az keyvault certificate show --name "${certificateName}" --vault-name "${keyVaultSecScan}" --query "x509ThumbprintHex" -o tsv 2>/dev/null) || thumbprintNew=""
     if [[ -z "${thumbprintNew}" ]]; then
-        echo "Error: Failure to create the certificate. Validate command output for details."
+        echo "Error: Failure to create the certificate. Operation status: ${operationStatus}"
         exit 1
     elif [[ -n "${thumbprintCurrent}" ]] && [[ "${thumbprintCurrent}" == "${thumbprintNew}" ]]; then
-        echo "Error: Certificate thumbprint did not change after creation. Validate command output for details."
+        echo "Error: Certificate thumbprint did not change after creation. Operation status: ${operationStatus}"
         exit 1
     else
         echo "Created new version of ${certificateName} certificate with thumbprint ${thumbprintNew}"
@@ -100,7 +109,7 @@ getCurrentUserDetails
 trap 'onExit-key-vault-rotate-certificate' EXIT
 
 function ensureCertificateIssuer() {
-    certificatePolicyFile="$(cd "${0%/*}/../templates" && pwd)/${certificatePolicyPrefix}-${environment}.json"
+    certificatePolicyFile="${0%/*}/../templates/${certificatePolicyPrefix}-${environment}.json"
     local issuerName
     issuerName=$(jq -r '.issuerParameters.name' "${certificatePolicyFile}")
 
