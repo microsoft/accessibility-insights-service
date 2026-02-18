@@ -35,6 +35,36 @@ fi
 
 . "${0%/*}/get-resource-names.sh"
 
+getCurrentUserDetails() {
+    echo "Getting logged in user name"
+    principalName=$(az account show --query "user.name" -o tsv)
+
+    if [[ -z ${principalName} ]]; then
+        echo "Unable to get logged in user name"
+        exit 1
+    fi
+}
+
+grantUserAccessToKeyVault() {
+    echo "Adding key vault role assignment for logged in user"
+    az role assignment create \
+        --role "Key Vault Secrets User" \
+        --assignee "${principalName}" \
+        --scope "/subscriptions/${subscription}/resourcegroups/${resourceGroupName}/providers/Microsoft.KeyVault/vaults/${keyVaultSecScan}" 1>/dev/null
+}
+
+onExit-enable-function-app-cert-auth() {
+    echo "Revoking key vault role assignment for logged in user"
+    az role assignment delete \
+        --role "Key Vault Secrets User" \
+        --assignee "${principalName}" \
+        --scope "/subscriptions/${subscription}/resourcegroups/${resourceGroupName}/providers/Microsoft.KeyVault/vaults/${keyVaultSecScan}" >/dev/null 2>&1
+}
+
+getCurrentUserDetails
+trap 'onExit-enable-function-app-cert-auth' EXIT
+grantUserAccessToKeyVault
+
 echo "Enabling certificate authentication for ${webApiFuncAppName} function app..."
 
 # Get the certificate thumbprint from Key Vault
