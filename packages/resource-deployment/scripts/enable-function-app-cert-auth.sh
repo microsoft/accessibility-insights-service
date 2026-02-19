@@ -56,7 +56,7 @@ grantUserAccessToKeyVault() {
 grantAppServiceAccessToKeyVault() {
     local kvScope="/subscriptions/${subscription}/resourcegroups/${resourceGroupName}/providers/Microsoft.KeyVault/vaults/${keyVaultSecScan}"
     # Microsoft.Azure.WebSites (App Service) resource provider service principal
-    local appServicePrincipalId="abfa0a7c-a6b6-4736-8310-5855508787cd"
+    local appServicePrincipalId="f8daea97-62e7-4026-becf-13c2ea98e8b4"
 
     echo "Granting App Service access to key vault ${keyVaultSecScan}"
     az role assignment create \
