@@ -55,13 +55,27 @@ grantUserAccessToKeyVault() {
 
 grantAppServiceAccessToKeyVault() {
     local kvScope="/subscriptions/${subscription}/resourcegroups/${resourceGroupName}/providers/Microsoft.KeyVault/vaults/${keyVaultSecScan}"
-    # Microsoft.Azure.WebSites (App Service) resource provider service principal
-    local appServicePrincipalId="f8daea97-62e7-4026-becf-13c2ea98e8b4"
 
-    echo "Granting App Service access to key vault ${keyVaultSecScan}"
+    # Use the function app's system-assigned managed identity
+    local functionAppPrincipalId
+    functionAppPrincipalId=$(az functionapp identity show \
+        --name "${webApiFuncAppName}" \
+        --resource-group "${resourceGroupName}" \
+        --query "principalId" -o tsv)
+
+    if [[ -z "${functionAppPrincipalId}" ]]; then
+        echo "Enabling system-assigned managed identity for ${webApiFuncAppName}..."
+        functionAppPrincipalId=$(az functionapp identity assign \
+            --name "${webApiFuncAppName}" \
+            --resource-group "${resourceGroupName}" \
+            --query "principalId" -o tsv)
+    fi
+
+    echo "Granting function app managed identity access to key vault ${keyVaultSecScan}"
     az role assignment create \
         --role "Key Vault Secrets User" \
-        --assignee "${appServicePrincipalId}" \
+        --assignee-object-id "${functionAppPrincipalId}" \
+        --assignee-principal-type ServicePrincipal \
         --scope "${kvScope}" 1>/dev/null
 }
 
@@ -91,8 +105,6 @@ fi
 echo "Using certificate ${certificateName} with thumbprint ${thumbprint}"
 
 # Upload the Key Vault certificate to the function app
-certificateId=$(az keyvault certificate show --name "${certificateName}" --vault-name "${keyVaultSecScan}" --query "id" -o tsv)
-
 az webapp config ssl import \
     --resource-group "${resourceGroupName}" \
     --name "${webApiFuncAppName}" \
