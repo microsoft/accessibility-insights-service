@@ -104,12 +104,25 @@ fi
 
 echo "Using certificate ${certificateName} with thumbprint ${thumbprint}"
 
-# Upload the Key Vault certificate to the function app
-az webapp config ssl import \
+# Download the certificate from Key Vault and upload it to the function app directly.
+# This avoids the need for the Microsoft.Azure.WebSites resource provider service principal
+# to have access to Key Vault (which may not be available in all tenants).
+certFile=$(mktemp /tmp/cert-"${certificateName}".pfx)
+trap 'rm -f "${certFile}"; onExit-enable-function-app-cert-auth' EXIT
+
+az keyvault secret download \
+    --name "${certificateName}" \
+    --vault-name "${keyVaultSecScan}" \
+    --encoding base64 \
+    --file "${certFile}" 1>/dev/null
+
+az webapp config ssl upload \
     --resource-group "${resourceGroupName}" \
     --name "${webApiFuncAppName}" \
-    --key-vault "${keyVaultSecScan}" \
-    --key-vault-certificate-name "${certificateName}" 1>/dev/null
+    --certificate-file "${certFile}" \
+    --certificate-password "" 1>/dev/null
+
+rm -f "${certFile}"
 
 echo "Imported certificate ${certificateName} to ${webApiFuncAppName}"
 
