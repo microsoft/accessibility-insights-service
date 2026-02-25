@@ -107,7 +107,7 @@ echo "Using certificate ${certificateName} with thumbprint ${thumbprint}"
 # Download the certificate from Key Vault and upload it to the function app directly.
 # This avoids the need for the Microsoft.Azure.WebSites resource provider service principal
 # to have access to Key Vault (which may not be available in all tenants).
-certFile=$(mktemp /tmp/cert-"${certificateName}".pfx)
+certFile=$(mktemp /tmp/cert-XXXXXX.pfx)
 trap 'rm -f "${certFile}"; onExit-enable-function-app-cert-auth' EXIT
 
 az keyvault secret download \
