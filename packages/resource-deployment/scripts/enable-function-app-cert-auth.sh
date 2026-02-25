@@ -108,6 +108,7 @@ echo "Using certificate ${certificateName} with thumbprint ${thumbprint}"
 # This avoids the need for the Microsoft.Azure.WebSites resource provider service principal
 # to have access to Key Vault (which may not be available in all tenants).
 certFile=$(mktemp /tmp/cert-XXXXXX.pfx)
+rm -f "${certFile}"
 trap 'rm -f "${certFile}"; onExit-enable-function-app-cert-auth' EXIT
 
 az keyvault secret download \
