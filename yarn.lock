@@ -6112,7 +6112,7 @@ __metadata:
     rollup: "npm:^4.52.5"
     serialize-error: "npm:^8.1.0"
     sha.js: "npm:^2.4.12"
-    ts-jest: "npm:^29.4.5"
+    ts-jest: "npm:^29.4.6"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
     yargs: "npm:^17.7.2"
@@ -6192,7 +6192,7 @@ __metadata:
     rimraf: "npm:^6.0.1"
     serialize-error: "npm:^8.1.0"
     sha.js: "npm:^2.4.12"
-    ts-jest: "npm:^29.4.5"
+    ts-jest: "npm:^29.4.6"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
     uuid-with-v6: "npm:^2.0.0"
@@ -6237,7 +6237,7 @@ __metadata:
     shellcheck: "npm:^4.1.0"
     simple-git: "npm:^3.29.0"
     syncpack: "npm:^8.4.11"
-    ts-jest: "npm:^29.4.5"
+    ts-jest: "npm:^29.4.6"
     tslint: "npm:^6.1.3"
     typescript: "npm:^5.5.3"
   languageName: unknown
@@ -6831,7 +6831,7 @@ __metadata:
     puppeteer: "npm:^24.31.0"
     reflect-metadata: "npm:^0.2.2"
     rimraf: "npm:^6.0.1"
-    ts-jest: "npm:^29.4.5"
+    ts-jest: "npm:^29.4.6"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
   languageName: unknown
@@ -6862,7 +6862,7 @@ __metadata:
     npm-run-all: "npm:^4.1.5"
     reflect-metadata: "npm:^0.2.2"
     rimraf: "npm:^6.0.1"
-    ts-jest: "npm:^29.4.5"
+    ts-jest: "npm:^29.4.6"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
   languageName: unknown
@@ -6946,7 +6946,7 @@ __metadata:
     reflect-metadata: "npm:^0.2.2"
     rimraf: "npm:^6.0.1"
     storage-documents: "workspace:*"
-    ts-jest: "npm:^29.4.5"
+    ts-jest: "npm:^29.4.6"
     ts-loader: "npm:^9.5.4"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
@@ -8105,7 +8105,7 @@ __metadata:
     rimraf: "npm:^6.0.1"
     serialize-error: "npm:^8.1.0"
     sha.js: "npm:^2.4.12"
-    ts-jest: "npm:^29.4.5"
+    ts-jest: "npm:^29.4.6"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
     uuid-with-v6: "npm:^2.0.0"
@@ -9046,7 +9046,7 @@ __metadata:
     node-loader: "npm:^2.1.0"
     npm-run-all: "npm:^4.1.5"
     rimraf: "npm:^6.0.1"
-    ts-jest: "npm:^29.4.5"
+    ts-jest: "npm:^29.4.6"
     ts-loader: "npm:^9.5.4"
     typescript: "npm:^5.5.3"
     webpack: "npm:^5.102.1"
@@ -10664,7 +10664,7 @@ __metadata:
     rimraf: "npm:^6.0.1"
     service-library: "workspace:*"
     storage-documents: "workspace:*"
-    ts-jest: "npm:^29.4.5"
+    ts-jest: "npm:^29.4.6"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
     web-api-client: "workspace:*"
@@ -11392,7 +11392,7 @@ __metadata:
     rimraf: "npm:^6.0.1"
     service-library: "workspace:*"
     shebang-loader: "npm:^0.0.1"
-    ts-jest: "npm:^29.4.5"
+    ts-jest: "npm:^29.4.6"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
     web-api-client: "workspace:*"
@@ -13855,7 +13855,7 @@ __metadata:
     npm-run-all: "npm:^4.1.5"
     reflect-metadata: "npm:^0.2.2"
     rimraf: "npm:^6.0.1"
-    ts-jest: "npm:^29.4.5"
+    ts-jest: "npm:^29.4.6"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
   languageName: unknown
@@ -15731,7 +15731,7 @@ __metadata:
     rimraf: "npm:^6.0.1"
     scanner-global-library: "workspace:*"
     storage-documents: "workspace:*"
-    ts-jest: "npm:^29.4.5"
+    ts-jest: "npm:^29.4.6"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
   languageName: unknown
@@ -15766,7 +15766,7 @@ __metadata:
     rimraf: "npm:^6.0.1"
     service-library: "workspace:*"
     storage-documents: "workspace:*"
-    ts-jest: "npm:^29.4.5"
+    ts-jest: "npm:^29.4.6"
     ts-loader: "npm:^9.5.4"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
@@ -15815,7 +15815,7 @@ __metadata:
     scanner-global-library: "workspace:*"
     service-library: "workspace:*"
     storage-documents: "workspace:*"
-    ts-jest: "npm:^29.4.5"
+    ts-jest: "npm:^29.4.6"
     ts-loader: "npm:^9.5.4"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
@@ -16507,7 +16507,7 @@ __metadata:
     rimraf: "npm:^6.0.1"
     service-library: "workspace:*"
     storage-documents: "workspace:*"
-    ts-jest: "npm:^29.4.5"
+    ts-jest: "npm:^29.4.6"
     ts-loader: "npm:^9.5.4"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
@@ -16555,7 +16555,7 @@ __metadata:
     scanner-global-library: "workspace:*"
     service-library: "workspace:*"
     storage-documents: "workspace:*"
-    ts-jest: "npm:^29.4.5"
+    ts-jest: "npm:^29.4.6"
     ts-loader: "npm:^9.5.4"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
@@ -17147,7 +17147,7 @@ __metadata:
     reflect-metadata: "npm:^0.2.2"
     rimraf: "npm:^6.0.1"
     storage-documents: "workspace:*"
-    ts-jest: "npm:^29.4.5"
+    ts-jest: "npm:^29.4.6"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
   languageName: unknown
@@ -17302,7 +17302,7 @@ __metadata:
     scanner-global-library: "workspace:*"
     sha.js: "npm:^2.4.12"
     storage-documents: "workspace:*"
-    ts-jest: "npm:^29.4.5"
+    ts-jest: "npm:^29.4.6"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
     yargs: "npm:^17.7.2"
@@ -17844,7 +17844,7 @@ __metadata:
     npm-run-all: "npm:^4.1.5"
     reflect-metadata: "npm:^0.2.2"
     rimraf: "npm:^6.0.1"
-    ts-jest: "npm:^29.4.5"
+    ts-jest: "npm:^29.4.6"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
   languageName: unknown
@@ -18574,9 +18574,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ts-jest@npm:^29.4.5":
-  version: 29.4.5
-  resolution: "ts-jest@npm:29.4.5"
+"ts-jest@npm:^29.4.6":
+  version: 29.4.6
+  resolution: "ts-jest@npm:29.4.6"
   dependencies:
     bs-logger: "npm:^0.2.6"
     fast-json-stable-stringify: "npm:^2.1.0"
@@ -18610,7 +18610,7 @@ __metadata:
       optional: true
   bin:
     ts-jest: cli.js
-  checksum: 10/48d867e0707474241b6339336cbe57d85122d6018fef957c8c095ff365e5d9428f112fe2cb11a8301343bbd32cec3ff639523d9bf9eea3a371734aa9a100f8a2
+  checksum: 10/e0ff9e13f684166d5331808b288043b8054f49a1c2970480a92ba3caec8d0ff20edd092f2a4e7a3ad8fcb9ba4d674bee10ec7ee75046d8066bbe43a7d16cf72e
   languageName: node
   linkType: hard
 
@@ -19322,7 +19322,7 @@ __metadata:
     reflect-metadata: "npm:^0.2.2"
     rimraf: "npm:^6.0.1"
     service-library: "workspace:*"
-    ts-jest: "npm:^29.4.5"
+    ts-jest: "npm:^29.4.6"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
   languageName: unknown
@@ -19357,7 +19357,7 @@ __metadata:
     rimraf: "npm:^6.0.1"
     service-library: "workspace:*"
     storage-documents: "workspace:*"
-    ts-jest: "npm:^29.4.5"
+    ts-jest: "npm:^29.4.6"
     ts-loader: "npm:^9.5.4"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
@@ -19391,7 +19391,7 @@ __metadata:
     rimraf: "npm:^6.0.1"
     service-library: "workspace:*"
     storage-documents: "workspace:*"
-    ts-jest: "npm:^29.4.5"
+    ts-jest: "npm:^29.4.6"
     ts-loader: "npm:^9.5.4"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
@@ -19450,7 +19450,7 @@ __metadata:
     service-library: "workspace:*"
     sha.js: "npm:^2.4.12"
     storage-documents: "workspace:*"
-    ts-jest: "npm:^29.4.5"
+    ts-jest: "npm:^29.4.6"
     ts-loader: "npm:^9.5.4"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
@@ -19489,7 +19489,7 @@ __metadata:
     rimraf: "npm:^6.0.1"
     service-library: "workspace:*"
     storage-documents: "workspace:*"
-    ts-jest: "npm:^29.4.5"
+    ts-jest: "npm:^29.4.6"
     ts-loader: "npm:^9.5.4"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
@@ -19533,7 +19533,7 @@ __metadata:
     service-library: "workspace:*"
     sha.js: "npm:^2.4.12"
     storage-documents: "workspace:*"
-    ts-jest: "npm:^29.4.5"
+    ts-jest: "npm:^29.4.6"
     ts-loader: "npm:^9.5.4"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
@@ -19573,7 +19573,7 @@ __metadata:
     rimraf: "npm:^6.0.1"
     service-library: "workspace:*"
     storage-documents: "workspace:*"
-    ts-jest: "npm:^29.4.5"
+    ts-jest: "npm:^29.4.6"
     ts-loader: "npm:^9.5.4"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
@@ -19615,7 +19615,7 @@ __metadata:
     rimraf: "npm:^6.0.1"
     service-library: "workspace:*"
     storage-documents: "workspace:*"
-    ts-jest: "npm:^29.4.5"
+    ts-jest: "npm:^29.4.6"
     ts-loader: "npm:^9.5.4"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
