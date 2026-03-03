@@ -4377,6 +4377,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@opentelemetry/semantic-conventions@npm:^1.40.0":
+  version: 1.40.0
+  resolution: "@opentelemetry/semantic-conventions@npm:1.40.0"
+  checksum: 10/edb58894590e42e631006a9f5741955fad248e3589aa334a5e59080c535ead44ee9f376c444ef2be094d1e6c1a2e596538c1df0a31a04508551e91b1a5d5c93c
+  languageName: node
+  linkType: hard
+
 "@opentelemetry/sql-common@npm:^0.41.2":
   version: 0.41.2
   resolution: "@opentelemetry/sql-common@npm:0.41.2"
@@ -6207,7 +6214,7 @@ __metadata:
     "@opentelemetry/exporter-metrics-otlp-grpc": "npm:^0.57.1"
     "@opentelemetry/resources": "npm:^1.15.0"
     "@opentelemetry/sdk-metrics": "npm:^1.28.0"
-    "@opentelemetry/semantic-conventions": "npm:^1.38.0"
+    "@opentelemetry/semantic-conventions": "npm:^1.40.0"
     "@sindresorhus/fnv1a": "npm:^2.0.1"
     "@types/escape-html": "npm:^1.0.4"
     "@types/jest": "npm:^29.5.12"
@@ -13874,7 +13881,7 @@ __metadata:
     "@opentelemetry/instrumentation": "npm:^0.208.0"
     "@opentelemetry/resources": "npm:^1.15.0"
     "@opentelemetry/sdk-metrics": "npm:^1.28.0"
-    "@opentelemetry/semantic-conventions": "npm:^1.38.0"
+    "@opentelemetry/semantic-conventions": "npm:^1.40.0"
     "@types/dotenv": "npm:^8.2.3"
     "@types/jest": "npm:^29.5.12"
     "@types/lodash": "npm:^4.17.24"
