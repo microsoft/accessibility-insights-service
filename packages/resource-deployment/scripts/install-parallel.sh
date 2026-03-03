@@ -182,6 +182,7 @@ function install() {
     . "${0%/*}/create-job-schedule.sh"
     . "${0%/*}/create-function-apps.sh"
     . "${0%/*}/create-all-private-links.sh"
+    . "${0%/*}/setup-key-vault-cert-auth.sh"
 
     . "${0%/*}/create-dashboard.sh" &
     dashboardProcessId="$!"
