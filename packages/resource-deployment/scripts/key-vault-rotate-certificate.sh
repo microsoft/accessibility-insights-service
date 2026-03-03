@@ -95,7 +95,7 @@ if [[ -z ${resourceGroupName} ]]; then
 fi
 
 if [[ -z ${environment} ]]; then
-    environment="prod"
+    environment="dev"
 fi
 
 # Login to Azure if required

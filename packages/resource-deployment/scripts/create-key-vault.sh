@@ -6,9 +6,6 @@
 # shellcheck disable=SC1091
 set -eo pipefail
 
-export resourceGroupName
-export keyVault
-
 # Set default ARM template files
 createKeyVaultTemplateFile="${0%/*}/../templates/key-vault-create.template.json"
 createKeyVaultSecScanTemplateFile="${0%/*}/../templates/key-vault-sec-scan-create.template.json"
