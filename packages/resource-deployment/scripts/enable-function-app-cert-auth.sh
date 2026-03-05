@@ -132,7 +132,7 @@ az functionapp update \
     --resource-group "${resourceGroupName}" \
     --name "${webApiFuncAppName}" \
     --set clientCertEnabled=true \
-    --set clientCertMode=Required 1>/dev/null
+    --set clientCertMode=Optional 1>/dev/null
 
 echo "Enabled client certificate authentication on ${webApiFuncAppName}"
 
