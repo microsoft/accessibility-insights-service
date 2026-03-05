@@ -71,27 +71,38 @@ function setAccessPolicies() {
         --enable-rbac-authorization "true" 1>/dev/null
 }
 
+function createRoleAssignmentIfNotExists() {
+    local role="$1"
+    local assigneeObjectId="$2"
+    local scope="$3"
+
+    local existing
+    existing=$(az role assignment list \
+        --role "${role}" \
+        --assignee "${assigneeObjectId}" \
+        --scope "${scope}" \
+        --query "[].id" -o tsv)
+
+    if [[ -n "${existing}" ]]; then
+        echo "Role assignment '${role}' already exists for ${assigneeObjectId} on ${scope##*/}"
+    else
+        echo "Assigning '${role}' role to ${assigneeObjectId} on ${scope##*/}"
+        az role assignment create \
+            --role "${role}" \
+            --assignee-object-id "${assigneeObjectId}" \
+            --assignee-principal-type ServicePrincipal \
+            --scope "${scope}" 1>/dev/null
+    fi
+}
+
 function assignRbacRoles() {
     local kvScope="subscriptions/${subscription}/resourcegroups/${resourceGroupName}/providers/Microsoft.KeyVault/vaults/${keyVault}"
 
     if [[ "${keyVaultType}" == "secscan" ]]; then
-        echo "Assigning Key Vault Secrets User role to ${objectId} on ${keyVault}"
-        az role assignment create \
-            --role "Key Vault Secrets User" \
-            --assignee "${objectId}" \
-            --scope "${kvScope}" 1>/dev/null
-
-        echo "Assigning Key Vault Reader role to ${objectId} on ${keyVault}"
-        az role assignment create \
-            --role "Key Vault Reader" \
-            --assignee "${objectId}" \
-            --scope "${kvScope}" 1>/dev/null
+        createRoleAssignmentIfNotExists "Key Vault Secrets User" "${objectId}" "${kvScope}"
+        createRoleAssignmentIfNotExists "Key Vault Reader" "${objectId}" "${kvScope}"
     else
-        echo "Assigning Key Vault Secrets Officer role to ${objectId} on ${keyVault}"
-        az role assignment create \
-            --role "Key Vault Secrets Officer" \
-            --assignee "${objectId}" \
-            --scope "${kvScope}" 1>/dev/null
+        createRoleAssignmentIfNotExists "Key Vault Secrets Officer" "${objectId}" "${kvScope}"
     fi
 }
 
