@@ -47,11 +47,30 @@ if [[ ${environment} != ppe* ]]; then
     exit 0
 fi
 
+if [[ -z ${certificateName} ]]; then
+    certificateName="secScanCert"
+fi
+
+. "${0%/*}/get-resource-names.sh"
+
 echo "Step 1/3: Creating security scan Key Vault"
 "${0%/*}/create-key-vault.sh"
 
-echo "Step 2/3: Creating certificate in Key Vault"
-"${0%/*}/key-vault-rotate-certificate.sh"
+echo "Step 2/3: Validating certificate in Key Vault"
+certStatus=$(az keyvault certificate show \
+    --name "${certificateName}" \
+    --vault-name "${keyVaultSecScan}" \
+    --query "attributes.enabled" -o tsv 2>/dev/null) || certStatus=""
+
+if [[ -z "${certStatus}" ]]; then
+    echo "Error: Certificate '${certificateName}' not found in key vault '${keyVaultSecScan}'. Use key-vault-rotate-certificate.sh script to create the certificate before running this script."
+    exit 1
+elif [[ "${certStatus}" != "true" ]]; then
+    echo "Error: Certificate '${certificateName}' is disabled in key vault '${keyVaultSecScan}'. Enable the certificate before running this script."
+    exit 1
+else
+    echo "Certificate '${certificateName}' is present and enabled in key vault '${keyVaultSecScan}'"
+fi
 
 echo "Step 3/3: Enabling certificate authentication on function app"
 "${0%/*}/enable-function-app-cert-auth.sh"

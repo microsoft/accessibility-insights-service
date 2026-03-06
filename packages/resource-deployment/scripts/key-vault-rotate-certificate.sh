@@ -113,7 +113,29 @@ fi
 getCurrentUserDetails
 trap 'onExit-key-vault-rotate-certificate' EXIT
 
-certificatePolicyFile="${0%/*}/../templates/${certificatePolicyPrefix}-${environment}.json"
+function ensureCertificateIssuer() {
+    certificatePolicyFile="${0%/*}/../templates/${certificatePolicyPrefix}-${environment}.json"
+    local issuerName
+    issuerName=$(jq -r '.issuerParameters.name' "${certificatePolicyFile}")
+
+    if [[ "${issuerName}" == "Self" || "${issuerName}" == "Unknown" ]]; then
+        return
+    fi
+
+    local existingIssuer
+    existingIssuer=$(az keyvault certificate issuer show --vault-name "${keyVaultSecScan}" --issuer-name "${issuerName}" --query "provider" -o tsv 2>/dev/null) || existingIssuer=""
+
+    if [[ -z "${existingIssuer}" ]]; then
+        echo "Registering certificate issuer ${issuerName} in ${keyVaultSecScan}"
+        az keyvault certificate issuer create \
+            --vault-name "${keyVaultSecScan}" \
+            --issuer-name "${issuerName}" \
+            --provider-name "${issuerName}" 1>/dev/null
+    else
+        echo "Certificate issuer ${issuerName} already exists in ${keyVaultSecScan}."
+    fi
+}
 
 grantUserAccessToKeyVault
+ensureCertificateIssuer
 createNewCertificateVersion
