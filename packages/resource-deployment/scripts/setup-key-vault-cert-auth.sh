@@ -53,8 +53,27 @@ fi
 
 . "${0%/*}/get-resource-names.sh"
 
+enableKeyVaultPublicAccess() {
+    echo "Enabling public network access for key vault ${keyVaultSecScan}"
+    az keyvault update \
+        --name "${keyVaultSecScan}" \
+        --resource-group "${resourceGroupName}" \
+        --public-network-access Enabled 1>/dev/null
+}
+
+disableKeyVaultPublicAccess() {
+    echo "Disabling public network access for key vault ${keyVaultSecScan}"
+    az keyvault update \
+        --name "${keyVaultSecScan}" \
+        --resource-group "${resourceGroupName}" \
+        --public-network-access Disabled 1>/dev/null
+}
+
 echo "Step 1/3: Creating security scan Key Vault"
 "${0%/*}/create-key-vault.sh"
+
+enableKeyVaultPublicAccess
+trap 'disableKeyVaultPublicAccess' EXIT
 
 echo "Step 2/3: Creating certificate in Key Vault"
 "${0%/*}/key-vault-rotate-certificate.sh"
