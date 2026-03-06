@@ -76,22 +76,19 @@ function createRoleAssignmentIfNotExists() {
     local assigneeObjectId="$2"
     local scope="$3"
 
-    local existing
-    existing=$(az role assignment list \
+    echo "Assigning '${role}' role to ${assigneeObjectId} on ${scope##*/}"
+    local output
+    if output=$(az role assignment create \
         --role "${role}" \
-        --assignee "${assigneeObjectId}" \
-        --scope "${scope}" \
-        --query "[].id" -o tsv)
-
-    if [[ -n "${existing}" ]]; then
-        echo "Role assignment '${role}' already exists for ${assigneeObjectId} on ${scope##*/}"
+        --assignee-object-id "${assigneeObjectId}" \
+        --assignee-principal-type ServicePrincipal \
+        --scope "${scope}" 2>&1); then
+        echo "Role assignment '${role}' created successfully"
+    elif echo "${output}" | grep -q "RoleAssignmentExists"; then
+        echo "Role assignment '${role}' already exists for ${assigneeObjectId}"
     else
-        echo "Assigning '${role}' role to ${assigneeObjectId} on ${scope##*/}"
-        az role assignment create \
-            --role "${role}" \
-            --assignee-object-id "${assigneeObjectId}" \
-            --assignee-principal-type ServicePrincipal \
-            --scope "${scope}" 1>/dev/null
+        echo "Failed to create role assignment: ${output}"
+        return 1
     fi
 }
 
