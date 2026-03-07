@@ -8,7 +8,6 @@ set -eo pipefail
 
 # Еxport variables to all child processes
 export apiManagementName
-
 export batchAccountName
 export cosmosAccountName
 export environment
@@ -37,7 +36,6 @@ Usage: ${BASH_SOURCE}
 -s <subscription name or ID>
 -v <release version>
 -b <Azure Batch object ID>
-
 [-d <pass \"true\" to force VM pools to drop>]
 [-w <pass \"true\" to preserve docker images in Azure Container Registry>]
 
@@ -95,7 +93,6 @@ while getopts ":r:s:l:e:o:p:b:v:d:w:" option; do
     p) publisherEmail=${OPTARG} ;;
     b) azureBatchObjectId=${OPTARG} ;;
     v) releaseVersion=${OPTARG} ;;
-
     d) dropPools=${OPTARG} ;;
     w) keepImages=${OPTARG} ;;
     *) exitWithUsageInfo ;;
