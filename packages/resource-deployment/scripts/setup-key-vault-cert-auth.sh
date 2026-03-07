@@ -73,19 +73,16 @@ disableKeyVaultPublicAccess() {
         --public-network-access Disabled 1>/dev/null
 }
 
-echo "Step 1/4: Creating security scan Key Vault"
+echo "Step 1/3: Creating security scan Key Vault"
 "${0%/*}/create-key-vault.sh"
 
 enableKeyVaultPublicAccess
 trap 'disableKeyVaultPublicAccess' EXIT
 
-echo "Step 2/4: Creating certificate in Key Vault"
+echo "Step 2/3: Creating certificate in Key Vault"
 "${0%/*}/key-vault-rotate-certificate.sh"
 
-echo "Step 3/4: Verifying app registration for certificate authentication"
-"${0%/*}/create-cert-auth-app-registration.sh" -r "${resourceGroupName}" -a "${appRegistrationClientId}"
-
-echo "Step 4/4: Enabling certificate authentication on function app"
+echo "Step 3/3: Enabling certificate authentication on function app"
 "${0%/*}/enable-function-app-cert-auth.sh" -r "${resourceGroupName}" -a "${appRegistrationClientId}"
 
 echo "Certificate authentication setup completed successfully"
