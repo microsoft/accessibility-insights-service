@@ -7,28 +7,30 @@ set -eo pipefail
 
 exitWithUsageInfo() {
     echo "
-Usage: ${BASH_SOURCE} -r <resource group> -e <environment> [-n <certificate name>]
+Usage: ${BASH_SOURCE} -r <resource group> -e <environment> [-a <app registration client id>] [-n <certificate name>]
 
 Options:
     -r  Resource group name (required)
     -e  Environment name (required, must be ppe)
+    -a  App registration client ID (optional, must be pre-created manually)
     -n  Certificate name (default: secScanCert)
 
 This script performs end-to-end setup of certificate authentication for the function app:
     1. Creates the security scan Key Vault
     2. Creates/rotates a certificate in the Key Vault
-    3. Creates the app registration for certificate authentication
+    3. Verifies the app registration for certificate authentication
     4. Enables certificate authentication on the function app
 "
     exit 1
 }
 
 # Read script arguments
-while getopts ":r:e:n:" option; do
+while getopts ":r:e:n:a:" option; do
     case ${option} in
     r) resourceGroupName=${OPTARG} ;;
     e) environment=${OPTARG} ;;
     n) certificateName=${OPTARG} ;;
+    a) appRegistrationClientId=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
@@ -40,6 +42,7 @@ fi
 export resourceGroupName
 export environment
 export certificateName
+export appRegistrationClientId
 export keyVaultType="secscan"
 export objectId="bda937a5-4fd5-4ca0-9710-c1729a120c07" # Object ID for "Security Scan Key Vault Access" in tenant
 
@@ -79,10 +82,10 @@ trap 'disableKeyVaultPublicAccess' EXIT
 echo "Step 2/4: Creating certificate in Key Vault"
 "${0%/*}/key-vault-rotate-certificate.sh"
 
-echo "Step 3/4: Creating app registration for certificate authentication"
-"${0%/*}/create-cert-auth-app-registration.sh" -r "${resourceGroupName}"
+echo "Step 3/4: Verifying app registration for certificate authentication"
+"${0%/*}/create-cert-auth-app-registration.sh" -r "${resourceGroupName}" -a "${appRegistrationClientId}"
 
 echo "Step 4/4: Enabling certificate authentication on function app"
-"${0%/*}/enable-function-app-cert-auth.sh"
+"${0%/*}/enable-function-app-cert-auth.sh" -r "${resourceGroupName}" -a "${appRegistrationClientId}"
 
 echo "Certificate authentication setup completed successfully"
