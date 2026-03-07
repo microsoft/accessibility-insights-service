@@ -37,19 +37,10 @@ existingAppId=$(az ad app list \
     --query "[?displayName=='${certAuthAppRegistrationName}'].appId | [0]" \
     -o tsv 2>/dev/null) || existingAppId=""
 
-if [[ -n "${existingAppId}" ]]; then
-    echo "App registration ${certAuthAppRegistrationName} already exists with appId ${existingAppId}"
-else
-    echo "Creating app registration ${certAuthAppRegistrationName}..."
-    existingAppId=$(az ad app create \
-        --display-name "${certAuthAppRegistrationName}" \
-        --sign-in-audience AzureADMyOrg \
-        --query "appId" -o tsv)
-
-    if [[ -z "${existingAppId}" ]]; then
-        echo "Error: Failed to create app registration ${certAuthAppRegistrationName}"
-        exit 1
-    fi
-
-    echo "Created app registration ${certAuthAppRegistrationName} with appId ${existingAppId}"
+if [[ -z "${existingAppId}" ]]; then
+    echo "Error: App registration ${certAuthAppRegistrationName} not found."
+    echo "Create it manually in Azure Entra ID with display name '${certAuthAppRegistrationName}' and single-tenant access, then re-run this script."
+    exit 1
 fi
+
+echo "Found app registration ${certAuthAppRegistrationName} with appId ${existingAppId}"
