@@ -11,17 +11,17 @@ export MSYS_NO_PATHCONV=1
 
 exitWithUsageInfo() {
     echo "
-Usage: ${BASH_SOURCE} -r <resource group> [-n <certificate name>] [-a <app registration client id>]
+Usage: ${BASH_SOURCE} -r <resource group> [-n <certificate name>]
 "
     exit 1
 }
 
 # Read script arguments
-while getopts ":r:n:a:" option; do
+while getopts ":r:n:" option; do
     case ${option} in
     r) resourceGroupName=${OPTARG} ;;
     n) certificateName=${OPTARG} ;;
-    a) appRegistrationClientId=${OPTARG} ;;
+
     *) exitWithUsageInfo ;;
     esac
 done
@@ -127,43 +127,6 @@ az webapp config ssl upload \
 rm -f "${certFile}"
 
 echo "Imported certificate ${certificateName} to ${webApiFuncAppName}"
-
-# Register the certificate's public key on the Azure AD App Registration
-# so the function app can authenticate to Azure AD using client certificate credentials
-if [[ -z "${appRegistrationClientId}" ]]; then
-    # Resolve from the app registration created for certificate auth
-    appRegistrationClientId=$(az ad app list \
-        --display-name "${certAuthAppRegistrationName}" \
-        --query "[?displayName=='${certAuthAppRegistrationName}'].appId | [0]" \
-        -o tsv 2>/dev/null) || appRegistrationClientId=""
-fi
-
-if [[ -n "${appRegistrationClientId}" ]]; then
-    echo "Registering certificate on App Registration ${appRegistrationClientId}..."
-
-    certPemFile=$(mktemp /tmp/cert-XXXXXX.pem)
-    rm -f "${certPemFile}"
-    trap 'rm -f "${certPemFile}"; onExit-enable-function-app-cert-auth' EXIT
-
-    az keyvault certificate download \
-        --name "${certificateName}" \
-        --vault-name "${keyVaultSecScan}" \
-        --file "${certPemFile}" \
-        --encoding PEM 1>/dev/null
-
-    az ad app credential reset \
-        --id "${appRegistrationClientId}" \
-        --cert "@${certPemFile}" \
-        --append 1>/dev/null
-
-    rm -f "${certPemFile}"
-
-    echo "Registered certificate on App Registration ${appRegistrationClientId}"
-else
-    echo "WARNING: No app registration client ID found. Skipping certificate registration on App Registration."
-    echo "The function app may fail to authenticate to Azure AD with error AADSTS700027."
-    echo "Re-run with -a <app registration client id> to register the certificate."
-fi
 
 # Enable client certificate authentication on the function app
 az functionapp update \

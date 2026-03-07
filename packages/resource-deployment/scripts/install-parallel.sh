@@ -8,7 +8,7 @@ set -eo pipefail
 
 # Еxport variables to all child processes
 export apiManagementName
-export appRegistrationClientId
+
 export batchAccountName
 export cosmosAccountName
 export environment
@@ -37,7 +37,7 @@ Usage: ${BASH_SOURCE}
 -s <subscription name or ID>
 -v <release version>
 -b <Azure Batch object ID>
-[-a <app registration client id>]
+
 [-d <pass \"true\" to force VM pools to drop>]
 [-w <pass \"true\" to preserve docker images in Azure Container Registry>]
 
@@ -85,7 +85,7 @@ onExit-install() {
 trap 'onExit-install' EXIT
 
 # Read script arguments
-while getopts ":r:s:l:e:o:p:b:v:a:d:w:" option; do
+while getopts ":r:s:l:e:o:p:b:v:d:w:" option; do
     case ${option} in
     r) resourceGroupName=${OPTARG} ;;
     s) subscription=${OPTARG} ;;
@@ -95,7 +95,7 @@ while getopts ":r:s:l:e:o:p:b:v:a:d:w:" option; do
     p) publisherEmail=${OPTARG} ;;
     b) azureBatchObjectId=${OPTARG} ;;
     v) releaseVersion=${OPTARG} ;;
-    a) appRegistrationClientId=${OPTARG} ;;
+
     d) dropPools=${OPTARG} ;;
     w) keepImages=${OPTARG} ;;
     *) exitWithUsageInfo ;;
@@ -185,13 +185,7 @@ function install() {
     . "${0%/*}/create-job-schedule.sh"
     . "${0%/*}/create-function-apps.sh"
     . "${0%/*}/create-all-private-links.sh"
-
-    if [[ -n ${appRegistrationClientId} ]]; then
-        . "${0%/*}/setup-key-vault-cert-auth.sh"
-    else
-        echo "Skipping certificate authentication setup. No app registration client ID provided."
-    fi
-
+    . "${0%/*}/setup-key-vault-cert-auth.sh"
     . "${0%/*}/create-dashboard.sh" &
     dashboardProcessId="$!"
 
