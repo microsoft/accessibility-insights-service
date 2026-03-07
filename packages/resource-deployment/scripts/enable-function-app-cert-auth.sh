@@ -131,11 +131,11 @@ echo "Imported certificate ${certificateName} to ${webApiFuncAppName}"
 # Register the certificate's public key on the Azure AD App Registration
 # so the function app can authenticate to Azure AD using client certificate credentials
 if [[ -z "${appRegistrationClientId}" ]]; then
-    # Resolve from the managed identity used by the function app
-    appRegistrationClientId=$(az identity show \
-        --name "${webApiManagedIdentityName}" \
-        --resource-group "${resourceGroupName}" \
-        --query "clientId" -o tsv 2>/dev/null) || appRegistrationClientId=""
+    # Resolve from the app registration created for certificate auth
+    appRegistrationClientId=$(az ad app list \
+        --display-name "${certAuthAppRegistrationName}" \
+        --query "[?displayName=='${certAuthAppRegistrationName}'].appId | [0]" \
+        -o tsv 2>/dev/null) || appRegistrationClientId=""
 fi
 
 if [[ -n "${appRegistrationClientId}" ]]; then
