@@ -142,6 +142,7 @@ if [[ -n "${appRegistrationClientId}" ]]; then
     echo "Registering certificate on App Registration ${appRegistrationClientId}..."
 
     certPemFile=$(mktemp /tmp/cert-XXXXXX.pem)
+    rm -f "${certPemFile}"
     trap 'rm -f "${certPemFile}"; onExit-enable-function-app-cert-auth' EXIT
 
     az keyvault certificate download \
