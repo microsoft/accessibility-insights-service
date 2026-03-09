@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { injectable } from 'inversify';
-import { Url } from 'common';
+import { inject, injectable } from 'inversify';
+import { ServiceConfiguration, Url } from 'common';
 import { AuthenticationType } from 'storage-documents';
 import { isEmpty } from 'lodash';
 
@@ -35,10 +35,21 @@ const authProviders = [
 
 @injectable()
 export class LoginPageDetector {
-    public getAuthenticationType(url: string): AuthenticationType {
+    constructor(@inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration) {}
+
+    public async getAuthenticationType(url: string): Promise<AuthenticationType> {
         const urlObj = Url.tryParseUrlString(url);
         if (urlObj === undefined) {
             return undefined;
+        }
+
+        // Check if the URL matches the E2E test site URL to use authentication.
+        const availabilityTestConfig = await this.serviceConfig.getConfigValue('availabilityTestConfig');
+        if (!isEmpty(availabilityTestConfig?.urlToScan)) {
+            const configUrlObj = Url.tryParseUrlString(availabilityTestConfig.urlToScan);
+            if (configUrlObj !== undefined && urlObj.protocol === configUrlObj.protocol && urlObj.host === configUrlObj.host) {
+                return 'bearerToken';
+            }
         }
 
         const authProvider = authProviders.find((provider) => provider.pattern.test(urlObj.href));

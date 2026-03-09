@@ -31,7 +31,7 @@ describe(UserAgentPlugin, () => {
         loginPageDetectorMock = Mock.ofType<LoginPageDetector>();
         loginPageDetectorMock
             .setup((o) => o.getAuthenticationType(url))
-            .returns(() => undefined)
+            .returns(() => Promise.resolve(undefined))
             .verifiable();
         puppeteerBrowserStub = {
             userAgent: () => Promise.resolve(chromiumUserAgent),
@@ -91,7 +91,7 @@ describe(UserAgentPlugin, () => {
         loginPageDetectorMock.reset();
         loginPageDetectorMock
             .setup((o) => o.getAuthenticationType(url))
-            .returns(() => 'entraId')
+            .returns(() => Promise.resolve('entraId'))
             .verifiable();
         puppeteerPageMock
             .setup((o) => o.setUserAgent(expectedLinuxUserAgent, userAgentMetadata))

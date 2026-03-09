@@ -73,7 +73,7 @@ export class PageAnalyzer {
         }
 
         const redirectResult = await this.detectRedirection(url, page, actualResponse.operationResult);
-        const authenticationType = this.detectAuth(page);
+        const authenticationType = await this.detectAuth(page);
         const result = {
             url,
             redirection: redirectResult.redirection,
@@ -166,8 +166,8 @@ export class PageAnalyzer {
         };
     }
 
-    private detectAuth(page: Puppeteer.Page): AuthenticationType {
-        const authenticationType = this.loginPageDetector.getAuthenticationType(page.url());
+    private async detectAuth(page: Puppeteer.Page): Promise<AuthenticationType> {
+        const authenticationType = await this.loginPageDetector.getAuthenticationType(page.url());
         if (authenticationType !== undefined) {
             this.logger?.logWarn('Page authentication was detected.', {
                 authenticationType,

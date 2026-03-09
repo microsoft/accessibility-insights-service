@@ -132,8 +132,10 @@ export class PageNavigator {
             return this.getOperationErrorResult(operationResult);
         }
 
-        const authType = this.loginPageDetector.getAuthenticationType(page.url());
-        if (disableAuthenticationOverride !== true && authType !== undefined) {
+        const authType = await this.loginPageDetector.getAuthenticationType(page.url());
+        // Skip validation for bearerToken auth type - token is passed via HTTP header on every request,
+        // unlike Entra ID which uses a browser-based login workflow with session persistence.
+        if (disableAuthenticationOverride !== true && authType !== undefined && authType !== 'bearerToken') {
             this.logger?.logError(
                 'Authentication is required for this page. Either enable authentication for the website or ensure it stays active between browser sessions.',
                 {

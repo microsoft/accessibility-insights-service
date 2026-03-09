@@ -43,6 +43,6 @@ fi
 resourceGroupStatus=$(az group list --query "$queryConditions.properties.provisioningState" -o tsv)
 
 if [ "$resourceGroupStatus" != "Succeeded" ]; then
-    echo "Deployment of resourceGroup $resourceGroupame failed with status $resourceGroupStatus"
+    echo "Deployment of resourceGroup $resourceGroupName failed with status $resourceGroupStatus"
     exit 1
 fi

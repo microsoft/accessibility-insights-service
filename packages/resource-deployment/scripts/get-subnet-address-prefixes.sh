@@ -20,7 +20,8 @@
 # ├── 10.2.5.0/26     - Storage File private endpoint (64 addresses)
 # ├── 10.2.6.0/26     - Key Vault private endpoint (64 addresses)
 # ├── 10.2.7.0/26     - Function App private endpoint (64 addresses)
-# └── 10.2.8.0/26     - Cosmos DB private endpoint (64 addresses)
+# ├── 10.2.8.0/26     - Cosmos DB private endpoint (64 addresses)
+# └── 10.2.9.0/26     - Website Storage Blob private endpoint (64 addresses)
 
 # VNet address space
 vnetAddressPrefix="10.2.0.0/16"                     # VNet address space
@@ -48,6 +49,7 @@ storageFileSubnetPrefix="10.2.5.0/26"               # Storage File private endpo
 keyVaultSubnetPrefix="10.2.6.0/26"                  # Key Vault private endpoint
 functionAppSubnetPrefix="10.2.7.0/26"               # Function App private endpoint
 cosmosDbSubnetPrefix="10.2.8.0/26"                  # Cosmos DB private endpoint
+websiteStorageBlobSubnetPrefix="10.2.9.0/26"        # Website Storage Blob private endpoint
 
 # Helper function to get Azure Bastion subnet prefix
 getBastionSubnetPrefix() {
@@ -91,6 +93,9 @@ getPrivateEndpointSubnetPrefix() {
     case "${groupId}" in
     blob)
         echo "${storageBlobSubnetPrefix}"
+        ;;
+    website)
+        echo "${websiteStorageBlobSubnetPrefix}"
         ;;
     queue)
         echo "${storageQueueSubnetPrefix}"

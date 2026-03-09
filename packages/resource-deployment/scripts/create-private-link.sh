@@ -18,7 +18,7 @@ Usage: ${BASH_SOURCE} -r <resource group> -g <group id> [-n <private endpoint na
 
 Required parameters:
   -r  Resource group name
-  -g  Group ID / sub-resource (e.g., 'blob', 'vault', 'queue', 'table', 'file', 'sql')
+  -g  Group ID / sub-resource (e.g., 'blob', 'vault', 'queue', 'table', 'file', 'sql', 'website')
 
 Optional parameters:
   -n  Private endpoint name prefix (auto-detected based on group ID if not provided)
@@ -50,7 +50,7 @@ getDnsZoneName() {
 
     # Auto-detect DNS zone based on group ID
     case "${groupId}" in
-    blob)
+    blob | website)
         dnsZoneName="privatelink.blob.core.windows.net"
         ;;
     queue)
@@ -95,6 +95,14 @@ getServiceResourceId() {
         serviceResourceId="/subscriptions/${subscription}/resourceGroups/${resourceGroupName}/providers/Microsoft.Storage/storageAccounts/${storageAccountName}"
         echo "  Detected Storage Account: ${storageAccountName}"
         ;;
+    website)
+        if [[ -z "${websiteStorageAccountName}" ]]; then
+            echo "Error: Storage account name not found in resource group ${resourceGroupName}"
+            exit 1
+        fi
+        serviceResourceId="/subscriptions/${subscription}/resourceGroups/${resourceGroupName}/providers/Microsoft.Storage/storageAccounts/${websiteStorageAccountName}"
+        echo "  Detected Storage Account: ${websiteStorageAccountName}"
+        ;;
     vault)
         if [[ -z "${keyVault}" ]]; then
             echo "Error: Key Vault name not found in resource group ${resourceGroupName}"
@@ -130,6 +138,9 @@ getPrivateEndpointNamePrefix() {
     blob | queue | table | file)
         privateEndpointNamePrefix="storage-${groupId}"
         ;;
+    website)
+        privateEndpointNamePrefix="storage-website"
+        ;;
     vault)
         privateEndpointNamePrefix="keyvault"
         ;;
@@ -160,7 +171,7 @@ createPrivateEndpointSubnet() {
             --vnet-name "${vnetName}" \
             --address-prefixes "${subnetAddressPrefix}" \
             --disable-private-endpoint-network-policies false \
-            1>/dev/null
+            --default-outbound false 1>/dev/null
         echo "Private endpoint subnet created successfully"
     else
         echo "Private endpoint subnet already exists: ${subnetName}"
@@ -249,13 +260,19 @@ createPrivateEndpoint() {
         return
     fi
 
+    # Map 'website' to 'blob' for Azure API (website is organizational only)
+    local azureGroupId="${groupId}"
+    if [[ "${groupId}" == "website" ]]; then
+        azureGroupId="blob"
+    fi
+
     az network private-endpoint create \
         --resource-group "${resourceGroupName}" \
         --name "${privateEndpointName}" \
         --vnet-name "${vnetName}" \
         --subnet "${subnetName}" \
         --private-connection-resource-id "${serviceResourceId}" \
-        --group-id "${groupId}" \
+        --group-id "${azureGroupId}" \
         --connection-name "${privateEndpointName}-conn" \
         --location "${location}" 1>/dev/null
 
@@ -310,12 +327,18 @@ createDnsZoneGroup() {
         --query "id" \
         -o tsv)
 
+    # Map 'website' to 'blob' for Azure API (website is organizational only)
+    local azureGroupId="${groupId}"
+    if [[ "${groupId}" == "website" ]]; then
+        azureGroupId="blob"
+    fi
+
     az network private-endpoint dns-zone-group create \
         --resource-group "${resourceGroupName}" \
         --endpoint-name "${privateEndpointName}" \
         --name "${zoneGroupName}" \
         --private-dns-zone "${dnsZoneId}" \
-        --zone-name "${groupId}" 1>/dev/null
+        --zone-name "${azureGroupId}" 1>/dev/null
 
     echo "DNS zone group created successfully"
 }
@@ -324,7 +347,7 @@ disablePublicNetworkAccess() {
     echo "Disabling public network access to the service..."
 
     case "${groupId}" in
-    blob | queue | table | file)
+    blob | queue | table | file | website)
         local accountName
         accountName=$(basename "${serviceResourceId}")
         echo "  Disabling public access for Storage Account: ${accountName}..."

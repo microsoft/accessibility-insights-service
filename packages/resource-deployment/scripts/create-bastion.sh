@@ -37,7 +37,8 @@ createBastionSubnet() {
         --name "AzureBastionSubnet" \
         --resource-group "${resourceGroupName}" \
         --vnet-name "${vnetName}" \
-        --address-prefixes "${bastionSubnetPrefix}" 1>/dev/null
+        --address-prefixes "${bastionSubnetPrefix}" \
+        --default-outbound false 1>/dev/null
 
     echo "Azure Bastion subnet created: ${bastionSubnetPrefix}"
 }

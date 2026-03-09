@@ -17,8 +17,8 @@ Required parameters:
 
 Optional parameters:
   -s  Comma-separated list of services to enable public network access for
-      Available services: blob, queue, table, file, vault, sql
-      Default: All services (blob,queue,table,file,vault,sql)
+      Available services: blob, queue, table, file, vault, sql, website
+      Default: All services (blob,queue,table,file,vault,sql,website)
 
 Examples:
   # Enable public network access for all supported services
@@ -34,7 +34,7 @@ Examples:
 }
 
 # Read script arguments
-services="blob,queue,table,file,vault,sql"
+services="blob,queue,table,file,vault,sql,website"
 while getopts ":r:s:" option; do
     case ${option} in
     r) resourceGroupName=${OPTARG} ;;

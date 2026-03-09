@@ -14,7 +14,7 @@ Usage: ${BASH_SOURCE} -r <resource group> -g <group id> [-s <service resource id
 
 Required parameters:
   -r  Resource group name
-  -g  Group ID / sub-resource (e.g., 'blob', 'queue', 'table', 'file', 'sql', 'vault')
+  -g  Group ID / sub-resource (e.g., 'blob', 'queue', 'table', 'file', 'sql', 'vault', 'website')
 
 Optional parameters:
   -s  Service resource ID (auto-detected based on group ID if not provided)
@@ -50,6 +50,14 @@ getServiceResourceId() {
         serviceResourceId="/subscriptions/${subscription}/resourceGroups/${resourceGroupName}/providers/Microsoft.Storage/storageAccounts/${storageAccountName}"
         echo "  Detected Storage Account: ${storageAccountName}"
         ;;
+    website)
+        if [[ -z "${websiteStorageAccountName}" ]]; then
+            echo "Error: Storage account name not found in resource group ${resourceGroupName}"
+            exit 1
+        fi
+        serviceResourceId="/subscriptions/${subscription}/resourceGroups/${resourceGroupName}/providers/Microsoft.Storage/storageAccounts/${websiteStorageAccountName}"
+        echo "  Detected Storage Account: ${websiteStorageAccountName}"
+        ;;
     vault)
         if [[ -z "${keyVault}" ]]; then
             echo "Error: Key Vault name not found in resource group ${resourceGroupName}"
@@ -79,7 +87,7 @@ enablePublicNetworkAccess() {
     echo "Checking and enabling public network access if service exists..."
 
     case "${groupId}" in
-    blob | queue | table | file)
+    blob | queue | table | file | website)
         local accountName
         accountName=$(basename "${serviceResourceId}")
 

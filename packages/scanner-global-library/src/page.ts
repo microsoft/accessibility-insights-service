@@ -7,6 +7,7 @@ import { inject, injectable, optional } from 'inversify';
 import { GlobalLogger } from 'logger';
 import * as Puppeteer from 'puppeteer';
 import { isNumber, isEmpty } from 'lodash';
+import { AccessTokenProvider } from './authenticator/access-token-provider';
 import { WebDriver, WebDriverCapabilities } from './web-driver';
 import { PageNavigator, NavigationResponse } from './page-navigator';
 import { BrowserError } from './browser-error';
@@ -72,6 +73,8 @@ export class Page {
     // This flag overrides the authentication flow and is used to bypass auth for specific scenarios.
     public disableAuthenticationOverride: boolean = false;
 
+    private extraHttpHeaders: Record<string, string> = {};
+
     public navigationResponse: Puppeteer.HTTPResponse;
 
     public pageAnalysisResult: PageAnalysisResult;
@@ -100,6 +103,7 @@ export class Page {
         @inject(PageRequestInterceptor) private readonly pageRequestInterceptor: PageRequestInterceptor,
         @inject(GlobalLogger) @optional() private readonly logger: GlobalLogger,
         private readonly scrollToPageTop: typeof scrollToTop = scrollToTop,
+        private readonly accessTokenProvider: AccessTokenProvider = new AccessTokenProvider(),
     ) {
         this.enableAuthenticationGlobalFlag = process.env.PAGE_AUTH === 'true' ? true : false;
         this.browserWSEndpoint = process.env.BROWSER_ENDPOINT;
@@ -385,6 +389,18 @@ export class Page {
             return;
         }
 
+        // Handle bearer token authentication
+        if (this.pageAnalysisResult.authenticationType === 'bearerToken') {
+            await this.setBearerTokenHeader();
+            this.authenticationResult = {
+                authenticated: true,
+                authenticationType: 'bearerToken',
+                navigationResponse: undefined,
+            };
+
+            return;
+        }
+
         // Invoke authentication client
         this.authenticationResult = await this.resourceAuthenticator.authenticate(
             this.requestUrl,
@@ -404,6 +420,9 @@ export class Page {
     private async navigateWithNetworkTrace(url: string): Promise<void> {
         await this.reopenBrowserImpl();
         await this.setExtraHTTPHeaders();
+        if (this.pageAnalysisResult.authenticationType === 'bearerToken') {
+            await this.setBearerTokenHeader();
+        }
         await this.pageNetworkTracer.trace(url, this.page);
     }
 
@@ -442,8 +461,6 @@ export class Page {
 
     private async setExtraHTTPHeaders(): Promise<void> {
         const nameSuffix = '_HTTP_HEADER';
-        const headers = [];
-        const headersObj = {} as any;
         const environmentVariables = Object.entries(process.env).map(([key, value]) => ({ name: key, value }));
         for (const variable of environmentVariables) {
             if (!variable.name.endsWith(nameSuffix)) {
@@ -452,14 +469,46 @@ export class Page {
 
             // eslint-disable-next-line security/detect-non-literal-regexp
             const name = variable.name.replace(new RegExp(nameSuffix, 'gi'), '').replace(/_/g, '-');
-            headers.push({ name, value: variable.value });
-            headersObj[name] = variable.value;
-
-            await this.page.setExtraHTTPHeaders({ [name]: `${variable.value}` });
+            this.extraHttpHeaders[name] = variable.value;
         }
 
-        if (!isEmpty(headers)) {
-            this.logger?.logWarn('Added extra HTTP headers to the navigation requests.', { headers: headersObj });
+        await this.applyExtraHTTPHeaders();
+    }
+
+    private async applyExtraHTTPHeaders(): Promise<void> {
+        if (!isEmpty(this.extraHttpHeaders)) {
+            await this.page.setExtraHTTPHeaders(this.extraHttpHeaders);
+            // Filter out Authorization header value from logs to avoid exposing sensitive tokens
+            const headersForLog = { ...this.extraHttpHeaders };
+            if (headersForLog.Authorization) {
+                headersForLog.Authorization = '[REDACTED]';
+            }
+            this.logger?.logWarn('Applied extra HTTP headers to the navigation requests.', {
+                headers: JSON.stringify(headersForLog),
+            });
+        }
+    }
+
+    private async setBearerTokenHeader(): Promise<void> {
+        try {
+            const accessToken = await this.accessTokenProvider.getWebsiteToken();
+            const bearerToken = `Bearer ${accessToken.token}`;
+
+            this.extraHttpHeaders.Authorization = bearerToken;
+            this.extraHttpHeaders['x-ms-version'] = '2025-11-05';
+
+            await this.applyExtraHTTPHeaders();
+
+            this.logger?.logInfo('Bearer token authorization header added to page requests.', {
+                expiresOnTimestamp: accessToken.expiresOnTimestamp.toString(),
+            });
+        } catch (error) {
+            this.logger?.logError('Failed to set bearer token header.', { error: System.serializeError(error) });
+            this.browserError = {
+                errorType: 'AuthenticationError',
+                message: 'Failed to retrieve bearer token for authentication.',
+                stack: error instanceof Error ? error.stack : new Error().stack,
+            };
         }
     }
 
