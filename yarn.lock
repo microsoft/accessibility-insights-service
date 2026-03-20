@@ -612,16 +612,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@azure/functions@npm:^4.11.2":
-  version: 4.11.2
-  resolution: "@azure/functions@npm:4.11.2"
-  dependencies:
-    "@azure/functions-extensions-base": "npm:0.2.0"
-    cookie: "npm:^0.7.0"
-  checksum: 10/5d639d28e1345a37e51c2a2b2be07ee502584fe18f80a18b86d28327740e40a820c42f33f88dbc7c5cb9c013236faeec7b57a42928cf004b975db878a5c4937f
-  languageName: node
-  linkType: hard
-
 "@azure/identity@npm:^4.13.0":
   version: 4.13.0
   resolution: "@azure/identity@npm:4.13.0"
