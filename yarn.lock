@@ -602,15 +602,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@azure/functions@npm:^4.10.0":
-  version: 4.10.0
-  resolution: "@azure/functions@npm:4.10.0"
+"@azure/functions@npm:^4.11.2":
+  version: 4.11.2
+  resolution: "@azure/functions@npm:4.11.2"
   dependencies:
     "@azure/functions-extensions-base": "npm:0.2.0"
     cookie: "npm:^0.7.0"
-    long: "npm:^4.0.0"
-    undici: "npm:^5.29.0"
-  checksum: 10/3229f0d2bc919542df53923327847485f50df7ce599cccb3b91a4cb24b5414064d5c1e38d34ec938d9a6ca08feb76a6f0dd5826056eb87d8aa7da0771542e00d
+  checksum: 10/5d639d28e1345a37e51c2a2b2be07ee502584fe18f80a18b86d28327740e40a820c42f33f88dbc7c5cb9c013236faeec7b57a42928cf004b975db878a5c4937f
   languageName: node
   linkType: hard
 
@@ -9133,7 +9131,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "e2e-web-apis@workspace:packages/e2e-web-apis"
   dependencies:
-    "@azure/functions": "npm:^4.10.0"
+    "@azure/functions": "npm:^4.11.2"
     "@types/dotenv": "npm:^8.2.3"
     "@types/jest": "npm:^29.5.12"
     "@types/lodash": "npm:^4.17.24"
@@ -17381,7 +17379,7 @@ __metadata:
   resolution: "service-library@workspace:packages/service-library"
   dependencies:
     "@azure/cosmos": "npm:^4.0.0"
-    "@azure/functions": "npm:^4.10.0"
+    "@azure/functions": "npm:^4.11.2"
     "@azure/identity": "npm:^4.13.0"
     "@azure/storage-blob": "npm:12.18.0"
     "@crawlee/puppeteer": "npm:^3.16.0"
@@ -19145,7 +19143,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"undici@npm:^5.13.0, undici@npm:^5.25.4, undici@npm:^5.29.0":
+"undici@npm:^5.13.0, undici@npm:^5.25.4":
   version: 6.23.0
   resolution: "undici@npm:6.23.0"
   checksum: 10/56950995e7b628e62c996430445d17995ca9b70f6f2afe760a63da54205660d968bd08f0741b6f4fb008f40aa35c69cce979cd96ced399585d8c897a76a4f1d1
@@ -19672,7 +19670,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "web-api@workspace:packages/web-api"
   dependencies:
-    "@azure/functions": "npm:^4.10.0"
+    "@azure/functions": "npm:^4.11.2"
     "@types/dotenv": "npm:^8.2.3"
     "@types/jest": "npm:^29.5.12"
     "@types/lodash": "npm:^4.17.24"
@@ -19711,7 +19709,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "web-workers@workspace:packages/web-workers"
   dependencies:
-    "@azure/functions": "npm:^4.10.0"
+    "@azure/functions": "npm:^4.11.2"
     "@types/dotenv": "npm:^8.2.3"
     "@types/jest": "npm:^29.5.12"
     "@types/lodash": "npm:^4.17.24"
