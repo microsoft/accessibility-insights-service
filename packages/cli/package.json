@@ -68,7 +68,7 @@
         "ajv": "^8.18.0",
         "applicationinsights": "^3.12.1",
         "axe-core": "4.10.2",
-        "convict": "^6.2.4",
+        "convict": "^6.2.5",
         "dotenv": "^17.2.1",
         "encoding-down": "^7.1.0",
         "exponential-backoff": "^3.1.3",
