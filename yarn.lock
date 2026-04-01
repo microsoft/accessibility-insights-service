@@ -8700,13 +8700,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"deep-equal-in-any-order@npm:^2.1.0":
-  version: 2.1.0
-  resolution: "deep-equal-in-any-order@npm:2.1.0"
+"deep-equal-in-any-order@npm:^2.2.0":
+  version: 2.2.0
+  resolution: "deep-equal-in-any-order@npm:2.2.0"
   dependencies:
-    lodash.mapvalues: "npm:^4.6.0"
-    sort-any: "npm:^2.0.0"
-  checksum: 10/aa48cfd68f2498e17ac876e4cbbd83d3d9378f7eb44490ab49772dfa69e9c64c759bed6f4903045c2a72ae70c435a1eb90a20d5fb8616e918475572407ccd68f
+    sort-any: "npm:^4.0.0"
+  checksum: 10/de8fc4f7596498b3e512c272390b96bfb558306f119dc1c555290ae5ded9285366e496ae58de73ba590f826a8569bbdf36c11aaa8dbe0542108e3ea2453a434f
   languageName: node
   linkType: hard
 
@@ -10700,7 +10699,7 @@ __metadata:
     azure-services: "workspace:*"
     chai: "npm:^4.3.7"
     common: "workspace:*"
-    deep-equal-in-any-order: "npm:^2.1.0"
+    deep-equal-in-any-order: "npm:^2.2.0"
     dotenv: "npm:^17.2.1"
     inversify: "npm:^6.0.1"
     jest: "npm:^29.7.0"
@@ -13818,13 +13817,6 @@ __metadata:
   version: 4.5.0
   resolution: "lodash.isequal@npm:4.5.0"
   checksum: 10/82fc58a83a1555f8df34ca9a2cd300995ff94018ac12cc47c349655f0ae1d4d92ba346db4c19bbfc90510764e0c00ddcc985a358bdcd4b3b965abf8f2a48a214
-  languageName: node
-  linkType: hard
-
-"lodash.mapvalues@npm:^4.6.0":
-  version: 4.6.0
-  resolution: "lodash.mapvalues@npm:4.6.0"
-  checksum: 10/566032abaacbc5dc7e74673e589830d2694ec03dc979ac134c93985b47409ac845cbd4eea3786cc0b4db4e80d726a32c1119af63d0151520e27789568aa76bd2
   languageName: node
   linkType: hard
 
@@ -17669,12 +17661,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"sort-any@npm:^2.0.0":
-  version: 2.0.0
-  resolution: "sort-any@npm:2.0.0"
-  dependencies:
-    lodash: "npm:^4.17.21"
-  checksum: 10/d2dc6cc4f56298ce50b13ce6aafd8bf16010a8f8d0ae75345e8424118ac2cc017a8ffea0eedd136dd67751c09e7b0edb09c959d052ed7ed02afcfbab63c68277
+"sort-any@npm:^4.0.0":
+  version: 4.0.7
+  resolution: "sort-any@npm:4.0.7"
+  checksum: 10/1349aff564521dd3096dd7054598a612939693716f71b56759b2a58bf63a3e50ea390c8ee24db0ed5013d41d0e5030481685d317fe7ac9b66b2b4d3658f380ee
   languageName: node
   linkType: hard
 
