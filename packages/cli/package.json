@@ -53,7 +53,7 @@
         "webpack-node-externals": "^3.0.0"
     },
     "dependencies": {
-        "@apify/log": "2.5.28",
+        "@apify/log": "2.5.34",
         "@axe-core/puppeteer": "4.10.1",
         "@crawlee/browser-pool": "^3.16.0",
         "@crawlee/puppeteer": "^3.16.0",
