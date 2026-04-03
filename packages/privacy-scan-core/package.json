@@ -38,7 +38,7 @@
     "dependencies": {
         "common": "workspace:*",
         "inversify": "^6.0.1",
-        "lodash": "^4.17.23",
+        "lodash": "^4.18.0",
         "logger": "workspace:*",
         "puppeteer": "^24.40.0",
         "reflect-metadata": "^0.2.2",
