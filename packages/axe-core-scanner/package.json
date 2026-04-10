@@ -39,7 +39,7 @@
         "@axe-core/puppeteer": "4.10.1",
         "axe-core": "4.10.2",
         "inversify": "^6.0.1",
-        "lodash": "^4.17.23",
+        "lodash": "^4.18.1",
         "puppeteer": "^24.34.0",
         "reflect-metadata": "^0.2.2"
     }
