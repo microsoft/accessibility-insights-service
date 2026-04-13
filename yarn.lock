@@ -4897,10 +4897,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sindresorhus/merge-streams@npm:^2.1.0":
-  version: 2.3.0
-  resolution: "@sindresorhus/merge-streams@npm:2.3.0"
-  checksum: 10/798bcb53cd1ace9df84fcdd1ba86afdc9e0cd84f5758d26ae9b1eefd8e8887e5fc30051132b9e74daf01bb41fa5a2faf1369361f83d76a3b3d7ee938058fd71c
+"@sindresorhus/merge-streams@npm:^4.0.0":
+  version: 4.0.0
+  resolution: "@sindresorhus/merge-streams@npm:4.0.0"
+  checksum: 10/16551c787f5328c8ef05fd9831ade64369ccc992df78deb635ec6c44af217d2f1b43f8728c348cdc4e00585ff2fad6e00d8155199cbf6b154acc45fe65cbf0aa
   languageName: node
   linkType: hard
 
@@ -6908,7 +6908,7 @@ __metadata:
     "@types/node": "npm:^20.14.9"
     "@types/puppeteer": "npm:^7.0.4"
     axe-core: "npm:4.10.2"
-    cpy-cli: "npm:^6.0.0"
+    cpy-cli: "npm:^7.0.0"
     inversify: "npm:^6.0.1"
     jest: "npm:^29.7.0"
     jest-junit: "npm:^16.0.0"
@@ -8373,29 +8373,30 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cpy-cli@npm:^6.0.0":
-  version: 6.0.0
-  resolution: "cpy-cli@npm:6.0.0"
+"cpy-cli@npm:^7.0.0":
+  version: 7.0.0
+  resolution: "cpy-cli@npm:7.0.0"
   dependencies:
-    cpy: "npm:^12.0.0"
-    meow: "npm:^13.2.0"
+    cpy: "npm:^13.2.0"
+    globby: "npm:^16.1.0"
+    meow: "npm:^14.0.0"
   bin:
     cpy: cli.js
-  checksum: 10/f2f2ad6f743ac6edabcc27dc085bfea92287fea5b1b903ef2d8ecd809241a9d309f36ec6318aca1df237042baa51c5ed9d05c865c538b9a16d4a1d371f1e5e7a
+  checksum: 10/0fe3ffb78e1b45b440e8a2ba0441136640dba90d0260206aebbaed97fb3f559caf77f3af6d35e2954f525f95a6d5a2481bc118bcef82be06d0eaf924a60bbc8d
   languageName: node
   linkType: hard
 
-"cpy@npm:^12.0.0":
-  version: 12.0.1
-  resolution: "cpy@npm:12.0.1"
+"cpy@npm:^13.2.0":
+  version: 13.2.1
+  resolution: "cpy@npm:13.2.1"
   dependencies:
     copy-file: "npm:^11.1.0"
-    globby: "npm:^14.1.0"
+    globby: "npm:^16.1.0"
     junk: "npm:^4.0.1"
     micromatch: "npm:^4.0.8"
     p-filter: "npm:^4.1.0"
-    p-map: "npm:^7.0.3"
-  checksum: 10/512049ee101d0720ae37f218aaa7dbac03886bbf31a794a0a563927dfebba649c5eaeaf12f029a81af039ff9ddaef66b28d58ff4a08a37fbd3a714ae4c357a3f
+    p-map: "npm:^7.0.4"
+  checksum: 10/794de650790f38dd78ed39de16d2ec144151a5aa6c57bb0e05850dcbec30efb98a7cd7afe48d960e60d5add863f37b50906874cd8f5dc4da945cd50166c49f11
   languageName: node
   linkType: hard
 
@@ -9125,7 +9126,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "e2e-test-site@workspace:packages/e2e-test-site"
   dependencies:
-    cpy-cli: "npm:^6.0.0"
+    cpy-cli: "npm:^7.0.0"
     npm-run-all: "npm:^4.1.5"
     rimraf: "npm:^6.1.3"
   languageName: unknown
@@ -11129,17 +11130,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"globby@npm:^14.1.0":
-  version: 14.1.0
-  resolution: "globby@npm:14.1.0"
+"globby@npm:^16.1.0":
+  version: 16.1.1
+  resolution: "globby@npm:16.1.1"
   dependencies:
-    "@sindresorhus/merge-streams": "npm:^2.1.0"
+    "@sindresorhus/merge-streams": "npm:^4.0.0"
     fast-glob: "npm:^3.3.3"
-    ignore: "npm:^7.0.3"
-    path-type: "npm:^6.0.0"
+    ignore: "npm:^7.0.5"
+    is-path-inside: "npm:^4.0.0"
     slash: "npm:^5.1.0"
-    unicorn-magic: "npm:^0.3.0"
-  checksum: 10/e527ff54f0dddf60abfabd0d9e799768619d957feecd8b13ef60481f270bfdce0d28f6b09267c60f8064798fb3003b8ec991375f7fe0233fbce5304e1741368c
+    unicorn-magic: "npm:^0.4.0"
+  checksum: 10/bb854734ad4957f4ec493b511712573dd16be2c2044c92dc8637039dbbb7603bc3a37e8f0a06e83e51eaa0b72c456efa6179eb0acbd0966394a696d17536feea
   languageName: node
   linkType: hard
 
@@ -11739,7 +11740,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ignore@npm:^7.0.3":
+"ignore@npm:^7.0.5":
   version: 7.0.5
   resolution: "ignore@npm:7.0.5"
   checksum: 10/f134b96a4de0af419196f52c529d5c6120c4456ff8a6b5a14ceaaa399f883e15d58d2ce651c9b69b9388491d4669dda47285d307e827de9304a53a1824801bc6
@@ -12286,6 +12287,13 @@ __metadata:
   version: 3.0.3
   resolution: "is-path-inside@npm:3.0.3"
   checksum: 10/abd50f06186a052b349c15e55b182326f1936c89a78bf6c8f2b707412517c097ce04bc49a0ca221787bc44e1049f51f09a2ffb63d22899051988d3a618ba13e9
+  languageName: node
+  linkType: hard
+
+"is-path-inside@npm:^4.0.0":
+  version: 4.0.0
+  resolution: "is-path-inside@npm:4.0.0"
+  checksum: 10/8810fa11c58e6360b82c3e0d6cd7d9c7d0392d3ac9eb10f980b81f9839f40ac6d1d6d6f05d069db0d227759801228f0b072e1b6c343e4469b065ab5fe0b68fe5
   languageName: node
   linkType: hard
 
@@ -14165,10 +14173,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"meow@npm:^13.2.0":
-  version: 13.2.0
-  resolution: "meow@npm:13.2.0"
-  checksum: 10/4eff5bc921fed0b8a471ad79069d741a0210036d717547d0c7f36fdaf84ef7a3036225f38b6a53830d84dc9cbf8b944b097fde62381b8b5b215119e735ce1063
+"meow@npm:^14.0.0":
+  version: 14.1.0
+  resolution: "meow@npm:14.1.0"
+  checksum: 10/c6a22b3912a6bc849dee0d6475cd8bb63b9307e26919ca3ace28dc1aaf3d30257071de32bba496f7b5eec3e62b03a6b7731e3d04d18efb3c3103b829aad52ca5
   languageName: node
   linkType: hard
 
@@ -15161,10 +15169,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"p-map@npm:^7.0.1, p-map@npm:^7.0.3":
+"p-map@npm:^7.0.1":
   version: 7.0.3
   resolution: "p-map@npm:7.0.3"
   checksum: 10/2ef48ccfc6dd387253d71bf502604f7893ed62090b2c9d73387f10006c342606b05233da0e4f29388227b61eb5aeface6197e166520c465c234552eeab2fe633
+  languageName: node
+  linkType: hard
+
+"p-map@npm:^7.0.4":
+  version: 7.0.4
+  resolution: "p-map@npm:7.0.4"
+  checksum: 10/ef48c3b2e488f31c693c9fcc0df0ef76518cf6426a495cf9486ebbb0fd7f31aef7f90e96f72e0070c0ff6e3177c9318f644b512e2c29e3feee8d7153fcb6782e
   languageName: node
   linkType: hard
 
@@ -15395,13 +15410,6 @@ __metadata:
   version: 4.0.0
   resolution: "path-type@npm:4.0.0"
   checksum: 10/5b1e2daa247062061325b8fdbfd1fb56dde0a448fb1455453276ea18c60685bdad23a445dc148cf87bc216be1573357509b7d4060494a6fd768c7efad833ee45
-  languageName: node
-  linkType: hard
-
-"path-type@npm:^6.0.0":
-  version: 6.0.0
-  resolution: "path-type@npm:6.0.0"
-  checksum: 10/b9f6eaf7795c48d5c9bc4c6bc3ac61315b8d36975a73497ab2e02b764c0836b71fb267ea541863153f633a069a1c2ed3c247cb781633842fc571c655ac57c00e
   languageName: node
   linkType: hard
 
@@ -16849,7 +16857,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "resource-deployment@workspace:packages/resource-deployment"
   dependencies:
-    cpy-cli: "npm:^6.0.0"
+    cpy-cli: "npm:^7.0.0"
     npm-run-all: "npm:^4.1.5"
     rimraf: "npm:^6.1.3"
   languageName: unknown
@@ -17195,7 +17203,7 @@ __metadata:
     axe-core: "npm:4.10.2"
     axe-core-scanner: "workspace:*"
     common: "workspace:*"
-    cpy-cli: "npm:^6.0.0"
+    cpy-cli: "npm:^7.0.0"
     inversify: "npm:^6.0.1"
     jest: "npm:^29.7.0"
     jest-junit: "npm:^16.0.0"
@@ -17345,7 +17353,7 @@ __metadata:
     axe-result-converter: "workspace:*"
     azure-services: "workspace:*"
     common: "workspace:*"
-    cpy-cli: "npm:^6.0.0"
+    cpy-cli: "npm:^7.0.0"
     dotenv: "npm:^17.2.1"
     inversify: "npm:^6.0.1"
     jest: "npm:^29.7.0"
@@ -19098,10 +19106,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"unicorn-magic@npm:^0.3.0":
-  version: 0.3.0
-  resolution: "unicorn-magic@npm:0.3.0"
-  checksum: 10/bdd7d7c522f9456f32a0b77af23f8854f9a7db846088c3868ec213f9550683ab6a2bdf3803577eacbafddb4e06900974385841ccb75338d17346ccef45f9cb01
+"unicorn-magic@npm:^0.4.0":
+  version: 0.4.0
+  resolution: "unicorn-magic@npm:0.4.0"
+  checksum: 10/5a02923ac75a322b6ea8b0835cd106180cce01b67110f933ebd446757c708591ea45fbbe576f1e027c44a69642926d1d5b94ddf3a64082f4ff420296c84caff9
   languageName: node
   linkType: hard
 
