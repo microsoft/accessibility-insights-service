@@ -6294,7 +6294,7 @@ __metadata:
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
     uuid-with-v6: "npm:^2.0.0"
-    webpack: "npm:^5.105.4"
+    webpack: "npm:^5.106.1"
     webpack-cli: "npm:^5.1.4"
     webpack-node-externals: "npm:^3.0.0"
     yargs: "npm:^17.7.2"
@@ -7036,7 +7036,7 @@ __metadata:
     ts-loader: "npm:^9.5.4"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
-    webpack: "npm:^5.105.4"
+    webpack: "npm:^5.106.1"
     webpack-cli: "npm:^5.1.4"
   languageName: unknown
   linkType: soft
@@ -9150,7 +9150,7 @@ __metadata:
     ts-jest: "npm:^29.4.6"
     ts-loader: "npm:^9.5.4"
     typescript: "npm:^5.5.3"
-    webpack: "npm:^5.105.4"
+    webpack: "npm:^5.106.1"
     webpack-cli: "npm:^5.1.4"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
   languageName: unknown
@@ -11467,7 +11467,7 @@ __metadata:
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
     web-api-client: "workspace:*"
-    webpack: "npm:^5.105.4"
+    webpack: "npm:^5.106.1"
     webpack-cli: "npm:^5.1.4"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
     yargs: "npm:^17.7.2"
@@ -15824,7 +15824,7 @@ __metadata:
     ts-loader: "npm:^9.5.4"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
-    webpack: "npm:^5.105.4"
+    webpack: "npm:^5.106.1"
     webpack-cli: "npm:^5.1.4"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
     yargs: "npm:^17.7.2"
@@ -15873,7 +15873,7 @@ __metadata:
     ts-loader: "npm:^9.5.4"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
-    webpack: "npm:^5.105.4"
+    webpack: "npm:^5.106.1"
     webpack-cli: "npm:^5.1.4"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
     yargs: "npm:^17.7.2"
@@ -16565,7 +16565,7 @@ __metadata:
     ts-loader: "npm:^9.5.4"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
-    webpack: "npm:^5.105.4"
+    webpack: "npm:^5.106.1"
     webpack-cli: "npm:^5.1.4"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
     yargs: "npm:^17.7.2"
@@ -16613,7 +16613,7 @@ __metadata:
     ts-loader: "npm:^9.5.4"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
-    webpack: "npm:^5.105.4"
+    webpack: "npm:^5.106.1"
     webpack-cli: "npm:^5.1.4"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
     yargs: "npm:^17.7.2"
@@ -19431,7 +19431,7 @@ __metadata:
     ts-loader: "npm:^9.5.4"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
-    webpack: "npm:^5.105.4"
+    webpack: "npm:^5.106.1"
     webpack-cli: "npm:^5.1.4"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
     yargs: "npm:^17.7.2"
@@ -19465,7 +19465,7 @@ __metadata:
     ts-loader: "npm:^9.5.4"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
-    webpack: "npm:^5.105.4"
+    webpack: "npm:^5.106.1"
     webpack-cli: "npm:^5.1.4"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
     yargs: "npm:^17.7.2"
@@ -19524,7 +19524,7 @@ __metadata:
     ts-loader: "npm:^9.5.4"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
-    webpack: "npm:^5.105.4"
+    webpack: "npm:^5.106.1"
     webpack-cli: "npm:^5.1.4"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
     yargs: "npm:^17.7.2"
@@ -19563,7 +19563,7 @@ __metadata:
     ts-loader: "npm:^9.5.4"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
-    webpack: "npm:^5.105.4"
+    webpack: "npm:^5.106.1"
     webpack-cli: "npm:^5.1.4"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
     yargs: "npm:^17.7.2"
@@ -19607,7 +19607,7 @@ __metadata:
     ts-loader: "npm:^9.5.4"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
-    webpack: "npm:^5.105.4"
+    webpack: "npm:^5.106.1"
     webpack-cli: "npm:^5.1.4"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
     yargs: "npm:^17.7.2"
@@ -19647,7 +19647,7 @@ __metadata:
     ts-loader: "npm:^9.5.4"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
-    webpack: "npm:^5.105.4"
+    webpack: "npm:^5.106.1"
     webpack-cli: "npm:^5.1.4"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
   languageName: unknown
@@ -19690,7 +19690,7 @@ __metadata:
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
     web-api-client: "workspace:*"
-    webpack: "npm:^5.105.4"
+    webpack: "npm:^5.106.1"
     webpack-cli: "npm:^5.1.4"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
   languageName: unknown
@@ -19773,9 +19773,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"webpack@npm:^5.105.4":
-  version: 5.105.4
-  resolution: "webpack@npm:5.105.4"
+"webpack@npm:^5.106.1":
+  version: 5.106.1
+  resolution: "webpack@npm:5.106.1"
   dependencies:
     "@types/eslint-scope": "npm:^3.7.7"
     "@types/estree": "npm:^1.0.8"
@@ -19807,7 +19807,7 @@ __metadata:
       optional: true
   bin:
     webpack: bin/webpack.js
-  checksum: 10/ae8088dd1c995fa17b920009f864138297a9ea5089bc563601f661fa4a31bb24b000cc91ae122168ce9def79c49258b8aa1021c2754c3555205c29a0d6c9cc8d
+  checksum: 10/f72b556872fd2855ded996011e279a20c90b8a9e82211b3afc414b3a73bc39cccb22066964b63ca32c07cbff796c6c4198cf7294c6b071115aeaecaa3469fd27
   languageName: node
   linkType: hard
 
