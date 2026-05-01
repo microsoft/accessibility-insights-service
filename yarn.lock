@@ -247,7 +247,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@azure/core-client@npm:^1.10.1":
+"@azure/core-client@npm:^1.10.1, @azure/core-client@npm:^1.9.3":
   version: 1.10.1
   resolution: "@azure/core-client@npm:1.10.1"
   dependencies:
@@ -289,6 +289,18 @@ __metadata:
     "@azure/logger": "npm:^1.0.0"
     tslib: "npm:^2.6.2"
   checksum: 10/0358b8245bf23943914eb77384955c994bf3ef84f862234cb3e261f9c602a9f4717beedafd48d1da902b15f3464a4211540976fabb4569039fac8e0d41e59ef1
+  languageName: node
+  linkType: hard
+
+"@azure/core-http-compat@npm:^2.0.0":
+  version: 2.4.0
+  resolution: "@azure/core-http-compat@npm:2.4.0"
+  dependencies:
+    "@azure/abort-controller": "npm:^2.1.2"
+  peerDependencies:
+    "@azure/core-client": ^1.10.0
+    "@azure/core-rest-pipeline": ^1.22.0
+  checksum: 10/65adde0d604d6aeebdde7623cc6d27938d7502a82c520ad8bc77539a4c8a26050af0f3242c9dd27f192b042970c3f8d53a98a7f755039d6d8c9813409305a9f4
   languageName: node
   linkType: hard
 
@@ -396,6 +408,21 @@ __metadata:
     https-proxy-agent: "npm:^7.0.0"
     tslib: "npm:^2.6.2"
   checksum: 10/8b0f7693d882210edb2f961929ce319c1c5b996507009d992c323d10a5744689a8c216f9593bf2d1e6bc225efab99567bd3af62f576e4bc1712b2891d99219a0
+  languageName: node
+  linkType: hard
+
+"@azure/core-rest-pipeline@npm:^1.19.1":
+  version: 1.23.0
+  resolution: "@azure/core-rest-pipeline@npm:1.23.0"
+  dependencies:
+    "@azure/abort-controller": "npm:^2.1.2"
+    "@azure/core-auth": "npm:^1.10.0"
+    "@azure/core-tracing": "npm:^1.3.0"
+    "@azure/core-util": "npm:^1.13.0"
+    "@azure/logger": "npm:^1.3.0"
+    "@typespec/ts-http-runtime": "npm:^0.3.4"
+    tslib: "npm:^2.6.2"
+  checksum: 10/9c60c8bb858cec1caf49d3c323667814512fbf0ca3b34fa382c010f4a6fcccf0a6ef8210c2f7d791b2af67b5c427aefb9b1e4c58a9a9ef60d1cff871fca548f3
   languageName: node
   linkType: hard
 
@@ -549,6 +576,16 @@ __metadata:
     "@azure/abort-controller": "npm:^2.0.0"
     tslib: "npm:^2.6.2"
   checksum: 10/601853796bf130a87e55c687bab4c97500a8cb16e02db8aeb32ac3f05551452eaf4164b7797e49e1ebefb69b0ad8a11fa698c2e4b42ab5075fee3002fef9b2d2
+  languageName: node
+  linkType: hard
+
+"@azure/core-xml@npm:^1.4.3":
+  version: 1.5.1
+  resolution: "@azure/core-xml@npm:1.5.1"
+  dependencies:
+    fast-xml-parser: "npm:^5.5.9"
+    tslib: "npm:^2.8.1"
+  checksum: 10/4c3fdc80449b46b0c5d8f99d43e4c61a6bddd6f13386e316cdb6df99aa45f2040b441d2b2dc9fceab4748443843c2cab1f8cdce1b304b54f1170a4dac46f85b8
   languageName: node
   linkType: hard
 
@@ -921,17 +958,40 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@azure/storage-queue@npm:12.16.0":
-  version: 12.16.0
-  resolution: "@azure/storage-queue@npm:12.16.0"
+"@azure/storage-common@npm:^12.2.0":
+  version: 12.3.0
+  resolution: "@azure/storage-common@npm:12.3.0"
   dependencies:
-    "@azure/abort-controller": "npm:^1.0.0"
-    "@azure/core-http": "npm:^3.0.0"
-    "@azure/core-paging": "npm:^1.1.1"
-    "@azure/core-tracing": "npm:1.0.0-preview.13"
-    "@azure/logger": "npm:^1.0.0"
-    tslib: "npm:^2.2.0"
-  checksum: 10/8a70281653dc05140f7d5295d117513ccf6b892df9ffa6edb5170514f4f79cd75b57c8f36688c26c4478cc4507a162df17b637aa2547ac09378e58fa53562b63
+    "@azure/abort-controller": "npm:^2.1.2"
+    "@azure/core-auth": "npm:^1.9.0"
+    "@azure/core-http-compat": "npm:^2.2.0"
+    "@azure/core-rest-pipeline": "npm:^1.19.1"
+    "@azure/core-tracing": "npm:^1.2.0"
+    "@azure/core-util": "npm:^1.11.0"
+    "@azure/logger": "npm:^1.1.4"
+    events: "npm:^3.3.0"
+    tslib: "npm:^2.8.1"
+  checksum: 10/e5bb4c9395a9f5d390e0766f2b9c64b7d223c1b12704e4557025396f65c680150d36e9ebb9d85a3801337d8e09b6f2dca571233ddc5e71e8887d917b4ce17bb5
+  languageName: node
+  linkType: hard
+
+"@azure/storage-queue@npm:12.29.0":
+  version: 12.29.0
+  resolution: "@azure/storage-queue@npm:12.29.0"
+  dependencies:
+    "@azure/abort-controller": "npm:^2.1.2"
+    "@azure/core-auth": "npm:^1.9.0"
+    "@azure/core-client": "npm:^1.9.3"
+    "@azure/core-http-compat": "npm:^2.0.0"
+    "@azure/core-paging": "npm:^1.6.2"
+    "@azure/core-rest-pipeline": "npm:^1.19.1"
+    "@azure/core-tracing": "npm:^1.2.0"
+    "@azure/core-util": "npm:^1.11.0"
+    "@azure/core-xml": "npm:^1.4.3"
+    "@azure/logger": "npm:^1.1.4"
+    "@azure/storage-common": "npm:^12.2.0"
+    tslib: "npm:^2.8.1"
+  checksum: 10/8236aca1a70d626150bb293f52acf4390606688c6c98f200cb60f00b41cbbec290848926d87566ddfc301702159ad9121479532641902987c2346a7cf59e9528
   languageName: node
   linkType: hard
 
@@ -3240,6 +3300,13 @@ __metadata:
   version: 1.10.224
   resolution: "@microsoft/load-themed-styles@npm:1.10.224"
   checksum: 10/7c2e91588e7dcb077ed10063c44f2c00b8a34a29af6dbb3918fcb1b4d67ffc8f9a742817932c87d516ae3000343fa570e45339f9bb925b413c0b95f668ded6ca
+  languageName: node
+  linkType: hard
+
+"@nodable/entities@npm:^2.1.0":
+  version: 2.1.0
+  resolution: "@nodable/entities@npm:2.1.0"
+  checksum: 10/355c55e82aebe45d4b962d16530951df51e19e3e63a27ea61ad3260c0807064619b270b9c83db10e8394f42760abd5b7f7c5b5117678c4246ce8364a4aafc637
   languageName: node
   linkType: hard
 
@@ -5885,6 +5952,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@typespec/ts-http-runtime@npm:^0.3.4":
+  version: 0.3.5
+  resolution: "@typespec/ts-http-runtime@npm:0.3.5"
+  dependencies:
+    http-proxy-agent: "npm:^7.0.0"
+    https-proxy-agent: "npm:^7.0.0"
+    tslib: "npm:^2.6.2"
+  checksum: 10/7cf459826e4867ab52a4b9855fdce4590e30a6f37e11fb93155e01c6e80139ec9966b7a3270cffed2c1e88ae66acbae5b4c9a7ecd9274679734da2c18310cc6c
+  languageName: node
+  linkType: hard
+
 "@ungap/structured-clone@npm:^1.2.0":
   version: 1.2.0
   resolution: "@ungap/structured-clone@npm:1.2.0"
@@ -7009,7 +7087,7 @@ __metadata:
     "@azure/ms-rest-js": "npm:^2.7.0"
     "@azure/ms-rest-nodeauth": "npm:^3.1.1"
     "@azure/storage-blob": "npm:12.18.0"
-    "@azure/storage-queue": "npm:12.16.0"
+    "@azure/storage-queue": "npm:12.29.0"
     "@types/got": "npm:^9.6.11"
     "@types/jest": "npm:^29.5.12"
     "@types/lodash": "npm:^4.17.24"
@@ -10007,6 +10085,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"events@npm:^3.3.0":
+  version: 3.3.0
+  resolution: "events@npm:3.3.0"
+  checksum: 10/a3d47e285e28d324d7180f1e493961a2bbb4cad6412090e4dec114f4db1f5b560c7696ee8e758f55e23913ede856e3689cd3aa9ae13c56b5d8314cd3b3ddd1be
+  languageName: node
+  linkType: hard
+
 "execa@npm:^5.0.0, execa@npm:^5.1.1":
   version: 5.1.1
   resolution: "execa@npm:5.1.1"
@@ -10192,6 +10277,29 @@ __metadata:
   version: 3.0.3
   resolution: "fast-uri@npm:3.0.3"
   checksum: 10/92487c75848b03edc45517fca0148287d342c30818ce43d556391db774d8e01644fb6964315a3336eec5a90f301b218b21f71fb9b2528ba25757435a20392c95
+  languageName: node
+  linkType: hard
+
+"fast-xml-builder@npm:^1.1.5":
+  version: 1.1.5
+  resolution: "fast-xml-builder@npm:1.1.5"
+  dependencies:
+    path-expression-matcher: "npm:^1.1.3"
+  checksum: 10/377c4ef816972e67192fd32757c50d2a9d4cccf352ceac48bda6681a0ee24fb0b1f1c892810f77886db760681f23fe0b8f62c7c0cc9469c0d2863c5c529ac1d2
+  languageName: node
+  linkType: hard
+
+"fast-xml-parser@npm:^5.5.9":
+  version: 5.7.2
+  resolution: "fast-xml-parser@npm:5.7.2"
+  dependencies:
+    "@nodable/entities": "npm:^2.1.0"
+    fast-xml-builder: "npm:^1.1.5"
+    path-expression-matcher: "npm:^1.5.0"
+    strnum: "npm:^2.2.3"
+  bin:
+    fxparser: src/cli/cli.js
+  checksum: 10/7f32d77127dbd5eb1b4c9f7f6ad81972527049905cebe8926c88d102b84c2a56468180dd7541384c93bfc8dad2cef0b1b82b097a931893d3cab3989bd1cf83e1
   languageName: node
   linkType: hard
 
@@ -15341,6 +15449,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"path-expression-matcher@npm:^1.1.3, path-expression-matcher@npm:^1.5.0":
+  version: 1.5.0
+  resolution: "path-expression-matcher@npm:1.5.0"
+  checksum: 10/28303bb9ee6831e6df14c10cd3f3f7b2d7c8d7f788d8bdb7440136fd696064c82a3e264999a0764d28e39f698275fc03a5493bec93c57ef4a22566280367dd64
+  languageName: node
+  linkType: hard
+
 "path-is-absolute@npm:^1.0.0":
   version: 1.0.1
   resolution: "path-is-absolute@npm:1.0.1"
@@ -18201,6 +18316,13 @@ __metadata:
   dependencies:
     escape-string-regexp: "npm:^1.0.2"
   checksum: 10/f8d65d33ca2b49aabc66bb41d689dda7b8b9959d320e3a40a2ef4d7079ff2f67ffb72db43f179f48dbf9495c2e33742863feab7a584d180fa62505439162c191
+  languageName: node
+  linkType: hard
+
+"strnum@npm:^2.2.3":
+  version: 2.2.3
+  resolution: "strnum@npm:2.2.3"
+  checksum: 10/fb70206301858c319f59ed34fecedf90ac3b821692c2accd403d9d4a3384223a09df8fd92b130bbd4e885b67b7790715c003405ce5f959d9cabbf07d41d62aa8
   languageName: node
   linkType: hard
 
