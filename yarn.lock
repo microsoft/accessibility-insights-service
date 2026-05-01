@@ -399,20 +399,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@azure/core-rest-pipeline@npm:^1.2.0":
-  version: 1.5.0
-  resolution: "@azure/core-rest-pipeline@npm:1.5.0"
+"@azure/core-rest-pipeline@npm:^1.19.1":
+  version: 1.23.0
+  resolution: "@azure/core-rest-pipeline@npm:1.23.0"
   dependencies:
-    "@azure/abort-controller": "npm:^1.0.0"
-    "@azure/core-auth": "npm:^1.3.0"
-    "@azure/core-tracing": "npm:1.0.0-preview.13"
-    "@azure/logger": "npm:^1.0.0"
-    form-data: "npm:^4.0.0"
-    http-proxy-agent: "npm:^4.0.1"
-    https-proxy-agent: "npm:^5.0.0"
-    tslib: "npm:^2.2.0"
-    uuid: "npm:^8.3.0"
-  checksum: 10/dc4664bb699904f3819c767d978d419d3fb38faf6f647fac6b4001466a4e1587e9115dc39ccc423943315c08d7fb7eaf06f6a4a35e67c18247d0da346ef22963
+    "@azure/abort-controller": "npm:^2.1.2"
+    "@azure/core-auth": "npm:^1.10.0"
+    "@azure/core-tracing": "npm:^1.3.0"
+    "@azure/core-util": "npm:^1.13.0"
+    "@azure/logger": "npm:^1.3.0"
+    "@typespec/ts-http-runtime": "npm:^0.3.4"
+    tslib: "npm:^2.6.2"
+  checksum: 10/9c60c8bb858cec1caf49d3c323667814512fbf0ca3b34fa382c010f4a6fcccf0a6ef8210c2f7d791b2af67b5c427aefb9b1e4c58a9a9ef60d1cff871fca548f3
   languageName: node
   linkType: hard
 
@@ -552,24 +550,22 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@azure/cosmos@npm:^4.0.0":
-  version: 4.0.0
-  resolution: "@azure/cosmos@npm:4.0.0"
+"@azure/cosmos@npm:^4.9.3":
+  version: 4.9.3
+  resolution: "@azure/cosmos@npm:4.9.3"
   dependencies:
-    "@azure/abort-controller": "npm:^1.0.0"
-    "@azure/core-auth": "npm:^1.3.0"
-    "@azure/core-rest-pipeline": "npm:^1.2.0"
-    "@azure/core-tracing": "npm:^1.0.0"
-    debug: "npm:^4.1.1"
+    "@azure/abort-controller": "npm:^2.1.2"
+    "@azure/core-auth": "npm:^1.9.0"
+    "@azure/core-rest-pipeline": "npm:^1.19.1"
+    "@azure/core-tracing": "npm:^1.2.0"
+    "@azure/core-util": "npm:^1.11.0"
+    "@azure/keyvault-keys": "npm:^4.9.0"
+    "@azure/logger": "npm:^1.1.4"
     fast-json-stable-stringify: "npm:^2.1.0"
-    jsbi: "npm:^3.1.3"
-    node-abort-controller: "npm:^3.0.0"
-    priorityqueuejs: "npm:^1.0.0"
-    semaphore: "npm:^1.0.5"
-    tslib: "npm:^2.2.0"
-    universal-user-agent: "npm:^6.0.0"
-    uuid: "npm:^8.3.0"
-  checksum: 10/4d660902d3ec453ca5957096908f36ab54489dd92e4432da27a0244bf27ac58f93da994de1fc71d0324d10c289d80f9be46a94fe3151bba76b149d591d655ae1
+    priorityqueuejs: "npm:^2.0.0"
+    semaphore: "npm:^1.1.0"
+    tslib: "npm:^2.8.1"
+  checksum: 10/4bf1492e87168fc821e32e0b09bc138e5fb3e3a95fb135ba6b936b1a9bf5d9ce83fd167824d18f5c400e58383bf9922f34bc4be03d57535788a6376afe156582
   languageName: node
   linkType: hard
 
@@ -676,6 +672,26 @@ __metadata:
     "@azure/logger": "npm:^1.1.4"
     tslib: "npm:^2.2.0"
   checksum: 10/c2124c6d5728233529b8af3550dc721ba47e4dfe5a92c9e66af84ae2e00176a1584a0b91291a5cb984628866e43c5d6f14f416999c1dde344ef09e701ac3a13a
+  languageName: node
+  linkType: hard
+
+"@azure/keyvault-keys@npm:^4.9.0":
+  version: 4.10.0
+  resolution: "@azure/keyvault-keys@npm:4.10.0"
+  dependencies:
+    "@azure-rest/core-client": "npm:^2.3.3"
+    "@azure/abort-controller": "npm:^2.1.2"
+    "@azure/core-auth": "npm:^1.9.0"
+    "@azure/core-http-compat": "npm:^2.2.0"
+    "@azure/core-lro": "npm:^2.7.2"
+    "@azure/core-paging": "npm:^1.6.2"
+    "@azure/core-rest-pipeline": "npm:^1.19.0"
+    "@azure/core-tracing": "npm:^1.2.0"
+    "@azure/core-util": "npm:^1.11.0"
+    "@azure/keyvault-common": "npm:^2.0.0"
+    "@azure/logger": "npm:^1.1.4"
+    tslib: "npm:^2.8.1"
+  checksum: 10/1b7b7d94430ebb60d8f1f4b8190196928399376445946bcf3b9e174c20e1c95682e9c84490b3377e46f1a2313724aeb5651846538cba0e27112220adc325218c
   languageName: node
   linkType: hard
 
@@ -4966,13 +4982,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tootallnate/once@npm:1":
-  version: 1.1.2
-  resolution: "@tootallnate/once@npm:1.1.2"
-  checksum: 10/e1fb1bbbc12089a0cb9433dc290f97bddd062deadb6178ce9bcb93bb7c1aecde5e60184bc7065aec42fe1663622a213493c48bbd4972d931aae48315f18e1be9
-  languageName: node
-  linkType: hard
-
 "@tootallnate/once@npm:2":
   version: 2.0.0
   resolution: "@tootallnate/once@npm:2.0.0"
@@ -5882,6 +5891,17 @@ __metadata:
     https-proxy-agent: "npm:^7.0.0"
     tslib: "npm:^2.6.2"
   checksum: 10/31918aa7433a3fb236cf5733f942eb94478e6e05e8a3cda60353f4292b2b8671399c7d6053047ab030946230860ca9e8b3a2a017090b1b4faba3224ae36f3391
+  languageName: node
+  linkType: hard
+
+"@typespec/ts-http-runtime@npm:^0.3.4":
+  version: 0.3.5
+  resolution: "@typespec/ts-http-runtime@npm:0.3.5"
+  dependencies:
+    http-proxy-agent: "npm:^7.0.0"
+    https-proxy-agent: "npm:^7.0.0"
+    tslib: "npm:^2.6.2"
+  checksum: 10/7cf459826e4867ab52a4b9855fdce4590e30a6f37e11fb93155e01c6e80139ec9966b7a3270cffed2c1e88ae66acbae5b4c9a7ecd9274679734da2c18310cc6c
   languageName: node
   linkType: hard
 
@@ -7003,7 +7023,7 @@ __metadata:
   dependencies:
     "@azure/batch": "npm:^10.2.0"
     "@azure/core-auth": "npm:^1.10.1"
-    "@azure/cosmos": "npm:^4.0.0"
+    "@azure/cosmos": "npm:^4.9.3"
     "@azure/identity": "npm:^4.13.0"
     "@azure/keyvault-secrets": "npm:^4.10.0"
     "@azure/ms-rest-js": "npm:^2.7.0"
@@ -10717,7 +10737,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "functional-tests@workspace:packages/functional-tests"
   dependencies:
-    "@azure/cosmos": "npm:^4.0.0"
+    "@azure/cosmos": "npm:^4.9.3"
     "@types/chai": "npm:^4.3.4"
     "@types/deep-equal-in-any-order": "npm:^1.0.4"
     "@types/dotenv": "npm:^8.2.3"
@@ -11526,17 +11546,6 @@ __metadata:
     statuses: "npm:~2.0.2"
     toidentifier: "npm:~1.0.1"
   checksum: 10/9fe31bc0edf36566c87048aed1d3d0cbe03552564adc3541626a0613f542d753fbcb13bdfcec0a3a530dbe1714bb566c89d46244616b66bddd26ac413b06a207
-  languageName: node
-  linkType: hard
-
-"http-proxy-agent@npm:^4.0.1":
-  version: 4.0.1
-  resolution: "http-proxy-agent@npm:4.0.1"
-  dependencies:
-    "@tootallnate/once": "npm:1"
-    agent-base: "npm:6"
-    debug: "npm:4"
-  checksum: 10/2e17f5519f2f2740b236d1d14911ea4be170c67419dc15b05ea9a860a22c5d9c6ff4da270972117067cc2cefeba9df5f7cd5e7818fdc6ae52b6acf2a533e5fdd
   languageName: node
   linkType: hard
 
@@ -13361,13 +13370,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jsbi@npm:^3.1.3":
-  version: 3.1.3
-  resolution: "jsbi@npm:3.1.3"
-  checksum: 10/0177137d21d4ad33c60f8c344d6ec49fa038b129fc364d29c14504ab510957188dd153f56ff9f2afe75e99329e1afe3088725d4709d59bc44e09bd705a9d029c
-  languageName: node
-  linkType: hard
-
 "jsbn@npm:1.1.0":
   version: 1.1.0
   resolution: "jsbn@npm:1.1.0"
@@ -14603,7 +14605,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"node-abort-controller@npm:^3.0.0, node-abort-controller@npm:^3.0.1":
+"node-abort-controller@npm:^3.0.1":
   version: 3.0.1
   resolution: "node-abort-controller@npm:3.0.1"
   checksum: 10/7437b015830a2f714692fd372c01ce5c8c66f332a205455f58ddc8b3228314e588a20abd34a2b037c9cc438ced74e75492c7fc04f4dc0cf7bf0c0ac4160175e3
@@ -15757,10 +15759,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"priorityqueuejs@npm:^1.0.0":
-  version: 1.0.0
-  resolution: "priorityqueuejs@npm:1.0.0"
-  checksum: 10/5b341037ca1a148a00b10ea4edd56572445ad01555b9224ea39ca24ff2fb86683b5ec6d7bbed6ce3f4375614d9ed678d1d7c2c38f7ecd075bf6a35afa0306bf7
+"priorityqueuejs@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "priorityqueuejs@npm:2.0.0"
+  checksum: 10/94aeb915c75b1a95efec8db83fc1d535d9a2d501fcc4e5f374cf714d76231358064caad9a1f6bb99893f94fad4a411dc9b0a3bce04c7da159119bd7bd82f75d7
   languageName: node
   linkType: hard
 
@@ -15835,7 +15837,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "privacy-scan-runner@workspace:packages/privacy-scan-runner"
   dependencies:
-    "@azure/cosmos": "npm:^4.0.0"
+    "@azure/cosmos": "npm:^4.9.3"
     "@types/dotenv": "npm:^8.2.3"
     "@types/jest": "npm:^29.5.12"
     "@types/lodash": "npm:^4.17.24"
@@ -16576,7 +16578,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "report-generator-runner@workspace:packages/report-generator-runner"
   dependencies:
-    "@azure/cosmos": "npm:^4.0.0"
+    "@azure/cosmos": "npm:^4.9.3"
     "@types/dotenv": "npm:^8.2.3"
     "@types/jest": "npm:^29.5.12"
     "@types/lodash": "npm:^4.17.24"
@@ -17272,7 +17274,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"semaphore@npm:^1.0.5":
+"semaphore@npm:^1.1.0":
   version: 1.1.0
   resolution: "semaphore@npm:1.1.0"
   checksum: 10/7a62e0486ab2e361aecf5d88ecb99f42236bb9fbe29e432644d8af371e78c559dc3f2fbef0f57f716491071c214bdf1a15f1f398445b20423278750e2290ea37
@@ -17328,7 +17330,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "service-library@workspace:packages/service-library"
   dependencies:
-    "@azure/cosmos": "npm:^4.0.0"
+    "@azure/cosmos": "npm:^4.9.3"
     "@azure/functions": "npm:^4.12.0"
     "@azure/identity": "npm:^4.13.0"
     "@azure/storage-blob": "npm:12.18.0"
@@ -19477,7 +19479,7 @@ __metadata:
   resolution: "web-api-scan-runner@workspace:packages/web-api-scan-runner"
   dependencies:
     "@axe-core/puppeteer": "npm:4.10.1"
-    "@azure/cosmos": "npm:^4.0.0"
+    "@azure/cosmos": "npm:^4.9.3"
     "@playwright/test": "npm:^1.59.1"
     "@types/dotenv": "npm:^8.2.3"
     "@types/jest": "npm:^29.5.12"
@@ -19574,7 +19576,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "web-api-send-notification-runner@workspace:packages/web-api-send-notification-runner"
   dependencies:
-    "@azure/cosmos": "npm:^4.0.0"
+    "@azure/cosmos": "npm:^4.9.3"
     "@types/dotenv": "npm:^8.2.3"
     "@types/got": "npm:^9.6.11"
     "@types/jest": "npm:^29.5.12"
