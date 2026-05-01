@@ -3536,10 +3536,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@opentelemetry/api@npm:^1.4.1":
-  version: 1.4.1
-  resolution: "@opentelemetry/api@npm:1.4.1"
-  checksum: 10/8637f66c2f7d94c377c9bb22a0528f1349e02a93c0c829de56e487aa4ae02561462a24bfb11a2be25c82e53af9f7737c1fc5d3533e0eb8b1ebf4928204f66ac6
+"@opentelemetry/api@npm:^1.9.1":
+  version: 1.9.1
+  resolution: "@opentelemetry/api@npm:1.9.1"
+  checksum: 10/b26032739d3c54ca99b5a2920844a1fbd4c3ee383cacbb0915e8c706a2626fe91e96feaa6e893397abe0545dc8d0a765b220aa18a31b1773176eeaf3a225e10e
   languageName: node
   linkType: hard
 
@@ -6243,7 +6243,7 @@ __metadata:
     "@crawlee/browser-pool": "npm:^3.16.0"
     "@crawlee/puppeteer": "npm:^3.16.0"
     "@medv/finder": "npm:^4.0.2"
-    "@opentelemetry/api": "npm:^1.4.1"
+    "@opentelemetry/api": "npm:^1.9.1"
     "@opentelemetry/exporter-metrics-otlp-grpc": "npm:^0.57.1"
     "@opentelemetry/resources": "npm:^1.15.0"
     "@opentelemetry/sdk-metrics": "npm:^1.28.0"
@@ -13917,7 +13917,7 @@ __metadata:
   resolution: "logger@workspace:packages/logger"
   dependencies:
     "@apify/log": "npm:2.5.34"
-    "@opentelemetry/api": "npm:^1.4.1"
+    "@opentelemetry/api": "npm:^1.9.1"
     "@opentelemetry/exporter-metrics-otlp-grpc": "npm:^0.57.1"
     "@opentelemetry/instrumentation": "npm:^0.214.0"
     "@opentelemetry/resources": "npm:^1.15.0"
