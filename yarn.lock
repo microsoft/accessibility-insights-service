@@ -6189,7 +6189,7 @@ __metadata:
     "@types/node": "npm:^20.14.9"
     "@types/normalize-path": "npm:^3.0.2"
     "@types/puppeteer": "npm:^7.0.4"
-    accessibility-insights-report: "npm:7.4.0"
+    accessibility-insights-report: "npm:7.5.0"
     axe-core: "npm:4.11.3"
     axe-core-scanner: "workspace:*"
     dotenv: "npm:^17.2.1"
@@ -6217,9 +6217,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"accessibility-insights-report@npm:7.4.0":
-  version: 7.4.0
-  resolution: "accessibility-insights-report@npm:7.4.0"
+"accessibility-insights-report@npm:7.5.0":
+  version: 7.5.0
+  resolution: "accessibility-insights-report@npm:7.5.0"
   dependencies:
     "@fluentui/react": "npm:^8.118.1"
     axe-core: "npm:4.11.3"
@@ -6229,8 +6229,8 @@ __metadata:
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
     react-helmet-async: "npm:^2.0.5"
-    uuid: "npm:^9.0.1"
-  checksum: 10/5f10ed91804fb3b435ae723aa8210ce967f7c13cba5150e2a1707f69ece7ffd09010f9aeffbbef20dd7cd8c51e9a107bf7f2be4a96377d4040cbf966b41a02fb
+    uuid: "npm:^14.0.0"
+  checksum: 10/798cce72ead1d8a9ee73af62b4b1aad546d52ac5d022e5da335820ab805582630af391c0bab83065b7159fe9540409f2e46f750721bd91547f8537b1b1ea11fd
   languageName: node
   linkType: hard
 
@@ -6257,7 +6257,7 @@ __metadata:
     "@types/puppeteer": "npm:^7.0.4"
     "@types/table": "npm:^6.3.2"
     accessibility-insights-crawler: "workspace:*"
-    accessibility-insights-report: "npm:7.4.0"
+    accessibility-insights-report: "npm:7.5.0"
     ajv: "npm:^8.18.0"
     applicationinsights: "npm:^3.14.0"
     axe-core: "npm:4.11.3"
@@ -6311,7 +6311,7 @@ __metadata:
     "@typescript-eslint/eslint-plugin": "npm:^7.15.0"
     "@typescript-eslint/eslint-plugin-tslint": "npm:^7.0.2"
     "@typescript-eslint/parser": "npm:^8.58.0"
-    accessibility-insights-report: "npm:7.4.0"
+    accessibility-insights-report: "npm:7.5.0"
     combine-dependabot-prs: "npm:^1.0.5"
     commander: "npm:^14.0.3"
     eslint: "npm:^8.57.0"
@@ -6938,7 +6938,7 @@ __metadata:
     "@types/jest": "npm:^29.5.12"
     "@types/lodash": "npm:^4.17.24"
     "@types/node": "npm:^20.14.9"
-    accessibility-insights-report: "npm:7.4.0"
+    accessibility-insights-report: "npm:7.5.0"
     axe-core: "npm:4.11.3"
     common: "workspace:*"
     inversify: "npm:^6.0.1"
@@ -6954,9 +6954,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"axe-sarif-converter@npm:^3.0.0":
-  version: 3.0.0
-  resolution: "axe-sarif-converter@npm:3.0.0"
+"axe-sarif-converter@npm:^3.1.0":
+  version: 3.1.0
+  resolution: "axe-sarif-converter@npm:3.1.0"
   dependencies:
     "@puppeteer/browsers": "npm:^2.1.0"
     "@types/sarif": "npm:>=2.1.1 <=2.1.8"
@@ -6964,7 +6964,7 @@ __metadata:
     yargs: "npm:^17.0.0"
   bin:
     axe-sarif-converter: dist/cli.js
-  checksum: 10/b3794d313490cf64bb3b4af5f23ac7b48ecb483a5e5afe57b623a895c5a70e3f211cf2541d825711b4bcf5ea1f231277e1d76808a7469df6f0281d51eab519e5
+  checksum: 10/6fe2edd7b0207c1a93fde51c6a7f8f040005e5b03ab9edae67d66c6d58fce728098174b48922a5a741ea0c9f1389e56b8f9b5f073e4eaae95f9ff13ed3f6a06f
   languageName: node
   linkType: hard
 
@@ -17339,7 +17339,7 @@ __metadata:
     "@types/puppeteer": "npm:^7.0.4"
     "@types/sha.js": "npm:^2.4.4"
     "@types/yargs": "npm:^17.0.33"
-    accessibility-insights-report: "npm:7.4.0"
+    accessibility-insights-report: "npm:7.5.0"
     async-mutex: "npm:^0.5.0"
     axe-core: "npm:4.11.3"
     axe-result-converter: "workspace:*"
@@ -19279,6 +19279,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"uuid@npm:^14.0.0":
+  version: 14.0.0
+  resolution: "uuid@npm:14.0.0"
+  bin:
+    uuid: dist-node/bin/uuid
+  checksum: 10/8ee9b98f9650e25555515f7a28d3c3ae9364e72f7bb19b9e08b681bc135338beba5509b2830f6ae1cfaba4d45401da0d16d4d109b977097bc3d6ba0c5583341b
+  languageName: node
+  linkType: hard
+
 "uuid@npm:^3.1.0, uuid@npm:^3.3.2":
   version: 3.4.0
   resolution: "uuid@npm:3.4.0"
@@ -19486,11 +19495,11 @@ __metadata:
     "@types/puppeteer": "npm:^7.0.4"
     "@types/sha.js": "npm:^2.4.4"
     "@types/yargs": "npm:^17.0.33"
-    accessibility-insights-report: "npm:7.4.0"
+    accessibility-insights-report: "npm:7.5.0"
     applicationinsights: "npm:^3.14.0"
     axe-core: "npm:4.11.3"
     axe-result-converter: "workspace:*"
-    axe-sarif-converter: "npm:^3.0.0"
+    axe-sarif-converter: "npm:^3.1.0"
     azure-services: "workspace:*"
     common: "workspace:*"
     copy-webpack-plugin: "npm:^13.0.1"

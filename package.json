@@ -99,7 +99,7 @@
         "file-type@^20.5.0": "^21.3.2"
     },
     "dependencies": {
-        "accessibility-insights-report": "7.4.0"
+        "accessibility-insights-report": "7.5.0"
     },
     "packageManager": "yarn@4.11.0"
 }
