@@ -19065,16 +19065,16 @@ __metadata:
   linkType: hard
 
 "undici-types@npm:~5.26.4":
-  version: 5.26.5
-  resolution: "undici-types@npm:5.26.5"
-  checksum: 10/0097779d94bc0fd26f0418b3a05472410408877279141ded2bd449167be1aed7ea5b76f756562cb3586a07f251b90799bab22d9019ceba49c037c76445f7cddd
+  version: 8.3.0
+  resolution: "undici-types@npm:8.3.0"
+  checksum: 10/6681d2837ac75a75ac1cc46090aa2b8ddc7c6b8ecc295a6cdb06838752a730da3d8afeecf05e5ab7903160eafad3a8b6ffa1927e5ded260590f4d4fef18646d5
   languageName: node
   linkType: hard
 
 "undici@npm:^5.13.0, undici@npm:^5.25.4":
-  version: 6.23.0
-  resolution: "undici@npm:6.23.0"
-  checksum: 10/56950995e7b628e62c996430445d17995ca9b70f6f2afe760a63da54205660d968bd08f0741b6f4fb008f40aa35c69cce979cd96ced399585d8c897a76a4f1d1
+  version: 8.3.0
+  resolution: "undici@npm:8.3.0"
+  checksum: 10/812a8643c2506bcfa7d9d163864965e95fd1b7e5803431ad072321a6f80511d6fd800913eb4846ca3f19102287342f31f9fad142f40c89d897d6ecb81d61843c
   languageName: node
   linkType: hard
 
