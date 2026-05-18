@@ -63,7 +63,7 @@
         "shellcheck": "^4.1.0",
         "simple-git": "^3.33.0",
         "syncpack": "^8.4.11",
-        "ts-jest": "^29.4.6",
+        "ts-jest": "^29.4.9",
         "tslint": "^6.1.3",
         "typescript": "^5.5.3"
     },
