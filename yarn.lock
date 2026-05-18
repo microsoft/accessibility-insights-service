@@ -3458,7 +3458,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@opentelemetry/api@npm:^1.4.1, @opentelemetry/api@npm:^1.9.1":
+"@opentelemetry/api@npm:^1.9.1":
   version: 1.9.1
   resolution: "@opentelemetry/api@npm:1.9.1"
   checksum: 10/b26032739d3c54ca99b5a2920844a1fbd4c3ee383cacbb0915e8c706a2626fe91e96feaa6e893397abe0545dc8d0a765b220aa18a31b1773176eeaf3a225e10e
@@ -13902,7 +13902,7 @@ __metadata:
   resolution: "logger@workspace:packages/logger"
   dependencies:
     "@apify/log": "npm:2.5.38"
-    "@opentelemetry/api": "npm:^1.4.1"
+    "@opentelemetry/api": "npm:^1.9.1"
     "@opentelemetry/exporter-metrics-otlp-grpc": "npm:^0.57.1"
     "@opentelemetry/instrumentation": "npm:^0.214.0"
     "@opentelemetry/resources": "npm:^1.15.0"
