@@ -3509,7 +3509,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@opentelemetry/api@npm:^1.9.1":
+"@opentelemetry/api@npm:^1.4.1, @opentelemetry/api@npm:^1.9.1":
   version: 1.9.1
   resolution: "@opentelemetry/api@npm:1.9.1"
   checksum: 10/b26032739d3c54ca99b5a2920844a1fbd4c3ee383cacbb0915e8c706a2626fe91e96feaa6e893397abe0545dc8d0a765b220aa18a31b1773176eeaf3a225e10e
@@ -10456,17 +10456,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"follow-redirects@npm:^1.15.6":
-  version: 1.16.0
-  resolution: "follow-redirects@npm:1.16.0"
-  peerDependenciesMeta:
-    debug:
-      optional: true
-  checksum: 10/3fbe3d80b3b544c22705d837aa5d4a0d07a740d913534a2620b0a004c610af4148e3b58723536dd099aaa1c9d3a155964bde9665d6e5cb331460809a1fc572fd
-  languageName: node
-  linkType: hard
-
-"follow-redirects@npm:^1.16.0":
+"follow-redirects@npm:^1.15.6, follow-redirects@npm:^1.16.0":
   version: 1.16.0
   resolution: "follow-redirects@npm:1.16.0"
   peerDependenciesMeta:
@@ -15870,7 +15860,7 @@ __metadata:
     rimraf: "npm:^6.1.3"
     service-library: "workspace:*"
     storage-documents: "workspace:*"
-    ts-jest: "npm:^29.4.6"
+    ts-jest: "npm:^29.4.9"
     ts-loader: "npm:^9.5.7"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
@@ -15919,7 +15909,7 @@ __metadata:
     scanner-global-library: "workspace:*"
     service-library: "workspace:*"
     storage-documents: "workspace:*"
-    ts-jest: "npm:^29.4.6"
+    ts-jest: "npm:^29.4.9"
     ts-loader: "npm:^9.5.7"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
