@@ -96,7 +96,8 @@
         "brace-expansion@^2.0.1": "^2.0.3",
         "brace-expansion@^5.0.2": "^5.0.5",
         "file-type@^20.0.0": "^21.3.2",
-        "file-type@^20.5.0": "^21.3.2"
+        "file-type@^20.5.0": "^21.3.2",
+        "@azure/core-rest-pipeline": "^1.22.0"
     },
     "dependencies": {
         "accessibility-insights-report": "7.5.0"
