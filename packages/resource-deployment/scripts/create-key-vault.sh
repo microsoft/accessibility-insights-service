@@ -6,16 +6,14 @@
 # shellcheck disable=SC1091
 set -eo pipefail
 
-export resourceGroupName
-export keyVault
-
 # Set default ARM template files
 createKeyVaultTemplateFile="${0%/*}/../templates/key-vault-create.template.json"
+createKeyVaultSecScanTemplateFile="${0%/*}/../templates/key-vault-sec-scan-create.template.json"
 setupKeyVaultResourcesTemplateFile="${0%/*}/../templates/key-vault-setup-resources.template.json"
 
 exitWithUsageInfo() {
     echo "
-Usage: ${BASH_SOURCE} -r <resource group> -c <web API client ID> -b <Azure Batch object ID> [-e <environment>]
+Usage: ${BASH_SOURCE} -r <resource group> [-b <Object ID to grant access>] [-t <key vault type: service|secscan>]
 "
     exit 1
 }
@@ -48,7 +46,6 @@ function createKeyVaultIfNotExists() {
         az deployment group create \
             --resource-group "${resourceGroupName}" \
             --template-file "${createKeyVaultTemplateFile}" \
-            --parameters objectId="${azureBatchObjectId}" \
             --query "properties.outputResources[].id" \
             -o tsv 1>/dev/null
 
@@ -74,6 +71,38 @@ function setAccessPolicies() {
         --enable-rbac-authorization "true" 1>/dev/null
 }
 
+function createRoleAssignmentIfNotExists() {
+    local role="$1"
+    local assigneeObjectId="$2"
+    local scope="$3"
+
+    echo "Assigning '${role}' role to ${assigneeObjectId} on ${scope##*/}"
+    local output
+    if output=$(az role assignment create \
+        --role "${role}" \
+        --assignee-object-id "${assigneeObjectId}" \
+        --assignee-principal-type ServicePrincipal \
+        --scope "${scope}" 2>&1); then
+        echo "Role assignment '${role}' created successfully"
+    elif echo "${output}" | grep -q "RoleAssignmentExists"; then
+        echo "Role assignment '${role}' already exists for ${assigneeObjectId}"
+    else
+        echo "Failed to create role assignment: ${output}"
+        return 1
+    fi
+}
+
+function assignRbacRoles() {
+    local kvScope="subscriptions/${subscription}/resourcegroups/${resourceGroupName}/providers/Microsoft.KeyVault/vaults/${keyVault}"
+
+    if [[ "${keyVaultType}" == "secscan" ]]; then
+        createRoleAssignmentIfNotExists "Key Vault Secrets User" "${objectId}" "${kvScope}"
+        createRoleAssignmentIfNotExists "Key Vault Reader" "${objectId}" "${kvScope}"
+    else
+        createRoleAssignmentIfNotExists "Key Vault Secrets Officer" "${objectId}" "${kvScope}"
+    fi
+}
+
 function setupKeyVaultResources() {
     echo "Setup key vault resources."
     az deployment group create \
@@ -84,30 +113,47 @@ function setupKeyVaultResources() {
 }
 
 # Read script arguments
-while getopts ":r:b:e:" option; do
+while getopts ":r:b:k:t:" option; do
     case ${option} in
     r) resourceGroupName=${OPTARG} ;;
-    b) azureBatchObjectId=${OPTARG} ;;
-    e) environment=${OPTARG} ;;
+    b) objectId=${OPTARG} ;;
+    k) keyVault=${OPTARG} ;;
+    t) keyVaultType=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
 
 # Print script usage help
-if [[ -z ${resourceGroupName} ]] || [[ -z ${azureBatchObjectId} ]]; then
+if [[ -z ${resourceGroupName} ]]; then
     exitWithUsageInfo
-fi
-
-if [[ -z ${environment} ]]; then
-    environment="dev"
 fi
 
 . "${0%/*}/get-resource-names.sh"
 . "${0%/*}/process-utilities.sh"
 
+# Select key vault template and name based on key vault type
+case ${keyVaultType} in
+secscan)
+    createKeyVaultTemplateFile="${createKeyVaultSecScanTemplateFile}"
+    keyVault="${keyVaultSecScan}"
+    ;;
+service | "") ;; # use default createKeyVaultTemplateFile and keyVault
+*)
+    echo "Error: Invalid key vault type '${keyVaultType}'. Must be 'service' or 'secscan'."
+    exitWithUsageInfo
+    ;;
+esac
+
 createOrRecoverKeyvault
 setupKeyVaultResources
 setAccessPolicies
-. "${0%/*}/push-secrets-to-key-vault.sh"
+
+if [[ -n "${objectId}" ]]; then
+    assignRbacRoles
+fi
+
+if [[ "${keyVaultType}" != "secscan" ]]; then
+    . "${0%/*}/push-secrets-to-key-vault.sh"
+fi
 
 echo "The ${keyVault} Azure Key Vault successfully deployed."

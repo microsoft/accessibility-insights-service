@@ -4,7 +4,7 @@
     "parameters": {
         "keyVault": {
             "type": "string",
-            "defaultValue": "[concat('allyvault',toLower(uniqueString(resourceGroup().id)))]",
+            "defaultValue": "[concat('secscankv',toLower(uniqueString(resourceGroup().id)))]",
             "metadata": {
                 "description": "The key vault name."
             }
@@ -29,12 +29,12 @@
                     "name": "standard"
                 },
                 "tenantId": "[subscription().tenantId]",
-                "accessPolicies": [],
                 "enabledForDeployment": true,
                 "enabledForDiskEncryption": true,
                 "enabledForTemplateDeployment": true,
                 "enableSoftDelete": true,
-                "enableRbacAuthorization": true
+                "enableRbacAuthorization": true,
+                "accessPolicies": []
             }
         }
     ]
