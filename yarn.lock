@@ -561,9 +561,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@azure/keyvault-secrets@npm:^4.11.1":
-  version: 4.11.1
-  resolution: "@azure/keyvault-secrets@npm:4.11.1"
+"@azure/keyvault-secrets@npm:^4.11.2":
+  version: 4.11.2
+  resolution: "@azure/keyvault-secrets@npm:4.11.2"
   dependencies:
     "@azure-rest/core-client": "npm:^2.3.3"
     "@azure/abort-controller": "npm:^2.1.2"
@@ -576,7 +576,7 @@ __metadata:
     "@azure/keyvault-common": "npm:^2.1.0"
     "@azure/logger": "npm:^1.1.4"
     tslib: "npm:^2.8.1"
-  checksum: 10/f9bc77fe2556e206abcb85309eb49da87f9e3e17639dffba50d1f6219863da1793fc9f8fab9c3ffea706e1d3b495783714e435cc5dd05c60191566c2ed1c0c43
+  checksum: 10/e38610e85e0d11a8b62ebb49b7a673df08773c5520211e89a8d09782ec0e31bb4466d425a56ca9c9e03d2d0f5243b352ecf5fccd7f6ec05716aefe51a9597c92
   languageName: node
   linkType: hard
 
@@ -6985,7 +6985,7 @@ __metadata:
     "@azure/core-auth": "npm:^1.10.1"
     "@azure/cosmos": "npm:^4.0.0"
     "@azure/identity": "npm:^4.13.0"
-    "@azure/keyvault-secrets": "npm:^4.11.1"
+    "@azure/keyvault-secrets": "npm:^4.11.2"
     "@azure/ms-rest-js": "npm:^2.7.0"
     "@azure/ms-rest-nodeauth": "npm:^3.1.1"
     "@azure/storage-blob": "npm:12.18.0"
