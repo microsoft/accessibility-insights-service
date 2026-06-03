@@ -6395,6 +6395,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"agent-base@npm:9.0.0":
+  version: 9.0.0
+  resolution: "agent-base@npm:9.0.0"
+  checksum: 10/3a61414cd10dbb17fa8dae35124ffaa55fbb00f495004b2e7a8f4eca3a2b6ed9879474d4e2ebc27ee2f4207265652341525b4154e85c4d479be4854acd786bfb
+  languageName: node
+  linkType: hard
+
 "agent-base@npm:^6.0.2":
   version: 6.0.2
   resolution: "agent-base@npm:6.0.2"
@@ -6960,19 +6967,19 @@ __metadata:
   linkType: hard
 
 "azure-functions-core-tools@npm:^4.x":
-  version: 4.10.0
-  resolution: "azure-functions-core-tools@npm:4.10.0"
+  version: 4.12.0
+  resolution: "azure-functions-core-tools@npm:4.12.0"
   dependencies:
-    chalk: "npm:3.0.0"
+    chalk: "npm:^4.1.2"
     extract-zip: "npm:^2.0.1"
-    https-proxy-agent: "npm:5.0.1"
+    https-proxy-agent: "npm:9.0.0"
     progress: "npm:2.0.3"
-    rimraf: "npm:4.4.1"
+    rimraf: "npm:^6.1.3"
   bin:
     azfun: lib/main.js
     azurefunctions: lib/main.js
     func: lib/main.js
-  checksum: 10/5e16565ade4f3b4635903bc3bc4df4f313f891550850a9c86cbf8d19293c73b0bb465699d57e2a4ab5a0168eb5fda8689275debdb8e69da3199076dd8b0c0705
+  checksum: 10/3ec753f0ad0626fe800bd5fd205c9d0a3d3de1f55af5672c4a439831c94202537b61c4f944b9e3c3db9c92251eca13db63558b5d1e342316534b8e77c0c21f9a
   conditions: (os=win32 | os=darwin | os=linux)
   languageName: node
   linkType: hard
@@ -7721,16 +7728,6 @@ __metadata:
     pathval: "npm:^1.1.1"
     type-detect: "npm:^4.0.5"
   checksum: 10/615eabfeb9032315fb2d287fb03c29b7996f943024c7d4482b1b5370b6c22807fd4da329244dc5ac0c8802408d741dfb9b86245ffeddc83ce18898dda8d7aed4
-  languageName: node
-  linkType: hard
-
-"chalk@npm:3.0.0":
-  version: 3.0.0
-  resolution: "chalk@npm:3.0.0"
-  dependencies:
-    ansi-styles: "npm:^4.1.0"
-    supports-color: "npm:^7.1.0"
-  checksum: 10/37f90b31fd655fb49c2bd8e2a68aebefddd64522655d001ef417e6f955def0ed9110a867ffc878a533f2dafea5f2032433a37c8a7614969baa7f8a1cd424ddfc
   languageName: node
   linkType: hard
 
@@ -11019,18 +11016,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"glob@npm:^9.2.0":
-  version: 9.3.5
-  resolution: "glob@npm:9.3.5"
-  dependencies:
-    fs.realpath: "npm:^1.0.0"
-    minimatch: "npm:^8.0.2"
-    minipass: "npm:^4.2.4"
-    path-scurry: "npm:^1.6.1"
-  checksum: 10/e5fa8a58adf53525bca42d82a1fad9e6800032b7e4d372209b80cfdca524dd9a7dbe7d01a92d7ed20d89c572457f12c250092bc8817cb4f1c63efefdf9b658c0
-  languageName: node
-  linkType: hard
-
 "global-agent@npm:3.0.0":
   version: 3.0.0
   resolution: "global-agent@npm:3.0.0"
@@ -11579,6 +11564,16 @@ __metadata:
     agent-base: "npm:6"
     debug: "npm:4"
   checksum: 10/f0dce7bdcac5e8eaa0be3c7368bb8836ed010fb5b6349ffb412b172a203efe8f807d9a6681319105ea1b6901e1972c7b5ea899672a7b9aad58309f766dcbe0df
+  languageName: node
+  linkType: hard
+
+"https-proxy-agent@npm:9.0.0":
+  version: 9.0.0
+  resolution: "https-proxy-agent@npm:9.0.0"
+  dependencies:
+    agent-base: "npm:9.0.0"
+    debug: "npm:^4.3.4"
+  checksum: 10/27457d671278c8c1074cc901fe305b70d1e340127433219124c4aefc44153a179a8921e4b16d67beb2868a3a39b6b7ec84d91d8f24f2ec1d39cf4ac385351a92
   languageName: node
   linkType: hard
 
@@ -14304,15 +14299,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"minimatch@npm:^8.0.2":
-  version: 8.0.4
-  resolution: "minimatch@npm:8.0.4"
-  dependencies:
-    brace-expansion: "npm:^2.0.1"
-  checksum: 10/aef05598ee565e1013bc8a10f53410ac681561f901c1a084b8ecfd016c9ed919f58f4bbd5b63e05643189dfb26e8106a84f0e1ff12e4a263aa37e1cae7ce9828
-  languageName: node
-  linkType: hard
-
 "minimist-options@npm:4.1.0":
   version: 4.1.0
   resolution: "minimist-options@npm:4.1.0"
@@ -14397,13 +14383,6 @@ __metadata:
   dependencies:
     yallist: "npm:^4.0.0"
   checksum: 10/70a12e3d3e6b8bd1c25bce2604a754cb30cadca34b32ed3e9721e83ccb3854744d2cee674afdc96e8e0df90201aa56ab39dce319f2adf28159271d5587c10377
-  languageName: node
-  linkType: hard
-
-"minipass@npm:^4.2.4":
-  version: 4.2.8
-  resolution: "minipass@npm:4.2.8"
-  checksum: 10/e148eb6dcb85c980234cad889139ef8ddf9d5bdac534f4f0268446c8792dd4c74f4502479be48de3c1cce2f6450f6da4d0d4a86405a8a12be04c1c36b339569a
   languageName: node
   linkType: hard
 
@@ -15359,7 +15338,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"path-scurry@npm:^1.11.1, path-scurry@npm:^1.6.1":
+"path-scurry@npm:^1.11.1":
   version: 1.11.1
   resolution: "path-scurry@npm:1.11.1"
   dependencies:
@@ -16904,17 +16883,6 @@ __metadata:
   version: 1.0.4
   resolution: "reusify@npm:1.0.4"
   checksum: 10/14222c9e1d3f9ae01480c50d96057228a8524706db79cdeb5a2ce5bb7070dd9f409a6f84a02cbef8cdc80d39aef86f2dd03d155188a1300c599b05437dcd2ffb
-  languageName: node
-  linkType: hard
-
-"rimraf@npm:4.4.1":
-  version: 4.4.1
-  resolution: "rimraf@npm:4.4.1"
-  dependencies:
-    glob: "npm:^9.2.0"
-  bin:
-    rimraf: dist/cjs/src/bin.js
-  checksum: 10/218ef9122145ccce9d0a71124d36a3894537de46600b37fae7dba26ccff973251eaa98aa63c2c5855a05fa04bca7cbbd7a92d4b29f2875d2203e72530ecf6ede
   languageName: node
   linkType: hard
 
