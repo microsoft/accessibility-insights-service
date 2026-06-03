@@ -6321,7 +6321,7 @@ __metadata:
     eslint-plugin-jest: "npm:^28.6.0"
     eslint-plugin-jsdoc: "npm:^48.5.0"
     eslint-plugin-prefer-arrow: "npm:^1.2.3"
-    eslint-plugin-security: "npm:^3.0.1"
+    eslint-plugin-security: "npm:^4.0.0"
     eslint-plugin-sort-class-members: "npm:^1.21.0"
     jest: "npm:^29.7.0"
     jest-extended: "npm:^7.0.0"
@@ -9804,12 +9804,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-plugin-security@npm:^3.0.1":
-  version: 3.0.1
-  resolution: "eslint-plugin-security@npm:3.0.1"
+"eslint-plugin-security@npm:^4.0.0":
+  version: 4.0.0
+  resolution: "eslint-plugin-security@npm:4.0.0"
   dependencies:
     safe-regex: "npm:^2.1.1"
-  checksum: 10/5a7eb9a9d499addad93e9a650f503b2bdc23e8ab8222a0330e216726ffcc0e154405d23c8c523ff987e894cb9c8358da883c1dd22e21423e4368cd13de14930c
+  checksum: 10/a952568f8fd2f5c46ae5e682eefc0c1bec0c2251c2e2623cb0bafc95e54d3004355e8b7095e1c1aa997d1c3f5e67ccd1766ebc5b7ee5c00774f6391e877efc6a
   languageName: node
   linkType: hard
 
