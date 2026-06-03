@@ -100,7 +100,7 @@
         "@azure/core-rest-pipeline": "^1.22.0"
     },
     "dependencies": {
-        "accessibility-insights-report": "7.5.0"
+        "accessibility-insights-report": "7.6.0"
     },
     "packageManager": "yarn@4.11.0"
 }
