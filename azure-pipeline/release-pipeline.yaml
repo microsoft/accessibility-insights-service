@@ -1,0 +1,260 @@
+# A11y Service - Production Deployment
+# Converted from Classic Release Pipeline (Definition ID: 377)
+# Source: https://dev.azure.com/mseng/1ES/_release?definitionId=377
+
+trigger: none # Release pipeline - triggered by artifacts
+
+resources:
+  pipelines:
+    - pipeline: a11y-service-insights-ci
+      source: 'Accessibility Insights Service CI'
+      project: '1ES'
+      trigger:
+        branches:
+          include:
+            - main
+    - pipeline: accessibility-insights-service-private
+      source: 'Accessibility Insights Service Private CI'
+      project: '1ES'
+
+variables:
+  - name: keepImages
+    value: 'false'
+  - name: orgName
+    value: '1ES'
+  - name: privateRepoDropName
+    value: '_accessibility-insights-service-private'
+  - name: publicRepoDropName
+    value: 'a11y-service-insights-ci'
+  - name: publisherEmail
+    value: 'a11y-services-dev@microsoft.com'
+  - name: testsEvaluationTimeoutInMinutes
+    value: '75'
+
+parameters:
+  - name: stages
+    type: object
+    default:
+      - name: Canary
+        environment: ci
+        location: westeurope
+        profileName: ci
+        resourceGroup: web-insights-service-canary-eu
+        subscriptionId: 4afc1577-3175-4d2c-87d5-de21ac0556e3
+        clientId: 9dd5004a-f8d9-4c37-85f7-2a19734e27bc
+        webApiBaseUrl: https://apim-a11yvdk575fkvwpuq.azure-api.net
+        azureBatchObjectId: 8ad17ea0-4c88-4465-b8ec-a827df84f896
+        downloadAIAgent: true
+        dependsOn: []
+      - name: Insider_Accessibility
+        displayName: 'Insider - Accessibility'
+        environment: ppe
+        location: westus2
+        profileName: ppe
+        resourceGroup: a11yScanner
+        subscriptionId: 4afc1577-3175-4d2c-87d5-de21ac0556e3
+        clientId: a0f34455-1928-40f8-9cc7-3772bb0cc6bf
+        webApiBaseUrl: https://apim-a11yli56mzbng5jpe.azure-api.net
+        azureBatchObjectId: 8ad17ea0-4c88-4465-b8ec-a827df84f896
+        downloadAIAgent: true
+        dependsOn:
+          - Canary
+      - name: Prod_Accessibility
+        displayName: 'Prod - Accessibility'
+        environment: prod
+        location: westus2
+        profileName: prod
+        resourceGroup: a11yInsight-Prod
+        subscriptionId: ef2bad63-12e9-47a1-a274-e9a29bab63b1
+        clientId: 89da15d3-fe95-48dd-be6f-5c7dfbca3260
+        webApiBaseUrl: https://apim-a11yy74ucua4sim3c.azure-api.net
+        azureBatchObjectId: 8ad17ea0-4c88-4465-b8ec-a827df84f896
+        downloadAIAgent: false
+        dependsOn:
+          - Insider_Accessibility
+      - name: Insider_Privacy
+        displayName: 'Insider - Privacy'
+        environment: ppe-eu
+        location: westeurope
+        profileName: ppe
+        resourceGroup: privacyscanner-PPE
+        subscriptionId: 4afc1577-3175-4d2c-87d5-de21ac0556e3
+        clientId: 4d24fbee-cb5c-476b-b555-86d6d7d9aa84
+        webApiBaseUrl: https://apim-a11yufgzh6qzutguk.azure-api.net
+        azureBatchObjectId: 8ad17ea0-4c88-4465-b8ec-a827df84f896
+        downloadAIAgent: true
+        dependsOn:
+          - Canary
+      - name: Prod_Privacy
+        displayName: 'Prod - Privacy'
+        environment: prod-eu
+        location: westeurope
+        profileName: prod
+        resourceGroup: privacyscanner-Prod
+        subscriptionId: ef2bad63-12e9-47a1-a274-e9a29bab63b1
+        clientId: 7ddaa0db-1ec3-4938-8773-09196362ff58
+        webApiBaseUrl: https://apim-a11yf4paesw4ctlmu.azure-api.net
+        azureBatchObjectId: 8ad17ea0-4c88-4465-b8ec-a827df84f896
+        downloadAIAgent: false
+        dependsOn:
+          - Insider_Privacy
+
+stages:
+  - ${{ each stageConfig in parameters.stages }}:
+    - stage: ${{ stageConfig.name }}
+      ${{ if stageConfig.displayName }}:
+        displayName: ${{ stageConfig.displayName }}
+      dependsOn: ${{ stageConfig.dependsOn }}
+      variables:
+        - name: environment
+          value: ${{ stageConfig.environment }}
+        - name: location
+          value: ${{ stageConfig.location }}
+        - name: profileName
+          value: ${{ stageConfig.profileName }}
+        - name: resourceGroup
+          value: ${{ stageConfig.resourceGroup }}
+        - name: subscriptionId
+          value: ${{ stageConfig.subscriptionId }}
+        - name: clientId
+          value: ${{ stageConfig.clientId }}
+        - name: webApiBaseUrl
+          value: ${{ stageConfig.webApiBaseUrl }}
+        - name: azureBatchObjectId
+          value: ${{ stageConfig.azureBatchObjectId }}
+        - name: dropPools
+          value: 'false'
+      jobs:
+        - deployment: Deploy
+          displayName: 'Deploy to ${{ stageConfig.environment }}'
+          pool:
+            vmImage: ubuntu-latest
+          # Environment with approval gates (configure approvals in Azure DevOps Environments UI)
+          # For stages requiring manual approval, configure the environment with approval checks
+          environment: 'a11y-service-${{ stageConfig.environment }}'
+          strategy:
+            runOnce:
+              deploy:
+                steps:
+                  # Download artifacts from both pipelines
+                  - download: a11y-service-insights-ci
+                    artifact: drop
+                    displayName: 'Download public repo artifacts'
+
+                  - download: accessibility-insights-service-private
+                    artifact: drop
+                    displayName: 'Download private repo artifacts'
+
+                  # Copy private files to service build artifacts
+                  - task: Bash@3
+                    displayName: 'Copy private files to service build artifacts'
+                    condition: succeededOrFailed()
+                    continueOnError: true
+                    inputs:
+                      targetType: inline
+                      script: |
+                        chmod +x "$(Pipeline.Workspace)/accessibility-insights-service-private/drop/scripts/copy-files-to-drop.sh"
+                        "$(Pipeline.Workspace)/accessibility-insights-service-private/drop/scripts/copy-files-to-drop.sh" \
+                          -d "$(Pipeline.Workspace)/a11y-service-insights-ci/drop" \
+                          -p "$(profileName)"
+
+                  # Grant executable permissions to deployment scripts
+                  - task: Bash@3
+                    displayName: 'Grant executable permissions to deployment scripts'
+                    condition: succeededOrFailed()
+                    continueOnError: true
+                    inputs:
+                      targetType: inline
+                      script: |
+                        chmod -R +x "$(Pipeline.Workspace)/a11y-service-insights-ci/drop/resource-deployment/dist/scripts"
+                        chmod +x "$(Pipeline.Workspace)/accessibility-insights-service-private/drop/scripts"
+
+                  # Download AI agent binaries (conditional per stage)
+                  - ${{ if eq(stageConfig.downloadAIAgent, true) }}:
+                    - task: AzureCLI@2
+                      displayName: 'Download AI agent binaries'
+                      inputs:
+                        azureSubscription: 'WebInsightsService-PPE'
+                        scriptType: bash
+                        scriptLocation: inlineScript
+                        inlineScript: |
+                          az config set extension.use_dynamic_install=yes_without_prompt
+                          echo $(System.AccessToken) | az devops login
+
+                          az artifacts universal download \
+                            --organization "https://dev.azure.com/mseng/" \
+                            --project "708e929f-6bd5-415a-8daf-25b1dac08dd8" \
+                            --scope project \
+                            --feed "A11yAgent" \
+                            --name "a11yagent-canary" \
+                            --version "*" \
+                            --path "$(Pipeline.Workspace)/a11y-service-insights-ci/drop/a11y_agent"
+
+                          unzip "$(Pipeline.Workspace)/a11y-service-insights-ci/drop/a11y_agent/A11yAgent*.zip" \
+                            -d "$(Pipeline.Workspace)/a11y-service-insights-ci/drop/web-api-scan-runner/dist/a11y_agent"
+
+                  # Install service
+                  - task: AzureCLI@2
+                    displayName: 'Install service'
+                    inputs:
+                      azureSubscription: 'WebInsightsService-PPE'
+                      scriptType: bash
+                      scriptLocation: inlineScript
+                      addSpnToEnvironment: true
+                      inlineScript: |
+                        /bin/bash "$(Pipeline.Workspace)/a11y-service-insights-ci/drop/resource-deployment/dist/scripts/install-parallel.sh" \
+                          -s "$(subscriptionId)" \
+                          -r "$(resourceGroup)" \
+                          -l "$(location)" \
+                          -e "$(environment)" \
+                          -o "$(orgName)" \
+                          -p "$(publisherEmail)" \
+                          -v "$(Build.BuildId)" \
+                          -d "$(dropPools)" \
+                          -w "$(keepImages)" \
+                          -b "$(azureBatchObjectId)"
+
+                  # Restart VMs
+                  - task: AzureCLI@2
+                    displayName: 'Restart VMs'
+                    inputs:
+                      azureSubscription: 'WebInsightsService-PPE'
+                      scriptType: bash
+                      scriptLocation: inlineScript
+                      inlineScript: |
+                        # Will not block the restart VMs script
+                        $(Pipeline.Workspace)/a11y-service-insights-ci/drop/resource-deployment/dist/scripts/create-bastion.sh \
+                          -r "$(resourceGroup)" &
+
+                        $(Pipeline.Workspace)/a11y-service-insights-ci/drop/resource-deployment/dist/scripts/restart-vm-pools.sh \
+                          -r "$(resourceGroup)"
+
+                  # Start health monitor
+                  - task: AzureCLI@2
+                    displayName: 'Start health monitor'
+                    inputs:
+                      azureSubscription: 'WebInsightsService-PPE'
+                      scriptType: bash
+                      scriptLocation: scriptPath
+                      scriptPath: '$(Pipeline.Workspace)/a11y-service-insights-ci/drop/resource-deployment/dist/scripts/start-health-monitor.sh'
+                      arguments: '-r "$(resourceGroup)"'
+
+                  # Validate deployment
+                  - task: AzureCLI@2
+                    displayName: 'Validate deployment'
+                    inputs:
+                      azureSubscription: 'WebInsightsService-PPE'
+                      scriptType: bash
+                      scriptLocation: inlineScript
+                      inlineScript: |
+                        cd $(Pipeline.Workspace)/a11y-service-insights-ci/drop/health-client/dist
+                        npm install
+
+                        export accessToken=$(az account get-access-token --resource="$(clientId)" --query "accessToken" -o tsv)
+
+                        node $(Pipeline.Workspace)/a11y-service-insights-ci/drop/health-client/dist/health-checker.js \
+                          --token $accessToken \
+                          --releaseId $(Build.BuildId) \
+                          --baseUrl $(webApiBaseUrl) \
+                          --reportDownloadLocation $(Pipeline.Workspace)/e2e-reports \
+                          --testsEvaluationTimeoutInMinutes $(testsEvaluationTimeoutInMinutes)
