@@ -209,7 +209,7 @@ stages:
                           -e "$(environment)" \
                           -o "$(orgName)" \
                           -p "$(publisherEmail)" \
-                          -v "$(Build.BuildId)" \
+                          -v "$(Release.ReleaseId)" \
                           -d "$(dropPools)" \
                           -w "$(keepImages)" \
                           -b "$(azureBatchObjectId)"
@@ -254,7 +254,7 @@ stages:
 
                         node $(Pipeline.Workspace)/a11y-service-insights-ci/drop/health-client/dist/health-checker.js \
                           --token $accessToken \
-                          --releaseId $(Build.BuildId) \
+                          --releaseId $(Release.ReleaseId) \
                           --baseUrl $(webApiBaseUrl) \
                           --reportDownloadLocation $(Pipeline.Workspace)/e2e-reports \
                           --testsEvaluationTimeoutInMinutes $(testsEvaluationTimeoutInMinutes)
