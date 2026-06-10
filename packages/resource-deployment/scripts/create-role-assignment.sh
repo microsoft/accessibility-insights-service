@@ -57,4 +57,8 @@ grantRoleToResource() {
     echo "Successfully granted ${role} role for service principal ${principalId} in ${scope}"
 }
 
-grantRoleToResource
+if [[ "${enableRoleAssignments:-false}" == "true" ]]; then
+    grantRoleToResource
+else
+    echo "Skipping ${role} role assignment for service principal ${principalId} in ${scope} because enableRoleAssignments flag is disabled."
+fi

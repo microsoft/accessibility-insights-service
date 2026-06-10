@@ -30,10 +30,14 @@ fi
 customRoleName="CosmosDocumentRW"
 RBACRoleId=$(az cosmosdb sql role definition list --account-name "${cosmosAccountName}" --resource-group "${resourceGroupName}" --query "[?roleName=='${customRoleName}'].id" -o tsv)
 
-az cosmosdb sql role assignment create --account-name "${cosmosAccountName}" \
-    --resource-group "${resourceGroupName}" \
-    --scope "/" \
-    --principal-id "${principalId}" \
-    --role-definition-id "${RBACRoleId}" 1>/dev/null
+if [[ "${enableRoleAssignments:-false}" == "true" ]]; then
+    az cosmosdb sql role assignment create --account-name "${cosmosAccountName}" \
+        --resource-group "${resourceGroupName}" \
+        --scope "/" \
+        --principal-id "${principalId}" \
+        --role-definition-id "${RBACRoleId}" 1>/dev/null
 
-echo "The custom role ${customRoleName} has been successfully assigned to the principal ${principalId}"
+    echo "The custom role ${customRoleName} has been successfully assigned to the principal ${principalId}"
+else
+    echo "Skipping the custom role ${customRoleName} assignment to the principal ${principalId} because enableRoleAssignments flag is disabled."
+fi
