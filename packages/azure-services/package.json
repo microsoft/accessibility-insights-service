@@ -31,11 +31,11 @@
         "mockdate": "^3.0.5",
         "npm-run-all": "^4.1.5",
         "rimraf": "^6.1.3",
-        "ts-jest": "^29.4.9",
-        "ts-loader": "^9.5.7",
+        "ts-jest": "^29.4.11",
+        "ts-loader": "^9.6.0",
         "typemoq": "^2.1.0",
         "typescript": "^5.5.3",
-        "webpack": "^5.106.2",
+        "webpack": "^5.107.2",
         "webpack-cli": "^5.1.4"
     },
     "dependencies": {
@@ -43,7 +43,7 @@
         "@azure/core-auth": "^1.10.1",
         "@azure/cosmos": "^4.0.0",
         "@azure/identity": "^4.13.0",
-        "@azure/keyvault-secrets": "^4.11.1",
+        "@azure/keyvault-secrets": "^4.11.2",
         "@azure/ms-rest-js": "^2.7.0",
         "@azure/ms-rest-nodeauth": "^3.1.1",
         "@azure/storage-blob": "12.18.0",
@@ -58,7 +58,7 @@
         "moment": "^2.30.1",
         "node-cache": "^5.1.2",
         "p-limit": "^3.1.0",
-        "pretty-format": "^30.2.0",
+        "pretty-format": "^30.4.1",
         "reflect-metadata": "^0.2.2",
         "storage-documents": "workspace:*"
     }
