@@ -2182,10 +2182,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@discoveryjs/json-ext@npm:^0.5.0":
-  version: 0.5.2
-  resolution: "@discoveryjs/json-ext@npm:0.5.2"
-  checksum: 10/0447653b340fe5e6629851b8ea8023b4d128de86b59c9889adf01149c1d4066443cde2701d78e428ec30747b5bbdb38a591864a707528eb6db25c51ffdb69279
+"@discoveryjs/json-ext@npm:^1.1.0":
+  version: 1.1.0
+  resolution: "@discoveryjs/json-ext@npm:1.1.0"
+  checksum: 10/c941e41fcfa0d40bfd0b12e5cd5995b609328adb5fa881b1e8bebcae57784d505ccb92ae5d470055336802197a664d3856decccfd09a59c8feef2bf214591ff5
   languageName: node
   linkType: hard
 
@@ -6028,39 +6028,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@webpack-cli/configtest@npm:^2.1.1":
-  version: 2.1.1
-  resolution: "@webpack-cli/configtest@npm:2.1.1"
-  peerDependencies:
-    webpack: 5.x.x
-    webpack-cli: 5.x.x
-  checksum: 10/9f9f9145c2d05471fc83d426db1df85cf49f329836b0c4b9f46b6948bed4b013464c00622b136d2a0a26993ce2306976682592245b08ee717500b1db45009a72
-  languageName: node
-  linkType: hard
-
-"@webpack-cli/info@npm:^2.0.2":
-  version: 2.0.2
-  resolution: "@webpack-cli/info@npm:2.0.2"
-  peerDependencies:
-    webpack: 5.x.x
-    webpack-cli: 5.x.x
-  checksum: 10/8f9a178afca5c82e113aed1efa552d64ee5ae4fdff63fe747c096a981ec74f18a5d07bd6e89bbe6715c3e57d96eea024a410e58977169489fe1df044c10dd94e
-  languageName: node
-  linkType: hard
-
-"@webpack-cli/serve@npm:^2.0.5":
-  version: 2.0.5
-  resolution: "@webpack-cli/serve@npm:2.0.5"
-  peerDependencies:
-    webpack: 5.x.x
-    webpack-cli: 5.x.x
-  peerDependenciesMeta:
-    webpack-dev-server:
-      optional: true
-  checksum: 10/20424e5c1e664e4d7ab11facee7033bb729f6acd86493138069532934c1299c1426da72942822dedb00caca8fc60cc8aec1626e610ee0e8a9679e3614f555860
-  languageName: node
-  linkType: hard
-
 "@xhmikosr/decompress-tar@npm:^8.1.0":
   version: 8.1.0
   resolution: "@xhmikosr/decompress-tar@npm:8.1.0"
@@ -6266,7 +6233,7 @@ __metadata:
     typescript: "npm:^5.5.3"
     uuid-with-v6: "npm:^2.0.0"
     webpack: "npm:^5.107.2"
-    webpack-cli: "npm:^5.1.4"
+    webpack-cli: "npm:^7.0.3"
     webpack-node-externals: "npm:^3.0.0"
     yargs: "npm:^17.7.2"
   bin:
@@ -7027,7 +6994,7 @@ __metadata:
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
     webpack: "npm:^5.107.2"
-    webpack-cli: "npm:^5.1.4"
+    webpack-cli: "npm:^7.0.3"
   languageName: unknown
   linkType: soft
 
@@ -8098,13 +8065,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"colorette@npm:^2.0.14":
-  version: 2.0.16
-  resolution: "colorette@npm:2.0.16"
-  checksum: 10/8501db5750d3b8f0935bdc9e999cbd6b6420b5c127a8c0bd41aaf252fe3f6636ff3a5c51e6dc8e12692e0b96ee3d28a4dfd0f89a86ef167a5728d4c926b67f31
-  languageName: node
-  linkType: hard
-
 "combine-dependabot-prs@npm:^1.0.5":
   version: 1.0.5
   resolution: "combine-dependabot-prs@npm:1.0.5"
@@ -8138,13 +8098,6 @@ __metadata:
   version: 9.4.1
   resolution: "commander@npm:9.4.1"
   checksum: 10/9d0d1d7e816545cf5ebf25e303533e45af2f941731063587d04917ac9fb6c81f59690aa8bda60d9b88d8aac018fdef6735ed953e72fdab08bb8b778bd4e0ef95
-  languageName: node
-  linkType: hard
-
-"commander@npm:^10.0.1":
-  version: 10.0.1
-  resolution: "commander@npm:10.0.1"
-  checksum: 10/8799faa84a30da985802e661cc9856adfaee324d4b138413013ef7f087e8d7924b144c30a1f1405475f0909f467665cd9e1ce13270a2f41b141dab0b7a58f3fb
   languageName: node
   linkType: hard
 
@@ -8406,7 +8359,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cross-spawn@npm:^6.0.5, cross-spawn@npm:^7.0.0, cross-spawn@npm:^7.0.2, cross-spawn@npm:^7.0.3":
+"cross-spawn@npm:^6.0.5, cross-spawn@npm:^7.0.0, cross-spawn@npm:^7.0.2, cross-spawn@npm:^7.0.3, cross-spawn@npm:^7.0.6":
   version: 7.0.6
   resolution: "cross-spawn@npm:7.0.6"
   dependencies:
@@ -9132,7 +9085,7 @@ __metadata:
     ts-loader: "npm:^9.6.0"
     typescript: "npm:^5.5.3"
     webpack: "npm:^5.107.2"
-    webpack-cli: "npm:^5.1.4"
+    webpack-cli: "npm:^7.0.3"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
   languageName: unknown
   linkType: soft
@@ -9320,12 +9273,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"envinfo@npm:^7.7.3":
-  version: 7.8.1
-  resolution: "envinfo@npm:7.8.1"
+"envinfo@npm:^7.14.0":
+  version: 7.21.0
+  resolution: "envinfo@npm:7.21.0"
   bin:
     envinfo: dist/cli.js
-  checksum: 10/e7a2d71c7dfe398a4ffda0e844e242d2183ef2627f98e74e4cd71edd2af691c8707a2b34aacef92538c27b3daf9a360d32202f33c0a9f27f767c4e1c6ba8b522
+  checksum: 10/2469a72802ded4e43c007dcd1c5dd44d8049b7d18276874dcc3f3f14a54bc72806fa35e82760974ca1442d82f5f9df3651048204e72791f81bcdd5f07422a561
   languageName: node
   linkType: hard
 
@@ -10176,13 +10129,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fastest-levenshtein@npm:^1.0.12":
-  version: 1.0.12
-  resolution: "fastest-levenshtein@npm:1.0.12"
-  checksum: 10/e1a013698dd1d302c7a78150130c7d50bb678c2c2f8839842a796d66cc7cdf50ea6b3d7ca930b0c8e7e8c2cd84fea8ab831023b382f7aab6922c318c1451beab
-  languageName: node
-  linkType: hard
-
 "fastq@npm:^1.6.0":
   version: 1.8.0
   resolution: "fastq@npm:1.8.0"
@@ -10413,6 +10359,15 @@ __metadata:
     keyv: "npm:^4.5.3"
     rimraf: "npm:^3.0.2"
   checksum: 10/02381c6ece5e9fa5b826c9bbea481d7fd77645d96e4b0b1395238124d581d10e56f17f723d897b6d133970f7a57f0fab9148cbbb67237a0a0ffe794ba60c0c70
+  languageName: node
+  linkType: hard
+
+"flat@npm:^5.0.2":
+  version: 5.0.2
+  resolution: "flat@npm:5.0.2"
+  bin:
+    flat: cli.js
+  checksum: 10/72479e651c15eab53e25ce04c31bab18cfaac0556505cac19221dbbe85bbb9686bc76e4d397e89e5bf516ce667dcf818f8b07e585568edba55abc2bf1f698fb5
   languageName: node
   linkType: hard
 
@@ -11437,7 +11392,7 @@ __metadata:
     typescript: "npm:^5.5.3"
     web-api-client: "workspace:*"
     webpack: "npm:^5.107.2"
-    webpack-cli: "npm:^5.1.4"
+    webpack-cli: "npm:^7.0.3"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
     yargs: "npm:^17.7.2"
   languageName: unknown
@@ -15809,7 +15764,7 @@ __metadata:
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
     webpack: "npm:^5.107.2"
-    webpack-cli: "npm:^5.1.4"
+    webpack-cli: "npm:^7.0.3"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
     yargs: "npm:^17.7.2"
   languageName: unknown
@@ -15858,7 +15813,7 @@ __metadata:
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
     webpack: "npm:^5.107.2"
-    webpack-cli: "npm:^5.1.4"
+    webpack-cli: "npm:^7.0.3"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
     yargs: "npm:^17.7.2"
   languageName: unknown
@@ -16577,7 +16532,7 @@ __metadata:
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
     webpack: "npm:^5.107.2"
-    webpack-cli: "npm:^5.1.4"
+    webpack-cli: "npm:^7.0.3"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
     yargs: "npm:^17.7.2"
   languageName: unknown
@@ -16625,7 +16580,7 @@ __metadata:
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
     webpack: "npm:^5.107.2"
-    webpack-cli: "npm:^5.1.4"
+    webpack-cli: "npm:^7.0.3"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
     yargs: "npm:^17.7.2"
   languageName: unknown
@@ -19465,7 +19420,7 @@ __metadata:
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
     webpack: "npm:^5.107.2"
-    webpack-cli: "npm:^5.1.4"
+    webpack-cli: "npm:^7.0.3"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
     yargs: "npm:^17.7.2"
   languageName: unknown
@@ -19499,7 +19454,7 @@ __metadata:
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
     webpack: "npm:^5.107.2"
-    webpack-cli: "npm:^5.1.4"
+    webpack-cli: "npm:^7.0.3"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
     yargs: "npm:^17.7.2"
   languageName: unknown
@@ -19558,7 +19513,7 @@ __metadata:
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
     webpack: "npm:^5.107.2"
-    webpack-cli: "npm:^5.1.4"
+    webpack-cli: "npm:^7.0.3"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
     yargs: "npm:^17.7.2"
   languageName: unknown
@@ -19597,7 +19552,7 @@ __metadata:
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
     webpack: "npm:^5.107.2"
-    webpack-cli: "npm:^5.1.4"
+    webpack-cli: "npm:^7.0.3"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
     yargs: "npm:^17.7.2"
   languageName: unknown
@@ -19641,7 +19596,7 @@ __metadata:
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
     webpack: "npm:^5.107.2"
-    webpack-cli: "npm:^5.1.4"
+    webpack-cli: "npm:^7.0.3"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
     yargs: "npm:^17.7.2"
   languageName: unknown
@@ -19681,7 +19636,7 @@ __metadata:
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
     webpack: "npm:^5.107.2"
-    webpack-cli: "npm:^5.1.4"
+    webpack-cli: "npm:^7.0.3"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
   languageName: unknown
   linkType: soft
@@ -19724,7 +19679,7 @@ __metadata:
     typescript: "npm:^5.5.3"
     web-api-client: "workspace:*"
     webpack: "npm:^5.107.2"
-    webpack-cli: "npm:^5.1.4"
+    webpack-cli: "npm:^7.0.3"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
   languageName: unknown
   linkType: soft
@@ -19743,35 +19698,30 @@ __metadata:
   languageName: node
   linkType: hard
 
-"webpack-cli@npm:^5.1.4":
-  version: 5.1.4
-  resolution: "webpack-cli@npm:5.1.4"
+"webpack-cli@npm:^7.0.3":
+  version: 7.0.3
+  resolution: "webpack-cli@npm:7.0.3"
   dependencies:
-    "@discoveryjs/json-ext": "npm:^0.5.0"
-    "@webpack-cli/configtest": "npm:^2.1.1"
-    "@webpack-cli/info": "npm:^2.0.2"
-    "@webpack-cli/serve": "npm:^2.0.5"
-    colorette: "npm:^2.0.14"
-    commander: "npm:^10.0.1"
-    cross-spawn: "npm:^7.0.3"
-    envinfo: "npm:^7.7.3"
-    fastest-levenshtein: "npm:^1.0.12"
+    "@discoveryjs/json-ext": "npm:^1.1.0"
+    commander: "npm:^14.0.3"
+    cross-spawn: "npm:^7.0.6"
+    envinfo: "npm:^7.14.0"
     import-local: "npm:^3.0.2"
     interpret: "npm:^3.1.1"
     rechoir: "npm:^0.8.0"
-    webpack-merge: "npm:^5.7.3"
+    webpack-merge: "npm:^6.0.1"
   peerDependencies:
-    webpack: 5.x.x
+    webpack: ^5.101.0
+    webpack-bundle-analyzer: ^4.0.0 || ^5.0.0
+    webpack-dev-server: ^5.0.0
   peerDependenciesMeta:
-    "@webpack-cli/generators":
-      optional: true
     webpack-bundle-analyzer:
       optional: true
     webpack-dev-server:
       optional: true
   bin:
     webpack-cli: bin/cli.js
-  checksum: 10/9ac3ae7c43b032051de2803d751bd3b44e1f226b931dcd56066a8e01b12734d49730903df9235e1eb1b67b2ee7451faf24a219c8f4a229c4f42c42e827eac44c
+  checksum: 10/e7e04acd95c0190f806aad14e5d967cf09239f20d6d31fba360090dd68b9ea82a3c67df135831222f5dfe1f7fd5df5506124147f30f86f2eba9c34f444e6e2e4
   languageName: node
   linkType: hard
 
@@ -19782,13 +19732,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"webpack-merge@npm:^5.7.3":
-  version: 5.7.3
-  resolution: "webpack-merge@npm:5.7.3"
+"webpack-merge@npm:^6.0.1":
+  version: 6.0.1
+  resolution: "webpack-merge@npm:6.0.1"
   dependencies:
     clone-deep: "npm:^4.0.1"
-    wildcard: "npm:^2.0.0"
-  checksum: 10/ced85851d0b753b8c0b963f1cb905635876b093ea9e879c6674b00fe4d7217d211cabee8c4e26f98f77347eed831f65ca869c38457c0689745c1d08f76b696f3
+    flat: "npm:^5.0.2"
+    wildcard: "npm:^2.0.1"
+  checksum: 10/39ab911c26237922295d9b3d0617c8ea0c438c35a3b21b05506616a10423f5ece1962bccbedec932c5db61af57999b6d055d56d1f1755c63e2701bd4a55c3887
   languageName: node
   linkType: hard
 
@@ -19973,10 +19924,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"wildcard@npm:^2.0.0":
-  version: 2.0.0
-  resolution: "wildcard@npm:2.0.0"
-  checksum: 10/56d4f8be540918ab3a676f0e57c9cac1d13009dc9974dbdc751a073bf71ec080376697eded083e8a8f86fcb3479135bfa9d4489e25e6c748666d3a53ee096d24
+"wildcard@npm:^2.0.1":
+  version: 2.0.1
+  resolution: "wildcard@npm:2.0.1"
+  checksum: 10/e0c60a12a219e4b12065d1199802d81c27b841ed6ad6d9d28240980c73ceec6f856771d575af367cbec2982d9ae7838759168b551776577f155044f5a5ba843c
   languageName: node
   linkType: hard
 
