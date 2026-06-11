@@ -15924,8 +15924,8 @@ __metadata:
   linkType: hard
 
 "protobufjs@npm:8.0.1":
-  version: 8.0.1
-  resolution: "protobufjs@npm:8.0.1"
+  version: 8.0.2
+  resolution: "protobufjs@npm:8.0.2"
   dependencies:
     "@protobufjs/aspromise": "npm:^1.1.2"
     "@protobufjs/base64": "npm:^1.1.2"
@@ -15939,7 +15939,7 @@ __metadata:
     "@protobufjs/utf8": "npm:^1.1.0"
     "@types/node": "npm:>=13.7.0"
     long: "npm:^5.0.0"
-  checksum: 10/71431cbb8013206052f404a01b0e10b2f1a07595937eebaba7f30e168b50d26ad1a1d5d6f6d23fa3497c0ee4ad2983ad598aec7e68f0f3ee17ed49a4842a86da
+  checksum: 10/815e717f653d6a362b7a71d9c7e0365a69624087d47a443e66df0c0ff34b13cb39d4e108112496b32bce53e13fff6188c30dca76db6a844b97ff8f8be245e455
   languageName: node
   linkType: hard
 
