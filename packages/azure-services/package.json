@@ -39,7 +39,7 @@
         "webpack-cli": "^5.1.4"
     },
     "dependencies": {
-        "@azure/batch": "^10.2.0",
+        "@azure/batch": "^13.0.0",
         "@azure/core-auth": "^1.10.1",
         "@azure/cosmos": "^4.0.0",
         "@azure/identity": "^4.13.0",

@@ -153,6 +153,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@azure-rest/core-client@npm:^2.3.1":
+  version: 2.6.1
+  resolution: "@azure-rest/core-client@npm:2.6.1"
+  dependencies:
+    "@azure/abort-controller": "npm:^2.1.2"
+    "@azure/core-auth": "npm:^1.10.0"
+    "@azure/core-rest-pipeline": "npm:^1.22.0"
+    "@azure/core-tracing": "npm:^1.3.0"
+    "@typespec/ts-http-runtime": "npm:^0.3.0"
+    tslib: "npm:^2.6.2"
+  checksum: 10/ef0835651ae094b099e85ff1819da63241527ec6da993f61f1a6a4720a0c7abbce2cb8a4e10ce90fe05976fd26d3e6aae818dc52ddafa55c088f7065210090b4
+  languageName: node
+  linkType: hard
+
 "@azure-rest/core-client@npm:^2.3.3":
   version: 2.5.0
   resolution: "@azure-rest/core-client@npm:2.5.0"
@@ -199,16 +213,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@azure/batch@npm:^10.2.0":
-  version: 10.2.0
-  resolution: "@azure/batch@npm:10.2.0"
+"@azure/batch@npm:^13.0.0":
+  version: 13.0.0
+  resolution: "@azure/batch@npm:13.0.0"
   dependencies:
-    "@azure/ms-rest-azure-js": "npm:^2.1.0"
-    "@azure/ms-rest-js": "npm:^2.2.0"
-    jssha: "npm:^3.2.0"
-    tslib: "npm:^1.10.0"
-    url-parse: "npm:^1.5.3"
-  checksum: 10/8e1d88c3acbe4e12f9d443cb4b1aef5c899c9a57f21980ccff1640bda19fc8d1a078d4967dfa1f81e26fb1f60baa98445d79721a7856a2b52491f31b2805c6aa
+    "@azure-rest/core-client": "npm:^2.3.1"
+    "@azure/abort-controller": "npm:^2.1.2"
+    "@azure/core-auth": "npm:^1.9.0"
+    "@azure/core-lro": "npm:^3.1.0"
+    "@azure/core-rest-pipeline": "npm:^1.20.0"
+    "@azure/core-util": "npm:^1.12.0"
+    "@azure/logger": "npm:^1.2.0"
+    tslib: "npm:^2.8.1"
+  checksum: 10/ca85de854cb48e1b7dd9b331189ef0e64e7069b46b42f86a6ba4e16adda79c1aad5a659354e26eaaacf45eb64111ee5d11ecb9a6466fbb1310eabd105057ddd7
   languageName: node
   linkType: hard
 
@@ -322,6 +339,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@azure/core-lro@npm:^3.1.0":
+  version: 3.3.1
+  resolution: "@azure/core-lro@npm:3.3.1"
+  dependencies:
+    "@azure/abort-controller": "npm:^2.1.2"
+    "@azure/core-util": "npm:^1.13.0"
+    "@azure/logger": "npm:^1.3.0"
+    tslib: "npm:^2.6.2"
+  checksum: 10/5e0c3df6adf359ac19463fa77f606773b61b8db7234e8d3411c19704b114816c4140499864e40339479176734f91e3dfbc7136e939faf697620eb446f10ac5a1
+  languageName: node
+  linkType: hard
+
 "@azure/core-paging@npm:^1.1.1":
   version: 1.1.1
   resolution: "@azure/core-paging@npm:1.1.1"
@@ -413,7 +442,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@azure/core-util@npm:^1.13.0":
+"@azure/core-util@npm:^1.12.0, @azure/core-util@npm:^1.13.0":
   version: 1.13.1
   resolution: "@azure/core-util@npm:1.13.1"
   dependencies:
@@ -605,7 +634,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@azure/logger@npm:^1.3.0":
+"@azure/logger@npm:^1.2.0, @azure/logger@npm:^1.3.0":
   version: 1.3.0
   resolution: "@azure/logger@npm:1.3.0"
   dependencies:
@@ -680,18 +709,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@azure/ms-rest-azure-js@npm:^2.1.0":
-  version: 2.1.0
-  resolution: "@azure/ms-rest-azure-js@npm:2.1.0"
-  dependencies:
-    "@azure/core-auth": "npm:^1.1.4"
-    "@azure/ms-rest-js": "npm:^2.2.0"
-    tslib: "npm:^1.10.0"
-  checksum: 10/79df2131d28854669fbe80a115dc61e8d808dcb554f4e89f4b1189bc221f5d4722ba19c725458479936d645738a0a0fec499429e72792e64804fe58febdac357
-  languageName: node
-  linkType: hard
-
-"@azure/ms-rest-js@npm:^2.0.4, @azure/ms-rest-js@npm:^2.2.0":
+"@azure/ms-rest-js@npm:^2.0.4":
   version: 2.6.0
   resolution: "@azure/ms-rest-js@npm:2.6.0"
   dependencies:
@@ -6991,7 +7009,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "azure-services@workspace:packages/azure-services"
   dependencies:
-    "@azure/batch": "npm:^10.2.0"
+    "@azure/batch": "npm:^13.0.0"
     "@azure/core-auth": "npm:^1.10.1"
     "@azure/cosmos": "npm:^4.0.0"
     "@azure/identity": "npm:^4.13.0"
@@ -13521,13 +13539,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jssha@npm:^3.2.0":
-  version: 3.2.0
-  resolution: "jssha@npm:3.2.0"
-  checksum: 10/6d01e8fa96a05534f19f81f7311f3f925d456007fd772085acada24f6013573c2854650d6b23c193afe18ba06efb40b93ce3ea6c45797ae4f79c0afcfaf6def0
-  languageName: node
-  linkType: hard
-
 "junk@npm:^4.0.1":
   version: 4.0.1
   resolution: "junk@npm:4.0.1"
@@ -15779,7 +15790,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "privacy-scan-job-manager@workspace:packages/privacy-scan-job-manager"
   dependencies:
-    "@azure/batch": "npm:^10.2.0"
+    "@azure/batch": "npm:^13.0.0"
     "@azure/ms-rest-nodeauth": "npm:^3.1.1"
     "@types/dotenv": "npm:^8.2.3"
     "@types/jest": "npm:^29.5.12"
@@ -16547,7 +16558,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "report-generator-job-manager@workspace:packages/report-generator-job-manager"
   dependencies:
-    "@azure/batch": "npm:^10.2.0"
+    "@azure/batch": "npm:^13.0.0"
     "@azure/ms-rest-nodeauth": "npm:^3.1.1"
     "@types/dotenv": "npm:^8.2.3"
     "@types/jest": "npm:^29.5.12"
@@ -19435,7 +19446,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "web-api-scan-job-manager@workspace:packages/web-api-scan-job-manager"
   dependencies:
-    "@azure/batch": "npm:^10.2.0"
+    "@azure/batch": "npm:^13.0.0"
     "@azure/ms-rest-nodeauth": "npm:^3.1.1"
     "@types/dotenv": "npm:^8.2.3"
     "@types/jest": "npm:^29.5.12"
@@ -19568,7 +19579,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "web-api-send-notification-job-manager@workspace:packages/web-api-send-notification-job-manager"
   dependencies:
-    "@azure/batch": "npm:^10.2.0"
+    "@azure/batch": "npm:^13.0.0"
     "@azure/ms-rest-nodeauth": "npm:^3.1.1"
     "@types/dotenv": "npm:^8.2.3"
     "@types/jest": "npm:^29.5.12"
