@@ -38,14 +38,18 @@ fi
 
 # Grant permissions to the managed identity
 echo "Granting $principalId service principal permissions to $keyVault key vault"
-az role assignment create \
-    --role "Key Vault Secrets User" \
-    --assignee "$principalId" \
-    --scope "/subscriptions/$subscription/resourcegroups/$resourceGroupName/providers/Microsoft.KeyVault/vaults/$keyVault" 1>/dev/null
+if [[ "${enableRoleAssignments:-false}" == "true" ]]; then
+    az role assignment create \
+        --role "Key Vault Secrets User" \
+        --assignee "$principalId" \
+        --scope "/subscriptions/$subscription/resourcegroups/$resourceGroupName/providers/Microsoft.KeyVault/vaults/$keyVault" 1>/dev/null
 
-az role assignment create \
-    --role "Key Vault Certificates Officer" \
-    --assignee "$principalId" \
-    --scope "/subscriptions/$subscription/resourcegroups/$resourceGroupName/providers/Microsoft.KeyVault/vaults/$keyVault" 1>/dev/null
+    az role assignment create \
+        --role "Key Vault Certificates Officer" \
+        --assignee "$principalId" \
+        --scope "/subscriptions/$subscription/resourcegroups/$resourceGroupName/providers/Microsoft.KeyVault/vaults/$keyVault" 1>/dev/null
 
-echo "  Permission successfully granted."
+    echo "  Permission successfully granted."
+else
+    echo "  Skipping key vault role assignments because enableRoleAssignments flag is disabled."
+fi

@@ -108,6 +108,11 @@ fi
 createOrRecoverKeyvault
 setupKeyVaultResources
 setAccessPolicies
-. "${0%/*}/push-secrets-to-key-vault.sh"
+
+if [[ "${enableRoleAssignments:-false}" == "true" ]]; then
+    . "${0%/*}/push-secrets-to-key-vault.sh"
+else
+    echo "Skipping push-secrets-to-key-vault.sh because enableRoleAssignments flag is disabled."
+fi
 
 echo "The ${keyVault} Azure Key Vault successfully deployed."
