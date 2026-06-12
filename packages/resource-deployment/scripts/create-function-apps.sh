@@ -162,11 +162,15 @@ function enableCosmosAccess() {
     role="DocumentDB Account Contributor"
     . "${0%/*}/create-role-assignment.sh"
 
-    az cosmosdb sql role assignment create --account-name "${cosmosAccountName}" \
-        --resource-group "${resourceGroupName}" \
-        --scope "/" \
-        --principal-id "${principalId}" \
-        --role-definition-id "${RBACRoleId}" 1>/dev/null
+    if [[ "${enableRoleAssignments:-false}" == "true" ]]; then
+        az cosmosdb sql role assignment create --account-name "${cosmosAccountName}" \
+            --resource-group "${resourceGroupName}" \
+            --scope "/" \
+            --principal-id "${principalId}" \
+            --role-definition-id "${RBACRoleId}" 1>/dev/null
+    else
+        echo "Skipping Cosmos DB role assignment for principal ${principalId} because enableRoleAssignments flag is disabled."
+    fi
 }
 
 function enableApplicationInsightsWriteAccess() {

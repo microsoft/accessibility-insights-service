@@ -6,7 +6,7 @@
 # shellcheck disable=SC1091
 set -eo pipefail
 
-# Еxport variables to all child processes
+# Export variables to all child processes
 export apiManagementName
 export batchAccountName
 export cosmosAccountName
@@ -24,6 +24,12 @@ export templatesFolder="${0%/*}/../templates/"
 export dropFolder="${0%/*}/../../../"
 export dropPools=false
 export keepImages=false
+
+# Global flag to gate all 'az role assignment' / 'az cosmosdb sql role assignment' calls.
+# Disabled by default because some environments enforce policies (e.g. pimOnlyModeForAzure)
+# that disallow role assignments created directly by a service principal.
+# Set to "true" to allow the deployment scripts to create/delete role assignments.
+export enableRoleAssignments=true
 
 exitWithUsageInfo() {
     echo "
