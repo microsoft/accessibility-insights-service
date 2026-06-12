@@ -639,7 +639,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@azure/keyvault-secrets@npm:^4.10.0":
+"@azure/keyvault-secrets@npm:^4.10.1":
   version: 4.10.1
   resolution: "@azure/keyvault-secrets@npm:4.10.1"
   dependencies:
@@ -6185,7 +6185,7 @@ __metadata:
     "@azure/core-auth": "npm:^1.10.1"
     "@azure/cosmos": "npm:^4.0.0"
     "@azure/identity": "npm:^4.13.0"
-    "@azure/keyvault-secrets": "npm:^4.10.0"
+    "@azure/keyvault-secrets": "npm:^4.10.1"
     "@azure/ms-rest-js": "npm:^2.7.0"
     "@azure/ms-rest-nodeauth": "npm:^3.1.1"
     "@azure/storage-blob": "npm:12.18.0"
