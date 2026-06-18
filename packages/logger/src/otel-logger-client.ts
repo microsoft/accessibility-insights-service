@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 import { inject, injectable } from 'inversify';
-import { Resource } from '@opentelemetry/resources';
+import { Resource, defaultResource, resourceFromAttributes } from '@opentelemetry/resources';
 import {
     AggregationTemporality,
     MeterProvider,
@@ -36,7 +36,7 @@ export class OTelLoggerClient implements LoggerClient {
 
     constructor(
         @inject(OTelConfigProvider) private readonly otelConfigProvider: OTelConfigProvider,
-        private readonly resource: Resource = Resource.default(),
+        private resource: Resource = defaultResource(),
     ) {}
 
     public async setup(baseProperties?: BaseTelemetryProperties): Promise<void> {
@@ -112,12 +112,11 @@ export class OTelLoggerClient implements LoggerClient {
             CustomerResourceId: config.resourceId,
             LocationId: config.locationId,
         };
-        this.resource.merge(
-            new Resource({
+        this.resource = resourceFromAttributes({
+                ...this.resource.attributes,
                 _microsoft_metrics_account: config.account,
                 _microsoft_metrics_namespace: config.namespace,
-            }),
-        );
+                });
         this.exporter = new OTLPMetricExporter({
             url: config.otelListenerUrl,
             temporalityPreference: AggregationTemporality.DELTA,
@@ -128,8 +127,8 @@ export class OTelLoggerClient implements LoggerClient {
         });
         this.meterProvider = new MeterProvider({
             resource: this.resource,
+            readers: [this.metricReader],
         });
-        this.meterProvider.addMetricReader(this.metricReader);
         opentelemetry.metrics.setGlobalMeterProvider(this.meterProvider);
     }
 }
