@@ -113,10 +113,10 @@ export class OTelLoggerClient implements LoggerClient {
             LocationId: config.locationId,
         };
         this.resource = resourceFromAttributes({
-                ...this.resource.attributes,
-                _microsoft_metrics_account: config.account,
-                _microsoft_metrics_namespace: config.namespace,
-                });
+            ...this.resource.attributes,
+            _microsoft_metrics_account: config.account,
+            _microsoft_metrics_namespace: config.namespace,
+        });
         this.exporter = new OTLPMetricExporter({
             url: config.otelListenerUrl,
             temporalityPreference: AggregationTemporality.DELTA,
