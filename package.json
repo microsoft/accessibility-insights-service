@@ -104,7 +104,8 @@
         "protobufjs@^7.5.5": "7.6.4",
         "protobufjs@8.0.1": "8.4.2",
         "@azure/monitor-opentelemetry": "1.18.1",
-        "@opentelemetry/core": "2.8.0"
+        "@opentelemetry/core": "2.8.0",
+        "undici": "^8.5.0"
     },
     "dependencies": {
         "accessibility-insights-report": "7.6.0"
