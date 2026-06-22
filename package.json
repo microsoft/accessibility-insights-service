@@ -102,7 +102,9 @@
         "tmp": "^0.2.6",
         "ws": "^8.21.0",
         "protobufjs@^7.5.5": "7.6.4",
-        "protobufjs@8.0.1": "8.4.2"
+        "protobufjs@8.0.1": "8.4.2",
+        "@azure/monitor-opentelemetry": "1.18.1",
+        "@opentelemetry/core": "2.8.0"
     },
     "dependencies": {
         "accessibility-insights-report": "7.6.0"
