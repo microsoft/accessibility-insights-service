@@ -108,7 +108,7 @@
         "undici": "^8.5.0"
     },
     "dependencies": {
-        "accessibility-insights-report": "7.6.0"
+        "accessibility-insights-report": "7.7.0"
     },
     "packageManager": "yarn@4.11.0"
 }
