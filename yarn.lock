@@ -6071,8 +6071,8 @@ __metadata:
   linkType: hard
 
 "azure-functions-core-tools@npm:^4.x":
-  version: 4.12.0
-  resolution: "azure-functions-core-tools@npm:4.12.0"
+  version: 4.12.1
+  resolution: "azure-functions-core-tools@npm:4.12.1"
   dependencies:
     chalk: "npm:^4.1.2"
     extract-zip: "npm:^2.0.1"
@@ -6083,7 +6083,7 @@ __metadata:
     azfun: lib/main.js
     azurefunctions: lib/main.js
     func: lib/main.js
-  checksum: 10/3ec753f0ad0626fe800bd5fd205c9d0a3d3de1f55af5672c4a439831c94202537b61c4f944b9e3c3db9c92251eca13db63558b5d1e342316534b8e77c0c21f9a
+  checksum: 10/7a8ecb0535ed612460a36f0e03c0bd3072b10c1c74aeec355aa0fa491a5b6a036d0af2ecc5c04177c3c250e04edd40957d6f8385ba6e114b8e59e484f2c8514d
   conditions: (os=win32 | os=darwin | os=linux)
   languageName: node
   linkType: hard
