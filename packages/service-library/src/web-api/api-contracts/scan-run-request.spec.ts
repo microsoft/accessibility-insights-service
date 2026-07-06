@@ -103,5 +103,4 @@ describe(isScanRunRequest, () => {
     ])('validate `reportGroups` object', (obj: any) => {
         expect(isScanRunRequest(obj)).toEqual(false);
     });
-
 });

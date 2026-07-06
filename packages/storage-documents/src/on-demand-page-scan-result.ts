@@ -144,4 +144,3 @@ export interface WebsiteScanRef {
 export interface WorkflowRunResults {
     report: ReportScanRunResult;
 }
-
