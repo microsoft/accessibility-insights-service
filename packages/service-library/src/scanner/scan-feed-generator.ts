@@ -87,13 +87,6 @@ export class ScanFeedGenerator {
                 discoveredUrl: url,
             });
 
-            // Allow extended scanning of original request pages only.
-            const isRequestKnownPage = (websiteScanData.knownPages as KnownPage[])?.some((p) => p.url === url && p.source === 'request');
-            const scanDefinitions =
-                pageScanResult.scanDefinitions === undefined || isRequestKnownPage === false
-                    ? {}
-                    : { scanDefinitions: pageScanResult.scanDefinitions };
-
             return {
                 scanId,
                 url,
@@ -103,7 +96,6 @@ export class ScanFeedGenerator {
                 // Propagate the deep scan id to subsequent requests
                 deepScanId: websiteScanData.deepScanId,
                 authenticationType: pageScanResult.authentication?.hint ?? undefined,
-                ...scanDefinitions,
                 ...(pageScanResult.privacyScan === undefined ? {} : { privacyScan: pageScanResult.privacyScan }),
                 ...(convertToBrowserValidationTypes(pageScanResult.browserValidationResult) === undefined
                     ? {}

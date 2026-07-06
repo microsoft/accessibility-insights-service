@@ -73,7 +73,7 @@ export class Runner {
             if (axeScanResults?.unscannable === true) {
                 // unscannable URL
                 this.setRunResult(pageScanResult, 'unscannable', axeScanResults.scannedUrl, axeScanResults.error);
-            } else if (axeScanResults.error === undefined && scanProcessorResult.agentResults?.result !== 'failed') {
+            } else if (axeScanResults.error === undefined) {
                 // scan completed successfully
                 await this.onCompletedScan(scanProcessorResult, pageScanResult);
             } else {
@@ -124,23 +124,6 @@ export class Runner {
             pageTitle: scanProcessorResult.axeScanResults?.pageTitle,
             pageResponseCode: scanProcessorResult.axeScanResults?.pageResponseCode,
         };
-
-        // Combine accessibility scan results with agents results
-        if (!isEmpty(scanProcessorResult.agentResults)) {
-            const agentRunState: ScanRunDetail = {
-                name: 'accessibility-agent',
-                state: scanProcessorResult.agentResults.result,
-                timestamp: new Date().toJSON(),
-                error: scanProcessorResult.agentResults.error,
-            };
-            const scanRunDetails = isEmpty(pageScanResult.run.scanRunDetails)
-                ? [agentRunState]
-                : [agentRunState, ...pageScanResult.run.scanRunDetails.filter((detail) => !['accessibility-agent'].includes(detail.name))];
-            pageScanResult.run = {
-                ...pageScanResult.run,
-                scanRunDetails,
-            };
-        }
 
         // Combine browser validation results
         const browserValidationResult = {
@@ -235,10 +218,6 @@ export class Runner {
 
         // Generate reports for accessibility scan results
         const reportResults: ReportResult[] = [{ reportSource: 'accessibility-scan', ...scanProcessorResult.axeScanResults }];
-        // Generate reports for agent scan results
-        if (!isEmpty(scanProcessorResult.agentResults?.axeResults)) {
-            reportResults.push({ reportSource: 'accessibility-agent', ...scanProcessorResult.agentResults });
-        }
         const reports = this.reportGenerator.generateReports(...reportResults);
 
         // Save reports for accessibility scan results

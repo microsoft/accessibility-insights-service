@@ -26,7 +26,6 @@ import {
     ReportGroupRequest,
     ScanGroupType,
     ScanRunBatchRequest,
-    ScanRunDetail,
     ScanType,
     WebsiteScanData,
 } from 'storage-documents';
@@ -104,13 +103,6 @@ export class ScanBatchRequestFeedController extends WebController {
                         scanGroupId: websiteScanData.scanGroupId,
                         scanGroupType: websiteScanData.scanGroupType,
                     };
-                    const scanDefinitionsRunState: ScanRunDetail[] = request.scanDefinitions?.map((scanDefinition) => {
-                        return {
-                            name: scanDefinition.name,
-                            state: 'pending',
-                            timestamp: new Date().toJSON(),
-                        };
-                    });
                     const dbDocument: OnDemandPageScanResult = {
                         schemaVersion: '2',
                         id: request.scanId,
@@ -125,7 +117,6 @@ export class ScanBatchRequestFeedController extends WebController {
                             request.scanId,
                         ),
                         websiteScanRef,
-                        ...(request.scanDefinitions === undefined ? {} : { scanDefinitions: request.scanDefinitions }),
                         ...(request.privacyScan === undefined ? {} : { privacyScan: request.privacyScan }),
                         ...(request.authenticationType === undefined ? {} : { authentication: { hint: request.authenticationType } }),
                         ...(convertToBrowserValidationResult(request.browserValidations) === undefined
@@ -134,7 +125,7 @@ export class ScanBatchRequestFeedController extends WebController {
                         run: {
                             state: 'accepted',
                             timestamp: new Date().toJSON(),
-                            scanRunDetails: scanDefinitionsRunState ?? [],
+                            scanRunDetails: [],
                         },
                         ...(isEmpty(request.scanNotifyUrl)
                             ? {}
@@ -204,7 +195,6 @@ export class ScanBatchRequestFeedController extends WebController {
                         itemType: ItemType.onDemandPageScanRequest,
                         partitionKey: PartitionKey.pageScanRequestDocuments,
                         ...(isEmpty(request.reportGroups) ? {} : { reportGroups: request.reportGroups }),
-                        ...(request.scanDefinitions === undefined ? {} : { scanDefinitions: request.scanDefinitions }),
                         ...(request.privacyScan === undefined ? {} : { privacyScan: request.privacyScan }),
                         ...(request.authenticationType === undefined ? {} : { authenticationType: request.authenticationType }),
                         ...(request.browserValidations === undefined ? {} : { browserValidations: request.browserValidations }),

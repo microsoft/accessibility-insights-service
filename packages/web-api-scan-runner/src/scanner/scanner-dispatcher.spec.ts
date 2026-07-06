@@ -10,7 +10,6 @@ import { OnDemandPageScanResult, WebsiteScanData } from 'storage-documents';
 import { DeepScanner, RunnerScanMetadata } from 'service-library';
 import { AxeScanner } from './axe-scanner';
 import { HighContrastScanner, HighContrastResults } from './high-contrast-scanner';
-import { AgentScanner, AgentResults } from './agent-scanner';
 import { ScannerDispatcher } from './scanner-dispatcher';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -19,7 +18,6 @@ describe(ScannerDispatcher, () => {
     let axeScannerMock: IMock<AxeScanner>;
     let deepScannerMock: IMock<DeepScanner>;
     let highContrastScannerMock: IMock<HighContrastScanner>;
-    let agentScannerMock: IMock<AgentScanner>;
     let loggerMock: IMock<GlobalLogger>;
     let scannerDispatcher: ScannerDispatcher;
 
@@ -34,14 +32,6 @@ describe(ScannerDispatcher, () => {
         browserValidationResult: {
             highContrastProperties: 'pending',
         },
-        run: {
-            scanRunDetails: [
-                {
-                    name: 'accessibility-agent',
-                    state: 'pending',
-                },
-            ],
-        },
     } as OnDemandPageScanResult;
 
     const websiteScanDataStub: WebsiteScanData = {} as WebsiteScanData;
@@ -52,14 +42,12 @@ describe(ScannerDispatcher, () => {
         axeScannerMock = Mock.ofType<AxeScanner>();
         deepScannerMock = Mock.ofType<DeepScanner>();
         highContrastScannerMock = Mock.ofType<HighContrastScanner>();
-        agentScannerMock = Mock.ofType<AgentScanner>();
         loggerMock = Mock.ofType<GlobalLogger>();
 
         scannerDispatcher = new ScannerDispatcher(
             axeScannerMock.object,
             deepScannerMock.object,
             highContrastScannerMock.object,
-            agentScannerMock.object,
             loggerMock.object,
         );
     });
@@ -68,14 +56,12 @@ describe(ScannerDispatcher, () => {
         axeScannerMock.verifyAll();
         deepScannerMock.verifyAll();
         highContrastScannerMock.verifyAll();
-        agentScannerMock.verifyAll();
         loggerMock.verifyAll();
     });
 
-    it('should dispatch all scanners and return results', async () => {
+    it('should dispatch scanners and return results', async () => {
         const axeScanResultsStub = { violations: [] } as AxeScanResults;
         const highContrastResultsStub: HighContrastResults = { result: 'pass' };
-        const agentResultsStub: AgentResults = { result: 'completed' };
 
         axeScannerMock
             .setup((a) => a.scan(pageMock.object))
@@ -85,10 +71,6 @@ describe(ScannerDispatcher, () => {
         highContrastScannerMock
             .setup((h) => h.scan(runnerScanMetadataStub.url))
             .returns(async () => highContrastResultsStub)
-            .verifiable(Times.once());
-        agentScannerMock
-            .setup((a) => a.scan(runnerScanMetadataStub.url))
-            .returns(async () => agentResultsStub)
             .verifiable(Times.once());
         pageMock
             .setup((p) => p.capturePageState())
@@ -101,7 +83,6 @@ describe(ScannerDispatcher, () => {
         expect(result).toEqual({
             axeScanResults: { violations: [], pageScreenshot: 'screenshot-data' },
             browserValidationResult: { highContrastProperties: 'pass' },
-            agentResults: agentResultsStub,
         });
     });
 
@@ -116,23 +97,4 @@ describe(ScannerDispatcher, () => {
         expect(result).toBeUndefined();
         highContrastScannerMock.verify((h) => h.scan(It.isAny()), Times.never());
     });
-
-    // it('should skip agent scan if not pending or error', async () => {
-    //     const modifiedPageScanResult = {
-    //         ...pageScanResultStub,
-    //         run: {
-    //             scanRunDetails: [
-    //                 {
-    //                     name: 'accessibility-agent',
-    //                     state: 'completed',
-    //                 },
-    //             ],
-    //         },
-    //     };
-
-    //     const result = await (scannerDispatcher as any).dispatchAgentScan(runnerScanMetadataStub, modifiedPageScanResult);
-
-    //     expect(result).toBeUndefined();
-    //     agentScannerMock.verify((a) => a.scan(It.isAny()), Times.never());
-    // });
 });

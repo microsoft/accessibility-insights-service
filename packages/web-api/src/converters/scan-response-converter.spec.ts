@@ -278,7 +278,7 @@ function getPageScanResult(options: options): OnDemandPageScanResult {
             pageTitle: pageTitle,
             pageResponseCode: pageResponseCode,
             error: options.isError === true ? 'internal-error' : undefined,
-            scanRunDetails: [{ name: 'accessibility-agent', state: 'completed' }],
+            scanRunDetails: [{ name: 'accessibility-scan', state: 'completed' }],
         },
         batchRequestId: 'batch-id',
         ...(options.isNotificationEnabled === true ? { notification: notificationDb } : {}),
@@ -336,7 +336,7 @@ function getScanResultClientResponseFull(options: options): ScanResultResponse {
             pageResponseCode: pageResponseCode,
             pageTitle: pageTitle,
             error: options.isError === true ? ScanRunErrorCodes.internalError : undefined,
-            scanRunDetails: [{ name: 'accessibility-agent', state: 'completed' }],
+            scanRunDetails: [{ name: 'accessibility-scan', state: 'completed' }],
         },
         ...(options.isNotificationEnabled === true ? { notification: notificationResponse } : {}),
         ...(options.isDeepScanEnabled === true ? { deepScanResult: deepScanResult } : {}),
@@ -365,7 +365,7 @@ function getScanResultClientResponseShort(options: options): ScanResultResponse 
     if (options.restApiState === 'completed' || options.restApiState === 'failed' || options.restApiState === 'retrying') {
         response.run.pageResponseCode = pageResponseCode;
         response.run.pageTitle = pageTitle;
-        response.run.scanRunDetails = [{ name: 'accessibility-agent', state: 'completed' }];
+        response.run.scanRunDetails = [{ name: 'accessibility-scan', state: 'completed' }];
     }
 
     return response;

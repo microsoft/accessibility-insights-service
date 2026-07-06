@@ -13,7 +13,7 @@ import { AxeResultConverter } from './axe-result-converter';
 export class AxeResultToSarifConverter implements AxeResultConverter {
     public readonly targetReportFormat: ReportFormat = 'sarif';
 
-    public readonly targetReportSource: ReportSource[] = ['accessibility-scan', 'accessibility-agent', 'accessibility-combined'];
+    public readonly targetReportSource: ReportSource[] = ['accessibility-scan', 'accessibility-combined'];
 
     constructor(@inject(iocTypeNames.ConvertAxeToSarifFunc) private readonly convertAxeToSarifFunc: (axeResults: AxeResults) => SarifLog) {}
 

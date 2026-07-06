@@ -14,7 +14,7 @@ import { htmlReportStrings } from './html-report-strings';
 export class AxeResultToHtmlConverter implements AxeResultConverter {
     public readonly targetReportFormat: ReportFormat = 'html';
 
-    public readonly targetReportSource: ReportSource[] = ['accessibility-scan', 'accessibility-agent', 'accessibility-combined'];
+    public readonly targetReportSource: ReportSource[] = ['accessibility-scan', 'accessibility-combined'];
 
     constructor(@inject(iocTypeNames.ReporterFactory) private readonly reporterFactoryFunc: ReporterFactory) {}
 

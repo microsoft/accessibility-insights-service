@@ -22,7 +22,6 @@ export class ReportGenerator {
      */
     public generateReports(...reportResults: ReportResult[]): GeneratedReport[] {
         const accessibilityReports = this.generateAccessibilityReports(reportResults);
-        accessibilityReports.push(...this.generateAgentReports(reportResults));
         accessibilityReports.push(...this.generateAccessibilityCombinedReports(reportResults));
 
         return accessibilityReports;
@@ -30,28 +29,6 @@ export class ReportGenerator {
 
     private generateAccessibilityReports(reportResults: ReportResult[]): GeneratedReport[] {
         const reportSource = 'accessibility-scan';
-        const reportResult = reportResults.find((r) => r.reportSource === reportSource);
-        if (reportResult === undefined) {
-            return [];
-        }
-
-        return (
-            this.axeResultConverters
-                // Filter out the converters that are not applicable to the current axeScanResults
-                .filter((axeResultConverter) => axeResultConverter.targetReportSource.includes(reportSource))
-                .map<GeneratedReport>((axeResultConverter) => {
-                    return {
-                        content: axeResultConverter.convert(reportResult),
-                        id: this.guidGenerator.createGuid(),
-                        format: axeResultConverter.targetReportFormat,
-                        source: reportSource,
-                    };
-                })
-        );
-    }
-
-    private generateAgentReports(reportResults: ReportResult[]): GeneratedReport[] {
-        const reportSource = 'accessibility-agent';
         const reportResult = reportResults.find((r) => r.reportSource === reportSource);
         if (reportResult === undefined) {
             return [];
@@ -86,7 +63,7 @@ export class ReportGenerator {
             reportResults
                 .filter(
                     // Filter out the reports that are not applicable to the current axeScanResults
-                    (r) => isEmpty(r) === false && (r.reportSource === 'accessibility-scan' || r.reportSource === 'accessibility-agent'),
+                    (r) => isEmpty(r) === false && r.reportSource === 'accessibility-scan',
                 )
                 .map((r) => r.axeResults),
         );

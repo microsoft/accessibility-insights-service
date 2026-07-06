@@ -241,7 +241,6 @@ describe(ScanRequestController, () => {
                     },
                     reportGroups: [{ consolidatedId: 'reportGroupId' }],
                     deepScan: true,
-                    scanDefinitions: [{ name: 'accessibility-agent', args: { arg1: 'arg1' } }],
                 }, // valid request
                 { url: '/invalid/url' }, // invalid URL
                 { url: 'https://cde/path/', priority: 9999 }, // invalid priority range
@@ -267,7 +266,6 @@ describe(ScanRequestController, () => {
                     },
                     reportGroups: [{ consolidatedId: 'reportGroupId' }],
                     deepScan: true,
-                    scanDefinitions: [{ name: 'accessibility-agent', args: { arg1: 'arg1' } }],
                 },
             ];
             scanDataProviderMock.setup(async (o) => o.writeScanRunBatchRequest(guid1, expectedSavedRequest)).verifiable(Times.once());

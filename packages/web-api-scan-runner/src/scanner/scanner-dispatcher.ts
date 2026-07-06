@@ -10,7 +10,6 @@ import { isEmpty } from 'lodash';
 import { AxeScanner } from '../scanner/axe-scanner';
 import { HighContrastResults, HighContrastScanner } from '../scanner/high-contrast-scanner';
 import { ScanProcessorResult } from '../processor/page-scan-processor';
-import { AgentResults, AgentScanner } from './agent-scanner';
 
 export const conditionsToDispatchScanner = ['pending', 'error'] as string[];
 
@@ -20,7 +19,6 @@ export class ScannerDispatcher {
         @inject(AxeScanner) private readonly axeScanner: AxeScanner,
         @inject(DeepScanner) private readonly deepScanner: DeepScanner,
         @inject(HighContrastScanner) private readonly highContrastScanner: HighContrastScanner,
-        @inject(AgentScanner) private readonly agentScanner: AgentScanner,
         @inject(GlobalLogger) private readonly logger: GlobalLogger,
     ) {}
 
@@ -40,12 +38,10 @@ export class ScannerDispatcher {
     ): Promise<ScanProcessorResult> {
         const axeScanResults = await this.dispatchAccessibilityScan(pageScanResult, websiteScanData, page);
         const highContrastResults = await this.dispatchHighContrastScan(runnerScanMetadata, pageScanResult);
-        const agentResults = await this.dispatchAgentScan(runnerScanMetadata, pageScanResult);
 
         return {
             axeScanResults,
             ...(isEmpty(highContrastResults) ? {} : { browserValidationResult: { highContrastProperties: highContrastResults.result } }),
-            ...(isEmpty(agentResults) ? {} : { agentResults }),
         };
     }
 
@@ -79,19 +75,6 @@ export class ScannerDispatcher {
             this.logger.logInfo(`Dispatching high contrast website page scanner.`);
 
             return this.highContrastScanner.scan(runnerScanMetadata.url);
-        }
-
-        return undefined;
-    }
-
-    private async dispatchAgentScan(runnerScanMetadata: RunnerScanMetadata, pageScanResult: OnDemandPageScanResult): Promise<AgentResults> {
-        if (pageScanResult.run.scanRunDetails?.find((s) => s.name === 'accessibility-agent') !== undefined) {
-            // Scan only for the original client request and disregard internal crawler requests. For
-            // supporting crawler requests, ensure that the relevant request portion is duplicated by
-            // the scan feed generator.
-            this.logger.logInfo(`Dispatching accessibility agent scanner.`);
-
-            return this.agentScanner.scan(runnerScanMetadata.url);
         }
 
         return undefined;

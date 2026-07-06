@@ -30,7 +30,7 @@ describe(ReportGenerator, () => {
     } as ReportResult;
 
     const axeScanResults2 = {
-        reportSource: 'accessibility-agent',
+        reportSource: 'accessibility-scan',
         pageTitle: 'test page 2',
         axeResults: {
             violations: [{ id: 'violation2' }],
@@ -73,7 +73,7 @@ describe(ReportGenerator, () => {
 
         axeResultConverterMock3.setup((converter) => converter.convert(It.isAny())).returns(() => 'converted-content-3');
         axeResultConverterMock3.setup((converter) => converter.targetReportFormat).returns(() => 'sarif');
-        axeResultConverterMock3.setup((converter) => converter.targetReportSource).returns(() => ['accessibility-agent']);
+        axeResultConverterMock3.setup((converter) => converter.targetReportSource).returns(() => ['privacy-scan']);
 
         guidId = 0;
         guidGeneratorMock.setup((g) => g.createGuid()).returns(() => generatedGuids[guidId++]);
@@ -109,25 +109,35 @@ describe(ReportGenerator, () => {
         axeResultConverterMock2.verify((converter) => converter.convert(axeScanResults1), Times.once());
     });
 
-    it('should generate reports for a accessibility-agent source', () => {
+    it('should generate reports for a accessibility-scan source', () => {
+        axeResultConverterMock3.setup((converter) => converter.targetReportSource).returns(() => ['accessibility-scan']);
+
         const reports = reportGenerator.generateReports(axeScanResults2);
 
         const expectedReports: GeneratedReport[] = [
             {
-                content: 'converted-content-3',
+                content: 'converted-content-1',
                 id: generatedGuids[0],
-                format: 'sarif',
-                source: 'accessibility-agent',
+                format: 'axe',
+                source: 'accessibility-scan',
+            },
+            {
+                content: 'converted-content-2',
+                id: generatedGuids[1],
+                format: 'html',
+                source: 'accessibility-scan',
             },
         ];
 
         expect(reports).toEqual(expectedReports);
 
-        axeResultConverterMock3.verify((converter) => converter.convert(axeScanResults2), Times.once());
-        axeResultConverterMock3.verify((converter) => converter.convert(axeScanResults2), Times.once());
+        axeResultConverterMock1.verify((converter) => converter.convert(axeScanResults2), Times.once());
+        axeResultConverterMock2.verify((converter) => converter.convert(axeScanResults2), Times.once());
     });
 
     it('should merge multiple ReportResult objects and generate reports', () => {
+        axeResultConverterMock3.setup((converter) => converter.targetReportSource).returns(() => []);
+
         const reports = reportGenerator.generateReports(axeScanResults1, axeScanResults2);
 
         const expectedReports: GeneratedReport[] = [
@@ -144,20 +154,14 @@ describe(ReportGenerator, () => {
                 source: 'accessibility-scan',
             },
             {
-                content: 'converted-content-3',
-                id: generatedGuids[2],
-                format: 'sarif',
-                source: 'accessibility-agent',
-            },
-            {
                 content: 'converted-content-1',
-                id: generatedGuids[3],
+                id: generatedGuids[2],
                 format: 'axe',
                 source: 'accessibility-combined',
             },
             {
                 content: 'converted-content-2',
-                id: generatedGuids[4],
+                id: generatedGuids[3],
                 format: 'html',
                 source: 'accessibility-combined',
             },

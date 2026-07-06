@@ -10,7 +10,7 @@ import { AxeResultConverter } from './axe-result-converter';
 export class AxeResultEchoConverter implements AxeResultConverter {
     public readonly targetReportFormat: ReportFormat = 'axe';
 
-    public readonly targetReportSource: ReportSource[] = ['accessibility-scan', 'accessibility-agent', 'accessibility-combined'];
+    public readonly targetReportSource: ReportSource[] = ['accessibility-scan', 'accessibility-combined'];
 
     public convert(reportResult: ReportResult): string {
         const report = {
