@@ -8,12 +8,10 @@ import { BrowserValidationResult, OnDemandPageScanResult, WebsiteScanData } from
 import { PageMetadata, PageMetadataGenerator, RunnerScanMetadata } from 'service-library';
 import { isEmpty } from 'lodash';
 import { ScannerDispatcher } from '../scanner/scanner-dispatcher';
-import { AgentResults } from '../scanner/agent-scanner';
 
 export interface ScanProcessorResult {
     axeScanResults: AxeScanResults;
     browserValidationResult?: BrowserValidationResult;
-    agentResults?: AgentResults;
 }
 
 @injectable()
