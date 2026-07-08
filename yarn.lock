@@ -489,25 +489,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@azure/identity@npm:^4.13.0":
-  version: 4.13.0
-  resolution: "@azure/identity@npm:4.13.0"
-  dependencies:
-    "@azure/abort-controller": "npm:^2.0.0"
-    "@azure/core-auth": "npm:^1.9.0"
-    "@azure/core-client": "npm:^1.9.2"
-    "@azure/core-rest-pipeline": "npm:^1.17.0"
-    "@azure/core-tracing": "npm:^1.0.0"
-    "@azure/core-util": "npm:^1.11.0"
-    "@azure/logger": "npm:^1.0.0"
-    "@azure/msal-browser": "npm:^4.2.0"
-    "@azure/msal-node": "npm:^3.5.0"
-    open: "npm:^10.1.0"
-    tslib: "npm:^2.2.0"
-  checksum: 10/8b97154ac85bb33abc0216ac7f45f41ccebaa8516db2173fbe029bbdd6c4dd227a83d7a6da6bb51c28b9189944a26cf6322bc52d79cbe4e75389e74266abc4b0
-  languageName: node
-  linkType: hard
-
 "@azure/identity@npm:^4.13.1":
   version: 4.13.1
   resolution: "@azure/identity@npm:4.13.1"
@@ -710,15 +691,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@azure/msal-browser@npm:^4.2.0":
-  version: 5.10.1
-  resolution: "@azure/msal-browser@npm:5.10.1"
-  dependencies:
-    "@azure/msal-common": "npm:15.5.0"
-  checksum: 10/0baed58ebdfe51b7c5a759015caa09bdfdcfdd9d3ba6114a5ea6cbd42e6ea98b441ab9bf6a99a4fd59ecc3a339bf700955ff74d099f9c9171bf0c9a6849fe663
-  languageName: node
-  linkType: hard
-
 "@azure/msal-browser@npm:^5.5.0":
   version: 5.15.0
   resolution: "@azure/msal-browser@npm:5.15.0"
@@ -728,35 +700,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@azure/msal-common@npm:15.5.0":
-  version: 15.5.0
-  resolution: "@azure/msal-common@npm:15.5.0"
-  checksum: 10/f76d4004c05f7cf495105e31a9ca942f3f3a78978f4aa56228f2c3fe6d229b0cf5ce51c9d23a8c84395d857c1f3324b67113d60b13dba10c7b136b21677f4bf5
-  languageName: node
-  linkType: hard
-
-"@azure/msal-common@npm:15.9.0":
-  version: 15.9.0
-  resolution: "@azure/msal-common@npm:15.9.0"
-  checksum: 10/49be12a0a505f3022d2519879541011e55c1c5d7ff545257703732729aae49053b76dc164842efc0c84be48496746d35e5d0dcbcb42e2a708d70f7dfac810e8c
-  languageName: node
-  linkType: hard
-
 "@azure/msal-common@npm:16.10.0":
   version: 16.10.0
   resolution: "@azure/msal-common@npm:16.10.0"
   checksum: 10/5b0d0968dbf6612ea8fd3a51d4b339526a396827727384dfb91c2ecdf09cc02075c6f8610ff30e67ab981894ebdbf6e484aeda47b8038ce23db2b92b799d3465
-  languageName: node
-  linkType: hard
-
-"@azure/msal-node@npm:^3.5.0":
-  version: 3.6.4
-  resolution: "@azure/msal-node@npm:3.6.4"
-  dependencies:
-    "@azure/msal-common": "npm:15.9.0"
-    jsonwebtoken: "npm:^9.0.0"
-    uuid: "npm:^8.3.0"
-  checksum: 10/2b99d2d702eec30296816b67bfb2481c4ce6e89acbf656f090a8144d6cd80ac5cff0d30fe3be5e7a912f30171818e67908633cef89cb68bfc16425e6693f2895
   languageName: node
   linkType: hard
 
@@ -6116,7 +6063,7 @@ __metadata:
     "@azure/batch": "npm:^10.2.0"
     "@azure/core-auth": "npm:^1.10.1"
     "@azure/cosmos": "npm:^4.0.0"
-    "@azure/identity": "npm:^4.13.0"
+    "@azure/identity": "npm:^4.13.1"
     "@azure/keyvault-secrets": "npm:^4.11.2"
     "@azure/ms-rest-js": "npm:^2.7.0"
     "@azure/ms-rest-nodeauth": "npm:^3.1.1"
@@ -16116,7 +16063,7 @@ __metadata:
   dependencies:
     "@axe-core/puppeteer": "npm:4.11.2"
     "@azure/core-auth": "npm:^1.10.1"
-    "@azure/identity": "npm:^4.13.0"
+    "@azure/identity": "npm:^4.13.1"
     "@types/jest": "npm:^29.5.12"
     "@types/lodash": "npm:^4.17.24"
     "@types/node": "npm:^20.14.9"
@@ -16258,7 +16205,7 @@ __metadata:
   dependencies:
     "@azure/cosmos": "npm:^4.0.0"
     "@azure/functions": "npm:^4.16.0"
-    "@azure/identity": "npm:^4.13.0"
+    "@azure/identity": "npm:^4.13.1"
     "@azure/storage-blob": "npm:12.18.0"
     "@crawlee/puppeteer": "npm:^3.17.0"
     "@types/jest": "npm:^29.5.12"
