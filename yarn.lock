@@ -5315,7 +5315,7 @@ __metadata:
     typescript: "npm:^5.5.3"
     uuid-with-v6: "npm:^2.0.0"
     webpack: "npm:^5.107.2"
-    webpack-cli: "npm:^7.0.3"
+    webpack-cli: "npm:^7.1.0"
     webpack-node-externals: "npm:^3.0.0"
     yargs: "npm:^17.7.2"
   bin:
@@ -6096,7 +6096,7 @@ __metadata:
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
     webpack: "npm:^5.107.2"
-    webpack-cli: "npm:^7.0.3"
+    webpack-cli: "npm:^7.1.0"
   languageName: unknown
   linkType: soft
 
@@ -8116,7 +8116,7 @@ __metadata:
     ts-loader: "npm:^9.6.0"
     typescript: "npm:^5.5.3"
     webpack: "npm:^5.107.2"
-    webpack-cli: "npm:^7.0.3"
+    webpack-cli: "npm:^7.1.0"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
   languageName: unknown
   linkType: soft
@@ -8283,7 +8283,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"envinfo@npm:^7.14.0":
+"envinfo@npm:^7.21.0":
   version: 7.21.0
   resolution: "envinfo@npm:7.21.0"
   bin:
@@ -10399,7 +10399,7 @@ __metadata:
     typescript: "npm:^5.5.3"
     web-api-client: "workspace:*"
     webpack: "npm:^5.107.2"
-    webpack-cli: "npm:^7.0.3"
+    webpack-cli: "npm:^7.1.0"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
     yargs: "npm:^17.7.2"
   languageName: unknown
@@ -10741,6 +10741,18 @@ __metadata:
   bin:
     import-local-fixture: fixtures/cli.js
   checksum: 10/c74d9f9484c878cda1de3434613c7ff72d5dadcf20e5482542232d7c2575b713ff88701d6675fcf09a3684cb23fb407c8b333b9cbc59438712723d058d8e976c
+  languageName: node
+  linkType: hard
+
+"import-local@npm:^3.2.0":
+  version: 3.2.0
+  resolution: "import-local@npm:3.2.0"
+  dependencies:
+    pkg-dir: "npm:^4.2.0"
+    resolve-cwd: "npm:^3.0.0"
+  bin:
+    import-local-fixture: fixtures/cli.js
+  checksum: 10/0b0b0b412b2521739fbb85eeed834a3c34de9bc67e670b3d0b86248fc460d990a7b116ad056c084b87a693ef73d1f17268d6a5be626bb43c998a8b1c8a230004
   languageName: node
   linkType: hard
 
@@ -14727,7 +14739,7 @@ __metadata:
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
     webpack: "npm:^5.107.2"
-    webpack-cli: "npm:^7.0.3"
+    webpack-cli: "npm:^7.1.0"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
     yargs: "npm:^17.7.2"
   languageName: unknown
@@ -14776,7 +14788,7 @@ __metadata:
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
     webpack: "npm:^5.107.2"
-    webpack-cli: "npm:^7.0.3"
+    webpack-cli: "npm:^7.1.0"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
     yargs: "npm:^17.7.2"
   languageName: unknown
@@ -15454,7 +15466,7 @@ __metadata:
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
     webpack: "npm:^5.107.2"
-    webpack-cli: "npm:^7.0.3"
+    webpack-cli: "npm:^7.1.0"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
     yargs: "npm:^17.7.2"
   languageName: unknown
@@ -15502,7 +15514,7 @@ __metadata:
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
     webpack: "npm:^5.107.2"
-    webpack-cli: "npm:^7.0.3"
+    webpack-cli: "npm:^7.1.0"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
     yargs: "npm:^17.7.2"
   languageName: unknown
@@ -18312,7 +18324,7 @@ __metadata:
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
     webpack: "npm:^5.107.2"
-    webpack-cli: "npm:^7.0.3"
+    webpack-cli: "npm:^7.1.0"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
     yargs: "npm:^17.7.2"
   languageName: unknown
@@ -18346,7 +18358,7 @@ __metadata:
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
     webpack: "npm:^5.107.2"
-    webpack-cli: "npm:^7.0.3"
+    webpack-cli: "npm:^7.1.0"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
     yargs: "npm:^17.7.2"
   languageName: unknown
@@ -18405,7 +18417,7 @@ __metadata:
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
     webpack: "npm:^5.107.2"
-    webpack-cli: "npm:^7.0.3"
+    webpack-cli: "npm:^7.1.0"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
     yargs: "npm:^17.7.2"
   languageName: unknown
@@ -18444,7 +18456,7 @@ __metadata:
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
     webpack: "npm:^5.107.2"
-    webpack-cli: "npm:^7.0.3"
+    webpack-cli: "npm:^7.1.0"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
     yargs: "npm:^17.7.2"
   languageName: unknown
@@ -18488,7 +18500,7 @@ __metadata:
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
     webpack: "npm:^5.107.2"
-    webpack-cli: "npm:^7.0.3"
+    webpack-cli: "npm:^7.1.0"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
     yargs: "npm:^17.7.2"
   languageName: unknown
@@ -18528,7 +18540,7 @@ __metadata:
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
     webpack: "npm:^5.107.2"
-    webpack-cli: "npm:^7.0.3"
+    webpack-cli: "npm:^7.1.0"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
   languageName: unknown
   linkType: soft
@@ -18571,7 +18583,7 @@ __metadata:
     typescript: "npm:^5.5.3"
     web-api-client: "workspace:*"
     webpack: "npm:^5.107.2"
-    webpack-cli: "npm:^7.0.3"
+    webpack-cli: "npm:^7.1.0"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
   languageName: unknown
   linkType: soft
@@ -18590,30 +18602,39 @@ __metadata:
   languageName: node
   linkType: hard
 
-"webpack-cli@npm:^7.0.3":
-  version: 7.0.3
-  resolution: "webpack-cli@npm:7.0.3"
+"webpack-cli@npm:^7.1.0":
+  version: 7.1.0
+  resolution: "webpack-cli@npm:7.1.0"
   dependencies:
     "@discoveryjs/json-ext": "npm:^1.1.0"
     commander: "npm:^14.0.3"
     cross-spawn: "npm:^7.0.6"
-    envinfo: "npm:^7.14.0"
-    import-local: "npm:^3.0.2"
+    envinfo: "npm:^7.21.0"
+    import-local: "npm:^3.2.0"
     interpret: "npm:^3.1.1"
     rechoir: "npm:^0.8.0"
     webpack-merge: "npm:^6.0.1"
   peerDependencies:
+    js-yaml: ^4.0.0 || ^5.0.0
+    json5: ^2.2.3
+    toml: ^3.0.0 || ^4.0.0
     webpack: ^5.101.0
     webpack-bundle-analyzer: ^4.0.0 || ^5.0.0
     webpack-dev-server: ^5.0.0
   peerDependenciesMeta:
+    js-yaml:
+      optional: true
+    json5:
+      optional: true
+    toml:
+      optional: true
     webpack-bundle-analyzer:
       optional: true
     webpack-dev-server:
       optional: true
   bin:
     webpack-cli: bin/cli.js
-  checksum: 10/e7e04acd95c0190f806aad14e5d967cf09239f20d6d31fba360090dd68b9ea82a3c67df135831222f5dfe1f7fd5df5506124147f30f86f2eba9c34f444e6e2e4
+  checksum: 10/74d404728b057e5887a822dc5abb41b825e2a819da26891ecb7eb125282d5041b99c8d0f90f3e910c128813ddfe5d5d946ce0106aab1fb7bbb236a94223f897a
   languageName: node
   linkType: hard
 
