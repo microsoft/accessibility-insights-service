@@ -3,8 +3,7 @@
 
 import { injectable } from 'inversify';
 
-// @ts-ignore
-import * as uuid from 'uuid-with-v6';
+import { v6 as uuidV6 } from 'uuid';
 
 /**
  * UUID RFC 4122 https://tools.ietf.org/html/rfc4122
@@ -15,7 +14,7 @@ export class GuidGenerator {
      * Creates new UUID version 6.
      */
     public createGuid(): string {
-        return uuid.v6();
+        return uuidV6();
     }
 
     /**
@@ -23,7 +22,7 @@ export class GuidGenerator {
      * @param baseGuid The UUID to match the UUID node with.
      */
     public createGuidFromBaseGuid(baseGuid: string): string {
-        const guid = <string>uuid.v6();
+        const guid = uuidV6();
         const guidNode = this.getGuidNode(baseGuid);
 
         return `${guid.substr(0, 24)}${guidNode}`;

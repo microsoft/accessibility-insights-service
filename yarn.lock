@@ -5303,7 +5303,7 @@ __metadata:
     ts-jest: "npm:^29.4.11"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
-    uuid-with-v6: "npm:^2.0.0"
+    uuid: "npm:^11.1.1"
     webpack: "npm:^5.108.4"
     webpack-cli: "npm:^7.1.0"
     webpack-node-externals: "npm:^3.0.0"
@@ -7178,7 +7178,7 @@ __metadata:
     ts-jest: "npm:^29.4.11"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
-    uuid-with-v6: "npm:^2.0.0"
+    uuid: "npm:^11.1.1"
   languageName: unknown
   linkType: soft
 
@@ -18122,21 +18122,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"uuid-with-v6@npm:^2.0.0":
-  version: 2.0.0
-  resolution: "uuid-with-v6@npm:2.0.0"
-  dependencies:
-    uuid: "npm:8.3.2"
-  checksum: 10/53fceab8b9f2ac52b26bda1fb06280823acd2d80d7e0a8746f14017b0bbf4fb298746a3dfb5c7556f32901e3b5237b74f70215c7ab41105820a8780a23367de8
-  languageName: node
-  linkType: hard
-
-"uuid@npm:8.3.2, uuid@npm:^8.3.0, uuid@npm:^8.3.2":
-  version: 8.3.2
-  resolution: "uuid@npm:8.3.2"
+"uuid@npm:^11.1.1, uuid@npm:^9.0.1":
+  version: 11.1.1
+  resolution: "uuid@npm:11.1.1"
   bin:
-    uuid: dist/bin/uuid
-  checksum: 10/9a5f7aa1d6f56dd1e8d5f2478f855f25c645e64e26e347a98e98d95781d5ed20062d6cca2eecb58ba7c84bc3910be95c0451ef4161906abaab44f9cb68ffbdd1
+    uuid: dist/esm/bin/uuid
+  checksum: 10/16411d3dc12a08d6691616c09a75e66a7f900ba1beef6628a76fe0602f82fae2ee537b564d0b7bc95c24f58d059ca9b58c75a1e806118efb50e17822ff00ddd2
   languageName: node
   linkType: hard
 
@@ -18158,12 +18149,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"uuid@npm:^9.0.1":
-  version: 11.1.1
-  resolution: "uuid@npm:11.1.1"
+"uuid@npm:^8.3.0, uuid@npm:^8.3.2":
+  version: 8.3.2
+  resolution: "uuid@npm:8.3.2"
   bin:
-    uuid: dist/esm/bin/uuid
-  checksum: 10/16411d3dc12a08d6691616c09a75e66a7f900ba1beef6628a76fe0602f82fae2ee537b564d0b7bc95c24f58d059ca9b58c75a1e806118efb50e17822ff00ddd2
+    uuid: dist/bin/uuid
+  checksum: 10/9a5f7aa1d6f56dd1e8d5f2478f855f25c645e64e26e347a98e98d95781d5ed20062d6cca2eecb58ba7c84bc3910be95c0451ef4161906abaab44f9cb68ffbdd1
   languageName: node
   linkType: hard
 
