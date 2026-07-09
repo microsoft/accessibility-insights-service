@@ -105,7 +105,9 @@
         "protobufjs@8.0.1": "8.4.2",
         "@azure/monitor-opentelemetry": "1.18.1",
         "@opentelemetry/core": "2.8.0",
-        "undici": "^8.5.0"
+        "undici": "^8.5.0",
+        "@azure/ms-rest-js/uuid": "^11.1.1",
+        "adal-node/uuid": "^11.1.1"
     },
     "dependencies": {
         "accessibility-insights-report": "7.7.0"
