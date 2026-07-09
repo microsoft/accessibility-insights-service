@@ -687,12 +687,12 @@ describe('CosmosClientWrapper', () => {
     function setupCosmosMocks(): void {
         cosmosClientMock = Mock.ofType<cosmos.CosmosClient>();
         cosmosClientMock = getPromisableDynamicMock(cosmosClientMock);
-        dbMock = Mock.ofType(cosmos.Database);
+        dbMock = getPromisableDynamicMock(Mock.ofType<cosmos.Database>());
         collectionMock = Mock.ofType<cosmos.Container>();
         collectionMock = getPromisableDynamicMock(collectionMock);
-        itemsMock = Mock.ofType(cosmos.Items);
-        itemMock = Mock.ofType(cosmos.Item);
-        queryIteratorMock = Mock.ofType(cosmos.QueryIterator);
+        itemsMock = Mock.ofType<cosmos.Items>();
+        itemMock = Mock.ofType<cosmos.Item>();
+        queryIteratorMock = Mock.ofType<cosmos.QueryIterator<any>>();
         cosmosClientProviderStub = async () => cosmosClientMock.object;
 
         collectionMock.setup((c) => c.items).returns(() => itemsMock.object);
