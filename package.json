@@ -27,7 +27,6 @@
         "syncpack:check": "npx syncpack list-mismatches",
         "syncpack:fix": "npx syncpack fix-mismatches",
         "shellcheck": "npx shellcheck ./packages/**/*.sh",
-        "pr:combine": "git push origin :combined-prs ; npx combine-dependabot-prs microsoft/accessibility-insights-service",
         "circular:check": "npx madge --warning --circular --extensions js ./"
     },
     "author": "Microsoft",
@@ -40,7 +39,6 @@
         "@typescript-eslint/eslint-plugin": "^7.15.0",
         "@typescript-eslint/eslint-plugin-tslint": "^7.0.2",
         "@typescript-eslint/parser": "^8.62.1",
-        "combine-dependabot-prs": "^1.0.5",
         "commander": "^14.0.3",
         "eslint": "^8.57.0",
         "eslint-plugin-check-file": "^3.3.1",
