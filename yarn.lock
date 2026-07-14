@@ -17451,7 +17451,7 @@ __metadata:
     ts-loader: "npm:^9.6.2"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
-    webpack: "npm:^5.107.2"
+    webpack: "npm:^5.108.4"
     webpack-cli: "npm:^7.1.0"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
     yargs: "npm:^17.7.2"
@@ -17763,7 +17763,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"webpack@npm:^5.107.2, webpack@npm:^5.108.4":
+"webpack@npm:^5.108.4":
   version: 5.108.4
   resolution: "webpack@npm:5.108.4"
   dependencies:
