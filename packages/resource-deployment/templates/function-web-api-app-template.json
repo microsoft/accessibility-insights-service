@@ -50,6 +50,13 @@
                 "description": "An allowlist of string application client IDs representing the client resource that is calling into the app."
             }
         },
+        "allowedAudiences": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": "An allowlist of token audiences (application client IDs) accepted by the app. Enables cross-tenant callers that request a token for the consented multi-tenant application."
+            }
+        },
         "keyVaultName": {
             "type": "string",
             "defaultValue": "[concat('allyvault', toLower(uniqueString(resourceGroup().id)))]",
@@ -173,13 +180,14 @@
                             "azureActiveDirectory": {
                                 "enabled": true,
                                 "registration": {
-                                    "openIdIssuer": "[concat('https://sts.windows.net/', subscription().tenantId, '/v2.0')]",
+                                    "openIdIssuer": "https://login.microsoftonline.com/common/v2.0",
                                     "clientId": "[parameters('clientId')]"
                                 },
                                 "login": {
                                     "disableWWWAuthenticate": true
                                 },
                                 "validation": {
+                                    "allowedAudiences": "[array(split(parameters('allowedAudiences'), ','))]",
                                     "defaultAuthorizationPolicy": {
                                         "allowedApplications": "[array(split(parameters('allowedApplications'), ','))]"
                                     }
