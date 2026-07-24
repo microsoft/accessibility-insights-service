@@ -73,7 +73,6 @@
         "axe-core": "4.11.3",
         "node-fetch": "^2.6.7",
         "normalize-url": "6.1.0",
-        "protobufjs@8.0.1": "8.4.2",
         "@azure/monitor-opentelemetry": "1.18.1",
         "@opentelemetry/core": "2.8.0"
     },
