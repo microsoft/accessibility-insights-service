@@ -73,7 +73,8 @@
         "axe-core": "4.11.3",
         "@azure/monitor-opentelemetry": "1.18.1",
         "@opentelemetry/core": "2.8.0",
-        "tar": "7.5.19"
+        "tar": "7.5.19",
+        "fast-uri": "4.1.0"
     },
     "dependencies": {
         "accessibility-insights-report": "7.7.0"

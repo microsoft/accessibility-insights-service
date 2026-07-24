@@ -8787,10 +8787,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fast-uri@npm:^3.0.1":
-  version: 3.1.3
-  resolution: "fast-uri@npm:3.1.3"
-  checksum: 10/7969a50a327482035d5c8c93faf51b26d7a93ce62bc750c91b3df158550004b5fbb378c95c900fd71f4dded36b5a78d1c666fb8043bb1214efbaebd8518d873e
+"fast-uri@npm:4.1.0":
+  version: 4.1.0
+  resolution: "fast-uri@npm:4.1.0::__archiveUrl=https%3A%2F%2Fms-feed-2.pkgs.visualstudio.com%2F1es-public%2F_packaging%2Fnpm-public%2Fnpm%2Fregistry%2Ffast-uri%2F-%2Ffast-uri-4.1.0.tgz"
+  checksum: 10/4c38a9c62c8bab8c91fd4b03ecd6beb7eae0d914ece346fca79075d079f1a721a6008c27ed57819b0b0f8967f108900c02800315ed9ab8a6add586993b6379ee
   languageName: node
   linkType: hard
 
