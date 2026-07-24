@@ -66,6 +66,32 @@ getAllowedApplications() {
     fi
 }
 
+getAllowedAudiences() {
+    if [[ ${environment} == prod* ]]; then
+        audienceFilePath="${0%/*}/../templates/web-api-aad-audience-prod.txt"
+    elif [[ ${environment} == ppe* ]]; then
+        audienceFilePath="${0%/*}/../templates/web-api-aad-audience-ppe.txt"
+    else
+        audienceFilePath="${0%/*}/../templates/web-api-aad-audience-${environment}.txt"
+    fi
+
+    if [[ -f ${audienceFilePath} ]]; then
+        echo "Using Azure Functions allowed audiences configuration ${audienceFilePath}"
+        allowedAudiences=$(<"${audienceFilePath}")
+    else
+        echo "Azure Functions allowed audiences configuration file not found. Expected configuration file ${audienceFilePath}"
+    fi
+
+    # The webApiIdentityClientId is the application (client) id of the user assigned managed identity (${webApiManagedIdentityName})
+    # used by the service. It is not part of the web-api-aad-audience-*.txt file and must be added implicitly so it remains a
+    # valid token audience for existing same-tenant clients.
+    if [[ -z ${allowedAudiences} ]]; then
+        allowedAudiences="${webApiIdentityClientId}"
+    else
+        allowedAudiences="${allowedAudiences},${webApiIdentityClientId}"
+    fi
+}
+
 copyConfigFileToScriptFolder() {
     local packageName=$1
 
@@ -247,7 +273,7 @@ function enableManagedIdentity() {
 function deployWebApiFunction() {
     # Upload the deployment package BEFORE deploying the ARM template
     publishFunctionAppScripts "web-api" "${webApiFuncAppName}"
-    deployFunctionAppTemplate "web-api-allyfuncapp" "${webApiFuncTemplateFilePath}" "${webApiFuncAppName}" "clientId=${webApiIdentityClientId} releaseVersion=${releaseVersion} allowedApplications=${allowedApplications}"
+    deployFunctionAppTemplate "web-api-allyfuncapp" "${webApiFuncTemplateFilePath}" "${webApiFuncAppName}" "clientId=${webApiIdentityClientId} releaseVersion=${releaseVersion} allowedApplications=${allowedApplications} allowedAudiences=${allowedAudiences}"
     assignUserIdentity "${webApiFuncAppName}"
     az functionapp restart --resource-group "${resourceGroupName}" --name "${webApiFuncAppName}"
 }
@@ -311,5 +337,6 @@ webApiIdentityPrincipalId=$(az identity show --name "${webApiManagedIdentityName
 userIdentityId=$(az identity show --name "${webApiManagedIdentityName}" --resource-group "${resourceGroupName}" --query "id" -o tsv)
 
 getAllowedApplications
+getAllowedAudiences
 createCosmosRBACRole
 setupAzureFunctions
