@@ -5145,7 +5145,7 @@ __metadata:
     ts-jest: "npm:^29.4.11"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
-    uuid: "npm:^11.1.1"
+    uuid: "npm:^14.0.1"
     webpack: "npm:^5.108.4"
     webpack-cli: "npm:^7.1.0"
     webpack-node-externals: "npm:^3.0.0"
@@ -6914,7 +6914,7 @@ __metadata:
     ts-jest: "npm:^29.4.11"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
-    uuid: "npm:^11.1.1"
+    uuid: "npm:^14.0.1"
   languageName: unknown
   linkType: soft
 
@@ -17478,7 +17478,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"uuid@npm:11.1.1, uuid@npm:^11.1.1, uuid@npm:^9.0.1":
+"uuid@npm:11.1.1, uuid@npm:^9.0.1":
   version: 11.1.1
   resolution: "uuid@npm:11.1.1"
   bin:
@@ -17493,6 +17493,15 @@ __metadata:
   bin:
     uuid: dist-node/bin/uuid
   checksum: 10/8ee9b98f9650e25555515f7a28d3c3ae9364e72f7bb19b9e08b681bc135338beba5509b2830f6ae1cfaba4d45401da0d16d4d109b977097bc3d6ba0c5583341b
+  languageName: node
+  linkType: hard
+
+"uuid@npm:^14.0.1":
+  version: 14.0.1
+  resolution: "uuid@npm:14.0.1::__archiveUrl=https%3A%2F%2Fms-feed-25.pkgs.visualstudio.com%2F1es-public%2F_packaging%2Fnpm-public%2Fnpm%2Fregistry%2Fuuid%2F-%2Fuuid-14.0.1.tgz"
+  bin:
+    uuid: ./dist-node/bin/uuid
+  checksum: 10/0f978fd5b0269d7acb615342aeb131f0b8d85eeb8ec34f2915d906baa3befcc14a079a430d0f8116aec6fd20c850cbfab65d1b3d1643fa81ed373c0cf9574f18
   languageName: node
   linkType: hard
 
