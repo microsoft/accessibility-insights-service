@@ -3268,7 +3268,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@opentelemetry/semantic-conventions@npm:^1.33.0, @opentelemetry/semantic-conventions@npm:^1.41.1":
+"@opentelemetry/semantic-conventions@npm:^1.33.0":
   version: 1.41.1
   resolution: "@opentelemetry/semantic-conventions@npm:1.41.1"
   checksum: 10/3b80fba5b0f28884326966a7b0dfc228c55698531db08834ece2c0ef7537aaaa83cba3f933731c14ffa6b0162b72cc14fee4a0ba68a1858837a590b49be23ee5
@@ -3293,6 +3293,13 @@ __metadata:
   version: 1.40.0
   resolution: "@opentelemetry/semantic-conventions@npm:1.40.0"
   checksum: 10/edb58894590e42e631006a9f5741955fad248e3589aa334a5e59080c535ead44ee9f376c444ef2be094d1e6c1a2e596538c1df0a31a04508551e91b1a5d5c93c
+  languageName: node
+  linkType: hard
+
+"@opentelemetry/semantic-conventions@npm:^1.43.0":
+  version: 1.43.0
+  resolution: "@opentelemetry/semantic-conventions@npm:1.43.0::__archiveUrl=https%3A%2F%2Fms-feed-12.pkgs.visualstudio.com%2F1es-public%2F_packaging%2Fnpm-public%2Fnpm%2Fregistry%2F%40opentelemetry%2Fsemantic-conventions%2F-%2Fsemantic-conventions-1.43.0.tgz"
+  checksum: 10/44c0e667cbfbecd98911cd6a90dc5f873de262da82d6684f467a87d529098b04fb2b9705bbd3524ecdedf13c62914d9ccf0ddcc4104dbba5062faf68f361aef4
   languageName: node
   linkType: hard
 
@@ -5099,7 +5106,7 @@ __metadata:
     "@opentelemetry/exporter-metrics-otlp-grpc": "npm:^0.219.0"
     "@opentelemetry/resources": "npm:^2.8.0"
     "@opentelemetry/sdk-metrics": "npm:^2.8.0"
-    "@opentelemetry/semantic-conventions": "npm:^1.41.1"
+    "@opentelemetry/semantic-conventions": "npm:^1.43.0"
     "@sindresorhus/fnv1a": "npm:^2.0.1"
     "@types/escape-html": "npm:^1.0.4"
     "@types/jest": "npm:^29.5.12"
@@ -12382,7 +12389,7 @@ __metadata:
     "@opentelemetry/instrumentation": "npm:^0.219.0"
     "@opentelemetry/resources": "npm:^2.8.0"
     "@opentelemetry/sdk-metrics": "npm:^2.8.0"
-    "@opentelemetry/semantic-conventions": "npm:^1.41.1"
+    "@opentelemetry/semantic-conventions": "npm:^1.43.0"
     "@types/dotenv": "npm:^8.2.3"
     "@types/jest": "npm:^29.5.12"
     "@types/lodash": "npm:^4.17.24"
