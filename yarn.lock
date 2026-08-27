@@ -375,9 +375,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@azure/cosmos@npm:^4.9.3":
-  version: 4.9.3
-  resolution: "@azure/cosmos@npm:4.9.3"
+"@azure/cosmos@npm:^4.10.0":
+  version: 4.10.0
+  resolution: "@azure/cosmos@npm:4.10.0::__archiveUrl=https%3A%2F%2Fms-feed-25.pkgs.visualstudio.com%2F1es-public%2F_packaging%2Fnpm-public%2Fnpm%2Fregistry%2F%40azure%2Fcosmos%2F-%2Fcosmos-4.10.0.tgz"
   dependencies:
     "@azure/abort-controller": "npm:^2.1.2"
     "@azure/core-auth": "npm:^1.9.0"
@@ -390,7 +390,7 @@ __metadata:
     priorityqueuejs: "npm:^2.0.0"
     semaphore: "npm:^1.1.0"
     tslib: "npm:^2.8.1"
-  checksum: 10/4bf1492e87168fc821e32e0b09bc138e5fb3e3a95fb135ba6b936b1a9bf5d9ce83fd167824d18f5c400e58383bf9922f34bc4be03d57535788a6376afe156582
+  checksum: 10/544ca6dbcde85e42051be45e25c9b4c6dc09327be3d0d9da0293da3e0ba48587461389ff37116fae6b9b50f9dd3878f1e9c98eb22b34411707169306c53d5651
   languageName: node
   linkType: hard
 
@@ -5871,7 +5871,7 @@ __metadata:
   dependencies:
     "@azure/batch": "npm:^10.2.0"
     "@azure/core-auth": "npm:^1.10.1"
-    "@azure/cosmos": "npm:^4.9.3"
+    "@azure/cosmos": "npm:^4.10.0"
     "@azure/identity": "npm:^4.13.1"
     "@azure/keyvault-secrets": "npm:^4.11.2"
     "@azure/ms-rest-js": "npm:^2.7.0"
@@ -9352,7 +9352,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "functional-tests@workspace:packages/functional-tests"
   dependencies:
-    "@azure/cosmos": "npm:^4.9.3"
+    "@azure/cosmos": "npm:^4.10.0"
     "@types/chai": "npm:^4.3.4"
     "@types/deep-equal-in-any-order": "npm:^1.0.4"
     "@types/dotenv": "npm:^8.2.3"
@@ -14249,7 +14249,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "privacy-scan-runner@workspace:packages/privacy-scan-runner"
   dependencies:
-    "@azure/cosmos": "npm:^4.9.3"
+    "@azure/cosmos": "npm:^4.10.0"
     "@types/dotenv": "npm:^8.2.3"
     "@types/jest": "npm:^29.5.12"
     "@types/lodash": "npm:^4.17.24"
@@ -14916,7 +14916,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "report-generator-runner@workspace:packages/report-generator-runner"
   dependencies:
-    "@azure/cosmos": "npm:^4.9.3"
+    "@azure/cosmos": "npm:^4.10.0"
     "@types/dotenv": "npm:^8.2.3"
     "@types/jest": "npm:^29.5.12"
     "@types/lodash": "npm:^4.17.24"
@@ -15648,7 +15648,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "service-library@workspace:packages/service-library"
   dependencies:
-    "@azure/cosmos": "npm:^4.9.3"
+    "@azure/cosmos": "npm:^4.10.0"
     "@azure/functions": "npm:^4.16.1"
     "@azure/identity": "npm:^4.13.1"
     "@azure/storage-blob": "npm:12.32.0"
@@ -17648,7 +17648,7 @@ __metadata:
   resolution: "web-api-scan-runner@workspace:packages/web-api-scan-runner"
   dependencies:
     "@axe-core/puppeteer": "npm:4.11.2"
-    "@azure/cosmos": "npm:^4.9.3"
+    "@azure/cosmos": "npm:^4.10.0"
     "@playwright/test": "npm:^1.61.1"
     "@types/dotenv": "npm:^8.2.3"
     "@types/jest": "npm:^29.5.12"
@@ -17744,7 +17744,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "web-api-send-notification-runner@workspace:packages/web-api-send-notification-runner"
   dependencies:
-    "@azure/cosmos": "npm:^4.9.3"
+    "@azure/cosmos": "npm:^4.10.0"
     "@types/dotenv": "npm:^8.2.3"
     "@types/got": "npm:^9.6.11"
     "@types/jest": "npm:^29.5.12"
