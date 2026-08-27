@@ -12,10 +12,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@apify/consts@npm:^2.53.3":
-  version: 2.53.3
-  resolution: "@apify/consts@npm:2.53.3"
-  checksum: 10/64888b0ba20c13a0c4b25a86aec820ad1210f1f53992b3387b15a164cc038cfcf1d09412ff1b4e14d5164afdf792e15cba6791d8f48a97301ea5257f9bf94eca
+"@apify/consts@npm:^2.54.2":
+  version: 2.54.2
+  resolution: "@apify/consts@npm:2.54.2::__archiveUrl=https%3A%2F%2Fms-feed-25.pkgs.visualstudio.com%2F1es-public%2F_packaging%2Fnpm-public%2Fnpm%2Fregistry%2F%40apify%2Fconsts%2F-%2Fconsts-2.54.2.tgz"
+  checksum: 10/108a4a9ecccd8c42e9402ddd0e4ed4c799ea5a3833e8b8be2b8d4d6ad4bd25f755afdd5bcaaa27357865101fd73ec39f68eb3058d61df2477de255cf5dd57e88
   languageName: node
   linkType: hard
 
@@ -26,13 +26,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@apify/log@npm:2.5.41":
-  version: 2.5.41
-  resolution: "@apify/log@npm:2.5.41"
+"@apify/log@npm:2.5.44":
+  version: 2.5.44
+  resolution: "@apify/log@npm:2.5.44::__archiveUrl=https%3A%2F%2Fms-feed-12.pkgs.visualstudio.com%2F1es-public%2F_packaging%2Fnpm-public%2Fnpm%2Fregistry%2F%40apify%2Flog%2F-%2Flog-2.5.44.tgz"
   dependencies:
-    "@apify/consts": "npm:^2.53.3"
+    "@apify/consts": "npm:^2.54.2"
     ansi-colors: "npm:^4.1.1"
-  checksum: 10/d4d34dbce4b4e768bfeeed6f0e06577904cfecc0270ade7aee69916f917f50a88816bda074ec60f09fd3a89d70277b67f9c727fd7c4808c1fa8a9081317204ea
+  checksum: 10/fa99ed345e0daa78c0fde3f8d77202c2e25f0b2e1ff692baf38d3fefdef91e959003f3e8d50ddaf3c3043d01e5788417dd3f605b10837d534814d3c11253a0d2
   languageName: node
   linkType: hard
 
@@ -5026,7 +5026,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "accessibility-insights-crawler@workspace:packages/crawler"
   dependencies:
-    "@apify/log": "npm:2.5.41"
+    "@apify/log": "npm:2.5.44"
     "@axe-core/puppeteer": "npm:4.11.2"
     "@crawlee/browser-pool": "npm:^3.17.0"
     "@crawlee/puppeteer": "npm:^3.17.0"
@@ -5062,7 +5062,7 @@ __metadata:
     rollup: "npm:^4.62.2"
     serialize-error: "npm:^8.1.0"
     sha.js: "npm:^2.4.12"
-    ts-jest: "npm:^29.4.11"
+    ts-jest: "npm:^29.4.12"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
     yargs: "npm:^17.7.2"
@@ -5090,7 +5090,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "accessibility-insights-scan@workspace:packages/cli"
   dependencies:
-    "@apify/log": "npm:2.5.41"
+    "@apify/log": "npm:2.5.44"
     "@axe-core/puppeteer": "npm:4.11.2"
     "@crawlee/browser-pool": "npm:^3.17.0"
     "@crawlee/puppeteer": "npm:^3.17.0"
@@ -5142,12 +5142,12 @@ __metadata:
     rimraf: "npm:^6.1.3"
     serialize-error: "npm:^8.1.0"
     sha.js: "npm:^2.4.12"
-    ts-jest: "npm:^29.4.11"
+    ts-jest: "npm:^29.4.12"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
     uuid: "npm:^11.1.1"
-    webpack: "npm:^5.108.4"
-    webpack-cli: "npm:^7.1.0"
+    webpack: "npm:^5.109.0"
+    webpack-cli: "npm:^7.2.1"
     webpack-node-externals: "npm:^3.0.0"
     yargs: "npm:^17.7.2"
   bin:
@@ -5186,7 +5186,7 @@ __metadata:
     shellcheck: "npm:^4.1.0"
     simple-git: "npm:^3.36.0"
     syncpack: "npm:^8.4.11"
-    ts-jest: "npm:^29.4.11"
+    ts-jest: "npm:^29.4.12"
     tslint: "npm:^6.1.3"
     typescript: "npm:^5.5.3"
   languageName: unknown
@@ -5198,15 +5198,6 @@ __metadata:
   peerDependencies:
     acorn: ^8
   checksum: 10/8bfbfbb6e2467b9b47abb4d095df717ab64fce2525da65eabee073e85e7975fb3a176b6c8bba17c99a7d8ede283a10a590272304eb54a93c4aa1af9790d47a8b
-  languageName: node
-  linkType: hard
-
-"acorn-import-phases@npm:^1.0.3":
-  version: 1.0.4
-  resolution: "acorn-import-phases@npm:1.0.4"
-  peerDependencies:
-    acorn: ^8.14.0
-  checksum: 10/471050ac7d9b61909c837b426de9eeef2958997f6277ad7dea88d5894fd9b3245d8ed4a225c2ca44f814dbb20688009db7a80e525e8196fc9e98c5285b66161d
   languageName: node
   linkType: hard
 
@@ -5781,7 +5772,7 @@ __metadata:
     puppeteer: "npm:^24.40.0"
     reflect-metadata: "npm:^0.2.2"
     rimraf: "npm:^6.1.3"
-    ts-jest: "npm:^29.4.11"
+    ts-jest: "npm:^29.4.12"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
   languageName: unknown
@@ -5812,7 +5803,7 @@ __metadata:
     npm-run-all: "npm:^4.1.5"
     reflect-metadata: "npm:^0.2.2"
     rimraf: "npm:^6.1.3"
-    ts-jest: "npm:^29.4.11"
+    ts-jest: "npm:^29.4.12"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
   languageName: unknown
@@ -5909,12 +5900,12 @@ __metadata:
     reflect-metadata: "npm:^0.2.2"
     rimraf: "npm:^6.1.3"
     storage-documents: "workspace:*"
-    ts-jest: "npm:^29.4.11"
+    ts-jest: "npm:^29.4.12"
     ts-loader: "npm:^9.6.2"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
-    webpack: "npm:^5.108.4"
-    webpack-cli: "npm:^7.1.0"
+    webpack: "npm:^5.109.0"
+    webpack-cli: "npm:^7.2.1"
   languageName: unknown
   linkType: soft
 
@@ -6140,31 +6131,31 @@ __metadata:
   languageName: node
   linkType: hard
 
-"brace-expansion@npm:5.0.8":
-  version: 5.0.8
-  resolution: "brace-expansion@npm:5.0.8"
-  dependencies:
-    balanced-match: "npm:^4.0.2"
-  checksum: 10/75d2d2ebc8f5f65156d16706216d23e48f499a1164e4b045e0ca4045d3ce6b16ced11ea2e4c76e3670b6c38454123213f43d23127df8fc6840980aea9a35e061
-  languageName: node
-  linkType: hard
-
-"brace-expansion@npm:^1.1.7":
-  version: 1.1.16
-  resolution: "brace-expansion@npm:1.1.16"
+"brace-expansion@npm:1.1.18":
+  version: 1.1.18
+  resolution: "brace-expansion@npm:1.1.18::__archiveUrl=https%3A%2F%2Fms-feed-2.pkgs.visualstudio.com%2F1es-public%2F_packaging%2Fnpm-public%2Fnpm%2Fregistry%2Fbrace-expansion%2F-%2Fbrace-expansion-1.1.18.tgz"
   dependencies:
     balanced-match: "npm:^1.0.0"
     concat-map: "npm:0.0.1"
-  checksum: 10/94498bead66c51536df5b7bf1b0a0e581a5b7f86888be10481d06920c4bd9d976e003b13a3d19fddc733f21a09d162ff72f90e18b2c9d062b15121e973d0e13b
+  checksum: 10/b55a3c03239b8d2127c7cbb3408c9ad3a556a8c303bf3064df78bfb7c093160fc8f6e0a32e42a850a78eba12f29ccf6ef997690b9acf945d242c56c61c4aa977
   languageName: node
   linkType: hard
 
-"brace-expansion@npm:^2.0.1":
-  version: 2.1.2
-  resolution: "brace-expansion@npm:2.1.2"
+"brace-expansion@npm:2.1.4":
+  version: 2.1.4
+  resolution: "brace-expansion@npm:2.1.4::__archiveUrl=https%3A%2F%2Fms-feed-2.pkgs.visualstudio.com%2F1es-public%2F_packaging%2Fnpm-public%2Fnpm%2Fregistry%2Fbrace-expansion%2F-%2Fbrace-expansion-2.1.4.tgz"
   dependencies:
     balanced-match: "npm:^1.0.0"
-  checksum: 10/0e0f9b0df1f0809e9c326470e022eeb24334ddb54c43b1ac39f1d38f3cbaeb940794de1db826f5491843ac00d7932c43f10350a65ccd51fe7d05da627152f204
+  checksum: 10/11e18dc39706037331abedbb742af1da733267042f94c0f08487ef1a63cee068c1859f8d5f95523869725191133eb1a69753de457ed4b76b7c187d9ea0646737
+  languageName: node
+  linkType: hard
+
+"brace-expansion@npm:5.0.9":
+  version: 5.0.9
+  resolution: "brace-expansion@npm:5.0.9::__archiveUrl=https%3A%2F%2Fms-feed-2.pkgs.visualstudio.com%2F1es-public%2F_packaging%2Fnpm-public%2Fnpm%2Fregistry%2Fbrace-expansion%2F-%2Fbrace-expansion-5.0.9.tgz"
+  dependencies:
+    balanced-match: "npm:^4.0.2"
+  checksum: 10/d8683d612919212c7cf298861acd1c15101e7e2ad186e7ae9747390e5b3fc9e9b55ce71107570d32985784d9d88fbbe438d725863aed7b0f3d08d5f080535eec
   languageName: node
   linkType: hard
 
@@ -6911,7 +6902,7 @@ __metadata:
     rimraf: "npm:^6.1.3"
     serialize-error: "npm:^8.1.0"
     sha.js: "npm:^2.4.12"
-    ts-jest: "npm:^29.4.11"
+    ts-jest: "npm:^29.4.12"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
     uuid: "npm:^11.1.1"
@@ -7768,9 +7759,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"durable-functions@npm:^3.4.0":
-  version: 3.4.0
-  resolution: "durable-functions@npm:3.4.0"
+"durable-functions@npm:^3.5.0":
+  version: 3.5.0
+  resolution: "durable-functions@npm:3.5.0::__archiveUrl=https%3A%2F%2Fms-feed-2.pkgs.visualstudio.com%2F1es-public%2F_packaging%2Fnpm-public%2Fnpm%2Fregistry%2Fdurable-functions%2F-%2Fdurable-functions-3.5.0.tgz"
   dependencies:
     "@azure/functions": "npm:^4.14.0"
     "@opentelemetry/api": "npm:^1.9.0"
@@ -7780,7 +7771,7 @@ __metadata:
     moment: "npm:^2.29.2"
     uuid: "npm:^9.0.1"
     validator: "npm:~13.15.20"
-  checksum: 10/ce6a3b1e4dd7604d221e2447e7c3e06c486d14e42c73ce6c8b2bccb39be0c71c23cd345a90baff17feaf543cd12f92d80c7bf20f55d4dab2cd4fb3025e8a4d1f
+  checksum: 10/7cdfba50242a59aa36b5baba8b464b313f1af60656d1e8c02ecd328e89b63f2fb90e190db185cecad0a2c059d5489a25d94c69ffd14b340ae7a12dd32c0eecf1
   languageName: node
   linkType: hard
 
@@ -7810,11 +7801,11 @@ __metadata:
     node-loader: "npm:^2.1.0"
     npm-run-all: "npm:^4.1.5"
     rimraf: "npm:^6.1.3"
-    ts-jest: "npm:^29.4.11"
+    ts-jest: "npm:^29.4.12"
     ts-loader: "npm:^9.6.2"
     typescript: "npm:^5.5.3"
-    webpack: "npm:^5.108.4"
-    webpack-cli: "npm:^7.1.0"
+    webpack: "npm:^5.109.0"
+    webpack-cli: "npm:^7.2.1"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
   languageName: unknown
   linkType: soft
@@ -7921,13 +7912,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"enhanced-resolve@npm:^5.22.2":
-  version: 5.24.1
-  resolution: "enhanced-resolve@npm:5.24.1"
+"enhanced-resolve@npm:^5.24.4":
+  version: 5.24.5
+  resolution: "enhanced-resolve@npm:5.24.5::__archiveUrl=https%3A%2F%2Fms-feed-2.pkgs.visualstudio.com%2F1es-public%2F_packaging%2Fnpm-public%2Fnpm%2Fregistry%2Fenhanced-resolve%2F-%2Fenhanced-resolve-5.24.5.tgz"
   dependencies:
     graceful-fs: "npm:^4.2.4"
     tapable: "npm:^2.3.3"
-  checksum: 10/161f52840ad84390ad5b9ac611692b0b45dd12a673455df697bb824a6fef47490ee7dadbe9fd7f003d9a576be8741092b7c0d9e8147e8fb47dbad698f2de2a9b
+  checksum: 10/cf3f6f62bd52c1d564d7967e474892d5b43690aedaf7a4e87c831fa6b4b065617baf08eb940907968c711965cbc6ccd773bcc67b8d87a71523c0512372be2a06
   languageName: node
   linkType: hard
 
@@ -8778,10 +8769,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fast-uri@npm:4.1.1":
-  version: 4.1.1
-  resolution: "fast-uri@npm:4.1.1"
-  checksum: 10/f8a186718e360ffb0888b812892dc2930902c4200b9a35ab15923678b4cbcece04a155d36edc74f1ed3e5a9f60893095cf195b6e0a2351282f7714bac0993445
+"fast-uri@npm:4.1.2":
+  version: 4.1.2
+  resolution: "fast-uri@npm:4.1.2::__archiveUrl=https%3A%2F%2Fms-feed-2.pkgs.visualstudio.com%2F1es-public%2F_packaging%2Fnpm-public%2Fnpm%2Fregistry%2Ffast-uri%2F-%2Ffast-uri-4.1.2.tgz"
+  checksum: 10/e5e049fabd47930669c1af4642e6205a18683138cbc984673317e1ccb88d46de20e66b4ae6bc2e9ee70011eff263cc0f745daeaa7f841835d12c1e0d8d558f11
   languageName: node
   linkType: hard
 
@@ -9384,7 +9375,7 @@ __metadata:
     rimraf: "npm:^6.1.3"
     service-library: "workspace:*"
     storage-documents: "workspace:*"
-    ts-jest: "npm:^29.4.11"
+    ts-jest: "npm:^29.4.12"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
     web-api-client: "workspace:*"
@@ -10066,12 +10057,12 @@ __metadata:
     rimraf: "npm:^6.1.3"
     service-library: "workspace:*"
     shebang-loader: "npm:^0.0.1"
-    ts-jest: "npm:^29.4.11"
+    ts-jest: "npm:^29.4.12"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
     web-api-client: "workspace:*"
-    webpack: "npm:^5.108.4"
-    webpack-cli: "npm:^7.1.0"
+    webpack: "npm:^5.109.0"
+    webpack-cli: "npm:^7.2.1"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
     yargs: "npm:^17.7.2"
   languageName: unknown
@@ -10483,9 +10474,9 @@ __metadata:
   linkType: hard
 
 "ip-address@npm:^10.1.1":
-  version: 10.2.0
-  resolution: "ip-address@npm:10.2.0"
-  checksum: 10/12fec399e1af5753ac322e47a6d81a50d3a528b3abb17c09525b2a2edcaedcca628c40520706f7037bc4d8e951b0296c47e7b86d0a8e6e2335c8f0ba4afcfac1
+  version: 10.3.1
+  resolution: "ip-address@npm:10.3.1::__archiveUrl=https%3A%2F%2Fms-feed-17.pkgs.visualstudio.com%2F1es-public%2F_packaging%2Fnpm-public%2Fnpm%2Fregistry%2Fip-address%2F-%2Fip-address-10.3.1.tgz"
+  checksum: 10/cc0d5b9953acb4114990a3887e0701f8fe843903811f982cf2856cd307c5fb6cdca426ad16c39a1f4950091935c8be4d42631a443f797a96626cce161fffed41
   languageName: node
   linkType: hard
 
@@ -11874,26 +11865,26 @@ __metadata:
   languageName: node
   linkType: hard
 
+"js-yaml@npm:4.3.1":
+  version: 4.3.1
+  resolution: "js-yaml@npm:4.3.1::__archiveUrl=https%3A%2F%2Fms-feed-2.pkgs.visualstudio.com%2F1es-public%2F_packaging%2Fnpm-public%2Fnpm%2Fregistry%2Fjs-yaml%2F-%2Fjs-yaml-4.3.1.tgz"
+  dependencies:
+    argparse: "npm:^2.0.1"
+  bin:
+    js-yaml: bin/js-yaml.js
+  checksum: 10/2ce71b5d632abbd77da80447bf860e8a0264e54bffe94840984887d58b023761495b523727547904517a6107a1ef189854b361e0fc44995ee13a84f222d7bd42
+  languageName: node
+  linkType: hard
+
 "js-yaml@npm:^3.13.1":
-  version: 3.15.0
-  resolution: "js-yaml@npm:3.15.0"
+  version: 3.15.1
+  resolution: "js-yaml@npm:3.15.1::__archiveUrl=https%3A%2F%2Fms-feed-25.pkgs.visualstudio.com%2F1es-public%2F_packaging%2Fnpm-public%2Fnpm%2Fregistry%2Fjs-yaml%2F-%2Fjs-yaml-3.15.1.tgz"
   dependencies:
     argparse: "npm:^1.0.7"
     esprima: "npm:^4.0.0"
   bin:
     js-yaml: bin/js-yaml.js
-  checksum: 10/2fdf3a1453ed93a8e06d6ca8054c0bec145cf40ab51f305d1071736a03668b95e40f47cfd0239d7d50019b4780a18cdaca3c935def935594c9876964c49f1185
-  languageName: node
-  linkType: hard
-
-"js-yaml@npm:^4.0.0, js-yaml@npm:^4.1.0":
-  version: 4.3.0
-  resolution: "js-yaml@npm:4.3.0"
-  dependencies:
-    argparse: "npm:^2.0.1"
-  bin:
-    js-yaml: bin/js-yaml.js
-  checksum: 10/2bcec3a8118d7f744badeb04e14366578d234a736f353d41fe35d2305e4ce2409a8e041d277f07cd6bbc8aaa12128d650a68ce43247072519bede20962d2126f
+  checksum: 10/905842ce08c18b154ff2c187ff81bb41294cc5dda214331b5d9b8bcf395894e48b00fa37b9d4dd4c3ffec672b7496a94558e3876d3a8ad4d12b06248112e6d92
   languageName: node
   linkType: hard
 
@@ -12279,13 +12270,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"loader-runner@npm:^4.3.2":
-  version: 4.3.2
-  resolution: "loader-runner@npm:4.3.2"
-  checksum: 10/fc0cf0026cdea7182720f58e8ff07869334bf299bd451d6192a8c2c4119ad493f1e0f5df099d031e81361f96196150d21047bf415edef4dc1e0fa02fa65ecced
-  languageName: node
-  linkType: hard
-
 "loader-utils@npm:^2.0.3":
   version: 2.0.4
   resolution: "loader-utils@npm:2.0.4"
@@ -12392,7 +12376,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "logger@workspace:packages/logger"
   dependencies:
-    "@apify/log": "npm:2.5.41"
+    "@apify/log": "npm:2.5.44"
     "@opentelemetry/api": "npm:^1.9.1"
     "@opentelemetry/exporter-metrics-otlp-grpc": "npm:^0.219.0"
     "@opentelemetry/instrumentation": "npm:^0.219.0"
@@ -12414,7 +12398,7 @@ __metadata:
     npm-run-all: "npm:^4.1.5"
     reflect-metadata: "npm:^0.2.2"
     rimraf: "npm:^6.1.3"
-    ts-jest: "npm:^29.4.11"
+    ts-jest: "npm:^29.4.12"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
   languageName: unknown
@@ -13007,11 +12991,11 @@ __metadata:
   linkType: hard
 
 "nanoid@npm:^3.3.4":
-  version: 3.3.8
-  resolution: "nanoid@npm:3.3.8"
+  version: 3.3.18
+  resolution: "nanoid@npm:3.3.18::__archiveUrl=https%3A%2F%2Fms-feed-25.pkgs.visualstudio.com%2F1es-public%2F_packaging%2Fnpm-public%2Fnpm%2Fregistry%2Fnanoid%2F-%2Fnanoid-3.3.18.tgz"
   bin:
-    nanoid: bin/nanoid.cjs
-  checksum: 10/2d1766606cf0d6f47b6f0fdab91761bb81609b2e3d367027aff45e6ee7006f660fb7e7781f4a34799fe6734f1268eeed2e37a5fdee809ade0c2d4eb11b0f9c40
+    nanoid: ./bin/nanoid.cjs
+  checksum: 10/1b3b4fdac831b92b56d1dbe8b1e63a372432faf86ea383134e3b53141ef8108a60b7f84343b5cefecac9550bb74edf8164da93ea07d1c4f757039bc75d8a5d9e
   languageName: node
   linkType: hard
 
@@ -14215,7 +14199,7 @@ __metadata:
     rimraf: "npm:^6.1.3"
     scanner-global-library: "workspace:*"
     storage-documents: "workspace:*"
-    ts-jest: "npm:^29.4.11"
+    ts-jest: "npm:^29.4.12"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
   languageName: unknown
@@ -14250,12 +14234,12 @@ __metadata:
     rimraf: "npm:^6.1.3"
     service-library: "workspace:*"
     storage-documents: "workspace:*"
-    ts-jest: "npm:^29.4.11"
+    ts-jest: "npm:^29.4.12"
     ts-loader: "npm:^9.6.2"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
-    webpack: "npm:^5.108.4"
-    webpack-cli: "npm:^7.1.0"
+    webpack: "npm:^5.109.0"
+    webpack-cli: "npm:^7.2.1"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
     yargs: "npm:^17.7.2"
   languageName: unknown
@@ -14299,12 +14283,12 @@ __metadata:
     scanner-global-library: "workspace:*"
     service-library: "workspace:*"
     storage-documents: "workspace:*"
-    ts-jest: "npm:^29.4.11"
+    ts-jest: "npm:^29.4.12"
     ts-loader: "npm:^9.6.2"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
-    webpack: "npm:^5.108.4"
-    webpack-cli: "npm:^7.1.0"
+    webpack: "npm:^5.109.0"
+    webpack-cli: "npm:^7.2.1"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
     yargs: "npm:^17.7.2"
   languageName: unknown
@@ -14917,12 +14901,12 @@ __metadata:
     rimraf: "npm:^6.1.3"
     service-library: "workspace:*"
     storage-documents: "workspace:*"
-    ts-jest: "npm:^29.4.11"
+    ts-jest: "npm:^29.4.12"
     ts-loader: "npm:^9.6.2"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
-    webpack: "npm:^5.108.4"
-    webpack-cli: "npm:^7.1.0"
+    webpack: "npm:^5.109.0"
+    webpack-cli: "npm:^7.2.1"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
     yargs: "npm:^17.7.2"
   languageName: unknown
@@ -14965,12 +14949,12 @@ __metadata:
     scanner-global-library: "workspace:*"
     service-library: "workspace:*"
     storage-documents: "workspace:*"
-    ts-jest: "npm:^29.4.11"
+    ts-jest: "npm:^29.4.12"
     ts-loader: "npm:^9.6.2"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
-    webpack: "npm:^5.108.4"
-    webpack-cli: "npm:^7.1.0"
+    webpack: "npm:^5.109.0"
+    webpack-cli: "npm:^7.2.1"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
     yargs: "npm:^17.7.2"
   languageName: unknown
@@ -15501,7 +15485,7 @@ __metadata:
     reflect-metadata: "npm:^0.2.2"
     rimraf: "npm:^6.1.3"
     storage-documents: "workspace:*"
-    ts-jest: "npm:^29.4.11"
+    ts-jest: "npm:^29.4.12"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
   languageName: unknown
@@ -15617,9 +15601,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"semver@npm:^7.3.2, semver@npm:^7.3.5, semver@npm:^7.3.8, semver@npm:^7.5.3, semver@npm:^7.5.4, semver@npm:^7.6.0, semver@npm:^7.6.2, semver@npm:^7.7.3, semver@npm:^7.7.4, semver@npm:^7.8.0":
+"semver@npm:^7.3.2, semver@npm:^7.3.5, semver@npm:^7.3.8, semver@npm:^7.5.3, semver@npm:^7.5.4, semver@npm:^7.6.0, semver@npm:^7.6.2, semver@npm:^7.7.3, semver@npm:^7.7.4":
   version: 7.8.5
   resolution: "semver@npm:7.8.5"
+  bin:
+    semver: bin/semver.js
+  checksum: 10/9b01d2ff11e6e4a4539b7ca3c5f280c8704cb397a28504469f2ed4f00ad2194748d756647362a9712fff30984d15772ab7f083108c2fb508e2096ae9e708f22c
+  languageName: node
+  linkType: hard
+
+"semver@npm:^7.8.5":
+  version: 7.8.5
+  resolution: "semver@npm:7.8.5::__archiveUrl=https%3A%2F%2Fms-feed-12.pkgs.visualstudio.com%2F1es-public%2F_packaging%2Fnpm-public%2Fnpm%2Fregistry%2Fsemver%2F-%2Fsemver-7.8.5.tgz"
   bin:
     semver: bin/semver.js
   checksum: 10/9b01d2ff11e6e4a4539b7ca3c5f280c8704cb397a28504469f2ed4f00ad2194748d756647362a9712fff30984d15772ab7f083108c2fb508e2096ae9e708f22c
@@ -15692,7 +15685,7 @@ __metadata:
     scanner-global-library: "workspace:*"
     sha.js: "npm:^2.4.12"
     storage-documents: "workspace:*"
-    ts-jest: "npm:^29.4.11"
+    ts-jest: "npm:^29.4.12"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
     yargs: "npm:^17.7.2"
@@ -15815,9 +15808,9 @@ __metadata:
   linkType: hard
 
 "shell-quote@npm:^1.6.1":
-  version: 1.8.4
-  resolution: "shell-quote@npm:1.8.4"
-  checksum: 10/a3e3796385f2cd5cf0b78207a4439f0c7395c0833fc75b2473084b5d298c109c5c0fa687fcd1c04e4b4484866e5bb8eaae7efae443b80fff71ea7e29baf11f0c
+  version: 1.10.0
+  resolution: "shell-quote@npm:1.10.0"
+  checksum: 10/d4a22aeefe64919290af753ac6098239d7ffee52a5db62c20edef69794bd10b5f86e298f68be26af9606ac435e890dd391994a5405a90bb8aebef1ff1dde839b
   languageName: node
   linkType: hard
 
@@ -16206,7 +16199,7 @@ __metadata:
     npm-run-all: "npm:^4.1.5"
     reflect-metadata: "npm:^0.2.2"
     rimraf: "npm:^6.1.3"
-    ts-jest: "npm:^29.4.11"
+    ts-jest: "npm:^29.4.12"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
   languageName: unknown
@@ -16924,9 +16917,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ts-jest@npm:^29.4.11":
-  version: 29.4.11
-  resolution: "ts-jest@npm:29.4.11"
+"ts-jest@npm:^29.4.12":
+  version: 29.4.12
+  resolution: "ts-jest@npm:29.4.12::__archiveUrl=https%3A%2F%2Fms-feed-2.pkgs.visualstudio.com%2F1es-public%2F_packaging%2Fnpm-public%2Fnpm%2Fregistry%2Fts-jest%2F-%2Fts-jest-29.4.12.tgz"
   dependencies:
     bs-logger: "npm:^0.2.6"
     fast-json-stable-stringify: "npm:^2.1.0"
@@ -16934,7 +16927,7 @@ __metadata:
     json5: "npm:^2.2.3"
     lodash.memoize: "npm:^4.1.2"
     make-error: "npm:^1.3.6"
-    semver: "npm:^7.8.0"
+    semver: "npm:^7.8.5"
     type-fest: "npm:^4.41.0"
     yargs-parser: "npm:^21.1.1"
   peerDependencies:
@@ -16960,7 +16953,7 @@ __metadata:
       optional: true
   bin:
     ts-jest: cli.js
-  checksum: 10/8a76800cac1c102c789429a82655adde1d540d7ff025fc888006f4f458afe07ca4d3f73622a10a604edea06aa12c298605cd1a208a6380c0e3d591a3daed8af6
+  checksum: 10/640678eb12d0911d99b0a2ac52ebfbf0ab170ba24ab73697d71de0e00ee95f2f468299a877a5e27dadf08265d5588e8cc982a6945c16b8893657390de7baa662
   languageName: node
   linkType: hard
 
@@ -17570,7 +17563,7 @@ __metadata:
     reflect-metadata: "npm:^0.2.2"
     rimraf: "npm:^6.1.3"
     service-library: "workspace:*"
-    ts-jest: "npm:^29.4.11"
+    ts-jest: "npm:^29.4.12"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
   languageName: unknown
@@ -17605,12 +17598,12 @@ __metadata:
     rimraf: "npm:^6.1.3"
     service-library: "workspace:*"
     storage-documents: "workspace:*"
-    ts-jest: "npm:^29.4.11"
+    ts-jest: "npm:^29.4.12"
     ts-loader: "npm:^9.6.2"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
-    webpack: "npm:^5.108.4"
-    webpack-cli: "npm:^7.1.0"
+    webpack: "npm:^5.109.0"
+    webpack-cli: "npm:^7.2.1"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
     yargs: "npm:^17.7.2"
   languageName: unknown
@@ -17639,12 +17632,12 @@ __metadata:
     rimraf: "npm:^6.1.3"
     service-library: "workspace:*"
     storage-documents: "workspace:*"
-    ts-jest: "npm:^29.4.11"
+    ts-jest: "npm:^29.4.12"
     ts-loader: "npm:^9.6.2"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
-    webpack: "npm:^5.108.4"
-    webpack-cli: "npm:^7.1.0"
+    webpack: "npm:^5.109.0"
+    webpack-cli: "npm:^7.2.1"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
     yargs: "npm:^17.7.2"
   languageName: unknown
@@ -17697,12 +17690,12 @@ __metadata:
     service-library: "workspace:*"
     sha.js: "npm:^2.4.12"
     storage-documents: "workspace:*"
-    ts-jest: "npm:^29.4.11"
+    ts-jest: "npm:^29.4.12"
     ts-loader: "npm:^9.6.2"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
-    webpack: "npm:^5.108.4"
-    webpack-cli: "npm:^7.1.0"
+    webpack: "npm:^5.109.0"
+    webpack-cli: "npm:^7.2.1"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
     yargs: "npm:^17.7.2"
   languageName: unknown
@@ -17736,12 +17729,12 @@ __metadata:
     rimraf: "npm:^6.1.3"
     service-library: "workspace:*"
     storage-documents: "workspace:*"
-    ts-jest: "npm:^29.4.11"
+    ts-jest: "npm:^29.4.12"
     ts-loader: "npm:^9.6.2"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
-    webpack: "npm:^5.108.4"
-    webpack-cli: "npm:^7.1.0"
+    webpack: "npm:^5.109.0"
+    webpack-cli: "npm:^7.2.1"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
     yargs: "npm:^17.7.2"
   languageName: unknown
@@ -17780,12 +17773,12 @@ __metadata:
     service-library: "workspace:*"
     sha.js: "npm:^2.4.12"
     storage-documents: "workspace:*"
-    ts-jest: "npm:^29.4.11"
+    ts-jest: "npm:^29.4.12"
     ts-loader: "npm:^9.6.2"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
-    webpack: "npm:^5.108.4"
-    webpack-cli: "npm:^7.1.0"
+    webpack: "npm:^5.109.0"
+    webpack-cli: "npm:^7.2.1"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
     yargs: "npm:^17.7.2"
   languageName: unknown
@@ -17820,12 +17813,12 @@ __metadata:
     rimraf: "npm:^6.1.3"
     service-library: "workspace:*"
     storage-documents: "workspace:*"
-    ts-jest: "npm:^29.4.11"
+    ts-jest: "npm:^29.4.12"
     ts-loader: "npm:^9.6.2"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
-    webpack: "npm:^5.108.4"
-    webpack-cli: "npm:^7.1.0"
+    webpack: "npm:^5.109.0"
+    webpack-cli: "npm:^7.2.1"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
   languageName: unknown
   linkType: soft
@@ -17845,7 +17838,7 @@ __metadata:
     azure-services: "workspace:*"
     common: "workspace:*"
     copy-webpack-plugin: "npm:^14.0.0"
-    durable-functions: "npm:^3.4.0"
+    durable-functions: "npm:^3.5.0"
     fork-ts-checker-webpack-plugin: "npm:^9.0.2"
     functional-tests: "workspace:*"
     inversify: "npm:^6.0.1"
@@ -17862,13 +17855,13 @@ __metadata:
     rimraf: "npm:^6.1.3"
     service-library: "workspace:*"
     storage-documents: "workspace:*"
-    ts-jest: "npm:^29.4.11"
+    ts-jest: "npm:^29.4.12"
     ts-loader: "npm:^9.6.2"
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
     web-api-client: "workspace:*"
-    webpack: "npm:^5.108.4"
-    webpack-cli: "npm:^7.1.0"
+    webpack: "npm:^5.109.0"
+    webpack-cli: "npm:^7.2.1"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
   languageName: unknown
   linkType: soft
@@ -17887,9 +17880,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"webpack-cli@npm:^7.1.0":
-  version: 7.1.0
-  resolution: "webpack-cli@npm:7.1.0"
+"webpack-cli@npm:^7.2.1":
+  version: 7.2.1
+  resolution: "webpack-cli@npm:7.2.1::__archiveUrl=https%3A%2F%2Fms-feed-2.pkgs.visualstudio.com%2F1es-public%2F_packaging%2Fnpm-public%2Fnpm%2Fregistry%2Fwebpack-cli%2F-%2Fwebpack-cli-7.2.1.tgz"
   dependencies:
     "@discoveryjs/json-ext": "npm:^1.1.0"
     commander: "npm:^14.0.3"
@@ -17905,7 +17898,7 @@ __metadata:
     toml: ^3.0.0 || ^4.0.0
     webpack: ^5.101.0
     webpack-bundle-analyzer: ^4.0.0 || ^5.0.0
-    webpack-dev-server: ^5.0.0
+    webpack-dev-server: ^5.0.0 || ^6.0.0
   peerDependenciesMeta:
     js-yaml:
       optional: true
@@ -17918,8 +17911,8 @@ __metadata:
     webpack-dev-server:
       optional: true
   bin:
-    webpack-cli: bin/cli.js
-  checksum: 10/74d404728b057e5887a822dc5abb41b825e2a819da26891ecb7eb125282d5041b99c8d0f90f3e910c128813ddfe5d5d946ce0106aab1fb7bbb236a94223f897a
+    webpack-cli: ./bin/cli.js
+  checksum: 10/0dd3e550549b5b5a693621f5f26b5621a0344bce195d977882aa97ad6c3262d056d637b9b140ae52608b72958d4b15c89458e1b73da087cef3bcec9bd7994711
   languageName: node
   linkType: hard
 
@@ -17948,16 +17941,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"webpack-sources@npm:^3.5.0":
-  version: 3.5.0
-  resolution: "webpack-sources@npm:3.5.0"
-  checksum: 10/e5af4245dbe52bb1520c7c373d73042fe091e273ff94269b877725a7873481e544ba4e71722df13e278f88069de900052764d98b99f9910be634826ec2f6e67d
+"webpack-sources@npm:^3.5.1":
+  version: 3.5.1
+  resolution: "webpack-sources@npm:3.5.1::__archiveUrl=https%3A%2F%2Fms-feed-25.pkgs.visualstudio.com%2F1es-public%2F_packaging%2Fnpm-public%2Fnpm%2Fregistry%2Fwebpack-sources%2F-%2Fwebpack-sources-3.5.1.tgz"
+  checksum: 10/50b9699a3ab9a698e117d8a6b816235576f17e60aeca0a44269041773f960c3beb2ad10d07bc5f2ef8eebde3db5275c6a23566dad475db8f840a34a7bfabd2c3
   languageName: node
   linkType: hard
 
-"webpack@npm:^5.108.4":
-  version: 5.108.4
-  resolution: "webpack@npm:5.108.4"
+"webpack@npm:^5.109.0":
+  version: 5.109.2
+  resolution: "webpack@npm:5.109.2::__archiveUrl=https%3A%2F%2Fms-feed-2.pkgs.visualstudio.com%2F1es-public%2F_packaging%2Fnpm-public%2Fnpm%2Fregistry%2Fwebpack%2F-%2Fwebpack-5.109.2.tgz"
   dependencies:
     "@types/estree": "npm:^1.0.8"
     "@types/json-schema": "npm:^7.0.15"
@@ -17965,28 +17958,26 @@ __metadata:
     "@webassemblyjs/wasm-edit": "npm:^1.14.1"
     "@webassemblyjs/wasm-parser": "npm:^1.14.1"
     acorn: "npm:^8.16.0"
-    acorn-import-phases: "npm:^1.0.3"
     browserslist: "npm:^4.28.1"
     chrome-trace-event: "npm:^1.0.2"
-    enhanced-resolve: "npm:^5.22.2"
+    enhanced-resolve: "npm:^5.24.4"
     es-module-lexer: "npm:^2.1.0"
     eslint-scope: "npm:5.1.1"
     events: "npm:^3.2.0"
     graceful-fs: "npm:^4.2.11"
-    loader-runner: "npm:^4.3.2"
     mime-db: "npm:^1.54.0"
     minimizer-webpack-plugin: "npm:^5.6.1"
     neo-async: "npm:^2.6.2"
     schema-utils: "npm:^4.3.3"
     tapable: "npm:^2.3.0"
     watchpack: "npm:^2.5.2"
-    webpack-sources: "npm:^3.5.0"
+    webpack-sources: "npm:^3.5.1"
   peerDependenciesMeta:
     webpack-cli:
       optional: true
   bin:
     webpack: bin/webpack.js
-  checksum: 10/f93cbd33e76a0ba8b708600ca0be66f172dda8f3eff5d201e4a1021af38a5c5d6b57a5d7eaf9a525fbd383907a05d92c2a04b21839e509a03bcbd61f13fa6093
+  checksum: 10/cb72358e4385719921085dbc9b937a6fef07ee690c6791c52c98b526d50a52e6c6aa73a70ba4d0588fab18739703028f2be02abdc0229dbf2008bd29dd477f93
   languageName: node
   linkType: hard
 
