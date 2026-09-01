@@ -5848,19 +5848,19 @@ __metadata:
   linkType: hard
 
 "azure-functions-core-tools@npm:^4.x":
-  version: 4.12.1
-  resolution: "azure-functions-core-tools@npm:4.12.1"
+  version: 4.14.0
+  resolution: "azure-functions-core-tools@npm:4.14.0::__archiveUrl=https%3A%2F%2Fms-feed-17.pkgs.visualstudio.com%2F1es-public%2F_packaging%2Fnpm-public%2Fnpm%2Fregistry%2Fazure-functions-core-tools%2F-%2Fazure-functions-core-tools-4.14.0.tgz"
   dependencies:
-    chalk: "npm:^4.1.2"
+    chalk: "npm:^6.0.0"
     extract-zip: "npm:^2.0.1"
-    https-proxy-agent: "npm:9.0.0"
+    https-proxy-agent: "npm:9.1.0"
     progress: "npm:2.0.3"
     rimraf: "npm:^6.1.3"
   bin:
     azfun: lib/main.js
     azurefunctions: lib/main.js
     func: lib/main.js
-  checksum: 10/7a8ecb0535ed612460a36f0e03c0bd3072b10c1c74aeec355aa0fa491a5b6a036d0af2ecc5c04177c3c250e04edd40957d6f8385ba6e114b8e59e484f2c8514d
+  checksum: 10/841c98794cb04f3636ada0187eeeb43335d148622b438544036d2344aceac6b0b1df9d8242e40402efe793f65e5502f8a9ae5aeaa74825efc1bd2ab20a8cee5e
   conditions: (os=win32 | os=darwin | os=linux)
   languageName: node
   linkType: hard
@@ -6531,6 +6531,13 @@ __metadata:
     escape-string-regexp: "npm:^1.0.5"
     supports-color: "npm:^5.3.0"
   checksum: 10/3d1d103433166f6bfe82ac75724951b33769675252d8417317363ef9d54699b7c3b2d46671b772b893a8e50c3ece70c4b933c73c01e81bc60ea4df9b55afa303
+  languageName: node
+  linkType: hard
+
+"chalk@npm:^6.0.0":
+  version: 6.0.0
+  resolution: "chalk@npm:6.0.0::__archiveUrl=https%3A%2F%2Fms-feed-25.pkgs.visualstudio.com%2F1es-public%2F_packaging%2Fnpm-public%2Fnpm%2Fregistry%2Fchalk%2F-%2Fchalk-6.0.0.tgz"
+  checksum: 10/bdcb895b9c848ddbce38f38df5a10a3e272d6c04d759161789c4a2fa5a1fa78bf9eecf4eef73433a2a3be7324d6da96c3c9baf5c80862f37683cc0b890597831
   languageName: node
   linkType: hard
 
@@ -10175,13 +10182,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"https-proxy-agent@npm:9.0.0":
-  version: 9.0.0
-  resolution: "https-proxy-agent@npm:9.0.0"
+"https-proxy-agent@npm:9.1.0":
+  version: 9.1.0
+  resolution: "https-proxy-agent@npm:9.1.0::__archiveUrl=https%3A%2F%2Fms-feed-12.pkgs.visualstudio.com%2F1es-public%2F_packaging%2Fnpm-public%2Fnpm%2Fregistry%2Fhttps-proxy-agent%2F-%2Fhttps-proxy-agent-9.1.0.tgz"
   dependencies:
     agent-base: "npm:9.0.0"
     debug: "npm:^4.3.4"
-  checksum: 10/27457d671278c8c1074cc901fe305b70d1e340127433219124c4aefc44153a179a8921e4b16d67beb2868a3a39b6b7ec84d91d8f24f2ec1d39cf4ac385351a92
+    proxy-agent-negotiate: "npm:1.1.0"
+  checksum: 10/45021d326c032bf8cd480acee488d5f701842cbef4756a33b81244a872304c918498ef6cf667d8348c11e9b065dd520ec1fd9138196147f608c5837500e7395b
   languageName: node
   linkType: hard
 
@@ -14362,6 +14370,18 @@ __metadata:
     "@types/node": "npm:>=13.7.0"
     long: "npm:^5.3.2"
   checksum: 10/58a5a635fbe0632a5c48a1ab659fabfc26d5b994915a20ad623a2cfb59a2ca7411d9f4f690ca79074967b632e2db58ecc184ab507927f5b7d0852fc16568d3da
+  languageName: node
+  linkType: hard
+
+"proxy-agent-negotiate@npm:1.1.0":
+  version: 1.1.0
+  resolution: "proxy-agent-negotiate@npm:1.1.0::__archiveUrl=https%3A%2F%2Fms-feed-17.pkgs.visualstudio.com%2F1es-public%2F_packaging%2Fnpm-public%2Fnpm%2Fregistry%2Fproxy-agent-negotiate%2F-%2Fproxy-agent-negotiate-1.1.0.tgz"
+  peerDependencies:
+    kerberos: ^2.0.0
+  peerDependenciesMeta:
+    kerberos:
+      optional: true
+  checksum: 10/4554c42b8b872f37cf76c9044b7a5827bccf41ad77a1992b09bb89b84c779f5536bdd0d3312f247565e09fba8700e48a25f233e339705978242e3ca1d0dab149
   languageName: node
   linkType: hard
 
