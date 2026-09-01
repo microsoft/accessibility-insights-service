@@ -74,6 +74,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@apify/timeout@npm:^0.4.0":
+  version: 0.4.13
+  resolution: "@apify/timeout@npm:0.4.13::__archiveUrl=https%3A%2F%2Fms-feed-17.pkgs.visualstudio.com%2F1es-public%2F_packaging%2Fnpm-public%2Fnpm%2Fregistry%2F%40apify%2Ftimeout%2F-%2Ftimeout-0.4.13.tgz"
+  checksum: 10/091caa26a949a5898e3f4ba7d9333e4cb5f010d4b91792b3de1a31ae0141f8304c38989e1ac8d14e486f575a41d00ce08167a6e3c73f09cc9b14891b346c739c
+  languageName: node
+  linkType: hard
+
 "@apify/utilities@npm:^2.7.10":
   version: 2.7.10
   resolution: "@apify/utilities@npm:2.7.10"
@@ -1257,16 +1264,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@crawlee/basic@npm:3.17.0":
-  version: 3.17.0
-  resolution: "@crawlee/basic@npm:3.17.0"
+"@crawlee/basic@npm:3.18.1":
+  version: 3.18.1
+  resolution: "@crawlee/basic@npm:3.18.1::__archiveUrl=https%3A%2F%2Fms-feed-25.pkgs.visualstudio.com%2F1es-public%2F_packaging%2Fnpm-public%2Fnpm%2Fregistry%2F%40crawlee%2Fbasic%2F-%2Fbasic-3.18.1.tgz"
   dependencies:
+    "@apify/datastructures": "npm:^2.0.0"
     "@apify/log": "npm:^2.4.0"
-    "@apify/timeout": "npm:^0.3.0"
+    "@apify/timeout": "npm:^0.4.0"
     "@apify/utilities": "npm:^2.7.10"
-    "@crawlee/core": "npm:3.17.0"
-    "@crawlee/types": "npm:3.17.0"
-    "@crawlee/utils": "npm:3.17.0"
+    "@crawlee/core": "npm:3.18.1"
+    "@crawlee/types": "npm:3.18.1"
+    "@crawlee/utils": "npm:3.18.1"
     csv-stringify: "npm:^6.2.0"
     fs-extra: "npm:^11.0.0"
     got-scraping: "npm:^4.2.1"
@@ -1274,11 +1282,41 @@ __metadata:
     tldts: "npm:^7.0.0"
     tslib: "npm:^2.4.0"
     type-fest: "npm:^4.0.0"
-  checksum: 10/5081da6cd8369163de92b3e24289273d6e8bc7682916b208c256b0581f072ebe62daa2ffea9d1742159c2bff7b0f0e2048a99b1e216b4e734fa23bf2148437ff
+  checksum: 10/ada528c9bb6a4ba21fa5a8a1a164eac9eb24ae41e80e93acb9da3cac7f0350919a1a95c5fe848ea0fa8c408600c858999c0444ef38498e14712c84d68c2ee9cf
   languageName: node
   linkType: hard
 
-"@crawlee/browser-pool@npm:3.17.0, @crawlee/browser-pool@npm:^3.17.0":
+"@crawlee/browser-pool@npm:3.18.1":
+  version: 3.18.1
+  resolution: "@crawlee/browser-pool@npm:3.18.1::__archiveUrl=https%3A%2F%2Fms-feed-25.pkgs.visualstudio.com%2F1es-public%2F_packaging%2Fnpm-public%2Fnpm%2Fregistry%2F%40crawlee%2Fbrowser-pool%2F-%2Fbrowser-pool-3.18.1.tgz"
+  dependencies:
+    "@apify/log": "npm:^2.4.0"
+    "@apify/timeout": "npm:^0.4.0"
+    "@crawlee/core": "npm:3.18.1"
+    "@crawlee/types": "npm:3.18.1"
+    fingerprint-generator: "npm:^2.1.68"
+    fingerprint-injector: "npm:^2.1.68"
+    lodash.merge: "npm:^4.6.2"
+    nanoid: "npm:^3.3.4"
+    ow: "npm:^0.28.1"
+    p-limit: "npm:^3.1.0"
+    proxy-chain: "npm:^2.0.1"
+    quick-lru: "npm:^5.1.1"
+    tiny-typed-emitter: "npm:^2.1.0"
+    tslib: "npm:^2.4.0"
+  peerDependencies:
+    playwright: "*"
+    puppeteer: "*"
+  peerDependenciesMeta:
+    playwright:
+      optional: true
+    puppeteer:
+      optional: true
+  checksum: 10/de5e697e787f0ae1a2f30e8e6acb9f58d73d52c319fd6e39421eb5186c5e427ed9ed5249c3b5f5ab9d0650a452c2ce559b59318750c056b15788b1eb60722dce
+  languageName: node
+  linkType: hard
+
+"@crawlee/browser-pool@npm:^3.17.0":
   version: 3.17.0
   resolution: "@crawlee/browser-pool@npm:3.17.0"
   dependencies:
@@ -1308,15 +1346,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@crawlee/browser@npm:3.17.0":
-  version: 3.17.0
-  resolution: "@crawlee/browser@npm:3.17.0"
+"@crawlee/browser@npm:3.18.1":
+  version: 3.18.1
+  resolution: "@crawlee/browser@npm:3.18.1::__archiveUrl=https%3A%2F%2Fms-feed-17.pkgs.visualstudio.com%2F1es-public%2F_packaging%2Fnpm-public%2Fnpm%2Fregistry%2F%40crawlee%2Fbrowser%2F-%2Fbrowser-3.18.1.tgz"
   dependencies:
-    "@apify/timeout": "npm:^0.3.0"
-    "@crawlee/basic": "npm:3.17.0"
-    "@crawlee/browser-pool": "npm:3.17.0"
-    "@crawlee/types": "npm:3.17.0"
-    "@crawlee/utils": "npm:3.17.0"
+    "@apify/timeout": "npm:^0.4.0"
+    "@crawlee/basic": "npm:3.18.1"
+    "@crawlee/browser-pool": "npm:3.18.1"
+    "@crawlee/types": "npm:3.18.1"
+    "@crawlee/utils": "npm:3.18.1"
     ow: "npm:^0.28.1"
     tslib: "npm:^2.4.0"
     type-fest: "npm:^4.0.0"
@@ -1328,7 +1366,7 @@ __metadata:
       optional: true
     puppeteer:
       optional: true
-  checksum: 10/0e33e6eb4cc2730dffa9248ac50e77b7eaf7568653713c77019d4e29ca98959e58f614cc437d347d5f3ad5cc51265f3d3568e55efd450e7070a06a851e932a7e
+  checksum: 10/7e01e50b2d99bf9acd28e27273a23d2cfa9b4456644b90558edbae11682fd3e58c3b8f16efc078cac995a47f41e394f78fdf01ce566183950ad66c88eaa2a839
   languageName: node
   linkType: hard
 
@@ -1362,6 +1400,37 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@crawlee/core@npm:3.18.1":
+  version: 3.18.1
+  resolution: "@crawlee/core@npm:3.18.1::__archiveUrl=https%3A%2F%2Fms-feed-17.pkgs.visualstudio.com%2F1es-public%2F_packaging%2Fnpm-public%2Fnpm%2Fregistry%2F%40crawlee%2Fcore%2F-%2Fcore-3.18.1.tgz"
+  dependencies:
+    "@apify/consts": "npm:^2.20.0"
+    "@apify/datastructures": "npm:^2.0.0"
+    "@apify/log": "npm:^2.4.0"
+    "@apify/pseudo_url": "npm:^2.0.30"
+    "@apify/timeout": "npm:^0.4.0"
+    "@apify/utilities": "npm:^2.7.10"
+    "@crawlee/memory-storage": "npm:3.18.1"
+    "@crawlee/types": "npm:3.18.1"
+    "@crawlee/utils": "npm:3.18.1"
+    "@sapphire/async-queue": "npm:^1.5.1"
+    "@standard-schema/spec": "npm:^1.0.0"
+    "@vladfrangu/async_event_emitter": "npm:^2.2.2"
+    csv-stringify: "npm:^6.2.0"
+    fs-extra: "npm:^11.0.0"
+    got-scraping: "npm:^4.2.1"
+    json5: "npm:^2.2.3"
+    minimatch: "npm:^9.0.0"
+    ow: "npm:^0.28.1"
+    stream-json: "npm:^1.8.0"
+    tldts: "npm:^7.0.0"
+    tough-cookie: "npm:^6.0.0"
+    tslib: "npm:^2.4.0"
+    type-fest: "npm:^4.0.0"
+  checksum: 10/3c93b4921d84c486c67a9942a5d714a1a8b6c82dec2d362d716c0d2ca7b79364c313b295bd32524153643a63b8e9d77e1fbee17e57c01e956bdc3a921a229ba5
+  languageName: node
+  linkType: hard
+
 "@crawlee/memory-storage@npm:3.17.0":
   version: 3.17.0
   resolution: "@crawlee/memory-storage@npm:3.17.0"
@@ -1381,16 +1450,35 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@crawlee/puppeteer@npm:^3.17.0":
-  version: 3.17.0
-  resolution: "@crawlee/puppeteer@npm:3.17.0"
+"@crawlee/memory-storage@npm:3.18.1":
+  version: 3.18.1
+  resolution: "@crawlee/memory-storage@npm:3.18.1::__archiveUrl=https%3A%2F%2Fms-feed-2.pkgs.visualstudio.com%2F1es-public%2F_packaging%2Fnpm-public%2Fnpm%2Fregistry%2F%40crawlee%2Fmemory-storage%2F-%2Fmemory-storage-3.18.1.tgz"
+  dependencies:
+    "@apify/log": "npm:^2.4.0"
+    "@crawlee/types": "npm:3.18.1"
+    "@sapphire/async-queue": "npm:^1.5.0"
+    "@sapphire/shapeshift": "npm:^3.0.0"
+    content-type: "npm:^1.0.4"
+    fs-extra: "npm:^11.0.0"
+    json5: "npm:^2.2.3"
+    mime-types: "npm:^2.1.35"
+    p-limit: "npm:^3.1.0"
+    proper-lockfile: "npm:^4.1.2"
+    tslib: "npm:^2.4.0"
+  checksum: 10/4527462a5c568684ea4c8b7caccf891887490fc9c3a025542c4ebdd628878fac01dc68a320ef99090474306d7e523ceb295ac7916778e88230cc0648b19a8af6
+  languageName: node
+  linkType: hard
+
+"@crawlee/puppeteer@npm:^3.18.1":
+  version: 3.18.1
+  resolution: "@crawlee/puppeteer@npm:3.18.1::__archiveUrl=https%3A%2F%2Fms-feed-25.pkgs.visualstudio.com%2F1es-public%2F_packaging%2Fnpm-public%2Fnpm%2Fregistry%2F%40crawlee%2Fpuppeteer%2F-%2Fpuppeteer-3.18.1.tgz"
   dependencies:
     "@apify/datastructures": "npm:^2.0.0"
     "@apify/log": "npm:^2.4.0"
-    "@crawlee/browser": "npm:3.17.0"
-    "@crawlee/browser-pool": "npm:3.17.0"
-    "@crawlee/types": "npm:3.17.0"
-    "@crawlee/utils": "npm:3.17.0"
+    "@crawlee/browser": "npm:3.18.1"
+    "@crawlee/browser-pool": "npm:3.18.1"
+    "@crawlee/types": "npm:3.18.1"
+    "@crawlee/utils": "npm:3.18.1"
     cheerio: "npm:1.0.0-rc.12"
     devtools-protocol: "npm:*"
     idcac-playwright: "npm:^0.2.0"
@@ -1405,7 +1493,7 @@ __metadata:
       optional: true
     puppeteer:
       optional: true
-  checksum: 10/334cb439d0bbe19ac24fcdeb0ca0f12ecd22af377c5a5f33e578c0094f9fd7ff993bfb64a64eef87bbe27e7d6bd8657913da9dfd1233685e501dc739906de9f5
+  checksum: 10/f2ed3e53fecb9e8b78ea7c0c7b436e77b591297713280aeafcf41a06e1fd9e449270c417d1c52aac28d65badc34a4b6d79b11393ab29795774557a6dbf60b0e2
   languageName: node
   linkType: hard
 
@@ -1415,6 +1503,15 @@ __metadata:
   dependencies:
     tslib: "npm:^2.4.0"
   checksum: 10/ec7541caf50b02a7ba0550411c6a03406ba833c5c3ac4c8453f1a3184c03c64d9cdbc54a0db0abaa9be4cfb1ad1331d8757d5e7d554b8148bbb5fbd85e8cbee1
+  languageName: node
+  linkType: hard
+
+"@crawlee/types@npm:3.18.1":
+  version: 3.18.1
+  resolution: "@crawlee/types@npm:3.18.1::__archiveUrl=https%3A%2F%2Fms-feed-25.pkgs.visualstudio.com%2F1es-public%2F_packaging%2Fnpm-public%2Fnpm%2Fregistry%2F%40crawlee%2Ftypes%2F-%2Ftypes-3.18.1.tgz"
+  dependencies:
+    tslib: "npm:^2.4.0"
+  checksum: 10/7634dbe167696f3d207db58b77f79831bd68c3dc379923c341ddc17c95a21acaaa62756b74539053cfb9af31f831d51016ad4fef54e9d7c685d02b5ce5443a0f
   languageName: node
   linkType: hard
 
@@ -1435,6 +1532,27 @@ __metadata:
     tslib: "npm:^2.4.0"
     whatwg-mimetype: "npm:^4.0.0"
   checksum: 10/e05436bc6c4847b7980c093bb3cf7e32b5c6233fdaf69bd5c493b1cb3d5df8147e7c58d2146a5e73498819e25b1292a556cbdc6cf75a37c2822d77de3eef5653
+  languageName: node
+  linkType: hard
+
+"@crawlee/utils@npm:3.18.1":
+  version: 3.18.1
+  resolution: "@crawlee/utils@npm:3.18.1::__archiveUrl=https%3A%2F%2Fms-feed-12.pkgs.visualstudio.com%2F1es-public%2F_packaging%2Fnpm-public%2Fnpm%2Fregistry%2F%40crawlee%2Futils%2F-%2Futils-3.18.1.tgz"
+  dependencies:
+    "@apify/log": "npm:^2.4.0"
+    "@apify/ps-tree": "npm:^1.2.0"
+    "@crawlee/types": "npm:3.18.1"
+    "@types/sax": "npm:^1.2.7"
+    cheerio: "npm:1.0.0-rc.12"
+    file-type: "npm:^21.3.1"
+    got-scraping: "npm:^4.2.1"
+    ow: "npm:^0.28.1"
+    robots-parser: "npm:^3.0.1"
+    sax: "npm:^1.4.1"
+    tldts: "npm:^7.0.0"
+    tslib: "npm:^2.4.0"
+    whatwg-mimetype: "npm:^4.0.0"
+  checksum: 10/67dd23984bd851000c6ffce7027d7ea371683544a7ca5dcfe038d0ab2b57cc76e8b62ee89944b563a94bef7408d5a08e5a8f1edf2ce1d2883c042e69c81ad9d0
   languageName: node
   linkType: hard
 
@@ -3829,6 +3947,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@standard-schema/spec@npm:^1.0.0":
+  version: 1.1.0
+  resolution: "@standard-schema/spec@npm:1.1.0::__archiveUrl=https%3A%2F%2Fms-feed-12.pkgs.visualstudio.com%2F1es-public%2F_packaging%2Fnpm-public%2Fnpm%2Fregistry%2F%40standard-schema%2Fspec%2F-%2Fspec-1.1.0.tgz"
+  checksum: 10/a209615c9e8b2ea535d7db0a5f6aa0f962fd4ab73ee86a46c100fb78116964af1f55a27c1794d4801e534a196794223daa25ff5135021e03c7828aa3d95e1763
+  languageName: node
+  linkType: hard
+
 "@swc/helpers@npm:^0.5.1":
   version: 0.5.11
   resolution: "@swc/helpers@npm:0.5.11"
@@ -5029,7 +5154,7 @@ __metadata:
     "@apify/log": "npm:2.5.44"
     "@axe-core/puppeteer": "npm:4.11.2"
     "@crawlee/browser-pool": "npm:^3.17.0"
-    "@crawlee/puppeteer": "npm:^3.17.0"
+    "@crawlee/puppeteer": "npm:^3.18.1"
     "@medv/finder": "npm:^4.0.2"
     "@rollup/plugin-commonjs": "npm:^29.0.3"
     "@rollup/plugin-node-resolve": "npm:^16.0.3"
@@ -5093,7 +5218,7 @@ __metadata:
     "@apify/log": "npm:2.5.44"
     "@axe-core/puppeteer": "npm:4.11.2"
     "@crawlee/browser-pool": "npm:^3.17.0"
-    "@crawlee/puppeteer": "npm:^3.17.0"
+    "@crawlee/puppeteer": "npm:^3.18.1"
     "@medv/finder": "npm:^4.0.2"
     "@opentelemetry/api": "npm:^1.9.1"
     "@opentelemetry/exporter-metrics-otlp-grpc": "npm:^0.219.0"
@@ -15652,7 +15777,7 @@ __metadata:
     "@azure/functions": "npm:^4.16.1"
     "@azure/identity": "npm:^4.13.1"
     "@azure/storage-blob": "npm:12.32.0"
-    "@crawlee/puppeteer": "npm:^3.17.0"
+    "@crawlee/puppeteer": "npm:^3.18.1"
     "@types/jest": "npm:^29.5.12"
     "@types/node": "npm:^20.14.9"
     "@types/node-fetch": "npm:^2.6.12"
