@@ -5147,7 +5147,7 @@ __metadata:
     typescript: "npm:^5.5.3"
     uuid: "npm:^11.1.1"
     webpack: "npm:^5.109.0"
-    webpack-cli: "npm:^7.2.1"
+    webpack-cli: "npm:^7.2.2"
     webpack-node-externals: "npm:^3.0.0"
     yargs: "npm:^17.7.2"
   bin:
@@ -5905,7 +5905,7 @@ __metadata:
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
     webpack: "npm:^5.109.0"
-    webpack-cli: "npm:^7.2.1"
+    webpack-cli: "npm:^7.2.2"
   languageName: unknown
   linkType: soft
 
@@ -7805,7 +7805,7 @@ __metadata:
     ts-loader: "npm:^9.6.2"
     typescript: "npm:^5.5.3"
     webpack: "npm:^5.109.0"
-    webpack-cli: "npm:^7.2.1"
+    webpack-cli: "npm:^7.2.2"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
   languageName: unknown
   linkType: soft
@@ -10062,7 +10062,7 @@ __metadata:
     typescript: "npm:^5.5.3"
     web-api-client: "workspace:*"
     webpack: "npm:^5.109.0"
-    webpack-cli: "npm:^7.2.1"
+    webpack-cli: "npm:^7.2.2"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
     yargs: "npm:^17.7.2"
   languageName: unknown
@@ -14239,7 +14239,7 @@ __metadata:
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
     webpack: "npm:^5.109.0"
-    webpack-cli: "npm:^7.2.1"
+    webpack-cli: "npm:^7.2.2"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
     yargs: "npm:^17.7.2"
   languageName: unknown
@@ -14288,7 +14288,7 @@ __metadata:
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
     webpack: "npm:^5.109.0"
-    webpack-cli: "npm:^7.2.1"
+    webpack-cli: "npm:^7.2.2"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
     yargs: "npm:^17.7.2"
   languageName: unknown
@@ -14906,7 +14906,7 @@ __metadata:
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
     webpack: "npm:^5.109.0"
-    webpack-cli: "npm:^7.2.1"
+    webpack-cli: "npm:^7.2.2"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
     yargs: "npm:^17.7.2"
   languageName: unknown
@@ -14954,7 +14954,7 @@ __metadata:
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
     webpack: "npm:^5.109.0"
-    webpack-cli: "npm:^7.2.1"
+    webpack-cli: "npm:^7.2.2"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
     yargs: "npm:^17.7.2"
   languageName: unknown
@@ -17603,7 +17603,7 @@ __metadata:
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
     webpack: "npm:^5.109.0"
-    webpack-cli: "npm:^7.2.1"
+    webpack-cli: "npm:^7.2.2"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
     yargs: "npm:^17.7.2"
   languageName: unknown
@@ -17637,7 +17637,7 @@ __metadata:
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
     webpack: "npm:^5.109.0"
-    webpack-cli: "npm:^7.2.1"
+    webpack-cli: "npm:^7.2.2"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
     yargs: "npm:^17.7.2"
   languageName: unknown
@@ -17695,7 +17695,7 @@ __metadata:
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
     webpack: "npm:^5.109.0"
-    webpack-cli: "npm:^7.2.1"
+    webpack-cli: "npm:^7.2.2"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
     yargs: "npm:^17.7.2"
   languageName: unknown
@@ -17734,7 +17734,7 @@ __metadata:
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
     webpack: "npm:^5.109.0"
-    webpack-cli: "npm:^7.2.1"
+    webpack-cli: "npm:^7.2.2"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
     yargs: "npm:^17.7.2"
   languageName: unknown
@@ -17778,7 +17778,7 @@ __metadata:
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
     webpack: "npm:^5.109.0"
-    webpack-cli: "npm:^7.2.1"
+    webpack-cli: "npm:^7.2.2"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
     yargs: "npm:^17.7.2"
   languageName: unknown
@@ -17818,7 +17818,7 @@ __metadata:
     typemoq: "npm:^2.1.0"
     typescript: "npm:^5.5.3"
     webpack: "npm:^5.109.0"
-    webpack-cli: "npm:^7.2.1"
+    webpack-cli: "npm:^7.2.2"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
   languageName: unknown
   linkType: soft
@@ -17861,7 +17861,7 @@ __metadata:
     typescript: "npm:^5.5.3"
     web-api-client: "workspace:*"
     webpack: "npm:^5.109.0"
-    webpack-cli: "npm:^7.2.1"
+    webpack-cli: "npm:^7.2.2"
     webpack-ignore-dynamic-require: "npm:^1.0.0"
   languageName: unknown
   linkType: soft
@@ -17880,9 +17880,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"webpack-cli@npm:^7.2.1":
-  version: 7.2.1
-  resolution: "webpack-cli@npm:7.2.1::__archiveUrl=https%3A%2F%2Fms-feed-2.pkgs.visualstudio.com%2F1es-public%2F_packaging%2Fnpm-public%2Fnpm%2Fregistry%2Fwebpack-cli%2F-%2Fwebpack-cli-7.2.1.tgz"
+"webpack-cli@npm:^7.2.2":
+  version: 7.2.2
+  resolution: "webpack-cli@npm:7.2.2::__archiveUrl=https%3A%2F%2Fms-feed-25.pkgs.visualstudio.com%2F1es-public%2F_packaging%2Fnpm-public%2Fnpm%2Fregistry%2Fwebpack-cli%2F-%2Fwebpack-cli-7.2.2.tgz"
   dependencies:
     "@discoveryjs/json-ext": "npm:^1.1.0"
     commander: "npm:^14.0.3"
@@ -17912,7 +17912,7 @@ __metadata:
       optional: true
   bin:
     webpack-cli: ./bin/cli.js
-  checksum: 10/0dd3e550549b5b5a693621f5f26b5621a0344bce195d977882aa97ad6c3262d056d637b9b140ae52608b72958d4b15c89458e1b73da087cef3bcec9bd7994711
+  checksum: 10/c010aabe502e2c1caa1fa7ea42ce4b107b96e47ed5b2b3761283ef1c9bd508b3f51e6cce7365833346a85ae0dd50419160c2be0001f37d83a950269073e738a7
   languageName: node
   linkType: hard
 
