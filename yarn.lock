@@ -5166,7 +5166,7 @@ __metadata:
     accessibility-insights-report: "npm:7.7.0"
     commander: "npm:^14.0.3"
     eslint: "npm:^8.57.0"
-    eslint-plugin-check-file: "npm:^3.3.1"
+    eslint-plugin-check-file: "npm:^3.3.2"
     eslint-plugin-header: "npm:^3.1.1"
     eslint-plugin-import: "npm:^2.32.0"
     eslint-plugin-jest: "npm:^28.6.0"
@@ -8313,15 +8313,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-plugin-check-file@npm:^3.3.1":
-  version: 3.3.1
-  resolution: "eslint-plugin-check-file@npm:3.3.1"
+"eslint-plugin-check-file@npm:^3.3.2":
+  version: 3.3.2
+  resolution: "eslint-plugin-check-file@npm:3.3.2::__archiveUrl=https%3A%2F%2Fms-feed-12.pkgs.visualstudio.com%2F1es-public%2F_packaging%2Fnpm-public%2Fnpm%2Fregistry%2Feslint-plugin-check-file%2F-%2Feslint-plugin-check-file-3.3.2.tgz"
   dependencies:
     is-glob: "npm:^4.0.3"
     micromatch: "npm:^4.0.8"
   peerDependencies:
     eslint: ">=9.0.0"
-  checksum: 10/d367d66e63ba7e8c488fa295e5185e65a2978c33fa4e1802c51e1c5edce538e4ad83425a37d5b044bede6eccfb4d13c03a6267da6e18f3b7bfb0f653b5695d5c
+  checksum: 10/833811ea0ff6ba2943b8c912fa067cde86ac230c5c0ddbb430c49226b3be1d49d733d6f02c228aacb038708146863dee4425312f09e236845e303fd85940002e
   languageName: node
   linkType: hard
 
