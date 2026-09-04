@@ -12,10 +12,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@apify/consts@npm:^2.54.2":
-  version: 2.54.2
-  resolution: "@apify/consts@npm:2.54.2::__archiveUrl=https%3A%2F%2Fms-feed-25.pkgs.visualstudio.com%2F1es-public%2F_packaging%2Fnpm-public%2Fnpm%2Fregistry%2F%40apify%2Fconsts%2F-%2Fconsts-2.54.2.tgz"
-  checksum: 10/108a4a9ecccd8c42e9402ddd0e4ed4c799ea5a3833e8b8be2b8d4d6ad4bd25f755afdd5bcaaa27357865101fd73ec39f68eb3058d61df2477de255cf5dd57e88
+"@apify/consts@npm:^2.58.0":
+  version: 2.58.0
+  resolution: "@apify/consts@npm:2.58.0::__archiveUrl=https%3A%2F%2Fms-feed-25.pkgs.visualstudio.com%2F1es-public%2F_packaging%2Fnpm-public%2Fnpm%2Fregistry%2F%40apify%2Fconsts%2F-%2Fconsts-2.58.0.tgz"
+  checksum: 10/5adf2ece7434253e3f3dfd693efa362e1b552bbbe5a5cd84b02982dac4b0c4b9ce00f4c98eed91d3c251871775ad18ce110502a4d1153eb958a7102b62d1fda5
   languageName: node
   linkType: hard
 
@@ -26,13 +26,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@apify/log@npm:2.5.44":
-  version: 2.5.44
-  resolution: "@apify/log@npm:2.5.44::__archiveUrl=https%3A%2F%2Fms-feed-12.pkgs.visualstudio.com%2F1es-public%2F_packaging%2Fnpm-public%2Fnpm%2Fregistry%2F%40apify%2Flog%2F-%2Flog-2.5.44.tgz"
+"@apify/log@npm:2.5.53":
+  version: 2.5.53
+  resolution: "@apify/log@npm:2.5.53::__archiveUrl=https%3A%2F%2Fms-feed-12.pkgs.visualstudio.com%2F1es-public%2F_packaging%2Fnpm-public%2Fnpm%2Fregistry%2F%40apify%2Flog%2F-%2Flog-2.5.53.tgz"
   dependencies:
-    "@apify/consts": "npm:^2.54.2"
+    "@apify/consts": "npm:^2.58.0"
     ansi-colors: "npm:^4.1.1"
-  checksum: 10/fa99ed345e0daa78c0fde3f8d77202c2e25f0b2e1ff692baf38d3fefdef91e959003f3e8d50ddaf3c3043d01e5788417dd3f605b10837d534814d3c11253a0d2
+  checksum: 10/85528c720c0ad252d4e7b4f3cc70d0347a06a4db6aecf85ecfab81062691b718fda4d9b53d5480d7b2caf4d6ed16540f44d7015e67e613649b1ae9379360554a
   languageName: node
   linkType: hard
 
@@ -5026,7 +5026,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "accessibility-insights-crawler@workspace:packages/crawler"
   dependencies:
-    "@apify/log": "npm:2.5.44"
+    "@apify/log": "npm:2.5.53"
     "@axe-core/puppeteer": "npm:4.11.2"
     "@crawlee/browser-pool": "npm:^3.17.0"
     "@crawlee/puppeteer": "npm:^3.17.0"
@@ -5090,7 +5090,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "accessibility-insights-scan@workspace:packages/cli"
   dependencies:
-    "@apify/log": "npm:2.5.44"
+    "@apify/log": "npm:2.5.53"
     "@axe-core/puppeteer": "npm:4.11.2"
     "@crawlee/browser-pool": "npm:^3.17.0"
     "@crawlee/puppeteer": "npm:^3.17.0"
@@ -12320,7 +12320,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "logger@workspace:packages/logger"
   dependencies:
-    "@apify/log": "npm:2.5.44"
+    "@apify/log": "npm:2.5.53"
     "@opentelemetry/api": "npm:^1.9.1"
     "@opentelemetry/exporter-metrics-otlp-grpc": "npm:^0.219.0"
     "@opentelemetry/instrumentation": "npm:^0.219.0"
