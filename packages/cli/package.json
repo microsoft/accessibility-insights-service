@@ -30,7 +30,7 @@
     "devDependencies": {
         "@types/escape-html": "^1.0.4",
         "@types/jest": "^29.5.12",
-        "@types/lodash": "^4.17.24",
+        "@types/lodash": "^4.17.25",
         "@types/node": "^20.14.9",
         "@types/normalize-path": "^3.0.2",
         "@types/puppeteer": "^7.0.4",
@@ -49,11 +49,11 @@
         "typemoq": "^2.1.0",
         "typescript": "^5.5.3",
         "webpack": "^5.109.0",
-        "webpack-cli": "^7.2.1",
+        "webpack-cli": "^7.2.2",
         "webpack-node-externals": "^3.0.0"
     },
     "dependencies": {
-        "@apify/log": "2.5.44",
+        "@apify/log": "2.5.53",
         "@axe-core/puppeteer": "4.11.2",
         "@crawlee/browser-pool": "^3.17.0",
         "@crawlee/puppeteer": "^3.17.0",
