@@ -209,7 +209,7 @@
                         "imageReference": {
                             "publisher": "microsoftwindowsserver",
                             "offer": "windowsserver",
-                            "sku": "2022-datacenter-smalldisk",
+                            "sku": "2025-datacenter-smalldisk-g2",
                             "version": "latest"
                         },
                         "nodeAgentSkuId": "batch.node.windows amd64",
@@ -285,7 +285,7 @@
                         "imageReference": {
                             "publisher": "microsoftwindowsserver",
                             "offer": "windowsserver",
-                            "sku": "2022-datacenter-smalldisk",
+                            "sku": "2025-datacenter-smalldisk-g2",
                             "version": "latest"
                         },
                         "nodeAgentSkuId": "batch.node.windows amd64",
@@ -361,7 +361,7 @@
                         "imageReference": {
                             "publisher": "microsoftwindowsserver",
                             "offer": "windowsserver",
-                            "sku": "2022-datacenter-smalldisk",
+                            "sku": "2025-datacenter-smalldisk-g2",
                             "version": "latest"
                         },
                         "nodeAgentSkuId": "batch.node.windows amd64",
