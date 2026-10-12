@@ -74,3 +74,12 @@ updates:
   - dependency-name: eslint-plugin-jest
     versions:
     - "> 26.9.0"
+- package-ecosystem: "github-actions"
+  directory: "/"
+  groups:
+    github-actions:
+      patterns: ["*"]
+  schedule:
+    interval: "weekly"
+  cooldown:
+    default-days: 7
