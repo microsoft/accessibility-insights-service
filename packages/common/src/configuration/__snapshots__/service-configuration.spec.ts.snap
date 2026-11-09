@@ -214,7 +214,7 @@ exports[`ServiceConfiguration verifies custom config 1`] = `
       "format": "int",
     },
     "maxScanStaleTimeoutInMinutes": {
-      "default": 4320,
+      "default": 7200,
       "doc": "Maximum sliding window for a scan to complete.",
       "format": "int",
     },
@@ -458,7 +458,7 @@ exports[`ServiceConfiguration verifies dev config 1`] = `
       "format": "int",
     },
     "maxScanStaleTimeoutInMinutes": {
-      "default": 4320,
+      "default": 7200,
       "doc": "Maximum sliding window for a scan to complete.",
       "format": "int",
     },

@@ -45,6 +45,16 @@ describe(ServiceConfiguration, () => {
         verifyMocks();
     });
 
+    it('uses a five-day scan stale timeout by default', async () => {
+        setupVerifiableFileExistsCall(ServiceConfiguration.profilePath, false);
+        testSubject = new ServiceConfiguration(fsMock.object);
+
+        const scanConfig = await testSubject.getConfigValue('scanConfig');
+
+        expect(scanConfig.maxScanStaleTimeoutInMinutes).toBe(5 * 24 * 60);
+        verifyMocks();
+    });
+
     it('loads config only once', async () => {
         setupVerifiableFileExistsCall(ServiceConfiguration.profilePath, false);
         const keyToFetch = 'logConfig' as const;
