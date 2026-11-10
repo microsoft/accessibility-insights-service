@@ -269,7 +269,7 @@ export class ServiceConfiguration {
                 },
                 maxScanStaleTimeoutInMinutes: {
                     format: 'int',
-                    default: 4320, // 3 days
+                    default: 7200, // 5 days
                     doc: 'Maximum sliding window for a scan to complete.',
                 },
                 scanTimeoutInMin: {
