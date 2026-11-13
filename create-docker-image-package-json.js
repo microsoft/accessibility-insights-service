@@ -19,11 +19,22 @@ webpackExternals.forEach((packageName) => {
     }
 });
 
+// Docker images use Node 20.15, which cannot require() ES modules. @typespec/ts-http-runtime >= 0.3.10
+// depends on ESM-only http(s)-proxy-agent v9, so pin those to the CommonJS v7 line (same API).
+// Remove once the images run Node >= 20.19 / 22.12.
+const imagePackageOverrides = {
+    '@typespec/ts-http-runtime': {
+        'http-proxy-agent': '^7.0.2',
+        'https-proxy-agent': '^7.0.6',
+    },
+};
+
 const newPackageJson = {
     ...packageJson,
     scripts: undefined,
     dependencies: imagePackageDependencies,
     devDependencies: undefined,
+    overrides: { ...packageJson.overrides, ...imagePackageOverrides },
 };
 
 fs.writeFileSync('./dist/package.json', JSON.stringify(newPackageJson, undefined, 4));
